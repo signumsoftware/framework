@@ -6,15 +6,14 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Authorization;
 
-namespace Signum.React.DiffLog
-{
-    public static class DiffLogServer
-    {
-        public static void Start(IApplicationBuilder app)
-        {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+namespace Signum.React.DiffLog;
 
-            ReflectionServer.RegisterLike(typeof(DiffLogMessage), () => TimeMachinePermission.ShowTimeMachine.IsAuthorized() || TypeAuthLogic.GetAllowed(typeof(OperationLogEntity)).MaxUI() >  TypeAllowedBasic.None);
-        }
+public static class DiffLogServer
+{
+    public static void Start(IApplicationBuilder app)
+    {
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
+        ReflectionServer.RegisterLike(typeof(DiffLogMessage), () => TimeMachinePermission.ShowTimeMachine.IsAuthorized() || TypeAuthLogic.GetAllowed(typeof(OperationLogEntity)).MaxUI() >  TypeAllowedBasic.None);
     }
 }

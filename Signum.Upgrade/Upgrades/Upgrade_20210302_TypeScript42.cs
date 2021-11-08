@@ -1,23 +1,22 @@
-namespace Signum.Upgrade.Upgrades
+namespace Signum.Upgrade.Upgrades;
+
+class Upgrade_20210302_TypeScript42: CodeUpgradeBase
 {
-    class Upgrade_20210302_TypeScript42: CodeUpgradeBase
+    public override string Description => "Upgrade to Typescript 4.2";
+
+    public override void Execute(UpgradeContext uctx)
     {
-        public override string Description => "Upgrade to Typescript 4.2";
-
-        public override void Execute(UpgradeContext uctx)
+        uctx.ForeachCodeFile("*.csproj", file =>
         {
-            uctx.ForeachCodeFile("*.csproj", file =>
-            {
-                file.UpdateNugetReference(@"Microsoft.TypeScript.MSBuild", @"4.2.2");
-                file.UpdateNugetReference(@"Microsoft.NET.Test.Sdk", @"16.9.1");
-                file.UpdateNugetReference(@"Selenium.Chrome.WebDriver", @"85.0.0");
-            });
+            file.UpdateNugetReference(@"Microsoft.TypeScript.MSBuild", @"4.2.2");
+            file.UpdateNugetReference(@"Microsoft.NET.Test.Sdk", @"16.9.1");
+            file.UpdateNugetReference(@"Selenium.Chrome.WebDriver", @"85.0.0");
+        });
 
-            uctx.ChangeCodeFile("Southwind.React/package.json", file =>
-            {
-                file.UpdateNpmPackage("ts-loader", "8.0.17");
-                file.UpdateNpmPackage("typescript", "4.2.2");
-            });
-        }
+        uctx.ChangeCodeFile("Southwind.React/package.json", file =>
+        {
+            file.UpdateNpmPackage("ts-loader", "8.0.17");
+            file.UpdateNpmPackage("typescript", "4.2.2");
+        });
     }
 }

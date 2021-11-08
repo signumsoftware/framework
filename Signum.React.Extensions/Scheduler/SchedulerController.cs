@@ -4,36 +4,35 @@ using System.Threading;
 using Signum.Entities.Scheduler;
 using Signum.Engine.Scheduler;
 
-namespace Signum.React.Scheduler
+namespace Signum.React.Scheduler;
+
+public class SchedulerController : ControllerBase
 {
-    public class SchedulerController : ControllerBase
+    [HttpGet("api/scheduler/view")]
+    public SchedulerState View()
     {
-        [HttpGet("api/scheduler/view")]
-        public SchedulerState View()
-        {
-            var state = SchedulerLogic.GetSchedulerState();
+        var state = SchedulerLogic.GetSchedulerState();
 
-            return state;
-        }
+        return state;
+    }
 
-        [HttpPost("api/scheduler/start")]
-        public void Start()
-        {
-            SchedulerPermission.ViewSchedulerPanel.AssertAuthorized();
+    [HttpPost("api/scheduler/start")]
+    public void Start()
+    {
+        SchedulerPermission.ViewSchedulerPanel.AssertAuthorized();
 
-            SchedulerLogic.StartScheduledTasks();
+        SchedulerLogic.StartScheduledTasks();
 
-            Thread.Sleep(1000);
-        }
+        Thread.Sleep(1000);
+    }
 
-        [HttpPost("api/scheduler/stop")]
-        public void Stop()
-        {
-            SchedulerPermission.ViewSchedulerPanel.AssertAuthorized();
+    [HttpPost("api/scheduler/stop")]
+    public void Stop()
+    {
+        SchedulerPermission.ViewSchedulerPanel.AssertAuthorized();
 
-            SchedulerLogic.StopScheduledTasks();
+        SchedulerLogic.StopScheduledTasks();
 
-            Thread.Sleep(1000);
-        }
+        Thread.Sleep(1000);
     }
 }

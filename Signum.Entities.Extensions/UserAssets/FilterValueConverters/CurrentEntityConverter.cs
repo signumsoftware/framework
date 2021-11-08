@@ -1,47 +1,46 @@
 
-namespace Signum.Entities.UserAssets
+namespace Signum.Entities.UserAssets;
+
+public class CurrentEntityConverter : IFilterValueConverter
 {
-    public class CurrentEntityConverter : IFilterValueConverter
+    public static string CurrentEntityKey = "[CurrentEntity]";
+
+    static readonly ThreadVariable<Entity?> currentEntityVariable = Statics.ThreadVariable<Entity?>("currentFilterValueEntity");
+
+    public static IDisposable SetCurrentEntity(Entity? currentEntity)
     {
-        public static string CurrentEntityKey = "[CurrentEntity]";
+        if (currentEntity == null)
+            throw new InvalidOperationException("currentEntity is null");
 
-        static readonly ThreadVariable<Entity?> currentEntityVariable = Statics.ThreadVariable<Entity?>("currentFilterValueEntity");
+        var old = currentEntityVariable.Value;
 
-        public static IDisposable SetCurrentEntity(Entity? currentEntity)
+        currentEntityVariable.Value = currentEntity;
+
+        return new Disposable(() => currentEntityVariable.Value = old);
+    }
+
+    public Result<string?>? TryToStringValue(object? value, Type type)
+    {
+        if (value is Lite<Entity> lite && lite.Is(currentEntityVariable.Value))
         {
-            if (currentEntity == null)
-                throw new InvalidOperationException("currentEntity is null");
-
-            var old = currentEntityVariable.Value;
-
-            currentEntityVariable.Value = currentEntity;
-
-            return new Disposable(() => currentEntityVariable.Value = old);
+            return new Result<string?>.Success(CurrentEntityKey);
         }
 
-        public Result<string?>? TryToStringValue(object? value, Type type)
-        {
-            if (value is Lite<Entity> lite && lite.Is(currentEntityVariable.Value))
-            {
-                return new Result<string?>.Success(CurrentEntityKey);
-            }
+        return null;
+    }
 
-            return null;
+    public Result<object?>? TryParseValue(string? value, Type type)
+    {
+        if (value.HasText() && value.StartsWith(CurrentEntityKey))
+        {
+            string after = value.Substring(CurrentEntityKey.Length).Trim();
+
+            string[] parts = after.SplitNoEmpty('.' );
+
+            return SimpleMemberEvaluator.EvaluateExpression(currentEntityVariable.Value, parts);
         }
 
-        public Result<object?>? TryParseValue(string? value, Type type)
-        {
-            if (value.HasText() && value.StartsWith(CurrentEntityKey))
-            {
-                string after = value.Substring(CurrentEntityKey.Length).Trim();
-
-                string[] parts = after.SplitNoEmpty('.' );
-
-                return SimpleMemberEvaluator.EvaluateExpression(currentEntityVariable.Value, parts);
-            }
-
-            return null;
-        }
+        return null;
     }
 }
 

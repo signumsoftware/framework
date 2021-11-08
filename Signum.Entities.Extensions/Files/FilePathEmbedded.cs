@@ -1,167 +1,166 @@
 using System.IO;
 using Signum.Services;
 
-namespace Signum.Entities.Files
+namespace Signum.Entities.Files;
+
+public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
 {
-    public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
+    public static string? ForceExtensionIfEmpty = ".dat";
+
+    public FilePathEmbedded() { }
+
+    public FilePathEmbedded(FileTypeSymbol fileType)
     {
-        public static string? ForceExtensionIfEmpty = ".dat";
+        this.FileType = fileType;
+    }
 
-        public FilePathEmbedded() { }
+    public FilePathEmbedded(FileTypeSymbol fileType, FilePathEmbedded cloneFrom) //Usefull for Email Attachments when combined with WeekFileReference
+    {
+        this.FileType = fileType;
+        this.Suffix = cloneFrom.Suffix;
+        this.Hash = cloneFrom.Hash;
+        this.FileLength = cloneFrom.FileLength;
+        this.fileName = cloneFrom.FileName;
+    }
 
-        public FilePathEmbedded(FileTypeSymbol fileType)
+    public FilePathEmbedded(FileTypeSymbol fileType, string readFileFrom)
+        : this(fileType)
+    {
+        this.FileName = Path.GetFileName(readFileFrom)!;
+        this.BinaryFile = File.ReadAllBytes(readFileFrom);
+    }
+
+    public FilePathEmbedded(FileTypeSymbol fileType, string fileName, byte[] fileData)
+        : this(fileType)
+    {
+        this.FileName = fileName;
+        this.BinaryFile = fileData;
+    }
+
+    string fileName;
+    [StringLengthValidator(Min = 1, Max = 260), FileNameValidator]
+    public string FileName
+    {
+        get { return fileName; }
+        set
         {
-            this.FileType = fileType;
+            var newValue = fileName;
+            if (ForceExtensionIfEmpty.HasText() && !Path.GetExtension(value).HasText())
+                value += ForceExtensionIfEmpty;
+
+            Set(ref fileName, value);
         }
+    }
 
-        public FilePathEmbedded(FileTypeSymbol fileType, FilePathEmbedded cloneFrom) //Usefull for Email Attachments when combined with WeekFileReference
-        {
-            this.FileType = fileType;
-            this.Suffix = cloneFrom.Suffix;
-            this.Hash = cloneFrom.Hash;
-            this.FileLength = cloneFrom.FileLength;
-            this.fileName = cloneFrom.FileName;
-        }
+    [Ignore]
+    public PrimaryKey EntityId;
+    [Ignore]
+    public PrimaryKey? MListRowId;
+    [Ignore]
+    public string PropertyRoute;
+    [Ignore]
+    public string RootType;
 
-        public FilePathEmbedded(FileTypeSymbol fileType, string readFileFrom)
-            : this(fileType)
+    [Ignore]
+    byte[] binaryFile;
+    [NotNullValidator(Disabled = true)]
+    public byte[] BinaryFile
+    {
+        get { return binaryFile; }
+        set
         {
-            this.FileName = Path.GetFileName(readFileFrom)!;
-            this.BinaryFile = File.ReadAllBytes(readFileFrom);
-        }
-
-        public FilePathEmbedded(FileTypeSymbol fileType, string fileName, byte[] fileData)
-            : this(fileType)
-        {
-            this.FileName = fileName;
-            this.BinaryFile = fileData;
-        }
-
-        string fileName;
-        [StringLengthValidator(Min = 1, Max = 260), FileNameValidator]
-        public string FileName
-        {
-            get { return fileName; }
-            set
+            if (Set(ref binaryFile, value) && binaryFile != null)
             {
-                var newValue = fileName;
-                if (ForceExtensionIfEmpty.HasText() && !Path.GetExtension(value).HasText())
-                    value += ForceExtensionIfEmpty;
-
-                Set(ref fileName, value);
+                FileLength = binaryFile.Length;
+                Hash = CryptorEngine.CalculateMD5Hash(binaryFile);
             }
         }
+    }
 
-        [Ignore]
-        public PrimaryKey EntityId;
-        [Ignore]
-        public PrimaryKey? MListRowId;
-        [Ignore]
-        public string PropertyRoute;
-        [Ignore]
-        public string RootType;
+    public string? Hash { get; private set; }
 
-        [Ignore]
-        byte[] binaryFile;
-        [NotNullValidator(Disabled = true)]
-        public byte[] BinaryFile
-        {
-            get { return binaryFile; }
-            set
-            {
-                if (Set(ref binaryFile, value) && binaryFile != null)
-                {
-                    FileLength = binaryFile.Length;
-                    Hash = CryptorEngine.CalculateMD5Hash(binaryFile);
-                }
-            }
-        }
+    public int FileLength { get; internal set; }
 
-        public string? Hash { get; private set; }
+    [AutoExpressionField]
+    public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize());
 
-        public int FileLength { get; internal set; }
+    [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
+    public string Suffix { get; set; }
 
-        [AutoExpressionField]
-        public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize());
+    [Ignore]
+    public string? CalculatedDirectory { get; set; }
 
-        [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
-        public string Suffix { get; set; }
+    [ForceNotNullable]
+    public FileTypeSymbol FileType { get; internal set; }
 
-        [Ignore]
-        public string? CalculatedDirectory { get; set; }
+    [Ignore]
+    internal PrefixPair? _prefixPair;
+    public void SetPrefixPair(PrefixPair prefixPair)
+    {
+        this._prefixPair = prefixPair;
+    }
 
-        [ForceNotNullable]
-        public FileTypeSymbol FileType { get; internal set; }
-
-        [Ignore]
-        internal PrefixPair? _prefixPair;
-        public void SetPrefixPair(PrefixPair prefixPair)
-        {
-            this._prefixPair = prefixPair;
-        }
-
-        public PrefixPair GetPrefixPair()
-        {
-            if (this._prefixPair != null)
-                return this._prefixPair;
-
-            if (CalculatePrefixPair == null)
-                throw new InvalidOperationException("OnCalculatePrefixPair not set");
-
-            this._prefixPair = CalculatePrefixPair(this);
-
+    public PrefixPair GetPrefixPair()
+    {
+        if (this._prefixPair != null)
             return this._prefixPair;
-        }
 
-        public static Func<FilePathEmbedded, PrefixPair> CalculatePrefixPair;
+        if (CalculatePrefixPair == null)
+            throw new InvalidOperationException("OnCalculatePrefixPair not set");
 
-        public string FullPhysicalPath()
-        {
-            var pp = this.GetPrefixPair();
+        this._prefixPair = CalculatePrefixPair(this);
 
-            return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
-        }
+        return this._prefixPair;
+    }
 
-        public static Func<string, string> ToAbsolute = str => str;
+    public static Func<FilePathEmbedded, PrefixPair> CalculatePrefixPair;
 
+    public string FullPhysicalPath()
+    {
+        var pp = this.GetPrefixPair();
 
-        public string? FullWebPath()
-        {
-            var pp = this.GetPrefixPair();
+        return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
+    }
 
-            if (string.IsNullOrEmpty(pp.WebPrefix))
-                return null;
-
-            var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
-
-            return result;
-        }
-
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => $"{FileName} - {((long)FileLength).ToComputerSize()}");
-
-        public static Action<FilePathEmbedded> OnPreSaving;
-        protected override void PreSaving(PreSavingContext ctx)
-        {
-            if (OnPreSaving == null)
-                throw new InvalidOperationException("OnPreSaving not set");
-
-            OnPreSaving(this);
-        }
+    public static Func<string, string> ToAbsolute = str => str;
 
 
-        protected override void PostRetrieving(PostRetrievingContext ctx)
-        {
-            if (CalculatePrefixPair == null)
-                throw new InvalidOperationException("OnCalculatePrefixPair not set");
+    public string? FullWebPath()
+    {
+        var pp = this.GetPrefixPair();
 
-            this.GetPrefixPair();
-        }
+        if (string.IsNullOrEmpty(pp.WebPrefix))
+            return null;
 
-        public static Func<FilePathEmbedded, FilePathEmbedded> CloneFunc;
-        internal FilePathEmbedded Clone()
-        {
-            return CloneFunc(this);
-        }
+        var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
+
+        return result;
+    }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{FileName} - {((long)FileLength).ToComputerSize()}");
+
+    public static Action<FilePathEmbedded> OnPreSaving;
+    protected override void PreSaving(PreSavingContext ctx)
+    {
+        if (OnPreSaving == null)
+            throw new InvalidOperationException("OnPreSaving not set");
+
+        OnPreSaving(this);
+    }
+
+
+    protected override void PostRetrieving(PostRetrievingContext ctx)
+    {
+        if (CalculatePrefixPair == null)
+            throw new InvalidOperationException("OnCalculatePrefixPair not set");
+
+        this.GetPrefixPair();
+    }
+
+    public static Func<FilePathEmbedded, FilePathEmbedded> CloneFunc;
+    internal FilePathEmbedded Clone()
+    {
+        return CloneFunc(this);
     }
 }

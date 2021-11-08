@@ -1,411 +1,410 @@
 
-namespace Signum.Utilities.ExpressionTrees
+namespace Signum.Utilities.ExpressionTrees;
+
+/// <summary>
+/// Implementation of SimpleExpressionVisitor that does the replacement
+/// * MethodExpanderAttribute
+/// * MemberXXXExpression static field
+/// * ExpressionExtensions.Evaluate method
+///
+/// It also simplifies and skip evaluating short circuited subexpresions
+/// Evaluates constant subexpressions
+/// </summary>
+public class ExpressionCleaner : ExpressionVisitor
 {
-	/// <summary>
-    /// Implementation of SimpleExpressionVisitor that does the replacement
-    /// * MethodExpanderAttribute
-    /// * MemberXXXExpression static field
-    /// * ExpressionExtensions.Evaluate method
-    ///
-    /// It also simplifies and skip evaluating short circuited subexpresions
-    /// Evaluates constant subexpressions
-	/// </summary>
-    public class ExpressionCleaner : ExpressionVisitor
+    Func<Expression, Expression> partialEval;
+
+    bool shortCircuit;
+
+    public ExpressionCleaner(Func<Expression, Expression> partialEval, bool shortCircuit)
+    {
+        this.partialEval = partialEval;
+        this.shortCircuit = shortCircuit;
+    }
+
+    public static Expression? Clean(Expression? expr)
+    {
+        return Clean(expr, ExpressionEvaluator.PartialEval, true);
+    }
+
+    public static Expression? Clean(Expression? expr, Func<Expression, Expression> partialEval, bool shortCircuit)
+    {
+        ExpressionCleaner ee = new ExpressionCleaner(partialEval, shortCircuit);
+        var result = ee.Visit(expr);
+        if (result == null)
+            return null;
+        return partialEval(result);
+    }
+
+    protected override Expression VisitInvocation(InvocationExpression iv)
+    {
+        if (iv.Expression is LambdaExpression)
+            return Visit(ExpressionReplacer.Replace(iv));
+        else
+            return base.VisitInvocation(iv); //Just calling a delegate in the projector
+    }
+
+	protected override Expression VisitMethodCall(MethodCallExpression m)
 	{
-        Func<Expression, Expression> partialEval;
+        MethodCallExpression expr = (MethodCallExpression)base.VisitMethodCall(m);
 
-        bool shortCircuit;
+        Expression? binded =  BindMethodExpression(expr, false);
+        if (binded != null)
+            return Visit(binded);
 
-        public ExpressionCleaner(Func<Expression, Expression> partialEval, bool shortCircuit)
+        return expr;
+	}
+
+    public static Expression? BindMethodExpression(MethodCallExpression m, bool allowPolymorphics)
+    {
+        if (m.Method.DeclaringType == typeof(ExpressionExtensions) && m.Method.Name == "Evaluate")
         {
-            this.partialEval = partialEval;
-            this.shortCircuit = shortCircuit;
+            LambdaExpression lambda = (LambdaExpression)ExpressionEvaluator.Eval(m.Arguments[0])!;
+
+            return Expression.Invoke(lambda, m.Arguments.Skip(1).ToArray());
         }
 
-        public static Expression? Clean(Expression? expr)
+        if (m.Method.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
+            return null;
+
+        MethodExpanderAttribute? attribute = m.Method.GetCustomAttribute<MethodExpanderAttribute>();
+        if (attribute != null)
         {
-            return Clean(expr, ExpressionEvaluator.PartialEval, true);
-        }
-
-        public static Expression? Clean(Expression? expr, Func<Expression, Expression> partialEval, bool shortCircuit)
-        {
-            ExpressionCleaner ee = new ExpressionCleaner(partialEval, shortCircuit);
-            var result = ee.Visit(expr);
-            if (result == null)
-                return null;
-            return partialEval(result);
-        }
-
-        protected override Expression VisitInvocation(InvocationExpression iv)
-        {
-            if (iv.Expression is LambdaExpression)
-                return Visit(ExpressionReplacer.Replace(iv));
-            else
-                return base.VisitInvocation(iv); //Just calling a delegate in the projector
-        }
-
-		protected override Expression VisitMethodCall(MethodCallExpression m)
-		{
-            MethodCallExpression expr = (MethodCallExpression)base.VisitMethodCall(m);
-
-            Expression? binded =  BindMethodExpression(expr, false);
-            if (binded != null)
-                return Visit(binded);
-
-            return expr;
-		}
-
-        public static Expression? BindMethodExpression(MethodCallExpression m, bool allowPolymorphics)
-        {
-            if (m.Method.DeclaringType == typeof(ExpressionExtensions) && m.Method.Name == "Evaluate")
+            if (attribute.ExpanderType.IsGenericTypeDefinition)
             {
-                LambdaExpression lambda = (LambdaExpression)ExpressionEvaluator.Eval(m.Arguments[0])!;
+                if (!typeof(GenericMethodExpander).IsAssignableFrom(attribute.ExpanderType))
+                    throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander or GenericMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
 
-                return Expression.Invoke(lambda, m.Arguments.Skip(1).ToArray());
-            }
-
-            if (m.Method.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
-                return null;
-
-            MethodExpanderAttribute? attribute = m.Method.GetCustomAttribute<MethodExpanderAttribute>();
-            if (attribute != null)
-            {
-                if (attribute.ExpanderType.IsGenericTypeDefinition)
-                {
-                    if (!typeof(GenericMethodExpander).IsAssignableFrom(attribute.ExpanderType))
-                        throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander or GenericMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
-
-                    Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
-
-                    var type = attribute.ExpanderType.MakeGenericType(m.Method.GetGenericArguments());
-                    GenericMethodExpander expander = (GenericMethodExpander)Activator.CreateInstance(type)!;
-                    return Expression.Invoke(expander.GenericLambdaExpression, args);
-                }
-                else
-                {
-                    if(!typeof(IMethodExpander).IsAssignableFrom(attribute.ExpanderType))
-                        throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander or GenericMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
-
-                    IMethodExpander expander = (IMethodExpander)Activator.CreateInstance(attribute.ExpanderType)!;
-
-                    Expression exp = expander.Expand(
-                        m.Object,
-                        m.Arguments.ToArray(),
-                        m.Method);
-
-                    return exp;
-                }
-            }
-
-            LambdaExpression? lambdaExpression = GetFieldExpansion(m.Object?.Type, m.Method);
-            if (lambdaExpression != null)
-            {
                 Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
 
-                return Expression.Invoke(lambdaExpression, args);
+                var type = attribute.ExpanderType.MakeGenericType(m.Method.GetGenericArguments());
+                GenericMethodExpander expander = (GenericMethodExpander)Activator.CreateInstance(type)!;
+                return Expression.Invoke(expander.GenericLambdaExpression, args);
             }
+            else
+            {
+                if(!typeof(IMethodExpander).IsAssignableFrom(attribute.ExpanderType))
+                    throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander or GenericMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
 
+                IMethodExpander expander = (IMethodExpander)Activator.CreateInstance(attribute.ExpanderType)!;
+
+                Expression exp = expander.Expand(
+                    m.Object,
+                    m.Arguments.ToArray(),
+                    m.Method);
+
+                return exp;
+            }
+        }
+
+        LambdaExpression? lambdaExpression = GetFieldExpansion(m.Object?.Type, m.Method);
+        if (lambdaExpression != null)
+        {
+            Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
+
+            return Expression.Invoke(lambdaExpression, args);
+        }
+
+        return null;
+
+    }
+
+    protected override Expression VisitMember(MemberExpression m)
+    {
+        MemberExpression exp = (MemberExpression)base.VisitMember(m);
+
+        Expression? binded = BindMemberExpression(exp, false);
+        if (binded != null)
+            return Visit(binded);
+
+        return exp;
+    }
+
+    public static Expression? BindMemberExpression(MemberExpression m, bool allowPolymorphics)
+    {
+        PropertyInfo? pi = m.Member as PropertyInfo;
+        if (pi == null)
             return null;
 
-        }
+        if (pi.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
+            return null;
 
-        protected override Expression VisitMember(MemberExpression m)
+        LambdaExpression? lambda = GetFieldExpansion(m.Expression?.Type, pi);
+        if (lambda == null)
+            return null;
+
+        if (m.Expression == null)
+            return lambda.Body;
+        else
+            return Expression.Invoke(lambda, m.Expression);
+    }
+
+    public static bool HasExpansions(Type type, MemberInfo mi)
+    {
+        return GetFieldExpansion(type, mi) != null || mi is MethodInfo && mi.HasAttribute<MethodExpanderAttribute>();
+    }
+
+    public static LambdaExpression? GetFieldExpansion(Type? decType, MemberInfo mi)
+    {
+        if (decType == null || decType == mi.DeclaringType || IsStatic(mi))
+            return GetExpansion(mi);
+        else
         {
-            MemberExpression exp = (MemberExpression)base.VisitMember(m);
-
-            Expression? binded = BindMemberExpression(exp, false);
-            if (binded != null)
-                return Visit(binded);
-
-            return exp;
-        }
-
-        public static Expression? BindMemberExpression(MemberExpression m, bool allowPolymorphics)
-        {
-            PropertyInfo? pi = m.Member as PropertyInfo;
-            if (pi == null)
-                return null;
-
-            if (pi.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
-                return null;
-
-            LambdaExpression? lambda = GetFieldExpansion(m.Expression?.Type, pi);
-            if (lambda == null)
-                return null;
-
-            if (m.Expression == null)
-                return lambda.Body;
-            else
-                return Expression.Invoke(lambda, m.Expression);
-        }
-
-        public static bool HasExpansions(Type type, MemberInfo mi)
-        {
-            return GetFieldExpansion(type, mi) != null || mi is MethodInfo && mi.HasAttribute<MethodExpanderAttribute>();
-        }
-
-        public static LambdaExpression? GetFieldExpansion(Type? decType, MemberInfo mi)
-        {
-            if (decType == null || decType == mi.DeclaringType || IsStatic(mi))
-                return GetExpansion(mi);
-            else
+            for (MemberInfo? m = GetMember(decType, mi); m != null; m = BaseMember(m))
             {
-                for (MemberInfo? m = GetMember(decType, mi); m != null; m = BaseMember(m))
-                {
-                    var result = GetExpansion(m);
-                    if (result != null)
-                        return result;
-                }
-
-                return null;
-            }
-        }
-
-        static bool IsStatic(MemberInfo mi)
-        {
-            if (mi is MethodInfo mti)
-                return mti.IsStatic;
-
-            if (mi is PropertyInfo pi)
-                return (pi.GetGetMethod() ?? pi.GetSetMethod())!.IsStatic;
-
-            return false;
-        }
-
-        static LambdaExpression? GetExpansion(MemberInfo mi)
-        {
-            ExpressionFieldAttribute? efa = mi.GetCustomAttribute<ExpressionFieldAttribute>();
-            if (efa == null)
-                return null;
-
-            if (efa.Name == "auto")
-                throw new InvalidOperationException($"The {nameof(ExpressionFieldAttribute)} for {mi.DeclaringType!.TypeName()}.{mi.MemberName()} has the default value 'auto'.\r\nMaybe Signum.MSBuildTask is not running in assemby {mi.DeclaringType!.Assembly.GetName().Name}?");
-
-            Type type = mi.DeclaringType!;
-            FieldInfo? fi = type.GetField(efa.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            if (fi == null)
-                throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".FormatWith(efa.Name, type.TypeName()));
-
-            var obj = fi.GetValue(null);
-
-            if (obj == null)
-                throw new InvalidOperationException("Expression field '{0}' is null".FormatWith(efa.Name));
-
-            if (!(obj is LambdaExpression result))
-                throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".FormatWith(efa.Name, type.TypeName()));
-
-            return result;
-        }
-
-        static readonly BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
-        
-
-        static MemberInfo? GetMember(Type decType, MemberInfo mi)
-        {
-            if (mi is MethodInfo)
-            {
-                Type[] types = ((MethodInfo)mi).GetParameters().Select(a => a.ParameterType).ToArray();
-                var result = decType.GetMethod(mi.Name, flags, null, types, null);
+                var result = GetExpansion(m);
                 if (result != null)
                     return result;
-
-                if (mi.DeclaringType!.IsInterface)
-                    return decType.GetMethod(mi.DeclaringType.FullName + "." + mi.Name, flags, null, types, null);
-
-                return null;
-            }
-
-            if (mi is PropertyInfo pi)
-            {
-                Type[] types = pi.GetIndexParameters().Select(a => a.ParameterType).ToArray();
-
-                var result = decType.GetProperty(mi.Name, flags, null, pi.PropertyType, types, null) ;
-                if (result != null)
-                    return result;
-
-                if(mi.DeclaringType!.IsInterface)
-                    return decType.GetProperty(mi.DeclaringType.FullName + "." + mi.Name, flags, null, pi.PropertyType, types, null);
-
-                return null;
-            }
-
-            throw new InvalidOperationException("Invalid Member type");
-        }
-
-        static MemberInfo? BaseMember(MemberInfo mi)
-        {
-            MemberInfo? result;
-            if (mi is MethodInfo mti)
-                result = mti.GetBaseDefinition();
-            else if (mi is PropertyInfo pi)
-                result = pi.GetBaseDefinition();
-            else
-                throw new InvalidOperationException("Invalid Member type");
-
-            if (result == mi)
-                return null;
-
-            return result;
-        }
-
-        #region Simplifier
-
-        bool GetBool(Expression exp)
-        {
-            return (bool)((ConstantExpression)exp).Value!;
-        }
-
-        protected override Expression VisitBinary(BinaryExpression b)
-        {
-            if (!shortCircuit)
-                return base.VisitBinary(b);
-
-            if (b.NodeType == ExpressionType.Coalesce)
-            {
-                Expression left = partialEval(this.Visit(b.Left));
-
-                if (left.NodeType == ExpressionType.Constant)
-                {
-                    var ce = (ConstantExpression)left;
-                    if (ce.Value == null)
-                        return Visit(b.Right);
-
-                    if (ce.Type.IsNullable())
-                        return Expression.Constant(ce.Value, ce.Type.UnNullify());
-                    else
-                        return ce;
-                }
-
-                Expression right = this.Visit(b.Right);
-                Expression? conversion = this.Visit(b.Conversion);
-
-                return Expression.Coalesce(left, right, conversion as LambdaExpression);
-            }
-
-            if (b.Type != typeof(bool))
-                return base.VisitBinary(b);
-
-            if (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso)
-            {
-                Expression left = partialEval(this.Visit(b.Left));
-                if (left.NodeType == ExpressionType.Constant)
-                    return GetBool(left) ? Visit(b.Right) : Expression.Constant(false);
-
-                Expression right = partialEval(this.Visit(b.Right));
-                if (right.NodeType == ExpressionType.Constant)
-                    return GetBool(right) ? left : Expression.Constant(false);
-
-                return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-            }
-            else if (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse)
-            {
-                Expression left = partialEval(this.Visit(b.Left));
-                if (left.NodeType == ExpressionType.Constant)
-                    return GetBool(left) ? Expression.Constant(true) : Visit(b.Right);
-
-                Expression right = partialEval(this.Visit(b.Right));
-                if (right.NodeType == ExpressionType.Constant)
-                    return GetBool(right) ? Expression.Constant(true) : left;
-
-                return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-            }
-
-            // rel == 'a' is compiled as (int)rel == 123 
-            if(b.NodeType == ExpressionType.Equal || 
-                b.NodeType == ExpressionType.NotEqual)
-            {
-                {
-                    if (IsConvertCharToInt(b.Left) is Expression l &&
-                        IsConvertCharToIntOrConstant(b.Right) is Expression r)
-                        return Expression.MakeBinary(b.NodeType, Visit(l), Visit(r));
-                }
-                {
-                    if (IsConvertCharToIntOrConstant(b.Left) is Expression l &&
-                        IsConvertCharToInt(b.Right) is Expression r)
-                        return Expression.MakeBinary(b.NodeType, Visit(l), Visit(r));
-                }
-
-            }
-
-            if (b.Left.Type != typeof(bool))
-                return base.VisitBinary(b);
-
-            if (b.NodeType == ExpressionType.Equal)
-            {
-                Expression left = partialEval(this.Visit(b.Left));
-                if (left.NodeType == ExpressionType.Constant)
-                    return GetBool(left) ? Visit(b.Right) : Visit(Expression.Not(b.Right));
-
-                Expression right = partialEval(this.Visit(b.Right));
-                if (right.NodeType == ExpressionType.Constant)
-                    return GetBool(right) ? left : Expression.Not(left);
-
-                return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-            }
-            else if (b.NodeType == ExpressionType.NotEqual)
-            {
-                Expression left = partialEval(this.Visit(b.Left));
-                if (left.NodeType == ExpressionType.Constant)
-                    return GetBool(left) ? Visit(Expression.Not(b.Right)) : Visit(b.Right);
-
-                Expression right = partialEval(this.Visit(b.Right));
-                if (right.NodeType == ExpressionType.Constant)
-                    return GetBool(right) ? Expression.Not(left) : left;
-
-                return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-            }
-
-            return base.VisitBinary(b);
-        }
-
-        static Expression? IsConvertCharToInt(Expression exp)
-        {
-            if (exp is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ue.Operand.Type == typeof(char))
-            {
-                return ue.Operand;
             }
 
             return null;
         }
+    }
 
-        static Expression? IsConvertCharToIntOrConstant(Expression exp)
+    static bool IsStatic(MemberInfo mi)
+    {
+        if (mi is MethodInfo mti)
+            return mti.IsStatic;
+
+        if (mi is PropertyInfo pi)
+            return (pi.GetGetMethod() ?? pi.GetSetMethod())!.IsStatic;
+
+        return false;
+    }
+
+    static LambdaExpression? GetExpansion(MemberInfo mi)
+    {
+        ExpressionFieldAttribute? efa = mi.GetCustomAttribute<ExpressionFieldAttribute>();
+        if (efa == null)
+            return null;
+
+        if (efa.Name == "auto")
+            throw new InvalidOperationException($"The {nameof(ExpressionFieldAttribute)} for {mi.DeclaringType!.TypeName()}.{mi.MemberName()} has the default value 'auto'.\r\nMaybe Signum.MSBuildTask is not running in assemby {mi.DeclaringType!.Assembly.GetName().Name}?");
+
+        Type type = mi.DeclaringType!;
+        FieldInfo? fi = type.GetField(efa.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        if (fi == null)
+            throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".FormatWith(efa.Name, type.TypeName()));
+
+        var obj = fi.GetValue(null);
+
+        if (obj == null)
+            throw new InvalidOperationException("Expression field '{0}' is null".FormatWith(efa.Name));
+
+        if (!(obj is LambdaExpression result))
+            throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".FormatWith(efa.Name, type.TypeName()));
+
+        return result;
+    }
+
+    static readonly BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+    
+
+    static MemberInfo? GetMember(Type decType, MemberInfo mi)
+    {
+        if (mi is MethodInfo)
         {
-            var result = IsConvertCharToInt(exp);
+            Type[] types = ((MethodInfo)mi).GetParameters().Select(a => a.ParameterType).ToArray();
+            var result = decType.GetMethod(mi.Name, flags, null, types, null);
             if (result != null)
                 return result;
 
-            if (exp is ConstantExpression ceInt && ceInt.Type == typeof(int))
-                return Expression.Constant((char)(int)ceInt.Value!, typeof(char));
-
-            if (exp is ConstantExpression ceChar && ceChar.Type == typeof(char))
-                return ceChar;
+            if (mi.DeclaringType!.IsInterface)
+                return decType.GetMethod(mi.DeclaringType.FullName + "." + mi.Name, flags, null, types, null);
 
             return null;
         }
 
-        protected override Expression VisitConditional(ConditionalExpression c)
+        if (mi is PropertyInfo pi)
         {
-            if (!shortCircuit)
-                return base.VisitConditional(c);
+            Type[] types = pi.GetIndexParameters().Select(a => a.ParameterType).ToArray();
 
-            Expression test = partialEval(this.Visit(c.Test));
-            if (test.NodeType == ExpressionType.Constant)
-            {
-                if (GetBool(test))
-                    return this.Visit(c.IfTrue);
-                else
-                    return this.Visit(c.IfFalse);
-            }
+            var result = decType.GetProperty(mi.Name, flags, null, pi.PropertyType, types, null) ;
+            if (result != null)
+                return result;
 
-            Expression ifTrue = this.Visit(c.IfTrue);
-            Expression ifFalse = this.Visit(c.IfFalse);
-            if (test != c.Test || ifTrue != c.IfTrue || ifFalse != c.IfFalse)
-            {
-                return Expression.Condition(test, ifTrue, ifFalse);
-            }
-            return c;
+            if(mi.DeclaringType!.IsInterface)
+                return decType.GetProperty(mi.DeclaringType.FullName + "." + mi.Name, flags, null, pi.PropertyType, types, null);
+
+            return null;
         }
-        #endregion
+
+        throw new InvalidOperationException("Invalid Member type");
     }
+
+    static MemberInfo? BaseMember(MemberInfo mi)
+    {
+        MemberInfo? result;
+        if (mi is MethodInfo mti)
+            result = mti.GetBaseDefinition();
+        else if (mi is PropertyInfo pi)
+            result = pi.GetBaseDefinition();
+        else
+            throw new InvalidOperationException("Invalid Member type");
+
+        if (result == mi)
+            return null;
+
+        return result;
+    }
+
+    #region Simplifier
+
+    bool GetBool(Expression exp)
+    {
+        return (bool)((ConstantExpression)exp).Value!;
+    }
+
+    protected override Expression VisitBinary(BinaryExpression b)
+    {
+        if (!shortCircuit)
+            return base.VisitBinary(b);
+
+        if (b.NodeType == ExpressionType.Coalesce)
+        {
+            Expression left = partialEval(this.Visit(b.Left));
+
+            if (left.NodeType == ExpressionType.Constant)
+            {
+                var ce = (ConstantExpression)left;
+                if (ce.Value == null)
+                    return Visit(b.Right);
+
+                if (ce.Type.IsNullable())
+                    return Expression.Constant(ce.Value, ce.Type.UnNullify());
+                else
+                    return ce;
+            }
+
+            Expression right = this.Visit(b.Right);
+            Expression? conversion = this.Visit(b.Conversion);
+
+            return Expression.Coalesce(left, right, conversion as LambdaExpression);
+        }
+
+        if (b.Type != typeof(bool))
+            return base.VisitBinary(b);
+
+        if (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso)
+        {
+            Expression left = partialEval(this.Visit(b.Left));
+            if (left.NodeType == ExpressionType.Constant)
+                return GetBool(left) ? Visit(b.Right) : Expression.Constant(false);
+
+            Expression right = partialEval(this.Visit(b.Right));
+            if (right.NodeType == ExpressionType.Constant)
+                return GetBool(right) ? left : Expression.Constant(false);
+
+            return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+        }
+        else if (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse)
+        {
+            Expression left = partialEval(this.Visit(b.Left));
+            if (left.NodeType == ExpressionType.Constant)
+                return GetBool(left) ? Expression.Constant(true) : Visit(b.Right);
+
+            Expression right = partialEval(this.Visit(b.Right));
+            if (right.NodeType == ExpressionType.Constant)
+                return GetBool(right) ? Expression.Constant(true) : left;
+
+            return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+        }
+
+        // rel == 'a' is compiled as (int)rel == 123 
+        if(b.NodeType == ExpressionType.Equal || 
+            b.NodeType == ExpressionType.NotEqual)
+        {
+            {
+                if (IsConvertCharToInt(b.Left) is Expression l &&
+                    IsConvertCharToIntOrConstant(b.Right) is Expression r)
+                    return Expression.MakeBinary(b.NodeType, Visit(l), Visit(r));
+            }
+            {
+                if (IsConvertCharToIntOrConstant(b.Left) is Expression l &&
+                    IsConvertCharToInt(b.Right) is Expression r)
+                    return Expression.MakeBinary(b.NodeType, Visit(l), Visit(r));
+            }
+
+        }
+
+        if (b.Left.Type != typeof(bool))
+            return base.VisitBinary(b);
+
+        if (b.NodeType == ExpressionType.Equal)
+        {
+            Expression left = partialEval(this.Visit(b.Left));
+            if (left.NodeType == ExpressionType.Constant)
+                return GetBool(left) ? Visit(b.Right) : Visit(Expression.Not(b.Right));
+
+            Expression right = partialEval(this.Visit(b.Right));
+            if (right.NodeType == ExpressionType.Constant)
+                return GetBool(right) ? left : Expression.Not(left);
+
+            return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+        }
+        else if (b.NodeType == ExpressionType.NotEqual)
+        {
+            Expression left = partialEval(this.Visit(b.Left));
+            if (left.NodeType == ExpressionType.Constant)
+                return GetBool(left) ? Visit(Expression.Not(b.Right)) : Visit(b.Right);
+
+            Expression right = partialEval(this.Visit(b.Right));
+            if (right.NodeType == ExpressionType.Constant)
+                return GetBool(right) ? Expression.Not(left) : left;
+
+            return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+        }
+
+        return base.VisitBinary(b);
+    }
+
+    static Expression? IsConvertCharToInt(Expression exp)
+    {
+        if (exp is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ue.Operand.Type == typeof(char))
+        {
+            return ue.Operand;
+        }
+
+        return null;
+    }
+
+    static Expression? IsConvertCharToIntOrConstant(Expression exp)
+    {
+        var result = IsConvertCharToInt(exp);
+        if (result != null)
+            return result;
+
+        if (exp is ConstantExpression ceInt && ceInt.Type == typeof(int))
+            return Expression.Constant((char)(int)ceInt.Value!, typeof(char));
+
+        if (exp is ConstantExpression ceChar && ceChar.Type == typeof(char))
+            return ceChar;
+
+        return null;
+    }
+
+    protected override Expression VisitConditional(ConditionalExpression c)
+    {
+        if (!shortCircuit)
+            return base.VisitConditional(c);
+
+        Expression test = partialEval(this.Visit(c.Test));
+        if (test.NodeType == ExpressionType.Constant)
+        {
+            if (GetBool(test))
+                return this.Visit(c.IfTrue);
+            else
+                return this.Visit(c.IfFalse);
+        }
+
+        Expression ifTrue = this.Visit(c.IfTrue);
+        Expression ifFalse = this.Visit(c.IfFalse);
+        if (test != c.Test || ifTrue != c.IfTrue || ifFalse != c.IfFalse)
+        {
+            return Expression.Condition(test, ifTrue, ifFalse);
+        }
+        return c;
+    }
+    #endregion
 }

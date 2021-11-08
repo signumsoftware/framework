@@ -5,16 +5,15 @@ using Signum.Engine.Extensions.Basics;
 using Signum.Engine.Authorization;
 using Signum.Entities.Omnibox;
 
-namespace Signum.Engine.Omnibox
+namespace Signum.Engine.Omnibox;
+
+public static class OmniboxLogic
 {
-    public static class OmniboxLogic
+    public static void Start(SchemaBuilder sb)
     {
-        public static void Start(SchemaBuilder sb)
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
-            if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-            {
-                PermissionAuthLogic.RegisterTypes(typeof(OmniboxPermission));
-            }
+            PermissionAuthLogic.RegisterTypes(typeof(OmniboxPermission));
         }
     }
 }

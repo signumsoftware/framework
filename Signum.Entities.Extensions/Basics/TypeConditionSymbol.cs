@@ -1,13 +1,12 @@
 ﻿
-namespace Signum.Entities.Basics
-{
-    public class TypeConditionSymbol : Symbol
-    {
-        private TypeConditionSymbol() { }
+namespace Signum.Entities.Basics;
 
-        public TypeConditionSymbol(Type declaringType, string fieldName) :
-            base(declaringType, fieldName)
-        {
-        }
+public class TypeConditionSymbol : Symbol
+{
+    private TypeConditionSymbol() { }
+
+    public TypeConditionSymbol(Type declaringType, string fieldName) :
+        base(declaringType, fieldName)
+    {
     }
 }

@@ -2,58 +2,57 @@
 using Signum.Engine.Authorization;
 using Signum.Entities.Profiler;
 
-namespace Signum.React.Profiler
+namespace Signum.React.Profiler;
+
+public class ProfilerTimesController : ControllerBase
 {
-    public class ProfilerTimesController : ControllerBase
+    [HttpPost("api/profilerTimes/clear")]
+    public void Clear()
     {
-        [HttpPost("api/profilerTimes/clear")]
-        public void Clear()
+        ProfilerPermission.ViewTimeTracker.AssertAuthorized();
+
+        TimeTracker.IdentifiedElapseds.Clear();
+    }
+
+    [HttpGet("api/profilerTimes/times")]
+    public List<TimeTrackerEntryTS> Times()
+    {
+        ProfilerPermission.ViewTimeTracker.AssertAuthorized();
+
+        return TimeTracker.IdentifiedElapseds.Select(pair => new TimeTrackerEntryTS
         {
-            ProfilerPermission.ViewTimeTracker.AssertAuthorized();
+            key = pair.Key,
+            count = pair.Value.Count,
+            averageTime = pair.Value.Average,
+            totalTime = pair.Value.TotalTime,
 
-            TimeTracker.IdentifiedElapseds.Clear();
-        }
+            lastTime = pair.Value.LastTime,
+            lastDate = pair.Value.LastDate,
 
-        [HttpGet("api/profilerTimes/times")]
-        public List<TimeTrackerEntryTS> Times()
-        {
-            ProfilerPermission.ViewTimeTracker.AssertAuthorized();
-
-            return TimeTracker.IdentifiedElapseds.Select(pair => new TimeTrackerEntryTS
-            {
-                key = pair.Key,
-                count = pair.Value.Count,
-                averageTime = pair.Value.Average,
-                totalTime = pair.Value.TotalTime,
-
-                lastTime = pair.Value.LastTime,
-                lastDate = pair.Value.LastDate,
-
-                maxTime = pair.Value.MaxTime,
-                maxDate = pair.Value.MaxDate,
+            maxTime = pair.Value.MaxTime,
+            maxDate = pair.Value.MaxDate,
 
 
-                minTime = pair.Value.MinTime,
-                minDate = pair.Value.MinDate,
-            }).ToList();
+            minTime = pair.Value.MinTime,
+            minDate = pair.Value.MinDate,
+        }).ToList();
 
-        }
+    }
 
-        public class TimeTrackerEntryTS
-        {
-            public string key;
-            public int count;
-            public double averageTime;
-            public double totalTime;
+    public class TimeTrackerEntryTS
+    {
+        public string key;
+        public int count;
+        public double averageTime;
+        public double totalTime;
 
-            public long lastTime;
-            public DateTime lastDate;
+        public long lastTime;
+        public DateTime lastDate;
 
-            public long maxTime;
-            public DateTime maxDate;
+        public long maxTime;
+        public DateTime maxDate;
 
-            public long minTime;
-            public DateTime minDate;
-        }
+        public long minTime;
+        public DateTime minDate;
     }
 }

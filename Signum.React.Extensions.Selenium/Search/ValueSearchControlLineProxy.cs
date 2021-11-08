@@ -6,43 +6,42 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Signum.React.Extensions.Selenium.Search
+namespace Signum.React.Extensions.Selenium.Search;
+
+public class ValueSearchControlLineProxy
 {
-    public class ValueSearchControlLineProxy
+    public WebDriver Selenium { get; private set; }
+
+    public IWebElement Element { get; private set; }
+
+    public ValueSearchControlLineProxy(IWebElement element)
     {
-        public WebDriver Selenium { get; private set; }
+        this.Selenium = element.GetDriver();
+        this.Element = element;
+    }
 
-        public IWebElement Element { get; private set; }
+    public WebElementLocator CountSearch
+    {
+        get { return this.Element.WithLocator(By.CssSelector(".count-search")); }
+    }
 
-        public ValueSearchControlLineProxy(IWebElement element)
-        {
-            this.Selenium = element.GetDriver();
-            this.Element = element;
-        }
+    public WebElementLocator FindButton
+    {
+        get { return this.Element.WithLocator(By.CssSelector(".sf-line-button.sf-find")); }
+    }
 
-        public WebElementLocator CountSearch
-        {
-            get { return this.Element.WithLocator(By.CssSelector(".count-search")); }
-        }
+    public WebElementLocator CreateButton
+    {
+        get { return this.Element.WithLocator(By.CssSelector(".sf-line-button.sf-create")); }
+    }
 
-        public WebElementLocator FindButton
-        {
-            get { return this.Element.WithLocator(By.CssSelector(".sf-line-button.sf-find")); }
-        }
+    public FrameModalProxy<T> Create<T>() where T : ModifiableEntity
+    {
+        var popup = this.CreateButton.Find().CaptureOnClick();
 
-        public WebElementLocator CreateButton
-        {
-            get { return this.Element.WithLocator(By.CssSelector(".sf-line-button.sf-create")); }
-        }
+        if (SelectorModalProxy.IsSelector(popup))
+            popup = popup.AsSelectorModal().SelectAndCapture<T>();
 
-        public FrameModalProxy<T> Create<T>() where T : ModifiableEntity
-        {
-            var popup = this.CreateButton.Find().CaptureOnClick();
-
-            if (SelectorModalProxy.IsSelector(popup))
-                popup = popup.AsSelectorModal().SelectAndCapture<T>();
-
-            return new FrameModalProxy<T>(popup).WaitLoaded();
-        }
+        return new FrameModalProxy<T>(popup).WaitLoaded();
     }
 }

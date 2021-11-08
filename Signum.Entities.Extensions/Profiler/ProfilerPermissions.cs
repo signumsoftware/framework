@@ -1,12 +1,11 @@
 ﻿using Signum.Entities.Authorization;
 
-namespace Signum.Entities.Profiler
+namespace Signum.Entities.Profiler;
+
+[AutoInit]
+public static class ProfilerPermission
 {
-    [AutoInit]
-    public static class ProfilerPermission
-    {
-        public static PermissionSymbol ViewTimeTracker;
-        public static PermissionSymbol ViewHeavyProfiler;
-        public static PermissionSymbol OverrideSessionTimeout;
-    }
+    public static PermissionSymbol ViewTimeTracker;
+    public static PermissionSymbol ViewHeavyProfiler;
+    public static PermissionSymbol OverrideSessionTimeout;
 }

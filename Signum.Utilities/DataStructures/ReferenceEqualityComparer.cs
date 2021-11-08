@@ -2,38 +2,37 @@ using System.Runtime.CompilerServices;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Signum.Utilities.DataStructures
+namespace Signum.Utilities.DataStructures;
+
+public class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer 
+    where T : class
 {
-    public class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer 
-        where T : class
+    static ReferenceEqualityComparer<T>? _default;
+
+    ReferenceEqualityComparer() { }
+
+    public static ReferenceEqualityComparer<T> Default
     {
-        static ReferenceEqualityComparer<T>? _default;
+        get { return _default ?? (_default = new ReferenceEqualityComparer<T>()); }
+    }
 
-        ReferenceEqualityComparer() { }
+    public int GetHashCode(T item)
+    {
+        return RuntimeHelpers.GetHashCode(item);
+    }
 
-        public static ReferenceEqualityComparer<T> Default
-        {
-            get { return _default ?? (_default = new ReferenceEqualityComparer<T>()); }
-        }
+    public bool Equals([AllowNull] T x, [AllowNull] T y)
+    {
+        return object.ReferenceEquals(x, y);
+    }
 
-        public int GetHashCode(T item)
-        {
-            return RuntimeHelpers.GetHashCode(item);
-        }
+    bool IEqualityComparer.Equals(object? x, object? y)
+    {
+        return object.ReferenceEquals(x, y);
+    }
 
-        public bool Equals([AllowNull] T x, [AllowNull] T y)
-        {
-            return object.ReferenceEquals(x, y);
-        }
-
-        bool IEqualityComparer.Equals(object? x, object? y)
-        {
-            return object.ReferenceEquals(x, y);
-        }
-
-        int IEqualityComparer.GetHashCode(object? obj)
-        {
-            return RuntimeHelpers.GetHashCode(obj!);
-        }
+    int IEqualityComparer.GetHashCode(object? obj)
+    {
+        return RuntimeHelpers.GetHashCode(obj!);
     }
 }

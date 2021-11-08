@@ -1,69 +1,68 @@
 using System.Collections.ObjectModel;
 
-namespace Signum.Entities.DynamicQuery
+namespace Signum.Entities.DynamicQuery;
+
+public abstract class Meta
 {
-    public abstract class Meta
+    public readonly Implementations? Implementations;
+
+    public abstract string? IsAllowed();
+
+    protected Meta(Implementations? implementations)
     {
-        public readonly Implementations? Implementations;
+        this.Implementations = implementations;
+    }
+}
 
-        public abstract string? IsAllowed();
+public class CleanMeta : Meta
+{
+    public readonly PropertyRoute[] PropertyRoutes;
 
-        protected Meta(Implementations? implementations)
-        {
-            this.Implementations = implementations;
-        }
+    public CleanMeta(Implementations? implementations, params PropertyRoute[] propertyRoutes)
+        : base(implementations)
+    {
+        this.PropertyRoutes = propertyRoutes;
     }
 
-    public class CleanMeta : Meta
+    public override string? IsAllowed()
     {
-        public readonly PropertyRoute[] PropertyRoutes;
+        var result = PropertyRoutes.Select(a => a.IsAllowed()).NotNull();
+        if (result.IsEmpty())
+            return null;
 
-        public CleanMeta(Implementations? implementations, params PropertyRoute[] propertyRoutes)
-            : base(implementations)
-        {
-            this.PropertyRoutes = propertyRoutes;
-        }
-
-        public override string? IsAllowed()
-        {
-            var result = PropertyRoutes.Select(a => a.IsAllowed()).NotNull();
-            if (result.IsEmpty())
-                return null;
-
-            return result.CommaAnd();
-        }
-
-        public override string ToString()
-        {
-            return "CleanMeta({0})".FormatWith(PropertyRoutes.ToString(", "));
-        }
-
+        return result.CommaAnd();
     }
 
-    public class DirtyMeta : Meta
+    public override string ToString()
     {
-        public readonly ReadOnlyCollection<CleanMeta> CleanMetas;
+        return "CleanMeta({0})".FormatWith(PropertyRoutes.ToString(", "));
+    }
 
-        public DirtyMeta(Implementations? implementations, Meta[] properties)
-            : base(implementations)
-        {
-            CleanMetas = properties.OfType<CleanMeta>().Concat(
-                properties.OfType<DirtyMeta>().SelectMany(d => d.CleanMetas))
-                .ToReadOnly();
-        }
+}
 
-        public override string? IsAllowed()
-        {
-            var result = CleanMetas.Select(a => a.IsAllowed()).NotNull();
-            if (result.IsEmpty())
-                return null;
+public class DirtyMeta : Meta
+{
+    public readonly ReadOnlyCollection<CleanMeta> CleanMetas;
 
-            return result.CommaAnd();
-        }
+    public DirtyMeta(Implementations? implementations, Meta[] properties)
+        : base(implementations)
+    {
+        CleanMetas = properties.OfType<CleanMeta>().Concat(
+            properties.OfType<DirtyMeta>().SelectMany(d => d.CleanMetas))
+            .ToReadOnly();
+    }
 
-        public override string ToString()
-        {
-            return "DirtyMeta({0})".FormatWith(CleanMetas.ToString(", "));
-        }
+    public override string? IsAllowed()
+    {
+        var result = CleanMetas.Select(a => a.IsAllowed()).NotNull();
+        if (result.IsEmpty())
+            return null;
+
+        return result.CommaAnd();
+    }
+
+    public override string ToString()
+    {
+        return "DirtyMeta({0})".FormatWith(CleanMetas.ToString(", "));
     }
 }

@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace Signum.React.Workflow
+namespace Signum.React.Workflow;
+
+public static class WorkflowServer
 {
-    public static class WorkflowServer
+    public static void Start(IApplicationBuilder app)
     {
-        public static void Start(IApplicationBuilder app)
-        {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-        }
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
     }
 }

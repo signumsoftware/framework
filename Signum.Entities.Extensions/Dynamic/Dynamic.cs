@@ -1,11 +1,10 @@
 ﻿using Signum.Entities.Authorization;
 
-namespace Signum.Entities.Dynamic
+namespace Signum.Entities.Dynamic;
+
+[AutoInit]
+public static class DynamicPanelPermission
 {
-    [AutoInit]
-    public static class DynamicPanelPermission
-    {
-        public static PermissionSymbol ViewDynamicPanel;
-        public static PermissionSymbol RestartApplication;
-    }
+    public static PermissionSymbol ViewDynamicPanel;
+    public static PermissionSymbol RestartApplication;
 }

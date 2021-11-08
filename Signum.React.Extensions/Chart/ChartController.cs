@@ -3,14 +3,13 @@ using Signum.Entities.Chart;
 using Signum.Engine.Chart;
 using System.ComponentModel.DataAnnotations;
 
-namespace Signum.React.Chart
+namespace Signum.React.Chart;
+
+public class ChartController : ControllerBase
 {
-    public class ChartController : ControllerBase
+    [HttpGet("api/chart/scripts")]
+    public List<ChartScript> ChartScripts()
     {
-        [HttpGet("api/chart/scripts")]
-        public List<ChartScript> ChartScripts()
-        {
-            return ChartScriptLogic.Scripts.Values.ToList();
-        }
+        return ChartScriptLogic.Scripts.Values.ToList();
     }
 }

@@ -5,22 +5,21 @@ using Signum.Entities.SMS;
 using Signum.React.Json;
 using Signum.React.Facades;
 
-namespace Signum.React.SMS
-{
-    public static class SMSServer
-    {
-        public static void Start(IApplicationBuilder app)
-        {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+namespace Signum.React.SMS;
 
-            SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((SMSTemplateEntity et) =>
+public static class SMSServer
+{
+    public static void Start(IApplicationBuilder app)
+    {
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
+        SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((SMSTemplateEntity et) =>
+        {
+            if (et.Query != null)
             {
-                if (et.Query != null)
-                {
-                    var qd = QueryLogic.Queries.QueryDescription(et.Query.ToQueryName());
-                    et.ParseData(qd);
-                }
-            });
-        }
+                var qd = QueryLogic.Queries.QueryDescription(et.Query.ToQueryName());
+                et.ParseData(qd);
+            }
+        });
     }
 }

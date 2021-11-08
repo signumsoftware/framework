@@ -1,38 +1,37 @@
 using Signum.Entities.Basics;
 
-namespace Signum.Entities.DiffLog
+namespace Signum.Entities.DiffLog;
+
+public class DiffLogMixin : MixinEntity
 {
-    public class DiffLogMixin : MixinEntity
+    protected DiffLogMixin(ModifiableEntity mainEntity, MixinEntity next)
+        : base(mainEntity, next)
     {
-        protected DiffLogMixin(ModifiableEntity mainEntity, MixinEntity next)
-            : base(mainEntity, next)
-        {
-            this.RebindEvents();
-        }
-
-        [NotifyChildProperty]
-        public BigStringEmbedded InitialState { get; set; } = new BigStringEmbedded();
-
-        [NotifyChildProperty]
-        public BigStringEmbedded FinalState { get; set; } = new BigStringEmbedded();
-
-        public bool Cleaned { get; set; }
+        this.RebindEvents();
     }
 
-    public enum DiffLogMessage
-    {
-        PreviousLog,
-        NextLog,
-        CurrentEntity,
+    [NotifyChildProperty]
+    public BigStringEmbedded InitialState { get; set; } = new BigStringEmbedded();
 
-        NavigatesToThePreviousOperationLog,
-        DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState,
-        StateWhenTheOperationStarted,
-        DifferenceBetweenInitialStateAndFinalState,
-        StateWhenTheOperationFinished,
-        DifferenceBetweenFinalStateAndTheInitialStateOfNextLog,
-        NavigatesToTheNextOperationLog,
-        DifferenceBetweenFinalStateAndTheCurrentStateOfTheEntity,
-        NavigatesToTheCurrentEntity,
-    }
+    [NotifyChildProperty]
+    public BigStringEmbedded FinalState { get; set; } = new BigStringEmbedded();
+
+    public bool Cleaned { get; set; }
+}
+
+public enum DiffLogMessage
+{
+    PreviousLog,
+    NextLog,
+    CurrentEntity,
+
+    NavigatesToThePreviousOperationLog,
+    DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState,
+    StateWhenTheOperationStarted,
+    DifferenceBetweenInitialStateAndFinalState,
+    StateWhenTheOperationFinished,
+    DifferenceBetweenFinalStateAndTheInitialStateOfNextLog,
+    NavigatesToTheNextOperationLog,
+    DifferenceBetweenFinalStateAndTheCurrentStateOfTheEntity,
+    NavigatesToTheCurrentEntity,
 }

@@ -1,51 +1,50 @@
 using System.Collections.ObjectModel;
 
-namespace Signum.Engine.Linq
+namespace Signum.Engine.Linq;
+
+internal class SqlCastLazyRemover : DbExpressionVisitor
 {
-    internal class SqlCastLazyRemover : DbExpressionVisitor
+    SelectExpression? currentSelect;
+    ColumnGenerator? cg;
+
+    static internal Expression Remove(Expression expression)
     {
-        SelectExpression? currentSelect;
-        ColumnGenerator? cg;
+        return new SqlCastLazyRemover().Visit(expression);
+    }
 
-        static internal Expression Remove(Expression expression)
+    protected internal override Expression VisitProjection(ProjectionExpression proj)
+    {
+        var oldCg = this.cg;
+        var oldSelect = this.currentSelect;
+        try
         {
-            return new SqlCastLazyRemover().Visit(expression);
-        }
+            var s = this.currentSelect = proj.Select;
 
-        protected internal override Expression VisitProjection(ProjectionExpression proj)
+            Expression projector = this.Visit(proj.Projector);
+
+
+            SelectExpression source = this.cg == null ? proj.Select :
+                new SelectExpression(s.Alias, s.IsDistinct, s.Top, this.cg.Columns.NotNull(), s.From, s.Where, s.OrderBy, s.GroupBy, s.SelectOptions);
+
+            if (source != proj.Select || projector != proj.Projector)
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, proj.Type);
+
+            return proj;
+        }
+        finally
         {
-            var oldCg = this.cg;
-            var oldSelect = this.currentSelect;
-            try
-            {
-                var s = this.currentSelect = proj.Select;
-
-                Expression projector = this.Visit(proj.Projector);
-
-
-                SelectExpression source = this.cg == null ? proj.Select :
-                    new SelectExpression(s.Alias, s.IsDistinct, s.Top, this.cg.Columns.NotNull(), s.From, s.Where, s.OrderBy, s.GroupBy, s.SelectOptions);
-
-                if (source != proj.Select || projector != proj.Projector)
-                    return new ProjectionExpression(source, projector, proj.UniqueFunction, proj.Type);
-
-                return proj;
-            }
-            finally
-            {
-                this.cg = oldCg;
-                this.currentSelect = oldSelect;
-            }
+            this.cg = oldCg;
+            this.currentSelect = oldSelect;
         }
+    }
 
-        protected internal override Expression VisitSqlCastLazy(SqlCastLazyExpression castExpr)
-        {
-            if(this.cg == null)
-                this.cg = new ColumnGenerator(this.currentSelect!.Columns);
+    protected internal override Expression VisitSqlCastLazy(SqlCastLazyExpression castExpr)
+    {
+        if(this.cg == null)
+            this.cg = new ColumnGenerator(this.currentSelect!.Columns);
 
-            var cd = cg.NewColumn(new SqlCastExpression(castExpr.Type, castExpr.Expression, castExpr.DbType));
+        var cd = cg.NewColumn(new SqlCastExpression(castExpr.Type, castExpr.Expression, castExpr.DbType));
 
-            return new ColumnExpression(cd.Expression.Type, this.currentSelect!.Alias, cd.Name);
-        }
+        return new ColumnExpression(cd.Expression.Type, this.currentSelect!.Alias, cd.Name);
     }
 }

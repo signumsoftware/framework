@@ -1,7 +1,6 @@
 ﻿
-namespace Signum.Entities
+namespace Signum.Entities;
+
+public abstract class EmbeddedEntity : ModifiableEntity
 {
-    public abstract class EmbeddedEntity : ModifiableEntity
-    {
-    }
 }

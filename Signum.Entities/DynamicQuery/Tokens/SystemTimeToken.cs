@@ -1,84 +1,83 @@
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Entities.DynamicQuery
+namespace Signum.Entities.DynamicQuery;
+
+public class SystemTimeToken : QueryToken
 {
-    public class SystemTimeToken : QueryToken
+    QueryToken parent;
+    public override QueryToken? Parent => parent;
+    
+    SystemTimeProperty property;
+    internal SystemTimeToken(QueryToken parent, SystemTimeProperty property)
     {
-        QueryToken parent;
-        public override QueryToken? Parent => parent;
-        
-        SystemTimeProperty property;
-        internal SystemTimeToken(QueryToken parent, SystemTimeProperty property)
-        {
-            Priority = 8;
-            this.property = property;
-            this.parent = parent;
-        }
+        Priority = 8;
+        this.property = property;
+        this.parent = parent;
+    }
 
-        public override Type Type
-        {
-            get { return typeof(DateTimeOffset?); }
-        }
+    public override Type Type
+    {
+        get { return typeof(DateTimeOffset?); }
+    }
 
-        public override string ToString()
-        {
-            return "[" + this.property.NiceToString() + "]";
-        }
+    public override string ToString()
+    {
+        return "[" + this.property.NiceToString() + "]";
+    }
 
-        public override string Key
-        {
-            get { return this.property.ToString(); }
-        }
-        static MethodInfo miSystemPeriod = ReflectionTools.GetMethodInfo((object o) => SystemTimeExtensions.SystemPeriod(null!));
+    public override string Key
+    {
+        get { return this.property.ToString(); }
+    }
+    static MethodInfo miSystemPeriod = ReflectionTools.GetMethodInfo((object o) => SystemTimeExtensions.SystemPeriod(null!));
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
-        {
-            var result = parent.BuildExpression(context).ExtractEntity(false);
+    protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+    {
+        var result = parent.BuildExpression(context).ExtractEntity(false);
 
-            var period = Expression.Call(miSystemPeriod, result.UnNullify());
+        var period = Expression.Call(miSystemPeriod, result.UnNullify());
 
-            return Expression.Property(period, property == SystemTimeProperty.SystemValidFrom ? "Min" : "Max");
-        }
+        return Expression.Property(period, property == SystemTimeProperty.SystemValidFrom ? "Min" : "Max");
+    }
 
-        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
-        {
-            return SubTokensBase(typeof(DateTime), options, GetImplementations());
-        }
+    protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
+    {
+        return SubTokensBase(typeof(DateTime), options, GetImplementations());
+    }
 
-        public override Implementations? GetImplementations()
-        {
-            return null;
-        }
+    public override Implementations? GetImplementations()
+    {
+        return null;
+    }
 
-        public override string? Format
-        {
-            get { return "o"; }
-        }
+    public override string? Format
+    {
+        get { return "o"; }
+    }
 
-        public override string? Unit
-        {
-            get { return null; }
-        }
+    public override string? Unit
+    {
+        get { return null; }
+    }
 
-        public override string? IsAllowed()
-        {
-            return parent.IsAllowed();
-        }
+    public override string? IsAllowed()
+    {
+        return parent.IsAllowed();
+    }
 
-        public override PropertyRoute? GetPropertyRoute()
-        {
-            return null;
-        }
+    public override PropertyRoute? GetPropertyRoute()
+    {
+        return null;
+    }
 
-        public override string NiceName()
-        {
-            return this.property.NiceToString();
-        }
+    public override string NiceName()
+    {
+        return this.property.NiceToString();
+    }
 
-        public override QueryToken Clone()
-        {
-            return new SystemTimeToken(parent.Clone(), this.property);
-        }
+    public override QueryToken Clone()
+    {
+        return new SystemTimeToken(parent.Clone(), this.property);
     }
 }

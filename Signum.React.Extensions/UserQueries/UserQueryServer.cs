@@ -9,34 +9,33 @@ using Signum.Engine.Json;
 using System.Text.Json;
 using Signum.Engine.Translation;
 
-namespace Signum.React.UserQueries
+namespace Signum.React.UserQueries;
+
+public static class UserQueryServer
 {
-    public static class UserQueryServer
+    public static void Start(IApplicationBuilder app)
     {
-        public static void Start(IApplicationBuilder app)
+        UserAssetServer.Start(app);
+
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
+        SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((UserQueryEntity uq) =>
         {
-            UserAssetServer.Start(app);
-
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
-            SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((UserQueryEntity uq) =>
+            if (uq.Query != null)
             {
-                if (uq.Query != null)
-                {
-                    var qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
-                    uq.ParseData(qd);
-                }
-            });
+                var qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
+                uq.ParseData(qd);
+            }
+        });
 
-            EntityPackTS.AddExtension += ep =>
-            {
-                if (ep.entity.IsNew || !UserQueryPermission.ViewUserQuery.IsAuthorized())
-                    return;
+        EntityPackTS.AddExtension += ep =>
+        {
+            if (ep.entity.IsNew || !UserQueryPermission.ViewUserQuery.IsAuthorized())
+                return;
 
-                var userQueries = UserQueryLogic.GetUserQueriesEntity(ep.entity.GetType());
-                if (userQueries.Any())
-                    ep.extension.Add("userQueries", userQueries);
-            };
-        }
+            var userQueries = UserQueryLogic.GetUserQueriesEntity(ep.entity.GetType());
+            if (userQueries.Any())
+                ep.extension.Add("userQueries", userQueries);
+        };
     }
 }

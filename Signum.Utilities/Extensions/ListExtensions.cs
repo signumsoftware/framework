@@ -1,63 +1,62 @@
 ﻿
-namespace Signum.Utilities
+namespace Signum.Utilities;
+
+public static class ListExtensions
 {
-    public static class ListExtensions
+    public static List<T> Extract<T>(this IList<T> list, Func<T, bool> condition)
     {
-        public static List<T> Extract<T>(this IList<T> list, Func<T, bool> condition)
+        List<T> result = new List<T>();
+        int i = 0;
+        while (i < list.Count)
         {
-            List<T> result = new List<T>();
-            int i = 0;
-            while (i < list.Count)
+            if (condition(list[i]))
             {
-                if (condition(list[i]))
-                {
-                    result.Add(list[i]);
-                    list.RemoveAt(i);
-                }
-                else
-                {
-                    i++;
-                }
+                result.Add(list[i]);
+                list.RemoveAt(i);
             }
-            return result;
-        }
-
-
-        public static void Sort<T, A>(this List<T> list, Func<T, A> element)
-            where A : IComparable<A>
-        {
-            list.Sort((a, b) => element(a).CompareTo(element(b)));
-        }
-
-        public static void SortDescending<T, A>(this List<T> list, Func<T, A> element)
-           where A : IComparable<A>
-        {
-            list.Sort((a, b) => element(b).CompareTo(element(a)));
-        }
-
-        public static void RemoveAll<T>(this IList<T> list, Func<T, bool> condition)
-        {
-            for (int i = list.Count - 1; i >= 0; i--)
+            else
             {
-                if (condition(list[i]))
-                    list.RemoveAt(i);
+                i++;
             }
         }
+        return result;
+    }
 
-        public static void AddRange<T>(this IList<T> list, IEnumerable<T> elements)
+
+    public static void Sort<T, A>(this List<T> list, Func<T, A> element)
+        where A : IComparable<A>
+    {
+        list.Sort((a, b) => element(a).CompareTo(element(b)));
+    }
+
+    public static void SortDescending<T, A>(this List<T> list, Func<T, A> element)
+       where A : IComparable<A>
+    {
+        list.Sort((a, b) => element(b).CompareTo(element(a)));
+    }
+
+    public static void RemoveAll<T>(this IList<T> list, Func<T, bool> condition)
+    {
+        for (int i = list.Count - 1; i >= 0; i--)
         {
-            foreach (var item in elements)
-            {
-                list.Add(item);
-            }
+            if (condition(list[i]))
+                list.RemoveAt(i);
         }
+    }
 
-        public static void AddRange<T>(this IList<T> list, params T[] elements)
+    public static void AddRange<T>(this IList<T> list, IEnumerable<T> elements)
+    {
+        foreach (var item in elements)
         {
-            foreach (var item in elements)
-            {
-                list.Add(item);
-            }
+            list.Add(item);
+        }
+    }
+
+    public static void AddRange<T>(this IList<T> list, params T[] elements)
+    {
+        foreach (var item in elements)
+        {
+            list.Add(item);
         }
     }
 }

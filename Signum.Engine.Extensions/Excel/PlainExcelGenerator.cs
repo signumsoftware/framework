@@ -7,231 +7,230 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Excel;
 
-namespace Signum.Engine.Excel
+namespace Signum.Engine.Excel;
+
+public static class PlainExcelGenerator
 {
-    public static class PlainExcelGenerator
+    public static byte[] Template { get; set; } = null!;
+    public static CellBuilder CellBuilder { get; set; } = null!;
+
+    static PlainExcelGenerator()
     {
-        public static byte[] Template { get; set; } = null!;
-        public static CellBuilder CellBuilder { get; set; } = null!;
+        SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Excel.plainExcelTemplate.xlsx")!);
+    }
 
-        static PlainExcelGenerator()
+    public static void SetTemplate(Stream templateStream)
+    {
+        Template = templateStream.ReadAllBytes();
+
+        MemoryStream memoryStream = new MemoryStream();
+        memoryStream.WriteAllBytes(Template);
+
+        using (SpreadsheetDocument document = SpreadsheetDocument.Open(memoryStream, true))
         {
-            SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Excel.plainExcelTemplate.xlsx")!);
-        }
+            document.PackageProperties.Creator = "";
+            document.PackageProperties.LastModifiedBy = "";
 
-        public static void SetTemplate(Stream templateStream)
-        {
-            Template = templateStream.ReadAllBytes();
+            WorkbookPart workbookPart = document.WorkbookPart!;
+                                        
+            WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
+            Worksheet worksheet = worksheetPart.Worksheet;
 
-            MemoryStream memoryStream = new MemoryStream();
-            memoryStream.WriteAllBytes(Template);
-
-            using (SpreadsheetDocument document = SpreadsheetDocument.Open(memoryStream, true))
+            CellBuilder = new CellBuilder()
             {
-                document.PackageProperties.Creator = "";
-                document.PackageProperties.LastModifiedBy = "";
-
-                WorkbookPart workbookPart = document.WorkbookPart!;
-                                            
-                WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
-                Worksheet worksheet = worksheetPart.Worksheet;
-
-                CellBuilder = new CellBuilder()
+                CellFormatCount = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet.CellFormats!.Count!,
+                DefaultStyles = new Dictionary<DefaultStyle, UInt32Value>
                 {
-                    CellFormatCount = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet.CellFormats!.Count!,
-                    DefaultStyles = new Dictionary<DefaultStyle, UInt32Value>
-                    {
-                        { DefaultStyle.Title, worksheet.FindCell("A1").StyleIndex! },
-                        { DefaultStyle.Header, worksheet.FindCell("A2").StyleIndex! },
-                        { DefaultStyle.Date, worksheet.FindCell("B3").StyleIndex! },
-                        { DefaultStyle.DateTime, worksheet.FindCell("C3").StyleIndex! },
-                        { DefaultStyle.Text, worksheet.FindCell("D3").StyleIndex! },
-                        { DefaultStyle.General, worksheet.FindCell("E3").StyleIndex! },
-                        { DefaultStyle.Boolean, worksheet.FindCell("E3").StyleIndex! },
-                        { DefaultStyle.Enum, worksheet.FindCell("E3").StyleIndex! },
-                        { DefaultStyle.Number, worksheet.FindCell("F3").StyleIndex! },
-                        { DefaultStyle.Decimal, worksheet.FindCell("G3").StyleIndex! },
-                        { DefaultStyle.Percentage, worksheet.FindCell("H3").StyleIndex! },
-                    }
-                };
-            }
-        }
-        
-        public static byte[] WritePlainExcel(ResultTable results,string title)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                WritePlainExcel(results, ms,title);
-                return ms.ToArray(); 
-            }
-        }
-
-        public static void WritePlainExcel(ResultTable results, string fileName,string title)
-        {
-            using (FileStream fs = File.Create(fileName))
-                WritePlainExcel(results, fs,title);
-        }
-
-        static void WritePlainExcel(ResultTable results, Stream stream, string title)
-        {
-            stream.WriteAllBytes(Template);
-
-            if (results == null)
-                throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
-
-            using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
-            {
-                document.PackageProperties.Creator = "";
-                document.PackageProperties.LastModifiedBy = "";
-
-                WorkbookPart workbookPart = document.WorkbookPart!;
-
-                WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
-                
-                worksheetPart.Worksheet = new Worksheet();
-
-                worksheetPart.Worksheet.Append(new Columns(results.Columns.Select((c, i) => new spreadsheet.Column()
-                    {
-                        Min = (uint)i + 1,
-                        Max = (uint)i + 1,
-                        Width = GetColumnWidth(c.Column.Type),
-                        BestFit = true,
-                        CustomWidth = true
-                    }).ToArray()));
-
-                Dictionary<ResultColumn, (DefaultStyle defaultStyle, UInt32Value styleIndex)> indexes =
-                    results.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
-                var ss = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet;
-                {
-                    var maxIndex = ss.NumberingFormats!.ChildElements.Cast<NumberingFormat>()
-                        .Max(f => (uint)f.NumberFormatId!) + 1;
-
-                    var decimalCellFormat = ss.CellFormats!.ElementAt((int)(uint)CellBuilder.DefaultStyles[DefaultStyle.Decimal]);
-                    foreach (var kvp in CellBuilder.CustomDecimalStyles)
-                    {
-                        var numberingFormat = new NumberingFormat
-                        {
-                            NumberFormatId = maxIndex++,
-                            FormatCode = kvp.Key
-                        };
-                        ss.NumberingFormats.AppendChild(numberingFormat);
-                        var cellFormat = (CellFormat)decimalCellFormat.CloneNode(false);
-                        cellFormat.NumberFormatId = numberingFormat.NumberFormatId;
-                        ss.CellFormats!.AppendChild(cellFormat);
-                        ss.CellFormats.Count = (uint)ss.CellFormats.ChildElements.Count;
-                        if (ss.CellFormats.Count != kvp.Value + 1)
-                        {
-                            throw new InvalidOperationException("Unexpected CellFormats count");
-                        }
-                    }
+                    { DefaultStyle.Title, worksheet.FindCell("A1").StyleIndex! },
+                    { DefaultStyle.Header, worksheet.FindCell("A2").StyleIndex! },
+                    { DefaultStyle.Date, worksheet.FindCell("B3").StyleIndex! },
+                    { DefaultStyle.DateTime, worksheet.FindCell("C3").StyleIndex! },
+                    { DefaultStyle.Text, worksheet.FindCell("D3").StyleIndex! },
+                    { DefaultStyle.General, worksheet.FindCell("E3").StyleIndex! },
+                    { DefaultStyle.Boolean, worksheet.FindCell("E3").StyleIndex! },
+                    { DefaultStyle.Enum, worksheet.FindCell("E3").StyleIndex! },
+                    { DefaultStyle.Number, worksheet.FindCell("F3").StyleIndex! },
+                    { DefaultStyle.Decimal, worksheet.FindCell("G3").StyleIndex! },
+                    { DefaultStyle.Percentage, worksheet.FindCell("H3").StyleIndex! },
                 }
-
-
-                worksheetPart.Worksheet.Append(new Sequence<Row>()
-                {
-                   new [] { CellBuilder.Cell(title,DefaultStyle.Title) }.ToRow(),
-
-                    (from c in results.Columns
-                    select CellBuilder.Cell(c.Column.DisplayName, DefaultStyle.Header)).ToRow(),
-
-                    from r in results.Rows
-                    select (from c in results.Columns
-                            let t = indexes.GetOrThrow(c)
-                            select CellBuilder.Cell(r[c], t.defaultStyle,t.styleIndex)).ToRow()
-                }.ToSheetData());
-
-                workbookPart.Workbook.Save();
-                document.Close();
-            }
+            };
         }
-
-        public static byte[] WritePlainExcel<T>(IEnumerable<T> results)
+    }
+    
+    public static byte[] WritePlainExcel(ResultTable results,string title)
+    {
+        using (MemoryStream ms = new MemoryStream())
         {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                WritePlainExcel(results, ms);
-                return ms.ToArray();
-            }
+            WritePlainExcel(results, ms,title);
+            return ms.ToArray(); 
         }
+    }
 
-        public static void WritePlainExcel<T>(IEnumerable<T> results, string fileName)
+    public static void WritePlainExcel(ResultTable results, string fileName,string title)
+    {
+        using (FileStream fs = File.Create(fileName))
+            WritePlainExcel(results, fs,title);
+    }
+
+    static void WritePlainExcel(ResultTable results, Stream stream, string title)
+    {
+        stream.WriteAllBytes(Template);
+
+        if (results == null)
+            throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
+
+        using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
         {
-            using (FileStream fs = File.Create(fileName))
-                WritePlainExcel(results, fs);
-        }
+            document.PackageProperties.Creator = "";
+            document.PackageProperties.LastModifiedBy = "";
 
-        public static void WritePlainExcel<T>(IEnumerable<T> results, Stream stream)
-        {
-            stream.WriteAllBytes(Template);
+            WorkbookPart workbookPart = document.WorkbookPart!;
 
-            if (results == null)
-                throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
+            WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
             
-            var members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Getter);
-            var formats = members.ToDictionary(a => a.Name, a => a.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format);
+            worksheetPart.Worksheet = new Worksheet();
 
-            using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
-            {
-                document.PackageProperties.Creator = "";
-                document.PackageProperties.LastModifiedBy = "";
-
-                WorkbookPart workbookPart = document.WorkbookPart!;
-
-                WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
-
-                worksheetPart.Worksheet = new Worksheet();
-
-                worksheetPart.Worksheet.Append(new Columns(members.Select((c, i) => new spreadsheet.Column()
+            worksheetPart.Worksheet.Append(new Columns(results.Columns.Select((c, i) => new spreadsheet.Column()
                 {
                     Min = (uint)i + 1,
                     Max = (uint)i + 1,
-                    Width = GetColumnWidth(c.MemberInfo.ReturningType()),
+                    Width = GetColumnWidth(c.Column.Type),
                     BestFit = true,
                     CustomWidth = true
                 }).ToArray()));
 
-                worksheetPart.Worksheet.Append(new Sequence<Row>()
-                {
-                    (from c in members
-                    select CellBuilder.Cell(c.Name, DefaultStyle.Header)).ToRow(),
-
-                    from r in results
-                    select (from c in members
-                            let template = formats.TryGetCN(c.Name) == "d" ? DefaultStyle.Date : CellBuilder.GetDefaultStyle(c.MemberInfo.ReturningType())
-                            select CellBuilder.Cell(c.Getter!(r), template)).ToRow()
-                }.ToSheetData());
-
-                workbookPart.Workbook.Save();
-                document.Close();
-            }
-        }
-
-        static double GetColumnWidth(Type type)
-        { 
-            type = type.UnNullify();
-
-            if (type == typeof(DateTime))
-                return 20;
-            if (type == typeof(string))
-                return 50;
-            if (type.IsLite())
-                return 50;
-
-            return 10;
-        }
-
-        public static List<T> ReadPlainExcel<T>(Stream stream, Func<string[], T> selector)
-        {
-            using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false))
+            Dictionary<ResultColumn, (DefaultStyle defaultStyle, UInt32Value styleIndex)> indexes =
+                results.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
+            var ss = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet;
             {
-                WorkbookPart workbookPart = document.WorkbookPart!;
+                var maxIndex = ss.NumberingFormats!.ChildElements.Cast<NumberingFormat>()
+                    .Max(f => (uint)f.NumberFormatId!) + 1;
 
-                WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
-
-                var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
-
-                return data.Descendants<Row>().Skip(1).Select(r => selector(r.Descendants<Cell>().Select(c => document.GetCellValue(c)).ToArray())).ToList();
+                var decimalCellFormat = ss.CellFormats!.ElementAt((int)(uint)CellBuilder.DefaultStyles[DefaultStyle.Decimal]);
+                foreach (var kvp in CellBuilder.CustomDecimalStyles)
+                {
+                    var numberingFormat = new NumberingFormat
+                    {
+                        NumberFormatId = maxIndex++,
+                        FormatCode = kvp.Key
+                    };
+                    ss.NumberingFormats.AppendChild(numberingFormat);
+                    var cellFormat = (CellFormat)decimalCellFormat.CloneNode(false);
+                    cellFormat.NumberFormatId = numberingFormat.NumberFormatId;
+                    ss.CellFormats!.AppendChild(cellFormat);
+                    ss.CellFormats.Count = (uint)ss.CellFormats.ChildElements.Count;
+                    if (ss.CellFormats.Count != kvp.Value + 1)
+                    {
+                        throw new InvalidOperationException("Unexpected CellFormats count");
+                    }
+                }
             }
+
+
+            worksheetPart.Worksheet.Append(new Sequence<Row>()
+            {
+               new [] { CellBuilder.Cell(title,DefaultStyle.Title) }.ToRow(),
+
+                (from c in results.Columns
+                select CellBuilder.Cell(c.Column.DisplayName, DefaultStyle.Header)).ToRow(),
+
+                from r in results.Rows
+                select (from c in results.Columns
+                        let t = indexes.GetOrThrow(c)
+                        select CellBuilder.Cell(r[c], t.defaultStyle,t.styleIndex)).ToRow()
+            }.ToSheetData());
+
+            workbookPart.Workbook.Save();
+            document.Close();
+        }
+    }
+
+    public static byte[] WritePlainExcel<T>(IEnumerable<T> results)
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            WritePlainExcel(results, ms);
+            return ms.ToArray();
+        }
+    }
+
+    public static void WritePlainExcel<T>(IEnumerable<T> results, string fileName)
+    {
+        using (FileStream fs = File.Create(fileName))
+            WritePlainExcel(results, fs);
+    }
+
+    public static void WritePlainExcel<T>(IEnumerable<T> results, Stream stream)
+    {
+        stream.WriteAllBytes(Template);
+
+        if (results == null)
+            throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
+        
+        var members = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Getter);
+        var formats = members.ToDictionary(a => a.Name, a => a.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format);
+
+        using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
+        {
+            document.PackageProperties.Creator = "";
+            document.PackageProperties.LastModifiedBy = "";
+
+            WorkbookPart workbookPart = document.WorkbookPart!;
+
+            WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
+
+            worksheetPart.Worksheet = new Worksheet();
+
+            worksheetPart.Worksheet.Append(new Columns(members.Select((c, i) => new spreadsheet.Column()
+            {
+                Min = (uint)i + 1,
+                Max = (uint)i + 1,
+                Width = GetColumnWidth(c.MemberInfo.ReturningType()),
+                BestFit = true,
+                CustomWidth = true
+            }).ToArray()));
+
+            worksheetPart.Worksheet.Append(new Sequence<Row>()
+            {
+                (from c in members
+                select CellBuilder.Cell(c.Name, DefaultStyle.Header)).ToRow(),
+
+                from r in results
+                select (from c in members
+                        let template = formats.TryGetCN(c.Name) == "d" ? DefaultStyle.Date : CellBuilder.GetDefaultStyle(c.MemberInfo.ReturningType())
+                        select CellBuilder.Cell(c.Getter!(r), template)).ToRow()
+            }.ToSheetData());
+
+            workbookPart.Workbook.Save();
+            document.Close();
+        }
+    }
+
+    static double GetColumnWidth(Type type)
+    { 
+        type = type.UnNullify();
+
+        if (type == typeof(DateTime))
+            return 20;
+        if (type == typeof(string))
+            return 50;
+        if (type.IsLite())
+            return 50;
+
+        return 10;
+    }
+
+    public static List<T> ReadPlainExcel<T>(Stream stream, Func<string[], T> selector)
+    {
+        using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false))
+        {
+            WorkbookPart workbookPart = document.WorkbookPart!;
+
+            WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
+
+            var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
+
+            return data.Descendants<Row>().Skip(1).Select(r => selector(r.Descendants<Cell>().Select(c => document.GetCellValue(c)).ToArray())).ToList();
         }
     }
 }

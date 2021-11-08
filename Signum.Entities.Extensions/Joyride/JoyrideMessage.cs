@@ -1,11 +1,10 @@
-﻿namespace Signum.Entities.Joyride
+﻿namespace Signum.Entities.Joyride;
+
+public enum JoyrideMessage
 {
-    public enum JoyrideMessage
-    {
-        Back,
-        Close,
-        Last,
-        Next,
-        Skip
-    }
+    Back,
+    Close,
+    Last,
+    Next,
+    Skip
 }

@@ -1,314 +1,313 @@
 using System.ComponentModel;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-namespace Signum.Entities.DynamicQuery
+namespace Signum.Entities.DynamicQuery;
+
+public abstract class BaseQueryRequest
 {
-    public abstract class BaseQueryRequest
+    public object QueryName { get; set; }
+
+    public List<Filter> Filters { get; set; }
+
+    public string QueryUrl { get; set; }
+
+    public override string ToString()
     {
-        public object QueryName { get; set; }
+        return "{0} {1}".FormatWith(GetType().Name, QueryName);
+    }
+}
 
-        public List<Filter> Filters { get; set; }
+public class QueryRequest : BaseQueryRequest
+{
+    public bool GroupResults { get; set; }
 
-        public string QueryUrl { get; set; }
+    public List<Column> Columns { get; set; }
 
-        public override string ToString()
+    public List<Order> Orders { get; set; }
+
+    public Pagination Pagination { get; set; }
+
+    public SystemTime? SystemTime { get; set; }
+
+    public List<CollectionElementToken> Multiplications()
+    {
+        HashSet<QueryToken> allTokens = new HashSet<QueryToken>(this.AllTokens());
+
+        return CollectionElementToken.GetElements(allTokens);
+    }
+
+    public List<QueryToken> AllTokens()
+    {
+        var allTokens = Columns.Select(a => a.Token).ToList();
+
+        if (Filters != null)
+            allTokens.AddRange(Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token));
+
+        if (Orders != null)
+            allTokens.AddRange(Orders.Select(a => a.Token));
+
+        return allTokens;
+    }
+}
+
+[DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(true)]
+public enum PaginationMode
+{
+    All,
+    [Description("First")]
+    Firsts,
+    [Description("Pages")]
+    Paginate
+}
+
+[DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+public enum RefreshMode
+{
+    Auto,
+    Manual
+}
+
+[DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+public enum SystemTimeMode
+{
+    AsOf,
+    Between,
+    ContainedIn,
+    All
+}
+
+[DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+public enum SystemTimeJoinMode
+{
+    Current,
+    FirstCompatible,
+    AllCompatible,
+}
+
+[DescriptionOptions(DescriptionOptions.Members)]
+public enum SystemTimeProperty
+{
+    SystemValidFrom,
+    SystemValidTo,
+}
+
+public abstract class Pagination
+{
+    public abstract PaginationMode GetMode();
+    public abstract int? GetElementsPerPage();
+    public abstract int? MaxElementIndex { get; }
+
+    public class All : Pagination
+    {
+        public override int? MaxElementIndex
         {
-            return "{0} {1}".FormatWith(GetType().Name, QueryName);
+            get { return null; }
+        }
+
+        public override PaginationMode GetMode()
+        {
+            return PaginationMode.All;
+        }
+
+        public override int? GetElementsPerPage()
+        {
+            return null;
         }
     }
 
-    public class QueryRequest : BaseQueryRequest
+    public class Firsts : Pagination
     {
-        public bool GroupResults { get; set; }
+        public static int DefaultTopElements = 20;
 
-        public List<Column> Columns { get; set; }
-
-        public List<Order> Orders { get; set; }
-
-        public Pagination Pagination { get; set; }
-
-        public SystemTime? SystemTime { get; set; }
-
-        public List<CollectionElementToken> Multiplications()
+        public Firsts(int topElements)
         {
-            HashSet<QueryToken> allTokens = new HashSet<QueryToken>(this.AllTokens());
+            this.TopElements = topElements;
+        }
+
+        public int TopElements { get; private set; }
+
+        public override int? MaxElementIndex
+        {
+            get { return TopElements; }
+        }
+
+        public override PaginationMode GetMode()
+        {
+            return PaginationMode.Firsts;
+        }
+
+        public override int? GetElementsPerPage()
+        {
+            return TopElements;
+        }
+    }
+
+    public class Paginate : Pagination
+    {
+        public static int DefaultElementsPerPage = 20;
+
+        public Paginate(int elementsPerPage, int currentPage = 1)
+        {
+            if (elementsPerPage <= 0)
+                throw new InvalidOperationException("elementsPerPage should be greater than zero");
+
+            if (currentPage <= 0)
+                throw new InvalidOperationException("currentPage should be greater than zero");
+
+            this.ElementsPerPage = elementsPerPage;
+            this.CurrentPage = currentPage;
+        }
+
+        public int ElementsPerPage { get; private set; }
+
+        public int CurrentPage { get; private set; }
+
+        public int StartElementIndex()
+        {
+            return (ElementsPerPage * (CurrentPage - 1)) + 1;
+        }
+
+        public int EndElementIndex(int rows)
+        {
+            return StartElementIndex() + rows - 1;
+        }
+
+        public int TotalPages(int totalElements)
+        {
+            return (totalElements + ElementsPerPage - 1) / ElementsPerPage; //Round up
+        }
+
+        public override int? MaxElementIndex
+        {
+            get { return (ElementsPerPage * (CurrentPage + 1)) - 1; }
+        }
+
+        public override PaginationMode GetMode()
+        {
+            return PaginationMode.Paginate;
+        }
+
+        public override int? GetElementsPerPage()
+        {
+            return ElementsPerPage;
+        }
+
+        public Paginate WithCurrentPage(int newPage)
+        {
+            return new Paginate(this.ElementsPerPage, newPage);
+        }
+    }
+}
+
+public class QueryValueRequest : BaseQueryRequest
+{
+    public QueryToken? ValueToken { get; set; }
+
+    public bool MultipleValues { get; set; }
+
+    public SystemTime? SystemTime { get; set; }
+
+    public List<CollectionElementToken> Multiplications
+    {
+        get
+        {
+            return CollectionElementToken.GetElements(Filters
+              .SelectMany(a => a.GetFilterConditions())
+              .Select(fc => fc.Token)
+              .PreAnd(ValueToken)
+              .NotNull()
+              .ToHashSet());
+        }
+    }
+
+}
+
+public class UniqueEntityRequest : BaseQueryRequest
+{
+    List<Order> orders;
+    public List<Order> Orders
+    {
+        get { return orders; }
+        set { orders = value; }
+    }
+
+    UniqueType uniqueType;
+    public UniqueType UniqueType
+    {
+        get { return uniqueType; }
+        set { uniqueType = value; }
+    }
+
+    public List<CollectionElementToken> Multiplications
+    {
+        get
+        {
+            var allTokens = Filters
+                .SelectMany(a => a.GetFilterConditions())
+                .Select(a => a.Token)
+                .Concat(Orders.Select(a => a.Token))
+                .ToHashSet();
 
             return CollectionElementToken.GetElements(allTokens);
         }
-
-        public List<QueryToken> AllTokens()
-        {
-            var allTokens = Columns.Select(a => a.Token).ToList();
-
-            if (Filters != null)
-                allTokens.AddRange(Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token));
-
-            if (Orders != null)
-                allTokens.AddRange(Orders.Select(a => a.Token));
-
-            return allTokens;
-        }
     }
+}
 
-    [DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(true)]
-    public enum PaginationMode
+public class QueryEntitiesRequest: BaseQueryRequest
+{
+    List<Order> orders = new List<Order>();
+    public List<Order> Orders
     {
-        All,
-        [Description("First")]
-        Firsts,
-        [Description("Pages")]
-        Paginate
+        get { return orders; }
+        set { orders = value; }
     }
 
-    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
-    public enum RefreshMode
+    public List<CollectionElementToken> Multiplications
     {
-        Auto,
-        Manual
+        get
+        {
+            var allTokens = Filters.SelectMany(a=>a.GetFilterConditions()).Select(a => a.Token)
+                .Concat(Orders.Select(a => a.Token)).ToHashSet();
+
+            return CollectionElementToken.GetElements(allTokens);
+        }
     }
 
-    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
-    public enum SystemTimeMode
+    public int? Count { get; set; }
+
+    public override string ToString() => QueryName.ToString()!;
+}
+
+public class DQueryableRequest : BaseQueryRequest
+{
+    List<Order> orders = new List<Order>();
+    public List<Order> Orders
     {
-        AsOf,
-        Between,
-        ContainedIn,
-        All
+        get { return orders; }
+        set { orders = value; }
     }
 
-    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
-    public enum SystemTimeJoinMode
+    List<Column> columns = new List<Column>();
+    public List<Column> Columns
     {
-        Current,
-        FirstCompatible,
-        AllCompatible,
+        get { return columns; }
+        set { columns = value; }
     }
 
-    [DescriptionOptions(DescriptionOptions.Members)]
-    public enum SystemTimeProperty
+    public List<CollectionElementToken> Multiplications
     {
-        SystemValidFrom,
-        SystemValidTo,
-    }
-
-    public abstract class Pagination
-    {
-        public abstract PaginationMode GetMode();
-        public abstract int? GetElementsPerPage();
-        public abstract int? MaxElementIndex { get; }
-
-        public class All : Pagination
+        get
         {
-            public override int? MaxElementIndex
-            {
-                get { return null; }
-            }
+            HashSet<QueryToken> allTokens =
+                Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token)
+                .Concat(Columns.Select(a => a.Token))
+                .Concat(Orders.Select(a => a.Token)).ToHashSet();
 
-            public override PaginationMode GetMode()
-            {
-                return PaginationMode.All;
-            }
-
-            public override int? GetElementsPerPage()
-            {
-                return null;
-            }
-        }
-
-        public class Firsts : Pagination
-        {
-            public static int DefaultTopElements = 20;
-
-            public Firsts(int topElements)
-            {
-                this.TopElements = topElements;
-            }
-
-            public int TopElements { get; private set; }
-
-            public override int? MaxElementIndex
-            {
-                get { return TopElements; }
-            }
-
-            public override PaginationMode GetMode()
-            {
-                return PaginationMode.Firsts;
-            }
-
-            public override int? GetElementsPerPage()
-            {
-                return TopElements;
-            }
-        }
-
-        public class Paginate : Pagination
-        {
-            public static int DefaultElementsPerPage = 20;
-
-            public Paginate(int elementsPerPage, int currentPage = 1)
-            {
-                if (elementsPerPage <= 0)
-                    throw new InvalidOperationException("elementsPerPage should be greater than zero");
-
-                if (currentPage <= 0)
-                    throw new InvalidOperationException("currentPage should be greater than zero");
-
-                this.ElementsPerPage = elementsPerPage;
-                this.CurrentPage = currentPage;
-            }
-
-            public int ElementsPerPage { get; private set; }
-
-            public int CurrentPage { get; private set; }
-
-            public int StartElementIndex()
-            {
-                return (ElementsPerPage * (CurrentPage - 1)) + 1;
-            }
-
-            public int EndElementIndex(int rows)
-            {
-                return StartElementIndex() + rows - 1;
-            }
-
-            public int TotalPages(int totalElements)
-            {
-                return (totalElements + ElementsPerPage - 1) / ElementsPerPage; //Round up
-            }
-
-            public override int? MaxElementIndex
-            {
-                get { return (ElementsPerPage * (CurrentPage + 1)) - 1; }
-            }
-
-            public override PaginationMode GetMode()
-            {
-                return PaginationMode.Paginate;
-            }
-
-            public override int? GetElementsPerPage()
-            {
-                return ElementsPerPage;
-            }
-
-            public Paginate WithCurrentPage(int newPage)
-            {
-                return new Paginate(this.ElementsPerPage, newPage);
-            }
+            return CollectionElementToken.GetElements(allTokens);
         }
     }
 
-    public class QueryValueRequest : BaseQueryRequest
-    {
-        public QueryToken? ValueToken { get; set; }
+    public int? Count { get; set; }
 
-        public bool MultipleValues { get; set; }
-
-        public SystemTime? SystemTime { get; set; }
-
-        public List<CollectionElementToken> Multiplications
-        {
-            get
-            {
-                return CollectionElementToken.GetElements(Filters
-                  .SelectMany(a => a.GetFilterConditions())
-                  .Select(fc => fc.Token)
-                  .PreAnd(ValueToken)
-                  .NotNull()
-                  .ToHashSet());
-            }
-        }
-
-    }
-
-    public class UniqueEntityRequest : BaseQueryRequest
-    {
-        List<Order> orders;
-        public List<Order> Orders
-        {
-            get { return orders; }
-            set { orders = value; }
-        }
-
-        UniqueType uniqueType;
-        public UniqueType UniqueType
-        {
-            get { return uniqueType; }
-            set { uniqueType = value; }
-        }
-
-        public List<CollectionElementToken> Multiplications
-        {
-            get
-            {
-                var allTokens = Filters
-                    .SelectMany(a => a.GetFilterConditions())
-                    .Select(a => a.Token)
-                    .Concat(Orders.Select(a => a.Token))
-                    .ToHashSet();
-
-                return CollectionElementToken.GetElements(allTokens);
-            }
-        }
-    }
-
-    public class QueryEntitiesRequest: BaseQueryRequest
-    {
-        List<Order> orders = new List<Order>();
-        public List<Order> Orders
-        {
-            get { return orders; }
-            set { orders = value; }
-        }
-
-        public List<CollectionElementToken> Multiplications
-        {
-            get
-            {
-                var allTokens = Filters.SelectMany(a=>a.GetFilterConditions()).Select(a => a.Token)
-                    .Concat(Orders.Select(a => a.Token)).ToHashSet();
-
-                return CollectionElementToken.GetElements(allTokens);
-            }
-        }
-
-        public int? Count { get; set; }
-
-        public override string ToString() => QueryName.ToString()!;
-    }
-
-    public class DQueryableRequest : BaseQueryRequest
-    {
-        List<Order> orders = new List<Order>();
-        public List<Order> Orders
-        {
-            get { return orders; }
-            set { orders = value; }
-        }
-
-        List<Column> columns = new List<Column>();
-        public List<Column> Columns
-        {
-            get { return columns; }
-            set { columns = value; }
-        }
-
-        public List<CollectionElementToken> Multiplications
-        {
-            get
-            {
-                HashSet<QueryToken> allTokens =
-                    Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token)
-                    .Concat(Columns.Select(a => a.Token))
-                    .Concat(Orders.Select(a => a.Token)).ToHashSet();
-
-                return CollectionElementToken.GetElements(allTokens);
-            }
-        }
-
-        public int? Count { get; set; }
-
-        public override string ToString() => QueryName.ToString()!;
-    }
+    public override string ToString() => QueryName.ToString()!;
 }

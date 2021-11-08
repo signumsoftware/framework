@@ -4,102 +4,101 @@ using Signum.Entities.Basics;
 using Signum.Entities.Authorization;
 using System.Text.Json.Serialization;
 
-namespace Signum.Entities.Help
+namespace Signum.Entities.Help;
+
+public class HelpModuleOmniboxResultGenerator : OmniboxResultGenerator<HelpModuleOmniboxResult>
 {
-    public class HelpModuleOmniboxResultGenerator : OmniboxResultGenerator<HelpModuleOmniboxResult>
+    public Func<string> NiceName = () => OmniboxMessage.Omnibox_Help.NiceToString();
+
+    static readonly Regex regex = new Regex("^I[IS]?$");
+
+    public override IEnumerable<HelpModuleOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
     {
-        public Func<string> NiceName = () => OmniboxMessage.Omnibox_Help.NiceToString();
+        if (!OmniboxParser.Manager.AllowedPermission(HelpPermissions.ViewHelp))
+            yield break;
 
-        static readonly Regex regex = new Regex("^I[IS]?$");
+        if (tokens.Count == 0 || !regex.IsMatch(tokenPattern))
+            yield break;
 
-        public override IEnumerable<HelpModuleOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
+        string key = tokens[0].Value;
+
+        var keyMatch = OmniboxUtils.Contains(NiceName(), NiceName(), key) ?? OmniboxUtils.Contains("help", "help", key);
+
+        if (keyMatch == null)
+            yield break;
+
+        if (tokenPattern == "I")
         {
-            if (!OmniboxParser.Manager.AllowedPermission(HelpPermissions.ViewHelp))
-                yield break;
-
-            if (tokens.Count == 0 || !regex.IsMatch(tokenPattern))
-                yield break;
-
-            string key = tokens[0].Value;
-
-            var keyMatch = OmniboxUtils.Contains(NiceName(), NiceName(), key) ?? OmniboxUtils.Contains("help", "help", key);
-
-            if (keyMatch == null)
-                yield break;
-
-            if (tokenPattern == "I")
-            {
-                yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch, SecondMatch = null };
-                yield break;
-            }
-
-            if(tokens.Count != 2)
-                yield break;
-
-            if (tokens[1].Type == OmniboxTokenType.String)
-            {
-                yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch, SearchString = tokens[1].Value.Trim('\'', '"') };
-                yield break;
-            }
-
-            string pattern = tokens[1].Value;
-
-            bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
-
-            foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
-            {
-                var type = (Type)match.Value;
-                if (OmniboxParser.Manager.AllowedType(type))
-                {
-                    yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = type, SecondMatch = match };
-                }
-            }
+            yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch, SecondMatch = null };
+            yield break;
         }
 
-        public override List<HelpOmniboxResult> GetHelp()
+        if(tokens.Count != 2)
+            yield break;
+
+        if (tokens[1].Type == OmniboxTokenType.String)
         {
-            var resultType = typeof(HelpModuleOmniboxResult);
-            return new List<HelpOmniboxResult>
+            yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch, SearchString = tokens[1].Value.Trim('\'', '"') };
+            yield break;
+        }
+
+        string pattern = tokens[1].Value;
+
+        bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
+
+        foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+        {
+            var type = (Type)match.Value;
+            if (OmniboxParser.Manager.AllowedType(type))
             {
-                new HelpOmniboxResult
-                {
-                    Text =  NiceName() + " " + typeof(TypeEntity).NiceName(),
-                    ReferencedType = resultType
-                },
-                new HelpOmniboxResult
-                {
-                    Text =  NiceName() + " '" + HelpMessage.SearchText.NiceToString()  + "'",
-                    ReferencedType = resultType
-                },
-            };
+                yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = type, SecondMatch = match };
+            }
         }
     }
 
-    public class HelpModuleOmniboxResult : OmniboxResult
+    public override List<HelpOmniboxResult> GetHelp()
     {
-        public OmniboxMatch KeywordMatch { get; set; }
-
-        [JsonIgnore]
-        public Type? Type { get; set; }
-        public string? TypeName { get { return this.Type == null ? null : QueryNameJsonConverter.GetQueryKey(this.Type); } }
-
-        public string? SearchString { get; set; }
-        public OmniboxMatch? SecondMatch { get; set; }
-
-        public override string ToString()
+        var resultType = typeof(HelpModuleOmniboxResult);
+        return new List<HelpOmniboxResult>
         {
-            if (Type == null && !SearchString.HasText())
-                return KeywordMatch.Value.ToString() + " ";
-
-            return "{0} {1}".FormatWith(KeywordMatch.Value,
-                Type != null ? Type.NiceName().ToOmniboxPascal() :
-                ("'" + SearchString + "'"));
-        }
+            new HelpOmniboxResult
+            {
+                Text =  NiceName() + " " + typeof(TypeEntity).NiceName(),
+                ReferencedType = resultType
+            },
+            new HelpOmniboxResult
+            {
+                Text =  NiceName() + " '" + HelpMessage.SearchText.NiceToString()  + "'",
+                ReferencedType = resultType
+            },
+        };
     }
+}
 
-    [AutoInit]
-    public static class HelpPermissions
+public class HelpModuleOmniboxResult : OmniboxResult
+{
+    public OmniboxMatch KeywordMatch { get; set; }
+
+    [JsonIgnore]
+    public Type? Type { get; set; }
+    public string? TypeName { get { return this.Type == null ? null : QueryNameJsonConverter.GetQueryKey(this.Type); } }
+
+    public string? SearchString { get; set; }
+    public OmniboxMatch? SecondMatch { get; set; }
+
+    public override string ToString()
     {
-        public static PermissionSymbol ViewHelp;
+        if (Type == null && !SearchString.HasText())
+            return KeywordMatch.Value.ToString() + " ";
+
+        return "{0} {1}".FormatWith(KeywordMatch.Value,
+            Type != null ? Type.NiceName().ToOmniboxPascal() :
+            ("'" + SearchString + "'"));
     }
+}
+
+[AutoInit]
+public static class HelpPermissions
+{
+    public static PermissionSymbol ViewHelp;
 }

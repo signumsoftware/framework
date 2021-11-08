@@ -1,59 +1,58 @@
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Chart
+namespace Signum.Entities.Chart;
+
+
+public class ChartParameterEmbedded : EmbeddedEntity
 {
-    
-    public class ChartParameterEmbedded : EmbeddedEntity
+    [Ignore]
+    internal IChartBase parentChart;
+
+    [HiddenProperty]
+    public IChartBase ParentChart { get { return parentChart; } }
+
+    [Ignore]
+    ChartScriptParameter scriptParameter;
+    [InTypeScript(false)]
+    public ChartScriptParameter ScriptParameter
     {
-        [Ignore]
-        internal IChartBase parentChart;
+        get { return scriptParameter; }
+        set { scriptParameter = value; Notify(() => ScriptParameter); }
+    }
 
-        [HiddenProperty]
-        public IChartBase ParentChart { get { return parentChart; } }
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Name { get; set; }
 
-        [Ignore]
-        ChartScriptParameter scriptParameter;
-        [InTypeScript(false)]
-        public ChartScriptParameter ScriptParameter
-        {
-            get { return scriptParameter; }
-            set { scriptParameter = value; Notify(() => ScriptParameter); }
-        }
+    [StringLengthValidator(Max = 500)]
+    public string? Value { get; set; }
 
-        [StringLengthValidator(Min = 3, Max = 100)]
-        public string Name { get; set; }
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(Name) && Name != scriptParameter.Name)
+            return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), scriptParameter.Name);
 
-        [StringLengthValidator(Max = 500)]
-        public string? Value { get; set; }
+        if (pi.Name == nameof(Value))
+            return ScriptParameter.Validate(this.Value, this.ScriptParameter.GetToken(this.ParentChart));
 
-        protected override string? PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Name == nameof(Name) && Name != scriptParameter.Name)
-                return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), scriptParameter.Name);
+        return base.PropertyValidation(pi);
+    }
 
-            if (pi.Name == nameof(Value))
-                return ScriptParameter.Validate(this.Value, this.ScriptParameter.GetToken(this.ParentChart));
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("Parameter",
+            new XAttribute("Name", this.Name),
+            this.Value == null ? null! : new XAttribute("Value", this.Value));
+    }
 
-            return base.PropertyValidation(pi);
-        }
+    internal void FromXml(XElement x, IFromXmlContext ctx)
+    {
+        Name = x.Attribute("Name")!.Value;
+        Value = x.Attribute("Value")?.Value;
+    }
 
-        public XElement ToXml(IToXmlContext ctx)
-        {
-            return new XElement("Parameter",
-                new XAttribute("Name", this.Name),
-                this.Value == null ? null! : new XAttribute("Value", this.Value));
-        }
-
-        internal void FromXml(XElement x, IFromXmlContext ctx)
-        {
-            Name = x.Attribute("Name")!.Value;
-            Value = x.Attribute("Value")?.Value;
-        }
-
-        public override string ToString()
-        {
-            return Name + ": " + Value;
-        }
+    public override string ToString()
+    {
+        return Name + ": " + Value;
     }
 }

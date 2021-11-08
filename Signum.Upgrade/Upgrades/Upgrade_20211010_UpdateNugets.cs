@@ -1,15 +1,14 @@
-namespace Signum.Upgrade.Upgrades
-{
-    class Upgrade_20211010_UpdateNugets : CodeUpgradeBase
-    {
-        public override string Description => "Update nugets";
+namespace Signum.Upgrade.Upgrades;
 
-        public override void Execute(UpgradeContext uctx)
+class Upgrade_20211010_UpdateNugets : CodeUpgradeBase
+{
+    public override string Description => "Update nugets";
+
+    public override void Execute(UpgradeContext uctx)
+    {
+        uctx.ForeachCodeFile(@"*.csproj", file =>
         {
-            uctx.ForeachCodeFile(@"*.csproj", file =>
-            {
-                file.UpdateNugetReference("Swashbuckle.AspNetCore", "6.2.2");
-            });
-        }
+            file.UpdateNugetReference("Swashbuckle.AspNetCore", "6.2.2");
+        });
     }
 }

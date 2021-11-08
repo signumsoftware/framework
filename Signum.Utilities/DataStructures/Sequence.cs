@@ -1,14 +1,13 @@
 ﻿
-namespace Signum.Utilities.DataStructures
+namespace Signum.Utilities.DataStructures;
+
+public class Sequence<T> : List<T>
 {
-    public class Sequence<T> : List<T>
+    public void Add(IEnumerable<T> collection)
     {
-        public void Add(IEnumerable<T> collection)
+        if (collection != null)
         {
-            if (collection != null)
-            {
-                AddRange(collection);
-            }
+            AddRange(collection);
         }
     }
 }

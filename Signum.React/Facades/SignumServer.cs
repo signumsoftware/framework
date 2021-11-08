@@ -18,189 +18,188 @@ using Signum.React.JsonModelValidators;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Signum.React.Facades
+namespace Signum.React.Facades;
+
+public static class SignumServer
 {
-    public static class SignumServer
+    public static WebEntityJsonConverterFactory WebEntityJsonConverterFactory = null!;
+
+    static SignumServer()
     {
-        public static WebEntityJsonConverterFactory WebEntityJsonConverterFactory = null!;
+        WebEntityJsonConverterFactory = new WebEntityJsonConverterFactory();
+        WebEntityJsonConverterFactory.CanWritePropertyRoute += EntityJsonConverter_CanWritePropertyRoute;
+    }
 
-        static SignumServer()
+    public static JsonSerializerOptions JsonSerializerOptions = null!;
+
+    public static JsonOptions AddSignumJsonConverters(this JsonOptions jsonOptions)
+    {
+        //Signum converters
+        jsonOptions.JsonSerializerOptions.IncludeFields = true;
+        jsonOptions.JsonSerializerOptions.Do(s =>
         {
-            WebEntityJsonConverterFactory = new WebEntityJsonConverterFactory();
-            WebEntityJsonConverterFactory.CanWritePropertyRoute += EntityJsonConverter_CanWritePropertyRoute;
-        }
+            JsonSerializerOptions = s;
+            s.WriteIndented = true;
+            s.Converters.Add(WebEntityJsonConverterFactory);
+            s.Converters.Add(new LiteJsonConverterFactory());
+            s.Converters.Add(new MListJsonConverterFactory(WebEntityJsonConverterFactory.AssertCanWrite));
+            s.Converters.Add(new JsonStringEnumConverter());
+            s.Converters.Add(new ResultTableConverter());
+            s.Converters.Add(new TimeSpanConverter());
+            s.Converters.Add(new DateOnlyConverter());
 
-        public static JsonSerializerOptions JsonSerializerOptions = null!;
+        });
 
-        public static JsonOptions AddSignumJsonConverters(this JsonOptions jsonOptions)
+        return jsonOptions;
+    }
+
+    public static MvcOptions AddSignumGlobalFilters(this MvcOptions options)
+    {
+        options.Filters.Add(new SignumInitializeFilterAttribute());
+        options.Filters.Add(new SignumExceptionFilterAttribute());
+        options.Filters.Add(new CleanThreadContextAndAssertFilter());
+        options.Filters.Add(new SignumEnableBufferingFilter());
+        options.Filters.Add(new SignumCurrentContextFilter());
+        options.Filters.Add(new SignumTimesTrackerFilter());
+        options.Filters.Add(new SignumHeavyProfilerFilter());
+        options.Filters.Add(new SignumHeavyProfilerResultFilter());
+        options.Filters.Add(new SignumHeavyProfilerActionFilter());
+        options.Filters.Add(new SignumAuthenticationFilter());
+        options.Filters.Add(new SignumCultureSelectorFilter());
+        options.Filters.Add(new VersionFilterAttribute());
+
+        return options;
+    }
+
+    public static void AddSignumValidation(this IServiceCollection services)
+    {
+        services.AddSingleton<IModelMetadataProvider>(s =>
         {
-            //Signum converters
-            jsonOptions.JsonSerializerOptions.IncludeFields = true;
-            jsonOptions.JsonSerializerOptions.Do(s =>
-            {
-                JsonSerializerOptions = s;
-                s.WriteIndented = true;
-                s.Converters.Add(WebEntityJsonConverterFactory);
-                s.Converters.Add(new LiteJsonConverterFactory());
-                s.Converters.Add(new MListJsonConverterFactory(WebEntityJsonConverterFactory.AssertCanWrite));
-                s.Converters.Add(new JsonStringEnumConverter());
-                s.Converters.Add(new ResultTableConverter());
-                s.Converters.Add(new TimeSpanConverter());
-                s.Converters.Add(new DateOnlyConverter());
-
-            });
-
-            return jsonOptions;
-        }
-
-        public static MvcOptions AddSignumGlobalFilters(this MvcOptions options)
+            var modelMetadataProvider = s.GetRequiredService<ICompositeMetadataDetailsProvider>();
+            return new SignumModelMetadataProvider(modelMetadataProvider);
+        });
+        services.AddSingleton<IObjectModelValidator>(s =>
         {
-            options.Filters.Add(new SignumInitializeFilterAttribute());
-            options.Filters.Add(new SignumExceptionFilterAttribute());
-            options.Filters.Add(new CleanThreadContextAndAssertFilter());
-            options.Filters.Add(new SignumEnableBufferingFilter());
-            options.Filters.Add(new SignumCurrentContextFilter());
-            options.Filters.Add(new SignumTimesTrackerFilter());
-            options.Filters.Add(new SignumHeavyProfilerFilter());
-            options.Filters.Add(new SignumHeavyProfilerResultFilter());
-            options.Filters.Add(new SignumHeavyProfilerActionFilter());
-            options.Filters.Add(new SignumAuthenticationFilter());
-            options.Filters.Add(new SignumCultureSelectorFilter());
-            options.Filters.Add(new VersionFilterAttribute());
+            var options = s.GetRequiredService<IOptions<MvcOptions>>().Value;
+            var modelMetadataProvider = s.GetRequiredService<IModelMetadataProvider>();
+            return new SignumObjectModelValidator(modelMetadataProvider, options.ModelValidatorProviders);
+        });
+    }
 
-            return options;
-        }
+    public static void Start(IApplicationBuilder app, IWebHostEnvironment hostingEnvironment, Assembly mainAsembly)
+    {
+        Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
 
-        public static void AddSignumValidation(this IServiceCollection services)
-        {
-            services.AddSingleton<IModelMetadataProvider>(s =>
-            {
-                var modelMetadataProvider = s.GetRequiredService<ICompositeMetadataDetailsProvider>();
-                return new SignumModelMetadataProvider(modelMetadataProvider);
-            });
-            services.AddSingleton<IObjectModelValidator>(s =>
-            {
-                var options = s.GetRequiredService<IOptions<MvcOptions>>().Value;
-                var modelMetadataProvider = s.GetRequiredService<IModelMetadataProvider>();
-                return new SignumObjectModelValidator(modelMetadataProvider, options.ModelValidatorProviders);
-            });
-        }
+        SignumControllerFactory.RegisterArea(typeof(EntitiesController));
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod()!);
 
-        public static void Start(IApplicationBuilder app, IWebHostEnvironment hostingEnvironment, Assembly mainAsembly)
-        {
-            Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
+        ReflectionServer.Start();
+        ReflectionServer.RegisterLike(typeof(SearchMessage), () => UserHolder.Current != null);
+        ReflectionServer.RegisterLike(typeof(PaginationMode), () => UserHolder.Current != null);
+        ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(DayOfWeek).Namespace!, () => UserHolder.Current != null);
+        ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(CollectionMessage).Namespace!, () => UserHolder.Current != null);
+    }
 
-            SignumControllerFactory.RegisterArea(typeof(EntitiesController));
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod()!);
+    private static string? EntityJsonConverter_CanWritePropertyRoute(PropertyRoute arg, ModifiableEntity? mod)
+    {
+        var val = Entities.Validator.TryGetPropertyValidator(arg);
 
-            ReflectionServer.Start();
-            ReflectionServer.RegisterLike(typeof(SearchMessage), () => UserHolder.Current != null);
-            ReflectionServer.RegisterLike(typeof(PaginationMode), () => UserHolder.Current != null);
-            ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(DayOfWeek).Namespace!, () => UserHolder.Current != null);
-            ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(CollectionMessage).Namespace!, () => UserHolder.Current != null);
-        }
-
-        private static string? EntityJsonConverter_CanWritePropertyRoute(PropertyRoute arg, ModifiableEntity? mod)
-        {
-            var val = Entities.Validator.TryGetPropertyValidator(arg);
-
-            if (val == null || mod == null)
-                return null;
-
-            if (val.IsPropertyReadonly(mod))
-                return $"Property {arg} is readonly";
-
+        if (val == null || mod == null)
             return null;
-        }
 
-        public static EntityPackTS GetEntityPack(Entity entity)
-        {
-            var canExecutes = OperationLogic.ServiceCanExecute(entity);
+        if (val.IsPropertyReadonly(mod))
+            return $"Property {arg} is readonly";
 
-            var result = new EntityPackTS(entity,
-                canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
-            );
+        return null;
+    }
 
-            if (EntityPackTS.AddExtension != null)
-                foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
+    public static EntityPackTS GetEntityPack(Entity entity)
+    {
+        var canExecutes = OperationLogic.ServiceCanExecute(entity);
+
+        var result = new EntityPackTS(entity,
+            canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
+        );
+
+        if (EntityPackTS.AddExtension != null)
+            foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
+            {
+                try
                 {
-                    try
-                    {
-                        action(result);
-                    }
-                    catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
-                    {
-
-                    }
+                    action(result);
                 }
+                catch (Exception) when (StartParameters.IgnoredDatabaseMismatches != null)
+                {
 
-            return result;
-        }
+                }
+            }
+
+        return result;
+    }
+}
+
+public class WebEntityJsonConverterFactory : EntityJsonConverterFactory
+{
+    public override EntityJsonConverterStrategy Strategy => EntityJsonConverterStrategy.WebAPI;
+
+    protected override PropertyRoute GetCurrentPropertyRouteEmbedded(EmbeddedEntity embedded)
+    {
+        var controller = ((ControllerActionDescriptor)SignumCurrentContextFilter.CurrentContext!.ActionDescriptor);
+        var att =
+            controller.MethodInfo.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
+            controller.MethodInfo.DeclaringType!.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
+            throw new InvalidOperationException(@$"Impossible to determine PropertyRoute for {embedded.GetType().Name}. 
+        Consider adding someting like [EmbeddedPropertyRoute(typeof({embedded.GetType().Name}), typeof(SomeEntity), nameof(SomeEntity.SomeProperty))] to your action or controller.
+        Current action: {controller.MethodInfo.MethodSignature()}
+        Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
+
+        return att.PropertyRoute;
     }
 
-    public class WebEntityJsonConverterFactory : EntityJsonConverterFactory
+    public override Type ResolveType(string typeStr, Type objectType)
     {
-        public override EntityJsonConverterStrategy Strategy => EntityJsonConverterStrategy.WebAPI;
+        if (Reflector.CleanTypeName(objectType) == typeStr)
+            return objectType;
 
-        protected override PropertyRoute GetCurrentPropertyRouteEmbedded(EmbeddedEntity embedded)
-        {
-            var controller = ((ControllerActionDescriptor)SignumCurrentContextFilter.CurrentContext!.ActionDescriptor);
-            var att =
-                controller.MethodInfo.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
-                controller.MethodInfo.DeclaringType!.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
-                throw new InvalidOperationException(@$"Impossible to determine PropertyRoute for {embedded.GetType().Name}. 
-            Consider adding someting like [EmbeddedPropertyRoute(typeof({embedded.GetType().Name}), typeof(SomeEntity), nameof(SomeEntity.SomeProperty))] to your action or controller.
-            Current action: {controller.MethodInfo.MethodSignature()}
-            Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
+        var type = ReflectionServer.TypesByName.Value.GetOrThrow(typeStr);
 
-            return att.PropertyRoute;
-        }
+        if (type.IsEnum)
+            type = EnumEntity.Generate(type);
 
-        public override Type ResolveType(string typeStr, Type objectType)
-        {
-            if (Reflector.CleanTypeName(objectType) == typeStr)
-                return objectType;
+        if (!objectType.IsAssignableFrom(type))
+            throw new JsonException($"Type '{type.Name}' is not assignable to '{objectType.TypeName()}'");
 
-            var type = ReflectionServer.TypesByName.Value.GetOrThrow(typeStr);
-
-            if (type.IsEnum)
-                type = EnumEntity.Generate(type);
-
-            if (!objectType.IsAssignableFrom(type))
-                throw new JsonException($"Type '{type.Name}' is not assignable to '{objectType.TypeName()}'");
-
-            return type;
-        }
+        return type;
     }
+}
 
-    public class EntityPackTS
+public class EntityPackTS
+{
+    public Entity entity { get; set; }
+    public Dictionary<string, string> canExecute { get; set; }
+
+    [JsonExtensionData]
+    public Dictionary<string, object?> extension { get; set; } = new Dictionary<string, object?>();
+
+    public static Action<EntityPackTS>? AddExtension;
+
+    public EntityPackTS(Entity entity, Dictionary<string, string> canExecute)
     {
-        public Entity entity { get; set; }
-        public Dictionary<string, string> canExecute { get; set; }
-
-        [JsonExtensionData]
-        public Dictionary<string, object?> extension { get; set; } = new Dictionary<string, object?>();
-
-        public static Action<EntityPackTS>? AddExtension;
-
-        public EntityPackTS(Entity entity, Dictionary<string, string> canExecute)
-        {
-            this.entity = entity;
-            this.canExecute = canExecute;
-        }
+        this.entity = entity;
+        this.canExecute = canExecute;
     }
+}
 
-    [System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
-    public class EmbeddedPropertyRouteAttribute : Attribute
+[System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+public class EmbeddedPropertyRouteAttribute : Attribute
+{
+
+    public Type EmbeddedType { get; private set; }
+    public PropertyRoute PropertyRoute { get; private set; }
+    // This is a positional argument
+    public EmbeddedPropertyRouteAttribute(Type embeddedType, Type propertyRouteRoot, string propertyRouteText)
     {
-
-        public Type EmbeddedType { get; private set; }
-        public PropertyRoute PropertyRoute { get; private set; }
-        // This is a positional argument
-        public EmbeddedPropertyRouteAttribute(Type embeddedType, Type propertyRouteRoot, string propertyRouteText)
-        {
-            this.EmbeddedType = embeddedType;
-            this.PropertyRoute = PropertyRoute.Parse(propertyRouteRoot, propertyRouteText);
-        }
+        this.EmbeddedType = embeddedType;
+        this.PropertyRoute = PropertyRoute.Parse(propertyRouteRoot, propertyRouteText);
     }
 }

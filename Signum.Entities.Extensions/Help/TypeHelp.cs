@@ -1,83 +1,82 @@
 using Signum.Entities.Basics;
 
-namespace Signum.Entities.Help
-{
-    [EntityKind(EntityKind.Main, EntityData.Master)]
-    public class TypeHelpEntity : Entity
-    {   
-        public TypeEntity Type { get; set; }
+namespace Signum.Entities.Help;
 
-        public CultureInfoEntity Culture { get; set; }
+[EntityKind(EntityKind.Main, EntityData.Master)]
+public class TypeHelpEntity : Entity
+{   
+    public TypeEntity Type { get; set; }
 
-		[StringLengthValidator(MultiLine = true)]
-        public string? Description { get; set; }
+    public CultureInfoEntity Culture { get; set; }
 
-        [NoRepeatValidator]
-        public MList<PropertyRouteHelpEmbedded> Properties { get; set; } = new MList<PropertyRouteHelpEmbedded>();
+	[StringLengthValidator(MultiLine = true)]
+    public string? Description { get; set; }
 
-        [NoRepeatValidator]
-        public MList<OperationHelpEmbedded> Operations { get; set; } = new MList<OperationHelpEmbedded>();
+    [NoRepeatValidator]
+    public MList<PropertyRouteHelpEmbedded> Properties { get; set; } = new MList<PropertyRouteHelpEmbedded>();
 
-        [Ignore]
-        public MList<QueryHelpEntity> Queries { get; set; } = new MList<QueryHelpEntity>();
+    [NoRepeatValidator]
+    public MList<OperationHelpEmbedded> Operations { get; set; } = new MList<OperationHelpEmbedded>();
 
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => $"{Type}");
+    [Ignore]
+    public MList<QueryHelpEntity> Queries { get; set; } = new MList<QueryHelpEntity>();
 
-        public bool IsEmpty
-        {
-            get { return string.IsNullOrEmpty(this.Description) && Properties.IsEmpty() && Operations.IsEmpty(); }
-        }
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Type}");
 
-        [Ignore]
-        public string Info { get; set; }
-
-        protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
-        {
-            if (pi.Name == nameof(IsEmpty) && IsEmpty)
-                return "IsEmpty is true";
-
-            return base.PropertyValidation(pi);
-        }
-    }
-
-    [AutoInit]
-    public static class TypeHelpOperation
+    public bool IsEmpty
     {
-        public static ExecuteSymbol<TypeHelpEntity> Save;
-        public static DeleteSymbol<TypeHelpEntity> Delete;
+        get { return string.IsNullOrEmpty(this.Description) && Properties.IsEmpty() && Operations.IsEmpty(); }
     }
 
-    public class PropertyRouteHelpEmbedded : EmbeddedEntity
+    [Ignore]
+    public string Info { get; set; }
+
+    protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
     {
-        public PropertyRouteEntity Property { get; set; }
+        if (pi.Name == nameof(IsEmpty) && IsEmpty)
+            return "IsEmpty is true";
 
-        [Ignore]
-        public string Info { get; set; }
-
-        [StringLengthValidator(MultiLine = true), ForceNotNullable]
-        public string? Description { get; set; }
-
-        public override string ToString()
-        {
-            return this.Property?.ToString() ?? "";
-        }
+        return base.PropertyValidation(pi);
     }
-
-    public class OperationHelpEmbedded : EmbeddedEntity
-    {
-        public OperationSymbol Operation { get; set; }
-
-        [Ignore]
-        public string Info { get; set; }
-
-        [StringLengthValidator(MultiLine = true), ForceNotNullable]
-        public string? Description { get; set; }
-
-        public override string ToString()
-        {
-            return this.Operation?.ToString() ?? "";
-        }
-    }
-
 }
+
+[AutoInit]
+public static class TypeHelpOperation
+{
+    public static ExecuteSymbol<TypeHelpEntity> Save;
+    public static DeleteSymbol<TypeHelpEntity> Delete;
+}
+
+public class PropertyRouteHelpEmbedded : EmbeddedEntity
+{
+    public PropertyRouteEntity Property { get; set; }
+
+    [Ignore]
+    public string Info { get; set; }
+
+    [StringLengthValidator(MultiLine = true), ForceNotNullable]
+    public string? Description { get; set; }
+
+    public override string ToString()
+    {
+        return this.Property?.ToString() ?? "";
+    }
+}
+
+public class OperationHelpEmbedded : EmbeddedEntity
+{
+    public OperationSymbol Operation { get; set; }
+
+    [Ignore]
+    public string Info { get; set; }
+
+    [StringLengthValidator(MultiLine = true), ForceNotNullable]
+    public string? Description { get; set; }
+
+    public override string ToString()
+    {
+        return this.Operation?.ToString() ?? "";
+    }
+}
+

@@ -4,60 +4,59 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace Signum.Engine.Translation
+namespace Signum.Engine.Translation;
+
+public class DeepLTranslator : ITranslator
 {
-    public class DeepLTranslator : ITranslator
+    public string Name => "DeepL";
+
+    public Func<string?> DeepLApiKey;
+
+    public Func<string?>? Proxy { get; }
+
+    public DeepLTranslator(Func<string?> deepLKey)
     {
-        public string Name => "DeepL";
+        this.DeepLApiKey = deepLKey;
+    }
 
-        public Func<string?> DeepLApiKey;
+    List<SupportedLanguage>? supportedLanguages;
 
-        public Func<string?>? Proxy { get; }
+    public async Task<List<string?>?> TranslateBatchAsync(List<string> list, string from, string to)
+    {
+        var apiKey = DeepLApiKey();
 
-        public DeepLTranslator(Func<string?> deepLKey)
+        if(string.IsNullOrEmpty(apiKey))
         {
-            this.DeepLApiKey = deepLKey;
+            return null;
         }
 
-        List<SupportedLanguage>? supportedLanguages;
-
-        public async Task<List<string?>?> TranslateBatchAsync(List<string> list, string from, string to)
+        using (DeepLClient client = new DeepLClient(apiKey))
         {
-            var apiKey = DeepLApiKey();
+            if (supportedLanguages == null)
+                supportedLanguages = (await client.GetSupportedLanguagesAsync()).ToList();
 
-            if(string.IsNullOrEmpty(apiKey))
+            if (!supportedLanguages.Any(a => a.LanguageCode == to.ToUpper()))
             {
                 return null;
             }
 
-            using (DeepLClient client = new DeepLClient(apiKey))
-            {
-                if (supportedLanguages == null)
-                    supportedLanguages = (await client.GetSupportedLanguagesAsync()).ToList();
+            var translation = await client.TranslateAsync(list, sourceLanguageCode: from.ToUpper(), targetLanguageCode: to.ToUpper());
 
-                if (!supportedLanguages.Any(a => a.LanguageCode == to.ToUpper()))
-                {
-                    return null;
-                }
-
-                var translation = await client.TranslateAsync(list, sourceLanguageCode: from.ToUpper(), targetLanguageCode: to.ToUpper());
-
-                return translation.Select(a => (string?)a.Text).ToList();
-            }
-        }
-
-        public bool AutoSelect() => true;
-
-        public List<string?>? TranslateBatch(List<string> list, string from, string to) 
-        {
-            var result = Task.Run(async () =>
-            {
-                return await this.TranslateBatchAsync(list, from, to);
-            }).Result;
-
-            return result;
+            return translation.Select(a => (string?)a.Text).ToList();
         }
     }
 
-   
+    public bool AutoSelect() => true;
+
+    public List<string?>? TranslateBatch(List<string> list, string from, string to) 
+    {
+        var result = Task.Run(async () =>
+        {
+            return await this.TranslateBatchAsync(list, from, to);
+        }).Result;
+
+        return result;
+    }
 }
+
+   

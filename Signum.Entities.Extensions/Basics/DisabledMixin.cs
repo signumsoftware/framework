@@ -1,31 +1,30 @@
 
-namespace Signum.Entities.Basics
+namespace Signum.Entities.Basics;
+
+
+public class DisabledMixin : MixinEntity
 {
-
-    public class DisabledMixin : MixinEntity
+    DisabledMixin(ModifiableEntity mainEntity, MixinEntity next)
+        : base(mainEntity, next)
     {
-        DisabledMixin(ModifiableEntity mainEntity, MixinEntity next)
-            : base(mainEntity, next)
-        {
-        }
-
-        public bool IsDisabled { get; set; }
-
-        protected override void CopyFrom(MixinEntity mixin, object[] args)
-        {
-            this.IsDisabled = ((DisabledMixin)mixin).IsDisabled;
-        }
     }
 
-    [AutoInit]
-    public static class DisableOperation
-    {
-        public static readonly ExecuteSymbol<Entity> Disable;
-        public static readonly ExecuteSymbol<Entity> Enabled;
-    }
+    public bool IsDisabled { get; set; }
 
-    public enum DisabledMessage
+    protected override void CopyFrom(MixinEntity mixin, object[] args)
     {
-        ParentIsDisabled,
+        this.IsDisabled = ((DisabledMixin)mixin).IsDisabled;
     }
+}
+
+[AutoInit]
+public static class DisableOperation
+{
+    public static readonly ExecuteSymbol<Entity> Disable;
+    public static readonly ExecuteSymbol<Entity> Enabled;
+}
+
+public enum DisabledMessage
+{
+    ParentIsDisabled,
 }

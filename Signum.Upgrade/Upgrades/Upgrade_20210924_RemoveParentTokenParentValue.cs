@@ -1,17 +1,16 @@
-namespace Signum.Upgrade.Upgrades
+namespace Signum.Upgrade.Upgrades;
+
+class Upgrade_20210924_RemoveParentTokenParentValue : CodeUpgradeBase
 {
-    class Upgrade_20210924_RemoveParentTokenParentValue : CodeUpgradeBase
+    public override string Description => "Remove parentToken / parentValue from FindOptions";
+
+    public override void Execute(UpgradeContext uctx)
     {
-        public override string Description => "Remove parentToken / parentValue from FindOptions";
+        Regex regex = new Regex(@"parentToken\s*:\s*(?<parentToken>[^,]+),(\s|\n)+parentValue\s*:\s*(?<parentValue>[^,}\r\n]+)");
 
-        public override void Execute(UpgradeContext uctx)
+        uctx.ForeachCodeFile(@"*.ts, *.tsx", file =>
         {
-            Regex regex = new Regex(@"parentToken\s*:\s*(?<parentToken>[^,]+),(\s|\n)+parentValue\s*:\s*(?<parentValue>[^,}\r\n]+)");
-
-            uctx.ForeachCodeFile(@"*.ts, *.tsx", file =>
-            {
-                file.Replace(regex, r => $"filterOptions: [{{ token: {r.Groups["parentToken"]}, value: {r.Groups["parentValue"]}}}] ");
-            });
-        }
+            file.Replace(regex, r => $"filterOptions: [{{ token: {r.Groups["parentToken"]}, value: {r.Groups["parentValue"]}}}] ");
+        });
     }
 }

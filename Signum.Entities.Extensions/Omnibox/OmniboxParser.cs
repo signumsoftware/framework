@@ -8,33 +8,33 @@ using Signum.Entities.UserAssets;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 
-namespace Signum.Entities.Omnibox
+namespace Signum.Entities.Omnibox;
+
+public static class OmniboxParser
 {
-    public static class OmniboxParser
+    static OmniboxManager manager;
+
+    public static OmniboxManager Manager
     {
-        static OmniboxManager manager;
-
-        public static OmniboxManager Manager
+        get
         {
-            get
-            {
-                if (manager == null)
-                    throw new InvalidOperationException("OmniboxParse.Manager is not set");
-                return manager;
-            }
-
-            set { manager = value; }
+            if (manager == null)
+                throw new InvalidOperationException("OmniboxParse.Manager is not set");
+            return manager;
         }
 
-        public static List<IOmniboxResultGenerator> Generators = new List<IOmniboxResultGenerator>();
+        set { manager = value; }
+    }
 
-        static string ident = @"[_\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}][\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\p{Cf}]*";
+    public static List<IOmniboxResultGenerator> Generators = new List<IOmniboxResultGenerator>();
 
-        static string guid = @"[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}";
+    static string ident = @"[_\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}][\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\p{Cf}]*";
 
-        static string symbol = @"[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+]";
+    static string guid = @"[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}";
 
-        static readonly Regex tokenizer = new Regex(
+    static string symbol = @"[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+]";
+
+    static readonly Regex tokenizer = new Regex(
 $@"(?<entity>{ident};(\d+|{guid}))|
 (?<space>\s+)|
 (?<guid>{guid})|
@@ -46,269 +46,268 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 (?<symbol>{symbol})",
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
-        public static int MaxResults = 20;
+    public static int MaxResults = 20;
 
-        public static List<OmniboxResult> Results(string omniboxQuery, CancellationToken ct)
+    public static List<OmniboxResult> Results(string omniboxQuery, CancellationToken ct)
+    {
+        List<OmniboxResult> result = new List<OmniboxResult>();
+
+        if (omniboxQuery == "")
         {
-            List<OmniboxResult> result = new List<OmniboxResult>();
+            result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_OmniboxSyntaxGuide.NiceToString() });
 
-            if (omniboxQuery == "")
+            foreach (var generator in Generators)
             {
-                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_OmniboxSyntaxGuide.NiceToString() });
+                if (ct.IsCancellationRequested)
+                    return result;
 
-                foreach (var generator in Generators)
-                {
-                    if (ct.IsCancellationRequested)
-                        return result;
-
-                    result.AddRange(generator.GetHelp());
-                }
-
-                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_MatchingOptions.NiceToString() });
-                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_DatabaseAccess.NiceToString() });
-                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_Disambiguate.NiceToString() });
-
-                return result.ToList();
+                result.AddRange(generator.GetHelp());
             }
-            else
+
+            result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_MatchingOptions.NiceToString() });
+            result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_DatabaseAccess.NiceToString() });
+            result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_Disambiguate.NiceToString() });
+
+            return result.ToList();
+        }
+        else
+        {
+            List<OmniboxToken> tokens = new List<OmniboxToken>();
+
+            foreach (Match m in tokenizer.Matches(omniboxQuery).Cast<Match>())
             {
-                List<OmniboxToken> tokens = new List<OmniboxToken>();
+                if (ct.IsCancellationRequested)
+                    return result;
 
-                foreach (Match m in tokenizer.Matches(omniboxQuery).Cast<Match>())
-                {
-                    if (ct.IsCancellationRequested)
-                        return result;
-
-                    AddTokens(tokens, m, "ident", OmniboxTokenType.Identifier);
-                    AddTokens(tokens, m, "symbol", OmniboxTokenType.Symbol);
-                    AddTokens(tokens, m, "comparer", OmniboxTokenType.Comparer);
-                    AddTokens(tokens, m, "number", OmniboxTokenType.Number);
-                    AddTokens(tokens, m, "guid", OmniboxTokenType.Guid);
-                    AddTokens(tokens, m, "string", OmniboxTokenType.String);
-                    AddTokens(tokens, m, "entity", OmniboxTokenType.Entity);
-                }
-
-                tokens.Sort(a => a.Index);
-
-                var tokenPattern = new string(tokens.Select(t => t.Char()).ToArray());
-
-                foreach (var generator in Generators)
-                {
-                    if (ct.IsCancellationRequested)
-                        return result;
-
-                    result.AddRange(generator.GetResults(omniboxQuery, tokens, tokenPattern).Take(MaxResults));
-                }
-
-                return result.OrderBy(a => a.Distance).Take(MaxResults).ToList();
+                AddTokens(tokens, m, "ident", OmniboxTokenType.Identifier);
+                AddTokens(tokens, m, "symbol", OmniboxTokenType.Symbol);
+                AddTokens(tokens, m, "comparer", OmniboxTokenType.Comparer);
+                AddTokens(tokens, m, "number", OmniboxTokenType.Number);
+                AddTokens(tokens, m, "guid", OmniboxTokenType.Guid);
+                AddTokens(tokens, m, "string", OmniboxTokenType.String);
+                AddTokens(tokens, m, "entity", OmniboxTokenType.Entity);
             }
-        }
 
-        static void AddTokens(List<OmniboxToken> tokens, Match m, string groupName, OmniboxTokenType type)
-        {
-            var group = m.Groups[groupName];
+            tokens.Sort(a => a.Index);
 
-            if (group.Success)
+            var tokenPattern = new string(tokens.Select(t => t.Char()).ToArray());
+
+            foreach (var generator in Generators)
             {
-                tokens.Add(new OmniboxToken(type, group.Index, group.Value));
+                if (ct.IsCancellationRequested)
+                    return result;
+
+                result.AddRange(generator.GetResults(omniboxQuery, tokens, tokenPattern).Take(MaxResults));
             }
+
+            return result.OrderBy(a => a.Distance).Take(MaxResults).ToList();
         }
+    }
 
-        public static string ToOmniboxPascal(this string text)
+    static void AddTokens(List<OmniboxToken> tokens, Match m, string groupName, OmniboxTokenType type)
+    {
+        var group = m.Groups[groupName];
+
+        if (group.Success)
         {
-            var simple = Regex.Replace(text, OmniboxMessage.ComplementWordsRegex.NiceToString(), m => "", RegexOptions.IgnoreCase);
-
-            var result = simple.ToPascal();
-
-            if (text.StartsWith("[") && text.EndsWith("]"))
-                return "[" + result + "]";
-
-            return result;
+            tokens.Add(new OmniboxToken(type, group.Index, group.Value));
         }
+    }
 
-        public static Dictionary<string, V> ToOmniboxPascalDictionary<T, V>(this IEnumerable<T> collection, Func<T, string> getKey, Func<T, V> getValue)
+    public static string ToOmniboxPascal(this string text)
+    {
+        var simple = Regex.Replace(text, OmniboxMessage.ComplementWordsRegex.NiceToString(), m => "", RegexOptions.IgnoreCase);
+
+        var result = simple.ToPascal();
+
+        if (text.StartsWith("[") && text.EndsWith("]"))
+            return "[" + result + "]";
+
+        return result;
+    }
+
+    public static Dictionary<string, V> ToOmniboxPascalDictionary<T, V>(this IEnumerable<T> collection, Func<T, string> getKey, Func<T, V> getValue)
+    {
+        Dictionary<string, V> result = new Dictionary<string, V>();
+        foreach (var item in collection)
         {
-            Dictionary<string, V> result = new Dictionary<string, V>();
-            foreach (var item in collection)
+            var key = getKey(item).ToOmniboxPascal();
+            if (result.ContainsKey(key))
             {
-                var key = getKey(item).ToOmniboxPascal();
-                if (result.ContainsKey(key))
+                for (int i = 1; ; i++)
                 {
-                    for (int i = 1; ; i++)
+                    var newKey = key + $"(Duplicated{(i == 1 ? "" : (" "  + i.ToString()))}!)";
+                    if (!result.ContainsKey(newKey))
                     {
-                        var newKey = key + $"(Duplicated{(i == 1 ? "" : (" "  + i.ToString()))}!)";
-                        if (!result.ContainsKey(newKey))
-                        {
-                            key = newKey;
-                            break;
-                        }
+                        key = newKey;
+                        break;
                     }
                 }
-                result.Add(key, getValue(item));
             }
-            return result;
+            result.Add(key, getValue(item));
         }
+        return result;
     }
+}
 
-    public abstract class OmniboxManager
+public abstract class OmniboxManager
+{
+    public abstract bool AllowedType(Type type);
+    public abstract bool AllowedPermission(PermissionSymbol permission);
+    public abstract bool AllowedQuery(object queryName);
+
+    public abstract QueryDescription GetDescription(object queryName);
+
+    public abstract Lite<Entity>? RetrieveLite(Type type, PrimaryKey id);
+
+    public List<Lite<Entity>> Autocomplete(Type type, string subString, int count)
     {
-        public abstract bool AllowedType(Type type);
-        public abstract bool AllowedPermission(PermissionSymbol permission);
-        public abstract bool AllowedQuery(object queryName);
-
-        public abstract QueryDescription GetDescription(object queryName);
-
-        public abstract Lite<Entity>? RetrieveLite(Type type, PrimaryKey id);
-
-        public List<Lite<Entity>> Autocomplete(Type type, string subString, int count)
-        {
-            return Autocomplete(Implementations.By(type), subString, count);
-        }
-
-        public abstract List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count);
-
-
-        protected abstract IEnumerable<object> GetAllQueryNames();
-
-        static ConcurrentDictionary<CultureInfo, Dictionary<string, object>> queries = new ConcurrentDictionary<CultureInfo, Dictionary<string, object>>();
-
-        public Dictionary<string, object> GetQueries()
-        {
-            return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
-                 GetAllQueryNames().ToOmniboxPascalDictionary(qn =>
-                  qn is Type t ? (EnumEntity.Extract(t) ?? t).NiceName() : QueryUtils.GetNiceName(qn), qn => qn));
-        }
-
-        protected abstract IEnumerable<Type> GetAllTypes();
-
-        static ConcurrentDictionary<CultureInfo, Dictionary<string, Type>> types = new ConcurrentDictionary<CultureInfo, Dictionary<string, Type>>();
-
-        public Dictionary<string, Type> Types()
-        {
-            return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
-               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToOmniboxPascalDictionary(t => t.NiceName(), t => t));
-        }
+        return Autocomplete(Implementations.By(type), subString, count);
     }
 
-    public class OmniboxConverter : JsonConverter<OmniboxResult>
+    public abstract List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count);
+
+
+    protected abstract IEnumerable<object> GetAllQueryNames();
+
+    static ConcurrentDictionary<CultureInfo, Dictionary<string, object>> queries = new ConcurrentDictionary<CultureInfo, Dictionary<string, object>>();
+
+    public Dictionary<string, object> GetQueries()
     {
-        public override bool CanConvert(Type type)
-        {
-            return typeof(OmniboxResult).IsAssignableFrom(type);
-        }
-
-        public override OmniboxResult? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void Write(Utf8JsonWriter writer, OmniboxResult value, JsonSerializerOptions options)
-        {
-            JsonSerializer.Serialize(writer, (object)value, options);
-        }
+        return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
+             GetAllQueryNames().ToOmniboxPascalDictionary(qn =>
+              qn is Type t ? (EnumEntity.Extract(t) ?? t).NiceName() : QueryUtils.GetNiceName(qn), qn => qn));
     }
 
+    protected abstract IEnumerable<Type> GetAllTypes();
 
-    [JsonConverter(typeof(OmniboxConverter))]
-    public abstract class OmniboxResult
+    static ConcurrentDictionary<CultureInfo, Dictionary<string, Type>> types = new ConcurrentDictionary<CultureInfo, Dictionary<string, Type>>();
+
+    public Dictionary<string, Type> Types()
     {
-        public float Distance;
-
-        public string ResultTypeName => GetType().Name;
+        return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
+           GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToOmniboxPascalDictionary(t => t.NiceName(), t => t));
     }
+}
 
-    public class HelpOmniboxResult : OmniboxResult
+public class OmniboxConverter : JsonConverter<OmniboxResult>
+{
+    public override bool CanConvert(Type type)
     {
-        public string Text { get; set; }
-
-        [JsonIgnore]
-        public Type ReferencedType { get; set; }
-
-        public string? ReferencedTypeName => this.ReferencedType?.Name;
-
-        public override string ToString()
-        {
-            return "";
-        }
+        return typeof(OmniboxResult).IsAssignableFrom(type);
     }
 
-    public interface IOmniboxResultGenerator
+    public override OmniboxResult? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        IEnumerable<OmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern);
-
-        List<HelpOmniboxResult> GetHelp();
+        throw new NotImplementedException();
     }
 
-    public abstract class OmniboxResultGenerator<T> : IOmniboxResultGenerator where T : OmniboxResult
+    public override void Write(Utf8JsonWriter writer, OmniboxResult value, JsonSerializerOptions options)
     {
-        public abstract IEnumerable<T> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern);
-
-        IEnumerable<OmniboxResult> IOmniboxResultGenerator.GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
-        {
-            return GetResults(rawQuery, tokens, tokenPattern);
-        }
-
-        public abstract List<HelpOmniboxResult> GetHelp();
+        JsonSerializer.Serialize(writer, (object)value, options);
     }
+}
 
-    public struct OmniboxToken
+
+[JsonConverter(typeof(OmniboxConverter))]
+public abstract class OmniboxResult
+{
+    public float Distance;
+
+    public string ResultTypeName => GetType().Name;
+}
+
+public class HelpOmniboxResult : OmniboxResult
+{
+    public string Text { get; set; }
+
+    [JsonIgnore]
+    public Type ReferencedType { get; set; }
+
+    public string? ReferencedTypeName => this.ReferencedType?.Name;
+
+    public override string ToString()
     {
-        public OmniboxToken(OmniboxTokenType type, int index, string value)
-        {
-            this.Type = type;
-            this.Index = index;
-            this.Value = value;
-        }
-
-        public readonly OmniboxTokenType Type;
-        public readonly int Index;
-        public readonly string Value;
-
-        public bool IsNull()
-        {
-            if (Type == OmniboxTokenType.Identifier)
-                return Value == "null" || Value == "none";
-
-            if (Type == OmniboxTokenType.String)
-                return Value == "\"\"";
-
-            return false;
-        }
-
-        internal char? Next(string rawQuery)
-        {
-            int last = Index + Value.Length;
-
-            if (last < rawQuery.Length)
-                return rawQuery[last];
-
-            return null;
-        }
-
-        internal char Char()
-        {
-            switch (Type)
-            {
-                case OmniboxTokenType.Identifier: return 'I';
-                case OmniboxTokenType.Symbol: return Value.Single();
-                case OmniboxTokenType.Comparer: return '=';
-                case OmniboxTokenType.Number: return 'N';
-                case OmniboxTokenType.String: return 'S';
-                case OmniboxTokenType.Entity: return 'E';
-                case OmniboxTokenType.Guid: return 'G';
-                default: return '?';
-            }
-        }
+        return "";
     }
+}
 
-    public enum OmniboxTokenType
+public interface IOmniboxResultGenerator
+{
+    IEnumerable<OmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern);
+
+    List<HelpOmniboxResult> GetHelp();
+}
+
+public abstract class OmniboxResultGenerator<T> : IOmniboxResultGenerator where T : OmniboxResult
+{
+    public abstract IEnumerable<T> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern);
+
+    IEnumerable<OmniboxResult> IOmniboxResultGenerator.GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
     {
-        Identifier,
-        Symbol,
-        Comparer,
-        Number,
-        String,
-        Entity,
-        Guid,
+        return GetResults(rawQuery, tokens, tokenPattern);
     }
+
+    public abstract List<HelpOmniboxResult> GetHelp();
+}
+
+public struct OmniboxToken
+{
+    public OmniboxToken(OmniboxTokenType type, int index, string value)
+    {
+        this.Type = type;
+        this.Index = index;
+        this.Value = value;
+    }
+
+    public readonly OmniboxTokenType Type;
+    public readonly int Index;
+    public readonly string Value;
+
+    public bool IsNull()
+    {
+        if (Type == OmniboxTokenType.Identifier)
+            return Value == "null" || Value == "none";
+
+        if (Type == OmniboxTokenType.String)
+            return Value == "\"\"";
+
+        return false;
+    }
+
+    internal char? Next(string rawQuery)
+    {
+        int last = Index + Value.Length;
+
+        if (last < rawQuery.Length)
+            return rawQuery[last];
+
+        return null;
+    }
+
+    internal char Char()
+    {
+        switch (Type)
+        {
+            case OmniboxTokenType.Identifier: return 'I';
+            case OmniboxTokenType.Symbol: return Value.Single();
+            case OmniboxTokenType.Comparer: return '=';
+            case OmniboxTokenType.Number: return 'N';
+            case OmniboxTokenType.String: return 'S';
+            case OmniboxTokenType.Entity: return 'E';
+            case OmniboxTokenType.Guid: return 'G';
+            default: return '?';
+        }
+    }
+}
+
+public enum OmniboxTokenType
+{
+    Identifier,
+    Symbol,
+    Comparer,
+    Number,
+    String,
+    Entity,
+    Guid,
 }

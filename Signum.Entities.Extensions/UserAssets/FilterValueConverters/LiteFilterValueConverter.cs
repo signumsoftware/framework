@@ -1,29 +1,28 @@
 ﻿
-namespace Signum.Entities.UserAssets
+namespace Signum.Entities.UserAssets;
+
+public class LiteFilterValueConverter : IFilterValueConverter
 {
-    public class LiteFilterValueConverter : IFilterValueConverter
+    public Result<string?>? TryToStringValue(object? value, Type type)
     {
-        public Result<string?>? TryToStringValue(object? value, Type type)
+        if (!(value is Lite<Entity> lite))
         {
-            if (!(value is Lite<Entity> lite))
-            {
-                return null;
-            }
-
-            return new Result<string?>.Success(lite.Key());
+            return null;
         }
 
-        public Result<object?>? TryParseValue(string? value, Type type)
-        {
-            if (!value.HasText())
-                return null;
+        return new Result<string?>.Success(lite.Key());
+    }
 
-            string? error = Lite.TryParseLite(value, out Lite<Entity>? lite);
-            if (error == null)
-                return new Result<object?>.Success(lite);
-            else
-                return new Result<object?>.Error(error);
-        }
+    public Result<object?>? TryParseValue(string? value, Type type)
+    {
+        if (!value.HasText())
+            return null;
+
+        string? error = Lite.TryParseLite(value, out Lite<Entity>? lite);
+        if (error == null)
+            return new Result<object?>.Success(lite);
+        else
+            return new Result<object?>.Error(error);
     }
 }
 

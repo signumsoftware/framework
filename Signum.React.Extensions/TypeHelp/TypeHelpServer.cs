@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace Signum.React.TypeHelp
+namespace Signum.React.TypeHelp;
+
+public static class TypeHelpServer
 {
-    public static class TypeHelpServer
+    public static void Start(IApplicationBuilder app)
     {
-        public static void Start(IApplicationBuilder app)
-        {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-        }
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
     }
 }

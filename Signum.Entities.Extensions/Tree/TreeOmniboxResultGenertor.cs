@@ -4,75 +4,74 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Signum.Entities.Tree
+namespace Signum.Entities.Tree;
+
+public class TreeOmniboxResultGenerator : OmniboxResultGenerator<TreeOmniboxResult>
 {
-    public class TreeOmniboxResultGenerator : OmniboxResultGenerator<TreeOmniboxResult>
+    Regex regex = new Regex(@"^II?$", RegexOptions.ExplicitCapture);
+    public override IEnumerable<TreeOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
     {
-        Regex regex = new Regex(@"^II?$", RegexOptions.ExplicitCapture);
-        public override IEnumerable<TreeOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
+        if (tokenPattern != "I")
+            yield break;
+        
+        string pattern = tokens[0].Value;
+
+        bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
+
+        foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), t => typeof(TreeEntity).IsAssignableFrom(t) && OmniboxParser.Manager.AllowedType(t) && OmniboxParser.Manager.AllowedQuery(t), pattern, isPascalCase).OrderBy(ma => ma.Distance))
         {
-            if (tokenPattern != "I")
-                yield break;
-            
-            string pattern = tokens[0].Value;
+            var type = match.Value;
 
-            bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
-
-            foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), t => typeof(TreeEntity).IsAssignableFrom(t) && OmniboxParser.Manager.AllowedType(t) && OmniboxParser.Manager.AllowedQuery(t), pattern, isPascalCase).OrderBy(ma => ma.Distance))
+            yield return new TreeOmniboxResult
             {
-                var type = match.Value;
-
-                yield return new TreeOmniboxResult
-                {
-                    Distance = match.Distance - 0.1f,
-                    Type = (Type)match.Value,
-                    TypeMatch = match
-                };
-            }
-
-        }
-
-        public override List<HelpOmniboxResult> GetHelp()
-        {
-            var resultType = typeof(TreeOmniboxResult);
-            return new List<HelpOmniboxResult>
-            {
-                new HelpOmniboxResult
-                {
-                    Text = TreeMessage.TreeType.NiceToString(),
-                    ReferencedType = resultType
-                }
+                Distance = match.Distance - 0.1f,
+                Type = (Type)match.Value,
+                TypeMatch = match
             };
         }
+
     }
 
-    public class TreeTypeJsonConverter : JsonConverter<object>
+    public override List<HelpOmniboxResult> GetHelp()
     {
-        public override bool CanConvert(Type objectType)
+        var resultType = typeof(TreeOmniboxResult);
+        return new List<HelpOmniboxResult>
         {
-            return true;
-        }
+            new HelpOmniboxResult
+            {
+                Text = TreeMessage.TreeType.NiceToString(),
+                ReferencedType = resultType
+            }
+        };
+    }
+}
 
-        public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
-        {
-            JsonSerializer.Serialize<object?>(writer, value == null ? null : (object?)QueryNameJsonConverter.GetQueryKey(value));
-        }
-
-        public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            throw new NotImplementedException();
-        }
+public class TreeTypeJsonConverter : JsonConverter<object>
+{
+    public override bool CanConvert(Type objectType)
+    {
+        return true;
     }
 
-    public class TreeOmniboxResult : OmniboxResult
+    public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
     {
-        [JsonConverter(typeof(TreeTypeJsonConverter))]
-        public Type Type { get; set; }
-        public OmniboxMatch TypeMatch { get; set; }
+        JsonSerializer.Serialize<object?>(writer, value == null ? null : (object?)QueryNameJsonConverter.GetQueryKey(value));
+    }
 
-        public override string ToString()
-        {
-            return Type.NiceName().ToOmniboxPascal();
-        }
+    public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class TreeOmniboxResult : OmniboxResult
+{
+    [JsonConverter(typeof(TreeTypeJsonConverter))]
+    public Type Type { get; set; }
+    public OmniboxMatch TypeMatch { get; set; }
+
+    public override string ToString()
+    {
+        return Type.NiceName().ToOmniboxPascal();
     }
 }

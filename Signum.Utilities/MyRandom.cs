@@ -1,122 +1,121 @@
 
-namespace Signum.Utilities
-{
-    public static class MyRandom
-    {
-        [ThreadStatic]
-        static Random? random;
+namespace Signum.Utilities;
 
-        public static Random Current => random ??= new Random();
+public static class MyRandom
+{
+    [ThreadStatic]
+    static Random? random;
+
+    public static Random Current => random ??= new Random();
+}
+
+public static class RandomExtensions
+{
+    public static bool NextBool(this Random r)
+    {
+        return r.Next(2) == 1;
     }
 
-    public static class RandomExtensions
+    const string Lowercase = "abcdefgijkmnopqrstwxyz";
+    const string Upercase = "ABCDEFGHJKLMNPQRSTWXYZ"; 
+
+
+    public static char NextUppercase(this Random r)
     {
-        public static bool NextBool(this Random r)
-        {
-            return r.Next(2) == 1;
-        }
+        return Upercase[r.Next(Upercase.Length)];
+    }
 
-        const string Lowercase = "abcdefgijkmnopqrstwxyz";
-        const string Upercase = "ABCDEFGHJKLMNPQRSTWXYZ"; 
+    public static char NextLowercase(this Random r)
+    {
+        return Lowercase[r.Next(Lowercase.Length)];
+    }
 
+    public static char NextChar(this Random r)
+    {
+        string s = r.NextBool() ? Upercase : Lowercase;
+        return s[r.Next(s.Length)];
+    }
 
-        public static char NextUppercase(this Random r)
-        {
-            return Upercase[r.Next(Upercase.Length)];
-        }
+    public static string NextUppercaseString(this Random r, int length)
+    {
+        return new string(0.To(length).Select(i=>r.NextUppercase()).ToArray());
+    }
 
-        public static char NextLowercase(this Random r)
-        {
-            return Lowercase[r.Next(Lowercase.Length)];
-        }
+    public static string NextLowercaseString(this Random r, int length)
+    {
+        return new string(0.To(length).Select(i => r.NextLowercase()).ToArray());
+    }
 
-        public static char NextChar(this Random r)
-        {
-            string s = r.NextBool() ? Upercase : Lowercase;
-            return s[r.Next(s.Length)];
-        }
+    public static string NextString(this Random r, int length)
+    {
+        return new string(0.To(length).Select(i => r.NextChar()).ToArray());
+    }
 
-        public static string NextUppercaseString(this Random r, int length)
-        {
-            return new string(0.To(length).Select(i=>r.NextUppercase()).ToArray());
-        }
+    public static string NextString(this Random r, int length, string chars)
+    {
+        return new string(0.To(length).Select(i => chars[r.Next(chars.Length)]).ToArray());
+    }
 
-        public static string NextLowercaseString(this Random r, int length)
-        {
-            return new string(0.To(length).Select(i => r.NextLowercase()).ToArray());
-        }
+    public static string NextSubstring(this Random r, string text, int minLength, int maxLength)
+    {
+        int length = r.Next(minLength, maxLength); 
 
-        public static string NextString(this Random r, int length)
-        {
-            return new string(0.To(length).Select(i => r.NextChar()).ToArray());
-        }
+        if(length > text.Length)
+            return text;
 
-        public static string NextString(this Random r, int length, string chars)
-        {
-            return new string(0.To(length).Select(i => chars[r.Next(chars.Length)]).ToArray());
-        }
+        return text.Substring(r.Next(text.Length - length), length);
+    }
 
-        public static string NextSubstring(this Random r, string text, int minLength, int maxLength)
-        {
-            int length = r.Next(minLength, maxLength); 
+    public static int NextAlphaColor(this Random r)
+    {
+        return Color(r.Next(256), r.Next(256), r.Next(256), r.Next(256));
+    }
 
-            if(length > text.Length)
-                return text;
+    public static int NextColor(this Random r)
+    {
+        return Color(255, r.Next(256), r.Next(256), r.Next(256));
+    }
 
-            return text.Substring(r.Next(text.Length - length), length);
-        }
+    public static int NextColor(this Random r, int minR, int maxR, int minG, int maxG, int minB, int maxB)
+    {
+        return Color(255, minR + r.Next(maxR - minR), minG + r.Next(maxG - minG), minB + r.Next(maxB - minB)); 
+    }
 
-        public static int NextAlphaColor(this Random r)
-        {
-            return Color(r.Next(256), r.Next(256), r.Next(256), r.Next(256));
-        }
+    static int Color(int a, int r, int g, int b)
+    {
+        return a << 24 | r << 16 | g << 8 | b;
+    }
 
-        public static int NextColor(this Random r)
-        {
-            return Color(255, r.Next(256), r.Next(256), r.Next(256));
-        }
+    public static DateTime NextDateTime(this Random r, DateTime min, DateTime max)
+    {
+        if (min.Kind != max.Kind)
+            throw new ArgumentException("min and max have differend Kind"); 
 
-        public static int NextColor(this Random r, int minR, int maxR, int minG, int maxG, int minB, int maxB)
-        {
-            return Color(255, minR + r.Next(maxR - minR), minG + r.Next(maxG - minG), minB + r.Next(maxB - minB)); 
-        }
+        return new DateTime(min.Ticks + r.NextLong(max.Ticks - min.Ticks), min.Kind);
+    }
 
-        static int Color(int a, int r, int g, int b)
-        {
-            return a << 24 | r << 16 | g << 8 | b;
-        }
+    public static long NextLong(this Random r, long max)
+    {
+        return (long)(r.NextDouble() * max);
+    }
 
-        public static DateTime NextDateTime(this Random r, DateTime min, DateTime max)
-        {
-            if (min.Kind != max.Kind)
-                throw new ArgumentException("min and max have differend Kind"); 
+    public static long NextLong(this Random r, long min, long max)
+    {
+        return (long)(min + r.NextDouble() * (max - min));
+    }
 
-            return new DateTime(min.Ticks + r.NextLong(max.Ticks - min.Ticks), min.Kind);
-        }
+    public static T NextParams<T>(this Random r, params T[] elements)
+    {
+        return elements[r.Next(elements.Length)];
+    }
 
-        public static long NextLong(this Random r, long max)
-        {
-            return (long)(r.NextDouble() * max);
-        }
+    public static T NextElement<T>(this Random r, IList<T> elements)
+    {
+        return elements[r.Next(elements.Count)];
+    }
 
-        public static long NextLong(this Random r, long min, long max)
-        {
-            return (long)(min + r.NextDouble() * (max - min));
-        }
-
-        public static T NextParams<T>(this Random r, params T[] elements)
-        {
-            return elements[r.Next(elements.Length)];
-        }
-
-        public static T NextElement<T>(this Random r, IList<T> elements)
-        {
-            return elements[r.Next(elements.Count)];
-        }
-
-        public static decimal NextDecimal(this Random r, decimal min, decimal max)
-        {
-            return r.NextLong((long)(min * 100L), (long)(max * 100L)) / 100m;
-        }
+    public static decimal NextDecimal(this Random r, decimal min, decimal max)
+    {
+        return r.NextLong((long)(min * 100L), (long)(max * 100L)) / 100m;
     }
 }

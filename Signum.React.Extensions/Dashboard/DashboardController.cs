@@ -4,20 +4,19 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Dashboard;
 using Signum.Engine.Dashboard;
 
-namespace Signum.React.Dashboard
+namespace Signum.React.Dashboard;
+
+public class DashboardController : ControllerBase
 {
-    public class DashboardController : ControllerBase
+    [HttpGet("api/dashboard/forEntityType/{typeName}")]
+    public IEnumerable<Lite<DashboardEntity>> FromEntityType(string typeName)
     {
-        [HttpGet("api/dashboard/forEntityType/{typeName}")]
-        public IEnumerable<Lite<DashboardEntity>> FromEntityType(string typeName)
-        {
-            return DashboardLogic.GetDashboardsEntity(TypeLogic.GetType(typeName));
-        }
-        [HttpGet("api/dashboard/home")]
-        public Lite<DashboardEntity>? Home()
-        {
-            var result = DashboardLogic.GetHomePageDashboard();
-            return result?.ToLite();
-        }
+        return DashboardLogic.GetDashboardsEntity(TypeLogic.GetType(typeName));
+    }
+    [HttpGet("api/dashboard/home")]
+    public Lite<DashboardEntity>? Home()
+    {
+        var result = DashboardLogic.GetHomePageDashboard();
+        return result?.ToLite();
     }
 }

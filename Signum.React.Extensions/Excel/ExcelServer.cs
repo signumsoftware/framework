@@ -4,15 +4,14 @@ using Microsoft.AspNetCore.Builder;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 
-namespace Signum.React.Excel
-{
-    public static class ExcelServer
-    {
-        public static void Start(IApplicationBuilder app)
-        {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+namespace Signum.React.Excel;
 
-            ReflectionServer.RegisterLike(typeof(ExcelMessage), () => ExcelPermission.PlainExcel.IsAuthorized());
-        }
+public static class ExcelServer
+{
+    public static void Start(IApplicationBuilder app)
+    {
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
+        ReflectionServer.RegisterLike(typeof(ExcelMessage), () => ExcelPermission.PlainExcel.IsAuthorized());
     }
 }

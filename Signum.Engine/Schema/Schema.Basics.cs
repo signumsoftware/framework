@@ -7,1683 +7,1682 @@ using NpgsqlTypes;
 using System.Runtime.CompilerServices;
 using Signum.Utilities.DataStructures;
 
-namespace Signum.Engine.Maps
+namespace Signum.Engine.Maps;
+
+public interface IFieldFinder
 {
-    public interface IFieldFinder
+    Field GetField(MemberInfo value);
+    Field? TryGetField(MemberInfo value);
+    IEnumerable<Field> FindFields(Func<Field, bool> predicate);
+}
+
+public interface ITable
+{
+    ObjectName Name { get; }
+
+    IColumn PrimaryKey { get; }
+
+    Dictionary<string, IColumn> Columns { get; }
+
+    List<TableIndex>? MultiColumnIndexes { get; set; }
+
+    List<TableIndex> GeneratAllIndexes();
+
+    void GenerateColumns();
+
+    SystemVersionedInfo? SystemVersioned { get; }
+
+    bool IdentityBehaviour { get; }
+
+    FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column);
+}
+
+public class SystemVersionedInfo
+{
+    public ObjectName TableName;
+    public string? StartColumnName;
+    public string? EndColumnName;
+    public string? PostgreeSysPeriodColumnName;
+
+    public SystemVersionedInfo(ObjectName tableName, string startColumnName, string endColumnName)
     {
-        Field GetField(MemberInfo value);
-        Field? TryGetField(MemberInfo value);
-        IEnumerable<Field> FindFields(Func<Field, bool> predicate);
+        TableName = tableName;
+        StartColumnName = startColumnName;
+        EndColumnName = endColumnName;
     }
 
-    public interface ITable
+    public SystemVersionedInfo(ObjectName tableName, string postgreeSysPeriodColumnName)
     {
-        ObjectName Name { get; }
-
-        IColumn PrimaryKey { get; }
-
-        Dictionary<string, IColumn> Columns { get; }
-
-        List<TableIndex>? MultiColumnIndexes { get; set; }
-
-        List<TableIndex> GeneratAllIndexes();
-
-        void GenerateColumns();
-
-        SystemVersionedInfo? SystemVersioned { get; }
-
-        bool IdentityBehaviour { get; }
-
-        FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column);
+        TableName = tableName;
+        PostgreeSysPeriodColumnName = postgreeSysPeriodColumnName;
     }
 
-    public class SystemVersionedInfo
+    internal IEnumerable<IColumn> Columns()
     {
-        public ObjectName TableName;
-        public string? StartColumnName;
-        public string? EndColumnName;
-        public string? PostgreeSysPeriodColumnName;
-
-        public SystemVersionedInfo(ObjectName tableName, string startColumnName, string endColumnName)
-        {
-            TableName = tableName;
-            StartColumnName = startColumnName;
-            EndColumnName = endColumnName;
-        }
-
-        public SystemVersionedInfo(ObjectName tableName, string postgreeSysPeriodColumnName)
-        {
-            TableName = tableName;
-            PostgreeSysPeriodColumnName = postgreeSysPeriodColumnName;
-        }
-
-        internal IEnumerable<IColumn> Columns()
-        {
-            if (PostgreeSysPeriodColumnName != null)
-                return new[]
-                {
-                    new PostgreePeriodColumn(this.PostgreeSysPeriodColumnName!),
-                };
-            else
-                return new[]
-                {
-                    new SqlServerPeriodColumn(this.StartColumnName!, ColumnType.Start),
-                    new SqlServerPeriodColumn(this.EndColumnName!, ColumnType.End)
-                };
-        }
-
-        internal IntervalExpression? IntervalExpression(Alias tableAlias)
-        {
-            return new IntervalExpression(typeof(NullableInterval<DateTimeOffset>),
-                StartColumnName == null ? null : new SqlCastLazyExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, StartColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
-                EndColumnName == null ? null : new SqlCastLazyExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, EndColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
-                PostgreeSysPeriodColumnName == null ? null : new ColumnExpression(typeof(NpgsqlRange<DateTimeOffset>), tableAlias, PostgreeSysPeriodColumnName)
-            );
-        }
-
-        public enum ColumnType
-        {
-            Start,
-            End,
-        }
-
-        public class SqlServerPeriodColumn : IColumn
-        {
-            public SqlServerPeriodColumn(string name, ColumnType systemVersionColumnType)
+        if (PostgreeSysPeriodColumnName != null)
+            return new[]
             {
-                this.Name = name;
-                this.SystemVersionColumnType = systemVersionColumnType;
-            }
-
-            public string Name { get; private set; }
-            public ColumnType SystemVersionColumnType { get; private set; }
-
-            public IsNullable Nullable => IsNullable.No;
-            public AbstractDbType DbType => new AbstractDbType(SqlDbType.DateTime2);
-            public Type Type => typeof(DateTime);
-            public string? UserDefinedTypeName => null;
-            public bool PrimaryKey => false;
-            public bool IdentityBehaviour => false;
-            public bool Identity => false;
-            public string? Default { get; set; }
-            public int? Size => null;
-            public int? Scale => null;
-            public string? Collation => null;
-            public Table? ReferenceTable => null;
-            public bool AvoidForeignKey => false;
-        }
-
-        public class PostgreePeriodColumn : IColumn
-        {
-            public PostgreePeriodColumn(string name)
+                new PostgreePeriodColumn(this.PostgreeSysPeriodColumnName!),
+            };
+        else
+            return new[]
             {
-                this.Name = name;
-            }
+                new SqlServerPeriodColumn(this.StartColumnName!, ColumnType.Start),
+                new SqlServerPeriodColumn(this.EndColumnName!, ColumnType.End)
+            };
+    }
 
-            public string Name { get; private set; }
+    internal IntervalExpression? IntervalExpression(Alias tableAlias)
+    {
+        return new IntervalExpression(typeof(NullableInterval<DateTimeOffset>),
+            StartColumnName == null ? null : new SqlCastLazyExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, StartColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
+            EndColumnName == null ? null : new SqlCastLazyExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, EndColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
+            PostgreeSysPeriodColumnName == null ? null : new ColumnExpression(typeof(NpgsqlRange<DateTimeOffset>), tableAlias, PostgreeSysPeriodColumnName)
+        );
+    }
 
-            public IsNullable Nullable => IsNullable.No;
-            public AbstractDbType DbType => new AbstractDbType(NpgsqlDbType.Range | NpgsqlDbType.TimestampTz);
-            public Type Type => typeof(DateTime);
-            public string? UserDefinedTypeName => null;
-            public bool PrimaryKey => false;
-            public bool IdentityBehaviour => false;
-            public bool Identity => false;
-            public string? Default { get; set; }
-            public int? Size => null;
-            public int? Scale => null;
-            public string? Collation => null;
-            public Table? ReferenceTable => null;
-            public bool AvoidForeignKey => false;
+    public enum ColumnType
+    {
+        Start,
+        End,
+    }
+
+    public class SqlServerPeriodColumn : IColumn
+    {
+        public SqlServerPeriodColumn(string name, ColumnType systemVersionColumnType)
+        {
+            this.Name = name;
+            this.SystemVersionColumnType = systemVersionColumnType;
         }
 
+        public string Name { get; private set; }
+        public ColumnType SystemVersionColumnType { get; private set; }
+
+        public IsNullable Nullable => IsNullable.No;
+        public AbstractDbType DbType => new AbstractDbType(SqlDbType.DateTime2);
+        public Type Type => typeof(DateTime);
+        public string? UserDefinedTypeName => null;
+        public bool PrimaryKey => false;
+        public bool IdentityBehaviour => false;
+        public bool Identity => false;
+        public string? Default { get; set; }
+        public int? Size => null;
+        public int? Scale => null;
+        public string? Collation => null;
+        public Table? ReferenceTable => null;
+        public bool AvoidForeignKey => false;
     }
 
-    interface ITablePrivate
+    public class PostgreePeriodColumn : IColumn
     {
-        ColumnExpression GetPrimaryOrder(Alias alias);
+        public PostgreePeriodColumn(string name)
+        {
+            this.Name = name;
+        }
+
+        public string Name { get; private set; }
+
+        public IsNullable Nullable => IsNullable.No;
+        public AbstractDbType DbType => new AbstractDbType(NpgsqlDbType.Range | NpgsqlDbType.TimestampTz);
+        public Type Type => typeof(DateTime);
+        public string? UserDefinedTypeName => null;
+        public bool PrimaryKey => false;
+        public bool IdentityBehaviour => false;
+        public bool Identity => false;
+        public string? Default { get; set; }
+        public int? Size => null;
+        public int? Scale => null;
+        public string? Collation => null;
+        public Table? ReferenceTable => null;
+        public bool AvoidForeignKey => false;
     }
 
-    public partial class Table : IFieldFinder, ITable, ITablePrivate
-    {
-        public Type Type { get; private set; }
-        public Schema Schema { get; private set; }
+}
 
-        public ObjectName Name { get; set; }
+interface ITablePrivate
+{
+    ColumnExpression GetPrimaryOrder(Alias alias);
+}
 
-        public bool IdentityBehaviour { get; internal set; }
-        public bool IsView { get; internal set; }
-        public string CleanTypeName { get; set; }
+public partial class Table : IFieldFinder, ITable, ITablePrivate
+{
+    public Type Type { get; private set; }
+    public Schema Schema { get; private set; }
 
-        public SystemVersionedInfo? SystemVersioned { get; set; }
+    public ObjectName Name { get; set; }
 
-        public Dictionary<string, EntityField> Fields { get; set; }
-        public Dictionary<Type, FieldMixin>? Mixins { get; set; }
+    public bool IdentityBehaviour { get; internal set; }
+    public bool IsView { get; internal set; }
+    public string CleanTypeName { get; set; }
 
-        public Dictionary<string, IColumn> Columns { get; set; }
+    public SystemVersionedInfo? SystemVersioned { get; set; }
+
+    public Dictionary<string, EntityField> Fields { get; set; }
+    public Dictionary<Type, FieldMixin>? Mixins { get; set; }
+
+    public Dictionary<string, IColumn> Columns { get; set; }
 
 
-        public List<TableIndex>? MultiColumnIndexes { get; set; }
+    public List<TableIndex>? MultiColumnIndexes { get; set; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public Table(Type type)
+    public Table(Type type)
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        {
-            this.Type = type;
-        }
+    {
+        this.Type = type;
+    }
 
-        public override string ToString()
-        {
-            return Name.ToString();
-        }
+    public override string ToString()
+    {
+        return Name.ToString();
+    }
 
-        public void GenerateColumns()
+    public void GenerateColumns()
+    {
+        var errorSuffix = "columns in table " + this.Name.Name;
+        var columns = new Dictionary<string, IColumn>();
+        void AddColumns(IEnumerable<IColumn> newColumns)
         {
-            var errorSuffix = "columns in table " + this.Name.Name;
-            var columns = new Dictionary<string, IColumn>();
-            void AddColumns(IEnumerable<IColumn> newColumns)
+            try
             {
-                try
-                {
-                    columns.AddRange(newColumns, c => c.Name, c => c, errorSuffix);
-                }catch(RepeatedElementsException ex) when (StartParameters.IgnoredCodeErrors != null)
-                {
-                    StartParameters.IgnoredCodeErrors.Add(ex);
-                }
+                columns.AddRange(newColumns, c => c.Name, c => c, errorSuffix);
+            }catch(RepeatedElementsException ex) when (StartParameters.IgnoredCodeErrors != null)
+            {
+                StartParameters.IgnoredCodeErrors.Add(ex);
             }
-
-            AddColumns(Fields.Values.SelectMany(c => c.Field.Columns()));
-
-            if (Mixins != null)
-                AddColumns(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()));
-
-            if (this.SystemVersioned != null)
-                AddColumns(this.SystemVersioned.Columns());
-
-            Columns = columns;
-            inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
-            inserterIdentity = new ResetLazy<InsertCacheIdentity>(() => InsertCacheIdentity.InitializeInsertIdentity(this));
-            updater = new ResetLazy<UpdateCache>(() => UpdateCache.InitializeUpdate(this));
-            saveCollections = new ResetLazy<CollectionsCache?>(() => CollectionsCache.InitializeCollections(this));
         }
 
-        public Field GetField(MemberInfo member)
+        AddColumns(Fields.Values.SelectMany(c => c.Field.Columns()));
+
+        if (Mixins != null)
+            AddColumns(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()));
+
+        if (this.SystemVersioned != null)
+            AddColumns(this.SystemVersioned.Columns());
+
+        Columns = columns;
+        inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
+        inserterIdentity = new ResetLazy<InsertCacheIdentity>(() => InsertCacheIdentity.InitializeInsertIdentity(this));
+        updater = new ResetLazy<UpdateCache>(() => UpdateCache.InitializeUpdate(this));
+        saveCollections = new ResetLazy<CollectionsCache?>(() => CollectionsCache.InitializeCollections(this));
+    }
+
+    public Field GetField(MemberInfo member)
+    {
+        Type? mixinType = member as Type ?? GetMixinType(member);
+        if (mixinType != null)
         {
-            Type? mixinType = member as Type ?? GetMixinType(member);
-            if (mixinType != null)
-            {
-                if (Mixins == null)
-                    throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Type.Name));
+            if (Mixins == null)
+                throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Type.Name));
 
-                return Mixins.GetOrThrow(mixinType);
-            }
-            
-            FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
+            return Mixins.GetOrThrow(mixinType);
+        }
+        
+        FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
 
-            if (fi == null)
-                throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, Type));
+        if (fi == null)
+            throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, Type));
 
-            EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
+        EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
 
-            return field.Field;
+        return field.Field;
+    }
+
+    public Field? TryGetField(MemberInfo member)
+    {
+        Type? mixinType = member as Type ?? GetMixinType(member);
+        if (mixinType!= null)
+        {
+            return Mixins?.TryGetC(mixinType);
         }
 
-        public Field? TryGetField(MemberInfo member)
-        {
-            Type? mixinType = member as Type ?? GetMixinType(member);
-            if (mixinType!= null)
-            {
-                return Mixins?.TryGetC(mixinType);
-            }
+        FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member)!;
 
-            FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member)!;
-
-            if (fi == null)
-                return null;
-
-            EntityField? field = Fields.TryGetC(fi.Name);
-
-            if (field == null)
-                return null;
-
-            return field.Field;
-        }
-
-
-        internal static Type? GetMixinType(MemberInfo member)
-        {
-            if (member is MethodInfo mi)
-            {
-                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
-                {
-                    return mi.GetGenericArguments().SingleEx();
-                }
-            }
+        if (fi == null)
             return null;
-        }
+
+        EntityField? field = Fields.TryGetC(fi.Name);
+
+        if (field == null)
+            return null;
+
+        return field.Field;
+    }
 
 
-        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+    internal static Type? GetMixinType(MemberInfo member)
+    {
+        if (member is MethodInfo mi)
         {
-            var fields =
-                Fields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
-                f is IFieldFinder ff ? ff.FindFields(predicate) :
-                Enumerable.Empty<Field>()).ToList();
-           
-            if(Mixins != null)
+            if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
             {
-                foreach (var mixin in this.Mixins.Values)
-                {
-                    fields.AddRange(mixin.FindFields(predicate));
-                }
+                return mi.GetGenericArguments().SingleEx();
             }
-            return fields;
         }
+        return null;
+    }
 
-        public List<TableIndex> GeneratAllIndexes()
+
+    public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+    {
+        var fields =
+            Fields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+            f is IFieldFinder ff ? ff.FindFields(predicate) :
+            Enumerable.Empty<Field>()).ToList();
+       
+        if(Mixins != null)
         {
-            IEnumerable<EntityField> fields = Fields.Values.AsEnumerable();
-            if (Mixins != null)
-                fields = fields.Concat(Mixins.Values.SelectMany(m => m.Fields.Values));
-
-            var result = fields.SelectMany(f => f.Field.GenerateIndexes(this)).ToList();
-
-            if (MultiColumnIndexes != null)
-                result.AddRange(MultiColumnIndexes);
-
-            if (result.OfType<UniqueTableIndex>().Any())
+            foreach (var mixin in this.Mixins.Values)
             {
-                var s = Schema.Current.Settings;
-                List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo))!.OfType<AttachToUniqueIndexesAttribute>().Any())
-                   .SelectMany(f => TableIndex.GetColumnsFromFields(f.Field))
-                   .ToList();
+                fields.AddRange(mixin.FindFields(predicate));
+            }
+        }
+        return fields;
+    }
 
-                if (attachedFields.Any())
+    public List<TableIndex> GeneratAllIndexes()
+    {
+        IEnumerable<EntityField> fields = Fields.Values.AsEnumerable();
+        if (Mixins != null)
+            fields = fields.Concat(Mixins.Values.SelectMany(m => m.Fields.Values));
+
+        var result = fields.SelectMany(f => f.Field.GenerateIndexes(this)).ToList();
+
+        if (MultiColumnIndexes != null)
+            result.AddRange(MultiColumnIndexes);
+
+        if (result.OfType<UniqueTableIndex>().Any())
+        {
+            var s = Schema.Current.Settings;
+            List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo))!.OfType<AttachToUniqueIndexesAttribute>().Any())
+               .SelectMany(f => TableIndex.GetColumnsFromFields(f.Field))
+               .ToList();
+
+            if (attachedFields.Any())
+            {
+                result = result.Select(ix =>
                 {
-                    result = result.Select(ix =>
+                    var ui = ix as UniqueTableIndex;
+                    if (ui == null || ui.AvoidAttachToUniqueIndexes)
+                        return ix;
+
+                    return new UniqueTableIndex(ui.Table, ui.Columns.Concat(attachedFields).ToArray())
                     {
-                        var ui = ix as UniqueTableIndex;
-                        if (ui == null || ui.AvoidAttachToUniqueIndexes)
-                            return ix;
-
-                        return new UniqueTableIndex(ui.Table, ui.Columns.Concat(attachedFields).ToArray())
-                        {
-                            Where = ui.Where
-                        };
-                    }).ToList();
-                }
+                        Where = ui.Where
+                    };
+                }).ToList();
             }
-
-            if(this.SystemVersioned != null)
-            {
-                result.Add(new TableIndex(this, this.SystemVersioned.Columns().PreAnd(this.PrimaryKey).ToArray()));
-            }
-
-            return result;
         }
 
-        public IEnumerable<KeyValuePair<Table, RelationInfo>> DependentTables()
+        if(this.SystemVersioned != null)
         {
-            var result = Fields.Values.SelectMany(f => f.Field.GetTables()).ToList();
-
-            if (Mixins != null)
-                result.AddRange(Mixins.Values.SelectMany(fm => fm.GetTables()));
-
-            return result;
+            result.Add(new TableIndex(this, this.SystemVersioned.Columns().PreAnd(this.PrimaryKey).ToArray()));
         }
 
-        public IEnumerable<TableMList> TablesMList()
-        {
-            return this.AllFields().SelectMany(f => f.Field.TablesMList());
-        }
-
-        public FieldTicks Ticks { get; internal set; }
-        public FieldPrimaryKey PrimaryKey { get; internal set; }
-
-        IColumn ITable.PrimaryKey
-        {
-            get { return PrimaryKey; }
-        }
-
-        public IEnumerable<EntityField> AllFields()
-        {
-            return this.Fields.Values.Concat(
-                this.Mixins == null ? Enumerable.Empty<EntityField>() :
-                this.Mixins.Values.SelectMany(fm => fm.Fields.Values));
-        }
-
-        public FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
-        {
-            return this.AllFields().Select(a => a.Field).OfType<FieldEmbedded>().Select(a => a.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
-        }
-
+        return result;
     }
 
-    public class EntityField
+    public IEnumerable<KeyValuePair<Table, RelationInfo>> DependentTables()
     {
-        public Field Field { get; set; }
-        public FieldInfo FieldInfo { get; private set; }
+        var result = Fields.Values.SelectMany(f => f.Field.GetTables()).ToList();
 
-        Type type;
-        Func<object, object?>? getter;
-        public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetter<object, object?>(FieldInfo)!);
+        if (Mixins != null)
+            result.AddRange(Mixins.Values.SelectMany(fm => fm.GetTables()));
 
-        public EntityField(Type type, FieldInfo fi, Field field)
-        {
-            this.FieldInfo = fi;
-            this.type = type;
-            this.Field = field;
-        }
-
-        public override string ToString()
-        {
-            return FieldInfo.FieldName();
-        }
+        return result;
     }
 
-    public abstract partial class Field
+    public IEnumerable<TableMList> TablesMList()
     {
-        public Type FieldType { get; private set; }
-        public PropertyRoute Route { get; private set; }
-        public UniqueTableIndex? UniqueIndex { get; set; }
-
-        public Field(PropertyRoute route, Type? fieldType = null)
-        {
-            this.Route = route;
-            this.FieldType = fieldType ?? route.Type;
-        }
-
-
-        public abstract IEnumerable<IColumn> Columns();
-
-        public virtual IEnumerable<TableIndex> GenerateIndexes(ITable table)
-        {
-            if (UniqueIndex == null)
-                return Enumerable.Empty<TableIndex>();
-
-            return new[] { UniqueIndex };
-        }
-
-        public virtual UniqueTableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
-        {
-            if (attribute == null)
-                return null;
-
-            var result = new UniqueTableIndex(table, TableIndex.GetColumnsFromFields(this))
-            {
-                AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
-            };
-
-            if(attribute.AllowMultipleNulls)
-                result.Where = IndexWhereExpressionVisitor.IsNull(this, false, Schema.Current.Settings.IsPostgres);
-
-            return result;
-        }
-
-        internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
-
-        internal abstract IEnumerable<TableMList> TablesMList();
+        return this.AllFields().SelectMany(f => f.Field.TablesMList());
     }
 
-    public static class FieldExtensions
+    public FieldTicks Ticks { get; internal set; }
+    public FieldPrimaryKey PrimaryKey { get; internal set; }
+
+    IColumn ITable.PrimaryKey
     {
-        public static bool Implements(this Field field, Type type)
-        {
-            if (field is FieldReference)
-                return ((FieldReference)field).FieldType == type;
-
-            if (field is FieldImplementedByAll)
-                return true;
-
-            if (field is FieldImplementedBy)
-                return ((FieldImplementedBy)field).ImplementationColumns.ContainsKey(type);
-
-            return false;
-        }
-
-        public static void AssertImplements(this Field field, Type type)
-        {
-            if (!Implements(field, type))
-                throw new InvalidOperationException("{0} does not implement {1}".FormatWith(field.ToString(), type.Name));
-        }
-
-        public static ObjectName GetName(this ITable table, bool useHistoryName)
-        {
-            return useHistoryName && table.SystemVersioned != null ? table.SystemVersioned.TableName : table.Name;
-        }
+        get { return PrimaryKey; }
     }
 
-    public partial interface IColumn
+    public IEnumerable<EntityField> AllFields()
     {
-        string Name { get; }
-        IsNullable Nullable { get; }
-        AbstractDbType DbType { get; }
-        Type Type { get; }
-        string? UserDefinedTypeName { get; }
-        bool PrimaryKey { get; }
-        bool IdentityBehaviour { get; }
-        bool Identity { get; }
-        string? Default { get; }
-        int? Size { get; }
-        int? Scale { get; }
-        string? Collation { get; }
-        Table? ReferenceTable { get; }
-        bool AvoidForeignKey { get; }
+        return this.Fields.Values.Concat(
+            this.Mixins == null ? Enumerable.Empty<EntityField>() :
+            this.Mixins.Values.SelectMany(fm => fm.Fields.Values));
     }
 
-    public enum IsNullable
+    public FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
     {
-        No,
-        Yes,
-        //Nullable only because in a Embedded nullabled
-        Forced
+        return this.AllFields().Select(a => a.Field).OfType<FieldEmbedded>().Select(a => a.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
     }
 
-    public static partial class ColumnExtensions
+}
+
+public class EntityField
+{
+    public Field Field { get; set; }
+    public FieldInfo FieldInfo { get; private set; }
+
+    Type type;
+    Func<object, object?>? getter;
+    public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetter<object, object?>(FieldInfo)!);
+
+    public EntityField(Type type, FieldInfo fi, Field field)
     {
-        public static bool ToBool(this IsNullable isNullable)
+        this.FieldInfo = fi;
+        this.type = type;
+        this.Field = field;
+    }
+
+    public override string ToString()
+    {
+        return FieldInfo.FieldName();
+    }
+}
+
+public abstract partial class Field
+{
+    public Type FieldType { get; private set; }
+    public PropertyRoute Route { get; private set; }
+    public UniqueTableIndex? UniqueIndex { get; set; }
+
+    public Field(PropertyRoute route, Type? fieldType = null)
+    {
+        this.Route = route;
+        this.FieldType = fieldType ?? route.Type;
+    }
+
+
+    public abstract IEnumerable<IColumn> Columns();
+
+    public virtual IEnumerable<TableIndex> GenerateIndexes(ITable table)
+    {
+        if (UniqueIndex == null)
+            return Enumerable.Empty<TableIndex>();
+
+        return new[] { UniqueIndex };
+    }
+
+    public virtual UniqueTableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
+    {
+        if (attribute == null)
+            return null;
+
+        var result = new UniqueTableIndex(table, TableIndex.GetColumnsFromFields(this))
         {
-            return isNullable != IsNullable.No;
-        }
+            AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
+        };
 
-        //public static string GetSqlDbTypeString(this IColumn column)
-        //{
-        //    return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
-        //}
+        if(attribute.AllowMultipleNulls)
+            result.Where = IndexWhereExpressionVisitor.IsNull(this, false, Schema.Current.Settings.IsPostgres);
 
-        public static GeneratedAlwaysType GetGeneratedAlwaysType(this IColumn column)
-        {
-            if (column is SystemVersionedInfo.SqlServerPeriodColumn svc)
-                return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? GeneratedAlwaysType.AsRowStart : GeneratedAlwaysType.AsRowEnd;
-
-            return GeneratedAlwaysType.None;
-        }
+        return result;
     }
 
-    public interface IFieldReference
+    internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
+
+    internal abstract IEnumerable<TableMList> TablesMList();
+}
+
+public static class FieldExtensions
+{
+    public static bool Implements(this Field field, Type type)
     {
-        bool IsLite { get; }
-        bool ClearEntityOnSaving { get; set; }
-        bool AvoidExpandOnRetrieving { get; }
-        Type FieldType { get; }
+        if (field is FieldReference)
+            return ((FieldReference)field).FieldType == type;
+
+        if (field is FieldImplementedByAll)
+            return true;
+
+        if (field is FieldImplementedBy)
+            return ((FieldImplementedBy)field).ImplementationColumns.ContainsKey(type);
+
+        return false;
     }
 
-    public partial class FieldPrimaryKey : Field, IColumn
+    public static void AssertImplements(this Field field, Type type)
+    {
+        if (!Implements(field, type))
+            throw new InvalidOperationException("{0} does not implement {1}".FormatWith(field.ToString(), type.Name));
+    }
+
+    public static ObjectName GetName(this ITable table, bool useHistoryName)
+    {
+        return useHistoryName && table.SystemVersioned != null ? table.SystemVersioned.TableName : table.Name;
+    }
+}
+
+public partial interface IColumn
+{
+    string Name { get; }
+    IsNullable Nullable { get; }
+    AbstractDbType DbType { get; }
+    Type Type { get; }
+    string? UserDefinedTypeName { get; }
+    bool PrimaryKey { get; }
+    bool IdentityBehaviour { get; }
+    bool Identity { get; }
+    string? Default { get; }
+    int? Size { get; }
+    int? Scale { get; }
+    string? Collation { get; }
+    Table? ReferenceTable { get; }
+    bool AvoidForeignKey { get; }
+}
+
+public enum IsNullable
+{
+    No,
+    Yes,
+    //Nullable only because in a Embedded nullabled
+    Forced
+}
+
+public static partial class ColumnExtensions
+{
+    public static bool ToBool(this IsNullable isNullable)
+    {
+        return isNullable != IsNullable.No;
+    }
+
+    //public static string GetSqlDbTypeString(this IColumn column)
+    //{
+    //    return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
+    //}
+
+    public static GeneratedAlwaysType GetGeneratedAlwaysType(this IColumn column)
+    {
+        if (column is SystemVersionedInfo.SqlServerPeriodColumn svc)
+            return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? GeneratedAlwaysType.AsRowStart : GeneratedAlwaysType.AsRowEnd;
+
+        return GeneratedAlwaysType.None;
+    }
+}
+
+public interface IFieldReference
+{
+    bool IsLite { get; }
+    bool ClearEntityOnSaving { get; set; }
+    bool AvoidExpandOnRetrieving { get; }
+    Type FieldType { get; }
+}
+
+public partial class FieldPrimaryKey : Field, IColumn
+{
+    public string Name { get; set; }
+    IsNullable IColumn.Nullable { get { return IsNullable.No; } }
+    public AbstractDbType DbType { get; set; }
+    public string? UserDefinedTypeName { get; set; }
+    bool IColumn.PrimaryKey { get { return true; } }
+    public bool Identity { get; set; }
+    bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
+    public int? Size { get; set; }
+    int? IColumn.Scale { get { return null; } }
+    public string? Collation { get; set; }
+    Table? IColumn.ReferenceTable { get { return null; } }
+    public Type Type { get; set; }
+    public bool AvoidForeignKey { get { return false; } }
+    public string? Default { get; set; }
+
+    Table table;
+    public FieldPrimaryKey(PropertyRoute route, Table table, string name, Type type)
+        : base(route)
+    {
+        this.table = table;
+        this.Name = name;
+        this.Type = type;
+    }
+
+    public override string ToString()
+    {
+        return "{0} PrimaryKey".FormatWith(Name);
+    }
+
+    public override IEnumerable<IColumn> Columns()
+    {
+        return new[] { this };
+    }
+
+    public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
+    {
+        if (this.UniqueIndex != null)
+            throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
+
+        return new[] { new PrimaryKeyIndex(table) };
+    }
+
+    internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+        return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
+    }
+
+    internal override IEnumerable<TableMList> TablesMList()
+    {
+        return Enumerable.Empty<TableMList>();
+    }
+}
+
+public partial class FieldValue : Field, IColumn
+{
+    public string Name { get; set; }
+    public IsNullable Nullable { get; set; }
+    public AbstractDbType DbType { get; set; }
+    public string? UserDefinedTypeName { get; set; }
+    public bool PrimaryKey { get; set; }
+    bool IColumn.Identity { get { return false; } }
+    bool IColumn.IdentityBehaviour { get { return false; } }
+    public int? Size { get; set; }
+    public string? Collation { get; set; }
+    public int? Scale { get; set; }
+    Table? IColumn.ReferenceTable { get { return null; } }
+    public bool AvoidForeignKey { get { return false; } }
+    public string? Default { get; set; }
+
+    public FieldValue(PropertyRoute route, Type? fieldType, string name)
+        : base(route, fieldType)
+    {
+        this.Name = name;
+    }
+
+    public override string ToString()
+    {
+        return "{0} {1} ({2},{3},{4})".FormatWith(
+            Name,
+            DbType,
+            Nullable.ToBool() ? "Nullable" : "",
+            Size,
+            Scale);
+    }
+
+    public override IEnumerable<IColumn> Columns()
+    {
+        return new[] { this };
+    }
+
+    internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+        return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
+    }
+
+    internal override IEnumerable<TableMList> TablesMList()
+    {
+        return Enumerable.Empty<TableMList>();
+    }
+
+    public virtual Type Type
+    {
+        get { return this.Nullable.ToBool() ? this.FieldType.Nullify() : this.FieldType; }
+    }
+}
+
+public partial class FieldTicks : FieldValue
+{
+    public new Type Type { get; set; }
+
+    public FieldTicks(PropertyRoute route, Type type, string name)
+        : base(route, null, name)
+    {
+        this.Type = type;
+    }
+}
+
+public partial class FieldEmbedded : Field, IFieldFinder
+{
+    public partial class EmbeddedHasValueColumn : IColumn
     {
         public string Name { get; set; }
-        IsNullable IColumn.Nullable { get { return IsNullable.No; } }
-        public AbstractDbType DbType { get; set; }
-        public string? UserDefinedTypeName { get; set; }
-        bool IColumn.PrimaryKey { get { return true; } }
-        public bool Identity { get; set; }
-        bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
-        public int? Size { get; set; }
-        int? IColumn.Scale { get { return null; } }
-        public string? Collation { get; set; }
-        Table? IColumn.ReferenceTable { get { return null; } }
-        public Type Type { get; set; }
-        public bool AvoidForeignKey { get { return false; } }
-        public string? Default { get; set; }
-
-        Table table;
-        public FieldPrimaryKey(PropertyRoute route, Table table, string name, Type type)
-            : base(route)
-        {
-            this.table = table;
-            this.Name = name;
-            this.Type = type;
-        }
-
-        public override string ToString()
-        {
-            return "{0} PrimaryKey".FormatWith(Name);
-        }
-
-        public override IEnumerable<IColumn> Columns()
-        {
-            return new[] { this };
-        }
-
-        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
-        {
-            if (this.UniqueIndex != null)
-                throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
-
-            return new[] { new PrimaryKeyIndex(table) };
-        }
-
-        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-            return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
-        }
-
-        internal override IEnumerable<TableMList> TablesMList()
-        {
-            return Enumerable.Empty<TableMList>();
-        }
-    }
-
-    public partial class FieldValue : Field, IColumn
-    {
-        public string Name { get; set; }
-        public IsNullable Nullable { get; set; }
-        public AbstractDbType DbType { get; set; }
-        public string? UserDefinedTypeName { get; set; }
-        public bool PrimaryKey { get; set; }
-        bool IColumn.Identity { get { return false; } }
-        bool IColumn.IdentityBehaviour { get { return false; } }
-        public int? Size { get; set; }
-        public string? Collation { get; set; }
-        public int? Scale { get; set; }
-        Table? IColumn.ReferenceTable { get { return null; } }
-        public bool AvoidForeignKey { get { return false; } }
-        public string? Default { get; set; }
-
-        public FieldValue(PropertyRoute route, Type? fieldType, string name)
-            : base(route, fieldType)
-        {
-            this.Name = name;
-        }
-
-        public override string ToString()
-        {
-            return "{0} {1} ({2},{3},{4})".FormatWith(
-                Name,
-                DbType,
-                Nullable.ToBool() ? "Nullable" : "",
-                Size,
-                Scale);
-        }
-
-        public override IEnumerable<IColumn> Columns()
-        {
-            return new[] { this };
-        }
-
-        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-            return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
-        }
-
-        internal override IEnumerable<TableMList> TablesMList()
-        {
-            return Enumerable.Empty<TableMList>();
-        }
-
-        public virtual Type Type
-        {
-            get { return this.Nullable.ToBool() ? this.FieldType.Nullify() : this.FieldType; }
-        }
-    }
-
-    public partial class FieldTicks : FieldValue
-    {
-        public new Type Type { get; set; }
-
-        public FieldTicks(PropertyRoute route, Type type, string name)
-            : base(route, null, name)
-        {
-            this.Type = type;
-        }
-    }
-
-    public partial class FieldEmbedded : Field, IFieldFinder
-    {
-        public partial class EmbeddedHasValueColumn : IColumn
-        {
-            public string Name { get; set; }
-            public IsNullable Nullable { get { return IsNullable.No; } } //even on neasted embeddeds
-            public AbstractDbType DbType => new AbstractDbType(SqlDbType.Bit, NpgsqlDbType.Boolean);
-            string? IColumn.UserDefinedTypeName { get { return null; } }
-            bool IColumn.PrimaryKey { get { return false; } }
-            bool IColumn.Identity { get { return false; } }
-            bool IColumn.IdentityBehaviour { get { return false; } }
-            int? IColumn.Size { get { return null; } }
-            int? IColumn.Scale { get { return null; } }
-            string? IColumn.Collation { get { return null; } }
-            public Table? ReferenceTable { get { return null; } }
-            Type IColumn.Type { get { return typeof(bool); } }
-            public bool AvoidForeignKey { get { return false; } }
-            public string? Default { get; set; }
-
-            public EmbeddedHasValueColumn(string name)
-            {
-                Name = name;
-            }
-        }
-
-        public EmbeddedHasValueColumn? HasValue { get; set; }
-
-        public Dictionary<string, EntityField> EmbeddedFields { get; set; }
-        public Dictionary<Type, FieldMixin>? Mixins { get; set; }
-
-        public FieldEmbedded(PropertyRoute route, EmbeddedHasValueColumn? hasValue, Dictionary<string, EntityField> embeddedFields, Dictionary<Type, FieldMixin>? mixins)
-            : base(route)
-        {
-            this.HasValue = hasValue;
-            this.EmbeddedFields = embeddedFields;
-            this.Mixins = mixins;
-        }
-
-        public override string ToString()
-        {
-            return "\r\n".Combine(
-                "Embedded",
-                EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2),
-                Mixins == null ? null : Mixins.ToString(m => "Mixin {0} : {1}".FormatWith(m.Key.Name, m.Value.ToString()), "\r\n")
-                );
-        }
-
-        public Field GetField(MemberInfo member)
-        {
-            Type? mixinType = member as Type ?? Table.GetMixinType(member);
-            if (mixinType != null)
-            {
-                if (Mixins == null)
-                    throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Route.Type.Name));
-
-                return Mixins.GetOrThrow(mixinType);
-            }
-
-            FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
-
-            if (fi == null)
-                throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, FieldType));
-
-            EntityField field = EmbeddedFields.GetOrThrow(fi.Name, "Field {0} not found on schema");
-
-            return field.Field;
-        }
-
-        public Field? TryGetField(MemberInfo member)
-        {
-            Type? mixinType = member as Type ?? Table.GetMixinType(member);
-            if (mixinType != null)
-            {
-                return Mixins?.TryGetC(mixinType);
-            }
-
-            FieldInfo fi = member as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)member)!;
-
-            if (fi == null)
-                return null;
-
-            EntityField? field = EmbeddedFields.TryGetC(fi.Name);
-
-            if (field == null)
-                return null;
-
-            return field.Field;
-        }
-
-        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
-        {
-            if (predicate(this))
-                return new[] { this };
-
-            var fields = EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
-                f is IFieldFinder ff ? ff.FindFields(predicate) :
-                Enumerable.Empty<Field>()).ToList();
-
-            if (Mixins != null)
-            {
-                foreach (var mixin in this.Mixins.Values)
-                {
-                    fields.AddRange(mixin.FindFields(predicate));
-                }
-            }
-            return fields;
-        }
-
-        public override IEnumerable<IColumn> Columns()
-        {
-            var result = new List<IColumn>();
-
-            if (HasValue != null)
-                result.Add(HasValue);
-
-            result.AddRange(EmbeddedFields.Values.SelectMany(c => c.Field.Columns()));
-
-            if (Mixins != null)
-                result.AddRange(Mixins.Values.SelectMany(c => c.Columns()));
-
-            return result;
-        }
-
-        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
-        {
-            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GenerateIndexes(table))
-                .Concat((this.Mixins?.Values.SelectMany(a => a.Fields.Values).SelectMany(f => f.Field.GenerateIndexes(table))).EmptyIfNull());
-        }
-
-        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-
-            foreach (var f in EmbeddedFields.Values)
-            {
-                foreach (var kvp in f.Field.GetTables())
-                {
-                    yield return kvp;
-                }
-            }
-
-            if (Mixins != null)
-            {
-                foreach (var mi in Mixins.Values)
-                {
-                    foreach (var f in mi.Fields.Values)
-                    {
-                        foreach (var kvp in f.Field.GetTables())
-                        {
-                            yield return kvp;
-                        }
-                    }
-                }
-            }
-        }
-
-        internal override IEnumerable<TableMList> TablesMList()
-        {
-            return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList());
-        }
-
-        internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
-        {
-            var enbeddedHasValue = this.EmbeddedFields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
-            if (enbeddedHasValue != null)
-                return enbeddedHasValue;
-
-            var mixinHasValue = this.Mixins?.Select(a => a.Value).Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
-            if (mixinHasValue != null)
-                return mixinHasValue;
-
-            return this.Columns().Contains(column) ? this.HasValue : null;
-        }
-    }
-
-    public partial class FieldMixin : Field, IFieldFinder
-    {
-        public Dictionary<string, EntityField> Fields { get; set; }
-
-        public ITable MainEntityTable;
-
-        public FieldMixin(PropertyRoute route, ITable mainEntityTable, Dictionary<string, EntityField> fields)
-            : base(route)
-        {
-            this.MainEntityTable = mainEntityTable;
-            this.Fields = fields;
-        }
-
-        public override string ToString()
-        {
-            return "Mixin\r\n{0}".FormatWith(Fields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
-        }
-
-        public Field GetField(MemberInfo member)
-        {
-            FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
-
-            if (fi == null)
-                throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, FieldType));
-
-            EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
-
-            return field.Field;
-        }
-
-        public Field? TryGetField(MemberInfo value)
-        {
-            FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value)!;
-
-            if (fi == null)
-                return null;
-
-            EntityField? field = Fields.TryGetC(fi.Name);
-
-            if (field == null)
-                return null;
-
-            return field.Field;
-        }
-
-        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
-        {
-            if (predicate(this))
-                return new[] { this };
-
-            return Fields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
-                f is IFieldFinder ff ? ff.FindFields(predicate) :
-                Enumerable.Empty<Field>()).ToList();
-        }
-
-        public override IEnumerable<IColumn> Columns()
-        {
-            var result = new List<IColumn>();
-            result.AddRange(Fields.Values.SelectMany(c => c.Field.Columns()));
-
-            return result;
-        }
-
-        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
-        {
-            throw new InvalidOperationException();
-        }
-
-        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-            foreach (var f in Fields.Values)
-            {
-                foreach (var kvp in f.Field.GetTables())
-                {
-                    yield return kvp;
-                }
-            }
-        }
-
-
-        internal override IEnumerable<TableMList> TablesMList()
-        {
-            return Fields.Values.SelectMany(e => e.Field.TablesMList());
-        }
-
-        internal MixinEntity Getter(Entity ident)
-        {
-            return ((Entity)ident).GetMixin(FieldType);
-        }
-
-        internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
-        {
-            return Fields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
-        }
-    }
-
-    public partial class FieldReference : Field, IColumn, IFieldReference
-    {
-        public string Name { get; set; }
-        public IsNullable Nullable { get; set; }
-
-        public bool PrimaryKey { get; set; } //For View
-        bool IColumn.Identity { get { return false; } }
-        bool IColumn.IdentityBehaviour { get { return false; } }
-        int? IColumn.Size { get { return this.ReferenceTable.PrimaryKey.Size; } }
-        int? IColumn.Scale { get { return null; } }
-        public Table ReferenceTable { get; set; }
-        Table? IColumn.ReferenceTable => ReferenceTable;
-        public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
-        public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
-        public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
-        public virtual Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
-
-        public bool AvoidForeignKey { get; set; }
-
-        public bool IsLite { get; internal set; }
-        public bool AvoidExpandOnRetrieving { get; set; }
-        public string? Default { get; set; }
-
-        public FieldReference(PropertyRoute route, Type? fieldType, string name, Table referenceTable) : base(route, fieldType)
-        {
-            this.Name = name;
-            this.ReferenceTable = referenceTable;
-        }
-
-        public override string ToString()
-        {
-            return "{0} -> {1} {3} ({2})".FormatWith(
-                Name,
-                ReferenceTable.Name,
-                IsLite ? "Lite" : "",
-                Nullable.ToBool() ? "Nullable" : "");
-        }
-
-        public override IEnumerable<IColumn> Columns()
-        {
-            return new[] { this };
-        }
-
-        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-            yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
-            {
-                IsLite = IsLite,
-                IsCollection = false,
-                IsNullable = Nullable.ToBool(),
-                PropertyRoute = this.Route
-            });
-        }
-
-        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
-        {
-            if (UniqueIndex == null)
-                return new[] { new TableIndex(table, (IColumn)this) };
-
-            return base.GenerateIndexes(table);
-        }
-
-        bool clearEntityOnSaving;
-        public bool ClearEntityOnSaving
-        {
-            get
-            {
-                this.AssertIsLite();
-                return this.clearEntityOnSaving;
-            }
-            set
-            {
-                this.AssertIsLite();
-                this.clearEntityOnSaving = value;
-            }
-        }
-
-        internal override IEnumerable<TableMList> TablesMList()
-        {
-            return Enumerable.Empty<TableMList>();
-        }
-    }
-
-    public partial class FieldEnum : FieldReference, IColumn
-    {
-        public override Type Type
-        {
-            get
-            {
-                if (this.ReferenceTable != null)
-                    return base.Type;
-
-                var ut = Enum.GetUnderlyingType(this.FieldType.UnNullify());
-
-                return this.Nullable.ToBool() ? ut.Nullify() : ut;
-            }
-        }
-
-        public FieldEnum(PropertyRoute route, string name, Table referenceTable) : base(route, null, name, referenceTable) { }
-
-        public override string ToString()
-        {
-            return "{0} -> {1} {3} ({2})".FormatWith(
-                Name,
-                "-",
-                IsLite ? "Lite" : "",
-                Nullable.ToBool() ? "Nullable" : "");
-        }
-
-        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-            if (ReferenceTable == null)
-                yield break;
-
-            yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
-            {
-                IsLite = IsLite,
-                IsCollection = false,
-                IsNullable = Nullable.ToBool(),
-                IsEnum = true,
-                PropertyRoute = this.Route
-            });
-        }
-
-        internal override IEnumerable<TableMList> TablesMList()
-        {
-            return Enumerable.Empty<TableMList>();
-        }
-    }
-
-    public partial class FieldImplementedBy : Field, IFieldReference
-    {
-        public bool IsLite { get; internal set; }
-        public CombineStrategy SplitStrategy { get; internal set; }
-        public bool AvoidExpandOnRetrieving { get; internal set; }
-
-        public Dictionary<Type, ImplementationColumn> ImplementationColumns { get; set; }
-
-        public FieldImplementedBy(PropertyRoute route, Dictionary<Type, ImplementationColumn> implementations) : base(route, null)
-        {
-            this.ImplementationColumns = implementations;
-        }
-
-        public override string ToString()
-        {
-            return "ImplementedBy\r\n{0}".FormatWith(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".FormatWith(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\r\n").Indent(2));
-        }
-
-        public override IEnumerable<IColumn> Columns()
-        {
-            return ImplementationColumns.Values.Cast<IColumn>();
-        }
-
-        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-            return ImplementationColumns.Select(a => KeyValuePair.Create(a.Value.ReferenceTable, new RelationInfo
-            {
-                IsLite = IsLite,
-                IsCollection = false,
-                IsNullable = a.Value.Nullable.ToBool(),
-                PropertyRoute = this.Route
-            }));
-        }
-
-        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
-        {
-            return this.Columns().Select(c => new TableIndex(table, c)).Concat(base.GenerateIndexes(table));
-        }
-
-        bool clearEntityOnSaving;
-        public bool ClearEntityOnSaving
-        {
-            get
-            {
-                this.AssertIsLite();
-                return this.clearEntityOnSaving;
-            }
-            set
-            {
-                this.AssertIsLite();
-                this.clearEntityOnSaving = value;
-            }
-        }
-
-        internal override IEnumerable<TableMList> TablesMList()
-        {
-            return Enumerable.Empty<TableMList>();
-        }
-    }
-
-    public partial class FieldImplementedByAll : Field, IFieldReference
-    {
-        public bool IsLite { get; internal set; }
-
-        public bool AvoidExpandOnRetrieving { get; internal set; }
-
-        public ImplementationStringColumn Column { get; set; }
-        public ImplementationColumn ColumnType { get; set; }
-
-        public FieldImplementedByAll(PropertyRoute route, ImplementationStringColumn column, ImplementationColumn columnType) : base(route)
-        {
-            this.Column = column;
-            this.ColumnType = columnType;
-        }
-
-        public override IEnumerable<IColumn> Columns()
-        {
-            return new IColumn[] { Column, ColumnType };
-        }
-
-        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-            yield return KeyValuePair.Create(ColumnType.ReferenceTable, new RelationInfo
-            {
-                IsNullable = this.ColumnType.Nullable.ToBool(),
-                IsLite = this.IsLite,
-                IsImplementedByAll = true,
-                PropertyRoute = this.Route
-            });
-        }
-
-        bool clearEntityOnSaving;
-        public bool ClearEntityOnSaving
-        {
-            get
-            {
-                this.AssertIsLite();
-                return this.clearEntityOnSaving;
-            }
-            set
-            {
-                this.AssertIsLite();
-                this.clearEntityOnSaving = value;
-            }
-        }
-
-        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
-        {
-            if (UniqueIndex == null)
-                return new[] { new TableIndex(table, (IColumn)this.Column, (IColumn)this.ColumnType) };
-
-            return base.GenerateIndexes(table);
-        }
-
-        internal override IEnumerable<TableMList> TablesMList()
-        {
-            return Enumerable.Empty<TableMList>();
-        }
-    }
-
-    public partial class ImplementationColumn : IColumn
-    {
-        public string Name { get; set; }
-        public IsNullable Nullable { get; set; }
+        public IsNullable Nullable { get { return IsNullable.No; } } //even on neasted embeddeds
+        public AbstractDbType DbType => new AbstractDbType(SqlDbType.Bit, NpgsqlDbType.Boolean);
+        string? IColumn.UserDefinedTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
-        public Table ReferenceTable { get; private set; }
-        Table? IColumn.ReferenceTable => ReferenceTable;
-        public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
-        public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
-        public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
-        public Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
-        public bool AvoidForeignKey { get; set; }
-        public string? Default { get; set; }
-
-        public ImplementationColumn(string name, Table referenceTable)
-        {
-            Name = name;
-            ReferenceTable = referenceTable;
-        }
-    }
-
-    public partial class ImplementationStringColumn : IColumn
-    {
-        public string Name { get; set; }
-        public IsNullable Nullable { get; set; }
-        string? IColumn.UserDefinedTypeName { get { return null; } }
-        bool IColumn.PrimaryKey { get { return false; } }
-        bool IColumn.Identity { get { return false; } }
-        bool IColumn.IdentityBehaviour { get { return false; } }
-        public int? Size { get; set; }
-        int? IColumn.Scale { get { return null; } }
-        public string? Collation { get; set; }
+        string? IColumn.Collation { get { return null; } }
         public Table? ReferenceTable { get { return null; } }
-        public AbstractDbType DbType => new AbstractDbType(SqlDbType.NVarChar, NpgsqlDbType.Varchar);
-        public Type Type { get { return typeof(string); } }
+        Type IColumn.Type { get { return typeof(bool); } }
         public bool AvoidForeignKey { get { return false; } }
         public string? Default { get; set; }
 
-        public ImplementationStringColumn(string name)
+        public EmbeddedHasValueColumn(string name)
         {
             Name = name;
         }
     }
 
-    public partial class FieldMList : Field, IFieldFinder
+    public EmbeddedHasValueColumn? HasValue { get; set; }
+
+    public Dictionary<string, EntityField> EmbeddedFields { get; set; }
+    public Dictionary<Type, FieldMixin>? Mixins { get; set; }
+
+    public FieldEmbedded(PropertyRoute route, EmbeddedHasValueColumn? hasValue, Dictionary<string, EntityField> embeddedFields, Dictionary<Type, FieldMixin>? mixins)
+        : base(route)
     {
-        public TableMList TableMList { get; set; }
+        this.HasValue = hasValue;
+        this.EmbeddedFields = embeddedFields;
+        this.Mixins = mixins;
+    }
 
-        public FieldMList(PropertyRoute route, TableMList tableMList) : base(route)
+    public override string ToString()
+    {
+        return "\r\n".Combine(
+            "Embedded",
+            EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2),
+            Mixins == null ? null : Mixins.ToString(m => "Mixin {0} : {1}".FormatWith(m.Key.Name, m.Value.ToString()), "\r\n")
+            );
+    }
+
+    public Field GetField(MemberInfo member)
+    {
+        Type? mixinType = member as Type ?? Table.GetMixinType(member);
+        if (mixinType != null)
         {
-            this.TableMList = tableMList;
+            if (Mixins == null)
+                throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Route.Type.Name));
+
+            return Mixins.GetOrThrow(mixinType);
         }
 
-        public override string ToString()
+        FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
+
+        if (fi == null)
+            throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, FieldType));
+
+        EntityField field = EmbeddedFields.GetOrThrow(fi.Name, "Field {0} not found on schema");
+
+        return field.Field;
+    }
+
+    public Field? TryGetField(MemberInfo member)
+    {
+        Type? mixinType = member as Type ?? Table.GetMixinType(member);
+        if (mixinType != null)
         {
-            return "Coleccion\r\n{0}".FormatWith(TableMList.ToString().Indent(2));
+            return Mixins?.TryGetC(mixinType);
         }
 
-        public Field GetField(MemberInfo member)
-        {
-            if (member.Name == "Item")
-                return TableMList.Field;
+        FieldInfo fi = member as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)member)!;
 
-            throw new InvalidOperationException("{0} not supported by MList field".FormatWith(member.Name));
-        }
-
-        public Field? TryGetField(MemberInfo member)
-        {
-            if (member.Name == "Item")
-                return TableMList.Field;
-
+        if (fi == null)
             return null;
-        }
 
-        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+        EntityField? field = EmbeddedFields.TryGetC(fi.Name);
+
+        if (field == null)
+            return null;
+
+        return field.Field;
+    }
+
+    public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+    {
+        if (predicate(this))
+            return new[] { this };
+
+        var fields = EmbeddedFields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+            f is IFieldFinder ff ? ff.FindFields(predicate) :
+            Enumerable.Empty<Field>()).ToList();
+
+        if (Mixins != null)
         {
-            if (predicate(this))
-                return new[] { this };
-
-            return TableMList.FindFields(predicate);
-            
-        }
-
-        public override IEnumerable<IColumn> Columns()
-        {
-            return Array.Empty<IColumn>();
-        }
-
-        public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
-        {
-            if (UniqueIndex != null)
-                throw new InvalidOperationException("Changing IndexType is not allowed for FieldMList");
-
-            return Enumerable.Empty<TableIndex>();
-        }
-
-        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-            foreach (var kvp in TableMList.GetTables())
+            foreach (var mixin in this.Mixins.Values)
             {
-                kvp.Value.IsCollection = true;
+                fields.AddRange(mixin.FindFields(predicate));
+            }
+        }
+        return fields;
+    }
+
+    public override IEnumerable<IColumn> Columns()
+    {
+        var result = new List<IColumn>();
+
+        if (HasValue != null)
+            result.Add(HasValue);
+
+        result.AddRange(EmbeddedFields.Values.SelectMany(c => c.Field.Columns()));
+
+        if (Mixins != null)
+            result.AddRange(Mixins.Values.SelectMany(c => c.Columns()));
+
+        return result;
+    }
+
+    public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
+    {
+        return this.EmbeddedFields.Values.SelectMany(f => f.Field.GenerateIndexes(table))
+            .Concat((this.Mixins?.Values.SelectMany(a => a.Fields.Values).SelectMany(f => f.Field.GenerateIndexes(table))).EmptyIfNull());
+    }
+
+    internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+
+        foreach (var f in EmbeddedFields.Values)
+        {
+            foreach (var kvp in f.Field.GetTables())
+            {
                 yield return kvp;
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList()
+        if (Mixins != null)
         {
-            return new[] { TableMList };
+            foreach (var mi in Mixins.Values)
+            {
+                foreach (var f in mi.Fields.Values)
+                {
+                    foreach (var kvp in f.Field.GetTables())
+                    {
+                        yield return kvp;
+                    }
+                }
+            }
         }
     }
 
-    public partial class TableMList : ITable, IFieldFinder, ITablePrivate
+    internal override IEnumerable<TableMList> TablesMList()
     {
-        public class PrimaryKeyColumn : IColumn
+        return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList());
+    }
+
+    internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+    {
+        var enbeddedHasValue = this.EmbeddedFields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+        if (enbeddedHasValue != null)
+            return enbeddedHasValue;
+
+        var mixinHasValue = this.Mixins?.Select(a => a.Value).Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+        if (mixinHasValue != null)
+            return mixinHasValue;
+
+        return this.Columns().Contains(column) ? this.HasValue : null;
+    }
+}
+
+public partial class FieldMixin : Field, IFieldFinder
+{
+    public Dictionary<string, EntityField> Fields { get; set; }
+
+    public ITable MainEntityTable;
+
+    public FieldMixin(PropertyRoute route, ITable mainEntityTable, Dictionary<string, EntityField> fields)
+        : base(route)
+    {
+        this.MainEntityTable = mainEntityTable;
+        this.Fields = fields;
+    }
+
+    public override string ToString()
+    {
+        return "Mixin\r\n{0}".FormatWith(Fields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
+    }
+
+    public Field GetField(MemberInfo member)
+    {
+        FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
+
+        if (fi == null)
+            throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, FieldType));
+
+        EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
+
+        return field.Field;
+    }
+
+    public Field? TryGetField(MemberInfo value)
+    {
+        FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value)!;
+
+        if (fi == null)
+            return null;
+
+        EntityField? field = Fields.TryGetC(fi.Name);
+
+        if (field == null)
+            return null;
+
+        return field.Field;
+    }
+
+    public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+    {
+        if (predicate(this))
+            return new[] { this };
+
+        return Fields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
+            f is IFieldFinder ff ? ff.FindFields(predicate) :
+            Enumerable.Empty<Field>()).ToList();
+    }
+
+    public override IEnumerable<IColumn> Columns()
+    {
+        var result = new List<IColumn>();
+        result.AddRange(Fields.Values.SelectMany(c => c.Field.Columns()));
+
+        return result;
+    }
+
+    public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
+    {
+        throw new InvalidOperationException();
+    }
+
+    internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+        foreach (var f in Fields.Values)
         {
-            public string Name { get; set; }
-            IsNullable IColumn.Nullable { get { return IsNullable.No; } }
-            public AbstractDbType DbType { get; set; }
-            public string? Collation { get; set; }
-            public string? UserDefinedTypeName { get; set; }
-            bool IColumn.PrimaryKey { get { return true; } }
-            public bool Identity { get; set; }
-            bool IColumn.IdentityBehaviour { get { return true; } }
-            int? IColumn.Size { get { return null; } }
-            int? IColumn.Scale { get { return null; } }
-            Table? IColumn.ReferenceTable { get { return null; } }
-            public Type Type { get; set; }
-            public bool AvoidForeignKey { get { return false; } }
-            public string? Default { get; set; }
-
-            public PrimaryKeyColumn(Type type, string name)
+            foreach (var kvp in f.Field.GetTables())
             {
-                Type = type;
-                Name = name;
+                yield return kvp;
             }
+        }
+    }
 
+
+    internal override IEnumerable<TableMList> TablesMList()
+    {
+        return Fields.Values.SelectMany(e => e.Field.TablesMList());
+    }
+
+    internal MixinEntity Getter(Entity ident)
+    {
+        return ((Entity)ident).GetMixin(FieldType);
+    }
+
+    internal FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+    {
+        return Fields.Select(a => a.Value.Field).OfType<FieldEmbedded>().Select(f => f.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
+    }
+}
+
+public partial class FieldReference : Field, IColumn, IFieldReference
+{
+    public string Name { get; set; }
+    public IsNullable Nullable { get; set; }
+
+    public bool PrimaryKey { get; set; } //For View
+    bool IColumn.Identity { get { return false; } }
+    bool IColumn.IdentityBehaviour { get { return false; } }
+    int? IColumn.Size { get { return this.ReferenceTable.PrimaryKey.Size; } }
+    int? IColumn.Scale { get { return null; } }
+    public Table ReferenceTable { get; set; }
+    Table? IColumn.ReferenceTable => ReferenceTable;
+    public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
+    public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
+    public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
+    public virtual Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+
+    public bool AvoidForeignKey { get; set; }
+
+    public bool IsLite { get; internal set; }
+    public bool AvoidExpandOnRetrieving { get; set; }
+    public string? Default { get; set; }
+
+    public FieldReference(PropertyRoute route, Type? fieldType, string name, Table referenceTable) : base(route, fieldType)
+    {
+        this.Name = name;
+        this.ReferenceTable = referenceTable;
+    }
+
+    public override string ToString()
+    {
+        return "{0} -> {1} {3} ({2})".FormatWith(
+            Name,
+            ReferenceTable.Name,
+            IsLite ? "Lite" : "",
+            Nullable.ToBool() ? "Nullable" : "");
+    }
+
+    public override IEnumerable<IColumn> Columns()
+    {
+        return new[] { this };
+    }
+
+    internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+        yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
+        {
+            IsLite = IsLite,
+            IsCollection = false,
+            IsNullable = Nullable.ToBool(),
+            PropertyRoute = this.Route
+        });
+    }
+
+    public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
+    {
+        if (UniqueIndex == null)
+            return new[] { new TableIndex(table, (IColumn)this) };
+
+        return base.GenerateIndexes(table);
+    }
+
+    bool clearEntityOnSaving;
+    public bool ClearEntityOnSaving
+    {
+        get
+        {
+            this.AssertIsLite();
+            return this.clearEntityOnSaving;
+        }
+        set
+        {
+            this.AssertIsLite();
+            this.clearEntityOnSaving = value;
+        }
+    }
+
+    internal override IEnumerable<TableMList> TablesMList()
+    {
+        return Enumerable.Empty<TableMList>();
+    }
+}
+
+public partial class FieldEnum : FieldReference, IColumn
+{
+    public override Type Type
+    {
+        get
+        {
+            if (this.ReferenceTable != null)
+                return base.Type;
+
+            var ut = Enum.GetUnderlyingType(this.FieldType.UnNullify());
+
+            return this.Nullable.ToBool() ? ut.Nullify() : ut;
+        }
+    }
+
+    public FieldEnum(PropertyRoute route, string name, Table referenceTable) : base(route, null, name, referenceTable) { }
+
+    public override string ToString()
+    {
+        return "{0} -> {1} {3} ({2})".FormatWith(
+            Name,
+            "-",
+            IsLite ? "Lite" : "",
+            Nullable.ToBool() ? "Nullable" : "");
+    }
+
+    internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+        if (ReferenceTable == null)
+            yield break;
+
+        yield return KeyValuePair.Create(ReferenceTable, new RelationInfo
+        {
+            IsLite = IsLite,
+            IsCollection = false,
+            IsNullable = Nullable.ToBool(),
+            IsEnum = true,
+            PropertyRoute = this.Route
+        });
+    }
+
+    internal override IEnumerable<TableMList> TablesMList()
+    {
+        return Enumerable.Empty<TableMList>();
+    }
+}
+
+public partial class FieldImplementedBy : Field, IFieldReference
+{
+    public bool IsLite { get; internal set; }
+    public CombineStrategy SplitStrategy { get; internal set; }
+    public bool AvoidExpandOnRetrieving { get; internal set; }
+
+    public Dictionary<Type, ImplementationColumn> ImplementationColumns { get; set; }
+
+    public FieldImplementedBy(PropertyRoute route, Dictionary<Type, ImplementationColumn> implementations) : base(route, null)
+    {
+        this.ImplementationColumns = implementations;
+    }
+
+    public override string ToString()
+    {
+        return "ImplementedBy\r\n{0}".FormatWith(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".FormatWith(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\r\n").Indent(2));
+    }
+
+    public override IEnumerable<IColumn> Columns()
+    {
+        return ImplementationColumns.Values.Cast<IColumn>();
+    }
+
+    internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+        return ImplementationColumns.Select(a => KeyValuePair.Create(a.Value.ReferenceTable, new RelationInfo
+        {
+            IsLite = IsLite,
+            IsCollection = false,
+            IsNullable = a.Value.Nullable.ToBool(),
+            PropertyRoute = this.Route
+        }));
+    }
+
+    public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
+    {
+        return this.Columns().Select(c => new TableIndex(table, c)).Concat(base.GenerateIndexes(table));
+    }
+
+    bool clearEntityOnSaving;
+    public bool ClearEntityOnSaving
+    {
+        get
+        {
+            this.AssertIsLite();
+            return this.clearEntityOnSaving;
+        }
+        set
+        {
+            this.AssertIsLite();
+            this.clearEntityOnSaving = value;
+        }
+    }
+
+    internal override IEnumerable<TableMList> TablesMList()
+    {
+        return Enumerable.Empty<TableMList>();
+    }
+}
+
+public partial class FieldImplementedByAll : Field, IFieldReference
+{
+    public bool IsLite { get; internal set; }
+
+    public bool AvoidExpandOnRetrieving { get; internal set; }
+
+    public ImplementationStringColumn Column { get; set; }
+    public ImplementationColumn ColumnType { get; set; }
+
+    public FieldImplementedByAll(PropertyRoute route, ImplementationStringColumn column, ImplementationColumn columnType) : base(route)
+    {
+        this.Column = column;
+        this.ColumnType = columnType;
+    }
+
+    public override IEnumerable<IColumn> Columns()
+    {
+        return new IColumn[] { Column, ColumnType };
+    }
+
+    internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+        yield return KeyValuePair.Create(ColumnType.ReferenceTable, new RelationInfo
+        {
+            IsNullable = this.ColumnType.Nullable.ToBool(),
+            IsLite = this.IsLite,
+            IsImplementedByAll = true,
+            PropertyRoute = this.Route
+        });
+    }
+
+    bool clearEntityOnSaving;
+    public bool ClearEntityOnSaving
+    {
+        get
+        {
+            this.AssertIsLite();
+            return this.clearEntityOnSaving;
+        }
+        set
+        {
+            this.AssertIsLite();
+            this.clearEntityOnSaving = value;
+        }
+    }
+
+    public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
+    {
+        if (UniqueIndex == null)
+            return new[] { new TableIndex(table, (IColumn)this.Column, (IColumn)this.ColumnType) };
+
+        return base.GenerateIndexes(table);
+    }
+
+    internal override IEnumerable<TableMList> TablesMList()
+    {
+        return Enumerable.Empty<TableMList>();
+    }
+}
+
+public partial class ImplementationColumn : IColumn
+{
+    public string Name { get; set; }
+    public IsNullable Nullable { get; set; }
+    bool IColumn.PrimaryKey { get { return false; } }
+    bool IColumn.Identity { get { return false; } }
+    bool IColumn.IdentityBehaviour { get { return false; } }
+    int? IColumn.Size { get { return null; } }
+    int? IColumn.Scale { get { return null; } }
+    public Table ReferenceTable { get; private set; }
+    Table? IColumn.ReferenceTable => ReferenceTable;
+    public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
+    public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
+    public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
+    public Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+    public bool AvoidForeignKey { get; set; }
+    public string? Default { get; set; }
+
+    public ImplementationColumn(string name, Table referenceTable)
+    {
+        Name = name;
+        ReferenceTable = referenceTable;
+    }
+}
+
+public partial class ImplementationStringColumn : IColumn
+{
+    public string Name { get; set; }
+    public IsNullable Nullable { get; set; }
+    string? IColumn.UserDefinedTypeName { get { return null; } }
+    bool IColumn.PrimaryKey { get { return false; } }
+    bool IColumn.Identity { get { return false; } }
+    bool IColumn.IdentityBehaviour { get { return false; } }
+    public int? Size { get; set; }
+    int? IColumn.Scale { get { return null; } }
+    public string? Collation { get; set; }
+    public Table? ReferenceTable { get { return null; } }
+    public AbstractDbType DbType => new AbstractDbType(SqlDbType.NVarChar, NpgsqlDbType.Varchar);
+    public Type Type { get { return typeof(string); } }
+    public bool AvoidForeignKey { get { return false; } }
+    public string? Default { get; set; }
+
+    public ImplementationStringColumn(string name)
+    {
+        Name = name;
+    }
+}
+
+public partial class FieldMList : Field, IFieldFinder
+{
+    public TableMList TableMList { get; set; }
+
+    public FieldMList(PropertyRoute route, TableMList tableMList) : base(route)
+    {
+        this.TableMList = tableMList;
+    }
+
+    public override string ToString()
+    {
+        return "Coleccion\r\n{0}".FormatWith(TableMList.ToString().Indent(2));
+    }
+
+    public Field GetField(MemberInfo member)
+    {
+        if (member.Name == "Item")
+            return TableMList.Field;
+
+        throw new InvalidOperationException("{0} not supported by MList field".FormatWith(member.Name));
+    }
+
+    public Field? TryGetField(MemberInfo member)
+    {
+        if (member.Name == "Item")
+            return TableMList.Field;
+
+        return null;
+    }
+
+    public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+    {
+        if (predicate(this))
+            return new[] { this };
+
+        return TableMList.FindFields(predicate);
+        
+    }
+
+    public override IEnumerable<IColumn> Columns()
+    {
+        return Array.Empty<IColumn>();
+    }
+
+    public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
+    {
+        if (UniqueIndex != null)
+            throw new InvalidOperationException("Changing IndexType is not allowed for FieldMList");
+
+        return Enumerable.Empty<TableIndex>();
+    }
+
+    internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+        foreach (var kvp in TableMList.GetTables())
+        {
+            kvp.Value.IsCollection = true;
+            yield return kvp;
+        }
+    }
+
+    internal override IEnumerable<TableMList> TablesMList()
+    {
+        return new[] { TableMList };
+    }
+}
+
+public partial class TableMList : ITable, IFieldFinder, ITablePrivate
+{
+    public class PrimaryKeyColumn : IColumn
+    {
+        public string Name { get; set; }
+        IsNullable IColumn.Nullable { get { return IsNullable.No; } }
+        public AbstractDbType DbType { get; set; }
+        public string? Collation { get; set; }
+        public string? UserDefinedTypeName { get; set; }
+        bool IColumn.PrimaryKey { get { return true; } }
+        public bool Identity { get; set; }
+        bool IColumn.IdentityBehaviour { get { return true; } }
+        int? IColumn.Size { get { return null; } }
+        int? IColumn.Scale { get { return null; } }
+        Table? IColumn.ReferenceTable { get { return null; } }
+        public Type Type { get; set; }
+        public bool AvoidForeignKey { get { return false; } }
+        public string? Default { get; set; }
+
+        public PrimaryKeyColumn(Type type, string name)
+        {
+            Type = type;
+            Name = name;
         }
 
-        public Dictionary<string, IColumn> Columns { get; set; }
-        public List<TableIndex>? MultiColumnIndexes { get; set; }
+    }
 
-        public ObjectName Name { get; set; }
-        public PrimaryKeyColumn PrimaryKey { get; set; }
-        public FieldReference BackReference { get; set; }
-        public FieldValue? Order { get; set; }
-        public Field Field { get; set; }
+    public Dictionary<string, IColumn> Columns { get; set; }
+    public List<TableIndex>? MultiColumnIndexes { get; set; }
 
-        public SystemVersionedInfo? SystemVersioned { get; set; }
+    public ObjectName Name { get; set; }
+    public PrimaryKeyColumn PrimaryKey { get; set; }
+    public FieldReference BackReference { get; set; }
+    public FieldValue? Order { get; set; }
+    public Field Field { get; set; }
 
-        public Type CollectionType { get; private set; }
+    public SystemVersionedInfo? SystemVersioned { get; set; }
 
-        public PropertyRoute PropertyRoute { get; internal set; }
-        Func<Entity, IMListPrivate>? getter;
-        public Func<Entity, IMListPrivate> Getter => getter ?? (getter = PropertyRoute.GetLambdaExpression<Entity, IMListPrivate>(true).Compile());
+    public Type CollectionType { get; private set; }
+
+    public PropertyRoute PropertyRoute { get; internal set; }
+    Func<Entity, IMListPrivate>? getter;
+    public Func<Entity, IMListPrivate> Getter => getter ?? (getter = PropertyRoute.GetLambdaExpression<Entity, IMListPrivate>(true).Compile());
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-        public TableMList(Type collectionType, ObjectName name, PrimaryKeyColumn primaryKey, FieldReference backReference)
-        {
-            this.Name = name;
-            this.PrimaryKey = primaryKey;
-            this.BackReference = backReference;
-            this.CollectionType = collectionType;
-            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field!.FieldType)(this));
-        }
+    public TableMList(Type collectionType, ObjectName name, PrimaryKeyColumn primaryKey, FieldReference backReference)
+    {
+        this.Name = name;
+        this.PrimaryKey = primaryKey;
+        this.BackReference = backReference;
+        this.CollectionType = collectionType;
+        this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field!.FieldType)(this));
+    }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
-        public override string ToString()
+    public override string ToString()
+    {
+        return "[{0}]\r\n  {1}\r\n  {2}".FormatWith(Name, BackReference.Name, Field.ToString());
+    }
+
+    public void GenerateColumns()
+    {
+        List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference };
+
+        if (Order != null)
+            cols.Add(Order);
+
+        cols.AddRange(Field.Columns());
+
+        if (this.SystemVersioned != null)
+            cols.AddRange(this.SystemVersioned.Columns());
+
+        Columns = cols.ToDictionary(a => a.Name);
+    }
+
+    public List<TableIndex> GeneratAllIndexes()
+    {
+        var result = new List<TableIndex>
         {
-            return "[{0}]\r\n  {1}\r\n  {2}".FormatWith(Name, BackReference.Name, Field.ToString());
-        }
+            new PrimaryKeyIndex(this)
+        };
 
-        public void GenerateColumns()
+        result.AddRange(BackReference.GenerateIndexes(this));
+        result.AddRange(Field.GenerateIndexes(this));
+
+        if (MultiColumnIndexes != null)
+            result.AddRange(MultiColumnIndexes);
+
+        return result;
+    }
+
+    public Field GetField(MemberInfo member)
+    {
+        Field? result = TryGetField(member);
+
+        if (result == null)
+            throw new InvalidOperationException("'{0}' not found".FormatWith(member.Name));
+
+        return result;
+    }
+
+    public Field? TryGetField(MemberInfo mi)
+    {
+        if (mi.Name == "Parent")
+            return this.BackReference;
+
+        if (mi.Name == "Element")
+            return this.Field;
+
+        return null;
+    }
+
+    public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
+    {
+        if (predicate(this.BackReference))
+            yield return this.BackReference;
+
+        if (this.Order != null && predicate(this.Order))
+            yield return this.Order;
+
+        if (predicate(this.Field))
+            yield return this.Field;
+        else if (this.Field is IFieldFinder ff)
         {
-            List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference };
-
-            if (Order != null)
-                cols.Add(Order);
-
-            cols.AddRange(Field.Columns());
-
-            if (this.SystemVersioned != null)
-                cols.AddRange(this.SystemVersioned.Columns());
-
-            Columns = cols.ToDictionary(a => a.Name);
-        }
-
-        public List<TableIndex> GeneratAllIndexes()
-        {
-            var result = new List<TableIndex>
+            foreach (var f in ff.FindFields(predicate))
             {
-                new PrimaryKeyIndex(this)
-            };
-
-            result.AddRange(BackReference.GenerateIndexes(this));
-            result.AddRange(Field.GenerateIndexes(this));
-
-            if (MultiColumnIndexes != null)
-                result.AddRange(MultiColumnIndexes);
-
-            return result;
-        }
-
-        public Field GetField(MemberInfo member)
-        {
-            Field? result = TryGetField(member);
-
-            if (result == null)
-                throw new InvalidOperationException("'{0}' not found".FormatWith(member.Name));
-
-            return result;
-        }
-
-        public Field? TryGetField(MemberInfo mi)
-        {
-            if (mi.Name == "Parent")
-                return this.BackReference;
-
-            if (mi.Name == "Element")
-                return this.Field;
-
-            return null;
-        }
-
-        public IEnumerable<Field> FindFields(Func<Field, bool> predicate)
-        {
-            if (predicate(this.BackReference))
-                yield return this.BackReference;
-
-            if (this.Order != null && predicate(this.Order))
-                yield return this.Order;
-
-            if (predicate(this.Field))
-                yield return this.Field;
-            else if (this.Field is IFieldFinder ff)
-            {
-                foreach (var f in ff.FindFields(predicate))
-                {
-                    yield return f;
-                }
+                yield return f;
             }
-        }
-
-        public void ToDatabase(DatabaseName databaseName)
-        {
-            this.Name = this.Name.OnDatabase(databaseName);
-        }
-
-        public void ToSchema(SchemaName schemaName)
-        {
-            this.Name = this.Name.OnSchema(schemaName);
-        }
-
-
-        IColumn ITable.PrimaryKey
-        {
-            get { return PrimaryKey; }
-        }
-
-        public bool IdentityBehaviour => true; //For now
-
-        internal object?[] BulkInsertDataRow(Entity entity, object value, int order)
-        {
-            return this.cache.Value.BulkInsertDataRow(entity, value, order);
-        }
-
-        public IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
-        {
-            return this.Field.GetTables();
-        }
-
-        public FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
-        {
-            if (this.Field is FieldEmbedded f)
-                return f.GetHasValueColumn(column);
-
-            return null;
         }
     }
 
-    public struct AbstractDbType : IEquatable<AbstractDbType>
+    public void ToDatabase(DatabaseName databaseName)
     {
-        SqlDbType? sqlServer;
-        public SqlDbType SqlServer => sqlServer ?? throw new InvalidOperationException("No SqlDbType type defined");
+        this.Name = this.Name.OnDatabase(databaseName);
+    }
 
-        NpgsqlDbType? postgreSql;
-        public NpgsqlDbType PostgreSql => postgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
-
-        public bool IsPostgres => postgreSql.HasValue;
-
-        public AbstractDbType(SqlDbType sqlDbType)
-        {
-            this.sqlServer = sqlDbType;
-            this.postgreSql = null;
-        }
-
-        public AbstractDbType(NpgsqlDbType npgsqlDbType)
-        { 
-            this.sqlServer = null;
-            this.postgreSql = npgsqlDbType;
-        }
-
-        public AbstractDbType(SqlDbType sqlDbType, NpgsqlDbType npgsqlDbType)
-        {
-            this.sqlServer = sqlDbType;
-            this.postgreSql = npgsqlDbType;
-        }
-
-        public override bool Equals(object? obj) => obj is AbstractDbType adt && Equals(adt);
-        public bool Equals(AbstractDbType adt) =>
-            Schema.Current.Settings.IsPostgres ?
-            this.postgreSql == adt.postgreSql :
-            this.sqlServer == adt.sqlServer;
-        public override int GetHashCode() => this.postgreSql.GetHashCode() ^ this.sqlServer.GetHashCode();
-
-        public bool IsDate()
-        {
-            if (sqlServer is SqlDbType s)
-                switch (s)
-                {
-                    case SqlDbType.Date:
-                    case SqlDbType.DateTime:
-                    case SqlDbType.DateTime2:
-                    case SqlDbType.SmallDateTime: 
-                        return true;
-                    default: 
-                        return false;
-                }
-
-            if (postgreSql is NpgsqlDbType p)
-                switch (p)
-                {
-                    case NpgsqlDbType.Date:
-                    case NpgsqlDbType.Timestamp: 
-                    case NpgsqlDbType.TimestampTz: 
-                        return true;
-                    default: 
-                        return false;
-                }
-
-            throw new NotImplementedException();
-        }
-
-        public bool IsTime()
-        {
-            if (sqlServer is SqlDbType s)
-                switch (s)
-                {
-                    case SqlDbType.Time:
-                        return true;
-                    default:
-                        return false;
-                }
-
-            if (postgreSql is NpgsqlDbType p)
-                switch (p)
-                {
-                    case NpgsqlDbType.Time:
-                    case NpgsqlDbType.TimeTz:
-                        return true;
-                    default:
-                        return false;
-                }
-
-            throw new NotImplementedException();
-        }
-
-        public bool IsNumber()
-        {
-            if(sqlServer is SqlDbType s)
-                switch (s)
-                {
-                    case SqlDbType.BigInt:
-                    case SqlDbType.Float:
-                    case SqlDbType.Decimal:
-                    case SqlDbType.Int:
-                    case SqlDbType.Bit:
-                    case SqlDbType.Money:
-                    case SqlDbType.Real:
-                    case SqlDbType.TinyInt:
-                    case SqlDbType.SmallInt:
-                    case SqlDbType.SmallMoney: 
-                        return true;
-                    default: 
-                        return false;
-                }
-
-            if (postgreSql is NpgsqlDbType p)
-                switch (p)
-                {
-                    case NpgsqlDbType.Smallint:
-                    case NpgsqlDbType.Integer:
-                    case NpgsqlDbType.Bigint:
-                    case NpgsqlDbType.Numeric:
-                    case NpgsqlDbType.Money:
-                    case NpgsqlDbType.Real:
-                    case NpgsqlDbType.Double: 
-                        return true;
-                    default: 
-                        return false;
-                }
-
-            throw new NotImplementedException();
-        }
-
-        public bool IsString()
-        {
-            if (sqlServer is SqlDbType s)
-                switch (s)
-                {
-                    case SqlDbType.NText:
-                    case SqlDbType.NVarChar:
-                    case SqlDbType.Text:
-                    case SqlDbType.VarChar:
-                    case SqlDbType.Char:
-                    case SqlDbType.NChar:
-                        return true;
-                    default: 
-                        return false;
-                }
+    public void ToSchema(SchemaName schemaName)
+    {
+        this.Name = this.Name.OnSchema(schemaName);
+    }
 
 
-            if (postgreSql is NpgsqlDbType p)
-                switch (p)
-                {
-                    case NpgsqlDbType.Char:
-                    case NpgsqlDbType.Varchar:
-                    case NpgsqlDbType.Text: 
-                        return true;
-                    default: 
-                        return false;
-                }
+    IColumn ITable.PrimaryKey
+    {
+        get { return PrimaryKey; }
+    }
 
-            throw new NotImplementedException();
-        }
+    public bool IdentityBehaviour => true; //For now
+
+    internal object?[] BulkInsertDataRow(Entity entity, object value, int order)
+    {
+        return this.cache.Value.BulkInsertDataRow(entity, value, order);
+    }
+
+    public IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+    {
+        return this.Field.GetTables();
+    }
+
+    public FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column)
+    {
+        if (this.Field is FieldEmbedded f)
+            return f.GetHasValueColumn(column);
+
+        return null;
+    }
+}
+
+public struct AbstractDbType : IEquatable<AbstractDbType>
+{
+    SqlDbType? sqlServer;
+    public SqlDbType SqlServer => sqlServer ?? throw new InvalidOperationException("No SqlDbType type defined");
+
+    NpgsqlDbType? postgreSql;
+    public NpgsqlDbType PostgreSql => postgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
+
+    public bool IsPostgres => postgreSql.HasValue;
+
+    public AbstractDbType(SqlDbType sqlDbType)
+    {
+        this.sqlServer = sqlDbType;
+        this.postgreSql = null;
+    }
+
+    public AbstractDbType(NpgsqlDbType npgsqlDbType)
+    { 
+        this.sqlServer = null;
+        this.postgreSql = npgsqlDbType;
+    }
+
+    public AbstractDbType(SqlDbType sqlDbType, NpgsqlDbType npgsqlDbType)
+    {
+        this.sqlServer = sqlDbType;
+        this.postgreSql = npgsqlDbType;
+    }
+
+    public override bool Equals(object? obj) => obj is AbstractDbType adt && Equals(adt);
+    public bool Equals(AbstractDbType adt) =>
+        Schema.Current.Settings.IsPostgres ?
+        this.postgreSql == adt.postgreSql :
+        this.sqlServer == adt.sqlServer;
+    public override int GetHashCode() => this.postgreSql.GetHashCode() ^ this.sqlServer.GetHashCode();
+
+    public bool IsDate()
+    {
+        if (sqlServer is SqlDbType s)
+            switch (s)
+            {
+                case SqlDbType.Date:
+                case SqlDbType.DateTime:
+                case SqlDbType.DateTime2:
+                case SqlDbType.SmallDateTime: 
+                    return true;
+                default: 
+                    return false;
+            }
+
+        if (postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Date:
+                case NpgsqlDbType.Timestamp: 
+                case NpgsqlDbType.TimestampTz: 
+                    return true;
+                default: 
+                    return false;
+            }
+
+        throw new NotImplementedException();
+    }
+
+    public bool IsTime()
+    {
+        if (sqlServer is SqlDbType s)
+            switch (s)
+            {
+                case SqlDbType.Time:
+                    return true;
+                default:
+                    return false;
+            }
+
+        if (postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Time:
+                case NpgsqlDbType.TimeTz:
+                    return true;
+                default:
+                    return false;
+            }
+
+        throw new NotImplementedException();
+    }
+
+    public bool IsNumber()
+    {
+        if(sqlServer is SqlDbType s)
+            switch (s)
+            {
+                case SqlDbType.BigInt:
+                case SqlDbType.Float:
+                case SqlDbType.Decimal:
+                case SqlDbType.Int:
+                case SqlDbType.Bit:
+                case SqlDbType.Money:
+                case SqlDbType.Real:
+                case SqlDbType.TinyInt:
+                case SqlDbType.SmallInt:
+                case SqlDbType.SmallMoney: 
+                    return true;
+                default: 
+                    return false;
+            }
+
+        if (postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Smallint:
+                case NpgsqlDbType.Integer:
+                case NpgsqlDbType.Bigint:
+                case NpgsqlDbType.Numeric:
+                case NpgsqlDbType.Money:
+                case NpgsqlDbType.Real:
+                case NpgsqlDbType.Double: 
+                    return true;
+                default: 
+                    return false;
+            }
+
+        throw new NotImplementedException();
+    }
+
+    public bool IsString()
+    {
+        if (sqlServer is SqlDbType s)
+            switch (s)
+            {
+                case SqlDbType.NText:
+                case SqlDbType.NVarChar:
+                case SqlDbType.Text:
+                case SqlDbType.VarChar:
+                case SqlDbType.Char:
+                case SqlDbType.NChar:
+                    return true;
+                default: 
+                    return false;
+            }
 
 
-        public override string ToString() => ToString(Schema.Current.Settings.IsPostgres);
-        public string ToString(bool isPostgres)
-        {
-            if (!isPostgres)
-                return sqlServer.ToString()!.ToUpperInvariant();
+        if (postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Char:
+                case NpgsqlDbType.Varchar:
+                case NpgsqlDbType.Text: 
+                    return true;
+                default: 
+                    return false;
+            }
 
-            var pg = postgreSql!.Value;
-            if ((pg & NpgsqlDbType.Array) != 0)
-                return (pg & ~NpgsqlDbType.Range).ToString() + "[]";
-
-            if ((pg & NpgsqlDbType.Range) != 0)
-                switch (pg & ~NpgsqlDbType.Range)
-                {
-                    case NpgsqlDbType.Integer: return "int4range";
-                    case NpgsqlDbType.Bigint : return "int8range";
-                    case NpgsqlDbType.Numeric: return "numrange";
-                    case NpgsqlDbType.TimestampTz: return "tstzrange";
-                    case NpgsqlDbType.Date: return "daterange";
-                    throw new InvalidOperationException("");
-                }
-
-            if (pg == NpgsqlDbType.Double)
-                return "double precision";
-
-            return pg.ToString()!;
-        }
-
-        public bool IsBoolean()
-        {
-            if (sqlServer is SqlDbType s)
-                switch (s)
-                {
-                    case SqlDbType.Bit:
-                        return true;
-                    default:
-                        return false;
-                }
+        throw new NotImplementedException();
+    }
 
 
-            if (postgreSql is NpgsqlDbType p)
-                switch (p)
-                {
-                    case NpgsqlDbType.Boolean:
-                        return true;
-                    default:
-                        return false;
-                }
+    public override string ToString() => ToString(Schema.Current.Settings.IsPostgres);
+    public string ToString(bool isPostgres)
+    {
+        if (!isPostgres)
+            return sqlServer.ToString()!.ToUpperInvariant();
 
-            throw new NotImplementedException();
-        }
+        var pg = postgreSql!.Value;
+        if ((pg & NpgsqlDbType.Array) != 0)
+            return (pg & ~NpgsqlDbType.Range).ToString() + "[]";
 
-        public bool IsGuid()
-        {
-            if (sqlServer is SqlDbType s)
-                switch (s)
-                {
-                    case SqlDbType.UniqueIdentifier:
-                        return true;
-                    default:
-                        return false;
-                }
+        if ((pg & NpgsqlDbType.Range) != 0)
+            switch (pg & ~NpgsqlDbType.Range)
+            {
+                case NpgsqlDbType.Integer: return "int4range";
+                case NpgsqlDbType.Bigint : return "int8range";
+                case NpgsqlDbType.Numeric: return "numrange";
+                case NpgsqlDbType.TimestampTz: return "tstzrange";
+                case NpgsqlDbType.Date: return "daterange";
+                throw new InvalidOperationException("");
+            }
+
+        if (pg == NpgsqlDbType.Double)
+            return "double precision";
+
+        return pg.ToString()!;
+    }
+
+    public bool IsBoolean()
+    {
+        if (sqlServer is SqlDbType s)
+            switch (s)
+            {
+                case SqlDbType.Bit:
+                    return true;
+                default:
+                    return false;
+            }
 
 
-            if (postgreSql is NpgsqlDbType p)
-                switch (p)
-                {
-                    case NpgsqlDbType.Uuid:
-                        return true;
-                    default:
-                        return false;
-                }
+        if (postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Boolean:
+                    return true;
+                default:
+                    return false;
+            }
 
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        internal bool IsDecimal()
-        {
-            if (sqlServer is SqlDbType s)
-                switch (s)
-                {
-                    case SqlDbType.Decimal:
-                        return true;
-                    default:
-                        return false;
-                }
+    public bool IsGuid()
+    {
+        if (sqlServer is SqlDbType s)
+            switch (s)
+            {
+                case SqlDbType.UniqueIdentifier:
+                    return true;
+                default:
+                    return false;
+            }
 
-            if (postgreSql is NpgsqlDbType p)
-                switch (p)
-                {
-                    case NpgsqlDbType.Numeric:
-                        return true;
-                    default:
-                        return false;
-                }
 
-            throw new NotImplementedException();
-        }
+        if (postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Uuid:
+                    return true;
+                default:
+                    return false;
+            }
+
+        throw new NotImplementedException();
+    }
+
+    internal bool IsDecimal()
+    {
+        if (sqlServer is SqlDbType s)
+            switch (s)
+            {
+                case SqlDbType.Decimal:
+                    return true;
+                default:
+                    return false;
+            }
+
+        if (postgreSql is NpgsqlDbType p)
+            switch (p)
+            {
+                case NpgsqlDbType.Numeric:
+                    return true;
+                default:
+                    return false;
+            }
+
+        throw new NotImplementedException();
     }
 }
 
