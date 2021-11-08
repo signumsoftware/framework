@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Signum.Entities.Templating
 {
     [Serializable]

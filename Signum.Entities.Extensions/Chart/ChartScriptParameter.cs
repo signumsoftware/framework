@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
 using Signum.Entities.DynamicQuery;
-using System.Reflection;
 using System.Globalization;
 using System.Collections;
 using System.Text.Json.Serialization;

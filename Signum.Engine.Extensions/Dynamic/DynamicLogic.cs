@@ -1,18 +1,9 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 
 namespace Signum.Engine.Dynamic
 {

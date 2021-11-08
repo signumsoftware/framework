@@ -1,15 +1,6 @@
-using System;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.DiffLog;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using Signum.Engine.Basics;
 using System.Threading;
 using Signum.Engine.Authorization;
 using System.Text.RegularExpressions;

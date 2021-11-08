@@ -1,14 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Utilities;
-using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
-using Signum.Engine;
 using System.Xml.Linq;
-using Signum.Engine.Basics;
 using Signum.Entities.Basics;
-using System.Reflection;
 using Signum.Entities.Reflection;
 
 namespace Signum.Entities.Authorization

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using Signum.Utilities;
-using System.Reflection;
 
 namespace Signum.Engine.Translation
 {

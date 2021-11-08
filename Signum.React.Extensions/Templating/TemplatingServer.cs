@@ -4,10 +4,6 @@ using Signum.Entities.Mailing;
 using Signum.Entities.Templating;
 using Signum.Entities.Word;
 using Signum.React.Facades;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Signum.React.Extensions.Templating

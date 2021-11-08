@@ -1,10 +1,4 @@
 using Microsoft.SqlServer.Types;
-using Signum.Engine;
-using Signum.Engine.Operations;
-using Signum.Entities;
-using System;
-using System.Linq;
-using Signum.Utilities;
 using System.Threading;
 
 namespace Signum.Test.Environment

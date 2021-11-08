@@ -1,5 +1,4 @@
-﻿using System;
-using Signum.Entities.Basics;
+﻿using Signum.Entities.Basics;
 
 namespace Signum.Entities.Mailing
 {

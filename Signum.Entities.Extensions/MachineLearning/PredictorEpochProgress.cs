@@ -1,6 +1,4 @@
-﻿using Signum.Utilities;
-using System;
-
+﻿
 namespace Signum.Entities.MachineLearning
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]

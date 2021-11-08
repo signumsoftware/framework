@@ -1,15 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Engine.Maps;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Engine.Basics;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using Signum.Entities;
-using Signum.Engine.Operations;
-using System.Reflection;
 using System.Xml.Linq;
 using System.Collections.Immutable;
 

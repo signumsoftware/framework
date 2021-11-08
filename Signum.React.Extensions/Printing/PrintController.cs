@@ -2,7 +2,6 @@ using Signum.Engine.Printing;
 using Signum.Entities.Files;
 using Signum.Entities.Processes;
 using Signum.React.Filters;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 

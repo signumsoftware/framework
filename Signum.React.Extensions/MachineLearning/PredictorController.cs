@@ -1,13 +1,7 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Entities.MachineLearning;
 using Signum.Engine.MachineLearning;
-using Signum.Engine;
-using Signum.Utilities;
-using Signum.Entities;
-using Signum.Engine.Basics;
 using Signum.React.Filters;
 
 namespace Signum.React.MachineLearning

@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Signum.Engine.Processes;
-using Signum.Entities;
 using Signum.Entities.MachineLearning;
-using Signum.Utilities;
-using Signum.Engine.Operations;
 
 namespace Signum.Engine.MachineLearning
 {

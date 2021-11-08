@@ -1,6 +1,4 @@
-﻿using Signum.Engine.Maps;
-using Signum.Entities.Workflow;
-using System;
+﻿using Signum.Entities.Workflow;
 
 namespace Signum.Engine.Workflow
 {

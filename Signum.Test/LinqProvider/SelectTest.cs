@@ -1,12 +1,3 @@
-using Xunit;
-using Signum.Engine;
-using Signum.Entities;
-using Signum.Test.Environment;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using System;
-using System.Linq;
-using System.Linq.Expressions;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Maps;
 

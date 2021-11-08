@@ -1,7 +1,4 @@
-using System;
-using Signum.Entities;
 using Signum.Entities.Basics;
-using Signum.Utilities;
 
 namespace Signum.Entities.Chart
 {

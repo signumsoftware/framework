@@ -1,16 +1,8 @@
-using System;
-using Signum.Engine;
 using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.React.Filters;
-using Signum.Utilities;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;

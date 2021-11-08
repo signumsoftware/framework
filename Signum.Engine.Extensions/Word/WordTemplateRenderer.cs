@@ -1,14 +1,7 @@
 using DocumentFormat.OpenXml.Packaging;
 using D = DocumentFormat.OpenXml.Drawing;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Signum.Entities.Word;
-using Signum.Engine.Basics;
 using Signum.Engine.Templating;
 using Signum.Entities.UserQueries;
 

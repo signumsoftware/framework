@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿
 namespace Signum.Utilities
 {
     public static class ArrayExtensions

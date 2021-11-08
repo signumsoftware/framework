@@ -1,5 +1,4 @@
 using Signum.Entities.Authorization;
-using System;
 
 namespace Signum.Entities.Workflow
 {

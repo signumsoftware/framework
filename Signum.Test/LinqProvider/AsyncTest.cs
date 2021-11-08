@@ -1,9 +1,4 @@
-﻿using Xunit;
-using Signum.Engine;
-using Signum.Utilities;
-using Signum.Test.Environment;
-using Signum.Utilities.ExpressionTrees;
-
+﻿
 namespace Signum.Test.LinqProvider
 {
     /// <summary>

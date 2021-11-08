@@ -1,9 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using System;
-using System.Linq;
 
 namespace Signum.React.Filters
 {

@@ -1,10 +1,4 @@
-﻿using System.Linq;
-using Xunit;
-using Signum.Engine;
-using Signum.Entities;
-using Signum.Utilities;
-using Signum.Test.Environment;
-using Signum.Engine.Maps;
+﻿using Signum.Engine.Maps;
 
 namespace Signum.Test.LinqProviderUpdateDelete
 {

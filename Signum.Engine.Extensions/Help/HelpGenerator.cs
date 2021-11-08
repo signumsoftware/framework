@@ -1,14 +1,5 @@
-using System;
-using System.Linq;
-using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Engine.DynamicQuery;
-using System.Reflection;
-using Signum.Entities;
-using Signum.Engine.Maps;
-using Signum.Engine.Basics;
 using Signum.Entities.Help;
-using Signum.Engine.Operations;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Help

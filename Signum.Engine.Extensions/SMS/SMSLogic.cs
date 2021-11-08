@@ -1,26 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Engine.Maps;
-using Signum.Engine.DynamicQuery;
-using System.Reflection;
 using Signum.Entities.SMS;
-using Signum.Entities;
-using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Operations;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
-using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
-using Signum.Engine.Basics;
 using System.Threading.Tasks;
 using System.Globalization;
 using Signum.Engine.Mailing;
 using Signum.Engine.Templating;
-using Signum.Entities.DynamicQuery;
-using System.Text;
 using System.Threading;
 
 namespace Signum.Engine.SMS

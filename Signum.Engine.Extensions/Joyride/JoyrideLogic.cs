@@ -1,9 +1,5 @@
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
 using Signum.Engine.UserAssets;
 using Signum.Entities.Joyride;
-using System.Reflection;
 
 namespace Signum.Engine.Joyride
 {

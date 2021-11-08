@@ -3,13 +3,7 @@ using Signum.Engine.Engine;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
-using Signum.Entities;
-using Signum.Entities.Reflection;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Signum.Engine

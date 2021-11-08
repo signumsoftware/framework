@@ -1,14 +1,4 @@
-using Signum.Engine;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Calendar;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 
 namespace Signum.Engine.Calendar
 {

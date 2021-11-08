@@ -1,20 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities;
 using Signum.Entities.Files;
-using Signum.Engine;
 using Signum.Engine.Files;
 using System.IO;
 using Signum.Engine.Mailing;
 using Signum.Entities.Basics;
-using Signum.Engine.Basics;
 using Microsoft.AspNetCore.Server.IIS.Core;
-using System;
-using System.Linq.Expressions;
-using System.Linq;
-using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Maps;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 namespace Signum.React.Files

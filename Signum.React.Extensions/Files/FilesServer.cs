@@ -1,15 +1,9 @@
 using Signum.React.Json;
-using Signum.Utilities;
-using System.Linq;
-using System.Reflection;
 using Signum.React.Facades;
-using Signum.Engine.Maps;
 using Microsoft.AspNetCore.Builder;
 using Signum.Entities.Files;
-using Signum.Engine;
 using Signum.Engine.Files;
 using Signum.React.Filters;
-using System;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Signum.Engine.Json;

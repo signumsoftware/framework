@@ -1,9 +1,5 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Signum.Entities;
 using Signum.React.Facades;
-using Signum.Engine;
-using Signum.Engine.Basics;
 using Signum.Entities.Word;
 using Signum.Engine.Word;
 using Signum.React.Files;
@@ -11,8 +7,6 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using Signum.Engine.Templating;
-using System;
-using Signum.Entities.DynamicQuery;
 
 namespace Signum.React.Word
 {

@@ -1,17 +1,8 @@
-using Signum.Engine.Basics;
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Files;
-using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 
 namespace Signum.Engine.Files
 {

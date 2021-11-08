@@ -1,16 +1,10 @@
-using System;
-using System.Text;
 using Signum.Entities.Authorization;
 using Signum.Entities.Processes;
-using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.ComponentModel;
 using System.Net.Mail;
-using System.Linq.Expressions;
 using Signum.Entities.Files;
 using System.Security.Cryptography;
-using System.Reflection;
-using Signum.Entities;
 
 namespace Signum.Entities.Mailing
 {

@@ -4,14 +4,8 @@ using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
-using Signum.Utilities;
-using System;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Xml.Linq;
-using System.Reflection;
 using Signum.Utilities.Reflection;
-using Signum.Entities;
 using Signum.Entities.Workflow;
 
 namespace Signum.Entities.Toolbar

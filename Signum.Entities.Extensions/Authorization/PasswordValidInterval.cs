@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]

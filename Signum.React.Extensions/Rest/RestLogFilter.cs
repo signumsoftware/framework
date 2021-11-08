@@ -2,16 +2,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Signum.Engine;
-using Signum.Engine.Basics;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Rest;
-using Signum.Utilities;
-using System;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Signum.React.RestLog
 {

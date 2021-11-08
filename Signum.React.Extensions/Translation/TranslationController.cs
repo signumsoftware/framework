@@ -1,12 +1,7 @@
 using Signum.Engine.Translation;
 using Signum.React.Filters;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Translation;

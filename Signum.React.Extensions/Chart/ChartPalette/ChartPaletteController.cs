@@ -1,12 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Basics;
 using Signum.Entities.Chart;
 using Signum.Engine.Chart;
 using System.ComponentModel.DataAnnotations;
-using System;
-using Signum.Utilities;
 
 namespace Signum.React.Chart
 {

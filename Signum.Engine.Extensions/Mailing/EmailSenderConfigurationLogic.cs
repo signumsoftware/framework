@@ -1,16 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Engine.Maps;
-using System.Reflection;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities.Mailing;
-using Signum.Entities;
-using Signum.Utilities;
 using System.Net.Mail;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
-using Signum.Engine.Operations;
-using System;
 
 namespace Signum.Engine.Mailing
 {

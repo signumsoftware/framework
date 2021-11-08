@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
 using Signum.Engine.Maps;
-using Signum.Utilities;
-using Signum.Entities;
 using Signum.Engine.SchemaInfoTables;
 using System.IO;
 

@@ -1,7 +1,4 @@
 using Signum.Entities.UserAssets;
-using Signum.Utilities;
-using System;
-using System.Reflection;
 using System.Xml.Linq;
 
 namespace Signum.Entities.Chart

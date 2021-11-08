@@ -1,6 +1,4 @@
-﻿using Signum.Engine.Maps;
-using Signum.Engine.Authorization;
-using System.Reflection;
+﻿using Signum.Engine.Authorization;
 using Signum.Entities.Map;
 
 namespace Signum.Engine.Map

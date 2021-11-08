@@ -1,16 +1,6 @@
-using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Reflection;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace Signum.Engine.Dynamic
 {

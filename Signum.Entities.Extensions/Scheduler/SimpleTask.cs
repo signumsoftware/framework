@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]

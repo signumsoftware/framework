@@ -3,16 +3,10 @@ using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
 using S = DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Engine.Templating;
-using Signum.Entities.DynamicQuery;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
-using Signum.Entities;
 
 namespace Signum.Engine.Word
 {

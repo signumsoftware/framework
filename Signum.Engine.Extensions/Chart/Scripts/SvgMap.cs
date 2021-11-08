@@ -1,8 +1,6 @@
 
 using Signum.Engine.Chart;
 using Signum.Entities.Chart;
-using Signum.Utilities;
-using System.Collections.Generic;
 
 namespace Signum.Engine.Chart.Scripts 
 {

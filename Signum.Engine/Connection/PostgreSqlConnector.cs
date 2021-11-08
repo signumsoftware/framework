@@ -5,16 +5,8 @@ using Signum.Engine.Connection;
 using Signum.Engine.Engine;
 using Signum.Engine.Maps;
 using Signum.Engine.PostgresCatalog;
-using Signum.Entities;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

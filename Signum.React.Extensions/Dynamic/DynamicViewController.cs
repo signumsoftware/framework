@@ -1,10 +1,5 @@
-using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Entities.Dynamic;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.Dynamic

@@ -1,4 +1,3 @@
-using System.Reflection;
 using Signum.Engine.Scheduler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

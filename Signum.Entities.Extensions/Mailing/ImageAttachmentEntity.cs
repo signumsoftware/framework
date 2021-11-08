@@ -1,7 +1,4 @@
 using Signum.Entities.Files;
-using Signum.Utilities;
-using System;
-using System.Linq.Expressions;
 
 namespace Signum.Entities.Mailing
 {

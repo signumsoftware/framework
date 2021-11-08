@@ -1,13 +1,7 @@
-using Signum.Utilities;
-using System;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
-using Signum.Entities;
 
 namespace Signum.Entities.Mailing
 {

@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.WebUtilities;
 using Signum.Entities.Basics;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 

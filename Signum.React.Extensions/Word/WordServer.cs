@@ -1,14 +1,7 @@
 using Signum.React.Json;
-using Signum.Utilities;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Signum.Engine.Basics;
-using Signum.Entities;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.Engine.Authorization;
-using Signum.Engine.Maps;
 using Signum.Entities.Templating;
 using Signum.Entities.Word;
 using Signum.Engine.Word;

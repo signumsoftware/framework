@@ -4,12 +4,8 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using DocumentFormat.OpenXml.Office2013.Excel;
 using Signum.Entities.Files;
-using Signum.Utilities;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Signum.Engine.Files
 {

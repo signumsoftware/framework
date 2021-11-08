@@ -1,20 +1,10 @@
 
-using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.React.Facades;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
-using System.Reflection;
 using Signum.Utilities.Reflection;
 
 namespace Signum.React.TypeHelp

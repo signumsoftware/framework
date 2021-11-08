@@ -1,13 +1,6 @@
 using Signum.Entities.Workflow;
-using Signum.Engine.DynamicQuery;
-using Signum.Entities;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Signum.Entities.Authorization;
-using System.Linq.Expressions;
 using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Workflow

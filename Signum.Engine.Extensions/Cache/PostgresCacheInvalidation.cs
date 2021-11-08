@@ -1,11 +1,6 @@
 using Npgsql;
-using Signum.Engine.Basics;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Signum.Engine.Cache

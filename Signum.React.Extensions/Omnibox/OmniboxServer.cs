@@ -1,19 +1,8 @@
-using Signum.Engine;
 using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.Entities.Authorization;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.Omnibox;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Omnibox

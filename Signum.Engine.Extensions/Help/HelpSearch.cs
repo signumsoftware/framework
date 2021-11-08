@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Signum.Engine.Basics;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.Help;
-using Signum.Utilities;
 
 namespace Signum.Engine.Help
 {

@@ -1,12 +1,5 @@
-using System;
-using System.Linq;
 using System.Net.Mail;
-using Signum.Engine.Basics;
-using Signum.Utilities;
 using Signum.Entities.Mailing;
-using Signum.Entities;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
 using System.IO;
 using Signum.Engine.Files;

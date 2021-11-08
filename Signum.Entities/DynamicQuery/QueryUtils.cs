@@ -1,13 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Utilities;
 using Signum.Entities.Reflection;
-using System.Reflection;
 using Signum.Utilities.Reflection;
-using System.Linq.Expressions;
 using System.Globalization;
-using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
 
 namespace Signum.Entities.DynamicQuery

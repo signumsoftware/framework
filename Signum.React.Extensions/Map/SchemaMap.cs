@@ -1,16 +1,8 @@
 using Newtonsoft.Json;
-using Signum.Engine;
-using Signum.Engine.Basics;
 using Signum.Engine.Engine;
-using Signum.Engine.Maps;
 using Signum.Engine.PostgresCatalog;
 using Signum.Engine.SchemaInfoTables;
-using Signum.Entities;
 using Signum.Entities.Basics;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Signum.React.Maps
 {

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Signum.Utilities;
 
 namespace Signum.Entities.Help
 {

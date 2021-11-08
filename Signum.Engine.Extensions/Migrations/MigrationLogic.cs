@@ -1,15 +1,6 @@
-using System;
-using System.Linq;
-using System.Reflection;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.Entities.Migrations;
-using Signum.Utilities;
 using Signum.Engine.SchemaInfoTables;
-using Signum.Engine.Basics;
 using Signum.Entities.Basics;
-using System.Text;
 using System.Threading;
 
 namespace Signum.Engine.Migrations

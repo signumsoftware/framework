@@ -1,15 +1,5 @@
-using System;
-using System.Linq;
-using Signum.Engine.Maps;
 using Signum.Entities.Files;
-using Signum.Entities;
-using Signum.Engine.Basics;
-using Signum.Utilities;
 using System.IO;
-using Signum.Engine.DynamicQuery;
-using System.Reflection;
-using System.Linq.Expressions;
-using Signum.Engine.Operations;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Files

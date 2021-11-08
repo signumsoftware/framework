@@ -1,10 +1,3 @@
-using Signum.Engine;
-using Signum.Engine.Basics;
-using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.DiffLog

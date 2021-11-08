@@ -1,9 +1,5 @@
-﻿using System.Collections.Generic;
-using Signum.Engine.Maps;
-using System.Reflection;
-using Signum.Engine.Authorization;
+﻿using Signum.Engine.Authorization;
 using Signum.Entities.Profiler;
-using Signum.Utilities;
 
 namespace Signum.Engine.Profiler
 {

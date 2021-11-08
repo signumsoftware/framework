@@ -1,15 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Isolation;
-using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;

@@ -1,12 +1,4 @@
-using System;
-using System.Linq;
-using System.Text;
 using Signum.Entities.Scheduler;
-using Signum.Engine.Maps;
-using Signum.Engine.Basics;
-using Signum.Entities;
-using Signum.Engine.DynamicQuery;
-using System.Reflection;
 using Signum.Entities.Basics;
 using System.Threading;
 

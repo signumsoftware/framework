@@ -1,4 +1,3 @@
-using System;
 using Signum.Entities.Basics;
 
 namespace Signum.Entities.SMS

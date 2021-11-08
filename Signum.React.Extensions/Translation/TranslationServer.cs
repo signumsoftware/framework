@@ -1,18 +1,13 @@
-using Signum.Engine.Basics;
 using Signum.Engine.Translation;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Facades;
 using Signum.Entities.Translation;
 using Microsoft.AspNetCore.Builder;
 using Signum.Engine.Authorization;
-using Signum.Utilities;
 using Signum.Engine.Json;
 using System.Text.Json;
 using Signum.Entities.UserQueries;
-using Signum.Entities;
 using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Translation

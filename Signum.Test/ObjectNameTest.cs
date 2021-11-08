@@ -1,9 +1,5 @@
-using Xunit;
 using Signum.Engine.Maps;
 using System.Globalization;
-using Signum.Test.Environment;
-using Signum.Engine;
-using Signum.Utilities;
 
 namespace Signum.Test
 {

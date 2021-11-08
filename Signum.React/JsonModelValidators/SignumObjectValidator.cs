@@ -1,14 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using Signum.Entities;
 using Signum.React.Facades;
 using Signum.React.Json;
-using Signum.Utilities;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Signum.React.JsonModelValidators
 {

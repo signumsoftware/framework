@@ -1,11 +1,3 @@
-using Xunit;
-using Signum.Engine;
-using Signum.Entities;
-using Signum.Test.Environment;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Signum.Test.LinqProvider
 {

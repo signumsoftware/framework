@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Utilities;
 using System.Xml.Linq;
 
 namespace Signum.Engine.Help

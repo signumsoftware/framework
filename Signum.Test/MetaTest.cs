@@ -1,11 +1,5 @@
-using System.Linq;
-using Xunit;
-using Signum.Engine;
 using Signum.Engine.DynamicQuery;
-using Signum.Utilities;
-using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Test.Environment;
 
 namespace Signum.Test
 {

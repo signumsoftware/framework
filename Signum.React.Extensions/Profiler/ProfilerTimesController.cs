@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
-using Signum.Utilities;
 using Signum.Entities.Profiler;
 
 namespace Signum.React.Profiler

@@ -1,13 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using System.Reflection;
 using Signum.Entities.Chart;
-using Signum.Engine.Operations;
-using Signum.Entities;
-using Signum.Utilities;
 using System.IO;
 using System.Xml.Linq;
 using Signum.Entities.Basics;

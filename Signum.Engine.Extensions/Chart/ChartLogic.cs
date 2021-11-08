@@ -1,13 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Signum.Entities.Chart;
-using Signum.Engine.DynamicQuery;
-using System.Reflection;
 using Signum.Utilities.Reflection;
-using Signum.Entities.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Basics;
 using Signum.Engine.Authorization;
 using System.Threading.Tasks;
 using System.Threading;

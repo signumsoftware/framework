@@ -1,5 +1,4 @@
 using Signum.Entities.Authorization;
-using Signum.Utilities;
 using System.ComponentModel;
 
 namespace Signum.Entities.Map

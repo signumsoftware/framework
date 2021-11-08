@@ -1,18 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
-using Signum.Engine.Maps;
 using Signum.Engine.Scheduler;
-using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Mailing;
 using Signum.Entities.Scheduler;
-using Signum.Utilities;
-using Signum.Engine.Operations;
 using Signum.Services;
 using Signum.Entities.Basics;
 

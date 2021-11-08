@@ -1,21 +1,15 @@
-using System;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
-using Signum.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http;
 using System.Security.Principal;
-using System.Linq;
 using System.DirectoryServices.AccountManagement;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Signum.Engine;
-using Signum.Engine.Operations;
-using Signum.Engine.Basics;
 
 namespace Signum.React.Authorization
 {

@@ -1,19 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Engine.Operations;
 using Signum.Entities.Authorization;
-using Signum.Entities;
-using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
-using Signum.Engine.DynamicQuery;
-using System.Reflection;
-using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Entities.Alerts;
-using System.Linq.Expressions;
 using Signum.Engine.Extensions.Basics;
-using Signum.Engine.Basics;
 using Signum.Engine.Authorization;
 using Signum.Engine.Mailing;
 using Signum.Entities.Mailing;
@@ -21,7 +10,6 @@ using Signum.Engine.Templating;
 using Signum.Engine.Scheduler;
 using Signum.Entities.UserAssets;
 using Microsoft.AspNetCore.Html;
-using Signum.Engine;
 using Signum.Entities.Scheduler;
 using System.Text.RegularExpressions;
 

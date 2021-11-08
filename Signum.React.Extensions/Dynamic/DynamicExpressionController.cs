@@ -1,18 +1,10 @@
-using Signum.Engine;
-using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
-using Signum.Utilities;
-using System;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace Signum.React.Dynamic
 {

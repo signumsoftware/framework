@@ -1,16 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Signum.Engine.Basics;
 using Signum.Engine.Templating;
-using Signum.Entities;
 using Signum.Entities.Basics;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Entities.UserQueries;
-using Signum.Utilities;
 
 namespace Signum.Engine.Mailing
 {

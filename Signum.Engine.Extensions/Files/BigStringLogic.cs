@@ -1,18 +1,6 @@
-using System;
-using Signum.Engine.Maps;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities.Files;
-using System.Reflection;
-using System.Linq.Expressions;
-using Signum.Entities;
-using Signum.Utilities;
-using Signum.Engine.Basics;
-using System.Collections.Generic;
-using System.Linq;
 using Signum.Entities.Basics;
 using Signum.Utilities.Reflection;
-using System.Text;
-using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

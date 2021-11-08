@@ -1,10 +1,4 @@
-using Signum.Engine.Basics;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.Workflow;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Signum.Engine.Workflow
 {

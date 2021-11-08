@@ -1,6 +1,3 @@
-using Signum.Utilities;
-using System.Reflection;
-using Signum.Engine.Basics;
 using Signum.React.Maps;
 using Signum.Entities.Map;
 using Signum.React.Facades;
@@ -10,9 +7,6 @@ using Signum.Engine.Authorization;
 using Signum.React.Filters;
 using Signum.React.Extensions.Isolation;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Isolation;
 

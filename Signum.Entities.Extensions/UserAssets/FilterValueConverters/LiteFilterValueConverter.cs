@@ -1,6 +1,4 @@
-﻿using System;
-using Signum.Utilities;
-
+﻿
 namespace Signum.Entities.UserAssets
 {
     public class LiteFilterValueConverter : IFilterValueConverter

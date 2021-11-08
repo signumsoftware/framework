@@ -1,12 +1,7 @@
-using Signum.Utilities;
-using System.Linq;
-using System.Reflection;
-using Signum.Entities;
 using Signum.React.Maps;
 using Signum.Entities.Map;
 using Signum.React.Facades;
 using Microsoft.AspNetCore.Builder;
-using Signum.Engine.Maps;
 using Signum.React.Authorization;
 using Signum.Engine.Authorization;
 

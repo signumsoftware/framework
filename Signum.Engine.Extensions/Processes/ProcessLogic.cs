@@ -1,21 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Engine.Maps;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities.Processes;
-using Signum.Entities;
-using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
-using Signum.Utilities;
 using System.Threading;
 using Signum.Entities.Basics;
-using Signum.Engine.Basics;
-using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Authorization;
-using System.Linq.Expressions;
 
 namespace Signum.Engine.Processes
 {

@@ -1,11 +1,8 @@
 using Signum.Engine.Scheduler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using System.Reflection;
 using Signum.Entities.SMS;
 using Signum.React.Json;
-using Signum.Utilities;
-using Signum.Engine.Basics;
 using Signum.React.Facades;
 
 namespace Signum.React.SMS

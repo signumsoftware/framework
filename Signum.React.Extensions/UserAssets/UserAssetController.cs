@@ -1,14 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using Signum.Entities;
-using Signum.Utilities;
 using Signum.React.ApiControllers;
-using Signum.Engine.Basics;
 using Signum.Entities.UserAssets;
-using Signum.Entities.DynamicQuery;
-using Signum.Engine;
 using Signum.React.Files;
 using Signum.Engine.UserAssets;
 using System.IO;

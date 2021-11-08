@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using Signum.React.Facades;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using Signum.React.Filters;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Formatters;

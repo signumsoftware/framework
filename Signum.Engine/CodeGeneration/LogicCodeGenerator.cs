@@ -1,15 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Entities.Reflection;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.CodeGeneration
 {

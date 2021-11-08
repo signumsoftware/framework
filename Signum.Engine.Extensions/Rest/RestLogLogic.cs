@@ -1,16 +1,8 @@
-using System;
-using System.Linq;
 using System.Net.Http;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Entities.Rest;
 using System.Threading;
-using Signum.Utilities;
 
 namespace Signum.Engine.Rest
 {

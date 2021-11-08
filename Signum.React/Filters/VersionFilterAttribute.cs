@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Signum.Utilities.Reflection;
-using System;
-using System.Reflection;
 
 namespace Signum.React.Filters
 {

@@ -1,7 +1,4 @@
-using System;
 using Signum.Entities.Basics;
-using System.Linq.Expressions;
-using Signum.Utilities;
 
 namespace Signum.Entities.ViewLog
 {

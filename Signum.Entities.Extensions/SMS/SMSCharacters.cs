@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Signum.Utilities;
 using System.ComponentModel;
 
 namespace Signum.Entities.SMS

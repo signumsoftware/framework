@@ -1,8 +1,5 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Signum.Entities.Files;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Signum.Engine.Files

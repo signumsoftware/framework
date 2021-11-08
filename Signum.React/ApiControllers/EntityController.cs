@@ -1,13 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Signum.Engine.Basics;
 using Signum.React.Facades;
-using Signum.Entities;
-using Signum.Engine;
 using Signum.React.Filters;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.ApiControllers
 {

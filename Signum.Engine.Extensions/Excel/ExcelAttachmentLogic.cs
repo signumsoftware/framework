@@ -1,17 +1,9 @@
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
-using Signum.Engine.Maps;
 using Signum.Engine.Templating;
 using Signum.Engine.UserQueries;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.Excel;
 using Signum.Entities.Mailing;
 using Signum.Entities.UserAssets;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Signum.Engine.Excel
 {

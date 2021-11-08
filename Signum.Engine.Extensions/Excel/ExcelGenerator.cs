@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
-using Signum.Entities.DynamicQuery;
 using System.IO;
 using Signum.Utilities.DataStructures;
-using Signum.Utilities;
-using Signum.Entities;
 using Signum.Entities.Excel;
 
 namespace Signum.Engine.Excel

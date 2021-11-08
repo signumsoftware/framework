@@ -1,15 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
 using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Translation;
-using Signum.Utilities;
 using System.Xml.Linq;
 using System.IO;
 using System.Collections.Concurrent;

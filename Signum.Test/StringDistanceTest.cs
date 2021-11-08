@@ -1,7 +1,4 @@
-﻿using System;
-using Xunit;
-using Signum.Utilities;
-
+﻿
 namespace Signum.Test
 {
     public class StringDistanceTest

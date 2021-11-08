@@ -1,11 +1,6 @@
-﻿using Signum.Engine.Basics;
-using Signum.Entities;
-using Signum.Entities.Basics;
+﻿using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Reflection;
-using Signum.Utilities;
-using System;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;

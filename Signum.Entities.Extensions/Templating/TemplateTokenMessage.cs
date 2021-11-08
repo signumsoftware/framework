@@ -1,6 +1,4 @@
 using Signum.Entities.DynamicQuery;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Signum.Entities.Templating

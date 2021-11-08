@@ -1,6 +1,4 @@
-﻿using Signum.Entities;
-using Signum.Entities.Dynamic;
-using System;
+﻿using Signum.Entities.Dynamic;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;

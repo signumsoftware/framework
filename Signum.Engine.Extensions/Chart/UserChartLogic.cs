@@ -1,23 +1,12 @@
 using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
 using Signum.Engine.Translation;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
-using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace Signum.Engine.Chart
 {

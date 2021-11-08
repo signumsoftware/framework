@@ -1,17 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using Signum.Engine.Basics;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Help;
 using Signum.Entities.Reflection;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Help

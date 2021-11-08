@@ -1,16 +1,7 @@
-using Signum.Engine;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Map;
 using Signum.Entities.Reflection;
-using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 
 namespace Signum.React.Map
 {

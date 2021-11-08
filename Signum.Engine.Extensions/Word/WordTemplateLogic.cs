@@ -1,18 +1,6 @@
 using DocumentFormat.OpenXml.Packaging;
-using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.Word;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using Signum.Engine.UserAssets;
 using Signum.Engine.Templating;
 using Signum.Entities.Files;
@@ -24,7 +12,6 @@ using System.Globalization;
 using Signum.Entities.Reflection;
 using Signum.Entities.Templating;
 using Signum.Engine.Authorization;
-using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Engine.Files;
 

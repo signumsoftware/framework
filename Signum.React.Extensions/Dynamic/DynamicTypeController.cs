@@ -1,9 +1,5 @@
-﻿using Signum.Engine;
-using Signum.Engine.Dynamic;
-using Signum.Engine.Maps;
+﻿using Signum.Engine.Dynamic;
 using Signum.Entities.Dynamic;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 

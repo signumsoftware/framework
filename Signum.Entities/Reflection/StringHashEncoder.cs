@@ -1,4 +1,3 @@
-using System.Text;
 
 namespace Signum.Entities.Reflection
 {

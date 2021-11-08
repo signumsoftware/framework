@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
-using Signum.Entities.DynamicQuery;
-using Signum.Utilities;
-using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 

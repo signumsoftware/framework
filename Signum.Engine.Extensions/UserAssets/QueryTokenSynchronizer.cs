@@ -1,12 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Engine.Basics;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.UserAssets
 {

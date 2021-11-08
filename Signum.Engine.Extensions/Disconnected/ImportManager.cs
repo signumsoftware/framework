@@ -1,19 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Signum.Entities.Disconnected;
-using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Utilities;
 using System.IO;
 using System.Data.Common;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Engine.Basics;
 
 namespace Signum.Engine.Disconnected
 {

@@ -1,7 +1,4 @@
 using Signum.Entities.Basics;
-using Signum.Utilities;
-using System;
-using System.Reflection;
 
 namespace Signum.Entities.Translation
 {

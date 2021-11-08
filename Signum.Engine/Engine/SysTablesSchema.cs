@@ -1,11 +1,6 @@
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 
 namespace Signum.Engine.Engine
 {

@@ -1,10 +1,7 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Signum.Entities;
 using Signum.React.ApiControllers;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
-using Signum.Engine.Basics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.UserQueries

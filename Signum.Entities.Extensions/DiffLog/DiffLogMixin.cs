@@ -1,5 +1,4 @@
 using Signum.Entities.Basics;
-using System;
 
 namespace Signum.Entities.DiffLog
 {

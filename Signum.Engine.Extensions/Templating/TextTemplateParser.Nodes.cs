@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Web;
-using Signum.Entities.DynamicQuery;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Templating;
 using Microsoft.AspNetCore.Html;
-using Signum.Entities;
 using System.Globalization;
 
 namespace Signum.Engine.Templating

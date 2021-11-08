@@ -1,23 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Mail;
-using System.Reflection;
-using Signum.Engine.Basics;
-using Signum.Engine.Maps;
-using Signum.Utilities;
 using Signum.Entities.Mailing;
 using Signum.Entities.Processes;
-using Signum.Entities;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
 using System.IO;
 using Signum.Engine.Files;
 using Microsoft.AspNetCore.StaticFiles;
 using Signum.Entities.Basics;
-using System.Text;
 using System.Threading;
 using Signum.Entities.Files;
 

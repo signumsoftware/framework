@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Signum.Utilities.DataStructures
 {
     public class Square<T1,T2>

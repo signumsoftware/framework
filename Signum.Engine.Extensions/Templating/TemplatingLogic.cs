@@ -1,10 +1,4 @@
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.Entities.Templating;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Signum.Engine.Templating
 {

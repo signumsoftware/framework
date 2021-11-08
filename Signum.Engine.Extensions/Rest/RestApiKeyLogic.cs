@@ -1,11 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
 using Signum.Entities.Rest;
-using Signum.Engine.Operations;
-using Signum.Utilities;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.WebUtilities;
 

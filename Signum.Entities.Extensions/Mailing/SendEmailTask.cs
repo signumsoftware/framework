@@ -1,10 +1,6 @@
-using Signum.Utilities;
-using System;
-using System.Linq.Expressions;
 using Signum.Entities.Scheduler;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Templating;
-using System.Reflection;
 
 namespace Signum.Entities.Mailing
 {

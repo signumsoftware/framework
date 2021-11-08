@@ -1,9 +1,4 @@
-using Signum.Entities;
 using Signum.Entities.Migrations;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Migrations

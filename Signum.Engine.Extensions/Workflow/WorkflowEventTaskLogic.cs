@@ -1,24 +1,12 @@
 using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
 using Signum.Engine.Processes;
 using Signum.Engine.Scheduler;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Processes;
 using Signum.Entities.Reflection;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Workflow;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 
 namespace Signum.Engine.Workflow

@@ -1,18 +1,11 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
-using Signum.Entities;
 using Signum.React.Facades;
-using Signum.Engine;
 using System.Threading;
-using Signum.Engine.Basics;
 using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
 using Signum.React.Filters;
-using System.Linq;
-using Signum.Utilities;
-using Signum.Engine.Maps;
 
 namespace Signum.React.Mailing
 {

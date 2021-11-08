@@ -2,7 +2,6 @@
 using DocumentFormat.OpenXml.Drawing.Charts;
 using Signum.Engine.Chart;
 using Signum.Entities.Chart;
-using System.Collections.Generic;
 
 namespace Signum.Engine.Chart.Scripts 
 {

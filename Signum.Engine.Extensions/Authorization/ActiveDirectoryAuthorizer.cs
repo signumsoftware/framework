@@ -1,12 +1,7 @@
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Reflection;
 using Signum.Services;
-using Signum.Utilities;
-using System;
 using System.DirectoryServices.AccountManagement;
-using System.Linq;
 using System.Security.Claims;
 
 #pragma warning disable CA1416 // Validate platform compatibility

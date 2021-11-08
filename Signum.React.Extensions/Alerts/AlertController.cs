@@ -1,20 +1,12 @@
 using Signum.Engine.Authorization;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Services;
-using Signum.Utilities;
-using System;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
-using Signum.Engine.Basics;
-using Signum.Engine;
 using static Signum.React.Authorization.AuthController;
-using System.Collections.Generic;
 using Signum.Entities.Alerts;
 
 namespace Signum.React.Authorization

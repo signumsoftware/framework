@@ -1,13 +1,6 @@
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.Entities.Word;
 using Signum.Entities.Mailing;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Signum.Engine.Templating;
 
 namespace Signum.Engine.Word

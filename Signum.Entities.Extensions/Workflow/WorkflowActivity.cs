@@ -1,13 +1,6 @@
 using Signum.Entities.Dynamic;
-using Signum.Entities;
 using Signum.Entities.Basics;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.ComponentModel;
-using System.Reflection;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 

@@ -1,11 +1,5 @@
-using System;
-using System.Linq;
-using Xunit;
-using Signum.Engine;
 using System.Diagnostics;
 using System.IO;
-using Signum.Utilities;
-using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {

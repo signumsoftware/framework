@@ -1,21 +1,12 @@
-using Signum.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Engine.Basics;
 using Signum.Utilities.Reflection;
-using Signum.Utilities;
 using Microsoft.SqlServer.Types;
 using Signum.React.Filters;
 using Signum.React.ApiControllers;
 using Signum.Entities.Tree;
 using Signum.Engine.Tree;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.Basics;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine;
 
 namespace Signum.React.Tree
 {

@@ -1,12 +1,4 @@
-using System;
-using Signum.Engine.Maps;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities.Files;
-using System.Reflection;
-using System.Linq.Expressions;
-using Signum.Entities;
-using Signum.Utilities;
-using Signum.Engine.Basics;
 
 namespace Signum.Engine.Files
 {

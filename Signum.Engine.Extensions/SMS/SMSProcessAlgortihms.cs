@@ -1,7 +1,5 @@
-using System.Linq;
 using Signum.Engine.Processes;
 using Signum.Entities.SMS;
-using Signum.Engine.Operations;
 
 namespace Signum.Engine.SMS
 {

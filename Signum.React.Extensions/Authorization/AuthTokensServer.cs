@@ -1,16 +1,10 @@
-using Signum.Engine;
 using Signum.Engine.Authorization;
-using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.React.Filters;
-using Signum.Utilities;
-using System;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Security.Authentication;
 using System.Security.Cryptography;
-using System.Text;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Controllers;

@@ -1,10 +1,5 @@
 using Signum.Engine.Maps;
 using Signum.Engine.PostgresCatalog;
-using Signum.Utilities;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text;
 using NpgsqlTypes;
 using static Signum.Engine.PostgresCatalog.PostgresFunctions;
 

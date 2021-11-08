@@ -1,5 +1,4 @@
-﻿using Signum.Engine.Basics;
-using Signum.Entities.Map;
+﻿using Signum.Entities.Map;
 using Signum.Engine.Authorization;
 using Signum.React.Maps;
 using Microsoft.AspNetCore.Mvc;

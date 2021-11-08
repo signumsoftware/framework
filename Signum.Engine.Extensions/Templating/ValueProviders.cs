@@ -1,20 +1,10 @@
-using Signum.Engine.Basics;
 using Signum.Engine.Translation;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Entities.Reflection;
 using Signum.Entities.UserAssets;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using Signum.Utilities.ExpressionTrees;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace Signum.Engine.Templating
 {

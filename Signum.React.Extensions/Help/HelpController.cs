@@ -1,5 +1,4 @@
 using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.React.Filters;
@@ -7,15 +6,8 @@ using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Signum.Engine.Help;
-using System.Collections.Generic;
-using System.Linq;
 using Signum.Entities.Help;
-using Signum.Engine;
-using Signum.Engine.Operations;
-using Signum.Utilities;
-using Signum.Entities;
 using System.Globalization;
-using System;
 
 namespace Signum.React.Help
 {

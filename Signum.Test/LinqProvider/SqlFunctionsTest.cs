@@ -1,15 +1,6 @@
 using Microsoft.SqlServer.Types;
-using Xunit;
-using Signum.Engine;
 using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Test.Environment;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
 
 namespace Signum.Test.LinqProvider
 {

@@ -1,14 +1,5 @@
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Mailing;
-using Signum.Utilities;
-using System;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using Signum.Engine.Basics;
 using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Mailing

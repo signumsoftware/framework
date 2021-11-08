@@ -1,13 +1,6 @@
-using Signum.Engine.Basics;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
 using Signum.Entities.UserQueries;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Signum.Engine.MachineLearning
 {

@@ -1,15 +1,6 @@
 using Microsoft.SqlServer.Types;
-using Signum.Engine;
-using Signum.Engine.Basics;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Tree;
-using Signum.Utilities;
-using System;
-using System.Linq;
-using System.Linq.Expressions;
 
 namespace Signum.Engine.Tree
 {

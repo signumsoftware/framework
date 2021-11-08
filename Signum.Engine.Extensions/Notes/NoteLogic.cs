@@ -1,18 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Utilities;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities.Authorization;
-using System.Reflection;
 using Signum.Entities.Basics;
-using Signum.Engine.Operations;
-using System.Linq.Expressions;
 using Signum.Entities.Notes;
 using Signum.Engine.Extensions.Basics;
-using Signum.Engine.Basics;
 
 namespace Signum.Engine.Notes
 {

@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using Signum.Utilities;
 using Signum.Entities.Authorization;
-using Signum.Entities;
 
 namespace Signum.Engine.Translation
 {

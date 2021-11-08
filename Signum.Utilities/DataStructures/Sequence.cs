@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Signum.Utilities.DataStructures
 {
     public class Sequence<T> : List<T>

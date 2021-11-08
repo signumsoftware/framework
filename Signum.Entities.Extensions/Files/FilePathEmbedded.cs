@@ -1,9 +1,5 @@
-using System;
-using Signum.Utilities;
 using System.IO;
-using System.Linq.Expressions;
 using Signum.Services;
-using Signum.Entities;
 
 namespace Signum.Entities.Files
 {

@@ -1,9 +1,4 @@
-using Signum.Entities;
 using Signum.Entities.Isolation;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Signum.Entities.Dynamic
 {

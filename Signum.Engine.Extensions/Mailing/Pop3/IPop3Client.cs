@@ -1,7 +1,4 @@
-﻿using Signum.Entities;
-using Signum.Entities.Mailing;
-using System;
-using System.Collections.Generic;
+﻿using Signum.Entities.Mailing;
 
 namespace Signum.Engine.Extensions.Mailing.Pop3
 {

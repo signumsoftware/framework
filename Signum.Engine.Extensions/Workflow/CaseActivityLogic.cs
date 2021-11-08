@@ -1,19 +1,8 @@
 using Signum.Entities.Workflow;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
-using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using Signum.Entities.Dynamic;
-using Signum.Engine.Basics;
 using Signum.Engine.Scheduler;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
@@ -22,7 +11,6 @@ using Signum.Entities.SMS;
 using Signum.Entities.Mailing;
 using System.Xml.Linq;
 using Signum.Engine.Authorization;
-using Signum.Engine;
 
 namespace Signum.Engine.Workflow
 {

@@ -1,15 +1,7 @@
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
-using Signum.Engine.Maps;
-using Signum.Entities;
 using Signum.Entities.Files;
 using Signum.Entities.Isolation;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 
 namespace Signum.Engine.Files
 {
