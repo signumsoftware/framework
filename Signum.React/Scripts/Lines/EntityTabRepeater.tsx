@@ -10,7 +10,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines';
 import { EntityTableProps } from './EntityTable'
 import { Tabs, Tab } from 'react-bootstrap'
-import { SelectCallback } from 'react-bootstrap/helpers'
 import { useController } from './LineBase'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {

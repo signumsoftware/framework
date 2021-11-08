@@ -257,7 +257,7 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
   function renderDefaultList() {
     var items = controller.items;
     return (
-      <Dropdown.Menu alignRight={controller.rtl} className="typeahead">
+      <Dropdown.Menu align={controller.rtl ? "end" : undefined} className="typeahead">
         {
           !items ? null :
             items.length == 0 ? <button className="no-results dropdown-item"><small>{p.noResultsMessage}</small></button> :

@@ -41,7 +41,7 @@ export default function LoginDropdown(p: {
   var extraButtons = p.extraButons && p.extraButons(user);
 
   return (
-    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={p.renderName ? p.renderName(user) : user.userName!} alignRight >
+    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={p.renderName ? p.renderName(user) : user.userName!} align="end">
       {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-edit" fixedWidth className="mr-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
       {cpv && <LinkContainer to="~/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth className="mr-2" /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>

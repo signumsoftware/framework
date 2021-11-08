@@ -1,4 +1,4 @@
-import { DateTime, Duration, DurationObjectUnits, Settings } from 'luxon';
+import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
@@ -112,7 +112,7 @@ export function toLuxonFormat(format: string | undefined, type: "Date" | "DateTi
 }
 
 
-declare module "luxon" {
+declare module "luxon/src/DateTime" {
   interface DateTime {
     toFormatFixed(format: string, options?: DateTimeFormatOptions): string;
   }
@@ -371,11 +371,11 @@ export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss
     const value = parseInt(valParts[i] || "0");
     switch (formP) {
       case "h":
-      case "hh": result.hour = value; break;
+      case "hh": result.hours = value; break;
       case "m":
-      case "mm": result.minute = value; break;
+      case "mm": result.minutes = value; break;
       case "s":
-      case "ss": result.second = value; break;
+      case "ss": result.seconds = value; break;
       default: throw new Error("Unexpected " + formP);
     }
   }

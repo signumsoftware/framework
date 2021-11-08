@@ -2,39 +2,39 @@
 # yarn lockfile v1
 
 
-"@azure/msal-browser@2.14.1":
-  version "2.14.1"
-  resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.14.1.tgz#6c4f283069e7bedb8cea664f728a2069338fc043"
-  integrity sha512-J2YgonII+/ureLk7jZddup15y5QlR1bj9dLSIcIluwn9l1TdqZXfbwvMeLgd2xmMPIuEKVyRwUkw2QMxZ7lehQ==
+"@azure/msal-browser@2.19.0":
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.19.0.tgz#6915d200e0679eb8b26368bf0e0fc02ee4a8617a"
+  integrity sha512-nVMMSbFeocGv3SUYGBD+3pkE/pbAciGhER3KCjsBu6Sy9EDaBCiQ418KZfHBcCcrNQgFxf3nleWdeYoYX7281g==
   dependencies:
-    "@azure/msal-common" "^4.2.1"
+    "@azure/msal-common" "^5.1.0"
 
-"@azure/msal-common@^4.2.1":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-4.2.1.tgz#0377c980aeebaaf3c768fef9165159759c9a9176"
-  integrity sha512-f6na0yqY+rUJ54m79TmFbG8BH1nFvlW+ETtYUGdZpJUO+/RgDVnRzkoj5PVQd6y7czKYlrBRetAcZEE+yGh+/g==
+"@azure/msal-common@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-5.1.0.tgz#e3a75a8ba1602da040698046161961d6dc59bbc4"
+  integrity sha512-4zHZ5Ec7jAgTIWZO3ap1ozgIPGAirF1wL8UhsmPF9QDoZz0cMHdaNmtov5i2+6Xq37YMzhN5s50EFHBuXd7sDQ==
   dependencies:
     debug "^4.1.1"
 
-"@types/codemirror@0.0.108":
-  version "0.0.108"
-  resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-0.0.108.tgz#e640422b666bf49251b384c390cdeb2362585bde"
-  integrity sha512-3FGFcus0P7C2UOGCNUVENqObEb4SFk+S8Dnxq7K6aIsLVs/vDtlangl3PEO0ykaKXyK56swVF6Nho7VsA44uhw==
+"@types/codemirror@5.60.5":
+  version "5.60.5"
+  resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-5.60.5.tgz#5b989a3b4bbe657458cf372c92b6bfda6061a2b7"
+  integrity sha512-TiECZmm8St5YxjFUp64LK0c8WU5bxMDt9YaAek1UqUb9swrSCoJhh92fWu1p3mTEqlHjhB5sY7OFBhWroJXZVg==
   dependencies:
     "@types/tern" "*"
 
-"@types/draft-js@0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@types/draft-js/-/draft-js-0.11.1.tgz#f67920c9583054143e263704e250dd3086de3ef3"
-  integrity sha512-jV4LAXYdVvS0ahIROZehkKqHgfLxaDBl3fzfEVqho8NxFAtEaObdIiu7FpPUu/Y97PlJVxGajar7aSikQqz9sQ==
+"@types/draft-js@0.11.6":
+  version "0.11.6"
+  resolved "https://registry.yarnpkg.com/@types/draft-js/-/draft-js-0.11.6.tgz#0a141dbd04a65c1c03c3852006c1b46c3d1d4f08"
+  integrity sha512-TY5/Ba9m/uXAJKJc9AxV8r3OpjXk7G0DoI1v99g9aGsx5mJSIK46f2VsFWR8aVTgMxFoxbDLx79Hkri+EbCOYQ==
   dependencies:
     "@types/react" "*"
     immutable "~3.7.4"
 
 "@types/estree@*":
-  version "0.0.45"
-  resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.45.tgz#e9387572998e5ecdac221950dab3e8c3b16af884"
-  integrity sha512-jnqIUKDUqJbDIUxm0Uj7bnlMnRm1T/eZ9N+AVMqhPgzrba2GhGG5o/jCTwmdPK709nEZsGoMzXEDUjcXHa3W0g==
+  version "0.0.50"
+  resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.50.tgz#1e0caa9364d3fccd2931c3ed96fdbeaa5d4cca83"
+  integrity sha512-C6N5s2ZFtuZRj54k2/zyRhNDjJwwcViAM3Nbm8zjBpbqAdZ00mr0CFxvSKeO8Y/e03WVFLpQMdHYVfUd6SB+Hw==
 
 "@types/googlemaps@3.43.3":
   version "3.43.3"
@@ -42,26 +42,26 @@
   integrity sha512-ZWNoz/O8MPEpiajvj7QiqCY8tTLFNqNZ/a+s+zTV58wFVNAvvqV4bdGfnsjTb5Cs4V6wEsLrX8XRhmnyYJ2Tdg==
 
 "@types/prop-types@*":
-  version "15.7.3"
-  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.3.tgz#2ab0d5da2e5815f94b0b9d4b95d1e5f243ab2ca7"
-  integrity sha512-KfRL3PuHmqQLOG+2tGpRO26Ctg+Cq1E01D2DMriKEATHgWLfeNDmq9e29Q9WIky0dQ3NPkd1mzYH8Lm936Z9qw==
+  version "15.7.4"
+  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.4.tgz#fcf7205c25dff795ee79af1e30da2c9790808f11"
+  integrity sha512-rZ5drC/jWjrArrS8BR6SIr4cWpW09RNTYt9AMZo3Jwwif+iacXAqgVjm0B0Bv/S1jhDXKHqRVNCbACkJ89RAnQ==
 
 "@types/react@*", "@types/react@file:../Signum.React/node_modules/@types/react":
-  version "17.0.3"
+  version "17.0.34"
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
     csstype "^3.0.2"
 
 "@types/scheduler@*":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.1.tgz#18845205e86ff0038517aab7a18a62a6b9f71275"
-  integrity sha512-EaCxbanVeyxDRTQBkdLb3Bvl/HK7PBK6UJjsSixB0iHKoWxE5uu2Q/DgtpOhPIojN0Zl1whvOd7PoHs2P0s5eA==
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.2.tgz#1a62f89525723dde24ba1b01b092bf5df8ad4d39"
+  integrity sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==
 
 "@types/tern@*":
-  version "0.23.3"
-  resolved "https://registry.yarnpkg.com/@types/tern/-/tern-0.23.3.tgz#4b54538f04a88c9ff79de1f6f94f575a7f339460"
-  integrity sha512-imDtS4TAoTcXk0g7u4kkWqedB3E4qpjXzCpD2LU5M5NAXHzCDsypyvXSaG7mM8DKYkCRa7tFp4tS/lp/Wo7Q3w==
+  version "0.23.4"
+  resolved "https://registry.yarnpkg.com/@types/tern/-/tern-0.23.4.tgz#03926eb13dbeaf3ae0d390caf706b2643a0127fb"
+  integrity sha512-JAUw1iXGO1qaWwEOzxTKJZ/5JxVeON9kvGZ/osgZaJImBnyjyn0cjovPsf6FNLmyGY8Vw9DoXZCMlfMkMwHRWg==
   dependencies:
     "@types/estree" "*"
 
@@ -71,26 +71,26 @@ asap@~2.0.3:
   integrity sha1-5QNHYR1+aQlDIIu9r+vLwvuGbUY=
 
 core-js@^3.6.4:
-  version "3.8.1"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.8.1.tgz#f51523668ac8a294d1285c3b9db44025fda66d47"
-  integrity sha512-9Id2xHY1W7m8hCl8NkhQn5CufmF/WuR30BTRewvCXc1aZd3kMECwNZ69ndLbekKfakw9Rf2Xyc+QR6E7Gg+obg==
+  version "3.19.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.19.1.tgz#f6f173cae23e73a7d88fa23b6e9da329276c6641"
+  integrity sha512-Tnc7E9iKd/b/ff7GFbhwPVzJzPztGrChB8X8GLqoYGdEOG8IpLnK1xPyo3ZoO3HsK6TodJS58VGPOxA+hLHQMg==
 
 cross-fetch@^3.0.4:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.0.6.tgz#3a4040bc8941e653e0e9cf17f29ebcd177d3365c"
-  integrity sha512-KBPUbqgFjzWlVcURG+Svp9TlhA5uliYtiNx/0r8nv0pdypeQCRJ9IaSIc3q/x3q8t3F75cHuwxVql1HFGHCNJQ==
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.4.tgz#9723f3a3a247bf8b89039f3a380a9244e8fa2f39"
+  integrity sha512-1eAtFWdIubi6T4XPy6ei9iUFoKpUkIF971QLN8lIvvvwueI65+Nw5haMNKUwfJxabqlIIDODJKGrQ66gxC0PbQ==
   dependencies:
     node-fetch "2.6.1"
 
 csstype@^3.0.2:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.4.tgz#b156d7be03b84ff425c9a0a4b1e5f4da9c5ca888"
-  integrity sha512-xc8DUsCLmjvCfoD7LTGE0ou2MIWLx0K9RCZwSHMOdynqRsP4MtUcLeqh1HcQ2dInwDTqn+3CE0/FZh1et+p4jA==
+  version "3.0.9"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.9.tgz#6410af31b26bd0520933d02cbc64fce9ce3fbf0b"
+  integrity sha512-rpw6JPxK6Rfg1zLOYCSwle2GFOOsnjmDYDaBwEcwoOg4qlsIVCN789VkBZDJAGi4T07gI4YSutR43t9Zz4Lzuw==
 
 debug@^4.1.1:
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.1.tgz#f0d229c505e0c6d8c49ac553d1b13dc183f6b2ee"
-  integrity sha512-doEwdvm4PCeK4K3RQN2ZC2BYUBaxwLARCqZmMjtF8a51J2Rb0xpVloFRnCODwqjpwnAoao4pelN8l3RJdv3gRQ==
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.2.tgz#f0a49c18ac8779e31d4a0c6029dfb76873c7428b"
+  integrity sha512-mOp8wKcvj7XxC78zLgw/ZA+6TSgkoE2C/ienthhRD298T7UNwAg9diBpLRxC0mOezLl4B0xV7M0cCO6P/O0Xhw==
   dependencies:
     ms "2.1.2"
 
@@ -131,6 +131,11 @@ html-to-draftjs@1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/html-to-draftjs/-/html-to-draftjs-1.5.0.tgz#0df0eabf429deaedb63f5c859889e2c983606e86"
   integrity sha512-kggLXBNciKDwKf+KYsuE+V5gw4dZ7nHyGMX9m0wy7urzWjKGWyNFetmArRLvRV0VrxKN70WylFsJvMTJx02OBQ==
+
+immutable@3.8.2:
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.2.tgz#c2439951455bb39913daf281376f1530e104adf3"
+  integrity sha1-wkOZUUVbs5kT2vKBN28VMOEErfM=
 
 immutable@~3.7.4:
   version "3.7.6"
@@ -202,6 +207,6 @@ setimmediate@^1.0.5:
   integrity sha1-KQy7Iy4waULX1+qbg3Mqt4VvgoU=
 
 ua-parser-js@^0.7.18:
-  version "0.7.21"
-  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.21.tgz#853cf9ce93f642f67174273cc34565ae6f308777"
-  integrity sha512-+O8/qh/Qj8CgC6eYBVBykMrNtp5Gebn4dlGD/kKXVkJNDwyrAwSIqwz8CDf+tsAIWVycKcku6gIXJ0qwx/ZXaQ==
+  version "0.7.31"
+  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.31.tgz#649a656b191dffab4f21d5e053e27ca17cbff5c6"
+  integrity sha512-qLK/Xe9E2uzmYI3qLeOmI0tEOt+TBBQyUIAh4aAgU05FVYzeZrKUdkAZfBNVGRaHVgV0TDkdEngJSw/SyQchkQ==

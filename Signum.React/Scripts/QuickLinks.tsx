@@ -203,7 +203,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
                   {dd.icon && "\u00A0"}
                   {dd.text(gr.elements)}
                 </>} />
-                <Dropdown.Menu alignRight>
+                <Dropdown.Menu align="end">
                   {gr.elements.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
                 </Dropdown.Menu>
               </Dropdown>

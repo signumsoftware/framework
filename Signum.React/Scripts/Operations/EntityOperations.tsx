@@ -230,7 +230,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     <Dropdown as={ButtonGroup}>
       {button}
       <Dropdown.Toggle split color={eoc.color} id={eoc.operationInfo.key + "_split"} />
-      <Dropdown.Menu alignRight>
+      <Dropdown.Menu align="end">
         {dropdownAlternatives.map(a => renderAlternative(a))}
       </Dropdown.Menu>
     </Dropdown>
