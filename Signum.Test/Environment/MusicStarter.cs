@@ -22,7 +22,7 @@ public static class MusicStarter
 
             var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
                 //.AddJsonFile("appsettings.json")
-                .AddUserSecrets(typeof(MusicStarter).Assembly)
+                .AddUserSecrets(typeof(MusicStarter).Assembly, optional: true)
                 .Build();
 
             var connectionString = conf.GetConnectionString("SignumTest") ?? "Data Source=.\\SQLEXPRESS;Initial Catalog=SignumTest;Integrated Security=true";

@@ -837,8 +837,12 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 b.Left is MemberExpression leftSide && leftSide.Member is PropertyInfo piLeft && ReflectionTools.PropertyEquals(piLeft, piDayNumber) &&
                 b.Right is MemberExpression rightSide && rightSide.Member is PropertyInfo piRight && ReflectionTools.PropertyEquals(piRight, piDayNumber))
             {
+                var diff = TrySqlDifference(SqlEnums.day, b.Type, leftSide.Expression!, rightSide.Expression!);
+                if (diff == null)
+                    return b;
 
-                return TrySqlDifference(SqlEnums.day, b.Type, leftSide.Expression!, rightSide.Expression!) ?? b;
+
+                return Add(new SqlCastExpression(typeof(int), diff));
             }
 
             b = SmartEqualizer.UnwrapPrimaryKeyBinary(b);
@@ -1610,7 +1614,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "DateTimeExtensions.Quarter": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.quarter), m.Arguments.Single());
             case "DateTimeExtensions.WeekNumber": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.week), m.Arguments.Single());
 
-            case "DateTimeExtensions.ToDate": return TrySqlCast(m.Type, m.GetArgument("dateTime"));
+            case "DateTimeExtensions.ToDateOnly": return TrySqlCast(m.Type, m.GetArgument("dateTime"));
             case "DateTimeExtensions.ToDateTime": return TrySqlCast(m.Type, m.GetArgument("date"));
             case "DateOnly.FromDateTime":return  TrySqlCast(m.Type, m.GetArgument("dateTime"));
 

@@ -29,7 +29,6 @@ public static class DynamicCSSOverrideLogic
         }
     }
 }
-}
 
 // In order to work this module, you should apply below mentioned changes to your index.cshtml file
 /*
