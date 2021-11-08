@@ -6,7 +6,7 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20211109_GlobalUsings : CodeUpgradeBase
 {
-    public override string Description => "Remove global usings";
+    public override string Description => "Remove trivial usings and creates GlobalUsing.cs";
 
     public override void Execute(UpgradeContext uctx)
     {

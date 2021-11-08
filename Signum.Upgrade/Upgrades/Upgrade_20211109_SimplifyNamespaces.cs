@@ -4,7 +4,7 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20211109_SimplifyNamespaces : CodeUpgradeBase
 {
-    public override string Description => "Update to TS 4.4";
+    public override string Description => "Uses file-scoped namespaces declarations to recover ident space";
 
     public override void Execute(UpgradeContext uctx)
     {

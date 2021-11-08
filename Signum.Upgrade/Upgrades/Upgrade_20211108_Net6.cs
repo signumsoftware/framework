@@ -2,7 +2,7 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20211108_Net6 : CodeUpgradeBase
 {
-    public override string Description => "Upgrade to .Net 6";
+    public override string Description => "Upgrade to .Net 6, replaces Date to DateOnly";
 
     public override void Execute(UpgradeContext uctx)
     {
