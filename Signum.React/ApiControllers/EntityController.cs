@@ -75,5 +75,15 @@ namespace Signum.React.ApiControllers
         {
             return;
         }
+
+        [HttpGet("api/exists/{type}/{id}")]
+        public bool Exists(string type, string id)
+        {
+            var entityType = TypeLogic.GetType(type);
+
+            var primaryKey = PrimaryKey.Parse(id, entityType);
+
+            return Database.Exists(entityType, primaryKey);
+        }
     }
 }

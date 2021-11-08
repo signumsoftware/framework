@@ -63,19 +63,9 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
   const treeMapRoot = treeMap(root);
 
-  var nodes = treeMapRoot.descendants().filter(d => !!d.data) as d3.HierarchyRectangularNode<(ChartRow | Folder) & { active?: boolean }>[];
+  var nodes = treeMapRoot.descendants().filter(d => !!d.data) as d3.HierarchyRectangularNode<(ChartRow | Folder)>[];
 
-  if (parentColumn) {
-
-    var activeDetector = dashboardFilter?.getActiveDetector(chartRequest);
-
-    if (activeDetector) {
-      nodes.forEach(a => {
-        a.data.active = activeDetector!(isFolder(a.data) ? { c2: a.data.folder } : a.data);
-      });
-    }
-
-  }
+  var activeDetector = dashboardFilter?.getActiveDetector(chartRequest);
 
   const nodeHeight = (n: d3.HierarchyRectangularNode<any>) => n.y1 - n.y0;
   const nodeWidth = (n: d3.HierarchyRectangularNode<any>) => n.x1 - n.x0;
@@ -100,16 +90,18 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
   return (
     <svg direction="ltr" width={width} height={height} >
-      {nodes.map((d, i) =>
-        <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
+      {nodes.map((d, i) => {
+        const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);
+
+        return (<g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
           {isFolder(d.data) &&
             <rect className="folder sf-transition" shapeRendering="initial"
-              opacity={d.data.active == false ? .5 : undefined}
+              opacity={active == false ? .5 : undefined}
               width={nodeWidth(d)}
-            height={nodeHeight(d)}
-            fill={parentColumn!.getColor(d.data.folder) ?? folderColor!(d.data.folder)}
-            stroke={d.data.active == true ? "black" : undefined}
-            strokeWidth={d.data.active == true ? 3 : undefined}
+              height={nodeHeight(d)}
+              fill={parentColumn!.getColor(d.data.folder) ?? folderColor!(d.data.folder)}
+              stroke={active == true ? "black" : undefined}
+              strokeWidth={active == true ? 3 : undefined}
               onClick={e => onDrillDown({ c2: (d.data as Folder).folder }, e)} cursor="pointer">
               <title>
                 {folderColor!(((d.data as Folder).folder))}
@@ -118,13 +110,13 @@ export default function renderTreeMap({ data, width, height, parameters, loading
           }
           {!isFolder(d.data) &&
             <rect className="leaf sf-transition"
-            shapeRendering="initial"
-            opacity={d.data.active == false ? .5 * opacity : opacity}
+              shapeRendering="initial"
+              opacity={active == false ? .5 * opacity : opacity}
               width={nodeWidth(d)}
               height={nodeHeight(d)}
-             fill={color(d.data)!}
-            stroke={d.data.active == true ? "black" : undefined}
-            strokeWidth={d.data.active == true ? 3 : undefined}
+              fill={color(d.data)!}
+              stroke={active == true ? "black" : undefined}
+              strokeWidth={active == true ? 3 : undefined}
               onClick={e => onDrillDown(d.data as ChartRow, e)}
               cursor="pointer">
               <title>
@@ -159,7 +151,8 @@ export default function renderTreeMap({ data, width, height, parameters, loading
               {valueColumn.getValueNiceName(d.data as ChartRow)}
             </TextEllipsis>
           }
-        </g>)
+        </g>);
+      })
       }
     </svg>
   );

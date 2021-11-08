@@ -729,6 +729,27 @@ export module API {
     return ajaxGet({ url: "~/api/entity/" + typeName + "/" + id });
   }
 
+  export function exists<T extends Entity>(lite: Lite<T>): Promise<boolean>;
+  export function exists<T extends Entity>(entity: T): Promise<boolean>;
+  export function exists<T extends Entity>(type: Type<T>, id: any): Promise<boolean>;
+  export function exists(type: PseudoType, id: number | string): Promise<boolean>;
+  export function exists(typeOrEntity: PseudoType | Lite<Entity> | Entity, idOrNull?: number | string): Promise<boolean> {
+
+    const typeName =
+      isEntity(typeOrEntity) ? typeOrEntity.Type :
+        isLite(typeOrEntity) ? typeOrEntity.EntityType :
+          getTypeName(typeOrEntity);
+
+    let id = isEntity(typeOrEntity) ? typeOrEntity.id :
+      isLite(typeOrEntity) ? typeOrEntity.id :
+        idOrNull;
+
+    if (id == null)
+      throw new Error("No id found");
+
+    return ajaxGet({ url: "~/api/exists/" + typeName + "/" + id });
+  }
+
 
   export function fetchEntityPack<T extends Entity>(lite: Lite<T>): Promise<EntityPack<T>>;
   export function fetchEntityPack<T extends Entity>(type: Type<T>, id: number | string): Promise<EntityPack<T>>;
