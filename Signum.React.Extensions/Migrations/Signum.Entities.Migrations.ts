@@ -11,7 +11,7 @@ export const CSharpMigrationEntity = new Type<CSharpMigrationEntity>("CSharpMigr
 export interface CSharpMigrationEntity extends Entities.Entity {
   Type: "CSharpMigration";
   uniqueName: string;
-  executionDate: string;
+  executionDate: string /*DateTime*/;
 }
 
 export const LoadMethodLogEntity = new Type<LoadMethodLogEntity>("LoadMethodLog");
@@ -20,8 +20,8 @@ export interface LoadMethodLogEntity extends Entities.Entity {
   methodName: string | null;
   className: string | null;
   description: string | null;
-  start: string;
-  end: string | null;
+  start: string /*DateTime*/;
+  end: string /*DateTime*/ | null;
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 

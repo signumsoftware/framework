@@ -47,16 +47,16 @@ namespace Signum.React.JsonModelValidators
         /// <inheritdoc />
         public virtual void Validate(
             ActionContext actionContext,
-            ValidationStateDictionary validationState,
+            ValidationStateDictionary? validationState,
             string prefix,
-            object model)
+            object? model)
         {
             var visitor = GetValidationVisitor(
                 actionContext,
                 _validatorProvider,
                 _validatorCache,
                 _modelMetadataProvider,
-                validationState);
+                validationState!);
 
             var metadata = model == null ? null : _modelMetadataProvider.GetMetadataForType(model.GetType());
             visitor.Validate(metadata, prefix, model, alwaysValidateAtTopLevel: false);

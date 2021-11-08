@@ -25,7 +25,7 @@ namespace Signum.React.Authorization
                     if (!ac.HttpContext.Request.Cookies.TryGetValue(CookieName, out string? ticketText) || !ticketText.HasText())
                         return false;   //there is no cookie
 
-                    var httpConnection = ac.HttpContext.Features.Get<IHttpConnectionFeature>();
+                    var httpConnection = ac.HttpContext.Features.Get<IHttpConnectionFeature>()!;
 
                     UserEntity user = UserTicketLogic.UpdateTicket(httpConnection.RemoteIpAddress!.ToString(), ref ticketText);
 
@@ -63,7 +63,7 @@ namespace Signum.React.Authorization
 
         public static void SaveCookie(ActionContext ac)
         {
-            var httpConnection = ac.HttpContext.Features.Get<IHttpConnectionFeature>();
+            var httpConnection = ac.HttpContext.Features.Get<IHttpConnectionFeature>()!;
 
             string ticketText = UserTicketLogic.NewTicket(httpConnection.LocalIpAddress!.ToString());
 

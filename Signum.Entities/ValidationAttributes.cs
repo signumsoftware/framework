@@ -724,7 +724,7 @@ namespace Signum.Entities
         internal static DateTime ToDateTime(object? value)
         {
             return value is DateTime dt ? dt :
-                value is Date d ? (DateTime)d :
+                value is DateOnly d ? d.ToDateTime() :
                 value is DateTimeOffset dto ? dto.DateTime :
                 throw new UnexpectedValueException(value);
         }

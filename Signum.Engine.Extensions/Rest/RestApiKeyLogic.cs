@@ -49,12 +49,9 @@ namespace Signum.Engine.Rest
 
         private static string DefaultGenerateRestApiKey()
         {
-            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
-            {
-                byte[] tokenData = new byte[32];
-                rng.GetBytes(tokenData);
-                return WebEncoders.Base64UrlEncode(tokenData);
-            }
+            byte[] tokenData = new byte[32];
+            RandomNumberGenerator.Create().GetBytes(tokenData);
+            return WebEncoders.Base64UrlEncode(tokenData);
         }
     }
 }

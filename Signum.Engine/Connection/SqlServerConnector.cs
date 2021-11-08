@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Signum.Engine.Connection;
 using Signum.Engine.SchemaInfoTables;
+using Signum.Entities;
 using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine
@@ -536,8 +537,13 @@ namespace Signum.Engine
             {
                 if (value is DateTime dt)
                     AssertDateTime(dt);
-                else if (value is Date d)
-                    value = (DateTime)d;
+                else if (value is DateOnly d)
+                    value = d.ToDateTime(); 
+            }
+            else if(dbType.IsTime())
+            {
+                if (value is TimeOnly to)
+                    value = to.ToTimeSpan();
             }
 
             var result = new SqlParameter(parameterName, value ?? DBNull.Value)
@@ -557,7 +563,8 @@ namespace Signum.Engine
             Expression valueExpr = Expression.Convert(
                 !dbType.IsDate() ? value: 
                 value.Type.UnNullify() == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
-                value.Type.UnNullify() == typeof(Date) ? Expression.Convert(Expression.Convert(value, typeof(Date?)), typeof(DateTime?)) : //Converting from Date -> DateTime? directly produces null always
+                value.Type.UnNullify() == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
+                value.Type.UnNullify() == typeof(TimeOnly) ? Expression.Call(miToTimeSpan, Expression.Convert(value, typeof(TimeOnly))) :
                 value,
                 typeof(object));
 

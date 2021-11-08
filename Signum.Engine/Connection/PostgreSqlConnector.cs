@@ -5,6 +5,7 @@ using Signum.Engine.Connection;
 using Signum.Engine.Engine;
 using Signum.Engine.Maps;
 using Signum.Engine.PostgresCatalog;
+using Signum.Entities;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -516,8 +517,8 @@ END; $$;");
             {
                 if (value is DateTime dt)
                     AssertDateTime(dt);
-                else if (value is Date d)
-                    value = new NpgsqlDate((DateTime)d);
+                else if (value is DateOnly d)
+                    value = new NpgsqlDate(d.ToDateTimeAutoUTC());
             }
 
             var result = new Npgsql.NpgsqlParameter(parameterName, value ?? DBNull.Value)
@@ -538,7 +539,7 @@ END; $$;");
             Expression valueExpr = Expression.Convert(
               !dbType.IsDate() ? value :
               value.Type.UnNullify() == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
-              value.Type.UnNullify() == typeof(Date) ? Expression.Convert(Expression.Convert(value, typeof(Date?)), typeof(DateTime?)) : //Converting from Date -> DateTime? directly produces null always
+              value.Type.UnNullify() == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly?)), Expression.Constant(Schema.Current.DateTimeKind)) :
               value,
               typeof(object));
 

@@ -130,7 +130,7 @@ namespace Signum.React.JsonModelValidators
             // We want to run validation unless it's already known that this key is invalid.
             if (state != ModelValidationState.Invalid)
             {
-                var validators = Cache.GetValidators(Metadata, ValidatorProvider);
+                var validators = Cache.GetValidators(Metadata!, ValidatorProvider);
 
                 var count = validators.Count;
                 if (count > 0)

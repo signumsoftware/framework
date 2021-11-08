@@ -132,7 +132,7 @@ export const AuthTokenConfigurationEmbedded = new Type<AuthTokenConfigurationEmb
 export interface AuthTokenConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "AuthTokenConfigurationEmbedded";
   refreshTokenEvery: number;
-  refreshAnyTokenPreviousTo: string | null;
+  refreshAnyTokenPreviousTo: string /*DateTime*/ | null;
 }
 
 export interface BaseRulePack<T> extends Entities.ModelEntity {
@@ -311,7 +311,7 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
   Type: "ResetPasswordRequest";
   code: string;
   user: UserEntity;
-  requestDate: string;
+  requestDate: string /*DateTime*/;
   used: boolean;
 }
 
@@ -382,8 +382,8 @@ export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
   Type: "SessionLog";
   user: Entities.Lite<UserEntity>;
-  sessionStart: string;
-  sessionEnd: string | null;
+  sessionStart: string /*DateTime*/;
+  sessionEnd: string /*DateTime*/ | null;
   sessionTimeOut: boolean;
   userHostAddress: string | null;
   userAgent: string | null;
@@ -448,7 +448,7 @@ export module UserADMessage {
 export const UserADMixin = new Type<UserADMixin>("UserADMixin");
 export interface UserADMixin extends Entities.MixinEntity {
   Type: "UserADMixin";
-  oID: string | null;
+  oID: string /*Guid*/ | null;
   sID: string | null;
 }
 
@@ -461,11 +461,11 @@ export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
   userName: string;
-  passwordHash: string | null;
+  passwordHash: string /*Byte[]*/ | null;
   role: Entities.Lite<RoleEntity>;
   email: string | null;
   cultureInfo: Signum.CultureInfoEntity | null;
-  disabledOn: string | null;
+  disabledOn: string /*DateTime*/ | null;
   state: UserState;
   loginFailedCounter: number;
 }
@@ -494,7 +494,7 @@ export interface UserTicketEntity extends Entities.Entity {
   Type: "UserTicket";
   user: Entities.Lite<UserEntity>;
   ticket: string;
-  connectionDate: string;
+  connectionDate: string /*DateTime*/;
   device: string;
 }
 

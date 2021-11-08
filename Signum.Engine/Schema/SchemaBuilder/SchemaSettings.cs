@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Linq.Expressions;
 using System.Data;
 using Signum.Entities.Reflection;
-using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.Server;
 using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
@@ -71,10 +70,11 @@ namespace Signum.Engine.Maps
                                                                                     
             {typeof(char),           new AbstractDbType(SqlDbType.NChar,            NpgsqlDbType.Char)},
             {typeof(string),         new AbstractDbType(SqlDbType.NVarChar,         NpgsqlDbType.Varchar)},
-            {typeof(Date),           new AbstractDbType(SqlDbType.Date,             NpgsqlDbType.Date)},
+            {typeof(DateOnly),       new AbstractDbType(SqlDbType.Date,             NpgsqlDbType.Date)},
             {typeof(DateTime),       new AbstractDbType(SqlDbType.DateTime2,        NpgsqlDbType.Timestamp)},
             {typeof(DateTimeOffset), new AbstractDbType(SqlDbType.DateTimeOffset,   NpgsqlDbType.TimestampTz)},
             {typeof(TimeSpan),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
+            {typeof(TimeOnly),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
 
             {typeof(byte[]),         new AbstractDbType(SqlDbType.VarBinary,        NpgsqlDbType.Bytea)},
 
@@ -404,6 +404,7 @@ namespace Signum.Engine.Maps
 
         public string? GetUdtName(Type udtType)
         {
+            var att = udtType.GetCustomAttribute<SqlUserDefinedTypeAttribute>();
             var att = udtType.GetCustomAttribute<SqlUserDefinedTypeAttribute>();
 
             if (att == null)

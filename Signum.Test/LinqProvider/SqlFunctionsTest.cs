@@ -86,8 +86,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void DateParameters()
         {
-            Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate == DateTime.Today).ToList();
-            Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate == Date.Today).ToList();
+            Database.Query<NoteWithDateEntity>().Where(a => a.CreationDate == DateTime.Today.ToDateOnly()).ToList();
         }
 
         [Fact]
@@ -127,6 +126,16 @@ namespace Signum.Test.LinqProvider
             Dump((NoteWithDateEntity n) => n.CreationDate.QuarterStart());
             Dump((NoteWithDateEntity n) => n.CreationDate.MonthStart());
             Dump((NoteWithDateEntity n) => n.CreationDate.WeekStart());
+        }
+
+        [Fact]
+        public void DateTimeFunctionsConvert()
+        {
+            Dump((NoteWithDateEntity n) => n.CreationTime.ToDateOnly());
+            Dump((NoteWithDateEntity n) => DateOnly.FromDateTime(n.CreationTime));
+
+            Dump((NoteWithDateEntity n) => n.CreationDate.ToDateTime());
+            Dump((NoteWithDateEntity n) => n.CreationDate.ToDateTime(TimeOnly.MaxValue));
         }
 
         [Fact]
@@ -216,7 +225,7 @@ namespace Signum.Test.LinqProvider
             Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalSeconds.InSql());
             Dump((NoteWithDateEntity n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
 
-            Dump((NoteWithDateEntity n) => (n.CreationDate - n.CreationDate).TotalDays.InSql());
+            Dump((NoteWithDateEntity n) => (n.CreationDate.DayNumber - n.CreationDate.DayNumber).InSql());
         }
 
         [Fact]

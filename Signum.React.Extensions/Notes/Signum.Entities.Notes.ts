@@ -12,7 +12,7 @@ export interface NoteEntity extends Entities.Entity {
   Type: "Note";
   title: string | null;
   target: Entities.Lite<Entities.Entity>;
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   text: string;
   createdBy: Entities.Lite<Basics.IUserEntity>;
   noteType: NoteTypeSymbol | null;

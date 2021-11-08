@@ -45,14 +45,14 @@ namespace Signum.Entities.DynamicQuery
 
                     case FilterType.DateTime:
                         {
-                            if (this.Type.UnNullify() == typeof(Date))
+                            if (this.Type.UnNullify() == typeof(DateOnly))
                                 return true;
 
                             PropertyRoute? route = this.GetPropertyRoute();
 
                             if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
                             {
-                                if (route.Type.UnNullify() == typeof(Date))
+                                if (route.Type.UnNullify() == typeof(DateOnly))
                                     return true;
 
                                 var pp = Validator.TryGetPropertyValidator(route);
@@ -163,8 +163,8 @@ namespace Signum.Entities.DynamicQuery
             if (ut == typeof(DateTime))
                 return DateTimeProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
 
-            if (ut == typeof(Date))
-                return DateProperties(this).AndHasValue(this);
+            if (ut == typeof(DateOnly))
+                return DateOnlyProperties(this).AndHasValue(this);
 
             if (ut == typeof(TimeSpan))
                 return TimeSpanProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
@@ -264,9 +264,13 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken?>
             {
                 precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Hours), () => QueryTokenMessage.Hour.NiceToString()),
+                precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.HourStart),
                 precision < DateTimePrecision.Minutes ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Minutes), () => QueryTokenMessage.Minute.NiceToString()),
+                precision < DateTimePrecision.Minutes ? null: new DatePartStartToken(parent, QueryTokenMessage.MinuteStart),
                 precision < DateTimePrecision.Seconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Seconds), () => QueryTokenMessage.Second.NiceToString()),
+                precision < DateTimePrecision.Seconds ? null: new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
                 precision < DateTimePrecision.Milliseconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Milliseconds), () => QueryTokenMessage.Millisecond.NiceToString()),
+
 
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalDays), () => QueryTokenMessage.TotalDays.NiceToString()),
                 precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.TotalHours), () => QueryTokenMessage.TotalHours.NiceToString()),
@@ -276,22 +280,38 @@ namespace Signum.Entities.DynamicQuery
             }.NotNull().ToList();
         }
 
-        public static List<QueryToken> DateProperties(QueryToken parent)
+        public static List<QueryToken> TimeOnlyProperties(QueryToken parent, DateTimePrecision precision)
+        {
+            string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
+
+            return new List<QueryToken?>
+            {
+                precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeOnly dt)=>dt.Hour), () => QueryTokenMessage.Hour.NiceToString()),
+                new DatePartStartToken(parent, QueryTokenMessage.HourStart),
+                precision < DateTimePrecision.Minutes ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeOnly dt)=>dt.Minute), () => QueryTokenMessage.Minute.NiceToString()),
+                new DatePartStartToken(parent, QueryTokenMessage.MinuteStart),
+                precision < DateTimePrecision.Seconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeOnly dt)=>dt.Second), () => QueryTokenMessage.Second.NiceToString()),
+                new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
+                precision < DateTimePrecision.Milliseconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeOnly dt)=>dt.Millisecond), () => QueryTokenMessage.Millisecond.NiceToString()),
+
+            }.NotNull().ToList();
+        }
+
+        public static List<QueryToken> DateOnlyProperties(QueryToken parent)
         {
 
             return new List<QueryToken?>
             {
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.Year), () => QueryTokenMessage.Year.NiceToString()),
-                new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((Date dt ) => dt.Quarter()), ()=> QueryTokenMessage.Quarter.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateOnly dt)=>dt.Year), () => QueryTokenMessage.Year.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((DateOnly dt ) => dt.Quarter()), ()=> QueryTokenMessage.Quarter.NiceToString()),
                 new DatePartStartToken(parent, QueryTokenMessage.QuarterStart),
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.Month),() => QueryTokenMessage.Month.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateOnly dt)=>dt.Month),() => QueryTokenMessage.Month.NiceToString()),
                 new DatePartStartToken(parent, QueryTokenMessage.MonthStart),
-                new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((Date dt ) => dt.WeekNumber()), ()=> QueryTokenMessage.WeekNumber.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((DateOnly dt ) => dt.WeekNumber()), ()=> QueryTokenMessage.WeekNumber.NiceToString()),
                 new DatePartStartToken(parent, QueryTokenMessage.WeekStart),
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.Day), () => QueryTokenMessage.Day.NiceToString()),
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.DayOfYear), () => QueryTokenMessage.DayOfYear.NiceToString()),
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((Date dt)=>dt.DayOfWeek), () => QueryTokenMessage.DayOfWeek.NiceToString()),
-
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateOnly dt)=>dt.Day), () => QueryTokenMessage.Day.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateOnly dt)=>dt.DayOfYear), () => QueryTokenMessage.DayOfYear.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateOnly dt)=>dt.DayOfWeek), () => QueryTokenMessage.DayOfWeek.NiceToString()),
             }.NotNull().ToList();
         }
 
@@ -440,7 +460,7 @@ namespace Signum.Entities.DynamicQuery
                 case FilterType.String: return QueryTokenMessage.Text.NiceToString();
                 case FilterType.Time: return QueryTokenMessage.TimeOfDay.NiceToString();
                 case FilterType.DateTime:
-                    if (type.UnNullify() == typeof(Date))
+                    if (type.UnNullify() == typeof(DateOnly))
                         return QueryTokenMessage.Date.NiceToString();
 
                     return QueryTokenMessage.DateTime.NiceToString();

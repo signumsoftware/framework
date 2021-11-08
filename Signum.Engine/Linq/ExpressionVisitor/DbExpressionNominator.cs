@@ -15,6 +15,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using SqlMethodAttribute = Microsoft.Data.SqlClient.Server.SqlMethodAttribute;
 
 namespace Signum.Engine.Linq
 {
@@ -394,7 +395,7 @@ namespace Signum.Engine.Linq
 
             var obj = Visit(m.Object!);
 
-            if ((!culture.IsReadOnly || isPostgres) && (obj.Type.UnNullify() == typeof(DateTime) || obj.Type.UnNullify() == typeof(Date)))
+            if ((!culture.IsReadOnly || isPostgres) && (obj.Type.UnNullify() == typeof(DateTime) || obj.Type.UnNullify() == typeof(DateOnly)))
                 format = DateTimeExtensions.ToCustomFormatString(format, culture);
 
             if (isPostgres)
@@ -523,7 +524,7 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        static int DaysBetween(Date a, Date b) => (a - b).Days;
+        static int DaysBetween(DateOnly a, DateOnly b) => a.DayNumber - b.DayNumber;
 
         private Expression? TrySqlDifference(SqlEnums unit, Type type, Expression leftSide, Expression rightSide)
         {
@@ -537,9 +538,9 @@ namespace Signum.Engine.Linq
 
             if (isPostgres)
             {
-                if (unit == SqlEnums.day && left.Type == typeof(Date) && right.Type == typeof(Date))
-                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(() => DaysBetween(Date.Today, Date.Today))), typeof(double)));
-
+                if (unit == SqlEnums.day && left.Type == typeof(DateOnly) && right.Type == typeof(DateOnly))
+                    return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(DateOnly.MinValue, DateOnly.MinValue))), typeof(double)));
+              
                 var secondsDouble = new SqlFunctionExpression(typeof(double), null, PostgresFunction.EXTRACT.ToString(), new Expression[]
                 {
                     new SqlLiteralExpression(SqlEnums.epoch),
@@ -784,7 +785,9 @@ namespace Signum.Engine.Linq
 
             return Add(result);
         }
-        
+
+        static PropertyInfo piDayNumber = ReflectionTools.GetPropertyInfo((DateOnly d) => d.DayNumber);
+
         protected override Expression VisitBinary(BinaryExpression b)
         {
             if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
@@ -836,6 +839,14 @@ namespace Signum.Engine.Linq
                 if ((b.NodeType == ExpressionType.Add || b.NodeType == ExpressionType.Subtract) && b.Left.Type.UnNullify() == typeof(TimeSpan) && b.Right.Type.UnNullify() == typeof(TimeSpan))
                 {
                     return TryAddSubtractTimeSpan(b.Left, b.Right, b.NodeType == ExpressionType.Add) ?? b;
+                }
+
+                if (b.NodeType == ExpressionType.Subtract && b.Type == typeof(int) && 
+                    b.Left is MemberExpression leftSide && leftSide.Member is PropertyInfo piLeft && ReflectionTools.PropertyEquals(piLeft, piDayNumber) &&
+                    b.Right is MemberExpression rightSide && rightSide.Member is PropertyInfo piRight && ReflectionTools.PropertyEquals(piRight, piDayNumber))
+                {
+
+                    return TrySqlDifference(SqlEnums.day, b.Type, leftSide.Expression!, rightSide.Expression!) ?? b;
                 }
 
                 b = SmartEqualizer.UnwrapPrimaryKeyBinary(b);
@@ -1369,15 +1380,15 @@ namespace Signum.Engine.Linq
             {
                 case "string.Length": return TrySqlFunction(null, isPostgres ? PostgresFunction.length.ToString() : SqlFunction.LEN.ToString(), m.Type, m.Expression!);
                 case "Math.PI": return TrySqlFunction(null, SqlFunction.PI, m.Type);
-                case "Date.Year":
+                case "DateOnly.Year":
                 case "DateTime.Year": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.year), m.Expression!);
-                case "Date.Month":
+                case "DateOnly.Month":
                 case "DateTime.Month": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.month), m.Expression!);
-                case "Date.Day":
+                case "DateOnly.Day":
                 case "DateTime.Day": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.day), m.Expression!);
-                case "Date.DayOfYear":
+                case "DateOnly.DayOfYear":
                 case "DateTime.DayOfYear": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(isPostgres? SqlEnums.doy: SqlEnums.dayofyear), m.Expression!);
-                case "Date.DayOfWeek":
+                case "DateOnly.DayOfWeek":
                 case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression!);
                 case "DateTime.Hour": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.hour), m.Expression!);
                 case "DateTime.Minute": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression!);
@@ -1579,17 +1590,17 @@ namespace Signum.Engine.Linq
                 case "DateTime.AddYears": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.year);
                 case "DateTime.AddMonths": return TryDateAdd(m.Type, m.Object!, m.GetArgument("months"), SqlEnums.month);
                 case "DateTime.AddDays": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.day);
-                case "Date.AddYears": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.year);
-                case "Date.AddMonths": return TryDateAdd(m.Type, m.Object!, m.GetArgument("months"), SqlEnums.month);
-                case "Date.AddDays": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.day);
+                case "DateOnly.AddYears": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.year);
+                case "DateOnly.AddMonths": return TryDateAdd(m.Type, m.Object!, m.GetArgument("months"), SqlEnums.month);
+                case "DateOnly.AddDays": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.day);
                 case "DateTime.AddHours": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.hour); 
                 case "DateTime.AddMinutes": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.minute); 
                 case "DateTime.AddSeconds": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.second); 
                 case "DateTime.AddMilliseconds": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.millisecond); 
-                case "Date.ToShortString": return GetDateTimeToStringSqlFunction(m, "d");
+                case "DateOnly.ToShortDateString": return GetDateTimeToStringSqlFunction(m, "d");
                 case "DateTime.ToShortDateString": return GetDateTimeToStringSqlFunction(m, "d");
                 case "DateTime.ToShortTimeString": return GetDateTimeToStringSqlFunction(m, "t");
-                case "Date.ToLongString": return GetDateTimeToStringSqlFunction(m, "D");
+                case "DateOnly.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
                 case "DateTime.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
                 case "DateTime.ToLongTimeString": return GetDateTimeToStringSqlFunction(m, "T");
 
@@ -1606,6 +1617,12 @@ namespace Signum.Engine.Linq
 
                 case "DateTimeExtensions.Quarter": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.quarter), m.Arguments.Single());
                 case "DateTimeExtensions.WeekNumber": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.week), m.Arguments.Single());
+
+                case "DateTimeExtensions.ToDate": return TrySqlCast(m.Type, m.GetArgument("dateTime"));
+                case "DateTimeExtensions.ToDateTime": return TrySqlCast(m.Type, m.GetArgument("date"));
+                case "DateOnly.FromDateTime":return  TrySqlCast(m.Type, m.GetArgument("dateTime"));
+
+                case "DateOnly.ToDateTime": return TryAddSubtractDateTimeTimeSpan(m.Object!, m.GetArgument("time"), add: true);
 
                 case "TimeSpan.FromHours": return TryTimeSpanFrom(SqlEnums.hour, m.GetArgument("value"));
                 case "TimeSpan.FromMinute": return TryTimeSpanFrom(SqlEnums.minute, m.GetArgument("value"));
@@ -1663,6 +1680,16 @@ namespace Signum.Engine.Linq
                 case "long.Parse": return Add(new SqlCastExpression(typeof(long), m.GetArgument("s")));
                 default: return null;
             }
+        }
+
+        private Expression? TrySqlCast(Type type, Expression expression)
+        {
+            var e = Visit(expression);
+
+            if (Has(e))
+                return Add(new SqlCastExpression(type, e));
+
+            return null;
         }
 
         private Expression? TryTimeSpanFrom(SqlEnums unit, Expression expression)

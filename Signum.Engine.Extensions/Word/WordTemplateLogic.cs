@@ -458,7 +458,7 @@ namespace Signum.Engine.Word
                     var oldHash = file.Hash;
                     try
                     {
-                        SynchronizationContext sc = new SynchronizationContext(replacements, sd, qd, template.Model?.ToType());
+                        var sc = new TemplateSynchronizationContext(replacements, sd, qd, template.Model?.ToType());
 
                         var bytes = template.ProcessOpenXmlPackage(document =>
                         {

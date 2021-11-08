@@ -77,6 +77,9 @@ namespace Signum.Upgrade
         public string LogicDirectory => Path.Combine(RootFolder, ApplicationName + ".Logic");
         public string TerminalDirectory => Path.Combine(RootFolder, ApplicationName + ".Terminal");
         public string ReactDirectory => Path.Combine(RootFolder, ApplicationName + ".React");
+        public string TestEnvironmentDirectory => Path.Combine(RootFolder, ApplicationName + ".Test.Environment");
+        public string TestLogicDirectory => Path.Combine(RootFolder, ApplicationName + ".Test.Logic");
+        public string TestReactDirectory => Path.Combine(RootFolder, ApplicationName + ".Test.React");
 
         public WarningLevel HasWarnings { get; internal set; }
 

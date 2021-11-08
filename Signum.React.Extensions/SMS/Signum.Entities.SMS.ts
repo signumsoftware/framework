@@ -53,7 +53,7 @@ export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLin
   message: string;
   editableMessage: boolean;
   from: string | null;
-  sendDate: string | null;
+  sendDate: string /*DateTime*/ | null;
   state: SMSMessageState;
   destinationNumber: string;
   messageID: string | null;

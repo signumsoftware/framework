@@ -297,7 +297,7 @@ namespace Signum.Entities
 
     class PrimaryKeyTypeConverter : TypeConverter
     {
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
         {
             return
                 sourceType == typeof(int) || sourceType == typeof(int?) ||
@@ -305,7 +305,7 @@ namespace Signum.Entities
                 sourceType == typeof(Guid) || sourceType == typeof(Guid?);
         }
 
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
         {
             return
                destinationType == typeof(int) || destinationType == typeof(int?) ||
@@ -313,14 +313,14 @@ namespace Signum.Entities
                destinationType == typeof(Guid) || destinationType == typeof(Guid?);
         }
 
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
         {
             return new PrimaryKey((IComparable)value);
         }
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        public override object ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
         {
-            return ((PrimaryKey)value).Object;
+            return ((PrimaryKey)value!).Object;
         }
     }
 }

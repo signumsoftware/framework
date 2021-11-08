@@ -48,7 +48,7 @@ namespace Signum.React.Filters
                 {
                     var req = context.HttpContext.Request;
 
-                    var connFeature = context.HttpContext.Features.Get<IHttpConnectionFeature>();
+                    var connFeature = context.HttpContext.Features.Get<IHttpConnectionFeature>()!;
 
                     var exLog = context.Exception.LogException(e =>
                     {

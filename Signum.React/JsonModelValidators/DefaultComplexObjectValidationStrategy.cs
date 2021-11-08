@@ -97,9 +97,9 @@ namespace Signum.React.JsonModelValidators
                 throw new NotImplementedException();
             }
 
-            private static object GetModel(object container, ModelMetadata property)
+            private static object? GetModel(object container, ModelMetadata property)
             {
-                return property.PropertyGetter(container);
+                return property.PropertyGetter!(container);
             }
 
             // Our property accessors don't work on Mono 4.0.4 - see https://github.com/aspnet/External/issues/44

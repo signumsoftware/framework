@@ -34,7 +34,7 @@ export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEnt
   location: ToolbarLocation;
   priority: number | null;
   elements: Entities.MList<ToolbarElementEmbedded>;
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export const ToolbarLocation = new EnumType<ToolbarLocation>("ToolbarLocation");
@@ -47,7 +47,7 @@ export const ToolbarMenuEntity = new Type<ToolbarMenuEntity>("ToolbarMenu");
 export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "ToolbarMenu";
   owner: Entities.Lite<Entities.Entity> | null;
-  guid: string;
+  guid: string /*Guid*/;
   name: string;
   elements: Entities.MList<ToolbarElementEmbedded>;
 }

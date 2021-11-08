@@ -256,7 +256,7 @@ namespace Signum.Engine.Authorization
         private static string ToStringValue(object? value)
         {
             return value is string str ? $"'{str}'" :
-                value is Utilities.Date date ? $"'{date.ToIsoString()}'" :
+                value is DateOnly date ? $"'{date.ToIsoString()}'" :
                 value is DateTime dt ? $"'{dt.ToIsoString()}'" :
                 value is DateTimeOffset dto ? $"'{dto.DateTime.ToIsoString()}'" :
                 value is Guid guid ? $"'{guid.ToString()}'" :

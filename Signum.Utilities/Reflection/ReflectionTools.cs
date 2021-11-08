@@ -392,7 +392,7 @@ namespace Signum.Utilities.Reflection
 
         public static bool IsDate(Type type)
         {
-            return type == typeof(Date)
+            return type == typeof(DateOnly)
                 || type == typeof(DateTime)
                 || type == typeof(DateTimeOffset);
         }
@@ -444,8 +444,8 @@ namespace Signum.Utilities.Reflection
             if (utype == typeof(Guid))
                 return (T)(object)Guid.Parse(value);
 
-            if (utype == typeof(Date))
-                return (T)(object)Date.Parse(value);
+            if (utype == typeof(DateOnly))
+                return (T)(object)DateOnly.Parse(value);
 
             return (T)Convert.ChangeType(value, utype)!;
         }
@@ -465,8 +465,8 @@ namespace Signum.Utilities.Reflection
             if (utype == typeof(Guid))
                 return Guid.Parse(value);
 
-            if (utype == typeof(Date))
-                return Date.Parse(value);
+            if (utype == typeof(DateOnly))
+                return DateOnly.Parse(value);
 
             if (CustomParsers.TryGetValue(utype, out var func))
                 return func(value); //Delay reference
@@ -706,9 +706,9 @@ namespace Signum.Utilities.Reflection
                 }
                 else return false;
             }
-            else if (utype == typeof(Date))
+            else if (utype == typeof(DateOnly))
             {
-                if (Date.TryParse(value, ci, DateTimeStyles.None, out Date _result))
+                if (DateOnly.TryParse(value, ci, DateTimeStyles.None, out DateOnly _result))
                 {
                     result = _result;
                     return true;
@@ -771,16 +771,16 @@ namespace Signum.Utilities.Reflection
                 if (utype == typeof(Guid) && value is string s)
                     return (T)(object)Guid.Parse(s);
 
-                if (utype == typeof(Date))
+                if (utype == typeof(DateOnly))
                 {
                     if (value is string s2)
-                        return (T)(object)Date.Parse(s2);
+                        return (T)(object)DateOnly.Parse(s2);
 
                     if (value is DateTime dt)
-                        return (T)(object)(Date)dt;
+                        return (T)(object)DateOnly.FromDateTime(dt);
 
                     if (value is DateTimeOffset dto)
-                        return (T)(object)(Date)dto.DateTime;
+                        return (T)(object)DateOnly.FromDateTime(dto.DateTime);
                 }
 
                 if (utype == typeof(DateTime))
@@ -821,16 +821,16 @@ namespace Signum.Utilities.Reflection
                 if (utype == typeof(Guid) && value is string)
                     return Guid.Parse((string)value);
 
-                if (utype == typeof(Date))
+                if (utype == typeof(DateOnly))
                 {
                     if (value is string s2)
-                        return Date.Parse(s2);
+                        return DateOnly.Parse(s2);
 
                     if (value is DateTime dt)
-                        return (Date)dt;
+                        return DateOnly.FromDateTime(dt);
 
                     if (value is DateTimeOffset dto)
-                        return (Date)dto.DateTime;
+                        return DateOnly.FromDateTime(dto.DateTime);
                 }
 
                 var conv = TypeDescriptor.GetConverter(type);

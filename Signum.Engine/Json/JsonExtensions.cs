@@ -30,7 +30,7 @@ namespace Signum.Engine.Json
                     new LiteJsonConverterFactory(),
                     new JsonStringEnumConverter(),
                     new TimeSpanConverter(),
-                    new DateConverter()
+                    new DateOnlyConverter()
                 }
             };
         }

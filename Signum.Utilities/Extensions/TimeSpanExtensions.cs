@@ -3,6 +3,7 @@ using System.Text;
 
 namespace Signum.Utilities
 {
+
     public static class TimeSpanExtensions
     {
 

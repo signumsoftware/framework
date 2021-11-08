@@ -539,7 +539,7 @@ namespace Signum.Engine.CodeGeneration
             if (type.IsEnum)
                 return true;
 
-            if (type == typeof(TimeSpan) || type == typeof(Date) || type == typeof(DateTimeOffset) || type == typeof(Guid))
+            if (type == typeof(TimeSpan) || type == typeof(DateOnly)  || type == typeof(TimeOnly) || type == typeof(DateTimeOffset) || type == typeof(Guid))
                 return true;
 
             TypeCode tc = Type.GetTypeCode(type);

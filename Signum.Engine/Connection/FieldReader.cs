@@ -13,6 +13,8 @@ using Npgsql;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.Server;
+using IBinarySerializeOld = Microsoft.SqlServer.Server.IBinarySerialize;
+using IBinarySerializeNew = Microsoft.Data.SqlClient.Server.IBinarySerialize;
 
 namespace Signum.Engine
 {
@@ -392,28 +394,28 @@ namespace Signum.Engine
             return GetDateTime(ordinal);
         }
 
-        public Date GetDate(int ordinal)
+        public DateOnly GetDateOnly(int ordinal)
         {
             LastOrdinal = ordinal;
-            LastMethodName = nameof(GetDate);
+            LastMethodName = nameof(GetDateOnly);
             var dt = typeCodes[ordinal] switch
             {
-                TypeCode.DateTime => new Date(reader.GetDateTime(ordinal)),
-                FieldReader.tcNpgsqlDate => new Date((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal)),
-                _ => new Date(ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal))),
+                TypeCode.DateTime => reader.GetDateTime(ordinal).ToDateOnly(),
+                FieldReader.tcNpgsqlDate => ((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal)).ToDateOnly(),
+                _ => ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)).ToDateOnly(),
             };
             return dt;
         }
 
-        public Date? GetNullableDate(int ordinal)
+        public DateOnly? GetNullableDateOnly(int ordinal)
         {
             LastOrdinal = ordinal;
-            LastMethodName = nameof(GetNullableDate);
+            LastMethodName = nameof(GetNullableDateOnly);
             if (reader.IsDBNull(ordinal))
             {
                 return null;
             }
-            return GetDate(ordinal);
+            return GetDateOnly(ordinal);
         }
 
         public DateTimeOffset GetDateTimeOffset(int ordinal)
@@ -471,6 +473,33 @@ namespace Signum.Engine
             return GetTimeSpan(ordinal);
         }
 
+        public TimeOnly GetTimeOnly(int ordinal)
+        {
+            LastOrdinal = ordinal;
+            LastMethodName = nameof(GetTimeOnly);
+            switch (typeCodes[ordinal])
+            {
+                case tcTimeSpan:
+                    if (isPostgres)
+                        return TimeOnly.FromTimeSpan(((NpgsqlDataReader)reader).GetTimeSpan(ordinal));
+                    else
+                        return TimeOnly.FromTimeSpan(((SqlDataReader)reader).GetTimeSpan(ordinal));
+                default:
+                    return TimeOnly.FromTimeSpan(ReflectionTools.ChangeType<TimeSpan>(reader.GetValue(ordinal)));
+            }
+        }
+
+        public TimeOnly? GetNullableTimeOnly(int ordinal)
+        {
+            LastOrdinal = ordinal;
+            LastMethodName = nameof(GetNullableTimeOnly);
+            if (reader.IsDBNull(ordinal))
+            {
+                return null;
+            }
+            return GetTimeOnly(ordinal);
+        }
+
 
         public Guid GetGuid(int ordinal)
         {
@@ -494,12 +523,27 @@ namespace Signum.Engine
             return GetGuid(ordinal);
         }
       
-        static readonly MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<IBinarySerialize>(0)).GetGenericMethodDefinition(); 
+        static readonly MethodInfo miGetUdtOld = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdtOld<IBinarySerializeOld>(0)).GetGenericMethodDefinition(); 
 
-        public T GetUdt<T>(int ordinal) where T : IBinarySerialize
+        public T GetUdtOld<T>(int ordinal) where T : IBinarySerializeOld
         {
             LastOrdinal = ordinal;
-            LastMethodName = nameof(GetUdt) + "<" + typeof(T).Name + ">";
+            LastMethodName = nameof(GetUdtOld) + "<" + typeof(T).Name + ">";
+            if (reader.IsDBNull(ordinal))
+            {
+                return (T)(object)null!;
+            }
+
+            var udt = Activator.CreateInstance<T>();
+            udt.Read(new BinaryReader(reader.GetStream(ordinal)));
+            return udt;
+        }
+
+        static readonly MethodInfo miGetUdtNew = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdtNew<IBinarySerializeNew>(0)).GetGenericMethodDefinition(); 
+        public T GetUdtNew<T>(int ordinal) where T : IBinarySerializeNew
+        {
+            LastOrdinal = ordinal;
+            LastMethodName = nameof(GetUdtOld) + "<" + typeof(T).Name + ">";
             if (reader.IsDBNull(ordinal))
             {
                 return (T)(object)null!;
@@ -515,7 +559,7 @@ namespace Signum.Engine
         public T[] GetArray<T>(int ordinal)
         {
             LastOrdinal = ordinal;
-            LastMethodName = nameof(GetUdt) + "<" + typeof(T).Name + ">";
+            LastMethodName = nameof(GetArray) + "<" + typeof(T).Name + ">";
             if (reader.IsDBNull(ordinal))
             {
                 return (T[])(object)null!;
@@ -557,12 +601,18 @@ namespace Signum.Engine
             if (mi != null)
                 return Expression.Call(reader, mi, Expression.Constant(ordinal));
 
-            if (typeof(IBinarySerialize).IsAssignableFrom(type.UnNullify()))
+            if (typeof(IBinarySerializeOld).IsAssignableFrom(type.UnNullify()))
             {
-                if (type.IsNullable())
-                    return Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal)).Nullify();
-                else
-                    return Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
+                var res = Expression.Call(reader, miGetUdtOld.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
+
+                return type.IsNullable() ? res.Nullify() : res;
+            }
+
+            if (typeof(IBinarySerializeNew).IsAssignableFrom(type.UnNullify()))
+            {
+                var res = Expression.Call(reader, miGetUdtNew.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
+
+                return type.IsNullable() ? res.Nullify() : res;
             }
 
             if (type.IsArray)

@@ -66,7 +66,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   columns: Entities.MList<QueryColumnEmbedded>;
   paginationMode: DynamicQuery.PaginationMode | null;
   elementsPerPage: number | null;
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export module UserQueryMessage {

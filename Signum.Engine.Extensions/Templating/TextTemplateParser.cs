@@ -256,7 +256,7 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public static string Synchronize(string text, SynchronizationContext sc)
+        public static string Synchronize(string text, TemplateSynchronizationContext sc)
         {
             BlockNode node = new TextTemplateParserImp(text, sc.QueryDescription, sc.ModelType).ParseSync();
 

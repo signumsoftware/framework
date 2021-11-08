@@ -28,10 +28,10 @@ namespace Signum.Engine.Calendar
             }
         }
 
-        public static void CreateDays(Date startDate, Date endDate)
+        public static void CreateDays(DateOnly startDate, DateOnly endDate)
         {
             List<CalendarDayEntity> days = new List<CalendarDayEntity>();
-            for (Date d = startDate; d < endDate; d = d.AddDays(1))
+            for (DateOnly d = startDate; d < endDate; d = d.AddDays(1))
                 days.Add(new CalendarDayEntity { Date = d });
             days.BulkInsert();
         }

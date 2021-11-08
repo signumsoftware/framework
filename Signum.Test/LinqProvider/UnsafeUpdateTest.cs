@@ -379,7 +379,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
                 int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate()
-                    .Set(a => a.OtherTarget, a => a.CreationTime > TimeZoneManager.Today ? michael.ToLite() : null)
+                    .Set(a => a.OtherTarget, a => a.CreationTime > TimeZoneManager.Now ? michael.ToLite() : null)
                     .Execute();
                 //tr.Commit();
             }

@@ -23,6 +23,7 @@ namespace Signum.Engine.Maps
 
         public TimeZoneMode TimeZoneMode { get; set; }
 
+        public DateTimeKind DateTimeKind => TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
         public Func<Entity, Expression<Func<Entity, bool>>?>? AttachToUniqueFilter = null;
 
         Version? version;

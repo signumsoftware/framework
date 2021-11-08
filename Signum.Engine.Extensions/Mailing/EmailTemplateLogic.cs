@@ -392,7 +392,7 @@ namespace Signum.Engine.Mailing
 
                         foreach (var item in et.Messages)
                         {
-                            SynchronizationContext sc = new SynchronizationContext(replacements, sd, qd, et.Model?.ToType());
+                            var sc = new TemplateSynchronizationContext(replacements, sd, qd, et.Model?.ToType());
 
                             item.Subject = TextTemplateParser.Synchronize(item.Subject, sc);
                             item.Text = TextTemplateParser.Synchronize(item.Text, sc);

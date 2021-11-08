@@ -195,7 +195,7 @@ export const PredictorEpochProgressEntity = new Type<PredictorEpochProgressEntit
 export interface PredictorEpochProgressEntity extends Entities.Entity {
   Type: "PredictorEpochProgress";
   predictor: Entities.Lite<PredictorEntity>;
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   ellapsed: number;
   trainingExamples: number;
   epoch: number;

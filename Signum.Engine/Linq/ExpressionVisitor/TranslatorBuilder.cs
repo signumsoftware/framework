@@ -227,8 +227,8 @@ namespace Signum.Engine.Linq
                     b.IsValueType && b.Nullify() == a)
                     return true;
 
-                if (a == typeof(Date) && b == typeof(DateTime) ||
-                    a == typeof(DateTime) && b == typeof(Date))
+                if (a == typeof(DateOnly) && b == typeof(DateTime) ||
+                    a == typeof(DateTime) && b == typeof(DateOnly))
                     return true;
 
                 return false;

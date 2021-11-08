@@ -19,7 +19,7 @@ namespace Signum.Engine.Templating
 
         public abstract bool Evaluate(TemplateParameters p);
 
-        public abstract void Synchronize(SynchronizationContext sc, string remainingText);
+        public abstract void Synchronize(TemplateSynchronizationContext sc, string remainingText);
 
         public abstract void Declare(ScopedDictionary<string, ValueProviderBase> variables);
         
@@ -82,7 +82,7 @@ namespace Signum.Engine.Templating
             this.RightNode.FillQueryTokens(tokens);
         }
 
-        public override void Synchronize(SynchronizationContext sc, string remainingText)
+        public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
         {
             this.LeftNode.Synchronize(sc, remainingText);
             this.RightNode.Synchronize(sc, remainingText);
@@ -132,7 +132,7 @@ namespace Signum.Engine.Templating
             this.RightNode.FillQueryTokens(tokens);
         }
 
-        public override void Synchronize(SynchronizationContext sc, string remainingText)
+        public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
         {
             this.LeftNode.Synchronize(sc, remainingText);
             this.RightNode.Synchronize(sc, remainingText);
@@ -224,7 +224,7 @@ namespace Signum.Engine.Templating
             return true;
         }
 
-        public override void Synchronize(SynchronizationContext sc, string remainingText)
+        public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
         {
             this.ValueProvider!.Synchronize(sc, remainingText);
 
