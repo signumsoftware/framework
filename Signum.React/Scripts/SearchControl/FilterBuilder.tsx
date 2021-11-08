@@ -457,9 +457,9 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       }
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
         if (f.value) {
-          const type = newToken.type.name as "Date" | "DateTime";
+          const type = newToken.type.name as "DateOnly" | "DateTime";
           const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
-          f.value = type == "Date" ? date.toISODate() : date.toISO();
+          f.value = type == "DateOnly" ? date.toISODate() : date.toISO();
         }
       }
     }

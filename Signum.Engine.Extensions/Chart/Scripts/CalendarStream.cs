@@ -12,7 +12,7 @@ namespace Signum.Engine.Chart.Scripts
             this.Icon = ChartScriptLogic.LoadIcon("calendar.png");
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Date", ChartColumnType.Date),
+                new ChartScriptColumn("Date", ChartColumnType.DateOnly),
                 new ChartScriptColumn("Color Scale", ChartColumnType.Magnitude) 
             };
             this.ParameterGroups = new List<ChartScriptParameterGroup>

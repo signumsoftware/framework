@@ -48,7 +48,7 @@ export const ChartColumnType = new EnumType<ChartColumnType>("ChartColumnType");
 export type ChartColumnType =
   "Integer" |
   "Real" |
-  "Date" |
+  "DateOnly" |
   "DateTime" |
   "String" |
   "Lite" |

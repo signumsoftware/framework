@@ -13,8 +13,6 @@ using Npgsql;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.Server;
-using IBinarySerializeOld = Microsoft.SqlServer.Server.IBinarySerialize;
-using IBinarySerializeNew = Microsoft.Data.SqlClient.Server.IBinarySerialize;
 
 namespace Signum.Engine
 {
@@ -523,27 +521,12 @@ namespace Signum.Engine
             return GetGuid(ordinal);
         }
       
-        static readonly MethodInfo miGetUdtOld = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdtOld<IBinarySerializeOld>(0)).GetGenericMethodDefinition(); 
 
-        public T GetUdtOld<T>(int ordinal) where T : IBinarySerializeOld
+        static readonly MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<IBinarySerialize>(0)).GetGenericMethodDefinition(); 
+        public T GetUdt<T>(int ordinal) where T : IBinarySerialize
         {
             LastOrdinal = ordinal;
-            LastMethodName = nameof(GetUdtOld) + "<" + typeof(T).Name + ">";
-            if (reader.IsDBNull(ordinal))
-            {
-                return (T)(object)null!;
-            }
-
-            var udt = Activator.CreateInstance<T>();
-            udt.Read(new BinaryReader(reader.GetStream(ordinal)));
-            return udt;
-        }
-
-        static readonly MethodInfo miGetUdtNew = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdtNew<IBinarySerializeNew>(0)).GetGenericMethodDefinition(); 
-        public T GetUdtNew<T>(int ordinal) where T : IBinarySerializeNew
-        {
-            LastOrdinal = ordinal;
-            LastMethodName = nameof(GetUdtOld) + "<" + typeof(T).Name + ">";
+            LastMethodName = nameof(GetUdt) + "<" + typeof(T).Name + ">";
             if (reader.IsDBNull(ordinal))
             {
                 return (T)(object)null!;
@@ -601,16 +584,9 @@ namespace Signum.Engine
             if (mi != null)
                 return Expression.Call(reader, mi, Expression.Constant(ordinal));
 
-            if (typeof(IBinarySerializeOld).IsAssignableFrom(type.UnNullify()))
+            if (typeof(IBinarySerialize).IsAssignableFrom(type.UnNullify()))
             {
-                var res = Expression.Call(reader, miGetUdtOld.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
-
-                return type.IsNullable() ? res.Nullify() : res;
-            }
-
-            if (typeof(IBinarySerializeNew).IsAssignableFrom(type.UnNullify()))
-            {
-                var res = Expression.Call(reader, miGetUdtNew.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
+                var res = Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
 
                 return type.IsNullable() ? res.Nullify() : res;
             }

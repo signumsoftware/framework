@@ -506,7 +506,7 @@ export function getTypeColor(type: TypeReference) {
     case "string":
     case "Guid":
     case "boolean": return "#000000";
-    case "Date": return "#5100A1";
+    case "DateOnly": return "#5100A1";
     case "DateTime": return "#5100A1";
     default:
       {
@@ -540,7 +540,7 @@ export function getNiceTypeName(tr: TypeReference) {
     case "string": return QueryTokenMessage.Text.niceToString();
     case "Guid": return QueryTokenMessage.GlobalUniqueIdentifier.niceToString();
     case "boolean": return QueryTokenMessage.Check.niceToString();
-    case "Date": return QueryTokenMessage.Date.niceToString();
+    case "DateOnly": return QueryTokenMessage.Date.niceToString();
     case "DateTime": return QueryTokenMessage.DateTime.niceToString();
     default:
       {

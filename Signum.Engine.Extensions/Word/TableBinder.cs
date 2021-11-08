@@ -279,7 +279,7 @@ namespace Signum.Engine.Word
         {
             return val == null ? null :
                 (val is DateTime dt) ? ExcelExtensions.ToExcelDate(dt) :
-                (val is Date d) ? ExcelExtensions.ToExcelDate((Date)d) :
+                (val is DateOnly d) ? ExcelExtensions.ToExcelDate(d.ToDateTime()) :
                 (val is IFormattable fmt) ? fmt.ToString(null, CultureInfo.InvariantCulture) :
                 val.ToString();
         }

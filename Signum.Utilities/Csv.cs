@@ -423,11 +423,11 @@ namespace Signum.Utilities
                 else
                     return DateTime.ParseExact(s, format, culture);
 
-            if (type == typeof(Date))
+            if (type == typeof(DateOnly))
                 if (format == null)
-                    return Date.Parse(s, culture);
+                    return DateOnly.Parse(s, culture);
                 else
-                    return Date.ParseExact(s, format, culture);
+                    return DateOnly.ParseExact(s, format, culture);
 
             if (type == typeof(Guid))
                 return Guid.Parse(s);

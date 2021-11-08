@@ -29,7 +29,8 @@ namespace Signum.React.Authorization
         public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
             Configuration = tokenConfig;
-            CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(Encoding.UTF8.GetBytes(hashableEncryptionKey)));
+            using var md5 = MD5.Create();
+            CryptoKey = md5.ComputeHash(Encoding.UTF8.GetBytes(hashableEncryptionKey));
 
             SignumAuthenticationFilter.Authenticators.Add(TokenAuthenticator);
             SignumAuthenticationFilter.Authenticators.Add(AnonymousUserAuthenticator);
@@ -192,50 +193,33 @@ namespace Signum.React.Authorization
         //http://stackoverflow.com/questions/8041451/good-aes-initialization-vector-practice
         static byte[] Encrypt(byte[] toEncryptBytes)
         {
-            using (var provider = new AesCryptoServiceProvider())
-            {
-                provider.Key = CryptoKey;
-                provider.Mode = CipherMode.CBC;
-                provider.Padding = PaddingMode.PKCS7;
-                using (var encryptor = provider.CreateEncryptor(provider.Key, provider.IV))
-                {
-                    using (var ms = new MemoryStream())
-                    {
-                        ms.Write(provider.IV, 0, provider.IV.Length);
-                        using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-                        {
-                            cs.Write(toEncryptBytes, 0, toEncryptBytes.Length);
-                            cs.FlushFinalBlock();
-                        }
-                        return ms.ToArray();
-                    }
-                }
-            }
+            using var provider = Aes.Create();
+            provider.Key = CryptoKey;
+            provider.Mode = CipherMode.CBC;
+            provider.Padding = PaddingMode.PKCS7;
+            using var encryptor = provider.CreateEncryptor(provider.Key, provider.IV);
+            using var ms = new MemoryStream();
+            ms.Write(provider.IV, 0, provider.IV.Length);
+            using var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
+                cs.Write(toEncryptBytes, 0, toEncryptBytes.Length);
+                cs.FlushFinalBlock();
+            return ms.ToArray();
         }
 
         static byte[] Decrypt(byte[] encryptedString)
         {
-            using (var provider = new AesCryptoServiceProvider())
-            {
-                provider.Key = CryptoKey;
-                using (var ms = new MemoryStream(encryptedString))
-                {
-                    // Read the first 16 bytes which is the IV.
-                    byte[] iv = new byte[16];
-                    ms.Read(iv, 0, 16);
-                    provider.IV = iv;
+            using var provider = Aes.Create();
+            provider.Key = CryptoKey;
+            using var ms = new MemoryStream(encryptedString);
+            // Read the first 16 bytes which is the IV.
+            byte[] iv = new byte[16];
+            ms.Read(iv, 0, 16);
+            provider.IV = iv;
 
-                    using (var decryptor = provider.CreateDecryptor())
-                    {
-                        using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                        {
-                            return cs.ReadAllBytes();
-                        }
-                    }
-                }
-            }
+            using var decryptor = provider.CreateDecryptor();
+            using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+            return cs.ReadAllBytes();
         }
-
     }
 
     [Serializable]

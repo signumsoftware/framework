@@ -405,7 +405,6 @@ namespace Signum.Engine.Maps
         public string? GetUdtName(Type udtType)
         {
             var att = udtType.GetCustomAttribute<SqlUserDefinedTypeAttribute>();
-            var att = udtType.GetCustomAttribute<SqlUserDefinedTypeAttribute>();
 
             if (att == null)
                 return null;

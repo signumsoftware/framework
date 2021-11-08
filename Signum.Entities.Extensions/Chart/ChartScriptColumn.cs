@@ -28,7 +28,7 @@ namespace Signum.Entities.Chart
         [Code("r")]
         Real = 2,
         [Code("d")]
-        Date = 4,
+        DateOnly = 4,
         [Code("dt")]
         DateTime = 8,
         [Code("s")]
@@ -43,11 +43,11 @@ namespace Signum.Entities.Chart
         Time = 256,
 
         [Code("G")]
-        Groupable = ChartColumnTypeUtils.GroupMargin | RealGroupable | Integer | Date | String | Lite | Enum,
+        Groupable = ChartColumnTypeUtils.GroupMargin | RealGroupable | Integer | DateOnly | String | Lite | Enum,
         [Code("M")]
         Magnitude = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable,
         [Code("P")]
-        Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | Date | DateTime | Time,
+        Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | DateOnly | DateTime | Time,
     }
 
 

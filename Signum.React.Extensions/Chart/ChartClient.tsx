@@ -236,7 +236,7 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
     case "Groupable": return [
       "RealGroupable",
       "Integer",
-      "Date",
+      "DateOnly",
       "String",
       "Lite",
       "Enum"].contains(type);
@@ -250,7 +250,7 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
       "Integer",
       "Real",
       "RealGroupable",
-      "Date",
+      "DateOnly",
       "DateTime",
       "Time"].contains(type);
   }
@@ -269,7 +269,7 @@ export function getChartColumnType(token: QueryToken): ChartColumnType | undefin
     case "Guid": return "String";
     case "Integer": return "Integer";
     case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
-    case "DateTime": return token.isGroupable ? "Date" : "DateTime";
+    case "DateTime": return token.isGroupable ? "DateOnly" : "DateTime";
     case "Time": return "Time";
   }
 
@@ -592,7 +592,7 @@ export module API {
       case "Guid": return "String";
       case "Integer": return "Integer";
       case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
-      case "DateTime": return token.isGroupable ? "Date" : "DateTime";
+      case "DateTime": return token.isGroupable ? "DateOnly" : "DateTime";
       case "Time": return "Time";
       default: return null;
     }
@@ -656,7 +656,7 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = toLuxonFormat(chartColumn.format || token.format, token.type.name as "Date" | "DateTime");
+        var format = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
         return date == null ? String(null) : DateTime.fromISO(date).toFormatFixed(format);
       };
 

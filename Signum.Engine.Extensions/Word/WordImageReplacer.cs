@@ -11,6 +11,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+#pragma warning disable CA1416 // Validate platform compatibility
 
 namespace Signum.Engine.Word
 {

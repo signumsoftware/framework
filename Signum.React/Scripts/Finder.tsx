@@ -144,7 +144,7 @@ export namespace Options {
   export let tokenCanSetPropery = (qt: QueryToken) =>
     qt.filterType == "Lite" && qt.key != "Entity" ||
     qt.filterType == "Enum" && !isState(qt.type) ||
-    qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "Date";
+    qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "DateOnly";
 
   export let isState = (ti: TypeReference) => ti.name.endsWith("State");
 
@@ -514,7 +514,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
     return undefined;
   }
 
-  if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti?.kind == "Enum") {
+  if (type.name == "string" || type.name == "Guid" || type.name == "DateOnly" || ti?.kind == "Enum") {
     if (typeof value === "string")
       return Promise.resolve(value);
 
@@ -1257,20 +1257,20 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
         if (val.length == 10 && token.type.name == "DateTime") //Date -> DateTime
           return dt.toISO();
 
-        if (val.length > 10 && token.type.name == "Date") //DateTime -> Date
+        if (val.length > 10 && token.type.name == "DateOnly") //DateTime -> Date
           return dt.toISODate();
 
         return val;
       }
 
       if (val instanceof DateTime) {
-        if (token.type.name == "Date") //DateTime -> Date
+        if (token.type.name == "DateOnly") //DateTime -> Date
           return val.toISODate();
         return val.toISO();
       }
 
       if (val instanceof Date) {
-        if (token.type.name == "Date") //DateTime -> Date
+        if (token.type.name == "DateOnly") //DateTime -> Date
           return DateTime.fromJSDate(val).toISODate();
         return DateTime.fromJSDate(val).toISO();
       }
@@ -1833,10 +1833,10 @@ export const formatRules: FormatRule[] = [
     formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid try-no-wrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
   },
   {
-    name: "Date",
+    name: "DateTime",
     isApplicable: qt => qt.filterType == "DateTime",
     formatter: qt => {
-      const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
+      const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
       return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
@@ -1860,7 +1860,7 @@ export const formatRules: FormatRule[] = [
           ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
             undefined;
 
-        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
+        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
         return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       }, "date-cell");
     }
@@ -1877,7 +1877,7 @@ export const formatRules: FormatRule[] = [
           ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
             undefined;
 
-        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
+        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
         return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       }, "date-cell");
     }

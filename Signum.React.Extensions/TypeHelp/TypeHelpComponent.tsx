@@ -231,7 +231,7 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
       );
 
     var kind = type.firstLower() == type ? "primitive" :
-      type == "DateTime" || type == "Date" || type == "TimeSpan"  ? "date" :
+      type == "DateTime" || type == "DateOnly" || type == "TimeSpan" || type == "TimeOnly"   ? "date" :
         type == "Lite" ? "lite" :
           type == "IEnumerable" || type == "IQueryable" || type == "List" || type == "MList" ? "collection" :
             isTypeEnum(type) ? "enum" : "others";

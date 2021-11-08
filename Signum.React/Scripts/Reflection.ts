@@ -74,10 +74,10 @@ export type OperationType =
 
 //https://moment.github.io/luxon/docs/manual/formatting.html#formatting-with-tokens--strings-for-cthulhu-
 //https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings
-export function toLuxonFormat(format: string | undefined, type: "Date" | "DateTime"): string {
+export function toLuxonFormat(format: string | undefined, type: "DateOnly" | "DateTime"): string {
 
   if (!format)
-    return type == "Date" ? "D" : "F";
+    return type == "DateOnly" ? "D" : "F";
   
   switch (format) {
     case "d": return "D"; // toFormatWithFixes
@@ -341,7 +341,7 @@ export function numberToString(val: any, format?: string) {
   return toNumberFormat(format).format(val);
 }
 
-export function dateToString(val: any, type: "Date" | "DateTime", format?: string) {
+export function dateToString(val: any, type: "DateOnly" | "DateTime", format?: string) {
   if (val == null)
     return "";
 

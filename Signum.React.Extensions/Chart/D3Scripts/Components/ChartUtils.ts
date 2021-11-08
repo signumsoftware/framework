@@ -54,7 +54,7 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
       .nice();
 
   if (scaleName == "MinMax") {
-    if (column.type == "Date" || column.type == "DateTime") {
+    if (column.type == "DateOnly" || column.type == "DateTime") {
       var dates = values.map(d => new Date(d));
 
       const scale = d3.scaleTime()
@@ -119,8 +119,8 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     return values;
 
   function normalizeToken(qt: QueryToken): { normalized: QueryToken, lastPart?: QueryToken } {
-    if ((qt.type.name == "Date" || qt.type.name == "DateTime") &&
-      qt.parent && (qt.parent.type.name == "Date" || qt.parent.type.name == "DateTime"))
+    if ((qt.type.name == "DateOnly" || qt.type.name == "DateTime") &&
+      qt.parent && (qt.parent.type.name == "DateOnly" || qt.parent.type.name == "DateTime"))
       switch (qt.key) {
         case "SecondStart":
         case "MinuteStart":
@@ -201,10 +201,10 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
   if (column.type == "Lite" || column.type == "String")
     return values;
 
-  if (column.type == "Date" || column.type == "DateTime") {
+  if (column.type == "DateOnly" || column.type == "DateTime") {
 
     const unit: DurationUnit | null = columnNomalized.lastPart != null ? durationUnit(columnNomalized.lastPart.key) :
-      columnNomalized.normalized.type.name == "Date" ? "day" : null;
+      columnNomalized.normalized.type.name == "DateOnly" ? "day" : null;
 
     if (unit == null)
       return values;
@@ -223,7 +223,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //             Min-> 1.4.2000
 
         var filterUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) :
-          f.token?.type.name == "Date" ? "day" : null;
+          f.token?.type.name == "DateOnly" ? "day" : null;
 
         const newValue = filterUnit == null ? value :
           f.operation == "GreaterThan" ? floor(value, filterUnit).plus({ [filterUnit]: 1 }) : floor(value, filterUnit);
@@ -244,7 +244,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         //             Max   1.5.2000
 
         var filterUnit = pair.lastPart != null ? durationUnit(pair.lastPart.key) :
-          f.token?.type.name == "Date" ? "day" : null;
+          f.token?.type.name == "DateOnly" ? "day" : null;
 
         const newValue = filterUnit == null ? value :
           f.operation == "LessThan" ? ceil(value, filterUnit) : floor(value, filterUnit).plus({ [filterUnit]: 1 });
@@ -267,7 +267,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(column.token!.type.name == "Date" ? date.toISODate() : date.toISO());
+      allValues.push(column.token!.type.name == "DateOnly" ? date.toISODate() : date.toISO());
       date = date.plus({ [unit]: 1 });
     }
 

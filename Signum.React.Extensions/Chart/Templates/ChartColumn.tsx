@@ -170,9 +170,9 @@ export function ChartColumn(p: ChartColumnProps) {
 
 function getTitle(ct: ChartColumnType): ChartColumnType[] {
   switch (ct) {
-    case "Groupable": return ["String", "Lite", "Enum", "Date", "Integer", "RealGroupable"];
+    case "Groupable": return ["String", "Lite", "Enum", "DateOnly", "Integer", "RealGroupable"];
     case "Magnitude": return ["Integer", "Real", "RealGroupable"];
-    case "Positionable": return ["Integer", "Real", "RealGroupable", "Date", "DateTime"];
+    case "Positionable": return ["Integer", "Real", "RealGroupable", "DateOnly", "DateTime"];
     default: return [];
   }
 }

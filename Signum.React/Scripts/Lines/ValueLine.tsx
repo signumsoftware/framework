@@ -117,7 +117,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "boolean")
       return "Checkbox";
 
-    if (t.name == "datetime" || t.name == "DateTimeOffset" || t.name == "Date")
+    if (t.name == "datetime" || t.name == "DateTimeOffset" || t.name == "DateOnly")
       return "DateTime";
 
     if (t.name == "string" || t.name == "Guid")
@@ -724,11 +724,11 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 ValueLineRenderers.renderers.set("DateTime", (vl) => {
 
   const s = vl.props;
-  const type = vl.props.type!.name as "Date" | "DateTime";
+  const type = vl.props.type!.name as "DateOnly" | "DateTime";
   const luxonFormat = toLuxonFormat(s.formatText, type);
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
-  const showTime = s.showTimeBox != null ? s.showTimeBox : type != "Date" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
+  const showTime = s.showTimeBox != null ? s.showTimeBox : type != "DateOnly" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -747,7 +747,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
 
     // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
     vl.setValue(m == null || !m.isValid ? null :
-      type == "Date" ? m.toISODate() :
+      type == "DateOnly" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss", { locale: 'en-GB' }/*No Z*/) :
           m.toISO());
   };
@@ -785,7 +785,7 @@ function defaultRenderDay({ date, label }: { date: Date; label: string }) {
   return <span className={today? "sf-today" : undefined}>{label}</span>;
 }
 
-export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", format: string | undefined): DateTime {
+export function trimDateToFormat(date: DateTime, type: "DateOnly" | "DateTime", format: string | undefined): DateTime {
 
   const luxonFormat = toLuxonFormat(format, type);
 
