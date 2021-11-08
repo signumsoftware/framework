@@ -57,7 +57,7 @@ namespace Signum.Engine.Authorization
         }
 
         static GenericInvoker<Action<Schema>> miRegister =
-            new GenericInvoker<Action<Schema>>(s => RegisterSchemaEvent<TypeEntity>(s));
+            new(s => RegisterSchemaEvent<TypeEntity>(s));
         static void RegisterSchemaEvent<T>(Schema sender)
              where T : Entity
         {

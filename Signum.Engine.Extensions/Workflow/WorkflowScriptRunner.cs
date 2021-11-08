@@ -113,7 +113,7 @@ namespace Signum.Engine.Workflow
 
                                                 try
                                                 {
-                                                    using (Transaction tr = Transaction.ForceNew())
+                                                    using (var tr = Transaction.ForceNew())
                                                     {
                                                         caseActivity.Execute(CaseActivityOperation.ScriptExecute);
 

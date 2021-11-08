@@ -67,7 +67,7 @@ namespace Signum.Engine.Files
             }
         }
 
-        static GenericInvoker<Action<List<PropertyRoute>>> giOnSaved = new GenericInvoker<Action<List<PropertyRoute>>>(prs => OnSaved<Entity>(prs));
+        static GenericInvoker<Action<List<PropertyRoute>>> giOnSaved = new(prs => OnSaved<Entity>(prs));
         static void OnSaved<T>(List<PropertyRoute> array)
             where T : Entity
         {
@@ -141,7 +141,7 @@ namespace Signum.Engine.Files
 
    
 
-        static GenericInvoker<Action<PropertyRoute>> giAddBinding = new GenericInvoker<Action<PropertyRoute>>(pr => AddBinding<Entity>(pr));
+        static GenericInvoker<Action<PropertyRoute>> giAddBinding = new(pr => AddBinding<Entity>(pr));
         static void AddBinding<T>(PropertyRoute route)
             where T : Entity
         {

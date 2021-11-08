@@ -62,7 +62,7 @@ namespace Signum.Engine.Scheduler
                 return false;
             try
             {
-                using (Transaction tr = Transaction.ForceNew())
+                using (var tr = Transaction.ForceNew())
                 {
                     using (ExecutionMode.Global())
                         new SystemEventLogEntity

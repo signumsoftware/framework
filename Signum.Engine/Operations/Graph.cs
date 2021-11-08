@@ -107,7 +107,7 @@ namespace Signum.Engine.Operations
 
                             var exLog = ex.LogException();
 
-                            using (Transaction tr2 = Transaction.ForceNew())
+                            using (var tr2 = Transaction.ForceNew())
                             {
                                 log!.Exception = exLog.ToLite();
 
@@ -275,7 +275,7 @@ namespace Signum.Engine.Operations
 
                             var exLog = ex.LogException();
 
-                            using (Transaction tr2 = Transaction.ForceNew())
+                            using (var tr2 = Transaction.ForceNew())
                             {
                                 log!.Exception = exLog.ToLite();
 
@@ -415,7 +415,7 @@ namespace Signum.Engine.Operations
 
                             var exLog = ex.LogException();
 
-                            using (Transaction tr2 = Transaction.ForceNew())
+                            using (var tr2 = Transaction.ForceNew())
                             {
                                 log!.Exception = exLog.ToLite();
 
@@ -554,7 +554,7 @@ namespace Signum.Engine.Operations
 
                         var exLog = ex.LogException();
 
-                        using (Transaction tr2 = Transaction.ForceNew())
+                        using (var tr2 = Transaction.ForceNew())
                         {
                             OperationLogEntity newLog = new OperationLogEntity //Transaction chould have been rollbacked just before commiting
                             {
@@ -687,7 +687,7 @@ namespace Signum.Engine.Operations
 
                                 var exLog = ex.LogException();
 
-                                using (Transaction tr2 = Transaction.ForceNew())
+                                using (var tr2 = Transaction.ForceNew())
                                 {
                                     log.Target = entity.ToLite();
                                     log.Exception = exLog.ToLite();

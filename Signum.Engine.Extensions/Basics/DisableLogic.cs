@@ -40,7 +40,7 @@ namespace Signum.Engine.Basics
         }
 
         static GenericInvoker<Action> giRegisterOperation
-            = new GenericInvoker<Action>(() => RegisterOperations<Entity>());
+            = new(() => RegisterOperations<Entity>());
         static void RegisterOperations<T>() where T : Entity
         {
             if (OperationLogic.TryFindOperation(typeof(T), DisableOperation.Disable.Symbol) == null)
@@ -59,7 +59,7 @@ namespace Signum.Engine.Basics
         }
 
         static GenericInvoker<Action> giRegisterTreeOperation
-          = new GenericInvoker<Action>(() => RegisterTreeOperations<TreeEntity>());
+          = new(() => RegisterTreeOperations<TreeEntity>());
         static void RegisterTreeOperations<T>() where T : TreeEntity
         {
             if (OperationLogic.TryFindOperation(typeof(T), DisableOperation.Disable.Symbol) == null)

@@ -276,7 +276,7 @@ namespace Signum.Engine.Printing
 
                     try
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             line.State = PrintLineState.Error;
                             line.Save();

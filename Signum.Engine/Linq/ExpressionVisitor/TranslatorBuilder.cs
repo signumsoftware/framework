@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
             return miBuildPrivate.GetInvoker(type)(proj);
         }
 
-        static GenericInvoker<Func<ProjectionExpression, ITranslateResult>> miBuildPrivate = new GenericInvoker<Func<ProjectionExpression, ITranslateResult>>(pe => BuildPrivate<int>(pe));
+        static GenericInvoker<Func<ProjectionExpression, ITranslateResult>> miBuildPrivate = new(pe => BuildPrivate<int>(pe));
 
         static TranslateResult<T> BuildPrivate<T>(ProjectionExpression proj)
         {
@@ -84,7 +84,7 @@ namespace Signum.Engine.Linq
         }
 
         static readonly GenericInvoker<Func<Expression, Scope, LookupToken, SqlPreCommandSimple, IChildProjection>> giLazyChild =
-            new GenericInvoker<Func<Expression, Scope, LookupToken, SqlPreCommandSimple, IChildProjection>>((proj, scope, token, sql) => LazyChild<int, bool>(proj, scope, token, sql));
+            new((proj, scope, token, sql) => LazyChild<int, bool>(proj, scope, token, sql));
         static IChildProjection LazyChild<K, V>(Expression projector, Scope scope, LookupToken token, SqlPreCommandSimple command)
             where K : notnull
         {
@@ -93,7 +93,7 @@ namespace Signum.Engine.Linq
         }
 
         static readonly GenericInvoker<Func<Expression, Scope, LookupToken, SqlPreCommandSimple, IChildProjection>> giEagerChild =
-            new GenericInvoker<Func<Expression, Scope, LookupToken, SqlPreCommandSimple, IChildProjection>>((proj, scope, token, sql) => EagerChild<int, bool>(proj, scope, token, sql));
+            new((proj, scope, token, sql) => EagerChild<int, bool>(proj, scope, token, sql));
         static IChildProjection EagerChild<K, V>(Expression projector, Scope scope, LookupToken token, SqlPreCommandSimple command)
         {
             var proj = ProjectionBuilder.Build<KeyValuePair<K, V>>(projector, scope);

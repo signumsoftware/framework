@@ -84,14 +84,14 @@ namespace Signum.Engine.Operations
 
 
 
-        static readonly GenericInvoker<Func<List<object>, IList>> giConvertToList = new GenericInvoker<Func<List<object>, IList>>(list => ConvertToList<int>(list));
+        static readonly GenericInvoker<Func<List<object>, IList>> giConvertToList = new(list => ConvertToList<int>(list));
 
         static List<S> ConvertToList<S>(List<object> list)
         {
             return SmartConvertTo<S>(list).ToList();
         }
 
-        static readonly GenericInvoker<Func<List<object>, Array>> giConvertToArray = new GenericInvoker<Func<List<object>, Array>>(list => ConvertToArray<int>(list));
+        static readonly GenericInvoker<Func<List<object>, Array>> giConvertToArray = new(list => ConvertToArray<int>(list));
 
         static S[] ConvertToArray<S>(List<object> list)
         {

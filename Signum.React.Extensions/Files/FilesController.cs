@@ -69,7 +69,7 @@ namespace Signum.React.Files
             new ConcurrentDictionary<PropertyRoute, Func<PrimaryKey, string?, FilePathEmbedded?>>();
 
         static GenericInvoker<Func<PropertyRoute, Func<PrimaryKey, string?, FilePathEmbedded?>>> giGetSimpleQuery =
-            new GenericInvoker<Func<PropertyRoute, Func<PrimaryKey, string?, FilePathEmbedded?>>>((propertyRoute) => GetSimpleQuery<Entity>(propertyRoute));
+            new((propertyRoute) => GetSimpleQuery<Entity>(propertyRoute));
         static Func<PrimaryKey, string?, FilePathEmbedded?> GetSimpleQuery<T>(PropertyRoute propertyRoute)
             where T : Entity
         {
@@ -85,7 +85,7 @@ namespace Signum.React.Files
         }
 
         static GenericInvoker<Func<PropertyRoute, PropertyRoute, Func<PrimaryKey, string?, FilePathEmbedded?>>> giGetMListQuery =
-           new GenericInvoker<Func<PropertyRoute, PropertyRoute, Func<PrimaryKey, string?, FilePathEmbedded?>>>((route, mlistRoute) => GetMListQuery<Entity, EmbeddedEntity>(route, mlistRoute));
+           new((route, mlistRoute) => GetMListQuery<Entity, EmbeddedEntity>(route, mlistRoute));
         static Func<PrimaryKey, string?, FilePathEmbedded?> GetMListQuery<T, M>(PropertyRoute route, PropertyRoute mlistRoute)
             where T : Entity
         {

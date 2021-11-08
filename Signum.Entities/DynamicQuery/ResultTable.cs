@@ -52,7 +52,7 @@ namespace Signum.Entities.DynamicQuery
         }
 #pragma warning restore CS8618, IDE0051 // Non-nullable field is uninitialized.
 
-        GenericInvoker<Func<int, IList>> listBuilder = new GenericInvoker<Func<int, IList>>(num => new List<int>(num));
+        GenericInvoker<Func<int, IList>> listBuilder = new(num => new List<int>(num));
 
         private IList Split(string concatenated, Func<string, object> deserialize)
         {

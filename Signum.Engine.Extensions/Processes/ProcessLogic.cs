@@ -359,7 +359,7 @@ namespace Signum.Engine.Processes
             else
             {
                 executingProcess.ForEachNonTransactional(collection, elementInfo, item => {
-                    using (Transaction tr = Transaction.ForceNew())
+                    using (var tr = Transaction.ForceNew())
                     {
                         action(item);
                         tr.Commit();

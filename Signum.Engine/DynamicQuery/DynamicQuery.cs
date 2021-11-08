@@ -108,7 +108,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         static readonly GenericInvoker<Func<LambdaExpression, IDynamicQueryCore>> giAutoPrivate =
-            new GenericInvoker<Func<LambdaExpression, IDynamicQueryCore>>(lambda => FromSelector<TypeEntity, object?>((Expression<Func<TypeEntity, object?>>)lambda));
+            new(lambda => FromSelector<TypeEntity, object?>((Expression<Func<TypeEntity, object?>>)lambda));
         public static AutoDynamicQueryCore<T> FromSelector<E, T>(Expression<Func<E, T>> selector)
             where E : Entity
         {
@@ -564,10 +564,10 @@ namespace Signum.Engine.DynamicQuery
             return (IOrderedQueryable<object>)query.Provider.CreateQuery<object?>(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
         }
 
-        static readonly GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miOrderByE = new GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>>((col, del) => col.OrderBy((Func<object, object?>)del));
-        static readonly GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miThenByE = new GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>>((col, del) => col.ThenBy((Func<object, object?>)del));
-        static readonly GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miOrderByDescendingE = new GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>>((col, del) => col.OrderByDescending((Func<object, object?>)del));
-        static readonly GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miThenByDescendingE = new GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>>((col, del) => col.ThenByDescending((Func<object, object?>)del));
+        static readonly GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miOrderByE = new((col, del) => col.OrderBy((Func<object, object?>)del));
+        static readonly GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miThenByE = new((col, del) => col.ThenBy((Func<object, object?>)del));
+        static readonly GenericInvoker<Func<IEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miOrderByDescendingE = new((col, del) => col.OrderByDescending((Func<object, object?>)del));
+        static readonly GenericInvoker<Func<IOrderedEnumerable<object>, Delegate, IOrderedEnumerable<object>>> miThenByDescendingE = new((col, del) => col.ThenByDescending((Func<object, object?>)del));
 
         public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
         {
@@ -854,7 +854,7 @@ namespace Signum.Engine.DynamicQuery
         #region GroupBy
 
         static readonly GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>> giGroupByE =
-            new GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>>(
+            new(
                 (col, ks, rs) => (IEnumerable<object>)Enumerable.GroupBy<string, int, double>((IEnumerable<string>)col, (Func<string, int>)ks, (Func<int, IEnumerable<string>, double>)rs));
         public static DEnumerable<T> GroupBy<T>(this DEnumerable<T> collection, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens)
         {
@@ -1152,7 +1152,7 @@ namespace Signum.Engine.DynamicQuery
             return new ResultTable(columnValues, totalElements, pagination);
         }
 
-        static readonly GenericInvoker<Func<object[], Delegate, Array>> miGetValues = new GenericInvoker<Func<object[], Delegate, Array>>((objs, del) => GetValues<int>(objs, (Func<object, int>)del));
+        static readonly GenericInvoker<Func<object[], Delegate, Array>> miGetValues = new((objs, del) => GetValues<int>(objs, (Func<object, int>)del));
         static S[] GetValues<S>(object[] collection, Func<object, S> getter)
         {
             S[] array = new S[collection.Length];

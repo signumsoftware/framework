@@ -952,7 +952,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        static readonly GenericInvoker<Action<Schema, Action>> giAttachInvalidationsDependant = new GenericInvoker<Action<Schema, Action>>((s, a) => AttachInvalidationsDependant<Entity>(s, a));
+        static readonly GenericInvoker<Action<Schema, Action>> giAttachInvalidationsDependant = new((s, a) => AttachInvalidationsDependant<Entity>(s, a));
         static void AttachInvalidationsDependant<T>(Schema s, Action action) where T : Entity
         {
             var ee = s.EntityEvents<T>();
@@ -965,7 +965,7 @@ namespace Signum.Engine.Maps
             ee.PreUnsafeUpdate += (u, q) => { action(); return null; };
         }
 
-        static readonly GenericInvoker<Action<Schema, Action>> giAttachInvalidations = new GenericInvoker<Action<Schema, Action>>((s, a) => AttachInvalidations<Entity>(s, a));
+        static readonly GenericInvoker<Action<Schema, Action>> giAttachInvalidations = new((s, a) => AttachInvalidations<Entity>(s, a));
         static void AttachInvalidations<T>(Schema s, Action action) where T : Entity
         {
             var ee = s.EntityEvents<T>();

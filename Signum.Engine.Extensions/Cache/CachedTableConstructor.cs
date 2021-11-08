@@ -95,15 +95,15 @@ namespace Signum.Engine.Cache
 
 
         static GenericInvoker<Func<ICacheLogicController, AliasGenerator?, string, string?, CachedTableBase>> ciCachedTable =
-         new GenericInvoker<Func<ICacheLogicController, AliasGenerator?, string, string?, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
+         new((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
              new CachedTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
         static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string?, CachedTableBase>> ciCachedSemiTable =
-          new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string?, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
+          new((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
               new CachedLiteTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
         static GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator?, string, string?, CachedTableBase>> ciCachedTableMList =
-          new GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator?, string, string?, CachedTableBase>>((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
+          new((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
               new CachedTableMList<Entity>(controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins));
 
         static Expression NullId = Expression.Constant(null, typeof(PrimaryKey?));
@@ -119,10 +119,10 @@ namespace Signum.Engine.Cache
             if (field is FieldEnum)
                 return Expression.Convert(GetTupleProperty((IColumn)field), field.FieldType);
 
-            if (field is IFieldReference)
+            if (field is IFieldReference fr)
             {
                 var nullRef = Expression.Constant(null, field.FieldType);
-                bool isLite = ((IFieldReference)field).IsLite;
+                bool isLite = fr.IsLite;
 
                 if (field is FieldReference)
                 {

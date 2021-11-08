@@ -325,7 +325,7 @@ namespace Signum.Engine.Mailing
         {
             using (AuthLogic.Disable())
             using (OperationLogic.AllowSave<EmailTemplateEntity>())
-            using (Transaction tr = Transaction.ForceNew())
+            using (var tr = Transaction.ForceNew())
             {
                 var template = CreateDefaultTemplateInternal(emailModelEntity);
 

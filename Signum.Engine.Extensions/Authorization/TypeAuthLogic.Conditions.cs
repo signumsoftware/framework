@@ -112,7 +112,7 @@ namespace Signum.Engine.Authorization
                     var groups = modified.GroupBy(e => e.GetType(), e => e.Id);
 
                     //Assert before
-                    using (Transaction tr = Transaction.ForceNew())
+                    using (var tr = Transaction.ForceNew())
                     {
                         foreach (var gr in groups)
                             miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
@@ -142,7 +142,7 @@ namespace Signum.Engine.Authorization
 
 
         static GenericInvoker<Action<PrimaryKey[], TypeAllowedBasic>> miAssertAllowed =
-            new GenericInvoker<Action<PrimaryKey[], TypeAllowedBasic>>((a, tab) => AssertAllowed<Entity>(a, tab));
+            new((a, tab) => AssertAllowed<Entity>(a, tab));
         static void AssertAllowed<T>(PrimaryKey[] requested, TypeAllowedBasic typeAllowed)
             where T : Entity
         {
@@ -210,7 +210,7 @@ namespace Signum.Engine.Authorization
         }
 
         static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, bool>> miIsAllowedForEntity
-            = new GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, bool>>((ie, tab, ec) => IsAllowedFor<Entity>((Entity)ie, tab, ec));
+            = new((ie, tab, ec) => IsAllowedFor<Entity>((Entity)ie, tab, ec));
         [MethodExpander(typeof(IsAllowedForExpander))]
         static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, bool inUserInterface)
             where T : Entity
@@ -270,7 +270,7 @@ namespace Signum.Engine.Authorization
         }
 
         static GenericInvoker<Func<Lite<IEntity>, TypeAllowedBasic, bool, bool>> miIsAllowedForLite =
-            new GenericInvoker<Func<Lite<IEntity>, TypeAllowedBasic, bool, bool>>((l, tab, ec) => IsAllowedFor<Entity>(l, tab, ec));
+            new((l, tab, ec) => IsAllowedFor<Entity>(l, tab, ec));
         [MethodExpander(typeof(IsAllowedForExpander))]
         static bool IsAllowedFor<T>(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
             where T : Entity
@@ -317,7 +317,7 @@ namespace Signum.Engine.Authorization
         }
 
         static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, DebugData>> miIsAllowedForDebugEntity =
-            new GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, DebugData>>((ii, tab, ec) => IsAllowedForDebug<Entity>((Entity)ii, tab, ec));
+            new((ii, tab, ec) => IsAllowedForDebug<Entity>((Entity)ii, tab, ec));
         [MethodExpander(typeof(IsAllowedForDebugExpander))]
         static DebugData IsAllowedForDebug<T>(this T entity, TypeAllowedBasic allowed, bool inUserInterface)
             where T : Entity
@@ -339,7 +339,7 @@ namespace Signum.Engine.Authorization
         }
 
         static GenericInvoker<Func<Lite<IEntity>, TypeAllowedBasic, bool, DebugData>> miIsAllowedForDebugLite =
-            new GenericInvoker<Func<Lite<IEntity>, TypeAllowedBasic, bool, DebugData>>((l, tab, ec) => IsAllowedForDebug<Entity>(l, tab, ec));
+            new((l, tab, ec) => IsAllowedForDebug<Entity>(l, tab, ec));
         [MethodExpander(typeof(IsAllowedForDebugExpander))]
         static DebugData IsAllowedForDebug<T>(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
              where T : Entity
@@ -448,7 +448,7 @@ namespace Signum.Engine.Authorization
                 return miCallWhereAllowed.GetInvoker(mi.GetGenericArguments()).Invoke(arguments[0]);
             }
 
-            static GenericInvoker<Func<Expression, Expression>> miCallWhereAllowed = new GenericInvoker<Func<Expression, Expression>>(exp => CallWhereAllowed<TypeEntity>(exp));
+            static GenericInvoker<Func<Expression, Expression>> miCallWhereAllowed = new(exp => CallWhereAllowed<TypeEntity>(exp));
             static Expression CallWhereAllowed<T>(Expression expression)
                 where T : Entity
             {
@@ -469,7 +469,7 @@ namespace Signum.Engine.Authorization
             }
 
             static GenericInvoker<Func<Expression, TypeAllowedBasic, bool, Expression>> miCallWhereIsAllowedFor =
-                new GenericInvoker<Func<Expression, TypeAllowedBasic, bool, Expression>>((ex, tab, ui) => CallWhereIsAllowedFor<TypeEntity>(ex, tab, ui));
+                new((ex, tab, ui) => CallWhereIsAllowedFor<TypeEntity>(ex, tab, ui));
             static Expression CallWhereIsAllowedFor<T>(Expression expression, TypeAllowedBasic allowed, bool inUserInterface)
                 where T : Entity
             {

@@ -91,7 +91,7 @@ namespace Signum.Engine
         }
 
         static GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>> giRequest =
-            new GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>>((rr, id) => rr.Request<Entity>(id)!);
+            new((rr, id) => rr.Request<Entity>(id)!);
         public T? Request<T>(PrimaryKey? id) where T : Entity
         {
             if (id == null)
@@ -302,7 +302,7 @@ namespace Signum.Engine
         }
 
         static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>> giGetStrings =
-            new GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>>((ids, token) => GetStrings<Entity>(ids, token));
+            new((ids, token) => GetStrings<Entity>(ids, token));
         static async Task<Dictionary<PrimaryKey, string>> GetStrings<T>(List<PrimaryKey> ids, CancellationToken? token) where T : Entity
         {
             ICacheController? cc = Schema.Current.CacheController(typeof(T));

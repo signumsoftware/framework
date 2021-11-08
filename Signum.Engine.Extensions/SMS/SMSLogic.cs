@@ -279,7 +279,7 @@ namespace Signum.Engine.SMS
                 catch (Exception e)
                 {
                     var ex = e.LogException();
-                    using (Transaction tr = Transaction.ForceNew())
+                    using (var tr = Transaction.ForceNew())
                     {
                         message.Exception = ex.ToLite();
                         message.State = SMSMessageState.SendFailed;
@@ -404,7 +404,7 @@ namespace Signum.Engine.SMS
                 giRegisterSMSMessagesExpression.GetInvoker(type)(sb);
         }
 
-        static GenericInvoker<Action<SchemaBuilder>> giRegisterSMSMessagesExpression = new GenericInvoker<Action<SchemaBuilder>>(sb => RegisterSMSMessagesExpression<ISMSOwnerEntity>(sb));
+        static GenericInvoker<Action<SchemaBuilder>> giRegisterSMSMessagesExpression = new(sb => RegisterSMSMessagesExpression<ISMSOwnerEntity>(sb));
         private static void RegisterSMSMessagesExpression<T>(SchemaBuilder sb)
             where T : ISMSOwnerEntity
         {
@@ -447,7 +447,7 @@ namespace Signum.Engine.SMS
                     catch (Exception e)
                     {
                         var ex = e.LogException();
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             m.Exception = ex.ToLite();
                             m.Save();

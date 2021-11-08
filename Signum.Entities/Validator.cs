@@ -38,7 +38,7 @@ namespace Signum.Entities
         }
 
         static readonly GenericInvoker<Action> giGenerateType =
-            new GenericInvoker<Action>(() => GenerateType<ModifiableEntity>());
+            new(() => GenerateType<ModifiableEntity>());
 
         static void GenerateType<T>() where T : ModifiableEntity
         {

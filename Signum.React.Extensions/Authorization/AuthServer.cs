@@ -261,7 +261,7 @@ namespace Signum.React.Authorization
 
 
 
-        static GenericInvoker<Func<int>> giCountReadonly = new GenericInvoker<Func<int>>(() => CountReadonly<Entity>());
+        static GenericInvoker<Func<int>> giCountReadonly = new(() => CountReadonly<Entity>());
         public static int CountReadonly<T>() where T : Entity
         {
             return Database.Query<T>().Count(a => !a.IsAllowedFor(TypeAllowedBasic.Write, true));

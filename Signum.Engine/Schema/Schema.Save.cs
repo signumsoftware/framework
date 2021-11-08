@@ -219,10 +219,10 @@ namespace Signum.Engine.Maps
 
                     var isPostgres = Schema.Current.Settings.IsPostgres;
 
-                    Func<string[], string> insertPattern = (suffixes) =>
+                    string insertPattern(string[] suffixes) =>
                         "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3};".FormatWith(table.Name,
                         trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                        isPostgres? "OVERRIDING SYSTEM VALUE\r\n" : null,
+                        isPostgres ? "OVERRIDING SYSTEM VALUE\r\n" : null,
                         suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"));
 
                     var expr = Expression.Lambda<Action<object, Forbidden, string, List<DbParameter>>>(
@@ -315,11 +315,11 @@ namespace Signum.Engine.Maps
                             item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
                     var isPostgres = Schema.Current.Settings.IsPostgres;
-                    Func<string[], string?, string> sqlInsertPattern = (suffixes, output) =>
+                    string sqlInsertPattern(string[] suffixes, string? output) =>
                     "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(
                     table.Name,
                     trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                    output != null && !isPostgres ?  $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\r\n" : null,
+                    output != null && !isPostgres ? $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\r\n" : null,
                     suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
                     output != null && isPostgres ? $"\r\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}" : null);
 
@@ -1147,7 +1147,7 @@ END $$;"); ;
         }
 
         static GenericInvoker<Func<TableMList, IMListCache>> giCreateCache =
-            new GenericInvoker<Func<TableMList, IMListCache>>((TableMList rt) => rt.CreateCache<int>());
+            new((TableMList rt) => rt.CreateCache<int>());
 
         internal Lazy<IMListCache> cache;
 

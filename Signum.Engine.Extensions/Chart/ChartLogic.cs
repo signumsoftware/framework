@@ -38,7 +38,7 @@ namespace Signum.Engine.Chart
         }
 
         static GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, CancellationToken, Task<ResultTable>>> miExecuteChartAsync =
-            new GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, CancellationToken, Task<ResultTable>>>((req, dq, token) => ExecuteChartAsync<int>(req, (DynamicQueryCore<int>)dq, token));
+            new((req, dq, token) => ExecuteChartAsync<int>(req, (DynamicQueryCore<int>)dq, token));
         static async Task<ResultTable> ExecuteChartAsync<T>(ChartRequestModel request, DynamicQueryCore<T> dq, CancellationToken token)
         {
             using (ExecutionMode.UserInterface())
@@ -69,7 +69,7 @@ namespace Signum.Engine.Chart
         }
 
         static GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, ResultTable>> miExecuteChart =
-            new GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQueryCore<int>)dq));
+            new((req, dq) => ExecuteChart<int>(req, (DynamicQueryCore<int>)dq));
         static ResultTable ExecuteChart<T>(ChartRequestModel request, DynamicQueryCore<T> dq)
         {
             using (ExecutionMode.UserInterface())

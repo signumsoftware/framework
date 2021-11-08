@@ -124,7 +124,7 @@ namespace Signum.Engine.Mailing.Pop3
                     CanBeModified = true,
                     Construct = (e, _) =>
                     {
-                        using (Transaction tr = Transaction.None())
+                        using (var tr = Transaction.None())
                         {
                             var result = e.ReceiveEmails();
                             return tr.Commit(result);
@@ -138,7 +138,7 @@ namespace Signum.Engine.Mailing.Pop3
                     CanBeModified = false,
                     Construct = (e, _) =>
                     {
-                        using (Transaction tr = Transaction.None())
+                        using (var tr = Transaction.None())
                         {
                             var result = e.ReceiveEmails(true);
                             return tr.Commit(result);
@@ -196,7 +196,7 @@ namespace Signum.Engine.Mailing.Pop3
                     {
                         List<MessageUid> messagesToSave = GetMessagesToSave(config, MaxReceptionPerTime, client, forceGetLastFromServer);
 
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             reception.NewEmails = messagesToSave.Count;
                             reception.Save();
@@ -215,7 +215,7 @@ namespace Signum.Engine.Mailing.Pop3
                             DeleteSavedEmail(config, now, client, mi, sent);
                         }
 
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             reception.EndDate = TimeZoneManager.Now;
                             reception.LastServerMessageUID = lastSuid;
@@ -233,7 +233,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                     try
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             reception.EndDate = TimeZoneManager.Now;
                             reception.Exception = ex.ToLite();
@@ -301,7 +301,7 @@ namespace Signum.Engine.Mailing.Pop3
 
             {
                 using (OperationLogic.AllowSave<EmailMessageEntity>())
-                using (Transaction tr = Transaction.ForceNew())
+                using (var tr = Transaction.ForceNew())
                 {
                     string rawContent = "";
                     try
@@ -360,7 +360,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                         var ex = e.LogException();
 
-                        using (Transaction tr2 = Transaction.ForceNew())
+                        using (var tr2 = Transaction.ForceNew())
                         {
                             new Pop3ReceptionExceptionEntity
                             {
@@ -420,7 +420,7 @@ namespace Signum.Engine.Mailing.Pop3
                              where ri != null && l.Contains(ri.UniqueId)
                              select KeyValuePair.Create(ri.UniqueId, (DateTime?)ri.SentDate))).ToDictionary();
 
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             reception.NewEmails = messageInfos.Count - already.Count;
                             reception.Save();
@@ -437,7 +437,7 @@ namespace Signum.Engine.Mailing.Pop3
                             DeleteSavedEmail(config, now, client, mi, sent);
                         }
 
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             reception.EndDate = TimeZoneManager.Now;
                             reception.Save();
@@ -453,7 +453,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                     try
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             reception.EndDate = TimeZoneManager.Now;
                             reception.Exception = ex.ToLite();
@@ -476,7 +476,7 @@ namespace Signum.Engine.Mailing.Pop3
 
             {
                 using (OperationLogic.AllowSave<EmailMessageEntity>())
-                using (Transaction tr = Transaction.ForceNew())
+                using (var tr = Transaction.ForceNew())
                 {
                     string? rawContent = null;
                     try
@@ -525,7 +525,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                         var ex = e.LogException();
 
-                        using (Transaction tr2 = Transaction.ForceNew())
+                        using (var tr2 = Transaction.ForceNew())
                         {
                             new Pop3ReceptionExceptionEntity
                             {

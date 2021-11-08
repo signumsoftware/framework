@@ -132,7 +132,7 @@ namespace Signum.Engine.Isolation
             return strategies[type];
         }
 
-        static readonly GenericInvoker<Action> giRegisterFilterQuery = new GenericInvoker<Action>(() => Register_FilterQuery<Entity>());
+        static readonly GenericInvoker<Action> giRegisterFilterQuery = new(() => Register_FilterQuery<Entity>());
         static void Register_FilterQuery<T>() where T : Entity
         {
             Schema.Current.EntityEvents<T>().FilterQuery += () =>
@@ -201,7 +201,7 @@ namespace Signum.Engine.Isolation
 
 
         static GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>?>> giGetOnlyIsolation =
-            new GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>?>>(list => GetOnlyIsolation<Entity>(list));
+            new(list => GetOnlyIsolation<Entity>(list));
 
 
         public static Lite<IsolationEntity>? GetOnlyIsolation<T>(IEnumerable<Lite<Entity>> selectedEntities) where T : Entity

@@ -147,7 +147,7 @@ namespace Signum.Engine.Translation
         }
 
         static GenericInvoker<Func<PropertyRoute, Dictionary<LocalizedInstanceKey, string?>>> giFromRoute =
-            new GenericInvoker<Func<PropertyRoute, Dictionary<LocalizedInstanceKey, string?>>>(pr => FromRoute<Entity>(pr));
+            new(pr => FromRoute<Entity>(pr));
         static Dictionary<LocalizedInstanceKey, string?> FromRoute<T>(PropertyRoute pr) where T : Entity
         {
             var selector = pr.GetLambdaExpression<T, string?>(safeNullAccess: false);
@@ -157,7 +157,7 @@ namespace Signum.Engine.Translation
         }
 
         static GenericInvoker<Func<PropertyRoute, Dictionary<LocalizedInstanceKey, string?>>> giFromRouteMList =
-            new GenericInvoker<Func<PropertyRoute, Dictionary<LocalizedInstanceKey, string?>>>(pr => FromRouteMList<Entity, EmbeddedEntity>(pr));
+            new(pr => FromRouteMList<Entity, EmbeddedEntity>(pr));
         static Dictionary<LocalizedInstanceKey, string?> FromRouteMList<T, M>(PropertyRoute pr) where T : Entity
         {
             var mlItemPr = pr.GetMListItemsRoute()!;
@@ -200,7 +200,7 @@ namespace Signum.Engine.Translation
         }
 
         static GenericInvoker<Func<PropertyRoute, CultureInfo, bool>> giAnyNoTranslated =
-            new GenericInvoker<Func<PropertyRoute, CultureInfo, bool>>((pr, ci) => AnyNoTranslated<Entity>(pr, ci));
+            new((pr, ci) => AnyNoTranslated<Entity>(pr, ci));
         static bool AnyNoTranslated<T>(PropertyRoute pr, CultureInfo ci) where T : Entity
         {
             var exp = pr.GetLambdaExpression<T, string>(safeNullAccess: false);
@@ -217,7 +217,7 @@ namespace Signum.Engine.Translation
         }
 
         static GenericInvoker<Func<PropertyRoute, CultureInfo, bool>> giAnyNoTranslatedMList =
-           new GenericInvoker<Func<PropertyRoute, CultureInfo, bool>>((pr, ci) => AnyNoTranslatedMList<Entity, string>(pr, ci));
+           new((pr, ci) => AnyNoTranslatedMList<Entity, string>(pr, ci));
         static bool AnyNoTranslatedMList<T, M>(PropertyRoute pr, CultureInfo ci) where T : Entity
         {
             var mlistItemPr = pr.GetMListItemsRoute()!;
@@ -257,7 +257,7 @@ namespace Signum.Engine.Translation
             return deletedPr + deleteInconsistent + deletedInstance + deletedMList;
         }
 
-        static GenericInvoker<Func<int>> giRemoveTranslationsForMissingEntities = new GenericInvoker<Func<int>>(() => RemoveTranslationsForMissingEntities<Entity>());
+        static GenericInvoker<Func<int>> giRemoveTranslationsForMissingEntities = new(() => RemoveTranslationsForMissingEntities<Entity>());
         static int RemoveTranslationsForMissingEntities<T>() where T : Entity
         {
             return (from ti in Database.Query<TranslatedInstanceEntity>()
@@ -267,7 +267,7 @@ namespace Signum.Engine.Translation
                     select ti).UnsafeDelete();
         }
 
-        static GenericInvoker<Func<PropertyRoute, int>> giRemoveTranslationsForMissingRowIds = new GenericInvoker<Func<PropertyRoute, int>>(pr => RemoveTranslationsForMissingRowIds<Entity, EmbeddedEntity>(pr));
+        static GenericInvoker<Func<PropertyRoute, int>> giRemoveTranslationsForMissingRowIds = new(pr => RemoveTranslationsForMissingRowIds<Entity, EmbeddedEntity>(pr));
         static int RemoveTranslationsForMissingRowIds<T, E>(PropertyRoute route) where T : Entity
         {
             Expression<Func<T, MList<E>>> expression = route.GetLambdaExpression<T, MList<E>>(false);

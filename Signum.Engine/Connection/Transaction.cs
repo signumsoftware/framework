@@ -445,7 +445,7 @@ namespace Signum.Engine
         public static T ForceNew<T>(Func<T> func)
         {
 
-            using (Transaction tr = Transaction.ForceNew())
+            using (var tr = Transaction.ForceNew())
                 return tr.Commit(func.Invoke());
         }
 
@@ -562,9 +562,7 @@ namespace Signum.Engine
             if (coreTransaction.IsRolledback != null)
                 throw new InvalidOperationException("The transation is rolled back and can not be commited.");
 
-            var rt = coreTransaction as RealTransaction;
-
-            if (rt == null)
+            if (coreTransaction is not RealTransaction rt)
                 throw new InvalidOperationException("This method is meant for testing purposes, and only Real and Test transactions can execute it");
 
             rt.OnPreRealCommit();

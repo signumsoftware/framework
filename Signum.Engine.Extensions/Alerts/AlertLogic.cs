@@ -334,7 +334,7 @@ namespace Signum.Engine.Alerts
             if (Started == false)
                 return null;
 
-            using (Transaction tr = Transaction.ForceNew())
+            using (var tr = Transaction.ForceNew())
             {
                 var alert = entity.CreateAlert(alertType, text, textArguments, alertDate, createdBy, title, recipient);
 

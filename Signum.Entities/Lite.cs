@@ -282,10 +282,10 @@ namespace Signum.Entities
         public static Type BaseImplementationType = typeof(LiteImp);
 
         static GenericInvoker<Func<PrimaryKey, string?, Lite<Entity>>> giNewLite =
-            new GenericInvoker<Func<PrimaryKey, string?, Lite<Entity>>>((id, str) => new LiteImp<Entity>(id, str));
+            new((id, str) => new LiteImp<Entity>(id, str));
 
         static GenericInvoker<Func<Entity, string?, Lite<Entity>>> giNewLiteFat =
-            new GenericInvoker<Func<Entity, string?, Lite<Entity>>>((entity, str) => new LiteImp<Entity>(entity, str));
+            new((entity, str) => new LiteImp<Entity>(entity, str));
 
         public static Type Generate(Type identificableType)
         {
@@ -497,7 +497,7 @@ namespace Signum.Entities
 
         class IsLiteEntityExpander : IMethodExpander
         {
-            static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeEntity type) => type.ToLite()).GetGenericMethodDefinition();
+            static readonly MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeEntity type) => type.ToLite()).GetGenericMethodDefinition();
 
             public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
             {

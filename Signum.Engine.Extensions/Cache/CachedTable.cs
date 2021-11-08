@@ -218,7 +218,7 @@ namespace Signum.Engine.Cache
                     Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
                     using (MeasureLoad())
                     using (Connector.Override(Connector.Current.ForDatabase(table.Name.Schema?.Database)))
-                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
+                    using (var tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
                         if (CacheLogic.LogWriter != null)
                             CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
@@ -481,7 +481,7 @@ namespace Signum.Engine.Cache
 
                     using (MeasureLoad())
                     using (Connector.Override(Connector.Current.ForDatabase(table.Name.Schema?.Database)))
-                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
+                    using (var tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
                         if (CacheLogic.LogWriter != null)
                             CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));
@@ -641,7 +641,7 @@ namespace Signum.Engine.Cache
 
                     using (MeasureLoad())
                     using (Connector.Override(Connector.Current.ForDatabase(table.Name.Schema?.Database)))
-                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
+                    using (var tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                     {
                         if (CacheLogic.LogWriter != null)
                             CacheLogic.LogWriter.WriteLine("Load {0}".FormatWith(GetType().TypeName()));

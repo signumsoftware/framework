@@ -229,7 +229,7 @@ namespace Signum.Engine
         }
 
         static readonly GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string?, int>> giBulkInsertMListFromEntities =
-            new GenericInvoker<Func<IList, PropertyRoute, SqlBulkCopyOptions, int?, string?, int>>((entities, propertyRoute, options, timeout, message) =>
+            new((entities, propertyRoute, options, timeout, message) =>
             BulkInsertMListTablePropertyRoute<Entity, string>((List<Entity>)entities, propertyRoute, options, timeout, message));
 
         static int BulkInsertMListTablePropertyRoute<E, V>(List<E> entities, PropertyRoute route, SqlBulkCopyOptions copyOptions, int? timeout, string? message)

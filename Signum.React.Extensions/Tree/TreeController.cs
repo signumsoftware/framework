@@ -30,7 +30,7 @@ namespace Signum.React.Tree
         }
 
         static GenericInvoker<Func<string, int, List<Lite<TreeEntity>>>> giFindTreeLiteLikeByNameGeneric =
-            new GenericInvoker<Func<string, int, List<Lite<TreeEntity>>>>((subString, count) => FindTreeLiteLikeByNameGeneric<TreeEntity>(subString, count));
+            new((subString, count) => FindTreeLiteLikeByNameGeneric<TreeEntity>(subString, count));
         static List<Lite<TreeEntity>> FindTreeLiteLikeByNameGeneric<T>(string subString, int count)
             where T : TreeEntity
         {
@@ -63,7 +63,7 @@ namespace Signum.React.Tree
         }
 
         static GenericInvoker<Func<FindNodesRequest, List<TreeInfo>>> giFindNodesGeneric =
-            new GenericInvoker<Func<FindNodesRequest, List<TreeInfo>>>(request => FindNodesGeneric<TreeEntity>(request));
+            new(request => FindNodesGeneric<TreeEntity>(request));
         static List<TreeInfo> FindNodesGeneric<T>(FindNodesRequest request)
             where T : TreeEntity
         {

@@ -398,7 +398,7 @@ namespace Signum.Engine.Workflow
             return caseActivity.Execute(CaseActivityOperation.Register);
         }
 
-        static readonly GenericInvoker<Action> giFixCaseDescriptions = new GenericInvoker<Action>(() => FixCaseDescriptions<Entity>());
+        static readonly GenericInvoker<Action> giFixCaseDescriptions = new(() => FixCaseDescriptions<Entity>());
 
         public static void FixCaseDescriptions<T>() where T : Entity
         {

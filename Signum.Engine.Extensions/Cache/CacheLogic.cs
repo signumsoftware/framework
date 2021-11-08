@@ -392,7 +392,7 @@ namespace Signum.Engine.Cache
         {
             try
             {
-                using (Transaction tr = Transaction.None())
+                using (var tr = Transaction.None())
                 {
                     Executor.ExecuteNonQuery("ALTER DATABASE [{0}] SET ENABLE_BROKER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
 
@@ -401,7 +401,7 @@ namespace Signum.Engine.Cache
             }
             catch (SqlException)
             {
-                using (Transaction tr = Transaction.None())
+                using (var tr = Transaction.None())
                 {
                     Executor.ExecuteNonQuery("ALTER DATABASE [{0}] SET NEW_BROKER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
 
@@ -641,7 +641,7 @@ namespace Signum.Engine.Cache
                 giCacheTable.GetInvoker(type)(sb);
         }
 
-        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<Entity>(sb));
+        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new(sb => CacheTable<Entity>(sb));
         public static void CacheTable<T>(SchemaBuilder sb) where T : Entity
         {
             AssertStarted(sb);

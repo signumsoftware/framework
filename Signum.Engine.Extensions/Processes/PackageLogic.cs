@@ -177,7 +177,7 @@ namespace Signum.Engine.Processes
             return package;
         }
 
-        static readonly GenericInvoker<Func<PackageEntity, IEnumerable<Lite<IEntity>>, int>> giInsertPackageLines = new GenericInvoker<Func<PackageEntity, IEnumerable<Lite<IEntity>>, int>>(
+        static readonly GenericInvoker<Func<PackageEntity, IEnumerable<Lite<IEntity>>, int>> giInsertPackageLines = new(
             (package, lites) => InsertPackageLines<Entity>(package, lites));
         static int InsertPackageLines<T>(PackageEntity package, IEnumerable<Lite<IEntity>> lites)
             where T :Entity

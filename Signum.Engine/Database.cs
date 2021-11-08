@@ -129,7 +129,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             return (T)(object)await RetrieveAsync(lite.EntityType, lite.Id, token);
         }
 
-        static readonly GenericInvoker<Func<PrimaryKey, Entity>> giRetrieve = new GenericInvoker<Func<PrimaryKey, Entity>>(id => Retrieve<Entity>(id));
+        static readonly GenericInvoker<Func<PrimaryKey, Entity>> giRetrieve = new(id => Retrieve<Entity>(id));
         public static T Retrieve<T>(PrimaryKey id) where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
@@ -177,7 +177,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             }
         }
 
-        static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>> giRetrieveAsync = new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>>((id, token) => RetrieveAsync<Entity>(id, token));
+        static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>> giRetrieveAsync = new((id, token) => RetrieveAsync<Entity>(id, token));
         public static async Task<T> RetrieveAsync<T>(PrimaryKey id, CancellationToken token) where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
@@ -266,7 +266,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
 
-        static readonly GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giRetrieveLite = new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => RetrieveLite<Entity>(id));
+        static readonly GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giRetrieveLite = new(id => RetrieveLite<Entity>(id));
         public static Lite<T> RetrieveLite<T>(PrimaryKey id)
             where T : Entity
         {
@@ -297,7 +297,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
         static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giRetrieveLiteAsync =
-            new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>>((id, token) => RetrieveLiteAsync<Entity>(id, token));
+            new((id, token) => RetrieveLiteAsync<Entity>(id, token));
         public static async Task<Lite<T>> RetrieveLiteAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
         {
@@ -343,7 +343,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
 
         public static string GetToStr(Type type, PrimaryKey id) => giGetToStr.GetInvoker(type)(id);
-        static readonly GenericInvoker<Func<PrimaryKey, string>> giGetToStr = new GenericInvoker<Func<PrimaryKey, string>>(id => GetToStr<Entity>(id));
+        static readonly GenericInvoker<Func<PrimaryKey, string>> giGetToStr = new(id => GetToStr<Entity>(id));
         public static string GetToStr<T>(PrimaryKey id)
             where T : Entity
         {
@@ -370,7 +370,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         public static Task<string> GetToStrAsync(Type type, PrimaryKey id, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, token);
         static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>> giGetToStrAsync =
-            new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>>((id, token) => GetToStrAsync<Entity>(id, token));
+            new((id, token) => GetToStrAsync<Entity>(id, token));
         public static async Task<string> GetToStrAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
         {
@@ -428,7 +428,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         public static bool Exists(Type type, PrimaryKey id) => giExist.GetInvoker(type)(id);
         static readonly GenericInvoker<Func<PrimaryKey, bool>> giExist =
-            new GenericInvoker<Func<PrimaryKey, bool>>(id => Exists<Entity>(id));
+            new(id => Exists<Entity>(id));
         public static bool Exists<T>(PrimaryKey id)
             where T : Entity
         {
@@ -446,7 +446,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         public static Task<bool> ExistsAsync(Type type, PrimaryKey id, CancellationToken token) => giExistAsync.GetInvoker(type)(id, token);
         static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>> giExistAsync =
-            new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>>((id, token) => ExistsAsync<Entity>(id, token));
+            new((id, token) => ExistsAsync<Entity>(id, token));
         public static async Task<bool> ExistsAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
         {
@@ -545,7 +545,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
 
 
-        static readonly GenericInvoker<Func<IList>> giRetrieveAll = new GenericInvoker<Func<IList>>(() => RetrieveAll<TypeEntity>());
+        static readonly GenericInvoker<Func<IList>> giRetrieveAll = new(() => RetrieveAll<TypeEntity>());
         public static List<Entity> RetrieveAll(Type type)
         {
             if (type == null)
@@ -557,7 +557,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         static Task<IList> RetrieveAllAsyncIList<T>(CancellationToken token) where T : Entity => RetrieveAllAsync<T>(token).ContinueWith(t => (IList)t.Result);
         static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllAsyncIList =
-            new GenericInvoker<Func<CancellationToken, Task<IList>>>(token => RetrieveAllAsyncIList<TypeEntity>(token));
+            new(token => RetrieveAllAsyncIList<TypeEntity>(token));
         public static async Task<List<Entity>> RetrieveAllAsync(Type type, CancellationToken token)
         {
             if (type == null)
@@ -568,7 +568,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
 
-        static readonly GenericInvoker<Func<IList>> giRetrieveAllLite = new GenericInvoker<Func<IList>>(() => Database.RetrieveAllLite<TypeEntity>());
+        static readonly GenericInvoker<Func<IList>> giRetrieveAllLite = new(() => Database.RetrieveAllLite<TypeEntity>());
         public static List<Lite<T>> RetrieveAllLite<T>()
             where T : Entity
         {
@@ -593,7 +593,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
         static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllLiteAsync =
-            new GenericInvoker<Func<CancellationToken, Task<IList>>>(token => Database.RetrieveAllLiteAsyncIList<TypeEntity>(token));
+            new(token => Database.RetrieveAllLiteAsyncIList<TypeEntity>(token));
         static Task<IList> RetrieveAllLiteAsyncIList<T>(CancellationToken token) where T : Entity => RetrieveAllLiteAsync<T>(token).ContinueWith(r => (IList)r.Result);
         public static async Task<List<Lite<T>>> RetrieveAllLiteAsync<T>(CancellationToken token)
             where T : Entity
@@ -638,7 +638,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
 
         private static readonly GenericInvoker<Func<List<PrimaryKey>, string?, IList>> giRetrieveList =
-            new GenericInvoker<Func<List<PrimaryKey>, string?, IList>>((ids, message) => RetrieveList<Entity>(ids, message));
+            new((ids, message) => RetrieveList<Entity>(ids, message));
         public static List<T> RetrieveList<T>(List<PrimaryKey> ids, string? message = null)
             where T : Entity
         {
@@ -730,7 +730,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
         static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListAsync =
-            new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListAsyncIList<Entity>(ids, token));
+            new((ids, token) => RetrieveListAsyncIList<Entity>(ids, token));
         static Task<IList> RetrieveListAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity =>
             RetrieveListAsync<T>(ids, token).ContinueWith(p => (IList)p.Result);
         public static async Task<List<T>> RetrieveListAsync<T>(List<PrimaryKey> ids, CancellationToken token)
@@ -832,7 +832,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
         static readonly GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite =
-            new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveListLite<Entity>(ids));
+            new(ids => RetrieveListLite<Entity>(ids));
         public static List<Lite<T>> RetrieveListLite<T>(List<PrimaryKey> ids)
             where T : Entity
         {
@@ -859,7 +859,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
         static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListLiteAsync =
-            new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListLiteAsyncIList<Entity>(ids, token));
+            new((ids, token) => RetrieveListLiteAsyncIList<Entity>(ids, token));
         static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
         public static async Task<List<Lite<T>>> RetrieveListLiteAsync<T>(List<PrimaryKey> ids, CancellationToken token)
             where T : Entity
@@ -989,7 +989,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             giDeleteId.GetInvoker(ident.GetType())(ident.Id);
         }
 
-        static readonly GenericInvoker<Action<PrimaryKey>> giDeleteId = new GenericInvoker<Action<PrimaryKey>>(id => Delete<Entity>(id));
+        static readonly GenericInvoker<Action<PrimaryKey>> giDeleteId = new(id => Delete<Entity>(id));
         public static void Delete<T>(PrimaryKey id)
             where T : Entity
         {
@@ -1058,7 +1058,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             giDeleteList.GetInvoker(type)(ids);
         }
 
-        static readonly GenericInvoker<Action<IList<PrimaryKey>>> giDeleteList = new GenericInvoker<Action<IList<PrimaryKey>>>(l => DeleteList<Entity>(l));
+        static readonly GenericInvoker<Action<IList<PrimaryKey>>> giDeleteList = new(l => DeleteList<Entity>(l));
         public static void DeleteList<T>(IList<PrimaryKey> ids)
             where T : Entity
         {
@@ -1173,7 +1173,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
         static readonly GenericInvoker<Func<IEntity, IQueryable>> giInDB =
-            new GenericInvoker<Func<IEntity, IQueryable>>((ie) => InDB<Entity, Entity>((Entity)ie));
+            new((ie) => InDB<Entity, Entity>((Entity)ie));
         static IQueryable<S> InDB<S, RT>(S entity)
             where S : class, IEntity
             where RT : Entity, S
@@ -1210,7 +1210,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
 
         static readonly GenericInvoker<Func<Lite<IEntity>, IQueryable>> giInDBLite =
-            new GenericInvoker<Func<Lite<IEntity>, IQueryable>>(l => InDB<IEntity, Entity>((Lite<Entity>)l));
+            new(l => InDB<IEntity, Entity>((Lite<Entity>)l));
         static IQueryable<S> InDB<S, RT>(Lite<RT> lite)
             where S : class, IEntity
             where RT : Entity, S

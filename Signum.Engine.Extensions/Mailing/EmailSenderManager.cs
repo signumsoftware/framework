@@ -51,7 +51,7 @@ namespace Signum.Engine.Mailing
 
                     try
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             email.Exception = exLog;
                             email.State = EmailMessageState.SentException;

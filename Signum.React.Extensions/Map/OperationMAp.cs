@@ -79,7 +79,7 @@ namespace Signum.React.Map
         }
 
         static readonly GenericInvoker<Func<LambdaExpression, Dictionary<Enum, int>>> giCountGroupBy =
-          new GenericInvoker<Func<LambdaExpression, Dictionary<Enum, int>>>(exp => CountGroupBy((Expression<Func<Entity, DayOfWeek>>)exp));
+          new(exp => CountGroupBy((Expression<Func<Entity, DayOfWeek>>)exp));
         static Dictionary<Enum, int> CountGroupBy<T, S>(Expression<Func<T, S>> expression)
             where T : Entity
         {
@@ -87,7 +87,7 @@ namespace Signum.React.Map
         }
 
         static readonly GenericInvoker<Func<Dictionary<Enum, int>>> giCount =
-            new GenericInvoker<Func<Dictionary<Enum, int>>>(() => Count<Entity>());
+            new(() => Count<Entity>());
         static Dictionary<Enum, int> Count<T>()
             where T : Entity
         {
@@ -105,7 +105,7 @@ namespace Signum.React.Map
         }
 
         static readonly GenericInvoker<Func<LambdaExpression>> giGetGraphGetter =
-            new GenericInvoker<Func<LambdaExpression>>(() => GetGraphGetter<Entity, DayOfWeek>());
+            new(() => GetGraphGetter<Entity, DayOfWeek>());
         static Expression<Func<T, S>> GetGraphGetter<T, S>()
               where T : Entity
         {

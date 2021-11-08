@@ -428,7 +428,7 @@ namespace Signum.Engine.Scheduler
 
                 using (AuthLogic.Disable())
                 {
-                    using (Transaction tr = Transaction.ForceNew())
+                    using (var tr = Transaction.ForceNew())
                     {
                         stl.Save();
 
@@ -443,7 +443,7 @@ namespace Signum.Engine.Scheduler
 
                     using (UserHolder.UserSession(entityIUser))
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             stl.ProductEntity = ExecuteTask.Invoke(task, ctx);
 
@@ -467,7 +467,7 @@ namespace Signum.Engine.Scheduler
 
                         var exLog = ex.LogException().ToLite();
 
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             stl.Exception = exLog;
                             stl.EndTime = TimeZoneManager.Now;
@@ -573,7 +573,7 @@ namespace Signum.Engine.Scheduler
                 {
                     try
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             action(item);
                             tr.Commit();
@@ -590,7 +590,7 @@ namespace Signum.Engine.Scheduler
 
                         var ex = e.LogException();
                         using (ExecutionMode.Global())
-                        using (Transaction tr = Transaction.ForceNew())
+                        using (var tr = Transaction.ForceNew())
                         {
                             new SchedulerTaskExceptionLineEntity
                             {

@@ -120,7 +120,7 @@ namespace Signum.Engine.Mailing
 
                                                 try
                                                 {
-                                                    using (Transaction tr = Transaction.ForceNew())
+                                                    using (var tr = Transaction.ForceNew())
                                                     {
                                                         EmailLogic.SenderManager.Send(email);
                                                         tr.Commit();
@@ -132,7 +132,7 @@ namespace Signum.Engine.Mailing
                                                     {
                                                         if (email.SendRetries < EmailLogic.Configuration.MaxEmailSendRetries)
                                                         {
-                                                            using (Transaction tr = Transaction.ForceNew())
+                                                            using (var tr = Transaction.ForceNew())
                                                             {
                                                                 var nm = email.ToLite().RetrieveAndRemember();
                                                                 nm.SendRetries += 1;

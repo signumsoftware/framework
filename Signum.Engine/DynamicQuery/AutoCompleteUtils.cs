@@ -144,7 +144,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         static GenericInvoker<Func<PrimaryKey, Lite<Entity>?>> giLiteById =
-            new GenericInvoker<Func<PrimaryKey, Lite<Entity>?>>(id => LiteById<TypeEntity>(id));
+            new(id => LiteById<TypeEntity>(id));
         static Lite<Entity>? LiteById<T>(PrimaryKey id)
             where T : Entity
         {
@@ -152,7 +152,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giLiteByIdAsync =
-            new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>>((id, token) => LiteByIdAsync<TypeEntity>(id, token));
+            new((id, token) => LiteByIdAsync<TypeEntity>(id, token));
         static Task<Lite<Entity>> LiteByIdAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
         {
@@ -160,7 +160,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         static GenericInvoker<Func<string[], int, List<Lite<Entity>>>> giLiteContaining =
-            new GenericInvoker<Func<string[], int, List<Lite<Entity>>>>((parts, c) => LiteContaining<TypeEntity>(parts, c));
+            new((parts, c) => LiteContaining<TypeEntity>(parts, c));
         static List<Lite<Entity>> LiteContaining<T>(string[] parts, int count)
             where T : Entity
         {
@@ -175,7 +175,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         static GenericInvoker<Func<string[], int, CancellationToken, Task<List<Lite<Entity>>>>> giLiteContainingAsync =
-            new GenericInvoker<Func<string[], int, CancellationToken, Task<List<Lite<Entity>>>>>((parts, c, token) => LiteContaining<TypeEntity>(parts, c, token));
+            new((parts, c, token) => LiteContaining<TypeEntity>(parts, c, token));
         static async Task<List<Lite<Entity>>> LiteContaining<T>(string[] parts, int count, CancellationToken token)
             where T : Entity
         {

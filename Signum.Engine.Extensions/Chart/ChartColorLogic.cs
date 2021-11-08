@@ -96,13 +96,13 @@ namespace Signum.Engine.Chart
         }
 
      
-        static readonly GenericInvoker<Func<int>> giCount = new GenericInvoker<Func<int>>(() => Count<Entity>());
+        static readonly GenericInvoker<Func<int>> giCount = new(() => Count<Entity>());
         static int Count<T>() where T : Entity
         {
             return Database.Query<T>().Count();
         }
 
-        static readonly GenericInvoker<Func<int>> giDeleteColors = new GenericInvoker<Func<int>>(() => DeleteColors<Entity>());
+        static readonly GenericInvoker<Func<int>> giDeleteColors = new(() => DeleteColors<Entity>());
         static int DeleteColors<T>() where T : Entity
         {
             return (from t in Database.Query<T>() // To filter by type conditions

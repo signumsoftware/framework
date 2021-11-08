@@ -427,7 +427,7 @@ namespace Signum.Engine.UserAssets
 
         }
 
-        static readonly GenericInvoker<Func<Guid, IUserAssetEntity>> giRetrieveOrCreate = new GenericInvoker<Func<Guid, IUserAssetEntity>>(
+        static readonly GenericInvoker<Func<Guid, IUserAssetEntity>> giRetrieveOrCreate = new(
             guid => RetrieveOrCreate<UserQueryEntity>(guid));
         static T RetrieveOrCreate<T>(Guid guid) where T : Entity, IUserAssetEntity, new()
         {

@@ -116,7 +116,7 @@ namespace Signum.Engine.ViewLog
                         Task.Factory.StartNew(() =>
                         {
                             using (ExecutionMode.Global())
-                            using (Transaction tr = Transaction.ForceNew())
+                            using (var tr = Transaction.ForceNew())
                             {
                                 viewLog.EndDate = TimeZoneManager.Now;
                                 viewLog.Data = new BigStringEmbedded(str);

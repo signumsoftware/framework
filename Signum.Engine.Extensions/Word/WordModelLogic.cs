@@ -259,7 +259,7 @@ namespace Signum.Engine.Word
             {
                 using (ExecutionMode.Global())
                 using (OperationLogic.AllowSave<WordTemplateEntity>())
-                using (Transaction tr = Transaction.ForceNew())
+                using (var tr = Transaction.ForceNew())
                 {
                     var template = CreateDefaultTemplate(model)!;
                     

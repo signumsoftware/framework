@@ -265,7 +265,7 @@ namespace Signum.Engine.SMS
             {
                 using (ExecutionMode.Global())
                 using (OperationLogic.AllowSave<SMSTemplateEntity>())
-                using (Transaction tr = Transaction.ForceNew())
+                using (var tr = Transaction.ForceNew())
                 {
                     var template = CreateDefaultTemplate(smsModelEntity);
 

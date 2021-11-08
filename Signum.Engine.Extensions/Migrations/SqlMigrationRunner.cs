@@ -211,7 +211,7 @@ namespace Signum.Engine.Migrations
             string? title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
             string text = File.ReadAllText(mi.FileName!, Encoding.UTF8);
             
-            using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
+            using (var tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
             {
                 string databaseName = Connector.Current.DatabaseName();
 
@@ -219,7 +219,7 @@ namespace Signum.Engine.Migrations
 
                 SqlPreCommandExtensions.ExecuteScript(title, text);
 
-                SqlMigrationEntity m = new SqlMigrationEntity
+                new SqlMigrationEntity
                 {
                     VersionNumber = mi.Version,
                     Comment = mi.Comment,

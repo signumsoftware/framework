@@ -130,7 +130,7 @@ namespace Signum.Engine.Operations
         }
 
         static GenericInvoker<Action> giRegisterExpression =
-            new GenericInvoker<Action>(() => RegisterPreviousLog<Entity>());
+            new(() => RegisterPreviousLog<Entity>());
 
         public static void RegisterPreviousLog<T>()
             where T : Entity
@@ -677,7 +677,7 @@ Consider the following options:
         }
 
         internal static GenericInvoker<Func<IEnumerable<Lite<IEntity>>, IEnumerable<IOperation>, Dictionary<OperationSymbol, string>>> giGetContextualGraphCanExecute =
-            new GenericInvoker<Func<IEnumerable<Lite<IEntity>>, IEnumerable<IOperation>, Dictionary<OperationSymbol, string>>>((lites, operations) => GetContextualGraphCanExecute<Entity, Entity, DayOfWeek>(lites, operations));
+            new((lites, operations) => GetContextualGraphCanExecute<Entity, Entity, DayOfWeek>(lites, operations));
         internal static Dictionary<OperationSymbol, string> GetContextualGraphCanExecute<T, E, S>(IEnumerable<Lite<IEntity>> lites, IEnumerable<IOperation> operations)
             where E : Entity
             //where S : struct (nullable enums)

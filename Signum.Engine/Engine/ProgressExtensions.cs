@@ -79,7 +79,7 @@ namespace Signum.Engine
 
                 collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, showProgress, action: item =>
                 {
-                    using (Transaction tr = Transaction.ForceNew())
+                    using (var tr = Transaction.ForceNew())
                     {
                         using (table.PrimaryKey.Default != null ? null : Administrator.DisableIdentity(table))
                             action!(item);
@@ -123,7 +123,7 @@ namespace Signum.Engine
                     {
                         if (transactional)
                         {
-                            using (Transaction tr = Transaction.ForceNew())
+                            using (var tr = Transaction.ForceNew())
                             {
                                 action(item);
                                 tr.Commit();
@@ -186,7 +186,7 @@ namespace Signum.Engine
                                 {
                                     if (transactional)
                                     {
-                                        using (Transaction tr = Transaction.ForceNew())
+                                        using (var tr = Transaction.ForceNew())
                                         {
                                             action(item);
                                             tr.Commit();

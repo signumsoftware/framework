@@ -200,7 +200,7 @@ namespace Signum.Engine.Processes
 
                                             if (taken.Any())
                                             {
-                                                using (Transaction tr = Transaction.ForceNew())
+                                                using (var tr = Transaction.ForceNew())
                                                 {
                                                     Database.Query<ProcessEntity>()
                                                         .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessEntity.None)
