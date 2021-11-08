@@ -3904,7 +3904,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    [Serializable]
     public class CurrentSourceNotFoundException : Exception
     {
         public CurrentSourceNotFoundException() { }

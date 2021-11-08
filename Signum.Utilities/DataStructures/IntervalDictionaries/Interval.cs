@@ -2,7 +2,6 @@ using System.Globalization;
 
 namespace Signum.Utilities.DataStructures
 {
-    [Serializable]
     public struct Interval<T> : IEquatable<Interval<T>>, IComparable<Interval<T>>, IFormattable, IComparable
         where T:struct, IComparable<T>, IEquatable<T>
     {
@@ -181,7 +180,6 @@ namespace Signum.Utilities.DataStructures
     }
 
 
-    [Serializable]
     public struct NullableInterval<T> : IEquatable<NullableInterval<T>>, IComparable<NullableInterval<T>>, IFormattable, IComparable
         where T : struct, IComparable<T>, IEquatable<T>
     {
@@ -384,7 +382,6 @@ namespace Signum.Utilities.DataStructures
     }
 
 
-    [Serializable]
     public struct IntervalWithEnd<T> : IEquatable<IntervalWithEnd<T>>, IComparable<IntervalWithEnd<T>>, IFormattable, IComparable
         where T : struct, IComparable<T>, IEquatable<T>
     {

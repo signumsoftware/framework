@@ -222,7 +222,6 @@ namespace Signum.Engine
     }
 
 
-    [Serializable]
     public class ExecuteSqlScriptException : Exception
     {
         public ExecuteSqlScriptException() { }

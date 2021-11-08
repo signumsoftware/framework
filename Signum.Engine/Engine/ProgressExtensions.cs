@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 namespace Signum.Engine
 {
 
-    [Serializable]
     public class StopProgressForeachException : Exception
     {
         public StopProgressForeachException() { }

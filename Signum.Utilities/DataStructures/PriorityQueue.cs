@@ -1,7 +1,6 @@
 ﻿
 namespace Signum.Utilities.DataStructures
 {
-    [Serializable]
     public class PriorityQueue<T>
     {
         List<T> list = new List<T>();

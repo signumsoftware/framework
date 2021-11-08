@@ -618,7 +618,6 @@ namespace Signum.Engine
         }
     }
 
-    [Serializable]
     public class FieldReaderException : DbException
     {
         public int? Ordinal { get; internal set; }

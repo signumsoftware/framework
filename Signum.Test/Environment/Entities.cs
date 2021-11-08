@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient.Server;
 
 namespace Signum.Test.Environment
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)),
+    [EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)),
         Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
     public class NoteWithDateEntity : Entity
     {
@@ -29,7 +29,7 @@ namespace Signum.Test.Environment
         }
     }
 
-    [Serializable] // Just a pattern
+    // Just a pattern
     public class ColaboratorsMixin : MixinEntity
     {
         ColaboratorsMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
@@ -56,7 +56,7 @@ namespace Signum.Test.Environment
         bool Lonely();
     }
 
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
+    [EntityKind(EntityKind.Shared, EntityData.Transactional)]
     public class ArtistEntity : Entity, IAuthorEntity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -121,7 +121,7 @@ namespace Signum.Test.Environment
         Married,
     }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class BandEntity : Entity, IAuthorEntity
     {
         [UniqueIndex]
@@ -152,7 +152,7 @@ namespace Signum.Test.Environment
         public static ExecuteSymbol<BandEntity> Save;
     }
 
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), PrimaryKey(typeof(long))]
+    [EntityKind(EntityKind.Shared, EntityData.Transactional), PrimaryKey(typeof(long))]
     public abstract class AwardEntity : Entity
     {
         public int Year { get; set; }
@@ -175,23 +175,20 @@ namespace Signum.Test.Environment
         Nominated
     }
 
-    [Serializable]
     public class GrammyAwardEntity : AwardEntity
     {
     }
 
-    [Serializable]
     public class AmericanMusicAwardEntity : AwardEntity
     {
     }
 
-    [Serializable]
     public class PersonalAwardEntity : AwardEntity
     {
     }
 
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [EntityKind(EntityKind.Main, EntityData.Master)]
     public class LabelEntity : Entity
     {
         [UniqueIndex]
@@ -215,7 +212,7 @@ namespace Signum.Test.Environment
         public static ExecuteSymbol<LabelEntity> Save;
     }
 
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
+    [EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class CountryEntity : Entity
     {
         [UniqueIndex]
@@ -228,7 +225,7 @@ namespace Signum.Test.Environment
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class AlbumEntity : Entity, ISecretContainer
     {
         [UniqueIndex]
@@ -281,7 +278,6 @@ namespace Signum.Test.Environment
         public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum;
     }
 
-    [Serializable]
     public class SongEmbedded : EmbeddedEntity
     {
         [StringLengthValidator(Min = 3, Max = 100)]
@@ -306,7 +302,7 @@ namespace Signum.Test.Environment
         public override string ToString() => As.Expression(() => Name);
     }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class AwardNominationEntity : Entity, ICanBeOrdered
     {
         [NotNullValidator(Disabled = true)]
@@ -326,13 +322,12 @@ namespace Signum.Test.Environment
         public MList<NominationPointEmbedded> Points { get; set; } = new MList<NominationPointEmbedded>();
     }
 
-    [Serializable]
     public class NominationPointEmbedded : EmbeddedEntity
     {
         public int Point { get; set; }
     }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class ConfigEntity : Entity
     {
         public EmbeddedConfigEmbedded? EmbeddedConfig { get; set; }
@@ -417,7 +412,7 @@ END");
 
 
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [EntityKind(EntityKind.System, EntityData.Transactional)]
     public class FolderEntity : Entity
     {
         [UniqueIndex]

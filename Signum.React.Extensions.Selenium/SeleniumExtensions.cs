@@ -67,7 +67,6 @@ namespace Signum.React.Selenium
         }
 
 
-        [Serializable]
         public class WaitTakingTooLongException : Exception
         {
             public WaitTakingTooLongException() { }

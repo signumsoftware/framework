@@ -2,7 +2,6 @@ using System.Collections;
 
 namespace Signum.Utilities.DataStructures
 {
-    [Serializable]
     public class HashSetComparer<T> : IEqualityComparer<HashSet<T>>, IEqualityComparer
     {
         public bool Equals(HashSet<T>? x, HashSet<T>? y)

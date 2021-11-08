@@ -704,7 +704,6 @@ namespace Signum.Engine.Authorization
         UserEntity Login(string userName, string password, out string authenticationType);
     }
 
-    [Serializable]
     public class InvalidRoleGraphException : Exception
     {
         public InvalidRoleGraphException() { }

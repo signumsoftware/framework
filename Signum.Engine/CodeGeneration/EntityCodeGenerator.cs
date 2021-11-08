@@ -293,7 +293,6 @@ namespace Signum.Engine.CodeGeneration
         protected virtual string WriteEmbeddedEntity(string fileName, DiffTable table, string name, List<DiffColumn> columns)
         {
             StringBuilder sb = new StringBuilder();
-            WriteAttributeTag(sb, new[] { "Serializable" });
             sb.AppendLine("public class {0} : {1}".FormatWith(name, typeof(EmbeddedEntity).Name));
             sb.AppendLine("{");
 
@@ -478,7 +477,7 @@ namespace Signum.Engine.CodeGeneration
         }
         protected virtual IEnumerable<string> GetEntityAttributes(DiffTable table)
         {
-            List<string> atts = new List<string> { "Serializable" };
+            List<string> atts = new List<string> { };
 
             atts.Add("EntityKind(EntityKind." + GetEntityKind(table) + ", EntityData." + GetEntityData(table) + ")");
 

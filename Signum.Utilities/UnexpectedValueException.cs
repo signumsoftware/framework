@@ -2,7 +2,6 @@
 namespace Signum.Utilities
 {
 
-    [Serializable]
     public class UnexpectedValueException : Exception
     {
         public UnexpectedValueException() { }

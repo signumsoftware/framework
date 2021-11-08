@@ -228,10 +228,6 @@ namespace Signum.Engine.Maps
                 if (!Reflector.IsEntity(type))
                     throw new InvalidOperationException(ErrorIncluding(route) + $"Impossible to include in the Schema the type {type} because is not and Entity");
 
-                foreach (var t in type.Follow(a => a.BaseType))
-                    if (!t.IsSerializable)
-                        throw new InvalidOperationException(ErrorIncluding(route) + $"Type {t.TypeName()} is not marked as serializable");
-
                 string cleanName = schema.Settings.desambiguatedNames?.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(cleanName))

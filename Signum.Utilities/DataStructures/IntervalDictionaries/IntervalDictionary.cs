@@ -4,7 +4,6 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities.DataStructures
 {
-    [Serializable]
     public class IntervalDictionary<K,V>: IEnumerable<KeyValuePair<Interval<K>, V>>
         where K: struct, IComparable<K>, IEquatable<K>
     {

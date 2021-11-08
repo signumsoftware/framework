@@ -216,7 +216,6 @@ namespace Signum.React.Authorization
         }
     }
 
-    [Serializable]
     public class AuthToken
     {
         public UserEntity User { get; set; }
@@ -224,7 +223,6 @@ namespace Signum.React.Authorization
         public DateTime CreationDate { get; set; }
     }
 
-    [Serializable]
     public class NewTokenRequiredException : Exception
     {
         public NewTokenRequiredException(string message) : base(message) { }

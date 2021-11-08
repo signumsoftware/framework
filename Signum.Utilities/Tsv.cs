@@ -319,7 +319,6 @@ namespace Signum.Utilities
     }
 
 
-    [Serializable]
     public class ParseTsvException : Exception
     {
         public int? Row { get; set; }

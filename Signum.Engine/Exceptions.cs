@@ -8,7 +8,6 @@ using Signum.Entities.Basics;
 
 namespace Signum.Engine
 {
-    [Serializable]
     public class UniqueKeyException : ApplicationException
     {
         public string? TableName { get; private set; }
@@ -188,8 +187,7 @@ namespace Signum.Engine
     }
 
 
-    [Serializable]
-    public class ForeignKeyException : ApplicationException
+     public class ForeignKeyException : ApplicationException
     {
         public string? TableName { get; private set; }
         public string? ColumnName { get; private set; }
@@ -266,7 +264,6 @@ namespace Signum.Engine
     }
 
 
-    [Serializable]
     public class EntityNotFoundException : Exception
     {
         public Type Type { get; private set; }
@@ -284,7 +281,6 @@ namespace Signum.Engine
         }
     }
 
-    [Serializable]
     public class ConcurrencyException: Exception
     {
         public Type Type { get; private set; }
@@ -303,7 +299,6 @@ namespace Signum.Engine
     }
 
 
-    [Serializable]
     public class ModelRequestedException : Exception
     {
         public ModelRequestedException(ModelEntity model) : base("Model Requested")

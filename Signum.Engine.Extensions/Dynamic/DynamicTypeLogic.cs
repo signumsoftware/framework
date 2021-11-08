@@ -382,7 +382,7 @@ namespace Signum.Engine.Dynamic
 
         private List<string> GetEntityAttributes()
         {
-            List<string> atts = new List<string> { "Serializable" };
+            List<string> atts = new List<string> { };
 
             if (this.BaseType == DynamicBaseType.Entity)
             {

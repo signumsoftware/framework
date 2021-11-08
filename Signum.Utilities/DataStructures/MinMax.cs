@@ -1,7 +1,6 @@
 
 namespace Signum.Utilities.DataStructures
 {
-    [Serializable]
     public struct MinMax<T> : IEquatable<MinMax<T>>
     {
         public readonly T Min;

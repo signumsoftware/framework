@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Utilities.DataStructures
 {
-    [Serializable]
     public class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer 
         where T : class
     {

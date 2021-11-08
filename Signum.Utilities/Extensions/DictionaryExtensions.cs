@@ -622,7 +622,6 @@ namespace Signum.Utilities
     }
 
 
-    [Serializable]
     public class RepeatedElementsException : Exception
     {
         public RepeatedElementsException(string message) : base(message) { }
