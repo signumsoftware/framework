@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace Signum.Upgrade
@@ -55,7 +54,7 @@ namespace Signum.Upgrade
 
         public void CreateCodeFile(string fileName, string content, WarningLevel showWarning = WarningLevel.Error)
         {
-            fileName = Path.Combine(this.RootFolder, fileName.Replace("Southwind", ApplicationName));
+            fileName = this.AbsolutePath(fileName.Replace("Southwind", ApplicationName));
             if (File.Exists(fileName))
             {
                 if (showWarning != WarningLevel.None)
@@ -71,17 +70,19 @@ namespace Signum.Upgrade
             {
                 var dir = Path.GetDirectoryName(fileName)!;
                 Directory.CreateDirectory(dir);
-                File.WriteAllText(Path.Combine(this.RootFolder, fileName), content, CodeFile.GetEncoding(fileName, null));
+                File.WriteAllText(fileName, content, CodeFile.GetEncoding(fileName, null));
             }
         }
 
-        public string EntitiesDirectory => Path.Combine(RootFolder, ApplicationName + ".Entities");
-        public string LogicDirectory => Path.Combine(RootFolder, ApplicationName + ".Logic");
-        public string TerminalDirectory => Path.Combine(RootFolder, ApplicationName + ".Terminal");
-        public string ReactDirectory => Path.Combine(RootFolder, ApplicationName + ".React");
-        public string TestEnvironmentDirectory => Path.Combine(RootFolder, ApplicationName + ".Test.Environment");
-        public string TestLogicDirectory => Path.Combine(RootFolder, ApplicationName + ".Test.Logic");
-        public string TestReactDirectory => Path.Combine(RootFolder, ApplicationName + ".Test.React");
+        public string AbsolutePath(string name) => Path.Combine(RootFolder, name);
+
+        public string EntitiesDirectory => AbsolutePath(ApplicationName + ".Entities");
+        public string LogicDirectory => AbsolutePath(ApplicationName + ".Logic");
+        public string TerminalDirectory => AbsolutePath(ApplicationName + ".Terminal");
+        public string ReactDirectory => AbsolutePath(ApplicationName + ".React");
+        public string TestEnvironmentDirectory => AbsolutePath(ApplicationName + ".Test.Environment");
+        public string TestLogicDirectory => AbsolutePath(ApplicationName + ".Test.Logic");
+        public string TestReactDirectory => AbsolutePath(ApplicationName + ".Test.React");
 
         public WarningLevel HasWarnings { get; internal set; }
 
@@ -90,7 +91,7 @@ namespace Signum.Upgrade
         public void ChangeCodeFile(string fileName, Action<CodeFile> action, WarningLevel showWarning = WarningLevel.Error)
         {
             fileName = fileName.Replace("Southwind", ApplicationName);
-            if (!File.Exists(Path.Combine(this.RootFolder, fileName)))
+            if (!File.Exists(this.AbsolutePath(fileName)))
             {
                 if (showWarning != WarningLevel.None)
                 {
@@ -123,7 +124,7 @@ namespace Signum.Upgrade
 
         public void ForeachCodeFile(string searchPattern, string directory, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None)
         {
-            var codeFiles = GetCodeFiles(Path.Combine(RootFolder, directory.Replace("Southwind", ApplicationName)), searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
+            var codeFiles = GetCodeFiles(this.AbsolutePath(directory.Replace("Southwind", ApplicationName)), searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
             foreach (var codeFile in codeFiles)
             {
                 codeFile.WarningLevel = showWarnings;
@@ -136,7 +137,7 @@ namespace Signum.Upgrade
         {
             foreach (var dir in directories)
             {
-                var codeFiles = GetCodeFiles(Path.Combine(RootFolder, dir.Replace("Southwind", ApplicationName)), searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
+                var codeFiles = GetCodeFiles(this.AbsolutePath(dir.Replace("Southwind", ApplicationName)), searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), DefaultIgnoreDirectories);
                 foreach (var codeFile in codeFiles)
                 {
                     codeFile.WarningLevel = showWarnings;

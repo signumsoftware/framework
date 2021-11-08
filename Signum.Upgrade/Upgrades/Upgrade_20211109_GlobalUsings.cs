@@ -1,12 +1,6 @@
 using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Signum.Upgrade.Upgrades
 {
@@ -21,21 +15,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using Signum.Entities;
-using Signum.Entities.Reflection;
+using System.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using System.Reflection;";
+using Signum.Entities;
+using Signum.Entities.Reflection;";
 
             ProcessDirectory(uctx, uctx.EntitiesDirectory, basicUsings + @"
 using System.ComponentModel;");
 
             ProcessDirectory(uctx, uctx.LogicDirectory, basicUsings + @"
+using Signum.Entities;
+using Signum.Entities.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;");
 
