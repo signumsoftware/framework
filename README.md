@@ -50,6 +50,7 @@ Check the different modules in https://www.signumsoftware.com/es/Extensions
 Signum Framework doesn't use any numeric versioning, since is distributed as source code we just use Git commit hashes.
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
+* [2021.11.09 .Net 6 and C# 10](https://github.com/signumsoftware/framework/commit/0669737b11a30dc385eb8fd1bc22ac97fa637cd0#commitcomment-59667330)
 * [2021.11.04 WordTemplate with embedded Excel charts from UserCharts / UserQueries](https://github.com/signumsoftware/framework/commit/e8d4ab20e612af0b826beca77b7edf648227e806)
 * [2021.11.01 Dashboard filters and InteractionGroup](https://github.com/signumsoftware/framework/commit/55def717ccf8414e11396faa6b47b12747c56f01)
 * [2021.08.28 Update to TypeScript 4.4](https://github.com/signumsoftware/framework/commit/f6412af23da1e225b0b417b329874acd8c820f05#commitcomment-55586120)
