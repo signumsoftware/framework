@@ -127,7 +127,7 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
               <Dropdown.Toggle id="dropdown-toolbar" as={CustomToggle} onClick={() => handleOnToggle(res)}>
                 {!icon ? title : (<span>{icon}{title}</span>)}
               </Dropdown.Toggle>
-              <Dropdown.Menu align={AppContext.isRtl() ? "end" : undefined}>
+              <Dropdown.Menu>
                 {res.elements && res.elements.flatMap(sr => renderDropdownItem(sr, 0, true, res)).map((sr, i) => withKey(sr, i))}
               </Dropdown.Menu>
             </Dropdown>

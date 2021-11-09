@@ -57,13 +57,12 @@ function isControlled(p: CollapsableCardProps): [boolean, (isOpen: boolean) => v
 export default function CollapsableCard(p: CollapsableCardProps) {
 
   const [isOpen, setIsOpen] = isControlled(p);
-  const isRTL = React.useMemo(() => document.body.classList.contains("rtl"), []);
   return (
     <div className={classes("card", cardStyleClasses(p.cardStyle), p.size && ("card-" + p.size))}>
       <div className={classes("card-header", cardStyleClasses(p.headerStyle))} style={{ cursor: "pointer" }} onClick={() => setIsOpen(!isOpen)}>
         {(p.collapsable == undefined || p.collapsable == true) &&
           <span
-            className={isRTL ? "float-left" : "float-right"}
+            className={"float-end"}
             style={{ cursor: "pointer" }}
             onClick={() => setIsOpen(!isOpen)}>
             <FontAwesomeIcon icon={isOpen ? "chevron-up" : "chevron-down"} />

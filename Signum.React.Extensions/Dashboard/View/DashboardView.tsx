@@ -226,7 +226,7 @@ export function PanelPart(p: PanelPartProps) {
         style && ("bg-" + style)
       )}>
         {renderer.handleEditClick &&
-          <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
+          <a className="sf-pointer float-end flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
             <FontAwesomeIcon icon="edit" className="me-1" />Edit
           </a>
         }

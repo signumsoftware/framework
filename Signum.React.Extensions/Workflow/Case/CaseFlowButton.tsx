@@ -15,7 +15,7 @@ export default function CaseFlowButton(p : CaseFlowButtonProps){
   }
 
   return (
-    <button className="btn btn-light float-right flip" onClick={handleClick}>
+    <button className="btn btn-light float-end flip" onClick={handleClick}>
       <FontAwesomeIcon icon="random" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
     </button>
   );
