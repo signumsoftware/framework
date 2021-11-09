@@ -164,7 +164,7 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
               <Toast onClose={() => handleOnCloseAlerts(alerts!.map(a=>a))}>
                 <Toast.Header>
                   <strong >{AlertMessage._0SimilarAlerts.niceToString(alertsGroups.filter((a, i) => i >= showAlerts).sum(gr => gr.elements.length))}</strong>
-                  <a href="#" className="mr-auto ml-auto" onClick={e => { e.preventDefault(); setShowAlert(a => a + 3); }}><small>{AlertMessage.ViewMore.niceToString()}</small></a>
+                  <a href="#" className="me-auto ms-auto" onClick={e => { e.preventDefault(); setShowAlert(a => a + 3); }}><small>{AlertMessage.ViewMore.niceToString()}</small></a>
                   <small>{AlertMessage.CloseAll.niceToString()}</small>
                 </Toast.Header>
               </Toast>
@@ -213,8 +213,8 @@ export function AlertToast(p: { alert: AlertEntity, onClose: (e: AlertEntity[]) 
   return (
     <Toast onClose={() => p.onClose([p.alert])} className={p.className}>
       <Toast.Header>
-        {icon && <span className="mr-2">{icon}</span>}
-        <strong className="mr-auto">{AlertsClient.getTitle(p.alert.titleField, p.alert.alertType)}</strong>
+        {icon && <span className="me-2">{icon}</span>}
+        <strong className="me-auto">{AlertsClient.getTitle(p.alert.titleField, p.alert.alertType)}</strong>
         <small>{DateTime.fromISO(p.alert.alertDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
@@ -242,9 +242,9 @@ export function AlertGroupToast(p: { alerts: Array<AlertEntity>, onClose: (e: Al
         p.alerts.length > showAlerts &&
         <Toast className="mt-0" onClose={() => p.onClose(p.alerts)}>
           <Toast.Header>
-            {icon && <span className="mr-2">{icon}</span>}
+            {icon && <span className="me-2">{icon}</span>}
             <strong >{AlertMessage._0SimilarAlerts.niceToString(p.alerts.length - showAlerts)}</strong>
-            <a href="#" className="mr-auto ml-auto" onClick={e => { e.preventDefault(); setShowAlert(a => a + 3); }}><small>{AlertMessage.ViewMore.niceToString()}</small></a>
+            <a href="#" className="me-auto ms-auto" onClick={e => { e.preventDefault(); setShowAlert(a => a + 3); }}><small>{AlertMessage.ViewMore.niceToString()}</small></a>
             <small>{AlertMessage.CloseAll.niceToString()}</small>
           </Toast.Header>
         </Toast>

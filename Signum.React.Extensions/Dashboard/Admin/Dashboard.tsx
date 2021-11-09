@@ -57,7 +57,7 @@ export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
       <div>
         <div className="d-flex">
           {icon && <div className="mx-2"><FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px", marginTop: "17px" }} /> </div>}
-          <div style={{ flexGrow: 1 }} className="mr-2">
+          <div style={{ flexGrow: 1 }} className="me-2">
 
             <div className="row">
               <div className="col-sm-8">

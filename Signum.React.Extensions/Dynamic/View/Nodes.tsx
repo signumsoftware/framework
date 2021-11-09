@@ -1487,7 +1487,7 @@ NodeUtils.register<ButtonNode>({
     var iconColor = NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.iconColor, NodeUtils.isStringOrNull);
 
     var children = pIcon || iconColor ? <>
-      {pIcon && <FontAwesomeIcon icon={pIcon} color={iconColor} className="mr-2" />}
+      {pIcon && <FontAwesomeIcon icon={pIcon} color={iconColor} className="me-2" />}
       {NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.text, NodeUtils.isStringOrNull)}
     </> : undefined;
 

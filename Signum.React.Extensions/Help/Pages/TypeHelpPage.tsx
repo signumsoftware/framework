@@ -117,13 +117,13 @@ function SubPropertiesCollapse({ node, cleanName, onChange }: { node: TreeNode<{
   var [open, setOpen] = React.useState(false);
   return (
     <>
-      <div className="row ml-4 mb-2">
+      <div className="row ms-4 mb-2">
         <span className="col-sm-9 offset-sm-3 lead" style={{ cursor: "pointer" }} onClick={() => setOpen(!open)}>
           <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {node.value.pr.member!.niceName}
         </span>
       </div>
       <Collapse in={open}>
-        <dl className="row ml-4">
+        <dl className="row ms-4">
           {node.children.map(n => <PropertyLine key={node.value.pr.propertyPath()} node={node} cleanName={cleanName} onChange={onChange} />)}
         </dl>
       </Collapse>
@@ -162,7 +162,7 @@ function QueryBlock({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryHelpEn
         </div>
       </div>
       <Collapse in={open}>
-        <dl className="row ml-4">
+        <dl className="row ms-4">
           {mlistItemContext(ctx.subCtx(th => th.columns)).map(qctx => <QueryColumnLine key={qctx.value.columnName} ctx={qctx} cleanName={cleanName} onChange={onChange} />)}
         </dl>
       </Collapse>

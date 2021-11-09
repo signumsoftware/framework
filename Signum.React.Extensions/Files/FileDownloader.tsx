@@ -80,7 +80,7 @@ export function FileDownloader(p: FileDownloaderProps) {
       >
         {p.children ??
           <>
-            {p.showFileIcon && <FontAwesomeIcon className="mr-1" icon={["far", info?.icon ?? "file"]} color={info?.color ?? "grey"} />}
+            {p.showFileIcon && <FontAwesomeIcon className="me-1" icon={["far", info?.icon ?? "file"]} color={info?.color ?? "grey"} />}
             {toStr}
           </>}
       </a>
@@ -91,7 +91,7 @@ export function FileDownloader(p: FileDownloaderProps) {
             e.preventDefault();
             handleOnClick(e, true);
           }}>
-          <FontAwesomeIcon className="ml-1 sf-pointer" icon={["fas", "download"]} />
+          <FontAwesomeIcon className="ms-1 sf-pointer" icon={["fas", "download"]} />
         </a>
       }
     </div>

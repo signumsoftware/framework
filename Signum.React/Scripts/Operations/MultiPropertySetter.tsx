@@ -134,7 +134,7 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
               <a href="#" title={StyleContext.default.titleLabels ? addElement : undefined}
                 className="sf-line-button sf-create sf-create-condition"
                 onClick={e => handleNewPropertySetter(e)}>
-                <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{addElement}
+                <FontAwesomeIcon icon="plus" className="sf-create me-1" />{addElement}
               </a>
             </td>
           </tr>

@@ -616,7 +616,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       {
         order: -3,
-        button: < button className={classes("sf-query-button sf-search btn ml-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
+        button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
           <FontAwesomeIcon icon={"search"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
         </button>
       },
@@ -625,7 +625,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       p.create && {
         order: -2,
-        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ml-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
+        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },
@@ -829,7 +829,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <Dropdown
           show={this.state.isSelectOpen}
           onToggle={this.handleSelectedToggle}>
-          <Dropdown.Toggle id="selectedButton" variant="light" className="sf-query-button sf-tm-selected ml-2" disabled={this.state.selectedRows!.length == 0}>
+          <Dropdown.Toggle id="selectedButton" variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
             {title}
           </Dropdown.Toggle>
           <Dropdown.Menu>
@@ -1215,7 +1215,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             <div className="d-flex" style={{ alignItems: "center" }}>
               {this.orderIcon(co)}
               {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
-                <FontAwesomeIcon icon="key" className="mr-1"
+                <FontAwesomeIcon icon="key" className="me-1"
                   color={rootKeys.contains(co) ? undefined : "gray"}
                   title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
               {co.displayName}
@@ -1259,7 +1259,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (orders.indexOf(o))
       asc += " l" + orders.indexOf(o);
 
-    return <span className={"mr-1 sf-header-sort " + asc} />;
+    return <span className={"me-1 sf-header-sort " + asc} />;
   }
 
   //ROWS

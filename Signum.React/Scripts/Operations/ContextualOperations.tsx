@@ -266,7 +266,7 @@ OperationMenuItem.getText = (coc: ContextualOperationContext<any>): React.ReactN
   if (coc.entityOperationSettings?.text)
     return coc.entityOperationSettings.text();
 
-  return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ml-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
+  return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ms-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
 
 };
 

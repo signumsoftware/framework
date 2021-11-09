@@ -277,10 +277,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           })}
         </div>
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
-        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="mr-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>
-        {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={["fas", "share-square"]} className="mr-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
-        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="mr-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
-        {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon icon={["fas", "plus"]} className="mr-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>
+        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={["fas", "share-square"]} className="me-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="me-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
+        {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>
     </Dropdown>
   );
 

@@ -54,7 +54,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
   function renderButtons() {
     const hasValue = !!p.ctx.value;
     const buttons = (
-      <span className="ml-1 float-right">
+      <span className="ms-1 float-right">
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {!hasValue && c.renderCreateButton(false)}
         {!hasValue && c.renderFindButton(false)}
