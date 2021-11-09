@@ -116,7 +116,7 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
         );
       else
         return (
-          <select className="form-control form-control-xs" style={style}
+          <select className="form-select form-control-xs" style={style}
             value={val == null ? "" : val.toString()} onChange={handleChangeSelectOrInput} >
             {p.defaultValue == null && <option value="">{" - "}</option>}
             {p.options.map((o, i) =>
@@ -298,7 +298,7 @@ export function FieldComponent(p : FieldComponentProps){
 
     const subMembers = route ? route.subMembers() : {};
 
-    return (<select className="form-control form-control-xs" value={strValue} onChange={handleChange} >
+    return (<select className="form-select form-control-xs" value={strValue} onChange={handleChange} >
       <option value=""> - </option>
       {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id").map((name, i) =>
         <option key={i} value={name}>{name}</option>)

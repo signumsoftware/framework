@@ -238,7 +238,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
 
   return (
     <div className="code-container">
-      <button type="button" className="close" aria-label="Close" style={{ float: "right" }} onClick={p.rootNode.context.onClose}><span aria-hidden="true">×</span></button>
+      <button type="button" className="btn-close" aria-label="Close" style={{ float: "right" }} onClick={p.rootNode.context.onClose}/>
       <h3>
         <small>{Navigator.getTypeTitle(p.dynamicView, undefined)}</small>
       </h3>

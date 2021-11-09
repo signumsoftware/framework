@@ -219,6 +219,10 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       }
     }
 
+    function bg(color: BsColor) {
+      return p.isLink ? "btn-" + color : "bg-" + color;
+    }
+
     let className = classes(
       p.valueToken == undefined && "count-search",
       p.valueToken == undefined && (this.state.value > 0 ? "count-with-results" : "count-no-results"),
@@ -229,10 +233,10 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
       p.isBadge == false ? "" :
         "badge badge-pill " +
-        (p.isBadge == "MoreThanZero" && (this.state.value == 0 || this.state.value == null) ? "badge-light text-muted" :
-          p.badgeColor && typeof p.badgeColor == "function" ? "badge-" + p.badgeColor(this.state.value) :
-            p.badgeColor ? "badge-" + p.badgeColor :
-              "badge-secondary"),
+        (p.isBadge == "MoreThanZero" && (this.state.value == 0 || this.state.value == null) ? bg("light") + " text-muted" :
+          p.badgeColor && typeof p.badgeColor == "function" ? bg(p.badgeColor(this.state.value)) :
+            p.badgeColor ? bg(p.badgeColor) :
+              bg("secondary")),
 
       p.customClass && typeof p.customClass == "function" ? p.customClass(this.state.value) : p.customClass
     );

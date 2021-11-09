@@ -234,9 +234,9 @@ export function PanelPart(p: PanelPartProps) {
           <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
         }
         {
-          dashboardFilter && <span className="badge badge-light border border-secondary ms-2 sf-filter-pill">
+          dashboardFilter && <span className="badge btn-light border border-secondary ms-2 sf-filter-pill">
             {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
-            <button type="button" aria-label="Close" className="close" onClick={handleClearFilter}><span aria-hidden="true">×</span></button>
+            <button type="button" aria-label="Close" className="btn-close" onClick={handleClearFilter}/>
           </span>
         }
       </div>

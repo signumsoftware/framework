@@ -275,7 +275,7 @@ export default function FramePage(p: FramePageProps) {
     const entity = state.pack.entity;
 
     return (
-      <h4>
+      <h4 className="border-bottom pb-3 mb-2">
         <span className="display-6 sf-entity-title">{getToString(entity)}</span>
         <br />
         <small className="sf-type-nice-name text-muted">{Navigator.getTypeTitle(entity, undefined)}</small>

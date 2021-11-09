@@ -112,6 +112,27 @@ export class StyleContext {
     }
   }
 
+  get formCheckClass(): string | undefined {
+    switch (this.formSize) {
+      case "ExtraSmall": return "form-check form-control-xs";
+      case "Small": return "form-check form-control-sm";
+      case "Normal": return "form-check";
+      case "Large": return "form-check form-control-lg";
+      default: throw new Error("Unexpected formSize " + this.formSize);
+    }
+  }
+
+
+  get formSelectClass(): string | undefined {
+    switch (this.formSize) {
+      case "ExtraSmall": return "form-select form-control-xs";
+      case "Small": return "form-select form-control-sm";
+      case "Normal": return "form-select";
+      case "Large": return "form-select form-control-lg";
+      default: throw new Error("Unexpected formSize " + this.formSize);
+    }
+  }
+
   get formControlPlainTextClass(): string | undefined {
     switch (this.formSize) {
       case "ExtraSmall": return "form-control-plaintext form-control-xs";

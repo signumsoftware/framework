@@ -130,14 +130,14 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
   const hasValue = !!p.ctx.value;
 
   const buttons = (
-    <span className="input-group-append">
+    <>
       {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
       {!hasValue && !p.avoidViewButton && c.renderCreateButton(true)}
       {!hasValue && c.renderFindButton(true)}
       {hasValue && !p.avoidViewButton && c.renderViewButton(true, p.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, p.ctx.value!)}
       {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
-    </span>
+    </>
   );
 
   return (

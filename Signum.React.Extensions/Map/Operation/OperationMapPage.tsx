@@ -96,7 +96,7 @@ export default function OperationMapPage(p: RouteComponentProps<{ type: string }
         <div className="form-group" style={{ marginLeft: "10px" }}>
           <label htmlFor="color"> {MapMessage.Color.niceToString()}</label>
           &nbsp;
-          <select className="form-control" id="color" value={color} onChange={e => setColor(e.currentTarget.value)}>
+          <select className="form-select" id="color" value={color} onChange={e => setColor(e.currentTarget.value)}>
             <option value="state">{MapMessage.StateColor.niceToString()}</option>
             <option value="rows">{MapMessage.Rows.niceToString()}</option>
           </select>

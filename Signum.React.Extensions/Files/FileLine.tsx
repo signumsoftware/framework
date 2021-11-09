@@ -109,9 +109,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
     return (
       <div className={ctx.inputGroupClass}>
         {content}
-        <span className="input-group-append">
-          {removeButton}
-        </span>
+        {removeButton}
       </div>
     );
   }

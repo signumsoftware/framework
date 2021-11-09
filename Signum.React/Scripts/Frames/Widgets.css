@@ -43,3 +43,7 @@ a.badge span.sf-alert-active {
         padding: 4px;
         background: #FF4400;
     }
+
+badge.badge-pill{
+    border-radius: 50rem;
+}

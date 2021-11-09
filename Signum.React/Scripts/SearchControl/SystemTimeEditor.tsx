@@ -123,7 +123,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
   function renderMode() {
 
     return (
-      <select value={p.findOptions.systemTime!.mode} className="form-control form-control-sm ms-1" style={{ width: "auto" }} onChange={handleChangeMode}>
+      <select value={p.findOptions.systemTime!.mode} className="form-select form-control-sm ms-1" style={{ width: "auto" }} onChange={handleChangeMode}>
         {SystemTimeMode.values().map((stm, i) => <option key={i} value={stm}>{SystemTimeMode.niceToString(stm)}</option>)}
       </select>
     );
@@ -132,7 +132,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
   function renderJoinMode() {
     
     return (
-      <select value={p.findOptions.systemTime!.joinMode} className="form-control form-control-sm ms-1" style={{ width: "auto" }} onChange={handleChangeJoinMode}>
+      <select value={p.findOptions.systemTime!.joinMode} className="form-select form-control-sm ms-1" style={{ width: "auto" }} onChange={handleChangeJoinMode}>
         {SystemTimeJoinMode.values().map((stjm, i) => <option key={i} value={stjm}>{SystemTimeJoinMode.niceToString(stjm)}</option>)}
       </select>
     );

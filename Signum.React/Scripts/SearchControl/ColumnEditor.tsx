@@ -53,7 +53,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
 
   return (
     <div className="sf-column-editor">
-      <button type="button" className="close" aria-label="Close" onClick={p.close} ><span aria-hidden="true">×</span></button>
+      <button type="button" className="btn-close float-end" aria-label="Close" onClick={p.close} />
       <div className={classes("d-flex", isCollection ? "error" : undefined)}
         title={StyleContext.default.titleLabels && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
         <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>{SearchMessage.Field.niceToString()}</label>

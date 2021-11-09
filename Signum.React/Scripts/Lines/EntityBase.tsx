@@ -189,7 +189,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-view", btn ? "btn input-group-text" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-view", btn ?  "input-group-text" : undefined)}
         onClick={this.handleViewClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
         {EntityBaseController.viewIcon}
@@ -261,7 +261,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-create", btn ? "btn input-group-text" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
         onClick={this.handleCreateClick}
         title={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() : undefined}>
         {EntityBaseController.createIcon}
@@ -308,7 +308,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-find", btn ? "btn input-group-text" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
         onClick={this.handleFindClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
         {EntityBaseController.findIcon}
@@ -334,7 +334,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "btn input-group-text" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
         {EntityBaseController.removeIcon}

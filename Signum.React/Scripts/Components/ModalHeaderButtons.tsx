@@ -23,12 +23,10 @@ interface ModalHeaderButtonsProps {
 export function ModalHeaderButtons(p: ModalHeaderButtonsProps) {
 
   var close = p.onClose &&
-    <button type="button" className="close" aria-label="Close" onClick={p.onClose}>
-      <span aria-hidden="true">×</span>
-    </button>;
+    <button type="button" className="btn-close" aria-label="Close" onClick={p.onClose}/>
 
   return (
-    <div className="modal-header" {...p.htmlAttributes}>
+    <div className="modal-header align-items-start" {...p.htmlAttributes}>
       {p.closeBeforeTitle && close}
       <h4 className="modal-title" >
         {p.children}

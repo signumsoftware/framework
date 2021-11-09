@@ -120,11 +120,11 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
       <div className="form-inline container" style={{ margin: "1rem 0" }}>
         <div className="form-group form-group-sm">
           <label htmlFor="filter"> {MapMessage.Filter.niceToString()}</label>&nbsp;
-                    <input type="text" className="form-control form-control-sm" id="filter" placeholder="type or namespace" value={filter} onChange={handleSetFilter} />
+          <input type="text" className="form-control form-control-sm" id="filter" placeholder="type or namespace" value={filter} onChange={handleSetFilter} />
         </div>
         <div className="form-group form-group-sm" style={{ marginLeft: "10px" }}>
           <label htmlFor="color"> {MapMessage.Color.niceToString()}</label>&nbsp;
-          <select className="form-control form-control-sm" id="color" value={color} onChange={handleSetColor}>
+          <select className="form-select form-control-sm" id="color" value={color} onChange={handleSetColor}>
             {
               schemaInfo &&
               schemaInfo.providers.map((a, i) =>
@@ -136,7 +136,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
           {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
         </span>
         &nbsp;
-                <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
+        <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
           <FontAwesomeIcon icon="external-link-alt" />
         </a>
       </div>
@@ -146,7 +146,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
     return null;
 
   return (
-    <div style={{display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {renderFilter()}
       {!(schemaInfo && schemaInfo && providers) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :
@@ -159,7 +159,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
               color={color}
               height={size.height}
               width={size.width}
-              providers={providers} 
+              providers={providers}
             />
           }
         </div>}

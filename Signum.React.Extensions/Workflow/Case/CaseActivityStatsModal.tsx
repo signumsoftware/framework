@@ -35,9 +35,7 @@ export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
     <Modal size="lg" onHide={handleCloseClicked} show={show} onExited={handleOnExited}>
       <div className="modal-header">
         <h5 className="modal-title">{caseActivityStats.first().workflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})</h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
       </div>
       <div className="modal-body">
         {

@@ -284,7 +284,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
               <FontAwesomeIcon icon={fg.expanded ? ["far", "minus-square"] : ["far", "plus-square"]} className="me-2" />
             </a>
             <label>Group:</label>
-            <select className="form-control form-control-xs sf-group-selector mx-2" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
+            <select className="form-select form-control-xs sf-group-selector mx-2" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
               {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
             </select>
           </div>
@@ -516,7 +516,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         </td>
         <td className="sf-filter-operation">
           {f.token && f.token.filterType && f.operation &&
-            <select className="form-control form-control-xs" value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
+            <select className="form-select form-control-xs" value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
               {f.token.filterType && filterOperations[f.token.filterType!]
                 .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
             </select>}

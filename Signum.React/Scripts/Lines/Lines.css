@@ -90,7 +90,7 @@ li.sf-strip-element {
     color: #b1bac4;
 }
 
-    .sf-line-button.btn {
+    .sf-line-button.input-group-text {
         color: gray;
     }
 
@@ -98,25 +98,25 @@ li.sf-strip-element {
         color: gray;
     }
 
-    .sf-line-button:not(.btn) {
+    .sf-line-button:not(.input-group-text) {
         margin: 0 2px;
     }
 
 
 
 /* EntityLine buttons  */
-.input-group-append.input-group-vertical {
+.input-group-vertical {
     flex-direction: column;
     align-items: stretch;
 }
 
-    .input-group-append.input-group-vertical > .btn {
+    .input-group-vertical > .btn {
         border-top-left-radius: 0px !important;
         border-bottom-left-radius: 0px !important;
         margin-left: 0px;
     }
 
-        .input-group-append.input-group-vertical > .btn:first-child:not(:last-child) {
+        .input-group-vertical > .btn:first-child:not(:last-child) {
             border-top-right-radius: 4px;
             border-bottom-right-radius: 0;
             border-bottom-left-radius: 0;
@@ -273,6 +273,10 @@ body.rtl .form-group.row > label {
         border-color: #a94442;
     }
 
+.form-group {
+    margin-bottom: 1rem;
+}
+
 .form-group .form-group {
     margin-bottom: 0px;
 }
@@ -285,14 +289,9 @@ body.rtl .form-group.row > label {
 
 /*form xs*/
 
-select.form-control-xs:not([size]):not([multiple]),
-.input-group-xs > select.form-control:not([size]):not([multiple]),
-.input-group-xs > .input-group-prepend > select.input-group-text:not([size]):not([multiple]),
-.input-group-xs > .input-group-append > select.input-group-text:not([size]):not([multiple]),
-.input-group-xs > .input-group-prepend > select.btn:not([size]):not([multiple]),
-.input-group-xs > .input-group-append > select.btn:not([size]):not([multiple]) {
-    height: 24px;
-    padding: 0 2px
+.form-select.form-control-xs {
+    background-position: right 0.2rem center;
+    padding: 1px 20px 1px 5px;
 }
 
 input[type=checkbox].form-control-xs {
@@ -301,10 +300,8 @@ input[type=checkbox].form-control-xs {
 
 .form-control-xs,
 .input-group-xs > .form-control,
-.input-group-xs > .input-group-prepend > .input-group-text,
-.input-group-xs > .input-group-append > .input-group-text,
-.input-group-xs > .input-group-prepend > .btn,
-.input-group-xs > .input-group-append > .btn {
+.input-group-xs > .input-group-text,
+.input-group-xs > .btn {
     padding: 1px 5px;
     font-size: 0.875rem;
     line-height: 1.5;

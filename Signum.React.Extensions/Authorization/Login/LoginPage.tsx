@@ -38,13 +38,15 @@ export default function LoginPage() {
       {showLoginForm && <LoginForm ctx={ctx} />}
       {LoginPage.customLoginButtons && LoginPage.customLoginButtons(ctx)}
       {LoginPage.showLoginForm == "initially_not" && showLoginForm == false &&
+        <div className="row">
         <div className="col-md-6 offset-md-3 mt-2">
-          <a href="#" onClick={e => {
-            e.preventDefault();
-            setShowLoginForm(true);
-          }}>
-            {LoginAuthMessage.ShowLoginForm.niceToString()}
-          </a>
+          <a href="#" className="ms-1" onClick={e => {
+              e.preventDefault();
+              setShowLoginForm(true);
+            }}>
+              {LoginAuthMessage.ShowLoginForm.niceToString()}
+            </a>
+          </div>
         </div>
       }
     </div>
@@ -113,9 +115,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
           <div className={classes("form-group", error("userName") && "has-error")}>
             <label className="sr-only" htmlFor="userName">{LoginAuthMessage.Username.niceToString()}</label>
             <div className="input-group mb-2 mr-sm-2 mb-sm-0">
-              <div className="input-group-prepend">
-                <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }} /></div>
-              </div>
+              <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }} /></div>
               <input type="text" className="form-control" id="userName" ref={userName} placeholder={LoginAuthMessage.Username.niceToString()} disabled={p.ctx.loading != null} />
             </div>
             {error("userName") && <span className="help-block text-danger">{error("userName")}</span>}
@@ -127,9 +127,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
           <div className={classes("form-group", error("password") && "has-error")}>
             <label className="sr-only" htmlFor="password">{LoginAuthMessage.Password.niceToString()}</label>
             <div className="input-group mb-2 mr-sm-2 mb-sm-0">
-              <div className="input-group-prepend">
-                <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
-              </div>
+              <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
               <input ref={password} type="password" name="password" className="form-control" id="password" placeholder={LoginAuthMessage.Password.niceToString()} disabled={p.ctx.loading != null} />
             </div>
             {error("password") && <span className="help-block text-danger">{error("password")}</span>}

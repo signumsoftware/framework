@@ -27,9 +27,7 @@ export default function ShowCodeModal(p: ShowCodeModalProps) {
     <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited} className="sf-selector-modal">
       <div className="modal-header">
         <h5 className="modal-title">{p.typeName + "Component code"}</h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
       </div>
       <div className="modal-body">
         <pre>

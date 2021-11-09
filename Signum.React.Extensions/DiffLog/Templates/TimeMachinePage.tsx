@@ -167,9 +167,7 @@ export function TimeMachineModal(p: TimeMachineModalProps) {
     <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
       <div className="modal-header">
         <h5 className="modal-title">{TimeMachineMessage.CompareVersions.niceToString()}</h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
       </div>
       <div className="modal-body">
         <TimeMachineTabs lite={p.lite} versionDatesUTC={p.versionDatesUTC} />

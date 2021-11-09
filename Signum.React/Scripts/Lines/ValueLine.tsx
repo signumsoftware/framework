@@ -142,13 +142,8 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     return (
       <div className={this.props.ctx.inputGroupClass}>
         {input}
-        {
-          (this.props.unitText != null || this.props.extraButtons != null) &&
-          <div className="input-group-append">
-            {this.props.unitText && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unitText}</span>}
-            {this.props.extraButtons && this.props.extraButtons(this)}
-          </div>
-        }
+        {this.props.unitText && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unitText}</span>}
+        {this.props.extraButtons && this.props.extraButtons(this)}
       </div>
     );
   }
@@ -244,7 +239,7 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
-          className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} disabled={s.ctx.readOnly} />
+          className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formCheckClass, vl.mandatoryClass))} disabled={s.ctx.readOnly} />
       </FormGroup>
     );
   }
@@ -365,7 +360,7 @@ function internalDropDownList(vl: ValueLineController) {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
-          <select {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} onChange={handleEnumOnChange} >
+          <select {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formSelectClass, vl.mandatoryClass))} onChange={handleEnumOnChange} >
             {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
           </select>)
         }

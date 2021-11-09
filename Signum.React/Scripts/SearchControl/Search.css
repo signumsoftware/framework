@@ -98,6 +98,10 @@ table.sf-search-results > tbody > tr > td {
     padding-right: 10px;
 }
 
+.sf-search-results > tbody{
+    border-top: none !important;
+}
+
 
 #divSearchPage .sf-search-footer {
     margin-top: 10px;
@@ -159,8 +163,8 @@ table.sf-search-results th.sf-current-column {
     /*Avoid EntityLines to get on top of sticky headers*/
     .sf-scroll-table-container .form-control,
     .sf-scroll-table-container .input-group,
-    .sf-scroll-table-container .input-group-prepend .btn,
-    .sf-scroll-table-container .input-group-append .btn {
+    .sf-scroll-table-container .btn,
+    .sf-scroll-table-container .btn {
         position: static !important;
         z-index: initial !important;
     }

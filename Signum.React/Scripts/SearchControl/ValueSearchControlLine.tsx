@@ -166,20 +166,11 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             deps={this.props.deps}
           />
 
-          {(view || extra || find || unit) && (isFormControl ?
-            <div className="input-group-append">
-              {unit}
-              {view}
-              {find}
-              {create}
-              {extra}
-            </div> : <span>
-              {unit}
-              {view}
-              {find}
-              {create}
-              {extra}
-            </span>)}
+          {unit}
+          {view}
+          {find}
+          {create}
+          {extra}
         </div>
       </FormGroup>
     );
