@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading.Tasks;
 using System.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -45,7 +46,7 @@ using System.Web;
 using Signum.Engine;
 using Signum.Engine.Operations;");
 
-        ProcessDirectory(uctx, uctx.TerminalDirectory, basicUsings+ $@"
+        ProcessDirectory(uctx, uctx.TerminalDirectory, basicUsings + $@"
 using Signum.Engine;
 using Signum.Engine.Operations;");
 
@@ -64,6 +65,8 @@ using {uctx.ApplicationName}.Test.Environment;");
 using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.React.Selenium;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
 using Xunit;
 using {uctx.ApplicationName}.Test.Environment;");
     }

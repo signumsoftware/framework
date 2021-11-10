@@ -26,7 +26,7 @@ class Upgrade_20211108_Net6 : CodeUpgradeBase
 
         uctx.ForeachCodeFile("*.cs", file =>
         {
-            file.Replace(new Regex("\bDate\b"), "DateOnly");
+            file.Replace(new Regex(@"\bDate\b"), "DateOnly");
         });
     }
 }
