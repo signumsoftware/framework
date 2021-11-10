@@ -11,14 +11,6 @@
       </SnippetTypes>
     </Header>
     <Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Entities</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Utilities</Namespace>
-        </Import>
-      </Imports>
       <Declarations>
         <Literal>
           <ID>entityName</ID>
@@ -28,19 +20,19 @@
       </Declarations>
       <Code Language="csharp">
         <![CDATA[public class $entityName$Mixin : MixinEntity
+{
+    $entityName$Mixin(ModifiableEntity mainEntity, MixinEntity? next)
+        : base(mainEntity, next)
     {
-        $entityName$Mixin(ModifiableEntity mainEntity, MixinEntity? next)
-            : base(mainEntity, next)
-        {
-        }
+    }
 
-        //public int AttachedField { get; set; }
-        //
-        //protected override void CopyFrom(MixinEntity mixin, object[] args)
-        //{
-        //    this.AttachedField = (($entityName$Mixin)mixin).AttachedField;
-        //}
-    }]]>
+    //public int AttachedField { get; set; }
+    //
+    //protected override void CopyFrom(MixinEntity mixin, object[] args)
+    //{
+    //    this.AttachedField = (($entityName$Mixin)mixin).AttachedField;
+    //}
+}]]>
       </Code>
     </Snippet>
   </CodeSnippet>
