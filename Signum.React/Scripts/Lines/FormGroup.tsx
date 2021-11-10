@@ -30,7 +30,7 @@ export function FormGroup(p: FormGroupProps) {
   }
 
   const labelClasses = classes(
-    ctx.formGroupStyle == "SrOnly" && "sr-only",
+    ctx.formGroupStyle == "SrOnly" && "visually-hidden",
     ctx.formGroupStyle == "LabelColumns" && ctx.labelColumnsCss,
     ctx.formGroupStyle == "LabelColumns" ? ctx.colFormLabelClass : ctx.labelClass,
   );
@@ -43,24 +43,27 @@ export function FormGroup(p: FormGroupProps) {
     </label>
   );
 
-  const formGroupClasses = classes(p.ctx.formGroupClass, p.ctx.formGroupStyle == "LabelColumns" ? "row" : undefined, errorClass);
+  const formGroupClasses = classes(ctx.formGroupClass,
+    ctx.formGroupStyle == "LabelColumns" ? "row" : undefined,
+    ctx.formGroupStyle == "FloatingLabel" ? "form-floating" : undefined,
+    errorClass);
   return (
     <div
       title={ctx.titleLabels && typeof labelText == "string" ? labelText : undefined}
       {...p.htmlAttributes}
       className={addClass(p.htmlAttributes, formGroupClasses)}
       {...errorAtts}>
-      {ctx.formGroupStyle != "BasicDown" && label}
+      {(ctx.formGroupStyle == "Basic" || ctx.formGroupStyle == "LabelColumns" || ctx.formGroupStyle == "SrOnly") && label}
       {
         ctx.formGroupStyle != "LabelColumns" ? p.children :
           (
-            <div className={p.ctx.valueColumnsCss} >
+            <div className={ctx.valueColumnsCss} >
               {p.children}
               {p.helpText && ctx.formGroupStyle == "LabelColumns" && <small className="form-text text-muted">{p.helpText}</small>}
             </div>
           )
       }
-      {ctx.formGroupStyle == "BasicDown" && label}
+      {(ctx.formGroupStyle == "BasicDown" || ctx.formGroupStyle == "FloatingLabel") && label}
       {p.helpText && ctx.formGroupStyle != "LabelColumns" && <small className="form-text text-muted">{p.helpText}</small>}
     </div>
   );

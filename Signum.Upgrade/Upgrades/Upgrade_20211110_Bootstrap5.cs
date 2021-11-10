@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Signum.Upgrade.Upgrades
 {
-    class Upgrade_20211108_Bootstrap5 : CodeUpgradeBase
+    class Upgrade_20211110_Bootstrap5 : CodeUpgradeBase
     {
         public override string Description => "Upgrade to Bootstrap 5 and many other NPM packages";
 
@@ -19,7 +19,7 @@ namespace Signum.Upgrade.Upgrades
             uctx.ChangeCodeFile(@"Southwind.React/package.json", file =>
             {
                 if (!file.Content.Contains(@"""immutable"""))
-                    file.InsertAfterFirstLine(a => a.Contains("draft -js"), @"""immutable"": ""3.8.2"",");
+                    file.InsertAfterFirstLine(a => a.Contains("draft-js"), @"""immutable"": ""3.8.2"",");
 
                 file.RemoveAllLines(a => a.Contains("jquery")); //Rome https://trends.google.com/trends/explore?date=all&geo=DE&q=jquery,react
                 file.ReplaceLine(a => a.Contains("popper.js"), @"""@popperjs/core"": ""2.10.2"",");

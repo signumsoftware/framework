@@ -289,7 +289,7 @@ body.rtl .form-group.row > label {
 
 /*form xs*/
 
-.form-select.form-control-xs {
+.form-select.form-select-xs {
     background-position: right 0.2rem center;
     padding: 1px 20px 1px 5px;
 }
@@ -332,6 +332,11 @@ input[type=checkbox].form-control-xs {
 .rw-widget-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-combobox-input {
     padding: 0 0.4em;
+}
+
+.form-select.form-control-xs {
+    background-position: right 0.2rem center;
+    padding: 1px 20px 1px 5px;
 }
 
 .form-control.form-control-sm.rw-combobox.rw-widget {
@@ -395,6 +400,16 @@ input[type=checkbox].form-control-xs {
 table .form-group.form-group-sm {
     margin-top: 3px;
     margin-bottom: 3px;
+}
+
+.form-floating.form-group-sm > .form-control,
+.form-floating.form-group-sm > .form-select {
+    height: calc(2.7rem + 2px);
+}
+
+
+.form-floating.form-group-sm > label {
+    padding: 0.7rem 0.75rem;
 }
 
 /*form-inline*/

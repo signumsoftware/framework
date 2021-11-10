@@ -7,11 +7,12 @@ import { classes } from './Globals';
 import { EmbeddedWidget } from './Frames/Widgets';
 
 export type FormGroupStyle =
-  "None" |  /// Only the value is rendered. Unaffected by FormGroupSize
-  "Basic" |   /// Label on top, value below. Requires form-vertical container
-  "BasicDown" |  /// Value on top, label below. Requires form-vertical container
-  "SrOnly" |    /// Label visible only for Screen-Readers. Requires form-vertical / form-inline container
-  "LabelColumns"; /// (default) Label on the left, value on the right (exept RTL). Requires form-horizontal, affected by LabelColumns / ValueColumns
+  "None" |  /// Only the value is rendered.
+  "Basic" |   /// Label on top, value below.
+  "BasicDown" |  /// Value on top, label below.
+  "SrOnly" |    /// Label visible only for Screen-Readers.
+  "LabelColumns" | 
+  "FloatingLabel"; /// (default) Label on the left, value on the right (exept RTL). Affected by labelColumns / valueColumns
 
 export type FormSize =
   "ExtraSmall" |
@@ -125,10 +126,10 @@ export class StyleContext {
 
   get formSelectClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "form-select form-control-xs";
-      case "Small": return "form-select form-control-sm";
+      case "ExtraSmall": return "form-select form-select-xs";
+      case "Small": return "form-select form-select-sm";
       case "Normal": return "form-select";
-      case "Large": return "form-select form-control-lg";
+      case "Large": return "form-select form-select-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
