@@ -49,11 +49,6 @@ public static class TimeZoneManager
 
     public static DateOnly Today => Now.ToDateOnly();
 
-    public static DateTime ToDateTimeAutoUTC(this DateOnly date)
-    {
-        return date.ToDateTime(new TimeOnly(), Mode == TimeZoneMode.Local ? DateTimeKind.Local : DateTimeKind.Utc);
-    }
-
     public static DateTime ToUserInterface(this DateTime dbDateTime)
     {
         if (Mode == TimeZoneMode.Local || dbDateTime.Kind == DateTimeKind.Local)

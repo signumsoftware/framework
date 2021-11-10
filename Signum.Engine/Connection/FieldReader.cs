@@ -16,7 +16,7 @@ public class FieldReader
     private const TypeCode tcGuid = (TypeCode)20;
     private const TypeCode tcTimeSpan = (TypeCode)21;
     private const TypeCode tcDateTimeOffset = (TypeCode)22;
-    private const TypeCode tcNpgsqlDate = (TypeCode)24;
+    private const TypeCode tcDateOnly = (TypeCode)24;
 
     public int? LastOrdinal;
     public string? LastMethodName;
@@ -36,8 +36,8 @@ public class FieldReader
             if (type == typeof(DateTimeOffset))
                 tc = tcDateTimeOffset;
 
-            if (type == typeof(NpgsqlTypes.NpgsqlDate))
-                tc = tcNpgsqlDate;
+            if (type == typeof(DateOnly))
+                tc = tcDateOnly;
         }
         return tc;
     }
@@ -391,8 +391,8 @@ public class FieldReader
         var dt = typeCodes[ordinal] switch
         {
             TypeCode.DateTime => reader.GetDateTime(ordinal).ToDateOnly(),
-            FieldReader.tcNpgsqlDate => ((DateTime)((NpgsqlDataReader)reader).GetDate(ordinal)).ToDateOnly(),
-            _ => ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)).ToDateOnly(),
+            tcDateOnly => reader.GetFieldValue<DateOnly>(ordinal),
+            _ => reader.GetFieldValue<DateOnly>(ordinal),
         };
         return dt;
     }

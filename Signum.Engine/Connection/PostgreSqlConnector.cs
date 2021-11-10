@@ -506,8 +506,6 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         {
             if (value is DateTime dt)
                 AssertDateTime(dt);
-            else if (value is DateOnly d)
-                value = new NpgsqlDate(d.ToDateTimeAutoUTC());
         }
 
         var result = new Npgsql.NpgsqlParameter(parameterName, value ?? DBNull.Value)
