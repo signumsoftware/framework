@@ -7,7 +7,6 @@ using System.IO;
 using Signum.Engine.Files;
 using Microsoft.AspNetCore.StaticFiles;
 using Signum.Entities.Basics;
-using System.Threading;
 using Signum.Entities.Files;
 
 namespace Signum.Engine.Mailing;

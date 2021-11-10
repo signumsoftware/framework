@@ -1,6 +1,5 @@
 using Signum.Engine.Translation;
 using Signum.React.Filters;
-using Signum.Utilities.DataStructures;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +7,6 @@ using Signum.Entities.Translation;
 using Signum.Utilities.Reflection;
 using Signum.React.Files;
 using System.IO;
-using Signum.Engine.Mailing;
 
 namespace Signum.React.Translation;
 

@@ -9,7 +9,6 @@ using Signum.Entities.Processes;
 using Signum.Engine.Alerts;
 using Signum.Entities.SMS;
 using Signum.Entities.Mailing;
-using System.Xml.Linq;
 using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Workflow;

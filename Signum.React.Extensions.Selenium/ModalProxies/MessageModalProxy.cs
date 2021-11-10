@@ -1,5 +1,4 @@
 using OpenQA.Selenium;
-using OpenQA.Selenium.Remote;
 using System;
 
 namespace Signum.React.Selenium;

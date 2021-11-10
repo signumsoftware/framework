@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 namespace Signum.React.JsonModelValidators;
 

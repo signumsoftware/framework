@@ -1,12 +1,10 @@
 using System.Text.RegularExpressions;
 using System.IO;
-using System.Threading;
 using System.Diagnostics;
 using System.Data.Common;
 using System.Globalization;
 using Signum.Engine.Maps;
 using Npgsql;
-using Microsoft.Data.SqlClient.Server;
 using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine;

@@ -1,7 +1,6 @@
 using Signum.React.Facades;
 using Signum.Entities.Profiler;
 using Microsoft.AspNetCore.Builder;
-using Signum.React.Authorization;
 using Signum.Engine.Authorization;
 
 namespace Signum.React.Profiler;

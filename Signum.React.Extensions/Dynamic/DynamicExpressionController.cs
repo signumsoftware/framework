@@ -1,5 +1,3 @@
-using Signum.Engine.Dynamic;
-using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;

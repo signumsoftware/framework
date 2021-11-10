@@ -1,7 +1,5 @@
-using System.Net.Mail;
 using Signum.Entities.Mailing;
 using Signum.Engine.Authorization;
-using System.IO;
 using Signum.Engine.Files;
 using Microsoft.Identity.Client;
 using Microsoft.Graph.Auth;

@@ -14,7 +14,6 @@ using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
 using Signum.Entities.Workflow;
 using Signum.Engine.Workflow;
-using Signum.Engine.Operations.Internal;
 
 namespace Signum.Engine.UserAssets;
 

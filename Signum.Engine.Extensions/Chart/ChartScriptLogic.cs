@@ -1,6 +1,4 @@
 using Signum.Entities.Chart;
-using System.IO;
-using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.Chart.Scripts;
 

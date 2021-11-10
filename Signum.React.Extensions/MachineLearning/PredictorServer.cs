@@ -1,4 +1,3 @@
-using Signum.React.Json;
 using Signum.React.UserAssets;
 using Signum.Entities.MachineLearning;
 using Signum.Engine.MachineLearning;

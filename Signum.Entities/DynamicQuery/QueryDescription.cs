@@ -1,5 +1,3 @@
-using System.Runtime.Serialization;
-
 namespace Signum.Entities.DynamicQuery;
 
 public class QueryDescription

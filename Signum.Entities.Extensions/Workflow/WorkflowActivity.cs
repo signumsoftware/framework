@@ -1,7 +1,6 @@
 using Signum.Entities.Dynamic;
 using Signum.Entities.Basics;
 using System.ComponentModel;
-using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow;

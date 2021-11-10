@@ -1,6 +1,4 @@
-using Signum.Entities.Mailing;
 using Signum.Entities.Scheduler;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.Alerts;
 

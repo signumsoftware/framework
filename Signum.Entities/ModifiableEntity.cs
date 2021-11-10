@@ -4,7 +4,6 @@ using System.IO;
 using System.Collections.Specialized;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
-using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
 using System.Diagnostics;

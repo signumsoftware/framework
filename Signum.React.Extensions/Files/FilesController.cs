@@ -4,7 +4,6 @@ using Signum.Engine.Files;
 using System.IO;
 using Signum.Engine.Mailing;
 using Signum.Entities.Basics;
-using Microsoft.AspNetCore.Server.IIS.Core;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 

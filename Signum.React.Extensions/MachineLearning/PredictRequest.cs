@@ -4,7 +4,6 @@ using Signum.React.ApiControllers;
 using Signum.Utilities.Reflection;
 using Signum.React.Facades;
 using System.Text.Json;
-using Signum.React.Json;
 
 namespace Signum.React.MachineLearning;
 

@@ -6,8 +6,6 @@ using Signum.Entities.Processes;
 using Signum.Entities.Reflection;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Workflow;
-using System.Diagnostics;
-using System.Threading;
 
 namespace Signum.Engine.Workflow;
 

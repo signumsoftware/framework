@@ -1,7 +1,6 @@
 using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Basics;
-using System.Threading;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Basics;

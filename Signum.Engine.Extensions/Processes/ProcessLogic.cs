@@ -1,6 +1,5 @@
 using Signum.Entities.Processes;
 using Signum.Engine.Authorization;
-using System.Threading;
 using Signum.Entities.Basics;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Authorization;

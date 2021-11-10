@@ -1,6 +1,5 @@
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
-using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Signum.Entities.DynamicQuery;

@@ -5,7 +5,6 @@ using System.Xml.Linq;
 using System.Diagnostics;
 using Signum.Entities.Basics;
 using System.Collections.Concurrent;
-using System.Runtime.Serialization;
 using System.ComponentModel;
 using Signum.Entities.Internal;
 

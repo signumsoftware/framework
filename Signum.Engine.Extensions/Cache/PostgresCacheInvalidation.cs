@@ -1,7 +1,5 @@
 using Npgsql;
-using System.Data.Common;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Cache;
 

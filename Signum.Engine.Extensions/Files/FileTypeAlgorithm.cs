@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Signum.Entities.Files;
 using System.IO;
 

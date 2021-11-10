@@ -1,8 +1,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Signum.Engine.Translation;
 

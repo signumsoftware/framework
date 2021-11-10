@@ -1,7 +1,3 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Notes;
-using Signum.Engine.Extensions.Basics;
 using Signum.Engine.Authorization;
 using Signum.Entities.Omnibox;
 

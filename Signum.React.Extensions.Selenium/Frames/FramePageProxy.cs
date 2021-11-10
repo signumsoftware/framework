@@ -1,5 +1,4 @@
 using System;
-using OpenQA.Selenium.Remote;
 using Signum.Engine;
 using Signum.Entities;
 using OpenQA.Selenium;

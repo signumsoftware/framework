@@ -1,6 +1,4 @@
 using Signum.Entities.Isolation;
-using Signum.Entities.Templating;
-using Signum.Engine.UserAssets;
 using Signum.Entities.SMS;
 using System.Globalization;
 

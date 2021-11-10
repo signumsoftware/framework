@@ -1,7 +1,6 @@
 using Signum.Entities.Processes;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
-using System.ComponentModel;
 
 namespace Signum.Entities.SMS;
 

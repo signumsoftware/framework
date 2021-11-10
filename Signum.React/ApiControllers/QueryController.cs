@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using Signum.React.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json;
-using Signum.Entities.Reflection;
 
 namespace Signum.React.ApiControllers;
 

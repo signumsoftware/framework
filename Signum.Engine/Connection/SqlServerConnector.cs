@@ -2,8 +2,6 @@ using System.Data.Common;
 using System.Data;
 using Signum.Engine.Maps;
 using System.Data.SqlTypes;
-using System.Threading;
-using System.Threading.Tasks;
 using Signum.Engine.Connection;
 using Signum.Engine.SchemaInfoTables;
 using Microsoft.Data.SqlClient;

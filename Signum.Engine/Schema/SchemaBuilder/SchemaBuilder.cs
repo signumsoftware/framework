@@ -3,7 +3,6 @@ using Signum.Engine.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Utilities.DataStructures;
-using System.Threading;
 
 namespace Signum.Engine.Maps;
 

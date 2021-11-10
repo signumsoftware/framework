@@ -1,12 +1,10 @@
 using System.Collections.Concurrent;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Linq;
-using System.Threading;
 using System.Data;
 using Signum.Entities.Reflection;
 using Signum.Entities.Internal;
 using Signum.Engine.Connection;
-using Microsoft.Data.SqlClient.Server;
 using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Cache;

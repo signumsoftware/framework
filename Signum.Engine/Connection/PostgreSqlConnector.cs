@@ -2,13 +2,10 @@ using Microsoft.Data.SqlClient;
 using Npgsql;
 using NpgsqlTypes;
 using Signum.Engine.Connection;
-using Signum.Engine.Engine;
 using Signum.Engine.Maps;
 using Signum.Engine.PostgresCatalog;
 using System.Data;
 using System.Data.Common;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Signum.Engine;
 

@@ -1,5 +1,3 @@
-using Microsoft.SqlServer.Types;
-
 namespace Signum.Test;
 
 public class SaveTest

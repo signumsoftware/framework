@@ -1,8 +1,6 @@
-
-using Signum.Engine.Chart;
 using Signum.Entities.Chart;
 
-namespace Signum.Engine.Chart.Scripts ;
+namespace Signum.Engine.Chart.Scripts;
 
 public class BubblePackChartScript : ChartScript                
 {

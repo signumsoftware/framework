@@ -1,8 +1,6 @@
 using Signum.Entities.Chart;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Authorization;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace Signum.Engine.Chart;
 

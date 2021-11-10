@@ -1,5 +1,3 @@
-using DocumentFormat.OpenXml.Office.CustomUI;
-using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.UserAssets;

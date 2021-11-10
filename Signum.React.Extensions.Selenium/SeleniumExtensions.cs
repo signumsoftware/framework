@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.Internal;
-using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using Signum.Utilities;
 

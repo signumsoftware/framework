@@ -14,7 +14,6 @@ using DocumentFormat.OpenXml.Packaging;
 using System.Globalization;
 using Signum.Engine.Templating;
 using Signum.Entities.Word;
-using System.Threading;
 using System.Text.RegularExpressions;
 using Signum.Engine.Excel;
 using Signum.Utilities.Reflection;

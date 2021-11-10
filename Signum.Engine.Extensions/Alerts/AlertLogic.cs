@@ -10,7 +10,6 @@ using Signum.Engine.Templating;
 using Signum.Engine.Scheduler;
 using Signum.Entities.UserAssets;
 using Microsoft.AspNetCore.Html;
-using Signum.Entities.Scheduler;
 using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Alerts;

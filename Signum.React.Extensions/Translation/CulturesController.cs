@@ -4,12 +4,8 @@ using Signum.Entities.Basics;
 using Signum.React.Filters;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
 using Microsoft.AspNetCore.Http;
-using Signum.React.Authorization;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc.Routing;
 

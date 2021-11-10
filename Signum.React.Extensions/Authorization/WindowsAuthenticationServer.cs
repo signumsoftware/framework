@@ -1,8 +1,6 @@
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Http;
 using System.Security.Principal;
 using System.DirectoryServices.AccountManagement;
 using Signum.Utilities.Reflection;

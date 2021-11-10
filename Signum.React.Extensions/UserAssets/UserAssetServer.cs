@@ -1,14 +1,11 @@
 using Signum.Entities.UserAssets;
-using Signum.React.Json;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Microsoft.AspNetCore.Builder;
 using Signum.Entities.UserQueries;
-using Signum.React.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Entities.Chart;
 using System.Text.Json;
-using DocumentFormat.OpenXml.Bibliography;
 using Signum.Engine.Json;
 
 namespace Signum.React.UserAssets;

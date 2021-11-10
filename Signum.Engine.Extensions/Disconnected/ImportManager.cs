@@ -1,8 +1,6 @@
 using Signum.Entities.Disconnected;
 using System.IO;
 using System.Data.Common;
-using System.Threading.Tasks;
-using System.Threading;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;

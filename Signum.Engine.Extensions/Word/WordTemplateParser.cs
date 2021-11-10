@@ -7,7 +7,6 @@ using Signum.Engine.Templating;
 using Signum.Utilities.DataStructures;
 using System.Text.RegularExpressions;
 using Signum.Entities.Word;
-using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Word;
 

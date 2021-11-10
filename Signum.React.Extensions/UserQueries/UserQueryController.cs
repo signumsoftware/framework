@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using Signum.React.ApiControllers;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Microsoft.AspNetCore.Mvc;

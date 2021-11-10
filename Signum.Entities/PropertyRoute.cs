@@ -4,7 +4,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.Collections.Immutable;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 

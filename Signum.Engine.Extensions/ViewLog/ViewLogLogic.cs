@@ -2,8 +2,6 @@ using Signum.Entities.Basics;
 using Signum.Entities.ViewLog;
 using System.IO;
 using Signum.Entities.Authorization;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.ViewLog;
 

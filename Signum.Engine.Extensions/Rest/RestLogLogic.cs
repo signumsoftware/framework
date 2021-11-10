@@ -1,8 +1,6 @@
 using System.Net.Http;
-using System.Threading.Tasks;
 using Signum.Entities.Basics;
 using Signum.Entities.Rest;
-using System.Threading;
 
 namespace Signum.Engine.Rest;
 

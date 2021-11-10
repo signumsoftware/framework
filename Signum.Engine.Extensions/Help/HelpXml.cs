@@ -5,7 +5,6 @@ using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Entities.Help;
 using Signum.Entities.Reflection;
-using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Help;
 

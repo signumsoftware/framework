@@ -2,7 +2,6 @@ using System.Data;
 using Microsoft.Data.SqlClient.Server;
 using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 using Signum.Utilities.Reflection;
 using NpgsqlTypes;
 

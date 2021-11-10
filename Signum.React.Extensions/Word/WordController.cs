@@ -3,10 +3,8 @@ using Signum.React.Facades;
 using Signum.Entities.Word;
 using Signum.Engine.Word;
 using Signum.React.Files;
-using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
-using Signum.Engine.Templating;
 
 namespace Signum.React.Word;
 

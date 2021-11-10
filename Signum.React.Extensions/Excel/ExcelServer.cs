@@ -2,7 +2,6 @@ using Signum.React.Facades;
 using Signum.Entities.Excel;
 using Microsoft.AspNetCore.Builder;
 using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
 
 namespace Signum.React.Excel;
 

@@ -1,6 +1,5 @@
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using System.Threading;
 
 namespace Signum.Engine.Authorization;
 

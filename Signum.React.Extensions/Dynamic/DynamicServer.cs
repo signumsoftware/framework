@@ -1,5 +1,4 @@
 using Signum.Entities.Basics;
-using Signum.React.Json;
 using Signum.React.TypeHelp;
 using Microsoft.AspNetCore.Builder;
 using Signum.React.Facades;

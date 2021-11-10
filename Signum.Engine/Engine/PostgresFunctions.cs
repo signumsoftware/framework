@@ -1,4 +1,3 @@
-using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlClient.Server;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.

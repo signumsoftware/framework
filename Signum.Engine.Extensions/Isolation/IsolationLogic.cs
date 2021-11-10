@@ -3,7 +3,6 @@ using Signum.Entities.Isolation;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
-using Signum.Entities.Scheduler;
 
 namespace Signum.Engine.Isolation;
 

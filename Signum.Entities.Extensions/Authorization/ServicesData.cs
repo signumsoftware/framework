@@ -1,5 +1,4 @@
 using Signum.Entities.Basics;
-using System.Collections.ObjectModel;
 
 namespace Signum.Entities.Authorization;
 

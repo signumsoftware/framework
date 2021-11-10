@@ -1,13 +1,10 @@
-using Signum.React.Json;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.Entities.Mailing;
-using Signum.Entities.Templating;
 using Signum.Engine.Mailing;
 using Signum.React.TypeHelp;
 using Microsoft.AspNetCore.Builder;
 using Signum.Engine.Authorization;
-using Signum.Entities.Word;
 using Signum.React.Extensions.Templating;
 using Microsoft.Exchange.WebServices.Data;
 using Signum.Entities.Authorization;

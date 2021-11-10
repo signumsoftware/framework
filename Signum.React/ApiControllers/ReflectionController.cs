@@ -2,10 +2,6 @@ using Signum.React.Facades;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.React.Filters;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.ApiControllers;

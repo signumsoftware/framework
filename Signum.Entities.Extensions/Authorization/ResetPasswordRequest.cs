@@ -1,5 +1,3 @@
-using Signum.Entities.Scheduler;
-
 namespace Signum.Entities.Authorization;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]

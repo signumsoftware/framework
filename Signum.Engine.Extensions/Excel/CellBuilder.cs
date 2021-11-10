@@ -1,5 +1,3 @@
-using System.Globalization;
-using spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using Signum.Entities.Reflection;

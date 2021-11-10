@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace Signum.Utilities.Reflection;
 
 public static class MemberEntryFactory

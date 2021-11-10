@@ -1,6 +1,3 @@
-using System.Collections.ObjectModel;
-using System.Data.SqlTypes;
-
 namespace Signum.Engine.Linq;
 
 internal class ConditionsRewriterPostgres: DbExpressionVisitor

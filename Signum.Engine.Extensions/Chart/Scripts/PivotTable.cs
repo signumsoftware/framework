@@ -1,9 +1,6 @@
-
-using DocumentFormat.OpenXml.Drawing.Charts;
-using Signum.Engine.Chart;
 using Signum.Entities.Chart;
 
-namespace Signum.Engine.Chart.Scripts ;
+namespace Signum.Engine.Chart.Scripts;
 
 public class PivotTableScript : ChartScript                
 {

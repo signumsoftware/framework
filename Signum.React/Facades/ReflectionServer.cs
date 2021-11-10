@@ -1,15 +1,11 @@
 using System.Collections.Concurrent;
 using System.Globalization;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
-using Signum.Entities.DynamicQuery;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Signum.React.Facades;
 

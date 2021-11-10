@@ -1,5 +1,4 @@
 using System.Xml.Linq;
-using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Basics;
 

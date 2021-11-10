@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 namespace Signum.Engine.Linq;
 
 internal class SqlCastLazyRemover : DbExpressionVisitor

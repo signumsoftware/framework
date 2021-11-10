@@ -6,7 +6,6 @@ using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using System.Xml.Linq;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Workflow;
 
 namespace Signum.Entities.Toolbar;
 

@@ -1,8 +1,6 @@
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
-using System.Drawing;
 using System.ComponentModel;
-using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Chart;
 

@@ -26,7 +26,6 @@ using Signum.Entities.Reflection;";
 using System.ComponentModel;");
 
         ProcessDirectory(uctx, uctx.LogicDirectory, basicUsings + @"
-using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;

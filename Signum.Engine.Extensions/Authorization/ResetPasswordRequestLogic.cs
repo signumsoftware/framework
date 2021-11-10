@@ -1,8 +1,6 @@
 using Signum.Engine.Mailing;
-using Signum.Engine.Scheduler;
 using Signum.Entities.Authorization;
 using Signum.Entities.Mailing;
-using Signum.Entities.Scheduler;
 using Signum.Services;
 using Signum.Entities.Basics;
 

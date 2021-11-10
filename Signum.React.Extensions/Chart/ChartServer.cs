@@ -1,4 +1,3 @@
-using Signum.React.Json;
 using Signum.React.UserAssets;
 using Signum.Entities.Chart;
 using Signum.React.ApiControllers;

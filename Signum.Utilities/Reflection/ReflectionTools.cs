@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
-using System.ComponentModel.DataAnnotations;
 
 namespace Signum.Utilities.Reflection;
 

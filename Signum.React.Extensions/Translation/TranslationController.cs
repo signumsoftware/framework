@@ -5,7 +5,6 @@ using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Translation;
-using System.Text.Json.Serialization;
 using static Signum.React.Translation.TranslationController;
 
 namespace Signum.React.Translation;

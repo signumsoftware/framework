@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using Signum.Engine.Isolation;
 using Signum.Entities.Authorization;
 using Signum.Entities.Isolation;
 using Signum.React.Filters;
-using System.Threading.Tasks;
 
 namespace Signum.React.Extensions.Isolation;
 

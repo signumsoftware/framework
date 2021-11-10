@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Chart;
 using Signum.Engine.Chart;
 using Signum.React.Filters;

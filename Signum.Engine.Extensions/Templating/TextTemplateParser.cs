@@ -1,11 +1,5 @@
 using System.Text.RegularExpressions;
-using System.Globalization;
-using Signum.Entities.Mailing;
-using Signum.Entities.UserAssets;
-using Signum.Engine.UserAssets;
 using Signum.Utilities.DataStructures;
-using Signum.Engine.Templating;
-using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Templating;
 

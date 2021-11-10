@@ -2,7 +2,6 @@ using Signum.React.Maps;
 using Signum.Entities.Map;
 using Signum.React.Facades;
 using Microsoft.AspNetCore.Builder;
-using Signum.React.Authorization;
 using Signum.Engine.Authorization;
 
 namespace Signum.React.Map;

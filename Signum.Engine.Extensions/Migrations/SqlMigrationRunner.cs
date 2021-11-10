@@ -1,5 +1,4 @@
 using Signum.Engine.Cache;
-using Signum.Engine.SchemaInfoTables;
 using Signum.Entities.Migrations;
 using System.IO;
 using System.Text.RegularExpressions;

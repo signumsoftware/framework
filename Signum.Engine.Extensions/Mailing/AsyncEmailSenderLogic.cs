@@ -1,11 +1,8 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Signum.Entities.Mailing;
 using Signum.Engine.Authorization;
 using Signum.Engine.Cache;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Basics;
-using Microsoft.Data.SqlClient.Server;
 using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Mailing;

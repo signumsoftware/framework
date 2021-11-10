@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace Signum.Entities.Basics;
 
 [InTypeScript(true)]

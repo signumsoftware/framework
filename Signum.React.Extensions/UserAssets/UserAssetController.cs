@@ -6,7 +6,6 @@ using Signum.Engine.UserAssets;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
-using Signum.Entities.UserQueries;
 using System.Collections.ObjectModel;
 using Signum.React.Facades;
 using System.Text.Json;

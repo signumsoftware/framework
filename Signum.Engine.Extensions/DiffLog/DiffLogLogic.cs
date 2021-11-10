@@ -1,7 +1,6 @@
 using Signum.Entities.Basics;
 using Signum.Entities.DiffLog;
 using Signum.Utilities.DataStructures;
-using System.Threading;
 using Signum.Engine.Authorization;
 using System.Text.RegularExpressions;
 

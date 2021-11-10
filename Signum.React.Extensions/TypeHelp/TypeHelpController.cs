@@ -4,7 +4,6 @@ using Signum.React.Facades;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 using Signum.Utilities.Reflection;
 
 namespace Signum.React.TypeHelp;

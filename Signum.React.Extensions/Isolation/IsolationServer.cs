@@ -1,13 +1,9 @@
 using Signum.React.Maps;
-using Signum.Entities.Map;
-using Signum.React.Facades;
 using Signum.Engine.Isolation;
 using Microsoft.AspNetCore.Builder;
-using Signum.Engine.Authorization;
 using Signum.React.Filters;
 using Signum.React.Extensions.Isolation;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Basics;
 using Signum.Entities.Isolation;
 
 namespace Signum.React.Isolation;

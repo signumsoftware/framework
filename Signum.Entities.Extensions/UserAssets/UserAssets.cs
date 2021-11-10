@@ -1,5 +1,4 @@
 using System.Xml.Linq;
-using DocumentFormat.OpenXml.Bibliography;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;

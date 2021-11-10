@@ -1,4 +1,3 @@
-using Signum.React.Json;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.Engine.Authorization;

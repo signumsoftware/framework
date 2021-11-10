@@ -1,7 +1,6 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using Signum.Engine.Maps;
-using Signum.Entities.Basics;
 
 namespace Signum.Engine.CodeGeneration;
 

@@ -3,7 +3,6 @@ using Signum.Entities.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http;
-using Signum.React.Filters;
 using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Signum.React.Authorization;

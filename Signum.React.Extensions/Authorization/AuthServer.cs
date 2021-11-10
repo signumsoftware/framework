@@ -1,6 +1,5 @@
 using Signum.Entities.Authorization;
 using Signum.React.Facades;
-using Signum.React.Json;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Utilities.Reflection;
 using Signum.Services;

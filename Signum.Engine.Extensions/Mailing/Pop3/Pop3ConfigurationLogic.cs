@@ -2,7 +2,6 @@ using Signum.Engine.Scheduler;
 using Signum.Entities.Mailing;
 using Signum.Entities.Basics;
 using Signum.Engine.Extensions.Mailing.Pop3;
-using System.Threading;
 
 namespace Signum.Engine.Mailing.Pop3;
 

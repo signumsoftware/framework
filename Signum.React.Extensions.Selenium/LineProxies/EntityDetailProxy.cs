@@ -1,4 +1,3 @@
-using System;
 using OpenQA.Selenium;
 using Signum.Entities;
 

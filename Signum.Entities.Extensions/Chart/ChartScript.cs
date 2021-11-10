@@ -1,7 +1,3 @@
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.Files;
-using System.Xml.Linq;
-using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 
 namespace Signum.Entities.Chart;

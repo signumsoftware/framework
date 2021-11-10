@@ -5,10 +5,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Security.Authentication;
 using System.Security.Cryptography;
-using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Authorization;
 using Signum.Engine.Json;
 using System.Text.Json;
 

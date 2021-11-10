@@ -5,7 +5,6 @@ using Signum.React.ApiControllers;
 using Signum.Utilities.DataStructures;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Hosting;
 using System.Threading.Tasks;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;

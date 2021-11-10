@@ -1,6 +1,5 @@
 using Signum.Entities.Basics;
 using System.ComponentModel;
-using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Alerts;
 

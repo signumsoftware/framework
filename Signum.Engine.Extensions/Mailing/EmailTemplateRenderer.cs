@@ -1,5 +1,4 @@
 using System.Globalization;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Signum.Engine.Templating;
 using Signum.Entities.Basics;
 using Signum.Entities.Mailing;
