@@ -1,9 +1,4 @@
-﻿@supports (-webkit-appearance:none) {
-    input[type=file].form-control {
-            padding-top: 1px;
-    }
-}
-
+﻿
 .sf-file-drop
 {
     font-weight: bold;

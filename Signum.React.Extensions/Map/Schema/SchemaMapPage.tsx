@@ -117,28 +117,37 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
   function renderFilter() {
 
     return (
-      <div className="form-inline container" style={{ margin: "1rem 0" }}>
-        <div className="form-group form-group-sm">
-          <label htmlFor="filter"> {MapMessage.Filter.niceToString()}</label>&nbsp;
-          <input type="text" className="form-control form-control-sm" id="filter" placeholder="type or namespace" value={filter} onChange={handleSetFilter} />
+      <div className="container">
+        <div className="row align-items-center">
+          <div className="col-auto">
+            <label htmlFor="filter"> {MapMessage.Filter.niceToString()}</label>&nbsp;
+          </div>
+
+          <div className="col-auto">
+            <input type="text" className="form-control form-control-sm" id="filter" placeholder="type or namespace" value={filter} onChange={handleSetFilter} />
+          </div>
+          <div className="col-auto">
+            <label htmlFor="color"> {MapMessage.Color.niceToString()}</label>&nbsp;
+          </div>
+          <div className="col-auto">
+            <select className="form-select form-select-sm" id="color" value={color} onChange={handleSetColor}>
+              {
+                schemaInfo &&
+                schemaInfo.providers.map((a, i) =>
+                  <option key={i} value={a.name}>{a.niceName}</option>)
+              }
+            </select>
+          </div>
+          <div className="col-auto">
+            <span style={{ marginLeft: "10px" }}>
+              {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
+            </span>
+            &nbsp;
+            <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
+              <FontAwesomeIcon icon="external-link-alt" />
+            </a>
+          </div>
         </div>
-        <div className="form-group form-group-sm" style={{ marginLeft: "10px" }}>
-          <label htmlFor="color"> {MapMessage.Color.niceToString()}</label>&nbsp;
-          <select className="form-select form-control-sm" id="color" value={color} onChange={handleSetColor}>
-            {
-              schemaInfo &&
-              schemaInfo.providers.map((a, i) =>
-                <option key={i} value={a.name}>{a.niceName}</option>)
-            }
-          </select>
-        </div>
-        <span style={{ marginLeft: "10px" }}>
-          {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
-        </span>
-        &nbsp;
-        <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
-          <FontAwesomeIcon icon="external-link-alt" />
-        </a>
       </div>
     );
   }

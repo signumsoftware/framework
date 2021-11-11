@@ -32,6 +32,6 @@ namespace Signum.Entities.Mailing
         public FileEmbedded File { get; set; }
 
         [AutoExpressionField]
-        public override string ToString() => As.Expression(() => FileName ?? File.FileName);
+        public override string ToString() => As.Expression(() => FileName ?? (File == null ? "" : File.FileName));
     }
 }

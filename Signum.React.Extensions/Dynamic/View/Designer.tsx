@@ -116,7 +116,7 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
         );
       else
         return (
-          <select className="form-select form-control-xs" style={style}
+          <select className="form-select form-select-xs" style={style}
             value={val == null ? "" : val.toString()} onChange={handleChangeSelectOrInput} >
             {p.defaultValue == null && <option value="">{" - "}</option>}
             {p.options.map((o, i) =>
@@ -127,7 +127,7 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
     else {
 
       if (p.type == "textArea") {
-        return (<textarea className="form-control form-control-xs" style={style}
+        return (<textarea className="form-control form-select-xs" style={style}
           value={val == null ? "" : val.toString()}
           onChange={handleChangeSelectOrInput} />);
       }
@@ -209,9 +209,13 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
 
   if (p.hideLabel) {
     return (
-      <div className="form-inline">
-        {expressionIcon}
-        {expr ? renderExpression(expr, p.dn!) : renderValue(value)}
+      <div className="row gx-1">
+        <div className="col-auto">
+          {expressionIcon}
+        </div>
+        <div className="col-auto">
+          {expr ? renderExpression(expr, p.dn!) : renderValue(value)}
+        </div>
       </div>
     );
   }
@@ -298,7 +302,7 @@ export function FieldComponent(p : FieldComponentProps){
 
     const subMembers = route ? route.subMembers() : {};
 
-    return (<select className="form-select form-control-xs" value={strValue} onChange={handleChange} >
+    return (<select className="form-select form-select-xs" value={strValue} onChange={handleChange} >
       <option value=""> - </option>
       {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id").map((name, i) =>
         <option key={i} value={name}>{name}</option>)

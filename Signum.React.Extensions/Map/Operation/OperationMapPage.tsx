@@ -92,22 +92,27 @@ export default function OperationMapPage(p: RouteComponentProps<{ type: string }
 
   function renderFilter() {
     return (
-      <div className="form-inline form-sm container" style={{ marginTop: "10px" }}>
-        <div className="form-group" style={{ marginLeft: "10px" }}>
-          <label htmlFor="color"> {MapMessage.Color.niceToString()}</label>
-          &nbsp;
-          <select className="form-select" id="color" value={color} onChange={e => setColor(e.currentTarget.value)}>
-            <option value="state">{MapMessage.StateColor.niceToString()}</option>
-            <option value="rows">{MapMessage.Rows.niceToString()}</option>
-          </select>
+      <div className="container">
+        <div className="row align-items-center">
+          <div className="col-auto">
+            <label htmlFor="color"> {MapMessage.Color.niceToString()}</label>
+          </div>
+          <div className="col-auto">
+            <select className="form-select" id="color" value={color} onChange={e => setColor(e.currentTarget.value)}>
+              <option value="state">{MapMessage.StateColor.niceToString()}</option>
+              <option value="rows">{MapMessage.Rows.niceToString()}</option>
+            </select>
+          </div>
+          <div className="col-auto">
+            <span style={{ marginLeft: "10px" }}>
+              {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
+            </span>
+            &nbsp;
+            <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
+              <FontAwesomeIcon icon="external-link-alt" />
+            </a>
+          </div>
         </div>
-        <span style={{ marginLeft: "10px" }}>
-          {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
-        </span>
-        &nbsp;
-                <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
-          <FontAwesomeIcon icon="external-link-alt" />
-        </a>
       </div>
     );
   }
@@ -115,18 +120,18 @@ export default function OperationMapPage(p: RouteComponentProps<{ type: string }
     return null;
 
   return (
-    <div style={{display: "flex", flexDirection: "column"}}>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {renderFilter()}
       {!(operationMapInfo && nodes) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :
-        <div ref={setContainer} style={{display: "flex", flexGrow: 1}}>
+        <div ref={setContainer} style={{ display: "flex", flexGrow: 1 }}>
           {size?.height && size?.width &&
-            <OperationMapRenderer 
-              operationMapInfo={operationMapInfo} 
-              nodes={nodes} 
-              color={color!} 
+            <OperationMapRenderer
+              operationMapInfo={operationMapInfo}
+              nodes={nodes}
+              color={color!}
               height={size.height}
-              width={size.width} 
+              width={size.width}
               queryName={p.match.params.type}
             />
           }

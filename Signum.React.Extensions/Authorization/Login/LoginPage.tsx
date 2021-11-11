@@ -39,8 +39,8 @@ export default function LoginPage() {
       {LoginPage.customLoginButtons && LoginPage.customLoginButtons(ctx)}
       {LoginPage.showLoginForm == "initially_not" && showLoginForm == false &&
         <div className="row">
-        <div className="col-md-6 offset-md-3 mt-2">
-          <a href="#" className="ms-1" onClick={e => {
+          <div className="col-md-6 offset-md-3 mt-2">
+            <a href="#" className="ms-1" onClick={e => {
               e.preventDefault();
               setShowLoginForm(true);
             }}>
@@ -112,7 +112,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
       </div>
       <div className="row">
         <div className="col-md-6 offset-md-3">
-          <div className={classes("form-group", error("userName") && "has-error")}>
+          <div className={classes("form-group mb-3", error("userName") && "has-error")}>
             <label className="sr-only" htmlFor="userName">{LoginAuthMessage.Username.niceToString()}</label>
             <div className="input-group mb-2 mr-sm-2 mb-sm-0">
               <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }} /></div>
@@ -124,7 +124,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
       </div>
       <div className="row">
         <div className="col-md-6 offset-md-3">
-          <div className={classes("form-group", error("password") && "has-error")}>
+          <div className={classes("form-group mb-3", error("password") && "has-error")}>
             <label className="sr-only" htmlFor="password">{LoginAuthMessage.Password.niceToString()}</label>
             <div className="input-group mb-2 mr-sm-2 mb-sm-0">
               <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
@@ -136,11 +136,10 @@ export function LoginForm(p: { ctx: LoginContext }) {
       </div>
       {AuthClient.Options.userTicket &&
         <div className="row">
-          <div className="col-md-6 offset-md-3" style={{ paddingTop: ".35rem" }}>
+          <div className="col-md-6 offset-md-3">
             <div className="form-check mb-2 mr-sm-2 mb-sm-0">
-              <label className="sf-remember-me">
-                <input ref={rememberMe} name="remember" type="checkbox" disabled={p.ctx.loading != null} /> {LoginAuthMessage.RememberMe.niceToString()}
-              </label>
+              <input ref={rememberMe} name="remember" id="rememberMe" className="form-check-input" type="checkbox" disabled={p.ctx.loading != null} />
+              <label className="sf-remember-me form-check-label" htmlFor="rememberMe" >{LoginAuthMessage.RememberMe.niceToString()}</label>
             </div>
           </div>
         </div>
@@ -151,7 +150,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
           <button type="submit" id="login" className="btn btn-success" disabled={p.ctx.loading != null}>
             {p.ctx.loading == "password" ?
               <FontAwesomeIcon icon="cog" fixedWidth style={{ fontSize: "larger" }} spin /> : < FontAwesomeIcon icon="sign-in-alt" />}
-              &nbsp;
+            &nbsp;
             {p.ctx.loading == "password" ? JavascriptMessage.loading.niceToString() : AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}
           </button>
           {error("login") && <span className="help-block text-danger" style={{ color: "red" }}>{error("login")}</span>}
@@ -159,7 +158,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
             <span>
               &nbsp;
               &nbsp;
-                <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+              <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
             </span>
           }
         </div>

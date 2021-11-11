@@ -139,6 +139,7 @@ fieldset {
         font-size: 16px;
         font-weight: bold;
         width: initial;
+        float: none;
     }
 
         fieldset > legend > div > span.pull-right {
@@ -334,11 +335,6 @@ input[type=checkbox].form-control-xs {
     padding: 0 0.4em;
 }
 
-.form-select.form-control-xs {
-    background-position: right 0.2rem center;
-    padding: 1px 20px 1px 5px;
-}
-
 .form-control.form-control-sm.rw-combobox.rw-widget {
     padding: 0px;
 }
@@ -412,10 +408,8 @@ table .form-group.form-group-sm {
     padding: 0.7rem 0.75rem;
 }
 
-/*form-inline*/
-.form-inline .sf-query-token-builder {
-    vertical-align: middle;
-}
+
+
 
 /* table non-fluid*/
 
@@ -499,4 +493,8 @@ body:not(.rtl) .sf-mandatory-widget .rw-input {
     .try-no-wrap {
         white-space: nowrap;
     }
+}
+
+.table > :not(:first-child) {
+    border-top: initial;
 }

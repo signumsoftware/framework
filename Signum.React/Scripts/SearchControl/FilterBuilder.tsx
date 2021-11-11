@@ -279,26 +279,36 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
       </td>
       <td colSpan={3} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
         <div className="justify-content-between d-flex" >
-          <div className="form-inline">
-            <a href="#" onClick={handleExpandCollapse} className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
-              <FontAwesomeIcon icon={fg.expanded ? ["far", "minus-square"] : ["far", "plus-square"]} className="me-2" />
-            </a>
-            <label>Group:</label>
-            <select className="form-select form-control-xs sf-group-selector mx-2" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
-              {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
-            </select>
+          <div className="row gx-1">
+            <div className="col-auto">
+              <a href="#" onClick={handleExpandCollapse} className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
+                <FontAwesomeIcon icon={fg.expanded ? ["far", "minus-square"] : ["far", "plus-square"]} className="me-2" />
+              </a>
+            </div>
+            <div className="col-auto">
+              <label>Group:</label>
+            </div>
+            <div className="col-auto">
+              <select className="form-select form-select-xs sf-group-selector mx-2" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
+                {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
+              </select>
+            </div>
           </div>
 
-          <div className="form-inline">
-            <label>Prefix:</label>
-            <div className={classes("rw-widget-xs mx-2", fg.token == null ? "hidden" : undefined)}>
-              <QueryTokenBuilder
-                prefixQueryToken={p.prefixToken}
-                queryToken={fg.token}
-                onTokenChange={handleTokenChanged}
-                queryKey={p.queryDescription.queryKey}
-                subTokenOptions={p.subTokensOptions}
-                readOnly={readOnly} />
+          <div className="row gx-1">
+            <div className="col-auto">
+              <label>Prefix:</label>
+            </div>
+            <div className="col-auto">
+              <div className={classes("rw-widget-xs mx-2", fg.token == null ? "hidden" : undefined)}>
+                <QueryTokenBuilder
+                  prefixQueryToken={p.prefixToken}
+                  queryToken={fg.token}
+                  onTokenChange={handleTokenChanged}
+                  queryKey={p.queryDescription.queryKey}
+                  subTokenOptions={p.subTokensOptions}
+                  readOnly={readOnly} />
+              </div>
             </div>
           </div>
           {fg.pinned &&
@@ -516,7 +526,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         </td>
         <td className="sf-filter-operation">
           {f.token && f.token.filterType && f.operation &&
-            <select className="form-select form-control-xs" value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
+            <select className="form-select form-select-xs" value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
               {f.token.filterType && filterOperations[f.token.filterType!]
                 .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
             </select>}

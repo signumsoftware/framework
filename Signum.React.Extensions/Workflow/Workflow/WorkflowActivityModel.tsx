@@ -204,7 +204,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
               {
                 <div className="row">
                   <div className="col-sm-6">
-                    <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-select form-control-sm" onChange={handleViewNameChange}>
+                  <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-select form-select-sm" onChange={handleViewNameChange}>
                       <option value="">{" - "}</option>
                       {(viewNames ?? []).map((v, i) => <option key={i} value={v}>{v}</option>)}
                     </select>
