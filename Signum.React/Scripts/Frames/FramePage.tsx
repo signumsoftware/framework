@@ -31,7 +31,7 @@ interface FramePageState {
   getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
   refreshCount: number;
   createNew?: () => Promise<EntityPack<Entity> | undefined>;
-  avoidPrompt?: boolean;
+  executing?: boolean;
 }
 
 export default function FramePage(p: FramePageProps) {
@@ -175,7 +175,18 @@ export default function FramePage(p: FramePageProps) {
     frameComponent: { forceUpdate, type: FramePage as any },
     entityComponent: entityComponent.current,
     pack: state.pack,
-    avoidPrompt: () => state.avoidPrompt = true,
+    isExecuting: () => state.executing == true,
+    execute: action => {
+      if (state.executing)
+        return;
+
+      state.executing = true;
+      forceUpdate();
+      action().then(
+        () => { state.executing = undefined; forceUpdate(); },
+        () => { state.executing = undefined; forceUpdate(); }
+      ).done();
+    },
     onReload: (pack, reloadComponent, callback) => {
 
       var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
@@ -233,18 +244,20 @@ export default function FramePage(p: FramePageProps) {
     <div className="normal-control">
       <Prompt when={true} message={() => hasChanges(state) ? JavascriptMessage.loseCurrentChanges.niceToString() : true} />
       {renderTitle()}
-      <div className="sf-button-widget-container">
-        {renderWidgets(wc)}
-        {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
-      </div>
-      <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
-      <WidgetEmbedded widgetContext={wc} >
-        <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
-          <ErrorBoundary>
-            {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
-          </ErrorBoundary>
+      <div style={state.executing == true ? { opacity: ".7" } : undefined}>
+        <div className="sf-button-widget-container">
+          {renderWidgets(wc)}
+          {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
         </div>
-      </WidgetEmbedded>
+        <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
+        <WidgetEmbedded widgetContext={wc} >
+          <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+            <ErrorBoundary>
+              {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
+            </ErrorBoundary>
+          </div>
+        </WidgetEmbedded>
+      </div>
     </div>
   );
 
@@ -267,7 +280,7 @@ export default function FramePage(p: FramePageProps) {
 
 function hasChanges(state: FramePageState) {
 
-  if (state.avoidPrompt)
+  if (state.executing)
     return false;
 
   const entity = state.pack.entity;

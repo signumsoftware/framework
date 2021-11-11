@@ -62,6 +62,8 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   const validationErrors = React.useRef<ValidationErrorsHandle>(null);
   const frameRef = React.useRef<EntityFrame | undefined>(undefined);
 
+  const [executing, setExecuting] = React.useState(false);
+
   const forceUpdate = useForceUpdate();
 
   React.useImperativeHandle(ref, () => ({
@@ -186,8 +188,9 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
           if (result instanceof EntityOperationContext) {
 
             result.onExecuteSuccess = pack => {
-              notifySuccess();
-              frameRef.current!.onClose(pack);
+                notifySuccess();
+                frameRef.current!.onClose(pack);
+                return Promise.resolve();
             };
 
             result.defaultClick();
@@ -262,6 +265,17 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       createNew: p.createNew,
       allowExchangeEntity: p.buttons == "close" && (p.allowExchangeEntity ?? true),
       prefix: prefix,
+      isExecuting: () => executing == true,
+      execute: action => {
+        if (executing)
+          return;
+
+        setExecuting(true);
+        action().then(
+          () => { setExecuting(false); },
+          () => { setExecuting(false) }
+        ).done();
+      }
     };
 
     frameRef.current = frame;
@@ -280,7 +294,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, frame: frame };
 
     return (
-      <div className="modal-body">
+      <div className="modal-body" style={executing == true ? { opacity: ".6" } : undefined}>
         <WidgetEmbedded widgetContext={wc} >
           <div className="sf-button-widget-container">
             {renderWidgets(wc)}

@@ -64,14 +64,14 @@ export function start(options: { routes: JSX.Element[] }) {
     onClick: ctx => {
       (ctx.frame.entityComponent as DynamicViewEntityComponent).beforeSave();
       cleanCaches();
-      ctx.defaultClick();
+      return ctx.defaultClick();
     }
   }));
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Delete, {
     onClick: ctx => {
       cleanCaches();
-      ctx.defaultClick();
+      return ctx.defaultClick();
     },
     contextual: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
     contextualFromMany: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
@@ -80,14 +80,14 @@ export function start(options: { routes: JSX.Element[] }) {
   Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Save, {
     onClick: ctx => {
       cleanCaches();
-      ctx.defaultClick();
+      return ctx.defaultClick();
     }
   }));
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Delete, {
     onClick: ctx => {
       cleanCaches();
-      ctx.defaultClick();
+      return ctx.defaultClick();
     },
     contextual: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
     contextualFromMany: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },

@@ -32,24 +32,24 @@ export function start(options: { routes: JSX.Element[] }) {
     onClick: eoc => {
       (eoc.frame.entityComponent as DynamicTypeComponent).beforeSave();
 
-      Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
+      return Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
         .then(pack => { eoc.frame.onReload(pack); Operations.notifySuccess(); })
         .then(() => {
           if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)) {
-            MessageModal.show({
+            return MessageModal.show({
               title: DynamicTypeMessage.TypeSaved.niceToString(),
               message: DynamicTypeMessage.DynamicType0SucessfullySavedGoToDynamicPanelNow.niceToString(eoc.entity.typeName),
               buttons: "yes_no",
               style: "success",
               icon: "success"
             }).then(result => {
-              if (result == "yes")
+              if (result == "yes") 
                 window.open(AppContext.toAbsoluteUrl("~/dynamic/panel"));
-            }).done();
+              return;
+            });
           }
         })
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
-        .done();
+        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
     },
     alternatives: eoc => [],
   }));

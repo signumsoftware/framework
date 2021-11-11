@@ -335,9 +335,9 @@ export class EntityOperationContext<T extends Entity> {
   settings?: EntityOperationSettings<T>;
   canExecute?: string;
   event?: React.MouseEvent<any>;
-  onExecuteSuccess?: (pack: EntityPack<T>) => void;
-  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
-  onDeleteSuccess?: () => void;
+  onExecuteSuccess?: (pack: EntityPack<T>) => Promise<void>;
+  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => Promise<void>;
+  onDeleteSuccess?: () => Promise<void>;
 
   color?: BsColor;
   icon?: IconProp;
@@ -401,17 +401,16 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   defaultClick(...args: any[]) {
-    defaultOnClick(this, ...args);
+    return defaultOnClick(this, ...args);
   }
 
   click() {
-    if (this.frame.avoidPrompt) //othwersie FrontPage will prompt then executing and navigating
-      this.frame.avoidPrompt();
-
-    if (this.settings && this.settings.onClick)
-      this.settings.onClick(this);
-    else
-      defaultOnClick(this);
+    this.frame.execute(() => {
+      if (this.settings && this.settings.onClick)
+        return this.settings.onClick(this);
+      else
+        return defaultOnClick(this);
+    });
   }
 
   textOrNiceName() {
@@ -466,7 +465,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
-  onClick?: (eoc: EntityOperationContext<T>) => void;
+  onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
@@ -498,7 +497,7 @@ export interface EntityOperationOptions<T extends Entity> {
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
-  onClick?: (eoc: EntityOperationContext<T>) => void;
+  onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;

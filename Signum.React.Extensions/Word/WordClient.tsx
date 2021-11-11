@@ -60,7 +60,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
     onClick: ctx => {
 
       var promise: Promise<string | undefined> = ctx.entity.model ? API.getConstructorType(ctx.entity.model) : Promise.resolve(undefined);
-      promise
+      return promise
         .then<Response | undefined>(ct => {
           var template = toLite(ctx.entity);
 
@@ -77,8 +77,8 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
           if (!response)
             return;
 
-          saveFile(response);
-        }).done();
+          return saveFile(response);
+        });
     }
   }));
 

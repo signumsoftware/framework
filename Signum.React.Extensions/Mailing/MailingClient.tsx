@@ -65,13 +65,11 @@ export function start(options: {
       var promise: Promise<string | undefined> = ctx.entity.model ? API.getConstructorType(ctx.entity.model) : Promise.resolve(undefined);
       promise
 
-      Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
+      return Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
         if (!lite)
           return;
-        Navigator.API.fetchAndForget(lite).then(entity =>
-          ctx.defaultClick(entity))
-          .done();
-      }).done();
+        return Navigator.API.fetchAndForget(lite).then(entity => { return ctx.defaultClick(entity); });
+      });
     }
   }));
 

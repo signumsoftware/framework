@@ -52,7 +52,16 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
   }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Delay, {
-    onClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.toISO())).done(),
+    onClick: (eoc) => {
+      return chooseDate().then(d => {
+        if (d) {
+          return eoc.defaultClick(d.toISO());
+        }
+        else {
+          return;
+        }
+      })
+    },
     hideOnCanExecute: true,
     contextual: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() },
     contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() },

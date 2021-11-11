@@ -75,6 +75,8 @@ export function RenderEntity(p: RenderEntityProps) {
     refreshCount: (ctx.frame ? ctx.frame.refreshCount : 0),
     allowExchangeEntity: false,
     prefix: prefix,
+    isExecuting: () => false,
+    execute: () => { throw new Error("Not implemented Exception"); }
   };
 
   function setComponent(c: React.Component<any, any> | null) {

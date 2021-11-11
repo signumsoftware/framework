@@ -29,6 +29,7 @@ interface CaseFramePageState {
   pack?: WorkflowClient.CaseEntityPack;
   getComponent?: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
   refreshCount: number;
+  executing?: boolean;
 }
 
 export default class CaseFramePage extends React.Component<CaseFramePageProps, CaseFramePageState> implements IHasCaseActivity {
@@ -161,7 +162,18 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       },
       refreshCount: this.state.refreshCount,
       allowExchangeEntity: false,
-      prefix: "caseFrame"
+      prefix: "caseFrame",
+      isExecuting: () => this.state.executing == true,
+      execute: action => {
+        if (this.state.executing)
+          return;
+
+        this.setState({ executing: true });
+        action().then(
+          () => { this.setState({ executing: undefined }) },
+          () => { this.setState({ executing: undefined }) }
+        ).done();
+      }
     };
 
 
@@ -232,7 +244,18 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       },
       refreshCount: this.state.refreshCount,
       allowExchangeEntity: false,
-      prefix: "caseFrame"
+      prefix: "caseFrame",
+      isExecuting: () => this.state.executing == true,
+      execute: action => {
+        if (this.state.executing)
+          return;
+
+        this.setState({ executing: true });
+        action().then(
+          () => { this.setState({ executing: undefined }) },
+          () => { this.setState({ executing: undefined }) }
+        ).done();
+      }
     };
 
     var ti = this.getMainTypeInfo();
@@ -252,7 +275,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     };
 
     return (
-      <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
+      <div className="sf-main-entity case-main-entity" style={this.state.executing == true ? { opacity: ".7" } : undefined} data-main-entity={entityInfo(mainEntity)}>
         <div className="sf-button-widget-container">
           {renderWidgets(wc)}
           {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={a => this.buttonBar = a} frame={mainFrame} pack={mainFrame.pack} /> : <br />}

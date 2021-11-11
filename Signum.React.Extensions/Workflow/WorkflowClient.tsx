@@ -191,13 +191,13 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   }));
 
   Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
-  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, color: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, color: "primary", onClick: eoc => { return Promise.resolve(executeCaseActivity(eoc, e => e.defaultClick())); }, }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, {
     icon: "share",
     iconColor: "blue",
     hideOnCanExecute: true,
-    onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump),
+    onClick: eoc => { return Promise.resolve(executeCaseActivity(eoc, executeWorkflowJump)); },
     contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual }
   }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timer, { isVisible: ctx => false }));
@@ -216,7 +216,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Next, {
     hideOnCanExecute: true,
     color: "primary",
-    onClick: eoc => executeCaseActivity(eoc, executeAndClose),
+    onClick: eoc => { return Promise.resolve(executeCaseActivity(eoc, executeAndClose)); },
     createButton: (eoc, group) => {
       const wa = eoc.entity.workflowActivity as WorkflowActivityEntity;
       const s = eoc.settings;
@@ -265,7 +265,9 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, {
     hideOnCanExecute: true,
     color: "danger",
-    onClick: eoc => executeCaseActivity(eoc, executeAndClose),
+    onClick: eoc => {
+      return Promise.resolve(executeCaseActivity(eoc, executeAndClose));
+    },
     contextual: { isVisible: ctx => true },
     contextualFromMany: {
       isVisible: ctx => true,
@@ -278,16 +280,34 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     workflowActivityMonitorUrl(ctx.lite),
     { icon: "tachometer-alt", iconColor: "green" }));
 
-  Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave, alternatives: eoc => [] }));
+  Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: eoc => { executeWorkflowSave; return Promise.resolve(); }, alternatives: eoc => [] }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Activate, {
     contextual: { icon: "heartbeat", iconColor: "red" },
     contextualFromMany: { icon: "heartbeat", iconColor: "red" },
   }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Deactivate, {
-    onClick: eoc => chooseWorkflowExpirationDate([toLite(eoc.entity)]).then(val => val && eoc.defaultClick(val)).done(),
+    onClick: eoc => {
+      return chooseWorkflowExpirationDate([toLite(eoc.entity)]).then(val => {
+        if (val) {
+          return eoc.defaultClick(val);
+        }
+        else {
+          return;
+        }
+      })
+    },
     contextual: {
-      onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => val && coc.defaultContextualClick(val)).done(),
+      onClick: coc => {
+        return chooseWorkflowExpirationDate(coc.context.lites).then(val => {
+          if (val) {
+            return coc.defaultContextualClick(val);
+          }
+          else {
+            return;
+          }
+        })
+      },
       icon: ["far", "heart"],
       iconColor: "gray"
     },
@@ -548,6 +568,7 @@ export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseA
   eoc.onExecuteSuccess = pack => {
     Operations.notifySuccess();
     eoc.frame.onClose(pack);
+    return Promise.resolve();
   }
 
   getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))

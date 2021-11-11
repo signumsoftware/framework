@@ -69,10 +69,9 @@ export function start(options: { routes: JSX.Element[] }) {
   Operations.addSettings(new EntityOperationSettings(PredictorOperation.Publish, {
     hideOnCanExecute: true,
     onClick: eoc => {
-      API.publications(eoc.entity.mainQuery.query!.key)
+      return API.publications(eoc.entity.mainQuery.query!.key)
         .then(pubs => SelectorModal.chooseElement(pubs, { buttonDisplay: a => symbolNiceName(a), buttonName: a => a.key }))
-        .then(pps => pps && eoc.defaultClick(pps))
-        .done();
+        .then(pps => { if (pps) { return eoc.defaultClick(pps); } else { return; } });
     },
     contextual: {
       onClick: coc => {
