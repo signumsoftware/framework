@@ -48,17 +48,11 @@ export function VersionInfo(p: { extraInformation?: string }) {
             <VersionInfoTooltip extraInformation={p.extraInformation} />
           </Tooltip>
         }>
-        <RefForwarder>
-          {(props, ref) => <FontAwesomeIcon forwardedRef={ref} icon="info-circle" className="sf-version-info" {...props} />}
-        </RefForwarder>
+        <div style={{ minWidth: "20px" }}><FontAwesomeIcon icon="info-circle" className="sf-version-info" /></div>
       </OverlayTrigger>
     </div>
   );
 }
-
-export const RefForwarder = React.forwardRef(function RefForwarder({ children, ...props }: { children: (props: any, ref?: React.Ref<any>, ) => React.ReactElement }, ref: React.Ref<any>) {
-  return children(props, ref);
-});
 
 function VersionInfoTooltip(p: { extraInformation?: string}) {
 
