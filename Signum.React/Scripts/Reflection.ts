@@ -111,13 +111,6 @@ export function toLuxonFormat(format: string | undefined, type: "Date" | "DateTi
   }
 }
 
-
-declare module "luxon/src/DateTime" {
-  interface DateTime {
-    toFormatFixed(format: string, options?: DateTimeFormatOptions): string;
-  }
-}
-
 const oneDigitCulture = new Set([
   "agq", "agq-CM",
   "ar-001", "ar-DJ", "ar-ER", "ar-IL", "ar-KM", "ar-MR", "ar-PS", "ar-SD", "ar-SO", "ar-SS", "ar-TD",
@@ -210,24 +203,24 @@ const oneDigitCulture = new Set([
   "zu", "zu-ZA"
 ]);
 
-DateTime.prototype.toFormatFixed = function toFormatWithFixes(this: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
+export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
 
-  if (!oneDigitCulture.has(this.locale)) {
+  if (!oneDigitCulture.has(dt.locale)) {
 
     if (format == "D")
-      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });
+      return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });
 
     if (format == "f")
-      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", ...options });
+      return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", ...options });
 
     if (format == "F")
-      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", second: "numeric", ...options });
+      return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", second: "numeric", ...options });
   }
 
   if (format == "EE") //missing
-    return this.toFormat("EEE", options).substr(0, 2);
+    return dt.toFormat("EEE", options).substr(0, 2);
 
-  return this.toFormat(format, options)
+  return dt.toFormat(format, options)
 
 }
 

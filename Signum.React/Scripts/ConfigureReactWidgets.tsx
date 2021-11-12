@@ -47,7 +47,7 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
     time: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "t"),
     datetime: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "FF"),
     header: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "MMMM yyyy"),
-    weekday: (date, format) => DateTime.fromJSDate(date).toFormatFixed(format ?? "EE"),
+    weekday: (date, format) => toFormatFixed(DateTime.fromJSDate(date), format ?? "EE"),
     dayOfMonth: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "dd"),
     month: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "MMM"),
     year: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "yyyy"),
@@ -250,3 +250,7 @@ export const firstDay: { [isoCode: string]: "mon" | "sat" | "sun" | "fri" } = {
   "ZW": "sun"
 };
 
+
+function toFormatFixed(arg0: DateTime, arg1: string): string {
+    throw new Error('Function not implemented.');
+}
