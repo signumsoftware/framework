@@ -1,34 +1,35 @@
-namespace Signum.Upgrade.Upgrades;
-
-class Upgrade_20211112_FixBootstrap : CodeUpgradeBase
+namespace Signum.Upgrade.Upgrades
 {
-    public override string Description => "Set Production mode";
-
-    public override void Execute(UpgradeContext uctx)
+    class Upgrade_20211112_FixBootstrap : CodeUpgradeBase
     {
-        uctx.ChangeCodeFile($@"Southwind.React\Dockerfile", file =>
-        {
-            file.Replace("build-development", "build-production");
-        });
+        public override string Description => "Set Production mode";
 
-        uctx.ChangeCodeFile($@"Southwind.React\App\Layout.tsx", file =>
+        public override void Execute(UpgradeContext uctx)
         {
-            file.Replace("supportIE = true", "supportIE = false");
-        });
+            uctx.ChangeCodeFile($@"Southwind.React\Dockerfile", file =>
+            {
+                file.Replace("build-development", "build-production");
+            });
 
-        uctx.ChangeCodeFile($@"Southwind.React\App\SCSS\custom.scss", file =>
-        {
-            file.InsertAfterFirstLine(a => a.Contains(@"@import ""./_bootswatch"";"), @".btn.input-group-text{
+            uctx.ChangeCodeFile($@"Southwind.React\App\Layout.tsx", file =>
+            {
+                file.Replace("supportIE = true", "supportIE = false");
+            });
+
+            uctx.ChangeCodeFile($@"Southwind.React\App\SCSS\custom.scss", file =>
+            {
+                file.InsertAfterFirstLine(a => a.Contains(@"@import ""./_bootswatch"";"), @".btn.input-group-text{
     background: $input-group-addon-bg;
     border: $input-border-width solid $input-group-addon-border-color
 }");
-        });
+            });
 
-        uctx.ChangeCodeFile(@$"Southwind.React\package.json", file =>
-        {
-            file.Replace(
-                @"webpack --config webpack.config.polyfills.js webpack --config webpack.config.dll.js --mode=production",
-                @"webpack --config webpack.config.polyfills.js --mode=production && webpack --config webpack.config.dll.js --mode=production")
-        });
+            uctx.ChangeCodeFile(@$"Southwind.React\package.json", file =>
+            {
+                file.Replace(
+                    @"webpack --config webpack.config.polyfills.js webpack --config webpack.config.dll.js --mode=production",
+                    @"webpack --config webpack.config.polyfills.js --mode=production && webpack --config webpack.config.dll.js --mode=production");
+            });
+        }
     }
 }
