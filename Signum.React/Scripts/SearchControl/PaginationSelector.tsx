@@ -108,13 +108,12 @@ export default function PaginationSelector(p: PaginationSelectorProps) {
 
     return (
       <div className="sf-pagination-center">
-        <div>
           {(p.pagination.mode == "All" ? SearchMessage.PaginationAll_0Elements :
             p.pagination.mode == "Firsts" ? SearchMessage.PaginationFirst_01Elements :
               SearchMessage.PaginationPages_0Of01lements)
             .niceToString().formatHtml(
 
-              <select value={p.pagination.mode} onChange={handleMode} className="form-select form-select-xs d-inline-block w-auto sf-pagination-mode">
+              <select value={p.pagination.mode} onChange={handleMode} className="form-select form-select-xs w-auto sf-pagination-mode mx-1">
                   {["Paginate" as PaginationMode,
                   "Firsts" as PaginationMode,
                   "All" as PaginationMode].map(mode =>
@@ -122,13 +121,12 @@ export default function PaginationSelector(p: PaginationSelectorProps) {
                 </select>,
 
                 p.pagination.mode != "All" &&
-                <select value={p.pagination.elementsPerPage!.toString()} onChange={handleElementsPerPage} className="form-select form-select-xs d-inline-block w-auto sf-elements-per-page">
+                <select value={p.pagination.elementsPerPage!.toString()} onChange={handleElementsPerPage} className="form-select form-select-xs w-auto sf-elements-per-page mx-1">
                   {[5, 10, 20, 50, 100, 200].map(elem =>
                     <option key={elem} value={elem.toString()}>{elem}</option>)}
                 </select>
               )
           }
-        </div>
       </div>
     );
   }

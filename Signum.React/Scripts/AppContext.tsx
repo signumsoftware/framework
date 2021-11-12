@@ -145,7 +145,7 @@ String.prototype.formatHtml = function (this: string) {
   }
   result.push(parts[parts.length - 1]);
 
-  return React.createElement("span", undefined, ...result);
+  return React.createElement(React.Fragment, undefined, ...result);
 };
 
 Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {

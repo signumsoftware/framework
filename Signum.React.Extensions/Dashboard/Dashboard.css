@@ -94,10 +94,10 @@ div.row-control-panel {
     padding: 0px 4px 3px 4px;
 }
 
-.sf-filter-pill .close {
-    float:none;
-    font-size: 1rem;
+.sf-filter-pill .btn-close {
+    font-size: .5rem;
     margin-left: 2px;
+    margin-top: 2px;
 }
 
 .sf-dot {

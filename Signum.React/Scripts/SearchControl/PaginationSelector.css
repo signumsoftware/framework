@@ -13,7 +13,9 @@ body.rtl .sf-pagination-left {
 
 
 .sf-pagination-center {
-    text-align: center;
+    display: flex;
+    align-content: center;
+    justify-content: center;
 }
 
 body:not(.rtl) .sf-pagination-right {
