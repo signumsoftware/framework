@@ -431,7 +431,7 @@ export class TypeContext<T> extends StyleContext {
   }
 
   get errorClass(): string | undefined {
-    return !!this.error ? "has-error": undefined;
+    return !!this.error ? "has-error" : undefined;
   }
 
   get errorClassBorder(): string | undefined {
@@ -491,7 +491,10 @@ export interface EntityFrame {
   onClose: (pack?: EntityPack<ModifiableEntity>) => void;
   refreshCount: number;
   allowExchangeEntity: boolean;
-  avoidPrompt?: () => void;
+
+  isExecuting(): boolean; 
+  execute: (action: () => Promise<void>) => void;
+
   createNew?: (oldPack: EntityPack<ModifiableEntity>) => (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
   prefix: string;
 }
@@ -502,7 +505,3 @@ export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[
     new MListElementBinding<T>(ctx.binding, i),
   ));
 }
-
-
-
-

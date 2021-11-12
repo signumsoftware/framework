@@ -200,7 +200,7 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 
 export interface OperationMenuItemProps {
   coc: ContextualOperationContext<any>;
-  onOperationClick?: (coc: ContextualOperationContext<Entity>) => void;
+  onOperationClick?: (coc: ContextualOperationContext<Entity>) => Promise<void>;
   onClick?: (me: React.MouseEvent<any>) => void; /*used to hide contextual menu*/
   extraButtons?: React.ReactNode;
   children?: React.ReactNode;
@@ -227,9 +227,9 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
 
   const handleOnClick = (me: React.MouseEvent<any>) => {
     coc.event = me;
-    operationClickOrDefault(coc);
-    if (onClick)
-      onClick(me);
+    operationClickOrDefault(coc)
+      .finally(() => onClick?.(me))
+      .done();
   }
 
   const item = (
@@ -276,69 +276,57 @@ OperationMenuItem.simplifyName = (niceName: string) => {
 }
 
 
-export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) {
+export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) : Promise<void> {
 
   coc.event!.persist();
 
-  confirmInNecessary(coc).then(conf => {
+  return confirmInNecessary(coc).then(conf => {
     if (!conf)
       return;
 
     switch (coc.operationInfo.operationType) {
       case "ConstructorFromMany":
         {
-
-          API.constructFromMany(coc.context.lites, coc.operationInfo.key, ...args)
+          return API.constructFromMany(coc.context.lites, coc.operationInfo.key, ...args)
             .then(coc.onConstructFromSuccess ?? (pack => {
               notifySuccess();
               Navigator.createNavigateOrTab(pack, coc.event!)
                 .then(() => coc.context.markRows({}))
                 .done();
-            }))
-            .done();
-
-          break;
+            }));
         }
       case "ConstructorFrom":
         if (coc.context.lites.length == 1) {
-          API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
+          return API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
             .then(coc.onConstructFromSuccess ?? (pack => {
               notifySuccess();
-              Navigator.createNavigateOrTab(pack, coc.event!)
+              return Navigator.createNavigateOrTab(pack, coc.event!)
                 .then(() => coc.context.markRows({}))
-                .done();
-            }))
-            .done();
+            }));
         } else {
-          getSetters(coc)
+          return getSetters(coc)
             .then(setters => setters && API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
               .then(coc.onContextualSuccess ?? (report => {
                 notifySuccess();
                 coc.context.markRows(report.errors);
-              })))
-            .done();
+              })));
         }
-        break;
       case "Execute":
-        getSetters(coc)
+        return getSetters(coc)
           .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {
               notifySuccess();
               coc.context.markRows(report.errors);
-            })))
-          .done();
-        break;
+            })));
       case "Delete":
-        getSetters(coc)
+        return getSetters(coc)
           .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {
               notifySuccess();
               coc.context.markRows(report.errors);
-            })))
-          .done();
-        break;
+            })));
     }
-  }).done();
+  });
 
   function getSetters(coc: ContextualOperationContext<Entity>): Promise<Operations.API.PropertySetter[] | undefined> {
 

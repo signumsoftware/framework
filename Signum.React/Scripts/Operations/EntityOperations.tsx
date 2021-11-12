@@ -20,7 +20,7 @@ import { FunctionalAdapter } from "../Modals";
 import { getTypeNiceName } from "../Finder";
 
 
-export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined > | undefined {
+export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {
   const ti = tryGetTypeInfo(ctx.pack.entity.Type);
 
   if (ti == undefined)
@@ -51,16 +51,16 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
 
       const group = gr.elements[0].group!;
       var groupButtons = gr.elements.flatMap(eoc => eoc.createButton(group)).orderBy(a => a.order);
-      
+
       return [{
         order: group.order != undefined ? group.order : 100,
         shortcut: e => groupButtons.some(bbe => bbe.shortcut != null && bbe.shortcut(e)),
         button: React.cloneElement(
           <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.outline != false ? ("outline-" + (group.color ?? "secondary")) : group.color ?? "light"}>
-            </DropdownButton>,
-            undefined,
-            ...groupButtons.map(bbe => bbe.button)
-          )
+          </DropdownButton>,
+          undefined,
+          ...groupButtons.map(bbe => bbe.button)
+        )
       } as ButtonBarElement];
     }
   });
@@ -69,7 +69,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
 }
 
 export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDropdown?: boolean): AlternativeOperationSetting<T> {
-  
+
   return ({
     name: "andClose",
     text: () => OperationMessage._0AndClose.niceToString(eoc.textOrNiceName()),
@@ -81,6 +81,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDro
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
         eoc.frame.onClose(pack);
+        return Promise.resolve(undefined);
       };
       eoc.click();
     }
@@ -100,16 +101,15 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
 
-        (eoc.frame.createNew!(pack) ?? Promise.resolve(undefined))
-          .then(newPack => newPack && eoc.frame.onReload(newPack, reloadComponent))
-          .done();
+        return (eoc.frame.createNew!(pack) ?? Promise.resolve(undefined))
+          .then(newPack => newPack && eoc.frame.onReload(newPack, reloadComponent));
       };
       eoc.defaultClick();
     }
   });
 }
 
-type OutlineBsColor = 
+type OutlineBsColor =
   | 'outline-primary'
   | 'outline-secondary'
   | 'outline-success'
@@ -172,7 +172,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
         {alternatives?.map(a => renderAlternative(a))}
       </>
     );
-  }    
+  }
 
   if (outline == null)
     outline = eoc.outline;
@@ -180,7 +180,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   if (color == null)
     color = eoc.color;
 
-  var button = <Button variant={(outline? ("outline-" + color) as OutlineBsColor: color)}
+  var button = <Button variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
     {...props}
     key="button"
     title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
@@ -266,7 +266,6 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   function handleOnClick(event: React.MouseEvent<any>) {
     eoc.event = event;
     event.persist();
-
     if (onOperationClick)
       onOperationClick(eoc, event);
     else
@@ -286,18 +285,18 @@ function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?:
   }
 }
 
-export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void> {
   if (!eoc.operationInfo.canBeModified) {
     switch (eoc.operationInfo.operationType) {
-      case "ConstructorFrom": defaultConstructFromLite(eoc, ...args); return;
-      case "Execute": defaultExecuteLite(eoc, ...args); return;
-      case "Delete": defaultDeleteLite(eoc, ...args); return;
+      case "ConstructorFrom": return defaultConstructFromLite(eoc, ...args);
+      case "Execute": return defaultExecuteLite(eoc, ...args);
+      case "Delete": return defaultDeleteLite(eoc, ...args);
     }
   } else {
     switch (eoc.operationInfo.operationType) {
-      case "ConstructorFrom": defaultConstructFromEntity(eoc, ...args); return;
-      case "Execute": defaultExecuteEntity(eoc, ...args); return;
-      case "Delete": defaultDeleteEntity(eoc, ...args); return;
+      case "ConstructorFrom": return defaultConstructFromEntity(eoc, ...args);
+      case "Execute": return defaultExecuteEntity(eoc, ...args);
+      case "Delete": return defaultDeleteEntity(eoc, ...args);
     }
   }
 
@@ -306,99 +305,97 @@ export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>,
 
 export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
-  confirmInNecessary(eoc).then(conf => {
+  return confirmInNecessary(eoc).then(conf => {
     if (!conf)
       return;
 
-    API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
+    return API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
       .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
         return Navigator.createNavigateOrTab(pack, eoc.event!);
       }))
-      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
-      .done();
-  }).done();
+      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
+  });
 }
 
-export function defaultConstructFromLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+export function defaultConstructFromLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void> {
 
-  confirmInNecessary(eoc).then(conf => {
+  return confirmInNecessary(eoc).then(conf => {
     if (!conf)
       return;
 
-    API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+    return API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
       .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
         return Navigator.createNavigateOrTab(pack, eoc.event!);
       }))
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
-      .done();
-  }).done();
+  });
 }
 
 
 export function defaultExecuteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
-  confirmInNecessary(eoc).then(conf => {
+  return confirmInNecessary(eoc).then(conf => {
     if (!conf)
       return;
 
-    API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
+    return API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
       .then(eoc.onExecuteSuccess ?? (pack => {
         eoc.frame.onReload(pack);
         notifySuccess();
+        return;
       }))
-      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
-      .done();
-  }).done();
+      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
+  });
 }
 
 export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
-  confirmInNecessary(eoc).then(conf => {
+  return confirmInNecessary(eoc).then(conf => {
     if (!conf)
       return;
 
-    API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+    return API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
       .then(eoc.onExecuteSuccess ?? (pack => {
         eoc.frame.onReload(pack);
         notifySuccess();
+        return;
       }))
-      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
-      .done();
-  }).done();
+      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
+  });
 }
 
 export function defaultDeleteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
-  confirmInNecessary(eoc).then(conf => {
+  return confirmInNecessary(eoc).then(conf => {
     if (!conf)
       return;
 
-    API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
+    return API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
       .then(eoc.onDeleteSuccess ?? (() => {
         eoc.frame.onClose();
         notifySuccess();
+        return;
       }))
-      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
-      .done();
-  }).done();
+      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
+  });
 }
 
 export function defaultDeleteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
-  confirmInNecessary(eoc).then(conf => {
+  return confirmInNecessary(eoc).then(conf => {
     if (!conf)
       return;
 
-    API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+    return API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
       .then(eoc.onDeleteSuccess ?? (() => {
         eoc.frame.onClose();
         notifySuccess();
+        return;
       }))
-      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
-      .done();
-  }).done();
+      .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
+  });
 }
 
 
