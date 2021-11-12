@@ -208,7 +208,7 @@ export function PanelPart(p: PanelPartProps) {
 
   const title = !icon ? titleText :
     <span>
-      <FontAwesomeIcon icon={icon} color={color} className="mr-1" />{titleText}
+      <FontAwesomeIcon icon={icon} color={color} className="me-1" />{titleText}
     </span>;
 
   var style = part.style == undefined ? undefined : part.style.toLowerCase();
@@ -226,17 +226,17 @@ export function PanelPart(p: PanelPartProps) {
         style && ("bg-" + style)
       )}>
         {renderer.handleEditClick &&
-          <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
-            <FontAwesomeIcon icon="edit" className="mr-1" />Edit
+          <a className="sf-pointer float-end flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
+            <FontAwesomeIcon icon="edit" className="me-1" />Edit
           </a>
         }
         {renderer.handleTitleClick == undefined ? title :
           <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
         }
         {
-          dashboardFilter && <span className="badge badge-light border border-secondary ml-2 sf-filter-pill">
+          dashboardFilter && <span className="badge btn-light border border-secondary ms-2 sf-filter-pill">
             {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
-            <button type="button" aria-label="Close" className="close" onClick={handleClearFilter}><span aria-hidden="true">×</span></button>
+            <button type="button" aria-label="Close" className="btn-close" onClick={handleClearFilter}/>
           </span>
         }
       </div>

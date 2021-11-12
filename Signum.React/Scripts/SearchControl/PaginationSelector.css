@@ -24,8 +24,6 @@ body.rtl .sf-pagination-right {
     text-align: left;
 }
 
-
-div.sf-pagination-center > div.form-inline,
 div.sf-pagination-right > ul.pagination {
     display: inline-flex;
     padding: 0px;

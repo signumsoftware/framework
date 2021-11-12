@@ -48,6 +48,7 @@ interface PackAndComponent {
   lastEntity: string;
   refreshCount: number;
   getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+  executing?: boolean;
 }
 
 export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProps, ref: React.Ref<IHandleKeyboard>) {
@@ -186,8 +187,9 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
           if (result instanceof EntityOperationContext) {
 
             result.onExecuteSuccess = pack => {
-              notifySuccess();
-              frameRef.current!.onClose(pack);
+                notifySuccess();
+                frameRef.current!.onClose(pack);
+                return Promise.resolve();
             };
 
             result.defaultClick();
@@ -262,6 +264,20 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       createNew: p.createNew,
       allowExchangeEntity: p.buttons == "close" && (p.allowExchangeEntity ?? true),
       prefix: prefix,
+      isExecuting: () => pc.executing == true,
+      execute: action => {
+        if (pc.executing)
+          return;
+
+        pc.executing = true;
+        forceUpdate();
+        action()
+          .finally(() => {
+            pc.executing = undefined;
+            forceUpdate();
+          })
+          .done();
+      }
     };
 
     frameRef.current = frame;
@@ -280,7 +296,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, frame: frame };
 
     return (
-      <div className="modal-body">
+      <div className="modal-body" style={pc.executing == true ? { opacity: ".6" } : undefined}>
         <WidgetEmbedded widgetContext={wc} >
           <div className="sf-button-widget-container">
             {renderWidgets(wc)}

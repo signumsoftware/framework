@@ -42,10 +42,10 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean, ma
   return (
     <div>
       <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.NewPassword.niceToString()}>
-        <input type="password" ref={newPass} autoComplete="off" className={classes(p.ctx.formControlClass, p.mandatory && !newPass.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />
+        <input type="password" ref={newPass} autoComplete="off" placeholder={LoginAuthMessage.NewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />
       </FormGroup>
       <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.ConfirmNewPassword.niceToString()}>
-        <input type="password" ref={newPass2} autoComplete="off" className={classes(p.ctx.formControlClass, p.mandatory && !newPass2.current?.value  ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />
+        <input type="password" ref={newPass2} autoComplete="off" placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass2.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />
       </FormGroup>
     </div>
   );

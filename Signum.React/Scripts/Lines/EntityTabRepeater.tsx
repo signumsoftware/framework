@@ -10,7 +10,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines';
 import { EntityTableProps } from './EntityTable'
 import { Tabs, Tab } from 'react-bootstrap'
-import { SelectCallback } from 'react-bootstrap/helpers'
 import { useController } from './LineBase'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
@@ -118,7 +117,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
 
   function renderButtons() {
     const buttons = (
-      <span className="ml-2">
+      <span className="ms-2">
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {!p.createAsLink && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}
@@ -158,13 +157,13 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                     onDrop={drag?.onDrop}>
                     {p.getTitle ? p.getTitle(mlec) : getToString(mlec.value)}
                     {c.canRemove(mlec.value) && !readOnly &&
-                      <span className={classes("sf-line-button", "sf-remove", "ml-2")}
+                      <span className={classes("sf-line-button", "sf-remove", "ms-2")}
                         onClick={e => { e.stopPropagation(); c.handleRemoveElementClick(e, mlec.index!) }}
                         title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
                         {EntityBaseController.removeIcon}
                       </span>
                     }
-                    {drag && <span className={classes("sf-line-button", "sf-move", "ml-2")}
+                    {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")}
                       draggable={true}
                       onDragStart={drag.onDragStart}
                       onDragEnd={drag.onDragEnd}

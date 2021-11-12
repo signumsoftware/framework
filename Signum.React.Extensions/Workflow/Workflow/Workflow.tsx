@@ -92,17 +92,17 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
 
           {issues.length == 0 ?
             <li>
-              <FontAwesomeIcon icon="check" className="text-success mr-1" />
+              <FontAwesomeIcon icon="check" className="text-success me-1" />
               {"-- No issues --"}
             </li> :
             issues.orderBy(a => a.type).map((issue, i) =>
 
               <li key={i}>
                 {issue.type == "Error" ?
-                  <FontAwesomeIcon icon="times-circle" className="text-danger mr-1" /> :
-                  <FontAwesomeIcon icon="exclamation-triangle" className="text-warning mr-1" />}
+                  <FontAwesomeIcon icon="times-circle" className="text-danger me-1" /> :
+                  <FontAwesomeIcon icon="exclamation-triangle" className="text-warning me-1" />}
 
-                {issue.bpmnElementId && <span className="mr-1">(in <a href="#" onClick={e => handleHighlightClick(e, issue)}>{issue.bpmnElementId}</a>)</span>}
+                {issue.bpmnElementId && <span className="me-1">(in <a href="#" onClick={e => handleHighlightClick(e, issue)}>{issue.bpmnElementId}</a>)</span>}
                 {issue.message}
 
               </li>
@@ -119,9 +119,9 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
     return (
       <div>
         <span className="display-7">{WorkflowMessage.WorkflowIssues.niceToString()}&nbsp;</span>
-        {errorCount > 0 && <FontAwesomeIcon icon="times-circle" className="text-danger mr-1" />}
+        {errorCount > 0 && <FontAwesomeIcon icon="times-circle" className="text-danger me-1" />}
         {errorCount > 0 && errorCount}
-        {warningCount > 0 && <FontAwesomeIcon icon="exclamation-triangle" className="text-warning mr-1" />}
+        {warningCount > 0 && <FontAwesomeIcon icon="exclamation-triangle" className="text-warning me-1" />}
         {warningCount > 0 && warningCount}
       </div>
     );

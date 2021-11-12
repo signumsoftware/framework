@@ -36,7 +36,7 @@ export default function DashboardPage(p: DashboardPageProps) {
       {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
         <div className="sf-show-hover">
           {!Navigator.isReadOnly(DashboardEntity) &&
-            <Link className="sf-hide float-right flip mt-3" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="edit" />&nbsp;Edit</Link>
+            <Link className="sf-hide float-end flip mt-3" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="edit" />&nbsp;Edit</Link>
           }
           <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>
         </div>}

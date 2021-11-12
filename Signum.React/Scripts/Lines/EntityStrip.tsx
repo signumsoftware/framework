@@ -133,12 +133,12 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
   function renderLastElement() {
 
     const buttons = (
-      <span className="input-group-append">
+      <>
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {c.renderCreateButton(true)}
         {c.renderFindButton(true)}
         {p.extraButtonsAfter && p.extraButtonsAfter(c)}
-      </span>
+      </>
     );
 
     return (

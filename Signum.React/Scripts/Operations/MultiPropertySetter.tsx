@@ -55,9 +55,7 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
     <Modal onHide={handleCancelClicked} show={show} className="message-modal" size="xl" onExited={handleOnExited}>
       <div className="modal-header">
         <h5 className="modal-title">{OperationMessage.BulkModifications.niceToString()}</h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
       </div>
       <div className="modal-body">
         <ErrorBoundary>
@@ -134,7 +132,7 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
               <a href="#" title={StyleContext.default.titleLabels ? addElement : undefined}
                 className="sf-line-button sf-create sf-create-condition"
                 onClick={e => handleNewPropertySetter(e)}>
-                <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{addElement}
+                <FontAwesomeIcon icon="plus" className="sf-create me-1" />{addElement}
               </a>
             </td>
           </tr>
@@ -287,14 +285,14 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
         <td>
           {
             operations &&
-              <select className="form-control form-control-xs" value={p.setter.operation} disabled={operations.length == 1} onChange={handleChangeOperation}>
+            <select className="form-select form-select-xs" value={p.setter.operation} disabled={operations.length == 1} onChange={handleChangeOperation}>
                 {operations.map((op, i) => <option key={i} value={op}>{PropertyOperation.niceToString(op)}</option>)}
               </select>
           }
 
           {
             fOperations &&
-            <select className="form-control form-control-xs" value={p.setter.filterOperation} disabled={fOperations.length == 1} onChange={handleChangeFilterOperation}>
+            <select className="form-select form-select-xs" value={p.setter.filterOperation} disabled={fOperations.length == 1} onChange={handleChangeFilterOperation}>
               {fOperations.map((op, i) => <option key={i} value={op}>{FilterOperation.niceToString(op)}</option>)}
             </select>
           }

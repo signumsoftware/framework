@@ -3,10 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
+import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity, registerToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
-import { PseudoType, Type, getTypeName } from '@framework/Reflection'
+import { PseudoType, Type, getTypeName, isTypeEntity } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity, EmailFromEmbedded, MicrosoftGraphEmbedded } from './Signum.Entities.Mailing'
 import { EmailSenderConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
@@ -61,17 +62,20 @@ export function start(options: {
 
   Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateEmailFromTemplate, {
     onClick: (ctx) => {
-
       var promise: Promise<string | undefined> = ctx.entity.model ? API.getConstructorType(ctx.entity.model) : Promise.resolve(undefined);
-      promise
-
-      Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
-        if (!lite)
-          return;
-        Navigator.API.fetch(lite).then(entity =>
-          ctx.defaultClick(entity))
-          .done();
-      }).done();
+      return promise.then(ct => {
+        if (!ct || isTypeEntity(ct))
+          return Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
+            if (!lite)
+              return;
+            return Navigator.API.fetch(lite).then(entity => ctx.defaultClick(entity));
+          });
+        else {
+          var s = settings[ct];
+          var promise = (s?.createFromTemplate ? s.createFromTemplate(ctx.entity) : Constructor.constructPack(ct).then(a => a && Navigator.view(a)));
+          return promise.then(model => model && ctx.defaultClick(model));
+        }
+      });
     }
   }));
 

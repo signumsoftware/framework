@@ -135,6 +135,11 @@ a.expand-window:hover {
   float: right;
 }
 
+.btn.disabled[data-operation]{
+    pointer-events: initial;
+}
+
+
 .btn-toolbar > .btn,
 .btn-toolbar > .btn-group,
 .btn-toolbar > .input-group,
@@ -171,6 +176,7 @@ a.expand-window:hover {
     margin-left: 2px;
     margin-right: 2px;
     padding: 4px;
+    text-decoration: none;
 }
 
 .sf-guid-id {

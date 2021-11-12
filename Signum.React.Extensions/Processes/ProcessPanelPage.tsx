@@ -68,7 +68,7 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
           </thead>
           <tbody>
             <tr>
-              <td colSpan={4}>
+              <td colSpan={6}>
                 <b> {s.executing.length} processes executing in {s.machineName}</b>
               </td>
             </tr>

@@ -31,7 +31,7 @@ export function start(options: { routes: JSX.Element[] }) {
     return (
       {
         order: -1,
-        button: <button className="btn btn-info ml-2"
+        button: <button className="btn btn-info ms-2"
           onClick={e => {
             e.preventDefault();
             var promise = ValueLineModal.show({

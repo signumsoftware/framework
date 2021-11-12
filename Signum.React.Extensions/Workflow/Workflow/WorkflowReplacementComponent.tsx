@@ -7,7 +7,7 @@ import { PreviewTask } from '../WorkflowClient'
 import { is } from "@framework/Signum.Entities";
 import { useForceUpdate } from '@framework/Hooks'
 
-export default function WorkflowReplacementComponent(p : { ctx: TypeContext<WorkflowReplacementModel> }){
+export default function WorkflowReplacementComponent(p: { ctx: TypeContext<WorkflowReplacementModel> }) {
   var ctx = p.ctx;
   var newTasks = ctx.value.newTasks.map(a => a.element);
   return (
@@ -47,7 +47,7 @@ export default function WorkflowReplacementComponent(p : { ctx: TypeContext<Work
   );
 }
 
-export function WorkflowReplacementItemCombo(p: { ctx: TypeContext<WorkflowReplacementItemEmbedded>, previewTasks: NewTasksEmbedded[] }){
+export function WorkflowReplacementItemCombo(p: { ctx: TypeContext<WorkflowReplacementItemEmbedded>, previewTasks: NewTasksEmbedded[] }) {
   const forceUpdate = useForceUpdate();
   function handleChange(e: React.FormEvent<any>) {
     p.ctx.subCtx(a => a.newNode).value = (e.currentTarget as HTMLSelectElement).value;
@@ -56,7 +56,7 @@ export function WorkflowReplacementItemCombo(p: { ctx: TypeContext<WorkflowRepla
 
   const ctx = p.ctx;
   return (
-    <select value={ctx.value.newNode ?? ""} className="form-control form-control-sm" onChange={handleChange}>
+    <select value={ctx.value.newNode ?? ""} className="form-select form-select-sm" onChange={handleChange}>
       <option value=""> - {symbolNiceName(WorkflowOperation.Delete).toUpperCase()} - </option>
       {p.previewTasks.filter(pt => is(pt.subWorkflow, ctx.value.subWorkflow))
         .map(pt => <option value={pt.bpmnId}>{pt.name}</option>)}

@@ -148,9 +148,7 @@ function ToolbarMainModalModal(p: ToolbarMainModalModalProps) {
     <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
       <div className="modal-header">
         <h5 className="modal-title">{p.tr.label ?? getToString(p.tr.content!)}</h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
       </div>
       <div className="modal-body">
         <ToolbarMainRendererPrivate response={p.tr} />

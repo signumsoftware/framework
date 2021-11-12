@@ -96,7 +96,7 @@ export default function TypeHelpPage(p: RouteComponentProps<{ cleanName: string 
 function PropertyLine({ node, cleanName, onChange }: { node: TreeNode<{ ctx: TypeContext<PropertyRouteHelpEmbedded>, pr: PropertyRoute }>, cleanName: string, onChange: () => void }) {
   return (
     <>
-      <dt className="col-sm-3 shortcut-container text-right" id={HelpClient.Urls.idProperty(node.value.pr)}>
+      <dt className="col-sm-3 shortcut-container text-end" id={HelpClient.Urls.idProperty(node.value.pr)}>
         {node.value.pr.member!.niceName}<br />
         <code className='shortcut'>[p:{cleanName}.{node.value.pr.propertyPath()}]</code>
       </dt>
@@ -117,13 +117,13 @@ function SubPropertiesCollapse({ node, cleanName, onChange }: { node: TreeNode<{
   var [open, setOpen] = React.useState(false);
   return (
     <>
-      <div className="row ml-4 mb-2">
+      <div className="row ms-4 mb-2">
         <span className="col-sm-9 offset-sm-3 lead" style={{ cursor: "pointer" }} onClick={() => setOpen(!open)}>
           <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {node.value.pr.member!.niceName}
         </span>
       </div>
       <Collapse in={open}>
-        <dl className="row ml-4">
+        <dl className="row ms-4">
           {node.children.map(n => <PropertyLine key={node.value.pr.propertyPath()} node={node} cleanName={cleanName} onChange={onChange} />)}
         </dl>
       </Collapse>
@@ -134,7 +134,7 @@ function SubPropertiesCollapse({ node, cleanName, onChange }: { node: TreeNode<{
 function OperationLine({ ctx, cleanName, onChange }: { ctx: TypeContext<OperationHelpEmbedded>, cleanName: string, onChange: () => void }) {
   return (
     <>
-      <dt className="col-sm-3 shortcut-container text-right" id={HelpClient.Urls.idOperation(ctx.value.operation)}>
+      <dt className="col-sm-3 shortcut-container text-end" id={HelpClient.Urls.idOperation(ctx.value.operation)}>
         {Operations.getOperationInfo(ctx.value.operation, cleanName).niceName}<br />
         <code className='shortcut'>[o:{cleanName}.{ctx.value.operation.key}]</code>
       </dt>
@@ -162,7 +162,7 @@ function QueryBlock({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryHelpEn
         </div>
       </div>
       <Collapse in={open}>
-        <dl className="row ml-4">
+        <dl className="row ms-4">
           {mlistItemContext(ctx.subCtx(th => th.columns)).map(qctx => <QueryColumnLine key={qctx.value.columnName} ctx={qctx} cleanName={cleanName} onChange={onChange} />)}
         </dl>
       </Collapse>
@@ -173,7 +173,7 @@ function QueryBlock({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryHelpEn
 function QueryColumnLine({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryColumnHelpEmbedded>, cleanName: string, onChange: () => void }) {
   return (
     <>
-      <dt className="col-sm-3 text-right">
+      <dt className="col-sm-3 text-end">
         {ctx.value.niceName}<br />
       </dt>
       <dd className="col-sm-9">

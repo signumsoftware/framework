@@ -91,7 +91,7 @@ export const CodeMirrorComponent = React.forwardRef(function CodeMirrorComponent
     p.onFocusChange && p.onFocusChange(focused);
   }
 
-  function codemirrorValueChanged(doc: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList) {
+  function codemirrorValueChanged(doc: CodeMirror.Editor, change: CodeMirror.EditorChange) {
     const newValue = doc.getValue();
     if (newValue != p.value && onChangeRef.current)
       onChangeRef.current(newValue);

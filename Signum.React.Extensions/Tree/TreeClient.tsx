@@ -36,7 +36,7 @@ export function start(options: { routes: JSX.Element[] }) {
     new EntityOperationSettings(TreeOperation.Copy, {
       onClick: ctx => copyModal(toLite(ctx.entity)).then(m => {
         if (m) {
-          ctx.onConstructFromSuccess = pack => Operations.notifySuccess();
+          ctx.onConstructFromSuccess = pack => { Operations.notifySuccess(); return Promise.resolve(); };
           ctx.defaultClick(m);
         }
       }),

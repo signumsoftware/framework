@@ -223,7 +223,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
       <legend>
         <div>
           <span>{p.labelText}</span>
-          <span className="float-right ml-2">
+          <span className="float-end ms-2">
             {p.extraButtonsBefore && p.extraButtonsBefore(c)}
             {c.renderCreateButton(false)}
             {c.renderFindButton(false)}
@@ -315,7 +315,7 @@ export function EntityGridItem(p : EntityGridItemProps){
         onDragStart={p.onTitleDragStart}
         onDragEnd={p.onTitleDragEnd} >
         {p.onRemove &&
-          <a href="#" className="sf-line-button sf-remove float-right" onClick={p.onRemove}
+          <a href="#" className="sf-line-button sf-remove float-end" onClick={p.onRemove}
               title={EntityControlMessage.Remove.niceToString()}>
               <FontAwesomeIcon icon="times" />
             </a>

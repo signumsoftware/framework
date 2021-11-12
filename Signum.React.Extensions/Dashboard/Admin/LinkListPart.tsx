@@ -8,7 +8,7 @@ export default function ValueSearchControlPart(p : { ctx: TypeContext<LinkListPa
   const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
 
   return (
-    <div className="form-inline">
+    <div>
       <EntityRepeater ctx={ctx.subCtx(p => p.links)} getComponent={(tc: TypeContext<LinkElementEmbedded>) => {
         return (
           <div>

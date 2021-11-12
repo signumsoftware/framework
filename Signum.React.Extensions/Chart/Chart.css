@@ -1,14 +1,4 @@
 ﻿
-@media (min-width: 1200px) {
-    body:not(.rtl) .sf-chart-type {
-        margin-right: -25px;
-    }
-
-    body.rtl .sf-chart-type {
-        margin-left: -25px;
-    }
-}
-
 .sf-chart-type {
     margin-bottom: 4px;
 }

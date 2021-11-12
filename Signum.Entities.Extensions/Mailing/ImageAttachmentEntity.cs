@@ -25,9 +25,9 @@ public class ImageAttachmentEntity : Entity, IAttachmentGeneratorEntity
 
     public EmailAttachmentType Type { get; set; }
 
-    
+
     public FileEmbedded File { get; set; }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => FileName ?? File.FileName);
+    public override string ToString() => As.Expression(() => FileName ?? (File == null ? "" : File.FileName));
 }

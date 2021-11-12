@@ -80,7 +80,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
   var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
 
   return (
-    <div className="row sf-chart-builder">
+    <div className="row sf-chart-builder gx-2">
       <div className="col-lg-2">
         <div className="sf-chart-type card">
           <div className="card-header">

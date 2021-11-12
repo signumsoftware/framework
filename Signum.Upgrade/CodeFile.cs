@@ -11,9 +11,9 @@ namespace Signum.Upgrade;
 
 public enum WarningLevel
 {
-    None, 
-    Warning, 
-    Error, 
+    None,
+    Warning,
+    Error,
 }
 
 public class CodeFile
@@ -32,7 +32,7 @@ public class CodeFile
     public UpgradeContext Uctx { get; }
 
     string? _content;
-    string? _originalContent; 
+    string? _originalContent;
     public string Content
     {
         get { ReadIfNecessary(); return _content!; }
@@ -43,7 +43,7 @@ public class CodeFile
 
     private void ReadIfNecessary()
     {
-        if(_content == null)
+        if (_content == null)
         {
             var bytes = File.ReadAllBytes(Path.Combine(Uctx.RootFolder, FilePath));
             encoding = GetEncoding(FilePath, bytes);
@@ -151,7 +151,7 @@ public class CodeFile
         ProcessLines(lines =>
         {
             var res = lines.RemoveAll(condition.Compile());
-            if(res == 0)
+            if (res == 0)
             {
                 Warning($"Unable to find any line where {condition} to remove it");
                 return false;
@@ -166,7 +166,7 @@ public class CodeFile
         ProcessLines(lines =>
         {
             var pos = lines.FindIndex(condition.Compile());
-            if(pos == -1)
+            if (pos == -1)
             {
                 Warning($"Unable to find line where {condition} the insert after {text}");
                 return false;
@@ -203,7 +203,7 @@ public class CodeFile
                 return false;
             }
             var to = lines.FindIndex(from + 1, toLine.Compile());
-            if(to == -1)
+            if (to == -1)
             {
                 Warning($"Unable to find a line where {toLine} after line {to} to insert before it the text: {text}");
                 return false;
@@ -306,6 +306,19 @@ public class CodeFile
             throw new InvalidOperationException("");
     }
 
+    public void UpdateNpmPackages(string packageJsonBlock)
+    {
+        var packages = packageJsonBlock.Lines().Select(a => a.Trim()).Where(a => a.HasText()).Select(a => new
+        {
+            PackageName = a.Before(":").Trim('"'),
+            Version = a.After(":").Trim(',', '"', ' '),
+        }).ToList();
+
+        foreach (var v in packages)
+        {
+            UpdateNpmPackage(v.PackageName, v.Version);
+        }
+    }
 
     public void UpdateNpmPackage(string packageName, string version)
     {

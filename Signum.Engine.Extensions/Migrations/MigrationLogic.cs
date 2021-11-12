@@ -49,10 +49,10 @@ public static class MigrationLogic
                     if (count > 0)
                     {
                         Console.Write("The database ");
-                        SafeConsole.WriteLineColor(ConsoleColor.White, Connector.Current.DatabaseName());
+                        SafeConsole.WriteColor(ConsoleColor.Yellow, Connector.Current.DatabaseName());
                         Console.Write(" contains ");
-                        SafeConsole.WriteLineColor(ConsoleColor.White, count.ToString());
-                        Console.Write(" Sql Migrations!");
+                        SafeConsole.WriteColor(ConsoleColor.Yellow, count.ToString());
+                        Console.WriteLine(" Sql Migrations!");
 
                         if (SafeConsole.Ask("Do you want to create a new SQL Migration instead?"))
                         {
@@ -107,7 +107,7 @@ public static class MigrationLogic
             }
 
             SafeConsole.WriteLineColor(ConsoleColor.White, "Table " + table.Name + " auto-generated...");
-     
+
             tr.Commit();
         }
     }
@@ -138,7 +138,7 @@ public static class MigrationLogic
             return null;
         }
         catch (Exception e)
-        {                
+        {
             Console.WriteLine();
 
             SafeConsole.WriteColor(ConsoleColor.Red, e.GetType() + ": ");

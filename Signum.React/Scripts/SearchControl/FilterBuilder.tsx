@@ -135,18 +135,18 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                   <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
                     className="sf-line-button sf-create sf-create-condition"
                     onClick={e => handlerNewFilter(e, false)}>
-                    <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddFilter.niceToString()}
+                    <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddFilter.niceToString()}
                   </a>
                   <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddGroup.niceToString() : undefined}
-                    className="sf-line-button sf-create sf-create-group ml-3"
+                    className="sf-line-button sf-create sf-create-group ms-3"
                     onClick={e => handlerNewFilter(e, true)}>
-                    <FontAwesomeIcon icon="plus" className="sf-create mr-1" />{SearchMessage.AddGroup.niceToString()}
+                    <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddGroup.niceToString()}
                   </a>
 
                   {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? (showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString() : undefined}
-                    className="sf-line-button ml-3"
+                    className="sf-line-button ms-3"
                     onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
-                    <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "star"]} className="mr-1" />{(showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString()}
+                    <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "star"]} className="me-1" />{(showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString()}
                   </a>
                   }
                 </td>
@@ -279,26 +279,36 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
       </td>
       <td colSpan={3} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
         <div className="justify-content-between d-flex" >
-          <div className="form-inline">
-            <a href="#" onClick={handleExpandCollapse} className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
-              <FontAwesomeIcon icon={fg.expanded ? ["far", "minus-square"] : ["far", "plus-square"]} className="mr-2" />
-            </a>
-            <label>Group:</label>
-            <select className="form-control form-control-xs sf-group-selector mx-2" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
-              {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
-            </select>
+          <div className="row gx-1">
+            <div className="col-auto">
+              <a href="#" onClick={handleExpandCollapse} className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
+                <FontAwesomeIcon icon={fg.expanded ? ["far", "minus-square"] : ["far", "plus-square"]} className="me-2" />
+              </a>
+            </div>
+            <div className="col-auto">
+              <label>Group:</label>
+            </div>
+            <div className="col-auto">
+              <select className="form-select form-select-xs sf-group-selector mx-2" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
+                {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
+              </select>
+            </div>
           </div>
 
-          <div className="form-inline">
-            <label>Prefix:</label>
-            <div className={classes("rw-widget-xs mx-2", fg.token == null ? "hidden" : undefined)}>
-              <QueryTokenBuilder
-                prefixQueryToken={p.prefixToken}
-                queryToken={fg.token}
-                onTokenChange={handleTokenChanged}
-                queryKey={p.queryDescription.queryKey}
-                subTokenOptions={p.subTokensOptions}
-                readOnly={readOnly} />
+          <div className="row gx-1">
+            <div className="col-auto">
+              <label>Prefix:</label>
+            </div>
+            <div className="col-auto">
+              <div className={classes("rw-widget-xs mx-2", fg.token == null ? "hidden" : undefined)}>
+                <QueryTokenBuilder
+                  prefixQueryToken={p.prefixToken}
+                  queryToken={fg.token}
+                  onTokenChange={handleTokenChanged}
+                  queryKey={p.queryDescription.queryKey}
+                  subTokenOptions={p.subTokensOptions}
+                  readOnly={readOnly} />
+              </div>
             </div>
           </div>
           {fg.pinned &&
@@ -357,7 +367,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                       </a>
 
                       <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddGroup.niceToString() : undefined}
-                        className="sf-line-button sf-create ml-3"
+                        className="sf-line-button sf-create ms-3"
                         onClick={e => handlerNewFilter(e, true)}>
                         <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
                       </a>
@@ -516,7 +526,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         </td>
         <td className="sf-filter-operation">
           {f.token && f.token.filterType && f.operation &&
-            <select className="form-control form-control-xs" value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
+            <select className="form-select form-select-xs" value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
               {f.token.filterType && filterOperations[f.token.filterType!]
                 .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
             </select>}

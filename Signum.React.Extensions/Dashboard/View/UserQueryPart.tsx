@@ -86,8 +86,6 @@ interface BigValueBadgeProps {
 
 export function BigValueSearchCounter(p: BigValueBadgeProps) {
 
-  const isRTL = React.useMemo(() => document.body.classList.contains("rtl"), []);
-
   const vsc = React.useRef<ValueSearchControl>(null);
 
   return (
@@ -103,13 +101,13 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
             {p.iconName &&
               <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="4x" />}
           </div>
-          <div className={classes("col-9 flip", isRTL ? "text-left" : "text-right")}>
+          <div className={classes("col-9 flip", "text-end")}>
             <h1>
               <ValueSearchControl ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps} />
             </h1>
           </div>
         </div>
-        <div className={classes("flip", isRTL ? "text-left" : "text-right")}>
+        <div className={classes("flip", "text-end")}>
           <h6 className="large">{p.text || getQueryNiceName(p.findOptions.queryName)}</h6>
         </div>
       </div>

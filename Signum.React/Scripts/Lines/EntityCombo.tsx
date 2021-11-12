@@ -83,14 +83,14 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
     return null;
 
   const buttons = (
-    <span className="input-group-append">
+    <>
       {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
       {!hasValue && c.renderCreateButton(true)}
       {!hasValue && c.renderFindButton(true)}
       {hasValue && c.renderViewButton(true, c.props.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, c.props.ctx.value!)}
       {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
-    </span>
+    </>
   );
 
   function getLabelText() {
@@ -229,7 +229,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     );
   } else {
     return (
-      <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
+      <select className={classes(ctx.formSelectClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
         title={lite?.toStr}
         onClick={() => setLoadData(true)}
         disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >

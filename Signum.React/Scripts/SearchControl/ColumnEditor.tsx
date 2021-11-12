@@ -53,10 +53,10 @@ export default function ColumnEditor(p: ColumnEditorProps) {
 
   return (
     <div className="sf-column-editor">
-      <button type="button" className="close" aria-label="Close" onClick={p.close} ><span aria-hidden="true">×</span></button>
+      <button type="button" className="btn-close float-end" aria-label="Close" onClick={p.close} />
       <div className={classes("d-flex", isCollection ? "error" : undefined)}
         title={StyleContext.default.titleLabels && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
-        <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>{SearchMessage.Field.niceToString()}</label>
+        <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>{SearchMessage.Field.niceToString()}</label>
         <div className="flex-grow-1">
           <div className="rw-widget-xs">
             <QueryTokenBuilder
@@ -69,21 +69,21 @@ export default function ColumnEditor(p: ColumnEditorProps) {
         </div>
       </div>
       <div className="d-flex">
-        <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>{SearchMessage.DisplayName.niceToString()}</label>
+        <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>{SearchMessage.DisplayName.niceToString()}</label>
         <div className="flex-grow-1">
           <input className="form-control form-control-xs"
             value={co.displayName || ""} disabled={co.hiddenColumn}
             onChange={handleOnChange} />
-          <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>
-            <input type="checkbox" disabled={co.token == null} checked={co.hiddenColumn} onChange={handleHiddenColumnClick} className="mr-1" />
+          <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
+            <input type="checkbox" disabled={co.token == null} checked={co.hiddenColumn} onChange={handleHiddenColumnClick} className="me-1" />
             {SearchMessage.HiddenColumn.niceToString()}
           </label>
         </div>
       </div>
       <div className={classes("d-flex", co.summaryToken && summaryNotAggregate ? "error" : undefined)}
         title={StyleContext.default.titleLabels && summaryNotAggregate ? SearchMessage.SummaryHeaderMustBeAnAggregate.niceToString() : undefined}>
-        <label className="col-form-label col-form-label-xs mr-2" style={{ minWidth: "140px" }}>
-          <input type="checkbox" disabled={co.token ==null} checked={co.summaryToken != null} onChange={handleSummaryCheck} className="mr-1" />
+        <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
+          <input type="checkbox" disabled={co.token ==null} checked={co.summaryToken != null} onChange={handleSummaryCheck} className="me-1" />
           {SearchMessage.SummaryHeader.niceToString()}
         </label>
         <div className="flex-grow-1">

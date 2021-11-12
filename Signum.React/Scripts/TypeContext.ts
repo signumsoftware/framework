@@ -7,11 +7,12 @@ import { classes } from './Globals';
 import { EmbeddedWidget } from './Frames/Widgets';
 
 export type FormGroupStyle =
-  "None" |  /// Only the value is rendered. Unaffected by FormGroupSize
-  "Basic" |   /// Label on top, value below. Requires form-vertical container
-  "BasicDown" |  /// Value on top, label below. Requires form-vertical container
-  "SrOnly" |    /// Label visible only for Screen-Readers. Requires form-vertical / form-inline container
-  "LabelColumns"; /// (default) Label on the left, value on the right (exept RTL). Requires form-horizontal, affected by LabelColumns / ValueColumns
+  "None" |  /// Only the value is rendered.
+  "Basic" |   /// Label on top, value below.
+  "BasicDown" |  /// Value on top, label below.
+  "SrOnly" |    /// Label visible only for Screen-Readers.
+  "LabelColumns" | 
+  "FloatingLabel"; /// (default) Label on the left, value on the right (exept RTL). Affected by labelColumns / valueColumns
 
 export type FormSize =
   "ExtraSmall" |
@@ -108,6 +109,27 @@ export class StyleContext {
       case "Small": return "form-control form-control-sm";
       case "Normal": return "form-control";
       case "Large": return "form-control form-control-lg";
+      default: throw new Error("Unexpected formSize " + this.formSize);
+    }
+  }
+
+  get formCheckClass(): string | undefined {
+    switch (this.formSize) {
+      case "ExtraSmall": return "form-check form-control-xs";
+      case "Small": return "form-check form-control-sm";
+      case "Normal": return "form-check";
+      case "Large": return "form-check form-control-lg";
+      default: throw new Error("Unexpected formSize " + this.formSize);
+    }
+  }
+
+
+  get formSelectClass(): string | undefined {
+    switch (this.formSize) {
+      case "ExtraSmall": return "form-select form-select-xs";
+      case "Small": return "form-select form-select-sm";
+      case "Normal": return "form-select";
+      case "Large": return "form-select form-select-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
@@ -409,7 +431,7 @@ export class TypeContext<T> extends StyleContext {
   }
 
   get errorClass(): string | undefined {
-    return !!this.error ? "has-error": undefined;
+    return !!this.error ? "has-error" : undefined;
   }
 
   get errorClassBorder(): string | undefined {
@@ -469,7 +491,10 @@ export interface EntityFrame {
   onClose: (pack?: EntityPack<ModifiableEntity>) => void;
   refreshCount: number;
   allowExchangeEntity: boolean;
-  avoidPrompt?: () => void;
+
+  isExecuting(): boolean; 
+  execute: (action: () => Promise<void>) => void;
+
   createNew?: (oldPack: EntityPack<ModifiableEntity>) => (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
   prefix: string;
 }
@@ -480,7 +505,3 @@ export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[
     new MListElementBinding<T>(ctx.binding, i),
   ));
 }
-
-
-
-

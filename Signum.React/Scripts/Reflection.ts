@@ -1,4 +1,4 @@
-import { DateTime, Duration, DurationObjectUnits, Settings } from 'luxon';
+import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
@@ -112,7 +112,7 @@ export function toLuxonFormat(format: string | undefined, type: "DateOnly" | "Da
 }
 
 
-declare module "luxon" {
+declare module "luxon/src/DateTime" {
   interface DateTime {
     toFormatFixed(format: string, options?: DateTimeFormatOptions): string;
   }
@@ -371,11 +371,11 @@ export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss
     const value = parseInt(valParts[i] || "0");
     switch (formP) {
       case "h":
-      case "hh": result.hour = value; break;
+      case "hh": result.hours = value; break;
       case "m":
-      case "mm": result.minute = value; break;
+      case "mm": result.minutes = value; break;
       case "s":
-      case "ss": result.second = value; break;
+      case "ss": result.seconds = value; break;
       default: throw new Error("Unexpected " + formP);
     }
   }
@@ -932,6 +932,7 @@ const getMixinRegexOld = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z
 const getMixinRegex = /^\(0,[^.]+\.getMixin\)\((.+),[^.]+\.([$a-zA-Z_][0-9a-zA-Z_$]*)\)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const fixNullPropagator = /^\(([_\w]+)\s*=\s(.*?)\s*\)\s*===\s*null\s*\|\|\s*\1\s*===\s*void 0\s*\?\s*void 0\s*:\s*\1$/;
+const fixNullPropagatorProd = /^\s*null\s*===\(([_\w]+)\s*=\s*(.*?)\s*\)\s*\|\|\s*void 0\s*===\s*\1\s*\?\s*void 0\s*:\s*\1$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[] {
 
@@ -964,7 +965,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
       result.push({ name: m[2], type: "Indexer" });
       body = m[1];
     }
-    else if (m = fixNullPropagator.exec(body)) {
+    else if (m = fixNullPropagator.exec(body) ?? fixNullPropagatorProd.exec(body)) {
       body = m[2];
     }
     else {

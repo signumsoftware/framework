@@ -64,7 +64,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 
   function renderButtons() {
     const buttons = (
-      <span className="float-right">
+      <span className="float-end">
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}

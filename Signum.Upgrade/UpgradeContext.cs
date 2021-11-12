@@ -98,7 +98,7 @@ public class UpgradeContext
                 if (HasWarnings != WarningLevel.Error)
                     HasWarnings = showWarning;
 
-                SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow, 
+                SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
                     showWarning.ToString().ToUpper() + " file " + fileName + " not found");
             }
         }

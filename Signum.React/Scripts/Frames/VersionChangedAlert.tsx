@@ -6,7 +6,8 @@ import { ConnectionMessage } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './VersionChangedAlert.css'
 import { useForceUpdate } from '../Hooks';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Placement } from 'popper.js';
 
 export function VersionChangedAlert(p: { blink?: boolean }) {
 
@@ -46,9 +47,8 @@ export function VersionInfo(p: { extraInformation?: string }) {
           <Tooltip id={`tooltip-buildId`}>
             <VersionInfoTooltip extraInformation={p.extraInformation} />
           </Tooltip>
-        }
-      >
-        <FontAwesomeIcon icon="info-circle" className="sf-version-info" />
+        }>
+        <div style={{ minWidth: "20px" }}><FontAwesomeIcon icon="info-circle" className="sf-version-info" /></div>
       </OverlayTrigger>
     </div>
   );

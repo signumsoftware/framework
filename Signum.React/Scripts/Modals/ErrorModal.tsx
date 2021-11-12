@@ -46,9 +46,7 @@ export default function ErrorModal(p: ErrorModalProps) {
                   renderTitle(e)
           }
         </h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
       </div>
 
       <div className="modal-body">

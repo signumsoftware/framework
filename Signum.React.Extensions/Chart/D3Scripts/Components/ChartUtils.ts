@@ -1,4 +1,4 @@
-import { DateTime, DurationUnit, Duration } from "luxon"
+import { DateTime, DurationUnit, Duration, DateTimeUnit } from "luxon"
 import * as d3 from "d3"
 import * as d3sc from "d3-scale-chromatic";
 import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient"
@@ -141,7 +141,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     };
   }
 
-  function durationUnit(lastPart: string): DurationUnit {
+  function durationUnit(lastPart: string): DateTimeUnit {
     switch (lastPart) {
       case "SecondStart": return "second";
       case "MinuteStart": return "minute";
@@ -153,7 +153,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     }
   }
 
-  function tryCeil(date: string | null | undefined, unit: DurationUnit) {
+  function tryCeil(date: string | null | undefined, unit: DateTimeUnit) {
     if (date == null)
       return undefined;
 
@@ -161,7 +161,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
   }
 
 
-  function ceil(date: DateTime, unit: DurationUnit) {
+  function ceil(date: DateTime, unit: DateTimeUnit) {
 
     if (date.toMillis() == date.startOf(unit).toMillis())
       return date;
@@ -169,14 +169,14 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     return date.startOf(unit).plus({ [unit]: 1 });
   }
  
-  function tryFloor(date: string | null | undefined, unit: DurationUnit) {
+  function tryFloor(date: string | null | undefined, unit: DateTimeUnit) {
     if (date == null)
       return undefined;
 
     return floor(DateTime.fromISO(date), unit).toISO();
   }
 
-  function floor(date: DateTime, unit: DurationUnit) {
+  function floor(date: DateTime, unit: DateTimeUnit) {
 
     return date.startOf(unit);
   }
