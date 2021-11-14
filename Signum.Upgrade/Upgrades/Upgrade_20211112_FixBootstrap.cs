@@ -28,7 +28,7 @@ class Upgrade_20211112_FixBootstrap : CodeUpgradeBase
         {
             file.Replace(
                 @"webpack --config webpack.config.polyfills.js webpack --config webpack.config.dll.js --mode=production",
-                @"webpack --config webpack.config.polyfills.js --mode=production && webpack --config webpack.config.dll.js --mode=production")
+                @"webpack --config webpack.config.polyfills.js --mode=production && webpack --config webpack.config.dll.js --mode=production");
         });
     }
 }
