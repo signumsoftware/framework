@@ -22,11 +22,11 @@ public class UniqueKeyException : ApplicationException
 
     protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-    static Regex[] regexes = new []
+    static Regex[] regexes = new[]
     {
-        new Regex(@"Cannot insert duplicate key row in object '(?<table>.*)' with unique index '(?<index>.*)'\. The duplicate key value is \((?<value>.*)\)"),
-        new Regex(@"Eine Zeile mit doppeltem Schlüssel kann in das Objekt ""(?<table>.*)"" mit dem eindeutigen Index ""(?<index>.*)"" nicht eingefügt werden. Der doppelte Schlüsselwert ist \((?<value>.*)\)")
-    };
+            new Regex(@"Cannot insert duplicate key row in object '(?<table>.*)' with unique index '(?<index>.*)'\. The duplicate key value is \((?<value>.*)\)"),
+            new Regex(@"Eine Zeile mit doppeltem Schlüssel kann in das Objekt ""(?<table>.*)"" mit dem eindeutigen Index ""(?<index>.*)"" nicht eingefügt werden. Der doppelte Schlüsselwert ist \((?<value>.*)\)")
+        };
 
     public UniqueKeyException(Exception inner) : base(null, inner)
     {
@@ -41,13 +41,13 @@ public class UniqueKeyException : ApplicationException
 
                 Table = cachedTables.GetOrAdd(TableName, tn => Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToString() == tn));
 
-                if(Table != null)
+                if (Table != null)
                 {
-                    var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup=>
+                    var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup =>
                     {
                         var index = tup.table.GeneratAllIndexes().OfType<UniqueTableIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
 
-                        if(index == null)
+                        if (index == null)
                             return null;
 
                         var properties = (from f in tup.table.Fields.Values
@@ -61,7 +61,7 @@ public class UniqueKeyException : ApplicationException
                         return (index, properties);
                     });
 
-                    if(tuple != null)
+                    if (tuple != null)
                     {
                         Index = tuple.Value.index;
                         Properties = tuple.Value.properties;
@@ -70,7 +70,7 @@ public class UniqueKeyException : ApplicationException
                         {
                             var values = Values.Split(", ");
 
-                            if(values.Length == Index.Columns.Length)
+                            if (values.Length == Index.Columns.Length)
                             {
                                 var colValues = Index.Columns.Zip(values).ToDictionary(a => a.First, a => a.Second == "<NULL>" ? null : a.Second.Trim().Trim('\''));
 
@@ -136,9 +136,9 @@ public class UniqueKeyException : ApplicationException
             return EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table?.Type.GetGender()).FormatWith(
                 Table == null ? TableName : Table.Type.NiceName(),
                 Index == null ? IndexName :
-                Properties != null  ? Properties!.CommaAnd(p => p.NiceName()) :
+                Properties != null ? Properties!.CommaAnd(p => p.NiceName()) :
                 Index.Columns.CommaAnd(c => c.Name),
-                HumanValues != null ? HumanValues.CommaAnd(a => a is string? $"'{a}'" : a == null ? "NULL" : a.ToString()) : 
+                HumanValues != null ? HumanValues.CommaAnd(a => a is string ? $"'{a}'" : a == null ? "NULL" : a.ToString()) :
                 Values);
         }
     }
@@ -187,7 +187,7 @@ public class UniqueKeyException : ApplicationException
 }
 
 
- public class ForeignKeyException : ApplicationException
+public class ForeignKeyException : ApplicationException
 {
     public string? TableName { get; private set; }
     public string? ColumnName { get; private set; }
@@ -207,7 +207,7 @@ public class UniqueKeyException : ApplicationException
     public ForeignKeyException(Exception inner) : base(null, inner)
     {
         Match m = indexRegex.Match(inner.Message);
-        
+
         if (m.Success)
         {
             var parts = m.Groups["parts"].Value.Split("_");
@@ -226,7 +226,7 @@ public class UniqueKeyException : ApplicationException
             }
         }
 
-        if(inner.Message.Contains("INSERT"))
+        if (inner.Message.Contains("INSERT") || inner.Message.Contains("UPDATE"))
         {
             IsInsert = true;
 
@@ -281,7 +281,7 @@ public class EntityNotFoundException : Exception
     }
 }
 
-public class ConcurrencyException: Exception
+public class ConcurrencyException : Exception
 {
     public Type Type { get; private set; }
     public PrimaryKey[] Ids { get; private set; }
