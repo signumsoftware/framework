@@ -237,7 +237,7 @@ namespace Signum.Engine
                 }
             }
 
-            if(inner.Message.Contains("INSERT"))
+            if(inner.Message.Contains("INSERT") || inner.Message.Contains("UPDATE"))
             {
                 IsInsert = true;
 
