@@ -1122,22 +1122,27 @@ public static class DQueryable
     {
         object[] array = collection.Collection as object[] ?? collection.Collection.ToArray();
 
-        var columnAccesors = req.Columns.Select(c =>  (
-            column: c,
-            lambda: Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter)
-        )).ToList();
+        var isMultiKeyGrupping = req.GroupResults && req.Columns.Count(col => col.Token is not AggregateToken) >= 2;
 
-        return ToResultTable(array, columnAccesors, collection.TotalElements, req.Pagination);
-    }
+        var rows = collection.Collection.ToArray();
 
-    public static ResultTable ToResultTable(object[] result, List<(Column column, LambdaExpression lambda)> columnAccesors, int? totalElements,  Pagination pagination)
-    {
-        var columnValues = columnAccesors.Select(c => new ResultColumn(
-            c.column,
-            miGetValues.GetInvoker(c.column.Type)(result, c.lambda.Compile()))
-         ).ToArray();
+        var columnAccesors = req.Columns.Select(c =>
+        {
+            var expression = Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter);
 
-        return new ResultTable(columnValues, totalElements, pagination);
+            var lambda = expression.Compile();
+
+            var values = miGetValues.GetInvoker(c.Token.Type)(rows, lambda);
+
+            var rc = new ResultColumn(c, values);
+
+            if (c.Token.Type.IsLite() || isMultiKeyGrupping && c.Token is not AggregateToken)
+                rc.CompressUniqueValues = true;
+
+            return rc;
+        }).ToArray();
+
+        return new ResultTable(columnAccesors, collection.TotalElements, req.Pagination);
     }
 
     static readonly GenericInvoker<Func<object[], Delegate, Array>> miGetValues = new((objs, del) => GetValues<int>(objs, (Func<object, int>)del));

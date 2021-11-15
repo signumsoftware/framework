@@ -23,6 +23,8 @@ public class ResultColumn :ISerializable
     IList values;
     public IList Values => values;
 
+    public bool CompressUniqueValues { get; set; }
+
     public ResultColumn(Column column, IList values)
     {
         this.column = column;

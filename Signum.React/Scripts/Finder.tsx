@@ -8,7 +8,7 @@ import { ajaxGet, ajaxPost } from './Services';
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
-  QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
+  QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
   isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive
 } from './FindOptions';
@@ -1409,6 +1409,27 @@ export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): 
   return useAPI(() => API.fetchAllLites({ types: type.typeName }), deps ?? []) as Lite<T>[] | undefined;
 }
 
+export function decompress(rt: ResultTable): ResultTable {
+
+  debugger;
+  var rows = rt.rows;
+  var columns = rt.columns;
+
+  for (var i = 0; i < columns.length; i++) {
+    var uniqueValues = rt.uniqueValues[columns[i]];
+
+    if (uniqueValues != null) {
+      for (var j = 0; j < rows.length; j++) {
+        var row = rows[j];
+        var index = row.columns[i] as number | null;
+        if (index != null)
+          row.columns[i] = uniqueValues[index];
+      }
+    }
+  }
+  return rt;
+}
+
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
@@ -1426,8 +1447,9 @@ export module API {
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
   
     const queryUrl = AppContext.history.location.pathname + AppContext.history.location.search;
-    const qr: QueryRequestUrl = { ...request, queryUrl: queryUrl};
-    return ajaxPost({ url: "~/api/query/executeQuery", signal }, qr);
+    const qr: QueryRequestUrl = { ...request, queryUrl: queryUrl };
+    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, qr)
+      .then(rt => decompress(rt));
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {

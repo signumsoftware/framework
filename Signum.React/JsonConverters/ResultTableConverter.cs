@@ -1,6 +1,8 @@
 using Signum.Engine.Json;
 using Signum.Entities.DynamicQuery;
 using Signum.React.ApiControllers;
+using Signum.Utilities.Reflection;
+using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -19,8 +21,38 @@ public class ResultTableConverter : JsonConverter<ResultTable>
             writer.WritePropertyName("entityColumn");
             writer.WriteStringValue(rt.EntityColumn?.Name);
 
+
             writer.WritePropertyName("columns");
-            JsonSerializer.Serialize(writer, rt.Columns.Select(c => c.Column.Token.FullKey()).ToList(), typeof(List<string>), options);
+            writer.WriteStartArray();
+            foreach (var rc in rt.Columns)
+            {
+                writer.WriteStringValue(rc.Column.Token.FullKey());
+            }
+            writer.WriteEndArray();
+
+            Dictionary<ResultColumn, List<int?>> uniqueValueIndexes = new Dictionary<ResultColumn, List<int?>>();
+
+            writer.WritePropertyName("uniqueValues");
+            writer.WriteStartObject();
+            foreach (var rc in rt.Columns)
+            {
+                if (rc.CompressUniqueValues)
+                {
+                    writer.WritePropertyName(rc.Column.Token.FullKey());
+                    {
+                        var pair = giUniqueValues.GetInvoker(rc.Column.Token.Type)(rc.Values);
+
+                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((rc.Column.Token.GetPropertyRoute()!, null, null)))
+                        {
+                            JsonSerializer.Serialize(writer, pair.UniqueValues, pair.UniqueValues.GetType(), options);
+                        }
+
+                        uniqueValueIndexes.Add(rc, pair.Indexes);
+                    }
+                }
+
+            }
+            writer.WriteEndObject();
 
             writer.WritePropertyName("pagination");
             JsonSerializer.Serialize(writer, new PaginationTS(rt.Pagination), typeof(PaginationTS), options);
@@ -47,9 +79,20 @@ public class ResultTableConverter : JsonConverter<ResultTable>
                 writer.WriteStartArray();
                 foreach (var column in rt.Columns)
                 {
-                    using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((column.Column.Token.GetPropertyRoute()!, null, null)))
+                    if (uniqueValueIndexes.TryGetValue(column, out var indexes))
                     {
-                        JsonSerializer.Serialize(writer, row[column], options);
+                        var ix = indexes[row.Index];
+                        if (ix != null)
+                            writer.WriteNumberValue(ix.Value);
+                        else
+                            writer.WriteNullValue();
+                    }
+                    else
+                    {
+                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((column.Column.Token.GetPropertyRoute()!, null, null)))
+                        {
+                            JsonSerializer.Serialize(writer, row[column], options);
+                        }
                     }
                 }
                 writer.WriteEndArray();
@@ -65,10 +108,52 @@ public class ResultTableConverter : JsonConverter<ResultTable>
         }
     }
 
+
+    interface IUniqueValuesPair
+    {
+        Array UniqueValues { get; }
+        List<int?> Indexes { get; }
+    }
+
+    class UniqueValuesPair<T> : IUniqueValuesPair
+    {
+        public UniqueValuesPair(T[] uniqueValues, List<int?> indexes)
+        {
+            this.UniqueValues = uniqueValues;
+            this.Indexes = indexes;
+        }
+
+        public T[] UniqueValues { get; }
+        public List<int?> Indexes { get; }
+
+        Array IUniqueValuesPair.UniqueValues => UniqueValues;
+    }
+
+    static GenericInvoker<Func<IList, IUniqueValuesPair>> giUniqueValues =
+        new(list => UniqueValues<string>((string[])list));
+
+    static UniqueValuesPair<T> UniqueValues<T>(T[] list) where T : notnull
+    {
+        List<int?> indexes = new List<int?>(list.Length);
+        Dictionary<T, int> uniqueDic = new Dictionary<T, int>();
+        foreach (var item in list)
+        {
+            int? idx = item == null ? null : uniqueDic.GetOrCreate(item, uniqueDic.Count);
+
+            indexes.Add(idx);
+        }
+
+        var uniqueValues = new T[uniqueDic.Count];
+        foreach (var kvp in uniqueDic)
+        {
+            uniqueValues[kvp.Value] = kvp.Key;
+        }
+
+        return new UniqueValuesPair<T>(uniqueValues, indexes);
+    }
+
     public override ResultTable? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         throw new NotImplementedException();
     }
 }
-
-
