@@ -84,4 +84,15 @@
 		<None Remove="Files\ImageModal.tsx" />
 		<None Remove="Files\MultiFileImageLine.tsx" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="package.json">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+	  </Content>
+	  <Content Update="tsconfig.json">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+	  </Content>
+	</ItemGroup>
 </Project>
