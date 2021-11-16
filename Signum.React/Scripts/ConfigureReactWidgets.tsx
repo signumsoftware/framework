@@ -4,6 +4,7 @@ import * as ReactWidgets from 'react-widgets';
 import { UserProvidedMessages } from 'react-widgets/cjs/messages';
 import { ReactWidgetsMessage } from './Signum.Entities';
 import { NumberLocalizer } from 'react-widgets/cjs/IntlLocalizer';
+import { toFormatWithFixes } from './Reflection';
 
 export function getMessages(): UserProvidedMessages{
   return ({
@@ -47,7 +48,7 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
     time: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "t"),
     datetime: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "FF"),
     header: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "MMMM yyyy"),
-    weekday: (date, format) => toFormatFixed(DateTime.fromJSDate(date), format ?? "EE"),
+    weekday: (date, format) => toFormatWithFixes(DateTime.fromJSDate(date), format ?? "EE"),
     dayOfMonth: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "dd"),
     month: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "MMM"),
     year: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "yyyy"),
