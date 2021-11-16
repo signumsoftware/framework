@@ -18,7 +18,7 @@ namespace Signum.Upgrade.Upgrades
         {
             uctx.ForeachCodeFile($@"*.tsx", uctx.ReactDirectory, file =>
             {
-                file.Replace("eoc.defaultClick(", "return eoc.defaultClick(");
+                file.Replace("eoc.defaultClick(", "/*TODO: fix*/ eoc.defaultClick(");
             });
         }
     }
