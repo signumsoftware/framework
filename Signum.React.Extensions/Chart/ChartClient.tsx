@@ -32,6 +32,8 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
 
   options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
 
+  AppContext.clearSettingsActions.push(ButtonBarChart.clearOnButtonBarElements);
+ 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
     if (!ctx.searchControl.props.showBarExtension ||
       !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ||
@@ -119,6 +121,10 @@ export namespace ButtonBarChart {
 
   export function getButtonBarElements(ctx: ButtonBarChartContext): React.ReactElement<any>[] {
     return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a!);
+  }
+
+  export function clearOnButtonBarElements() {
+    ButtonBarChart.onButtonBarElements.clear();
   }
 }
 
@@ -386,6 +392,7 @@ export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isSh
     cr.columns.forEach(a => {
       a.element.orderByType = null;
       a.element.orderByIndex = null;
+      a.element.modified = true;
     });
 
     col.orderByType = newOrder;
