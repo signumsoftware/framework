@@ -77,10 +77,9 @@ public class LogicCodeGenerator
             sb.AppendLine("using {0};".FormatWith(item));
 
         sb.AppendLine();
-        sb.AppendLine("namespace " + GetNamespace(mod));
-        sb.AppendLine("{");
-        sb.Append(WriteLogicClass(mod, expression).Indent(4));
-        sb.AppendLine("}");
+        sb.AppendLine("namespace " + GetNamespace(mod) + ";");
+        sb.AppendLine();
+        sb.Append(WriteLogicClass(mod, expression));
 
         return sb.ToString();
     }
@@ -117,19 +116,6 @@ public class LogicCodeGenerator
     {
         var result = new List<string>()
         {
-            "System",
-            "System.Collections.Generic",
-            "System.Linq",
-            "System.Linq.Expressions",
-            "System.Text",
-            "System.Reflection",
-            "Signum.Utilities",
-            "Signum.Utilities.ExpressionTrees",
-            "Signum.Entities",
-            "Signum.Engine",
-            "Signum.Engine.Operations",
-            "Signum.Engine.Maps",
-            "Signum.Engine.DynamicQuery",
         };
 
         result.AddRange(mod.Types.Concat(expressions.Select(e => e.FromType)).Select(t => t.Namespace!).Distinct());

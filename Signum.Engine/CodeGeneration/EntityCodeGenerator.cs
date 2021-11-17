@@ -94,15 +94,15 @@ public class EntityCodeGenerator
             sb.AppendLine("using {0};".FormatWith(item));
 
         sb.AppendLine();
-        sb.AppendLine("namespace " + GetNamespace(fileName));
-        sb.AppendLine("{");
+        sb.AppendLine("namespace " + GetNamespace(fileName) + ";");
+        sb.AppendLine();
         int length = sb.Length;
         foreach (var t in tables.OrderByDescending(a => a.Columns.Count).Iterate())
         {
             var entity = WriteTableEntity(fileName, t.Value);
             if (entity != null)
             {
-                sb.Append(entity.Indent(4));
+                sb.Append(entity);
                 if (!t.IsLast)
                 {
                     sb.AppendLine();
@@ -114,8 +114,6 @@ public class EntityCodeGenerator
         if (sb.Length == length)
             return null;
 
-        sb.AppendLine("}");
-
         return sb.ToString();
     }
 
@@ -123,15 +121,6 @@ public class EntityCodeGenerator
     {
         var result = new List<string>
         {
-            "System",
-            "System.Collections.Generic",
-            "System.Data",
-            "System.Linq",
-            "System.Linq.Expressions",
-            "System.Text",
-            "System.ComponentModel",
-            "Signum.Entities",
-            "Signum.Utilities",
         };
 
         var currentNamespace = GetNamespace(fileName);
