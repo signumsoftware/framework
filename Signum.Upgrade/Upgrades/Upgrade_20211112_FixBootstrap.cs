@@ -26,7 +26,9 @@ namespace Signum.Upgrade.Upgrades
 
             uctx.ChangeCodeFile(@$"Southwind.React\package.json", file =>
             {
-                file.Replace(
+
+                file.Replace("--mode='production'", "--mode=production");
+               file.Replace(
                     @"webpack --config webpack.config.polyfills.js webpack --config webpack.config.dll.js --mode=production",
                     @"webpack --config webpack.config.polyfills.js --mode=production && webpack --config webpack.config.dll.js --mode=production");
             });

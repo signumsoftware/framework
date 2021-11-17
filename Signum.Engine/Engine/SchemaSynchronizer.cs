@@ -737,21 +737,19 @@ WHERE {where}"))!;
 
             AliasGenerator ag = new AliasGenerator();
 
+            var newFk = tabCol.ReferenceTable.Name;
+            var tnAlias = ag.NextTableAlias(tn);
+            var oldFkAlias = ag.NextTableAlias(oldFk.Name);
+
             return new SqlPreCommandSimple(
-@"-- Column {0} was referencing {3} but not references {1}. An update is needed?
-UPDATE {2}
-SET {0} =  -- get {5} id from {4}.Id
-FROM {1} {2}
-JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
-                tn, ag.NextTableAlias(tn),
-                oldFk, ag.NextTableAlias(oldFk.Name),
-                tabCol.ReferenceTable.Name.Name));
+@$"-- Column {tn}.{tabCol.Name} was referencing {oldFk} but not references {newFk}. An update is needed?
+UPDATE {tnAlias}
+SET {tabCol.Name} =  -- get {newFk} id from {oldFkAlias}.Id
+FROM {tn} {tnAlias}
+JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
         }
 
         public static Func<DiffTable, bool>? IgnoreTable = null;
-
-      
-
 
 
 
