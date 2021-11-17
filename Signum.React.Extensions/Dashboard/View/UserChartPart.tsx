@@ -16,19 +16,39 @@ import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { DashboardFilter, DashboardFilterController, DashboardFilterRow, equalsDFR } from "./DashboardFilterController"
-import { filterOperations } from '@framework/FindOptions'
+import { filterOperations, isFilterGroupOptionParsed } from '@framework/FindOptions'
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
   const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity, ...p.deps ?? []]);
-  const originalLength = React.useMemo(() => chartRequest?.filterOptions.length, [chartRequest]);
+  const dbFop = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.pinned?.active == "DashboardFilter"), [chartRequest]);
+  const originalFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.pinned == null || a.pinned.active != "DashboardFilter"), [chartRequest]);
+
   if (chartRequest != null) {
-    chartRequest.filterOptions.splice(originalLength!);
-    chartRequest.filterOptions.push(
+    chartRequest.filterOptions.clear();
+    chartRequest.filterOptions = [
+      ...originalFilters!,
       ...p.filterController.getFilterOptions(p.partEmbedded, chartRequest!.queryKey),
-    );
+    ];
   }
+
+  React.useEffect(() => {
+    if (dbFop) {
+
+      if (isFilterGroupOptionParsed(dbFop))
+        throw new Error("DashboardFilter is not compatible with groups");
+
+      var dashboarFilter = new DashboardFilter(p.partEmbedded, chartRequest!.queryKey);
+      if (dbFop.operation == "EqualTo")
+        dashboarFilter.rows.push({ filters: [{ token: dbFop.token!, value: dbFop.value }] });
+      else if (dbFop.operation == "IsIn") {
+        (dbFop.value as any[]).forEach(val => dashboarFilter.rows.push({ filters: [{ token: dbFop!.token!, value: val }] }));
+      } else
+        throw new Error("DashboardFilter is not compatible with filter operation " + dbFop.operation);
+      p.filterController.setFilter(dashboarFilter)
+    }
+  }, [dbFop]);
 
   const [resultOrError, makeQuery] = useAPIWithReload<undefined | { error?: any, result?: ChartClient.API.ExecuteChartResult }>(() => chartRequest == null ? Promise.resolve(undefined) :
     ChartClient.getChartScript(chartRequest!.chartScript)

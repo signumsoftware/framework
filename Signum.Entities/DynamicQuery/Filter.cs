@@ -273,5 +273,6 @@ namespace Signum.Entities.DynamicQuery
         Checkbox_StartChecked,
         [Description("Checkbox (start unchecked)")]
         Checkbox_StartUnchecked,
+        DashboardFilter,
     }
 }

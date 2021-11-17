@@ -66,7 +66,8 @@ export type PinnedFilterActive =
   "Always" |
   "WhenHasValue" |
   "Checkbox_StartChecked" |
-  "Checkbox_StartUnchecked";
+  "Checkbox_StartUnchecked" |
+  "DashboardFilter";
 
 export module QueryTokenMessage {
   export const _0As1 = new MessageKey("QueryTokenMessage", "_0As1");
