@@ -298,7 +298,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         return numbroFormat.format(value);
       case "DateTime":
         const momentFormat = toLuxonFormat(this.props.format ?? token.format, token.type.name as "DateOnly" | "DateTime");
-        return DateTime.fromISO(value).toFormatFixed(momentFormat);
+        return toFormatFixed(DateTime.fromISO(value), momentFormat);
       case "Time":
         const durationFormat = toDurationFormat(this.props.format ?? token.format);
         return durationToString(value, durationFormat);
@@ -329,4 +329,8 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
           this.props.onExplored();
       }).done();
   }
+}
+
+function toFormatFixed(arg0: DateTime, momentFormat: string) {
+    throw new Error('Function not implemented.')
 }

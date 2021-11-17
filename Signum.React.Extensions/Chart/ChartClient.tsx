@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
-import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, toDurationFormat, durationToString } from '@framework/Reflection'
+import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, toDurationFormat, durationToString, toFormatWithFixes } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
 } from '@framework/FindOptions'
@@ -657,7 +657,7 @@ export module API {
       return v => {
         var date = v as string | null;
         var format = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
-        return date == null ? String(null) : DateTime.fromISO(date).toFormatFixed(format);
+        return date == null ? String(null) : toFormatWithFixes(DateTime.fromISO(date), format);
       };
 
     if (token.filterType == "Time")
