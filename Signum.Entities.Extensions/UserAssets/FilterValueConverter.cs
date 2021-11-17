@@ -102,7 +102,24 @@ namespace Signum.Entities.UserAssets
                 {
                     var res = fvc.TryParseValue(stringValue, type);
                     if (res != null)
-                        return res;
+                    {
+                        if (res is Result<object?>.Success s)
+                        {
+                            try
+                            {
+                                var v = ReflectionTools.ChangeType(s.Value, type);
+                                return new Result<object?>.Success(v);
+                            }
+                            catch (Exception e)
+                            {
+                                return new Result<object?>.Error(e.Message);
+                            }
+                        }
+                        else
+                            return res;
+
+                    }
+                        
                 }
             }
 
