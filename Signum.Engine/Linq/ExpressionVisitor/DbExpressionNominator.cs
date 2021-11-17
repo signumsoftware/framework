@@ -1586,7 +1586,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "DateTime.AddMonths": return TryDateAdd(m.Type, m.Object!, m.GetArgument("months"), SqlEnums.month);
             case "DateTime.AddDays": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.day);
             case "DateOnly.AddYears": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.year);
-            case "DateOnly.AddMonths": return TryDateAdd(m.Type, m.Object!, m.GetArgument("months"), SqlEnums.month);
+            case "DateOnly.AddMonths": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.month);
             case "DateOnly.AddDays": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.day);
             case "DateTime.AddHours": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.hour); 
             case "DateTime.AddMinutes": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.minute); 

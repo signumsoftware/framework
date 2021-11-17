@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Signum.Engine.Json;
 
+//https://github.com/dotnet/runtime/issues/53539
 public class DateOnlyConverter : JsonConverter<DateOnly>
 {
     public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

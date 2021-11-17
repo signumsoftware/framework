@@ -52,7 +52,7 @@ export type ValueLineType =
   "Number" |
   "Decimal" |
   "Color" |
-  "TimeSpan" |
+  "Time" |
   "RadioGroup" |
   "Password";
 
@@ -129,8 +129,8 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "decimal")
       return "Decimal";
 
-    if (t.name == "TimeSpan")
-      return "TimeSpan";
+    if (t.name == "TimeSpan" || t.name == "TimeOnly")
+      return "Time";
 
     return undefined;
   }
@@ -793,7 +793,7 @@ export function trimDateToFormat(date: DateTime, type: "DateOnly" | "DateTime", 
   return DateTime.fromFormat(formatted, luxonFormat,{locale:'en-GB'}); 
 }
 
-ValueLineRenderers.renderers.set("TimeSpan", (vl) => {
+ValueLineRenderers.renderers.set("Time", (vl) => {
   return durationTextBox(vl, isDuration);
 });
 
@@ -888,7 +888,8 @@ export function DurationTextBox(p: DurationTextBoxProps) {
     var format = p.format!;
 
     const input = e.currentTarget as HTMLInputElement;
-    const result = input.value == undefined || input.value.length == 0 ? null : parseDurationRelaxed(input.value, format)?.toFormat(format) ?? null;
+    debugger;
+    const result = input.value == undefined || input.value.length == 0 ? null : parseDurationRelaxed(input.value, format)?.toFormat("hh:mm:ss.SSSSSS") ?? null;
     setText(undefined);
     if (p.value != result)
       p.onChange(result);
@@ -907,9 +908,9 @@ export function DurationTextBox(p: DurationTextBoxProps) {
   }
 }
 
-export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss"): Duration | null {
-  var valParts = timeStampOrHumanStr.split(":");
-  var formatParts = format.split(":").map(p => p.length == 1 ? p + p : p); //"h -> hh"
+export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss.FFFF"): Duration | null {
+  var valParts = timeStampOrHumanStr.split(/[:.]/);
+  var formatParts = format.split(/[:.]/).map(p => p.length == 1 ? p + p : p); //"h -> hh"
   if (valParts.length == 1 && formatParts.length > 1) {
     const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
 
@@ -931,6 +932,7 @@ export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string
       hour: getPart("hh"),
       minute: getPart("mm"),
       second: getPart("ss"),
+      millisecond: getPart("FFFF")
     });
 
   } else {

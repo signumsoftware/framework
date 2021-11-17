@@ -90,7 +90,7 @@ public class EntityPropertyToken : QueryToken
 
             if (route != null)
             {
-                var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<TimeSpanPrecisionValidatorAttribute>().SingleOrDefaultEx();
+                var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<TimePrecisionValidatorAttribute>().SingleOrDefaultEx();
                 if (att != null)
                 {
                     return TimeSpanProperties(this, att.Precision).AndHasValue(this);
