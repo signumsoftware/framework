@@ -292,7 +292,7 @@ body.rtl .form-group.row > label {
 
 .form-select.form-select-xs {
     background-position: right 0.2rem center;
-    padding: 1px 20px 1px 5px;
+    padding: 0px 20px 0px 5px;
 }
 
 input[type=checkbox].form-control-xs {
@@ -307,7 +307,7 @@ input[type=checkbox].form-control-xs {
     font-size: 0.875rem;
     line-height: 1.5;
     border-radius: 0.2rem;
-    height: 24px;
+    height: 26px;
 }
 
 .col-form-label-xs {
