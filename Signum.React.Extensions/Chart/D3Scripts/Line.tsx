@@ -63,7 +63,7 @@ export default function renderLine({ data, width, height, parameters, loading, c
   return (
     <svg direction="ltr" width={width} height={height}>
 
-      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={true} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
+      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={x.bandwidth() > 5} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
       <g opacity={dashboardFilter ? .5 : undefined}>
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
       </g>

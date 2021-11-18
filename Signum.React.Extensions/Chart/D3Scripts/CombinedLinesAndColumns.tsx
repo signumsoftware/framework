@@ -113,7 +113,7 @@ export function renderCombinedLinesAndColumns({ infos, width, height, initialLoa
   return (
     <svg direction="ltr" width={width} height={height}>
 
-      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={true} />
+      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={x.bandwidth() > 5} />
       <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={yScales[0]!} />
       {!useSameScale && yScales[1] && <YScaleTicksEnd xRule={xRule} yRule={yRule} valueColumn={infos[1].data!.columns.c1 as ChartColumn<number>} y={yScales[1]!} />}
 
