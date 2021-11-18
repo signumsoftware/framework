@@ -5,7 +5,7 @@ import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 import { coalesce, Dic } from "@framework/Globals";
-import { getTypeInfo, parseDuration, tryGetTypeInfo } from "@framework/Reflection";
+import { tryGetTypeInfo } from "@framework/Reflection";
 import { ChartRequestModel } from "../../Signum.Entities.Chart";
 import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken, FilterConditionOption } from "@framework/FindOptions";
 import { MemoRepository } from "./ReactChart";

@@ -150,8 +150,11 @@ internal class LambdaToJavascriptConverter
         if (expr.Type.UnNullify() == typeof(DateOnly))
             return "dateToString(" + r + ", 'Date'" + formatFull + ")";
 
-        if (expr.Type.UnNullify() == typeof(TimeSpan))
-            return "durationToString(" + r + formatFull + ")";
+        if (expr.Type.UnNullify() == typeof(TimeSpan)) /*deprecate?*/
+            return "timeToString(" + r + formatFull + ")";
+
+        if (expr.Type.UnNullify() == typeof(TimeOnly))
+            return "timeToString(" + r + formatFull + ")";
 
         if (ReflectionTools.IsIntegerNumber(expr.Type.UnNullify()))
             return "numberToString(" + r + (formatFull ?? ", 'D'") + ")";

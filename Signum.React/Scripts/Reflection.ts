@@ -342,38 +342,12 @@ export function dateToString(val: any, type: "DateOnly" | "DateTime", format?: s
   return m.toFormat(toLuxonFormat(format, type));
 }
 
-export function durationToString(val: any, format?: string) {
+export function timeToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var duration = parseDuration(val);
+  var duration = Duration.fromISOTime(val);
   return duration.toFormat(format ?? "hh:mm:ss");
-}
-
-export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss.FFFFFF") {
-  var valParts = timeStampToStr.split(/[:.]/);
-  var formatParts = format.split(/[:.]/);
-
-  if (valParts.length > formatParts.length)
-    throw new Error("Invalid Format")
-
-  const result: DurationObjectUnits = {};
-
-  for (let i = 0; i < formatParts.length; i++) {
-    const formP = formatParts[i];
-    switch (formP) {
-      case "h":
-      case "hh": result.hours = parseInt(valParts[i] || "0"); break;
-      case "m":
-      case "mm": result.minutes = parseInt(valParts[i] || "0"); break;
-      case "s":
-      case "ss": result.seconds = parseInt(valParts[i] || "0"); break;
-      case "FFFF": result.milliseconds = parseInt((valParts[i] || "0").padEnd(4, "0")); break;
-      case "FFFFFF": result.milliseconds = parseInt((valParts[i] || "0").padEnd(6, "0")) / 100; break;
-      default: throw new Error("Unexpected " + formP);
-    }
-  }
-  return Duration.fromObject(result);
 }
 
 

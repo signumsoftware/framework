@@ -22,7 +22,7 @@ import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
-  Anonymous, toDurationFormat, durationToString, toFormatWithFixes
+  Anonymous, toDurationFormat, timeToString, toFormatWithFixes
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -1848,7 +1848,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: qt => qt.filterType == "Time",
     formatter: qt => {
       const durationFormat = toDurationFormat(qt.format);
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{durationToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{timeToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {

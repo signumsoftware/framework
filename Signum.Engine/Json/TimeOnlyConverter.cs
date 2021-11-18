@@ -11,11 +11,13 @@ public class TimeOnlyConverter : JsonConverter<TimeOnly>
 
     public override TimeOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return TimeOnly.ParseExact((string)reader.GetString()!, TimeFormat, CultureInfo.InvariantCulture);
+        var str = (string)reader.GetString()!;
+        return TimeOnly.ParseExact(str, TimeFormat, CultureInfo.InvariantCulture);
     }
 
     public override void Write(Utf8JsonWriter writer, TimeOnly value, JsonSerializerOptions options)
     {
-        writer.WriteStringValue(value.ToString(TimeFormat, CultureInfo.InvariantCulture));
+        var str = value.ToString(TimeFormat, CultureInfo.InvariantCulture);
+        writer.WriteStringValue(str);
     }
 }

@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
-import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, toDurationFormat, durationToString, toFormatWithFixes } from '@framework/Reflection'
+import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, toDurationFormat, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
 } from '@framework/FindOptions'
@@ -671,7 +671,7 @@ export module API {
       return v => {
         var date = v as string | null;
         var format = toDurationFormat(chartColumn.format || token.format);
-        return date == null ? String(null) : durationToString(date, format);
+        return date == null ? String(null) : timeToString(date, format);
       };
 
     if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))

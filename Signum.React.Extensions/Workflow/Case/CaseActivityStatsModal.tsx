@@ -2,7 +2,7 @@ import { DateTime, Duration } from 'luxon'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
-import { durationToString, toNumberFormat } from '@framework/Reflection';
+import { timeToString, toNumberFormat } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Navigator from '@framework/Navigator';
 import { JavascriptMessage } from '@framework/Signum.Entities'
