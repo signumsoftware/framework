@@ -389,7 +389,7 @@ public sealed class ExecutingProcess
         if (position > count)
             throw new InvalidOperationException("Position ({0}) should not be greater thant count ({1}). Maybe the process is not making progress.".FormatWith(position, count));
 
-        decimal progress = Math.Round(((decimal)position) / count, DecimalPlaces);
+        decimal progress = count == 0 ? 0 : Math.Round(((decimal)position) / count, DecimalPlaces);
 
         if (WriteToConsole)
             SafeConsole.WriteSameLine("{0:p} [{1}/{2}]".FormatWith(progress, position, count));
