@@ -889,7 +889,10 @@ export function TimeTextBox(p: DurationTextBoxProps) {
 
     const input = e.currentTarget as HTMLInputElement;
     debugger;
-    const result = input.value == undefined || input.value.length == 0 ? null : parseDurationRelaxed(input.value, format)?.toFormat("hh:mm:ss.SSSSSS") ?? null;
+
+    var duration = input.value == undefined || input.value.length == 0 ? null : parseDurationRelaxed(input.value, format);
+
+    const result = duration && formatDuration(duration);
     setText(undefined);
     if (p.value != result)
       p.onChange(result);
@@ -906,6 +909,10 @@ export function TimeTextBox(p: DurationTextBoxProps) {
     if (!p.validateKey(e))
       e.preventDefault();
   }
+}
+
+export function formatDuration(d: Duration): string {
+  return d.toFormat("hh:mm:ss.SSSSSS");
 }
 
 export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss.FFFF"): Duration | null {
