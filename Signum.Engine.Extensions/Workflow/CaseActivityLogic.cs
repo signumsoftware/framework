@@ -688,9 +688,9 @@ namespace Signum.Engine.Workflow
                         ca.StartDate = now;
                         ca.Save();
 
-                        wec.NotifyTransitionContext(ca);
-
                         InsertCaseActivityNotifications(ca);
+
+                        wec.NotifyTransitionContext(ca);
                     }
                 }.Register();
 
@@ -1017,8 +1017,8 @@ namespace Signum.Engine.Workflow
                     else
                     {
                         var nca = InsertNewCaseActivity(@case, twa, previous);
-                        ctx.NotifyTransitionContext(nca);
                         InsertCaseActivityNotifications(nca);
+                        ctx.NotifyTransitionContext(nca);
                     }
                 }
 
