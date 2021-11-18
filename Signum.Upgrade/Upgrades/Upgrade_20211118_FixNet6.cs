@@ -28,5 +28,10 @@ class Upgrade_20211118_FixNet6 : CodeUpgradeBase
         {
             file.UpdateNpmPackage("typescript", "4.5.2");
         });
+
+        uctx.ChangeCodeFile(".editorconfig", file =>
+        {
+            file.InsertAfterFirstLine(line => line.Contains("indent_size = 4"), "@csharp_style_namespace_declarations = file_scoped:warning");
+        });
     }
 }
