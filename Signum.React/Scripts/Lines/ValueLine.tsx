@@ -794,10 +794,10 @@ export function trimDateToFormat(date: DateTime, type: "DateOnly" | "DateTime", 
 }
 
 ValueLineRenderers.renderers.set("Time", (vl) => {
-  return durationTextBox(vl, isDuration);
+  return timeTextBox(vl, isDuration);
 });
 
-function durationTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
+function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
 
   const s = vl.props;
 
@@ -830,7 +830,7 @@ function durationTextBox(vl: ValueLineController, validateKey: (e: React.Keyboar
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <DurationTextBox htmlAttributes={htmlAttributes}
+        <TimeTextBox htmlAttributes={htmlAttributes}
           value={s.ctx.value}
           onChange={handleOnChange}
           validateKey={validateKey}
@@ -852,7 +852,7 @@ export interface DurationTextBoxProps {
   innerRef?: React.RefObject<HTMLInputElement>;
 }
 
-export function DurationTextBox(p: DurationTextBoxProps) {
+export function TimeTextBox(p: DurationTextBoxProps) {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 
@@ -940,7 +940,7 @@ export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string
   }
 }
 
-DurationTextBox.defaultProps = {
+TimeTextBox.defaultProps = {
   format: "hh:mm:ss"
 };
 
