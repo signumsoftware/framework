@@ -74,7 +74,7 @@ public class OpenPop3Client : IPop3Client
             UniqueId = messageInfo.Uid,
             RawContent = Encoding.ASCII.GetString(message.RawMessage),
             SentDate = message.Headers.DateSent,
-            ReceivedDate = TimeZoneManager.Now,
+            ReceivedDate = Clock.Now,
         };
 
         em.Mixin<EmailReceptionMixin>().ReceptionInfo = receptionInfo;

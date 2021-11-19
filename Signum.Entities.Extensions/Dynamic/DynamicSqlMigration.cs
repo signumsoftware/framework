@@ -48,7 +48,7 @@ public enum DynamicSqlMigrationMessage
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class DynamicRenameEntity : Entity
 {
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     [StringLengthValidator(Max = 200)]
     public string ReplacementKey { get; set; }

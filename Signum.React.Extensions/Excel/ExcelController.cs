@@ -25,7 +25,7 @@ public class ExcelController : ControllerBase
         ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);
         byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName));
 
-        var fileName = request.queryKey + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
+        var fileName = request.queryKey + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
         return FilesController.GetFileStreamResult(new MemoryStream(binaryFile), fileName);
     }
@@ -41,7 +41,7 @@ public class ExcelController : ControllerBase
     {
         byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest());
 
-        var fileName = request.excelReport.ToString() + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
+        var fileName = request.excelReport.ToString() + "-" + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
         return FilesController.GetFileStreamResult(new MemoryStream(file),  fileName);
     }

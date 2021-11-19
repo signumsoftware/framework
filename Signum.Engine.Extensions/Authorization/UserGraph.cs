@@ -29,7 +29,7 @@ public class UserGraph : Graph<UserEntity, UserState>
             ToStates = { UserState.Deactivated },
             Execute = (u, _) =>
             {
-                u.DisabledOn = TimeZoneManager.Now;
+                u.DisabledOn = Clock.Now;
                 u.State = UserState.Deactivated;
             },
         }.Register();

@@ -19,7 +19,7 @@ public class ViewLogEntity : Entity
     public string ViewAction { get; set; }
 
     [Format("G")]
-    public DateTime StartDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime StartDate { get; private set; } = Clock.Now;
 
     [Format("G")]
     public DateTime EndDate { get; set; }

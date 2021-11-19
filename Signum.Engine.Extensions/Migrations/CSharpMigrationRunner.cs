@@ -104,7 +104,7 @@ public class CSharpMigrationRunner: IEnumerable<CSharpMigrationRunner.MigrationI
 
         CSharpMigrationEntity m = new CSharpMigrationEntity
         {
-            ExecutionDate = TimeZoneManager.Now,
+            ExecutionDate = Clock.Now,
             UniqueName = mi.UniqueName,
         }.Save();
 

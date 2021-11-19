@@ -7,7 +7,7 @@ public class PredictorEpochProgressEntity : Entity
     
     public Lite<PredictorEntity> Predictor { get; set; }
 
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
     [Unit("ms")]
     public long Ellapsed { get; internal set; }
 

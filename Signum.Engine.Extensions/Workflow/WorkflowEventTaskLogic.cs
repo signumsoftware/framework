@@ -229,7 +229,7 @@ public static class WorkflowEventTaskLogic
             var result =
                 caseActivities.Count == 0 ? null :
                 caseActivities.Count == 1 ? (Lite<IEntity>)caseActivities.SingleEx() :
-                new PackageEntity { Name = wet.Event.ToString() + " " + TimeZoneManager.Now.ToString()}
+                new PackageEntity { Name = wet.Event.ToString() + " " + Clock.Now.ToString()}
                 .CreateLines(caseActivities).ToLite();
 
             return tr.Commit(result);

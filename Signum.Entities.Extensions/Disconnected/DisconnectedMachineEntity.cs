@@ -6,7 +6,7 @@ namespace Signum.Entities.Disconnected;
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class DisconnectedMachineEntity : Entity
 {
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     [UniqueIndex]
     [StringLengthValidator(Min = 1, Max = 100)]

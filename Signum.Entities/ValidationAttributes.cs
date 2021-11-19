@@ -733,7 +733,7 @@ public class DateInPastValidatorAttribute : ValidatorAttribute
 
         DateTime dateTime = DateTimePrecisionValidatorAttribute.ToDateTime(value);
 
-        if (dateTime > TimeZoneManager.Now)
+        if (dateTime > Clock.Now)
             return ValidationMessage._0ShouldBeADateInThePast.NiceToString();
 
         return null;

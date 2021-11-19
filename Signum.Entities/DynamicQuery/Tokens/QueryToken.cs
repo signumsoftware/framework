@@ -225,7 +225,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precision)
     {
-        string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
+        string utc = Clock.Mode == TimeZoneMode.Utc ? "Utc - " : "";
 
         return new List<QueryToken?>
         {
@@ -274,7 +274,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public static List<QueryToken> TimeOnlyProperties(QueryToken parent, DateTimePrecision precision)
     {
-        string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
+        string utc = Clock.Mode == TimeZoneMode.Utc ? "Utc - " : "";
 
         return new List<QueryToken?>
         {

@@ -62,19 +62,19 @@ public static class SuffixGenerators
         public static readonly Func<IFilePath, string> FileName = (IFilePath fp) => Path.GetFileName(fp.FileName)!;
         public static readonly Func<IFilePath, string> CalculatedDirectory_FileName = (IFilePath fp) => Path.Combine(fp.CalculatedDirectory!, Path.GetFileName(fp.FileName)!);
 
-        public static readonly Func<IFilePath, string> Year_FileName = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.GetFileName(fp.FileName)!);
-        public static readonly Func<IFilePath, string> Year_Month_FileName = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), TimeZoneManager.Now.Month.ToString(), Path.GetFileName(fp.FileName)!);
+        public static readonly Func<IFilePath, string> Year_FileName = (IFilePath fp) => Path.Combine(Clock.Now.Year.ToString(), Path.GetFileName(fp.FileName)!);
+        public static readonly Func<IFilePath, string> Year_Month_FileName = (IFilePath fp) => Path.Combine(Clock.Now.Year.ToString(), Clock.Now.Month.ToString(), Path.GetFileName(fp.FileName)!);
 
     }
 
     //Thanks to the GUID, the file name can not be guessed
     public static class Safe
     {
-        public static readonly Func<IFilePath, string> Year_GuidExtension = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Guid.NewGuid().ToString() + Path.GetExtension(fp.FileName));
-        public static readonly Func<IFilePath, string> Year_Month_GuidExtension = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName));
+        public static readonly Func<IFilePath, string> Year_GuidExtension = (IFilePath fp) => Path.Combine(Clock.Now.Year.ToString(), Guid.NewGuid().ToString() + Path.GetExtension(fp.FileName));
+        public static readonly Func<IFilePath, string> Year_Month_GuidExtension = (IFilePath fp) => Path.Combine(Clock.Now.Year.ToString(), Clock.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName));
 
-        public static readonly Func<IFilePath, string> YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName)!);
-        public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(IsolationEntity.Current?.IdOrNull.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName)!);
+        public static readonly Func<IFilePath, string> YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(Clock.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName)!);
+        public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(IsolationEntity.Current?.IdOrNull.ToString() ?? "None", Clock.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName)!);
     }
 }
 

@@ -137,7 +137,7 @@ public partial class Table
 
                 AssertHasId(entity);
                 
-                entity.Ticks = TimeZoneManager.Now.Ticks;
+                entity.Ticks = Clock.Now.Ticks;
 
                 table.SetToStrField(entity);
 
@@ -164,7 +164,7 @@ public partial class Table
                     var entity = entities[i];
                     AssertHasId(entity);
 
-                    entity.Ticks = TimeZoneManager.Now.Ticks;
+                    entity.Ticks = Clock.Now.Ticks;
 
                     table.SetToStrField(entity);
                 }
@@ -258,7 +258,7 @@ public partial class Table
                     var entity = entities[i];
                     AssertNoId(entity);
 
-                    entity.Ticks = TimeZoneManager.Now.Ticks;
+                    entity.Ticks = Clock.Now.Ticks;
 
                     table.SetToStrField(entity);
                 }
@@ -415,7 +415,7 @@ public partial class Table
                     Entity entity = (Entity)ident;
 
                     long oldTicks = entity.Ticks;
-                    entity.Ticks = TimeZoneManager.Now.Ticks;
+                    entity.Ticks = Clock.Now.Ticks;
 
                     table.SetToStrField(ident);
 
@@ -470,7 +470,7 @@ public partial class Table
                         Entity entity = (Entity)idents[i];
 
                         long oldTicks = entity.Ticks;
-                        entity.Ticks = TimeZoneManager.Now.Ticks;
+                        entity.Ticks = Clock.Now.Ticks;
 
                         UpdateParameters(entity, oldTicks, new Forbidden(graph, entity), i.ToString(), parameters);
                     }

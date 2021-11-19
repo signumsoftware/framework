@@ -18,7 +18,7 @@ public class CaseEntity : Entity
     
     public ICaseMainEntity MainEntity { get; set; }
 
-    public DateTime StartDate { get; set; } = TimeZoneManager.Now;
+    public DateTime StartDate { get; set; } = Clock.Now;
     public DateTime? FinishDate { get; set; }
 
     [AutoExpressionField]
@@ -53,7 +53,7 @@ public class CaseTagsModel : ModelEntity
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class CaseTagEntity : Entity
 {
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     
     public Lite<CaseEntity> Case { get; set; }

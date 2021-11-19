@@ -41,7 +41,7 @@ public class ProcessEntity : Entity
 
     public ProcessState State { get; set; }
 
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     [DateTimePrecisionValidator(DateTimePrecision.Milliseconds)]
     public DateTime? PlannedDate { get; set; }

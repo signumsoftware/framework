@@ -13,7 +13,7 @@ public class ResetPasswordRequestEntity : Entity
     public bool Used { get; set; }
 
     private static Expression<Func<ResetPasswordRequestEntity, bool>> IsValidExpression = r =>
-        !r.Used && TimeZoneManager.Now < r.RequestDate.AddHours(24);
+        !r.Used && Clock.Now < r.RequestDate.AddHours(24);
 
     [ExpressionField(nameof(IsValidExpression))]
     public bool IsValid => IsValidExpression.Evaluate(this);

@@ -70,7 +70,7 @@ public static class AsyncEmailSenderLogic
                     {
                         if (EmailLogic.Configuration.AvoidSendingEmailsOlderThan.HasValue)
                         {
-                            DateTime firstDate = TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
+                            DateTime firstDate = Clock.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
                             Database.Query<EmailMessageEntity>().Where(m =>
                                 m.State == EmailMessageState.ReadyToSend &&
                                 m.CreationDate < firstDate).UnsafeUpdate()
@@ -191,11 +191,11 @@ public static class AsyncEmailSenderLogic
     private static bool RecruitQueuedItems()
     {
         DateTime? firstDate = EmailLogic.Configuration.AvoidSendingEmailsOlderThan == null ?
-            null : (DateTime?)TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
+            null : (DateTime?)Clock.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
 
         queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
             m.State == EmailMessageState.ReadyToSend &&
-            m.CreationDate  < TimeZoneManager.Now &&
+            m.CreationDate  < Clock.Now &&
             (firstDate == null ? true : m.CreationDate >= firstDate)).UnsafeUpdate()
                 .Set(m => m.ProcessIdentifier, m => processIdentifier)
                 .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
@@ -221,7 +221,7 @@ public static class AsyncEmailSenderLogic
 
     private static void SetTimer()
     {
-        nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(EmailLogic.Configuration.AsyncSenderPeriod * 1000);
+        nextPlannedExecution = Clock.Now.AddMilliseconds(EmailLogic.Configuration.AsyncSenderPeriod * 1000);
         timer!.Change(EmailLogic.Configuration.AsyncSenderPeriod * 1000, Timeout.Infinite);
     }
 

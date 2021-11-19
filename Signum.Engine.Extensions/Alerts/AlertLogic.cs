@@ -141,7 +141,7 @@ public static class AlertLogic
 
         SchedulerLogic.ExecuteTask.Register((SendNotificationEmailTaskEntity task, ScheduledTaskContext ctx) =>
         {
-            var limit = TimeZoneManager.Now.AddMinutes(-task.SendNotificationsOlderThan);
+            var limit = Clock.Now.AddMinutes(-task.SendNotificationsOlderThan);
 
             var query = Database.Query<AlertEntity>()
             .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.Recipient != null && a.AlertDate < limit)
@@ -297,7 +297,7 @@ public static class AlertLogic
         {
             var result = new AlertEntity
             {
-                AlertDate = alertDate ?? TimeZoneManager.Now,
+                AlertDate = alertDate ?? Clock.Now,
                 CreatedBy = createdBy ?? UserHolder.Current?.ToLite(),
                 TitleField = title,
                 TextArguments = textArguments?.ToString("\n###\n"),
@@ -397,7 +397,7 @@ public class AlertGraph : Graph<AlertEntity, AlertState>
             ToStates = { AlertState.New },
             Construct = (a, _) => new AlertEntity
             {
-                AlertDate = TimeZoneManager.Now,
+                AlertDate = Clock.Now,
                 CreatedBy = UserHolder.Current.ToLite(),
                 Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
                 TitleField = null,
@@ -412,7 +412,7 @@ public class AlertGraph : Graph<AlertEntity, AlertState>
             ToStates = { AlertState.New },
             Construct = (_) => new AlertEntity
             {
-                AlertDate = TimeZoneManager.Now,
+                AlertDate = Clock.Now,
                 CreatedBy = UserHolder.Current.ToLite(),
                 Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
                 TitleField = null,
@@ -438,7 +438,7 @@ public class AlertGraph : Graph<AlertEntity, AlertState>
             Execute = (a, _) =>
             {
                 a.State = AlertState.Attended;
-                a.AttendedDate = TimeZoneManager.Now;
+                a.AttendedDate = Clock.Now;
                 a.AttendedBy = UserEntity.Current.ToLite();
             }
         }.Register();

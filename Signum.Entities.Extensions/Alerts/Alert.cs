@@ -9,7 +9,7 @@ public class AlertEntity : Entity
     [ImplementedByAll]
     public Lite<Entity>? Target { get; set; }
 
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     [NotNullValidator]
     public DateTime? AlertDate { get; set; }
@@ -58,15 +58,15 @@ public class AlertEntity : Entity
     public bool NotAttended => As.Expression(() => AttendedDate == null);
 
     [AutoExpressionField]
-    public bool Alerted => As.Expression(() => !AttendedDate.HasValue && AlertDate <= TimeZoneManager.Now);
+    public bool Alerted => As.Expression(() => !AttendedDate.HasValue && AlertDate <= Clock.Now);
 
     [AutoExpressionField]
-    public bool Future => As.Expression(() => !AttendedDate.HasValue && AlertDate > TimeZoneManager.Now);
+    public bool Future => As.Expression(() => !AttendedDate.HasValue && AlertDate > Clock.Now);
 
     [AutoExpressionField]
     public AlertCurrentState CurrentState => As.Expression(() =>
         AttendedDate.HasValue ? AlertCurrentState.Attended :
-        AlertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted :
+        AlertDate <= Clock.Now ? AlertCurrentState.Alerted :
         AlertCurrentState.Future);
 
     protected override string? PropertyValidation(PropertyInfo pi)

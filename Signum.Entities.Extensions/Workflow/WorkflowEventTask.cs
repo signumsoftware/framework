@@ -81,7 +81,7 @@ public static class WorkflowEventTaskOperation
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class WorkflowEventTaskConditionResultEntity : Entity
 {
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     public Lite<WorkflowEventTaskEntity>? WorkflowEventTask { get; set; }
 

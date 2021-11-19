@@ -23,7 +23,7 @@ public class ExceptionEntity : Entity
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     [ForceNotNullable, DbType(Size = 100)]
     public string? ExceptionType { get; set; }
@@ -134,7 +134,7 @@ public class DeleteLogParametersEmbedded : EmbeddedEntity
         if (moreThan == null)
             return null;
 
-        return moreThan == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-moreThan.Value);
+        return moreThan == 0 ? Clock.Now.TrimToHours() : Clock.Now.Date.AddDays(-moreThan.Value);
     }
 
     public DateTime? GetDateLimitDeleteWithExceptions(TypeEntity type)
@@ -144,7 +144,7 @@ public class DeleteLogParametersEmbedded : EmbeddedEntity
         if (moreThan == null)
             return null;
 
-        return moreThan.Value == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-moreThan.Value);
+        return moreThan.Value == 0 ? Clock.Now.TrimToHours() : Clock.Now.Date.AddDays(-moreThan.Value);
     }
 
     public int ChunkSize { get; set; } = 1000;

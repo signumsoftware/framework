@@ -120,8 +120,8 @@ public static class EmailTemplateLogic
             EmailTemplateGraph.Register();
 
             GlobalValueProvider.RegisterGlobalVariable("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
-            GlobalValueProvider.RegisterGlobalVariable("Now", _ => TimeZoneManager.Now);
-            GlobalValueProvider.RegisterGlobalVariable("Today", _ => TimeZoneManager.Now.Date, "d");
+            GlobalValueProvider.RegisterGlobalVariable("Now", _ => Clock.Now);
+            GlobalValueProvider.RegisterGlobalVariable("Today", _ => Clock.Now.Date, "d");
 
             sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
             sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;

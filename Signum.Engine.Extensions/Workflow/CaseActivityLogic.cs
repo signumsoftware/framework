@@ -158,7 +158,7 @@ public static class CaseActivityLogic
                     foreach (var ca in currentActivities)
                     {
                         ca.DoneBy = UserEntity.Current.ToLite();
-                        ca.DoneDate = TimeZoneManager.Now;
+                        ca.DoneDate = Clock.Now;
                         ca.DoneType = DoneType.Jump;
                         ca.DoneDecision = CaseActivityMessage.CanceledCase.ToString();
                         ca.Save();
@@ -170,7 +170,7 @@ public static class CaseActivityLogic
                         }
                     }
 
-                    c.FinishDate = TimeZoneManager.Now;
+                    c.FinishDate = Clock.Now;
                     c.Save();
                 }
             }.Register();
@@ -270,7 +270,7 @@ public static class CaseActivityLogic
                 var candidates = boundaryCandidates.Concat(intermediateCandidates).Distinct().ToList();
                 var conditions = candidates.Select(a => a.Event.Timer!.Condition).Distinct().ToList();
 
-                var now = TimeZoneManager.Now;
+                var now = Clock.Now;
                 var activities = conditions.SelectMany(cond =>
                 {
                     if (cond == null)
@@ -658,7 +658,7 @@ public static class CaseActivityLogic
                         throw new InvalidOperationException(WorkflowMessage.YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0.NiceToString(wfGraph.Workflow));
 
                     SaveEntity(ca.Case.MainEntity);
-                    var now = TimeZoneManager.Now;
+                    var now = Clock.Now;
                     var c = ca.Case;
                     c.StartDate = now;
                     c.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);
@@ -766,7 +766,7 @@ public static class CaseActivityLogic
                 ca.WorkflowActivity is WorkflowActivityEntity wa && wa.BoundaryTimers.Any()) ? null : CaseActivityMessage.Activity0HasNoTimers.NiceToString(ca.WorkflowActivity),
                 Execute = (ca, _) =>
                 {
-                    var now = TimeZoneManager.Now;
+                    var now = Clock.Now;
 
                     var alreadyExecuted = ca.ExecutedTimers().Select(a => a.BoundaryEvent).ToHashSet();
 
@@ -1079,7 +1079,7 @@ public static class CaseActivityLogic
         {
             return new CaseActivityEntity
             {
-                StartDate = previous?.DoneDate ?? TimeZoneManager.Now,
+                StartDate = previous?.DoneDate ?? Clock.Now,
                 Previous = previous?.ToLite(),
                 WorkflowActivity = workflowActivity,
                 OriginalWorkflowActivityName = workflowActivity.GetName()!,
@@ -1093,7 +1093,7 @@ public static class CaseActivityLogic
         {
             return workflowActivity is WorkflowActivityEntity w && w.Type == WorkflowActivityType.Script ? new ScriptExecutionEmbedded
             {
-                NextExecution = TimeZoneManager.Now,
+                NextExecution = Clock.Now,
                 RetryCount = 0,
             } : null;
         }
@@ -1463,7 +1463,7 @@ public static class CaseActivityLogic
     private static void MakeDone(this CaseActivityEntity ca, DoneType doneType, string? decision) 
     {
         ca.DoneBy = UserEntity.Current.ToLite();
-        ca.DoneDate = TimeZoneManager.Now;
+        ca.DoneDate = Clock.Now;
         ca.DoneType = doneType;
         ca.DoneDecision = decision;
         ca.Case.Description = ca.Case.MainEntity.ToString()!.Trim().Etc(100);

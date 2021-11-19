@@ -5,7 +5,7 @@ namespace Signum.Entities.Disconnected;
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class DisconnectedExportEntity : Entity
 {
-    public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; set; } = Clock.Now;
 
     
     public Lite<DisconnectedMachineEntity> Machine { get; set; }

@@ -8,7 +8,7 @@ namespace Signum.Entities.Printing;
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class PrintLineEntity : Entity, IProcessLineDataEntity
 {
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     [Ignore]
     public FileTypeSymbol? TestFileType { get; set; }

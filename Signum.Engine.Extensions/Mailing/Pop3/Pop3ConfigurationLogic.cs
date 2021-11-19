@@ -175,9 +175,9 @@ public static class Pop3ConfigurationLogic
            
 
             Pop3ReceptionEntity reception = Transaction.ForceNew().Using(tr => tr.Commit(
-                new Pop3ReceptionEntity { Pop3Configuration = config.ToLite(), StartDate = TimeZoneManager.Now }.Save()));
+                new Pop3ReceptionEntity { Pop3Configuration = config.ToLite(), StartDate = Clock.Now }.Save()));
 
-            var now = TimeZoneManager.Now;
+            var now = Clock.Now;
             try
             {
                 using (var client = GetPop3Client(config))
@@ -205,7 +205,7 @@ public static class Pop3ConfigurationLogic
 
                     using (var tr = Transaction.ForceNew())
                     {
-                        reception.EndDate = TimeZoneManager.Now;
+                        reception.EndDate = Clock.Now;
                         reception.LastServerMessageUID = lastSuid;
                         reception.MailsFromDifferentAccounts = anomalousReception;
                         reception.Save();
@@ -223,7 +223,7 @@ public static class Pop3ConfigurationLogic
                 {
                     using (var tr = Transaction.ForceNew())
                     {
-                        reception.EndDate = TimeZoneManager.Now;
+                        reception.EndDate = Clock.Now;
                         reception.Exception = ex.ToLite();
                         reception.Save();
                         tr.Commit();
@@ -370,7 +370,7 @@ public static class Pop3ConfigurationLogic
     private static void DeleteSavedEmail(Pop3ConfigurationEntity config, DateTime now, IPop3Client client, MessageUid mi, DateTime? sent)
     {
         if (config.DeleteMessagesAfter != null && sent != null &&
-             sent.Value.Date.AddDays(config.DeleteMessagesAfter.Value) < TimeZoneManager.Now.Date)
+             sent.Value.Date.AddDays(config.DeleteMessagesAfter.Value) < Clock.Now.Date)
         {
             client.DeleteMessage(mi);
 
@@ -393,9 +393,9 @@ public static class Pop3ConfigurationLogic
         using (Disposable.Combine(SurroundReceiveEmail, func => func(config)))
         {
             Pop3ReceptionEntity reception = Transaction.ForceNew().Using(tr => tr.Commit(
-                new Pop3ReceptionEntity { Pop3Configuration = config.ToLite(), StartDate = TimeZoneManager.Now }.Save()));
+                new Pop3ReceptionEntity { Pop3Configuration = config.ToLite(), StartDate = Clock.Now }.Save()));
 
-            var now = TimeZoneManager.Now;
+            var now = Clock.Now;
             try
             {
                 using (var client = GetPop3Client(config))
@@ -427,7 +427,7 @@ public static class Pop3ConfigurationLogic
 
                     using (var tr = Transaction.ForceNew())
                     {
-                        reception.EndDate = TimeZoneManager.Now;
+                        reception.EndDate = Clock.Now;
                         reception.Save();
                         tr.Commit();
                     }
@@ -443,7 +443,7 @@ public static class Pop3ConfigurationLogic
                 {
                     using (var tr = Transaction.ForceNew())
                     {
-                        reception.EndDate = TimeZoneManager.Now;
+                        reception.EndDate = Clock.Now;
                         reception.Exception = ex.ToLite();
                         reception.Save();
                         tr.Commit();

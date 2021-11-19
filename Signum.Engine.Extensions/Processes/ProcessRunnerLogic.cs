@@ -68,7 +68,7 @@ public static class ProcessRunnerLogic
     {
         return query.UnsafeUpdate()
         .Set(p => p.State, p => ProcessState.Queued)
-        .Set(p => p.QueuedDate, p => TimeZoneManager.Now)
+        .Set(p => p.QueuedDate, p => Clock.Now)
         .Set(p => p.ExecutionStart, p => null)
         .Set(p => p.ExecutionEnd, p => null)
         .Set(p => p.SuspendDate, p => null)
@@ -84,7 +84,7 @@ public static class ProcessRunnerLogic
     internal static void SetAsQueued(this ProcessEntity process)
     {
         process.State = ProcessState.Queued;
-        process.QueuedDate = TimeZoneManager.Now;
+        process.QueuedDate = Clock.Now;
         process.ExecutionStart = null;
         process.ExecutionEnd = null;
         process.SuspendDate = null;
@@ -155,7 +155,7 @@ public static class ProcessRunnerLogic
                             using (HeavyProfiler.Log("PWL", () => "Process Runner"))
                             {
                                 (from p in Database.Query<ProcessEntity>()
-                                 where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now
+                                 where p.State == ProcessState.Planned && p.PlannedDate <= Clock.Now
                                  select p).SetAsQueued();
 
                                 var list = Database.Query<ProcessEntity>()
@@ -325,7 +325,7 @@ public static class ProcessRunnerLogic
         }
         else
         {
-            TimeSpan ts = next.Value - TimeZoneManager.Now;
+            TimeSpan ts = next.Value - Clock.Now;
             if (ts < TimeSpan.Zero)
                 ts = TimeSpan.Zero;
             else
@@ -431,7 +431,7 @@ public sealed class ExecutingProcess
     public void TakeForThisMachine()
     {
         CurrentProcess.State = ProcessState.Executing;
-        CurrentProcess.ExecutionStart = TimeZoneManager.Now;
+        CurrentProcess.ExecutionStart = Clock.Now;
         CurrentProcess.ExecutionEnd = null;
         CurrentProcess.Progress = 0;
         CurrentProcess.MachineName = Environment.MachineName;
@@ -463,7 +463,7 @@ public sealed class ExecutingProcess
                 {
                     Algorithm.Execute(this);
 
-                    CurrentProcess.ExecutionEnd = TimeZoneManager.Now;
+                    CurrentProcess.ExecutionEnd = Clock.Now;
                     CurrentProcess.State = ProcessState.Finished;
                     CurrentProcess.Progress = null;
                     CurrentProcess.User.ClearEntity();
@@ -475,7 +475,7 @@ public sealed class ExecutingProcess
                     if (!e.CancellationToken.Equals(this.CancellationToken))
                         throw;
 
-                    CurrentProcess.SuspendDate = TimeZoneManager.Now;
+                    CurrentProcess.SuspendDate = Clock.Now;
                     CurrentProcess.State = ProcessState.Suspended;
                     using (OperationLogic.AllowSave<ProcessEntity>())
                         CurrentProcess.Save();
@@ -486,7 +486,7 @@ public sealed class ExecutingProcess
                         throw;
 
                     CurrentProcess.State = ProcessState.Error;
-                    CurrentProcess.ExceptionDate = TimeZoneManager.Now;
+                    CurrentProcess.ExceptionDate = Clock.Now;
                     CurrentProcess.Exception = e.LogException(el => el.ActionName = CurrentProcess.Algorithm.ToString()).ToLite();
                     using (OperationLogic.AllowSave<ProcessEntity>())
                         CurrentProcess.Save();
