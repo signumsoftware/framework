@@ -93,7 +93,7 @@ function getOrCreateToStringFunction(type: string) {
     const valToString = Reflection.valToString;
     const numberToString = Reflection.numberToString;
     const dateToString = Reflection.dateToString;
-    const durationToString = Reflection.durationToString;
+    const timeToString = Reflection.timeToString;
 
     f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
   } catch (e) {
