@@ -9,7 +9,7 @@ public abstract class BaseQueryRequest
 
     public List<Filter> Filters { get; set; }
 
-    public string QueryUrl { get; set; }
+    public string? QueryUrl { get; set; }
 
     public override string ToString()
     {

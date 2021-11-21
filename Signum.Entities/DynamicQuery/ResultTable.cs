@@ -244,13 +244,6 @@ public class ResultTable
         this.totalElements = totalElements;
         this.pagination = pagination;
     }
-
-    //[OnDeserialized]
-    //private void OnDeserialized(StreamingContext context)
-    //{
-    //    CreateIndices(columns);
-    //}
-
     
     public DataTable ToDataTable(DataTableValueConverter? converter = null)
     {

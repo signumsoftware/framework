@@ -349,8 +349,6 @@ export interface QueryValueRequest {
 }
 
 export interface ResultTable {
-  queryKey: string;
-  entityColumn: string;
   columns: string[];
   uniqueValues: { [token: string]: any[] }
   rows: ResultRow[];

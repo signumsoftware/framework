@@ -13,7 +13,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.React.ApiControllers;
 using Signum.React.Filters;
-using Signum.React.Json;
 using Signum.React.JsonModelValidators;
 using System.Text.Json;
 using System.Text.Json.Serialization;

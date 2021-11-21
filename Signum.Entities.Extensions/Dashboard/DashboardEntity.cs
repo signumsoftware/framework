@@ -5,6 +5,8 @@ using Signum.Entities.Chart;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
+using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Dashboard;
 
@@ -40,6 +42,8 @@ public class DashboardEntity : Entity, IUserAssetEntity
     public string DisplayName { get; set; }
 
     public bool CombineSimilarRows { get; set; } = true;
+
+    public CachedQueriesEmbedded? CachedQueries { get; set; }
 
     [NotifyCollectionChanged, NotifyChildProperty]
     [NoRepeatValidator]
@@ -166,8 +170,19 @@ public class DashboardEntity : Entity, IUserAssetEntity
                 return ValidationMessage._0IsNotAllowed.NiceToString(pi.NiceName());
         }
 
+        if(pi.Name == nameof(CachedQueries) && CachedQueries != null && EntityType != null)
+        {
+            return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => EntityType));
+        }
+
         return base.PropertyValidation(pi);
     }
+}
+
+public class CachedQueriesEmbedded : EmbeddedEntity
+{
+    [Unit("s")]
+    public int TimeoutForQueries { get; set; } = 5 * 60;
 }
 
 [AutoInit]
@@ -180,6 +195,7 @@ public static class DashboardPermission
 public static class DashboardOperation
 {
     public static ExecuteSymbol<DashboardEntity> Save;
+    public static ExecuteSymbol<DashboardEntity> RegenerateCachedFiles;
     public static ConstructSymbol<DashboardEntity>.From<DashboardEntity> Clone;
     public static DeleteSymbol<DashboardEntity> Delete;
 }
@@ -212,3 +228,5 @@ public enum DashboardEmbedededInEntity
     Bottom,
     Tab
 }
+
+

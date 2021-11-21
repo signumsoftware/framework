@@ -127,10 +127,18 @@ public interface IPartEntity : IEntity
     void FromXml(XElement element, IFromXmlContext ctx);
 }
 
+public enum CachedQuery
+{
+    DatabaseQuery,
+    CachedFile
+}
+
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class UserQueryPartEntity : Entity, IPartEntity
 {
     public UserQueryEntity UserQuery { get; set; }
+
+    public CachedQuery CachedQuery { get; set; }
 
     public UserQueryPartRenderMode RenderMode { get; set; }
 
@@ -234,10 +242,14 @@ public class UserTreePartEntity : Entity, IPartEntity
     }
 }
 
+
+
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class UserChartPartEntity : Entity, IPartEntity
 {   
     public UserChartEntity UserChart { get; set; }
+
+    public CachedQuery CachedQuery { get; set; }
 
     public bool ShowData { get; set; } = false;
 
@@ -290,6 +302,8 @@ public class CombinedUserChartPartEntity : Entity, IPartEntity
 {
     [PreserveOrder, NoRepeatValidator]
     public MList<UserChartEntity> UserCharts { get; set; } = new MList<UserChartEntity>();
+
+    public CachedQuery CachedQuery { get; set; }
 
     public bool ShowData { get; set; } = false;
 
@@ -380,6 +394,8 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
     public string? Label { get; set; }
     
     public UserQueryEntity UserQuery { get; set; }
+
+    public CachedQuery CachedQuery { get; set; }
 
     [StringLengthValidator(Max = 200)]
     public string? Href { get; set; }

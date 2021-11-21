@@ -1,11 +1,15 @@
 using Signum.Engine.Authorization;
+using Signum.Engine.Chart;
+using Signum.Engine.Files;
 using Signum.Engine.Translation;
 using Signum.Engine.UserAssets;
+using Signum.Engine.UserQueries;
 using Signum.Engine.ViewLog;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
+using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.Dashboard;
@@ -14,6 +18,21 @@ public static class DashboardLogic
 {
     public static ResetLazy<Dictionary<Lite<DashboardEntity>, DashboardEntity>> Dashboards = null!;
     public static ResetLazy<Dictionary<Type, List<Lite<DashboardEntity>>>> DashboardsByType = null!;
+
+    public static Polymorphic<Func<IPartEntity, PanelPartEmbedded, IEnumerable<CachedQueryDefinition>>> GetCachedQueryDefinition = new();
+
+
+    [AutoExpressionField]
+    public static IQueryable<CachedQueryEntity> CachedQueries(this DashboardEntity db) =>
+        As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.Dashboard.Is(db)));
+
+    [AutoExpressionField]
+    public static IQueryable<CachedQueryEntity> CachedQueries(this UserQueryEntity uq) =>
+    As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.UserAsset.Is(uq)));
+
+    [AutoExpressionField]
+    public static IQueryable<CachedQueryEntity> CachedQueries(this UserChartEntity uc) =>
+        As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.UserAsset.Is(uc)));
 
     public static void Start(SchemaBuilder sb)
     {
@@ -33,6 +52,13 @@ public static class DashboardLogic
                 {"UserTreePart", typeof(UserTreePartEntity)},
             });
 
+            GetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) =>  new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), pp, ucp.UserChart, ucp.CachedQuery, canWriteFilters: true) });
+            GetCachedQueryDefinition.Register((CombinedUserChartPartEntity cucp, PanelPartEmbedded pp) => cucp.UserCharts.Select(uc => new CachedQueryDefinition(uc.ToChartRequest().ToQueryRequest(), pp, uc, cucp.CachedQuery, canWriteFilters: false)));
+            GetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.UserQuery.ToQueryRequest(), pp, uqp.UserQuery, uqp.CachedQuery, canWriteFilters: false) });
+            GetCachedQueryDefinition.Register((LinkListPartEntity uqp, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
+            GetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequest(), pp, uqe.UserQuery, uqe.CachedQuery, canWriteFilters: false)));
+            GetCachedQueryDefinition.Register((UserTreePartEntity ute, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
+
             sb.Include<DashboardEntity>()
                 .WithQuery(() => cp => new
                 {
@@ -43,6 +69,20 @@ public static class DashboardLogic
                     cp.Owner,
                     cp.DashboardPriority,
                 });
+
+            sb.Include<CachedQueryEntity>()
+                .WithUniqueIndex(cq => new { cq.UserAsset, cq.Dashboard })
+                .WithExpressionFrom((DashboardEntity d) => d.CachedQueries())
+                .WithExpressionFrom((UserChartEntity d) => d.CachedQueries())
+                .WithExpressionFrom((UserQueryEntity d) => d.CachedQueries())
+                  .WithQuery(() => e => new
+                  {
+                      Entity = e,
+                      e.Id,
+                      e.Dashboard,
+                      e.UserAsset,
+                      e.File,
+                  });
 
             if (sb.Settings.ImplementedBy((DashboardEntity cp) => cp.Parts.First().Content, typeof(UserQueryPartEntity)))
             {
@@ -117,7 +157,6 @@ public static class DashboardLogic
     {
         public static void Register()
         {
-
             new Execute(DashboardOperation.Save)
             {
                 CanBeNew = true,
@@ -138,6 +177,25 @@ public static class DashboardLogic
             new ConstructFrom<DashboardEntity>(DashboardOperation.Clone)
             {
                 Construct = (cp, _) => cp.Clone()
+            }.Register();
+
+            new Execute(DashboardOperation.RegenerateCachedFiles)
+            {
+                Execute = (db, _) =>
+                {
+                    var oldCachedQueries = db.CachedQueries().ToList();
+                    oldCachedQueries.ForEach(a => a.File.DeleteFileOnCommit());
+
+                    var list = DashboardLogic.GetCachedQueries(db).ToList();
+
+                    foreach (var def in list)
+                    {
+                        var rt = QueryLogic.Queries.ExecuteQuery(def.QueryRequest);
+
+                        
+                    }
+
+                }
             }.Register();
         }
     }
@@ -276,4 +334,62 @@ public static class DashboardLogic
         TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
             uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
     }
+
+    public static IEnumerable<CachedQueryDefinition> GetCachedQueries(DashboardEntity db)
+    {
+        var definitions = db.Parts.SelectMany(p => GetCachedQueryDefinition.Invoke(p.Content, p));
+
+        var groups = definitions
+            .Where(a => a.PanelPart.InteractionGroup != null)
+            .GroupBy(a => a.PanelPart.InteractionGroup)
+            .ToList();
+
+        foreach (var gr in groups)
+        {
+            var writers = gr.Where(a => a.CanWriteFilters).ToList();
+            if (!writers.Any())
+                continue;
+
+            foreach (var wr in writers)
+            {
+                if (wr.QueryRequest.GroupResults)
+                {
+                    var keyColumns = wr.QueryRequest.Columns.Where(c => c.Token is not AggregateToken);
+
+                    foreach (var item in gr.Where(e => e != wr))
+                    {
+                        var extraColumns = keyColumns.Where(k => !item.QueryRequest.Columns.Any(c => c.Token.Equals(k))).ToList();
+
+                        item.QueryRequest.Columns.AddRange(extraColumns.Select(c => new Column(c.Token, null)));
+
+                        item.QueryRequest.Pagination = new Pagination.All();
+                    }
+                }
+            }
+        }
+
+        var cached = definitions.Where(a => a.CachedQuery == CachedQuery.CachedFile);
+
+        return cached.ToList();
+    }
+}
+
+public class CachedQueryDefinition
+{
+    public CachedQueryDefinition(QueryRequest queryRequest, PanelPartEmbedded panelPart, IUserAssetEntity userAsset, CachedQuery cachedQuery, bool canWriteFilters)
+    {
+        QueryRequest = queryRequest;
+        PanelPart = panelPart;
+        Guid = userAsset.Guid;
+        UserAsset = userAsset.ToLite();
+        CachedQuery = cachedQuery;
+        CanWriteFilters = canWriteFilters;
+    }
+
+    public QueryRequest QueryRequest { get; set; }
+    public PanelPartEmbedded PanelPart { get; set; }
+    public Guid Guid { get; set; }
+    public Lite<IUserAssetEntity> UserAsset { get; set; }
+    public CachedQuery CachedQuery { get; }
+    public bool CanWriteFilters { get; }
 }

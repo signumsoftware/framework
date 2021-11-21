@@ -8,9 +8,9 @@ using System.Collections.ObjectModel;
 using Signum.Engine.Maps;
 using System.Threading;
 using System.Threading.Tasks;
-using Signum.React.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Signum.Engine.Json;
 
 namespace Signum.React.ApiControllers;
 
@@ -103,321 +103,30 @@ public class QueryController : ControllerBase
     [HttpPost("api/query/executeQuery"), ProfilerActionSplitter]
     public async Task<ResultTable> ExecuteQuery([Required, FromBody]QueryRequestTS request, CancellationToken token)
     {
-        var result = await QueryLogic.Queries.ExecuteQueryAsync(request.ToQueryRequest(), token);
+        var result = await QueryLogic.Queries.ExecuteQueryAsync(request.ToQueryRequest(SignumServer.JsonSerializerOptions), token);
         return result;
     }
 
     [HttpPost("api/query/entitiesLiteWithFilter"), ProfilerActionSplitter]
     public async Task<List<Lite<Entity>>> GetEntitiesLiteWithFilter([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
     {
-        return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest()).ToListAsync(token);
+        return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }
 
     [HttpPost("api/query/entitiesFullWithFilter"), ProfilerActionSplitter]
     public async Task<List<Entity>> GetEntitiesFullWithFilter([Required, FromBody] QueryEntitiesRequestTS request, CancellationToken token)
     {
-        return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest()).ToListAsync(token);
+        return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }
 
     [HttpPost("api/query/queryValue"), ProfilerActionSplitter]
     public async Task<object?> QueryValue([Required, FromBody]QueryValueRequestTS request, CancellationToken token)
     {
-        return await QueryLogic.Queries.ExecuteQueryValueAsync(request.ToQueryValueRequest(), token);
+        return await QueryLogic.Queries.ExecuteQueryValueAsync(request.ToQueryValueRequest(SignumServer.JsonSerializerOptions), token);
     }
 }
 
-public class QueryValueRequestTS
-{
-    public string querykey;
-    public List<FilterTS> filters;
-    public string valueToken;
-    public bool? multipleValues;
-    public SystemTimeTS/*?*/ systemTime;
 
-    public QueryValueRequest ToQueryValueRequest()
-    {
-        var qn = QueryLogic.ToQueryName(this.querykey);
-        var qd = QueryLogic.Queries.QueryDescription(qn);
-
-        var value = valueToken.HasText() ? QueryUtils.Parse(valueToken, qd, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement) : null;
-
-        return new QueryValueRequest
-        {
-            QueryName = qn,
-            MultipleValues = multipleValues ?? false,
-            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
-            ValueToken = value,
-            SystemTime = this.systemTime?.ToSystemTime(),
-        };
-    }
-
-    public override string ToString() => querykey;
-}
-
-public class QueryRequestTS
-{
-    public string queryUrl;
-    public string queryKey;
-    public bool groupResults;
-    public List<FilterTS> filters;
-    public List<OrderTS> orders;
-    public List<ColumnTS> columns;
-    public PaginationTS pagination;
-    public SystemTimeTS/*?*/ systemTime;
-
-    public QueryRequest ToQueryRequest()
-    {
-        var qn = QueryLogic.ToQueryName(this.queryKey);
-        var qd = QueryLogic.Queries.QueryDescription(qn);
-
-        return new QueryRequest
-        {
-            QueryUrl = queryUrl,
-            QueryName = qn,
-            GroupResults = groupResults,
-            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults)).ToList(),
-            Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: groupResults)).ToList(),
-            Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd, canAggregate: groupResults)).ToList(),
-            Pagination = this.pagination.ToPagination(),
-            SystemTime = this.systemTime?.ToSystemTime(),
-        };
-    }
-
-
-    public override string ToString() => queryKey;
-}
-
-public class QueryEntitiesRequestTS
-{
-    public string queryKey;
-    public List<FilterTS> filters;
-    public List<OrderTS> orders;
-    public int? count;
-
-    public override string ToString() => queryKey;
-
-    public QueryEntitiesRequest ToQueryEntitiesRequest()
-    {
-        var qn = QueryLogic.ToQueryName(queryKey);
-        var qd = QueryLogic.Queries.QueryDescription(qn);
-        return new QueryEntitiesRequest
-        {
-            QueryName = qn,
-            Count = count,
-            Filters = filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
-            Orders = orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false)).ToList(),
-        };
-    }
-}
-
-public class OrderTS
-{
-    public string token;
-    public OrderType orderType;
-
-    public Order ToOrder(QueryDescription qd, bool canAggregate)
-    {
-        return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0)), orderType);
-    }
-
-    public override string ToString() => $"{token} {orderType}";
-}
-
-[JsonConverter(typeof(FilterJsonConverter))]
-public abstract class FilterTS
-{
-    public abstract Filter ToFilter(QueryDescription qd, bool canAggregate);
-
-    public static FilterTS FromFilter(Filter filter)
-    {
-        if (filter is FilterCondition fc)
-            return new FilterConditionTS
-            {
-                token = fc.Token.FullKey(),
-                operation = fc.Operation,
-                value = fc.Value
-            };
-
-        if (filter is FilterGroup fg)
-            return new FilterGroupTS
-            {
-                token = fg.Token?.FullKey(),
-                groupOperation = fg.GroupOperation,
-                filters = fg.Filters.Select(f => FromFilter(f)).ToList(),
-            };
-
-        throw new UnexpectedValueException(filter);
-    }
-}
-
-public class FilterConditionTS : FilterTS
-{
-    public string token;
-    public FilterOperation operation;
-    public object? value;
-
-    public override Filter ToFilter(QueryDescription qd, bool canAggregate)
-    {
-        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
-        var parsedToken = QueryUtils.Parse(token, qd, options);
-        var expectedValueType = operation.IsList() ? typeof(ObservableCollection<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
-
-        var val = value is JsonElement jtok ?
-             jtok.ToObject(expectedValueType, SignumServer.JsonSerializerOptions) :
-             value;
-
-        if (val is DateTime dt)
-            val = dt.FromUserInterface();
-        else if (val is ObservableCollection<DateTime?> col)
-            val = col.Select(dt => dt?.FromUserInterface()).ToObservableCollection();
-
-        return new FilterCondition(parsedToken, operation, val);
-    }
-
-    public override string ToString() => $"{token} {operation} {value}";
-}
-
-public class FilterGroupTS : FilterTS
-{
-    public FilterGroupOperation groupOperation;
-    public string? token;
-    public List<FilterTS> filters;
-
-    public override Filter ToFilter(QueryDescription qd, bool canAggregate)
-    {
-        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
-        var parsedToken = token == null ? null : QueryUtils.Parse(token, qd, options);
-
-        var parsedFilters = filters.Select(f => f.ToFilter(qd, canAggregate)).ToList();
-
-        return new FilterGroup(groupOperation, parsedToken, parsedFilters);
-    }
-}
-
-public class ColumnTS
-{
-    public string token;
-    public string displayName;
-
-    public Column ToColumn(QueryDescription qd, bool canAggregate)
-    {
-        var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
-
-        return new Column(queryToken, displayName ?? queryToken.NiceName());
-    }
-
-    public override string ToString() => $"{token} '{displayName}'";
-
-}
-
-public class PaginationTS
-{
-    public PaginationMode mode;
-    public int? elementsPerPage;
-    public int? currentPage;
-
-    public PaginationTS() { }
-
-    public PaginationTS(Pagination pagination)
-    {
-        this.mode = pagination.GetMode();
-        this.elementsPerPage = pagination.GetElementsPerPage();
-        this.currentPage = (pagination as Pagination.Paginate)?.CurrentPage;
-    }
-
-    public override string ToString() => $"{mode} {elementsPerPage} {currentPage}";
-
-
-    public Pagination ToPagination()
-    {
-        return mode switch
-        {
-            PaginationMode.All => new Pagination.All(),
-            PaginationMode.Firsts => new Pagination.Firsts(this.elementsPerPage!.Value),
-            PaginationMode.Paginate => new Pagination.Paginate(this.elementsPerPage!.Value, this.currentPage!.Value),
-            _ => throw new InvalidOperationException($"Unexpected {mode}"),
-        };
-    }
-}
-
-public class SystemTimeTS
-{
-    public SystemTimeMode mode;
-    public SystemTimeJoinMode? joinMode;
-    public DateTimeOffset? startDate;
-    public DateTimeOffset? endDate;
-
-    public SystemTimeTS() { }
-
-    public SystemTimeTS(SystemTime systemTime)
-    {
-        if (systemTime is SystemTime.AsOf asOf)
-        {
-            mode = SystemTimeMode.AsOf;
-            startDate = asOf.DateTime;
-        }
-        else if (systemTime is SystemTime.Between between)
-        {
-            mode = SystemTimeMode.Between;
-            joinMode = ToSystemTimeJoinMode(between.JoinBehaviour);
-            startDate = between.StartDateTime;
-            endDate = between.EndtDateTime;
-        }
-        else if (systemTime is SystemTime.ContainedIn containedIn)
-        {
-            mode = SystemTimeMode.ContainedIn;
-            joinMode = ToSystemTimeJoinMode(containedIn.JoinBehaviour);
-            startDate = containedIn.StartDateTime;
-            endDate = containedIn.EndtDateTime;
-        }
-        else if (systemTime is SystemTime.All all)
-        {
-            mode = SystemTimeMode.All;
-            joinMode = ToSystemTimeJoinMode(all.JoinBehaviour);
-            startDate = null;
-            endDate = null;
-        }
-        else
-            throw new InvalidOperationException("Unexpected System Time");
-    }
-
-    public override string ToString() => $"{mode} {startDate} {endDate}";
-
-
-    public SystemTime ToSystemTime()
-    {
-        return mode switch
-        {
-            SystemTimeMode.AsOf => new SystemTime.AsOf(startDate!.Value),
-            SystemTimeMode.Between => new SystemTime.Between(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value)),
-            SystemTimeMode.ContainedIn => new SystemTime.ContainedIn(startDate!.Value, endDate!.Value, ToJoinBehaviour(joinMode!.Value)),
-            SystemTimeMode.All => new SystemTime.All(ToJoinBehaviour(joinMode!.Value)),
-            _ => throw new InvalidOperationException($"Unexpected {mode}"),
-        };
-    }
-
-    public static JoinBehaviour ToJoinBehaviour(SystemTimeJoinMode joinMode)
-    {
-        return joinMode switch
-        {
-            SystemTimeJoinMode.Current => JoinBehaviour.Current,
-            SystemTimeJoinMode.FirstCompatible => JoinBehaviour.FirstCompatible,
-            SystemTimeJoinMode.AllCompatible => JoinBehaviour.AllCompatible,
-            _ => throw new UnexpectedValueException(joinMode),
-        };
-    }
-
-    public static SystemTimeJoinMode ToSystemTimeJoinMode(JoinBehaviour joinBehaviour)
-    {
-        return joinBehaviour switch
-        {
-            JoinBehaviour.Current => SystemTimeJoinMode.Current,
-            JoinBehaviour.FirstCompatible => SystemTimeJoinMode.FirstCompatible,
-            JoinBehaviour.AllCompatible => SystemTimeJoinMode.AllCompatible,
-            _ => throw new UnexpectedValueException(joinBehaviour),
-        };
-    }
-}
 
 public class QueryDescriptionTS
 {
