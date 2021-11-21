@@ -733,7 +733,7 @@ public class DateInPastValidatorAttribute : ValidatorAttribute
 
         DateTime dateTime = DateTimePrecisionValidatorAttribute.ToDateTime(value);
 
-        if (dateTime > TimeZoneManager.Now)
+        if (dateTime > Clock.Now)
             return ValidationMessage._0ShouldBeADateInThePast.NiceToString();
 
         return null;
@@ -771,11 +771,11 @@ public class YearGreaterThanValidatorAttribute : ValidatorAttribute
 }
 
 
-public class TimeSpanPrecisionValidatorAttribute : ValidatorAttribute
+public class TimePrecisionValidatorAttribute : ValidatorAttribute
 {
     public DateTimePrecision Precision { get; private set; }
 
-    public TimeSpanPrecisionValidatorAttribute(DateTimePrecision precision)
+    public TimePrecisionValidatorAttribute(DateTimePrecision precision)
     {
         this.Precision = precision;
     }
@@ -785,12 +785,21 @@ public class TimeSpanPrecisionValidatorAttribute : ValidatorAttribute
         if (value == null)
             return null;
 
-        var prec = ((TimeSpan)value).GetPrecision();
-        if (prec > Precision)
-            return "{0} has a precision of {1} instead of {2}".FormatWith("{0}", prec, Precision);
+        if (value is TimeSpan ts)
+        {
+            var prec = ts.GetPrecision();
+            if (prec > Precision)
+                return "{0} has a precision of {1} instead of {2}".FormatWith("{0}", prec, Precision);
 
-        if(((TimeSpan)value).Days != 0)
-            return "{0} has days";
+            if (ts.Days != 0)
+                return "{0} has days";
+        }
+        else if(value is TimeOnly to)
+        {
+            var prec = to.GetPrecision();
+            if (prec > Precision)
+                return "{0} has a precision of {1} instead of {2}".FormatWith("{0}", prec, Precision);
+        }
 
         return null;
     }
@@ -811,30 +820,6 @@ public class TimeSpanPrecisionValidatorAttribute : ValidatorAttribute
     }
 
     public override string HelpMessage => ValidationMessage.HaveAPrecisionOf0.NiceToString(Precision.NiceToString().ToLower());
-}
-
-public class TimeOfDayValidatorAttribute : ValidatorAttribute
-{
-    public TimeOfDayValidatorAttribute()
-    {
-    }
-
-    protected override string? OverrideError(object? value)
-    {
-        if (value == null)
-            return null;
-
-        var prec = (TimeSpan)value;
-        if (prec.Days > 0)
-            return ValidationMessage._0ShouldBeLessThan1.NiceToString("{0}", "24h");
-
-        if (prec < TimeSpan.Zero)
-            return ValidationMessage._0ShouldBeGreaterThanOrEqual1.NiceToString("{0}", "0");
-        
-        return null;
-    }
-
-    public override string HelpMessage => ValidationMessage.IsATimeOfTheDay.NiceToString();
 }
 
 public class StringCaseValidatorAttribute : ValidatorAttribute

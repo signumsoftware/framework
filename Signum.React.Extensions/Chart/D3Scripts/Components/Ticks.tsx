@@ -139,7 +139,7 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
     <>
       {
         showLines && <g className="x-key-line-group" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('content'))}>
-          {orderedKeys.map(t => <line key={keyColumn.getKey(t)} className="y-key-line-group sf-transition"
+          {orderedKeys.map(t => <line key={keyColumn.getKey(t)} className="x-key-line-group sf-transition"
             opacity={isActive?.(t) == false ? 0.5 : undefined}
             transform={translate(x(keyColumn.getKey(t))!, 0)}
             y1={yRule.size('content')}

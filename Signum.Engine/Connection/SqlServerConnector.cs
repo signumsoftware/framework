@@ -552,13 +552,16 @@ public class SqlParameterBuilder : ParameterBuilder
 
     public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value)
     {
-        Expression valueExpr = Expression.Convert(
-            !dbType.IsDate() ? value: 
-            value.Type.UnNullify() == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
-            value.Type.UnNullify() == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
-            value.Type.UnNullify() == typeof(TimeOnly) ? Expression.Call(miToTimeSpan, Expression.Convert(value, typeof(TimeOnly))) :
-            value,
-            typeof(object));
+        var uType = value.Type.UnNullify();
+
+        var exp = 
+            uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
+            //https://github.com/dotnet/SqlClient/issues/1009
+            uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
+            uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :
+            value;
+
+        Expression valueExpr = Expression.Convert(exp, typeof(object));
 
         if (nullable)
             valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),

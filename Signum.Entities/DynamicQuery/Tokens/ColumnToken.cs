@@ -80,7 +80,7 @@ public class ColumnToken : QueryToken
             {
                 DateTimePrecision? precision =
                     Column.PropertyRoutes
-                    .Select(pr => Validator.TryGetPropertyValidator(pr.Parent!.Type, pr.PropertyInfo!.Name)?.Validators.OfType<TimeSpanPrecisionValidatorAttribute>().SingleOrDefaultEx())
+                    .Select(pr => Validator.TryGetPropertyValidator(pr.Parent!.Type, pr.PropertyInfo!.Name)?.Validators.OfType<TimePrecisionValidatorAttribute>().SingleOrDefaultEx())
                     .Select(dtp => dtp?.Precision)
                     .Distinct()
                     .Only();

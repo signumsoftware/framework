@@ -240,7 +240,7 @@ public class PackageOperationAlgorithm : IProcessAlgorithm
                     throw new InvalidOperationException("Unexpected operation type {0}".FormatWith(operationType));
             }
 
-            line.FinishTime = TimeZoneManager.Now;
+            line.FinishTime = Clock.Now;
             line.Save();
         });
     }
@@ -265,7 +265,7 @@ public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IEnt
         {
             ((T)(IEntity)line.Target).Delete(DeleteSymbol, args);
 
-            line.FinishTime = TimeZoneManager.Now;
+            line.FinishTime = Clock.Now;
             line.Save();
         });
     }
@@ -283,7 +283,7 @@ public class PackageSave<T> : IProcessAlgorithm where T : class, IEntity
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
                 ((T)(object)line.Target).Save();
-                line.FinishTime = TimeZoneManager.Now;
+                line.FinishTime = Clock.Now;
                 line.Save();
             });
     }
@@ -307,7 +307,7 @@ public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IEn
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
             ((T)(object)line.Target).Execute(Symbol, args);
-            line.FinishTime = TimeZoneManager.Now;
+            line.FinishTime = Clock.Now;
             line.Save();
         });
     }
@@ -344,7 +344,7 @@ public class PackageConstructFromAlgorithm<F, T> : IProcessAlgorithm
                 line.Result = ((Entity)(IEntity)result).ToLite();
             }
 
-            line.FinishTime = TimeZoneManager.Now;
+            line.FinishTime = Clock.Now;
             line.Save();
         });
     }

@@ -5,7 +5,7 @@ import * as Navigator from '../Navigator'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toDurationFormat, durationToString } from '../Reflection'
+import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toDurationFormat, timeToString } from '../Reflection'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
@@ -298,10 +298,10 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         return numbroFormat.format(value);
       case "DateTime":
         const momentFormat = toLuxonFormat(this.props.format ?? token.format, token.type.name as "DateOnly" | "DateTime");
-        return DateTime.fromISO(value).toFormatFixed(momentFormat);
+        return toFormatFixed(DateTime.fromISO(value), momentFormat);
       case "Time":
         const durationFormat = toDurationFormat(this.props.format ?? token.format);
-        return durationToString(value, durationFormat);
+        return timeToString(value, durationFormat);
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;
       case "Embedded": return getToString(value as EmbeddedEntity);
@@ -329,4 +329,8 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
           this.props.onExplored();
       }).done();
   }
+}
+
+function toFormatFixed(arg0: DateTime, momentFormat: string) {
+    throw new Error('Function not implemented.')
 }

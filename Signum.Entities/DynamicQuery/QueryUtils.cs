@@ -40,7 +40,7 @@ public static class QueryUtils
         if (uType == typeof(DateOnly) || uType == typeof(DateTimeOffset))
             return FilterType.DateTime;
 
-        if (uType == typeof(TimeSpan))
+        if (uType == typeof(TimeSpan) || uType == typeof(TimeOnly))
             return FilterType.Time;
 
         if (uType.IsEnum)

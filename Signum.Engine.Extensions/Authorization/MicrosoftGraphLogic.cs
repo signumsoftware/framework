@@ -47,8 +47,8 @@ public static class MicrosoftGraphLogic
             return new List<Guid>();
 
         var tuple = ADGroupsCache.AddOrUpdate(UserEntity.Current.ToLite(),
-            addValueFactory: user => (TimeZoneManager.Now, CurrentADGroupsInternal(oid.Value)),
-            updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > TimeZoneManager.Now ? old : (TimeZoneManager.Now, CurrentADGroupsInternal(oid.Value)));
+            addValueFactory: user => (Clock.Now, CurrentADGroupsInternal(oid.Value)),
+            updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > Clock.Now ? old : (Clock.Now, CurrentADGroupsInternal(oid.Value)));
 
         return tuple.groups;
     }

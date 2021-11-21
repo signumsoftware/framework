@@ -9,10 +9,10 @@ namespace Signum.Entities.UserAssets;
 public static class FilterValueConverter
 {
     public static Dictionary<FilterType, List<IFilterValueConverter>> SpecificConverters = new Dictionary<FilterType, List<IFilterValueConverter>>()
-    {
-        { FilterType.DateTime, new List<IFilterValueConverter>{ new CurrentEntityConverter(), new SmartDateTimeFilterValueConverter() } },
-        { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter()} },
-    };
+        {
+            { FilterType.DateTime, new List<IFilterValueConverter>{ new CurrentEntityConverter(), new SmartDateTimeFilterValueConverter() } },
+            { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter()} },
+        };
 
     public static string? ToString(object? value, Type type)
     {
@@ -98,7 +98,24 @@ public static class FilterValueConverter
             {
                 var res = fvc.TryParseValue(stringValue, type);
                 if (res != null)
-                    return res;
+                {
+                    if (res is Result<object?>.Success s)
+                    {
+                        try
+                        {
+                            var v = ReflectionTools.ChangeType(s.Value, type);
+                            return new Result<object?>.Success(v);
+                        }
+                        catch (Exception e)
+                        {
+                            return new Result<object?>.Error(e.Message);
+                        }
+                    }
+                    else
+                        return res;
+
+                }
+
             }
         }
 

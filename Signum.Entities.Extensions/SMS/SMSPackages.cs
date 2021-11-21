@@ -18,7 +18,7 @@ public abstract class SMSPackageEntity : Entity, IProcessDataEntity
 {
     public SMSPackageEntity()
     {
-        this.Name = GetType().NiceName() + ": " + TimeZoneManager.Now.ToString();
+        this.Name = GetType().NiceName() + ": " + Clock.Now.ToString();
     }
 
     [StringLengthValidator(Max = 200)]

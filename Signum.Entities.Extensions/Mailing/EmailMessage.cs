@@ -27,7 +27,7 @@ public class EmailMessageEntity : Entity, IProcessLineDataEntity
 
     public Lite<EmailTemplateEntity>? Template { get; set; }
 
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     public DateTime? Sent { get; set; }
 

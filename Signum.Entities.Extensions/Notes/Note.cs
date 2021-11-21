@@ -12,7 +12,7 @@ public class NoteEntity : Entity
     [ImplementedByAll]
     public Lite<Entity> Target { get; set; }
 
-    public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; set; } = Clock.Now;
 
     [StringLengthValidator(Min = 1, MultiLine = true)]
     public string Text { get; set; }

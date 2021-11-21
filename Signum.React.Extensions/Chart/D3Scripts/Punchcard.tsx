@@ -216,8 +216,8 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
 
   return (
     <svg direction="ltr" width={width} height={height}>
-      <XKeyTicks keyColumn={horizontalColumn} keyValues={horizontalKeys} xRule={xRule} yRule={yRule} x={x} showLines={true} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)}/>
-      <YKeyTicks keyColumn={verticalColumn} keyValues={verticalKeys} xRule={xRule} yRule={yRule} y={y} showLines={true} showLabels={true} isActive={detector && (val => detector!({ c1: val }))} onDrillDown={(v, e) => onDrillDown({ c1: v }, e)}/>
+      <XKeyTicks keyColumn={horizontalColumn} keyValues={horizontalKeys} xRule={xRule} yRule={yRule} x={x} showLines={x.bandwidth() > 5} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)}/>
+      <YKeyTicks keyColumn={verticalColumn} keyValues={verticalKeys} xRule={xRule} yRule={yRule} y={y} showLines={y.bandwidth() > 5} showLabels={true} isActive={detector && (val => detector!({ c1: val }))} onDrillDown={(v, e) => onDrillDown({ c1: v }, e)}/>
       <g className="punch-panel" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content') - y.bandwidth() / 2)}>
       {data.rows
         .orderBy(horizontalColumn.getValueKey)

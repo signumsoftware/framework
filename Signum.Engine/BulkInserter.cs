@@ -315,7 +315,7 @@ public static class BulkInserter
                         .Where(a => maxRowId == null || a.RowId > maxRowId)
                         .Select(a => a.Parent)
                         .UnsafeUpdate()
-                        .Set(e => e.Ticks, a => TimeZoneManager.Now.Ticks)
+                        .Set(e => e.Ticks, a => Clock.Now.Ticks)
                         .Execute();
                 }
 

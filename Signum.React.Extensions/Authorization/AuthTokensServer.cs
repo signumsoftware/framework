@@ -72,7 +72,7 @@ public static class AuthTokenServer
 
         var c = Configuration();
 
-        bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < TimeZoneManager.Now ||
+        bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < Clock.Now ||
             c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo ||
             ctx.HttpContext.Request.Query.ContainsKey("refreshToken");
 
@@ -108,7 +108,7 @@ public static class AuthTokenServer
         AuthToken newToken = new AuthToken
         {
             User = user,
-            CreationDate = TimeZoneManager.Now,
+            CreationDate = Clock.Now,
         };
 
         OnAuthToken?.Invoke(user, oldToken, newToken);
@@ -147,7 +147,7 @@ public static class AuthTokenServer
         AuthToken newToken = new AuthToken
         {
             User = user,
-            CreationDate = TimeZoneManager.Now,
+            CreationDate = Clock.Now,
         };
 
         OnAuthToken?.Invoke(user, null, newToken);

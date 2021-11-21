@@ -22,7 +22,7 @@ import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
-  Anonymous, toDurationFormat, durationToString
+  Anonymous, toDurationFormat, timeToString, toFormatWithFixes
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -873,6 +873,9 @@ interface OverridenValue {
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
 
   if (fop.pinned && fop.pinned.active == "Checkbox_StartUnchecked")
+    return undefined;
+
+  if (fop.pinned && fop.pinned.active == "DashboardFilter")
     return undefined;
 
   if (fop.pinned && overridenValue == null) {
@@ -1859,7 +1862,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: qt => qt.filterType == "DateTime",
     formatter: qt => {
       const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
@@ -1867,7 +1870,7 @@ export const formatRules: FormatRule[] = [
     isApplicable: qt => qt.filterType == "Time",
     formatter: qt => {
       const durationFormat = toDurationFormat(qt.format);
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{durationToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{timeToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {
@@ -1883,7 +1886,7 @@ export const formatRules: FormatRule[] = [
             undefined;
 
         const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-        return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
       }, "date-cell");
     }
   },

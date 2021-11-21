@@ -273,7 +273,7 @@ public static class SchedulerLogic
         using (AuthLogic.Disable())
             lock (priorityQueue)
             {
-                DateTime now = TimeZoneManager.Now;
+                DateTime now = Clock.Now;
                 var lastExecutions = Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask != null).GroupBy(a => a.ScheduledTask!).Select(gr => KeyValuePair.Create(
                       gr.Key,
                       gr.Max(a => a.StartTime)
@@ -315,7 +315,7 @@ public static class SchedulerLogic
             timer.Change(Timeout.Infinite, Timeout.Infinite);
         else
         {
-            TimeSpan ts = NextExecution.Value - TimeZoneManager.Now;
+            TimeSpan ts = NextExecution.Value - Clock.Now;
 
             if (ts < TimeSpan.Zero)
                 ts = TimeSpan.Zero; // cannot be negative !
@@ -337,7 +337,7 @@ public static class SchedulerLogic
                     if (priorityQueue.Empty)
                         throw new InvalidOperationException("Inconstency in SchedulerLogic PriorityQueue");
 
-                    DateTime now = TimeZoneManager.Now;
+                    DateTime now = Clock.Now;
 
                     while (priorityQueue.Peek().NextDate < now)
                     {
@@ -406,7 +406,7 @@ public static class SchedulerLogic
             {
                 Task = task,
                 ScheduledTask = scheduledTask,
-                StartTime = TimeZoneManager.Now,
+                StartTime = Clock.Now,
                 MachineName = Environment.MachineName,
                 ApplicationName = Schema.Current.ApplicationName,
                 User = entityIUser.ToLite(),
@@ -435,7 +435,7 @@ public static class SchedulerLogic
 
                         using (AuthLogic.Disable())
                         {
-                            stl.EndTime = TimeZoneManager.Now;
+                            stl.EndTime = Clock.Now;
                             stl.Remarks = ctx.StringBuilder.ToString();
                             stl.Save();
                         }
@@ -456,7 +456,7 @@ public static class SchedulerLogic
                     using (var tr = Transaction.ForceNew())
                     {
                         stl.Exception = exLog;
-                        stl.EndTime = TimeZoneManager.Now;
+                        stl.EndTime = Clock.Now;
                         stl.Save();
 
                         tr.Commit();

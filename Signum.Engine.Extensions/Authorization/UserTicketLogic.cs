@@ -61,7 +61,7 @@ public static class UserTicketLogic
             {
                 User = UserEntity.Current.ToLite(),
                 Device = device,
-                ConnectionDate = TimeZoneManager.Now,
+                ConnectionDate = Clock.Now,
                 Ticket = Guid.NewGuid().ToString(),
             };
 
@@ -92,7 +92,7 @@ public static class UserTicketLogic
             {
                 User = user.ToLite(),
                 Device = device,
-                ConnectionDate = TimeZoneManager.Now,
+                ConnectionDate = Clock.Now,
                 Ticket = Guid.NewGuid().ToString(),
             }.Save();
 
@@ -105,7 +105,7 @@ public static class UserTicketLogic
 
     static int CleanExpiredTickets(UserEntity user)
     {
-        DateTime min = TimeZoneManager.Now.Subtract(ExpirationInterval);
+        DateTime min = Clock.Now.Subtract(ExpirationInterval);
 
         int expired = user.UserTickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
 

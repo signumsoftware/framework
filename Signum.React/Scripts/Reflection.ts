@@ -111,13 +111,6 @@ export function toLuxonFormat(format: string | undefined, type: "DateOnly" | "Da
   }
 }
 
-
-declare module "luxon/src/DateTime" {
-  interface DateTime {
-    toFormatFixed(format: string, options?: DateTimeFormatOptions): string;
-  }
-}
-
 const oneDigitCulture = new Set([
   "agq", "agq-CM",
   "ar-001", "ar-DJ", "ar-ER", "ar-IL", "ar-KM", "ar-MR", "ar-PS", "ar-SD", "ar-SO", "ar-SS", "ar-TD",
@@ -210,24 +203,24 @@ const oneDigitCulture = new Set([
   "zu", "zu-ZA"
 ]);
 
-DateTime.prototype.toFormatFixed = function toFormatWithFixes(this: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
+export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
 
-  if (!oneDigitCulture.has(this.locale)) {
+  if (!oneDigitCulture.has(dt.locale)) {
 
     if (format == "D")
-      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });
+      return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });
 
     if (format == "f")
-      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", ...options });
+      return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", ...options });
 
     if (format == "F")
-      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", second: "numeric", ...options });
+      return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", second: "numeric", ...options });
   }
 
   if (format == "EE") //missing
-    return this.toFormat("EEE", options).substr(0, 2);
+    return dt.toFormat("EEE", options).substr(0, 2);
 
-  return this.toFormat(format, options)
+  return dt.toFormat(format, options)
 
 }
 
@@ -349,37 +342,12 @@ export function dateToString(val: any, type: "DateOnly" | "DateTime", format?: s
   return m.toFormat(toLuxonFormat(format, type));
 }
 
-export function durationToString(val: any, format?: string) {
+export function timeToString(val: any, format?: string) {
   if (val == null)
     return "";
 
-  var duration = parseDuration(val);
+  var duration = Duration.fromISOTime(val);
   return duration.toFormat(format ?? "hh:mm:ss");
-}
-
-export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss") {
-  var valParts = timeStampToStr.split(":");
-  var formatParts = format.split(":");
-
-  if (valParts.length > formatParts.length)
-    throw new Error("Invalid Format")
-
-  const result: DurationObjectUnits = {};
-
-  for (let i = 0; i < formatParts.length; i++) {
-    const formP = formatParts[i];
-    const value = parseInt(valParts[i] || "0");
-    switch (formP) {
-      case "h":
-      case "hh": result.hours = value; break;
-      case "m":
-      case "mm": result.minutes = value; break;
-      case "s":
-      case "ss": result.seconds = value; break;
-      default: throw new Error("Unexpected " + formP);
-    }
-  }
-  return Duration.fromObject(result);
 }
 
 

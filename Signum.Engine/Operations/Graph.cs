@@ -59,7 +59,7 @@ public class Graph<T>
                 OperationLogEntity? log = new OperationLogEntity
                 {
                     Operation = operationSymbol,
-                    Start = TimeZoneManager.Now,
+                    Start = Clock.Now,
                     User = UserHolder.Current?.ToLite()!,
                 };
 
@@ -79,7 +79,7 @@ public class Graph<T>
                                 if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
                                 {
                                     log.SetTarget(result);
-                                    log.End = TimeZoneManager.Now;
+                                    log.End = Clock.Now;
                                 }
                                 else
                                     log = null;
@@ -223,7 +223,7 @@ public class Graph<T>
                 OperationLogEntity? log = new OperationLogEntity
                 {
                     Operation = operationSymbol,
-                    Start = TimeZoneManager.Now,
+                    Start = Clock.Now,
                     User = UserHolder.Current?.ToLite()!,
                     Origin = origin.ToLite(origin.IsNew),
                 };
@@ -244,7 +244,7 @@ public class Graph<T>
 
                                 if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
                                 {
-                                    log.End = TimeZoneManager.Now;
+                                    log.End = Clock.Now;
                                     log.SetTarget(result);
                                 }
                                 else
@@ -363,7 +363,7 @@ public class Graph<T>
                 OperationLogEntity? log = new OperationLogEntity
                 {
                     Operation = operationSymbol,
-                    Start = TimeZoneManager.Now,
+                    Start = Clock.Now,
                     User = UserHolder.Current?.ToLite()!
                 };
 
@@ -384,7 +384,7 @@ public class Graph<T>
 
                                 if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
                                 {
-                                    log.End = TimeZoneManager.Now;
+                                    log.End = Clock.Now;
                                     log.SetTarget(result);
                                 }
                                 else
@@ -513,7 +513,7 @@ public class Graph<T>
                 OperationLogEntity log = new OperationLogEntity
                 {
                     Operation = Symbol.Symbol,
-                    Start = TimeZoneManager.Now,
+                    Start = Clock.Now,
                     User = UserHolder.Current?.ToLite()!
                 };
 
@@ -532,7 +532,7 @@ public class Graph<T>
                                     entity.Save(); //Nothing happens if already saved
 
                                 log.SetTarget(entity);
-                                log.End = TimeZoneManager.Now;
+                                log.End = Clock.Now;
                             });
 
                         log.SaveLog();
@@ -652,7 +652,7 @@ public class Graph<T>
                 OperationLogEntity log = new OperationLogEntity
                 {
                     Operation = Symbol.Symbol,
-                    Start = TimeZoneManager.Now,
+                    Start = Clock.Now,
                     User = UserHolder.Current?.ToLite()!,
                 };
 
@@ -666,7 +666,7 @@ public class Graph<T>
                                 OnDelete((T)entity, args);
 
                                 log.SetTarget(entity);
-                                log.End = TimeZoneManager.Now;
+                                log.End = Clock.Now;
 
                                 log.SaveLog();
 

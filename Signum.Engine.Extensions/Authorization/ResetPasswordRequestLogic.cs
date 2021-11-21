@@ -134,7 +134,7 @@ public static class ResetPasswordRequestLogic
             {
                 Code = MyRandom.Current.NextString(32),
                 User = user,
-                RequestDate = TimeZoneManager.Now,
+                RequestDate = Clock.Now,
             }.Save();
         }
     }

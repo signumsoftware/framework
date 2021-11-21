@@ -47,7 +47,7 @@ public class RestLogFilter : ActionFilterAttribute
                 Action = ((ControllerActionDescriptor)context.ActionDescriptor).ActionName,
                 MachineName = System.Environment.MachineName,
                 ApplicationName = AppDomain.CurrentDomain.FriendlyName,
-                StartDate = TimeZoneManager.Now,
+                StartDate = Clock.Now,
                 UserHostAddress = connection.RemoteIpAddress!.ToString(),
                 UserHostName = request.Host.Value,
                 Referrer = request.Headers["Referrer"].ToString(),
@@ -89,7 +89,7 @@ public class RestLogFilter : ActionFilterAttribute
         {
             var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
             var originalStream = (Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey)!;
-            request.EndDate = TimeZoneManager.Now;
+            request.EndDate = Clock.Now;
             request.Exception = context.Exception.LogException()?.ToLite();
 
             RestoreOriginalStream(context);
@@ -106,7 +106,7 @@ public class RestLogFilter : ActionFilterAttribute
         try
         {
             var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
-            request.EndDate = TimeZoneManager.Now;
+            request.EndDate = Clock.Now;
 
             Stream memoryStream = RestoreOriginalStream(context);
 

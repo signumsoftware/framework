@@ -33,7 +33,7 @@ public static class NoteLogic
             
             new Graph<NoteEntity>.ConstructFrom<Entity>(NoteOperation.CreateNoteFromEntity)
             {
-                Construct = (a, _) => new NoteEntity{ CreationDate = TimeZoneManager.Now, Target = a.ToLite() }
+                Construct = (a, _) => new NoteEntity{ CreationDate = Clock.Now, Target = a.ToLite() }
             }.Register();
 
             sb.Include<NoteTypeSymbol>()

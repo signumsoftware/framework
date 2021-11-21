@@ -77,7 +77,7 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
 
         public DateTime ToDateTime()
         {
-            DateTime now = TimeZoneManager.Now;
+            DateTime now = Clock.Now;
 
             int year = Mix(now.Year, Year, "yyyy");
             int month = Mix(now.Month, Month, "mm");
@@ -254,7 +254,7 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
             value is DateOnly d ? d.ToDateTime(): 
             value is DateTime dt ? dt : throw new UnexpectedValueException(value);
 
-        SmartDateTimeSpan ss = SmartDateTimeSpan.Substract(dateTime, TimeZoneManager.Now);
+        SmartDateTimeSpan ss = SmartDateTimeSpan.Substract(dateTime, Clock.Now);
 
         return new Result<string?>.Success(ss.ToString());
     }

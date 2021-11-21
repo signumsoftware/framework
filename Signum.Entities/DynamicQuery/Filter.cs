@@ -66,7 +66,7 @@ public class FilterGroup : Filter
 
     public override string ToString()
     {
-        return $@"{this.GroupOperation}{(this.Token != null ? $" ({this.Token})": null)}
+        return $@"{this.GroupOperation}{(this.Token != null ? $" ({this.Token})" : null)}
 {Filters.ToString("\r\n").Indent(4)}";
     }
 
@@ -118,7 +118,7 @@ public class FilterCondition : Filter
         return anyAll.BuildAnyAll(collection, p, body);
     }
 
-    public static Func<bool> ToLowerString = () => false; 
+    public static Func<bool> ToLowerString = () => false;
 
     private Expression GetConditionExpressionBasic(BuildExpressionContext context)
     {
@@ -160,7 +160,7 @@ public class FilterCondition : Filter
             }
 
             Expression right = Expression.Constant(clone, typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()));
-            var contains =  Expression.Call(miContainsEnumerable.MakeGenericMethod(Token.Type.Nullify()), right, left.Nullify());
+            var contains = Expression.Call(miContainsEnumerable.MakeGenericMethod(Token.Type.Nullify()), right, left.Nullify());
 
             var result = !hasNull || Token.Type == typeof(string) ? (Expression)contains :
                     Expression.Or(Expression.Equal(left, Expression.Constant(null, Token.Type.Nullify())), contains);
@@ -182,8 +182,8 @@ public class FilterCondition : Filter
                 left = Expression.Coalesce(left, Expression.Constant(""));
             }
 
-            
-            if(Token.Type == typeof(string) && ToLowerString())
+
+            if (Token.Type == typeof(string) && ToLowerString())
             {
                 Expression right = Expression.Constant(((string)val!).ToLower(), Token.Type);
                 return QueryUtils.GetCompareExpression(Operation, Expression.Call(left, miToLower), right);
@@ -264,4 +264,5 @@ public enum PinnedFilterActive
     Checkbox_StartChecked,
     [Description("Checkbox (start unchecked)")]
     Checkbox_StartUnchecked,
+    DashboardFilter,
 }

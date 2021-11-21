@@ -3,7 +3,7 @@ import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import { DateTimePicker, DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes, softCast } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration, tryGetTypeInfo } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -52,7 +52,7 @@ export type ValueLineType =
   "Number" |
   "Decimal" |
   "Color" |
-  "TimeSpan" |
+  "Time" |
   "RadioGroup" |
   "Password";
 
@@ -129,8 +129,8 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "decimal")
       return "Decimal";
 
-    if (t.name == "TimeSpan")
-      return "TimeSpan";
+    if (t.name == "TimeSpan" || t.name == "TimeOnly")
+      return "Time";
 
     return undefined;
   }
@@ -729,7 +729,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
-          {m?.toFormatFixed(luxonFormat)}
+          {m && toFormatWithFixes(m, luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
     );
@@ -793,11 +793,11 @@ export function trimDateToFormat(date: DateTime, type: "DateOnly" | "DateTime", 
   return DateTime.fromFormat(formatted, luxonFormat,{locale:'en-GB'}); 
 }
 
-ValueLineRenderers.renderers.set("TimeSpan", (vl) => {
-  return durationTextBox(vl, isDuration);
+ValueLineRenderers.renderers.set("Time", (vl) => {
+  return timeTextBox(vl, isDuration);
 });
 
-function durationTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
+function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
 
   const s = vl.props;
 
@@ -808,7 +808,7 @@ function durationTextBox(vl: ValueLineController, validateKey: (e: React.Keyboar
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.props.valueHtmlAttributes, "numeric")} innerRef={vl.inputElement}>
-            {durationToString(s.ctx.value, durationFormat)}
+            {timeToString(s.ctx.value, durationFormat)}
           </FormControlReadonly>
         )}
       </FormGroup>
@@ -830,7 +830,7 @@ function durationTextBox(vl: ValueLineController, validateKey: (e: React.Keyboar
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <DurationTextBox htmlAttributes={htmlAttributes}
+        <TimeTextBox htmlAttributes={htmlAttributes}
           value={s.ctx.value}
           onChange={handleOnChange}
           validateKey={validateKey}
@@ -852,12 +852,12 @@ export interface DurationTextBoxProps {
   innerRef?: React.RefObject<HTMLInputElement>;
 }
 
-export function DurationTextBox(p: DurationTextBoxProps) {
+export function TimeTextBox(p: DurationTextBoxProps) {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 
   const value = text != undefined ? text :
-    p.value != undefined ? durationToString(p.value, p.format) :
+    p.value != undefined ? timeToString(p.value, p.format) :
       "";
 
   return <input ref={p.innerRef}
@@ -885,10 +885,11 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
   function handleOnBlur(e: React.FocusEvent<any>) {
 
-    var format = p.format!;
-
     const input = e.currentTarget as HTMLInputElement;
-    const result = input.value == undefined || input.value.length == 0 ? null : parseDurationRelaxed(input.value, format)?.toFormat(format) ?? null;
+
+    var duration = input.value == undefined || input.value.length == 0 ? null : Duration.fromISOTime(fixCasual(input.value));
+
+    const result = duration && duration.toISOTime();
     setText(undefined);
     if (p.value != result)
       p.onChange(result);
@@ -907,38 +908,24 @@ export function DurationTextBox(p: DurationTextBoxProps) {
   }
 }
 
-export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss"): Duration | null {
-  var valParts = timeStampOrHumanStr.split(":");
-  var formatParts = format.split(":").map(p => p.length == 1 ? p + p : p); //"h -> hh"
-  if (valParts.length == 1 && formatParts.length > 1) {
-    const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
+function fixCasual(val: string) {
 
-    var inferedFormat = validFormats.firstOrNull(f => f.length >= timeStampOrHumanStr.length);
-    if (inferedFormat == null)
-      return null;
+  if (val.contains(":"))
+    return val.split(":").map(a => a.padStart(2, "0")).join(":");
 
-    var fixedVal = timeStampOrHumanStr.padStart(inferedFormat.length, '0');
+  if (val.length == 1)
+    return "0" + val + "00";
 
-    const getPart = (part: string) => {
-      var index = inferedFormat!.indexOf(part);
-      if (index == -1)
-        return 0;
+  if (val.length == 2)
+    return  val + "00";
 
-      return parseInt(fixedVal.substr(index, part.length));
-    }
+  if (val.length == 3)
+    return "0" + val;
 
-    return Duration.fromObject({
-      hour: getPart("hh"),
-      minute: getPart("mm"),
-      second: getPart("ss"),
-    });
-
-  } else {
-    return parseDuration(timeStampOrHumanStr, format);
-  }
+  return val;
 }
 
-DurationTextBox.defaultProps = {
+TimeTextBox.defaultProps = {
   format: "hh:mm:ss"
 };
 

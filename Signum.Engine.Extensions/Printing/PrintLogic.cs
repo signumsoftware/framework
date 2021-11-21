@@ -55,7 +55,7 @@ public static class PrintingLogic
 
             SimpleTaskLogic.Register(PrintTask.RemoveOldFiles, (ScheduledTaskContext ctx) =>
             {
-                var lines = Database.Query<PrintLineEntity>().Where(a => a.State == PrintLineState.Printed).Where(b => b.CreationDate <= TimeZoneManager.Now.AddMinutes(-DeleteFilesAfter));
+                var lines = Database.Query<PrintLineEntity>().Where(a => a.State == PrintLineState.Printed).Where(b => b.CreationDate <= Clock.Now.AddMinutes(-DeleteFilesAfter));
                 foreach (var line in lines)
                 {
                     try
@@ -253,7 +253,7 @@ public class PrintLineGraph : Graph<PrintLineEntity, PrintLineState>
                 PrintingLogic.Print?.Invoke(line);
                 
                 line.State = PrintLineState.Printed;
-                line.PrintedOn = TimeZoneManager.Now;
+                line.PrintedOn = Clock.Now;
                 line.Save();
             }
             catch (Exception ex)

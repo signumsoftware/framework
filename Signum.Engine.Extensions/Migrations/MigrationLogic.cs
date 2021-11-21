@@ -119,7 +119,7 @@ public static class MigrationLogic
 
         var log = !Schema.Current.Tables.ContainsKey(typeof(LoadMethodLogEntity)) ? null : new LoadMethodLogEntity
         {
-            Start = TimeZoneManager.Now,
+            Start = Clock.Now,
             ClassName = action.Method.DeclaringType!.FullName,
             MethodName = action.Method.Name,
             Description = description,
@@ -130,7 +130,7 @@ public static class MigrationLogic
             action();
             if (log != null)
             {
-                log.End = TimeZoneManager.Now;
+                log.End = Clock.Now;
                 log.Save();
                 Console.WriteLine("------- Executed {0} (took {1})".FormatWith(showDescription, (log.End.Value - log.Start).NiceToString()).PadRight(Console.WindowWidth - 2, '-'));
             }
@@ -148,7 +148,7 @@ public static class MigrationLogic
             {
                 var exLog = e.LogException();
                 log.Exception = exLog.ToLite();
-                log.End = TimeZoneManager.Now;
+                log.End = Clock.Now;
                 log.Save();
             }
 

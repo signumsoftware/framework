@@ -18,7 +18,7 @@ public partial class EmailSenderManager : IEmailSenderManager
             if (!EmailLogic.Configuration.SendEmails)
             {
                 email.State = EmailMessageState.Sent;
-                email.Sent = TimeZoneManager.Now;
+                email.Sent = Clock.Now;
                 email.Save();
                 return;
             }
@@ -28,7 +28,7 @@ public partial class EmailSenderManager : IEmailSenderManager
                 SendInternal(email);
 
                 email.State = EmailMessageState.Sent;
-                email.Sent = TimeZoneManager.Now;
+                email.Sent = Clock.Now;
                 email.Save();
             }
             catch (Exception ex)

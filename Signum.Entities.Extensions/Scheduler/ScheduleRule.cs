@@ -15,7 +15,7 @@ public interface IScheduleRuleEntity : IEntity
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
 {
-    public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
+    public DateTime StartingOn { get; set; } = Clock.Now.Date;
 
     public DateTime Next(DateTime now)
     {
@@ -52,7 +52,7 @@ public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class ScheduleRuleWeekDaysEntity :  Entity, IScheduleRuleEntity
 {
-    public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
+    public DateTime StartingOn { get; set; } = Clock.Now.Date;
 
     public bool Monday { get; set; }
 
@@ -149,7 +149,7 @@ public class ScheduleRuleWeekDaysEntity :  Entity, IScheduleRuleEntity
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class ScheduleRuleMonthsEntity : Entity, IScheduleRuleEntity
 {
-    public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
+    public DateTime StartingOn { get; set; } = Clock.Now.Date;
 
     public bool January { get; set; }
     public bool February { get; set; }

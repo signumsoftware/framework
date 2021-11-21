@@ -18,7 +18,7 @@ public static class WorkflowLogic
 
     [AutoExpressionField]
     public static bool HasExpired(this WorkflowEntity w) => 
-        As.Expression(() => w.ExpirationDate.HasValue && w.ExpirationDate.Value < TimeZoneManager.Now);
+        As.Expression(() => w.ExpirationDate.HasValue && w.ExpirationDate.Value < Clock.Now);
 
     [AutoExpressionField]
     public static IQueryable<WorkflowPoolEntity> WorkflowPools(this WorkflowEntity e) => 

@@ -195,10 +195,9 @@ public class ReactCodeGenerator
             sb.AppendLine("using {0};".FormatWith(item));
 
         sb.AppendLine();
-        sb.AppendLine("namespace " + GetServerNamespace(mod));
-        sb.AppendLine("{");
-        sb.Append(WriteServerClass(mod).Indent(2));
-        sb.AppendLine("}");
+        sb.AppendLine("namespace " + GetServerNamespace(mod) + ";");
+        sb.AppendLine();
+        sb.Append(WriteServerClass(mod));
 
         return sb.ToString();
     }
@@ -247,13 +246,10 @@ public class ReactCodeGenerator
         foreach (var item in GetServerUsingNamespaces(mod))
             sb.AppendLine("using {0};".FormatWith(item));
 
-        sb.AppendLine("using Microsoft.AspNetCore.Mvc;");
-
         sb.AppendLine();
-        sb.AppendLine("namespace " + GetServerNamespace(mod));
-        sb.AppendLine("{");
-        sb.Append(WriteControllerClass(mod).Indent(2));
-        sb.AppendLine("}");
+        sb.AppendLine("namespace " + GetServerNamespace(mod) + ";");
+        sb.AppendLine();
+        sb.Append(WriteControllerClass(mod));
 
         return sb.ToString();
     }
@@ -292,17 +288,6 @@ public class ReactCodeGenerator
     {
         var result = new List<string>()
         {
-            "System",
-            "System.Collections.Generic",
-            "System.Linq",
-            "System.Text",
-            "System.Reflection",
-            "System.Web.Http",
-            "Signum.Utilities",
-            "Signum.Entities",
-            "Signum.Engine",
-            "Signum.Engine.Operations",
-            "Signum.React",
         };
 
         result.AddRange(mod.Types.Select(t => t.Namespace!).Distinct());

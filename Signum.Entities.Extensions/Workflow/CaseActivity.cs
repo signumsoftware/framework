@@ -17,7 +17,7 @@ public class CaseActivityEntity : Entity
     [StringLengthValidator(Min = 3, Max = 255)]
     public string OriginalWorkflowActivityName { get; set; }
 
-    public DateTime StartDate { get; set; } = TimeZoneManager.Now;
+    public DateTime StartDate { get; set; } = Clock.Now;
 
     public Lite<CaseActivityEntity>? Previous { get; set; }
 
@@ -30,7 +30,7 @@ public class CaseActivityEntity : Entity
     public double? Duration { get; set; }
     
     [AutoExpressionField]
-    public double? DurationRealTime => As.Expression(() => Duration ?? (double?)(TimeZoneManager.Now - StartDate).TotalMinutes);
+    public double? DurationRealTime => As.Expression(() => Duration ?? (double?)(Clock.Now - StartDate).TotalMinutes);
 
     [AutoExpressionField]
     public double? DurationRatio => As.Expression(() => Duration / ((WorkflowActivityEntity)WorkflowActivity).EstimatedDuration);
@@ -189,7 +189,7 @@ public class ActivityWithRemarks : ModelEntity
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class CaseActivityExecutedTimerEntity : Entity
 {
-    public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     
     public Lite<CaseActivityEntity> CaseActivity { get; set; }

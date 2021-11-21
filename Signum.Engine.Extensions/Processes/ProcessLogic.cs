@@ -203,7 +203,7 @@ public static class ProcessLogic
                 Execute = (p, _) =>
                 {
                     p.State = ProcessState.Canceled;
-                    p.CancelationDate = TimeZoneManager.Now;
+                    p.CancelationDate = Clock.Now;
                 }
             }.Register();
 
@@ -229,7 +229,7 @@ public static class ProcessLogic
                 Execute = (p, _) =>
                 {
                     p.State = ProcessState.Suspending;
-                    p.SuspendDate = TimeZoneManager.Now;
+                    p.SuspendDate = Clock.Now;
                 }
             }.Register();
 
@@ -264,7 +264,7 @@ public static class ProcessLogic
 
     public static void ExecuteTest(this ProcessEntity p, bool writeToConsole = false)
     {
-        p.QueuedDate = TimeZoneManager.Now;
+        p.QueuedDate = Clock.Now;
         var ep = new ExecutingProcess(GetProcessAlgorithm(p.Algorithm), p)
         {
             WriteToConsole = writeToConsole

@@ -81,7 +81,7 @@ public static class DynamicSqlMigrationLogic
 
                         return new DynamicSqlMigrationEntity
                         {
-                            CreationDate = TimeZoneManager.Now,
+                            CreationDate = Clock.Now,
                             CreatedBy = UserEntity.Current.ToLite(),
                             Script = script?.ToString() ?? "",
                         };
@@ -110,7 +110,7 @@ public static class DynamicSqlMigrationLogic
                     if (CurrentLog != null)
                         throw new InvalidOperationException("There is already a migration running");
 
-                    e.ExecutionDate = TimeZoneManager.Now;
+                    e.ExecutionDate = Clock.Now;
                     e.ExecutedBy = UserEntity.Current.ToLite();
 
                     var oldOut = Console.Out;

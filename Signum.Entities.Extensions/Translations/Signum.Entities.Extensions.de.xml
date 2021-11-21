@@ -403,7 +403,7 @@
     <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="ChartColumnType">
-    <Member Name="Date" Description="Datum" />
+    <Member Name="DateOnly" Description="Datum" />
     <Member Name="DateTime" Description="Datum Uhrzeit" />
     <Member Name="Enum" Description="Enum" />
     <Member Name="Groupable" Description="Gruppierbar" />

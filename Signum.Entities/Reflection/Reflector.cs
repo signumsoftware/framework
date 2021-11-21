@@ -410,7 +410,7 @@ public static class Reflector
             if (datetimePrecision != null)
                 return datetimePrecision.FormatString;
 
-            TimeSpanPrecisionValidatorAttribute? timeSpanPrecision = pp.Validators.OfType<TimeSpanPrecisionValidatorAttribute>().SingleOrDefaultEx();
+            TimePrecisionValidatorAttribute? timeSpanPrecision = pp.Validators.OfType<TimePrecisionValidatorAttribute>().SingleOrDefaultEx();
             if (timeSpanPrecision != null)
                 return timeSpanPrecision.FormatString;
 

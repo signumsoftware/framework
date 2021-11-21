@@ -81,7 +81,7 @@ public class SelectTest
     [Fact]
     public void SelectNoColumns()
     {
-        var list = Database.Query<AlbumEntity>().Select(a => new { TimeZoneManager.Now, Album = (AlbumEntity?)null, Artist = (Lite<ArtistEntity>?)null }).ToList();
+        var list = Database.Query<AlbumEntity>().Select(a => new { Clock.Now, Album = (AlbumEntity?)null, Artist = (Lite<ArtistEntity>?)null }).ToList();
     }
 
     [Fact]

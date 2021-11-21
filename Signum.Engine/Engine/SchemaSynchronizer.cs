@@ -27,10 +27,10 @@ public static class SchemaSynchronizer
         Dictionary<string, DiffTable> databaseTables = Schema.Current.Settings.IsPostgres ?
             PostgresCatalogSchema.GetDatabaseDescription(Schema.Current.DatabaseNames()) :
             SysTablesSchema.GetDatabaseDescription(s.DatabaseNames());
-        
+
         var databaseTablesHistory = databaseTables.Extract((key, val) => val.TemporalType == SysTableTemporalType.HistoryTable);
         HashSet<SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
-            PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()): 
+            PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()) :
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
         SimplifyDiffTables?.Invoke(databaseTables);
@@ -78,7 +78,7 @@ public static class SchemaSynchronizer
             diff.Columns = replacements.ApplyReplacementsToOld(diff.Columns, key);
             diff.Indices = ApplyIndexAutoReplacements(diff, tab, modelIndices[tab]);
 
-            if(diff.TemporalTableName != null)
+            if (diff.TemporalTableName != null)
             {
                 var diffTemp = databaseTablesHistory.GetOrThrow(replacements.Apply(Replacements.KeyTables, diff.TemporalTableName.ToString()));
                 diffTemp.Columns = replacements.ApplyReplacementsToOld(diffTemp.Columns, key);
@@ -118,8 +118,8 @@ public static class SchemaSynchronizer
             //use database without replacements to just remove indexes
             SqlPreCommand? dropStatistics =
                 Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
-                createNew:  null,
-                removeOld:  (tn, dif) => sqlBuilder.DropStatistics(tn, dif.Stats),
+                createNew: null,
+                removeOld: (tn, dif) => sqlBuilder.DropStatistics(tn, dif.Stats),
                 mergeBoth: (tn, tab, dif) =>
                 {
                     var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
@@ -127,7 +127,7 @@ public static class SchemaSynchronizer
                     return sqlBuilder.DropStatistics(tn, dif.Stats.Where(a => a.Columns.Any(removedColums.Contains)).ToList());
                 });
 
-            
+
             SqlPreCommand? dropIndices =
                 Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
                 createNew: null,
@@ -135,12 +135,12 @@ public static class SchemaSynchronizer
                 mergeBoth: (tn, tab, dif) =>
                 {
                     Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
-                    
+
                     var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
 
-                    var changes = Synchronizer.SynchronizeScript(Spacing.Simple, 
-                        modelIxs.Where(kvp => !(kvp.Value is PrimaryKeyIndex)).ToDictionary(), 
-                        dif.Indices.Where(kvp =>!kvp.Value.IsPrimary).ToDictionary(),
+                    var changes = Synchronizer.SynchronizeScript(Spacing.Simple,
+                        modelIxs.Where(kvp => !(kvp.Value is PrimaryKeyIndex)).ToDictionary(),
+                        dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: null,
                         removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.DropIndex(dif.Name, dix) : null
@@ -159,8 +159,8 @@ public static class SchemaSynchronizer
 
                     var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
 
-                    var changes = Synchronizer.SynchronizeScript(Spacing.Simple, 
-                        modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(), 
+                    var changes = Synchronizer.SynchronizeScript(Spacing.Simple,
+                        modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: null,
                         removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
@@ -212,11 +212,11 @@ public static class SchemaSynchronizer
 
                         bool disableEnableSystemVersioning = false;
 
-                        var disableSystemVersioning = !sqlBuilder.IsPostgres && dif.TemporalType != SysTableTemporalType.None && 
-                        (tab.SystemVersioned == null || 
-                        !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString()) || 
-                        (disableEnableSystemVersioning = StrongColumnChanges(tab, dif))) ? 
-                        sqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) : 
+                        var disableSystemVersioning = !sqlBuilder.IsPostgres && dif.TemporalType != SysTableTemporalType.None &&
+                        (tab.SystemVersioned == null ||
+                        !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString()) ||
+                        (disableEnableSystemVersioning = StrongColumnChanges(tab, dif))) ?
+                        sqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) :
                         null;
 
                         var dropPeriod = !sqlBuilder.IsPostgres && dif.Period != null &&
@@ -226,7 +226,7 @@ public static class SchemaSynchronizer
                         var modelPK = modelIndices[tab].Values.OfType<PrimaryKeyIndex>().SingleOrDefaultEx();
                         var diffPK = dif.Indices.Values.SingleOrDefaultEx(a => a.IsPrimary);
 
-                        var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK)) ? sqlBuilder.DropIndex(tab.Name, diffPK) : null; 
+                        var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK)) ? sqlBuilder.DropIndex(tab.Name, diffPK) : null;
 
                         var columns = Synchronizer.SynchronizeScript(
                                 Spacing.Simple,
@@ -258,7 +258,7 @@ public static class SchemaSynchronizer
                                                     UpdateCompatible(sqlBuilder, replacements, tab, dif, tabCol, difCol),
                                                     (sqlBuilder.IsPostgres ?
                                                     tabCol.DbType.PostgreSql == NpgsqlDbType.Varchar && difCol.DbType.PostgreSql == NpgsqlDbType.Char :
-                                                    tabCol.DbType.SqlServer == SqlDbType.NVarChar && difCol.DbType.SqlServer == SqlDbType.NChar)? sqlBuilder.UpdateTrim(tab, tabCol) : null),
+                                                    tabCol.DbType.SqlServer == SqlDbType.NVarChar && difCol.DbType.SqlServer == SqlDbType.NChar) ? sqlBuilder.UpdateTrim(tab, tabCol) : null),
 
                                             UpdateByFkChange(tn, difCol, tabCol, ChangeName),
 
@@ -278,7 +278,7 @@ public static class SchemaSynchronizer
                                             drop
                                         ));
 
-                                        if (disableSystemVersioning != null)  
+                                        if (disableSystemVersioning != null)
                                         {
                                             delayedUpdates.Add(update == null ? null : ForHistoryTable(update, tab));
                                             delayedDrops.Add(drop == null ? null : ForHistoryTable(drop, tab));
@@ -300,9 +300,9 @@ public static class SchemaSynchronizer
                             (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
                             (SqlPreCommandSimple)sqlBuilder.AlterTableAddPeriod(tab) : null;
 
-                        var addSystemVersioning = (!sqlBuilder.IsPostgres && tab.SystemVersioned != null && 
-                            (dif.Period == null || dif.TemporalTableName == null || 
-                            !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) || 
+                        var addSystemVersioning = (!sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
+                            (dif.Period == null || dif.TemporalTableName == null ||
+                            !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName.ToString()), tab.SystemVersioned.TableName.ToString()) ||
                             disableEnableSystemVersioning) ?
                             sqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a => a.GoBefore = true) : null);
 
@@ -314,9 +314,9 @@ public static class SchemaSynchronizer
                             if (periodRows.Count == 2)
                             {
                                 combinedAddPeriod = new SqlPreCommandSimple($@"ALTER TABLE {tn} ADD
-{periodRows[0].Sql.After(" ADD ").BeforeLast(";")},
-{periodRows[1].Sql.After(" ADD ").BeforeLast(";")},
-{addPeriod.Sql.After(" ADD ")}
+    {periodRows[0].Sql.After(" ADD ").BeforeLast(";")},
+    {periodRows[1].Sql.After(" ADD ").BeforeLast(";")},
+    {addPeriod.Sql.After(" ADD ")}
 ");
                                 addPeriod = null;
                                 columns = cols.Leaves().Except(periodRows).Combine(cols.Spacing);
@@ -325,13 +325,13 @@ public static class SchemaSynchronizer
 
                         delayedAddSystemVersioning.Add(SqlPreCommand.Combine(Spacing.Simple, addPeriod, addSystemVersioning));
 
-                        return SqlPreCommand.Combine(Spacing.Simple, 
-                            rename, 
-                            disableSystemVersioning, 
-                            dropPeriod, 
+                        return SqlPreCommand.Combine(Spacing.Simple,
+                            rename,
+                            disableSystemVersioning,
+                            dropPeriod,
                             dropPrimaryKey,
-                            combinedAddPeriod, 
-                            columns, 
+                            combinedAddPeriod,
+                            columns,
                             columnsHistory,
                             createPrimaryKey);
                     });
@@ -426,7 +426,7 @@ public static class SchemaSynchronizer
                     return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
                 });
 
-            
+
 
             SqlPreCommand? dropSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
                 modelSchemas.ToDictionary(a => a.ToString()),
@@ -436,19 +436,19 @@ public static class SchemaSynchronizer
                 mergeBoth: (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : sqlBuilder.DropSchema(oldSN)
              );
 
-            return SqlPreCommand.Combine(Spacing.Triple, 
+            return SqlPreCommand.Combine(Spacing.Triple,
                 preRenameColumns,
-                createSchemas, 
-                dropStatistics, 
+                createSchemas,
+                dropStatistics,
 
-                dropIndices, dropIndicesHistory,  
+                dropIndices, dropIndicesHistory,
                 dropForeignKeys,
-                
+
                 tables, historyTables,
                 delayedUpdates.Combine(Spacing.Double), delayedDrops.Combine(Spacing.Double), delayedAddSystemVersioning.Combine(Spacing.Double),
                 syncEnums,
                 addForeingKeys,
-                addIndices, addIndicesHistory, 
+                addIndices, addIndicesHistory,
 
                 dropSchemas);
         }
@@ -461,7 +461,7 @@ public static class SchemaSynchronizer
 
     private static SqlPreCommand? UpdateForeignKeyTypeChanged(SqlBuilder sqlBuilder, ITable tab, DiffTable dif, IColumn tabCol, DiffColumn difCol, Func<ObjectName, ObjectName> changeName, Dictionary<ObjectName, Dictionary<string, string>> preRenameColumnsList)
     {
-        if(difCol.ForeignKey != null && tabCol.ReferenceTable != null)
+        if (difCol.ForeignKey != null && tabCol.ReferenceTable != null)
         {
             if (changeName(difCol.ForeignKey.TargetTable).Equals(tabCol.ReferenceTable.Name))
             {
@@ -481,7 +481,7 @@ public static class SchemaSynchronizer
 SET {tabCol.Name} = {fkAlias}.{tabCol.ReferenceTable.PrimaryKey.Name.SqlEscape(sqlBuilder.IsPostgres)}
 FROM {tab.Name} {tabAlias}
 JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAlias}.{oldId}
-            ");
+                ");
             }
         }
 
@@ -513,7 +513,7 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
     {
         if (!(difCol.Nullable && !tabCol.Nullable.ToBool()))
             return sqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol);
-        
+
         var defaultValue = GetDefaultValue(tab, tabCol, replacements, forNewColumn: false);
 
         if (defaultValue == "force")
@@ -560,7 +560,7 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
             return SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
                 new SqlPreCommandSimple($@"UPDATE {table.Name} SET
-{column.Name} = {sqlBuilder.Quote(column.DbType, defaultValue)}
+    {column.Name} = {sqlBuilder.Quote(column.DbType, defaultValue)}
 WHERE {where}"))!;
         }
         else
@@ -581,7 +581,7 @@ WHERE {where}"))!;
             return SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
                 sqlBuilder.IsPostgres ?
-                sqlBuilder.AlterTableAlterColumnDropDefault(table.Name, column.Name):
+                sqlBuilder.AlterTableAlterColumnDropDefault(table.Name, column.Name) :
                 sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
         }
     }
@@ -591,11 +591,11 @@ WHERE {where}"))!;
         if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn)
             return sqlBuilder.AlterTableAddColumn(table, column);
 
-        var defaultValue = 
-            column.DbType.IsNumber()? "0" :
-            column.DbType.IsString()? "''" :
+        var defaultValue =
+            column.DbType.IsNumber() ? "0" :
+            column.DbType.IsString() ? "''" :
             column.DbType.IsDate() ? "GetDate()" :
-            column.DbType.IsGuid() ?  "'00000000-0000-0000-0000-000000000000'" :
+            column.DbType.IsGuid() ? "'00000000-0000-0000-0000-000000000000'" :
             "?";
 
         var tempDefault = new SqlBuilder.DefaultConstraint(
@@ -642,7 +642,7 @@ WHERE {where}"))!;
             if ((column.DbType.IsDate() || column.DbType.IsTime()) && !defaultValue.Contains("'") && defaultValue != typeDefault)
                 defaultValue = "'" + defaultValue + "'";
 
-            if(column.DbType.IsBoolean() && defaultValue != typeDefault)
+            if (column.DbType.IsBoolean() && defaultValue != typeDefault)
             {
                 defaultValue = Schema.Current.Settings.IsPostgres ?
                      (defaultValue == "0" ? "false" : defaultValue == "1" ? "true" : defaultValue) :
@@ -731,21 +731,19 @@ WHERE {where}"))!;
 
         AliasGenerator ag = new AliasGenerator();
 
+        var newFk = tabCol.ReferenceTable.Name;
+        var tnAlias = ag.NextTableAlias(tn);
+        var oldFkAlias = ag.NextTableAlias(oldFk.Name);
+
         return new SqlPreCommandSimple(
-@"-- Column {0} was referencing {3} but not references {1}. An update is needed?
-UPDATE {2}
-SET {0} =  -- get {5} id from {4}.Id
-FROM {1} {2}
-JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
-            tn, ag.NextTableAlias(tn),
-            oldFk, ag.NextTableAlias(oldFk.Name),
-            tabCol.ReferenceTable.Name.Name));
+@$"-- Column {tn}.{tabCol.Name} was referencing {oldFk} but not references {newFk}. An update is needed?
+UPDATE {tnAlias}
+SET {tabCol.Name} =  -- get {newFk} id from {oldFkAlias}.Id
+FROM {tn} {tnAlias}
+JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
     }
 
     public static Func<DiffTable, bool>? IgnoreTable = null;
-
-  
-
 
 
 

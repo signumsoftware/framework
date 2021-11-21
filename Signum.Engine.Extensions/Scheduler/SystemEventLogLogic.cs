@@ -58,7 +58,7 @@ public static class SystemEventLogLogic
                 using (ExecutionMode.Global())
                     new SystemEventLogEntity
                     {
-                        Date = TimeZoneManager.Now,
+                        Date = Clock.Now,
                         MachineName = Environment.MachineName,
                         User = UserHolder.Current?.ToLite(),
                         EventType = eventType,

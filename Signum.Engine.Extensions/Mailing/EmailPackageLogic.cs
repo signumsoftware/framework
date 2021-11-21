@@ -105,7 +105,7 @@ public class CreateEmailsSendAsyncProcessAlgorithm : IProcessAlgorithm
                 email.SendMailAsync();
 
             line.Result = emails.Only()?.ToLite();
-            line.FinishTime = TimeZoneManager.Now;
+            line.FinishTime = Clock.Now;
             line.Save();
         });
     }

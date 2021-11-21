@@ -357,7 +357,7 @@ public class UpdateUpdateTest
             ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
             int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate()
-                .Set(a => a.Target, a => a.CreationTime > TimeZoneManager.Now ? michael : null!)
+                .Set(a => a.Target, a => a.CreationTime > Clock.Now ? michael : null!)
                 .Execute();
             //tr.Commit();
         }
@@ -372,7 +372,7 @@ public class UpdateUpdateTest
             ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
             int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate()
-                .Set(a => a.OtherTarget, a => a.CreationTime > TimeZoneManager.Now ? michael.ToLite() : null)
+                .Set(a => a.OtherTarget, a => a.CreationTime > Clock.Now ? michael.ToLite() : null)
                 .Execute();
             //tr.Commit();
         }

@@ -660,7 +660,7 @@ public class DateValueProvider : ValueProviderBase
     {
         try
         {
-            var obj = dateTimeExpression == null ? TimeZoneManager.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), isList: false);
+            var obj = dateTimeExpression == null ? Clock.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), isList: false);
             this.dateTimeExpression = dateTimeExpression;
         }
         catch (Exception e)
@@ -673,7 +673,7 @@ public class DateValueProvider : ValueProviderBase
 
     public override object? GetValue(TemplateParameters p)
     {
-        return dateTimeExpression == null ? TimeZoneManager.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), isList: false);
+        return dateTimeExpression == null ? Clock.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), isList: false);
     }
 
     public override void FillQueryTokens(List<QueryToken> list)

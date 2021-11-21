@@ -104,7 +104,7 @@ public static class ViewLogLogic
                         using (ExecutionMode.Global())
                         using (var tr = Transaction.ForceNew())
                         {
-                            viewLog.EndDate = TimeZoneManager.Now;
+                            viewLog.EndDate = Clock.Now;
                             viewLog.Data = new BigStringEmbedded(str);
                             using (ExecutionMode.Global())
                                 viewLog.Save();
@@ -145,7 +145,7 @@ public static class ViewLogLogic
 
         return new Disposable(() =>
         {
-            viewLog.EndDate = TimeZoneManager.Now;
+            viewLog.EndDate = Clock.Now;
             using (ExecutionMode.Global())
                 viewLog.Save();
         });

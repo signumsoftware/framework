@@ -46,6 +46,7 @@ public static class SignumServer
             s.Converters.Add(new ResultTableConverter());
             s.Converters.Add(new TimeSpanConverter());
             s.Converters.Add(new DateOnlyConverter());
+            s.Converters.Add(new TimeOnlyConverter());
 
         });
 

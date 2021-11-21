@@ -165,7 +165,7 @@ public class SqlMigrationRunner
 
             try
             {
-                DateTime start = TimeZoneManager.Now;
+                DateTime start = Clock.Now;
 
                 foreach (var mi in migrations.AsEnumerable().Where(a => !a.IsExecuted))
                 {
@@ -176,7 +176,7 @@ public class SqlMigrationRunner
 
                 ResetCache();
 
-                Console.WriteLine("Elapsed time: {0}".FormatWith(TimeZoneManager.Now.Subtract(start).ToString(@"hh\:mm\:ss")));
+                Console.WriteLine("Elapsed time: {0}".FormatWith(Clock.Now.Subtract(start).ToString(@"hh\:mm\:ss")));
 
                 return true;
             }

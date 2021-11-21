@@ -1,7 +1,7 @@
 
 namespace Signum.Entities;
 
-public static class TimeZoneManager
+public static class Clock
 {
     public static TimeZoneMode Mode { get; set; }
 

@@ -188,13 +188,13 @@ public static class WorkflowScriptRunner
     private static bool RecruitQueuedItems()
     {
         DateTime? firstDate = WorkflowLogic.Configuration.AvoidExecutingScriptsOlderThan == null ?
-            null : (DateTime?)TimeZoneManager.Now.AddHours(-WorkflowLogic.Configuration.AvoidExecutingScriptsOlderThan.Value);
+            null : (DateTime?)Clock.Now.AddHours(-WorkflowLogic.Configuration.AvoidExecutingScriptsOlderThan.Value);
 
         queuedItems = Database.Query<CaseActivityEntity>()
             .Where(ca => !ca.Workflow().HasExpired() &&
                          ca.DoneDate == null &&
                          ((firstDate == null || firstDate < ca.ScriptExecution!.NextExecution) &&
-                         ca.ScriptExecution!.NextExecution < TimeZoneManager.Now))
+                         ca.ScriptExecution!.NextExecution < Clock.Now))
             .UnsafeUpdate()
             .Set(m => m.ScriptExecution!.ProcessIdentifier, m => processIdentifier)
             .Execute();
@@ -231,7 +231,7 @@ public static class WorkflowScriptRunner
 
     private static void SetTimer()
     {
-        nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(WorkflowLogic.Configuration.ScriptRunnerPeriod * 1000);
+        nextPlannedExecution = Clock.Now.AddMilliseconds(WorkflowLogic.Configuration.ScriptRunnerPeriod * 1000);
         timer.Change(WorkflowLogic.Configuration.ScriptRunnerPeriod * 1000, Timeout.Infinite);
     }
 

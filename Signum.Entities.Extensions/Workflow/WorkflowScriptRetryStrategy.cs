@@ -41,10 +41,10 @@ public class WorkflowScriptRetryStrategyEntity : Entity, IUserAssetEntity
 
         switch (unit.ToLower())
         {
-            case "s": return TimeZoneManager.Now.AddSeconds(value);
-            case "m": return TimeZoneManager.Now.AddMinutes(value);
-            case "h": return TimeZoneManager.Now.AddHours(value);
-            case "d": return TimeZoneManager.Now.AddDays(value);
+            case "s": return Clock.Now.AddSeconds(value);
+            case "m": return Clock.Now.AddMinutes(value);
+            case "h": return Clock.Now.AddHours(value);
+            case "d": return Clock.Now.AddDays(value);
             default: throw new InvalidOperationException("Unexpected unit " + unit);
         }
     }
