@@ -12,7 +12,7 @@ public class EntityTabRepeaterProxy : EntityBaseProxy
     {
     }
 
-    public WebElementLocator Tab(int index) => new WebElementLocator(this.Element, By.CssSelector($".nav-tabs .nav-item.nav-link[data-rb-event-key=\"{index}\"]"));
+    public WebElementLocator Tab(int index) => new WebElementLocator(this.Element, By.CssSelector($".nav-tabs .nav-item .nav-link[data-rr-ui-event-key=\"{index}\"]"));
     public WebElementLocator ElementPanel() => new WebElementLocator(this.Element, By.CssSelector($".sf-repeater-element.active"));
 
     public LineContainer<T> SelectTab<T>(int index) where T : ModifiableEntity
@@ -30,9 +30,9 @@ public class EntityTabRepeaterProxy : EntityBaseProxy
 
     public int SelectedTabIndex()
     {
-        var active = this.Element.FindElement(By.CssSelector(".nav-tabs .nav-item.nav-link.active"));
+        var active = this.Element.FindElement(By.CssSelector(".nav-tabs .nav-item .nav-link.active"));
 
-        return int.Parse(active.GetAttribute("data-rb-event-key"));
+        return int.Parse(active.GetAttribute("data-rr-ui-event-key"));
     }
 
     public LineContainer<T> Details<T>() where T : ModifiableEntity
