@@ -33,7 +33,8 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
       <div className={classes("row", p.extraSmall ? "" : "mt-3 mb-3")}>
         {
           allPinned
-            .groupBy(a => (a.pinned!.column ?? 0).toString())
+            .filter(fo => fo.pinned?.active != "DashboardFilter")
+            .groupBy(fo => (fo.pinned!.column ?? 0).toString())
             .orderBy(gr => parseInt(gr.key))
             .map(gr => <div className="col-sm-3" key={gr.key}>
               {gr.elements.orderBy(a => a.pinned!.row).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
@@ -80,7 +81,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
         </FormGroup>
       );
 
-    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), labelText, f.pinned!.active == "WhenHasValue");
+    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), labelText, f.pinned!.active == "WhenHasValue" || f.pinned!.active == "DashboardFilter");
   }
 
 

@@ -13,7 +13,6 @@ import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
 import { getToString } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
-import { softCast } from '../../../Signum.React/Scripts/Globals';
 
 export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
   const forceUpdate = useForceUpdate();
