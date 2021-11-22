@@ -354,7 +354,7 @@ public static class SeleniumExtensions
 
     public static IWebElement CaptureOnClick(this IWebElement button)
     {
-        return button.GetDriver().CapturePopup(() => button.Click());
+        return button.GetDriver().CapturePopup(() => button.SafeClick());
     }
 
     public static IWebElement CaptureOnDoubleClick(this IWebElement button)
@@ -396,6 +396,7 @@ public static class SeleniumExtensions
 
     public static void SafeSendKeys(this IWebElement element, string? text)
     {
+        element.ScrollTo();
         new Actions(element.GetDriver()).MoveToElement(element).Perform();
         var length = 0;
         while((length = element.GetAttribute("value").Length) > 0)
