@@ -784,6 +784,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isReadOnly?: boolean;
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
+  allowWrapEntityLink?: boolean;
 
   modalSize?: BsSize;
 
@@ -837,6 +838,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   isReadOnly?: boolean;
   avoidPopup!: boolean;
   supportsAdditionalTabs?: boolean;
+
+  allowWrapEntityLink?: boolean;
 
   modalSize?: BsSize;
 

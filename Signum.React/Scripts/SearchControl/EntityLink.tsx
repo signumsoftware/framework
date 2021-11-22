@@ -21,13 +21,15 @@ export default function EntityLink(p: EntityLinkProps) {
   if (!Navigator.isViewable(lite.EntityType, { isSearch: p.inSearch || false }))
     return <span data-entity={liteKey(lite)}>{p.children ?? getToString(lite)}</span>;
 
+  const settings = Navigator.getSettings(p.lite.EntityType);
+
   return (
     <Link
       innerRef={p.innerRef as any}
       to={Navigator.navigateRoute(lite)}
       title={StyleContext.default.titleLabels ? p.title ?? getToString(lite) : undefined}
       data-entity={liteKey(lite)}
-      className="try-no-wrap"
+      className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}
       onClick={handleClick}
     >

@@ -7,7 +7,7 @@ import { ValueLine } from '../Lines';
 import { TypeContext } from '../TypeContext';
 
 export function start(options: { routes: JSX.Element[] }) {
-  Navigator.addSettings(new EntitySettings(ExceptionEntity, e => import('./Exception')));
+  Navigator.addSettings(new EntitySettings(ExceptionEntity, e => import('./Exception'), { allowWrapEntityLink: true }));
   customTypeComponent[BigStringEmbedded.typeName] = (ctx: TypeContext<BigStringEmbedded>)=> {
     return <ValueLine ctx={ctx.subCtx(a => a.text)} valueLineType="TextArea" readOnly />;
   };
