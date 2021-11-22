@@ -35,8 +35,8 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
     const rec = op?.getBoundingClientRect();
 
     var result = ({
-      left: e.clientX - (rec ? rec.left : 0),
-      top: e.clientY - (rec ? rec.top : 0),
+      left: rec == null ? e.pageX : e.clientX - rec.left,
+      top: rec == null ? e.pageY : e.clientY - rec.top,
       width: (op ? op.offsetWidth : window.innerWidth)
     }) as ContextMenuPosition;
 
