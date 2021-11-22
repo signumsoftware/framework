@@ -21,7 +21,7 @@ public class ModalProxy : IDisposable
 
     public WebElementLocator CloseButton
     {
-        get { return this.Element.WithLocator(By.CssSelector(".modal-header button.close")); }
+        get { return this.Element.WithLocator(By.CssSelector(".modal-header button.btn-close")); }
     }
 
     public bool AvoidClose { get; set; }
