@@ -10,7 +10,7 @@ import { StyleContext, TypeContext } from '../TypeContext'
 import ValueSearchControl from './ValueSearchControl'
 import { FormGroup } from '../Lines/FormGroup'
 import { SearchControlProps } from "./SearchControl";
-import { BsColor } from '../Components';
+import { BsColor, BsSize } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines/EntityBase'
 import SelectorModal from '../SelectorModal'
@@ -41,6 +41,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   onCreate?: () => Promise<any>;
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
   searchControlProps?: Partial<SearchControlProps>;
+  modalSize?: BsSize;
   onExplored?: () => void;
   onViewEntity?: (entity: Lite<Entity>) => void;
   onValueChanged?: (value: any) => void;
@@ -163,6 +164,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             onTokenLoaded={() => this.forceUpdate()}
             onExplored={this.props.onExplored}
             searchControlProps={this.props.searchControlProps}
+            modalSize={this.props.modalSize}
             deps={this.props.deps}
           />
 

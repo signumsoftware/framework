@@ -8,7 +8,7 @@ import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
 import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toDurationFormat, timeToString } from '../Reflection'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
-import { BsColor } from '../Components';
+import { BsColor, BsSize } from '../Components';
 import { toFilterRequests } from '../Finder';
 import { PropertyRoute } from '../Lines'
 import * as Hooks from '../Hooks'
@@ -32,6 +32,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   avoidNotifyPendingRequest?: boolean;
   deps?: React.DependencyList;
   searchControlProps?: Partial<SearchControlProps>;
+  modalSize?: BsSize;
   onRender?: (value: any | undefined, vsc: ValueSearchControl) => React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLElement>,
 }
@@ -321,7 +322,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (e.ctrlKey || e.button == 1)
       window.open(Finder.findOptionsPath(this.props.findOptions));
     else
-      Finder.explore(this.props.findOptions, { searchControlProps: this.props.searchControlProps }).then(() => {
+      Finder.explore(this.props.findOptions, { searchControlProps: this.props.searchControlProps, modalSize: this.props.modalSize }).then(() => {
         if (!this.props.avoidAutoRefresh)
           this.refreshValue(this.props);
 
