@@ -113,9 +113,13 @@ public static class EntityButtonContainerExtensions
 
     public static void WaitReload(this IEntityButtonContainer container, Action action)
     {
-        var ticks = container.TestTicks()!.Value;
+        var oldCount = container.RefreshCount()!.Value;
         action();
-        container.Element.GetDriver().Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
+        container.Element.GetDriver().Wait(() =>
+        {
+            var newCount = container.RefreshCount();
+            return newCount != null && newCount != oldCount;
+        });
     }
 
     private static void AssertNoErrors(this IValidationSummaryContainer vs)
@@ -156,11 +160,11 @@ public static class EntityButtonContainerExtensions
         return new FramePageProxy<T>(container.Element.GetDriver());
     }
 
-    public static long? TestTicks(this IEntityButtonContainer container)
+    public static long? RefreshCount(this IEntityButtonContainer container)
     {
         try
         {
-            return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-test-ticks]"))?.GetAttribute("data-test-ticks").ToLong();
+            return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-refresh-count]"))?.GetAttribute("data-refresh-count").ToLong();
         }
         catch
         {

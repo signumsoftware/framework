@@ -268,7 +268,7 @@ export default function FramePage(p: FramePageProps) {
         </div>
         <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
         <WidgetEmbedded widgetContext={wc} >
-          <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+          <div className="sf-main-control" data-refresh-count={state.refreshCount} data-main-entity={entityInfo(ctx.value)}>
             <ErrorBoundary>
               {state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(state.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
             </ErrorBoundary>

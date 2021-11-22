@@ -303,7 +303,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
             {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={pc.pack} isOperationVisible={p.isOperationVisible} />}
           </div>
           <ValidationErrors ref={validationErrors} entity={pc.pack.entity} prefix={prefix} />
-          <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+          <div className="sf-main-control" data-refresh-count={pc.refreshCount} data-main-entity={entityInfo(ctx.value)}>
             <ErrorBoundary>
               {pc.getComponent && <AutoFocus>{FunctionalAdapter.withRef(pc.getComponent(ctx), c => setComponent(c))}</AutoFocus>}
             </ErrorBoundary>
