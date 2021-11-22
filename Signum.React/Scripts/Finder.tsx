@@ -1904,7 +1904,7 @@ export const formatRules: FormatRule[] = [
   {
     name: "Bool",
     isApplicable: qt => qt.filterType == "Boolean",
-    formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell} />, "centered-cell")
+    formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, "centered-cell")
   },
 ];
 
