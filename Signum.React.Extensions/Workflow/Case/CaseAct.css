@@ -19,7 +19,6 @@ div.workflow-buttons {
 }
 
 .case-main-entity .sf-button-widget-container {
-    overflow: auto;
 }
 
 .case-alert {
@@ -33,6 +32,14 @@ div.workflow-buttons {
     padding: 3px;
 }
 
-.inline-tags{
-    text-align:right;
+.inline-tags {
+    text-align: right;
+    margin-top: -40px;
+}
+
+
+.case-activity-widgets {
+    display: flex;
+    align-items: center;
+    justify-content: end;
 }

@@ -131,7 +131,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     return (
       <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked} className="sf-popup-control" >
-        <ModalHeaderButtons htmlAttributes={{ style: { display: "block" } }} closeBeforeTitle={true}
+        <ModalHeaderButtons
           onClose={this.handleCloseClicked}>
           {this.renderTitle()}
         </ModalHeaderButtons>
@@ -194,14 +194,19 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
 
     return (
-      <div className="modal-body">
-        <CaseFromSenderInfo current={pack.activity} />
-        {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
-        <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
-          {this.renderMainEntity()}
+      <>
+        <div className="case-activity-widgets mt-2 me-2">
+          {!pack.activity.case.isNew && <div className="mx-2"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
+          {!pack.activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) && <CaseFlowButton caseActivity={pack.activity} />}
         </div>
-        {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
-      </div>
+        <CaseFromSenderInfo current={pack.activity} />
+        <div className="modal-body">
+          <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
+            {this.renderMainEntity()}
+          </div>
+          {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
+        </div>
+      </>
     );
   }
 
@@ -288,19 +293,16 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   renderTitle() {
 
     if (!this.state.pack)
-      return JavascriptMessage.loading.niceToString();
+      return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
 
     const activity = this.state.pack.activity;
 
     return (
-      <div>
-        <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;
-                {this.renderExpandLink()}
+      <span>
+        <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;{this.renderExpandLink()}
         <br />
-        {!activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
-          <CaseFlowButton caseActivity={this.state.pack.activity} />}
         <small className="sf-type-nice-name text-muted"> {Navigator.getTypeTitle(activity, undefined)}</small>
-      </div>
+      </span>
     );
   }
 

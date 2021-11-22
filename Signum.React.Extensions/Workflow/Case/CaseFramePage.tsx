@@ -181,8 +181,10 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     return (
       <div className="normal-control">
         {this.renderTitle()}
-        <CaseFromSenderInfo current={pack.activity} />
-        {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
+        <div className="case-activity-widgets mt-2 me-2">
+          {!pack.activity.case.isNew && <div className="mx-2"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
+          {!pack.activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) && <CaseFlowButton caseActivity={pack.activity} />}
+        </div>
         <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
           {this.renderMainEntity()}
         </div>
@@ -194,14 +196,12 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
   renderTitle() {
 
     if (!this.state.pack)
-      return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+      return <h3 className="border-bottom pb-3">{JavascriptMessage.loading.niceToString()}</h3>;
 
     const activity = this.state.pack.activity;
 
     return (
-      <h3>
-        {!activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
-          <CaseFlowButton caseActivity={this.state.pack.activity} />}
+      <h3 className="border-bottom pb-3">
         <span className="sf-entity-title">{getToString(activity)}</span>
         {CaseFramePage.showSubTitle && <br />}
         {CaseFramePage.showSubTitle && <small className="sf-type-nice-name text-muted">{Navigator.getTypeTitle(activity, undefined)}</small>}
