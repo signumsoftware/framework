@@ -51,10 +51,14 @@ export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
   return (
     <div>
       <FormGroup ctx={ctx} labelText={ctx.value.label ?? getQueryNiceName(fo.queryName)}>
-        <span className="form-inline">
-          <span>{ctx.value.label ?? getQueryNiceName(fo.queryName)}</span>&nbsp;
-          <ValueSearchControlLine ctx={ctx2} findOptions={fo} />
-        </span>
+        <div className="row align-items-center">
+          <div className="col-auto">
+            <span>{ctx.value.label ?? getQueryNiceName(fo.queryName)}</span>
+          </div>
+          <div className="col-auto">
+            <ValueSearchControlLine ctx={ctx2} findOptions={fo} />
+          </div>
+        </div>
       </FormGroup>
     </div>
   );
