@@ -230,7 +230,9 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
   if (s.inlineCheckbox) {
     return (
       <label className={vl.props.ctx.error} style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...vl.baseHtmlAttributes()} {...s.formGroupHtmlAttributes} {...s.labelHtmlAttributes}>
-        <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly} />
+        <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
+          className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))}
+        />
         {" "}{s.labelText}
         {s.helpText && <small className="form-text text-muted">{s.helpText}</small>}
       </label>
@@ -240,7 +242,7 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
-          className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formCheckClass, vl.mandatoryClass))} disabled={s.ctx.readOnly} />
+          className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))} disabled={s.ctx.readOnly} />
       </FormGroup>
     );
   }

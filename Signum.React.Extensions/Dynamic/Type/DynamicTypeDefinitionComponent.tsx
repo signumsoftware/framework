@@ -846,7 +846,7 @@ export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetCo
     let value = this.props.binding.getValue();
     return (
       <fieldset style={{ marginTop: "-5px" }}>
-        <legend><input type="checkbox" checked={!!value} onChange={this.handleChecked} /> {this.props.title ?? this.props.binding.member.toString().firstUpper()}</legend>
+        <legend><input type="checkbox" className="form-check-input" checked={!!value} onChange={this.handleChecked} /> {this.props.title ?? this.props.binding.member.toString().firstUpper()}</legend>
         {value && this.props.renderContent(value)}
       </fieldset>
     );

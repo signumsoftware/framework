@@ -36,7 +36,7 @@ export default function HeavyEntry(p: HeavyEntryProps) {
   return (
     <div>
       <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index}</h2>
-      <label><input type="checkbox" checked={asyncDepth} onChange={a => setAsyncDepth(a.currentTarget.checked)} />Async Stack</label>
+      <label><input type="checkbox" className="form-check-input" checked={asyncDepth} onChange={a => setAsyncDepth(a.currentTarget.checked)} />Async Stack</label>
       <br />
       {entries && <HeavyProfilerDetailsD3 entries={entries} selected={current} asyncDepth={asyncDepth} />}
       <br />

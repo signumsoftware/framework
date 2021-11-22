@@ -99,7 +99,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
                   <td> {EntityAction.niceToString(mle.element.action!)} </td>
                   <td>
                     {mle.element.action == "Different" &&
-                      <input type="checkbox" checked={mle.element.overrideEntity} onChange={e => {
+                      <input type="checkbox" className="form-check-input" checked={mle.element.overrideEntity} onChange={e => {
                         mle.element.overrideEntity = (e.currentTarget as HTMLInputElement).checked;
                         mle.element.modified = true;
                         forceUpdate();

@@ -196,7 +196,7 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
         <div>
           <label className="label-xs">
             {expressionIcon}
-            <input className="design-check-box"
+            <input className="design-check-box form-check-input"
               type="checkbox"
               checked={value == undefined ? p.defaultValue as boolean : value}
               onChange={handleChangeCheckbox} />

@@ -135,7 +135,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       )}
       {p.part.allowChangeShowData &&
         <label>
-        <input type="checkbox" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
+          <input type="checkbox" className="form-check-input" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
         {" "}{CombinedUserChartPartEntity.nicePropertyName(a => a.showData)}
         </label>}
       {showData ?

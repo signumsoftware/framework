@@ -305,7 +305,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;
       case "Embedded": return getToString(value as EmbeddedEntity);
-      case "Boolean": return <input type="checkbox" disabled={true} checked={value} />
+      case "Boolean": return <input type="checkbox" className="form-check-input" disabled={true} checked={value} />
       case "Enum": return getEnumInfo(token!.type.name, value).niceName;
       case "Guid":
         let str = value as string;

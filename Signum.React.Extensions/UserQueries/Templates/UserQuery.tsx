@@ -75,7 +75,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
 
                     <div className="d-flex">
                       <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
-                        <input type="checkbox" disabled={ctx.value.token == null} checked={ctx.value.summaryToken != null} onChange={() => {
+                        <input type="checkbox" className="form-check-input" disabled={ctx.value.token == null} checked={ctx.value.summaryToken != null} onChange={() => {
                           ctx.value.summaryToken = ctx.value.summaryToken == null ? QueryTokenEmbedded.New(ctx.value.token) : null;
                           ctx.value.modified = true;
                           row.forceUpdate();

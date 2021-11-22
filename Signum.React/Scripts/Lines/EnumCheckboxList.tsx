@@ -87,6 +87,7 @@ export const EnumCheckboxList = React.forwardRef(function EnumCheckboxList(props
         {data.map((val, i) =>
           <label className="sf-checkbox-element" key={val}>
             <input type="checkbox"
+              className="form-check-input"
               checked={p.ctx.value.some(mle => mle.element == val)}
               disabled={p.ctx.readOnly}
               name={val}

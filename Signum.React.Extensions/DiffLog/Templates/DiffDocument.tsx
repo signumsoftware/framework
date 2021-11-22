@@ -12,9 +12,9 @@ export function DiffDocument(p: { diff: Array<DiffPair<Array<DiffPair<string>>>>
     <div>
       <div>
         <label>
-          <input type="checkbox" checked={margin != null} onChange={() => setMargin(margin == null ? DiffDocument.defaultMarginLines : null)} />
+          <input type="checkbox" className="form-check-input" checked={margin != null} onChange={() => setMargin(margin == null ? DiffDocument.defaultMarginLines : null)} />
           <span className="mx-2">Show only</span><NumericTextBox format={toNumberFormat("0")} value={margin == null ? 4 : margin} onChange={num => setMargin(num == null ? 0 : Math.max(num, 0))}
-            validateKey={isNumber} /> lines arround each change</label>
+          validateKey={isNumber} /> lines arround each change</label>
       </div>
       <div>
         <DiffDocumentSimple diff={p.diff} margin={margin} />

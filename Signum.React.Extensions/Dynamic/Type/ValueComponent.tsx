@@ -71,7 +71,7 @@ export default function ValueComponent(p : ValueComponentProps){
       if (p.type == "boolean") {
         return (<input
           type="checkbox" onBlur={p.onBlur}
-          className="form-control"
+          className="form-check-input"
           checked={value == undefined ? p.defaultValue as boolean : value as boolean}
           onChange={handleChangeCheckbox} />
         );
@@ -96,8 +96,10 @@ export default function ValueComponent(p : ValueComponentProps){
 
   if (p.hideLabel) {
     return (
-      <div className="form-inline form-sm" style={opacity}>
-        {renderValue(value)}
+      <div className="row align-items-center">
+        <div className="col-auto">
+          {renderValue(value)}
+        </div>
       </div>
     );
   }

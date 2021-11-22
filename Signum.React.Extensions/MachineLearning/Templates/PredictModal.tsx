@@ -94,7 +94,7 @@ export function AlternativesCheckBox(p : { binding: Binding<number | null>, onCh
   var val = p.binding.getValue();
   return (
     <label>
-      <input type="checkbox" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => setValue(n)} validateKey={isNumber} format={toNumberFormat("0")} /> alternative predictions </label>
+      <input type="checkbox" className="form-check-input" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => setValue(n)} validateKey={isNumber} format={toNumberFormat("0")} /> alternative predictions </label>
   );
 }
 

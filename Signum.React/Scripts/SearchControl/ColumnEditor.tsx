@@ -75,7 +75,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
             value={co.displayName || ""} disabled={co.hiddenColumn}
             onChange={handleOnChange} />
           <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
-            <input type="checkbox" disabled={co.token == null} checked={co.hiddenColumn} onChange={handleHiddenColumnClick} className="me-1" />
+            <input type="checkbox" disabled={co.token == null} className="form-check-input me-1" checked={co.hiddenColumn} onChange={handleHiddenColumnClick} />
             {SearchMessage.HiddenColumn.niceToString()}
           </label>
         </div>
@@ -83,7 +83,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
       <div className={classes("d-flex", co.summaryToken && summaryNotAggregate ? "error" : undefined)}
         title={StyleContext.default.titleLabels && summaryNotAggregate ? SearchMessage.SummaryHeaderMustBeAnAggregate.niceToString() : undefined}>
         <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
-          <input type="checkbox" disabled={co.token ==null} checked={co.summaryToken != null} onChange={handleSummaryCheck} className="me-1" />
+          <input type="checkbox" disabled={co.token == null} className="form-check-input me-1" checked={co.summaryToken != null}  onChange={handleSummaryCheck} />
           {SearchMessage.SummaryHeader.niceToString()}
         </label>
         <div className="flex-grow-1">

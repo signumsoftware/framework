@@ -110,7 +110,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => makeQuery()} extraSmall={true} />
       {p.part.allowChangeShowData &&
         <label>
-          <input type="checkbox" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
+          <input type="checkbox" className="form-check-input" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
           {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
         </label>}
       {result != null && chartRequest.maxRows == result.resultTable.rows.length ?
