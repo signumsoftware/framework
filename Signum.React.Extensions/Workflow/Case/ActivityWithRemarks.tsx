@@ -98,7 +98,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
         <FontAwesomeIcon icon={"bell"} />
       </a>}
       &nbsp;
-      <InlineCaseTags case={p.data.case} defaultTags={tags} />
+      <InlineCaseTags case={p.data.case} defaultTags={tags} wrap />
     </span>
   );
 }

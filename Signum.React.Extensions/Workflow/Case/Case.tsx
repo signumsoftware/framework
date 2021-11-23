@@ -79,7 +79,6 @@ export default function CaseComponent(p: CaseComponentProps) {
           </Tab>
         <Tab eventKey={"CaseActivities" as CaseTab} title={CaseActivityEntity.nicePluralName()}>
             <SearchControl
-              showContextMenu={fo => "Basic"}
               view={false}
               findOptions={{
                 queryName: CaseActivityEntity,

@@ -11,3 +11,7 @@
     font-weight: normal;
     display: inline-block;
 }
+
+a.case-icon {
+    display: inline-flex;
+}
