@@ -41,7 +41,7 @@ public class IntervalDictionary<K,V>: IEnumerable<KeyValuePair<Interval<K>, V>>
         if (interval.IsEmpty)
             return;
 
-        if (dic.Count != 0) // no vac�o
+        if (dic.Count != 0) // no vacío
         {
             int index = PossibleIndex(interval.Min);
 
