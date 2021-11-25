@@ -3,7 +3,7 @@ import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import { DateTimePicker, DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes, softCast } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -803,14 +803,12 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
 
   const s = vl.props;
 
-  const durationFormat = toDurationFormat(s.formatText);
-
   if (s.ctx.readOnly) {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.props.valueHtmlAttributes, "numeric")} innerRef={vl.inputElement}>
-            {timeToString(s.ctx.value, durationFormat)}
+            {timeToString(s.ctx.value, s.formatText)}
           </FormControlReadonly>
         )}
       </FormGroup>
@@ -827,7 +825,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
   } as React.AllHTMLAttributes<any>;
 
   if (htmlAttributes.placeholder == undefined)
-    htmlAttributes.placeholder = durationFormat;
+    htmlAttributes.placeholder = s.formatText?.replace("H", "h");
 
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -837,7 +835,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
           onChange={handleOnChange}
           validateKey={validateKey}
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
-          format={durationFormat}
+          format={s.formatText}
           innerRef={vl.inputElement as React.RefObject<HTMLInputElement>} />
       )}
     </FormGroup>

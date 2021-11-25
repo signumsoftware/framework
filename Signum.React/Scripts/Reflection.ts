@@ -74,12 +74,12 @@ export type OperationType =
 
 //https://moment.github.io/luxon/docs/manual/formatting.html#formatting-with-tokens--strings-for-cthulhu-
 //https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings
-export function toLuxonFormat(format: string | undefined, type: "DateOnly" | "DateTime"): string {
+export function toLuxonFormat(netFormat: string | undefined, type: "DateOnly" | "DateTime"): string {
 
-  if (!format)
+  if (!netFormat)
     return type == "DateOnly" ? "D" : "F";
   
-  switch (format) {
+  switch (netFormat) {
     case "d": return "D"; // toFormatWithFixes
     case "D": return "DDDD";
     case "f": return "fff"
@@ -96,7 +96,7 @@ export function toLuxonFormat(format: string | undefined, type: "DateOnly" | "Da
     case "y": return "LLLL yyyy";
     case "Y": return "LLLL yyyy";
     default: {
-      const result = format
+      const result = netFormat
         .replaceAll("f", "S")
         .replaceAll("tt", "A")
         .replaceAll("t", "a")
@@ -227,12 +227,12 @@ export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.
 
 //https://msdn.microsoft.com/en-us/library/ee372286(v=vs.110).aspx
 //https://github.com/jsmreese/moment-duration-format
-export function toDurationFormat(format: string | undefined): string | undefined {
+export function toLuxonDurationFormat(netFormat: string | undefined): string | undefined {
 
-  if (format == undefined)
+  if (netFormat == undefined)
     return undefined;
 
-  return format.replace("\\:", ":");
+  return netFormat.replaceAll("\\:", ":").replaceAll("H", "h");
 }
 
 export namespace NumberFormatSettings {
@@ -334,20 +334,20 @@ export function numberToString(val: any, format?: string) {
   return toNumberFormat(format).format(val);
 }
 
-export function dateToString(val: any, type: "DateOnly" | "DateTime", format?: string) {
+export function dateToString(val: any, type: "DateOnly" | "DateTime", netFormat?: string) {
   if (val == null)
     return "";
 
   var m = DateTime.fromISO(val);
-  return m.toFormat(toLuxonFormat(format, type));
+  return m.toFormat(toLuxonFormat(netFormat, type));
 }
 
-export function timeToString(val: any, format?: string) {
+export function timeToString(val: any, netFormat?: string) {
   if (val == null)
     return "";
 
   var duration = Duration.fromISOTime(val);
-  return duration.toFormat(format ?? "hh:mm:ss");
+  return duration.toFormat(toLuxonDurationFormat(netFormat) ?? "hh:mm:ss");
 }
 
 
