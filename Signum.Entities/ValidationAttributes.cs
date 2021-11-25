@@ -804,7 +804,7 @@ public class TimePrecisionValidatorAttribute : ValidatorAttribute
         return null;
     }
 
-    public string FormatString
+    public string FormatString_TimeSpan
     {
         get
         {
@@ -813,6 +813,21 @@ public class TimePrecisionValidatorAttribute : ValidatorAttribute
                 case DateTimePrecision.Hours: return "hh";
                 case DateTimePrecision.Minutes: return @"hh\:mm";
                 case DateTimePrecision.Seconds: return @"hh\:mm\:ss";
+                case DateTimePrecision.Milliseconds: return "c";
+                default: return "";
+            }
+        }
+    }
+
+    public string FormatString_TimeOnly
+    {
+        get
+        {
+            switch (Precision)
+            {
+                case DateTimePrecision.Hours: return "HH";
+                case DateTimePrecision.Minutes: return @"HH\:mm";
+                case DateTimePrecision.Seconds: return @"HH\:mm\:ss";
                 case DateTimePrecision.Milliseconds: return "c";
                 default: return "";
             }

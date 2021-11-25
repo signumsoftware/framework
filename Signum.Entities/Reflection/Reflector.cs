@@ -412,7 +412,9 @@ public static class Reflector
 
             TimePrecisionValidatorAttribute? timeSpanPrecision = pp.Validators.OfType<TimePrecisionValidatorAttribute>().SingleOrDefaultEx();
             if (timeSpanPrecision != null)
-                return timeSpanPrecision.FormatString;
+                return route.Type.UnNullify() == typeof(TimeSpan) ? timeSpanPrecision.FormatString_TimeSpan :
+                    route.Type.UnNullify() == typeof(TimeOnly) ? timeSpanPrecision.FormatString_TimeOnly :
+                    throw new UnexpectedValueException(route.Type);
 
             DecimalsValidatorAttribute? decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
             if (decimals != null)
