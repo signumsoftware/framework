@@ -567,7 +567,7 @@ namespace Signum.Engine.Workflow
                     var lane = caseActivity.WorkflowActivity.Lane;
                     var actors = lane.Actors.ToList();
                     if (lane.ActorsEval != null)
-                        actors = lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList();
+                        actors.AddRange(lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList());
 
                     var notifications = actors.Distinct().SelectMany(a =>
                     Database.Query<UserEntity>()
