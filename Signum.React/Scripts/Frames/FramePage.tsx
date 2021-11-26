@@ -189,7 +189,8 @@ export default function FramePage(p: FramePageProps) {
       state.executing = true;
       forceUpdate();
       action()
-        .finally(() => { state.executing = undefined; forceUpdate(); }).done();
+        .finally(() => { state.executing = undefined; forceUpdate(); })
+        .done();
     },
     onReload: (pack, reloadComponent, callback) => {
 
