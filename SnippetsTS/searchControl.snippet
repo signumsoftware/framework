@@ -3,7 +3,7 @@
     <Title>SearchControl</Title>
     <Author>Signum Software</Author>
     <Shortcut>sc</Shortcut>
-    <Description>Code snippet for adding an React SearchControl with IsNew check and header</Description>
+    <Description>Code snippet for adding an React SearchControl with header</Description>
     <SnippetTypes>
       <SnippetType>Expansion</SnippetType>
     </SnippetTypes>
@@ -24,7 +24,9 @@
       </Literal>
     </Declarations>
     <Code Language="TypeScript">
-      <![CDATA[<SearchControl findOptions={{ queryName: $entityType$, filterOptions: [{ token: $entityType$.token(a => a.$end$), value: ctx.value}]} />]]>
+      <![CDATA[
+	  <h3>{$entityType$.nicePluralName()}</h3>
+	  <SearchControl findOptions={{ queryName: $entityType$, filterOptions: [{ token: $entityType$.token(a => a.$end$), value: ctx.value}]}} />]]>
     </Code>
   </Snippet>
 </CodeSnippet>
