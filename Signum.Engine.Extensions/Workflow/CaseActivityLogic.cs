@@ -16,23 +16,23 @@ namespace Signum.Engine.Workflow;
 public static class CaseActivityLogic
 {
     [AutoExpressionField]
-    public static IQueryable<CaseActivityEntity> CaseActivities(this ICaseMainEntity e) => 
+    public static IQueryable<CaseActivityEntity> CaseActivities(this ICaseMainEntity e) =>
         As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Case.MainEntity == e));
 
     [AutoExpressionField]
-    public static CaseActivityEntity? LastCaseActivity(this ICaseMainEntity e) => 
+    public static CaseActivityEntity? LastCaseActivity(this ICaseMainEntity e) =>
         As.Expression(() => e.CaseActivities().OrderByDescending(a => a.StartDate).FirstOrDefault());
 
     [AutoExpressionField]
-    public static IQueryable<CaseEntity> Cases(this ICaseMainEntity e) => 
+    public static IQueryable<CaseEntity> Cases(this ICaseMainEntity e) =>
         As.Expression(() => e.CaseActivities().Select(a => a.Case));
 
     [AutoExpressionField]
-    public static bool CurrentUserHasNotification(this ICaseMainEntity e) => 
+    public static bool CurrentUserHasNotification(this ICaseMainEntity e) =>
         As.Expression(() => e.CaseActivities().SelectMany(a => a.Notifications()).Any(a => a.User.Is(UserEntity.Current)));
 
     [AutoExpressionField]
-    public static IQueryable<CaseEntity> Cases(this WorkflowEntity w) => 
+    public static IQueryable<CaseEntity> Cases(this WorkflowEntity w) =>
         As.Expression(() => Database.Query<CaseEntity>().Where(a => a.Workflow.Is(w)));
 
     [AutoExpressionField]
@@ -43,49 +43,49 @@ public static class CaseActivityLogic
                                               cn.State == CaseNotificationState.InProgress)));
 
     [AutoExpressionField]
-    public static IQueryable<CaseActivityEntity> NextActivities(this CaseActivityEntity ca) => 
+    public static IQueryable<CaseActivityEntity> NextActivities(this CaseActivityEntity ca) =>
         As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Previous.Is(ca)));
 
     [AutoExpressionField]
-    public static CaseActivityEntity DecompositionSurrogateActivity(this CaseEntity childCase) => 
+    public static CaseActivityEntity DecompositionSurrogateActivity(this CaseEntity childCase) =>
         As.Expression(() => childCase.CaseActivities().OrderBy(ca => ca.StartDate).Select(a => a.Previous!.Entity).First());
 
     [AutoExpressionField]
-    public static IQueryable<CaseEntity> SubCases(this CaseEntity p) => 
+    public static IQueryable<CaseEntity> SubCases(this CaseEntity p) =>
         As.Expression(() => Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(p)));
 
     [AutoExpressionField]
     public static bool IsFreshNew(this CaseActivityEntity ca) =>
         As.Expression(() => ca.State == CaseActivityState.Pending && ca.Notifications().All(n => n.State == CaseNotificationState.New));
-    
+
     [AutoExpressionField]
-    public static IQueryable<CaseActivityEntity> CaseActivities(this IWorkflowNodeEntity e) => 
+    public static IQueryable<CaseActivityEntity> CaseActivities(this IWorkflowNodeEntity e) =>
         As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.WorkflowActivity == e));
 
     [AutoExpressionField]
-    public static double? AverageDuration(this WorkflowActivityEntity wa) => 
+    public static double? AverageDuration(this WorkflowActivityEntity wa) =>
         As.Expression(() => wa.CaseActivities().Average(a => a.Duration));
 
     [AutoExpressionField]
-    public static double? AverageDuration(this WorkflowEventEntity we) => 
+    public static double? AverageDuration(this WorkflowEventEntity we) =>
         As.Expression(() => we.CaseActivities().Average(a => a.Duration));
 
     [AutoExpressionField]
-    public static IQueryable<CaseActivityEntity> CaseActivities(this CaseEntity e) => 
+    public static IQueryable<CaseActivityEntity> CaseActivities(this CaseEntity e) =>
         As.Expression(() => Database.Query<CaseActivityEntity>().Where(a => a.Case.Is(e)));
 
 
     [AutoExpressionField]
-    public static IQueryable<CaseTagEntity> Tags(this CaseEntity e) => 
+    public static IQueryable<CaseTagEntity> Tags(this CaseEntity e) =>
         As.Expression(() => Database.Query<CaseTagEntity>().Where(a => a.Case.Is(e)));
 
     [AutoExpressionField]
-    public static IQueryable<CaseNotificationEntity> Notifications(this CaseActivityEntity e) => 
+    public static IQueryable<CaseNotificationEntity> Notifications(this CaseActivityEntity e) =>
         As.Expression(() => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.Is(e)));
 
 
     [AutoExpressionField]
-    public static IQueryable<CaseActivityExecutedTimerEntity> ExecutedTimers(this CaseActivityEntity e) => 
+    public static IQueryable<CaseActivityExecutedTimerEntity> ExecutedTimers(this CaseActivityEntity e) =>
         As.Expression(() => Database.Query<CaseActivityExecutedTimerEntity>().Where(a => a.CaseActivity.Is(e)));
 
     public static void Start(SchemaBuilder sb)
@@ -147,7 +147,7 @@ public static class CaseActivityLogic
                 },
             }.Register();
 
-            
+
             new Graph<CaseEntity>.Execute(CaseOperation.Cancel)
             {
                 CanExecute = c => c.FinishDate == null ? null : CaseActivityMessage.AlreadyFinished.NiceToString(),
@@ -183,7 +183,7 @@ public static class CaseActivityLogic
 
             new Graph<CaseEntity>.Execute(CaseOperation.Reactivate)
             {
-                CanExecute = c => c.FinishDate != null  && CancelledCases(c).Any() ? null : CaseActivityMessage.NotCanceled.NiceToString(),
+                CanExecute = c => c.FinishDate != null && CancelledCases(c).Any() ? null : CaseActivityMessage.NotCanceled.NiceToString(),
                 Execute = (c, _) =>
                 {
                     var currentActivities = CancelledCases(c).ToList();
@@ -396,7 +396,7 @@ public static class CaseActivityLogic
                       .Execute();
     }
 
-    public static Dictionary<Type, WorkflowOptions> Options = new Dictionary<Type, WorkflowOptions>(); 
+    public static Dictionary<Type, WorkflowOptions> Options = new Dictionary<Type, WorkflowOptions>();
 
     public class WorkflowOptions
     {
@@ -409,11 +409,11 @@ public static class CaseActivityLogic
             SaveEntity = saveEntity;
         }
     }
-    
+
     public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T>? constructor, Action<T> save)
-        where T: Entity, ICaseMainEntity
+        where T : Entity, ICaseMainEntity
     {
-        fi.SchemaBuilder.Schema.EntityEvents<T>().Saved += (e, args)=>
+        fi.SchemaBuilder.Schema.EntityEvents<T>().Saved += (e, args) =>
         {
             if (AvoidNotifyInProgressVariable.Value == true)
                 return;
@@ -423,7 +423,7 @@ public static class CaseActivityLogic
 
         Options[typeof(T)] = new WorkflowOptions(constructor, e => save((T)e));
 
-        return fi; 
+        return fi;
     }
 
     static IDisposable AvoidNotifyInProgress()
@@ -432,7 +432,7 @@ public static class CaseActivityLogic
         AvoidNotifyInProgressVariable.Value = true;
         return new Disposable(() => AvoidNotifyInProgressVariable.Value = old);
     }
-    
+
     static ThreadVariable<bool> AvoidNotifyInProgressVariable = Statics.ThreadVariable<bool>("avoidNotifyInProgress");
 
     public static int NotifyInProgress(this ICaseMainEntity mainEntity)
@@ -474,7 +474,7 @@ public static class CaseActivityLogic
                 var alg = connection.Action.RetrieveFromCache().Eval.Algorithm;
                 alg.ExecuteUntyped(Case.MainEntity, wctx);
             };
-            
+
             this.Connections.Add(connection);
         }
 
@@ -513,12 +513,12 @@ public static class CaseActivityLogic
         if (wc.Condition != null)
         {
             var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
-            var result = alg.EvaluateUntyped(ctx.Case.MainEntity,ctx.NewTransitionContext(wc));
+            var result = alg.EvaluateUntyped(ctx.Case.MainEntity, ctx.NewTransitionContext(wc));
 
 
             return result;
         }
-        
+
         return true;
     }
 
@@ -545,8 +545,8 @@ public static class CaseActivityLogic
 
     public static void InsertCaseActivityNotifications(CaseActivityEntity caseActivity)
     {
-        if (caseActivity.WorkflowActivity is WorkflowActivityEntity wa && 
-            (wa.Type == WorkflowActivityType.Task ||  
+        if (caseActivity.WorkflowActivity is WorkflowActivityEntity wa &&
+            (wa.Type == WorkflowActivityType.Task ||
             wa.Type == WorkflowActivityType.Decision))
         {
             using (ExecutionMode.Global())
@@ -554,7 +554,7 @@ public static class CaseActivityLogic
                 var lane = caseActivity.WorkflowActivity.Lane;
                 var actors = lane.Actors.ToList();
                 if (lane.ActorsEval != null)
-                    actors = lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList();
+                    actors.AddRange(lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList());
 
                 var notifications = actors.Distinct().SelectMany(a =>
                 Database.Query<UserEntity>()
@@ -614,9 +614,9 @@ public static class CaseActivityLogic
                         Case = @case,
                     };
 
-                    //new WorkflowExecuteStepContext(@case, ca).ExecuteConnection(connection);
+                        //new WorkflowExecuteStepContext(@case, ca).ExecuteConnection(connection);
 
-                    return ca;
+                        return ca;
                 }
             }.Register();
 
@@ -697,7 +697,7 @@ public static class CaseActivityLogic
                 },
             }.Register();
 
- 
+
 
             new Execute(CaseActivityOperation.Next)
             {
@@ -749,7 +749,7 @@ public static class CaseActivityLogic
                     {
                         SaveEntity(ca.Case.MainEntity);
                     }
-                  
+
                     ca.MakeDone(DoneType.Jump, null);
 
                     var ctx = new WorkflowExecuteStepContext(ca.Case, ca);
@@ -838,12 +838,12 @@ public static class CaseActivityLogic
                     var cases = ca.NextActivities().Select(a => a.Case).ToList();
                     cases.Remove(ca.Case);
                     ca.NextActivities().UnsafeDelete();
-                    //Decomposition
-                    if (cases.Any())
+                        //Decomposition
+                        if (cases.Any())
                         Database.Query<CaseEntity>().Where(c => cases.Contains(c) && !c.CaseActivities().Any()).UnsafeDelete();
 
-                    //Recomposition
-                    if (ca.Case.ParentCase != null && ca.Case.FinishDate.HasValue)
+                        //Recomposition
+                        if (ca.Case.ParentCase != null && ca.Case.FinishDate.HasValue)
                     {
                         var surrogate = ca.Case.DecompositionSurrogateActivity();
                         surrogate.NextActivities().SelectMany(a => a.Notifications()).UnsafeDelete();
@@ -946,7 +946,7 @@ public static class CaseActivityLogic
                 {
                     var jumpCtx = ctx.NewTransitionContext(firstConnection);
                     var alg = firstConnection.Condition.RetrieveFromCache().Eval.Algorithm;
-                    var result = alg.EvaluateUntyped(ca.Case.MainEntity,  jumpCtx);
+                    var result = alg.EvaluateUntyped(ca.Case.MainEntity, jumpCtx);
                     if (!result)
                         throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(firstConnection.To, firstConnection.Condition));
                 }
@@ -1374,7 +1374,7 @@ public static class CaseActivityLogic
                             var graph = WorkflowLogic.GetWorkflowNodeGraph(node.Lane.Pool.Workflow.ToLite());
 
                             var trackGroups = connections.AgGroupToDictionary(
-                                wc => graph.TrackId.GetOrThrow(wc.From), 
+                                wc => graph.TrackId.GetOrThrow(wc.From),
                                 wcs => wcs.ToDictionaryEx(wc => wc, wc => AllTrackCompleted(depth + 1, wc.From, ctx, visited).IsCompatible(wc)));
 
                             if (trackGroups.All(kvp => kvp.Value.Values.Any(a => a))) // Every Parallel gets implicit Exclusive Join behaviour for each Track ID group. 
@@ -1403,7 +1403,7 @@ public static class CaseActivityLogic
                 if (caseActivity != null && !isCompleted)
                     throw new InvalidOperationException("Not completed should not have caseActivities");
 
-                if(caseActivity != null && caseActivity.DoneDate == null)
+                if (caseActivity != null && caseActivity.DoneDate == null)
                     throw new InvalidOperationException("caseActivity is not completed");
 
                 this.IsCompleted = isCompleted;
@@ -1428,7 +1428,7 @@ public static class CaseActivityLogic
                     DoneType.Jump => wc.From.Is(CaseActivity.WorkflowActivity) ? wc.Type == ConnectionType.Jump : wc.Type == ConnectionType.Normal,
                     DoneType.ScriptFailure => wc.From.Is(CaseActivity.WorkflowActivity) ? wc.Type == ConnectionType.ScriptException : wc.Type == ConnectionType.Normal,
                     DoneType.ScriptSuccess => wc.Type == ConnectionType.Normal,
-                    DoneType.Timeout => 
+                    DoneType.Timeout =>
                     CaseActivity.WorkflowActivity is WorkflowActivityEntity wa ? !wc.From.Is(wa) /*wa.BoundaryTimers.Contains(wc.From)*/ && wc.Type == ConnectionType.Normal :
                     CaseActivity.WorkflowActivity is WorkflowEventEntity we && we.Is(wc.From) ? wc.Type == ConnectionType.Normal :
                     false,
@@ -1460,7 +1460,7 @@ public static class CaseActivityLogic
         return options.Constructor();
     }
 
-    private static void MakeDone(this CaseActivityEntity ca, DoneType doneType, string? decision) 
+    private static void MakeDone(this CaseActivityEntity ca, DoneType doneType, string? decision)
     {
         ca.DoneBy = UserEntity.Current.ToLite();
         ca.DoneDate = Clock.Now;

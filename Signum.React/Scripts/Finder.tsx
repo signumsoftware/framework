@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
 import { Dic, classes, softCast } from './Globals'
@@ -22,7 +22,7 @@ import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
-  Anonymous, toDurationFormat, timeToString, toFormatWithFixes
+  Anonymous, toLuxonDurationFormat, timeToString, toFormatWithFixes
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -1847,8 +1847,9 @@ export const formatRules: FormatRule[] = [
     name: "Time",
     isApplicable: qt => qt.filterType == "Time",
     formatter: qt => {
-      const durationFormat = toDurationFormat(qt.format);
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{timeToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      const durationFormat = toLuxonDurationFormat(qt.format) ?? "hh:mm:ss";
+
+      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
     }
   },
   {

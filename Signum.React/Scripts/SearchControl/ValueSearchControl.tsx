@@ -1,11 +1,11 @@
 import * as React from 'react'
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import { areEqual, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toDurationFormat, timeToString } from '../Reflection'
+import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toLuxonDurationFormat, timeToString } from '../Reflection'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
 import { BsColor, BsSize } from '../Components';
@@ -295,14 +295,20 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     switch (token.filterType) {
       case "Integer":
       case "Decimal":
-        const numbroFormat = toNumberFormat(this.props.format ?? token.format);
-        return numbroFormat.format(value);
+        {
+          const numberFormat = toNumberFormat(this.props.format ?? token.format);
+          return numberFormat.format(value);
+        }
       case "DateTime":
-        const momentFormat = toLuxonFormat(this.props.format ?? token.format, token.type.name as "DateOnly" | "DateTime");
-        return toFormatFixed(DateTime.fromISO(value), momentFormat);
+        {
+          const luxonFormat = toLuxonFormat(this.props.format ?? token.format, token.type.name as "DateOnly" | "DateTime");
+          return toFormatFixed(DateTime.fromISO(value), luxonFormat);
+        }
       case "Time":
-        const durationFormat = toDurationFormat(this.props.format ?? token.format);
-        return timeToString(value, durationFormat);
+        {
+          const luxonFormat = toLuxonDurationFormat(this.props.format ?? token.format);
+          return Duration.fromISOTime(value).toFormat(luxonFormat ?? "hh:mm:ss");
+        }
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;
       case "Embedded": return getToString(value as EmbeddedEntity);
