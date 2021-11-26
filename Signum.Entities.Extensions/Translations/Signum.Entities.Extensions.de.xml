@@ -1481,6 +1481,7 @@
     <Member Name="ChangePassword" Description="Passwort ändern" />
     <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
     <Member Name="CurrentPassword" Description="Aktuelles Kennwort" />
+    <Member Name="EMailAddress" Description="E-Mail Adresse" />
     <Member Name="EnterActualPasswordAndNewOne" Description="Geben Sie Ihr aktuelles Passwort und das neue ein" />
     <Member Name="EnterTheNewPassword" Description="Geben Sie das neue Passwort ein" />
     <Member Name="EnterYourUserEmail" Description="Geben Sie Ihre Benutzer-E-Mail ein" />
@@ -1520,6 +1521,7 @@
     <Member Name="Username" Description="Benutzername" />
     <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
     <Member Name="UserNameMustHaveAValue" Description="Sie müssen den Benutzernamen eingeben" />
+    <Member Name="UsernameOrEmailAddress" Description="Benutzername oder E-Mail Adresse" />
     <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Wir haben Ihnen eine E-Mail mit einem Link geschickt, mit dem Sie Ihr Passwort zurücksetzen können." />
   </Type>
   <Type Name="MapMessage">

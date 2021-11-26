@@ -162,6 +162,8 @@ export module LoginAuthMessage {
   export const Logout = new MessageKey("LoginAuthMessage", "Logout");
   export const EnterYourUserNameAndPassword = new MessageKey("LoginAuthMessage", "EnterYourUserNameAndPassword");
   export const Username = new MessageKey("LoginAuthMessage", "Username");
+  export const EMailAddress = new MessageKey("LoginAuthMessage", "EMailAddress");
+  export const UsernameOrEmailAddress = new MessageKey("LoginAuthMessage", "UsernameOrEmailAddress");
   export const RememberMe = new MessageKey("LoginAuthMessage", "RememberMe");
   export const IHaveForgottenMyPassword = new MessageKey("LoginAuthMessage", "IHaveForgottenMyPassword");
   export const ShowLoginForm = new MessageKey("LoginAuthMessage", "ShowLoginForm");
