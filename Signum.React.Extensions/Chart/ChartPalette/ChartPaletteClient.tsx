@@ -50,10 +50,11 @@ export function getColorPalette(type: PseudoType): Promise<ColorPalette | null> 
 
   const typeName = getTypeName(type);
 
-  if (colorPalette[typeName])
+  if (colorPalette[typeName] !== undefined)
     return Promise.resolve(colorPalette[typeName]);
 
-  return API.fetchColorPalette(typeName, false).then(cs => colorPalette[typeName] = cs && toColorPalete(cs));
+  return API.fetchColorPalette(typeName, false)
+    .then(cs => colorPalette[typeName] = (cs && toColorPalete(cs)) ?? null);
 }
 
 export function toColorPalete(model: ChartPaletteModel): ColorPalette {

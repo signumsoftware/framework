@@ -74,7 +74,7 @@ public static class PredictorLogic
         return Trainings.TryGetC(lite)?.Context;
     }
 
-    public static void Start(SchemaBuilder sb, Func<IFileTypeAlgorithm> predictorFileAlgorithm)
+    public static void Start(SchemaBuilder sb, IFileTypeAlgorithm predictorFileAlgorithm)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -143,7 +143,7 @@ public static class PredictorLogic
                     e.AccuracyValidation,
                 });
 
-            FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm());
+            FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm);
 
             SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, () => Algorithms.Keys);
             SymbolLogic<PredictorColumnEncodingSymbol>.Start(sb, () => Algorithms.Values.SelectMany(a => a.GetRegisteredEncodingSymbols()).Distinct());

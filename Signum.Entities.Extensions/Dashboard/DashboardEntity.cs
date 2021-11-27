@@ -43,7 +43,7 @@ public class DashboardEntity : Entity, IUserAssetEntity
 
     public bool CombineSimilarRows { get; set; } = true;
 
-    public CachedQueriesEmbedded? CachedQueries { get; set; }
+    public CacheQueryConfigurationEmbedded? CacheQueryConfiguration { get; set; }
 
     [NotifyCollectionChanged, NotifyChildProperty]
     [NoRepeatValidator]
@@ -123,13 +123,15 @@ public class DashboardEntity : Entity, IUserAssetEntity
     {
         return new DashboardEntity
         {
-            DisplayName = "Clone {0}".FormatWith(this.DisplayName),
-            DashboardPriority = DashboardPriority,
-            Parts = Parts.Select(p => p.Clone()).ToMList(),
-            Owner = Owner,
             EntityType = this.EntityType,
             EmbeddedInEntity = this.EmbeddedInEntity,
+            Owner = Owner,
+            DashboardPriority = DashboardPriority,
             AutoRefreshPeriod = this.AutoRefreshPeriod,
+            DisplayName = "Clone {0}".FormatWith(this.DisplayName),
+            CombineSimilarRows = this.CombineSimilarRows,
+            CacheQueryConfiguration = this.CacheQueryConfiguration?.Clone(),
+            Parts = Parts.Select(p => p.Clone()).ToMList(),
             Key = this.Key
         };
     }
@@ -144,6 +146,7 @@ public class DashboardEntity : Entity, IUserAssetEntity
             DashboardPriority == null ? null! : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
             EmbeddedInEntity == null ? null! : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
             new XAttribute("CombineSimilarRows", CombineSimilarRows),
+            CacheQueryConfiguration?.ToXml(ctx),
             new XElement("Parts", Parts.Select(p => p.ToXml(ctx))));
     }
 
@@ -156,6 +159,7 @@ public class DashboardEntity : Entity, IUserAssetEntity
         DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
         EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
         CombineSimilarRows = element.Attribute("CombineSimilarRows")?.Let(a => bool.Parse(a.Value)) ?? false;
+        CacheQueryConfiguration = CacheQueryConfiguration.CreateOrAssignEmbedded(element.Element(nameof(CacheQueryConfiguration)), (cqc, elem) => cqc.FromXml(elem));
         Parts.Synchronize(element.Element("Parts")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
     }
 
@@ -170,7 +174,7 @@ public class DashboardEntity : Entity, IUserAssetEntity
                 return ValidationMessage._0IsNotAllowed.NiceToString(pi.NiceName());
         }
 
-        if(pi.Name == nameof(CachedQueries) && CachedQueries != null && EntityType != null)
+        if(pi.Name == nameof(CacheQueryConfiguration) && CacheQueryConfiguration != null && EntityType != null)
         {
             return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => EntityType));
         }
@@ -179,10 +183,29 @@ public class DashboardEntity : Entity, IUserAssetEntity
     }
 }
 
-public class CachedQueriesEmbedded : EmbeddedEntity
+public class CacheQueryConfigurationEmbedded : EmbeddedEntity
 {
     [Unit("s")]
     public int TimeoutForQueries { get; set; } = 5 * 60;
+
+    public int MaxRows { get; set; } = 1000 * 1000;
+
+    internal CacheQueryConfigurationEmbedded Clone() => new CacheQueryConfigurationEmbedded
+    {
+        TimeoutForQueries = TimeoutForQueries,
+        MaxRows = MaxRows,
+    };
+
+    internal XElement ToXml(IToXmlContext ctx) => new XElement("CacheQueryConfiguration",
+        new XAttribute(nameof(TimeoutForQueries), TimeoutForQueries),
+        new XAttribute(nameof(MaxRows), MaxRows)
+    );
+
+    internal void FromXml(XElement elem)
+    {
+        TimeoutForQueries = elem.Attribute(nameof(TimeoutForQueries))?.Value.ToInt() ?? 5 * 60;
+        MaxRows = elem.Attribute(nameof(MaxRows))?.Value.ToInt() ?? 1000 * 1000;
+    }
 }
 
 [AutoInit]

@@ -1,11 +1,11 @@
 
 import * as React from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ValueLine, EntityLine, RenderEntity, OptionItem } from '@framework/Lines'
+import { ValueLine, EntityLine, RenderEntity, OptionItem, EntityDetail } from '@framework/Lines'
 import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity } from '../Signum.Entities.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import * as DashboardClient from "../DashboardClient";
 import { iconToString, IconTypeaheadLine, parseIcon } from "../../Basics/Templates/IconTypeahead";
@@ -13,8 +13,11 @@ import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
 import { getToString } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
+import { ValueSearchControlLine } from '../../../Signum.React/Scripts/Search';
+import { withClassName } from '../../Dynamic/View/HtmlAttributesExpression';
+import { classes } from '../../../Signum.React/Scripts/Globals';
 
-export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
+export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   const forceUpdate = useForceUpdate();
   function handleEntityTypeChange() {
     if (!p.ctx.value.entityType)
@@ -86,44 +89,64 @@ export default function Dashboard(p : { ctx: TypeContext<DashboardEntity> }){
 
     return (
       <EntityGridItem title={title} bsStyle={tc.value.style}>
-        <RenderEntity ctx={tc.subCtx(a => a.content)} />
+        <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: ctx.value }} />
       </EntityGridItem>
     );
   }
 
   const ctx = p.ctx;
-  const sc = ctx.subCtx({ formGroupStyle: "Basic" });
+  const ctxBasic = ctx.subCtx({ formGroupStyle: "Basic" });
   return (
     <div>
       <div>
         <div className="row">
           <div className="col-sm-6">
-            <ValueLine ctx={sc.subCtx(cp => cp.displayName)} />
+            <ValueLine ctx={ctxBasic.subCtx(cp => cp.displayName)} />
           </div>
           <div className="col-sm-3">
-            <ValueLine ctx={sc.subCtx(cp => cp.dashboardPriority)} />
+            <ValueLine ctx={ctxBasic.subCtx(cp => cp.dashboardPriority)} />
           </div>
           <div className="col-sm-3">
-            <ValueLine ctx={sc.subCtx(cp => cp.autoRefreshPeriod)} />
+            <ValueLine ctx={ctxBasic.subCtx(cp => cp.autoRefreshPeriod)} />
           </div>
         </div>
         <div className="row">
           <div className="col-sm-4">
-            <EntityLine ctx={sc.subCtx(cp => cp.owner)} create={false} />
+            <EntityLine ctx={ctxBasic.subCtx(cp => cp.owner)} create={false} />
           </div>
           <div className="col-sm-4">
-            <EntityLine ctx={sc.subCtx(cp => cp.entityType)} onChange={handleEntityTypeChange} />
+            <EntityLine ctx={ctxBasic.subCtx(cp => cp.entityType)} onChange={handleEntityTypeChange} />
           </div>
-          {sc.value.entityType && <div className="col-sm-4">
-            <ValueLine ctx={sc.subCtx(f => f.embeddedInEntity)} />
+          {ctxBasic.value.entityType && <div className="col-sm-4">
+            <ValueLine ctx={ctxBasic.subCtx(f => f.embeddedInEntity)} />
           </div>}
         </div>
       </div>
-      <ValueLine ctx={sc.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
+
+      <EntityDetail ctx={ctxBasic.subCtx(cp => cp.cacheQueryConfiguration)}
+        onChange={forceUpdate}
+        onCreate={() => Promise.resolve(CacheQueryConfigurationEmbedded.New({ timeoutForQueries: 5 * 60, maxRows: 1000 * 1000 }))}
+        getComponent={(ectx: TypeContext<CacheQueryConfigurationEmbedded>) => <div className="row">
+          <div className="col-sm-3">
+            <ValueLine ctx={ectx.subCtx(cp => cp.timeoutForQueries)} />
+          </div>
+          <div className="col-sm-3">
+            <ValueLine ctx={ectx.subCtx(cp => cp.maxRows)} />
+          </div>
+          <div className="col-sm-3">
+            {!ctx.value.isNew && <ValueSearchControlLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
+          </div>
+        </div>} />
+
+      <ValueLine ctx={ctxBasic.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
       <div className="sf-dashboard-admin">
-      <EntityGridRepeater ctx={ctx.subCtx(cp => cp.parts)} getComponent={renderPart} onCreate={handleOnCreate} />
-    </div>
+        <EntityGridRepeater ctx={ctx.subCtx(cp => cp.parts)} getComponent={renderPart} onCreate={handleOnCreate} />
+      </div>
     </div>
   );
 }
 
+export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }) {
+  const forceUpate = useForceUpdate();
+  return <ValueLine ctx={p.ctx} labelText={<span className={classes("fw-bold", p.ctx.value ? "text-success" : "text-danger")}> {p.ctx.niceName()}</span>} inlineCheckbox="block" onChange={forceUpate} />
+}

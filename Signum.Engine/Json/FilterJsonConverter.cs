@@ -15,7 +15,12 @@ public class FilterJsonConverter : JsonConverter<FilterTS>
 
     public override void Write(Utf8JsonWriter writer, FilterTS value, JsonSerializerOptions options)
     {
-        throw new NotImplementedException();
+        if (value is FilterConditionTS fc)
+            JsonSerializer.Serialize(writer, fc, options);
+        else if (value is FilterGroupTS fg)
+            JsonSerializer.Serialize(writer, fg, options);
+        else 
+            throw new UnexpectedValueException(value);
     }
 
     public override FilterTS? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -121,7 +126,7 @@ public class FilterGroupTS : FilterTS
 public class ColumnTS
 {
     public string token;
-    public string displayName;
+    public string? displayName;
 
     public Column ToColumn(QueryDescription qd, bool canAggregate)
     {
@@ -280,7 +285,22 @@ public class QueryRequestTS
     public List<OrderTS> orders;
     public List<ColumnTS> columns;
     public PaginationTS pagination;
-    public SystemTimeTS/*?*/ systemTime;
+    public SystemTimeTS? systemTime;
+
+    public static QueryRequestTS FromQueryRequest(QueryRequest qr)
+    {
+        return new QueryRequestTS
+        {
+            queryKey = QueryUtils.GetKey(qr.QueryName),
+            queryUrl = qr.QueryUrl,
+            groupResults = qr.GroupResults,
+            columns = qr.Columns.Select(c => new ColumnTS { token = c.Token.FullKey(), displayName = c.DisplayName }).ToList(),
+            filters = qr.Filters.Select(f => FilterTS.FromFilter(f)).ToList(),
+            orders = qr.Orders.Select(o => new OrderTS { orderType = o.OrderType, token = o.Token.FullKey() }).ToList(),
+            pagination = new PaginationTS(qr.Pagination),
+            systemTime = qr.SystemTime == null ? null : new SystemTimeTS(qr.SystemTime),
+        };
+    }
 
     public QueryRequest ToQueryRequest(JsonSerializerOptions jsonSerializerOptions)
     {

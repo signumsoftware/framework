@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { ajaxGet } from '@framework/Services';
+import { ajaxGet, ajaxPost } from '@framework/Services';
 import * as Constructor from '@framework/Constructor';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
+import * as Operations from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SelectorMessage } from '@framework/Signum.Entities'
@@ -14,7 +15,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
-import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity } from './Signum.Entities.Dashboard'
+import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '@framework/Hooks';
@@ -23,6 +24,7 @@ import SelectorModal from '@framework/SelectorModal';
 import { translated } from '../Translation/TranslatedInstanceTools';
 import { DashboardFilterController } from "./View/DashboardFilterController";
 import { EntityFrame } from '../../Signum.React/Scripts/TypeContext';
+import { CachedQuery } from './CachedQuery';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -31,6 +33,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
   entity?: Lite<Entity>;
   deps?: React.DependencyList;
   filterController: DashboardFilterController;
+  cachedQueries: { [userAssetKey: string]: Promise<CachedQuery> }
 }
 
 interface IconColor {
@@ -58,12 +61,15 @@ export function start(options: { routes: JSX.Element[] }) {
   Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
   Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
+  Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
   Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => import('./Admin/ValueUserQueryListPart')));
   Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
   Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('./Admin/UserChartPart')));
   Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('./Admin/CombinedUserChartPart')));
   Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
+
+  Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedFiles, { hideOnCanExecute: true, color: "warning", icon: "cogs" }));
 
   Finder.addSettings({
     queryName: DashboardEntity,
@@ -106,8 +112,8 @@ export function start(options: { routes: JSX.Element[] }) {
       (p, e, ev) => {
         ev.preventDefault();
         return SelectorModal.chooseElement(p.userCharts.map(a => a.element), {
-          buttonDisplay: a => a.displayName ?? "",
-          buttonName: a => a.id!.toString(),
+          buttonDisplay: a => a.userChart.displayName ?? "",
+          buttonName: a => a.userChart.id!.toString(),
           title: SelectorMessage.SelectAnElement.niceToString(),
           message: SelectorMessage.PleaseSelectAnElement.niceToString()
         })
@@ -119,14 +125,14 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.preventDefault();
         ev.persist();
         SelectorModal.chooseElement(p.userCharts.map(a => a.element), {
-          buttonDisplay: a => a.displayName ?? "",
-          buttonName: a => a.id!.toString(),
+          buttonDisplay: a => a.userChart.displayName ?? "",
+          buttonName: a => a.userChart.id!.toString(),
           title: SelectorMessage.SelectAnElement.niceToString(),
           message: SelectorMessage.PleaseSelectAnElement.niceToString()
         }).then(uc => {
           if (uc) {
-            UserChartClient.Converter.toChartRequest(uc, e)
-              .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc!)))
+            UserChartClient.Converter.toChartRequest(uc.userChart, e)
+              .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc.userChart)))
               .then(path => AppContext.pushOrOpenInTab(path, ev))
               .done();
           }
@@ -216,7 +222,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
               AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
             }).done();
-      }).done()));
+      }).done(), { group: null, icon: "eye", iconColor: "blue", color: "info" }));
 }
 
 export function home(): Promise<Lite<DashboardEntity> | null> {
@@ -246,6 +252,15 @@ export module API {
   export function home(): Promise<Lite<DashboardEntity> | null> {
     return ajaxGet({ url: "~/api/dashboard/home" });
   }
+
+  export function get(dashboard: Lite<DashboardEntity>): Promise<DashboardWithCachedQueries | null> {
+    return ajaxPost({ url: "~/api/dashboard/get" }, dashboard);
+  }
+}
+
+export interface DashboardWithCachedQueries {
+  dashboard: DashboardEntity
+  cachedQueries: Array<CachedQueryEntity>;
 }
 
 declare module '@framework/Signum.Entities' {
@@ -273,6 +288,7 @@ export function DashboardWidget(p: DashboardWidgetProps) {
     dashboard: p.dashboard,
     entity: p.pack.entity,
     reload: () => p.frame.onReload(),
+    cachedQueries: {} /*for now*/
   });
 }
 

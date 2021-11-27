@@ -60,7 +60,7 @@ export function start(options: { routes: JSX.Element[] }) {
             })
             .done();
       }).done();
-    }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) }));
+    }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting), group: null, icon: "eye", iconColor: "blue", color: "info" }));
 
 
   Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never" }));

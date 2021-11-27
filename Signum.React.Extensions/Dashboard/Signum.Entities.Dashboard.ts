@@ -6,16 +6,48 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
+import * as Files from '../Files/Signum.Entities.Files'
 import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const CachedQueryEntity = new Type<CachedQueryEntity>("CachedQuery");
+export interface CachedQueryEntity extends Entities.Entity {
+  Type: "CachedQuery";
+  dashboard: Entities.Lite<DashboardEntity>;
+  userAssets: Entities.MList<Entities.Lite<UserAssets.IUserAssetEntity>>;
+  file: Files.FilePathEmbedded;
+  numRows: number;
+  numColumns: number;
+  creationDate: string /*DateTime*/;
+  queryDuration: number;
+  uploadDuration: number;
+}
+
+export module CachedQueryFileType {
+  export const CachedQuery : Files.FileTypeSymbol = registerSymbol("FileType", "CachedQueryFileType.CachedQuery");
+}
+
+export const CacheQueryConfigurationEmbedded = new Type<CacheQueryConfigurationEmbedded>("CacheQueryConfigurationEmbedded");
+export interface CacheQueryConfigurationEmbedded extends Entities.EmbeddedEntity {
+  Type: "CacheQueryConfigurationEmbedded";
+  timeoutForQueries: number;
+  maxRows: number;
+}
+
+export const CombinedUserChartElementEmbedded = new Type<CombinedUserChartElementEmbedded>("CombinedUserChartElementEmbedded");
+export interface CombinedUserChartElementEmbedded extends Entities.EmbeddedEntity {
+  Type: "CombinedUserChartElementEmbedded";
+  userChart: Chart.UserChartEntity;
+  isQueryCached: boolean;
+}
+
 export const CombinedUserChartPartEntity = new Type<CombinedUserChartPartEntity>("CombinedUserChartPart");
 export interface CombinedUserChartPartEntity extends Entities.Entity, IPartEntity {
   Type: "CombinedUserChartPart";
-  userCharts: Entities.MList<Chart.UserChartEntity>;
+  userCharts: Entities.MList<CombinedUserChartElementEmbedded>;
   showData: boolean;
   allowChangeShowData: boolean;
   combinePinnedFiltersWithSameLabel: boolean;
@@ -40,6 +72,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   autoRefreshPeriod: number | null;
   displayName: string;
   combineSimilarRows: boolean;
+  cacheQueryConfiguration: CacheQueryConfigurationEmbedded | null;
   parts: Entities.MList<PanelPartEmbedded>;
   guid: string /*Guid*/;
   key: string | null;
@@ -57,6 +90,7 @@ export module DashboardMessage {
 
 export module DashboardOperation {
   export const Save : Entities.ExecuteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Save");
+  export const RegenerateCachedFiles : Entities.ExecuteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.RegenerateCachedFiles");
   export const Clone : Entities.ConstructSymbol_From<DashboardEntity, DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Clone");
   export const Delete : Entities.DeleteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Delete");
 }
@@ -112,6 +146,7 @@ export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart"
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
   Type: "UserChartPart";
   userChart: Chart.UserChartEntity;
+  isQueryCached: boolean;
   showData: boolean;
   allowChangeShowData: boolean;
   createNew: boolean;
@@ -123,6 +158,7 @@ export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart"
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
   Type: "UserQueryPart";
   userQuery: UserQueries.UserQueryEntity;
+  isQueryCached: boolean;
   renderMode: UserQueryPartRenderMode;
   allowSelection: boolean;
   showFooter: boolean;
@@ -147,6 +183,7 @@ export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ValueUserQueryElementEmbedded";
   label: string | null;
   userQuery: UserQueries.UserQueryEntity;
+  isQueryCached: boolean;
   href: string | null;
 }
 

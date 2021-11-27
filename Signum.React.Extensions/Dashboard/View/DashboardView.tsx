@@ -4,7 +4,7 @@ import { classes } from '@framework/Globals'
 import { Entity, getToString, is, Lite, MListElement, SearchMessage, toLite } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as DashboardClient from '../DashboardClient'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage, CachedQueryEntity } from '../Signum.Entities.Dashboard'
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
@@ -13,10 +13,10 @@ import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 
 import { DashboardFilterController } from './DashboardFilterController'
+import { FilePathEmbedded } from '../../Files/Signum.Entities.Files'
+import { CachedQuery } from '../CachedQuery'
 
-
-
-export default function DashboardView(p: { dashboard: DashboardEntity, entity?: Entity, deps?: React.DependencyList; reload: () => void;  }) {
+export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQuery> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; }) {
 
   const forceUpdate = useForceUpdate();
   var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate), [p.dashboard]);
@@ -42,7 +42,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
 
                   return (
                     <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
-                      <PanelPart ctx={c} entity={p.entity} filterController={filterController} reload={p.reload} />
+                      <PanelPart ctx={c} entity={p.entity} filterController={filterController} reload={p.reload} cachedQueries={p.cachedQueries} /> 
                     </div>
                   );
                 })}
@@ -78,7 +78,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, entity?: 
               const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
               return (
                 <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`}>
-                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} filterController={filterController} reload={p.reload} />)}
+                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} filterController={filterController} reload={p.reload} cachedQueries={p.cachedQueries} />)}
                 </div>
               );
             })}
@@ -174,6 +174,7 @@ export interface PanelPartProps {
   deps?: React.DependencyList;
   filterController: DashboardFilterController;
   reload: () => void;
+  cachedQueries: { [userAssetKey: string]: Promise<CachedQuery> }
 }
 
 export function PanelPart(p: PanelPartProps) {
@@ -197,8 +198,9 @@ export function PanelPart(p: PanelPartProps) {
       part: content,
       entity: lite,
       deps: p.deps,
-      filterController: p.filterController
-    });
+      filterController: p.filterController,
+      cachedQueries: p.cachedQueries
+    } as DashboardClient.PanelPartContentProps<IPartEntity>);
   }
 
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
@@ -248,7 +250,8 @@ export function PanelPart(p: PanelPartProps) {
               part: content,
               entity: lite,
               deps: p.deps,
-              filterController: p.filterController
+              filterController: p.filterController,
+              cachedQueries: p.cachedQueries,
             } as DashboardClient.PanelPartContentProps<IPartEntity>)
           }
         </ErrorBoundary>

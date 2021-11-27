@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
@@ -48,6 +49,17 @@ public class QueryRequest : BaseQueryRequest
 
         return allTokens;
     }
+
+    public QueryRequest Clone() => new QueryRequest
+    {
+        QueryName = QueryName,
+        GroupResults = GroupResults,
+        Columns = Columns,
+        Filters = Filters,
+        Orders = Orders,
+        Pagination = Pagination,
+        SystemTime = SystemTime,
+    };
 }
 
 [DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(true)]
@@ -91,28 +103,19 @@ public enum SystemTimeProperty
     SystemValidTo,
 }
 
-public abstract class Pagination
+public abstract class Pagination : IEquatable<Pagination>
 {
     public abstract PaginationMode GetMode();
     public abstract int? GetElementsPerPage();
     public abstract int? MaxElementIndex { get; }
+    public abstract bool Equals(Pagination? other);
 
     public class All : Pagination
     {
-        public override int? MaxElementIndex
-        {
-            get { return null; }
-        }
-
-        public override PaginationMode GetMode()
-        {
-            return PaginationMode.All;
-        }
-
-        public override int? GetElementsPerPage()
-        {
-            return null;
-        }
+        public override PaginationMode GetMode() => PaginationMode.All;
+        public override int? GetElementsPerPage() => null;
+        public override int? MaxElementIndex => null;
+        public override bool Equals(Pagination? other) => other is All;
     }
 
     public class Firsts : Pagination
@@ -124,28 +127,16 @@ public abstract class Pagination
             this.TopElements = topElements;
         }
 
-        public int TopElements { get; private set; }
+        public int TopElements { get;  }
 
-        public override int? MaxElementIndex
-        {
-            get { return TopElements; }
-        }
-
-        public override PaginationMode GetMode()
-        {
-            return PaginationMode.Firsts;
-        }
-
-        public override int? GetElementsPerPage()
-        {
-            return TopElements;
-        }
+        public override PaginationMode GetMode() => PaginationMode.Firsts;
+        public override int? GetElementsPerPage() => TopElements;
+        public override int? MaxElementIndex => TopElements;
+        public override bool Equals(Pagination? other) => other is Firsts f && f.TopElements == this.TopElements;
     }
 
     public class Paginate : Pagination
     {
-        public static int DefaultElementsPerPage = 20;
-
         public Paginate(int elementsPerPage, int currentPage = 1)
         {
             if (elementsPerPage <= 0)
@@ -159,43 +150,17 @@ public abstract class Pagination
         }
 
         public int ElementsPerPage { get; private set; }
-
         public int CurrentPage { get; private set; }
 
-        public int StartElementIndex()
-        {
-            return (ElementsPerPage * (CurrentPage - 1)) + 1;
-        }
+        public int StartElementIndex() => (ElementsPerPage * (CurrentPage - 1)) + 1;
+        public int EndElementIndex(int rows) => StartElementIndex() + rows - 1;
+        public int TotalPages(int totalElements) => (totalElements + ElementsPerPage - 1) / ElementsPerPage; //Round up
+        public Paginate WithCurrentPage(int newPage) => new Paginate(this.ElementsPerPage, newPage);
 
-        public int EndElementIndex(int rows)
-        {
-            return StartElementIndex() + rows - 1;
-        }
-
-        public int TotalPages(int totalElements)
-        {
-            return (totalElements + ElementsPerPage - 1) / ElementsPerPage; //Round up
-        }
-
-        public override int? MaxElementIndex
-        {
-            get { return (ElementsPerPage * (CurrentPage + 1)) - 1; }
-        }
-
-        public override PaginationMode GetMode()
-        {
-            return PaginationMode.Paginate;
-        }
-
-        public override int? GetElementsPerPage()
-        {
-            return ElementsPerPage;
-        }
-
-        public Paginate WithCurrentPage(int newPage)
-        {
-            return new Paginate(this.ElementsPerPage, newPage);
-        }
+        public override PaginationMode GetMode() => PaginationMode.Paginate;
+        public override int? GetElementsPerPage() => ElementsPerPage;
+        public override int? MaxElementIndex => (ElementsPerPage * (CurrentPage + 1)) - 1;
+        public override bool Equals(Pagination? other) => other is Paginate p && p.ElementsPerPage == ElementsPerPage && p.CurrentPage == CurrentPage;
     }
 }
 

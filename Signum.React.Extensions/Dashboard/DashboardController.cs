@@ -11,10 +11,27 @@ public class DashboardController : ControllerBase
     {
         return DashboardLogic.GetDashboardsEntity(TypeLogic.GetType(typeName));
     }
+
     [HttpGet("api/dashboard/home")]
     public Lite<DashboardEntity>? Home()
     {
         var result = DashboardLogic.GetHomePageDashboard();
         return result?.ToLite();
     }
+
+    [HttpPost("api/dashboard/get")]
+    public DashboardWithCachedQueries GetDashboard([FromBody]Lite<DashboardEntity> dashboard)
+    {
+        return new DashboardWithCachedQueries
+        {
+            Dashboard = DashboardLogic.RetrieveDashboard(dashboard),
+            CachedQueries = DashboardLogic.GetCachedQueries(dashboard).ToList(),
+        };
+    }
+}
+
+public class DashboardWithCachedQueries
+{
+    public DashboardEntity Dashboard;
+    public List<CachedQueryEntity> CachedQueries;
 }

@@ -1413,8 +1413,6 @@ export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): 
 }
 
 export function decompress(rt: ResultTable): ResultTable {
-
-  debugger;
   var rows = rt.rows;
   var columns = rt.columns;
 

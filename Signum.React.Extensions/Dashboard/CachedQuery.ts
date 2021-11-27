@@ -1,7 +1,10 @@
 import * as Finder from '@framework/Finder'
-import { ColumnRequest, FilterOperation, FilterRequest, isFilterGroupRequest, OrderRequest, Pagination, QueryRequest, QueryToken, ResultRow, ResultTable } from '@framework/FindOptions'
+import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, isFilterGroupOptionParsed, isFilterGroupRequest, OrderRequest, Pagination, QueryRequest, QueryToken, ResultRow, ResultTable } from '@framework/FindOptions'
 import { Entity, is, Lite } from '@framework/Signum.Entities';
-import { TypeAllowedAndConditions } from '../Authorization/Signum.Entities.Authorization';
+import { useFetchAll } from '../../Signum.React/Scripts/Navigator';
+import { ignoreErrors } from '../../Signum.React/Scripts/QuickLinks';
+import * as ChartClient from '../Chart/ChartClient'
+import { ChartRequestModel } from '../Chart/Signum.Entities.Chart';
 
 
 export interface CachedQuery {
@@ -10,34 +13,63 @@ export interface CachedQuery {
   resultTable: ResultTable;
 }
 
-export function getCachedResultTable(cachedQuery: CachedQuery, request: QueryRequest, parsedTokens: { [token: string]: QueryToken }): ResultTable | string /*Error*/ {
+
+export function executeChartCached(request: ChartRequestModel, chartScript: ChartClient.ChartScript, cachedQuery: CachedQuery): Promise<ChartClient.API.ExecuteChartResult> {
+  const palettesPromise = ChartClient.API.getPalletes(request);
+
+  const tokens = [
+    ...request.columns.map(a => a.element.token?.token).notNull(),
+    ...getAllFilterTokens(request.filterOptions),
+  ].toObjectDistinct(a => a.fullKey);
+
+  const queryRequest = ChartClient.API.getRequest(request);
+  const resultTable = getCachedResultTable(cachedQuery, queryRequest, tokens);
+
+  return palettesPromise.then(palettes => ChartClient.API.toChartResult(request, resultTable, chartScript, palettes));
+}
+
+function getAllFilterTokens(fos: FilterOptionParsed[]): QueryToken[]{
+  return fos.flatMap(f => isFilterGroupOptionParsed(f) ?
+    [f.token, ...getAllFilterTokens(f.filters)] :
+    [f.token])
+    .notNull();
+}
+
+
+class CachedQueryError {
+  message: string;
+  constructor(error: string) {
+    this.message = error;
+  }
+
+  toString() {
+    return this.message;
+  }
+}
+
+export function getCachedResultTable(cachedQuery: CachedQuery, request: QueryRequest, parsedTokens: { [token: string]: QueryToken }): ResultTable {
 
   if (request.queryKey != cachedQuery.queryRequest.queryKey)
-    return "Invalid queryKey";
+    throw new CachedQueryError("Invalid queryKey");
 
-  var pagProblems = paginatinProblems(request.pagination, cachedQuery.queryRequest.pagination);
-  if (typeof pagProblems == "string")
-    return pagProblems;
+  var pagProblems = pagionationRestriction(request.pagination, cachedQuery.queryRequest.pagination);
 
-  const onlyIfExactFiltersAndOrders = typeof pagProblems == "symbol";
+  const exactFiltersAndOrders = pagProblems == "ExactFiltersAndOrders";
 
   const sameOrders = ordersEquals(cachedQuery.queryRequest.orders, request.orders)
-  if (!sameOrders && onlyIfExactFiltersAndOrders)
-    return "Incompatible pagination if the orders are not identical";
+  if (!sameOrders && exactFiltersAndOrders)
+    throw new CachedQueryError("Incompatible pagination if the orders are not identical");
 
   const extraFilters = extractRequestedFilters(cachedQuery.queryRequest.filters, request.filters);
-  if (typeof extraFilters == "string")
-    return extraFilters;
-
-  if (extraFilters.length && onlyIfExactFiltersAndOrders)
-    return "Incompatible pagination if the filters are not identical";
+  if (extraFilters.length && exactFiltersAndOrders)
+    throw new CachedQueryError("Incompatible pagination if the filters are not identical");
 
   if (request.groupResults) {
 
-    if (onlyIfExactFiltersAndOrders) {
+    if (exactFiltersAndOrders) {
 
       if (!cachedQuery.queryRequest.groupResults)
-        return "Incompatible pagination if the request is grouping but the cached query is not";
+        throw new CachedQueryError("Incompatible pagination if the request is grouping but the cached query is not");
       else {
 
         const requestKeyColumns = request.columns.map(a => parsedTokens[a.token].queryTokenType != "Aggregate");
@@ -45,55 +77,39 @@ export function getCachedResultTable(cachedQuery: CachedQuery, request: QueryReq
         const cachedKeyColumns = cachedQuery.queryRequest.columns.map(a => parsedTokens[a.token].queryTokenType != "Aggregate");
 
         var extraColumns = cachedKeyColumns.filter(c => !requestKeyColumns.contains(c));
-        if (extraColumns.length && onlyIfExactFiltersAndOrders)
-          return "Incompatible pagination if the key columns are not identical";
+        if (extraColumns.length && exactFiltersAndOrders)
+          throw new CachedQueryError("Incompatible pagination if the key columns are not identical");
       }
     }
 
     const aggregateFilters = extraFilters.extract(f => !isFilterGroupRequest(f) && parsedTokens[f.token].queryTokenType == "Aggregate");
 
     const filtered = filterRows(cachedQuery.resultTable, extraFilters);
-    if (typeof filtered == "string")
-      return filtered;
-
+    
     const allColumns = [...request.columns.map(a => a.token), ...aggregateFilters.map(a => a.token!), ...sameOrders ? [] : request.orders.map(a => a.token)].distinctBy(a => a);
 
     const grouped = groupByRows(filtered, true, allColumns, parsedTokens);
-    if (typeof grouped == "string")
-      return grouped;
-
+  
     const reFiltered = filterRows(grouped, aggregateFilters);
-    if (typeof reFiltered == "string")
-      return reFiltered;
-
+    
     const ordered = sameOrders ? reFiltered : orderRows(reFiltered, request.orders, parsedTokens);
-    if (typeof ordered == "string")
-      return ordered;
-
+    
     const select = selectRows(ordered, request.columns);
-    if (typeof select == "string")
-      return select;
-
+    
     const paginate = paginateRows(select, request.pagination);
 
     return paginate;
 
   } else {
     if (cachedQuery.queryRequest.groupResults)
-      return "Cached query is grouping but request is not";
+      throw new CachedQueryError("Cached query is grouping but request is not");
     else {
       const filtered = filterRows(cachedQuery.resultTable, extraFilters);
-      if (typeof filtered == "string")
-        return filtered;
-
+      
       const ordered = sameOrders ? filtered : orderRows(filtered, request.orders, parsedTokens);
-      if (typeof ordered == "string")
-        return ordered;
-
+      
       const select = selectRows(ordered, request.columns);
-      if (typeof select == "string")
-        return select;
-
+      
       const paginate = paginateRows(select, request.pagination);
       return paginate;
     }
@@ -101,12 +117,11 @@ export function getCachedResultTable(cachedQuery: CachedQuery, request: QueryReq
 }
 
 
-function groupByRows(rt: ResultTable, alreadyGrouped: boolean, tokens: string[], parsedTokens: { [token: string]: QueryToken }): ResultTable | string {
+function groupByRows(rt: ResultTable, alreadyGrouped: boolean, tokens: string[], parsedTokens: { [token: string]: QueryToken }): ResultTable {
 
   const groups = new Map<string, ResultRow[]>();
   const keyColumns = tokens.filter(a => parsedTokens[a].queryTokenType != "Aggregate");
   const rowKey = getRowKey(rt, keyColumns, parsedTokens);
-
 
   for (var i = 0; i < rt.rows.length; i++) {
 
@@ -123,7 +138,26 @@ function groupByRows(rt: ResultTable, alreadyGrouped: boolean, tokens: string[],
   var result: ResultRow[];
 
 
-  function getGetter(token: string): string | ((gr: ResultRow[]) => any)  {
+  function getGetter(token: string): ((gr: ResultRow[]) => any) {
+
+    function getColumnIndex(t: string) {
+
+      var idx = rt.columns.indexOf(t);
+      if (idx == -1)
+        throw new CachedQueryError(`Column ${t} not found` + (t != token ? ` (required for ${token})` : ""));
+
+      return idx;
+    }
+
+    function tryColumnIndex(t: string) {
+
+      var idx = rt.columns.indexOf(t);
+      if (idx == -1)
+        return null; 
+
+      return idx;
+    }
+
     const qt = parsedTokens[token];
     if (qt.queryTokenType != "Aggregate") {
       const index = rt.columns.indexOf(token);
@@ -135,9 +169,7 @@ function groupByRows(rt: ResultTable, alreadyGrouped: boolean, tokens: string[],
         if (qt.key == "Count")
           return gr => gr.length;
 
-        const index = rt.columns.indexOf(qt.parent!.fullKey);
-        if (index == -1)
-          return qt.parent!.fullKey;
+        const index = getColumnIndex(qt.parent!.fullKey);
 
         switch (qt.key) {
           case "Min": return rows => rows.map(a => a.columns[index]).min();
@@ -151,28 +183,19 @@ function groupByRows(rt: ResultTable, alreadyGrouped: boolean, tokens: string[],
       } else {
 
         if (qt.key == "Count") {
-          const indexCount = rt.columns.indexOf(qt.fullKey);
-          if (indexCount == -1)
-            return qt.fullKey;
+          const indexCount = getColumnIndex(qt.fullKey);
 
           return rows => rows.sum(a => a.columns[indexCount]);
 
-        } else if (qt.key == "Avg") {
+        } else if (qt.key == "Average") {
           const sumToken = qt.parent!.fullKey + ".Sum";
-          const indexSum = rt.columns.indexOf(sumToken);
-          if (indexSum == -1)
-            return sumToken;
+          const indexSum = getColumnIndex(sumToken);
 
           const countToken = qt.parent!.fullKey + ".CountNotNull";
-          const indexCount = rt.columns.indexOf(countToken);
-          if (indexCount == -1)
-            return countToken;
-
-          return rows => rows.sum(a => a.columns[indexSum]) / rows.sum(a => a.columns[indexCount]);
+          const indexCount2 = getColumnIndex(countToken);
+          return rows => rows.sum(a => a.columns[indexSum]) / rows.sum(a => a.columns[indexCount2]);
         } else {
-          const index = rt.columns.indexOf(qt.parent!.fullKey);
-          if (index == -1)
-            return qt.parent?.fullKey!;
+          const index = tryColumnIndex(qt.fullKey) ?? getColumnIndex(qt.parent!.fullKey);
 
           switch (qt.key) {
             case "Min": return rows => rows.map(a => a.columns[index]).min();
@@ -186,18 +209,12 @@ function groupByRows(rt: ResultTable, alreadyGrouped: boolean, tokens: string[],
     throw new Error("Unexpected " + token);
   }
 
+  var getters = tokens.map(t => {
+    var g = getGetter(t);
 
-
-  var getters: ((gr: ResultRow[]) => any)[] = [];
-  for (let i = 0; i < tokens.length; i++) {
-    var g = getGetter(tokens[i]);
-
-    if (typeof g == "string") {
-      return `Column ${g} not found` + (g != tokens[i]) ? `(required for ${tokens[i]})` : "";
-    }
-
-    getters.push(g);
-  }
+    
+    return g;
+  });
 
   const newRows: ResultRow[] = []; 
   groups.forEach(rows => {
@@ -229,20 +246,24 @@ function getRowKey(rt: ResultTable, keyTokens: string[], parsedTokens: { [token:
   function columnKey(token: string) {
     const index = rt.columns.indexOf(token);
 
+    if (index == -1)
+      throw new CachedQueryError("Token " + token + " not found for filtering");
+
     const qt = parsedTokens[token];
 
     if (qt.filterType == "Lite")
-      return `(rt.columns[${index}] && (rt.columns[${index}].EntityType + ";" + rt.columns[${index}].id))`
+      return `(rr.columns[${index}] && (rr.columns[${index}].EntityType + ";" + rr.columns[${index}].id))`
 
-    return `rt.columns[${index}]`;
+    return `rr.columns[${index}]`;
   }
 
-  const parts = keyTokens.map(a => columnKey(a)).join("|");
+
+  const parts = keyTokens.map(token => columnKey(token)).join("+ \"|\" + ");
 
   return new Function(rr, "return " + parts + ";") as (row: ResultRow) => string;
 }
 
-function orderRows(rt: ResultTable, orders: OrderRequest[], parseTokens: { [token: string]: QueryToken }): ResultTable | string {
+function orderRows(rt: ResultTable, orders: OrderRequest[], parseTokens: { [token: string]: QueryToken }): ResultTable {
 
   var newRows = Array.from(rt.rows);
 
@@ -255,7 +276,7 @@ function orderRows(rt: ResultTable, orders: OrderRequest[], parseTokens: { [toke
     var index = rt.columns.indexOf(o.token);
 
     if (index == -1)
-      return "Unable to order by token " + o.token;
+      throw new CachedQueryError("Unable to order by token " + o.token);
 
     if (o.orderType == "Ascending") {
       if (pt.filterType == "Lite")
@@ -281,13 +302,13 @@ function orderRows(rt: ResultTable, orders: OrderRequest[], parseTokens: { [toke
 
 }
 
-function selectRows(rt: ResultTable, columns: ColumnRequest[]): ResultTable | string {
+function selectRows(rt: ResultTable, columns: ColumnRequest[]): ResultTable {
 
   const indexes: number[] = [];
   for (var i = 0; i < columns.length; i++) {
     var idx = rt.columns.indexOf(columns[i].token);
     if (idx == -1)
-      return "Unable to select by token " + columns[i].token;
+      throw new CachedQueryError("Unable to select by token " + columns[i].token);
 
     indexes.push(idx);
   }
@@ -312,18 +333,15 @@ function selectRows(rt: ResultTable, columns: ColumnRequest[]): ResultTable | st
   });
 }
 
-function filterRows(rt: ResultTable, filters: FilterRequest[]): ResultTable | string{
+function filterRows(rt: ResultTable, filters: FilterRequest[]): ResultTable{
 
   if (filters.length == 0)
     return rt;
 
   if (rt.pagination.mode != "All")
-    return "Unable to filter " + rt.pagination.mode;
+    throw new CachedQueryError("Unable to filter " + rt.pagination.mode);
 
   var filterer = createFilterer(rt, filters);
-
-  if (typeof filterer == "string")
-    return filterer;
 
   var newRows = filterer(rt.rows);
 
@@ -336,25 +354,34 @@ function filterRows(rt: ResultTable, filters: FilterRequest[]): ResultTable | st
   };
 }
 
-function createFilterer(result: ResultTable, filters: FilterRequest[]): ((rows: ResultRow[]) => ResultRow[]) | string{
+function createFilterer(result: ResultTable, filters: FilterRequest[]): ((rows: ResultRow[]) => ResultRow[]){
 
   const cls = "cls";
 
   var allValues: unknown[] = [];
+
+  function getUniqueValue(v: unknown, token: string) {
+    var uvs = result.uniqueValues[token];
+
+    if (uvs) {
+      for (var i = 0; i < uvs.length; i++) {
+        if (uvs[i] == v || is(uvs[i], v as Lite<Entity>, false, false))
+          return uvs[i];
+      }
+    }
+
+    return v;
+  }
 
   function getVarName(v: unknown) {
     allValues.push(v);
     return "v" + (allValues.length - 1);
   }
 
-  function getExpression(f: FilterRequest): string | string[] /*errors*/{
+  function getExpression(f: FilterRequest): string {
     if (isFilterGroupRequest(f)) {
 
       const parts = f.filters.map(ff => getExpression(ff));
-
-      var errors = parts.filter(a => Array.isArray(a)).flatMap(a => a as string[]);
-      if (errors.length > 0)
-        return errors;
 
       if (f.groupOperation == "Or")
         return "( " + parts.join(" || ") + ")";
@@ -365,20 +392,20 @@ function createFilterer(result: ResultTable, filters: FilterRequest[]): ((rows: 
       var index = result.columns.indexOf(f.token);
 
       if (index == -1)
-        return [f.token];
+        throw new CachedQueryError(f.token);
 
       var op = "cls[" + index + "]"; 
 
       if (f.operation == "IsIn" || f.operation == "IsNotIn") {
         var values = f.value as unknown[];
 
-        var exps = allValues.map(v => op + "===" + getVarName(v)).join(" || ");
+        var exps = allValues.map(v => op + "===" + getVarName(getUniqueValue(v, f.token))).join(" || ");
 
         return f.operation == "IsIn" ? exps : ("!(" + exps + ")");
       }
       else {
 
-        var vn = getVarName(f.value);
+        var vn = getVarName(getUniqueValue(f.value, f.token));
         switch (f.operation) {
           case "EqualTo": return `${op} === ${vn}`;
           case "DistinctTo": return `${op} !== ${vn}`;
@@ -393,8 +420,8 @@ function createFilterer(result: ResultTable, filters: FilterRequest[]): ((rows: 
           case "StartsWith": return `${op} !== null && ${op}.startsWith(${vn})`;
           case "NotStartsWith": return `!(${op} !== null && ${op}.startsWith(${vn}))`;
 
-          case "Like": return ["Like not supported"];
-          case "NotLike": return ["NotLike not supported"];
+          case "Like": throw new CachedQueryError("Like not supported");
+          case "NotLike": throw new CachedQueryError("NotLike not supported");
 
           default: throw new Error("Unexpected " + f.operation);
         }
@@ -411,7 +438,7 @@ function createFilterer(result: ResultTable, filters: FilterRequest[]): ((rows: 
   const result = [];
   for(let i = 0; i < rows.length; i++) {
     var cls = rows[i].columns;
-    if (expression) {
+    if (${expression}) {
       result.push(rows[i]);
     }
   }
@@ -420,29 +447,6 @@ function createFilterer(result: ResultTable, filters: FilterRequest[]): ((rows: 
 
   return factory(...allValues);
 }
-
-
-
-function splitAggregate(token: string) {
-  const suffix = token.tryAfterLast(".") ?? token;
-
-  const prefix = token.tryBeforeLast(".");
-
-  if (
-    suffix == "Count" ||
-    suffix == "Average" ||
-    suffix == "Sum" ||
-    suffix == "Min" ||
-    suffix == "Max") {
-    return ({ aggregate: suffix, token: prefix });
-  }
-
-
-  return ({ aggregate: null, token: token });
-}
-
-
-
 
 function ordersEquals(cached: OrderRequest[], requested: OrderRequest[]) {
   if (cached.length != requested.length)
@@ -459,7 +463,7 @@ function ordersEquals(cached: OrderRequest[], requested: OrderRequest[]) {
   return true;
 }
 
-function extractRequestedFilters(cached: FilterRequest[], request: FilterRequest[]): FilterRequest[] | string {
+function extractRequestedFilters(cached: FilterRequest[], request: FilterRequest[]): FilterRequest[] {
 
   var cloned = JSON.parse(JSON.stringify(request)) as FilterRequest[];
 
@@ -470,7 +474,7 @@ function extractRequestedFilters(cached: FilterRequest[], request: FilterRequest
     const toRemove = cloned.filter(rf => equalFilter(c, rf));
 
     if (toRemove.length)
-      return "Cached filter not found in requet";
+      throw new CachedQueryError("Cached filter not found in requet");
 
     toRemove.forEach(r => cloned.remove(r));
   }
@@ -510,7 +514,7 @@ function equalFilter(c: FilterRequest, r: FilterRequest): boolean {
   }
 }
 
-function paginateRows(rt: ResultTable, req: Pagination): ResultTable | string {
+function paginateRows(rt: ResultTable, req: Pagination): ResultTable{
   switch (rt.pagination.mode) {
     case "All":
       {
@@ -529,7 +533,7 @@ function paginateRows(rt: ResultTable, req: Pagination): ResultTable | string {
           if (rt.pagination.currentPage == 1 && req.elementsPerPage! <= rt.pagination.elementsPerPage!)
             return { ...rt, rows: rt.rows.slice(0, rt.pagination.elementsPerPage), pagination: req };
 
-          return `Invalid first`;
+          throw new CachedQueryError(`Invalid first`);
 
         case "Paginate":
           if (((req.elementsPerPage! == rt.pagination.elementsPerPage! && req.currentPage == rt.pagination.currentPage) ||
@@ -539,7 +543,7 @@ function paginateRows(rt: ResultTable, req: Pagination): ResultTable | string {
             return { ...rt, rows: rt.rows.slice(startIndex, startIndex + rt.pagination.elementsPerPage!), pagination: req };
           }
 
-          return "Invalid paginate";
+          throw new CachedQueryError("Invalid paginate");
       }
     }
     case "Firsts": {
@@ -550,13 +554,13 @@ function paginateRows(rt: ResultTable, req: Pagination): ResultTable | string {
 
           throw new Error(`Invalid first`);
         case "Paginate":
-        case "All": return `Requesting ${req.mode} but cached is ${rt.pagination.mode}`;
+        case "All": throw new CachedQueryError(`Requesting ${req.mode} but cached is ${rt.pagination.mode}`);
       }
     }
   }
 }
 
-function paginatinProblems(req: Pagination, cached: Pagination): symbol| string |  null {
+function pagionationRestriction(req: Pagination, cached: Pagination): null | "ExactFiltersAndOrders" {
 
   switch (cached.mode) {
     case "All": return null;
@@ -566,20 +570,20 @@ function paginatinProblems(req: Pagination, cached: Pagination): symbol| string 
 
         case "Firsts": {
           if (cached.currentPage == 1 && req.elementsPerPage! <= cached.elementsPerPage!)
-            return Symbol("OnlyIfExactFiltersAndOrders");
+            return "ExactFiltersAndOrders";
 
-          return "Invalid First";
+          throw new CachedQueryError("Invalid First");
         }
 
         case "Paginate": {
           if (((req.elementsPerPage! == cached.elementsPerPage! && req.currentPage == cached.currentPage) ||
               (req.elementsPerPage! <= cached.elementsPerPage! && req.currentPage == 1 && cached.currentPage == 1)))
-            return Symbol("OnlyIfExactFiltersAndOrders");
+            return "ExactFiltersAndOrders";
 
-          return "Invalid Paginate";
+          throw new CachedQueryError("Invalid Paginate");
         }
 
-        case "All": return `Requesting ${req.mode} but cached is ${cached.mode}`;
+        case "All": throw new CachedQueryError(`Requesting ${req.mode} but cached is ${cached.mode}`);
       }
     }
 
@@ -588,27 +592,13 @@ function paginatinProblems(req: Pagination, cached: Pagination): symbol| string 
         switch (req.mode) {
           case "Firsts": {
             if (req.elementsPerPage! <= cached.elementsPerPage!)
-              return Symbol("OnlyIfExactFiltersAndOrders");
+              return "ExactFiltersAndOrders";
 
-            return "Invalid First";
+            throw new CachedQueryError("Invalid First");
           }
           case "Paginate":
-          case "All": return `Requesting ${req.mode} but cached is ${cached.mode}`;
+          case "All": throw new CachedQueryError(`Requesting ${req.mode} but cached is ${cached.mode}`);
         }
       }
   }
-
-  if (cached.mode == "All")
-    return null;
-
-  if (cached.mode == "Paginate")
-
-  if (cached.mode == "Firsts") {
-    if (req.mode == "Firsts") {
-     
-    }
-  }
-
-
-  throw new Error("Unexpected value");
 }

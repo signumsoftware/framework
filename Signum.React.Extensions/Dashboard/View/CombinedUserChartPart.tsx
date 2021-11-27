@@ -35,7 +35,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   const forceUpdate = useForceUpdate();
 
-  const infos = React.useMemo<CombinedUserChartInfoTemp[]>(() => p.part.userCharts.map(uc => ({ userChart: uc.element } as CombinedUserChartInfoTemp)), [p.part]);
+  const infos = React.useMemo<CombinedUserChartInfoTemp[]>(() => p.part.userCharts.map(uc => ({ userChart: uc.element.userChart } as CombinedUserChartInfoTemp)), [p.part]);
 
   const [showData, setShowData] = React.useState(p.part.showData);
 

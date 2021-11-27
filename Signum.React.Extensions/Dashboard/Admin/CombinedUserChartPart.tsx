@@ -1,22 +1,33 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityStrip } from '@framework/Lines'
+import { ValueLine, EntityLine, EntityStrip, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { UserChartPartEntity, DashboardEntity, CombinedUserChartPartEntity } from '../Signum.Entities.Dashboard'
+import { UserChartPartEntity, DashboardEntity, CombinedUserChartPartEntity, CombinedUserChartElementEmbedded } from '../Signum.Entities.Dashboard'
 import { D3ChartScript, UserChartEntity } from '../../Chart/Signum.Entities.Chart';
+import { IsQueryCachedLine } from './Dashboard';
 
 export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUserChartPartEntity> }) {
   const ctx = p.ctx;
 
   return (
     <div >
-      <EntityStrip ctx={ctx.subCtx(p => p.userCharts)} findOptions={{
-        queryName: UserChartEntity, filterOptions: [{
-          token: UserChartEntity.token(a => a.entity.chartScript.key),
-          operation: "IsIn",
-          value: [D3ChartScript.Columns.key, D3ChartScript.Line.key]
-        }]
-      }} />
-
+      <EntityTable ctx={ctx.subCtx(p => p.userCharts)} columns={EntityTable.typedColumns<CombinedUserChartElementEmbedded>([
+        {
+          property: p => p.userChart,
+          template: (ectx) => <EntityLine ctx={ectx.subCtx(p => p.userChart)} findOptions={{
+            queryName: UserChartEntity, filterOptions: [{
+              token: UserChartEntity.token(a => a.entity.chartScript.key),
+              operation: "IsIn",
+              value: [D3ChartScript.Columns.key, D3ChartScript.Line.key]
+            }]
+          }}/>,
+          headerHtmlAttributes: { style: { width: "70%" } },
+        },
+        ctx.findParentCtx(DashboardEntity).value.cacheQueryConfiguration && {
+          property: p => p.isQueryCached,
+          headerHtmlAttributes: { style: { width: "30%" } },
+        },
+      ])}
+      />
       <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
       <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
       <ValueLine ctx={ctx.subCtx(p => p.combinePinnedFiltersWithSameLabel)} inlineCheckbox="block" />
