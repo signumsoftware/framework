@@ -4,7 +4,6 @@ using Signum.React.Facades;
 using System.Threading;
 using Signum.Entities.Basics;
 using Signum.Engine.Authorization;
-using Signum.React.ApiControllers;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using static Signum.React.ApiControllers.OperationController;
@@ -12,6 +11,7 @@ using Signum.Entities.Reflection;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Signum.Engine.Json;
 
 namespace Signum.React.Workflow;
 
@@ -291,7 +291,7 @@ public class WorkflowActivityMonitorRequestTS
         return new WorkflowActivityMonitorRequest
         {
             Workflow = workflow,
-            Filters = filters.Select(f => f.ToFilter(qd, true)).ToList(),
+            Filters = filters.Select(f => f.ToFilter(qd, true, SignumServer.JsonSerializerOptions)).ToList(),
             Columns = columns.Select(c => c.ToColumn(qd, true)).ToList(),
         };
     }

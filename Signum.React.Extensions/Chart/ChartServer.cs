@@ -95,7 +95,7 @@ public static class ChartServer
 
                 var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
-                cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true)).ToList();
+                cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true, SignumServer.JsonSerializerOptions)).ToList();
             },
             CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
             {

@@ -348,20 +348,13 @@ export interface QueryValueRequest {
   systemTime?: SystemTime;
 }
 
-export interface ResultColumn {
-  displayName: string;
-  token: QueryToken;
-}
-
 export interface ResultTable {
-  queryKey: string;
-  entityColumn: string;
   columns: string[];
+  uniqueValues: { [token: string]: any[] }
   rows: ResultRow[];
   pagination: Pagination
   totalElements?: number;
 }
-
 
 export interface ResultRow {
   entity?: Lite<Entity>;

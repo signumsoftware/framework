@@ -3,14 +3,15 @@ import * as React from 'react'
 import { FormGroup } from '@framework/Lines'
 import { FindOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
-import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
+import { Entity, Lite, is, JavascriptMessage, liteKey, toLite } from '@framework/Signum.Entities'
 import { ValueSearchControlLine } from '@framework/Search'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
+import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, PanelPartEmbedded, CachedQueryEntity } from '../Signum.Entities.Dashboard'
 import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { DashboardFilterController } from './DashboardFilterController'
+import { CachedQueryJS, executeQueryValueCached } from '../CachedQueryExecutor'
 
 export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUserQueryListPartEntity>) {
   const entity = p.part;
@@ -21,7 +22,9 @@ export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUse
         mlistItemContext(ctx.subCtx(a => a.userQueries))
           .map((ctx, i) =>
             <div key={i} >
-              <ValueUserQueryElement ctx={ctx} entity={p.entity} filterController={p.filterController} partEmbedded={p.partEmbedded} />
+              <ValueUserQueryElement ctx={ctx} entity={p.entity} filterController={p.filterController}
+                partEmbedded={p.partEmbedded}
+                cachedQuery={p.cachedQueries[liteKey(toLite(ctx.value.userQuery))]} />
             </div>)
       }
     </div>
@@ -33,6 +36,7 @@ export interface ValueUserQueryElementProps {
   entity?: Lite<Entity>;
   filterController: DashboardFilterController;
   partEmbedded: PanelPartEmbedded;
+  cachedQuery?: Promise<CachedQueryJS>;
 }
 
 export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
@@ -56,7 +60,8 @@ export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
             <span>{ctx.value.label ?? getQueryNiceName(fo.queryName)}</span>
           </div>
           <div className="col-auto">
-            <ValueSearchControlLine ctx={ctx2} findOptions={fo} />
+          <ValueSearchControlLine ctx={ctx2} findOptions={fo}
+            customRequest={p.cachedQuery && ((qr, fo, token) => p.cachedQuery!.then(cq => executeQueryValueCached(qr, fo, token, cq)))} />
           </div>
         </div>
       </FormGroup>

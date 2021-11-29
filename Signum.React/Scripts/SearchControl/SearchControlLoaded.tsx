@@ -89,6 +89,7 @@ export interface SearchControlLoadedProps {
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
   styleContext?: StyleContext;
+  customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
 }
 
 export interface SearchControlLoadedState {
@@ -225,8 +226,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }, continuation);
   }
 
-  abortableSearch = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
-  abortableSearchSummary = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
+  abortableSearch = new AbortableRequest((signal, a: {
+    request: QueryRequest;
+    fop: FindOptionsParsed,
+    customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>
+  }) => a.customRequest ? a.customRequest(a.request, a.fop) : Finder.API.executeQuery(a.request, signal));
+
+  abortableSearchSummary = new AbortableRequest((signal, a: {
+    request: QueryRequest;
+    fop: FindOptionsParsed,
+    customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>
+  }) => a.customRequest ? a.customRequest(a.request, a.fop) : Finder.API.executeQuery(a.request, signal));
 
   dataChanged(): Promise<void> {
     if (this.isManualRefreshOrAllPagination()) {
@@ -253,13 +263,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.simpleFilterBuilderInstance.onDataChanged();
 
       this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
-      var resultFindOptions = JSON.parse(JSON.stringify(this.props.findOptions));
+      var resultFindOptions = JSON.parse(JSON.stringify(fop));
 
       const qr = this.getQueryRequest();
       const qrSummary = this.getSummaryQueryRequest();
 
-      return Promise.all([this.abortableSearch.getData(qr),
-        qrSummary == null ? Promise.resolve<ResultTable | undefined>(undefined) : this.abortableSearchSummary.getData(qrSummary)
+      const customRequest = this.props.customRequest;
+
+      return Promise.all([this.abortableSearch.getData({ request: qr, fop, customRequest }),
+        qrSummary ? this.abortableSearchSummary.getData({ request: qrSummary, fop, customRequest }) : Promise.resolve<ResultTable | undefined>(undefined) 
       ]).then(([rt, summaryRt]) => {
         this.setState({
           resultTable: rt,

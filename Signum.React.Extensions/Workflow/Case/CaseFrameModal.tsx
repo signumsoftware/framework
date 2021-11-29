@@ -179,16 +179,17 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       allowExchangeEntity: false,
       prefix: this.prefix,
       isExecuting: () => this.state.executing == true,
-      execute: action => {
+      execute: async action => {
         if (this.state.executing)
           return;
 
         this.setState({ executing: true });
-        action()
-          .finally(() => this.setState({ executing: undefined }))
-          .done();
+        try {
+          await action();
+        } finally {
+          this.setState({ executing: undefined });
+        }
       }
-
     };
 
     var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
@@ -248,15 +249,16 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       allowExchangeEntity: false,
       prefix: this.prefix,
       isExecuting: () => this.state.executing == true,
-      execute: action => {
+      execute: async action => {
         if (this.state.executing)
           return;
 
         this.setState({ executing: true });
-
-        action()
-          .finally(() => this.setState({ executing: undefined }))
-          .done();
+        try {
+          await action();
+        } finally {
+          this.setState({ executing: undefined })
+        }
       }
     };
 

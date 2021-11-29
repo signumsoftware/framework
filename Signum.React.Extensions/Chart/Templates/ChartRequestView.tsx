@@ -20,7 +20,7 @@ import ChartTableComponent from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 import "@framework/SearchControl/Search.css"
 import "../Chart.css"
-import { ChartScript } from '../ChartClient';
+import { ChartScript, cleanedChartRequest } from '../ChartClient';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
@@ -61,7 +61,9 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
   const queryDescription = useAPI(signal => p.chartRequest ? Finder.getQueryDescription(p.chartRequest.queryKey) : Promise.resolve(undefined),
     [p.chartRequest.queryKey]);
 
-  const abortableQuery = React.useRef(new AbortableRequest<{ cr: ChartRequestModel; cs: ChartScript }, ChartClient.API.ExecuteChartResult>((signal, request) => ChartClient.API.executeChart(request.cr, request.cs, signal)));
+  const abortableQuery = React.useRef(new AbortableRequest<{ cr: ChartRequestModel; cs: ChartScript }, ChartClient.API.ExecuteChartResult>(
+    (signal, request) => Navigator.API.validateEntity(cleanedChartRequest(request.cr)).then(() => ChartClient.API.executeChart(request.cr, request.cs, signal))));
+
   React.useEffect(() => {
     if (p.searchOnLoad)
       handleOnDrawClick();

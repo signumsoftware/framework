@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { FindOptions } from '@framework/FindOptions'
 import { getQueryKey, getQueryNiceName, getTypeInfos } from '@framework/Reflection'
-import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
+import { Entity, Lite, is, JavascriptMessage, toLite, liteKey } from '@framework/Signum.Entities'
 import { SearchControl, ValueSearchControl } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { UserQueryPartEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
@@ -18,10 +18,13 @@ import SelectorModal from '@framework/SelectorModal'
 import { BootstrapStyle } from '../../Basics/Signum.Entities.Basics'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
+import { CachedQueryJS, executeQueryCached, executeQueryValueCached } from '../CachedQueryExecutor'
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
   let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
+
+  const cachedQuery = p.cachedQueries[liteKey(toLite(p.part.userQuery))];
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
@@ -36,13 +39,22 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
       iconName={p.partEmbedded.iconName ?? undefined}
       iconColor={p.partEmbedded.iconColor ?? undefined}
       deps={p.deps}
+      cachedQuery={cachedQuery}
     />;
   }
 
-  return <SearchContolInPart part={p.part} findOptions={fo} deps={p.deps} />;
+  return <SearchContolInPart
+    part={p.part}
+    findOptions={fo} deps={p.deps}
+    cachedQuery={cachedQuery} />;
 }
 
-function SearchContolInPart({ findOptions, part, deps }: { findOptions: FindOptions, part: UserQueryPartEntity, deps?: React.DependencyList }) {
+function SearchContolInPart({ findOptions, part, deps, cachedQuery }: {
+  findOptions: FindOptions,
+  part: UserQueryPartEntity,
+  cachedQuery?: Promise<CachedQueryJS>,
+  deps?: React.DependencyList
+}) {
 
   const [refreshCount, setRefreshCount] = React.useState<number>(0)
   const qd = useAPI(() => Finder.getQueryDescription(part.userQuery.query.key), [part.userQuery.query.key]);
@@ -70,6 +82,7 @@ function SearchContolInPart({ findOptions, part, deps }: { findOptions: FindOpti
         allowSelection={part.allowSelection}
         defaultRefreshMode={part.userQuery.refreshMode}
         searchOnLoad={part.userQuery.refreshMode == "Auto"}
+        customRequest={cachedQuery && ((req, fop) => cachedQuery!.then(cq => executeQueryCached(req, fop, cq)))}
       />
     </FullscreenComponent>
   );
@@ -82,6 +95,7 @@ interface BigValueBadgeProps {
   iconName?: string;
   iconColor?: string;
   deps?: React.DependencyList;
+  cachedQuery?: Promise<CachedQueryJS>;
 }
 
 export function BigValueSearchCounter(p: BigValueBadgeProps) {
@@ -103,7 +117,9 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
           </div>
           <div className={classes("col-9 flip", "text-end")}>
             <h1>
-              <ValueSearchControl ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps} />
+              <ValueSearchControl ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
+                customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq=> executeQueryValueCached(req, fop, token,cq)))}
+              />
             </h1>
           </div>
         </div>

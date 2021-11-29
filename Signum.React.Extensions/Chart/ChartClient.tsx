@@ -792,24 +792,28 @@ export module API {
 
 
   export function executeChart(request: ChartRequestModel, chartScript: ChartScript, abortSignal?: AbortSignal): Promise<ExecuteChartResult> {
-    return Navigator.API.validateEntity(cleanedChartRequest(request)).then(cr => {
-      const queryRequest = getRequest(request);
 
-      var allTypes = request.columns
-        .map(c => c.element.token)
-        .notNull()
-        .map(a => a.token && a.token.type.name)
-        .notNull()
-        .flatMap(a => tryGetTypeInfos(a))
-        .notNull()
-        .distinctBy(a => a.name);
+    var palettesPromise = getPalletes(request);
 
-      var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
-        .then(list => list.toObject(a => a.type, a => a.palette));
+    const queryRequest = getRequest(request);
+    return Finder.API.executeQuery(queryRequest, abortSignal)
+      .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
+  }
 
-      return Finder.API.executeQuery(queryRequest, abortSignal)
-        .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
-    });
+  export function getPalletes(request: ChartRequestModel): Promise<{ [type: string]: ChartPaletteClient.ColorPalette | null }> {
+    var allTypes = request.columns
+      .map(c => c.element.token)
+      .notNull()
+      .map(a => a.token && a.token.type.name)
+      .notNull()
+      .flatMap(a => tryGetTypeInfos(a))
+      .notNull()
+      .distinctBy(a => a.name);
+
+    var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
+      .then(list => list.toObject(a => a.type, a => a.palette));
+
+    return palettesPromise;
   }
 
   export interface ExecuteChartResult {

@@ -410,7 +410,7 @@ export class EntityOperationContext<T extends Entity> {
         return this.settings.onClick(this);
       else
         return defaultOnClick(this);
-    });
+    }).done();
   }
 
   textOrNiceName() {
