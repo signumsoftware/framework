@@ -69,7 +69,6 @@ public interface IDynamicQueryCore
 
     IQueryable<Lite<Entity>> GetEntitiesLite(QueryEntitiesRequest request);
     IQueryable<Entity> GetEntitiesFull(QueryEntitiesRequest request);
-    DQueryable<object> GetDQueryable(DQueryableRequest request);
 }
 
 
@@ -130,7 +129,6 @@ public abstract class DynamicQueryCore<T> : IDynamicQueryCore
 
     public abstract IQueryable<Lite<Entity>> GetEntitiesLite(QueryEntitiesRequest request);
     public abstract IQueryable<Entity> GetEntitiesFull(QueryEntitiesRequest request);
-    public abstract DQueryable<object> GetDQueryable(DQueryableRequest request);
 
 
     protected virtual ColumnDescriptionFactory[] InitializeColumns()

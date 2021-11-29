@@ -213,21 +213,6 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         return result.TryTake(request.Count);
     }
 
-    public override DQueryable<object> GetDQueryable(DQueryableRequest request)
-    {
-        request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
-
-        DQueryable<T> query = Query
-         .ToDQueryable(GetQueryDescription())
-         .SelectMany(request.Multiplications)
-         .OrderBy(request.Orders)
-         .Where(request.Filters)
-         .Select(request.Columns)
-         .TryTake(request.Count);
-
-        return new DQueryable<object>(query.Query, query.Context);
-    }
-
     public override Expression? Expression
     {
         get { return Query.Expression; }

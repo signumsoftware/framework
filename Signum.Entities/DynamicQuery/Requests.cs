@@ -242,37 +242,3 @@ public class QueryEntitiesRequest: BaseQueryRequest
 
     public override string ToString() => QueryName.ToString()!;
 }
-
-public class DQueryableRequest : BaseQueryRequest
-{
-    List<Order> orders = new List<Order>();
-    public List<Order> Orders
-    {
-        get { return orders; }
-        set { orders = value; }
-    }
-
-    List<Column> columns = new List<Column>();
-    public List<Column> Columns
-    {
-        get { return columns; }
-        set { columns = value; }
-    }
-
-    public List<CollectionElementToken> Multiplications
-    {
-        get
-        {
-            HashSet<QueryToken> allTokens =
-                Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token)
-                .Concat(Columns.Select(a => a.Token))
-                .Concat(Orders.Select(a => a.Token)).ToHashSet();
-
-            return CollectionElementToken.GetElements(allTokens);
-        }
-    }
-
-    public int? Count { get; set; }
-
-    public override string ToString() => QueryName.ToString()!;
-}

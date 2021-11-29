@@ -129,11 +129,6 @@ public class ManualDynamicQueryCore<T> : DynamicQueryCore<T>
         throw new NotImplementedException();
     }
 
-    public override DQueryable<object> GetDQueryable(DQueryableRequest request)
-    {
-        throw new NotImplementedException();
-    }
-
     public override IQueryable<Entity> GetEntitiesFull(QueryEntitiesRequest request)
     {
         throw new NotImplementedException();

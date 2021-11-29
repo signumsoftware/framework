@@ -162,11 +162,6 @@ public class DynamicQueryContainer
         return Execute(ExecuteType.GetEntities, request.QueryName, null, dqb => dqb.Core.Value.GetEntitiesFull(request));
     }
 
-    public DQueryable<object> GetDQueryable(DQueryableRequest request)
-    {
-        return Execute(ExecuteType.GetDQueryable, request.QueryName, null, dqb => dqb.Core.Value.GetDQueryable(request));
-    }
-
     public event Func<object, bool, bool>? AllowQuery;
 
     public bool QueryAllowed(object queryName, bool fullScreen)
