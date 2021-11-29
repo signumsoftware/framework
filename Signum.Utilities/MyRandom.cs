@@ -1,4 +1,6 @@
 
+using Signum.Utilities.DataStructures;
+
 namespace Signum.Utilities;
 
 public static class MyRandom
@@ -117,5 +119,25 @@ public static class RandomExtensions
     public static decimal NextDecimal(this Random r, decimal min, decimal max)
     {
         return r.NextLong((long)(min * 100L), (long)(max * 100L)) / 100m;
+    }
+}
+
+public class ProbabilityDictionary<K> where K : notnull
+{
+    IntervalDictionary<double, K> accumulatedProbabilities;
+    public double TotalMax;
+
+    public ProbabilityDictionary(Dictionary<K, double> probabilities)
+    {
+        accumulatedProbabilities = probabilities
+            .SelectAggregate(new { Value = default(K)!, Acum = 0.0 }, (acum, kvp) => new { Value = kvp.Key, Acum = kvp.Value + acum.Acum })
+            .BiSelectC((p, next) => KeyValuePair.Create(new Interval<double>(p!.Acum, next!.Acum), next!.Value!))
+            .ToIntervalDictionary();
+        TotalMax = accumulatedProbabilities.TotalMax!.Value;
+    }
+
+    public K NextElement(Random r)
+    {
+        return this.accumulatedProbabilities[r.NextDouble() * TotalMax];
     }
 }
