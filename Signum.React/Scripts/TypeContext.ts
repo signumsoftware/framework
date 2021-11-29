@@ -493,7 +493,7 @@ export interface EntityFrame {
   allowExchangeEntity: boolean;
 
   isExecuting(): boolean; 
-  execute: (action: () => Promise<void>) => void;
+  execute: (action: () => Promise<void>) => Promise<void>;
 
   createNew?: (oldPack: EntityPack<ModifiableEntity>) => (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
   prefix: string;

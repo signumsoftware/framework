@@ -265,18 +265,19 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       allowExchangeEntity: p.buttons == "close" && (p.allowExchangeEntity ?? true),
       prefix: prefix,
       isExecuting: () => pc.executing == true,
-      execute: action => {
+      execute: async action => {
         if (pc.executing)
           return;
 
         pc.executing = true;
         forceUpdate();
-        action()
-          .finally(() => {
-            pc.executing = undefined;
-            forceUpdate();
-          })
-          .done();
+        try {
+          await action();
+
+        } finally {
+          pc.executing = undefined;
+          forceUpdate();
+        }
       }
     };
 

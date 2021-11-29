@@ -164,14 +164,16 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       allowExchangeEntity: false,
       prefix: "caseFrame",
       isExecuting: () => this.state.executing == true,
-      execute: action => {
+      execute: async action => {
         if (this.state.executing)
           return;
 
         this.setState({ executing: true });
-        action()
-          .finally(() => { this.setState({ executing: undefined }) })
-          .done();
+        try {
+          await action();
+        } finally {
+          this.setState({ executing: undefined });
+        }
       }
     };
 
@@ -245,14 +247,16 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
       allowExchangeEntity: false,
       prefix: "caseFrame",
       isExecuting: () => this.state.executing == true,
-      execute: action => {
+      execute: async action => {
         if (this.state.executing)
           return;
 
         this.setState({ executing: true });
-        action()
-          .finally(() => this.setState({ executing: undefined }))
-          .done();
+        try {
+          await action();
+        } finally {
+          this.setState({ executing: undefined });
+        }
       }
     };
 
