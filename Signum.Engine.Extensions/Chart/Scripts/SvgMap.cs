@@ -24,8 +24,8 @@ public class SvgMapScript : ChartScript
 
             new ChartScriptParameterGroup("Location")
             {
-                new ChartScriptParameter("LocationSelector", ChartParameterType.String) { ColumnIndex = 0,  ValueDefinition = new StringValue("path[data-code]") },
-                new ChartScriptParameter("LocationAttribute", ChartParameterType.String) { ColumnIndex = 0,  ValueDefinition = new StringValue("data-code") },
+                new ChartScriptParameter("LocationSelector", ChartParameterType.String) { ColumnIndex = 0,  ValueDefinition = new StringValue("path[id]") },
+                new ChartScriptParameter("LocationAttribute", ChartParameterType.String) { ColumnIndex = 0,  ValueDefinition = new StringValue("id") },
                 new ChartScriptParameter("LocationMatch", ChartParameterType.Enum) {  ColumnIndex = 0, ValueDefinition = EnumValueList.Parse("Exact|Prefix") },
             },
 
@@ -33,6 +33,11 @@ public class SvgMapScript : ChartScript
             {
                 new ChartScriptParameter("StrokeColor", ChartParameterType.String) {  ValueDefinition = new StringValue("") },
                 new ChartScriptParameter("StrokeWidth", ChartParameterType.String) {  ValueDefinition = new StringValue("") },
+            },
+
+            new ChartScriptParameterGroup("Fill")
+            {
+                new ChartScriptParameter("NoDataColor", ChartParameterType.String) {  ValueDefinition = new StringValue("#aaa") },
             },
 
             new ChartScriptParameterGroup("Color Scale")

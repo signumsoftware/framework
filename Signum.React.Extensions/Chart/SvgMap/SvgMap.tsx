@@ -19,6 +19,7 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, da
 
   const divRef = React.useRef<HTMLDivElement>(null);
 
+  var noDataColor = parameters["NoDataColor"];
 
   var svgUrl = parameters["SvgUrl"];
   var locationSelector = parameters["LocationSelector"];
@@ -167,8 +168,10 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, da
             + (opacityColumn == null ? '' : (' (' + opacityColumn.getValueNiceName(row) + ')'));
         }
         else {
-          elem.removeAttribute("fill");
+          elem.setAttribute("fill", noDataColor);
           elem.removeAttribute("cursor");
+
+          titleElement.textContent = "No Data for " + attr;
         }
       });
 
