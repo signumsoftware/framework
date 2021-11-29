@@ -202,7 +202,7 @@ export function PanelPart(p: PanelPartProps) {
   }
 
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
-  const defaultIcon = renderer.defaultIcon(content);
+  const defaultIcon = renderer.defaultIcon();
   const icon = coalesceIcon(parseIcon(part.iconName), defaultIcon?.icon);
   const color = part.iconColor ?? defaultIcon?.iconColor;
 

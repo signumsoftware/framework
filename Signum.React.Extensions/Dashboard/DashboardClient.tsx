@@ -8,7 +8,7 @@ import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SelectorMessage } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
-import { Type } from '@framework/Reflection'
+import { getTypeName, PseudoType, Type } from '@framework/Reflection'
 import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
@@ -40,7 +40,7 @@ interface IconColor {
 
 export interface PartRenderer<T extends IPartEntity> {
   component: () => Promise<React.ComponentType<PanelPartContentProps<T>>>;
-  defaultIcon: (element: T) => IconColor;
+  defaultIcon: () => IconColor;
   defaultTitle?: (elenent: T) => string;
   withPanel?: (element: T) => boolean;
   handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
@@ -74,15 +74,15 @@ export function start(options: { routes: JSX.Element[] }) {
 
   registerRenderer(ValueUserQueryListPartEntity, {
     component: () => import('./View/ValueUserQueryListPart').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "lightblue" })
+    defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#21618C" })
   });
   registerRenderer(LinkListPartEntity, {
     component: () => import('./View/LinkListPart').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" })
+    defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#B9770E" })
   });
   registerRenderer(UserChartPartEntity, {
     component: () => import('./View/UserChartPart').then(a => a.default),
-    defaultIcon: () => ({ icon: "chart-bar", iconColor: "violet" }),
+    defaultIcon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
     defaultTitle: e => translated(e.userChart, uc => uc.displayName),
     handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
       (p, e, ev) => {
@@ -101,7 +101,7 @@ export function start(options: { routes: JSX.Element[] }) {
   });
   registerRenderer(CombinedUserChartPartEntity, {
     component: () => import('./View/CombinedUserChartPart').then(a => a.default),
-    defaultIcon: () => ({ icon: "chart-bar", iconColor: "violet" }),
+    defaultIcon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
     handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
@@ -136,7 +136,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   registerRenderer(UserQueryPartEntity, {
     component: () => import('./View/UserQueryPart').then((a: any) => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "dodgerblue" }),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "#2E86C1" }),
     defaultTitle: e => translated(e.userQuery, uc => uc.displayName),
     withPanel: p => p.renderMode != "BigValue",
     handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
@@ -157,7 +157,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   registerRenderer(UserTreePartEntity, {
     component: () => import('./View/UserTreePart').then((a: any) => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "dodgerblue" }),
+    defaultIcon: () => ({ icon: ["far", "network-wired"], iconColor: "#B7950B" }),
     withPanel: p => true,
     handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
       (p, e, ev) => {
@@ -226,8 +226,8 @@ export function home(): Promise<Lite<DashboardEntity> | null> {
   return API.home();
 }
 
-export function defaultIcon<T extends IPartEntity>(part: T) {
-  return partRenderers[part.Type].defaultIcon(part);
+export function defaultIcon(type: PseudoType) {
+  return partRenderers[getTypeName(type)].defaultIcon();
 }
 
 export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>) {
