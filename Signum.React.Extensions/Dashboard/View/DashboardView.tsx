@@ -14,9 +14,9 @@ import { translated } from '../../Translation/TranslatedInstanceTools'
 
 import { DashboardFilterController } from './DashboardFilterController'
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files'
-import { CachedQuery } from '../CachedQuery'
+import { CachedQueryJS } from '../CachedQueryExecutor'
 
-export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQuery> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; }) {
+export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; }) {
 
   const forceUpdate = useForceUpdate();
   var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate), [p.dashboard]);
@@ -174,7 +174,7 @@ export interface PanelPartProps {
   deps?: React.DependencyList;
   filterController: DashboardFilterController;
   reload: () => void;
-  cachedQueries: { [userAssetKey: string]: Promise<CachedQuery> }
+  cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }
 }
 
 export function PanelPart(p: PanelPartProps) {

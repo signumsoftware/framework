@@ -63,10 +63,10 @@ public static class DashboardLogic
 
             OnGetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) =>  new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), pp, ucp.UserChart, ucp.IsQueryCached, canWriteFilters: true) });
             OnGetCachedQueryDefinition.Register((CombinedUserChartPartEntity cucp, PanelPartEmbedded pp) => cucp.UserCharts.Select(uc => new CachedQueryDefinition(uc.UserChart.ToChartRequest().ToQueryRequest(), pp, uc.UserChart, uc.IsQueryCached, canWriteFilters: false)));
-            OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.UserQuery.ToQueryRequest(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
-            OnGetCachedQueryDefinition.Register((LinkListPartEntity uqp, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
-            OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequest(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
+            OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.RenderMode == UserQueryPartRenderMode.BigValue ? uqp.UserQuery.ToQueryRequestValue() : uqp.UserQuery.ToQueryRequest(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
+            OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
             OnGetCachedQueryDefinition.Register((UserTreePartEntity ute, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
+            OnGetCachedQueryDefinition.Register((LinkListPartEntity uqp, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
 
             sb.Include<DashboardEntity>()
                 .WithQuery(() => cp => new
@@ -149,6 +149,12 @@ public static class DashboardLogic
                 };
             }
 
+            sb.Schema.EntityEvents<DashboardEntity>().PreUnsafeDelete += query =>
+            {
+                query.SelectMany(d => d.CachedQueries()).UnsafeDelete();
+                return null;
+            };
+
             DashboardGraph.Register();
 
 
@@ -191,7 +197,7 @@ public static class DashboardLogic
                 Construct = (cp, _) => cp.Clone()
             }.Register();
 
-            new Execute(DashboardOperation.RegenerateCachedFiles)
+            new Execute(DashboardOperation.RegenerateCachedQueries)
             {
                 CanExecute = c => c.CacheQueryConfiguration == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => c.CacheQueryConfiguration)) : null,
                 Execute = (db, _) =>
@@ -230,7 +236,7 @@ public static class DashboardLogic
                                 throw new ApplicationException($"The query for {c.UserAssets.CommaAnd(a => a.KeyLong())} has returned more than {cq.MaxRows} rows: " +
                                     JsonSerializer.Serialize(QueryRequestTS.FromQueryRequest(c.QueryRequest), EntityJsonContext.FullJsonSerializerOptions));
                             else
-                                rt = new ResultTable(rt.Columns, null, new Pagination.All());
+                                rt = new ResultTable(rt.AllColumns(), null, new Pagination.All());
                         }
 
 
@@ -263,7 +269,7 @@ public static class DashboardLogic
                     }
 
                 }
-            }.Register();
+            }.SetMinimumTypeAllowed(TypeAllowedBasic.Read).Register();
         }
     }
 
@@ -539,12 +545,10 @@ public class CombinedCachedQueryDefinition
         var meExtraFilters = me.Filters.Distinct(FilterComparer.Instance).Except(other.Filters, FilterComparer.Instance).ToList();
         var otherExtraFilters = other.Filters.Distinct(FilterComparer.Instance).Except(me.Filters, FilterComparer.Instance).ToList();
 
-        if (meExtraFilters.Count > 0 && otherExtraFilters.Count > 0)
+        if (meExtraFilters.Count > 0 || otherExtraFilters.Count > 0)
             return false;
 
-        var groupResults = me.GroupResults;
-
-        if (me.Pagination is Pagination.All && meExtraFilters.Count == 0)
+        if (me.Pagination is Pagination.All)
         {
             this.QueryRequest = WithExtraColumns(me, other);
 
@@ -554,7 +558,7 @@ public class CombinedCachedQueryDefinition
 
         }
         
-        if (other.Pagination is Pagination.All && otherExtraFilters.Count == 0)
+        if (other.Pagination is Pagination.All)
         {
             this.QueryRequest = WithExtraColumns(other, me);
 
@@ -563,7 +567,7 @@ public class CombinedCachedQueryDefinition
             return true;
         }
 
-        if (me.Pagination.Equals(other.Pagination) && meExtraFilters.Count == 0 && otherExtraFilters.Count == 0 && me.Orders.SequenceEqual(other.Orders))
+        if (me.Pagination.Equals(other.Pagination) && me.Orders.SequenceEqual(other.Orders))
         {
             this.QueryRequest = WithExtraColumns(me, other);
 

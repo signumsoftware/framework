@@ -25,6 +25,7 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
         ctx.findParentCtx(DashboardEntity).value.cacheQueryConfiguration && {
           property: p => p.isQueryCached,
           headerHtmlAttributes: { style: { width: "30%" } },
+          template: ectx => <IsQueryCachedLine ctx={ectx.subCtx(p => p.isQueryCached)} />,
         },
       ])}
       />

@@ -218,7 +218,7 @@ public static class DashboardPermission
 public static class DashboardOperation
 {
     public static ExecuteSymbol<DashboardEntity> Save;
-    public static ExecuteSymbol<DashboardEntity> RegenerateCachedFiles;
+    public static ExecuteSymbol<DashboardEntity> RegenerateCachedQueries;
     public static ConstructSymbol<DashboardEntity>.From<DashboardEntity> Clone;
     public static DeleteSymbol<DashboardEntity> Delete;
 }

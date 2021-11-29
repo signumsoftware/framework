@@ -24,7 +24,7 @@ import SelectorModal from '@framework/SelectorModal';
 import { translated } from '../Translation/TranslatedInstanceTools';
 import { DashboardFilterController } from "./View/DashboardFilterController";
 import { EntityFrame } from '../../Signum.React/Scripts/TypeContext';
-import { CachedQuery } from './CachedQuery';
+import { CachedQueryJS } from './CachedQueryExecutor';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -33,7 +33,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
   entity?: Lite<Entity>;
   deps?: React.DependencyList;
   filterController: DashboardFilterController;
-  cachedQueries: { [userAssetKey: string]: Promise<CachedQuery> }
+  cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }
 }
 
 interface IconColor {
@@ -69,7 +69,13 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('./Admin/CombinedUserChartPart')));
   Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
 
-  Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedFiles, { hideOnCanExecute: true, color: "warning", icon: "cogs" }));
+  Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
+    isVisible: () => false,
+    color: "warning",
+    icon: "cogs",
+    contextual: { isVisible: () => true },
+    contextualFromMany: { isVisible: () => true },
+  }));
 
   Finder.addSettings({
     queryName: DashboardEntity,

@@ -5,7 +5,7 @@ import { ValueLine, EntityLine, RenderEntity, OptionItem, EntityDetail } from '@
 import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation } from '../Signum.Entities.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import * as DashboardClient from "../DashboardClient";
 import { iconToString, IconTypeaheadLine, parseIcon } from "../../Basics/Templates/IconTypeahead";
@@ -16,6 +16,8 @@ import { useForceUpdate } from '@framework/Hooks'
 import { ValueSearchControlLine } from '../../../Signum.React/Scripts/Search';
 import { withClassName } from '../../Dynamic/View/HtmlAttributesExpression';
 import { classes } from '../../../Signum.React/Scripts/Globals';
+import { OperationButton } from '../../../Signum.React/Scripts/Operations/EntityOperations';
+import { EntityOperationContext } from '../../../Signum.React/Scripts/Operations';
 
 export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   const forceUpdate = useForceUpdate();
@@ -133,8 +135,11 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           <div className="col-sm-3">
             <ValueLine ctx={ectx.subCtx(cp => cp.maxRows)} />
           </div>
-          <div className="col-sm-3">
+          <div className="col-sm-2">
             {!ctx.value.isNew && <ValueSearchControlLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
+          </div>
+          <div className="col-sm-2 pt-4">
+            {!ctx.value.isNew && <OperationButton eoc={EntityOperationContext.fromTypeContext(ctx, DashboardOperation.RegenerateCachedQueries)} className="w-100" />}
           </div>
         </div>} />
 

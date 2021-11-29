@@ -3,7 +3,7 @@ import { ServiceError } from '@framework/Services'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import * as Constructor from '@framework/Constructor'
-import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
+import { Entity, Lite, is, JavascriptMessage, toLite, liteKey } from '@framework/Signum.Entities'
 import * as UserChartClient from '../../Chart/UserChart/UserChartClient'
 import * as ChartClient from '../../Chart/ChartClient'
 import { ChartRequestModel, UserChartEntity } from '../../Chart/Signum.Entities.Chart'
@@ -18,6 +18,8 @@ import { QueryDescription } from '@framework/FindOptions'
 import { ErrorBoundary } from '@framework/Components'
 import ChartRendererCombined from '../../Chart/Templates/ChartRendererCombined'
 import { MemoRepository } from '../../Chart/D3Scripts/Components/ReactChart'
+import { getQueryKey } from '@framework/Reflection'
+import { executeChartCached } from '../CachedQueryExecutor'
 
 
 export interface CombinedUserChartInfoTemp {
@@ -69,6 +71,24 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
                     );
                   }
 
+                  var cachedQuery = p.cachedQueries[liteKey(toLite(c.userChart))];
+
+                  if (cachedQuery)
+                    return ChartClient.getChartScript(chartRequest!.chartScript)
+                      .then(cs => cachedQuery.then(cq => executeChartCached(chartRequest, cs, cq)))
+                      .then(result => {
+                        if (!signal.aborted) {
+                          c.result = result;
+                          forceUpdate();
+                        }
+                      })
+                      .catch(error => {
+                        if (!signal.aborted) {
+                          c.error = error;
+                          forceUpdate();
+                        }
+                      });
+
                   return ChartClient.API.executeChart(chartRequest!, c.chartScript!, signal)
                     .then(result => {
                       if (!signal.aborted) {
@@ -94,8 +114,13 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       abortController.abort();
     };
 
-  }, [p.part, ...p.deps ?? [], infos.max(e => p.filterController.lastChange.get(e.userChart.query.key))]);
+  }, [p.part, ...p.deps ?? []]);
 
+  React.useEffect(() => {
+    infos.forEach(inf => {
+      inf.makeQuery?.().done();
+    });
+  }, [p.part, ...p.deps ?? [], infos.max(e => p.filterController.lastChange.get(e.userChart.query.key))]);
 
   function renderError(e: any, key: number) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;

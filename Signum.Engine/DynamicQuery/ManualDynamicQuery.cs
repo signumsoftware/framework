@@ -95,7 +95,7 @@ public class ManualDynamicQueryCore<T> : DynamicQueryCore<T>
         {
             req.Columns.Add(new Column(request.ValueToken, request.ValueToken.NiceName()));
             var result = await Execute(req, GetQueryDescription(), cancellationToken);
-            return result.SelectOne(request.ValueToken).Unique(UniqueType.Single);
+            return result.SelectOne(request.ValueToken).Unique(UniqueType.SingleOrDefault);
         }
     }
 

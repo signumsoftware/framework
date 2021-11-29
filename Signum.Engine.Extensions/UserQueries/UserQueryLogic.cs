@@ -72,21 +72,44 @@ public static class UserQueryLogic
         return qr;
     }
 
+    public static QueryRequest ToQueryRequestValue(this UserQueryEntity userQuery, QueryToken? valueToken = null)
+    {
+        var qn = userQuery.Query.ToQueryName();
+
+        if (valueToken == null)
+        {
+            var qd = QueryLogic.Queries.QueryDescription(qn);
+            valueToken = QueryUtils.Parse("Count", qd, SubTokensOptions.CanAggregate);
+        }
+
+        var qr = new QueryRequest()
+        {
+            QueryName = qn,
+            GroupResults = userQuery.GroupResults || valueToken is AggregateToken,
+        };
+
+        qr.Filters = userQuery.Filters.ToFilterList();
+        qr.Columns = new List<Column> { new Column(valueToken, null) };
+        qr.Orders = valueToken is AggregateToken ? new List<Order>() : userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList();
+
+        qr.Pagination = userQuery.GetPagination() ?? new Pagination.All();
+
+        return qr;
+    }
+
     static List<Column> MergeColumns(UserQueryEntity uq)
     {
         QueryDescription qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
 
-        switch (uq.ColumnsMode)
+        var result = uq.ColumnsMode switch
         {
-            case ColumnOptionsMode.Add:
-                return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(uq.Columns.Select(co => ToColumn(co))).ToList();
-            case ColumnOptionsMode.Remove:
-                return qd.Columns.Where(cd => !cd.IsEntity && !uq.Columns.Any(co => co.Token.TokenString == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
-            case ColumnOptionsMode.Replace:
-                return uq.Columns.Select(co => ToColumn(co)).ToList();
-            default:
-                throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".FormatWith(uq.ColumnsMode));
-        }
+            ColumnOptionsMode.Add => qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(uq.Columns.Select(co => ToColumn(co))).ToList(),
+            ColumnOptionsMode.Remove => qd.Columns.Where(cd => !cd.IsEntity && !uq.Columns.Any(co => co.Token.TokenString == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList(),
+            ColumnOptionsMode.Replace => uq.Columns.Select(co => ToColumn(co)).ToList(),
+            _ => throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".FormatWith(uq.ColumnsMode))
+        };
+
+        return result; 
     }
 
     private static Column ToColumn(QueryColumnEmbedded co)

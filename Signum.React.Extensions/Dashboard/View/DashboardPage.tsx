@@ -14,7 +14,7 @@ import { translated } from '../../Translation/TranslatedInstanceTools'
 import * as DashboardClient from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 import { downloadFile } from '../../Files/FileDownloader'
-import { CachedQuery } from '../CachedQuery'
+import { CachedQueryJS } from '../CachedQueryExecutor'
 
 interface DashboardPageProps extends RouteComponentProps<{ dashboardId: string }> {
 
@@ -44,7 +44,7 @@ export default function DashboardPage(p: DashboardPageProps) {
   }, [refreshCounter]);
 
   var cachedQueries = React.useMemo(() => dashboardWithQueries?.cachedQueries
-    .map(a => ({ userAssets: a.userAssets, promise: downloadFile(a.file).then(r => r.json() as Promise<CachedQuery>).then(cq => { Finder.decompress(cq.resultTable); debugger; return cq; }) })) //share promise
+    .map(a => ({ userAssets: a.userAssets, promise: downloadFile(a.file).then(r => r.json() as Promise<CachedQueryJS>).then(cq => { Finder.decompress(cq.resultTable); return cq; })})) //share promise
     .flatMap(a => a.userAssets.map(mle => ({ ua: mle.element, promise: a.promise })))
     .toObject(a => liteKey(a.ua), a => a.promise), [dashboardWithQueries]);
 

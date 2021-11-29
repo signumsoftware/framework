@@ -17,7 +17,7 @@ import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { DashboardFilter, DashboardFilterController, DashboardFilterRow, equalsDFR } from "./DashboardFilterController"
 import { filterOperations, isFilterGroupOptionParsed } from '@framework/FindOptions'
-import { CachedQuery, executeChartCached } from '../CachedQuery'
+import { CachedQueryJS, executeChartCached } from '../CachedQueryExecutor'
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 

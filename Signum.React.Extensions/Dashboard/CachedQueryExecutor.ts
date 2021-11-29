@@ -1,5 +1,5 @@
 import * as Finder from '@framework/Finder'
-import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, isFilterGroupOptionParsed, isFilterGroupRequest, OrderRequest, Pagination, QueryRequest, QueryToken, ResultRow, ResultTable } from '@framework/FindOptions'
+import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, FindOptionsParsed, isFilterGroupOptionParsed, isFilterGroupRequest, OrderRequest, Pagination, QueryRequest, QueryToken, QueryValueRequest, ResultRow, ResultTable } from '@framework/FindOptions'
 import { Entity, is, Lite } from '@framework/Signum.Entities';
 import { useFetchAll } from '../../Signum.React/Scripts/Navigator';
 import { ignoreErrors } from '../../Signum.React/Scripts/QuickLinks';
@@ -7,14 +7,68 @@ import * as ChartClient from '../Chart/ChartClient'
 import { ChartRequestModel } from '../Chart/Signum.Entities.Chart';
 
 
-export interface CachedQuery {
+export interface CachedQueryJS {
   creationDate: string;
   queryRequest: QueryRequest;
   resultTable: ResultTable;
 }
 
 
-export function executeChartCached(request: ChartRequestModel, chartScript: ChartClient.ChartScript, cachedQuery: CachedQuery): Promise<ChartClient.API.ExecuteChartResult> {
+
+export function executeQueryCached(request: QueryRequest, fop: FindOptionsParsed, cachedQuery: CachedQueryJS): ResultTable {
+
+  const tokens = [
+    ...fop.columnOptions.map(a => a.token).notNull(),
+    ...fop.columnOptions.map(a => a.summaryToken).notNull(),
+    ...fop.orderOptions.map(a => a.token),
+    ...getAllFilterTokens(fop.filterOptions),
+  ].notNull().toObjectDistinct(a => a.fullKey);
+
+  const resultTable = getCachedResultTable(cachedQuery, request, tokens);
+
+  return resultTable;
+}
+
+export function executeQueryValueCached(request: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | undefined, cachedQuery: CachedQueryJS): unknown {
+
+  if (token == null)
+    token = {
+      fullKey: "Count",
+      type: { name: "number" },
+      queryTokenType: "Aggregate",
+      niceName: "Count",
+      key: "Count",
+      toStr: "Count",
+      niceTypeName: "Number",
+      typeColor: "",
+      isGroupable: false,
+      filterType: "Integer",
+    };
+
+  var queryRequest: QueryRequest = {
+    queryKey: request.queryKey,
+    columns: [{ token: token.fullKey, displayName: token.niceName }],
+    filters: request.filters,
+    groupResults: token.queryTokenType == "Aggregate",
+    orders: [],
+    pagination: request.multipleValues ? { mode: "All" } : { mode: "Firsts", elementsPerPage: 2 },
+    systemTime: undefined,
+  };
+
+  const tokens = [
+    token,
+    ...getAllFilterTokens(fop.filterOptions),
+  ].notNull().toObjectDistinct(a => a.fullKey);
+
+  const resultTable = getCachedResultTable(cachedQuery, queryRequest, tokens);
+
+  if (request.multipleValues)
+    return resultTable.rows.map(r => r.columns[0]);    
+
+  return resultTable.rows.map(r => r.columns[0]).singleOrNull();
+}
+
+export function executeChartCached(request: ChartRequestModel, chartScript: ChartClient.ChartScript, cachedQuery: CachedQueryJS): Promise<ChartClient.API.ExecuteChartResult> {
   const palettesPromise = ChartClient.API.getPalletes(request);
 
   const tokens = [
@@ -47,7 +101,7 @@ class CachedQueryError {
   }
 }
 
-export function getCachedResultTable(cachedQuery: CachedQuery, request: QueryRequest, parsedTokens: { [token: string]: QueryToken }): ResultTable {
+export function getCachedResultTable(cachedQuery: CachedQueryJS, request: QueryRequest, parsedTokens: { [token: string]: QueryToken }): ResultTable {
 
   if (request.queryKey != cachedQuery.queryRequest.queryKey)
     throw new CachedQueryError("Invalid queryKey");
@@ -188,6 +242,11 @@ function groupByRows(rt: ResultTable, alreadyGrouped: boolean, tokens: string[],
           return rows => rows.sum(a => a.columns[indexCount]);
 
         } else if (qt.key == "Average") {
+          var avg = tryColumnIndex(qt.fullKey);
+          if (avg != null) { //No interaction group
+            return rows => rows.single().columns[avg!];
+          }
+
           const sumToken = qt.parent!.fullKey + ".Sum";
           const indexSum = getColumnIndex(sumToken);
 
@@ -392,7 +451,7 @@ function createFilterer(result: ResultTable, filters: FilterRequest[]): ((rows: 
       var index = result.columns.indexOf(f.token);
 
       if (index == -1)
-        throw new CachedQueryError(f.token);
+        throw new CachedQueryError("Unable to filter " + f.token + ", column not found");
 
       var op = "cls[" + index + "]"; 
 
@@ -471,12 +530,10 @@ function extractRequestedFilters(cached: FilterRequest[], request: FilterRequest
 
     const c = cached[i];
 
-    const toRemove = cloned.filter(rf => equalFilter(c, rf));
+    const removed = cloned.extract(rf => equalFilter(c, rf));
 
-    if (toRemove.length)
+    if (removed.length == 0)
       throw new CachedQueryError("Cached filter not found in requet");
-
-    toRemove.forEach(r => cloned.remove(r));
   }
 
   return cloned;
@@ -514,47 +571,47 @@ function equalFilter(c: FilterRequest, r: FilterRequest): boolean {
   }
 }
 
-function paginateRows(rt: ResultTable, req: Pagination): ResultTable{
+function paginateRows(rt: ResultTable, reqPag: Pagination): ResultTable{
   switch (rt.pagination.mode) {
     case "All":
       {
-        switch (req.mode) {
+        switch (reqPag.mode) {
           case "All": return rt;
-          case "Firsts": return { ...rt, rows: rt.rows.slice(0, rt.pagination.elementsPerPage), pagination: req };
+          case "Firsts": return { ...rt, rows: rt.rows.slice(0, rt.pagination.elementsPerPage), pagination: reqPag };
           case "Paginate":
-            var startIndex = rt.pagination.elementsPerPage! * (rt.pagination.currentPage! - 1);
-            return { ...rt, rows: rt.rows.slice(startIndex, startIndex + rt.pagination.elementsPerPage!), pagination: req };
+            var startIndex = reqPag.elementsPerPage! * (reqPag.currentPage! - 1);
+            return { ...rt, rows: rt.rows.slice(startIndex, startIndex + reqPag.elementsPerPage!), pagination: reqPag };
         }
       }
     case "Paginate": {
-      switch (req.mode) {
-        case "All": throw new Error(`Requesting ${req.mode} but cached is ${rt.pagination.mode}`)
+      switch (reqPag.mode) {
+        case "All": throw new Error(`Requesting ${reqPag.mode} but cached is ${rt.pagination.mode}`)
         case "Firsts":
-          if (rt.pagination.currentPage == 1 && req.elementsPerPage! <= rt.pagination.elementsPerPage!)
-            return { ...rt, rows: rt.rows.slice(0, rt.pagination.elementsPerPage), pagination: req };
+          if (reqPag.currentPage == 1 && reqPag.elementsPerPage! <= rt.pagination.elementsPerPage!)
+            return { ...rt, rows: rt.rows.slice(0, reqPag.elementsPerPage), pagination: reqPag };
 
           throw new CachedQueryError(`Invalid first`);
 
         case "Paginate":
-          if (((req.elementsPerPage! == rt.pagination.elementsPerPage! && req.currentPage == rt.pagination.currentPage) ||
-            (req.elementsPerPage! <= rt.pagination.elementsPerPage! && req.currentPage == 1 && rt.pagination.currentPage == 1))) {
+          if (((reqPag.elementsPerPage! == rt.pagination.elementsPerPage! && reqPag.currentPage == rt.pagination.currentPage) ||
+            (reqPag.elementsPerPage! <= rt.pagination.elementsPerPage! && reqPag.currentPage == 1 && rt.pagination.currentPage == 1))) {
 
-            var startIndex = rt.pagination.elementsPerPage! * (rt.pagination.currentPage! - 1);
-            return { ...rt, rows: rt.rows.slice(startIndex, startIndex + rt.pagination.elementsPerPage!), pagination: req };
+            var startIndex = reqPag.elementsPerPage! * (reqPag.currentPage! - 1);
+            return { ...rt, rows: rt.rows.slice(startIndex, startIndex + reqPag.elementsPerPage!), pagination: reqPag };
           }
 
           throw new CachedQueryError("Invalid paginate");
       }
     }
     case "Firsts": {
-      switch (req.mode) {
+      switch (reqPag.mode) {
         case "Firsts":
-          if (req.elementsPerPage! <= rt.pagination.elementsPerPage!)
-            return { ...rt, rows: rt.rows.slice(0, rt.pagination.elementsPerPage), pagination: req };
+          if (reqPag.elementsPerPage! <= rt.pagination.elementsPerPage!)
+            return { ...rt, rows: rt.rows.slice(0, reqPag.elementsPerPage), pagination: reqPag };
 
           throw new Error(`Invalid first`);
         case "Paginate":
-        case "All": throw new CachedQueryError(`Requesting ${req.mode} but cached is ${rt.pagination.mode}`);
+        case "All": throw new CachedQueryError(`Requesting ${reqPag.mode} but cached is ${rt.pagination.mode}`);
       }
     }
   }

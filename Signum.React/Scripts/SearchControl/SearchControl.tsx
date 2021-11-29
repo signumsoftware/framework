@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
-import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription } from '../FindOptions'
+import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, QueryRequest } from '../FindOptions'
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
@@ -65,6 +65,7 @@ export interface SearchControlProps {
   onCreate?: (scl: SearchControlLoaded) => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined, scl: SearchControlLoaded) => void;
   styleContext?: StyleContext;
+  customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
 }
 
 export interface SearchControlState {
@@ -221,6 +222,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         onResult={p.onResult}
 
         styleContext={p.styleContext}
+        customRequest={p.customRequest}
       />
     </ErrorBoundary>
   );

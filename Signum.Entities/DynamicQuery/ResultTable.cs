@@ -231,6 +231,8 @@ public class ResultTable
     ResultRow[] rows;
     public ResultRow[] Rows { get { return rows; } }
 
+    public ResultColumn[] AllColumns() => entityColumn == null ? Columns : Columns.PreAnd(entityColumn).ToArray();
+
     public ResultTable(ResultColumn[] columns, int? totalElements, Pagination pagination)
     {
         this.entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx();
