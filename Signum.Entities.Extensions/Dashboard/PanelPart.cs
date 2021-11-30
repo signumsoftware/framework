@@ -337,9 +337,9 @@ public class CombinedUserChartPartEntity : Entity, IPartEntity
             AllowChangeShowData ? new XAttribute(nameof(AllowChangeShowData), AllowChangeShowData) : null,
             CombinePinnedFiltersWithSameLabel ? new XAttribute(nameof(CombinePinnedFiltersWithSameLabel), CombinePinnedFiltersWithSameLabel) : null,
             UseSameScale ? new XAttribute(nameof(UseSameScale), UseSameScale) : null,
-            UserCharts.Select(uc => new XElement(nameof(UserCharts),
-            new XAttribute("Guid", ctx.Include(uc.UserChart)),
-            uc.IsQueryCached ? new XAttribute(nameof(uc.IsQueryCached), uc.IsQueryCached) : null))
+            UserCharts.Select(uc => new XElement("UserChart",
+                new XAttribute("Guid", ctx.Include(uc.UserChart)),
+                uc.IsQueryCached ? new XAttribute(nameof(uc.IsQueryCached), uc.IsQueryCached) : null))
         );
     }
 
@@ -349,10 +349,10 @@ public class CombinedUserChartPartEntity : Entity, IPartEntity
         AllowChangeShowData = element.Attribute(nameof(AllowChangeShowData))?.Value.ToBool() ?? false;
         CombinePinnedFiltersWithSameLabel = element.Attribute(nameof(CombinePinnedFiltersWithSameLabel))?.Value.ToBool() ?? false;
         UseSameScale = element.Attribute(nameof(UseSameScale))?.Value.ToBool() ?? false;
-        UserCharts.Synchronize(element.Elements(nameof(UserCharts)).ToList(), (cuce, elem) =>
+        UserCharts.Synchronize(element.Elements("UserChart").ToList(), (cuce, elem) =>
         {
             cuce.UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(elem.Attribute("Guid")!.Value));
-            cuce.IsQueryCached = elem.Attribute(nameof(cuce.IsQueryCached))?.Value.ToBool() ?? true;
+            cuce.IsQueryCached = elem.Attribute(nameof(cuce.IsQueryCached))?.Value.ToBool() ?? false;
         });
     }
 }

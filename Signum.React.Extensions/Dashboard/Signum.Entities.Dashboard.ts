@@ -7,6 +7,7 @@ import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Files from '../Files/Signum.Entities.Files'
+import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Chart from '../Chart/Signum.Entities.Chart'
@@ -35,6 +36,7 @@ export interface CacheQueryConfigurationEmbedded extends Entities.EmbeddedEntity
   Type: "CacheQueryConfigurationEmbedded";
   timeoutForQueries: number;
   maxRows: number;
+  autoRegenerateWhenOlderThan: number | null;
 }
 
 export const CombinedUserChartElementEmbedded = new Type<CombinedUserChartElementEmbedded>("CombinedUserChartElementEmbedded");
@@ -63,7 +65,7 @@ export type DashboardEmbedededInEntity =
   "Tab";
 
 export const DashboardEntity = new Type<DashboardEntity>("Dashboard");
-export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
+export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity, Scheduler.ITaskEntity {
   Type: "Dashboard";
   entityType: Entities.Lite<Basics.TypeEntity> | null;
   embeddedInEntity: DashboardEmbedededInEntity | null;
@@ -86,6 +88,8 @@ export module DashboardMessage {
   export const Part0IsTooLarge = new MessageKey("DashboardMessage", "Part0IsTooLarge");
   export const Part0OverlapsWith1 = new MessageKey("DashboardMessage", "Part0OverlapsWith1");
   export const RowsSelected = new MessageKey("DashboardMessage", "RowsSelected");
+  export const ForPerformanceReasonsThisDashboardMayShowOutdatedInformation = new MessageKey("DashboardMessage", "ForPerformanceReasonsThisDashboardMayShowOutdatedInformation");
+  export const LasUpdateWasOn0 = new MessageKey("DashboardMessage", "LasUpdateWasOn0");
 }
 
 export module DashboardOperation {

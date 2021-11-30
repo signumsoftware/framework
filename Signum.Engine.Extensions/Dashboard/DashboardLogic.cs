@@ -2,6 +2,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Chart;
 using Signum.Engine.Files;
 using Signum.Engine.Json;
+using Signum.Engine.Scheduler;
 using Signum.Engine.Translation;
 using Signum.Engine.UserAssets;
 using Signum.Engine.UserQueries;
@@ -60,6 +61,8 @@ public static class DashboardLogic
                 {"ValueUserQueryListPart", typeof(ValueUserQueryListPartEntity)},
                 {"UserTreePart", typeof(UserTreePartEntity)},
             });
+
+            SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) => { db.Execute(DashboardOperation.RegenerateCachedQueries); return null; });
 
             OnGetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) =>  new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), pp, ucp.UserChart, ucp.IsQueryCached, canWriteFilters: true) });
             OnGetCachedQueryDefinition.Register((CombinedUserChartPartEntity cucp, PanelPartEmbedded pp) => cucp.UserCharts.Select(uc => new CachedQueryDefinition(uc.UserChart.ToChartRequest().ToQueryRequest(), pp, uc.UserChart, uc.IsQueryCached, canWriteFilters: false)));
@@ -200,6 +203,7 @@ public static class DashboardLogic
             new Execute(DashboardOperation.RegenerateCachedQueries)
             {
                 CanExecute = c => c.CacheQueryConfiguration == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => c.CacheQueryConfiguration)) : null,
+                AvoidImplicitSave = true,
                 Execute = (db, _) =>
                 {
                     var cq = db.CacheQueryConfiguration!;

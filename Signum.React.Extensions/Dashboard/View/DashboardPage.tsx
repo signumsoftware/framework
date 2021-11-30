@@ -1,10 +1,11 @@
 import * as React from 'react'
+import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
 import { Entity, parseLite, getToString, JavascriptMessage, EntityPack, liteKey } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import { DashboardEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, DashboardMessage } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
 import { RouteComponentProps } from "react-router";
 import "../Dashboard.css"
@@ -53,7 +54,13 @@ export default function DashboardPage(p: DashboardPageProps) {
       {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
         <div className="sf-show-hover">
           {!Navigator.isReadOnly(DashboardEntity) &&
-            <Link className="sf-hide float-end flip mt-3" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="edit" />&nbsp;Edit</Link>
+            <div className="float-end mt-3">
+              {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +
+                DashboardMessage.LasUpdateWasOn0.niceToString(DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS))}>
+                <FontAwesomeIcon icon="history" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
+              </span> : null}
+              <Link className="sf-hide " style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="edit" />&nbsp;Edit</Link>
+            </div>
           }
           <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>
         </div>}

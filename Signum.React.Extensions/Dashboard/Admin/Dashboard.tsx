@@ -134,11 +134,14 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
         onChange={forceUpdate}
         onCreate={() => Promise.resolve(CacheQueryConfigurationEmbedded.New({ timeoutForQueries: 5 * 60, maxRows: 1000 * 1000 }))}
         getComponent={(ectx: TypeContext<CacheQueryConfigurationEmbedded>) => <div className="row">
-          <div className="col-sm-3">
+          <div className="col-sm-2">
             <ValueLine ctx={ectx.subCtx(cp => cp.timeoutForQueries)} />
           </div>
-          <div className="col-sm-3">
+          <div className="col-sm-2">
             <ValueLine ctx={ectx.subCtx(cp => cp.maxRows)} />
+          </div>
+          <div className="col-sm-2">
+            <ValueLine ctx={ectx.subCtx(cp => cp.autoRegenerateWhenOlderThan)} />
           </div>
           <div className="col-sm-2">
             {!ctx.value.isNew && <ValueSearchControlLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}

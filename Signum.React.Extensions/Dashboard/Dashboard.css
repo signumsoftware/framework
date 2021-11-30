@@ -71,6 +71,8 @@ div.row-control-panel {
 
 .sf-show-hover:not(:hover) .sf-hide {
     color: #aaa;
+    opacity: .3;
+    transition: opacity 200ms, color 200ms;
 }
 
 .huge {
@@ -98,7 +100,12 @@ div.row-control-panel {
     font-size: .5rem;
     margin-left: 2px;
     margin-top: 2px;
+    opacity: .7;
 }
+
+    .sf-filter-pill .btn-close:hover {
+        opacity: 1
+    }
 
 .sf-dot {
     height: 15px;

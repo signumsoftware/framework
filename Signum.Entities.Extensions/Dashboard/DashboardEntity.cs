@@ -7,11 +7,12 @@ using System.Xml.Linq;
 using Signum.Entities.Authorization;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Dashboard;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class DashboardEntity : Entity, IUserAssetEntity
+public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
 {
     public DashboardEntity()
     {
@@ -190,6 +191,9 @@ public class CacheQueryConfigurationEmbedded : EmbeddedEntity
 
     public int MaxRows { get; set; } = 1000 * 1000;
 
+    [Unit("m")]
+    public int? AutoRegenerateWhenOlderThan { get; set; }
+
     internal CacheQueryConfigurationEmbedded Clone() => new CacheQueryConfigurationEmbedded
     {
         TimeoutForQueries = TimeoutForQueries,
@@ -242,6 +246,11 @@ public enum DashboardMessage
 
     [Description("Row[s] selected")]
     RowsSelected,
+
+    ForPerformanceReasonsThisDashboardMayShowOutdatedInformation,
+
+    [Description("Last update was on {0}")]
+    LasUpdateWasOn0
 }
 
 public enum DashboardEmbedededInEntity
