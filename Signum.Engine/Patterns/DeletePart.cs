@@ -35,7 +35,7 @@ public static class DeletePart
             var toDelete = filteredQuery.Select(relatedEntity).Select(a => a.ToLite()).ToList().NotNull().Distinct().ToList();
             return new Disposable(() =>
             {
-                var groups = toDelete.GroupsOf(Connector.Current.Schema.Settings.MaxNumberOfParameters).ToList();
+                var groups = toDelete.Chunk(Connector.Current.Schema.Settings.MaxNumberOfParameters).ToList();
                 groups.ForEach(l => Database.DeleteList(l));
             });
         };

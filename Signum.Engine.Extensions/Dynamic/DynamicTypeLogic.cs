@@ -274,7 +274,7 @@ public class DynamicTypeCodeGenerator
     public string GetEntityCode()
     {
         StringBuilder sb = new StringBuilder();
-        foreach (var gr in GetEntityAttributes().GroupsOf(a => a.Length, 100))
+        foreach (var gr in GetEntityAttributes().Chunk(a => a.Length, 100))
         {
             sb.AppendLine("[" + gr.ToString(", ") + "]");
         }
@@ -494,7 +494,7 @@ public class DynamicTypeCodeGenerator
 
     protected virtual void WriteAttributeTag(StringBuilder sb, IEnumerable<string> attributes)
     {
-        foreach (var gr in attributes.GroupsOf(a => a.Length, 100))
+        foreach (var gr in attributes.Chunk(a => a.Length, 100))
         {
             sb.AppendLine("[" + gr.ToString(", ") + "]");
         }

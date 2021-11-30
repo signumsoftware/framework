@@ -402,7 +402,7 @@ public static class Pop3ConfigurationLogic
                 {
                     var messageInfos = client.GetMessageInfos();
 
-                    var already = messageInfos.Select(a => a.Uid).GroupsOf(50).SelectMany(l =>
+                    var already = messageInfos.Select(a => a.Uid).Chunk(50).SelectMany(l =>
                         (from em in Database.Query<EmailMessageEntity>()
                          let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
                          where ri != null && l.Contains(ri.UniqueId)

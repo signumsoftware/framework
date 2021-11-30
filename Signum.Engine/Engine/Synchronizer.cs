@@ -300,7 +300,7 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
 
         while (oldOnly.Count > 0 && newOnly.Count > 0)
         {
-            var oldDist = distances.WithMin(kvp => kvp.Value.Values.Min());
+            var oldDist = distances.MinBy(kvp => kvp.Value.Values.Min());
 
             var alternatives = oldDist.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList();
 

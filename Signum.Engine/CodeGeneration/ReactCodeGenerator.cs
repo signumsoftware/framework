@@ -310,7 +310,7 @@ public class ReactCodeGenerator
         foreach (var gr in mod.Types.GroupBy(a => a.Namespace))
         {
             sb.AppendLine("import { "
-                + gr.Select(t => t.Name).GroupsOf(5).ToString(a => a.ToString(", "), ",\r\n")
+                + gr.Select(t => t.Name).Chunk(5).ToString(a => a.ToString(", "), ",\r\n")
                 + " } from './" + gr.Key + "'");
         }
 

@@ -209,7 +209,7 @@ public class TensorFlowNeuralNetworkPredictor : IPredictorAlgorithm
             }
         }
 
-        var best = candidate.WithMin(a => a.ResultValidation.Loss!.Value)!;
+        var best = candidate.MinBy(a => a.ResultValidation.Loss!.Value)!;
 
         p.ResultTraining = best.ResultTraining;
         p.ResultValidation = best.ResultValidation;

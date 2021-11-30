@@ -18,7 +18,7 @@ public class ActiveDirectoryController : ControllerBase
     {
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
         if (config.Azure_ApplicationID.HasText())
-            return MicrosoftGraphLogic.FindActiveDirectoryUsers(subString, count, token);
+            return AzureADLogic.FindActiveDirectoryUsers(subString, count, token);
 
         if (config.DomainName.HasText())
             return ActiveDirectoryLogic.SearchUser(subString);
@@ -33,7 +33,7 @@ public class ActiveDirectoryController : ControllerBase
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
         if (config.Azure_ApplicationID.HasText())
-            return MicrosoftGraphLogic.CreateUserFromAD(user).ToLite();
+            return AzureADLogic.CreateUserFromAD(user).ToLite();
 
         if (config.DomainName.HasText())
             return ActiveDirectoryLogic.CreateUserFromAD(user).ToLite();

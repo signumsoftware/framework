@@ -132,7 +132,7 @@ public static class PackageLogic
 
         int inserts =
             lites.GroupBy(a => a.EntityType).Sum(gr =>
-                gr.GroupsOf(100).Sum(gr2 =>
+                gr.Chunk(100).Sum(gr2 =>
                     giInsertPackageLines.GetInvoker(gr.Key)(package, gr2)));
 
         return package;
@@ -144,7 +144,7 @@ public static class PackageLogic
 
         int inserts =
             entities.GroupBy(a => a.GetType()).Sum(gr =>
-                gr.GroupsOf(100).Sum(gr2 =>
+                gr.Chunk(100).Sum(gr2 =>
                     giInsertPackageLines.GetInvoker(gr.Key)(package, gr2.Select(a => a.ToLite()))));
 
         return package;

@@ -496,7 +496,7 @@ public class DirectedEdgedGraph<T, E> : IEnumerable<T>
 
             Func<T, int> fanInOut = n => clone.RelatedTo(n).Count() - inv.RelatedTo(n).Count();
 
-            MinMax<T> mm = clone.WithMinMaxPair(fanInOut);
+            MinMax<T> mm = clone.MinMaxBy(fanInOut);
 
             if (fanInOut(mm.Max) > -fanInOut(mm.Min))
             {

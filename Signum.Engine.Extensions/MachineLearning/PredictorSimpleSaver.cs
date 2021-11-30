@@ -62,7 +62,7 @@ public class PredictorSimpleSaver : IPredictorResultSaver
 
                     var pc = PredictorPredictLogic.CreatePredictContext(ctx.Predictor);
                     int grIndex = 0;
-                    foreach (var gr in dictionary.GroupsOf(PredictionBatchSize))
+                    foreach (var gr in dictionary.Chunk(PredictionBatchSize))
                     {
                         using (HeavyProfiler.LogNoStackTrace("Group"))
                         {
@@ -110,7 +110,7 @@ public class PredictorSimpleSaver : IPredictorResultSaver
 
                     if (SaveAllResults)
                     {
-                        var groups = toInsert.GroupsOf(PredictionBatchSize).ToList();
+                        var groups = toInsert.Chunk(PredictionBatchSize).ToList();
                         foreach (var iter in groups.Iterate())
                         {
                             ctx.ReportProgress($"Inserting {typeof(PredictSimpleResultEntity).NicePluralName()}", iter.Position / (decimal)groups.Count);

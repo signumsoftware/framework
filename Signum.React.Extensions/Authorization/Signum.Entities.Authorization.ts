@@ -7,6 +7,7 @@ import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
 import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as Mailing from '../Mailing/Signum.Entities.Mailing'
+import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 
 export interface UserEntity {
     newPassword: string;
@@ -57,6 +58,10 @@ export module ActiveDirectoryMessage {
 
 export module ActiveDirectoryPermission {
   export const InviteUsersFromAD : PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
+}
+
+export module ActiveDirectoryTask {
+  export const DeactivateUsers : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "ActiveDirectoryTask.DeactivateUsers");
 }
 
 export const ADGroupEntity = new Type<ADGroupEntity>("ADGroup");

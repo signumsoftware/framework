@@ -134,7 +134,7 @@ public static partial class TypeAuthLogic
     {
         using (DisableQueryFilter())
         {
-            var found = requested.GroupsOf(1000).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)).Select(a => new
+            var found = requested.Chunks(1000).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)).Select(a => new
             {
                 a.Id,
                 Allowed = a.IsAllowedFor(typeAllowed, ExecutionMode.InUserInterface),

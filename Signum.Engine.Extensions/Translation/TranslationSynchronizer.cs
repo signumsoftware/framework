@@ -20,7 +20,7 @@ public static class TranslationSynchronizer
         totalTypes = types.Count;
 
         if (types.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
-            types = types.GroupsOf(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
+            types = types.Chunk(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
 
         var result = Translate(translators, target, types);
 
