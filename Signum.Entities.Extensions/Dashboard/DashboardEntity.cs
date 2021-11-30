@@ -198,17 +198,20 @@ public class CacheQueryConfigurationEmbedded : EmbeddedEntity
     {
         TimeoutForQueries = TimeoutForQueries,
         MaxRows = MaxRows,
+        AutoRegenerateWhenOlderThan = AutoRegenerateWhenOlderThan,
     };
 
     internal XElement ToXml(IToXmlContext ctx) => new XElement("CacheQueryConfiguration",
         new XAttribute(nameof(TimeoutForQueries), TimeoutForQueries),
-        new XAttribute(nameof(MaxRows), MaxRows)
+        new XAttribute(nameof(MaxRows), MaxRows),
+        AutoRegenerateWhenOlderThan == null ? null : new XAttribute(nameof(AutoRegenerateWhenOlderThan), AutoRegenerateWhenOlderThan)
     );
 
     internal void FromXml(XElement elem)
     {
         TimeoutForQueries = elem.Attribute(nameof(TimeoutForQueries))?.Value.ToInt() ?? 5 * 60;
         MaxRows = elem.Attribute(nameof(MaxRows))?.Value.ToInt() ?? 1000 * 1000;
+        AutoRegenerateWhenOlderThan = elem.Attribute(nameof(AutoRegenerateWhenOlderThan))?.Value.ToInt();
     }
 }
 
