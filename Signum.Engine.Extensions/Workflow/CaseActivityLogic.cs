@@ -188,7 +188,32 @@ namespace Signum.Engine.Workflow
                     }
                 }.Register();
 
-                IQueryable<CaseActivityEntity> CancelledCases(CaseEntity c)
+                new Graph<CaseEntity>.Delete(CaseOperation.Delete)
+                {
+                    CanDelete = e => e.ParentCase == null ? null : CaseActivityMessage.CaseIsADecompositionOf0.NiceToString(e.ParentCase),
+                    Delete = (c, args) =>
+                    {
+                        DeleteCase(c);
+
+                        if (args.GetArg<bool>())
+                            c.MainEntity.Delete();
+                    }
+
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
+
+                void DeleteCase(CaseEntity c)
+                {
+                    foreach (var sc in c.SubCases())
+                    {
+                        DeleteCase(sc);
+                    }
+
+                    c.CaseActivities().SelectMany(ca => ca.Notifications()).UnsafeDelete();
+                    c.CaseActivities().UnsafeDelete();
+                    c.Delete();
+                }
+
+                IQueryable <CaseActivityEntity> CancelledCases(CaseEntity c)
                 {
                     return c.CaseActivities().Where(a => a.DoneBy != null && a.DoneType == DoneType.Jump &&
                             (a.DoneDecision == CaseActivityMessage.CanceledCase.ToString() || a.DoneDecision == CaseActivityMessage.CanceledCase.NiceToString()));
@@ -330,6 +355,22 @@ namespace Signum.Engine.Workflow
                         e.Remarks = args.GetArg<string>();
                     },
                 }.Register();
+
+                new Graph<CaseNotificationEntity>.Delete(CaseNotificationOperation.Delete)
+                {
+                    Delete = (e, args) => e.Delete(),
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
+
+                new Graph<CaseNotificationEntity>.ConstructFrom<CaseActivityEntity>(CaseNotificationOperation.CreteCaseNotificationFromCaseActivity)
+                {
+                    Construct = (e, args) => new CaseNotificationEntity
+                    {
+                        CaseActivity = e.ToLite(),
+                        Actor = args.GetArg<Lite<UserEntity>>(),
+                        User = args.GetArg<Lite<UserEntity>>(),
+                        State = CaseNotificationState.New,
+                    }.Save(),
+                }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
 
                 QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
@@ -694,22 +735,23 @@ namespace Signum.Engine.Workflow
                     }
                 }.Register();
 
+
                 new Delete(CaseActivityOperation.Delete)
                 {
                     FromStates = { CaseActivityState.Pending },
                     CanDelete = ca => ca.Case.ParentCase != null ? CaseActivityMessage.CaseIsADecompositionOf0.NiceToString(ca.Case.ParentCase) :
-                    ca.Case.CaseActivities().Any(a => !a.Is(ca)) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() :
+                    ca.Case.CaseActivities().Any(a => !a.Is(ca)) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() : 
                     !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
-                    Delete = (ca, _) =>
+                    Delete = (ca, args) =>
                     {
                         var c = ca.Case;
                         ca.Notifications().UnsafeDelete();
                         ca.Delete();
                         c.Delete();
-                        c.MainEntity.Delete();
+                        if (args.GetArg<bool>())
+                            c.MainEntity.Delete();
                     },
                 }.Register();
-
      
 
                 new Execute(CaseActivityOperation.Next)

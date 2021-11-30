@@ -36,6 +36,8 @@ namespace Signum.Entities.Workflow
     public static class CaseNotificationOperation
     {
         public static readonly ExecuteSymbol<CaseNotificationEntity> SetRemarks;
+        public static readonly DeleteSymbol<CaseNotificationEntity> Delete;
+        public static readonly ConstructSymbol<CaseNotificationEntity>.From<CaseActivityEntity> CreteCaseNotificationFromCaseActivity;
     }
 
     [Serializable]
