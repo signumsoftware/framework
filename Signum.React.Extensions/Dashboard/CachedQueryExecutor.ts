@@ -306,7 +306,7 @@ function getRowKey(rt: ResultTable, keyTokens: string[], parsedTokens: { [token:
     const index = rt.columns.indexOf(token);
 
     if (index == -1)
-      throw new CachedQueryError("Token " + token + " not found for filtering");
+      throw new CachedQueryError("Token " + token + " not found for grouping");
 
     const qt = parsedTokens[token];
 

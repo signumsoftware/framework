@@ -88,7 +88,7 @@ export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterG
 }
 
 export function isActive(fo: FilterOptionParsed) {
-  return !(fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "DashboardFilter" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+  return !(fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "InitialSelectionDashboardFilter" || fo.pinned.active == "WhenHasValue" && fo.value == null));
 }
 
 export interface FilterConditionOptionParsed {

@@ -129,10 +129,11 @@ interface OperationButtonProps extends ButtonProps {
   color?: BsColor;
   avoidAlternatives?: boolean;
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>, event: React.MouseEvent) => void;
-  children?: React.ReactNode
+  children?: React.ReactNode;
+  hideOnCanExecute?: boolean;
 }
 
-export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color, avoidAlternatives, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color, avoidAlternatives, hideOnCanExecute,  ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
   if (eocOrNull == null)
     return null;
@@ -143,6 +144,9 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;
 
   const disabled = !!canExecute;
+
+  if (hideOnCanExecute && disabled)
+    return null;
 
   var alternatives = avoidAlternatives ? undefined : eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 

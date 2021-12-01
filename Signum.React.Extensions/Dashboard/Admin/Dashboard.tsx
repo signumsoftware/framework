@@ -146,8 +146,8 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           <div className="col-sm-2">
             {!ctx.value.isNew && <ValueSearchControlLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
           </div>
-          <div className="col-sm-2 pt-4">
-            {!ctx.value.isNew && <OperationButton eoc={EntityOperationContext.fromTypeContext(ctx, DashboardOperation.RegenerateCachedQueries)} className="w-100" />}
+          <div className="col-sm-3 pt-4">
+            {!ctx.value.isNew && <OperationButton eoc={EntityOperationContext.fromTypeContext(ctx, DashboardOperation.RegenerateCachedQueries)} hideOnCanExecute className="w-100" />}
           </div>
         </div>} />
 
