@@ -5,10 +5,10 @@ namespace Signum.Entities.Workflow;
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class CaseNotificationEntity : Entity
 {
-    
+
     public Lite<CaseActivityEntity> CaseActivity { get; set; }
 
-    
+
     public Lite<UserEntity> User { get; set; }
 
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
@@ -29,12 +29,12 @@ public enum CaseNotificationState
     DoneByOther,
 }
 
-
-
 [AutoInit]
 public static class CaseNotificationOperation
 {
     public static readonly ExecuteSymbol<CaseNotificationEntity> SetRemarks;
+    public static readonly DeleteSymbol<CaseNotificationEntity> Delete;
+    public static readonly ConstructSymbol<CaseNotificationEntity>.From<CaseActivityEntity> CreteCaseNotificationFromCaseActivity;
 }
 
 public class InboxFilterModel : ModelEntity
