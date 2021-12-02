@@ -23,7 +23,7 @@ import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation
+  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation, CaseActivityMessage, CaseMessage,
 } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -36,8 +36,9 @@ import {
   CaseActivityOperation, CaseEntity, CaseNotificationState, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
   WorkflowReplacementModel, WorkflowModel, BpmnEntityPairEmbedded, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
   WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimerEmbedded, CaseTagsModel, CaseTagTypeEntity,
-  WorkflowPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType, CaseActivityMixin,
+  WorkflowPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType, CaseActivityMixin, 
 } from './Signum.Entities.Workflow'
+
 
 import InboxFilter from './Case/InboxFilter'
 import Workflow, { WorkflowHandle } from './Workflow/Workflow'
@@ -54,6 +55,10 @@ import { FunctionalAdapter } from '@framework/Modals';
 import { QueryString } from '@framework/QueryString';
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 import { OperationMenuItem } from '@framework/Operations/ContextualOperations';
+import { UserEntity } from '../Authorization/Signum.Entities.Authorization';
+import { SearchControl } from '../../Signum.React/Scripts/Search';
+import SearchModal from '../../Signum.React/Scripts/SearchControl/SearchModal';
+import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
@@ -191,9 +196,59 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   }));
 
   Operations.addSettings(new EntityOperationSettings(CaseNotificationOperation.SetRemarks, { isVisible: v => false }));
+
+  Operations.addSettings(new EntityOperationSettings(CaseNotificationOperation.CreteCaseNotificationFromCaseActivity, {
+    onClick: eoc => {
+      eoc.onConstructFromSuccess = pack => {
+        Operations.notifySuccess(); return Promise.resolve();
+      }
+      return Finder.find(UserEntity)
+        .then(u => u && eoc.defaultClick(u))
+    }
+  }));
+
+  Operations.addSettings(new EntityOperationSettings(CaseOperation.Delete, {
+    onClick: eoc => askDeleteMainEntity(eoc.entity.mainEntity)
+      .then(u => u == undefined ? undefined : eoc.defaultClick(u)),
+    contextual: {
+      onClick: coc => askDeleteMainEntity(coc.pack!.entity.mainEntity)
+        .then(u => u == undefined ? undefined : coc.defaultContextualClick(u))
+    },
+    contextualFromMany: {
+      onClick: coc => askDeleteMainEntity()
+        .then(u => u == undefined ? undefined : coc.defaultContextualClick(u))
+    },
+  }));
+
+  function askDeleteMainEntity(mainEntity?: ICaseMainEntity): Promise<boolean | undefined> {
+   return MessageModal.show({
+     title: CaseMessage.DeleteMainEntity.niceToString(),
+     message: mainEntity == null ? CaseMessage.DoYouWAntToAlsoDeleteTheMainEntities.niceToString():  CaseMessage.DoYouWAntToAlsoDeleteTheMainEntity0.niceToString(mainEntity.toStr),
+      buttons: "yes_no_cancel",
+      style: "warning"
+   }).then(u => u == "cancel" ? undefined : u == "yes")
+  }
+
+
+  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, {
+    hideOnCanExecute: true,
+    isVisible: ctx => false,
+    onClick: eoc => askDeleteMainEntity(eoc.entity.case.mainEntity)
+      .then(u => u == undefined ? undefined : eoc.defaultClick(u)),
+    contextual: {
+      onClick: coc => askDeleteMainEntity(coc.pack!.entity.case.mainEntity)
+        .then(u => u == undefined ? undefined : coc.defaultContextualClick(u))
+    },
+    contextualFromMany: {
+      onClick: coc => askDeleteMainEntity()
+        .then(u => u == undefined ? undefined : coc.defaultContextualClick(u))
+    },
+  }));
+
+  
+
   Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, color: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
-  Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, {
     icon: "share",
     iconColor: "blue",
