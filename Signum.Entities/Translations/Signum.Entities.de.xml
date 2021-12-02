@@ -276,7 +276,8 @@
     <Member Name="Always" Description="Immer" />
     <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
     <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
-    <Member Name="DashboardFilter" Description="Dashboard-Filter" />
+    <Member Name="DefaultDashboardFilter" Description="Default Dashboardfilter" />
+    <Member Name="InitialSelectionDashboardFilter" Description="Erstauswahl Dashboard-Filter" />
     <Member Name="WhenHasValue" Description="Wenn er einen Wert hat" />
   </Type>
   <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">
