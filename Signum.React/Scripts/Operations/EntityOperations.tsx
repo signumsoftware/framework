@@ -129,10 +129,11 @@ interface OperationButtonProps extends ButtonProps {
   color?: BsColor;
   avoidAlternatives?: boolean;
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>, event: React.MouseEvent) => void;
-  children?: React.ReactNode
+  children?: React.ReactNode;
+  hideOnCanExecute?: boolean;
 }
 
-export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color, avoidAlternatives, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color, avoidAlternatives, hideOnCanExecute,  ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
   if (eocOrNull == null)
     return null;
@@ -143,6 +144,9 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;
 
   const disabled = !!canExecute;
+
+  if (hideOnCanExecute && disabled)
+    return null;
 
   var alternatives = avoidAlternatives ? undefined : eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 
@@ -312,7 +316,7 @@ export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperatio
     return API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
       .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
-        return Navigator.createNavigateOrTab(pack, eoc.event!);
+        return Navigator.createNavigateOrTab(pack, eoc.event ?? ({} as React.MouseEvent));
       }))
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
   });
@@ -327,7 +331,7 @@ export function defaultConstructFromLite<T extends Entity>(eoc: EntityOperationC
     return API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
       .then(eoc.onConstructFromSuccess ?? (pack => {
         notifySuccess();
-        return Navigator.createNavigateOrTab(pack, eoc.event!);
+        return Navigator.createNavigateOrTab(pack, eoc.event ?? ({} as React.MouseEvent));
       }))
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
   });

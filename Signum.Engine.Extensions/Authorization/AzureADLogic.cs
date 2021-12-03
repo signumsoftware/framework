@@ -103,7 +103,7 @@ public static class AzureADLogic
 
                 ClientCredentialProvider authProvider = GetClientCredentialProvider();
                 GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-                stc.ForeachWriting(list.Chunk(50), gr => gr.Length + " user(s)...", gr =>
+                stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
                 {
                     var filter = gr.Select(a => "id eq '" + a.Mixin<UserADMixin>().OID + "'").Combined(FilterGroupOperation.Or);
                     var users = graphClient.Users.Request().Filter(filter).Select("accountEnabled, id").GetAsync().Result;

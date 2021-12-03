@@ -1,12 +1,13 @@
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
+using System.ComponentModel;
 
 namespace Signum.Entities.Workflow;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class CaseEntity : Entity
 {
-    
+
     public WorkflowEntity Workflow { get; set; }
 
     public Lite<CaseEntity>? ParentCase { get; set; }
@@ -15,7 +16,7 @@ public class CaseEntity : Entity
     public string Description { get; set; }
 
     [ImplementedByAll]
-    
+
     public ICaseMainEntity MainEntity { get; set; }
 
     public DateTime StartDate { get; set; } = Clock.Now;
@@ -31,6 +32,7 @@ public static class CaseOperation
     public static readonly ExecuteSymbol<CaseEntity> SetTags;
     public static readonly ExecuteSymbol<CaseEntity> Cancel;
     public static readonly ExecuteSymbol<CaseEntity> Reactivate;
+    public static readonly DeleteSymbol<CaseEntity> Delete;
 }
 
 public interface ICaseMainEntity : IEntity
@@ -55,10 +57,10 @@ public class CaseTagEntity : Entity
 {
     public DateTime CreationDate { get; private set; } = Clock.Now;
 
-    
+
     public Lite<CaseEntity> Case { get; set; }
 
-    
+
     public CaseTagTypeEntity TagType { get; set; }
 
     [ImplementedBy(typeof(UserEntity))]
@@ -91,4 +93,17 @@ public enum CaseFlowColor
     CaseMaxDuration,
     AverageDuration,
     EstimatedDuration
+}
+
+
+public enum CaseMessage
+{
+    [Description("Delete Main Entity")]
+    DeleteMainEntity,
+
+    [Description("Do you want to also delete the main entity: {0}")]
+    DoYouWAntToAlsoDeleteTheMainEntity0,
+
+    [Description("Do you want to also delete the main entities?")]
+    DoYouWAntToAlsoDeleteTheMainEntities,
 }

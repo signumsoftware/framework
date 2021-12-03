@@ -875,7 +875,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
   if (fop.pinned && fop.pinned.active == "Checkbox_StartUnchecked")
     return undefined;
 
-  if (fop.pinned && fop.pinned.active == "DashboardFilter")
+  if (fop.pinned && fop.pinned.active == "InitialSelectionDashboardFilter")
     return undefined;
 
   if (fop.pinned && overridenValue == null) {

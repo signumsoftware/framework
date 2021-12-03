@@ -28,12 +28,13 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
   if (allPinned.length == 0)
     return null;
 
+
   return (
     <div onKeyUp={handleFiltersKeyUp }>
       <div className={classes("row", p.extraSmall ? "" : "mt-3 mb-3")}>
         {
           allPinned
-            .filter(fo => fo.pinned?.active != "DashboardFilter")
+            .filter(fo => fo.pinned?.active != "InitialSelectionDashboardFilter")
             .groupBy(fo => (fo.pinned!.column ?? 0).toString())
             .orderBy(gr => parseInt(gr.key))
             .map(gr => <div className="col-sm-3" key={gr.key}>
@@ -81,7 +82,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
         </FormGroup>
       );
 
-    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), labelText, f.pinned!.active == "WhenHasValue" || f.pinned!.active == "DashboardFilter");
+    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), labelText, f.pinned!.active == "WhenHasValue" || f.pinned!.active == "InitialSelectionDashboardFilter");
   }
 
 

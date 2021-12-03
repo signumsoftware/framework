@@ -268,5 +268,6 @@ public enum PinnedFilterActive
     Checkbox_StartChecked,
     [Description("Checkbox (start unchecked)")]
     Checkbox_StartUnchecked,
-    DashboardFilter,
+    InitialSelectionDashboardFilter,
+    DefaultDashboardFilter,
 }

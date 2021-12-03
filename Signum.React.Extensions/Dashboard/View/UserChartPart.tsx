@@ -16,21 +16,30 @@ import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { DashboardFilter, DashboardFilterController, DashboardFilterRow, equalsDFR } from "./DashboardFilterController"
-import { filterOperations, isFilterGroupOptionParsed } from '@framework/FindOptions'
+import { filterOperations, FilterOptionParsed, isFilterGroupOption, isFilterGroupOptionParsed, QueryToken } from '@framework/FindOptions'
 import { CachedQueryJS, executeChartCached } from '../CachedQueryExecutor'
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
   const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity, ...p.deps ?? []]);
-  const dbFop = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.pinned?.active == "DashboardFilter"), [chartRequest]);
-  const originalFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.pinned == null || a.pinned.active != "DashboardFilter"), [chartRequest]);
+  const dbFop = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.pinned?.active == "InitialSelectionDashboardFilter"), [chartRequest]);
+  const originalFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.pinned == null || a.pinned.active != "InitialSelectionDashboardFilter"), [chartRequest]);
 
   if (chartRequest != null) {
     chartRequest.filterOptions.clear();
+
+    var dashboardFilters = p.filterController.getFilterOptions(p.partEmbedded, chartRequest!.queryKey);
+
+    function allTokens(fs: FilterOptionParsed[]): QueryToken[] {
+      return fs.flatMap(f => isFilterGroupOptionParsed(f) ? [f.token, ...allTokens(f.filters)].notNull() : [f.token].notNull())
+    }
+
+    var tokens = allTokens(dashboardFilters);
+
     chartRequest.filterOptions = [
-      ...originalFilters!,
-      ...p.filterController.getFilterOptions(p.partEmbedded, chartRequest!.queryKey),
+      ...originalFilters!.filter(a => a.pinned == null || a.pinned.active !== "DefaultDashboardFilter" || !tokens.some(t => t.fullKey == a.token?.fullKey)),
+      ...dashboardFilters,
     ];
   }
 

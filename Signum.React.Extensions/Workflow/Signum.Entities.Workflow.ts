@@ -167,6 +167,12 @@ export interface CaseJunctionEntity extends Entities.Entity {
   to: Entities.Lite<CaseActivityEntity>;
 }
 
+export module CaseMessage {
+  export const DeleteMainEntity = new MessageKey("CaseMessage", "DeleteMainEntity");
+  export const DoYouWAntToAlsoDeleteTheMainEntity0 = new MessageKey("CaseMessage", "DoYouWAntToAlsoDeleteTheMainEntity0");
+  export const DoYouWAntToAlsoDeleteTheMainEntities = new MessageKey("CaseMessage", "DoYouWAntToAlsoDeleteTheMainEntities");
+}
+
 export const CaseNotificationEntity = new Type<CaseNotificationEntity>("CaseNotification");
 export interface CaseNotificationEntity extends Entities.Entity {
   Type: "CaseNotification";
@@ -179,6 +185,8 @@ export interface CaseNotificationEntity extends Entities.Entity {
 
 export module CaseNotificationOperation {
   export const SetRemarks : Entities.ExecuteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.SetRemarks");
+  export const Delete : Entities.DeleteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.Delete");
+  export const CreteCaseNotificationFromCaseActivity : Entities.ConstructSymbol_From<CaseNotificationEntity, CaseActivityEntity> = registerSymbol("Operation", "CaseNotificationOperation.CreteCaseNotificationFromCaseActivity");
 }
 
 export const CaseNotificationState = new EnumType<CaseNotificationState>("CaseNotificationState");
@@ -193,6 +201,7 @@ export module CaseOperation {
   export const SetTags : Entities.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.SetTags");
   export const Cancel : Entities.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.Cancel");
   export const Reactivate : Entities.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.Reactivate");
+  export const Delete : Entities.DeleteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.Delete");
 }
 
 export const CaseTagEntity = new Type<CaseTagEntity>("CaseTag");

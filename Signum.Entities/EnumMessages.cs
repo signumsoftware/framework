@@ -245,7 +245,7 @@ public enum SearchMessage
     HideHiddenColumns, 
 
     GroupKey,
-    DerivedGroupKey
+    DerivedGroupKey,
 }
 
 public enum SelectorMessage

@@ -459,9 +459,9 @@ public static class DashboardLogic
             }
         }
 
-        var cached = definitions.Where(a => a.IsQueryCached);
+        var cached = definitions.Where(a => a.IsQueryCached).ToList();
 
-        return cached.ToList();
+        return cached;
     }
 
     public static List<CombinedCachedQueryDefinition> CombineCachedQueryDefinitions(List<CachedQueryDefinition> cachedQueryDefinition)
@@ -505,6 +505,8 @@ public class CachedQueryDefinition
     public Lite<IUserAssetEntity> UserAsset { get; set; }
     public bool IsQueryCached { get; }
     public bool CanWriteFilters { get; }
+
+    public override string ToString() => $"{UserAsset} IsQueryCached={IsQueryCached} CanWriteFilters={CanWriteFilters}";
 }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -541,7 +543,7 @@ public class CombinedCachedQueryDefinition
         if (me.GroupResults)
         {
             var meKeys = me.Columns.Select(a => a.Token).Where(t => t is not AggregateToken).ToHashSet();
-            var otherKeys = me.Columns.Select(a => a.Token).Where(t => t is not AggregateToken).ToHashSet();
+            var otherKeys = other.Columns.Select(a => a.Token).Where(t => t is not AggregateToken).ToHashSet();
             if (!meKeys.SetEquals(otherKeys))
                 return false;
         }
