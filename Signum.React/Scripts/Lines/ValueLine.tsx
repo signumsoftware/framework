@@ -206,7 +206,7 @@ export function isNumber(e: React.KeyboardEvent<any>) {
     (e.ctrlKey && c == 67) /*Ctrl + c*/);
 }
 
-function isDecimal(e: React.KeyboardEvent<any>): boolean {
+export function isDecimal(e: React.KeyboardEvent<any>): boolean {
   const c = e.keyCode;
   return (isNumber(e) ||
     (c == 110) /*NumPad Decimal*/ ||
