@@ -53,6 +53,8 @@ Whenever there are big changes worth to mention, we typicaly write it in the rel
 
 * [2021.12.03 Dashboard III; InitialSelectionDashboardFilter and DefaultDashboardFilter](https://github.com/signumsoftware/framework/commit/90392c1066b7aed631ec3aaa55258e06f18ad013#comments)
 * [2021.12.02 Dashboard II: Presenting CachedQueries](https://github.com/signumsoftware/framework/commit/641293cd886280a857493e6b9b10361220f19702#commitcomment-61271093) 
+* [2021.11.30 Target ES2017 (async await welcomed!)](https://github.com/signumsoftware/framework/commit/9caeecfc0a8b489d4460aafe53450ef9ec416194#comments)
+* [2021.11.30 Replace GroupsOf -> Chunk, WithMin -> MinBy and WithMax -> MaxBy](https://github.com/signumsoftware/framework/commit/45303a1a81a4335de21191438a574f98019075da#comments)
 * [2021.11.14 Operation Executing](https://github.com/signumsoftware/framework/commit/002bcc9665ebf2bb6c0eed5e043cb081aab7e73c#comments)
 * [2021.11.13 Bootstrap 5](https://github.com/signumsoftware/framework/commit/7d0804c7c2ab4841d0985e42c3b5fa96b8f01780#comments)
 * [2021.11.09 .Net 6 and C# 10](https://github.com/signumsoftware/framework/commit/0669737b11a30dc385eb8fd1bc22ac97fa637cd0#commitcomment-59667330)
