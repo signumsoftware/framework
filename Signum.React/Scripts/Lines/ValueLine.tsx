@@ -228,8 +228,10 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
   };
 
   if (s.inlineCheckbox) {
+
+    var atts = { ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes, ...s.labelHtmlAttributes };
     return (
-      <label className={vl.props.ctx.error} style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...vl.baseHtmlAttributes()} {...s.formGroupHtmlAttributes} {...s.labelHtmlAttributes}>
+      <label style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...atts} className={classes(s.ctx.labelClass, vl.props.ctx.errorClass, atts.className)}>
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
           className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))}
         />
@@ -949,7 +951,7 @@ function internalRadioGroup(vl: ValueLineController) {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       <div style={getColumnStyle()}>
         {optionItems.map((oi, i) =>
-          <label {...vl.props.valueHtmlAttributes} className={classes("sf-radio-element", vl.props.ctx.error)}>
+          <label {...vl.props.valueHtmlAttributes} className={classes("sf-radio-element", vl.props.ctx.errorClass)}>
             <input type="radio" key={i} value={oi.value} checked={s.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={s.ctx.readOnly} />
             {" " + oi.label}
           </label>)}
