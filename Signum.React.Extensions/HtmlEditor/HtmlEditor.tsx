@@ -92,7 +92,7 @@ export class HtmlEditorController {
     if (!this.readOnly) {
       var newContent = this.editorState.getCurrentContent();
       if (newContent != this.initialContentState) {
-        var value = this.converter.contentStateToText(newContent);
+        var value = !newContent.hasText() ? null : this.converter.contentStateToText(newContent);
         this.binding.setValue(value);
       }
     }
