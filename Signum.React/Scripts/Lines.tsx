@@ -45,6 +45,9 @@ export { EntityTabRepeater } from './Lines/EntityTabRepeater'
 
 export { EntityStrip } from './Lines/EntityStrip'
 
+export { EntityMultiSelect } from './Lines/EntityMultiSelect'
+
+
 export { EntityCheckboxList } from './Lines/EntityCheckboxList'
 export { EntityRadioButtonList } from './Lines/EntityRadioButtonList'
 
