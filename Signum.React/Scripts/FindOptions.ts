@@ -88,7 +88,7 @@ export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterG
 }
 
 export function isActive(fo: FilterOptionParsed) {
-  return !(fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "DashboardFilter" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+  return !(fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "InitialSelectionDashboardFilter" || fo.pinned.active == "WhenHasValue" && fo.value == null));
 }
 
 export interface FilterConditionOptionParsed {
@@ -348,20 +348,13 @@ export interface QueryValueRequest {
   systemTime?: SystemTime;
 }
 
-export interface ResultColumn {
-  displayName: string;
-  token: QueryToken;
-}
-
 export interface ResultTable {
-  queryKey: string;
-  entityColumn: string;
   columns: string[];
+  uniqueValues: { [token: string]: any[] }
   rows: ResultRow[];
   pagination: Pagination
   totalElements?: number;
 }
-
 
 export interface ResultRow {
   entity?: Lite<Entity>;

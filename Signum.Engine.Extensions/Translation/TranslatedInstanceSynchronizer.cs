@@ -16,7 +16,7 @@ public static class TranslatedInstanceSynchronizer
 
         totalInstances = instances.Count;
         if (instances.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
-            instances = instances.GroupsOf(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
+            instances = instances.Chunk(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
 
         return TranslateInstances(translators, type, targetCulture, instances);
     }

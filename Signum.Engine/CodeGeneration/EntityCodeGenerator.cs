@@ -158,7 +158,7 @@ public class EntityCodeGenerator
 
     protected virtual void WriteAttributeTag(StringBuilder sb, IEnumerable<string> attributes)
     {
-        foreach (var gr in attributes.GroupsOf(a => a.Length, 100))
+        foreach (var gr in attributes.Chunk(a => a.Length, 100))
         {
             sb.AppendLine("[" + gr.ToString(", ") + "]");
         }

@@ -64,7 +64,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
   }
 }
 
-function FormatJson(p: { code: string | undefined | null }) {
+export function FormatJson(p: { code: string | undefined | null }) {
 
   const [formatJson, setFormatJson] = React.useState<boolean>(false);
 

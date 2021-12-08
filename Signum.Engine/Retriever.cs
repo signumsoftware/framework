@@ -180,7 +180,7 @@ class RealRetriever : IRetriever
         {
             while (requests.Count > 0)
             {
-                var group = requests.WithMax(a => a.Value.Count);
+                var group = requests.MaxBy(a => a.Value.Count);
 
                 var dic = group.Value;
 
@@ -305,7 +305,7 @@ class RealRetriever : IRetriever
         }
         else if (token != null)
         {
-            var tasks = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
+            var tasks = ids.Chunk(Schema.Current.Settings.MaxNumberOfParameters)
                .Select(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KeyValuePair.Create(a.Id, a.ToString())).ToListAsync(token!.Value))
                .ToList();
 
@@ -316,7 +316,7 @@ class RealRetriever : IRetriever
         }
         else
         {
-            var dic = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
+            var dic = ids.Chunk(Schema.Current.Settings.MaxNumberOfParameters)
                 .SelectMany(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KeyValuePair.Create(a.Id, a.ToString())))
                 .ToDictionaryEx();
 

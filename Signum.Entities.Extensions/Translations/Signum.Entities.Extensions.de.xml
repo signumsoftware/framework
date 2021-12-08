@@ -41,6 +41,9 @@
   <Type Name="ActiveDirectoryPermission">
     <Member Name="InviteUsersFromAD" Description="Benutzer aus AD einladen" />
   </Type>
+  <Type Name="ActiveDirectoryTask">
+    <Member Name="DeactivateUsers" Description="Benutzer deaktivieren" />
+  </Type>
   <Type Name="ActivityWithRemarks" Description="Aktivität mit Bemerkungen">
     <Member Name="Alerts" Description="Benachrichtigungen" />
     <Member Name="Case" Description="Fall" />
@@ -238,9 +241,27 @@
     <Member Name="Name" Description="Name" />
     <Member Name="Style" Description="Stil" />
   </Type>
+  <Type Name="CachedQueryEntity" Description="Cached-Abfrage">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Dashboard" Description="Dashboard" />
+    <Member Name="File" Description="Datei" />
+    <Member Name="NumColumns" Description="Anzahl Spalten" />
+    <Member Name="NumRows" Description="Anzahl Zeilen" />
+    <Member Name="QueryDuration" Description="Dauer der Abfrage" />
+    <Member Name="UploadDuration" Description="Dauer des Uploads" />
+    <Member Name="UserAssets" Description="Benutzer-Assets" />
+  </Type>
+  <Type Name="CachedQueryFileType">
+    <Member Name="CachedQuery" Description="Cached-Abfrage" />
+  </Type>
   <Type Name="CachePermission">
     <Member Name="InvalidateCache" Description="Cache ungültig" />
     <Member Name="ViewCache" Description="Cache sehen" />
+  </Type>
+  <Type Name="CacheQueryConfigurationEmbedded" Description="Konfiguration der Cached-Abfrage">
+    <Member Name="AutoRegenerateWhenOlderThan" Description="Automatisch regenerieren, wenn älter als" />
+    <Member Name="MaxRows" Description="Max. Zeilen" />
+    <Member Name="TimeoutForQueries" Description="Timeout für Abfragen" />
   </Type>
   <Type Name="CalendarDayEntity" Description="Kalendertag" Gender="m">
     <Member Name="Date" Description="Datum" />
@@ -484,6 +505,10 @@
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
+  <Type Name="CombinedUserChartElementEmbedded" Description="Kombiniertes Benutzerdiagrammelement">
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
+    <Member Name="UserChart" Description="Benutzerdiagramm" />
+  </Type>
   <Type Name="CombinedUserChartPartEntity" Description="Kombinierter Benutzerdiagrammteil" Gender="m">
     <Member Name="AllowChangeShowData" Description="Daten anzeigen ändern lassen" />
     <Member Name="CombinePinnedFiltersWithSameLabel" Description="Kombinieren Vorgewahlter Filter Bezeichnung" />
@@ -533,6 +558,7 @@
   </Type>
   <Type Name="DashboardEntity" Description="Dashboard" PluralDescription="Dashboards" Gender="n">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
+    <Member Name="CacheQueryConfiguration" Description="Konfiguration der Cache-Abfrage" />
     <Member Name="CombineSimilarRows" Description="Ähnliche Zeilen kombinieren" />
     <Member Name="DashboardPriority" Description="Dashboard-Priorität" />
     <Member Name="DisplayName" Description="Name" />
@@ -547,6 +573,8 @@
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
     <Member Name="CreateNewPart" Description="Neues Teil erstellen" />
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Titel muss angegeben werden für {0}" />
+    <Member Name="ForPerformanceReasonsThisDashboardMayShowOutdatedInformation" Description="Aus Leistungsgründen kann dieses Dashboard veraltete Informationen anzeigen" />
+    <Member Name="LasUpdateWasOn0" Description="Die letzte Aktualisierung erfolgte am {0}" />
     <Member Name="Part0IsTooLarge" Description="Teil {0} ist zu groß" />
     <Member Name="Part0OverlapsWith1" Description="Teil {0} überschneidet sich mit {1}" />
     <Member Name="Preview" Description="Vorschau" />
@@ -555,6 +583,7 @@
   <Type Name="DashboardOperation">
     <Member Name="Clone" Description="Klonen" />
     <Member Name="Delete" Description="Löschen" />
+    <Member Name="RegenerateCachedQueries" Description="Cache-Abfragen neu generieren" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="DashboardPermission">
@@ -1481,6 +1510,7 @@
     <Member Name="ChangePassword" Description="Passwort ändern" />
     <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
     <Member Name="CurrentPassword" Description="Aktuelles Kennwort" />
+    <Member Name="EMailAddress" Description="E-Mail Adresse" />
     <Member Name="EnterActualPasswordAndNewOne" Description="Geben Sie Ihr aktuelles Passwort und das neue ein" />
     <Member Name="EnterTheNewPassword" Description="Geben Sie das neue Passwort ein" />
     <Member Name="EnterYourUserEmail" Description="Geben Sie Ihre Benutzer-E-Mail ein" />
@@ -1520,6 +1550,7 @@
     <Member Name="Username" Description="Benutzername" />
     <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
     <Member Name="UserNameMustHaveAValue" Description="Sie müssen den Benutzernamen eingeben" />
+    <Member Name="UsernameOrEmailAddress" Description="Benutzername oder E-Mail Adresse" />
     <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Wir haben Ihnen eine E-Mail mit einem Link geschickt, mit dem Sie Ihr Passwort zurücksetzen können." />
   </Type>
   <Type Name="MapMessage">
@@ -2573,6 +2604,7 @@
     <Member Name="AllowChangeShowData" Description="Änderungsdaten anzeigen lassen" />
     <Member Name="AutoRefresh" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
@@ -2637,6 +2669,7 @@
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
     <Member Name="CreateNew" Description="Neue erstellen" />
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
     <Member Name="RenderMode" Description="Render-Modus" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowFooter" Description="Show-Fußzeile" />
@@ -2666,6 +2699,7 @@
   </Type>
   <Type Name="ValueUserQueryElementEmbedded" Description="Wert der Benutzerabfrage">
     <Member Name="Href" Description="Href" />
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>

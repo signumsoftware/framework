@@ -3,6 +3,7 @@ import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { UserQueryPartEntity, DashboardEntity } from '../Signum.Entities.Dashboard'
 import { useForceUpdate } from '@framework/Hooks';
+import { IsQueryCachedLine } from './Dashboard';
 
 export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity> }) {
   const ctx = p.ctx.subCtx({ formGroupStyle: p.ctx.value.renderMode == "BigValue" ? "Basic" : undefined });
@@ -18,6 +19,7 @@ export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity>
           <ValueLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
         </div>
       }
+      {ctx.findParentCtx(DashboardEntity).value.cacheQueryConfiguration && <IsQueryCachedLine ctx={ctx.subCtx(p => p.isQueryCached)} />}
     </div>
   );
 }

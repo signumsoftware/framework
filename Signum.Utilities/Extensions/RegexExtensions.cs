@@ -34,7 +34,7 @@ public static class RegexExtensions
     public static T? MostSimilar<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string pattern)
     {
         StringDistance sd = new StringDistance();
-        return collection.WithMin(item => sd.LevenshteinDistance(stringSelector(item), pattern));
+        return collection.MinBy(item => sd.LevenshteinDistance(stringSelector(item), pattern));
     }
 
     public static IEnumerable<R> JoinSimilar<T, S, R>(this List<T> outer, List<S> inner,
@@ -51,7 +51,7 @@ public static class RegexExtensions
                                                     sd.LevenshteinDistance(outerKeySelector(o), innerKeySelector(i)))).ToDictionary();
         while (distances.Count > 0)
         {
-            var kvp = distances.WithMin(a => a.Value);
+            var kvp = distances.MinBy(a => a.Value);
             var tuple = kvp.Key;
 
             distances.RemoveRange(distances.Keys.Where(a => a.Item1.Equals(tuple.Item1) || a.Item2.Equals(tuple.Item2)).ToList());

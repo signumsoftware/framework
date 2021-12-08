@@ -69,7 +69,7 @@ export function start(options: { routes: JSX.Element[] }) {
             })
             .done();
       }).done();
-    }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
+    }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info" }));
 
   onContextualItems.push(getGroupUserQueriesContextMenu);
 

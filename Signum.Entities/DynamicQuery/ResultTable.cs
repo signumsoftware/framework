@@ -23,6 +23,8 @@ public class ResultColumn :ISerializable
     IList values;
     public IList Values => values;
 
+    public bool CompressUniqueValues { get; set; }
+
     public ResultColumn(Column column, IList values)
     {
         this.column = column;
@@ -229,6 +231,8 @@ public class ResultTable
     ResultRow[] rows;
     public ResultRow[] Rows { get { return rows; } }
 
+    public ResultColumn[] AllColumns() => entityColumn == null ? Columns : Columns.PreAnd(entityColumn).ToArray();
+
     public ResultTable(ResultColumn[] columns, int? totalElements, Pagination pagination)
     {
         this.entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx();
@@ -242,13 +246,6 @@ public class ResultTable
         this.totalElements = totalElements;
         this.pagination = pagination;
     }
-
-    //[OnDeserialized]
-    //private void OnDeserialized(StreamingContext context)
-    //{
-    //    CreateIndices(columns);
-    //}
-
     
     public DataTable ToDataTable(DataTableValueConverter? converter = null)
     {

@@ -188,6 +188,10 @@ public class FilterCondition : Filter
                 Expression right = Expression.Constant(((string)val!).ToLower(), Token.Type);
                 return QueryUtils.GetCompareExpression(Operation, Expression.Call(left, miToLower), right);
             }
+            else if (Token.Type == typeof(bool) && val == null)
+            {
+                return QueryUtils.GetCompareExpression(Operation, left, Expression.Constant(false, typeof(bool)));
+            }
             else
             {
                 Expression right = Expression.Constant(val, Token.Type);
@@ -264,5 +268,6 @@ public enum PinnedFilterActive
     Checkbox_StartChecked,
     [Description("Checkbox (start unchecked)")]
     Checkbox_StartUnchecked,
-    DashboardFilter,
+    InitialSelectionDashboardFilter,
+    DefaultDashboardFilter,
 }

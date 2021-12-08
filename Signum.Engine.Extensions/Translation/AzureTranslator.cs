@@ -58,9 +58,9 @@ public class AzureTranslator : ITranslator
         if(this.AzureKey() == null)
             return null;
 
-        var result = list.GroupsOf(10).SelectMany(listPart => Task.Run(async () =>
+        var result = list.Chunk(10).SelectMany(listPart => Task.Run(async () =>
         {
-            return await this.TranslateBatchAsync(listPart, from, to);
+            return await this.TranslateBatchAsync(listPart.ToList(), from, to);
         }).Result!).ToList();
         
         return result;

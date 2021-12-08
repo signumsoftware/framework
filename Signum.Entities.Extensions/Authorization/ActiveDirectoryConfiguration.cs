@@ -1,3 +1,4 @@
+using Signum.Entities.Scheduler;
 using System.ComponentModel;
 
 namespace Signum.Entities.Authorization;
@@ -163,3 +164,10 @@ public static class ADGroupOperation
     public static readonly ExecuteSymbol<ADGroupEntity> Save;
     public static readonly DeleteSymbol<ADGroupEntity> Delete;
 }
+
+[AutoInit]
+public static class ActiveDirectoryTask
+{
+    public static readonly SimpleTaskSymbol DeactivateUsers;
+}
+

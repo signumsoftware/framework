@@ -59,12 +59,12 @@ export function FormGroup(p: FormGroupProps) {
           (
             <div className={ctx.valueColumnsCss} >
               {p.children}
-              {p.helpText && ctx.formGroupStyle == "LabelColumns" && <small className="form-text text-muted">{p.helpText}</small>}
+              {p.helpText && ctx.formGroupStyle == "LabelColumns" && <small className="form-text d-block">{p.helpText}</small>}
             </div>
           )
       }
       {(ctx.formGroupStyle == "BasicDown" || ctx.formGroupStyle == "FloatingLabel") && label}
-      {p.helpText && ctx.formGroupStyle != "LabelColumns" && <small className="form-text text-muted">{p.helpText}</small>}
+      {p.helpText && ctx.formGroupStyle != "LabelColumns" && <small className="form-text d-block">{p.helpText}</small>}
     </div>
   );
 

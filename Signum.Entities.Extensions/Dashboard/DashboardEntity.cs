@@ -5,11 +5,14 @@ using Signum.Entities.Chart;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
+using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Dashboard;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class DashboardEntity : Entity, IUserAssetEntity
+public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
 {
     public DashboardEntity()
     {
@@ -40,6 +43,8 @@ public class DashboardEntity : Entity, IUserAssetEntity
     public string DisplayName { get; set; }
 
     public bool CombineSimilarRows { get; set; } = true;
+
+    public CacheQueryConfigurationEmbedded? CacheQueryConfiguration { get; set; }
 
     [NotifyCollectionChanged, NotifyChildProperty]
     [NoRepeatValidator]
@@ -119,13 +124,15 @@ public class DashboardEntity : Entity, IUserAssetEntity
     {
         return new DashboardEntity
         {
-            DisplayName = "Clone {0}".FormatWith(this.DisplayName),
-            DashboardPriority = DashboardPriority,
-            Parts = Parts.Select(p => p.Clone()).ToMList(),
-            Owner = Owner,
             EntityType = this.EntityType,
             EmbeddedInEntity = this.EmbeddedInEntity,
+            Owner = Owner,
+            DashboardPriority = DashboardPriority,
             AutoRefreshPeriod = this.AutoRefreshPeriod,
+            DisplayName = "Clone {0}".FormatWith(this.DisplayName),
+            CombineSimilarRows = this.CombineSimilarRows,
+            CacheQueryConfiguration = this.CacheQueryConfiguration?.Clone(),
+            Parts = Parts.Select(p => p.Clone()).ToMList(),
             Key = this.Key
         };
     }
@@ -140,6 +147,7 @@ public class DashboardEntity : Entity, IUserAssetEntity
             DashboardPriority == null ? null! : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
             EmbeddedInEntity == null ? null! : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
             new XAttribute("CombineSimilarRows", CombineSimilarRows),
+            CacheQueryConfiguration?.ToXml(ctx),
             new XElement("Parts", Parts.Select(p => p.ToXml(ctx))));
     }
 
@@ -152,6 +160,7 @@ public class DashboardEntity : Entity, IUserAssetEntity
         DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
         EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
         CombineSimilarRows = element.Attribute("CombineSimilarRows")?.Let(a => bool.Parse(a.Value)) ?? false;
+        CacheQueryConfiguration = CacheQueryConfiguration.CreateOrAssignEmbedded(element.Element(nameof(CacheQueryConfiguration)), (cqc, elem) => cqc.FromXml(elem));
         Parts.Synchronize(element.Element("Parts")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
     }
 
@@ -166,7 +175,43 @@ public class DashboardEntity : Entity, IUserAssetEntity
                 return ValidationMessage._0IsNotAllowed.NiceToString(pi.NiceName());
         }
 
+        if(pi.Name == nameof(CacheQueryConfiguration) && CacheQueryConfiguration != null && EntityType != null)
+        {
+            return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => EntityType));
+        }
+
         return base.PropertyValidation(pi);
+    }
+}
+
+public class CacheQueryConfigurationEmbedded : EmbeddedEntity
+{
+    [Unit("s")]
+    public int TimeoutForQueries { get; set; } = 5 * 60;
+
+    public int MaxRows { get; set; } = 1000 * 1000;
+
+    [Unit("m")]
+    public int? AutoRegenerateWhenOlderThan { get; set; }
+
+    internal CacheQueryConfigurationEmbedded Clone() => new CacheQueryConfigurationEmbedded
+    {
+        TimeoutForQueries = TimeoutForQueries,
+        MaxRows = MaxRows,
+        AutoRegenerateWhenOlderThan = AutoRegenerateWhenOlderThan,
+    };
+
+    internal XElement ToXml(IToXmlContext ctx) => new XElement("CacheQueryConfiguration",
+        new XAttribute(nameof(TimeoutForQueries), TimeoutForQueries),
+        new XAttribute(nameof(MaxRows), MaxRows),
+        AutoRegenerateWhenOlderThan == null ? null : new XAttribute(nameof(AutoRegenerateWhenOlderThan), AutoRegenerateWhenOlderThan)
+    );
+
+    internal void FromXml(XElement elem)
+    {
+        TimeoutForQueries = elem.Attribute(nameof(TimeoutForQueries))?.Value.ToInt() ?? 5 * 60;
+        MaxRows = elem.Attribute(nameof(MaxRows))?.Value.ToInt() ?? 1000 * 1000;
+        AutoRegenerateWhenOlderThan = elem.Attribute(nameof(AutoRegenerateWhenOlderThan))?.Value.ToInt();
     }
 }
 
@@ -180,6 +225,7 @@ public static class DashboardPermission
 public static class DashboardOperation
 {
     public static ExecuteSymbol<DashboardEntity> Save;
+    public static ExecuteSymbol<DashboardEntity> RegenerateCachedQueries;
     public static ConstructSymbol<DashboardEntity>.From<DashboardEntity> Clone;
     public static DeleteSymbol<DashboardEntity> Delete;
 }
@@ -203,6 +249,11 @@ public enum DashboardMessage
 
     [Description("Row[s] selected")]
     RowsSelected,
+
+    ForPerformanceReasonsThisDashboardMayShowOutdatedInformation,
+
+    [Description("Last update was on {0}")]
+    LasUpdateWasOn0
 }
 
 public enum DashboardEmbedededInEntity
@@ -212,3 +263,5 @@ public enum DashboardEmbedededInEntity
     Bottom,
     Tab
 }
+
+

@@ -26,6 +26,10 @@ public enum LoginAuthMessage
     Logout,
     EnterYourUserNameAndPassword,
     Username,
+    [Description("E-Mail Address")]
+    EMailAddress,
+    [Description("Username or E-Mail Address")]
+    UsernameOrEmailAddress,
     RememberMe,
     IHaveForgottenMyPassword,
 

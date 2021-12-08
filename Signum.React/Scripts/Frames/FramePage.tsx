@@ -182,14 +182,18 @@ export default function FramePage(p: FramePageProps) {
     entityComponent: entityComponent.current,
     pack: state.pack,
     isExecuting: () => state.executing == true,
-    execute: action => {
+    execute: async action => {
       if (state.executing)
         return;
 
       state.executing = true;
       forceUpdate();
-      action()
-        .finally(() => { state.executing = undefined; forceUpdate(); }).done();
+      try {
+        await action();
+      } finally {
+        state.executing = undefined;
+        forceUpdate();
+      }
     },
     onReload: (pack, reloadComponent, callback) => {
 

@@ -122,46 +122,7 @@ public static class GroupExtensions
             .ToDictionaryEx(g => g.Key, aggregateSelector);
     }
 
-
-    public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, int groupSize)
-    {
-        List<T> newList = new List<T>(groupSize);
-        foreach (var item in collection)
-        {
-            newList.Add(item);
-            if (newList.Count == groupSize)
-            {
-                yield return newList;
-                newList = new List<T>(groupSize);
-            }
-        }
-
-        if (newList.Count != 0)
-            yield return newList;
-    }
-
-    public static IEnumerable<ValueTuple<int,List<T>>> GroupsOfWithIndex<T>(this IEnumerable<T> collection, int groupSize)
-    {
-        int i = 0;
-        List<T> newList = new List<T>(groupSize);
-        foreach (var item in collection)
-        {
-            newList.Add(item);
-            if (newList.Count == groupSize)
-            {
-                i++;
-                yield return ValueTuple.Create(i,newList);
-                newList = new List<T>(groupSize);
-            }
-        }
-
-        if (newList.Count != 0)
-            yield return ValueTuple.Create(i,newList);
-    }
-
-
-
-    public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, Func<T, int> elementSize, int groupSize)
+    public static IEnumerable<List<T>> Chunk<T>(this IEnumerable<T> collection, Func<T, int> elementSize, int groupSize)
     {
         List<T> newList = new List<T>();
         int accumSize = 0;
@@ -188,9 +149,8 @@ public static class GroupExtensions
     public static IEnumerable<IntervalWithEnd<T>> IntervalsOf<T>(this IEnumerable<T> collection, int groupSize)
         where T : struct, IEquatable<T>, IComparable<T>
     {
-        return collection.OrderBy().GroupsOf(groupSize).Select(gr => new IntervalWithEnd<T>(gr.Min(), gr.Max()));
+        return collection.OrderBy().Chunk(groupSize).Select(gr => new IntervalWithEnd<T>(gr.Min(), gr.Max()));
     }
-
 
 
     public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, BeforeFirstKey beforeFirstKey = BeforeFirstKey.Throw, bool includeKeyInGroup = false)

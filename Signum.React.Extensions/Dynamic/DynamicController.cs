@@ -12,6 +12,8 @@ using Signum.Entities.Dynamic;
 using Signum.Entities.Basics;
 using Microsoft.Extensions.Hosting;
 using Signum.Engine.Authorization;
+using Signum.Engine.Json;
+using Signum.React.Facades;
 
 namespace Signum.React.Dynamic;
 
@@ -102,7 +104,7 @@ public class DynamicController : ControllerBase
     {
         DynamicPanelPermission.ViewDynamicPanel.AssertAuthorized();
 
-        var allEntities = await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest()).Select(a => a.Entity).ToListAsync();
+        var allEntities = await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).Select(a => a.Entity).ToListAsync();
 
         return allEntities.Select(entity =>
         {

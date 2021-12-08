@@ -456,24 +456,36 @@ public static class UserQueryUtils
     {
         return filters.GroupWhen(filter => filter.Indentation == indent).Select(gr =>
         {
+            var filter = gr.Key;
+
+            if (filter.Pinned != null)
+            {
+                if (filter.Pinned.Active == PinnedFilterActive.Checkbox_StartUnchecked ||
+                  filter.Pinned.Active == PinnedFilterActive.DefaultDashboardFilter /*TODO, works for CachedQueries but maybe not in other cases*/ ||
+                  filter.Pinned.Active == PinnedFilterActive.InitialSelectionDashboardFilter)
+                    return null;
+            }
+
             if (!gr.Key.IsGroup)
             {
                 if (gr.Count() != 0)
                     throw new InvalidOperationException("Unexpected childrens of condition");
 
-                var filter = gr.Key;
-
                 var value = FilterValueConverter.Parse(filter.ValueString, filter.Token!.Token.Type, filter.Operation!.Value.IsList());
+
+                if (filter.Pinned?.Active == PinnedFilterActive.WhenHasValue && value == null)
+                    return null;
 
                 return (Filter)new FilterCondition(filter.Token.Token, filter.Operation.Value, value);
             }
             else
             {
-                var group = gr.Key;
+                if (filter.Pinned?.Active == PinnedFilterActive.WhenHasValue /*TODO, works for empty groups */)
+                    return null;
 
-                return (Filter)new FilterGroup(group.GroupOperation!.Value, group.Token?.Token, gr.ToFilterList(indent + 1).ToList());
+                return (Filter)new FilterGroup(filter.GroupOperation!.Value, filter.Token?.Token, gr.ToFilterList(indent + 1).ToList());
             }
-        }).ToList();
+        }).NotNull().ToList();
     }
 }
 

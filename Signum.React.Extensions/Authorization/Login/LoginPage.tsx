@@ -56,6 +56,7 @@ export default function LoginPage() {
 
 LoginPage.customLoginButtons = null as (null | ((ctx: LoginContext) => React.ReactElement<any>));
 LoginPage.showLoginForm = "yes" as "yes" | "no" | "initially_not";
+LoginPage.usernameLabel = () => LoginAuthMessage.Username.niceToString();
 
 export function LoginForm(p: { ctx: LoginContext }) {
   const userName = React.useRef<HTMLInputElement>(null);
@@ -101,7 +102,6 @@ export function LoginForm(p: { ctx: LoginContext }) {
     return modelState && modelState[field];
   }
 
-
   return (
     <form onSubmit={(e) => handleSubmit(e)} className="mb-4">
       <div className="row">
@@ -113,10 +113,10 @@ export function LoginForm(p: { ctx: LoginContext }) {
       <div className="row">
         <div className="col-md-6 offset-md-3">
           <div className={classes("form-group mb-3", error("userName") && "has-error")}>
-            <label className="sr-only" htmlFor="userName">{LoginAuthMessage.Username.niceToString()}</label>
+            <label className="sr-only" htmlFor="userName">{LoginPage.usernameLabel()}</label>
             <div className="input-group mb-2 mr-sm-2 mb-sm-0">
               <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }} /></div>
-              <input type="text" className="form-control" id="userName" ref={userName} placeholder={LoginAuthMessage.Username.niceToString()} disabled={p.ctx.loading != null} />
+              <input type="text" className="form-control" id="userName" ref={userName} placeholder={LoginPage.usernameLabel()} disabled={p.ctx.loading != null} />
             </div>
             {error("userName") && <span className="help-block text-danger">{error("userName")}</span>}
           </div>

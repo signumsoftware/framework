@@ -1,5 +1,4 @@
 using System.Data;
-using System.Runtime.Serialization;
 using Signum.Entities.Reflection;
 using Signum.Entities.Basics;
 using NpgsqlTypes;
@@ -19,7 +18,7 @@ public sealed class AttachToUniqueIndexesAttribute : Attribute
 {
 }
 
-public struct Implementations : IEquatable<Implementations>, ISerializable
+public struct Implementations : IEquatable<Implementations>
 {
     object? arrayOrType;
 
@@ -115,7 +114,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         if (error.HasText())
             throw new InvalidOperationException(error);
 
-        return new Implementations { arrayOrType = types.OrderBy(a => a.FullName).ToArray() };
+        return new Implementations { arrayOrType = types.ToArray() };
     }
 
     static string? Error(Type type)
@@ -158,30 +157,12 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     {
         return IsByAll && other.IsByAll ||
             arrayOrType == other.arrayOrType ||
-            Enumerable.SequenceEqual(Types, other.Types);
+            Enumerable.SequenceEqual(Types.OrderBy(a => a.FullName), other.Types.OrderBy(a => a.FullName));
     }
 
     public override int GetHashCode()
     {
         return arrayOrType == null ? 0 : Types.Aggregate(0, (acum, type) => acum ^ type.GetHashCode());
-    }
-
-    Implementations(SerializationInfo info, StreamingContext context)
-    {
-        string str = info.GetString("arrayOrType")!;
-
-        arrayOrType = str == "ALL" ? null :
-            str.Split('|').Select(Type.GetType).ToArray();
-
-        if (arrayOrType is Type[] array && array.Length == 1)
-            arrayOrType = array[0];
-    }
-
-    public void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue("arrayOrType", arrayOrType == null ? "ALL" :
-            arrayOrType is Type t ? t.AssemblyQualifiedName :
-            arrayOrType is Type[] ts ? ts.ToString(a => a.AssemblyQualifiedName, "|") : null);
     }
 
     public static bool operator ==(Implementations left, Implementations right)

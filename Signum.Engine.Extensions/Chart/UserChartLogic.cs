@@ -133,7 +133,7 @@ public static class UserChartLogic
         }
     }
 
-    internal static ChartRequestModel ToChartRequest(UserChartEntity userChart)
+    internal static ChartRequestModel ToChartRequest(this UserChartEntity userChart)
     {
         var cr = new ChartRequestModel(userChart.Query.ToQueryName())
         {

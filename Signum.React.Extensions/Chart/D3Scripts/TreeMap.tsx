@@ -87,6 +87,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
     return last;
   };
+  var format = d3.format(",d");
 
   return (
     <svg direction="ltr" width={width} height={height} >
@@ -104,7 +105,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
               strokeWidth={active == true ? 3 : undefined}
               onClick={e => onDrillDown({ c2: (d.data as Folder).folder }, e)} cursor="pointer">
               <title>
-                {folderColor!(((d.data as Folder).folder))}
+                {parentColumn!.getNiceName(d.data.folder)}: {format(size.invert(d.value!))}
               </title>
             </rect>
           }

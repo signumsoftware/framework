@@ -7,6 +7,8 @@ using Signum.Engine.Tree;
 using Signum.Entities.Basics;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using Signum.Engine.Json;
+using Signum.React.Facades;
 
 namespace Signum.React.Tree;
 
@@ -59,8 +61,8 @@ public class TreeController : ControllerBase
         where T : TreeEntity
     {
         var qd = QueryLogic.Queries.QueryDescription(typeof(T));
-        var userFilters = request.userFilters.Select(f => f.ToFilter(qd, false)).ToList();
-        var frozenFilters = request.frozenFilters.Select(f => f.ToFilter(qd, false)).ToList();
+        var userFilters = request.userFilters.Select(f => f.ToFilter(qd, false, SignumServer.JsonSerializerOptions)).ToList();
+        var frozenFilters = request.frozenFilters.Select(f => f.ToFilter(qd, false, SignumServer.JsonSerializerOptions)).ToList();
 
 
         var frozenQuery = QueryLogic.Queries.GetEntitiesLite(new QueryEntitiesRequest { QueryName = typeof(T), Filters = frozenFilters, Orders = new List<Order>() })

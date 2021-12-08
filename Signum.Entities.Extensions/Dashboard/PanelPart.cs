@@ -68,7 +68,9 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             Title = Title,
             Row = Row,
             Style = Style,
-
+            InteractionGroup = InteractionGroup,
+            IconColor = IconColor,
+            IconName = IconName,
         };
     }
 
@@ -127,10 +129,13 @@ public interface IPartEntity : IEntity
     void FromXml(XElement element, IFromXmlContext ctx);
 }
 
+
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class UserQueryPartEntity : Entity, IPartEntity
 {
     public UserQueryEntity UserQuery { get; set; }
+
+    public bool IsQueryCached { get; set; }
 
     public UserQueryPartRenderMode RenderMode { get; set; }
 
@@ -157,27 +162,31 @@ public class UserQueryPartEntity : Entity, IPartEntity
             AllowSelection = this.AllowSelection,
             ShowFooter = this.ShowFooter,
             CreateNew = this.CreateNew,
+            IsQueryCached = this.IsQueryCached,
+
         };
     }
 
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("UserQueryPart",
-            new XAttribute("UserQuery", ctx.Include(UserQuery)),
-            new XAttribute("RenderMode", RenderMode.ToString()),
-            new XAttribute("AllowSelection", AllowSelection.ToString()),
-            new XAttribute("ShowFooter", ShowFooter.ToString()),
-            new XAttribute("CreateNew", CreateNew.ToString())
+            new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
+            new XAttribute(nameof(RenderMode), RenderMode),
+            new XAttribute(nameof(AllowSelection), AllowSelection),
+            ShowFooter ?  new XAttribute(nameof(ShowFooter), ShowFooter) : null,
+            CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null,
+            IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null
             );
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
-        RenderMode = element.Attribute("RenderMode")?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
-        AllowSelection = element.Attribute("AllowSelection")?.Value.ToBool() ?? true;
-        ShowFooter = element.Attribute("ShowFooter")?.Value.ToBool() ?? false;
-        CreateNew = element.Attribute("CreateNew")?.Value.ToBool() ?? false;
+        RenderMode = element.Attribute(nameof(RenderMode))?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
+        AllowSelection = element.Attribute(nameof(AllowSelection))?.Value.ToBool() ?? true;
+        ShowFooter = element.Attribute(nameof(ShowFooter))?.Value.ToBool() ?? false;
+        CreateNew = element.Attribute(nameof(CreateNew))?.Value.ToBool() ?? false;
+        IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
     }
 }
 
@@ -213,18 +222,15 @@ public class UserTreePartEntity : Entity, IPartEntity
         get { return false; }
     }
 
-    public IPartEntity Clone()
+    public IPartEntity Clone() => new UserTreePartEntity
     {
-        return new UserTreePartEntity
-        {
-            UserQuery = this.UserQuery,
-        };
-    }
+        UserQuery = this.UserQuery,
+    };
 
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("UserTreePart",
-            new XAttribute("UserQuery", ctx.Include(UserQuery))
+            new XAttribute(nameof(UserQuery), ctx.Include(UserQuery))
             );
     }
 
@@ -234,10 +240,14 @@ public class UserTreePartEntity : Entity, IPartEntity
     }
 }
 
+
+
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class UserChartPartEntity : Entity, IPartEntity
 {   
     public UserChartEntity UserChart { get; set; }
+
+    public bool IsQueryCached { get; set; }
 
     public bool ShowData { get; set; } = false;
 
@@ -255,24 +265,26 @@ public class UserChartPartEntity : Entity, IPartEntity
         get { return false; }
     }
 
-    public IPartEntity Clone()
+    public IPartEntity Clone() => new UserChartPartEntity
     {
-        return new UserChartPartEntity
-        {
-            UserChart = this.UserChart,
-            ShowData = this.ShowData,
-            AllowChangeShowData = this.AllowChangeShowData,
-        };
-    }
+        UserChart = this.UserChart,
+        IsQueryCached = this.IsQueryCached,
+        ShowData = this.ShowData,
+        AllowChangeShowData = this.AllowChangeShowData,
+        CreateNew = this.CreateNew,
+        AutoRefresh = this.AutoRefresh,
+    };
 
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("UserChartPart",
-            new XAttribute("ShowData", ShowData),
-            new XAttribute("AllowChangeShowData", AllowChangeShowData),
-            CreateNew ? new XAttribute("CreateNew", CreateNew) : null!,
-            AutoRefresh ? new XAttribute("AutoRefresh", AutoRefresh) : null!,
-            new XAttribute("UserChart", ctx.Include(UserChart)));
+            new XAttribute(nameof(UserChart), ctx.Include(UserChart)),
+            ShowData ? new XAttribute(nameof(ShowData), ShowData) : null,
+            AllowChangeShowData ? new XAttribute(nameof(AllowChangeShowData), AllowChangeShowData) : null,
+            IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null,
+            CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null!,
+            AutoRefresh ? new XAttribute(nameof(AutoRefresh), AutoRefresh) : null!
+            );
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -289,7 +301,7 @@ public class UserChartPartEntity : Entity, IPartEntity
 public class CombinedUserChartPartEntity : Entity, IPartEntity
 {
     [PreserveOrder, NoRepeatValidator]
-    public MList<UserChartEntity> UserCharts { get; set; } = new MList<UserChartEntity>();
+    public MList<CombinedUserChartElementEmbedded> UserCharts { get; set; } = new MList<CombinedUserChartElementEmbedded>();
 
     public bool ShowData { get; set; } = false;
 
@@ -309,33 +321,53 @@ public class CombinedUserChartPartEntity : Entity, IPartEntity
         get { return true; }
     }
 
-    public IPartEntity Clone()
+    public IPartEntity Clone() => new CombinedUserChartPartEntity
     {
-        return new CombinedUserChartPartEntity
-        {
-            UserCharts = this.UserCharts.ToMList(),
-        };
-    }
+        UserCharts = this.UserCharts.Select(a=>a.Clone()).ToMList(),
+        ShowData = ShowData,
+        AllowChangeShowData = AllowChangeShowData, 
+        CombinePinnedFiltersWithSameLabel = CombinePinnedFiltersWithSameLabel,
+        UseSameScale = UseSameScale
+    };
 
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("CombinedUserChartPart",
-            new XAttribute("ShowData", ShowData),
-            new XAttribute("AllowChangeShowData", AllowChangeShowData),
-            new XAttribute("CombinePinnedFiltersWithSameLabel", CombinePinnedFiltersWithSameLabel),
-            new XAttribute("UseSameScale", UseSameScale),
-            UserCharts.Select(uc => new XElement("UserChart", new XAttribute("Guid", ctx.Include(uc)))));
+            ShowData ? new XAttribute(nameof(ShowData), ShowData) : null,
+            AllowChangeShowData ? new XAttribute(nameof(AllowChangeShowData), AllowChangeShowData) : null,
+            CombinePinnedFiltersWithSameLabel ? new XAttribute(nameof(CombinePinnedFiltersWithSameLabel), CombinePinnedFiltersWithSameLabel) : null,
+            UseSameScale ? new XAttribute(nameof(UseSameScale), UseSameScale) : null,
+            UserCharts.Select(uc => new XElement("UserChart",
+                new XAttribute("Guid", ctx.Include(uc.UserChart)),
+                uc.IsQueryCached ? new XAttribute(nameof(uc.IsQueryCached), uc.IsQueryCached) : null))
+        );
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        var newUserCharts = element.Elements("UserChart").Select(uc => (UserChartEntity)ctx.GetEntity(Guid.Parse(uc.Attribute("Guid")!.Value))).ToList();
-        ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
-        AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
-        CombinePinnedFiltersWithSameLabel = element.Attribute("CombinePinnedFiltersWithSameLabel")?.Value.ToBool() ?? false;
-        UseSameScale = element.Attribute("UseSameScale")?.Value.ToBool() ?? false;
-        UserCharts.Synchronize(newUserCharts);
+        ShowData = element.Attribute(nameof(ShowData))?.Value.ToBool() ?? false;
+        AllowChangeShowData = element.Attribute(nameof(AllowChangeShowData))?.Value.ToBool() ?? false;
+        CombinePinnedFiltersWithSameLabel = element.Attribute(nameof(CombinePinnedFiltersWithSameLabel))?.Value.ToBool() ?? false;
+        UseSameScale = element.Attribute(nameof(UseSameScale))?.Value.ToBool() ?? false;
+        UserCharts.Synchronize(element.Elements("UserChart").ToList(), (cuce, elem) =>
+        {
+            cuce.UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(elem.Attribute("Guid")!.Value));
+            cuce.IsQueryCached = elem.Attribute(nameof(cuce.IsQueryCached))?.Value.ToBool() ?? false;
+        });
     }
+}
+
+public class CombinedUserChartElementEmbedded : EmbeddedEntity
+{
+    public UserChartEntity UserChart { get; set; }
+
+    public bool IsQueryCached { get; set; }
+
+    internal CombinedUserChartElementEmbedded Clone() => new CombinedUserChartElementEmbedded
+    {
+        UserChart = UserChart,
+        IsQueryCached = IsQueryCached,
+    };
 }
 
 
@@ -354,13 +386,10 @@ public class ValueUserQueryListPartEntity : Entity, IPartEntity
         get { return true; }
     }
 
-    public IPartEntity Clone()
+    public IPartEntity Clone() => new ValueUserQueryListPartEntity
     {
-        return new ValueUserQueryListPartEntity
-        {
-            UserQueries = this.UserQueries.Select(e => e.Clone()).ToMList(),
-        };
-    }
+        UserQueries = this.UserQueries.Select(e => e.Clone()).ToMList(),
+    };
 
     public XElement ToXml(IToXmlContext ctx)
     {
@@ -381,6 +410,8 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
     
     public UserQueryEntity UserQuery { get; set; }
 
+    public bool IsQueryCached { get; set; }
+
     [StringLengthValidator(Max = 200)]
     public string? Href { get; set; }
 
@@ -391,22 +422,25 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
             Href = this.Href,
             Label = this.Label,
             UserQuery = UserQuery,
+            IsQueryCached = this.IsQueryCached,
         };
     }
 
     internal XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ValueUserQueryElement",
-            Label == null ? null! : new XAttribute("Label", Label),
-            Href == null ? null! : new XAttribute("Href", Href),
+            Label == null ? null! : new XAttribute(nameof(Label), Label),
+            Href == null ? null! : new XAttribute(nameof(Href), Href),
+            IsQueryCached == false? null! : new XAttribute(nameof(IsQueryCached), IsQueryCached),
             new XAttribute("UserQuery", ctx.Include(UserQuery)));
     }
 
     internal void FromXml(XElement element, IFromXmlContext ctx)
     {
-        Label = element.Attribute("Label")?.Value;
-        Href = element.Attribute("Href")?.Value;
-        UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
+        Label = element.Attribute(nameof(Label))?.Value;
+        Href = element.Attribute(nameof(Href))?.Value;
+        IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
+        UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(UserQuery))!.Value));
     }
 }
 

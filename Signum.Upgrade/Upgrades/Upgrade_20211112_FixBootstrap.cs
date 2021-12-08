@@ -11,7 +11,7 @@ class Upgrade_20211112_FixBootstrap : CodeUpgradeBase
             file.Replace("build-development", "build-production");
         });
 
-        uctx.ChangeCodeFile($@"Southwind.React\App\Layout.tsx", file =>
+        uctx.ChangeCodeFile($@"Southwind.React\Views\Home\Index.cshtml", file =>
         {
             file.Replace("supportIE = true", "supportIE = false");
         });
@@ -29,7 +29,7 @@ class Upgrade_20211112_FixBootstrap : CodeUpgradeBase
 
             file.Replace("--mode='production'", "--mode=production");
             file.Replace(
-                @"webpack --config webpack.config.polyfills.js webpack --config webpack.config.dll.js --mode=production",
+                @"webpack --config webpack.config.polyfills.js && webpack --config webpack.config.dll.js --mode=production",
                 @"webpack --config webpack.config.polyfills.js --mode=production && webpack --config webpack.config.dll.js --mode=production");
         });
     }

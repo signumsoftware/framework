@@ -195,7 +195,7 @@ public static class IsolationLogic
 
     public static Lite<IsolationEntity>? GetOnlyIsolation<T>(IEnumerable<Lite<Entity>> selectedEntities) where T : Entity
     {
-        return selectedEntities.Cast<Lite<T>>().GroupsOf(100).Select(gr =>
+        return selectedEntities.Cast<Lite<T>>().Chunk(100).Select(gr =>
             Database.Query<T>().Where(e => gr.Contains(e.ToLite())).Select(e => e.Isolation()).Only()
             ).NotNull().Only();
     }

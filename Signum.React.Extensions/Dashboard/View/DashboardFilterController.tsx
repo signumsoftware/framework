@@ -58,7 +58,6 @@ export class DashboardFilterController {
     if (fops.length == 0)
       return fo;
 
-
     var newFilters = Finder.toFilterOptions(fops);
     return {
       ...fo,

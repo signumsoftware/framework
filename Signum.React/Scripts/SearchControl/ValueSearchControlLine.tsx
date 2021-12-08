@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import * as Constructor from '../Constructor'
-import { FindOptions, QueryDescription } from '../FindOptions'
+import { FindOptions, FindOptionsParsed, QueryDescription, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
 import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
@@ -45,6 +45,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   onExplored?: () => void;
   onViewEntity?: (entity: Lite<Entity>) => void;
   onValueChanged?: (value: any) => void;
+  customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token?: QueryToken) => Promise<any>,
 }
 
 export default class ValueSearchControlLine extends React.Component<ValueSearchControlLineProps> {
@@ -101,7 +102,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
       );
     }
 
-    var token = this.valueSearchControl && this.valueSearchControl.state.token;
+    var token = this.valueSearchControl && this.valueSearchControl.state.valueToken;
 
     const isQuery = this.props.valueToken == undefined || token?.queryTokenType == "Aggregate";
 
@@ -166,6 +167,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             searchControlProps={this.props.searchControlProps}
             modalSize={this.props.modalSize}
             deps={this.props.deps}
+            customRequest={this.props.customRequest}
           />
 
           {unit}

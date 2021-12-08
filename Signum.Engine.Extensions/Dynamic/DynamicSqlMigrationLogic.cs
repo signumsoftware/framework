@@ -159,7 +159,7 @@ public static class DynamicSqlMigrationLogic
     private static string AutoReplacementEnums(Replacements.AutoReplacementContext ctx)
     {
         StringDistance sd = new StringDistance();
-        return ctx.NewValues!.WithMin(nv => sd.LevenshteinDistance(nv, ctx.OldValue))!;
+        return ctx.NewValues!.MinBy(nv => sd.LevenshteinDistance(nv, ctx.OldValue))!;
     }
 
     public static string? DynamicAutoReplacementsSimple(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames, string replacementKey)

@@ -700,89 +700,7 @@ public static class EnumerableExtensions
     #endregion
 
     #region Min Max
-    public static T? WithMin<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
-      where V : IComparable<V>
-    {
-        T result = default!;
-        bool hasMin = false;
-        V min = default!;
-        foreach (var item in collection)
-        {
-            V val = valueSelector(item);
-            if (!hasMin || val.CompareTo(min) < 0)
-            {
-                hasMin = true;
-                min = val;
-                result = item;
-            }
-        }
-
-        return result;
-    }
-
-    public static T? WithMax<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
-           where V : IComparable<V>
-    {
-        T result = default!;
-        bool hasMax = false;
-        V max = default!;
-
-        foreach (var item in collection)
-        {
-            V val = valueSelector(item);
-            if (!hasMax || val.CompareTo(max) > 0)
-            {
-                hasMax = true;
-                max = val;
-                result = item;
-            }
-        }
-        return result;
-    }
-
-    public static List<T> WithMinList<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
-           where V : IComparable<V>
-    {
-        List<T> result = new List<T>();
-        V min = default!;
-
-        foreach (var item in collection)
-        {
-            V val = valueSelector(item);
-            int comp = 0;
-            if (result.Count == 0 || (comp = val.CompareTo(min)) <= 0)
-            {
-                if (comp < 0)
-                    result.Clear();
-                result.Add(item);
-                min = val;
-            }
-        }
-        return result;
-    }
-
-    public static List<T> WithMaxList<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
-           where V : IComparable<V>
-    {
-        List<T> result = new List<T>();
-        V max = default!;
-
-        foreach (var item in collection)
-        {
-            V val = valueSelector(item);
-            int comp = 0;
-            if (result.Count == 0 || (comp = val.CompareTo(max)) >= 0)
-            {
-                if (comp > 0)
-                    result.Clear();
-                result.Add(item);
-                max = val;
-            }
-        }
-        return result;
-    }
-
-    public static MinMax<T> WithMinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+    public static MinMax<T> MinMaxBy<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
         where V : IComparable<V>
     {
         T withMin = default!, withMax = default!;
@@ -807,6 +725,48 @@ public static class EnumerableExtensions
         }
 
         return new MinMax<T>(withMin, withMax);
+    }
+
+    public static List<T> MinByList<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+         where V : IComparable<V>
+    {
+        List<T> result = new List<T>();
+        V min = default!;
+
+        foreach (var item in collection)
+        {
+            V val = valueSelector(item);
+            int comp = 0;
+            if (result.Count == 0 || (comp = val.CompareTo(min)) <= 0)
+            {
+                if (comp < 0)
+                    result.Clear();
+                result.Add(item);
+                min = val;
+            }
+        }
+        return result;
+    }
+
+    public static List<T> MaxByList<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+           where V : IComparable<V>
+    {
+        List<T> result = new List<T>();
+        V max = default!;
+
+        foreach (var item in collection)
+        {
+            V val = valueSelector(item);
+            int comp = 0;
+            if (result.Count == 0 || (comp = val.CompareTo(max)) >= 0)
+            {
+                if (comp > 0)
+                    result.Clear();
+                result.Add(item);
+                max = val;
+            }
+        }
+        return result;
     }
 
     public static Interval<T> ToInterval<T>(this IEnumerable<T> collection)

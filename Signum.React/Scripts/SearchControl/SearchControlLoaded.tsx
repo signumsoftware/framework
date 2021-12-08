@@ -79,8 +79,8 @@ export interface SearchControlLoadedProps {
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
-  onCreate?: (scl: SearchControlLoaded) => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
-  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined, scl: SearchControlLoaded) => void;
+  onCreate?: (scl: SearchControlLoaded) => Promise<undefined | void | EntityPack<any> | ModifiableEntity | "no_change">;
+  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
@@ -89,6 +89,7 @@ export interface SearchControlLoadedProps {
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
   styleContext?: StyleContext;
+  customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
 }
 
 export interface SearchControlLoadedState {
@@ -225,8 +226,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }, continuation);
   }
 
-  abortableSearch = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
-  abortableSearchSummary = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
+  abortableSearch = new AbortableRequest((signal, a: {
+    request: QueryRequest;
+    fop: FindOptionsParsed,
+    customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>
+  }) => a.customRequest ? a.customRequest(a.request, a.fop) : Finder.API.executeQuery(a.request, signal));
+
+  abortableSearchSummary = new AbortableRequest((signal, a: {
+    request: QueryRequest;
+    fop: FindOptionsParsed,
+    customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>
+  }) => a.customRequest ? a.customRequest(a.request, a.fop) : Finder.API.executeQuery(a.request, signal));
 
   dataChanged(): Promise<void> {
     if (this.isManualRefreshOrAllPagination()) {
@@ -253,13 +263,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.simpleFilterBuilderInstance.onDataChanged();
 
       this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
-      var resultFindOptions = JSON.parse(JSON.stringify(this.props.findOptions));
+      var resultFindOptions = JSON.parse(JSON.stringify(fop));
 
       const qr = this.getQueryRequest();
       const qrSummary = this.getSummaryQueryRequest();
 
-      return Promise.all([this.abortableSearch.getData(qr),
-        qrSummary == null ? Promise.resolve<ResultTable | undefined>(undefined) : this.abortableSearchSummary.getData(qrSummary)
+      const customRequest = this.props.customRequest;
+
+      return Promise.all([this.abortableSearch.getData({ request: qr, fop, customRequest }),
+        qrSummary ? this.abortableSearchSummary.getData({ request: qrSummary, fop, customRequest }) : Promise.resolve<ResultTable | undefined>(undefined) 
       ]).then(([rt, summaryRt]) => {
         this.setState({
           resultTable: rt,
@@ -666,7 +678,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       .then(ti => ti ? ti.name : undefined);
   }
 
-  handleCreated = (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined) => {
+  handleCreated = (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void) => {
     if (this.props.onCreateFinished) {
       this.props.onCreateFinished(entity, this);
     } else {

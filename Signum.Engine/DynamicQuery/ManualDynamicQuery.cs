@@ -95,7 +95,7 @@ public class ManualDynamicQueryCore<T> : DynamicQueryCore<T>
         {
             req.Columns.Add(new Column(request.ValueToken, request.ValueToken.NiceName()));
             var result = await Execute(req, GetQueryDescription(), cancellationToken);
-            return result.SelectOne(request.ValueToken).Unique(UniqueType.Single);
+            return result.SelectOne(request.ValueToken).Unique(UniqueType.SingleOrDefault);
         }
     }
 
@@ -125,11 +125,6 @@ public class ManualDynamicQueryCore<T> : DynamicQueryCore<T>
     }, true);
 
     public override IQueryable<Lite<Entity>> GetEntitiesLite(QueryEntitiesRequest request)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override DQueryable<object> GetDQueryable(DQueryableRequest request)
     {
         throw new NotImplementedException();
     }

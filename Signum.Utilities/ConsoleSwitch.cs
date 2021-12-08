@@ -204,7 +204,7 @@ public class ConsoleSwitch<K, V> : IEnumerable<KeyValuePair<string, WithDescript
             return exact;
 
         var sd = new StringDistance();
-        var best = dictionary.Keys.WithMin(a => sd.LevenshteinDistance(input.ToLowerInvariant(), a.ToLowerInvariant()));
+        var best = dictionary.Keys.MinBy(a => sd.LevenshteinDistance(input.ToLowerInvariant(), a.ToLowerInvariant()));
         if (best != null && sd.LevenshteinDistance(input.ToLowerInvariant(), best.ToLowerInvariant()) <= 2)
         {
             if (SafeConsole.Ask($"Did you mean '{best}'?"))
