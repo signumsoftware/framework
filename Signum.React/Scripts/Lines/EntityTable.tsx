@@ -15,8 +15,8 @@ export interface EntityTableProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTableController) => React.ReactElement<any>);
   firstColumnHtmlAttributes?: React.ThHTMLAttributes<any>;
   /**Consider using EntityTable.typedColumns to get Autocompletion**/
-  columns?: EntityTableColumn<any /*T*/, any>[],
-  fetchRowState?: (ctx: TypeContext<any /*T*/>, row: EntityTableRowHandle) => Promise<any>;
+  columns?: EntityTableColumn<any /*T*/, any /*RS*/>[], 
+  rowHooks?: (ctx: TypeContext<any /*T*/>, row: EntityTableRowHandle) => any /*RS*/;
   onRowHtmlAttributes?: (ctx: TypeContext<any /*T*/>, row: EntityTableRowHandle, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   avoidFieldSet?: boolean;
   avoidEmptyTable?: boolean;
@@ -291,7 +291,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
                   index={i}
                   firstColumnVisible={firstColumnVisible}
                   onRowHtmlAttributes={p.onRowHtmlAttributes}
-                  fetchRowState={p.fetchRowState}
+                  rowHooks={p.rowHooks}
                   onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
                   onView={c.canView(mlec.value) && !readOnly ? e => c.handleViewElement(e, mlec.index!) : undefined}
                   draggable={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
@@ -340,7 +340,7 @@ export interface EntityTableRowProps {
   onRemove?: (event: React.MouseEvent<any>) => void;
   onView?: (event: React.MouseEvent<any>) => void;
   draggable?: DragConfig;
-  fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRowHandle) => Promise<any>;
+  rowHooks?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRowHandle) => Promise<any>;
   onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRowHandle, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   onBlur?: (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => void;
 }
@@ -354,8 +354,7 @@ export interface EntityTableRowHandle {
 export function EntityTableRow(p: EntityTableRowProps) {
   const forceUpdate = useForceUpdate();
 
-  const rowState = useAPI((signal, oldState) => !p.fetchRowState ? Promise.resolve(undefined) :
-    p.fetchRowState(p.ctx, { props: p, rowState: oldState, forceUpdate }), []);
+  const rowState = p.rowHooks?.(p.ctx, { props: p, forceUpdate });
 
   const rowHandle = { props: p, rowState, forceUpdate } as EntityTableRowHandle;
 

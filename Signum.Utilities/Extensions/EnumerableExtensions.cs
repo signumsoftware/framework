@@ -727,6 +727,48 @@ public static class EnumerableExtensions
         return new MinMax<T>(withMin, withMax);
     }
 
+    public static List<T> MinByList<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+         where V : IComparable<V>
+    {
+        List<T> result = new List<T>();
+        V min = default!;
+
+        foreach (var item in collection)
+        {
+            V val = valueSelector(item);
+            int comp = 0;
+            if (result.Count == 0 || (comp = val.CompareTo(min)) <= 0)
+            {
+                if (comp < 0)
+                    result.Clear();
+                result.Add(item);
+                min = val;
+            }
+        }
+        return result;
+    }
+
+    public static List<T> MaxByList<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+           where V : IComparable<V>
+    {
+        List<T> result = new List<T>();
+        V max = default!;
+
+        foreach (var item in collection)
+        {
+            V val = valueSelector(item);
+            int comp = 0;
+            if (result.Count == 0 || (comp = val.CompareTo(max)) >= 0)
+            {
+                if (comp > 0)
+                    result.Clear();
+                result.Add(item);
+                max = val;
+            }
+        }
+        return result;
+    }
+
     public static Interval<T> ToInterval<T>(this IEnumerable<T> collection)
         where T : struct, IComparable<T>, IEquatable<T>
     {

@@ -27,7 +27,14 @@ public class DynamicViewEntity : Entity
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if (pi.Name == nameof(Props))
-            return NoRepeatValidatorAttribute.ByKey(Props, a => a.Name);
+        {
+            var dups = NoRepeatValidatorAttribute.ByKey(Props, a => a.Name);
+
+            if (dups.HasText())
+                return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(pi.NiceName(), dups);
+
+            return null;
+        }
 
         return base.PropertyValidation(pi);
     }

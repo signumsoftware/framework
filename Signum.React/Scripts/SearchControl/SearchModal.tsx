@@ -77,7 +77,7 @@ function SearchModal(p: SearchModalProps) {
     handleOkClicked();
   }
 
-  function handleCreateFinished(entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined) {
+  function handleCreateFinished(entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void) {
 
     const scl = searchControl.current!.searchControlLoaded!;
     if (p.findMode == "Find" && entity != null && !p.avoidReturnCreate && !p.findOptions.groupResults && !p.onOKClicked) {

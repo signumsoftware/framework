@@ -21,7 +21,7 @@ public sealed class InTypeScriptAttribute : Attribute
     bool? inTypeScript = null;
     public bool? GetInTypeScript() => inTypeScript;
 
-    public InTypeScriptAttribute() { }
+    private InTypeScriptAttribute() { }
     public InTypeScriptAttribute(bool inTypeScript)
     {
         this.inTypeScript = inTypeScript;
