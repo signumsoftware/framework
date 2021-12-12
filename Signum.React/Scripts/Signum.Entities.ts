@@ -86,6 +86,10 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 
 import * as Reflection from './Reflection'
 
+export function newNiceName(ti: Reflection.TypeInfo) {
+  return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
+}
+
 function getOrCreateToStringFunction(type: string) {
   let f = toStringDictionary[type];
   if (f || f === null)
@@ -101,6 +105,7 @@ function getOrCreateToStringFunction(type: string) {
     const numberToString = Reflection.numberToString;
     const dateToString = Reflection.dateToString;
     const timeToString = Reflection.timeToString;
+    const getTypeInfo = Reflection.getTypeInfo;
 
     f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
   } catch (e) {
@@ -355,7 +360,6 @@ export module JavascriptMessage {
 export module LiteMessage {
   export const IdNotValid = new MessageKey("LiteMessage", "IdNotValid");
   export const InvalidFormat = new MessageKey("LiteMessage", "InvalidFormat");
-  export const New_G = new MessageKey("LiteMessage", "New_G");
   export const Type0NotFound = new MessageKey("LiteMessage", "Type0NotFound");
   export const ToStr = new MessageKey("LiteMessage", "ToStr");
 }

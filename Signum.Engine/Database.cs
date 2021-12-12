@@ -58,7 +58,7 @@ public static class Database
         }
         catch (Exception e)
         {
-            e.Data["entity"] = ((Entity)(IEntity)entity).BaseToString();
+            e.Data["entity"] = entity;
 
             throw;
         }

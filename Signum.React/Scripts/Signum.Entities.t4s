@@ -79,6 +79,10 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 
 import * as Reflection from './Reflection'
 
+export function newNiceName(ti: Reflection.TypeInfo) {
+  return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
+}
+
 function getOrCreateToStringFunction(type: string) {
   let f = toStringDictionary[type];
   if (f || f === null)
@@ -94,6 +98,7 @@ function getOrCreateToStringFunction(type: string) {
     const numberToString = Reflection.numberToString;
     const dateToString = Reflection.dateToString;
     const timeToString = Reflection.timeToString;
+    const getTypeInfo = Reflection.getTypeInfo;
 
     f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
   } catch (e) {

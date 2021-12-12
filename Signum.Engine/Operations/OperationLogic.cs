@@ -329,7 +329,7 @@ Consider the following options:
         }
         catch(Exception e)
         {
-            e.Data["entity"] = entity.BaseToString();
+            e.Data["entity"] = entity;
             throw;
         }
     }

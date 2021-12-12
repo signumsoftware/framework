@@ -369,8 +369,6 @@ public enum LiteMessage
     IdNotValid,
     [Description("Invalid Format")]
     InvalidFormat,
-    [Description("New")]
-    New_G,
     [Description("Type {0} not found")]
     Type0NotFound,
     [Description("Text")]
