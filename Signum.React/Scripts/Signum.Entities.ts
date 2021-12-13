@@ -102,6 +102,7 @@ function getOrCreateToStringFunction(type: string) {
   const ti = Reflection.tryGetTypeInfo(type);
 
   const getToString2 = getToString;
+  const newNiceName2 = newNiceName;
 
   try {
     const getToString = getToString2;
@@ -110,6 +111,7 @@ function getOrCreateToStringFunction(type: string) {
     const dateToString = Reflection.dateToString;
     const timeToString = Reflection.timeToString;
     const getTypeInfo = Reflection.getTypeInfo;
+    const newNiceName = newNiceName2;
 
     f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
   } catch (e) {
