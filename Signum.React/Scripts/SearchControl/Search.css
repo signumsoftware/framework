@@ -73,8 +73,7 @@ table.sf-search-results > tbody > tr > td {
 }
 
 .sf-search-results > thead > tr > th {
-    border-left: 1px solid #eee;
-    border-right: 1px solid #eee;
+    box-shadow: inset 1px 1px 0 #eee, inset -1px -1px 0 #eee;
     cursor: pointer;
     background-color: #f8f8f8;
     position: sticky;
