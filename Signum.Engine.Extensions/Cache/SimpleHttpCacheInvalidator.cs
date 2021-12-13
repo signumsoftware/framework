@@ -16,12 +16,12 @@ public class SimpleHttpCacheInvalidator : ICacheMultiServerInvalidator {
 
     HttpClient client = new HttpClient();
     readonly string invalidationSecretHash;
-    readonly string[] invalidateUrls;
+    readonly string[] invalidationUrls;
 
-    public SimpleHttpCacheInvalidator(string invalidationSecret, string[] invalidateUrls)
+    public SimpleHttpCacheInvalidator(string invalidationSecret, string[] invalidationUrls)
     {
         this.invalidationSecretHash = Convert.ToBase64String(Security.EncodePassword(invalidationSecret));
-        this.invalidateUrls = invalidateUrls;
+        this.invalidationUrls = invalidationUrls;
     }
 
     public event Action<string>? ReceiveInvalidation;
@@ -53,7 +53,7 @@ public class SimpleHttpCacheInvalidator : ICacheMultiServerInvalidator {
             OriginApplicationName = Schema.Current.ApplicationName,
         };
 
-        foreach (var url in invalidateUrls)
+        foreach (var url in invalidationUrls)
         {
             try
             {
