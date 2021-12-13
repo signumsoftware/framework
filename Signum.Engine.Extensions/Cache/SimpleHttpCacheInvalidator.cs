@@ -57,9 +57,11 @@ public class SimpleHttpCacheInvalidator : ICacheMultiServerInvalidator {
         {
             try
             {
-                var fullUrl = url.TrimEnd('/') + "/api/invalidateTable";
+                var fullUrl = url.TrimEnd('/') + "/api/cache/invalidateTable";
 
-                client.PostAsync(fullUrl, JsonContent.Create(request, options: EntityJsonContext.FullJsonSerializerOptions));
+                var json = JsonContent.Create(request, options: EntityJsonContext.FullJsonSerializerOptions /*SignumServer.JsonSerializerOptions*/);
+
+                var response = client.PostAsync(fullUrl, json).Result.EnsureSuccessStatusCode();
             }
             catch(Exception e)
             {

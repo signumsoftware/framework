@@ -25,7 +25,7 @@ public interface ICacheMultiServerInvalidator
 
 public static class CacheLogic
 {
-    public static ICacheMultiServerInvalidator? CacheInvalidator;
+    public static ICacheMultiServerInvalidator? CacheInvalidator { get; private set; }
 
     public static bool WithSqlDependency { get; internal set; }
 

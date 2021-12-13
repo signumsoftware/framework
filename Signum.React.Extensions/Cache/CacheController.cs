@@ -56,7 +56,7 @@ public class CacheController : ControllerBase
     }
 
     [HttpPost("api/cache/invalidateTable"), SignumAllowAnonymous]
-    public void InvalidateTable(InvalidateTableRequest req)
+    public void InvalidateTable([FromBody]InvalidateTableRequest req)
     {
         if (CacheLogic.CacheInvalidator is not SimpleHttpCacheInvalidator sci)
             throw new InvalidOperationException("CacheInvalidator is not a SimpleHttpCacheInvalidator");
