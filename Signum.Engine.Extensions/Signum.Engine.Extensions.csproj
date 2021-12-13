@@ -14,6 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.5.1" />
 		<PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
 		<PackageReference Include="DeepL" Version="0.3.0" />
 		<PackageReference Include="Microsoft.Exchange.WebServices.NETStandard" Version="1.1.3" />

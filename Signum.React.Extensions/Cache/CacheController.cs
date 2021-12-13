@@ -3,6 +3,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Cache;
 using Signum.Entities.Cache;
 using Signum.Engine.Scheduler;
+using Signum.React.Filters;
 
 namespace Signum.React.Cache;
 
@@ -52,6 +53,15 @@ public class CacheController : ControllerBase
         GlobalLazy.ResetAll();
         Schema.Current.InvalidateMetadata();
         GC.Collect(2);
+    }
+
+    [HttpPost("api/cache/invalidateTable"), SignumAllowAnonymous]
+    public void InvalidateTable(InvalidateTableRequest req)
+    {
+        if (CacheLogic.CacheInvalidator is not SimpleHttpCacheInvalidator sci)
+            throw new InvalidOperationException("CacheInvalidator is not a SimpleHttpCacheInvalidator");
+
+        sci.InvalidateTable(req);
     }
 }
 
