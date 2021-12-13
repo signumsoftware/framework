@@ -50,12 +50,12 @@ export function newMListElement<T>(element: T): MListElement<T> {
   return { rowId: null, element };
 }
 
-export function toMList<T>(array: T[]): MList<T> {
-  return array.map(newMListElement);
-}
-
 export function isMListElement(obj: unknown): obj is MListElement<unknown> {
   return obj != null && (obj as MListElement<unknown>).rowId !== undefined;
+}
+
+export function toMList<T>(array: T[]): MList<T> {
+  return array.map(newMListElement);
 }
 
 export interface Lite<T extends Entity> {
