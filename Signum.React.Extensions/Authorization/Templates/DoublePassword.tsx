@@ -4,13 +4,14 @@ import { UserEntity, UserState, LoginAuthMessage } from '../Signum.Entities.Auth
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { TypeContext } from '@framework/TypeContext'
 import { classes } from '../../../Signum.React/Scripts/Globals'
+import { useForceUpdate } from '../../../Signum.React/Scripts/Hooks'
 
 export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean, mandatory: boolean }) {
 
   const [withPassword, setWithPassword] = React.useState(p.isNew);
   var newPass = React.useRef<HTMLInputElement>(null);
   var newPass2 = React.useRef<HTMLInputElement>(null);
-
+  const forceUpdate = useForceUpdate();
 
 
   function handlePasswordBlur(e: React.SyntheticEvent<any>) {
@@ -25,7 +26,7 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean, ma
         ctx.value = newPass.current!.value;
       }
     }
-
+    forceUpdate();
     ctx.frame!.revalidate();
   }
 

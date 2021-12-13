@@ -6,7 +6,7 @@ import * as Finder from '@framework/Finder'
 import { is, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { Toast, NavItem, Button, ButtonGroup } from 'react-bootstrap'
 import { DateTime } from 'luxon'
-import { useAPI, useAPIWithReload, useForceUpdate, useInterval, usePrevious, useThrottle, useUpdatedRef } from '@framework/Hooks';
+import { useAPI, useAPIWithReload, useDocumentEvent, useForceUpdate, useInterval, usePrevious, useThrottle, useUpdatedRef } from '@framework/Hooks';
 import { LinkContainer } from '@framework/Components'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as Navigator from '@framework/Navigator'
@@ -73,7 +73,11 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
 
       return () => { clearTimeout(handler) };
     }
-  }, [ringing])
+  }, [ringing]);
+
+  useDocumentEvent("refresh-alerts", (e: Event) => {
+    reloadCount();
+  }, []);
 
   const [alerts, setAlerts] = React.useState<AlertEntity[] | undefined>(undefined);
   const [groupBy, setGroupBy] = React.useState<AlertDropDownGroup>("ByTypeAndUser");
