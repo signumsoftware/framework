@@ -65,7 +65,7 @@ public class SimpleHttpCacheInvalidator : ICacheMultiServerInvalidator {
             }
             catch(Exception e)
             {
-                e.LogException();
+                e.LogException(a => a.ControllerName = nameof(SimpleHttpCacheInvalidator));
             }
         }
     }
