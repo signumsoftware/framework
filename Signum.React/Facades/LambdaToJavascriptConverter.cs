@@ -10,7 +10,9 @@ internal class LambdaToJavascriptConverter
         if (lambdaExpression == null)
             return null;
 
-        var body = ToJavascript(lambdaExpression.Parameters.Single(), lambdaExpression.Body);
+        var newLambda = (LambdaExpression)ExpressionCleaner.Clean(lambdaExpression)!;
+
+        var body = ToJavascript(newLambda.Parameters.Single(), newLambda.Body);
 
         if (body == null)
             return null;
@@ -30,14 +32,22 @@ internal class LambdaToJavascriptConverter
         if (param == expr)
             return "e";
 
-        if (expr is ConstantExpression ce && expr.Type == typeof(string))
+        if (expr is ConstantExpression ce)
         {
-            var str = (string)ce.Value!;
+            if (expr.Type == typeof(string))
+            {
+                var str = (string)ce.Value!;
 
-            if (!str.HasText())
-                return "\"\"";
+                if (!str.HasText())
+                    return "\"\"";
 
-            return "\"" + str.Replace(replacements) + "\"";
+                return "\"" + str.Replace(replacements) + "\"";
+            }
+
+            if(ce.Value == null)
+            {
+                return "null";
+            }
         }
 
         if (expr is MemberExpression me)
@@ -58,21 +68,68 @@ internal class LambdaToJavascriptConverter
             return a + "." + me.Member.Name.FirstLower();
         }
 
-        if (expr is BinaryExpression be && be.NodeType == ExpressionType.Add)
+        if (expr is BinaryExpression be)
         {
-            var a = ToJavascriptToString(param, be.Left);
-            var b = ToJavascriptToString(param, be.Right);
+            if (be.NodeType == ExpressionType.Add && be.Type == typeof(string))
+            {
 
-            if (a != null && b != null)
-                return "(" + a + " + " + b + ")";
+                var a = ToJavascriptToString(param, be.Left);
+                var b = ToJavascriptToString(param, be.Right);
 
-            return null;
+                if (a != null && b != null)
+                    return "(" + a + " + " + b + ")";
+
+                return null;
+            }
+            else
+            {
+                var a = ToJavascript(param, be.Left);
+                var b = ToJavascript(param, be.Right);
+
+                var op = ToJsOperator(be.NodeType);
+
+                if (a != null && op != null && b != null)
+                {
+                    return a + op + b;
+                }
+
+                return null;
+            }
         }
 
         if (expr is MethodCallExpression mc)
         {
             if (mc.Method.Name == "ToString")
                 return ToJavascriptToString(param, mc.Object!, mc.TryGetArgument("format") is ConstantExpression format ? (string)format.Value! : null);
+
+            if (mc.Method.Name == "GetType" && mc.Object != null && mc.Object.Type.IsIEntity())
+            {
+                var obj = ToJavascript(param, mc.Object!);
+                if (obj == null)
+                    return null;
+
+                return "getTypeInfo(" + obj + ")";
+            }
+
+            if (mc.Method.IsExtensionMethod() && mc.Arguments.Only()?.Type == typeof(Type))
+            {
+                var obj = ToJavascript(param, mc.Arguments.SingleEx());
+                if (obj == null)
+                    return null;
+
+                if (mc.Method.Name == nameof(DescriptionManager.NiceName))
+                    return obj + ".niceName";
+
+
+                if (mc.Method.Name == nameof(DescriptionManager.NicePluralName))
+                    return obj + ".nicePluralName";
+
+                if (mc.Method.Name == nameof(Reflector.NewNiceName))
+                    return "newNiceName(" + obj + ")";
+             
+                return null;
+            }
+
 
             if (mc.Method.DeclaringType == typeof(DateTime))
             {
@@ -127,6 +184,23 @@ internal class LambdaToJavascriptConverter
         }
 
         return null;
+    }
+
+    private static string? ToJsOperator(ExpressionType nodeType)
+    {
+        return nodeType switch
+        {
+            ExpressionType.Add => "+",
+            ExpressionType.Subtract => "-",
+            ExpressionType.Equal => "==",
+            ExpressionType.NotEqual => "!=",
+            ExpressionType.LessThan => "<",
+            ExpressionType.LessThanOrEqual => "<",
+            ExpressionType.GreaterThan => ">",
+            ExpressionType.GreaterThanOrEqual => ">=",
+            ExpressionType.Coalesce => "??",
+            _ => null
+        };
     }
 
     private static string? ToJavascriptToString(ParameterExpression param, Expression expr, string? format = null)

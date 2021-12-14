@@ -480,4 +480,17 @@ public static class Reflector
 
         return str.Length;
     }
+    
+    public static string NiceCount(this Type type, int count)
+    {
+        if (count == 1)
+            return "1 " + type.NiceName();
+
+        return count + " " + type.NicePluralName();
+    }
+
+    public static string NewNiceName(this Type type)
+    {
+        return NormalWindowMessage.New0_G.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName());
+    }
 }

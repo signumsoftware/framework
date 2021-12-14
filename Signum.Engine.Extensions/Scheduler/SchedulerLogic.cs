@@ -482,7 +482,8 @@ public static class SchedulerLogic
             Running = Running,
             SchedulerMargin = SchedulerMargin,
             NextExecution = NextExecution,
-            MachineName = Environment.MachineName,          
+            MachineName = Environment.MachineName,     
+            ApplicationName = Schema.Current.ApplicationName,
             Queue = priorityQueue.GetOrderedList().Select(p => new SchedulerItemState
             {
                 ScheduledTask = p.ScheduledTask.ToLite(),
@@ -516,6 +517,7 @@ public class SchedulerState
     public DateTime? NextExecution;
     public List<SchedulerItemState> Queue;
     public string MachineName;
+    public string ApplicationName; 
 
     public List<SchedulerRunningTaskState> RunningTask; 
 }

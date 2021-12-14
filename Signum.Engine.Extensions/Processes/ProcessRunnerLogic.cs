@@ -41,6 +41,7 @@ public static class ProcessRunnerLogic
             NextPlannedExecution = nextPlannedExecution,
             JustMyProcesses = ProcessLogic.JustMyProcesses,
             MachineName = Environment.MachineName,
+            ApplicationName = Schema.Current.ApplicationName,
             Executing = executing.Values.Select(p => new ExecutionState
             {
                 IsCancellationRequested = p.CancelationSource.IsCancellationRequested,
@@ -515,6 +516,7 @@ public class ProcessLogicState
     public int MaxDegreeOfParallelism;
     public int InitialDelayMiliseconds;
     public string MachineName;
+    public string ApplicationName;
     public bool Running;
     public bool JustMyProcesses;
     public DateTime? NextPlannedExecution;

@@ -290,6 +290,8 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
           return API.constructFromMany(coc.context.lites, coc.operationInfo.key, ...args)
             .then(coc.onConstructFromSuccess ?? (pack => {
               notifySuccess();
+              if (pack?.entity.id != null)
+                Navigator.raiseEntityChanged(pack.entity);
               Navigator.createNavigateOrTab(pack, coc.event!)
                 .then(() => coc.context.markRows({}))
                 .done();
@@ -299,6 +301,8 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         if (coc.context.lites.length == 1) {
           return API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
             .then(coc.onConstructFromSuccess ?? (pack => {
+              if (pack?.entity.id != null)
+                Navigator.raiseEntityChanged(pack.entity);
               notifySuccess();
               return Navigator.createNavigateOrTab(pack, coc.event!)
                 .then(() => coc.context.markRows({}))
@@ -307,6 +311,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
           return getSetters(coc)
             .then(setters => setters && API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
               .then(coc.onContextualSuccess ?? (report => {
+                //Navigator.raiseEntityChanged(??);
                 notifySuccess();
                 coc.context.markRows(report.errors);
               })));
@@ -315,6 +320,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         return getSetters(coc)
           .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {
+              coc.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
               notifySuccess();
               coc.context.markRows(report.errors);
             })));
@@ -322,6 +328,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         return getSetters(coc)
           .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {
+              coc.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
               notifySuccess();
               coc.context.markRows(report.errors);
             })));

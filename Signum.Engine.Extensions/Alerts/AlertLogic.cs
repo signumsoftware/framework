@@ -367,14 +367,14 @@ public static class AlertLogic
     }
 
 
-    public static void DeleteUnattendedAlerts(this Entity target, AlertTypeSymbol alertType, Lite<UserEntity> recipient) =>
+    public static void DeleteUnattendedAlerts(this Entity target, AlertTypeSymbol alertType, Lite<UserEntity>? recipient = null) =>
         target.ToLite().DeleteUnattendedAlerts(alertType, recipient);
-    public static void DeleteUnattendedAlerts(this Lite<Entity> target, AlertTypeSymbol alertType, Lite<UserEntity> recipient)
+    public static void DeleteUnattendedAlerts(this Lite<Entity> target, AlertTypeSymbol alertType, Lite<UserEntity>? recipient = null)
     {
         using (AuthLogic.Disable())
         {
             Database.Query<AlertEntity>()
-                .Where(a => a.State == AlertState.Saved && a.Target.Is(target) && a.AlertType.Is(alertType) && a.Recipient.Is(recipient))
+                .Where(a => a.State == AlertState.Saved && a.Target.Is(target) && a.AlertType.Is(alertType) && (recipient == null || a.Recipient.Is(recipient)))
                 .UnsafeDelete();
         }
     }

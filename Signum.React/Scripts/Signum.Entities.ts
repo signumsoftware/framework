@@ -50,12 +50,13 @@ export function newMListElement<T>(element: T): MListElement<T> {
   return { rowId: null, element };
 }
 
-export function toMList<T>(array: T[]): MList<T> {
-  return array.map(newMListElement);
-}
-
 export function isMListElement(obj: unknown): obj is MListElement<unknown> {
   return obj != null && (obj as MListElement<unknown>).rowId !== undefined;
+}
+
+
+export function toMList<T>(array: T[]): MList<T> {
+  return array.map(newMListElement);
 }
 
 export interface Lite<T extends Entity> {
@@ -90,6 +91,10 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 
 import * as Reflection from './Reflection'
 
+export function newNiceName(ti: Reflection.TypeInfo) {
+  return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
+}
+
 function getOrCreateToStringFunction(type: string) {
   let f = toStringDictionary[type];
   if (f || f === null)
@@ -98,6 +103,7 @@ function getOrCreateToStringFunction(type: string) {
   const ti = Reflection.tryGetTypeInfo(type);
 
   const getToString2 = getToString;
+  const newNiceName2 = newNiceName;
 
   try {
     const getToString = getToString2;
@@ -105,6 +111,8 @@ function getOrCreateToStringFunction(type: string) {
     const numberToString = Reflection.numberToString;
     const dateToString = Reflection.dateToString;
     const timeToString = Reflection.timeToString;
+    const getTypeInfo = Reflection.getTypeInfo;
+    const newNiceName = newNiceName2;
 
     f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
   } catch (e) {
@@ -359,7 +367,6 @@ export module JavascriptMessage {
 export module LiteMessage {
   export const IdNotValid = new MessageKey("LiteMessage", "IdNotValid");
   export const InvalidFormat = new MessageKey("LiteMessage", "InvalidFormat");
-  export const New_G = new MessageKey("LiteMessage", "New_G");
   export const Type0NotFound = new MessageKey("LiteMessage", "Type0NotFound");
   export const ToStr = new MessageKey("LiteMessage", "ToStr");
 }

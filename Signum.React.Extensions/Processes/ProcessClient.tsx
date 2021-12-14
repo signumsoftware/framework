@@ -149,6 +149,7 @@ export interface ProcessLogicState {
   initialDelayMiliseconds: number;
   running: boolean;
   machineName: string;
+  applicationName: string;
   justMyProcesses: boolean;
   nextPlannedExecution: string;
   executing: ExecutionState[];

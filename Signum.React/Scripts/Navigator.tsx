@@ -32,7 +32,7 @@ export function start(options: { routes: JSX.Element[] }) {
   AppContext.clearSettingsActions.push(clearWidgets)
   AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
   AppContext.clearSettingsActions.push(clearCustomConstructors);
-
+  AppContext.clearSettingsActions.push()
   ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
   ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
 }
@@ -45,6 +45,19 @@ export namespace NavigatorManager {
   export function getFrameModal() {
     return import("./Frames/FrameModal");
   }
+}
+
+export const entityChanged: Array<(cleanName: string, entity?: Entity) => void> = [];
+
+function cleanEntityChanged() {
+  entityChanged.clear();
+}
+
+export function raiseEntityChanged(cleanNameOrEntity: string | Entity) {
+  var cleanName = isEntity(cleanNameOrEntity) ? cleanNameOrEntity.Type : cleanNameOrEntity;
+  var entity = isEntity(cleanNameOrEntity) ? cleanNameOrEntity : undefined;
+
+  entityChanged.forEach(a => a(cleanName, entity));
 }
 
 export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
