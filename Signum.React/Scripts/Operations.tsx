@@ -303,6 +303,21 @@ export class ContextualOperationContext<T extends Entity> {
 export class EntityOperationContext<T extends Entity> {
   
 
+  static fromChildTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string, canExecute: string | undefined): EntityOperationContext<T> | undefined {
+
+    const operationKey = (operation as OperationSymbol).key || operation as string;
+    const oi = getTypeInfo(ctx.value.Type).operations![operationKey];
+
+    if (oi == null)
+      return undefined;
+
+    const result = new EntityOperationContext<T>(ctx.frame!, ctx.value, oi);
+    result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
+    result.canExecute = canExecute ?? (ctx.value.isNew && !oi.canBeNew ? EngineMessage.TheEntity0IsNew.niceToString(getToString(ctx.value)) : undefined);
+    result.complete();
+    return result;
+  }
+
   static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string): EntityOperationContext<T> | undefined {
     if (!ctx.frame)
       throw new Error("a frame is necessary");
