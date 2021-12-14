@@ -74,7 +74,7 @@ export default function DashboardPage(p: DashboardPageProps) {
                 <span className="display-6">{getToString(entity)}</span>
               }
               &nbsp;
-            <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
+            <small className="sf-type-nice-name">{Navigator.getTypeSubTitle(entity, undefined)}</small>
             </h3>
           }
         </div>

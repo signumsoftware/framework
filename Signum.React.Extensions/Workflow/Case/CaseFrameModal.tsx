@@ -303,7 +303,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       <span>
         <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;{this.renderExpandLink()}
         <br />
-        <small className="sf-type-nice-name text-muted"> {Navigator.getTypeTitle(activity, undefined)}</small>
+        <small className="sf-type-nice-name text-muted"> {Navigator.getTypeSubTitle(activity, undefined)}</small>
       </span>
     );
   }

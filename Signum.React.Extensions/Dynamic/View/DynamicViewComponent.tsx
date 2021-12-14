@@ -240,7 +240,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
     <div className="code-container">
       <button type="button" className="btn-close" aria-label="Close" style={{ float: "right" }} onClick={p.rootNode.context.onClose}/>
       <h3>
-        <small>{Navigator.getTypeTitle(p.dynamicView, undefined)}</small>
+        <small>{Navigator.getTypeSubTitle(p.dynamicView, undefined)}</small>
       </h3>
       <ValueLine ctx={ctx.subCtx(e => e.viewName)} formGroupStyle="SrOnly" placeholderLabels={true} />
       {renderButtonBar()}
