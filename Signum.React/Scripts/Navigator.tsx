@@ -47,7 +47,7 @@ export namespace NavigatorManager {
   }
 }
 
-export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
+export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
 
   if (isTypeEntity(entity.Type)) {
 
@@ -57,15 +57,11 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
       return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
     return renderTitle(typeInfo, entity);
-
   }
   else if (isTypeModel(entity.Type)) {
-
-    const typeInfo = getTypeInfo(entity.Type);
-    return typeInfo.niceName;
+    return undefined;
 
   } else {
-
     return pr!.typeReference().typeNiceName;
   }
 }
@@ -548,7 +544,8 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
 }
 
 export interface ViewOptions {
-  title?: string;
+  title?: React.ReactNode | null;
+  subTitle?: React.ReactNode | null;
   propertyRoute?: PropertyRoute;
   readOnly?: boolean;
   modalSize?: BsSize;
