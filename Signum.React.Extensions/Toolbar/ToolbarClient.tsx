@@ -23,8 +23,6 @@ export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarCon
 
   Finder.addSettings({ queryName: ToolbarEntity, defaultOrders: [{ token: ToolbarEntity.token(a => a.priority), orderType: "Descending" }] });
 
-  Operations.addSettings
-
   Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Item" }));
 
   configs.forEach(c => registerConfig(c));

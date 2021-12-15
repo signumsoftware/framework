@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using Signum.Entities.Alerts;
 
-namespace Signum.React.Authorization;
+namespace Signum.React.Alerts;
 
 [ValidateModelFilter]
 public class AlertController : ControllerBase

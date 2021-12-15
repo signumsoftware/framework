@@ -40,7 +40,6 @@ export interface TypeInfo {
 export interface MemberInfo {
   name: string,
   niceName: string;
-  typeNiceName: string;
   type: TypeReference;
   isReadOnly?: boolean;
   isIgnoredEnum?: boolean;
