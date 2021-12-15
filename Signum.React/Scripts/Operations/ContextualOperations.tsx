@@ -345,7 +345,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
     if (settersConfig == "NoDialog")
       return Promise.resolve([]);
 
-    var onlyType = coc.context.lites.map(a => a.EntityType).distinctBy(a => a).onlyOrNull();
+    var onlyType = coc.context.lites.map(a => a.EntityType).distinctBy().onlyOrNull();
 
     if (!onlyType)
       return Promise.resolve([]);
