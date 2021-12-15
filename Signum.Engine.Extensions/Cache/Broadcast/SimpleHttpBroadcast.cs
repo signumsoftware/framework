@@ -41,7 +41,7 @@ public class SimpleHttpBroadcast : IServerBroadcast
         if (this.bordcastSecretHash != request.SecretHash)
             throw new InvalidOperationException("invalidationSecret does not match");
 
-        if (request.OriginMachineName == Environment.MachineName ||
+        if (request.OriginMachineName == Environment.MachineName &&
             request.OriginApplicationName == Schema.Current.ApplicationName)
             return;
 
