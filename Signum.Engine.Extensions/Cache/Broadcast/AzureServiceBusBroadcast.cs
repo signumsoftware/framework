@@ -10,9 +10,9 @@ namespace Signum.Engine.Cache;
 //Never Tested, works only in theory
 //https://github.com/briandunnington/SynchronizedCache/blob/master/SynchronizedCache.cs
 //https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/servicebus/Azure.Messaging.ServiceBus/MigrationGuide.md
-public class AzureServiceBusCacheInvalidator : ICacheMultiServerInvalidator, IAsyncDisposable
+public class AzureServiceBusBroadcast : IServerBroadcast, IAsyncDisposable
 {
-    public event Action<string>? ReceiveInvalidation;
+    public event Action<string, string>? Receive;
 
     ServiceBusAdministrationClient adminClient;
     ServiceBusClient client;
@@ -25,7 +25,7 @@ public class AzureServiceBusCacheInvalidator : ICacheMultiServerInvalidator, IAs
 
     public DateTime StartTime;
     
-    public AzureServiceBusCacheInvalidator(string namespaceConnectionString, string topicName = "cache-invalidation")
+    public AzureServiceBusBroadcast(string namespaceConnectionString, string topicName = "cache-invalidation")
     {
         this.TopicName = topicName;
         this.SubscriptionName = Environment.MachineName + "-" + Schema.Current.ApplicationName;
@@ -36,15 +36,15 @@ public class AzureServiceBusCacheInvalidator : ICacheMultiServerInvalidator, IAs
     }
 
 
-
-    public void SendInvalidation(string cleanName)
+    public void Send(string methodName, string argument)
     {
         sender.SendMessageAsync(new ServiceBusMessage(BinaryData.FromObjectAsJson(new AzureInvalidationMessage
         {
             CreationDate = DateTime.UtcNow,
             OriginMachineName = Environment.MachineName,
             OriginApplicationName = Schema.Current.ApplicationName,
-            CleanName = cleanName,
+            MethodName = methodName,
+            Argument = argument,
         }, EntityJsonContext.FullJsonSerializerOptions))).Wait();
     }
 
@@ -79,7 +79,7 @@ public class AzureServiceBusCacheInvalidator : ICacheMultiServerInvalidator, IAs
 
     private Task Processor_ProcessErrorAsync(ProcessErrorEventArgs arg)
     {
-        arg.Exception.LogException(ex => ex.ControllerName = nameof(AzureServiceBusCacheInvalidator));
+        arg.Exception.LogException(ex => ex.ControllerName = nameof(AzureServiceBusBroadcast));
         return Task.CompletedTask;
     }
 
@@ -96,12 +96,12 @@ public class AzureServiceBusCacheInvalidator : ICacheMultiServerInvalidator, IAs
                message.OriginApplicationName == Schema.Current.ApplicationName)
                 return;
 
-            ReceiveInvalidation?.Invoke(message.CleanName);
+            Receive?.Invoke(message.MethodName, message.Argument);
 
             await arg.CompleteMessageAsync(arg.Message);
         }catch (Exception ex)
         {
-            ex.LogException(ex => ex.ControllerName = nameof(AzureServiceBusCacheInvalidator));
+            ex.LogException(ex => ex.ControllerName = nameof(AzureServiceBusBroadcast));
         }
     }
 
@@ -109,6 +109,12 @@ public class AzureServiceBusCacheInvalidator : ICacheMultiServerInvalidator, IAs
     {
         await this.client.DisposeAsync();
     }
+
+    public override string ToString()
+    {
+        return $"{nameof(AzureServiceBusBroadcast)}(TopicName = {TopicName}, SubscriptionName = {SubscriptionName})";
+    }
+
 }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -117,6 +123,8 @@ public class AzureInvalidationMessage
     public DateTime CreationDate;
     public string OriginMachineName;
     public string OriginApplicationName;
-    public string CleanName;
+    public string MethodName;
+
+    public string Argument { get; internal set; }
 }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
