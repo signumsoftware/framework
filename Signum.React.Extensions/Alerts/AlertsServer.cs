@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
+using Signum.Engine.Cache;
 using Signum.Entities.Alerts;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
@@ -31,6 +32,26 @@ public static class AlertsServer
         alertEvents.PreUnsafeDelete += AlertEvents_PreUnsafeDelete;
         alertEvents.PreUnsafeUpdate += AlertEvents_PreUnsafeUpdate;
         alertEvents.PreUnsafeInsert += AlertEvents_PreUnsafeInsert;
+
+        CacheLogic.BroadcastReceivers.Add("AlertForReceiber", args =>
+        {
+            var users = args.Split("/").Select(a => (Lite<IUserEntity>)Lite.ParsePrimaryKey<UserEntity>(a)).ToHashSet();
+
+            NotifySignalRClients(users);
+        });
+    }
+
+    public static void BroadcastToServers(HashSet<Lite<IUserEntity>> users)
+    {
+        if (CacheLogic.ServerBroadcast != null)
+        {
+            users.Chunk(100).ToList().ForEach(list =>
+            {
+                var ids = list.ToString(a => a.Id.ToString(), "/");
+
+                CacheLogic.ServerBroadcast!.Send("AlertForReceiber", ids);
+            });
+        }
     }
 
     private static IDisposable? AlertEvents_PreUnsafeUpdate(IUpdateable update, IQueryable<AlertEntity> entityQuery)
@@ -75,6 +96,13 @@ public static class AlertsServer
     private static void Transaction_PostRealCommit(Dictionary<string, object> dic)
     {
         var hashSet = (HashSet<Lite<IUserEntity>>)dic["AlertRecipients"];
+
+        BroadcastToServers(hashSet);
+        NotifySignalRClients(hashSet);
+    }
+
+    private static void NotifySignalRClients(HashSet<Lite<IUserEntity>> hashSet)
+    {
         foreach (var user in hashSet)
         {
             foreach (var connectionId in Connections.GetConnections(user))
@@ -83,7 +111,7 @@ public static class AlertsServer
                 {
                     AlertsServer.AlertsHub.Clients.Client(connectionId).AlertsChanged();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     ex.LogException();
                 }
