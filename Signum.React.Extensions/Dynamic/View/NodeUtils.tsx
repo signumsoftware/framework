@@ -365,7 +365,7 @@ export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNo
 
   if (dn.context.props) {
 
-    var allKeys = Dic.getKeys(dn.context.props).concat(Dic.getKeys(dn.context.propTypes)).distinctBy(;
+    var allKeys = Dic.getKeys(dn.context.props).concat(Dic.getKeys(dn.context.propTypes)).distinctBy();
 
     var errors = allKeys.map(key => validatePropType(key, dn.context.props[key], dn.context.propTypes[key])).notNull();
 

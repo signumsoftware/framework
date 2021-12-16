@@ -33,7 +33,7 @@ public static class AlertsServer
         alertEvents.PreUnsafeUpdate += AlertEvents_PreUnsafeUpdate;
         alertEvents.PreUnsafeInsert += AlertEvents_PreUnsafeInsert;
 
-        CacheLogic.BroadcastReceivers.Add("AlertForReceiber", args =>
+        CacheLogic.BroadcastReceivers.Add("AlertForReceiver", args =>
         {
             var users = args.Split("/").Select(a => (Lite<IUserEntity>)Lite.ParsePrimaryKey<UserEntity>(a)).ToHashSet();
 
@@ -49,7 +49,7 @@ public static class AlertsServer
             {
                 var ids = list.ToString(a => a.Id.ToString(), "/");
 
-                CacheLogic.ServerBroadcast!.Send("AlertForReceiber", ids);
+                CacheLogic.ServerBroadcast!.Send("AlertForReceiver", ids);
             });
         }
     }

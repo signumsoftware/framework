@@ -120,7 +120,7 @@ public static class CacheLogic
         BroadcastReceivers.TryGetC(methodName)?.Invoke(argument);
     }
 
-    public static Dictionary<string, Action<string>> BroadcastReceivers = new Dictionary<string, Action<string>>
+    public static Dictionary<string /*methodName*/, Action<string /*argument*/>> BroadcastReceivers = new Dictionary<string, Action<string>>
     {
         { InvalidateTable, ServerBroadcast_InvalidateTable}
     };
