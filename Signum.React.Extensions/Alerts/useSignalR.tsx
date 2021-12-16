@@ -7,10 +7,7 @@ import { useForceUpdate } from '../../Signum.React/Scripts/Hooks';
 
 //Orifinally from https://github.com/pguilbert/react-use-signalr/
 
-export function useSignalRConnection(url: string, options?: signalR.IHttpConnectionOptions, register?: {
-  onConnect: (connection: signalR.HubConnection) => Promise<void>,
-  onDisconnect: (connection: signalR.HubConnection) => Promise<void>,
-}) {
+export function useSignalRConnection(url: string, options?: signalR.IHttpConnectionOptions) {
 
   const connection = React.useMemo<signalR.HubConnection | undefined>(() => {
 
@@ -42,7 +39,6 @@ export function useSignalRConnection(url: string, options?: signalR.IHttpConnect
     if (connection.state === signalR.HubConnectionState.Disconnected) {
       const promise = connection
         .start()
-        .then(() => register?.onConnect(connection))
         .then(() => { forceUpdate() });
 
       forceUpdate();
@@ -51,7 +47,6 @@ export function useSignalRConnection(url: string, options?: signalR.IHttpConnect
 
       return () => {
         promise
-          .then(() => register?.onDisconnect(connection))
           .then(() => {
             connection.stop();
           });
@@ -65,6 +60,26 @@ export function useSignalRConnection(url: string, options?: signalR.IHttpConnect
   }, [connection]);
 
   return connection;
+}
+
+export function useSignalRGroup(connection: signalR.HubConnection | undefined, options: {
+  enterGroup: (connection: signalR.HubConnection) => Promise<void>,
+  exitGroup: (connection: signalR.HubConnection) => Promise<void>,
+  deps: any[]
+}) {
+
+  React.useEffect(() => {
+
+    if (connection?.state == signalR.HubConnectionState.Connected) {
+      options.enterGroup(connection).done();
+
+      return () => {
+        if (connection?.state == signalR.HubConnectionState.Connected) {
+          options.exitGroup(connection).done();
+        }
+      };
+    }
+  }, [connection, connection?.start, ...options.deps ]);
 }
 
 export function useSignalRCallback(connection: signalR.HubConnection | undefined, methodName: string, callback: (...args: any[]) => void, deps: any[]) {
