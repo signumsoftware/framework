@@ -59,7 +59,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
       }
 
     } else {
-      if (!ringingRef.current)
+      if (ringingRef.current)
         setRinging(false);
 
       setAlerts([]);
