@@ -5,7 +5,7 @@ using Signum.React.Alerts;
 using Signum.React.Authorization;
 using System.Threading.Tasks;
 
-namespace Signum.React.Facades;
+namespace Signum.React.Alerts;
 
 public interface IAlertsClient
 {
