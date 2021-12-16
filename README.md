@@ -51,6 +51,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2021.12.16 Add SignalR to AlertDropdown](https://github.com/signumsoftware/framework/commit/c3e89ed1dfd53eaaf619c2823de43cb0cc2d3154#commitcomment-62061830)
 * [2021.12.13 IsNew and GetType() members supported in ToStringExpression](https://github.com/signumsoftware/framework/commit/644151a2481307fdbb53216d2d71022a71e75d2c#comments)
 * [2021.12.03 Dashboard III; InitialSelectionDashboardFilter and DefaultDashboardFilter](https://github.com/signumsoftware/framework/commit/90392c1066b7aed631ec3aaa55258e06f18ad013#comments)
 * [2021.12.02 Dashboard II: Presenting CachedQueries](https://github.com/signumsoftware/framework/commit/641293cd886280a857493e6b9b10361220f19702#commitcomment-61271093) 
