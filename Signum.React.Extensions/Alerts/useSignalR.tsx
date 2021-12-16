@@ -79,7 +79,7 @@ export function useSignalRGroup(connection: signalR.HubConnection | undefined, o
         }
       };
     }
-  }, [connection, connection?.start, ...options.deps ]);
+  }, [connection, connection?.state, ...options.deps]);
 }
 
 export function useSignalRCallback(connection: signalR.HubConnection | undefined, methodName: string, callback: (...args: any[]) => void, deps: any[]) {
