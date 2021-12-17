@@ -70,14 +70,20 @@ export function useSignalRGroup(connection: signalR.HubConnection | undefined, o
 
   React.useEffect(() => {
 
-    if (connection?.state == signalR.HubConnectionState.Connected) {
-      options.enterGroup(connection).done();
+    if (connection) {
+      if (connection.state == signalR.HubConnectionState.Connected) {
+        options.enterGroup(connection).done();
 
-      return () => {
-        if (connection?.state == signalR.HubConnectionState.Connected) {
-          options.exitGroup(connection).done();
-        }
-      };
+        return () => {
+          if (connection.state == signalR.HubConnectionState.Connected) {
+            options.exitGroup(connection).catch(e => {
+              if (connection.state == signalR.HubConnectionState.Connected)
+                throw e;
+              else { /* Silent exception */ }
+            }).done();
+          }
+        };
+      }
     }
   }, [connection, connection?.state, ...options.deps]);
 }
