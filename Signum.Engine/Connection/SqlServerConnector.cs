@@ -552,7 +552,7 @@ namespace Signum.Engine
             return result;
         }
 
-        public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value)
+        public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, Expression value)
         {
             Expression valueExpr = Expression.Convert(
                 !dbType.IsDate() ? value: 
@@ -571,12 +571,21 @@ namespace Signum.Engine
 
             List<MemberBinding> mb = new()
             {
-                Expression.Bind(typeof(SqlParameter).GetProperty("IsNullable")!, Expression.Constant(nullable)),
-                Expression.Bind(typeof(SqlParameter).GetProperty("SqlDbType")!, Expression.Constant(dbType.SqlServer)),
+                Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.IsNullable))!, Expression.Constant(nullable)),
+                Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.SqlDbType))!, Expression.Constant(dbType.SqlServer)),
             };
 
+            if (size != null)
+                mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.Size))!, Expression.Constant(size)));
+
+            if (precision != null)
+                mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.Precision))!, Expression.Constant(precision)));
+
+            if (scale != null)
+                mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.Scale))!, Expression.Constant(scale)));
+
             if (udtTypeName != null)
-                mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty("UdtTypeName")!, Expression.Constant(udtTypeName)));
+                mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.UdtTypeName))!, Expression.Constant(udtTypeName)));
 
             return Expression.MemberInit(newExpr, mb);
         }

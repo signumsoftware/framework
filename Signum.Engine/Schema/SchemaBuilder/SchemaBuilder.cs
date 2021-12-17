@@ -583,6 +583,7 @@ namespace Signum.Engine.Maps
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = IsNullable.No,
                 Size = Settings.GetSqlSize(ticksAttr, null, pair.DbType),
+                Precision = Settings.GetSqlPrecision(ticksAttr, null, pair.DbType),
                 Scale = Settings.GetSqlScale(ticksAttr, null, pair.DbType),
                 Default = ticksAttr?.GetDefault(Settings.IsPostgres),
             };
@@ -603,6 +604,7 @@ namespace Signum.Engine.Maps
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = Settings.GetIsNullable(route, forceNull),
                 Size = Settings.GetSqlSize(att, route, pair.DbType),
+                Precision = Settings.GetSqlPrecision(att, route, pair.DbType),
                 Scale = Settings.GetSqlScale(att, route, pair.DbType),
                 Default = att?.GetDefault(Settings.IsPostgres),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
@@ -721,6 +723,7 @@ namespace Signum.Engine.Maps
                     UserDefinedTypeName = pair.UserDefinedTypeName,
                     Nullable = IsNullable.No,
                     Size = Settings.GetSqlSize(orderAttr, null, pair.DbType),
+                    Precision = Settings.GetSqlPrecision(orderAttr, null, pair.DbType),
                     Scale = Settings.GetSqlScale(orderAttr, null, pair.DbType),
                 };
             }

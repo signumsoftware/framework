@@ -281,10 +281,18 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             set { size = value; }
         }
 
+        byte? precision;
+        public bool HasPrecision => precision.HasValue;
+        public byte Precision
+        {
+            get { return precision!.Value; }
+            set { precision = value; }
+        }
 
-        int? scale;
+
+        byte? scale;
         public bool HasScale => scale.HasValue;
-        public int Scale
+        public byte Scale
         {
             get { return scale!.Value; }
             set { scale = value; }

@@ -100,12 +100,22 @@ namespace Signum.Engine.Maps
             {NpgsqlDbType.Numeric, 18},
         };
 
-        readonly Dictionary<SqlDbType, int> defaultScaleSqlServer = new Dictionary<SqlDbType, int>()
+        readonly Dictionary<SqlDbType, byte> defaultPrecisionSqlServer = new Dictionary<SqlDbType, byte>()
+        {
+            {SqlDbType.Decimal, 18},
+        };
+
+        readonly Dictionary<NpgsqlDbType, byte> defaultPrecisionPostgreSql = new Dictionary<NpgsqlDbType, byte>()
+        {
+            {NpgsqlDbType.Numeric, 18},
+        };
+
+        readonly Dictionary<SqlDbType, byte> defaultScaleSqlServer = new Dictionary<SqlDbType, byte>()
         {
             {SqlDbType.Decimal, 2},
         };
 
-        readonly Dictionary<NpgsqlDbType, int> defaultScalePostgreSql = new Dictionary<NpgsqlDbType, int>()
+        readonly Dictionary<NpgsqlDbType, byte> defaultScalePostgreSql = new Dictionary<NpgsqlDbType, byte>()
         {
             {NpgsqlDbType.Numeric, 2},
         };
@@ -345,7 +355,28 @@ namespace Signum.Engine.Maps
                 return defaultSizePostgreSql.TryGetS(dbType.PostgreSql);
         }
 
-        internal int? GetSqlScale(DbTypeAttribute? att, PropertyRoute? route, AbstractDbType dbType)
+        internal byte? GetSqlPrecision(DbTypeAttribute? att, PropertyRoute? route, AbstractDbType dbType)
+        {
+            if (this.IsPostgres && dbType.PostgreSql == NpgsqlDbType.Bytea)
+                return null;
+
+            if (att != null && att.HasPrecision)
+                return att.Precision;
+
+/*            if (route != null && route.Type == typeof(string))
+            {
+                var sla = ValidatorAttribute<StringLengthValidatorAttribute>(route);
+                if (sla != null)
+                    return sla.Max == -1 ? int.MaxValue : sla.Max;
+            }*/
+
+            if (!this.IsPostgres)
+                return defaultPrecisionSqlServer.TryGetS(dbType.SqlServer);
+            else
+                return defaultPrecisionPostgreSql.TryGetS(dbType.PostgreSql);
+        }
+
+        internal byte? GetSqlScale(DbTypeAttribute? att, PropertyRoute? route, AbstractDbType dbType)
         {
             bool isDecimal = dbType.IsDecimal();
             if (att != null && att.HasScale)
