@@ -30,7 +30,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 
   useSignalRGroup(conn, {
     enterGroup: c => c.invoke("Login", AuthClient.getAuthToken()),
-    exitGroup: c => c.invoke("LoginOut"),
+    exitGroup: c => c.send("Logout"),
     deps: [AuthClient.getAuthToken()]
   });
 
