@@ -14,7 +14,7 @@ import "./AlertDropdown.css"
 import { Link } from 'react-router-dom';
 import { classes, Dic } from '@framework/Globals'
 import MessageModal from '@framework/Modals/MessageModal'
-import { useSignalRCallback, useSignalRConnection } from './useSignalR'
+import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from './useSignalR'
 
 export default function AlertDropdown(props: { keepRingingFor?: number }) {
 
@@ -26,8 +26,12 @@ export default function AlertDropdown(props: { keepRingingFor?: number }) {
 
 function AlertDropdownImp(props: { keepRingingFor: number }) {
 
-  const conn = useSignalRConnection("~/api/alertshub", {
-    accessTokenFactory: () => AuthClient.getAuthToken()!,
+  const conn = useSignalRConnection("~/api/alertshub");
+
+  useSignalRGroup(conn, {
+    enterGroup: c => c.invoke("Login", AuthClient.getAuthToken()),
+    exitGroup: c => c.invoke("LoginOut"),
+    deps: [AuthClient.getAuthToken()]
   });
 
   useSignalRCallback(conn, "AlertsChanged", () => {

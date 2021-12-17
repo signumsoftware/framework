@@ -14,13 +14,20 @@ public interface IAlertsClient
 
 public class AlertsHub : Hub<IAlertsClient>
 {
-    public override Task OnConnectedAsync()
+    public Task Login(string tokenString)
     {
-        var user = GetUser(Context.GetHttpContext()!);
+        var token = AuthTokenServer.DeserializeToken(tokenString);
 
-        AlertsServer.Connections.Add(user.ToLite(), Context.ConnectionId);
+        AlertsServer.Connections.Add(token.User.ToLite(), Context.ConnectionId);
 
-        return base.OnConnectedAsync();
+        return Task.CompletedTask;
+    }
+
+    public Task Logout(string tokenString)
+    {
+        AlertsServer.Connections.Remove(Context.ConnectionId);
+
+        return Task.CompletedTask;
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)
@@ -29,24 +36,6 @@ public class AlertsHub : Hub<IAlertsClient>
         return base.OnDisconnectedAsync(exception);
     }
 
-    IUserEntity GetUser(HttpContext httpContext)
-    {
-        var tokenString = httpContext.Request.Query["access_token"];
-        if (tokenString.Count > 1)
-            throw new InvalidOperationException($"{tokenString.Count} values in 'access_token' query string found");
-
-        if (tokenString.Count == 0)
-        {
-            tokenString = httpContext.Request.Headers["Authorization"];
-
-            if (tokenString.Count != 1)
-                throw new InvalidOperationException($"{tokenString.Count} values in 'Authorization' header found");
-        }
-
-        var token = AuthTokenServer.DeserializeToken(tokenString.SingleEx());
-
-        return token.User;
-    }
 }
 
 public class ConnectionMapping<T> where T : class
