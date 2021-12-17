@@ -254,7 +254,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
         public string GetColumnType(IColumn c)
         {
-            return c.UserDefinedTypeName ?? (c.DbType.ToString(IsPostgres) + GetSizeScale(c.Size, c.Scale));
+            return c.UserDefinedTypeName ?? (c.DbType.ToString(IsPostgres) + GetSizePrecisionScale(c.Size, c.Precision, c.Scale));
         }
 
         public string GetColumnType(DiffColumn c)
@@ -270,18 +270,24 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             return @default;
         }
 
-        public string GetSizeScale(int? size, int? scale)
+        public string GetSizePrecisionScale(int? size, byte? precision, byte? scale)
         {
-            if (size == null)
+            if (size == null && precision == null)
                 return "";
+
+            //Presicion is given priority over Size
+            if (precision != null)
+            {
+                if (scale == null)
+                    return "({0})".FormatWith(precision);
+                else
+                    return "({0},{1})".FormatWith(precision, scale);
+            }
 
             if (size == int.MaxValue)
                 return IsPostgres ? "" : "(MAX)";
 
-            if (scale == null)
-                return "({0})".FormatWith(size);
-
-            return "({0},{1})".FormatWith(size, scale);
+            return "({0})".FormatWith(size);
         }
 
         public SqlPreCommand? AlterTableForeignKeys(ITable t)

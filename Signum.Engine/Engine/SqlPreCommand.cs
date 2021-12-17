@@ -346,7 +346,8 @@ namespace Signum.Engine
             var pars = this.Parameters.EmptyIfNull();
             var sqlBuilder = Connector.Current.SqlBuilder;
 
-            var parameterVars = pars.ToString(p => $"{p.ParameterName} {(p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString())}{sqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
+            var parameterVars = pars.ToString(p => 
+                $"{p.ParameterName} {(p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString())}{sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
             var parameterValues = pars.ToString(p => p.ParameterName + " = " + Encode(p.Value, simple: true), ",\r\n");
 
             return @$"EXEC sp_executesql N'{this.Sql.Replace("'", "''")}', 
