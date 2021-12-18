@@ -89,7 +89,7 @@ namespace Signum.Engine.Maps
             {SqlDbType.Binary, 8000},
             {SqlDbType.Char, 1},
             {SqlDbType.NChar, 1},
-            {SqlDbType.Decimal, 18},
+//            {SqlDbType.Decimal, 18},
         };
 
         readonly Dictionary<NpgsqlDbType, int> defaultSizePostgreSql = new Dictionary<NpgsqlDbType, int>()
@@ -97,7 +97,7 @@ namespace Signum.Engine.Maps
             {NpgsqlDbType.Varbit, 200},
             {NpgsqlDbType.Varchar, 200},
             {NpgsqlDbType.Char, 1},
-            {NpgsqlDbType.Numeric, 18},
+//            {NpgsqlDbType.Numeric, 18},
         };
 
         readonly Dictionary<SqlDbType, byte> defaultPrecisionSqlServer = new Dictionary<SqlDbType, byte>()

@@ -254,7 +254,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
         public string GetColumnType(IColumn c)
         {
-            return c.UserDefinedTypeName ?? (c.DbType.ToString(IsPostgres) + GetSizePrecisionScale(c.Size, c.Precision, c.Scale));
+            return c.UserDefinedTypeName ?? (c.DbType.ToString(IsPostgres) + GetSizePrecisionScale(c));
         }
 
         public string GetColumnType(DiffColumn c)
@@ -262,21 +262,17 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             return c.UserTypeName ?? c.DbType.ToString(IsPostgres) /*+ GetSizeScale(Math.Max(c.Length, c.Precision), c.Scale)*/;
         }
 
-        public string Quote(AbstractDbType type, string @default)
+        public string GetSizePrecisionScale(IColumn c)
         {
-            if (type.IsString() && !(@default.StartsWith("'") && @default.StartsWith("'")))
-                return "'" + @default + "'";
-
-            return @default;
+            return GetSizePrecisionScale(c.Size, c.Precision, c.Scale, c.DbType.IsDecimal());
         }
 
-        public string GetSizePrecisionScale(int? size, byte? precision, byte? scale)
+        public string GetSizePrecisionScale(int? size, byte? precision, byte? scale, bool isDecimal)
         {
             if (size == null && precision == null)
                 return "";
 
-            //Presicion is given priority over Size
-            if (precision != null)
+            if (isDecimal)
             {
                 if (scale == null)
                     return "({0})".FormatWith(precision);
@@ -288,6 +284,14 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
                 return IsPostgres ? "" : "(MAX)";
 
             return "({0})".FormatWith(size);
+        }
+
+        public string Quote(AbstractDbType type, string @default)
+        {
+            if (type.IsString() && !(@default.StartsWith("'") && @default.StartsWith("'")))
+                return "'" + @default + "'";
+
+            return @default;
         }
 
         public SqlPreCommand? AlterTableForeignKeys(ITable t)

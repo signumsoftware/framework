@@ -1148,12 +1148,12 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
 
         public bool SizeEquals(IColumn other)
         {
-            return (other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
+            return (other.DbType.IsDecimal() || other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
         }
 
         public bool PrecisionEquals(IColumn other)
         {
-            return (other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision);
+            return (!other.DbType.IsDecimal() || other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision);
         }
 
         public bool DefaultEquals(IColumn other)
