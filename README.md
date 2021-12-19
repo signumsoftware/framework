@@ -51,6 +51,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2021.12.19 Split between Size and Precission and Microsoft.Data.SqlClient 4.0.0](https://github.com/signumsoftware/framework/commit/fe17abd91b3e319d78c7ae2b4dfb0c70c7c4f276)
 * [2021.12.17 CacheLogic.ServerBrodcast](https://github.com/signumsoftware/framework/commit/1903c0df005bec80dac4a7fca5b20b257420c591#commitcomment-62129403)
 * [2021.12.16 Add SignalR to AlertDropdown](https://github.com/signumsoftware/framework/commit/c3e89ed1dfd53eaaf619c2823de43cb0cc2d3154#commitcomment-62061830)
 * [2021.12.13 IsNew and GetType() members supported in ToStringExpression](https://github.com/signumsoftware/framework/commit/644151a2481307fdbb53216d2d71022a71e75d2c#comments)
