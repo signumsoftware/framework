@@ -59,14 +59,14 @@ public class SystemVersionedInfo
         if (PostgreeSysPeriodColumnName != null)
             return new[]
             {
-                new PostgreePeriodColumn(this.PostgreeSysPeriodColumnName!),
-            };
+                    new PostgreePeriodColumn(this.PostgreeSysPeriodColumnName!),
+                };
         else
             return new[]
             {
-                new SqlServerPeriodColumn(this.StartColumnName!, ColumnType.Start),
-                new SqlServerPeriodColumn(this.EndColumnName!, ColumnType.End)
-            };
+                    new SqlServerPeriodColumn(this.StartColumnName!, ColumnType.Start),
+                    new SqlServerPeriodColumn(this.EndColumnName!, ColumnType.End)
+                };
     }
 
     internal IntervalExpression? IntervalExpression(Alias tableAlias)
@@ -104,7 +104,8 @@ public class SystemVersionedInfo
         public bool Identity => false;
         public string? Default { get; set; }
         public int? Size => null;
-        public int? Scale => null;
+        public byte? Precision => null;
+        public byte? Scale => null;
         public string? Collation => null;
         public Table? ReferenceTable => null;
         public bool AvoidForeignKey => false;
@@ -128,7 +129,8 @@ public class SystemVersionedInfo
         public bool Identity => false;
         public string? Default { get; set; }
         public int? Size => null;
-        public int? Scale => null;
+        public byte? Precision => null;
+        public byte? Scale => null;
         public string? Collation => null;
         public Table? ReferenceTable => null;
         public bool AvoidForeignKey => false;
@@ -183,7 +185,8 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
             try
             {
                 columns.AddRange(newColumns, c => c.Name, c => c, errorSuffix);
-            }catch(RepeatedElementsException ex) when (StartParameters.IgnoredCodeErrors != null)
+            }
+            catch (RepeatedElementsException ex) when (StartParameters.IgnoredCodeErrors != null)
             {
                 StartParameters.IgnoredCodeErrors.Add(ex);
             }
@@ -214,7 +217,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
 
             return Mixins.GetOrThrow(mixinType);
         }
-        
+
         FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
 
         if (fi == null)
@@ -228,12 +231,12 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
     public Field? TryGetField(MemberInfo member)
     {
         Type? mixinType = member as Type ?? GetMixinType(member);
-        if (mixinType!= null)
+        if (mixinType != null)
         {
             return Mixins?.TryGetC(mixinType);
         }
 
-        FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member)!;
+        FieldInfo fi = member as FieldInfo ?? Reflector.TryFindFieldInfo(Type, (PropertyInfo)member)!;
 
         if (fi == null)
             return null;
@@ -266,8 +269,8 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
             Fields.Values.Select(a => a.Field).SelectMany(f => predicate(f) ? new[] { f } :
             f is IFieldFinder ff ? ff.FindFields(predicate) :
             Enumerable.Empty<Field>()).ToList();
-       
-        if(Mixins != null)
+
+        if (Mixins != null)
         {
             foreach (var mixin in this.Mixins.Values)
             {
@@ -311,7 +314,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
             }
         }
 
-        if(this.SystemVersioned != null)
+        if (this.SystemVersioned != null)
         {
             result.Add(new TableIndex(this, this.SystemVersioned.Columns().PreAnd(this.PrimaryKey).ToArray()));
         }
@@ -411,7 +414,7 @@ public abstract partial class Field
             AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
         };
 
-        if(attribute.AllowMultipleNulls)
+        if (attribute.AllowMultipleNulls)
             result.Where = IndexWhereExpressionVisitor.IsNull(this, false, Schema.Current.Settings.IsPostgres);
 
         return result;
@@ -462,7 +465,8 @@ public partial interface IColumn
     bool Identity { get; }
     string? Default { get; }
     int? Size { get; }
-    int? Scale { get; }
+    byte? Precision { get; }
+    byte? Scale { get; }
     string? Collation { get; }
     Table? ReferenceTable { get; }
     bool AvoidForeignKey { get; }
@@ -515,7 +519,8 @@ public partial class FieldPrimaryKey : Field, IColumn
     public bool Identity { get; set; }
     bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
     public int? Size { get; set; }
-    int? IColumn.Scale { get { return null; } }
+    byte? IColumn.Precision { get { return null; } }
+    byte? IColumn.Scale { get { return null; } }
     public string? Collation { get; set; }
     Table? IColumn.ReferenceTable { get { return null; } }
     public Type Type { get; set; }
@@ -571,7 +576,8 @@ public partial class FieldValue : Field, IColumn
     bool IColumn.IdentityBehaviour { get { return false; } }
     public int? Size { get; set; }
     public string? Collation { get; set; }
-    public int? Scale { get; set; }
+    public byte? Precision { get; set; }
+    public byte? Scale { get; set; }
     Table? IColumn.ReferenceTable { get { return null; } }
     public bool AvoidForeignKey { get { return false; } }
     public string? Default { get; set; }
@@ -584,11 +590,12 @@ public partial class FieldValue : Field, IColumn
 
     public override string ToString()
     {
-        return "{0} {1} ({2},{3},{4})".FormatWith(
+        return "{0} {1} ({2},{3},{4},{5})".FormatWith(
             Name,
             DbType,
             Nullable.ToBool() ? "Nullable" : "",
             Size,
+            Precision,
             Scale);
     }
 
@@ -636,7 +643,8 @@ public partial class FieldEmbedded : Field, IFieldFinder
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
         int? IColumn.Size { get { return null; } }
-        int? IColumn.Scale { get { return null; } }
+        byte? IColumn.Precision { get { return null; } }
+        byte? IColumn.Scale { get { return null; } }
         string? IColumn.Collation { get { return null; } }
         public Table? ReferenceTable { get { return null; } }
         Type IColumn.Type { get { return typeof(bool); } }
@@ -903,7 +911,8 @@ public partial class FieldReference : Field, IColumn, IFieldReference
     bool IColumn.Identity { get { return false; } }
     bool IColumn.IdentityBehaviour { get { return false; } }
     int? IColumn.Size { get { return this.ReferenceTable.PrimaryKey.Size; } }
-    int? IColumn.Scale { get { return null; } }
+    byte? IColumn.Precision { get { return null; } }
+    byte? IColumn.Scale { get { return null; } }
     public Table ReferenceTable { get; set; }
     Table? IColumn.ReferenceTable => ReferenceTable;
     public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
@@ -1152,7 +1161,8 @@ public partial class ImplementationColumn : IColumn
     bool IColumn.Identity { get { return false; } }
     bool IColumn.IdentityBehaviour { get { return false; } }
     int? IColumn.Size { get { return null; } }
-    int? IColumn.Scale { get { return null; } }
+    byte? IColumn.Precision { get { return null; } }
+    byte? IColumn.Scale { get { return null; } }
     public Table ReferenceTable { get; private set; }
     Table? IColumn.ReferenceTable => ReferenceTable;
     public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
@@ -1178,7 +1188,8 @@ public partial class ImplementationStringColumn : IColumn
     bool IColumn.Identity { get { return false; } }
     bool IColumn.IdentityBehaviour { get { return false; } }
     public int? Size { get; set; }
-    int? IColumn.Scale { get { return null; } }
+    byte? IColumn.Precision { get { return null; } }
+    byte? IColumn.Scale { get { return null; } }
     public string? Collation { get; set; }
     public Table? ReferenceTable { get { return null; } }
     public AbstractDbType DbType => new AbstractDbType(SqlDbType.NVarChar, NpgsqlDbType.Varchar);
@@ -1228,7 +1239,7 @@ public partial class FieldMList : Field, IFieldFinder
             return new[] { this };
 
         return TableMList.FindFields(predicate);
-        
+
     }
 
     public override IEnumerable<IColumn> Columns()
@@ -1272,7 +1283,8 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         public bool Identity { get; set; }
         bool IColumn.IdentityBehaviour { get { return true; } }
         int? IColumn.Size { get { return null; } }
-        int? IColumn.Scale { get { return null; } }
+        byte? IColumn.Precision { get { return null; } }
+        byte? IColumn.Scale { get { return null; } }
         Table? IColumn.ReferenceTable { get { return null; } }
         public Type Type { get; set; }
         public bool AvoidForeignKey { get { return false; } }
@@ -1337,9 +1349,9 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
     public List<TableIndex> GeneratAllIndexes()
     {
         var result = new List<TableIndex>
-        {
-            new PrimaryKeyIndex(this)
-        };
+            {
+                new PrimaryKeyIndex(this)
+            };
 
         result.AddRange(BackReference.GenerateIndexes(this));
         result.AddRange(Field.GenerateIndexes(this));
@@ -1444,7 +1456,7 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
     }
 
     public AbstractDbType(NpgsqlDbType npgsqlDbType)
-    { 
+    {
         this.sqlServer = null;
         this.postgreSql = npgsqlDbType;
     }
@@ -1470,9 +1482,9 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
                 case SqlDbType.Date:
                 case SqlDbType.DateTime:
                 case SqlDbType.DateTime2:
-                case SqlDbType.SmallDateTime: 
+                case SqlDbType.SmallDateTime:
                     return true;
-                default: 
+                default:
                     return false;
             }
 
@@ -1480,10 +1492,10 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
             switch (p)
             {
                 case NpgsqlDbType.Date:
-                case NpgsqlDbType.Timestamp: 
-                case NpgsqlDbType.TimestampTz: 
+                case NpgsqlDbType.Timestamp:
+                case NpgsqlDbType.TimestampTz:
                     return true;
-                default: 
+                default:
                     return false;
             }
 
@@ -1516,7 +1528,7 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
 
     public bool IsNumber()
     {
-        if(sqlServer is SqlDbType s)
+        if (sqlServer is SqlDbType s)
             switch (s)
             {
                 case SqlDbType.BigInt:
@@ -1528,9 +1540,9 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
                 case SqlDbType.Real:
                 case SqlDbType.TinyInt:
                 case SqlDbType.SmallInt:
-                case SqlDbType.SmallMoney: 
+                case SqlDbType.SmallMoney:
                     return true;
-                default: 
+                default:
                     return false;
             }
 
@@ -1543,9 +1555,9 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
                 case NpgsqlDbType.Numeric:
                 case NpgsqlDbType.Money:
                 case NpgsqlDbType.Real:
-                case NpgsqlDbType.Double: 
+                case NpgsqlDbType.Double:
                     return true;
-                default: 
+                default:
                     return false;
             }
 
@@ -1564,7 +1576,7 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
                 case SqlDbType.Char:
                 case SqlDbType.NChar:
                     return true;
-                default: 
+                default:
                     return false;
             }
 
@@ -1574,9 +1586,9 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
             {
                 case NpgsqlDbType.Char:
                 case NpgsqlDbType.Varchar:
-                case NpgsqlDbType.Text: 
+                case NpgsqlDbType.Text:
                     return true;
-                default: 
+                default:
                     return false;
             }
 
@@ -1598,11 +1610,12 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
             switch (pg & ~NpgsqlDbType.Range)
             {
                 case NpgsqlDbType.Integer: return "int4range";
-                case NpgsqlDbType.Bigint : return "int8range";
+                case NpgsqlDbType.Bigint: return "int8range";
                 case NpgsqlDbType.Numeric: return "numrange";
                 case NpgsqlDbType.TimestampTz: return "tstzrange";
                 case NpgsqlDbType.Date: return "daterange";
-                throw new InvalidOperationException("");
+                default:
+                    throw new UnexpectedValueException(pg);
             }
 
         if (pg == NpgsqlDbType.Double)

@@ -8,6 +8,7 @@
 
     .sidebar-container .container-fluid {
         flex-grow: 1;
+        width: 0; /*Fixes SearchPage scrolling https://gaurav5430.medium.com/css-flex-positioning-gotchas-child-expands-to-more-than-the-width-allowed-by-the-parent-799c37428dd6*/
     }
 
 

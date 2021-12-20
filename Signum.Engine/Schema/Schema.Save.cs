@@ -136,7 +136,7 @@ public partial class Table
                 Entity entity = list.Single();
 
                 AssertHasId(entity);
-                
+
                 entity.Ticks = Clock.Now.Ticks;
 
                 table.SetToStrField(entity);
@@ -210,15 +210,15 @@ public partial class Table
                 var isPostgres = Schema.Current.Settings.IsPostgres;
 
                 string insertPattern(string[] suffixes) =>
-                    "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3};".FormatWith(table.Name,
-                    trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                    isPostgres ? "OVERRIDING SYSTEM VALUE\r\n" : null,
-                    suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"));
+                        "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3};".FormatWith(table.Name,
+                        trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
+                        isPostgres ? "OVERRIDING SYSTEM VALUE\r\n" : null,
+                        suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"));
 
                 var expr = Expression.Lambda<Action<object, Forbidden, string, List<DbParameter>>>(
                     CreateBlock(trios.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramForbidden, paramSuffix, paramList);
 
-                
+
                 return new InsertCacheDisableIdentity(table, insertPattern, expr.Compile());
             }
         }
@@ -306,17 +306,17 @@ public partial class Table
 
                 var isPostgres = Schema.Current.Settings.IsPostgres;
                 string sqlInsertPattern(string[] suffixes, string? output) =>
-                "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(
-                table.Name,
-                trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
-                output != null && !isPostgres ? $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\r\n" : null,
-                suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
-                output != null && isPostgres ? $"\r\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}" : null);
+                    "INSERT INTO {0}\r\n  ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(
+                    table.Name,
+                    trios.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
+                    output != null && !isPostgres ? $"OUTPUT INSERTED.{table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}\r\n" : null,
+                    suffixes.ToString(s => " (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
+                    output != null && isPostgres ? $"\r\nRETURNING {table.PrimaryKey.Name.SqlEscape(isPostgres)}{(output.Length > 0 ? " INTO " + output : "")}" : null);
 
 
                 var expr = Expression.Lambda<Action<Entity, Forbidden, string, List<DbParameter>>>(
                     CreateBlock(trios.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramForbidden, paramSuffix, paramList);
-                
+
                 return new InsertCacheIdentity(table, sqlInsertPattern, expr.Compile());
             }
         }
@@ -580,14 +580,14 @@ SELECT {id} FROM rows;";
                 };
 
                 List<Expression> parameters = new List<Expression>
-                {
-                    pb.ParameterFactory(Trio.Concat(idParamName, paramSuffix), table.PrimaryKey.DbType, null, false,
-                    Expression.Field(Expression.Property(Expression.Field(paramIdent, fiId), "Value"), "Object"))
-                };
+                    {
+                        pb.ParameterFactory(Trio.Concat(idParamName, paramSuffix), table.PrimaryKey.DbType, null, null, null, null, false,
+                        Expression.Field(Expression.Property(Expression.Field(paramIdent, fiId), "Value"), "Object"))
+                    };
 
                 if (table.Ticks != null)
                 {
-                    parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramSuffix), table.Ticks.DbType, null, false, table.Ticks.ConvertTicks(paramOldTicks)));
+                    parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramSuffix), table.Ticks.DbType, null, null, null, null, false, table.Ticks.ConvertTicks(paramOldTicks)));
                 }
 
                 parameters.AddRange(trios.Select(a => (Expression)a.ParameterBuilder));
@@ -595,7 +595,7 @@ SELECT {id} FROM rows;";
                 var expr = Expression.Lambda<Action<Entity, long, Forbidden, string, List<DbParameter>>>(
                     CreateBlock(parameters, assigments, paramList), paramIdent, paramOldTicks, paramForbidden, paramSuffix, paramList);
 
-                
+
                 return new UpdateCache(table, sqlUpdatePattern, expr.Compile());
             }
         }
@@ -612,8 +612,8 @@ SELECT {id} FROM rows;";
         public Action<List<EntityForbidden>> InsertCollections;
         public Action<List<EntityForbidden>> UpdateCollections;
 
-        public CollectionsCache(Func<Entity, string, bool, SqlPreCommand> insertCollectionsSync, 
-            Action<List<EntityForbidden>> insertCollections, 
+        public CollectionsCache(Func<Entity, string, bool, SqlPreCommand> insertCollectionsSync,
+            Action<List<EntityForbidden>> insertCollections,
             Action<List<EntityForbidden>> updateCollections)
         {
             InsertCollectionsSync = insertCollectionsSync;
@@ -714,18 +714,18 @@ END $$;"); ;
         }
         else if (isGuid)
         {
-            return SqlPreCommand.Combine(Spacing.Simple, 
-                insert, 
-                new SqlPreCommandSimple($"DECLARE {parentId} {pkType};"), 
-                new SqlPreCommandSimple($"SELECT {parentId} = ID FROM {newIds};"), 
+            return SqlPreCommand.Combine(Spacing.Simple,
+                insert,
+                new SqlPreCommandSimple($"DECLARE {parentId} {pkType};"),
+                new SqlPreCommandSimple($"SELECT {parentId} = ID FROM {newIds};"),
                 collections)!;
         }
         else
         {
-            return SqlPreCommand.Combine(Spacing.Simple, 
-                new SqlPreCommandSimple($"DECLARE {parentId} {pkType};") { GoBefore = true }, 
-                insert, 
-                new SqlPreCommandSimple($"SET {parentId} = @@Identity;"), 
+            return SqlPreCommand.Combine(Spacing.Simple,
+                new SqlPreCommandSimple($"DECLARE {parentId} {pkType};") { GoBefore = true },
+                insert,
+                new SqlPreCommandSimple($"SET {parentId} = @@Identity;"),
                 collections)!;
         }
     }
@@ -758,7 +758,7 @@ END $$;"); ;
 
             update = isPostgres ?
                 PostgresDoBlock(entity.Id.VariableName!, declare, updateSql) :
-                SqlPreCommand.Combine(Spacing.Simple, declare, updateSql);;
+                SqlPreCommand.Combine(Spacing.Simple, declare, updateSql); ;
         }
         else
         {
@@ -789,7 +789,7 @@ END $$;"); ;
             var withEntites = error.WithEntities(modifiables);
             throw new IntegrityCheckException(withEntites);
 #else
-            throw new IntegrityCheckException(error);
+                throw new IntegrityCheckException(error);
 #endif
         }
         GraphExplorer.PropagateModifications(modifiables.Inverse());
@@ -801,7 +801,9 @@ END $$;"); ;
         {
             this.SourceColumn = column.Name;
             this.ParameterName = Signum.Engine.ParameterBuilder.GetParameterName(column.Name);
-            this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(Concat(this.ParameterName, suffix), column.DbType, column.UserDefinedTypeName, column.Nullable.ToBool(), value);
+            this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(
+                Concat(this.ParameterName, suffix),
+                column.DbType, column.Size, column.Precision, column.Scale, column.UserDefinedTypeName, column.Nullable.ToBool(), value);
         }
 
         public string SourceColumn;
@@ -1118,7 +1120,7 @@ public partial class TableMList
                     var parameters = new List<DbParameter>();
                     InsertParameters(parent, e, i, new Forbidden(new HashSet<Entity> { parent }), suffix + "_" + i, parameters);
                     var parentId = parameters.First(); // wont be replaced, generating @parentId
-                    parameters.RemoveAt(0);
+                        parameters.RemoveAt(0);
                     string script = sqlInsert(new[] { suffix + "_" + i }, false);
                     script = script.Replace(parentId.ParameterName, parentIdVar);
                     return new SqlPreCommandSimple(script, parameters).AddComment(e?.ToString());
@@ -1137,7 +1139,7 @@ public partial class TableMList
     }
 
     static GenericInvoker<Func<TableMList, IMListCache>> giCreateCache =
-        new((TableMList rt) => rt.CreateCache<int>());
+    new((TableMList rt) => rt.CreateCache<int>());
 
     internal Lazy<IMListCache> cache;
 
@@ -1169,7 +1171,7 @@ public partial class TableMList
             {
                 var list = new List<DbParameter>
                 {
-                pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name), delete.Entity.Id, BackReference)
+                    pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name), delete.Entity.Id, BackReference)
                 };
 
                 list.AddRange(delete.ExceptRowIds.Select((e, i) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName("e" + i), e, PrimaryKey)));
@@ -1229,9 +1231,9 @@ public partial class TableMList
 
             var parameters = trios.Select(a => a.ParameterBuilder).ToList();
 
-            parameters.Add(pb.ParameterFactory(Table.Trio.Concat(parentId, paramSuffix), this.BackReference.DbType, null, false,
+            parameters.Add(pb.ParameterFactory(Table.Trio.Concat(parentId, paramSuffix), this.BackReference.DbType, null, null, null, null, false,
                 Expression.Field(Expression.Property(Expression.Field(paramIdent, Table.fiId), "Value"), "Object")));
-            parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramSuffix), this.PrimaryKey.DbType, null, false,
+            parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramSuffix), this.PrimaryKey.DbType, null, null, null, null, false,
                 Expression.Field(paramRowId, "Object")));
 
             var expr = Expression.Lambda<Action<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>>>(
@@ -1532,7 +1534,7 @@ public partial class FieldEmbedded
                     Expression.Field(embedded, ef.FieldInfo).Nullify()), forbidden, suffix);
         }
 
-        if(Mixins != null)
+        if (Mixins != null)
         {
             foreach (var mi in Mixins)
             {

@@ -66,15 +66,12 @@ public abstract class Entity : ModifiableEntity, IEntity
         return base.Set<T>(ref field, value, automaticPropertyName!);
     }
 
-    public override string ToString()
-    {
-        return BaseToString();
-    }
 
-    public string BaseToString()
-    {
-        return "{0} ({1})".FormatWith(GetType().NiceName(), id.HasValue ? id.ToString() : LiteMessage.New_G.NiceToString().ForGenderAndNumber(this.GetType().GetGender()));
-    }
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => BaseToString());
+    
+    [AutoExpressionField]
+    public string BaseToString() => As.Expression(() => IsNew ? GetType().NewNiceName() : GetType().NiceName() + " " + Id);
 
     public override bool Equals(object? obj)
     {

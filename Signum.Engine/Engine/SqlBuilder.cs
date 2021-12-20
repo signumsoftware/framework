@@ -19,21 +19,21 @@ public class SqlBuilder
     }
 
     public List<string> SystemSchemas = new List<string>()
-    {
-        "dbo",
-        "guest",
-        "INFORMATION_SCHEMA",
-        "sys",
-        "db_owner",
-        "db_accessadmin",
-        "db_securityadmin",
-        "db_ddladmin",
-        "db_backupoperator",
-        "db_datareader",
-        "db_datawriter",
-        "db_denydatareader",
-        "db_denydatawriter"
-    };
+        {
+            "dbo",
+            "guest",
+            "INFORMATION_SCHEMA",
+            "sys",
+            "db_owner",
+            "db_accessadmin",
+            "db_securityadmin",
+            "db_ddladmin",
+            "db_backupoperator",
+            "db_datareader",
+            "db_datawriter",
+            "db_denydatareader",
+            "db_denydatawriter"
+        };
 
     public SqlPreCommandSimple? UseDatabase(string? databaseName = null)
     {
@@ -46,9 +46,9 @@ public class SqlBuilder
     #region Create Tables
     public SqlPreCommand CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false)
     {
-        var primaryKeyConstraint = t.PrimaryKey == null || t.SystemVersioned != null && tableName != null && t.SystemVersioned.TableName.Equals(tableName) ? null : 
-            isPostgres ? 
-            "CONSTRAINT {0} PRIMARY KEY ({1})".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres)) : 
+        var primaryKeyConstraint = t.PrimaryKey == null || t.SystemVersioned != null && tableName != null && t.SystemVersioned.TableName.Equals(tableName) ? null :
+            isPostgres ?
+            "CONSTRAINT {0} PRIMARY KEY ({1})".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres)) :
             "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres));
 
         var systemPeriod = t.SystemVersioned == null || IsPostgres || avoidSystemVersioning ? null : Period(t.SystemVersioned);
@@ -69,14 +69,14 @@ public class SqlBuilder
 
         return new[]
         {
-            result,
-            new SqlPreCommandSimple($"CREATE TABLE {t.SystemVersioned.TableName}(LIKE {t.Name});"),
-            new SqlPreCommandSimple(@$"CREATE TRIGGER versioning_trigger
+                result,
+                new SqlPreCommandSimple($"CREATE TABLE {t.SystemVersioned.TableName}(LIKE {t.Name});"),
+                new SqlPreCommandSimple(@$"CREATE TRIGGER versioning_trigger
 BEFORE INSERT OR UPDATE OR DELETE ON {t.Name}
 FOR EACH ROW EXECUTE PROCEDURE versioning(
   'sys_period', '{t.SystemVersioned.TableName}', true
 );")
-        }.Combine(Spacing.Simple)!;
+            }.Combine(Spacing.Simple)!;
 
     }
 
@@ -109,9 +109,9 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
     SqlPreCommand DropViewIndex(ObjectName viewName, string index)
     {
         return new[]{
-             DropIndex(viewName, index),
-             DropView(viewName)
-        }.Combine(Spacing.Simple)!;
+                 DropIndex(viewName, index),
+                 DropView(viewName)
+            }.Combine(Spacing.Simple)!;
     }
 
     public SqlPreCommand AlterTableAddPeriod(ITable table)
@@ -119,7 +119,8 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
         return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned!)};");
     }
 
-    string? Period(SystemVersionedInfo sv) {
+    string? Period(SystemVersionedInfo sv)
+    {
 
         if (!Connector.Current.SupportsTemporalTables)
             throw new InvalidOperationException($"The current connector '{Connector.Current}' does not support Temporal Tables");
@@ -163,12 +164,12 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
         var alterColumn = !IsPostgres ?
              new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, this.ColumnLine(column, null, isChange: true))) :
-             new[] 
+             new[]
              {
-                 !diffColumn.DbType.Equals(column.DbType) || diffColumn.Collation != column.Collation || !diffColumn.ScaleEquals(column) || !diffColumn.SizeEquals(column) ? 
-                    new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, column.Name.SqlEscape(isPostgres),  GetColumnType(column) + (column.Collation != null ? " COLLATE " + column.Collation : null))) : null, 
-                 diffColumn.Nullable &&  !column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
-                 !diffColumn.Nullable && column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+                     !diffColumn.DbType.Equals(column.DbType) || diffColumn.Collation != column.Collation || !diffColumn.ScaleEquals(column) || !diffColumn.SizeEquals(column) ?
+                        new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, column.Name.SqlEscape(isPostgres),  GetColumnType(column) + (column.Collation != null ? " COLLATE " + column.Collation : null))) : null,
+                     diffColumn.Nullable &&  !column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+                     !diffColumn.Nullable && column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
              }.Combine(Spacing.Simple) ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, column.Name.SqlEscape(isPostgres)));
 
         if (column.Default == null)
@@ -213,7 +214,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             $"GENERATED ALWAYS AS ROW {(c.GeneratedAlwaysType == GeneratedAlwaysType.AsRowStart ? "START" : "END")} HIDDEN" :
             null;
 
-        var defaultConstraint = c.DefaultConstraint!= null ? $"CONSTRAINT {c.DefaultConstraint.Name} DEFAULT " + c.DefaultConstraint.Definition : null;
+        var defaultConstraint = c.DefaultConstraint != null ? $"CONSTRAINT {c.DefaultConstraint.Name} DEFAULT " + c.DefaultConstraint.Definition : null;
 
         return $" ".Combine(
             c.Name.SqlEscape(isPostgres),
@@ -239,7 +240,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
         return $" ".Combine(
             c.Name.SqlEscape(isPostgres),
             fullType,
-            c.Identity && !isChange && !forHistoryTable ? (isPostgres? "GENERATED ALWAYS AS IDENTITY": "IDENTITY") : null, 
+            c.Identity && !isChange && !forHistoryTable ? (isPostgres ? "GENERATED ALWAYS AS IDENTITY" : "IDENTITY") : null,
             generatedAlways,
             c.Collation != null ? ("COLLATE " + c.Collation) : null,
             c.Nullable.ToBool() ? "NULL" : "NOT NULL",
@@ -249,12 +250,36 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
     public string GetColumnType(IColumn c)
     {
-        return c.UserDefinedTypeName ?? (c.DbType.ToString(IsPostgres) + GetSizeScale(c.Size, c.Scale));
+        return c.UserDefinedTypeName ?? (c.DbType.ToString(IsPostgres) + GetSizePrecisionScale(c));
     }
 
     public string GetColumnType(DiffColumn c)
     {
         return c.UserTypeName ?? c.DbType.ToString(IsPostgres) /*+ GetSizeScale(Math.Max(c.Length, c.Precision), c.Scale)*/;
+    }
+
+    public string GetSizePrecisionScale(IColumn c)
+    {
+        return GetSizePrecisionScale(c.Size, c.Precision, c.Scale, c.DbType.IsDecimal());
+    }
+
+    public string GetSizePrecisionScale(int? size, byte? precision, byte? scale, bool isDecimal)
+    {
+        if (size == null && precision == null)
+            return "";
+
+        if (isDecimal)
+        {
+            if (scale == null)
+                return "({0})".FormatWith(precision);
+            else
+                return "({0},{1})".FormatWith(precision, scale);
+        }
+
+        if (size == int.MaxValue)
+            return IsPostgres ? "" : "(MAX)";
+
+        return "({0})".FormatWith(size);
     }
 
     public string Quote(AbstractDbType type, string @default)
@@ -263,20 +288,6 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             return "'" + @default + "'";
 
         return @default;
-    }
-
-    public string GetSizeScale(int? size, int? scale)
-    {
-        if (size == null)
-            return "";
-
-        if (size == int.MaxValue)
-            return IsPostgres ? "" : "(MAX)";
-
-        if (scale == null)
-            return "({0})".FormatWith(size);
-
-        return "({0},{1})".FormatWith(size, scale);
     }
 
     public SqlPreCommand? AlterTableForeignKeys(ITable t)
@@ -334,9 +345,9 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
                 SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName.SqlEscape(isPostgres)} ON {viewName}({columns});");
 
-                return SqlPreCommand.Combine(Spacing.Simple, 
-                    checkUnique!=null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null, 
-                    viewSql, 
+                return SqlPreCommand.Combine(Spacing.Simple,
+                    checkUnique != null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null,
+                    viewSql,
                     indexSql)!;
             }
             else
@@ -371,10 +382,10 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 $@"SELECT Count(*) FROM {oldTableName}
 WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 (
-SELECT MIN({oldPrimaryKey.SqlEscape(IsPostgres)})
-FROM {oldTableName}
-{(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
-GROUP BY {oldColumns}
+    SELECT MIN({oldPrimaryKey.SqlEscape(IsPostgres)})
+    FROM {oldTableName}
+    {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
+    GROUP BY {oldColumns}
 ){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))};")!);
     }
 
@@ -419,10 +430,10 @@ GROUP BY {oldColumns}
         return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
 WHERE {primaryKey.Name} NOT IN
 (
-SELECT MIN({primaryKey.Name})
-FROM {uniqueIndex.Table.Name}
-{(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
-GROUP BY {columns}
+    SELECT MIN({primaryKey.Name})
+    FROM {uniqueIndex.Table.Name}
+    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
+    GROUP BY {columns}
 ){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
     }
 
@@ -440,7 +451,7 @@ GROUP BY {columns}
 
     internal SqlPreCommand UpdateTrim(ITable tab, IColumn tabCol)
     {
-        return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1});".FormatWith(tab.Name, tabCol.Name));;
+        return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1});".FormatWith(tab.Name, tabCol.Name)); ;
     }
 
     public SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName foreignKeyName) =>
@@ -509,7 +520,7 @@ GROUP BY {columns}
     public SqlPreCommandSimple SP_RENAME(DatabaseName? database, string oldName, string newName, string? objectType)
     {
         return new SqlPreCommandSimple("EXEC {0}SP_RENAME '{1}' , '{2}'{3};".FormatWith(
-            database == null ? null: SchemaName.Default(isPostgres).OnDatabase(database).ToString() + ".",
+            database == null ? null : SchemaName.Default(isPostgres).OnDatabase(database).ToString() + ".",
             oldName,
             newName,
             objectType == null ? null : ", '{0}'".FormatWith(objectType)
@@ -523,7 +534,7 @@ GROUP BY {columns}
 
         if (object.Equals(oldTableName.Schema, newTableName.Schema))
             return RenameTable(oldTableName, newTableName.Name);
-        
+
         var oldNewSchema = oldTableName.OnSchema(newTableName.Schema);
 
         return SqlPreCommand.Combine(Spacing.Simple,
@@ -535,7 +546,7 @@ GROUP BY {columns}
     {
         if (object.Equals(oldTable.Name.Schema.Database, newTableName.Schema.Database))
             return RenameOrChangeSchema(oldTable.Name, newTableName);
-        
+
         return SqlPreCommand.Combine(Spacing.Simple,
           CreateTableSql(newTable, newTableName, avoidSystemVersioning: true),
           MoveRows(oldTable.Name, newTableName, newTable.Columns.Keys, avoidIdentityInsert: newTable.SystemVersioned != null && newTable.SystemVersioned.Equals(newTable)),

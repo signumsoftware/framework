@@ -157,7 +157,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
     {
         return IsByAll && other.IsByAll ||
             arrayOrType == other.arrayOrType ||
-            Enumerable.SequenceEqual(Types.OrderBy(a => a.FullName), other.Types.OrderBy(a => a.FullName));
+        Enumerable.SequenceEqual(Types.OrderBy(a => a.FullName), other.Types.OrderBy(a => a.FullName));
     }
 
     public override int GetHashCode()
@@ -224,14 +224,14 @@ public sealed class ForceNotNullableAttribute : Attribute
 /// This attribute is only necessary in the case an entity field is not-nullable but you can not make the DB column nullable because of legacy data, or cycles in a graph of entities.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class ForceNullableAttribute: Attribute
+public sealed class ForceNullableAttribute : Attribute
 {
 }
 
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public class DbTypeAttribute : Attribute
-{   
+{
     SqlDbType? sqlDbType;
     public bool HasSqlDbType => sqlDbType.HasValue;
     public SqlDbType SqlDbType
@@ -256,10 +256,18 @@ public class DbTypeAttribute : Attribute
         set { size = value; }
     }
 
+    byte? precision;
+    public bool HasPrecision => precision.HasValue;
+    public byte Precision
+    {
+        get { return precision!.Value; }
+        set { precision = value; }
+    }
 
-    int? scale;
+
+    byte? scale;
     public bool HasScale => scale.HasValue;
-    public int Scale
+    public byte Scale
     {
         get { return scale!.Value; }
         set { scale = value; }
@@ -282,7 +290,7 @@ public class DbTypeAttribute : Attribute
 
     public const string SqlServer_NewId = "NEWID()";
     public const string SqlServer_NewSequentialId = "NEWSEQUENTIALID()";
-    public const string Postgres_UuidGenerateV1= "uuid_generate_v1()";
+    public const string Postgres_UuidGenerateV1 = "uuid_generate_v1()";
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
@@ -369,7 +377,7 @@ public sealed class TableNameAttribute : Attribute
     }
 }
 
-   
+
 
 [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
 public sealed class TicksColumnAttribute : DbTypeAttribute

@@ -20,11 +20,11 @@ public class EntityCodeGenerator
 
     public virtual void GenerateEntitiesFromDatabaseTables()
     {
-        CurrentSchema = Schema.Current; 
+        CurrentSchema = Schema.Current;
 
-        var tables =  GetTables();
+        var tables = GetTables();
 
-        this.Tables = tables.ToDictionary(a=>a.Name);
+        this.Tables = tables.ToDictionary(a => a.Name);
 
         InverseGraph = DirectedGraph<DiffTable>.Generate(tables, t =>
             t.Columns.Values.Select(a => a.ForeignKey).NotNull().Select(a => a.TargetTable).Distinct().Select(on => this.Tables.GetOrThrow(on))).Inverse();
@@ -136,7 +136,7 @@ public class EntityCodeGenerator
             (from t in tables
              from kvp in GetMListFields(t)
              let tec = kvp.Value.TrivialElementColumn
-             let targetTable = tec != null  && tec.ForeignKey != null ? Tables.GetOrThrow(tec.ForeignKey.TargetTable) : kvp.Key
+             let targetTable = tec != null && tec.ForeignKey != null ? Tables.GetOrThrow(tec.ForeignKey.TargetTable) : kvp.Key
              select GetNamespace(GetFileName(targetTable)));
 
         result.AddRange(fkNamespaces.Concat(mListNamespaces).Where(ns => ns != currentNamespace).Distinct());
@@ -326,7 +326,7 @@ public class EntityCodeGenerator
 
         var dataTable = Executor.ExecuteDataTable("select * from " + table.Name);
 
-        var rowsById = dataTable.Rows.Cast<DataRow>().ToDictionary(row=>GetEnumId(table, row));
+        var rowsById = dataTable.Rows.Cast<DataRow>().ToDictionary(row => GetEnumId(table, row));
 
         int lastId = -1;
         foreach (var kvp in rowsById.OrderBy(a => a.Key))
@@ -518,7 +518,7 @@ public class EntityCodeGenerator
         if (type != def.Type || parts.Any())
             parts.Insert(0, "typeof(" + type.TypeName() + ")");
 
-        if(parts.Any())
+        if (parts.Any())
             return "PrimaryKey(" + parts.ToString(", ") + ")";
 
         return null;
@@ -625,7 +625,7 @@ public class EntityCodeGenerator
         List<string> attributes = new List<string>();
 
         string? stringLengthValidator = GetStringLengthValidator(table, col, relatedEntity);
-        if(stringLengthValidator != null)
+        if (stringLengthValidator != null)
             attributes.Add(stringLengthValidator);
 
         return attributes;
@@ -655,7 +655,7 @@ public class EntityCodeGenerator
 
     protected virtual string GetFieldName(DiffTable table, DiffColumn col)
     {
-        string name = !IdentifierValidatorAttribute.PascalAscii.IsMatch(col.Name)  || col.Name.Contains("_") ? col.Name.ToPascal(false, false) : col.Name;
+        string name = !IdentifierValidatorAttribute.PascalAscii.IsMatch(col.Name) || col.Name.Contains("_") ? col.Name.ToPascal(false, false) : col.Name;
 
         if (this.GetRelatedEntity(table, col) != null)
         {
@@ -743,10 +743,17 @@ public class EntityCodeGenerator
         var defaultSize = CurrentSchema.Settings.GetSqlSize(null, null, pair.DbType);
         if (defaultSize != null)
         {
-            if (!(defaultSize == col.Precision || defaultSize == col.Length || defaultSize == int.MaxValue && col.Length == -1))
+            if (!(defaultSize == col.Length || defaultSize == int.MaxValue && col.Length == -1))
                 parts.Add("Size = " + (col.Length == -1 ? "int.MaxValue" :
                                     col.Length != 0 ? col.Length.ToString() :
                                     col.Precision != 0 ? col.Precision.ToString() : "0"));
+        }
+
+        var defaultPrecision = CurrentSchema.Settings.GetSqlPrecision(null, null, pair.DbType);
+        if (defaultPrecision != null)
+        {
+            if (defaultPrecision != col.Precision)
+                parts.Add("Precision = " + (col.Precision != 0 ? col.Precision.ToString() : "0"));
         }
 
         var defaultScale = CurrentSchema.Settings.GetSqlScale(null, null, col.DbType);
@@ -851,7 +858,7 @@ public class EntityCodeGenerator
     {
         string type;
         List<string> fieldAttributes;
-        if(mListInfo.TrivialElementColumn == null )
+        if (mListInfo.TrivialElementColumn == null)
         {
             type = GetEntityName(relatedTable);
             fieldAttributes = new List<string> { };
@@ -886,7 +893,7 @@ public class EntityCodeGenerator
         WriteAttributeTag(sb, fieldAttributes);
         sb.AppendLine("[NoRepeatValidator]");
 
-        if (mListInfo.IsVirtual) 
+        if (mListInfo.IsVirtual)
             sb.AppendLine("[Ignore, QueryableProperty] //Virtual MList ");
 
         sb.AppendLine("public MList<{0}> {1} {{ get; set; }} = new MList<{0}>();".FormatWith(type, fieldName.FirstUpper()));
@@ -896,16 +903,16 @@ public class EntityCodeGenerator
 
     protected virtual string? GetPreserveOrderAttribute(MListInfo mListInfo)
     {
-        if(mListInfo.PreserveOrderColumn == null)
+        if (mListInfo.PreserveOrderColumn == null)
             return null;
 
         if (mListInfo.IsVirtual)
             return "PreserveOrder";
 
         var parts = new List<string>
-        {
-            "\"" + mListInfo.PreserveOrderColumn.Name + "\""
-        };
+            {
+                "\"" + mListInfo.PreserveOrderColumn.Name + "\""
+            };
 
         Type type = GetValueType(mListInfo.PreserveOrderColumn);
 

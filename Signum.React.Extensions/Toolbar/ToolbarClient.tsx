@@ -11,6 +11,7 @@ import { Lite, Entity } from '@framework/Signum.Entities'
 import { Type } from '@framework/Reflection'
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation } from './Signum.Entities.Toolbar'
 import * as Constructor from '@framework/Constructor'
+import * as Operations from '@framework/Operations'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ValueSearchControl } from '@framework/Search';
 import { parseIcon } from '../Basics/Templates/IconTypeahead';
@@ -28,6 +29,18 @@ export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarCon
 
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(ToolbarEntity);
+
+  Navigator.entityChanged.push((cleanName) => document.dispatchEvent(new RefreshCounterEvent(cleanName)));
+}
+
+export class RefreshCounterEvent extends Event {
+
+  queryKey: string | string[];
+
+  constructor(queryKey: string[] | string,) {
+    super("count-user-query");
+    this.queryKey = queryKey;
+  }
 }
 
 export abstract class ToolbarConfig<T extends Entity> {

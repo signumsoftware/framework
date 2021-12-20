@@ -28,7 +28,7 @@ public class SchemaSettings
     public ConcurrentDictionary<Type, AttributeCollection> TypeAttributesCache = new ConcurrentDictionary<Type, AttributeCollection>();
 
     public Dictionary<Type, LambdaExpression> CustomOrder = new Dictionary<Type, LambdaExpression>();
-    
+
     internal Dictionary<Type, string>? desambiguatedNames;
     public void Desambiguate(Type type, string cleanName)
     {
@@ -48,16 +48,16 @@ public class SchemaSettings
     public Dictionary<Type, AbstractDbType> TypeValues = new Dictionary<Type, AbstractDbType>
     {
         {typeof(bool),           new AbstractDbType(SqlDbType.Bit,              NpgsqlDbType.Boolean)},
-                                                                                
+
         {typeof(byte),           new AbstractDbType(SqlDbType.TinyInt,          NpgsqlDbType.Smallint)},
         {typeof(short),          new AbstractDbType(SqlDbType.SmallInt,         NpgsqlDbType.Smallint)},
         {typeof(int),            new AbstractDbType(SqlDbType.Int,              NpgsqlDbType.Integer)},
         {typeof(long),           new AbstractDbType(SqlDbType.BigInt,           NpgsqlDbType.Bigint)},
-                                                                                
+
         {typeof(float),          new AbstractDbType(SqlDbType.Real,             NpgsqlDbType.Real)},
         {typeof(double),         new AbstractDbType(SqlDbType.Float,            NpgsqlDbType.Double)},
         {typeof(decimal),        new AbstractDbType(SqlDbType.Decimal,          NpgsqlDbType.Numeric)},
-                                                                                
+
         {typeof(char),           new AbstractDbType(SqlDbType.NChar,            NpgsqlDbType.Char)},
         {typeof(string),         new AbstractDbType(SqlDbType.NVarChar,         NpgsqlDbType.Varchar)},
         {typeof(DateOnly),       new AbstractDbType(SqlDbType.Date,             NpgsqlDbType.Date)},
@@ -79,7 +79,6 @@ public class SchemaSettings
         {SqlDbType.Binary, 8000},
         {SqlDbType.Char, 1},
         {SqlDbType.NChar, 1},
-        {SqlDbType.Decimal, 18},
     };
 
     readonly Dictionary<NpgsqlDbType, int> defaultSizePostgreSql = new Dictionary<NpgsqlDbType, int>()
@@ -87,15 +86,24 @@ public class SchemaSettings
         {NpgsqlDbType.Varbit, 200},
         {NpgsqlDbType.Varchar, 200},
         {NpgsqlDbType.Char, 1},
+    };
+
+    readonly Dictionary<SqlDbType, byte> defaultPrecisionSqlServer = new Dictionary<SqlDbType, byte>()
+    {
+        {SqlDbType.Decimal, 18},
+    };
+
+    readonly Dictionary<NpgsqlDbType, byte> defaultPrecisionPostgreSql = new Dictionary<NpgsqlDbType, byte>()
+    {
         {NpgsqlDbType.Numeric, 18},
     };
 
-    readonly Dictionary<SqlDbType, int> defaultScaleSqlServer = new Dictionary<SqlDbType, int>()
+    readonly Dictionary<SqlDbType, byte> defaultScaleSqlServer = new Dictionary<SqlDbType, byte>()
     {
         {SqlDbType.Decimal, 2},
     };
 
-    readonly Dictionary<NpgsqlDbType, int> defaultScalePostgreSql = new Dictionary<NpgsqlDbType, int>()
+    readonly Dictionary<NpgsqlDbType, byte> defaultScalePostgreSql = new Dictionary<NpgsqlDbType, byte>()
     {
         {NpgsqlDbType.Numeric, 2},
     };
@@ -195,7 +203,7 @@ public class SchemaSettings
         }
     }
 
-    public V? ValidatorAttribute<V>(PropertyRoute propertyRoute) where V: ValidatorAttribute
+    public V? ValidatorAttribute<V>(PropertyRoute propertyRoute) where V : ValidatorAttribute
     {
         if (!typeof(ModifiableEntity).IsAssignableFrom(propertyRoute.RootType))
             return null;
@@ -335,7 +343,28 @@ public class SchemaSettings
             return defaultSizePostgreSql.TryGetS(dbType.PostgreSql);
     }
 
-    internal int? GetSqlScale(DbTypeAttribute? att, PropertyRoute? route, AbstractDbType dbType)
+    internal byte? GetSqlPrecision(DbTypeAttribute? att, PropertyRoute? route, AbstractDbType dbType)
+    {
+        if (this.IsPostgres && dbType.PostgreSql == NpgsqlDbType.Bytea)
+            return null;
+
+        if (att != null && att.HasPrecision)
+            return att.Precision;
+
+        /*            if (route != null && route.Type == typeof(string))
+                    {
+                        var sla = ValidatorAttribute<StringLengthValidatorAttribute>(route);
+                        if (sla != null)
+                            return sla.Max == -1 ? int.MaxValue : sla.Max;
+                    }*/
+
+        if (!this.IsPostgres)
+            return defaultPrecisionSqlServer.TryGetS(dbType.SqlServer);
+        else
+            return defaultPrecisionPostgreSql.TryGetS(dbType.PostgreSql);
+    }
+
+    internal byte? GetSqlScale(DbTypeAttribute? att, PropertyRoute? route, AbstractDbType dbType)
     {
         bool isDecimal = dbType.IsDecimal();
         if (att != null && att.HasScale)
@@ -346,7 +375,7 @@ public class SchemaSettings
             return att.Scale;
         }
 
-        if(isDecimal && route != null)
+        if (isDecimal && route != null)
         {
             var dv = ValidatorAttribute<DecimalsValidatorAttribute>(route);
             if (dv != null)
@@ -387,7 +416,7 @@ public class SchemaSettings
 
         string? udtTypeName = GetUdtName(type);
         if (udtTypeName != null)
-            return new DbTypePair(new  AbstractDbType(SqlDbType.Udt), udtTypeName);
+            return new DbTypePair(new AbstractDbType(SqlDbType.Udt), udtTypeName);
 
         return null;
     }
@@ -419,7 +448,7 @@ public class DbTypePair
 {
     public AbstractDbType DbType { get; private set; }
     public string? UserDefinedTypeName { get; private set; }
-    
+
     public DbTypePair(AbstractDbType type, string? udtTypeName)
     {
         this.DbType = type;
@@ -432,7 +461,7 @@ public class AttributeCollection : Collection<Attribute>
     readonly AttributeTargets Targets;
     readonly Action assertNotIncluded;
 
-    public AttributeCollection(AttributeTargets targets, IList<Attribute> attributes, Action assertNotIncluded):base(attributes)
+    public AttributeCollection(AttributeTargets targets, IList<Attribute> attributes, Action assertNotIncluded) : base(attributes)
     {
         this.Targets = targets;
         this.assertNotIncluded = assertNotIncluded;
@@ -481,7 +510,7 @@ public class AttributeCollection : Collection<Attribute>
 
     public AttributeCollection Remove<A>() where A : Attribute
     {
-        this.RemoveAll(a=>a is A);
+        this.RemoveAll(a => a is A);
 
         return this;
     }

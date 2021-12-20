@@ -16,16 +16,16 @@ using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Cache;
 
-public interface ICacheMultiServerInvalidator
+public interface IServerBroadcast
 {
     void Start();
-    void SendInvalidation(string cleanName);
-    event Action<string>? ReceiveInvalidation;
+    void Send(string methodName, string argument);
+    event Action<string, string>? Receive;
 }
 
 public static class CacheLogic
 {
-    public static ICacheMultiServerInvalidator? CacheInvalidator;
+    public static IServerBroadcast? ServerBroadcast { get; private set; }
 
     public static bool WithSqlDependency { get; internal set; }
 
@@ -50,7 +50,7 @@ public static class CacheLogic
     ///    Change Server Authentication mode and enable SA: http://msdn.microsoft.com/en-us/library/ms188670.aspx
     ///    Change Database ownership to sa: ALTER AUTHORIZATION ON DATABASE::yourDatabase TO sa
     /// </summary>
-    public static void Start(SchemaBuilder sb, bool? withSqlDependency = null, ICacheMultiServerInvalidator? cacheInvalidator = null)
+    public static void Start(SchemaBuilder sb, bool? withSqlDependency = null, IServerBroadcast? serverBroadcast = null)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -63,14 +63,14 @@ public static class CacheLogic
 
             WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
 
-            if (cacheInvalidator != null && WithSqlDependency)
+            if (serverBroadcast != null && WithSqlDependency)
                 throw new InvalidOperationException("cacheInvalidator is only necessary if SqlDependency is not enabled");
 
-            CacheInvalidator = cacheInvalidator;
-            if(CacheInvalidator != null)
+            ServerBroadcast = serverBroadcast;
+            if(ServerBroadcast != null)
             {
-                CacheInvalidator!.ReceiveInvalidation += CacheInvalidator_ReceiveInvalidation;
-                sb.Schema.BeforeDatabaseAccess += () => CacheInvalidator!.Start();
+                ServerBroadcast!.Receive += ServerBroadcast_Receive;
+                sb.Schema.BeforeDatabaseAccess += () => ServerBroadcast!.Start();
             }
 
             sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
@@ -115,7 +115,17 @@ public static class CacheLogic
         }
     }
 
-    static void CacheInvalidator_ReceiveInvalidation(string cleanName)
+    static void ServerBroadcast_Receive(string methodName, string argument)
+    {
+        BroadcastReceivers.TryGetC(methodName)?.Invoke(argument);
+    }
+
+    public static Dictionary<string /*methodName*/, Action<string /*argument*/>> BroadcastReceivers = new Dictionary<string, Action<string>>
+    {
+        { InvalidateTable, ServerBroadcast_InvalidateTable}
+    };
+
+    static void ServerBroadcast_InvalidateTable(string cleanName)
     {
         Type type = TypeEntity.TryGetType(cleanName)!;
 
@@ -707,6 +717,8 @@ Remember that the Start could be called with an empty database!");
         }
     }
 
+    const string InvalidateTable = "InvalidateTable";
+
     internal static void NotifyInvalidateAllConnectedTypes(Type type)
     {
         var connected = inverseDependencies.IndirectlyRelatedTo(type, includeInitialNode: true);
@@ -717,7 +729,7 @@ Remember that the Start could be called with an empty database!");
             if (controller != null)
                 controller.NotifyInvalidated();
 
-            CacheInvalidator?.SendInvalidation(TypeLogic.GetCleanName(stype));
+            ServerBroadcast?.Send(InvalidateTable, TypeLogic.GetCleanName(stype));
         }
     }
 

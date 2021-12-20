@@ -32,7 +32,7 @@ export function start(options: { routes: JSX.Element[] }) {
   AppContext.clearSettingsActions.push(clearWidgets)
   AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
   AppContext.clearSettingsActions.push(clearCustomConstructors);
-
+  AppContext.clearSettingsActions.push()
   ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
   ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
 }
@@ -47,7 +47,20 @@ export namespace NavigatorManager {
   }
 }
 
-export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
+export const entityChanged: Array<(cleanName: string, entity?: Entity) => void> = [];
+
+function cleanEntityChanged() {
+  entityChanged.clear();
+}
+
+export function raiseEntityChanged(cleanNameOrEntity: string | Entity) {
+  var cleanName = isEntity(cleanNameOrEntity) ? cleanNameOrEntity.Type : cleanNameOrEntity;
+  var entity = isEntity(cleanNameOrEntity) ? cleanNameOrEntity : undefined;
+
+  entityChanged.forEach(a => a(cleanName, entity));
+}
+
+export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
 
   if (isTypeEntity(entity.Type)) {
 
@@ -57,15 +70,11 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
       return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
     return renderTitle(typeInfo, entity);
-
   }
   else if (isTypeModel(entity.Type)) {
-
-    const typeInfo = getTypeInfo(entity.Type);
-    return typeInfo.niceName;
+    return undefined;
 
   } else {
-
     return pr!.typeReference().typeNiceName;
   }
 }
@@ -548,7 +557,8 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
 }
 
 export interface ViewOptions {
-  title?: string;
+  title?: React.ReactNode | null;
+  subTitle?: React.ReactNode | null;
   propertyRoute?: PropertyRoute;
   readOnly?: boolean;
   modalSize?: BsSize;

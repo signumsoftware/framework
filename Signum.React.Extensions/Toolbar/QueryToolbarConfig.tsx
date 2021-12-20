@@ -1,14 +1,15 @@
 import * as React from 'react'
 import { Location } from 'history'
-import { getQueryNiceName } from '@framework/Reflection'
+import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'
-import { ToolbarConfig, ToolbarResponse } from './ToolbarClient'
+import { RefreshCounterEvent, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { ValueSearchControl, FindOptions } from '@framework/Search';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useInterval } from '@framework/Hooks'
+import { useDocumentEvent, useInterval } from '@framework/Hooks'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
+import a from 'bpmn-js/lib/features/search'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   constructor() {
@@ -51,10 +52,23 @@ export function CountIcon(p: CountIconProps) {
 
   const deps = useInterval(p.autoRefreshPeriod == null ? null : p.autoRefreshPeriod! * 1000, 0, a => a + 1);
 
-  return <ValueSearchControl deps={[deps]}
+  const [invalidations, setInvalidation] = React.useState<number>(0);
+
+  useDocumentEvent("count-user-query", (e: Event) => {
+    const queryKey = getQueryKey(p.findOptions.queryName);
+    if (e instanceof RefreshCounterEvent) {
+      if (e.queryKey == queryKey || Array.isArray(e.queryKey) && e.queryKey.contains(queryKey)) {
+        setInvalidation(a => a + 1);
+      } 
+    }
+  }, [p.findOptions.queryName]);
+
+  return <ValueSearchControl deps={[deps, invalidations]}
     findOptions={p.findOptions}
     customClass="icon"
     customStyle={{ color: p.color }}
     avoidNotifyPendingRequest={true}
   />;
 }
+
+

@@ -77,8 +77,8 @@ public class SchemaBuilder
         return index;
     }
 
-    public TableIndex AddIndex<T>(Expression<Func<T, object?>> fields, 
-        Expression<Func<T, bool>>? where = null, 
+    public TableIndex AddIndex<T>(Expression<Func<T, object?>> fields,
+        Expression<Func<T, bool>>? where = null,
         Expression<Func<T, object>>? includeFields = null) where T : Entity
     {
         var table = Schema.Table<T>();
@@ -569,6 +569,7 @@ public class SchemaBuilder
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = IsNullable.No,
             Size = Settings.GetSqlSize(ticksAttr, null, pair.DbType),
+            Precision = Settings.GetSqlPrecision(ticksAttr, null, pair.DbType),
             Scale = Settings.GetSqlScale(ticksAttr, null, pair.DbType),
             Default = ticksAttr?.GetDefault(Settings.IsPostgres),
         };
@@ -589,6 +590,7 @@ public class SchemaBuilder
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = Settings.GetIsNullable(route, forceNull),
             Size = Settings.GetSqlSize(att, route, pair.DbType),
+            Precision = Settings.GetSqlPrecision(att, route, pair.DbType),
             Scale = Settings.GetSqlScale(att, route, pair.DbType),
             Default = att?.GetDefault(Settings.IsPostgres),
         }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
@@ -700,13 +702,14 @@ public class SchemaBuilder
         {
             var pair = Settings.GetSqlDbTypePair(typeof(int));
 
-            order = new FieldValue(route: null!, fieldType:  typeof(int), orderAttr.Name ?? "Order")
+            order = new FieldValue(route: null!, fieldType: typeof(int), orderAttr.Name ?? "Order")
             {
                 DbType = pair.DbType,
                 Collation = Settings.GetCollate(orderAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = IsNullable.No,
                 Size = Settings.GetSqlSize(orderAttr, null, pair.DbType),
+                Precision = Settings.GetSqlPrecision(orderAttr, null, pair.DbType),
                 Scale = Settings.GetSqlScale(orderAttr, null, pair.DbType),
             };
         }
@@ -742,7 +745,7 @@ public class SchemaBuilder
         };
 
         mlistTable.Field = GenerateField(mlistTable, route.Add("Item"), NameSequence.Void, forceNull: false, inMList: true);
-        
+
         var sysAttribute = Settings.FieldAttribute<SystemVersionedAttribute>(route) ??
             (Settings.TypeAttribute<SystemVersionedAttribute>(table.Type) != null ? new SystemVersionedAttribute() : null);
 
@@ -799,7 +802,7 @@ public class SchemaBuilder
 
         SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default(isPostgres);
 
-        string name =  tn?.Name ?? EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type);
+        string name = tn?.Name ?? EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type);
 
         return new ObjectName(sn, name, isPostgres);
     }
@@ -875,8 +878,8 @@ public class SchemaBuilder
         GlobalLazyManager = manager;
     }
 
-    public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith, 
-        Action? onInvalidated = null, 
+    public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith,
+        Action? onInvalidated = null,
         LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication) where T : class
     {
         var result = Signum.Engine.GlobalLazy.WithoutInvalidations(() =>

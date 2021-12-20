@@ -25,7 +25,8 @@ import WidgetEmbedded from './WidgetEmbedded'
 import SaveChangesModal from '../Modals/SaveChangesModal';
 
 interface FrameModalProps extends IModalProps<ModifiableEntity | undefined> {
-  title?: string;
+  title?: React.ReactNode | null;
+  subTitle?: React.ReactNode | null;
   entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
   propertyRoute?: PropertyRoute;
   isOperationVisible?: (eoc: EntityOperationContext<any /*Entity*/>) => boolean;
@@ -223,7 +224,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   return (
     <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
       <ModalHeaderButtons onClose={p.buttons == "close" ? handleCancelClicked : undefined}>
-        <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} getViewPromise={p.getViewPromise} />
+        <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise} />
       </ModalHeaderButtons>
       {packComponent && renderBody(packComponent)}
       {p.buttons == "ok_cancel" && <ModalFooterButtons
@@ -343,6 +344,7 @@ export namespace FrameModalManager {
       extraProps={options.extraProps}
       validate={options.validate == undefined ? isTypeModel(getTypeName(entityOrPack)) : options.validate}
       title={options.title}
+      subTitle={options.subTitle}
       createNew={options.createNew}
       allowExchangeEntity={options.allowExchangeEntity}
       buttons={options.buttons ?? Navigator.typeDefaultButtons(getTypeName(entityOrPack), options.propertyRoute?.typeReference().isEmbedded)} />);
@@ -351,19 +353,29 @@ export namespace FrameModalManager {
 
 
 
-export function FrameModalTitle({ pack, pr, title, getViewPromise }: { pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>); }) {
+export function FrameModalTitle({ pack, pr, title, subTitle, getViewPromise }: { pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, subTitle?: React.ReactNode | null, getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>); }) {
 
   if (!pack)
     return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
 
   const entity = pack.entity;
 
+  if (title === undefined) {
+    title = getToString(entity);
+  }
+
+  if (subTitle === undefined) {
+    subTitle = Navigator.getTypeSubTitle(entity, pr);
+  }
+
   return (
     <span>
-      <span className="sf-entity-title">{title || getToString(entity)}</span>&nbsp;
-      {renderExpandLink(pack.entity)}
-      <br />
-      <small className="sf-type-nice-name text-muted"> {pr?.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
+      {title && <> <span className="sf-entity-title">{title}</span>&nbsp;
+        {renderExpandLink(pack.entity)}
+        <br />
+      </>
+      }
+      {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
     </span>
   );
 

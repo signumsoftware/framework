@@ -42,6 +42,9 @@ class ToStringExpressionVisitor : ExpressionVisitor
 
         if (exp is CachedEntityExpression cee)
         {
+            if (node.Member.Name == "IsNew")
+                return Expression.Constant(false);
+
             Field field = 
                 cee.FieldEmbedded != null ? cee.FieldEmbedded.GetField(node.Member) :
                 cee.FieldMixin != null ? cee.FieldMixin.GetField(node.Member) :
@@ -51,6 +54,26 @@ class ToStringExpressionVisitor : ExpressionVisitor
         }
 
         return node.Update(exp);
+    }
+
+    protected override Expression VisitConditional(ConditionalExpression c) // a.IsNew
+    {
+        Expression test = this.Visit(c.Test);
+        if (test is ConstantExpression co)
+        {
+            if ((bool)co.Value!)
+                return this.Visit(c.IfTrue);
+            else
+                return this.Visit(c.IfFalse);
+        }
+
+        Expression ifTrue = this.Visit(c.IfTrue);
+        Expression ifFalse = this.Visit(c.IfFalse);
+        if (test != c.Test || ifTrue != c.IfTrue || ifFalse != c.IfFalse)
+        {
+            return Expression.Condition(test, ifTrue, ifFalse);
+        }
+        return c;
     }
 
     private Expression BindMember(CachedEntityExpression n, Field field, Expression? prevPrimaryKey)
@@ -192,6 +215,7 @@ class ToStringExpressionVisitor : ExpressionVisitor
         var obj = base.Visit(node.Object);
         var args = base.Visit(node.Arguments);
 
+
         if (node.Method.Name == "ToString" && node.Arguments.IsEmpty() && obj is CachedEntityExpression ce && ce.Type.IsEntity())
         {
             var table = (Table)ce.Constructor.table;
@@ -210,6 +234,11 @@ class ToStringExpressionVisitor : ExpressionVisitor
 
                 return Expression.Call(tab, mi, ce.PrimaryKey.UnNullify());
             }
+        }
+
+        if(node.Method.Name == "GetType" && obj is CachedEntityExpression ce2)
+        {
+            return Expression.Constant(ce2.Type);
         }
 
         LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(obj?.Type, node.Method);

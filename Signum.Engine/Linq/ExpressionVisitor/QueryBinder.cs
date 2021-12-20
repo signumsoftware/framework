@@ -1487,6 +1487,26 @@ internal class QueryBinder : ExpressionVisitor
         return assignment;
     }
 
+    protected override Expression VisitConditional(ConditionalExpression c) // a.IsNew
+    {
+        Expression test = this.Visit(c.Test);
+        if (test is ConstantExpression co)
+        {
+            if ((bool)co.Value!)
+                return this.Visit(c.IfTrue);
+            else
+                return this.Visit(c.IfFalse);
+        }
+
+        Expression ifTrue = this.Visit(c.IfTrue);
+        Expression ifFalse = this.Visit(c.IfFalse);
+        if (test != c.Test || ifTrue != c.IfTrue || ifFalse != c.IfFalse)
+        {
+            return Expression.Condition(test, ifTrue, ifFalse);
+        }
+        return c;
+    }
+
     protected override Expression VisitMember(MemberExpression m)
     {
         Expression ex = base.VisitMember(m);
@@ -1538,6 +1558,7 @@ internal class QueryBinder : ExpressionVisitor
             map.RemoveRange(replacements.Keys);
             return result;
         }
+
 
         if (source is ImplementedByExpression ib)
         {
@@ -1625,8 +1646,38 @@ internal class QueryBinder : ExpressionVisitor
             return tablePeriod;
         }
 
+        Expression PartialEval(Expression ee)
+        {
+            if (m.Method.IsExtensionMethod())
+            {
+                return ExpressionEvaluator.PartialEval(Expression.Call(null, m.Method, m.Arguments.Skip(1).PreAnd(ee)));
+            }
+            else
+            {
+                return ExpressionEvaluator.PartialEval(Expression.Call(ee, m.Method, m.Arguments));
+            }
+        }
+
+        if (source is TypeEntityExpression type)
+        {
+            return Condition(Expression.NotEqual(type.ExternalId, NullId(type.ExternalId.ValueType)),
+              ifTrue: PartialEval(Expression.Constant(type.TypeValue)),
+              ifFalse: Expression.Constant(null, m.Type));
+        }
+
+        if(source is TypeImplementedByExpression typeIB)
+        {
+            return typeIB.TypeImplementations.Aggregate(
+               (Expression)Expression.Constant(null, m.Type),
+               (acum, kvp) => Condition(Expression.NotEqual(kvp.Value, NullId(kvp.Value.Value.Type)),
+               ifTrue: PartialEval(Expression.Constant(kvp.Key)),
+               ifFalse: acum));
+        }
+
         return m;
     }
+
+    
 
 
     private ConditionalExpression DispatchConditional(MethodCallExpression m, Expression test, Expression ifTrue, Expression ifFalse)
@@ -1748,6 +1799,9 @@ internal class QueryBinder : ExpressionVisitor
                                     if (pi != null && ReflectionTools.PropertyEquals(pi, EntityExpression.IdOrNullProperty))
                                         return ee.ExternalId;
 
+                                    if (m.Member.Name == nameof(Entity.IsNew))
+                                        return Expression.Constant(false);
+
                                     FieldInfo? fi = m.Member as FieldInfo ?? Reflector.TryFindFieldInfo(ee.Type, pi!);
 
                                     if (fi == null)
@@ -1861,6 +1915,25 @@ internal class QueryBinder : ExpressionVisitor
                                         "Max" => interval.Max ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.upper.ToString(), new[] { interval.PostgresRange! }),
                                         _ => throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member)),
                                     };
+                                }
+                            case DbExpressionType.TypeEntity:
+                                {
+                                    TypeEntityExpression type = (TypeEntityExpression)source;
+
+                                    return Condition(Expression.NotEqual(type.ExternalId, NullId(type.ExternalId.ValueType)),
+                                        ifTrue: ExpressionEvaluator.PartialEval(Expression.MakeMemberAccess(Expression.Constant(type.TypeValue), m.Member)),
+                                        ifFalse: Expression.Constant(null, m.Type));
+                                }
+
+                            case DbExpressionType.TypeImplementedBy:
+                                {
+                                    TypeImplementedByExpression typeIB = (TypeImplementedByExpression)source;
+
+                                    return typeIB.TypeImplementations.Aggregate(
+                                        (Expression)Expression.Constant(null, m.Type),
+                                        (acum, kvp) => Condition(Expression.NotEqual(kvp.Value, NullId(kvp.Value.Value.Type)),
+                                        ifTrue: ExpressionEvaluator.PartialEval(Expression.MakeMemberAccess(Expression.Constant(kvp.Key), m.Member)),
+                                        ifFalse: acum));
                                 }
                         }
                     }
@@ -3476,6 +3549,7 @@ class AssignAdapterExpander : DbExpressionVisitor
         var test = c.Test;
         var ifTrue = Visit(c.IfTrue);
         var ifFalse = Visit(c.IfFalse);
+
 
         if (colExpression is LiteReferenceExpression)
         {

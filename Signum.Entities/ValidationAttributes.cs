@@ -81,8 +81,8 @@ public static class NotNullValidatorExtensions
 {
     public static string? IsSetOnlyWhen(this (PropertyInfo pi, object? nullableValue) tuple, bool shouldBeSet)
     {
-        var isNull = tuple.nullableValue == null || 
-            tuple.nullableValue is string s && string.IsNullOrEmpty(s) || 
+        var isNull = tuple.nullableValue == null ||
+            tuple.nullableValue is string s && string.IsNullOrEmpty(s) ||
             tuple.nullableValue is ICollection col && col.Count == 0;
 
         if (isNull && shouldBeSet)
@@ -135,13 +135,13 @@ public class StringLengthValidatorAttribute : ValidatorAttribute
         if (string.IsNullOrEmpty(val))
             return null;
 
-        if(!MultiLine && (val.Contains('\n') || val.Contains('\r')))
+        if (!MultiLine && (val.Contains('\n') || val.Contains('\r')))
             return ValidationMessage._0ShouldHaveJustOneLine.NiceToString();
 
         if (!AllowLeadingSpaces && Regex.IsMatch(val, @"^\s+"))
             return ValidationMessage._0ShouldNotHaveInitialSpaces.NiceToString();
 
-         if (!AllowTrailingSpaces && Regex.IsMatch(val, @"\s+$"))
+        if (!AllowTrailingSpaces && Regex.IsMatch(val, @"\s+$"))
             return ValidationMessage._0ShouldNotHaveFinalSpaces.NiceToString();
 
         if (min == max && min != -1 && val.Length != min)
@@ -163,10 +163,10 @@ public class StringLengthValidatorAttribute : ValidatorAttribute
             string result =
                 min != -1 && max != -1 ? ValidationMessage.HaveBetween0And1Characters.NiceToString().FormatWith(min, max) :
                 min != -1 ? ValidationMessage.HaveMinimum0Characters.NiceToString().FormatWith(min) :
-                max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().FormatWith(max) : 
-                MultiLine ? ValidationMessage.BeAMultilineString.NiceToString() : 
+                max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().FormatWith(max) :
+                MultiLine ? ValidationMessage.BeAMultilineString.NiceToString() :
                 ValidationMessage.BeAString.NiceToString();
-            
+
             return result;
         }
     }
@@ -287,7 +287,7 @@ public class IdentifierValidatorAttribute : RegexValidatorAttribute
     public IdentifierValidatorAttribute(IdentifierType type)
            : base(
                  type == IdentifierType.PascalAscii ? PascalAscii :
-                 type == IdentifierType.Ascii ? Ascii:
+                 type == IdentifierType.Ascii ? Ascii :
                  type == IdentifierType.International ? International :
                  throw new UnexpectedValueException(type)
                  )
@@ -345,11 +345,11 @@ public class URLValidatorAttribute : RegexValidatorAttribute
         "^[0-9a-z_!~*'().;?:@&=+$,%#-](/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
 
     public URLValidatorAttribute(bool absolute = true, bool siteRelative = false, bool aspNetSiteRelative = false, bool documentRelative = false)
-        : base(new []{
-            absolute ? AbsoluteUrlRegex: null,
-            siteRelative ? SiteRelativeRegex: null,
-            aspNetSiteRelative ? AspNetRelativeRegex: null,
-            documentRelative ? DocumentRelativeRegex: null,
+        : base(new[]{
+                absolute ? AbsoluteUrlRegex: null,
+                siteRelative ? SiteRelativeRegex: null,
+                aspNetSiteRelative ? AspNetRelativeRegex: null,
+                documentRelative ? DocumentRelativeRegex: null,
         }.NotNull().ToArray())
     {
     }
@@ -406,14 +406,14 @@ public class FileNameValidatorAttribute : ValidatorAttribute
 
 public class DecimalsValidatorAttribute : ValidatorAttribute
 {
-    public int DecimalPlaces { get; set; }
+    public byte DecimalPlaces { get; set; }
 
     public DecimalsValidatorAttribute()
     {
         DecimalPlaces = 2;
     }
 
-    public DecimalsValidatorAttribute(int decimalPlaces)
+    public DecimalsValidatorAttribute(byte decimalPlaces)
     {
         this.DecimalPlaces = decimalPlaces;
     }
@@ -653,7 +653,7 @@ public class CountIsValidatorAttribute : ValidatorAttribute
         return ValidationMessage.TheNumberOfElementsOf0HasToBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().FirstLower(), Number.ToString());
     }
 
-    public bool IsGreaterThanZero => 
+    public bool IsGreaterThanZero =>
         ComparisonType == ComparisonType.GreaterThan && Number == 0 ||
         ComparisonType == ComparisonType.GreaterThanOrEqualTo && Number == 1;
 
@@ -716,7 +716,7 @@ public class DateTimePrecisionValidatorAttribute : ValidatorAttribute
     internal static DateTime ToDateTime(object? value)
     {
         return value is DateTime dt ? dt :
-            value is DateOnly d ? d.ToDateTime() :
+        value is DateOnly d ? d.ToDateTime() :
             value is DateTimeOffset dto ? dto.DateTime :
             throw new UnexpectedValueException(value);
     }
@@ -739,7 +739,7 @@ public class DateInPastValidatorAttribute : ValidatorAttribute
         return null;
     }
 
-    
+
 
     public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
 }
@@ -794,7 +794,7 @@ public class TimePrecisionValidatorAttribute : ValidatorAttribute
             if (ts.Days != 0)
                 return "{0} has days";
         }
-        else if(value is TimeOnly to)
+        else if (value is TimeOnly to)
         {
             var prec = to.GetPrecision();
             if (prec > Precision)
@@ -856,7 +856,7 @@ public class StringCaseValidatorAttribute : ValidatorAttribute
         string? str = (string?)value;
         if (!str.HasText())
             return null;
-        
+
         if ((this.textCase == StringCase.Uppercase) && (str != str.ToUpper()))
             return ValidationMessage._0HasToBeUppercase.NiceToString();
 

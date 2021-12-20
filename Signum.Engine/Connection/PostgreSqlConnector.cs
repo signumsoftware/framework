@@ -363,7 +363,7 @@ public class PostgreSqlConnector : Connector
     }
 }
 
-public static class PostgreSqlConnectorScripts 
+public static class PostgreSqlConnectorScripts
 {
     public static SqlPreCommandSimple RemoveAllScript(DatabaseName? databaseName)
     {
@@ -392,109 +392,109 @@ public static class PostgreSqlConnectorScripts
 
 DO $$
 DECLARE
-    r RECORD;
+        r RECORD;
 BEGIN
-    -- triggers
-    FOR r IN (SELECT pns.nspname, pc.relname, pt.tgname
-            FROM pg_trigger pt, pg_class pc, pg_namespace pns
-            WHERE pns.oid=pc.relnamespace AND pc.oid=pt.tgrelid
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                AND pt.tgisinternal=false
-        ) LOOP
-            EXECUTE format('DROP TRIGGER %I ON %I.%I;',
-                r.tgname, r.nspname, r.relname);
-    END LOOP;
-    -- constraints #1: foreign key
-    FOR r IN (SELECT pns.nspname, pc.relname, pcon.conname
-            FROM pg_constraint pcon, pg_class pc, pg_namespace pns
-            WHERE pns.oid=pc.relnamespace AND pc.oid=pcon.conrelid
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                AND pcon.contype='f'
-        ) LOOP
-            EXECUTE format('ALTER TABLE ONLY %I.%I DROP CONSTRAINT %I;',
-                r.nspname, r.relname, r.conname);
-    END LOOP;
-    -- constraints #2: the rest
-    FOR r IN (SELECT pns.nspname, pc.relname, pcon.conname
-            FROM pg_constraint pcon, pg_class pc, pg_namespace pns
-            WHERE pns.oid=pc.relnamespace AND pc.oid=pcon.conrelid
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                AND pcon.contype<>'f'
-        ) LOOP
-            EXECUTE format('ALTER TABLE ONLY %I.%I DROP CONSTRAINT %I;',
-                r.nspname, r.relname, r.conname);
-    END LOOP;
-    -- indicēs
-    FOR r IN (SELECT pns.nspname, pc.relname
-            FROM pg_class pc, pg_namespace pns
-            WHERE pns.oid=pc.relnamespace
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                AND pc.relkind='i'
-        ) LOOP
-            EXECUTE format('DROP INDEX %I.%I;',
-                r.nspname, r.relname);
-    END LOOP;
-    -- normal and materialised views
-    FOR r IN (SELECT pns.nspname, pc.relname
-            FROM pg_class pc, pg_namespace pns
-            WHERE pns.oid=pc.relnamespace
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                AND pc.relname NOT LIKE 'pg_%'
-                AND pc.relkind IN ('v', 'm')
-        ) LOOP
-            EXECUTE format('DROP VIEW %I.%I;',
-                r.nspname, r.relname);
-    END LOOP;
-    -- tables
-    FOR r IN (SELECT pns.nspname, pc.relname
-            FROM pg_class pc, pg_namespace pns
-            WHERE pns.oid=pc.relnamespace
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                AND pc.relkind='r'
-        ) LOOP
-            EXECUTE format('DROP TABLE %I.%I;',
-                r.nspname, r.relname);
-    END LOOP;
-    -- sequences
-    FOR r IN (SELECT pns.nspname, pc.relname
-            FROM pg_class pc, pg_namespace pns
-            WHERE pns.oid=pc.relnamespace
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-                AND pc.relkind='S'
-        ) LOOP
-            EXECUTE format('DROP SEQUENCE %I.%I;',
-                r.nspname, r.relname);
-    END LOOP;
-    -- extensions (see below), only if necessary
-    FOR r IN (SELECT pns.nspname, pe.extname
-            FROM pg_extension pe, pg_namespace pns
-            WHERE pns.oid=pe.extnamespace
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-        ) LOOP
-            EXECUTE format('DROP EXTENSION %I;', r.extname);
-    END LOOP;
-    -- functions / procedures
-    FOR r IN (SELECT pns.nspname, pp.proname, pp.oid
-            FROM pg_proc pp, pg_namespace pns
-            WHERE pns.oid=pp.pronamespace
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
-        ) LOOP
-            EXECUTE format('DROP FUNCTION %I.%I(%s);',
-                r.nspname, r.proname,
-                pg_get_function_identity_arguments(r.oid));
-    END LOOP;
-    -- nōn-default schemata we own; assume to be run by a not-superuser
-    FOR r IN (SELECT pns.nspname
-            FROM pg_namespace pns, pg_roles pr
-            WHERE pr.oid=pns.nspowner
-                AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast', 'public')
-                AND pr.rolname=current_user
-        ) LOOP
-            EXECUTE format('DROP SCHEMA %I;', r.nspname);
-    END LOOP;
-    -- voilà
-    RAISE NOTICE 'Database cleared!';
-END; $$;"); 
+        -- triggers
+        FOR r IN (SELECT pns.nspname, pc.relname, pt.tgname
+                FROM pg_trigger pt, pg_class pc, pg_namespace pns
+                WHERE pns.oid=pc.relnamespace AND pc.oid=pt.tgrelid
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pt.tgisinternal=false
+            ) LOOP
+                EXECUTE format('DROP TRIGGER %I ON %I.%I;',
+                    r.tgname, r.nspname, r.relname);
+        END LOOP;
+        -- constraints #1: foreign key
+        FOR r IN (SELECT pns.nspname, pc.relname, pcon.conname
+                FROM pg_constraint pcon, pg_class pc, pg_namespace pns
+                WHERE pns.oid=pc.relnamespace AND pc.oid=pcon.conrelid
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pcon.contype='f'
+            ) LOOP
+                EXECUTE format('ALTER TABLE ONLY %I.%I DROP CONSTRAINT %I;',
+                    r.nspname, r.relname, r.conname);
+        END LOOP;
+        -- constraints #2: the rest
+        FOR r IN (SELECT pns.nspname, pc.relname, pcon.conname
+                FROM pg_constraint pcon, pg_class pc, pg_namespace pns
+                WHERE pns.oid=pc.relnamespace AND pc.oid=pcon.conrelid
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pcon.contype<>'f'
+            ) LOOP
+                EXECUTE format('ALTER TABLE ONLY %I.%I DROP CONSTRAINT %I;',
+                    r.nspname, r.relname, r.conname);
+        END LOOP;
+        -- indicēs
+        FOR r IN (SELECT pns.nspname, pc.relname
+                FROM pg_class pc, pg_namespace pns
+                WHERE pns.oid=pc.relnamespace
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pc.relkind='i'
+            ) LOOP
+                EXECUTE format('DROP INDEX %I.%I;',
+                    r.nspname, r.relname);
+        END LOOP;
+        -- normal and materialised views
+        FOR r IN (SELECT pns.nspname, pc.relname
+                FROM pg_class pc, pg_namespace pns
+                WHERE pns.oid=pc.relnamespace
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pc.relname NOT LIKE 'pg_%'
+                    AND pc.relkind IN ('v', 'm')
+            ) LOOP
+                EXECUTE format('DROP VIEW %I.%I;',
+                    r.nspname, r.relname);
+        END LOOP;
+        -- tables
+        FOR r IN (SELECT pns.nspname, pc.relname
+                FROM pg_class pc, pg_namespace pns
+                WHERE pns.oid=pc.relnamespace
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pc.relkind='r'
+            ) LOOP
+                EXECUTE format('DROP TABLE %I.%I;',
+                    r.nspname, r.relname);
+        END LOOP;
+        -- sequences
+        FOR r IN (SELECT pns.nspname, pc.relname
+                FROM pg_class pc, pg_namespace pns
+                WHERE pns.oid=pc.relnamespace
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pc.relkind='S'
+            ) LOOP
+                EXECUTE format('DROP SEQUENCE %I.%I;',
+                    r.nspname, r.relname);
+        END LOOP;
+        -- extensions (see below), only if necessary
+        FOR r IN (SELECT pns.nspname, pe.extname
+                FROM pg_extension pe, pg_namespace pns
+                WHERE pns.oid=pe.extnamespace
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+            ) LOOP
+                EXECUTE format('DROP EXTENSION %I;', r.extname);
+        END LOOP;
+        -- functions / procedures
+        FOR r IN (SELECT pns.nspname, pp.proname, pp.oid
+                FROM pg_proc pp, pg_namespace pns
+                WHERE pns.oid=pp.pronamespace
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+            ) LOOP
+                EXECUTE format('DROP FUNCTION %I.%I(%s);',
+                    r.nspname, r.proname,
+                    pg_get_function_identity_arguments(r.oid));
+        END LOOP;
+        -- nōn-default schemata we own; assume to be run by a not-superuser
+        FOR r IN (SELECT pns.nspname
+                FROM pg_namespace pns, pg_roles pr
+                WHERE pr.oid=pns.nspowner
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast', 'public')
+                    AND pr.rolname=current_user
+            ) LOOP
+                EXECUTE format('DROP SCHEMA %I;', r.nspname);
+        END LOOP;
+        -- voilà
+        RAISE NOTICE 'Database cleared!';
+END; $$;");
     }
 }
 
@@ -521,12 +521,12 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         return result;
     }
 
-    public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value)
+    public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, Expression value)
     {
         Expression valueExpr = Expression.Convert(
           !dbType.IsDate() ? value :
           value.Type.UnNullify() == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
-          value.Type.UnNullify() == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly?)), Expression.Constant(Schema.Current.DateTimeKind)) :
+      value.Type.UnNullify() == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly?)), Expression.Constant(Schema.Current.DateTimeKind)) :
           value,
           typeof(object));
 
@@ -539,10 +539,19 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
 
 
         List<MemberBinding> mb = new List<MemberBinding>()
-        {
-            Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.IsNullable))!, Expression.Constant(nullable)),
-            Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)),
-        };
+            {
+                Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.IsNullable))!, Expression.Constant(nullable)),
+                Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)),
+            };
+
+        if (size != null)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Size))!, Expression.Constant(size)));
+
+        if (precision != null)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Precision))!, Expression.Constant(precision)));
+
+        if (scale != null)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Scale))!, Expression.Constant(scale)));
 
         if (udtTypeName != null)
             mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.DataTypeName))!, Expression.Constant(udtTypeName)));

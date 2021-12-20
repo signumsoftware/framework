@@ -60,11 +60,14 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
 
   var cellFormatter = new Finder.CellFormatter((cell, ctx) => {
 
+    if (cell == null)
+      return undefined;
+
     var alert: Partial<AlertEntity> = {
       target: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.target).toString())],
       textArguments: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.entity.textArguments).toString())]
     };
-    return formatText(cell, alert);
+    return  formatText(cell, alert);
   });
 
   Finder.registerPropertyFormatter(PropertyRoute.tryParse(AlertEntity, "Text"), cellFormatter);
@@ -120,10 +123,13 @@ export function getTitle(titleField: string | null, type: AlertTypeSymbol | null
   if (titleField)
     return titleField;
 
-  if (type!.key)
+  if (type == null)
+    return " - ";
+
+  if (type.key)
     return symbolNiceName(type! as Entity & ISymbol);
 
-  return type!.name;
+  return type.name;
 }
 export function formatText(text: string, alert: Partial<AlertEntity>, onNavigated?: () => void): React.ReactElement {
   var nodes: (string | React.ReactElement)[] = [];

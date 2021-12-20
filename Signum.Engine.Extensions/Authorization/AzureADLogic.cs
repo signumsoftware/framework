@@ -66,188 +66,195 @@ public static class AzureADLogic
         }
     }
 
-    public static void Start(SchemaBuilder sb)
+    public static void Start(SchemaBuilder sb, bool adGroups, bool deactivateUsersTask)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-            sb.Include<ADGroupEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.DisplayName
-                });
-
-            Schema.Current.OnMetadataInvalidated += () => ADGroupsCache.Clear();
-
-            new Graph<ADGroupEntity>.Execute(ADGroupOperation.Save)
+            if (deactivateUsersTask)
             {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (e, _) => 
+                SimpleTaskLogic.Register(ActiveDirectoryTask.DeactivateUsers, stc =>
                 {
-                    if (e.IsNew && e.IdOrNull != null)
-                        Administrator.SaveDisableIdentity(e);
-                },
-            }.Register();
+                    var list = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID != null).ToList();
 
-            new Graph<ADGroupEntity>.Delete(ADGroupOperation.Delete)
-            {
-                Delete = (e, _) => e.Delete(),
-            }.Register();
-
-
-            SimpleTaskLogic.Register(ActiveDirectoryTask.DeactivateUsers, stc =>
-            {
-                var list = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID != null).ToList();
-
-                ClientCredentialProvider authProvider = GetClientCredentialProvider();
-                GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-                stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
-                {
-                    var filter = gr.Select(a => "id eq '" + a.Mixin<UserADMixin>().OID + "'").Combined(FilterGroupOperation.Or);
-                    var users = graphClient.Users.Request().Filter(filter).Select("accountEnabled, id").GetAsync().Result;
-
-                    var isEnabledDictionary = users.ToDictionary(a => Guid.Parse(a.Id), a => a.AccountEnabled!.Value);
-
-                    foreach (var u in gr)
-                    {
-                        if (u.State == UserState.Active && !isEnabledDictionary.GetOrThrow(u.Mixin<UserADMixin>().OID!.Value))
-                        {
-                            stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserADMixin>().OID} has been deactivated in Azure AD");
-                            u.Execute(UserOperation.Deactivate);
-                        }
-                    }
-                });
-
-                return null;
-
-            });
-
-            QueryLogic.Queries.Register(UserADQuery.ActiveDirectoryUsers, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
-             {
-                 using (HeavyProfiler.Log("Microsoft Graph", ()=> "ActiveDirectoryUsers"))
-                 {
-                     ClientCredentialProvider authProvider = GetClientCredentialProvider();
-                     GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-
-                     var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "InGroup" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
-
-                     var query = graphClient.Users.Request()
-                        .InGroup(inGroup?.Value as Lite<ADGroupEntity>)
-                        .Filter(request.Filters)
-                        .Search(request.Filters)
-                        .Select(request.Columns)
-                        .OrderBy(request.Orders)
-                        .Paginate(request.Pagination);
-
-                     query.QueryOptions.Add(new QueryOption("$count", "true"));
-                     query.Headers.Add(new HeaderOption("ConsistencyLevel", "eventual"));
-
-                     var result =  await query.GetAsync(cancellationToken);
-
-                     var count = ((JsonElement)result.AdditionalData["@odata.count"]).GetInt32();
-
-                     var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
-
-                     return result.Skip(skip).Select(u => new
-                     {
-                         Entity = (Lite<Entities.Entity>?)null,
-                         u.Id,
-                         u.DisplayName,
-                         u.UserPrincipalName,
-                         u.Mail,
-                         u.GivenName,
-                         u.Surname,
-                         u.JobTitle,
-                         OnPremisesExtensionAttributes = u.OnPremisesExtensionAttributes?.Let(ea => new OnPremisesExtensionAttributesModel
-                         {
-                             ExtensionAttribute1 = ea.ExtensionAttribute1,
-                             ExtensionAttribute2 = ea.ExtensionAttribute2,
-                             ExtensionAttribute3 = ea.ExtensionAttribute3,
-                             ExtensionAttribute4 = ea.ExtensionAttribute4,
-                             ExtensionAttribute5 = ea.ExtensionAttribute5,
-                             ExtensionAttribute6 = ea.ExtensionAttribute6,
-                             ExtensionAttribute7 = ea.ExtensionAttribute7,
-                             ExtensionAttribute8 = ea.ExtensionAttribute8,
-                             ExtensionAttribute9 = ea.ExtensionAttribute9,
-                             ExtensionAttribute10 = ea.ExtensionAttribute10,
-                             ExtensionAttribute11 = ea.ExtensionAttribute11,
-                             ExtensionAttribute12 = ea.ExtensionAttribute12,
-                             ExtensionAttribute13 = ea.ExtensionAttribute13,
-                             ExtensionAttribute14 = ea.ExtensionAttribute14,
-                             ExtensionAttribute15 = ea.ExtensionAttribute15,
-                         }),
-                         u.OnPremisesImmutableId,
-                         u.CompanyName,
-                         u.CreationType,
-                         u.AccountEnabled,
-                         InGroup = (Lite<ADGroupEntity>?)null,
-                     }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount(count);
-                 }
-             })
-            .Column(a => a.Entity, c => c.Implementations = Implementations.By())
-            .ColumnDisplayName(a => a.Id, () => ActiveDirectoryMessage.Id.NiceToString())
-            .ColumnDisplayName(a => a.DisplayName, () => ActiveDirectoryMessage.DisplayName.NiceToString())
-            .ColumnDisplayName(a => a.Mail, () => ActiveDirectoryMessage.Mail.NiceToString())
-            .ColumnDisplayName(a => a.GivenName, () => ActiveDirectoryMessage.GivenName.NiceToString())
-            .ColumnDisplayName(a => a.Surname, () => ActiveDirectoryMessage.Surname.NiceToString())
-            .ColumnDisplayName(a => a.JobTitle, () => ActiveDirectoryMessage.JobTitle.NiceToString())
-            .ColumnDisplayName(a => a.OnPremisesExtensionAttributes, () => ActiveDirectoryMessage.OnPremisesExtensionAttributes.NiceToString())
-            .ColumnDisplayName(a => a.OnPremisesImmutableId, () => ActiveDirectoryMessage.OnPremisesImmutableId.NiceToString())
-            .ColumnDisplayName(a => a.CompanyName, () => ActiveDirectoryMessage.CompanyName.NiceToString())
-            .ColumnDisplayName(a => a.AccountEnabled, () => ActiveDirectoryMessage.AccountEnabled.NiceToString())
-            .Column(a => a.InGroup, c => { c.Implementations = Implementations.By(typeof(ADGroupEntity)); c.OverrideDisplayName = () => ActiveDirectoryMessage.InGroup.NiceToString(); })
-            ,
-            Implementations.By());
-
-            QueryLogic.Queries.Register(UserADQuery.ActiveDirectoryGroups, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
-            {
-                using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryGroups"))
-                {
                     ClientCredentialProvider authProvider = GetClientCredentialProvider();
                     GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-
-                    var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "HasUser" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
-
-                    var query = graphClient.Groups.Request()
-                       .HasUser(inGroup?.Value as Lite<UserEntity>)
-                       .Filter(request.Filters)
-                       .Search(request.Filters)
-                       .Select(request.Columns)
-                       .OrderBy(request.Orders)
-                       .Paginate(request.Pagination);
-
-                    query.QueryOptions.Add(new QueryOption("$count", "true"));
-                    query.Headers.Add(new HeaderOption("ConsistencyLevel", "eventual"));
-
-                    var result = await query.GetAsync(cancellationToken);
-
-                    var count = ((JsonElement)result.AdditionalData["@odata.count"]).GetInt32();
-
-                    var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
-
-                    return result.Skip(skip).Select(u => new
+                    stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
                     {
-                        Entity = (Lite<Entities.Entity>?)null,
-                        u.Id,
-                        u.DisplayName,
-                        u.Description,
-                        u.SecurityEnabled,
-                        u.Visibility,
-                        HasUser = (Lite<UserEntity>?)null,
-                    }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount(count);
-                }
-            })
-            .Column(a => a.Entity, c => c.Implementations = Implementations.By())
-            .ColumnDisplayName(a => a.Id, () => ActiveDirectoryMessage.Id.NiceToString())
-            .ColumnDisplayName(a => a.DisplayName, () => ActiveDirectoryMessage.DisplayName.NiceToString())
-            .ColumnDisplayName(a => a.Description, () => ActiveDirectoryMessage.Description.NiceToString())
-            .ColumnDisplayName(a => a.SecurityEnabled, () => ActiveDirectoryMessage.SecurityEnabled.NiceToString())
-            .ColumnDisplayName(a => a.Visibility, () => ActiveDirectoryMessage.Visibility.NiceToString())
-            .Column(a => a.HasUser, c => { c.Implementations = Implementations.By(typeof(UserEntity)); c.OverrideDisplayName = () => ActiveDirectoryMessage.HasUser.NiceToString(); })
-            ,
-            Implementations.By());
+                        var filter = gr.Select(a => "id eq '" + a.Mixin<UserADMixin>().OID + "'").Combined(FilterGroupOperation.Or);
+                        var users = graphClient.Users.Request().Filter(filter).Select("accountEnabled, id").GetAsync().Result;
+
+                        var isEnabledDictionary = users.ToDictionary(a => Guid.Parse(a.Id), a => a.AccountEnabled!.Value);
+
+                        foreach (var u in gr)
+                        {
+                            if (u.State == UserState.Active && !isEnabledDictionary.GetOrThrow(u.Mixin<UserADMixin>().OID!.Value))
+                            {
+                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserADMixin>().OID} has been deactivated in Azure AD");
+                                u.Execute(UserOperation.Deactivate);
+                            }
+                        }
+                    });
+
+                    return null;
+                });
+            }
+
+            if (adGroups)
+            {
+                sb.Include<ADGroupEntity>()
+                    .WithQuery(() => e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.DisplayName
+                    });
+
+                Schema.Current.OnMetadataInvalidated += () => ADGroupsCache.Clear();
+
+                new Graph<ADGroupEntity>.Execute(ADGroupOperation.Save)
+                {
+                    CanBeNew = true,
+                    CanBeModified = true,
+                    Execute = (e, _) =>
+                    {
+                        if (e.IsNew && e.IdOrNull != null)
+                            Administrator.SaveDisableIdentity(e);
+                    },
+                }.Register();
+
+                new Graph<ADGroupEntity>.Delete(ADGroupOperation.Delete)
+                {
+                    Delete = (e, _) => e.Delete(),
+                }.Register();
+
+
+            
+
+                QueryLogic.Queries.Register(UserADQuery.ActiveDirectoryUsers, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
+                 {
+                     using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryUsers"))
+                     {
+                         ClientCredentialProvider authProvider = GetClientCredentialProvider();
+                         GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+
+                         var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "InGroup" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
+
+                         var query = graphClient.Users.Request()
+                            .InGroup(inGroup?.Value as Lite<ADGroupEntity>)
+                            .Filter(request.Filters)
+                            .Search(request.Filters)
+                            .Select(request.Columns)
+                            .OrderBy(request.Orders)
+                            .Paginate(request.Pagination);
+
+                         query.QueryOptions.Add(new QueryOption("$count", "true"));
+                         query.Headers.Add(new HeaderOption("ConsistencyLevel", "eventual"));
+
+                         var result = await query.GetAsync(cancellationToken);
+
+                         var count = ((JsonElement)result.AdditionalData["@odata.count"]).GetInt32();
+
+                         var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
+
+                         return result.Skip(skip).Select(u => new
+                         {
+                             Entity = (Lite<Entities.Entity>?)null,
+                             u.Id,
+                             u.DisplayName,
+                             u.UserPrincipalName,
+                             u.Mail,
+                             u.GivenName,
+                             u.Surname,
+                             u.JobTitle,
+                             OnPremisesExtensionAttributes = u.OnPremisesExtensionAttributes?.Let(ea => new OnPremisesExtensionAttributesModel
+                             {
+                                 ExtensionAttribute1 = ea.ExtensionAttribute1,
+                                 ExtensionAttribute2 = ea.ExtensionAttribute2,
+                                 ExtensionAttribute3 = ea.ExtensionAttribute3,
+                                 ExtensionAttribute4 = ea.ExtensionAttribute4,
+                                 ExtensionAttribute5 = ea.ExtensionAttribute5,
+                                 ExtensionAttribute6 = ea.ExtensionAttribute6,
+                                 ExtensionAttribute7 = ea.ExtensionAttribute7,
+                                 ExtensionAttribute8 = ea.ExtensionAttribute8,
+                                 ExtensionAttribute9 = ea.ExtensionAttribute9,
+                                 ExtensionAttribute10 = ea.ExtensionAttribute10,
+                                 ExtensionAttribute11 = ea.ExtensionAttribute11,
+                                 ExtensionAttribute12 = ea.ExtensionAttribute12,
+                                 ExtensionAttribute13 = ea.ExtensionAttribute13,
+                                 ExtensionAttribute14 = ea.ExtensionAttribute14,
+                                 ExtensionAttribute15 = ea.ExtensionAttribute15,
+                             }),
+                             u.OnPremisesImmutableId,
+                             u.CompanyName,
+                             u.CreationType,
+                             u.AccountEnabled,
+                             InGroup = (Lite<ADGroupEntity>?)null,
+                         }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount(count);
+                     }
+                 })
+                .Column(a => a.Entity, c => c.Implementations = Implementations.By())
+                .ColumnDisplayName(a => a.Id, () => ActiveDirectoryMessage.Id.NiceToString())
+                .ColumnDisplayName(a => a.DisplayName, () => ActiveDirectoryMessage.DisplayName.NiceToString())
+                .ColumnDisplayName(a => a.Mail, () => ActiveDirectoryMessage.Mail.NiceToString())
+                .ColumnDisplayName(a => a.GivenName, () => ActiveDirectoryMessage.GivenName.NiceToString())
+                .ColumnDisplayName(a => a.Surname, () => ActiveDirectoryMessage.Surname.NiceToString())
+                .ColumnDisplayName(a => a.JobTitle, () => ActiveDirectoryMessage.JobTitle.NiceToString())
+                .ColumnDisplayName(a => a.OnPremisesExtensionAttributes, () => ActiveDirectoryMessage.OnPremisesExtensionAttributes.NiceToString())
+                .ColumnDisplayName(a => a.OnPremisesImmutableId, () => ActiveDirectoryMessage.OnPremisesImmutableId.NiceToString())
+                .ColumnDisplayName(a => a.CompanyName, () => ActiveDirectoryMessage.CompanyName.NiceToString())
+                .ColumnDisplayName(a => a.AccountEnabled, () => ActiveDirectoryMessage.AccountEnabled.NiceToString())
+                .Column(a => a.InGroup, c => { c.Implementations = Implementations.By(typeof(ADGroupEntity)); c.OverrideDisplayName = () => ActiveDirectoryMessage.InGroup.NiceToString(); })
+                ,
+                Implementations.By());
+
+                QueryLogic.Queries.Register(UserADQuery.ActiveDirectoryGroups, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
+                {
+                    using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryGroups"))
+                    {
+                        ClientCredentialProvider authProvider = GetClientCredentialProvider();
+                        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+
+                        var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "HasUser" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
+
+                        var query = graphClient.Groups.Request()
+                           .HasUser(inGroup?.Value as Lite<UserEntity>)
+                           .Filter(request.Filters)
+                           .Search(request.Filters)
+                           .Select(request.Columns)
+                           .OrderBy(request.Orders)
+                           .Paginate(request.Pagination);
+
+                        query.QueryOptions.Add(new QueryOption("$count", "true"));
+                        query.Headers.Add(new HeaderOption("ConsistencyLevel", "eventual"));
+
+                        var result = await query.GetAsync(cancellationToken);
+
+                        var count = ((JsonElement)result.AdditionalData["@odata.count"]).GetInt32();
+
+                        var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
+
+                        return result.Skip(skip).Select(u => new
+                        {
+                            Entity = (Lite<Entities.Entity>?)null,
+                            u.Id,
+                            u.DisplayName,
+                            u.Description,
+                            u.SecurityEnabled,
+                            u.Visibility,
+                            HasUser = (Lite<UserEntity>?)null,
+                        }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount(count);
+                    }
+                })
+                .Column(a => a.Entity, c => c.Implementations = Implementations.By())
+                .ColumnDisplayName(a => a.Id, () => ActiveDirectoryMessage.Id.NiceToString())
+                .ColumnDisplayName(a => a.DisplayName, () => ActiveDirectoryMessage.DisplayName.NiceToString())
+                .ColumnDisplayName(a => a.Description, () => ActiveDirectoryMessage.Description.NiceToString())
+                .ColumnDisplayName(a => a.SecurityEnabled, () => ActiveDirectoryMessage.SecurityEnabled.NiceToString())
+                .ColumnDisplayName(a => a.Visibility, () => ActiveDirectoryMessage.Visibility.NiceToString())
+                .Column(a => a.HasUser, c => { c.Implementations = Implementations.By(typeof(UserEntity)); c.OverrideDisplayName = () => ActiveDirectoryMessage.HasUser.NiceToString(); })
+                ,
+                Implementations.By());
+            }
         }
     }
 

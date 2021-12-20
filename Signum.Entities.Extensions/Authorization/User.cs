@@ -27,7 +27,7 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     [StringLengthValidator(Min = 2, Max = 100)]
     public string UserName { get; set; }
 
-    [DbType(Size = 128)]
+    [DbType(Size = 128), QueryableProperty(false)]
     public byte[]? PasswordHash { get; set; }
 
     public Lite<RoleEntity> Role { get; set; }

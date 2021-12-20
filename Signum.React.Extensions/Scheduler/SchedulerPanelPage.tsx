@@ -66,6 +66,8 @@ export default function SchedulerPanelPage(p: SchedulerPanelProps) {
         <br />
         MachineName: {s.machineName}
         <br />
+        ApplicatonName: {s.applicationName}
+        <br />
         NextExecution: {s.nextExecution} ({s.nextExecution == undefined ? "-None-" : DateTime.fromISO(s.nextExecution).toRelative()})
         <br />
         <InMemoryQueue queue={s.queue} onReload={reloadState} />

@@ -6,6 +6,7 @@ import './HtmlEditor.css'
 import 'draft-js/dist/Draft.css'
 import { InlineStyleButton, Separator, BlockStyleButton, SubMenuButton } from './HtmlEditorButtons';
 import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
+import { classes } from '../../Signum.React/Scripts/Globals';
 
 export interface IContentStateConverter {
   contentStateToText(content: draftjs.ContentState): string;
@@ -15,6 +16,7 @@ export interface IContentStateConverter {
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
+  mandatory?: boolean;
   converter?: IContentStateConverter;
   innerRef?: React.Ref<draftjs.Editor>;
   decorators?: draftjs.DraftDecorator[],
@@ -90,7 +92,7 @@ export class HtmlEditorController {
     if (!this.readOnly) {
       var newContent = this.editorState.getCurrentContent();
       if (newContent != this.initialContentState) {
-        var value = this.converter.contentStateToText(newContent);
+        var value = !newContent.hasText() ? null : this.converter.contentStateToText(newContent);
         this.binding.setValue(value);
       }
     }
@@ -119,6 +121,7 @@ export default React.forwardRef(function HtmlEditor({
   decorators,
   plugins,
   htmlAttributes,
+  mandatory,
   ...props }: HtmlEditorProps & Partial<draftjs.EditorProps>, ref?: React.Ref<HtmlEditorController>) {
 
   const textConverter = converter ?? new HtmlContentStateConverter({}, {});
@@ -172,7 +175,7 @@ export default React.forwardRef(function HtmlEditor({
 
   return (
     <>
-      <div className="sf-html-editor" onClick={() => c.editor.focus()} {...htmlAttributes}>
+      <div className={classes("sf-html-editor", mandatory && !c.editorState.getCurrentContent().hasText() && "sf-mandatory")} onClick={() => c.editor.focus()} {...htmlAttributes}>
         {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
 
         <draftjs.Editor

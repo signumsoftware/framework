@@ -73,7 +73,7 @@ public static class SqlPreCommandExtensions
 
     public static SqlPreCommand PlainSqlCommand(this SqlPreCommand command)
     {
-        return command.PlainSql().SplitNoEmpty("GO\r\n" )
+        return command.PlainSql().SplitNoEmpty("GO\r\n")
             .Select(s => new SqlPreCommandSimple(s))
             .Combine(Spacing.Simple)!;
     }
@@ -90,22 +90,22 @@ public static class SqlPreCommandExtensions
         Console.WriteLine("Check the synchronization script before running it!");
         var answer = SafeConsole.AskRetry("Open or run?", "open", "run", "exit");
 
-        if(answer == "open")
+        if (answer == "open")
         {
             Thread.Sleep(1000);
             Open(fileName);
             if (SafeConsole.Ask("run now?"))
                 ExecuteRetry(fileName);
         }
-        else if(answer == "run")
+        else if (answer == "run")
         {
-            ExecuteRetry(fileName);   
+            ExecuteRetry(fileName);
         }
     }
 
     static void ExecuteRetry(string fileName)
     {
-        retry:
+    retry:
         try
         {
             var script = File.ReadAllText(fileName);
@@ -144,7 +144,7 @@ public static class SqlPreCommandExtensions
                 try
                 {
 
-                    SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length), 
+                    SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length),
                         () => Executor.ExecuteNonQuery(currentPart));
 
                 }
@@ -293,7 +293,7 @@ public class SqlPreCommandSimple : SqlPreCommand
         {
             var str = ts.ToString("g", CultureInfo.InvariantCulture);
 
-            return Schema.Current.Settings.IsPostgres || simple?
+            return Schema.Current.Settings.IsPostgres || simple ?
                "'{0}'".FormatWith(str) :
                 "convert(time, '{0}')".FormatWith(str);
         }
@@ -338,7 +338,10 @@ public class SqlPreCommandSimple : SqlPreCommand
         var pars = this.Parameters.EmptyIfNull();
         var sqlBuilder = Connector.Current.SqlBuilder;
 
-        var parameterVars = pars.ToString(p => $"{p.ParameterName} {(p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString())}{sqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
+        var parameterVars = pars.ToString(p => "{0} {1}{2}".FormatWith(
+            p.ParameterName,
+            p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
+            sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)), ", ");
         var parameterValues = pars.ToString(p => p.ParameterName + " = " + Encode(p.Value, simple: true), ",\r\n");
 
         return @$"EXEC sp_executesql N'{this.Sql.Replace("'", "''")}', 
@@ -403,11 +406,11 @@ public class SqlPreCommandConcat : SqlPreCommand
     }
 
     static Dictionary<Spacing, string> separators = new Dictionary<Spacing, string>()
-    {
-        {Spacing.Simple, "\r\n"},
-        {Spacing.Double, "\r\n\r\n"},
-        {Spacing.Triple, "\r\n\r\n\r\n"},
-    };
+        {
+            {Spacing.Simple, "\r\n"},
+            {Spacing.Double, "\r\n\r\n"},
+            {Spacing.Triple, "\r\n\r\n\r\n"},
+        };
 
     protected internal override int NumParameters
     {

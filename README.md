@@ -51,12 +51,19 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
-
+* [2021.12.19 Split between Size and Precission and Microsoft.Data.SqlClient 4.0.0](https://github.com/signumsoftware/framework/commit/fe17abd91b3e319d78c7ae2b4dfb0c70c7c4f276)
+* [2021.12.17 CacheLogic.ServerBrodcast](https://github.com/signumsoftware/framework/commit/1903c0df005bec80dac4a7fca5b20b257420c591#commitcomment-62129403)
+* [2021.12.16 Add SignalR to AlertDropdown](https://github.com/signumsoftware/framework/commit/c3e89ed1dfd53eaaf619c2823de43cb0cc2d3154#commitcomment-62061830)
+* [2021.12.13 IsNew and GetType() members supported in ToStringExpression](https://github.com/signumsoftware/framework/commit/644151a2481307fdbb53216d2d71022a71e75d2c#comments)
+* [2021.12.03 Dashboard III; InitialSelectionDashboardFilter and DefaultDashboardFilter](https://github.com/signumsoftware/framework/commit/90392c1066b7aed631ec3aaa55258e06f18ad013#comments)
+* [2021.12.02 Dashboard II: Presenting CachedQueries](https://github.com/signumsoftware/framework/commit/641293cd886280a857493e6b9b10361220f19702#commitcomment-61271093) 
+* [2021.11.30 Target ES2017 (async await welcomed!)](https://github.com/signumsoftware/framework/commit/9caeecfc0a8b489d4460aafe53450ef9ec416194#comments)
+* [2021.11.30 Replace GroupsOf -> Chunk, WithMin -> MinBy and WithMax -> MaxBy](https://github.com/signumsoftware/framework/commit/45303a1a81a4335de21191438a574f98019075da#comments)
 * [2021.11.14 Operation Executing](https://github.com/signumsoftware/framework/commit/002bcc9665ebf2bb6c0eed5e043cb081aab7e73c#comments)
 * [2021.11.13 Bootstrap 5](https://github.com/signumsoftware/framework/commit/7d0804c7c2ab4841d0985e42c3b5fa96b8f01780#comments)
 * [2021.11.09 .Net 6 and C# 10](https://github.com/signumsoftware/framework/commit/0669737b11a30dc385eb8fd1bc22ac97fa637cd0#commitcomment-59667330)
 * [2021.11.04 WordTemplate with embedded Excel charts from UserCharts / UserQueries](https://github.com/signumsoftware/framework/commit/e8d4ab20e612af0b826beca77b7edf648227e806)
-* [2021.11.01 Dashboard filters and InteractionGroup](https://github.com/signumsoftware/framework/commit/55def717ccf8414e11396faa6b47b12747c56f01)
+* [2021.11.01 Dashboard I: Dashboard filters and InteractionGroup](https://github.com/signumsoftware/framework/commit/55def717ccf8414e11396faa6b47b12747c56f01)
 * [2021.08.28 Update to TypeScript 4.4](https://github.com/signumsoftware/framework/commit/f6412af23da1e225b0b417b329874acd8c820f05#commitcomment-55586120)
 * [2021.08.28 Extensions ❤ Framework](https://github.com/signumsoftware/framework/commit/b7848eff42f5d242ed73035a5cc91f35d5ec20c8#commitcomment-55557696)
 * [2021.03.31 Update to React Widgets to 5.0.0 final](https://github.com/signumsoftware/framework/commit/f85f1d71be63273d8d55f224274af677e4d586f5#commitcomment-48935445)

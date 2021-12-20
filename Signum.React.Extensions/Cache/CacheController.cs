@@ -3,6 +3,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Cache;
 using Signum.Entities.Cache;
 using Signum.Engine.Scheduler;
+using Signum.React.Filters;
 
 namespace Signum.React.Cache;
 
@@ -19,9 +20,11 @@ public class CacheController : ControllerBase
 
         return new CacheStateTS
         {
-            isEnabled = !CacheLogic.GloballyDisabled,
-            tables = tables,
-            lazies = lazies
+            IsEnabled = !CacheLogic.GloballyDisabled,
+            ServerBroadcast = CacheLogic.ServerBroadcast?.ToString(),
+            SqlDependency = CacheLogic.WithSqlDependency,
+            Tables = tables,
+            Lazies = lazies
         };
     }
 
@@ -53,6 +56,15 @@ public class CacheController : ControllerBase
         Schema.Current.InvalidateMetadata();
         GC.Collect(2);
     }
+
+    [HttpPost("api/cache/invalidateTable"), SignumAllowAnonymous]
+    public void InvalidateTable([FromBody]InvalidateTableRequest req)
+    {
+        if (CacheLogic.ServerBroadcast is not SimpleHttpBroadcast sci)
+            throw new InvalidOperationException("CacheInvalidator is not a SimpleHttpCacheInvalidator");
+
+        sci.InvalidateTable(req);
+    }
 }
 
 public class ResetLazyStatsTS
@@ -75,9 +87,11 @@ public class ResetLazyStatsTS
 
 public class CacheStateTS
 {
-    public bool isEnabled;
-    public List<CacheTableTS> tables;
-    public List<ResetLazyStatsTS> lazies;
+    public bool IsEnabled;
+    public bool SqlDependency;
+    public string? ServerBroadcast;
+    public List<CacheTableTS> Tables;
+    public List<ResetLazyStatsTS> Lazies;
 }
 
 public class CacheTableTS

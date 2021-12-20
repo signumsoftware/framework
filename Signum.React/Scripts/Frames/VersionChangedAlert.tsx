@@ -42,13 +42,13 @@ export function VersionInfo(p: { extraInformation?: string }) {
   return (
     <div className="nav-link">
       <OverlayTrigger
-        placement={"bottom"}
+        placement={"bottom-end"}
         overlay={
           <Tooltip id={`tooltip-buildId`}>
             <VersionInfoTooltip extraInformation={p.extraInformation} />
           </Tooltip>
         }>
-        <div style={{ minWidth: "20px" }}><FontAwesomeIcon icon="info-circle" className="sf-version-info" /></div>
+        <div><FontAwesomeIcon icon="info-circle" className="sf-version-info" /></div>
       </OverlayTrigger>
     </div>
   );

@@ -327,6 +327,8 @@ Array.prototype.toObjectDistinct = function (this: any[], keySelector: (element:
 Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) => any): any[] {
   const obj: any = {};
 
+  keySelector ??= a => a.toString();
+
   this.forEach(item => {
     const key = keySelector(item);
 
