@@ -37,7 +37,7 @@ public class HasValueToken : QueryToken
 
     public override Type Type
     {
-        get { return typeof(bool); }
+        get { return typeof(bool?); }
     }
 
     public override string ToString()
@@ -69,7 +69,7 @@ public class HasValueToken : QueryToken
         if (baseExpression.Type == typeof(string))
             result = Expression.And(result, Expression.NotEqual(baseExpression, Expression.Constant("")));
 
-        return result;
+        return result.Nullify();
     }
 
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
