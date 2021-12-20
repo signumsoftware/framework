@@ -15,22 +15,71 @@ public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
 #pragma warning restore IDE1006
     where T : class, IEntity
 {
+    /// <summary>
+    /// Returns Entity if the lite has been previously loaded, or in database queries, otherwise exception
+    /// </summary>
     T Entity { get; }
+
+    /// <summary>
+    /// Returns Entity if the lite has been previously loaded, otherwise null
+    /// </summary>
     T? EntityOrNull { get; }
 
+    /// <summary>
+    /// Returns the Id if the lite is not pointing to a new entity, otherwise exception
+    /// </summary>
     PrimaryKey Id { get; }
+
+    /// <summary>
+    /// Determines whether the lite is pointing to a new Entity. 
+    /// </summary>
     bool IsNew { get; }
+
+    /// <summary>
+    /// Returns the Id if the lite is not pointing to a new entity, otherwise null
+    /// </summary>
     PrimaryKey? IdOrNull { get; }
+
+    /// <summary>
+    /// Returns the run-time type of the entity the lite is pointing to. 
+    /// </summary>
     Type EntityType { get; }
 
+
+    /// <summary>
+    /// Removes the reference to the full entity, maiking the lite more lightweight
+    /// </summary>
     void ClearEntity();
+
+    /// <summary>
+    /// Sets the reference to the full entity. Not generic to keep Lite<T> co-variant. Type and Id checked at run-time. 
+    /// </summary>
     void SetEntity(Entity ei);
+
+    /// <summary>
+    /// Sets the toStr of the entity. Not checked in anyway. 
+    /// </summary>
     void SetToString(string toStr);
+
+    /// <summary>
+    /// Copies the Id from the entity to this lite instance. Typically used after saving by the framework. 
+    /// </summary>
     PrimaryKey RefreshId();
 
+    /// <summary>
+    /// Unique identifier of this lite, containing type and id
+    /// </summary>
     string Key();
+
+    /// <summary>
+    /// Unique identifier of this lite, containing type and id and toString
+    /// </summary>
     string KeyLong();
 
+    /// <summary>
+    /// Creates a new instance of this lite without the entity. Only works for Lite with an ID. 
+    /// Usefull to be defenisive about someone else loading the entity and producing serialization problems. 
+    /// </summary>
     Lite<T> Clone();
 }
 
