@@ -723,14 +723,16 @@ class CachedLiteTable<T> : CachedTableBase where T : Entity
                 return FieldReader.GetExpression(reader, columns.Count - 1, typeof(string));
             }
 
+            var cleanLambda = (LambdaExpression)ExpressionCleaner.Clean(lambda, ExpressionEvaluator.PartialEval, shortCircuit: false)!;
+
             ToStringExpressionVisitor toStr = new ToStringExpressionVisitor(
-                lambda.Parameters.SingleEx(),
+                cleanLambda.Parameters.SingleEx(),
                 reader,
                 columns,
                 table
             );
 
-            var result = toStr.Visit(lambda.Body);
+            var result = toStr.Visit(cleanLambda.Body);
 
             return result;
         }
