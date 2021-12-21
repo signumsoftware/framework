@@ -13,10 +13,9 @@ public abstract class ModelEntity : ModifiableEntity, IRootEntity
         throw new InvalidOperationException("ModelEntities are not meant to be retrieved");
     }
 
-    public override string ToString()
-    {
-        return "";
-    }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => this.GetType().NiceName());
 
     public static Implementations GetImplementations(PropertyRoute route)
     {
