@@ -30,11 +30,11 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
     public Func<bool> WebDownload { get; private set; } = () => false;
 
     public Func<IFilePath, string> CalculateSuffix { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
-    public bool RenameOnCollision { get; set; } = true;
     public bool WeakFileReference { get; set; }
     public bool CreateBlobContainerIfNotExists { get; set; }
 
-    public Func<string, int, string> RenameAlgorithm { get; set; } = FileTypeAlgorithm.DefaultRenameAlgorithm;
+    //ExistBlob is too slow, consider using CalculateSuffix with a GUID!
+    public Func<string, int, string>? RenameAlgorithm { get; set; } = null; // FileTypeAlgorithm.DefaultRenameAlgorithm;
 
     public Func<IFilePath, BlobAction> BlobAction { get; set; } = (IFilePath ifp) => { return Files.BlobAction.Download; };
 
@@ -92,6 +92,52 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
             if (WeakFileReference)
                 return;
 
+            BlobContainerClient client = CalculateSuffixWithRenames(fp);
+
+            try
+            {
+                var action = this.BlobAction(fp);
+                client.GetBlobClient(fp.Suffix).Upload(new MemoryStream(fp.BinaryFile),
+                    httpHeaders: GetBlobHttpHeaders(fp, action));
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("Suffix", fp.Suffix);
+                ex.Data.Add("AccountName", client.AccountName);
+                ex.Data.Add("ContainerName", client.Name);
+            }
+        }
+    }
+
+    public virtual async Task SaveFileAsync(IFilePath fp, CancellationToken cancellationToken = default)
+    {
+        using (HeavyProfiler.Log("AzureBlobStorage SaveFile"))
+        using (new EntityCache(EntityCacheType.ForceNew))
+        {
+            if (WeakFileReference)
+                return;
+
+            BlobContainerClient client = CalculateSuffixWithRenames(fp);
+
+            try
+            {
+                var action = this.BlobAction(fp);
+                await client.GetBlobClient(fp.Suffix).UploadAsync(new MemoryStream(fp.BinaryFile),
+                    httpHeaders: GetBlobHttpHeaders(fp, action), cancellationToken: cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("Suffix", fp.Suffix);
+                ex.Data.Add("AccountName", client.AccountName);
+                ex.Data.Add("ContainerName", client.Name);
+            }
+        }
+    }
+
+    private BlobContainerClient CalculateSuffixWithRenames(IFilePath fp)
+    {
+        using (HeavyProfiler.LogNoStackTrace("CalculateSuffixWithRenames"))
+        {
             string suffix = CalculateSuffix(fp);
             if (!suffix.HasText())
                 throw new InvalidOperationException("Suffix not set");
@@ -102,7 +148,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
             var client = GetClient(fp);
             if (CreateBlobContainerIfNotExists)
             {
-                using (HeavyProfiler.Log("AzureBlobStorage CreateIfNotExists"))
+                using (HeavyProfiler.LogNoStackTrace("AzureBlobStorage CreateIfNotExists"))
                 {
                     client.CreateIfNotExists();
                     CreateBlobContainerIfNotExists = false;
@@ -112,31 +158,28 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
             int i = 2;
             fp.Suffix = suffix.Replace("\\", "/");
 
-            while (RenameOnCollision && client.ExistsBlob(fp.Suffix))
+            if (RenameAlgorithm != null) 
             {
-                fp.Suffix = RenameAlgorithm(suffix, i).Replace("\\", "/");
-                i++;
+                while (HeavyProfiler.LogNoStackTrace("ExistBlob").Using(_ => client.ExistsBlob(fp.Suffix)))
+                {
+                    fp.Suffix = RenameAlgorithm(suffix, i).Replace("\\", "/");
+                    i++;
+                }
             }
 
-            try
-            {
-                var action = this.BlobAction(fp);
-                client.GetBlobClient(fp.Suffix).Upload(new MemoryStream(fp.BinaryFile), 
-                    httpHeaders: new Azure.Storage.Blobs.Models.BlobHttpHeaders 
-                    { 
-                        ContentType = action == Files.BlobAction.Download 
-                            ? "application/octet-stream" 
-                            : ContentTypesDict.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream"),
-                        ContentDisposition = action == Files.BlobAction.Download ? "attachment" : "inline"
-                    });
-            }
-            catch (Exception ex)
-            {
-                ex.Data.Add("Suffix", fp.Suffix);
-                ex.Data.Add("AccountName", client.AccountName);
-                ex.Data.Add("ContainerName", client.Name);
-            }
+            return client;
         }
+    }
+
+    private static BlobHttpHeaders GetBlobHttpHeaders(IFilePath fp, BlobAction action)
+    {
+        return new BlobHttpHeaders
+        {
+            ContentType = action == Files.BlobAction.Download
+                            ? "application/octet-stream"
+                            : ContentTypesDict.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream"),
+            ContentDisposition = action == Files.BlobAction.Download ? "attachment" : "inline"
+        };
     }
 
     public void MoveFile(IFilePath ofp, IFilePath nfp)

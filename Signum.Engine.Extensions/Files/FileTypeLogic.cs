@@ -45,6 +45,7 @@ public interface IFileTypeAlgorithm
     bool OnlyImages { get; set; }
     long? MaxSizeInBytes { get; set; }
     void SaveFile(IFilePath fp);
+    Task SaveFileAsync(IFilePath fp, CancellationToken token = default);
     void ValidateFile(IFilePath fp);
     void DeleteFiles(IEnumerable<IFilePath> files);
     void DeleteFilesIfExist(IEnumerable<IFilePath> files);
