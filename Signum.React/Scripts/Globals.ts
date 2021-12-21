@@ -152,13 +152,14 @@ Array.prototype.groupBy = function (this: any[],
   for (const elem of this) {
 
     var key = keySelector(elem);
+    var elem2 = elementSelector == null ? elem : elementSelector(elem);
     var gr = obj[keyStringifier(key)];
     if (gr) {
-      gr.push(elem);
+      gr.push(elem2);
     } else {
       var group = {
         key: key,
-        elements: [elem]
+        elements: [elem2]
       };
       result.push(group);
       obj[keyStringifier(key)] = group.elements;
