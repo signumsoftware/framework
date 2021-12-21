@@ -11,6 +11,7 @@ class Upgrade_20211219_MicrosoftDataSqlClient : CodeUpgradeBase
         {
             file.UpdateNugetReference("Microsoft.Data.SqlClient", "4.0.0");
             file.UpdateNugetReference("DocumentFormat.OpenXml", "2.14.0");
+            file.UpdateNugetReference("Microsoft.Graph", "4.11.0");
         });
 
         uctx.ForeachCodeFile(@"*.json", file =>
