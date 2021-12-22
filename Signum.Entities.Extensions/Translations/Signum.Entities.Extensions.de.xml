@@ -369,6 +369,7 @@
     <Member Name="From" Description="Von" />
     <Member Name="To" Description="An" />
   </Type>
+  <Type Name="CaseMessage" />
   <Type Name="CaseNotificationEntity" Description="Fall Benachrichtigung">
     <Member Name="Actor" Description="Akteur" />
     <Member Name="CaseActivity" Description="Fall-Aktivität" />
