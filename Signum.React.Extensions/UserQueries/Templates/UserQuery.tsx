@@ -19,6 +19,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
 
   const query = p.ctx.value.query;
   const ctx = p.ctx;
+  const ctx4 = ctx.subCtx({ labelColumns: 4 });
   const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
 
   const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
@@ -51,11 +52,22 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               </div>
             </div>
         }
-          <ValueLine ctx={ctx.subCtx(e => e.refreshMode)} valueColumns={2} />
-          <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
-            helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
-          <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} valueColumns={2} />
-          <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
+         
+
+
+        <div className="row">
+          <div className="col-sm-6">
+            <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} />
+            <ValueLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+              helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
+
+          </div>
+          <div className="col-sm-6">
+            <ValueLine ctx={ctx4.subCtx(e => e.refreshMode)} />
+            <ValueLine ctx={ctx4.subCtx(e => e.includeDefaultFilters)} />
+          </div>
+        </div>
+
           <div>
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}

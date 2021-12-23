@@ -271,3 +271,11 @@ public enum PinnedFilterActive
     InitialSelectionDashboardFilter,
     DefaultDashboardFilter,
 }
+
+public enum DashboardBehaviour
+{
+    ShowAsPartFilter, //Pinned Filter shown in the Part Widget
+    ShowAsDasboardFilter, //Pinned Filter promoted to dashboard
+    UseAsInitialSelection, //Filters other parts in the same interaction group as if the user initially selected
+    UseWhenNoFilters
+}

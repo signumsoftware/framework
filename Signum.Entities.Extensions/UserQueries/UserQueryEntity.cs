@@ -464,9 +464,12 @@ public static class UserQueryUtils
                   filter.Pinned.Active == PinnedFilterActive.DefaultDashboardFilter /*TODO, works for CachedQueries but maybe not in other cases*/ ||
                   filter.Pinned.Active == PinnedFilterActive.InitialSelectionDashboardFilter)
                     return null;
+
+                if (filter.Pinned.SplitText && !filter.ValueString.HasText())
+                    return null;
             }
 
-            if (!gr.Key.IsGroup)
+            if (!filter.IsGroup)
             {
                 if (gr.Count() != 0)
                     throw new InvalidOperationException("Unexpected childrens of condition");
@@ -486,6 +489,22 @@ public static class UserQueryUtils
                 return (Filter)new FilterGroup(filter.GroupOperation!.Value, filter.Token?.Token, gr.ToFilterList(indent + 1).ToList());
             }
         }).NotNull().ToList();
+    }
+
+    public static List<QueryToken> GetPinnedFilterTokens(this IEnumerable<QueryFilterEmbedded> filters, int indent = 0)
+    {
+        return filters.GroupWhen(filter => filter.Indentation == indent).SelectMany(gr =>
+        {
+            var filter = gr.Key;
+
+            if (filter.Pinned != null)
+                return gr.Select(a => a.Token?.Token).NotNull().Distinct();
+
+            if (filter.IsGroup)
+                return gr.GetPinnedFilterTokens(indent + 1);
+            else
+                return Enumerable.Empty<QueryToken>(); 
+        }).ToList();
     }
 }
 

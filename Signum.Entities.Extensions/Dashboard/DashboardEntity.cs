@@ -50,6 +50,9 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     [NoRepeatValidator]
     public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 
+    [Ignore, QueryableProperty]
+    public MList<TokenEquivalenceGroupEntity> TokenEquivalences { get; set; } = new MList<TokenEquivalenceGroupEntity>();
+
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
@@ -264,4 +267,21 @@ public enum DashboardEmbedededInEntity
     Tab
 }
 
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class TokenEquivalenceGroupEntity : Entity
+{
+    [NotNullValidator(DisabledInModelBinder = true)]
+    public Lite<DashboardEntity> Dashboard { get; set; }
 
+    public InteractionGroup? InteractionGroup { get; set; }
+
+    [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 1)]
+    public MList<TokenEquivalenceEmbedded> TokenEquivalences { get; set; } = new MList<TokenEquivalenceEmbedded>();
+}
+
+public class TokenEquivalenceEmbedded : EmbeddedEntity
+{
+    public QueryEntity Query { get; set; }
+
+    public QueryTokenEmbedded QueryToken { get; set; }
+}

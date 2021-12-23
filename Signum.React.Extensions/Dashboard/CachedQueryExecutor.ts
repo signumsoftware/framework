@@ -533,7 +533,7 @@ function extractRequestedFilters(cached: FilterRequest[], request: FilterRequest
     const removed = cloned.extract(rf => equalFilter(c, rf));
 
     if (removed.length == 0)
-      throw new CachedQueryError("Cached filter not found in requet");
+      throw new CachedQueryError("Cached filter not found in request");
   }
 
   return cloned;

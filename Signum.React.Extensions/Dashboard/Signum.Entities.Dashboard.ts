@@ -76,6 +76,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   combineSimilarRows: boolean;
   cacheQueryConfiguration: CacheQueryConfigurationEmbedded | null;
   parts: Entities.MList<PanelPartEmbedded>;
+  tokenEquivalences: Entities.MList<TokenEquivalenceGroupEntity>;
   guid: string /*Guid*/;
   key: string | null;
 }
@@ -144,6 +145,21 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   interactionGroup: InteractionGroup | null;
   style: Signum.BootstrapStyle;
   content: IPartEntity;
+}
+
+export const TokenEquivalenceEmbedded = new Type<TokenEquivalenceEmbedded>("TokenEquivalenceEmbedded");
+export interface TokenEquivalenceEmbedded extends Entities.EmbeddedEntity {
+  Type: "TokenEquivalenceEmbedded";
+  query: Basics.QueryEntity;
+  queryToken: UserAssets.QueryTokenEmbedded;
+}
+
+export const TokenEquivalenceGroupEntity = new Type<TokenEquivalenceGroupEntity>("TokenEquivalenceGroup");
+export interface TokenEquivalenceGroupEntity extends Entities.Entity {
+  Type: "TokenEquivalenceGroup";
+  dashboard: Entities.Lite<DashboardEntity>;
+  interactionGroup: InteractionGroup | null;
+  tokenEquivalences: Entities.MList<TokenEquivalenceEmbedded>;
 }
 
 export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
