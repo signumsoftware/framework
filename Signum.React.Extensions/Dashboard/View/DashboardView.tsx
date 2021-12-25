@@ -19,7 +19,7 @@ import { CachedQueryJS } from '../CachedQueryExecutor'
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; }) {
 
   const forceUpdate = useForceUpdate();
-  var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate), [p.dashboard]);
+  var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate, p.dashboard), [p.dashboard]);
 
 
   function renderBasic() {

@@ -72,7 +72,7 @@ public static class DashboardLogic
             OnGetCachedQueryDefinition.Register((LinkListPartEntity uqp, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
 
             sb.Include<DashboardEntity>()
-                .WithVirtualMList(a => a.TokenEquivalences, e => e.Dashboard)
+                .WithVirtualMList(a => a.TokenEquivalencesGroups, e => e.Dashboard)
                 .WithQuery(() => cp => new
                 {
                     Entity = cp,
@@ -82,6 +82,9 @@ public static class DashboardLogic
                     cp.Owner,
                     cp.DashboardPriority,
                 });
+
+            sb.Schema.EntityEvents<DashboardEntity>().Retrieved += DashboardLogic_Retrieved; ;
+
 
             sb.Include<CachedQueryEntity>()
                 .WithExpressionFrom((DashboardEntity d) => d.CachedQueries())
@@ -173,6 +176,18 @@ public static class DashboardLogic
             .GroupToDictionary(),
                 new InvalidateWith(typeof(DashboardEntity)));
         }
+    }
+
+    private static void DashboardLogic_Retrieved(DashboardEntity db, PostRetrievingContext ctx)
+    {
+        db.ParseData(query =>
+        {
+            object? queryName = query.ToQueryNameCatch();
+            if (queryName == null)
+                return null;
+
+            return QueryLogic.Queries.QueryDescription(queryName);
+        });
     }
 
     class DashboardGraph : Graph<DashboardEntity>
@@ -432,41 +447,40 @@ public static class DashboardLogic
             if (!writers.Any())
                 continue;
 
-            var equivalences = db.TokenEquivalences.Where(a => a.InteractionGroup == key || a.InteractionGroup == null);
+            var equivalences = db.TokenEquivalencesGroups.Where(a => a.InteractionGroup == key || a.InteractionGroup == null);
 
             foreach (var wr in writers)
             {
-                if (wr.QueryRequest.GroupResults)
+                var keyColumns = wr.QueryRequest.GroupResults ? 
+                    wr.QueryRequest.Columns.Where(c => c.Token is not AggregateToken) : 
+                    wr.QueryRequest.Columns;
+
+                var equivalencesDictionary = (from gr in equivalences
+                                              from t in gr.TokenEquivalences.Where(a => a.Query.ToQueryName() == wr.QueryRequest.QueryName)
+                                              select KeyValuePair.Create(t.Token.Token, gr.TokenEquivalences.GroupToDictionary(a => a.Query.ToQueryName(), a => a.Token.Token)))
+                                             .ToDictionaryEx();
+
+                foreach (var cqd in cqdefs.Where(e => e != wr))
                 {
-                    var keyColumns = wr.QueryRequest.Columns.Where(c => c.Token is not AggregateToken);
-
-                    var equivalencesDictionary = (from gr in equivalences
-                                                  from t in gr.TokenEquivalences.Where(a => a.Query.ToQueryName() == wr.QueryRequest.QueryName)
-                                                  select KeyValuePair.Create(t.QueryToken.Token, gr.TokenEquivalences.GroupToDictionary(a => a.Query.ToQueryName(), a => a.QueryToken.Token)))
-                                                 .ToDictionaryEx();
-
-                    foreach (var cqd in cqdefs.Where(e => e != wr))
+                    var extraColumns = keyColumns.Select(k =>
                     {
-                        var extraColumns = keyColumns.Select(k =>
-                        {
-                            var translatedToken = TranslatedToken(k.Token, cqd.QueryRequest.QueryName, equivalencesDictionary);
+                        var translatedToken = TranslatedToken(k.Token, cqd.QueryRequest.QueryName, equivalencesDictionary);
 
-                            if (translatedToken == null)
-                                return null;
+                        if (translatedToken == null)
+                            return null;
 
-                            if (!cqd.QueryRequest.Columns.Any(c => translatedToken.Contains(c.Token)))
-                                return translatedToken.FirstEx(); //Doesn't really matter if we add "Product" or "Entity.Product"; 
+                        if (!cqd.QueryRequest.Columns.Any(c => translatedToken.Contains(c.Token)))
+                            return translatedToken.FirstEx(); //Doesn't really matter if we add "Product" or "Entity.Product"; 
 
                             return null;
-                        }).NotNull().ToList();
+                    }).NotNull().ToList();
 
-                        if (extraColumns.Any())
-                        {
-                            ExpandColumns(cqd, extraColumns);
-                        }
-
-                        cqd.QueryRequest.Pagination = new Pagination.All();
+                    if (extraColumns.Any())
+                    {
+                        ExpandColumns(cqd, extraColumns);
                     }
+
+                    cqd.QueryRequest.Pagination = new Pagination.All();
                 }
             }
         }
@@ -499,10 +513,20 @@ public static class DashboardLogic
         var toAppend = new List<QueryToken>();
         for (var t = original; t != null; t = t.Parent)
         {
-            if (equivalences.TryGetValue(t, out var dic) && dic.TryGetValue(targetQueryName, out var list))
-                return list.Select(t => AppendTokens(t, toAppend)).ToList();
+            {
+                if (equivalences.TryGetValue(t, out var dic) && dic.TryGetValue(targetQueryName, out var list))
+                    return list.Select(t => AppendTokens(t, toAppend)).ToList();
+            }
 
             toAppend.Insert(0, t);
+
+            if(t.Parent == null)
+            {
+                var entityToken = QueryUtils.Parse("Entity", QueryLogic.Queries.QueryDescription(original.QueryName), 0);
+
+                if(equivalences.TryGetValue(entityToken, out var dic) && dic.TryGetValue(targetQueryName, out var list))
+                    return list.Select(t => AppendTokens(t, toAppend)).ToList();
+            }
         }
 
         if (original.QueryName == targetQueryName)
@@ -522,6 +546,8 @@ public static class DashboardLogic
 
             if (newToken == null)
                 throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(nt.Key, t, QueryUtils.GetKey(qd.QueryName)));
+
+            t = newToken;
         }
 
         return t;

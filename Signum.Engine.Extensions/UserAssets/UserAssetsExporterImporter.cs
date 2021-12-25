@@ -145,7 +145,7 @@ public static class UserAssetsImporter
                     Guid = guid,
                     Action = entity.IsNew ? EntityAction.New :
                              customResolutionModel.ContainsKey(entity.Guid) ? EntityAction.Different :
-                             GraphExplorer.FromRoot((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
+                             GraphExplorer.FromRootVirtual((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
                              EntityAction.Identical,
                     CustomResolution = customResolutionModel.TryGetCN(entity.Guid),
                 });

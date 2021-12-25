@@ -28,5 +28,10 @@ public static class DashboardServer
             if (result != null)
                 ep.extension.Add("embeddedDashboards", result);
         };
+
+        SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((DashboardEntity uq) =>
+        {
+            uq.ParseData(q => QueryLogic.Queries.QueryDescription(q.ToQueryName()));
+        });
     }
 }

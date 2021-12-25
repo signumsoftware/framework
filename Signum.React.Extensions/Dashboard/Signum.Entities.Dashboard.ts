@@ -76,7 +76,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   combineSimilarRows: boolean;
   cacheQueryConfiguration: CacheQueryConfigurationEmbedded | null;
   parts: Entities.MList<PanelPartEmbedded>;
-  tokenEquivalences: Entities.MList<TokenEquivalenceGroupEntity>;
+  tokenEquivalencesGroups: Entities.MList<TokenEquivalenceGroupEntity>;
   guid: string /*Guid*/;
   key: string | null;
 }
@@ -151,7 +151,7 @@ export const TokenEquivalenceEmbedded = new Type<TokenEquivalenceEmbedded>("Toke
 export interface TokenEquivalenceEmbedded extends Entities.EmbeddedEntity {
   Type: "TokenEquivalenceEmbedded";
   query: Basics.QueryEntity;
-  queryToken: UserAssets.QueryTokenEmbedded;
+  token: UserAssets.QueryTokenEmbedded;
 }
 
 export const TokenEquivalenceGroupEntity = new Type<TokenEquivalenceGroupEntity>("TokenEquivalenceGroup");

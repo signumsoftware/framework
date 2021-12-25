@@ -168,10 +168,11 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
             <EntityGridRepeater ctx={ctx.subCtx(cp => cp.parts)} getComponent={renderPart} onCreate={handleOnCreate} />
           </div>
         </Tab>
-        <Tab title={ctxBasic.niceName(a => a.tokenEquivalences)} eventKey="equivalences">
-          <EntityRepeater ctx={ctxBasic.subCtx(a => a.tokenEquivalences)} avoidFieldSet getComponent={(ctxGr: TypeContext<TokenEquivalenceGroupEntity>) => 
+        <Tab title={ctxBasic.niceName(a => a.tokenEquivalencesGroups)} eventKey="equivalences">
+          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "ExtraSmall" })} avoidFieldSet getComponent={(ctxGr: TypeContext<TokenEquivalenceGroupEntity>) => 
             <div>
-              <ValueLine ctx={ctxGr.subCtx(cp => cp.interactionGroup)} inlineCheckbox={true} />
+              <ValueLine ctx={ctxGr.subCtx(pp => pp.interactionGroup)}
+                onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
               <EntityTable ctx={ctxGr.subCtx(p => p.tokenEquivalences)} avoidFieldSet columns={EntityTable.typedColumns<TokenEquivalenceEmbedded>([
                 {
                   property: p => p.query,
@@ -179,8 +180,8 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
                   headerHtmlAttributes: { style: { width: "30%" } },
                 },
                 {
-                  property: p => p.query,
-                  template: (ectx) => ectx.value.query && <QueryTokenEntityBuilder ctx={ectx.subCtx(p => p.queryToken)}
+                  property: p => p.token,
+                  template: (ectx) => ectx.value.query && <QueryTokenEntityBuilder ctx={ectx.subCtx(p => p.token)}
                     queryKey={ectx.value.query.key} subTokenOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll} />,
                   headerHtmlAttributes: { style: { width: "100%" } },
                 },

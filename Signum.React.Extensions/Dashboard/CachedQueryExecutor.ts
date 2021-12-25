@@ -577,7 +577,7 @@ function paginateRows(rt: ResultTable, reqPag: Pagination): ResultTable{
       {
         switch (reqPag.mode) {
           case "All": return rt;
-          case "Firsts": return { ...rt, rows: rt.rows.slice(0, rt.pagination.elementsPerPage), pagination: reqPag };
+          case "Firsts": return { ...rt, rows: rt.rows.slice(0, reqPag.elementsPerPage), pagination: reqPag };
           case "Paginate":
             var startIndex = reqPag.elementsPerPage! * (reqPag.currentPage! - 1);
             return { ...rt, rows: rt.rows.slice(startIndex, startIndex + reqPag.elementsPerPage!), pagination: reqPag };
