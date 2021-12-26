@@ -414,14 +414,14 @@ namespace Signum.Entities
 
     public class DecimalsValidatorAttribute : ValidatorAttribute
     {
-        public int DecimalPlaces { get; set; }
+        public byte DecimalPlaces { get; set; }
 
         public DecimalsValidatorAttribute()
         {
             DecimalPlaces = 2;
         }
 
-        public DecimalsValidatorAttribute(int decimalPlaces)
+        public DecimalsValidatorAttribute(byte decimalPlaces)
         {
             this.DecimalPlaces = decimalPlaces;
         }

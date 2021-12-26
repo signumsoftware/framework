@@ -254,12 +254,36 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
         public string GetColumnType(IColumn c)
         {
-            return c.UserDefinedTypeName ?? (c.DbType.ToString(IsPostgres) + GetSizeScale(c.Size, c.Scale));
+            return c.UserDefinedTypeName ?? (c.DbType.ToString(IsPostgres) + GetSizePrecisionScale(c));
         }
 
         public string GetColumnType(DiffColumn c)
         {
             return c.UserTypeName ?? c.DbType.ToString(IsPostgres) /*+ GetSizeScale(Math.Max(c.Length, c.Precision), c.Scale)*/;
+        }
+
+        public string GetSizePrecisionScale(IColumn c)
+        {
+            return GetSizePrecisionScale(c.Size, c.Precision, c.Scale, c.DbType.IsDecimal());
+        }
+
+        public string GetSizePrecisionScale(int? size, byte? precision, byte? scale, bool isDecimal)
+        {
+            if (size == null && precision == null)
+                return "";
+
+            if (isDecimal)
+            {
+                if (scale == null)
+                    return "({0})".FormatWith(precision);
+                else
+                    return "({0},{1})".FormatWith(precision, scale);
+            }
+
+            if (size == int.MaxValue)
+                return IsPostgres ? "" : "(MAX)";
+
+            return "({0})".FormatWith(size);
         }
 
         public string Quote(AbstractDbType type, string @default)
@@ -268,20 +292,6 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
                 return "'" + @default + "'";
 
             return @default;
-        }
-
-        public string GetSizeScale(int? size, int? scale)
-        {
-            if (size == null)
-                return "";
-
-            if (size == int.MaxValue)
-                return IsPostgres ? "" : "(MAX)";
-
-            if (scale == null)
-                return "({0})".FormatWith(size);
-
-            return "({0},{1})".FormatWith(size, scale);
         }
 
         public SqlPreCommand? AlterTableForeignKeys(ITable t)

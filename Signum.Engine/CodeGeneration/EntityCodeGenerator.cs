@@ -763,10 +763,17 @@ namespace Signum.Engine.CodeGeneration
             var defaultSize = CurrentSchema.Settings.GetSqlSize(null, null, pair.DbType);
             if (defaultSize != null)
             {
-                if (!(defaultSize == col.Precision || defaultSize == col.Length || defaultSize == int.MaxValue && col.Length == -1))
+                if (!(defaultSize == col.Length || defaultSize == int.MaxValue && col.Length == -1))
                     parts.Add("Size = " + (col.Length == -1 ? "int.MaxValue" :
                                         col.Length != 0 ? col.Length.ToString() :
                                         col.Precision != 0 ? col.Precision.ToString() : "0"));
+            }
+
+            var defaultPrecision = CurrentSchema.Settings.GetSqlPrecision(null, null, pair.DbType);
+            if (defaultPrecision != null)
+            {
+                if (defaultPrecision != col.Precision)
+                    parts.Add("Precision = " + (col.Precision != 0 ? col.Precision.ToString() : "0"));
             }
 
             var defaultScale = CurrentSchema.Settings.GetSqlScale(null, null, col.DbType);

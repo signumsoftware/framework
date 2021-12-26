@@ -181,7 +181,7 @@ namespace Signum.Engine
         }
 
         public abstract DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value);
-        public abstract MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value);
+        public abstract MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, Expression value);
 
         protected static MethodInfo miAsserDateTime = ReflectionTools.GetMethodInfo(() => AssertDateTime(null));
         protected static DateTime? AssertDateTime(DateTime? dateTime)

@@ -1129,6 +1129,7 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
                 && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
                 && Nullable == (other.Nullable.ToBool())
                 && SizeEquals(other)
+                && PrecisionEquals(other)
                 && ScaleEquals(other)
                 && (ignoreIdentity || Identity == other.Identity)
                 && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
@@ -1147,7 +1148,12 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
 
         public bool SizeEquals(IColumn other)
         {
-            return (other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
+            return (other.DbType.IsDecimal() || other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
+        }
+
+        public bool PrecisionEquals(IColumn other)
+        {
+            return (!other.DbType.IsDecimal() || other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision);
         }
 
         public bool DefaultEquals(IColumn other)
