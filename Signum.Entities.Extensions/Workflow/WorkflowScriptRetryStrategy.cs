@@ -17,7 +17,7 @@ namespace Signum.Entities.Workflow
         public string Rule { get; set; }
 
         [UniqueIndex]
-        public Guid Guid { get; set; }
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Rule);

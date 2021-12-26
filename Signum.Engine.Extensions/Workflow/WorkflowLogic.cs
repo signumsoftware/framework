@@ -219,6 +219,7 @@ namespace Signum.Engine.Workflow
                 UserAssetsImporter.Register<WorkflowTimerConditionEntity>("WorkflowTimerCondition", WorkflowTimerConditionOperation.Save);
                 UserAssetsImporter.Register<WorkflowConditionEntity>("WorkflowCondition", WorkflowConditionOperation.Save);
                 UserAssetsImporter.Register<WorkflowActionEntity>("WorkflowAction", WorkflowActionOperation.Save);
+                UserAssetsImporter.Register<WorkflowScriptRetryStrategyEntity>("WorkflowScriptRetryStrategy", WorkflowScriptRetryStrategyOperation.Save);
 
                 sb.Include<WorkflowEntity>()
                     .WithConstruct(WorkflowOperation.Create)
