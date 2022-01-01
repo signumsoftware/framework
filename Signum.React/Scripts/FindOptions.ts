@@ -1,6 +1,6 @@
 import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
 import { BsSize } from './Components';
 
@@ -88,7 +88,7 @@ export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterG
 }
 
 export function isActive(fo: FilterOptionParsed) {
-  return !(fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "InitialSelectionDashboardFilter" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
 }
 
 export interface FilterConditionOptionParsed {
@@ -97,6 +97,7 @@ export interface FilterConditionOptionParsed {
   operation?: FilterOperation;
   value: any;
   pinned?: PinnedFilterParsed;
+  dashboardBehaviour?: DashboardBehaviour;
 }
 
 export interface PinnedFilterParsed {
@@ -124,6 +125,7 @@ export interface FilterGroupOptionParsed {
   token?: QueryToken;
   filters: FilterOptionParsed[];
   pinned?: PinnedFilterParsed;
+  dashboardBehaviour?: DashboardBehaviour;
   value?: string; /*For search in multiple columns*/
 }
 

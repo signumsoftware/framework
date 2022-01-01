@@ -18,13 +18,14 @@ import SelectorModal from '@framework/SelectorModal'
 import { DashboardFilter, DashboardFilterController, DashboardFilterRow, equalsDFR } from "./DashboardFilterController"
 import { filterOperations, FilterOptionParsed, isFilterGroupOption, isFilterGroupOptionParsed, QueryToken } from '@framework/FindOptions'
 import { CachedQueryJS, executeChartCached } from '../CachedQueryExecutor'
+import { DashboardBehaviour } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery'
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
   const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity, ...p.deps ?? []]);
-  const dbFop = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.pinned?.active == "InitialSelectionDashboardFilter"), [chartRequest]);
-  const originalFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.pinned == null || a.pinned.active != "InitialSelectionDashboardFilter"), [chartRequest]);
+  const initialSelection = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.dashboardBehaviour == "UseAsInitialSelection"), [chartRequest]);
+  const originalFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour != "UseAsInitialSelection"), [chartRequest]);
 
   if (chartRequest != null) {
     chartRequest.filterOptions.clear();
@@ -38,27 +39,27 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     var tokens = allTokens(dashboardFilters);
 
     chartRequest.filterOptions = [
-      ...originalFilters!.filter(a => a.pinned == null || a.pinned.active !== "DefaultDashboardFilter" || !tokens.some(t => t.fullKey == a.token?.fullKey)),
+      ...originalFilters!.filter(a =>  a.dashboardBehaviour !== "UseWhenNoFilters" || !tokens.some(t => t.fullKey == a.token?.fullKey)),
       ...dashboardFilters,
     ];
   }
 
   React.useEffect(() => {
-    if (dbFop) {
+    if (initialSelection) {
 
-      if (isFilterGroupOptionParsed(dbFop))
-        throw new Error("DashboardFilter is not compatible with groups");
+      if (isFilterGroupOptionParsed(initialSelection))
+        throw new Error(DashboardBehaviour.niceToString("UseAsInitialSelection") + " is not compatible with groups");
 
       var dashboarFilter = new DashboardFilter(p.partEmbedded, chartRequest!.queryKey);
-      if (dbFop.operation == "EqualTo")
-        dashboarFilter.rows.push({ filters: [{ token: dbFop.token!, value: dbFop.value }] });
-      else if (dbFop.operation == "IsIn") {
-        (dbFop.value as any[]).forEach(val => dashboarFilter.rows.push({ filters: [{ token: dbFop!.token!, value: val }] }));
+      if (initialSelection.operation == "EqualTo")
+        dashboarFilter.rows.push({ filters: [{ token: initialSelection.token!, value: initialSelection.value }] });
+      else if (initialSelection.operation == "IsIn") {
+        (initialSelection.value as any[]).forEach(val => dashboarFilter.rows.push({ filters: [{ token: initialSelection!.token!, value: val }] }));
       } else
-        throw new Error("DashboardFilter is not compatible with filter operation " + dbFop.operation);
+        throw new Error("DashboardFilter is not compatible with filter operation " + initialSelection.operation);
       p.filterController.setFilter(dashboarFilter)
     }
-  }, [dbFop]);
+  }, [initialSelection]);
 
   
   const cachedQuery = p.cachedQueries[liteKey(toLite(p.part.userChart))];
@@ -128,7 +129,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   return (
     <div>
-      <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => reloadQuery()} extraSmall={true} />
+      <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => reloadQuery()} pinnedFilterVisible={fop => fop.dashboardBehaviour == null} extraSmall={true} />
       {p.part.allowChangeShowData &&
         <label>
           <input type="checkbox" className="form-check-input" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />

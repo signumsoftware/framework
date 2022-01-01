@@ -9,10 +9,9 @@ import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumbe
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FilterGroupOperation, PinnedFilterActive } from '../Signum.Entities.DynamicQuery';
+import { DashboardBehaviour, FilterGroupOperation, PinnedFilterActive } from '../Signum.Entities.DynamicQuery';
 import "./FilterBuilder.css"
 import { NumericTextBox } from '../Lines/ValueLine';
-import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { useStateWithPromise, useForceUpdate, useForceUpdatePromise } from '../Hooks'
 import { Dropdown } from 'react-bootstrap'
 
@@ -29,6 +28,7 @@ interface FilterBuilderProps {
   renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
   showPinnedFiltersOptions?: boolean;
   showPinnedFiltersOptionsButton?: boolean;
+  showDashboardBehaviour?: boolean;
 }
 
 export default function FilterBuilder(p: FilterBuilderProps) {
@@ -122,12 +122,15 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
                 lastToken={p.lastToken} onHeightChanged={handleHeightChanged} renderValue={p.renderValue}
                 showPinnedFiltersOptions={showPinnedFiltersOptions}
+                showDashboardBehaviour={p.showDashboardBehaviour ?? true}
                 disableValue={false} /> :
               <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged} renderValue={p.renderValue}
-                showPinnedFiltersOptions={showPinnedFiltersOptions} disableValue={false} />
+                showPinnedFiltersOptions={showPinnedFiltersOptions}
+                showDashboardBehaviour={p.showDashboardBehaviour ?? true}
+                disableValue={false} />
             )}
             {!p.readOnly &&
               <tr className="sf-filter-create">
@@ -179,6 +182,7 @@ export interface FilterGroupComponentsProps {
   lastToken: QueryToken | undefined;
   renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
   showPinnedFiltersOptions: boolean;
+  showDashboardBehaviour: boolean;
   disableValue: boolean;
 }
 
@@ -318,11 +322,18 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
           }
           <div>
             {p.showPinnedFiltersOptions &&
-              <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")} onClick={e => { fg.pinned = fg.pinned ? undefined : {}; changeFilter(); }} disabled={p.readOnly}>
+              <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")} onClick={e => {
+                fg.pinned = fg.pinned ? undefined : {};
+                fixDashboardBehaviour(fg);
+                changeFilter();
+              }} disabled={p.readOnly}>
                 <FontAwesomeIcon color="orange" icon={[fg.pinned ? "fas" : "far", "star"]} />
               </button>
             }
           </div>
+          {p.showDashboardBehaviour && <div>
+            <DashboardBehaviourComponent filter={fg} readonly={readOnly} onChange={() => changeFilter()} />
+          </div>}
         </div>
         <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
           <table className="table-sm" style={{ width: "100%" }}>
@@ -346,6 +357,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged}
                     lastToken={p.lastToken} onHeightChanged={p.onHeightChanged} renderValue={p.renderValue}
                     showPinnedFiltersOptions={p.showPinnedFiltersOptions}
+                    showDashboardBehaviour={p.showDashboardBehaviour}
                     disableValue={p.disableValue || fg.pinned != null && fg.pinned.active != "Checkbox_StartChecked" && fg.pinned.active != "Checkbox_StartUnchecked"}
                   /> :
 
@@ -354,6 +366,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged} renderValue={p.renderValue}
                     showPinnedFiltersOptions={p.showPinnedFiltersOptions}
+                    showDashboardBehaviour={p.showDashboardBehaviour}
                     disableValue={p.disableValue || fg.pinned != null && fg.pinned.active != "Checkbox_StartChecked" && fg.pinned.active != "Checkbox_StartUnchecked"}
                   />
                 )}
@@ -437,6 +450,7 @@ export interface FilterConditionComponentProps {
   onFilterChanged: () => void;
   renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
   showPinnedFiltersOptions: boolean;
+  showDashboardBehaviour: boolean;
   disableValue: boolean;
 }
 
@@ -536,13 +550,21 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
           {p.disableValue ? <small className="text-muted">{SearchMessage.ParentValue.niceToString()}</small> :
             f.token && f.token.filterType && f.operation && renderValue()}
         </td>
-        {f.token && f.token.filterType && f.operation && p.showPinnedFiltersOptions &&
+        {p.showPinnedFiltersOptions &&
           <td>
-            <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => { f.pinned = f.pinned ? undefined : {}; changeFilter(); }} disabled={p.readOnly}>
+            {f.token && f.token.filterType && f.operation && <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => {
+              f.pinned = f.pinned ? undefined : {};
+              fixDashboardBehaviour(f);
+              changeFilter();
+            }} disabled={p.readOnly}>
               <FontAwesomeIcon color="orange" icon={[f.pinned ? "fas" : "far", "star"]} />
             </button>
+            }
           </td>
         }
+        {p.showDashboardBehaviour && <td>
+          <DashboardBehaviourComponent filter={f} readonly={readOnly} onChange={()=> changeFilter()}/>
+        </td>}
       </tr>
       {p.showPinnedFiltersOptions && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => changeFilter()} readonly={readOnly} />}
     </>
@@ -651,6 +673,34 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
   }
 }
 
+function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: boolean, onChange: ()=> void }) {
+  return (
+    <Dropdown>
+      <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "light"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
+        title={StyleContext.default.titleLabels ? "Behaviour of the filter when used inside of a Dashboard" : undefined}>
+        {<FontAwesomeIcon icon="tachometer-alt" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
+      </Dropdown.Toggle>
+
+      <Dropdown.Menu>
+        {[undefined, ...DashboardBehaviour.values()].map(v =>
+          <Dropdown.Item key={v} active={v == p.filter.dashboardBehaviour} onClick={() => {
+
+            p.filter.dashboardBehaviour = v;
+            if (v == "PromoteToDasboardFilter" && p.filter.pinned == null)
+              p.filter.pinned = {};
+            else if ((v == "UseAsInitialSelection" || v == "UseWhenNoFilters") && p.filter.pinned != null)
+              p.filter.pinned = undefined;
+
+            p.onChange();
+          }}>
+            {v == null? " - " :  DashboardBehaviour.niceToString(v)}
+          </Dropdown.Item>)
+        }
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+}
+
 export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, labelText?: string, forceNullable?: boolean): React.ReactElement<any> {
 
   var tokenType = token.type;
@@ -742,3 +792,12 @@ export function MultiValue(p: MultiValueProps) {
   );
 }
 
+
+function fixDashboardBehaviour(fop: FilterOptionParsed) {
+  if (fop.dashboardBehaviour == "PromoteToDasboardFilter" && fop.pinned == null)
+    fop.dashboardBehaviour = undefined;
+
+  if ((fop.dashboardBehaviour == "UseWhenNoFilters" || fop.dashboardBehaviour == "UseAsInitialSelection") && fop.pinned != null)
+    fop.dashboardBehaviour = undefined;
+
+}

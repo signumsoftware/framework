@@ -59,6 +59,7 @@ public class UserAssetController : ControllerBase
                     operation = filter.operation.Value,
                     value = value,
                     pinned = filter.pinned,
+                    dashboardBehaviour = filter.dashboardBehaviour,
                 };
             }
             else
@@ -73,7 +74,8 @@ public class UserAssetController : ControllerBase
                 {
                     groupOperation = group.groupOperation!.Value,
                     token = token == null ? null : new QueryTokenTS(token, true),
-                    pinned = gr.Key.pinned,
+                    pinned = group.pinned,
+                    dashboardBehaviour = group.dashboardBehaviour,
                     filters = ParseFilterInternal(gr, qd, options, indent + 1).ToList()
                 };
             }
@@ -158,6 +160,7 @@ public class UserAssetController : ControllerBase
         public FilterOperation? operation;
         public string? valueString;
         public PinnedFilter pinned;
+        public DashboardBehaviour? dashboardBehaviour; 
         public int indentation;
     }
 
@@ -179,6 +182,7 @@ public class UserAssetController : ControllerBase
         public object? value;
         public List<FilterNode> filters;
         public PinnedFilter pinned;
+        public DashboardBehaviour? dashboardBehaviour;
     }
 
     public class FilterElement

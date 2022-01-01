@@ -9,7 +9,7 @@ import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPer
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { QueryToken } from '@framework/FindOptions';
-import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
+import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../UserQueries/Signum.Entities.UserQueries';
 import { softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
@@ -68,6 +68,7 @@ export module Converter {
         groupOperation: fn.groupOperation,
         filters: fn.filters!.map(f => toFilterOptionParsed(f)),
         pinned: fn.pinned && toPinnedFilterParsed(fn.pinned),
+        dashboardBehaviour: fn.dashboardBehaviour,
         frozen: false,
         expanded: false,
       });
@@ -78,6 +79,7 @@ export module Converter {
         value: fn.value,
         frozen: false,
         pinned: fn.pinned && toPinnedFilterParsed(fn.pinned),
+        dashboardBehaviour: fn.dashboardBehaviour,
       });
   }
 
@@ -163,6 +165,7 @@ export module Converter {
       operation: qf.operation ?? undefined,
       valueString: qf.valueString ?? undefined,
       pinned: qf.pinned ? toPinnedFilter(qf.pinned) : undefined,
+      dashboardBehaviour: qf.dashboardBehaviour ?? undefined,
       indentation: qf.indentation!,
     });
   }
@@ -203,6 +206,7 @@ export module API {
     value?: any;
     filters?: FilterNode[];
     pinned?: PinnedFilter;
+    dashboardBehaviour?: DashboardBehaviour;
   }
 
   export interface QueryFilterItem {
@@ -213,6 +217,7 @@ export module API {
     operation?: FilterOperation ;
     valueString?: string;
     pinned?: PinnedFilter;
+    dashboardBehaviour?: DashboardBehaviour;
     indentation?: number;
   }
 

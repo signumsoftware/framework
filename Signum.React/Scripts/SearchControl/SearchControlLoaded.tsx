@@ -57,6 +57,7 @@ export interface SearchControlLoadedProps {
   hideButtonBar: boolean;
   hideFullScreenButton: boolean;
   showHeader: boolean | "PinnedFilters";
+  pinnedFilterVisible?: (fop: FilterOptionParsed) => boolean;
   showBarExtension: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
   showFilters: boolean;
@@ -1502,6 +1503,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return <AutoFocus disabled={!this.props.enableAutoFocus}>
       <PinnedFilterBuilder
         filterOptions={fo.filterOptions}
+        pinnedFilterVisible={this.props.pinnedFilterVisible}
         onFiltersChanged={this.handlePinnedFilterChanged}
         onSearch={() => this.doSearchPage1(true)}
         showSearchButton={this.state.refreshMode == "Manual" && this.props.showHeader != true}

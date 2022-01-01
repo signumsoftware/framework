@@ -27,27 +27,29 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
     const ctx = TypeContext.root(db);
 
     return (
-      <div className="sf-dashboard-view">
-        {
-          mlistItemContext(ctx.subCtx(a => a.parts))
-            .groupBy(c => c.value.row!.toString())
-            .orderBy(gr => Number(gr.key))
-            .map(gr =>
-              <div className="row row-control-panel" key={"row" + gr.key}>
-                {gr.elements.orderBy(ctx => ctx.value.startColumn).map((c, j, list) => {
+      <div>
+        <div className="sf-dashboard-view">
+          {
+            mlistItemContext(ctx.subCtx(a => a.parts))
+              .groupBy(c => c.value.row!.toString())
+              .orderBy(gr => Number(gr.key))
+              .map(gr =>
+                <div className="row row-control-panel" key={"row" + gr.key}>
+                  {gr.elements.orderBy(ctx => ctx.value.startColumn).map((c, j, list) => {
 
-                  const prev = j == 0 ? undefined : list[j - 1].value;
+                    const prev = j == 0 ? undefined : list[j - 1].value;
 
-                  const offset = c.value.startColumn! - (prev ? (prev.startColumn! + prev.columns!) : 0);
+                    const offset = c.value.startColumn! - (prev ? (prev.startColumn! + prev.columns!) : 0);
 
-                  return (
-                    <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
-                      <PanelPart ctx={c} entity={p.entity} filterController={filterController} reload={p.reload} cachedQueries={p.cachedQueries} /> 
-                    </div>
-                  );
-                })}
-              </div>)
-        }
+                    return (
+                      <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
+                        <PanelPart ctx={c} entity={p.entity} filterController={filterController} reload={p.reload} cachedQueries={p.cachedQueries} />
+                      </div>
+                    );
+                  })}
+                </div>)
+          }
+        </div>
       </div>
     );
   }

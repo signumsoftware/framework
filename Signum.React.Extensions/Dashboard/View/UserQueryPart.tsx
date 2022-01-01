@@ -78,6 +78,7 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery }: {
         deps={[refreshCount, ...deps ?? []]}
         findOptions={findOptions}
         showHeader={"PinnedFilters"}
+        pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
         showFooter={part.showFooter}
         allowSelection={part.allowSelection}
         defaultRefreshMode={part.userQuery.refreshMode}

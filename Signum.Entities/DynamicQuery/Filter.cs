@@ -268,14 +268,13 @@ public enum PinnedFilterActive
     Checkbox_StartChecked,
     [Description("Checkbox (start unchecked)")]
     Checkbox_StartUnchecked,
-    InitialSelectionDashboardFilter,
-    DefaultDashboardFilter,
 }
 
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
 public enum DashboardBehaviour
 {
-    ShowAsPartFilter, //Pinned Filter shown in the Part Widget
-    ShowAsDasboardFilter, //Pinned Filter promoted to dashboard
+    //ShowAsPartFilter = 0, //Pinned Filter shown in the Part Widget
+    PromoteToDasboardFilter = 1, //Pinned Filter promoted to dashboard
     UseAsInitialSelection, //Filters other parts in the same interaction group as if the user initially selected
     UseWhenNoFilters
 }
