@@ -716,9 +716,9 @@ public static class CaseActivityLogic
                     ca.StartDate = now;
                     ca.Save();
 
-                    wec.NotifyTransitionContext(ca);
-
                     InsertCaseActivityNotifications(ca);
+
+                    wec.NotifyTransitionContext(ca);
                 }
             }.Register();
 
@@ -730,14 +730,14 @@ public static class CaseActivityLogic
                 ca.Case.CaseActivities().Any(a => !a.Is(ca)) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() :
                 !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
                 Delete = (ca, args) =>
-                {
-                    var c = ca.Case;
-                    ca.Notifications().UnsafeDelete();
-                    ca.Delete();
-                    c.Delete();
-                    if (args.GetArg<bool>())
-                        c.MainEntity.Delete();
-                },
+                    {
+                        var c = ca.Case;
+                        ca.Notifications().UnsafeDelete();
+                        ca.Delete();
+                        c.Delete();
+                        if (args.GetArg<bool>())
+                            c.MainEntity.Delete();
+                    },
             }.Register();
 
 
@@ -1046,8 +1046,8 @@ public static class CaseActivityLogic
                 else
                 {
                     var nca = InsertNewCaseActivity(@case, twa, previous);
-                    ctx.NotifyTransitionContext(nca);
                     InsertCaseActivityNotifications(nca);
+                    ctx.NotifyTransitionContext(nca);
                 }
             }
 
