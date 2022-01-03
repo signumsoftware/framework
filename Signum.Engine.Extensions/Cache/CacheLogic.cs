@@ -881,16 +881,6 @@ Remember that the Start could be called with an empty database!");
                 assumeMassiveChangesAsInvalidations.Value = null;
         });
     }
-
-    internal static bool IsAssumedMassiveChangeAsInvalidation<T>()
-    {
-        var asssumeAsInvalidation = CacheLogic.assumeMassiveChangesAsInvalidations.Value?.TryGetS(typeof(T));
-
-        if (asssumeAsInvalidation == null)
-            throw new InvalidOperationException($"Impossible to determine if the massive operation will affect the semi-cached instances of {typeof(T).TypeName()}. Execute CacheLogic.AssumeMassiveChangesAsInvalidations to desanbiguate.");
-
-        return asssumeAsInvalidation.Value;
-    }
 }
 
 internal interface ICacheLogicController : ICacheController
