@@ -15,7 +15,7 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
-import { DashboardFilter, DashboardFilterController, DashboardFilterRow, equalsDFR } from "./DashboardFilterController"
+import { DashboardFilter, DashboardFilterController, DashboardFilterRow, DashboardPinnedFilters, equalsDFR } from "./DashboardFilterController"
 import { filterOperations, FilterOptionParsed, isFilterGroupOption, isFilterGroupOptionParsed, QueryToken } from '@framework/FindOptions'
 import { CachedQueryJS, executeChartCached } from '../CachedQueryExecutor'
 import { DashboardBehaviour } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery'
@@ -25,7 +25,9 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
   const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity, ...p.deps ?? []]);
   const initialSelection = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.dashboardBehaviour == "UseAsInitialSelection"), [chartRequest]);
-  const originalFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour != "UseAsInitialSelection"), [chartRequest]);
+  const dashboardPinnedFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == "PromoteToDasboardPinnedFilter"), [chartRequest]);
+  const useWhenNoFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == "UseWhenNoFilters"), [chartRequest]);
+  const simpleFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == null), [chartRequest]);
 
   if (chartRequest != null) {
     chartRequest.filterOptions.clear();
@@ -39,7 +41,8 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     var tokens = allTokens(dashboardFilters);
 
     chartRequest.filterOptions = [
-      ...originalFilters!.filter(a =>  a.dashboardBehaviour !== "UseWhenNoFilters" || !tokens.some(t => t.fullKey == a.token?.fullKey)),
+      ...simpleFilters!,
+      ...useWhenNoFilters!.filter(a => !tokens.some(t => t.fullKey == a.token?.fullKey)),
       ...dashboardFilters,
     ];
   }
@@ -58,8 +61,16 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       } else
         throw new Error("DashboardFilter is not compatible with filter operation " + initialSelection.operation);
       p.filterController.setFilter(dashboarFilter)
+    } else {
+      p.filterController.clearFilters(p.partEmbedded);
     }
-  }, [initialSelection]);
+
+    if (dashboardPinnedFilters) {
+      p.filterController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, chartRequest!.queryKey, dashboardPinnedFilters));
+    } else {
+      p.filterController.clearFilters(p.partEmbedded);
+    }
+  }, [initialSelection, dashboardPinnedFilters]);
 
   
   const cachedQuery = p.cachedQueries[liteKey(toLite(p.part.userChart))];
@@ -155,7 +166,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           loading={result === null}
           onBackgroundClick={e => {
             if (!e.ctrlKey) {
-              p.filterController.clear(p.partEmbedded);
+              p.filterController.clearFilters(p.partEmbedded);
             }
           }}
           dashboardFilter={p.filterController.filters.get(p.partEmbedded)}

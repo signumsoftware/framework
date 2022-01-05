@@ -499,19 +499,22 @@ public static class UserQueryUtils
         }).NotNull().ToList();
     }
 
-    public static List<QueryToken> GetPinnedFilterTokens(this IEnumerable<QueryFilterEmbedded> filters, int indent = 0)
+    public static List<(QueryToken, bool prototedToDashboard)> GetDashboardPinnedFilterTokens(this IEnumerable<QueryFilterEmbedded> filters, int indent = 0)
     {
         return filters.GroupWhen(filter => filter.Indentation == indent).SelectMany(gr =>
         {
             var filter = gr.Key;
 
             if (filter.Pinned != null)
-                return gr.Select(a => a.Token?.Token).NotNull().Distinct();
+            {
+                var promotedToDashboard = filter.DashboardBehaviour == DashboardBehaviour.PromoteToDasboardPinnedFilter;
+                return gr.PreAnd(filter).Select(a => a.Token?.Token).NotNull().Distinct().Select(t => (t, promotedToDashboard));
+            }
 
             if (filter.IsGroup)
-                return gr.GetPinnedFilterTokens(indent + 1);
+                return gr.GetDashboardPinnedFilterTokens(indent + 1);
             else
-                return Enumerable.Empty<QueryToken>(); 
+                return Enumerable.Empty<(QueryToken, bool prototedToDashboard)>(); 
         }).ToList();
     }
 }

@@ -686,7 +686,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
           <Dropdown.Item key={v} active={v == p.filter.dashboardBehaviour} onClick={() => {
 
             p.filter.dashboardBehaviour = v;
-            if (v == "PromoteToDasboardFilter" && p.filter.pinned == null)
+            if (v == "PromoteToDasboardPinnedFilter" && p.filter.pinned == null)
               p.filter.pinned = {};
             else if ((v == "UseAsInitialSelection" || v == "UseWhenNoFilters") && p.filter.pinned != null)
               p.filter.pinned = undefined;
@@ -794,7 +794,7 @@ export function MultiValue(p: MultiValueProps) {
 
 
 function fixDashboardBehaviour(fop: FilterOptionParsed) {
-  if (fop.dashboardBehaviour == "PromoteToDasboardFilter" && fop.pinned == null)
+  if (fop.dashboardBehaviour == "PromoteToDasboardPinnedFilter" && fop.pinned == null)
     fop.dashboardBehaviour = undefined;
 
   if ((fop.dashboardBehaviour == "UseWhenNoFilters" || fop.dashboardBehaviour == "UseAsInitialSelection") && fop.pinned != null)

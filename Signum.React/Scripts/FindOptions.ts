@@ -63,6 +63,7 @@ export interface FilterConditionOption {
   operation?: FilterOperation;
   value?: any;
   pinned?: PinnedFilter;
+  dashboardBehaviour?: DashboardBehaviour;
 }
 
 export interface FilterGroupOption {
@@ -70,6 +71,7 @@ export interface FilterGroupOption {
   groupOperation: FilterGroupOperation;
   filters: FilterOption[];
   pinned?: PinnedFilter;
+  dashboardBehaviour?: DashboardBehaviour;
   value?: string; /*For search in multiple columns*/
 }
 

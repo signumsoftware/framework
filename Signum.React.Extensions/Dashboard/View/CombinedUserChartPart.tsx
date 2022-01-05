@@ -121,7 +121,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
     infos.forEach(inf => {
       inf.makeQuery?.().done();
     });
-  }, [p.part, ...p.deps ?? [], infos.max(e => p.filterController.lastChange.get(e.userChart.query.key))]);
+  }, [p.part, ...p.deps ?? [], infos.max(e => p.filterController.getLastChange(e.userChart.query.key))]);
 
   function renderError(e: any, key: number) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;

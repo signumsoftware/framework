@@ -19,10 +19,25 @@ import { BootstrapStyle } from '../../Basics/Signum.Entities.Basics'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import { CachedQueryJS, executeQueryCached, executeQueryValueCached } from '../CachedQueryExecutor'
+import { DashboardPinnedFilters } from './DashboardFilterController'
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
   let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
+
+  React.useEffect(() => {
+
+    if (fo) {
+      var dashboardPinnedFilters = fo.filterOptions?.filter(a => a?.pinned == "PromoteToDasboardFilter") ?? [];
+
+      if (dashboardPinnedFilters.length) {
+        Finder.getQueryDescription(fo.queryName)
+          .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd))
+          .then(fops => p.filterController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops)))
+          .done();
+      }
+    }
+  }, [fo]);
 
   const cachedQuery = p.cachedQueries[liteKey(toLite(p.part.userQuery))];
 
@@ -45,7 +60,8 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
 
   return <SearchContolInPart
     part={p.part}
-    findOptions={fo} deps={p.deps}
+    findOptions={fo}
+    deps={p.deps}
     cachedQuery={cachedQuery} />;
 }
 

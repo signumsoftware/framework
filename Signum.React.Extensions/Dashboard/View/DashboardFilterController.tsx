@@ -1,5 +1,5 @@
 import { DashboardEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard';
-import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOptionParsed, FindOptions, QueryToken } from '@framework/FindOptions';
+import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOptionParsed, FindOptions, isFilterGroupOptionParsed, QueryToken } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart';
 import { ChartRow } from '../../Chart/ChartClient';
@@ -14,12 +14,17 @@ export class DashboardFilterController {
   forceUpdate: () => void;
 
   filters: Map<PanelPartEmbedded, DashboardFilter> = new Map();
+  pinnedFilters: Map<PanelPartEmbedded, DashboardPinnedFilters> = new Map();
   lastChange: Map<string /*queryKey*/, number> = new Map();
   dashboard: DashboardEntity;
+  queriesWithEquivalences: string/*queryKey*/[];
 
   constructor(forceUpdate: () => void, dashboard: DashboardEntity) {
     this.forceUpdate = forceUpdate;
     this.dashboard = dashboard;
+
+    this.queriesWithEquivalences = dashboard.tokenEquivalencesGroups.flatMap(a => a.element.tokenEquivalences.map(a => a.element.query.key)).distinctBy(a => a);
+    
   }
 
   setFilter(filter: DashboardFilter) {
@@ -28,23 +33,42 @@ export class DashboardFilterController {
     this.forceUpdate();
   }
 
-  clear(partEmbedded: PanelPartEmbedded) {
-    var current = this.filters.get(partEmbedded);
-    if (current) {
+  setPinnedFilter(filter: DashboardPinnedFilters) {
+    this.lastChange.set(filter.queryKey, new Date().getTime());
+    this.pinnedFilters.set(filter.partEmbedded, filter);
+    this.forceUpdate();
+  }       
+
+  clearPinnesFilter(partEmbedded: PanelPartEmbedded) {
+    var current = this.pinnedFilters.get(partEmbedded);
+    if (current)
       this.lastChange.set(current.queryKey, new Date().getTime());
-    }
+
+    this.pinnedFilters.delete(partEmbedded);
+    this.forceUpdate();
+  }
+
+  clearFilters(partEmbedded: PanelPartEmbedded) {
+    var current = this.filters.get(partEmbedded);
+    if (current)
+      this.lastChange.set(current.queryKey, new Date().getTime());
     this.filters.delete(partEmbedded);
     this.forceUpdate();
   }
 
+  getLastChange(queryKey: string) {
+    if (this.queriesWithEquivalences.contains(queryKey))
+      return this.queriesWithEquivalences.max(qk => this.lastChange.get(qk));
+
+    return this.lastChange.get(queryKey);
+  }
+
   getFilterOptions(partEmbedded: PanelPartEmbedded, queryKey: string): FilterOptionParsed[] {
 
-    if (partEmbedded.interactionGroup == null)
+    var otherFilters = partEmbedded.interactionGroup == null ? [] : Array.from(this.filters.values()).filter(f => f.partEmbedded != partEmbedded && f.partEmbedded.interactionGroup == partEmbedded.interactionGroup && f.rows?.length);
+    var pinnedFilters = Array.from(this.pinnedFilters.values()).filter(a => a.pinnedFilters.length > 0);
+    if (otherFilters.length == 0 && pinnedFilters.length == 0)
       return [];
-
-    var otherFilters = Array.from(this.filters.values()).filter(f => f.partEmbedded != partEmbedded && f.partEmbedded.interactionGroup == partEmbedded.interactionGroup && f.rows?.length);
-
-    debugger;
 
     var equivalences = this.dashboard.tokenEquivalencesGroups
       .filter(a => a.element.interactionGroup == partEmbedded.interactionGroup || a.element.interactionGroup == null)
@@ -59,9 +83,8 @@ export class DashboardFilterController {
         })));
       }).groupToObject(a => a.fromQueryKey)
 
-    var result = otherFilters.map(
+    var resultFilters = otherFilters.map(
       df => {
-
         
         var tokenEquivalences = equivalences[df.queryKey]?.groupToObject(a => a.fromToken!.fullKey);
 
@@ -81,13 +104,21 @@ export class DashboardFilterController {
         ).notNull())
       }).notNull();
 
-    return result;
+    var resultPinnedFilters = pinnedFilters.flatMap(a => {
+      if (a.queryKey == queryKey)
+        return a.pinnedFilters;
+
+      var tokenEquivalences = equivalences[a.queryKey]?.groupToObject(a => a.fromToken!.fullKey);
+
+      return a.pinnedFilters.map(fop => tokenEquivalences && translateFilterToken(fop, tokenEquivalences)).notNull();
+    })
+
+    return [...resultPinnedFilters, ...resultFilters];
   }
 
  
 
   applyToFindOptions(partEmbedded: PanelPartEmbedded, fo: FindOptions): FindOptions {
-
     var fops = this.getFilterOptions(partEmbedded, getQueryKey(fo.queryName));
     if (fops.length == 0)
       return fo;
@@ -103,9 +134,27 @@ export class DashboardFilterController {
   }
 }
 
+function translateFilterToken(fop: FilterOptionParsed, tokenEquivalences: { [token: string]: TokenEquivalenceTuple[] }): FilterOptionParsed | null {
+  var newToken: QueryToken | null | undefined = fop.token;
+  if (newToken != null) {
+    newToken = translateToken(newToken, tokenEquivalences);
+    if (newToken == null)
+      return null;
+  }
+
+  if (isFilterGroupOptionParsed(fop)) {
+    return ({ ...fop, token: newToken, filters: fop.filters.map(f => translateFilterToken(f, tokenEquivalences)).notNull() });
+  }
+  else
+    return ({ ...fop, token: newToken });
+}
+
 function translateToken(token: QueryToken, tokenEquivalences: { [token: string]: TokenEquivalenceTuple[] }) {
 
   var toAdd: QueryToken[] = [];
+
+  if (tokenEquivalences == null)
+    return null;
 
   for (var t = token; t != null; t = t.parent!) {
 
@@ -118,7 +167,6 @@ function translateToken(token: QueryToken, tokenEquivalences: { [token: string]:
     toAdd.insertAt(0, t);
 
     if (t.parent == null) {//Is a Column, like 'Supplier', but maybe 'Entity' is mapped to we can interpret it as 'Entity.Supplier'  
-      debugger;
       equivalence = tokenEquivalences["Entity"];
 
       if (equivalence != null) {
@@ -150,6 +198,18 @@ interface TokenEquivalenceTuple {
   fromToken: QueryToken;
   toQuery: string;
   toToken: QueryToken;
+}
+
+export class DashboardPinnedFilters {
+  partEmbedded: PanelPartEmbedded; 
+  queryKey: string;
+  pinnedFilters: FilterOptionParsed[];
+
+  constructor(partEmbedded: PanelPartEmbedded, queryKey: string, pinnedFilters: FilterOptionParsed[]) {
+    this.partEmbedded = partEmbedded;
+    this.queryKey = queryKey;
+    this.pinnedFilters = pinnedFilters;
+  }
 }
 
 export class DashboardFilter {

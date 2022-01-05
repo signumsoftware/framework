@@ -15,6 +15,7 @@ import { translated } from '../../Translation/TranslatedInstanceTools'
 import { DashboardFilterController } from './DashboardFilterController'
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files'
 import { CachedQueryJS } from '../CachedQueryExecutor'
+import PinnedFilterBuilder from '../../../Signum.React/Scripts/SearchControl/PinnedFilterBuilder'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; }) {
 
@@ -91,10 +92,18 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
   }
 
 
-  if (p.dashboard.combineSimilarRows)
-    return renderCombinedRows();
-  else
-    return renderBasic();
+  return (
+    <div>
+      {filterController.pinnedFilters.size > 0 && <PinnedFilterBuilder
+        filterOptions={Array.from(filterController.pinnedFilters.values()).flatMap(a => a.pinnedFilters)}
+        onFiltersChanged={forceUpdate} />}
+      {
+        p.dashboard.combineSimilarRows ?
+          renderCombinedRows() :
+          renderBasic()
+      }
+    </div>
+  );
 }
 
 function combineRows(rows: CombinedRow[]): CombinedRow[] {
@@ -220,7 +229,7 @@ export function PanelPart(p: PanelPartProps) {
   var dashboardFilter = p.filterController?.filters.get(p.ctx.value);
 
   function handleClearFilter(e: React.MouseEvent) {
-    p.filterController.clear(p.ctx.value);
+    p.filterController.clearFilters(p.ctx.value);
   }
 
   return (

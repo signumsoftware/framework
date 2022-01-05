@@ -274,7 +274,7 @@ public enum PinnedFilterActive
 public enum DashboardBehaviour
 {
     //ShowAsPartFilter = 0, //Pinned Filter shown in the Part Widget
-    PromoteToDasboardFilter = 1, //Pinned Filter promoted to dashboard
+    PromoteToDasboardPinnedFilter = 1, //Pinned Filter promoted to dashboard
     UseAsInitialSelection, //Filters other parts in the same interaction group as if the user initially selected
     UseWhenNoFilters
 }

@@ -89,14 +89,16 @@ export module Converter {
         token: fr.token && fr.token.fullKey,
         groupOperation: fr.groupOperation,
         filters: fr.filters!.map(f => toFilterOption(f)),
-        pinned: fr.pinned
+        pinned: fr.pinned,
+        dashboardBehaviour: fr.dashboardBehaviour,
       } as FilterGroupOption);
     else
       return ({
         token: fr.token!.fullKey,
         operation: fr.operation ?? "EqualTo",
         value: fr.value,
-        pinned: fr.pinned
+        pinned: fr.pinned,
+        dashboardBehaviour: fr.dashboardBehaviour,
       } as FilterConditionOption);
   }
 
@@ -109,6 +111,7 @@ export module Converter {
         value: fr.value,
         pinned: fr.pinned,
         filters: fr.filters.map(f => toFilterNode(f)),
+        dashboardBehaviour: fr.dashboardBehaviour,
       });
 
     else
@@ -117,6 +120,7 @@ export module Converter {
         operation: fr.operation ?? "EqualTo",
         value: fr.value,
         pinned: fr.pinned,
+        dashboardBehaviour: fr.dashboardBehaviour,
       });
   }
 
@@ -142,6 +146,7 @@ export module Converter {
       operation: e.operation,
       valueString: e.valueString,
       pinned: e.pinned && toPinnedFilterEmbedded(e.pinned),
+      dashboardBehaviour: e.dashboardBehaviour,
       indentation: e.indentation,
     });
   }

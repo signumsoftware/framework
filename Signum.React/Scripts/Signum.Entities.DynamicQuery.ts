@@ -15,7 +15,7 @@ export type ColumnOptionsMode =
 
 export const DashboardBehaviour = new EnumType<DashboardBehaviour>("DashboardBehaviour");
 export type DashboardBehaviour =
-  "PromoteToDasboardFilter" |
+  "PromoteToDasboardPinnedFilter" |
   "UseAsInitialSelection" |
   "UseWhenNoFilters";
 
