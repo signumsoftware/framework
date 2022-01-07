@@ -28,7 +28,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
   React.useEffect(() => {
 
     if (fo) {
-      var dashboardPinnedFilters = fo.filterOptions?.filter(a => a?.pinned == "PromoteToDasboardFilter") ?? [];
+      var dashboardPinnedFilters = fo.filterOptions?.filter(a => a?.dashboardBehaviour == "PromoteToDasboardPinnedFilter") ?? [];
 
       if (dashboardPinnedFilters.length) {
         Finder.getQueryDescription(fo.queryName)
