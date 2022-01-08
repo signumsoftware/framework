@@ -37,6 +37,8 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
             CalculateSufixWithRenames(fp);
 
+            EnsureDirectory(fp);
+
             SaveFileInDisk(fp);
         }
     }

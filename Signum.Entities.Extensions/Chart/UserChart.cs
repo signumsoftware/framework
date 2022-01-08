@@ -42,6 +42,8 @@ public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEnt
     [StringLengthValidator(Min = 3, Max = 200)]
     public string DisplayName { get; set; }
 
+    public bool? IncludeDefaultFilters { get; set; }
+
     public int? MaxRows { get; set; }
 
     ChartScriptSymbol chartScript;
@@ -116,6 +118,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEnt
             EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
             new XAttribute("HideQuickLink", HideQuickLink),
             Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+            IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
             new XAttribute("ChartScript", this.ChartScript.Key),
             MaxRows == null ? null! : new XAttribute("MaxRows", MaxRows.Value),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
@@ -130,6 +133,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEnt
         EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetTypeLite(a.Value));
         HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
         Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
+        IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
         ChartScript = ctx.ChartScript(element.Attribute("ChartScript")!.Value);
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));

@@ -64,14 +64,15 @@ public static class DashboardLogic
 
             SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) => { db.Execute(DashboardOperation.RegenerateCachedQueries); return null; });
 
-            OnGetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) =>  new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), pp, ucp.UserChart, ucp.IsQueryCached, canWriteFilters: true) });
-            OnGetCachedQueryDefinition.Register((CombinedUserChartPartEntity cucp, PanelPartEmbedded pp) => cucp.UserCharts.Select(uc => new CachedQueryDefinition(uc.UserChart.ToChartRequest().ToQueryRequest(), pp, uc.UserChart, uc.IsQueryCached, canWriteFilters: false)));
-            OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.RenderMode == UserQueryPartRenderMode.BigValue ? uqp.UserQuery.ToQueryRequestValue() : uqp.UserQuery.ToQueryRequest(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
-            OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
+            OnGetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) =>  new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), ucp.UserChart.Filters.GetDashboardPinnedFilterTokens(), pp, ucp.UserChart, ucp.IsQueryCached, canWriteFilters: true) });
+            OnGetCachedQueryDefinition.Register((CombinedUserChartPartEntity cucp, PanelPartEmbedded pp) => cucp.UserCharts.Select(uc => new CachedQueryDefinition(uc.UserChart.ToChartRequest().ToQueryRequest(), uc.UserChart.Filters.GetDashboardPinnedFilterTokens(), pp, uc.UserChart, uc.IsQueryCached, canWriteFilters: false)));
+            OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.RenderMode == UserQueryPartRenderMode.BigValue ? uqp.UserQuery.ToQueryRequestValue() : uqp.UserQuery.ToQueryRequest(), uqp.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
+            OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), uqe.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
             OnGetCachedQueryDefinition.Register((UserTreePartEntity ute, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
             OnGetCachedQueryDefinition.Register((LinkListPartEntity uqp, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
 
             sb.Include<DashboardEntity>()
+                .WithVirtualMList(a => a.TokenEquivalencesGroups, e => e.Dashboard)
                 .WithQuery(() => cp => new
                 {
                     Entity = cp,
@@ -81,6 +82,9 @@ public static class DashboardLogic
                     cp.Owner,
                     cp.DashboardPriority,
                 });
+
+            sb.Schema.EntityEvents<DashboardEntity>().Retrieved += DashboardLogic_Retrieved; ;
+
 
             sb.Include<CachedQueryEntity>()
                 .WithExpressionFrom((DashboardEntity d) => d.CachedQueries())
@@ -172,6 +176,18 @@ public static class DashboardLogic
             .GroupToDictionary(),
                 new InvalidateWith(typeof(DashboardEntity)));
         }
+    }
+
+    private static void DashboardLogic_Retrieved(DashboardEntity db, PostRetrievingContext ctx)
+    {
+        db.ParseData(query =>
+        {
+            object? queryName = query.ToQueryNameCatch();
+            if (queryName == null)
+                return null;
+
+            return QueryLogic.Queries.QueryDescription(queryName);
+        });
     }
 
     class DashboardGraph : Graph<DashboardEntity>
@@ -425,43 +441,162 @@ public static class DashboardLogic
             .Where(a => a.PanelPart.InteractionGroup != null)
             .GroupToDictionary(a => a.PanelPart.InteractionGroup!.Value);
 
-        foreach (var (key, value) in groups)
+        foreach (var (key, cqdefs) in groups)
         {
-            var writers = value.Where(a => a.CanWriteFilters).ToList();
+            var writers = cqdefs.Where(a => a.CanWriteFilters).ToList();
             if (!writers.Any())
                 continue;
 
+            var equivalenceGroups = db.TokenEquivalencesGroups.Where(a => a.InteractionGroup == key || a.InteractionGroup == null);
+
             foreach (var wr in writers)
             {
-                if (wr.QueryRequest.GroupResults)
+                var keyColumns = wr.QueryRequest.GroupResults ?
+                    wr.QueryRequest.Columns.Where(c => c.Token is not AggregateToken).Select(c => c.Token).Distinct().ToList() :
+                    wr.QueryRequest.Columns.Select(c => c.Token).Distinct().ToList();
+                
+                Dictionary<QueryToken, Dictionary<object, List<QueryToken>>> equivalencesDictionary = GetEquivalenceDictionary(equivalenceGroups, fromQuery: wr.QueryRequest.QueryName);
+
+                foreach (var cqd in cqdefs.Where(e => e != wr))
                 {
-                    var keyColumns = wr.QueryRequest.Columns.Where(c => c.Token is not AggregateToken);
+                    List<QueryToken> extraColumns = ExtraColumns(keyColumns, cqd, equivalencesDictionary);
 
-                    foreach (var item in value.Where(e => e != wr))
+                    if (extraColumns.Any())
                     {
-                        var extraColumns = keyColumns.Where(k => !item.QueryRequest.Columns.Any(c => c.Token.Equals(k.Token))).ToList();
+                        ExpandColumns(cqd, extraColumns, "Dashboard Filters from " + key);
+                    }
 
+                    cqd.QueryRequest.Pagination = new Pagination.All();
+                }
+            }
+        }
+
+        foreach (var writer in definitions)
+        {
+            if (writer.PinnedFiltersTokens.Any())
+            {
+                var pft = writer.PinnedFiltersTokens.Where(a => a.prototedToDashboard == false).Select(a=>a.token).ToList();
+                if (pft.Any())
+                    ExpandColumns(writer, pft, "Pinned Filters");
+
+                var dpft = writer.PinnedFiltersTokens.Where(a => a.prototedToDashboard == true).Select(a => a.token).ToList();
+                if (dpft.Any())
+                {
+                    var equivalenceGroups = db.TokenEquivalencesGroups.Where(a => /*a.InteractionGroup == writer.PanelPart.InteractionGroup Needed? ||*/ a.InteractionGroup == null);
+
+                    Dictionary<QueryToken, Dictionary<object, List<QueryToken>>> equivalencesDictionary = GetEquivalenceDictionary(equivalenceGroups, fromQuery: writer.QueryRequest.QueryName);
+
+                    foreach (var cqd in definitions.Where(e => e != writer))
+                    {
+                        List<QueryToken> extraColumns = ExtraColumns(dpft, cqd, equivalencesDictionary);
                         if (extraColumns.Any())
                         {
-                            item.QueryRequest.Columns.AddRange(extraColumns.Select(c => new Column(c.Token, null)));
-                            var avgs = item.QueryRequest.Columns.Extract(a => a.Token is AggregateToken at && at.AggregateFunction == AggregateFunction.Average);
-                            foreach (var av in avgs)
-                            {
-                                item.QueryRequest.Columns.Remove(av);
-                                item.QueryRequest.Columns.Add(new Column(new AggregateToken(AggregateFunction.Sum, av.Token.Parent!), null));
-                                item.QueryRequest.Columns.Add(new Column(new AggregateToken(AggregateFunction.Count, av.Token.Parent!, FilterOperation.DistinctTo, null), null));
-                            }
+                            ExpandColumns(cqd, extraColumns, "Dashboard Pinned Filters");
                         }
-
-                        item.QueryRequest.Pagination = new Pagination.All();
                     }
                 }
+
             }
         }
 
         var cached = definitions.Where(a => a.IsQueryCached).ToList();
 
         return cached;
+    }
+
+    private static List<QueryToken> ExtraColumns(List<QueryToken> requiredTokens, CachedQueryDefinition cqd, Dictionary<QueryToken, Dictionary<object, List<QueryToken>>> equivalencesDictionary)
+    {
+        var extraColumns = requiredTokens.Select(t =>
+        {
+            var translatedToken = TranslatedToken(t, cqd.QueryRequest.QueryName, equivalencesDictionary);
+
+            if (translatedToken == null)
+                return null;
+
+            if (!cqd.QueryRequest.Columns.Any(c => translatedToken.Contains(c.Token)))
+                return translatedToken.FirstEx(); //Doesn't really matter if we add "Product" or "Entity.Product"; 
+
+            return null;
+        }).NotNull().ToList();
+        return extraColumns;
+    }
+
+    private static Dictionary<QueryToken, Dictionary<object, List<QueryToken>>> GetEquivalenceDictionary(IEnumerable<TokenEquivalenceGroupEntity> equivalences, object fromQuery)
+    {
+        return (from gr in equivalences
+                from t in gr.TokenEquivalences.Where(a => a.Query.ToQueryName() == fromQuery)
+                select KeyValuePair.Create(t.Token.Token, gr.TokenEquivalences.GroupToDictionary(a => a.Query.ToQueryName(), a => a.Token.Token)))
+                .ToDictionaryEx();
+    }
+
+    private static void ExpandColumns(CachedQueryDefinition cqd, List<QueryToken> extraColumns, string errorContext)
+    {
+        if (cqd.QueryRequest.GroupResults)
+        {
+            var errors = extraColumns
+                .Select(a => new {
+                    token = a,
+                    error = QueryUtils.CanColumn(a) ?? (cqd.QueryRequest.GroupResults && !a.IsGroupable ? "Is not groupable" : null)
+                })
+                .Where(a => a.error != null);
+
+            if (errors.Any())
+                throw new InvalidOperationException($"Unable to expand columns in '{cqd.UserAsset.KeyLong()}' (query {QueryUtils.GetKey(cqd.QueryRequest.QueryName)}) requested by {errorContext} because: \r\n{errors.ToString(a => a.token.FullKey() + ": " + a.error, "\r\n")}");
+        }
+
+        cqd.QueryRequest.Columns.AddRange(extraColumns.Select(c => new Column(c, null)));
+        var avgs = cqd.QueryRequest.Columns.Extract(a => a.Token is AggregateToken at && at.AggregateFunction == AggregateFunction.Average);
+        foreach (var av in avgs)
+        {
+            cqd.QueryRequest.Columns.Remove(av);
+            cqd.QueryRequest.Columns.Add(new Column(new AggregateToken(AggregateFunction.Sum, av.Token.Parent!), null));
+            cqd.QueryRequest.Columns.Add(new Column(new AggregateToken(AggregateFunction.Count, av.Token.Parent!, FilterOperation.DistinctTo, null), null));
+        }
+    }
+
+    private static List<QueryToken>? TranslatedToken(QueryToken original, object targetQueryName, Dictionary<QueryToken, Dictionary<object, List<QueryToken>>> equivalences)
+    {
+        var toAppend = new List<QueryToken>();
+        for (var t = original; t != null; t = t.Parent)
+        {
+            {
+                if (equivalences.TryGetValue(t, out var dic) && dic.TryGetValue(targetQueryName, out var list))
+                    return list.Select(t => AppendTokens(t, toAppend)).ToList();
+            }
+
+            toAppend.Insert(0, t);
+
+            if(t.Parent == null)
+            {
+                var entityToken = QueryUtils.Parse("Entity", QueryLogic.Queries.QueryDescription(original.QueryName), 0);
+
+                if(equivalences.TryGetValue(entityToken, out var dic) && dic.TryGetValue(targetQueryName, out var list))
+                    return list.Select(t => AppendTokens(t, toAppend)).ToList();
+            }
+        }
+
+        if (original.QueryName == targetQueryName)
+            return new List<QueryToken> { original };
+
+        return null;
+
+    }
+
+    private static QueryToken AppendTokens(QueryToken t, List<QueryToken> toAppend)
+    {
+        var qd = QueryLogic.Queries.QueryDescription(t.QueryName);
+
+        foreach (var nt in toAppend)
+        {
+            var newToken = QueryUtils.SubToken(t, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate | SubTokensOptions.CanElement, nt.Key);
+
+            if (newToken == null)
+                throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(nt.Key, t, QueryUtils.GetKey(qd.QueryName)));
+
+            t = newToken;
+        }
+
+        return t;
     }
 
     public static List<CombinedCachedQueryDefinition> CombineCachedQueryDefinitions(List<CachedQueryDefinition> cachedQueryDefinition)
@@ -489,9 +624,10 @@ public static class DashboardLogic
 
 public class CachedQueryDefinition
 {
-    public CachedQueryDefinition(QueryRequest queryRequest, PanelPartEmbedded panelPart, IUserAssetEntity userAsset, bool isQueryCached, bool canWriteFilters)
+    public CachedQueryDefinition(QueryRequest queryRequest, List<(QueryToken token, bool prototedToDashboard)> pinnedFiltersTokens, PanelPartEmbedded panelPart, IUserAssetEntity userAsset, bool isQueryCached, bool canWriteFilters)
     {
         QueryRequest = queryRequest;
+        PinnedFiltersTokens = pinnedFiltersTokens;
         PanelPart = panelPart;
         Guid = userAsset.Guid;
         UserAsset = userAsset.ToLite();
@@ -500,6 +636,7 @@ public class CachedQueryDefinition
     }
 
     public QueryRequest QueryRequest { get; set; }
+    public List<(QueryToken token, bool prototedToDashboard)> PinnedFiltersTokens { get; set; }
     public PanelPartEmbedded PanelPart { get; set; }
     public Guid Guid { get; set; }
     public Lite<IUserAssetEntity> UserAsset { get; set; }

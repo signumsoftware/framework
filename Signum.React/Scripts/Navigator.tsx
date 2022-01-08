@@ -616,6 +616,7 @@ export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event:
 
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
+  debugger;
   if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
     return Promise.resolve(entityOrEntityPack as EntityPack<ModifiableEntity>);
 

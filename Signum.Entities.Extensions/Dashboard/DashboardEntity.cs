@@ -50,6 +50,9 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     [NoRepeatValidator]
     public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 
+    [Ignore, QueryableProperty]
+    public MList<TokenEquivalenceGroupEntity> TokenEquivalencesGroups { get; set; } = new MList<TokenEquivalenceGroupEntity>();
+
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
@@ -102,6 +105,19 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     }
 
 
+    internal void ParseData(Func<QueryEntity, QueryDescription?> getDescription)
+    {
+        foreach (var f in TokenEquivalencesGroups)
+        {
+            foreach (var t in f.TokenEquivalences)
+            {
+                var description = getDescription(t.Query);
+                if (description != null)
+                    t.Token.ParseData(this, description, SubTokensOptions.CanElement);
+            }
+        }
+    }
+
     [Ignore]
     bool invalidating = false;
     protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -148,7 +164,9 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
             EmbeddedInEntity == null ? null! : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
             new XAttribute("CombineSimilarRows", CombineSimilarRows),
             CacheQueryConfiguration?.ToXml(ctx),
-            new XElement("Parts", Parts.Select(p => p.ToXml(ctx))));
+            new XElement("Parts", Parts.Select(p => p.ToXml(ctx))),
+            new XElement(nameof(TokenEquivalencesGroups), TokenEquivalencesGroups.Select(teg => teg.ToXml(ctx)))
+        );
     }
 
 
@@ -162,6 +180,8 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
         CombineSimilarRows = element.Attribute("CombineSimilarRows")?.Let(a => bool.Parse(a.Value)) ?? false;
         CacheQueryConfiguration = CacheQueryConfiguration.CreateOrAssignEmbedded(element.Element(nameof(CacheQueryConfiguration)), (cqc, elem) => cqc.FromXml(elem));
         Parts.Synchronize(element.Element("Parts")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+        TokenEquivalencesGroups.Synchronize(element.Element(nameof(TokenEquivalencesGroups))?.Elements().ToList() ?? new List<XElement>(), (teg, x) => teg.FromXml(x, ctx));
+        ParseData(q => ctx.GetQueryDescription(q));
     }
 
     protected override string? PropertyValidation(PropertyInfo pi)
@@ -178,6 +198,16 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
         if(pi.Name == nameof(CacheQueryConfiguration) && CacheQueryConfiguration != null && EntityType != null)
         {
             return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => EntityType));
+        }
+
+        if(pi.Name == nameof(TokenEquivalencesGroups))
+        {
+            var dups = TokenEquivalencesGroups
+                .SelectMany(a => a.TokenEquivalences).Select(a => a.Token.Token).NotNull()
+                .GroupCount(a => a).Where(gr => gr.Value > 1).ToString(a => a.Value + " x " + a.Key.FullKey(), "\n");
+
+            if (dups.HasText())
+                return "Duplicated tokens: " + dups;
         }
 
         return base.PropertyValidation(pi);
@@ -264,4 +294,60 @@ public enum DashboardEmbedededInEntity
     Tab
 }
 
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class TokenEquivalenceGroupEntity : Entity
+{
+    [NotNullValidator(Disabled = true)]
+    public Lite<DashboardEntity> Dashboard { get; set; }
 
+    public InteractionGroup? InteractionGroup { get; set; }
+
+    [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 1)]
+    public MList<TokenEquivalenceEmbedded> TokenEquivalences { get; set; } = new MList<TokenEquivalenceEmbedded>();
+
+    internal void FromXml(XElement x, IFromXmlContext ctx)
+    {
+        InteractionGroup = x.Attribute("InteractionGroup")?.Value.ToEnum<InteractionGroup>();
+        TokenEquivalences.Synchronize(x.Elements("TokenEquivalence").ToList(), (teg, x) => teg.FromXml(x, ctx));
+    }
+
+    internal XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("TokenEquivalenceGroup",
+            InteractionGroup == null ? null : new XAttribute(nameof(InteractionGroup), InteractionGroup.Value.ToString()),
+            TokenEquivalences.Select(te => te.ToXml(ctx)));
+    }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if(pi.Name == nameof(TokenEquivalences))
+        {
+            var list = TokenEquivalences.Select(a => a.Token.Token.Type.UnNullify().CleanType()).Distinct().ToList();
+            if(list.Count > 1)
+            {
+                if (!list.Any(t => list.All(t2 => t.IsAssignableFrom(t2))))
+                    return "Types " + list.CommaAnd(t => t.TypeName()) + " are not compatible";
+            }
+        }    
+
+        return base.PropertyValidation(pi);
+    }
+}
+
+public class TokenEquivalenceEmbedded : EmbeddedEntity
+{
+    public QueryEntity Query { get; set; }
+
+    public QueryTokenEmbedded Token { get; set; }
+
+    internal void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        Query = ctx.GetQuery(element.Attribute("Query")!.Value);
+        Token = new QueryTokenEmbedded(element.Attribute("Token")!.Value);
+    }
+
+    internal XElement ToXml(IToXmlContext ctx) => new XElement("TokenEquivalence",
+        new XAttribute("Query", Query.Key),
+        new XAttribute("Token", Token.Token.FullKey())
+    );
+}

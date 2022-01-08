@@ -533,7 +533,7 @@ function extractRequestedFilters(cached: FilterRequest[], request: FilterRequest
     const removed = cloned.extract(rf => equalFilter(c, rf));
 
     if (removed.length == 0)
-      throw new CachedQueryError("Cached filter not found in requet");
+      throw new CachedQueryError("Cached filter not found in request");
   }
 
   return cloned;
@@ -577,7 +577,7 @@ function paginateRows(rt: ResultTable, reqPag: Pagination): ResultTable{
       {
         switch (reqPag.mode) {
           case "All": return rt;
-          case "Firsts": return { ...rt, rows: rt.rows.slice(0, rt.pagination.elementsPerPage), pagination: reqPag };
+          case "Firsts": return { ...rt, rows: rt.rows.slice(0, reqPag.elementsPerPage), pagination: reqPag };
           case "Paginate":
             var startIndex = reqPag.elementsPerPage! * (reqPag.currentPage! - 1);
             return { ...rt, rows: rt.rows.slice(startIndex, startIndex + reqPag.elementsPerPage!), pagination: reqPag };
