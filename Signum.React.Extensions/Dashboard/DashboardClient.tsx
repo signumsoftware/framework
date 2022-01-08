@@ -15,7 +15,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
-import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation } from './Signum.Entities.Dashboard'
+import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity} from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '@framework/Hooks';
@@ -25,6 +25,7 @@ import { translated } from '../Translation/TranslatedInstanceTools';
 import { DashboardFilterController } from "./View/DashboardFilterController";
 import { EntityFrame } from '../../Signum.React/Scripts/TypeContext';
 import { CachedQueryJS } from './CachedQueryExecutor';
+import { Separator } from '../HtmlEditor/HtmlEditorButtons';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -68,6 +69,8 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('./Admin/UserChartPart')));
   Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('./Admin/CombinedUserChartPart')));
   Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
+  Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
+  Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
 
   Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
     isVisible: () => false,
@@ -184,6 +187,16 @@ export function start(options: { routes: JSX.Element[] }) {
           .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
           .done()
       }
+  });
+  registerRenderer(ImagePartEntity, {
+    component: () => import('./View/ImagePartView').then(a => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    withPanel: () => false
+  });
+  registerRenderer(SeparatorPartEntity, {
+    component: () => import('./View/SeparatorPartView').then(a => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    withPanel: () => false
   });
 
   onEmbeddedWidgets.push(wc => {

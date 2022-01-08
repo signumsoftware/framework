@@ -226,14 +226,16 @@ export function PanelPart(p: PanelPartProps) {
       <div className={classes("card-header", "sf-show-hover",
         style && style != "light" && "text-white",
         style && ("bg-" + style)
-      )}>
+      )}
+        style={{ backgroundColor: part.customColor ?? undefined }}
+      >
         {renderer.handleEditClick &&
           <a className="sf-pointer float-end flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
             <FontAwesomeIcon icon="edit" className="me-1" />Edit
           </a>
         }
         {renderer.handleTitleClick == undefined ? title :
-          <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
+          <a className="sf-pointer" style={{ color: color}} onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
         }
         {
           dashboardFilter && <span className="badge bg-light text-dark border ms-2 sf-filter-pill">

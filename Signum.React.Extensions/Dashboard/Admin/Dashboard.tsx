@@ -18,6 +18,7 @@ import { withClassName } from '../../Dynamic/View/HtmlAttributesExpression';
 import { classes } from '../../../Signum.React/Scripts/Globals';
 import { OperationButton } from '../../../Signum.React/Scripts/Operations/EntityOperations';
 import { EntityOperationContext } from '../../../Signum.React/Scripts/Operations';
+import { BootstrapStyle } from '../../Basics/Signum.Entities.Basics';
 
 export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   const forceUpdate = useForceUpdate();
@@ -70,7 +71,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
             <div className="row">
               <div className="col-sm-8">
-                <ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
+                < ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
               </div>
               <div className="col-sm-4">
                 <ValueLine ctx={tcs.subCtx(pp => pp.interactionGroup)}
@@ -79,9 +80,14 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
             </div>
 
             <div className="row">
-              <div className="col-sm-4">
+              <div className={tcs.value.style == 'CustomColor' ? "col-sm-2" : "col-sm-4"}>
                 <ValueLine ctx={tcs.subCtx(pp => pp.style)} onChange={() => forceUpdate()} />
               </div>
+              {tcs.value.style == 'CustomColor' &&
+                <div className="col-sm-2">
+                  <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
+                </div>
+              }
               <div className="col-sm-4">
                 <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => forceUpdate()} />
               </div>
@@ -95,7 +101,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
     );
 
     return (
-      <EntityGridItem title={title} bsStyle={tc.value.style}>
+      <EntityGridItem title={title} bsStyle={tc.value.style != "CustomColor" ? tc.value.style as BootstrapStyle : undefined} customColor= {tc.value.customColor ?? undefined}>
         <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: ctx.value }} />
       </EntityGridItem>
     );
@@ -110,10 +116,13 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           <div className="col-sm-6">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.displayName)} />
           </div>
-          <div className="col-sm-3">
+          <div className="col-sm-2">
+            <ValueLine ctx={ctxBasic.subCtx(cp => cp.hideDisplayName)} />
+          </div>
+          <div className="col-sm-2">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.dashboardPriority)} />
           </div>
-          <div className="col-sm-3">
+          <div className="col-sm-2">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.autoRefreshPeriod)} />
           </div>
         </div>

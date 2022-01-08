@@ -28,22 +28,35 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [NumberBetweenValidator(1, 12)]
     public int Columns { get; set; }
 
+    PanelStyle style;
+    public PanelStyle Style
+    {
+        get { return style; }
+        set
+        {
+            if (Set(ref style, value) && value != PanelStyle.CustomColor)
+                CustomColor = null;
+        }
+    }
+
     public InteractionGroup? InteractionGroup { get; set; }
 
-    public BootstrapStyle Style { get; set; }
+    public string? CustomColor { get; set; }
 
     [ImplementedBy(
         typeof(UserChartPartEntity),
         typeof(CombinedUserChartPartEntity),
         typeof(UserQueryPartEntity),
         typeof(ValueUserQueryListPartEntity),
-        typeof(LinkListPartEntity))]
+        typeof(LinkListPartEntity),
+        typeof(ImagePartEntity),
+        typeof(SeparatorPartEntity))]
     public IPartEntity Content { get; set; }
 
     public override string ToString()
     {
         return Title.HasText() ? Title :
-            Content==null?"":
+            Content == null ? "" :
             Content.ToString()!;
     }
 
@@ -71,6 +84,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             InteractionGroup = InteractionGroup,
             IconColor = IconColor,
             IconName = IconName,
+            CustomColor = CustomColor
         };
     }
 
@@ -102,7 +116,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         Title = x.Attribute("Title")?.Value;
         IconName = x.Attribute("IconName")?.Value;
         IconColor = x.Attribute("IconColor")?.Value;
-        Style = x.Attribute("Style")?.Value.TryToEnum<BootstrapStyle>() ?? BootstrapStyle.Light;
+        Style = x.Attribute("Style")?.Value.TryToEnum<PanelStyle>() ?? PanelStyle.Light;
         InteractionGroup = x.Attribute("InteractionGroup")?.Value.ToEnum<InteractionGroup>();
         Content = ctx.GetPart(Content, x.Elements().Single());
     }
@@ -173,7 +187,7 @@ public class UserQueryPartEntity : Entity, IPartEntity
             new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
             new XAttribute(nameof(RenderMode), RenderMode),
             new XAttribute(nameof(AllowSelection), AllowSelection),
-            ShowFooter ?  new XAttribute(nameof(ShowFooter), ShowFooter) : null,
+            ShowFooter ? new XAttribute(nameof(ShowFooter), ShowFooter) : null,
             CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null,
             IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null
             );
@@ -244,7 +258,7 @@ public class UserTreePartEntity : Entity, IPartEntity
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class UserChartPartEntity : Entity, IPartEntity
-{   
+{
     public UserChartEntity UserChart { get; set; }
 
     public bool IsQueryCached { get; set; }
@@ -323,9 +337,9 @@ public class CombinedUserChartPartEntity : Entity, IPartEntity
 
     public IPartEntity Clone() => new CombinedUserChartPartEntity
     {
-        UserCharts = this.UserCharts.Select(a=>a.Clone()).ToMList(),
+        UserCharts = this.UserCharts.Select(a => a.Clone()).ToMList(),
         ShowData = ShowData,
-        AllowChangeShowData = AllowChangeShowData, 
+        AllowChangeShowData = AllowChangeShowData,
         CombinePinnedFiltersWithSameLabel = CombinePinnedFiltersWithSameLabel,
         UseSameScale = UseSameScale
     };
@@ -373,7 +387,7 @@ public class CombinedUserChartElementEmbedded : EmbeddedEntity
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class ValueUserQueryListPartEntity : Entity, IPartEntity
-{   
+{
     public MList<ValueUserQueryElementEmbedded> UserQueries { get; set; } = new MList<ValueUserQueryElementEmbedded>();
 
     public override string ToString()
@@ -407,7 +421,7 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
 {
     [StringLengthValidator(Max = 200)]
     public string? Label { get; set; }
-    
+
     public UserQueryEntity UserQuery { get; set; }
 
     public bool IsQueryCached { get; set; }
@@ -431,7 +445,7 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
         return new XElement("ValueUserQueryElement",
             Label == null ? null! : new XAttribute(nameof(Label), Label),
             Href == null ? null! : new XAttribute(nameof(Href), Href),
-            IsQueryCached == false? null! : new XAttribute(nameof(IsQueryCached), IsQueryCached),
+            IsQueryCached == false ? null! : new XAttribute(nameof(IsQueryCached), IsQueryCached),
             new XAttribute("UserQuery", ctx.Include(UserQuery)));
     }
 
@@ -447,7 +461,7 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class LinkListPartEntity : Entity, IPartEntity
 {
-    
+
     public MList<LinkElementEmbedded> Links { get; set; } = new MList<LinkElementEmbedded>();
 
     public override string ToString()
@@ -509,5 +523,72 @@ public class LinkElementEmbedded : EmbeddedEntity
     {
         Label = element.Attribute("Label")!.Value;
         Link = element.Attribute("Link")!.Value;
+    }
+}
+
+[Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+public class ImagePartEntity : Entity, IPartEntity
+{
+    [StringLengthValidator(Max = int.MaxValue)]
+    public string ImageSrcContent { get; set; }
+
+    public string? ClickActionURL { get; set; }
+
+    public override string ToString() => "Panel de imágen";
+
+    public bool RequiresTitle => false;
+
+    public IPartEntity Clone()
+    {
+        return new ImagePartEntity
+        {
+            ImageSrcContent = this.ImageSrcContent,
+            ClickActionURL = this.ClickActionURL,
+        };
+    }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("UserQueryPart",
+            new XAttribute("ImageSrcContent", ImageSrcContent),
+            new XAttribute("ClickActionURL", ClickActionURL!)
+            );
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        ImageSrcContent = element.Attribute("ImageSrcContent")?.Value ?? "";
+        ClickActionURL = element.Attribute("ClickActionURL")?.Value;
+    }
+}
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class SeparatorPartEntity : Entity, IPartEntity
+{
+    public string? Title { get; set; }
+
+    public bool RequiresTitle => Title != null;
+
+    public override string ToString()
+    {
+        return "{0}".FormatWith(Title);
+    }
+
+    public IPartEntity Clone()
+    {
+        return new SeparatorPartEntity
+        {
+            Title = this.Title
+        };
+    }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        throw new NotImplementedException();
     }
 }

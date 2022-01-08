@@ -295,6 +295,8 @@ export interface EntityGridItemProps {
   title?: React.ReactElement<any>;
   bsStyle?: BootstrapStyle;
   children?: React.ReactNode;
+  style?: React.CSSProperties;
+  customColor?: string;
 
   onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent<any>) => void;
   onTitleDragStart?: (e: React.DragEvent<any>) => void;
@@ -309,9 +311,10 @@ export function EntityGridItem(p : EntityGridItemProps){
     return (
       <div className={classes("card", style && ("border-" + style), "shadow-sm")}>
         <div className={classes("card-header",
-          style && style != "light" && "text-white",
-          style && ("bg-" + style)
-      )} draggable={!!p.onTitleDragStart}
+          style && style != "light" && style != "CustomColor" && "text-white",
+          style && style != "CustomColor" && ("bg-" + style)
+        )} style={{ backgroundColor: p.customColor ?? undefined }}
+        draggable={!!p.onTitleDragStart}
         onDragStart={p.onTitleDragStart}
         onDragEnd={p.onTitleDragEnd} >
         {p.onRemove &&

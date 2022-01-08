@@ -60,11 +60,13 @@ public static class DashboardLogic
                 {"LinkListPart", typeof(LinkListPartEntity)},
                 {"ValueUserQueryListPart", typeof(ValueUserQueryListPartEntity)},
                 {"UserTreePart", typeof(UserTreePartEntity)},
+                {"ImagePart", typeof(UserTreePartEntity)},
+                {"SeparatorPart", typeof(UserTreePartEntity)},
             });
 
             SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) => { db.Execute(DashboardOperation.RegenerateCachedQueries); return null; });
 
-            OnGetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) =>  new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), pp, ucp.UserChart, ucp.IsQueryCached, canWriteFilters: true) });
+            OnGetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), pp, ucp.UserChart, ucp.IsQueryCached, canWriteFilters: true) });
             OnGetCachedQueryDefinition.Register((CombinedUserChartPartEntity cucp, PanelPartEmbedded pp) => cucp.UserCharts.Select(uc => new CachedQueryDefinition(uc.UserChart.ToChartRequest().ToQueryRequest(), pp, uc.UserChart, uc.IsQueryCached, canWriteFilters: false)));
             OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.RenderMode == UserQueryPartRenderMode.BigValue ? uqp.UserQuery.ToQueryRequestValue() : uqp.UserQuery.ToQueryRequest(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
             OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
@@ -234,7 +236,7 @@ public static class DashboardLogic
 
                         var queryDuration = sw.ElapsedMilliseconds;
 
-                        if(c.QueryRequest.Pagination is Pagination.All)
+                        if (c.QueryRequest.Pagination is Pagination.All)
                         {
                             if (rt.Rows.Length == cq.MaxRows)
                                 throw new ApplicationException($"The query for {c.UserAssets.CommaAnd(a => a.KeyLong())} has returned more than {cq.MaxRows} rows: " +
@@ -253,7 +255,7 @@ public static class DashboardLogic
                             ResultTable = rt,
                         };
 
-                        var bytes =  JsonSerializer.SerializeToUtf8Bytes(json, EntityJsonContext.FullJsonSerializerOptions);
+                        var bytes = JsonSerializer.SerializeToUtf8Bytes(json, EntityJsonContext.FullJsonSerializerOptions);
 
                         var file = new Entities.Files.FilePathEmbedded(CachedQueryFileType.CachedQuery, "CachedQuery.json", bytes).SaveFile();
 
@@ -326,7 +328,7 @@ public static class DashboardLogic
         {
             using (ViewLogLogic.LogView(item.ToLite(), "GetEmbeddedDashboards"))
             {
-            } 
+            }
         }
         return result;
     }
@@ -415,6 +417,12 @@ public static class DashboardLogic
 
         TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
             uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+
+        TypeConditionLogic.Register<ImagePartEntity>(typeCondition,
+         uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+
+        TypeConditionLogic.Register<SeparatorPartEntity>(typeCondition,
+         uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
     }
 
     public static List<CachedQueryDefinition> GetCachedQueryDefinitions(DashboardEntity db)
@@ -484,7 +492,7 @@ public static class DashboardLogic
         }
         return result;
     }
-        
+
 }
 
 public class CachedQueryDefinition
@@ -563,7 +571,7 @@ public class CombinedCachedQueryDefinition
             return true;
 
         }
-        
+
         if (other.Pagination is Pagination.All)
         {
             this.QueryRequest = WithExtraColumns(other, me);
@@ -580,7 +588,7 @@ public class CombinedCachedQueryDefinition
             this.UserAssets.Add(definition.UserAsset);
 
             return true;
-        }   
+        }
 
         //More cases?
 
@@ -630,7 +638,7 @@ public class FilterComparer : IEqualityComparer<Filter>
                 xg.GroupOperation == yg.GroupOperation &&
                 xg.Filters.ToHashSet(this).SetEquals(yg.Filters);
         }
-        else 
+        else
             throw new UnexpectedValueException(x);
     }
 

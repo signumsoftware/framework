@@ -35,11 +35,12 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
     return <BigValueSearchCounter
       findOptions={fo}
       text={translated(p.partEmbedded, a => a.title) || translated(p.part.userQuery, a => a.displayName)}
-      style={p.partEmbedded.style}
+      style={p.partEmbedded.style as BootstrapStyle} 
       iconName={p.partEmbedded.iconName ?? undefined}
       iconColor={p.partEmbedded.iconColor ?? undefined}
       deps={p.deps}
       cachedQuery={cachedQuery}
+      customColor={p.partEmbedded.customColor}
     />;
   }
 
@@ -96,6 +97,7 @@ interface BigValueBadgeProps {
   iconColor?: string;
   deps?: React.DependencyList;
   cachedQuery?: Promise<CachedQueryJS>;
+  customColor: string | null;
 }
 
 export function BigValueSearchCounter(p: BigValueBadgeProps) {
@@ -106,10 +108,10 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
     <div className={classes(
       "card",
       p.style != "Light" && p.style != "Secondary" && "text-white",
-      "bg-" + p.style.toLowerCase(),
+      p.style && "bg-" + p.style.toLowerCase(),
       "o-hidden"
-    )}>
-      <div className={classes("card-body", "bg-" + p.style.toLowerCase())} onClick={e => vsc.current!.handleClick(e)} style={{ cursor: "pointer" }}>
+    )} style={{ backgroundColor: p.customColor ?? undefined}}>
+      <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{ cursor: "pointer", color: p.iconColor ?? undefined }}>
         <div className="row">
           <div className="col-3">
             {p.iconName &&
