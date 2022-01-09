@@ -1,14 +1,20 @@
+using Signum.Entities.UserAssets;
+using System.Xml.Linq;
+using System.Globalization;
 
 namespace Signum.Entities.Scheduler;
 
+
 [EntityKind(EntityKind.Shared, EntityData.Master)]
-public class HolidayCalendarEntity : Entity
+public class HolidayCalendarEntity : Entity, IUserAssetEntity
 {
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
     [UniqueIndex]
     [StringLengthValidator(Min = 3, Max = 100)]
     public string Name { get; set; }
 
-    
+
     public MList<HolidayEmbedded> Holidays { get; set; } = new MList<HolidayEmbedded>();
 
     public bool IsHoliday(DateOnly date)
@@ -34,6 +40,20 @@ public class HolidayCalendarEntity : Entity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("HolidayCalendar",
+            new XAttribute("Guid", this.Guid),
+            new XAttribute("Name", this.Name),
+            new XElement("Holidays", this.Holidays.Select(p => p.ToXml(ctx))));
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        this.Name = element.Attribute("Name")!.Value;
+        this.Holidays.Synchronize(element.Element("Holidays")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+    }
 }
 
 [AutoInit]
@@ -53,5 +73,18 @@ public class HolidayEmbedded : EmbeddedEntity
     public override string ToString()
     {
         return "{0:d} {1}".FormatWith(Date, Name);
+    }
+
+    internal XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("HolidayElement",
+            new XAttribute("Date", this.Date.ToString("o", CultureInfo.InvariantCulture)),
+            this.Name == null ? null! : new XAttribute("Name", this.Name));
+    }
+
+    internal void FromXml(XElement x, IFromXmlContext ctx)
+    {
+        this.Date = DateOnly.ParseExact(x.Attribute("Date")!.Value, "o", CultureInfo.InvariantCulture);
+        this.Name = x.Attribute("Name")?.Value;
     }
 }

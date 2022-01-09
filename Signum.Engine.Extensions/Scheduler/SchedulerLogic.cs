@@ -4,31 +4,32 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Isolation;
 using System.Collections.Concurrent;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Scheduler;
 
 public static class SchedulerLogic
 {
     public static Action<ScheduledTaskLogEntity>? OnFinally;
-    
+
     [AutoExpressionField]
-    public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity t) => 
+    public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity t) =>
         As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == t));
 
     [AutoExpressionField]
-    public static ScheduledTaskLogEntity? LastExecution(this ITaskEntity t) => 
+    public static ScheduledTaskLogEntity? LastExecution(this ITaskEntity t) =>
         As.Expression(() => t.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault());
 
     [AutoExpressionField]
-    public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity st) => 
+    public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity st) =>
         As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask.Is(st)));
 
 
     [AutoExpressionField]
-    public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e) => 
+    public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e) =>
         As.Expression(() => Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog.Is(e)));
 
-    public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>> ExecuteTask = 
+    public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>> ExecuteTask =
         new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>>();
 
     public class ScheduledTaskPair
@@ -86,7 +87,7 @@ public static class SchedulerLogic
                 });
 
             sb.Include<ScheduledTaskLogEntity>()
-                .WithIndex(s => s.ScheduledTask, includeFields: s=> s.StartTime)
+                .WithIndex(s => s.ScheduledTask, includeFields: s => s.StartTime)
                 .WithQuery(() => cte => new
                 {
                     Entity = cte,
@@ -184,6 +185,11 @@ public static class SchedulerLogic
                 return null;
             };
 
+            UserAssetsImporter.Register<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely", e => e.Save());
+            UserAssetsImporter.Register<ScheduleRuleMonthsEntity>("ScheduleRuleMonths", e => e.Save());
+            UserAssetsImporter.Register<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDays", e => e.Save());
+            UserAssetsImporter.Register<HolidayCalendarEntity>("HolidayCalendar", HolidayCalendarOperation.Save);
+
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
         }
     }
@@ -280,7 +286,8 @@ public static class SchedulerLogic
                   )).ToDictionary();
 
                 priorityQueue.Clear();
-                priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st => {
+                priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st =>
+                {
 
                     var previous = lastExecutions.TryGetS(st);
 
@@ -482,7 +489,7 @@ public static class SchedulerLogic
             Running = Running,
             SchedulerMargin = SchedulerMargin,
             NextExecution = NextExecution,
-            MachineName = Environment.MachineName,     
+            MachineName = Environment.MachineName,
             ApplicationName = Schema.Current.ApplicationName,
             Queue = priorityQueue.GetOrderedList().Select(p => new SchedulerItemState
             {
@@ -517,9 +524,9 @@ public class SchedulerState
     public DateTime? NextExecution;
     public List<SchedulerItemState> Queue;
     public string MachineName;
-    public string ApplicationName; 
+    public string ApplicationName;
 
-    public List<SchedulerRunningTaskState> RunningTask; 
+    public List<SchedulerRunningTaskState> RunningTask;
 }
 
 public class SchedulerItemState
@@ -550,7 +557,7 @@ public class ScheduledTaskContext
     internal CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
     public CancellationToken CancellationToken => CancellationTokenSource.Token;
-    
+
     public void Foreach<T>(IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
     {
         foreach (var item in collection)
@@ -567,7 +574,7 @@ public class ScheduledTaskContext
                         tr.Commit();
                     }
                 }
-                catch(OperationCanceledException)
+                catch (OperationCanceledException)
                 {
                     throw;
                 }
