@@ -18,6 +18,7 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Entities.Isolation;
 using System.Collections.Concurrent;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Scheduler
 {
@@ -197,6 +198,11 @@ namespace Signum.Engine.Scheduler
                     query.SelectMany(e => e.ExceptionLines()).UnsafeDelete();
                     return null;
                 };
+
+                UserAssetsImporter.Register<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely", e => e.Save());
+                UserAssetsImporter.Register<ScheduleRuleMonthsEntity>("ScheduleRuleMonths", e => e.Save());
+                UserAssetsImporter.Register<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDays", e => e.Save());
+                UserAssetsImporter.Register<HolidayCalendarEntity>("HolidayCalendar", HolidayCalendarOperation.Save);
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
