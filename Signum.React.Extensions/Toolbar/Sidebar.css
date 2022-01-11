@@ -35,13 +35,13 @@
 
 .sidebar-container .dropdown-item.active {
     background-color: #ececec;
-    color: #333333;
+    color: unset;
     font-weight: 500;
 }
 
 .sidebar-container .dropdown-item:active {
     background-color: #ececec;
-    color: #333333;
+    color: unset;
 }
 
 .sidebar-container .dropdown-item:focus {
