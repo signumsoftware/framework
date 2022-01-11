@@ -569,6 +569,7 @@
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parts" Description="Teile" />
+    <Member Name="TokenEquivalencesGroups" Description="Tokenäquivalenzengruppen" />
   </Type>
   <Type Name="DashboardMessage">
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
@@ -1319,6 +1320,7 @@
     <Member Name="UnorderedListItem" Description="Ungeordnetes Listenelement" />
   </Type>
   <Type Name="HolidayCalendarEntity" Description="Ferienkalender" Gender="m">
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Holidays" Description="Urlaub" />
     <Member Name="Name" Description="Name" />
   </Type>
@@ -1950,6 +1952,7 @@
     <Member Name="NiceName" Description="Schöner Name" />
   </Type>
   <Type Name="QueryFilterEmbedded" Description="Abfragefilter">
+    <Member Name="DashboardBehaviour" Description="Dashboard-Verhalten" />
     <Member Name="GroupOperation" Description="Gruppenoperation" />
     <Member Name="Indentation" Description="Einrückung" />
     <Member Name="IsGroup" Description="Ist Gruppe" />
@@ -2121,6 +2124,7 @@
   </Type>
   <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich">
     <Member Name="EachMinutes" Description="Alle Minuten" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="IsAligned" Description="Ist ausgerichtet" />
     <Member Name="StartingOn" Description="Beginnend am" />
   </Type>
@@ -2129,6 +2133,7 @@
     <Member Name="August" Description="August" />
     <Member Name="December" Description="Dezember" />
     <Member Name="February" Description="Februar" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="January" Description="Januar" />
     <Member Name="July" Description="Juli" />
     <Member Name="June" Description="Juni" />
@@ -2142,6 +2147,7 @@
   <Type Name="ScheduleRuleWeekDaysEntity" Description="Schedule-Regel Wochentage" PluralDescription="Schedule-Regeln Wochentage">
     <Member Name="Calendar" Description="Kalender" />
     <Member Name="Friday" Description="Freitag" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Holiday" Description="Feiertag" />
     <Member Name="Monday" Description="Montag" />
     <Member Name="Saturday" Description="Samstag" />
@@ -2345,6 +2351,15 @@
     <Member Name="Hours" Description="Stunden" />
     <Member Name="Minutes" Description="Minuten" />
     <Member Name="Seconds" Description="Sekunden" />
+  </Type>
+  <Type Name="TokenEquivalenceEmbedded" Description="Token-Äquivalenz">
+    <Member Name="Query" Description="Abfrage" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="TokenEquivalenceGroupEntity" Description="Tokenäquivalenzgruppe">
+    <Member Name="Dashboard" Description="Dashboard" />
+    <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
+    <Member Name="TokenEquivalences" Description="Token-Äquivalenzen" />
   </Type>
   <Type Name="ToolbarElementEmbedded" Description="Toolbar-element">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
@@ -2592,6 +2607,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="MaxRows" Description="Max. Zeilen" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parameters" Description="Parameter" />
