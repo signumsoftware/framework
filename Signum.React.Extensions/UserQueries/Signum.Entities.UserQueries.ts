@@ -38,6 +38,7 @@ export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
   operation: DynamicQuery.FilterOperation | null;
   valueString: string | null;
   pinned: PinnedQueryFilterEmbedded | null;
+  dashboardBehaviour: DynamicQuery.DashboardBehaviour | null;
   indentation: number;
 }
 

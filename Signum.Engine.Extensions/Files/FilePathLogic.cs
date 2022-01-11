@@ -100,7 +100,13 @@ public static class FilePathLogic
         {
             var alg = fp.FileType.GetAlgorithm();
             alg.ValidateFile(fp);
-            alg.SaveFile(fp);
+            var task = alg.SaveFileAsync(fp);
+
+            Transaction.PreRealCommit += data =>
+            {
+                var a = fp; //For ebuggin
+                task.Wait();
+            };
         }
     }
 

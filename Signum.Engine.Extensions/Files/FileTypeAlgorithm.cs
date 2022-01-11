@@ -8,10 +8,9 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     public Func<IFilePath, PrefixPair> GetPrefixPair { get; set; }
     public Func<IFilePath, string> CalculateSuffix { get; set; }
 
-    public bool RenameOnCollision { get; set; }
     public bool WeakFileReference { get; set; }
 
-    public Func<string, int, string> RenameAlgorithm { get; set; }
+    public Func<string, int, string>? RenameAlgorithm { get; set; }
 
     public FileTypeAlgorithm(Func<IFilePath, PrefixPair> getPrefixPair)
     {
@@ -20,8 +19,8 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         WeakFileReference = false;
         CalculateSuffix = SuffixGenerators.Safe.YearMonth_Guid_Filename;
 
-        RenameOnCollision = true;
-        RenameAlgorithm = DefaultRenameAlgorithm;
+        //Avoids potentially slow File.Exists, consider using CalculateSuffix using GUID
+        RenameAlgorithm = null; // DefaultRenameAlgorithm;
     }
 
     public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
@@ -36,34 +35,57 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             if (WeakFileReference)
                 return;
 
-            string suffix = CalculateSuffix(fp);
-            if (!suffix.HasText())
-                throw new InvalidOperationException("Suffix not set");
+            CalculateSufixWithRenames(fp);
 
-            fp.SetPrefixPair(GetPrefixPair(fp));
-
-            int i = 2;
-            fp.Suffix = suffix;
-            while (RenameOnCollision && File.Exists(fp.FullPhysicalPath()))
-            {
-                fp.Suffix = RenameAlgorithm(suffix, i);
-                i++;
-            }
+            EnsureDirectory(fp);
 
             SaveFileInDisk(fp);
         }
     }
 
+    public virtual Task SaveFileAsync(IFilePath fp, CancellationToken token = default)
+    {
+        using (new EntityCache(EntityCacheType.ForceNew))
+        {
+            if (WeakFileReference)
+                return Task.CompletedTask;
+
+            CalculateSufixWithRenames(fp);
+
+            EnsureDirectory(fp);
+
+            return SaveFileInDiskAsync(fp, token);
+        }
+    }
+
+    private void CalculateSufixWithRenames(IFilePath fp)
+    {
+        string suffix = CalculateSuffix(fp);
+        if (!suffix.HasText())
+            throw new InvalidOperationException("Suffix not set");
+
+        fp.SetPrefixPair(GetPrefixPair(fp));
+
+        int i = 2;
+        fp.Suffix = suffix;
+        if (RenameAlgorithm != null)
+        {
+            while (File.Exists(fp.FullPhysicalPath()))
+            {
+                fp.Suffix = RenameAlgorithm(suffix, i);
+                i++;
+            }
+        }
+    }
+
     public virtual void SaveFileInDisk(IFilePath fp)
     {
-        string fullPhysicalPath = fp.FullPhysicalPath();
+        var fullPhysicalPath = fp.FullPhysicalPath();
         using (HeavyProfiler.Log("SaveFileInDisk", () => fullPhysicalPath))
             try
             {
-                string directory = Path.GetDirectoryName(fullPhysicalPath)!;
-                if (!Directory.Exists(directory))
-                    Directory.CreateDirectory(directory);
-                File.WriteAllBytes(fp.FullPhysicalPath(), fp.BinaryFile);
+
+                File.WriteAllBytes(fullPhysicalPath, fp.BinaryFile);
                 fp.BinaryFile = null!;
             }
             catch (IOException ex)
@@ -73,6 +95,34 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
                 throw;
             }
+    }
+
+    public virtual async Task SaveFileInDiskAsync(IFilePath fp, CancellationToken token = default)
+    {
+        var fullPhysicalPath = fp.FullPhysicalPath();
+        using (HeavyProfiler.Log("SaveFileInDisk", () => fullPhysicalPath))
+            try
+            {
+
+                await File.WriteAllBytesAsync(fullPhysicalPath, fp.BinaryFile);
+                fp.BinaryFile = null!;
+            }
+            catch (IOException ex)
+            {
+                ex.Data.Add("FullPhysicalPath", fullPhysicalPath);
+                ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal!.Identity!.Name);
+
+                throw;
+            }
+    }
+
+    private static string EnsureDirectory(IFilePath fp)
+    {
+        string fullPhysicalPath = fp.FullPhysicalPath();
+        string directory = Path.GetDirectoryName(fullPhysicalPath)!;
+        if (!Directory.Exists(directory))
+            Directory.CreateDirectory(directory);
+        return fullPhysicalPath;
     }
 
     public virtual Stream OpenRead(IFilePath path)

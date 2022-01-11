@@ -159,9 +159,6 @@ fieldset {
 /*EntityRepeater*/
 
 fieldset.sf-repeater-element {
-    margin: 0;
-    padding-top: 6px;
-    padding-bottom: 3px;
 }
 
     fieldset.sf-repeater-element legend {

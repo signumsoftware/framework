@@ -25,7 +25,7 @@ public static class MusicStarter
                 .AddUserSecrets(typeof(MusicStarter).Assembly, optional: true)
                 .Build();
 
-            var connectionString = conf.GetConnectionString("SignumTest") ?? "Data Source=.\\SQLEXPRESS;Initial Catalog=SignumTest;Integrated Security=true";
+            var connectionString = conf.GetConnectionString("SignumTest") ?? "Data Source=.\\SQLEXPRESS;Initial Catalog=SignumTest;Integrated Security=true;TrustServerCertificate=true";
 
             Start(connectionString);
 

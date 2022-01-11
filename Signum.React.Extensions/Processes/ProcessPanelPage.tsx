@@ -69,7 +69,7 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
           <tbody>
             <tr>
               <td colSpan={6}>
-                <b> {s.executing.length} processes executing in {s.machineName}</b>
+                <b> {s.executing.length} processes executing in {s.machineName} / {s.applicationName}</b>
               </td>
             </tr>
             {s.executing.map((item, i) =>

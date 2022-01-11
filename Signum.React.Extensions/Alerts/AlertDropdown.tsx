@@ -1,13 +1,10 @@
 import * as React from 'react'
-import { isRtl } from '@framework/AppContext'
 import * as Operations from '@framework/Operations'
-import { getTypeInfo, symbolNiceName } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
 import { is, JavascriptMessage, toLite } from '@framework/Signum.Entities'
-import { Toast, NavItem, Button, ButtonGroup } from 'react-bootstrap'
+import { Toast, Button, ButtonGroup } from 'react-bootstrap'
 import { DateTime } from 'luxon'
-import { useAPI, useAPIWithReload, useDocumentEvent, useForceUpdate, useInterval, usePrevious, useThrottle, useUpdatedRef } from '@framework/Hooks';
-import { LinkContainer } from '@framework/Components'
+import { useAPIWithReload, useForceUpdate, useUpdatedRef } from '@framework/Hooks';
 import * as AuthClient from '../Authorization/AuthClient'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -17,17 +14,29 @@ import "./AlertDropdown.css"
 import { Link } from 'react-router-dom';
 import { classes, Dic } from '@framework/Globals'
 import MessageModal from '@framework/Modals/MessageModal'
-import { EntityLink } from '@framework/Search'
+import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from './useSignalR'
 
-export default function AlertDropdown(props: { checkForChangesEvery?: number, keepRingingFor?: number }) {
+export default function AlertDropdown(props: { keepRingingFor?: number }) {
 
   if (!Navigator.isViewable(AlertEntity))
     return null;
 
-  return <AlertDropdownImp checkForChangesEvery={props.checkForChangesEvery ?? 30 * 1000} keepRingingFor={props.keepRingingFor ?? 10 * 1000} />;
+  return <AlertDropdownImp keepRingingFor={props.keepRingingFor ?? 10 * 1000} />;
 }
 
-function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor: number }) {
+function AlertDropdownImp(props: { keepRingingFor: number }) {
+
+  const conn = useSignalRConnection("~/api/alertshub");
+
+  useSignalRGroup(conn, {
+    enterGroup: c => c.invoke("Login", AuthClient.getAuthToken()),
+    exitGroup: c => c.send("Logout"),
+    deps: [AuthClient.getAuthToken()]
+  });
+
+  useSignalRCallback(conn, "AlertsChanged", () => {
+    reloadCount();
+  }, []);
 
   const forceUpdate = useForceUpdate();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -35,9 +44,7 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
   const ringingRef = useUpdatedRef(ringing);
 
   const [showAlerts, setShowAlert] = React.useState<number>(5);
-
-  var ticks = useInterval(props.checkForChangesEvery, 0, n => n + 1);
-
+  
   const isOpenRef = useUpdatedRef(isOpen);
 
   var [countResult, reloadCount] = useAPIWithReload<AlertsClient.NumAlerts>((signal, oldResult) => AlertsClient.API.myAlertsCount().then(res => {
@@ -56,14 +63,14 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
       }
 
     } else {
-      if (!ringingRef.current)
+      if (ringingRef.current)
         setRinging(false);
 
       setAlerts([]);
     }
 
     return res;
-  }), [ticks], { avoidReset: true });
+  }), [], { avoidReset: true });
 
   React.useEffect(() => {
     if (ringing) {
@@ -74,10 +81,6 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
       return () => { clearTimeout(handler) };
     }
   }, [ringing]);
-
-  useDocumentEvent("refresh-alerts", (e: Event) => {
-    reloadCount();
-  }, []);
 
   const [alerts, setAlerts] = React.useState<AlertEntity[] | undefined>(undefined);
   const [groupBy, setGroupBy] = React.useState<AlertDropDownGroup>("ByTypeAndUser");
@@ -107,8 +110,6 @@ function AlertDropdownImp(props: { checkForChangesEvery: number, keepRingingFor:
     if (countResult)
       countResult.numAlerts -= toRemove.length;
     forceUpdate();
-
-
 
     Operations.API.executeMultiple(toRemove.map(a => toLite(a)), AlertOperation.Attend)
       .then(res => {

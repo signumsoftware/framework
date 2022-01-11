@@ -80,7 +80,9 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     #region Retrieve
 
 
-
+    /// <summary>
+    /// Returns Lite.Entitiy field if set, othwerise Retrieves the entity from the database and sets the Lite.Entity field.
+    /// </summary>
     public static T RetrieveAndRemember<T>(this Lite<T> lite) where T : class, IEntity
     {
         if (lite == null)
@@ -92,6 +94,9 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return lite.EntityOrNull!;
     }
 
+    /// <summary>
+    /// Returns Lite.Entitiy field if set, othwerise Retrieves the entity from the database asynchronously and sets the Lite.Entity field.
+    /// </summary>
     public static async Task<T> RetrieveAndRememberAsyc<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
     {
         if (lite == null)
@@ -103,7 +108,9 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return lite.EntityOrNull!;
     }
 
-
+    /// <summary>
+    /// Always retrieves the entity from the database WITHOUT reading or writing in the Lite.Entity field.
+    /// </summary>
     public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
     {
         if (lite == null)
@@ -112,6 +119,9 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return (T)(object)Retrieve(lite.EntityType, lite.Id);
     }
 
+    /// <summary>
+    /// Always retrieves the entity from the database asynchronously WITHOUT reading or writing in the Lite.Entity field.
+    /// </summary>
     public static async Task<T> RetrieveAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
     {
         if (lite == null)

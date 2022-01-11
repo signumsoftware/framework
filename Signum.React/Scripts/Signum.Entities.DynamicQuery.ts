@@ -13,6 +13,12 @@ export type ColumnOptionsMode =
   "Replace" |
   "InsertStart";
 
+export const DashboardBehaviour = new EnumType<DashboardBehaviour>("DashboardBehaviour");
+export type DashboardBehaviour =
+  "PromoteToDasboardPinnedFilter" |
+  "UseAsInitialSelection" |
+  "UseWhenNoFilters";
+
 export const FilterGroupOperation = new EnumType<FilterGroupOperation>("FilterGroupOperation");
 export type FilterGroupOperation =
   "And" |
@@ -66,9 +72,7 @@ export type PinnedFilterActive =
   "Always" |
   "WhenHasValue" |
   "Checkbox_StartChecked" |
-  "Checkbox_StartUnchecked" |
-  "InitialSelectionDashboardFilter" |
-  "DefaultDashboardFilter";
+  "Checkbox_StartUnchecked";
 
 export module QueryTokenMessage {
   export const _0As1 = new MessageKey("QueryTokenMessage", "_0As1");

@@ -514,20 +514,37 @@ public class FieldReader
     }
   
 
-    static readonly MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<IBinarySerialize>(0)).GetGenericMethodDefinition(); 
+    static readonly MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<UdtExample>(0)).GetGenericMethodDefinition(); 
     public T GetUdt<T>(int ordinal) where T : IBinarySerialize
     {
         LastOrdinal = ordinal;
         LastMethodName = nameof(GetUdt) + "<" + typeof(T).Name + ">";
+        var udt = Activator.CreateInstance<T>();
+        udt.Read(new BinaryReader(reader.GetStream(ordinal)));
+        return udt;
+    }
+
+    struct UdtExample : IBinarySerialize
+    {
+        public void Read(BinaryReader r) => throw new NotImplementedException();
+        public void Write(BinaryWriter w) => throw new NotImplementedException();
+    }
+
+    static readonly MethodInfo miGetNullableUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetNullableUdt<UdtExample>(0)).GetGenericMethodDefinition();
+    public T? GetNullableUdt<T>(int ordinal) where T : struct, IBinarySerialize
+    {
+        LastOrdinal = ordinal;
+        LastMethodName = nameof(GetNullableUdt) + "<" + typeof(T).Name + ">";
         if (reader.IsDBNull(ordinal))
         {
-            return (T)(object)null!;
+            return null;
         }
 
         var udt = Activator.CreateInstance<T>();
         udt.Read(new BinaryReader(reader.GetStream(ordinal)));
         return udt;
     }
+
 
     static readonly MethodInfo miGetArray = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetArray<int>(0)).GetGenericMethodDefinition();
 
@@ -576,11 +593,14 @@ public class FieldReader
         if (mi != null)
             return Expression.Call(reader, mi, Expression.Constant(ordinal));
 
+
+
         if (typeof(IBinarySerialize).IsAssignableFrom(type.UnNullify()))
         {
-            var res = Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
-
-            return type.IsNullable() ? res.Nullify() : res;
+            if (type.IsNullable())
+                return Expression.Call(reader, miGetNullableUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
+            else
+                return Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
         }
 
         if (type.IsArray)
@@ -595,7 +615,7 @@ public class FieldReader
 
         if (type.IsNullable() && type.UnNullify().IsInstantiationOf(typeof(NpgsqlTypes.NpgsqlRange<>)))
         {
-            return Expression.Call(reader, miGetRange.MakeGenericMethod(type.UnNullify().GetGenericArguments()[0]!), Expression.Constant(ordinal));
+            return Expression.Call(reader, miNullableGetRange.MakeGenericMethod(type.UnNullify().GetGenericArguments()[0]!), Expression.Constant(ordinal));
         }
 
         throw new InvalidOperationException("Type {0} not supported".FormatWith(type));

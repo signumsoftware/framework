@@ -181,6 +181,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   hideQuickLink: boolean;
   owner: Entities.Lite<Entities.Entity> | null;
   displayName: string;
+  includeDefaultFilters: boolean | null;
   maxRows: number | null;
   chartScript: ChartScriptSymbol;
   parameters: Entities.MList<ChartParameterEmbedded>;

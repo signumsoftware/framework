@@ -625,7 +625,7 @@ WHERE {where}"))!;
             column.DbType.IsString() ? "''" :
             column.DbType.IsDate() ? "GetDate()" :
             column.DbType.IsGuid() ? "NEWID()" :
-            column.DbType.IsTime() ? "'00:00'" :
+        column.DbType.IsTime() ? "'00:00'" :
             "?");
 
         string defaultValue = rep.Interactive ? SafeConsole.AskString($"Default value for '{table.Name.Name}.{column.Name}'? ([Enter] for {typeDefault} or 'force' if there are no {(forNewColumn ? "rows" : "nulls")}) ", stringValidator: str => null) : "";
@@ -1122,6 +1122,7 @@ public class DiffColumn
             && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
             && Nullable == (other.Nullable.ToBool())
             && SizeEquals(other)
+            && PrecisionEquals(other)
             && ScaleEquals(other)
             && (ignoreIdentity || Identity == other.Identity)
             && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
@@ -1140,7 +1141,12 @@ public class DiffColumn
 
     public bool SizeEquals(IColumn other)
     {
-        return (other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
+        return (other.DbType.IsDecimal() || other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
+    }
+
+    public bool PrecisionEquals(IColumn other)
+    {
+        return (!other.DbType.IsDecimal() || other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision);
     }
 
     public bool DefaultEquals(IColumn other)

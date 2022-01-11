@@ -57,9 +57,7 @@ export function $ComponentName$Modal(p: $ComponentName$ModalProps) {
     <Modal onHide={handleCancelClicked} show={show} className="message-modal" onExited={handleOnExited}>
       <div className="modal-header">
         <h5 className="modal-title">Important Question</h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
       </div>
       <div className="modal-body">
         {p.question}

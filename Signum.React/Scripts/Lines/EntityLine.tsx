@@ -20,6 +20,7 @@ export interface EntityLineProps extends EntityBaseProps {
   autocomplete?: AutocompleteConfig<unknown> | null;
   renderItem?: React.ReactNode;
   showType?: boolean;
+  inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>,
   itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
@@ -176,7 +177,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     return (
       <Typeahead ref={c.typeahead}
-        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass) }}
+        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined, ...p.inputAttributes }}
         getItems={query => ac!.getItems(query)}
         getItemsDelay={ac.getItemsDelay}
         minLength={ac.minLength}

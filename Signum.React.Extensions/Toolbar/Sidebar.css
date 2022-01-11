@@ -6,15 +6,15 @@
     flex-grow: 1;
 }
 
-    .sidebar-container .container-fluid {
-        flex-grow: 1;
-    }
-
-
 @media (min-width: 768px) {
     .sidebar-container {
         flex-direction: row;
     }
+
+        .sidebar-container .container-fluid {
+            flex-grow: 1;
+            width: 0; /*Fixes SearchPage scrolling https://gaurav5430.medium.com/css-flex-positioning-gotchas-child-expands-to-more-than-the-width-allowed-by-the-parent-799c37428dd6*/
+        }
 
     body:not(.rtl) .sidebar {
         border-right: 1px solid #e7e7e7;

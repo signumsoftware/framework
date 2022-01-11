@@ -23,6 +23,7 @@ interface FilterBuilderEmbeddedProps {
   subTokenOptions: SubTokensOptions;
   onChanged?: () => void;
   showPinnedFilterOptions?: boolean
+  showDashboardBehaviour?: boolean
 }
 
 export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
@@ -46,7 +47,8 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
           groupOperation: fo.groupOperation,
           token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
           valueString: fo.value,
-          pinned: !fo.pinned ? undefined : toPinnedQueryFilterEmbedded(fo.pinned)
+          pinned: !fo.pinned ? undefined : toPinnedQueryFilterEmbedded(fo.pinned),
+          dashboardBehaviour: fo.dashboardBehaviour,
         })));
 
         fo.filters.forEach(f => pushFilter(f, indent + 1));
@@ -64,7 +66,8 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
           operation: fo.operation,
           valueString: fo.value,
           indentation: indent,
-          pinned: !fo.pinned ? undefined : toPinnedQueryFilterEmbedded(fo.pinned)
+          pinned: !fo.pinned ? undefined : toPinnedQueryFilterEmbedded(fo.pinned),
+          dashboardBehaviour: fo.dashboardBehaviour,
         })));
       }
 
@@ -139,6 +142,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
           readOnly={p.ctx.readOnly}
           onFiltersChanged={handleFiltersChanged}
           showPinnedFiltersOptions={p.showPinnedFilterOptions}
+          showDashboardBehaviour={p.showDashboardBehaviour}
           showPinnedFiltersOptionsButton={false}
           renderValue={handleRenderValue} />
       }
@@ -170,6 +174,7 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
           value: gr.key.valueString,
           frozen: false,
           pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
+          dashboardBehaviour: gr.key.dashboardBehaviour ?? undefined,
         };
 
         return filterCondition;
@@ -186,6 +191,7 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
           frozen: false,
           expanded: false,
           pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
+          dashboardBehaviour: gr.key.dashboardBehaviour ?? undefined,
         };
 
         return filterGroup;

@@ -144,29 +144,6 @@ public static class ChartUtils
         return result;
     }
     
-    public static ChartRequestModel ToRequest(this UserChartEntity uq)
-    {
-        var result = new ChartRequestModel(uq.QueryName)
-        {
-            ChartScript = uq.ChartScript,
-            Filters = uq.Filters.ToFilterList(),
-        };
-
-        result.Columns.ZipForeach(uq.Columns, (r, u) =>
-        {
-            r.Token = u.Token;
-            r.DisplayName = u.DisplayName;
-            r.OrderByIndex = u.OrderByIndex;
-            r.OrderByType = u.OrderByType;
-        });
-
-        result.Parameters.ForEach(r =>
-        {
-            r.Value = uq.Parameters.FirstOrDefault(u => u.Name == r.Name)?.Value ?? r.ScriptParameter.DefaultValue(r.ScriptParameter.GetToken(uq));
-        });
-        return result;
-    }
-    
     internal static void FixParameters(IChartBase chart, ChartColumnEmbedded chartColumn)
     {
         int index = chart.Columns.IndexOf(chartColumn);

@@ -102,7 +102,7 @@ internal class LambdaToJavascriptConverter
             if (mc.Method.Name == "ToString")
                 return ToJavascriptToString(param, mc.Object!, mc.TryGetArgument("format") is ConstantExpression format ? (string)format.Value! : null);
 
-            if (mc.Method.Name == "GetType" && mc.Object != null && mc.Object.Type.IsIEntity())
+            if (mc.Method.Name == "GetType" && mc.Object != null && (mc.Object.Type.IsIEntity() || mc.Object.Type.IsModelEntity()))
             {
                 var obj = ToJavascript(param, mc.Object!);
                 if (obj == null)

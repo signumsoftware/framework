@@ -41,10 +41,10 @@ public static class SqlServerVersionDetector
                 con.Open();
                 var sql =
 @"SELECT
-SERVERPROPERTY ('ProductVersion') as ProductVersion,
-SERVERPROPERTY('ProductLevel') as ProductLevel,
-SERVERPROPERTY('Edition') as Edition,
-SERVERPROPERTY('EngineEdition') as EngineEdition";
+    SERVERPROPERTY ('ProductVersion') as ProductVersion,
+    SERVERPROPERTY('ProductLevel') as ProductLevel,
+    SERVERPROPERTY('Edition') as Edition,
+    SERVERPROPERTY('EngineEdition') as EngineEdition";
 
                 using (var cmd = new SqlCommand(sql, con))
                 {
@@ -200,7 +200,7 @@ public class SqlServerConnector : Connector
     public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach, CommandType commandType)
     {
         bool reconected = false;
-        retry:
+    retry:
         try
         {
             EnsureConnectionRetry(con =>
@@ -272,7 +272,7 @@ public class SqlServerConnector : Connector
         {
             var cmd = NewCommand(preCommand, null, commandType);
 
-            var reader =  cmd.ExecuteReader();
+            var reader = cmd.ExecuteReader();
 
             return new DbDataReaderWithCommand(cmd, reader);
         }
@@ -292,7 +292,7 @@ public class SqlServerConnector : Connector
         {
             var cmd = NewCommand(preCommand, null, commandType);
 
-            var reader =  await cmd.ExecuteReaderAsync(token);
+            var reader = await cmd.ExecuteReaderAsync(token);
 
             return new DbDataReaderWithCommand(cmd, reader);
         }
@@ -470,20 +470,20 @@ public class SqlServerConnector : Connector
     {
         return new[]
         {
-            this.Version == SqlServerVersion.SqlServer2005 ?
-                new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".FormatWith(databaseName)):
-                new []
-                {
-                    new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".FormatWith(databaseName)),
-                    new[]{
-                        new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
-                        new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
-                        new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
-                    }.Combine(Spacing.Simple)!.PlainSqlCommand(),
-                    new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".FormatWith(databaseName)),
-                }.Combine(Spacing.Simple),
-            new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".FormatWith(databaseName))
-        }.Combine(Spacing.Simple)!;
+                this.Version == SqlServerVersion.SqlServer2005 ?
+                    new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".FormatWith(databaseName)):
+                    new []
+                    {
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".FormatWith(databaseName)),
+                        new[]{
+                            new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
+                            new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
+                            new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
+                        }.Combine(Spacing.Simple)!.PlainSqlCommand(),
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".FormatWith(databaseName)),
+                    }.Combine(Spacing.Simple),
+                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".FormatWith(databaseName))
+            }.Combine(Spacing.Simple)!;
     }
 
     public override bool AllowsConvertToDate
@@ -503,7 +503,7 @@ public class SqlServerConnector : Connector
 
     public override bool SupportsFormat
     {
-        get { return  Version >= SqlServerVersion.SqlServer2012; }
+        get { return Version >= SqlServerVersion.SqlServer2012; }
     }
 
     public override bool SupportsTemporalTables
@@ -530,9 +530,9 @@ public class SqlParameterBuilder : ParameterBuilder
             if (value is DateTime dt)
                 AssertDateTime(dt);
             else if (value is DateOnly d)
-                value = d.ToDateTime(); 
+                value = d.ToDateTime();
         }
-        else if(dbType.IsTime())
+        else if (dbType.IsTime())
         {
             if (value is TimeOnly to)
                 value = to.ToTimeSpan();
@@ -550,11 +550,11 @@ public class SqlParameterBuilder : ParameterBuilder
         return result;
     }
 
-    public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, Expression value)
+    public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, Expression value)
     {
         var uType = value.Type.UnNullify();
 
-        var exp = 
+        var exp =
             uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
             //https://github.com/dotnet/SqlClient/issues/1009
             uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
@@ -573,12 +573,21 @@ public class SqlParameterBuilder : ParameterBuilder
 
         List<MemberBinding> mb = new()
         {
-            Expression.Bind(typeof(SqlParameter).GetProperty("IsNullable")!, Expression.Constant(nullable)),
-            Expression.Bind(typeof(SqlParameter).GetProperty("SqlDbType")!, Expression.Constant(dbType.SqlServer)),
+            Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.IsNullable))!, Expression.Constant(nullable)),
+            Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.SqlDbType))!, Expression.Constant(dbType.SqlServer)),
         };
 
+        if (size != null)
+            mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.Size))!, Expression.Constant(size)));
+
+        if (precision != null)
+            mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.Precision))!, Expression.Constant(precision)));
+
+        if (scale != null)
+            mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.Scale))!, Expression.Constant(scale)));
+
         if (udtTypeName != null)
-            mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty("UdtTypeName")!, Expression.Constant(udtTypeName)));
+            mb.Add(Expression.Bind(typeof(SqlParameter).GetProperty(nameof(SqlParameter.UdtTypeName))!, Expression.Constant(udtTypeName)));
 
         return Expression.MemberInit(newExpr, mb);
     }
@@ -596,13 +605,13 @@ from information_schema.table_constraints tc
 join information_schema.referential_constraints rc on rc.unique_constraint_name = tc.constraint_name
 join information_schema.constraint_column_usage cu on cu.constraint_name = rc.constraint_name
 open cur
-fetch next from cur into @schema, @tbl, @constraint
-while @@fetch_status <> -1
-begin
-    select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] DROP CONSTRAINT [' + @constraint + '];'
-    exec sp_executesql @sql
     fetch next from cur into @schema, @tbl, @constraint
-end
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] DROP CONSTRAINT [' + @constraint + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @schema, @tbl, @constraint
+    end
 close cur
 deallocate cur";
 
@@ -614,13 +623,13 @@ declare cur cursor fast_forward for
 select distinct table_schema, table_name
 from information_schema.tables where table_type = 'BASE TABLE'
 open cur
-fetch next from cur into @schema, @tbl
-while @@fetch_status <> -1
-begin
-    select @sql = 'DROP TABLE [' + @schema + '].[' + @tbl + '];'
-    exec sp_executesql @sql
     fetch next from cur into @schema, @tbl
-end
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'DROP TABLE [' + @schema + '].[' + @tbl + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @schema, @tbl
+    end
 close cur
 deallocate cur";
 
@@ -633,13 +642,13 @@ select distinct table_schema, table_name
 from information_schema.tables where table_type = 'VIEW'
 and table_schema not in ({0})
 open cur
-fetch next from cur into @schema, @view
-while @@fetch_status <> -1
-begin
-    select @sql = 'DROP VIEW [' + @schema + '].[' + @view + '];'
-    exec sp_executesql @sql
     fetch next from cur into @schema, @view
-end
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'DROP VIEW [' + @schema + '].[' + @view + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @schema, @view
+    end
 close cur
 deallocate cur";
 
@@ -651,13 +660,13 @@ declare cur cursor fast_forward for
 select routine_schema, routine_name, routine_type
 from information_schema.routines
 open cur
-fetch next from cur into @schema, @proc, @type
-while @@fetch_status <> -1
-begin
-    select @sql = 'DROP '+ @type +' [' + @schema + '].[' + @proc + '];'
-    exec sp_executesql @sql
     fetch next from cur into @schema, @proc, @type
-end
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'DROP '+ @type +' [' + @schema + '].[' + @proc + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @schema, @proc, @type
+    end
 close cur
 deallocate cur";
 
@@ -670,13 +679,13 @@ select schema_name
 from information_schema.schemata
 where schema_name not in ({0})
 open cur
-fetch next from cur into @schema
-while @@fetch_status <> -1
-begin
-    select @sql = 'DROP SCHEMA [' + @schema + '];'
-    exec sp_executesql @sql
     fetch next from cur into @schema
-end
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'DROP SCHEMA [' + @schema + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @schema
+    end
 close cur
 deallocate cur";
 
@@ -688,13 +697,13 @@ select distinct s.name, t.name
 from sys.tables t
 join sys.schemas s on t.schema_id = s.schema_id where history_table_id is not null
 open cur
-fetch next from cur into @schema, @tbl
-while @@fetch_status <> -1
-begin
-    select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] SET (SYSTEM_VERSIONING = OFF);'
-    exec sp_executesql @sql
     fetch next from cur into @schema, @tbl
-end
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] SET (SYSTEM_VERSIONING = OFF);'
+        exec sp_executesql @sql
+        fetch next from cur into @schema, @tbl
+    end
 close cur
 deallocate cur";
 

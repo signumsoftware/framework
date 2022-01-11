@@ -51,6 +51,11 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2022.01.08 Dashboard V: Dashboard Pinned Filters](https://github.com/signumsoftware/framework/commit/552079543443bff685e0a5b2fbe48dbefaaf149b#commitcomment-63148535)
+* [2022.01.08 Dashboard IV: Dashboard IV: Token Equivalences](https://github.com/signumsoftware/framework/commit/85b2648205a6cd1e3a84ffdac955b74585cddfa2#comments)
+* [2021.12.19 Split between Size and Precission and Microsoft.Data.SqlClient 4.0.0](https://github.com/signumsoftware/framework/commit/fe17abd91b3e319d78c7ae2b4dfb0c70c7c4f276)
+* [2021.12.17 CacheLogic.ServerBrodcast](https://github.com/signumsoftware/framework/commit/1903c0df005bec80dac4a7fca5b20b257420c591#commitcomment-62129403)
+* [2021.12.16 Add SignalR to AlertDropdown](https://github.com/signumsoftware/framework/commit/c3e89ed1dfd53eaaf619c2823de43cb0cc2d3154#commitcomment-62061830)
 * [2021.12.13 IsNew and GetType() members supported in ToStringExpression](https://github.com/signumsoftware/framework/commit/644151a2481307fdbb53216d2d71022a71e75d2c#comments)
 * [2021.12.03 Dashboard III; InitialSelectionDashboardFilter and DefaultDashboardFilter](https://github.com/signumsoftware/framework/commit/90392c1066b7aed631ec3aaa55258e06f18ad013#comments)
 * [2021.12.02 Dashboard II: Presenting CachedQueries](https://github.com/signumsoftware/framework/commit/641293cd886280a857493e6b9b10361220f19702#commitcomment-61271093) 

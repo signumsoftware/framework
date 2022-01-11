@@ -25,7 +25,12 @@ public static class FilePathEmbeddedLogic
             {
                 if(efp.BinaryFile != null) //First time
                 {
-                    efp.SaveFile();
+                    var task = efp.SaveFileAsync();
+                    Transaction.PreRealCommit += data =>
+                    {
+                        var a = efp; //For debugging
+                        task.Wait();
+                    };
                 }
             };
 
@@ -184,6 +189,15 @@ public static class FilePathEmbeddedLogic
         alg.SaveFile(efp);
         efp.BinaryFile = null!;
         return efp;
+    }
+
+
+    public static async Task SaveFileAsync(this FilePathEmbedded efp)
+    {
+        var alg = efp.FileType.GetAlgorithm();
+        alg.ValidateFile(efp);
+        await alg.SaveFileAsync(efp);
+        efp.BinaryFile = null!;
     }
 
     public static void DeleteFileOnCommit(this FilePathEmbedded efp)
