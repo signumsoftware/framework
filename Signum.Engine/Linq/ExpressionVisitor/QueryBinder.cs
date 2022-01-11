@@ -1752,9 +1752,47 @@ internal class QueryBinder : ExpressionVisitor
         switch (source.NodeType)
         {
             case ExpressionType.MemberInit:
-                return ((MemberInitExpression)source).Bindings
-                    .OfType<MemberAssignment>()
-                    .SingleEx(a => ReflectionTools.MemeberEquals(a.Member, m.Member)).Expression;
+                {
+                    var mie = (MemberInitExpression)source;
+                    var mas = mie.Bindings.OfType<MemberAssignment>().SingleEx(a => ReflectionTools.MemeberEquals(a.Member, m.Member));
+                    return mas.Expression;
+                }
+            case ExpressionType.Call:
+                {
+                    var mce = (MethodCallExpression)source;
+
+                    if (mce.Method.DeclaringType == typeof(Tuple) && mce.Method.Name == "Create")
+                    {
+                        int index = TupleReflection.TupleIndex((PropertyInfo)m.Member);
+                        return mce.Arguments[index];
+                    }
+                    else if (mce.Method.DeclaringType == typeof(ValueTuple) && mce.Method.Name == "Create")
+                    {
+                        int index = ValueTupleReflection.TupleIndex((FieldInfo)m.Member);
+                        return mce.Arguments[index];
+                    }
+                    else if (mce.Method.DeclaringType == typeof(KeyValuePair) && mce.Method.Name == "Create")
+                    {
+                        if (m.Member.Name == "Key")
+                            return mce.Arguments[0];
+                        else if(m.Member.Name == "Value")
+                            return mce.Arguments[1];
+                    }
+                    else if(mce.Method.IsInstantiationOf(miSetReadonly))
+                    {
+                        var pi = ReflectionTools.BasePropertyInfo(mce.Arguments[1].StripQuotes());
+                        if (m.Member is PropertyInfo piMember && ReflectionTools.PropertyEquals(pi, piMember))
+                            return mce.Arguments[2];
+                        else
+                            return BindMemberAccess(
+                                m.Member is PropertyInfo pi1 ? Expression.Property(mce.Arguments[0], pi1) : 
+                                m.Member is FieldInfo fi1 ? Expression.Field(mce.Arguments[0], fi1) :
+                                throw new InvalidOperationException(nameof(m.Member))
+                                );
+                    }
+
+                    break;
+                }
             case ExpressionType.New:
                 {
                     NewExpression nex = (NewExpression)source;
@@ -1767,6 +1805,11 @@ internal class QueryBinder : ExpressionVisitor
                     else if (TupleReflection.IsTuple(nex.Type))
                     {
                         int index = TupleReflection.TupleIndex((PropertyInfo)m.Member);
+                        return nex.Arguments[index];
+                    }
+                    else if (ValueTupleReflection.IsValueTuple(nex.Type))
+                    {
+                        int index = ValueTupleReflection.TupleIndex((FieldInfo)m.Member);
                         return nex.Arguments[index];
                     }
                     else
