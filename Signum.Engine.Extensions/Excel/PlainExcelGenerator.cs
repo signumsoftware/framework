@@ -52,6 +52,7 @@ public static class PlainExcelGenerator
                     { DefaultStyle.Number, worksheet.FindCell("F3").StyleIndex! },
                     { DefaultStyle.Decimal, worksheet.FindCell("G3").StyleIndex! },
                     { DefaultStyle.Percentage, worksheet.FindCell("H3").StyleIndex! },
+                    { DefaultStyle.Time, worksheet.FindCell("I3").StyleIndex! },
                 }
             };
         }
@@ -212,6 +213,8 @@ public static class PlainExcelGenerator
 
         if (type == typeof(DateTime))
             return 20;
+        if (type == typeof(DateOnly))
+            return 15;
         if (type == typeof(string))
             return 50;
         if (type.IsLite())

@@ -17,7 +17,8 @@ public enum DefaultStyle
     Enum,
     Number,
     Decimal,
-    Percentage
+    Percentage,
+    Time
 }
 
 public class CellBuilder
@@ -49,6 +50,12 @@ public class CellBuilder
         var uType = type.UnNullify();
         if (uType.IsEnum)
             return DefaultStyle.Enum;
+
+        if (uType == typeof(DateOnly))
+            return DefaultStyle.Date;
+
+        if (uType == typeof(TimeOnly))
+            return DefaultStyle.Time;
 
         TypeCode tc = Type.GetTypeCode(uType);
         return DefaultTemplateCells.TryGetS(tc) ?? DefaultStyle.General;
@@ -84,11 +91,13 @@ public class CellBuilder
 #pragma warning restore CA1822 // Mark members as static
     {
         string excelValue = value == null ? "" :
-                    (template == DefaultStyle.Date || template == DefaultStyle.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
-                    (template.ToString().StartsWith("Decimal")) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
-                    (template == DefaultStyle.Boolean) ? ToYesNo((bool)value) :
-                    (template == DefaultStyle.Enum) ? ((Enum)value).NiceToString() :
-                    value.ToString()!;
+            template == DefaultStyle.DateTime ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
+            template == DefaultStyle.Date ? value is DateTime dt ? ExcelExtensions.ToExcelDate(dt) : ExcelExtensions.ToExcelDate(((DateOnly)value).ToDateTime()) :
+            template == DefaultStyle.Time ? ExcelExtensions.ToExcelTime((TimeOnly)value) :
+            template == DefaultStyle.Decimal ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
+            template == DefaultStyle.Boolean ? ToYesNo((bool)value) :
+            template == DefaultStyle.Enum ? ((Enum)value).NiceToString() :
+            value.ToString()!;
 
         Cell cell = IsInlineString(template)? 
             new Cell(new InlineString(new Text { Text = excelValue })) { DataType = CellValues.InlineString } : 
@@ -113,6 +122,7 @@ public class CellBuilder
 
             DefaultStyle.Date or 
             DefaultStyle.DateTime or 
+            DefaultStyle.Time or 
             DefaultStyle.Number or 
             DefaultStyle.Decimal => false,
             _ => throw new InvalidOperationException("Unexpected"),
