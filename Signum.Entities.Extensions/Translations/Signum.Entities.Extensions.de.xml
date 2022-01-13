@@ -2071,7 +2071,7 @@
   <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln" Gender="m">
     <Member Name="Conditions" Description="Bedingungen" />
   </Type>
-  <Type Name="ScheduledTaskEntity" Description="Geplante Aufgabe">
+  <Type Name="ScheduledTaskEntity" Description="Geplanter Task">
     <Member Name="ApplicationName" Description="Anwendungsname" />
     <Member Name="MachineName" Description="Computername" />
     <Member Name="Rule" Description="Regel" />
@@ -2089,7 +2089,7 @@
     <Member Name="Remarks" Description="Bemerkungen" />
     <Member Name="ScheduledTask" Description="Geplante Task" />
     <Member Name="StartTime" Description="Startzeit" />
-    <Member Name="Task" Description="Aufgabe" />
+    <Member Name="Task" Description="Task" />
     <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="ScheduledTaskLogOperation">
@@ -2197,7 +2197,7 @@
   <Type Name="SessionLogPermission">
     <Member Name="TrackSession" Description="Sitzungskontrolle" />
   </Type>
-  <Type Name="SimpleTaskSymbol" Description="Einfache Aufgabe" />
+  <Type Name="SimpleTaskSymbol" Description="Einfacher Task" />
   <Type Name="SMSCharactersMessage">
     <Member Name="Insert" Description="Einfügen" />
     <Member Name="Language" Description="Sprache" />
