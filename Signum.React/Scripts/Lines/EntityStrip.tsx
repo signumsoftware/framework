@@ -32,7 +32,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
         p.showType = p.type.name.contains(",");
 
       if (p.autocomplete === undefined) {
-        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.ctx, p.create!, p.showType);
+        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create!, p.showType);
       }
       if (p.iconStart == undefined && p.vertical)
         p.iconStart = true;
