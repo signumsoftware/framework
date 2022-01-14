@@ -28,20 +28,11 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [NumberBetweenValidator(1, 12)]
     public int Columns { get; set; }
 
-    PanelStyle style;
-    public PanelStyle Style
-    {
-        get { return style; }
-        set
-        {
-            if (Set(ref style, value) && value != PanelStyle.CustomColor)
-                CustomColor = null;
-        }
-    }
-
     public InteractionGroup? InteractionGroup { get; set; }
 
     public string? CustomColor { get; set; }
+
+    public bool SameIconTitleColor { get; set; }
 
     [ImplementedBy(
         typeof(UserChartPartEntity),
@@ -80,7 +71,6 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             Content = Content.Clone(),
             Title = Title,
             Row = Row,
-            Style = Style,
             InteractionGroup = InteractionGroup,
             IconColor = IconColor,
             IconName = IconName,
@@ -104,7 +94,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             IconName == null ? null! : new XAttribute("IconName", IconName),
             IconColor == null ? null! : new XAttribute("IconColor", IconColor),
             InteractionGroup == null ? null! : new XAttribute("InteractionGroup", InteractionGroup),
-            new XAttribute("Style", Style),
+             CustomColor == null ? null! : new XAttribute("CustomColor", CustomColor),
             Content.ToXml(ctx));
     }
 
@@ -116,7 +106,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         Title = x.Attribute("Title")?.Value;
         IconName = x.Attribute("IconName")?.Value;
         IconColor = x.Attribute("IconColor")?.Value;
-        Style = x.Attribute("Style")?.Value.TryToEnum<PanelStyle>() ?? PanelStyle.Light;
+        CustomColor = x.Attribute("CustomColor")?.Value;
         InteractionGroup = x.Attribute("InteractionGroup")?.Value.ToEnum<InteractionGroup>();
         Content = ctx.GetPart(Content, x.Elements().Single());
     }

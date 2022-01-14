@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as _fontawesome_svg_core from '@fortawesome/fontawesome-svg-core'; //throwaway reference to avoid error the inferred type cannot be named without a reference -> https://github.com/microsoft/TypeScript/issues/5938
-import { classes } from '@framework/Globals'
+import { classes, getColorContrasColorBWByHex } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
 import { ModifiableEntity, EntityControlMessage } from '@framework/Signum.Entities'
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
@@ -293,11 +293,10 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
 
 export interface EntityGridItemProps {
   title?: React.ReactElement<any>;
-  bsStyle?: BootstrapStyle;
   children?: React.ReactNode;
   style?: React.CSSProperties;
   customColor?: string;
-
+  sameColor: boolean;
   onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent<any>) => void;
   onTitleDragStart?: (e: React.DragEvent<any>) => void;
   onTitleDragEnd?: (e: React.DragEvent<any>) => void;
@@ -306,14 +305,13 @@ export interface EntityGridItemProps {
 
 
 export function EntityGridItem(p : EntityGridItemProps){
-  var style = p.bsStyle == undefined ? undefined : p.bsStyle.toLowerCase();
+  var style = p.customColor == null ? "light" : "customColor";
 
     return (
-      <div className={classes("card", style && ("border-" + style), "shadow-sm")}>
+      <div className={classes("card", "shadow-sm")}>
         <div className={classes("card-header",
-          style && style != "light" && style != "CustomColor" && "text-white",
-          style && style != "CustomColor" && ("bg-" + style)
-        )} style={{ backgroundColor: p.customColor ?? undefined }}
+          style != "customColor" && ("bg-" + style)
+        )} style={{ backgroundColor: p.customColor ?? undefined}}
         draggable={!!p.onTitleDragStart}
         onDragStart={p.onTitleDragStart}
         onDragEnd={p.onTitleDragEnd} >

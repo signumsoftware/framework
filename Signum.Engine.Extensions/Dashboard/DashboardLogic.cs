@@ -60,8 +60,8 @@ public static class DashboardLogic
                 {"LinkListPart", typeof(LinkListPartEntity)},
                 {"ValueUserQueryListPart", typeof(ValueUserQueryListPartEntity)},
                 {"UserTreePart", typeof(UserTreePartEntity)},
-                {"ImagePart", typeof(UserTreePartEntity)},
-                {"SeparatorPart", typeof(UserTreePartEntity)},
+                {"ImagePart", typeof(ImagePartEntity)},
+                {"SeparatorPart", typeof(SeparatorPartEntity)},
             });
 
             SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) => { db.Execute(DashboardOperation.RegenerateCachedQueries); return null; });

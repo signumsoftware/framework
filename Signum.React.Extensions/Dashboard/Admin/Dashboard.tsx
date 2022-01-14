@@ -51,7 +51,6 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           content: part,
           iconName: iconToString(icon.icon),
           iconColor: icon.iconColor,
-          style: "Light"
         });
       });
   }
@@ -80,19 +79,17 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
             </div>
 
             <div className="row">
-              <div className={tcs.value.style == 'CustomColor' ? "col-sm-2" : "col-sm-4"}>
-                <ValueLine ctx={tcs.subCtx(pp => pp.style)} onChange={() => forceUpdate()} />
-              </div>
-              {tcs.value.style == 'CustomColor' &&
-                <div className="col-sm-2">
+                <div className="col-sm-3">
                   <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
                 </div>
-              }
-              <div className="col-sm-4">
+              <div className="col-sm-3">
                 <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => forceUpdate()} />
               </div>
-              <div className="col-sm-4">
+              <div className="col-sm-3">
                 <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
+              </div>
+              <div className="col-sm-3">
+                <ValueLine ctx={tcs.subCtx(t => t.sameIconTitleColor)} onChange={() => forceUpdate()} />
               </div>
             </div>
           </div>
@@ -101,7 +98,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
     );
 
     return (
-      <EntityGridItem title={title} bsStyle={tc.value.style != "CustomColor" ? tc.value.style as BootstrapStyle : undefined} customColor= {tc.value.customColor ?? undefined}>
+      <EntityGridItem title={title} customColor={tc.value.customColor ?? undefined} sameColor={tc.value.sameIconTitleColor}>
         <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: ctx.value }} />
       </EntityGridItem>
     );
