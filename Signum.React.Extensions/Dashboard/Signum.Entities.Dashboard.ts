@@ -156,6 +156,13 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   content: IPartEntity;
 }
 
+export const SeparatorPartEntity = new Type<SeparatorPartEntity>("SeparatorPart");
+export interface SeparatorPartEntity extends Entities.Entity, IPartEntity {
+  Type: "SeparatorPart";
+  title: string | null;
+  requiresTitle: boolean;
+}
+
 export const TokenEquivalenceEmbedded = new Type<TokenEquivalenceEmbedded>("TokenEquivalenceEmbedded");
 export interface TokenEquivalenceEmbedded extends Entities.EmbeddedEntity {
   Type: "TokenEquivalenceEmbedded";
@@ -169,13 +176,6 @@ export interface TokenEquivalenceGroupEntity extends Entities.Entity {
   dashboard: Entities.Lite<DashboardEntity>;
   interactionGroup: InteractionGroup | null;
   tokenEquivalences: Entities.MList<TokenEquivalenceEmbedded>;
-}
-
-export const SeparatorPartEntity = new Type<SeparatorPartEntity>("SeparatorPart");
-export interface SeparatorPartEntity extends Entities.Entity, IPartEntity {
-  Type: "SeparatorPart";
-  title: string | null;
-  requiresTitle: boolean;
 }
 
 export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
