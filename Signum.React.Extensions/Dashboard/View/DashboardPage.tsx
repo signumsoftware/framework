@@ -2,8 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
-import { Entity, parseLite, getToString, JavascriptMessage, EntityPack, liteKey } from '@framework/Signum.Entities'
-import * as Finder from '@framework/Finder'
+import { Entity, parseLite, getToString, JavascriptMessage, EntityPack } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { DashboardEntity, DashboardMessage } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
@@ -14,8 +13,6 @@ import { QueryString } from '@framework/QueryString'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import * as DashboardClient from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
-import { downloadFile } from '../../Files/FileDownloader'
-import { CachedQueryJS } from '../CachedQueryExecutor'
 
 interface DashboardPageProps extends RouteComponentProps<{ dashboardId: string }> {
 
