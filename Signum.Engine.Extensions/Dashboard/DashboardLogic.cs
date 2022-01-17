@@ -60,6 +60,8 @@ public static class DashboardLogic
                 {"LinkListPart", typeof(LinkListPartEntity)},
                 {"ValueUserQueryListPart", typeof(ValueUserQueryListPartEntity)},
                 {"UserTreePart", typeof(UserTreePartEntity)},
+                {"ImagePart", typeof(ImagePartEntity)},
+                {"SeparatorPart", typeof(SeparatorPartEntity)},
             });
 
             SchedulerLogic.ExecuteTask.Register((DashboardEntity db, ScheduledTaskContext ctx) => { db.Execute(DashboardOperation.RegenerateCachedQueries); return null; });
@@ -431,6 +433,12 @@ public static class DashboardLogic
 
         TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
             uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+
+        TypeConditionLogic.Register<ImagePartEntity>(typeCondition,
+         uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+
+        TypeConditionLogic.Register<SeparatorPartEntity>(typeCondition,
+         uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
     }
 
     public static List<CachedQueryDefinition> GetCachedQueryDefinitions(DashboardEntity db)
@@ -546,13 +554,13 @@ public static class DashboardLogic
 
         cqd.QueryRequest.Columns.AddRange(extraColumns.Select(c => new Column(c, null)));
         var avgs = cqd.QueryRequest.Columns.Extract(a => a.Token is AggregateToken at && at.AggregateFunction == AggregateFunction.Average);
-        foreach (var av in avgs)
-        {
+                            foreach (var av in avgs)
+                            {
             cqd.QueryRequest.Columns.Remove(av);
             cqd.QueryRequest.Columns.Add(new Column(new AggregateToken(AggregateFunction.Sum, av.Token.Parent!), null));
             cqd.QueryRequest.Columns.Add(new Column(new AggregateToken(AggregateFunction.Count, av.Token.Parent!, FilterOperation.DistinctTo, null), null));
-        }
-    }
+                            }
+                        }
 
     private static List<QueryToken>? TranslatedToken(QueryToken original, object targetQueryName, Dictionary<QueryToken, Dictionary<object, List<QueryToken>>> equivalences)
     {
@@ -562,7 +570,7 @@ public static class DashboardLogic
             {
                 if (equivalences.TryGetValue(t, out var dic) && dic.TryGetValue(targetQueryName, out var list))
                     return list.Select(t => AppendTokens(t, toAppend)).ToList();
-            }
+                    }
 
             toAppend.Insert(0, t);
 
@@ -572,15 +580,15 @@ public static class DashboardLogic
 
                 if(equivalences.TryGetValue(entityToken, out var dic) && dic.TryGetValue(targetQueryName, out var list))
                     return list.Select(t => AppendTokens(t, toAppend)).ToList();
+                }
             }
-        }
 
         if (original.QueryName == targetQueryName)
             return new List<QueryToken> { original };
 
         return null;
 
-    }
+        }
 
     private static QueryToken AppendTokens(QueryToken t, List<QueryToken> toAppend)
     {
@@ -594,7 +602,7 @@ public static class DashboardLogic
                 throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(nt.Key, t, QueryUtils.GetKey(qd.QueryName)));
 
             t = newToken;
-        }
+    }
 
         return t;
     }
