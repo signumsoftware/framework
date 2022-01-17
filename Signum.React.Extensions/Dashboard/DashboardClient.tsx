@@ -26,6 +26,7 @@ import { DashboardFilterController } from "./View/DashboardFilterController";
 import { EntityFrame } from '../../Signum.React/Scripts/TypeContext';
 import { CachedQueryJS } from './CachedQueryExecutor';
 import { QueryEntity } from '../../Signum.React/Scripts/Signum.Entities.Basics';
+import { downloadFile } from '../Files/FileDownloader';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -308,5 +309,18 @@ export function DashboardWidget(p: DashboardWidgetProps) {
     reload: () => p.frame.onReload(),
     cachedQueries: {} /*for now*/
   });
+}
+
+export function toCachedQueries(dashboardWithQueries?: DashboardWithCachedQueries | null) {
+
+  if (!dashboardWithQueries)
+    return undefined;
+
+  const result = dashboardWithQueries.cachedQueries
+    .map(a => ({ userAssets: a.userAssets, promise: downloadFile(a.file).then(r => r.json() as Promise<CachedQueryJS>).then(cq => { Finder.decompress(cq.resultTable); return cq; }) })) //share promise
+    .flatMap(a => a.userAssets.map(mle => ({ ua: mle.element, promise: a.promise })))
+    .toObject(a => liteKey(a.ua), a => a.promise);
+
+  return result;
 }
 

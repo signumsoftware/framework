@@ -44,10 +44,7 @@ export default function DashboardPage(p: DashboardPageProps) {
 
   }, [refreshCounter]);
 
-  var cachedQueries = React.useMemo(() => dashboardWithQueries?.cachedQueries
-    .map(a => ({ userAssets: a.userAssets, promise: downloadFile(a.file).then(r => r.json() as Promise<CachedQueryJS>).then(cq => { Finder.decompress(cq.resultTable); return cq; })})) //share promise
-    .flatMap(a => a.userAssets.map(mle => ({ ua: mle.element, promise: a.promise })))
-    .toObject(a => liteKey(a.ua), a => a.promise), [dashboardWithQueries]);
+  var cachedQueries = React.useMemo(() => DashboardClient.toCachedQueries(dashboardWithQueries), [dashboardWithQueries]);
 
   return (
     <div>
