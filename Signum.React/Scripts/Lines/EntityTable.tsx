@@ -10,6 +10,7 @@ import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAPI, useForceUpdate } from '../Hooks'
 import { useController } from './LineBase'
+import { KeyCodes } from '../Components'
 
 export interface EntityTableProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTableController) => React.ReactElement<any>);
@@ -114,6 +115,16 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
     }
   }
 
+  handleKeyDown = (sender: EntityTableRowHandle, e: React.KeyboardEvent<HTMLTableRowElement>) => {
+
+    if (e.keyCode != KeyCodes.tab) {
+      if (this.recentlyCreated.current && sender.props.ctx.value == this.recentlyCreated.current)
+        this.recentlyCreated.current = null;
+
+      return;
+    }
+  }
+
   handleBlur = (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => {
     const p = this.props;
     var tr = DomUtils.closest(e.target, "tr")!;
@@ -126,6 +137,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
     }
 
     if (this.recentlyCreated.current && sender.props.ctx.value == this.recentlyCreated.current) {
+
       p.ctx.value.extract(a => a.element == this.recentlyCreated.current);
       this.setValue(p.ctx.value);
 
@@ -297,6 +309,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
                   draggable={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
                   columns={p.columns!}
                   onBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleBlur : undefined}
+                  onKeyDown={p.createOnBlurLastRow && p.create && !readOnly ? c.handleKeyDown : undefined}
                 />
                 )
             }
@@ -343,6 +356,7 @@ export interface EntityTableRowProps {
   rowHooks?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRowHandle) => Promise<any>;
   onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRowHandle, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   onBlur?: (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => void;
+  onKeyDown?: (sender: EntityTableRowHandle, e: React.KeyboardEvent<HTMLTableRowElement>) => void;
 }
 
 export interface EntityTableRowHandle {
@@ -367,6 +381,7 @@ export function EntityTableRow(p: EntityTableRowProps) {
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
         onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}
+        onKeyDown={p.onKeyDown && (e => p.onKeyDown!(rowHandle, e))}
         className={classes(drag?.dropClass, rowAtts?.className)}
       >
       {p.firstColumnVisible && <td>
