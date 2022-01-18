@@ -1,12 +1,12 @@
 import { Dic } from './Globals';
-import { Entity, ModifiableEntity, SelectorMessage, EntityPack } from './Signum.Entities';
+import { Entity, ModifiableEntity, SelectorMessage, EntityPack, isEntityPack } from './Signum.Entities';
 import { Type, getTypeInfo, OperationType, New, OperationInfo, PropertyRoute, tryGetTypeInfo } from './Reflection';
 import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
 import {API} from "./Navigator";
 
-export const customConstructors: { [typeName: string]: (props?: any, pr?: PropertyRoute) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
+export const customConstructors: { [typeName: string]: (props?: any, pr?: PropertyRoute) => ModifiableEntity | Promise<ModifiableEntity | EntityPack<ModifiableEntity> | undefined> } = {}
 
 export function construct<T extends ModifiableEntity>(type: Type<T>, props?: Partial<T>, pr?: PropertyRoute): Promise<T | undefined>;
 export function construct(type: string, props?: any, pr?: PropertyRoute): Promise<ModifiableEntity | undefined>;
@@ -31,10 +31,9 @@ export function constructPack(type: string | Type<any>, props?: any, pr?: Proper
       if (e == undefined)
         return undefined;
 
-      assertCorrect(e);
+      assertCorrect(isEntityPack(e) ? e.entity : e);
       return Navigator.toEntityPack(e);
     });
-
 
   if (ti) {
 
@@ -94,7 +93,7 @@ function assertCorrect(m: ModifiableEntity) {
     throw new Error("Member 'modified' expected after constructor");
 }
 
-export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (props?: Partial<T>, pr?: PropertyRoute) => T | Promise<T | undefined>, options?: { override?: boolean }) {
+export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (props?: Partial<T>, pr?: PropertyRoute) => T | Promise<T | EntityPack<T> | undefined>, options ?: { override?: boolean }) {
   if (customConstructors[type.typeName] && !(options?.override))
     throw new Error(`Constructor for ${type.typeName} already registered`);
 

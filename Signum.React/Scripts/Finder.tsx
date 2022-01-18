@@ -117,7 +117,7 @@ export function defaultFind(fo: FindOptions, modalOptions?: ModalFindOptions): P
     .then(a => a?.row.entity);
 
   if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
-    return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
+    return fetchLitesWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
       .then(data => {
         if (data.length == 1 && modalOptions?.autoSelectIfOne)
           return Promise.resolve(data[0]);
@@ -188,7 +188,7 @@ export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptions
     .then(a => a?.rows.map(a => a.entity!));
 
   if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
-    return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
+    return fetchLitesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
       .then(data => {
         if (data.length == 1 && modalOptions?.autoSelectIfOne)
           return Promise.resolve(data);
@@ -844,7 +844,7 @@ function getTypeIfNew(val: any): string[] {
 
 
 export function exploreOrView(findOptions: FindOptions): Promise<void> {
-  return fetchEntitiesLiteWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
+  return fetchLitesWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
     if (list.length == 1)
       return Navigator.view(list[0], { buttons: "close" }).then(() => undefined);
     else
@@ -982,14 +982,14 @@ function isValidGuid(str : string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 }
 
-export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<T>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]> {
+export function fetchLitesWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<T>[]>;
+export function fetchLitesWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]>;
+export function fetchLitesWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]> {
   return getQueryDescription(queryName).then(qd =>
     parseFilterOptions(filterOptions, false, qd)
       .then(fops =>
         parseOrderOptions(orderOptions, false, qd).then(oop =>
-          API.fetchEntitiesLiteWithFilters({
+          API.fetchLitesWithFilters({
 
             queryKey: qd.queryKey,
 
@@ -1007,14 +1007,14 @@ export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, f
   );
 }
 
-export function fetchEntitiesFullWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<T[]>;
-export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]>;
-export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]> {
+export function fetchEntitiesWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<T[]>;
+export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]>;
+export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]> {
   return getQueryDescription(queryName).then(qd =>
     parseFilterOptions(filterOptions, false, qd)
       .then(fops =>
         parseOrderOptions(orderOptions, false, qd).then(oop =>
-          API.fetchEntitiesFullWithFilters({
+          API.fetchEntitiesWithFilters({
 
             queryKey: qd.queryKey,
 
@@ -1460,12 +1460,12 @@ export module API {
     return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
-  export function fetchEntitiesLiteWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost({ url: "~/api/query/entitiesLiteWithFilter" }, request);
+  export function fetchLitesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
+    return ajaxPost({ url: "~/api/query/litesWithFilter" }, request);
   }
 
-  export function fetchEntitiesFullWithFilters(request: QueryEntitiesRequest): Promise<Entity[]>{
-    return ajaxPost({ url: "~/api/query/entitiesFullWithFilter" }, request);
+  export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Entity[]>{
+    return ajaxPost({ url: "~/api/query/entitiesWithFilter" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
