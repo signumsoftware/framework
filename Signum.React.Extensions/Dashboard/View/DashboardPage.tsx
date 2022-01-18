@@ -56,7 +56,7 @@ export default function DashboardPage(p: DashboardPageProps) {
               <Link className="sf-hide " style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="edit" />&nbsp;Edit</Link>
             </div>
           }
-          <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>
+          {dashboard.hideDisplayName && <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>}
         </div>}
 
       {entityKey &&

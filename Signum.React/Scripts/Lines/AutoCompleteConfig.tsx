@@ -122,6 +122,28 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   }
 }
 
+//Usefull to make a MultiFindOptions autocomplete using 
+export async function getLitesWithSubStr(fo: FindOptions, subStr: string, signal: AbortSignal): Promise<Lite<Entity>[]> {
+
+  const foClean = Finder.defaultNoColumnsAllRows(fo, 5);
+
+  const qd = await Finder.getQueryDescription(fo.queryName);
+  const qs = Finder.getSettings(fo.queryName);
+
+  const fop = await Finder.parseFindOptions({
+    ...fo,
+    filterOptions: FindOptionsAutocompleteConfig.filtersWithSubStr(fo, qd, qs, subStr),
+    includeDefaultFilters: false,
+  }, qd, true);
+
+  var qr = Finder.getQueryRequest(fop);
+
+  const rt = await Finder.API.executeQuery(qr, signal);
+
+  return rt.rows.map(a => a.entity).notNull();
+}
+
+
 interface FindOptionsAutocompleteConfigOptions extends AutocompleteConfigOptions {
   getAutocompleteConstructor?: (str: string, foundRows: ResultRow[]) => AutocompleteConstructor<Entity>[],
   count?: number,

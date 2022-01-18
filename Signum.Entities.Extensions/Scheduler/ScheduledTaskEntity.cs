@@ -1,4 +1,4 @@
-﻿using Signum.Utilities.Reflection;
+using Signum.Utilities.Reflection;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 
