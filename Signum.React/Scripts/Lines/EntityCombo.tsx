@@ -21,7 +21,7 @@ export interface EntityComboProps extends EntityBaseProps {
   deps?: React.DependencyList;
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: ResultRow | undefined, resultTable?: ResultTable) => React.ReactChild;
+  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem") => React.ReactChild;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
@@ -145,7 +145,7 @@ export interface EntityComboSelectProps {
   onDataLoaded?: (data: Lite<Entity>[] | ResultTable | undefined) => void;
   deps?: React.DependencyList;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: ResultRow | undefined) => React.ReactNode;
+  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem") => React.ReactNode;
   liteToString?: (e: Entity) => string;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
@@ -223,8 +223,8 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     return (
       <DropdownList className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionRows()} onChange={row => p.onChange(row?.entity ?? null)} value={getResultRow(lite)}
         title={lite?.toStr}
-        renderValue={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item)}
-        renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined: a.item)}
+        renderValue={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "Value")}
+        renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "ListItem")}
       />
     );
   } else {
