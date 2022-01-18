@@ -46,6 +46,10 @@ export namespace NavigatorManager {
   export function getFrameModal() {
     return import("./Frames/FrameModal");
   }
+
+  export function onFramePageCreationCancelled() {
+    AppContext.history.replace("~/");
+  }
 }
 
 export const entityChanged: Array<(cleanName: string, entity?: Entity) => void> = [];

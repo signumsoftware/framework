@@ -66,10 +66,6 @@ function SearchPage(p: SearchPageProps) {
     <div id="divSearchPage" className="sf-search-page">
       <h3 className="display-6 sf-query-title">
         <span>{getQueryNiceName(fo.queryName)}</span>
-        &nbsp;
-            <a className="sf-popup-fullscreen" href="#" onClick={(e) => searchControl.current!.searchControlLoaded!.handleFullScreenClick(e)}>
-          <FontAwesomeIcon icon="external-link-alt" />
-        </a>
       </h3>
       {qd && <SearchControl ref={searchControl}
         defaultIncludeDefaultFilters={true}
