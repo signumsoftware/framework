@@ -107,7 +107,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
     );
 
     return (
-      <EntityGridItem title={title} customColor={tc.value.customColor ?? undefined} sameColor={tc.value.sameIconTitleColor}>
+      <EntityGridItem title={title} customColor={tc.value.customColor ?? undefined}>
         <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: ctx.value }} />
       </EntityGridItem>
     );

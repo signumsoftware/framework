@@ -294,9 +294,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
 export interface EntityGridItemProps {
   title?: React.ReactElement<any>;
   children?: React.ReactNode;
-  style?: React.CSSProperties;
   customColor?: string;
-  sameColor: boolean;
   onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent<any>) => void;
   onTitleDragStart?: (e: React.DragEvent<any>) => void;
   onTitleDragEnd?: (e: React.DragEvent<any>) => void;
