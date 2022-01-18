@@ -60,7 +60,6 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           content: part,
           iconName: iconToString(icon.icon),
           iconColor: icon.iconColor,
-          style: "Light"
         });
       });
   }
@@ -80,7 +79,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
             <div className="row">
               <div className="col-sm-8">
-                <ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
+                < ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
               </div>
               <div className="col-sm-4">
                 <ValueLine ctx={tcs.subCtx(pp => pp.interactionGroup)}
@@ -89,14 +88,17 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
             </div>
 
             <div className="row">
-              <div className="col-sm-4">
-                <ValueLine ctx={tcs.subCtx(pp => pp.style)} onChange={() => forceUpdate()} />
-              </div>
-              <div className="col-sm-4">
+                <div className="col-sm-3">
+                  <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
+                </div>
+              <div className="col-sm-3">
                 <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => forceUpdate()} />
               </div>
-              <div className="col-sm-4">
+              <div className="col-sm-3">
                 <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
+              </div>
+              <div className="col-sm-3">
+                <ValueLine ctx={tcs.subCtx(t => t.sameIconTitleColor)} onChange={() => forceUpdate()} />
               </div>
             </div>
           </div>
@@ -105,7 +107,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
     );
 
     return (
-      <EntityGridItem title={title} bsStyle={tc.value.style}>
+      <EntityGridItem title={title} customColor={tc.value.customColor ?? undefined} sameColor={tc.value.sameIconTitleColor}>
         <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: ctx.value }} />
       </EntityGridItem>
     );
@@ -120,10 +122,13 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           <div className="col-sm-6">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.displayName)} />
           </div>
-          <div className="col-sm-3">
+          <div className="col-sm-2">
+            <ValueLine ctx={ctxBasic.subCtx(cp => cp.hideDisplayName)} />
+          </div>
+          <div className="col-sm-2">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.dashboardPriority)} />
           </div>
-          <div className="col-sm-3">
+          <div className="col-sm-2">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.autoRefreshPeriod)} />
           </div>
         </div>

@@ -42,6 +42,8 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     [StringLengthValidator(Min = 2, Max = 200)]
     public string DisplayName { get; set; }
 
+    public bool HideDisplayName { get; set; }
+
     public bool CombineSimilarRows { get; set; } = true;
 
     public CacheQueryConfigurationEmbedded? CacheQueryConfiguration { get; set; }

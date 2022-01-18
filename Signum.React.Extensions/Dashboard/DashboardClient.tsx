@@ -15,7 +15,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
-import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity } from './Signum.Entities.Dashboard'
+import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, ImagePartEntity, SeparatorPartEntity } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '@framework/Hooks';
@@ -71,6 +71,8 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('./Admin/UserChartPart')));
   Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('./Admin/CombinedUserChartPart')));
   Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
+  Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
+  Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
 
 
   Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
@@ -193,6 +195,16 @@ export function start(options: { routes: JSX.Element[] }) {
           .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
           .done()
       }
+  });
+  registerRenderer(ImagePartEntity, {
+    component: () => import('./View/ImagePartView').then(a => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    withPanel: () => false
+  });
+  registerRenderer(SeparatorPartEntity, {
+    component: () => import('./View/SeparatorPartView').then(a => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    withPanel: () => false
   });
 
   onEmbeddedWidgets.push(wc => {
