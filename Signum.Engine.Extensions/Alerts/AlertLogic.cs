@@ -11,6 +11,7 @@ using Signum.Engine.Scheduler;
 using Signum.Entities.UserAssets;
 using Microsoft.AspNetCore.Html;
 using System.Text.RegularExpressions;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Engine.Alerts;
 
@@ -138,6 +139,9 @@ public static class AlertLogic
                   e.SendNotificationsOlderThan,
                   e.SendBehavior,
               });
+
+        sb.Schema.Settings.AssertImplementedBy((ScheduledTaskEntity a) => a.Task, typeof(SendNotificationEmailTaskEntity));
+        sb.Schema.Settings.AssertImplementedBy((ScheduledTaskLogEntity a) => a.Task, typeof(SendNotificationEmailTaskEntity));
 
         SchedulerLogic.ExecuteTask.Register((SendNotificationEmailTaskEntity task, ScheduledTaskContext ctx) =>
         {
@@ -310,6 +314,34 @@ public static class AlertLogic
             return result.Execute(AlertOperation.Save);
         }
     }
+
+    public static int? UnsafeInsertAlerts(IQueryable<(Lite<IUserEntity>? recipient, Lite<Entity>? target)> query, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null)
+    {
+        if (Started == false)
+            return null;
+
+        using (AuthLogic.Disable())
+        {
+            alertDate ??= Clock.Now;
+            createdBy ??= UserHolder.Current?.ToLite();
+
+            var txtArgumentJoined = textArguments?.ToString("\n###\n");
+            return query.UnsafeInsert(tuple => new AlertEntity
+            {
+                AlertDate = alertDate,
+                CreatedBy = createdBy,
+                TitleField = title,
+                TextArguments = txtArgumentJoined,
+                TextField = text,
+                Target = tuple.target,
+                AlertType = alertType,
+                Recipient = tuple.recipient,
+                State = AlertState.Saved,
+                EmailNotificationsSent = false,
+            }.SetReadonly(a => a.CreationDate, Clock.Now));
+        }
+    }
+
 
     public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
     {

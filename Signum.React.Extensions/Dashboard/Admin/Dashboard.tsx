@@ -1,23 +1,28 @@
 
 import * as React from 'react'
+import { Tabs, Tab } from 'react-bootstrap'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ValueLine, EntityLine, RenderEntity, OptionItem, EntityDetail } from '@framework/Lines'
+import { ValueLine, EntityLine, RenderEntity, OptionItem, EntityDetail, EntityRepeater, EntityTable, EntityCombo } from '@framework/Lines'
 import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, TokenEquivalenceEmbedded } from '../Signum.Entities.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import * as DashboardClient from "../DashboardClient";
 import { iconToString, IconTypeaheadLine, parseIcon } from "../../Basics/Templates/IconTypeahead";
 import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
-import { getToString } from '@framework/Signum.Entities';
+import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
 import { ValueSearchControlLine } from '../../../Signum.React/Scripts/Search';
 import { withClassName } from '../../Dynamic/View/HtmlAttributesExpression';
 import { classes } from '../../../Signum.React/Scripts/Globals';
 import { OperationButton } from '../../../Signum.React/Scripts/Operations/EntityOperations';
 import { EntityOperationContext } from '../../../Signum.React/Scripts/Operations';
+import { addAdditionalTabs } from '../../../Signum.React/Scripts/Frames/WidgetEmbedded';
+import a from 'bpmn-js/lib/features/search';
+import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder';
+import { SubTokensOptions } from '@framework/FindOptions';
 
 export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   const forceUpdate = useForceUpdate();
@@ -27,6 +32,11 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
     forceUpdate()
   }
+
+  var allQueryNames = p.ctx.value.parts.flatMap(a => DashboardClient.getQueryNames(a.element.content))
+    .distinctBy(a => a.id!.toString())
+    .orderBy(a => a.toStr)
+    .map(a => toLite(a));
 
 
   function handleOnCreate() {
@@ -50,7 +60,6 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           content: part,
           iconName: iconToString(icon.icon),
           iconColor: icon.iconColor,
-          style: "Light"
         });
       });
   }
@@ -70,7 +79,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
             <div className="row">
               <div className="col-sm-8">
-                <ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
+                < ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
               </div>
               <div className="col-sm-4">
                 <ValueLine ctx={tcs.subCtx(pp => pp.interactionGroup)}
@@ -79,14 +88,17 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
             </div>
 
             <div className="row">
-              <div className="col-sm-4">
-                <ValueLine ctx={tcs.subCtx(pp => pp.style)} onChange={() => forceUpdate()} />
-              </div>
-              <div className="col-sm-4">
+                <div className="col-sm-3">
+                  <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
+                </div>
+              <div className="col-sm-3">
                 <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => forceUpdate()} />
               </div>
-              <div className="col-sm-4">
+              <div className="col-sm-3">
                 <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
+              </div>
+              <div className="col-sm-3">
+                <ValueLine ctx={tcs.subCtx(t => t.sameIconTitleColor)} onChange={() => forceUpdate()} />
               </div>
             </div>
           </div>
@@ -95,7 +107,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
     );
 
     return (
-      <EntityGridItem title={title} bsStyle={tc.value.style}>
+      <EntityGridItem title={title} customColor={tc.value.customColor ?? undefined} sameColor={tc.value.sameIconTitleColor}>
         <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: ctx.value }} />
       </EntityGridItem>
     );
@@ -110,10 +122,13 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           <div className="col-sm-6">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.displayName)} />
           </div>
-          <div className="col-sm-3">
+          <div className="col-sm-2">
+            <ValueLine ctx={ctxBasic.subCtx(cp => cp.hideDisplayName)} />
+          </div>
+          <div className="col-sm-2">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.dashboardPriority)} />
           </div>
-          <div className="col-sm-3">
+          <div className="col-sm-2">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.autoRefreshPeriod)} />
           </div>
         </div>
@@ -151,10 +166,37 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           </div>
         </div>} />
 
-      <ValueLine ctx={ctxBasic.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
-      <div className="sf-dashboard-admin">
-        <EntityGridRepeater ctx={ctx.subCtx(cp => cp.parts)} getComponent={renderPart} onCreate={handleOnCreate} />
-      </div>
+      <Tabs id={ctxBasic.getUniqueId("tabs")}>
+        <Tab title={ctxBasic.niceName(a => a.parts)} eventKey="parts">
+          <ValueLine ctx={ctxBasic.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
+          <div className="sf-dashboard-admin">
+            <EntityGridRepeater ctx={ctx.subCtx(cp => cp.parts)} getComponent={renderPart} onCreate={handleOnCreate} />
+          </div>
+        </Tab>
+        <Tab title={ctxBasic.niceName(a => a.tokenEquivalencesGroups)} eventKey="equivalences">
+          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "ExtraSmall" })} avoidFieldSet getComponent={(ctxGr: TypeContext<TokenEquivalenceGroupEntity>) => 
+            <div>
+              <ValueLine ctx={ctxGr.subCtx(pp => pp.interactionGroup)}
+                onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
+              <EntityTable ctx={ctxGr.subCtx(p => p.tokenEquivalences)} avoidFieldSet columns={EntityTable.typedColumns<TokenEquivalenceEmbedded>([
+                {
+                  property: p => p.query,
+                  template: (ectx, row) => <EntityCombo ctx={ectx.subCtx(p => p.query)} data={allQueryNames} onChange={row.forceUpdate} />,
+                  headerHtmlAttributes: { style: { width: "30%" } },
+                },
+                {
+                  property: p => p.token,
+                  template: (ectx) => ectx.value.query && <QueryTokenEntityBuilder ctx={ectx.subCtx(p => p.token)}
+                    queryKey={ectx.value.query.key} subTokenOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll} />,
+                  headerHtmlAttributes: { style: { width: "100%" } },
+                },
+              ])}
+              />
+            </div>
+          }/>
+        </Tab>
+
+        </Tabs>
     </div>
   );
 }

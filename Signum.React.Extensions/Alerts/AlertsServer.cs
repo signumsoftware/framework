@@ -35,22 +35,37 @@ public static class AlertsServer
 
         CacheLogic.BroadcastReceivers.Add("AlertForReceiver", args =>
         {
-            var users = args.Split("/").Select(a => (Lite<IUserEntity>)Lite.ParsePrimaryKey<UserEntity>(a)).ToHashSet();
+            if (args == "*")
+                NotifySignalRClients(null);
+            else
+            {
+                var users = args.Split("/").Select(a => (Lite<IUserEntity>)Lite.ParsePrimaryKey<UserEntity>(a)).ToHashSet();
 
-            NotifySignalRClients(users);
+                NotifySignalRClients(users);
+            }
         });
     }
+
+    public static int NotifyEverybodyLimit = 1000;
+    public static int NotifyChunkSize = 100;
 
     public static void BroadcastToServers(HashSet<Lite<IUserEntity>> users)
     {
         if (CacheLogic.ServerBroadcast != null)
         {
-            users.Chunk(100).ToList().ForEach(list =>
+            if (users.Count > NotifyEverybodyLimit)
             {
-                var ids = list.ToString(a => a.Id.ToString(), "/");
+                CacheLogic.ServerBroadcast!.Send("AlertForReceiver", "*");
+            }
+            else
+            {
+                users.Chunk(100).ToList().ForEach(list =>
+                {
+                    var ids = list.ToString(a => a.Id.ToString(), "/");
 
-                CacheLogic.ServerBroadcast!.Send("AlertForReceiver", ids);
-            });
+                    CacheLogic.ServerBroadcast!.Send("AlertForReceiver", ids);
+                });
+            }
         }
     }
 
@@ -101,9 +116,9 @@ public static class AlertsServer
         NotifySignalRClients(hashSet);
     }
 
-    private static void NotifySignalRClients(HashSet<Lite<IUserEntity>> hashSet)
-    {
-        foreach (var user in hashSet)
+    private static void NotifySignalRClients(HashSet<Lite<IUserEntity>>? hashSet)
+    { 
+        foreach (var user in hashSet ?? Connections.AllKeys())
         {
             foreach (var connectionId in Connections.GetConnections(user))
             {

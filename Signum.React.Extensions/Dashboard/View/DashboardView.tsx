@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { classes } from '@framework/Globals'
+import { classes, getColorContrasColorBWByHex} from '@framework/Globals'
 import { Entity, getToString, is, Lite, MListElement, SearchMessage, toLite } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as DashboardClient from '../DashboardClient'
@@ -15,11 +15,12 @@ import { translated } from '../../Translation/TranslatedInstanceTools'
 import { DashboardFilterController } from './DashboardFilterController'
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files'
 import { CachedQueryJS } from '../CachedQueryExecutor'
+import PinnedFilterBuilder from '../../../Signum.React/Scripts/SearchControl/PinnedFilterBuilder'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; }) {
 
   const forceUpdate = useForceUpdate();
-  var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate), [p.dashboard]);
+  var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate, p.dashboard), [p.dashboard]);
 
 
   function renderBasic() {
@@ -27,27 +28,29 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
     const ctx = TypeContext.root(db);
 
     return (
-      <div className="sf-dashboard-view">
-        {
-          mlistItemContext(ctx.subCtx(a => a.parts))
-            .groupBy(c => c.value.row!.toString())
-            .orderBy(gr => Number(gr.key))
-            .map(gr =>
-              <div className="row row-control-panel" key={"row" + gr.key}>
-                {gr.elements.orderBy(ctx => ctx.value.startColumn).map((c, j, list) => {
+      <div>
+        <div className="sf-dashboard-view">
+          {
+            mlistItemContext(ctx.subCtx(a => a.parts))
+              .groupBy(c => c.value.row!.toString())
+              .orderBy(gr => Number(gr.key))
+              .map(gr =>
+                <div className="row row-control-panel" key={"row" + gr.key}>
+                  {gr.elements.orderBy(ctx => ctx.value.startColumn).map((c, j, list) => {
 
-                  const prev = j == 0 ? undefined : list[j - 1].value;
+                    const prev = j == 0 ? undefined : list[j - 1].value;
 
-                  const offset = c.value.startColumn! - (prev ? (prev.startColumn! + prev.columns!) : 0);
+                    const offset = c.value.startColumn! - (prev ? (prev.startColumn! + prev.columns!) : 0);
 
-                  return (
-                    <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
-                      <PanelPart ctx={c} entity={p.entity} filterController={filterController} reload={p.reload} cachedQueries={p.cachedQueries} /> 
-                    </div>
-                  );
-                })}
-              </div>)
-        }
+                    return (
+                      <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
+                        <PanelPart ctx={c} entity={p.entity} filterController={filterController} reload={p.reload} cachedQueries={p.cachedQueries} />
+                      </div>
+                    );
+                  })}
+                </div>)
+          }
+        </div>
       </div>
     );
   }
@@ -89,10 +92,18 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
   }
 
 
-  if (p.dashboard.combineSimilarRows)
-    return renderCombinedRows();
-  else
-    return renderBasic();
+  return (
+    <div>
+      {filterController.pinnedFilters.size > 0 && <PinnedFilterBuilder
+        filterOptions={Array.from(filterController.pinnedFilters.values()).flatMap(a => a.pinnedFilters)}
+        onFiltersChanged={forceUpdate} />}
+      {
+        p.dashboard.combineSimilarRows ?
+          renderCombinedRows() :
+          renderBasic()
+      }
+    </div>
+  );
 }
 
 function combineRows(rows: CombinedRow[]): CombinedRow[] {
@@ -213,27 +224,30 @@ export function PanelPart(p: PanelPartProps) {
       <FontAwesomeIcon icon={icon} color={color} className="me-1" />{titleText}
     </span>;
 
-  var style = part.style == undefined ? undefined : part.style.toLowerCase();
+  var style = part.customColor != null ?  "customColor": "light";
 
   var dashboardFilter = p.filterController?.filters.get(p.ctx.value);
 
   function handleClearFilter(e: React.MouseEvent) {
-    p.filterController.clear(p.ctx.value);
+    p.filterController.clearFilters(p.ctx.value);
   }
 
   return (
-    <div className={classes("card", style && ("border-" + style), "shadow-sm", "mb-4")}>
+
+
+    <div className={classes("card", style && style != "customColor" && ("border-" + style), "shadow-sm", "mb-4")}>
       <div className={classes("card-header", "sf-show-hover",
-        style && style != "light" && "text-white",
-        style && ("bg-" + style)
-      )}>
+        style != "customColor" && ("bg-" + style)
+      )}
+        style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor != null ? getColorContrasColorBWByHex(part.customColor) : "black"  }}
+      >
         {renderer.handleEditClick &&
           <a className="sf-pointer float-end flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
             <FontAwesomeIcon icon="edit" className="me-1" />Edit
           </a>
         }
         {renderer.handleTitleClick == undefined ? title :
-          <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
+          <a className="sf-pointer" style={{ color: part.sameIconTitleColor ? color : (part.customColor != null ? getColorContrasColorBWByHex(part.customColor) : "black"), textDecoration:"none"}} onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
         }
         {
           dashboardFilter && <span className="badge bg-light text-dark border ms-2 sf-filter-pill">

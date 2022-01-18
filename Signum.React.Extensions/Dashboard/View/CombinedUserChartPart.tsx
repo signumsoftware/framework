@@ -20,6 +20,7 @@ import ChartRendererCombined from '../../Chart/Templates/ChartRendererCombined'
 import { MemoRepository } from '../../Chart/D3Scripts/Components/ReactChart'
 import { getQueryKey } from '@framework/Reflection'
 import { executeChartCached } from '../CachedQueryExecutor'
+import { FilePathOperation } from '../../Files/Signum.Entities.Files'
 
 
 export interface CombinedUserChartInfoTemp {
@@ -120,7 +121,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
     infos.forEach(inf => {
       inf.makeQuery?.().done();
     });
-  }, [p.part, ...p.deps ?? [], infos.max(e => p.filterController.lastChange.get(e.userChart.query.key))]);
+  }, [p.part, ...p.deps ?? [], infos.max(e => p.filterController.getLastChange(e.userChart.query.key))]);
 
   function renderError(e: any, key: number) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
@@ -156,6 +157,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
     <div>
       {infos.map((info, i) => <PinnedFilterBuilder key={i}
         filterOptions={info.chartRequest!.filterOptions}
+        pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
         onFiltersChanged={() => info.makeQuery!()} extraSmall={true} />
       )}
       {p.part.allowChangeShowData &&

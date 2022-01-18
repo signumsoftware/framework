@@ -25,6 +25,7 @@ export interface EntityBaseProps extends LineBaseProps {
   onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
   onRemove?: (entity: any /*T*/) => Promise<boolean>;
   findOptions?: FindOptions;
+  findOptionsDictionary?: { [typeName: string]: FindOptions };
   extraButtonsBefore?: (ec: EntityBaseController<EntityBaseProps>) => React.ReactNode;
   extraButtonsAfter?: (ec: EntityBaseController<EntityBaseProps>) => React.ReactNode;
   liteToString?: (e: any /*T*/) => string;
@@ -212,6 +213,13 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       .then(ti => ti ? ti.name : undefined);
   }
 
+  getFindOptions(typeName: string) {
+    if (this.props.findOptionsDictionary)
+      return this.props.findOptionsDictionary[typeName];
+
+    return this.props.findOptions;
+  }
+
   defaultCreate(pr: PropertyRoute): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
     return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, { customComponent: !!this.props.getComponent || !!this.props.getViewPromise, isEmbedded: pr.member!.type.isEmbedded }))
@@ -219,7 +227,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         if (!typeName)
           return Promise.resolve(undefined);
 
-        var fo = this.props.findOptions;
+        var fo = this.getFindOptions(typeName);
 
         return Finder.getPropsFromFindOptions(typeName, fo)
           .then(props => Constructor.construct(typeName, props, pr));
@@ -283,8 +291,14 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     }
 
     return this.chooseType(ti => Finder.isFindable(ti, false))
-      .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
-        qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions, { searchControlProps: { create: this.props.createOnFind } }));
+      .then<ModifiableEntity | Lite<Entity> | undefined>(typeName => {
+        if (typeName == null)
+          return undefined;
+
+        var fo: FindOptions = (this.props.findOptionsDictionary && this.props.findOptionsDictionary[typeName]) ?? Navigator.defaultFindOptions({ name: typeName }) ?? { queryName: typeName };
+
+        return Finder.find(fo, { searchControlProps: { create: this.props.createOnFind } })
+      });
   }
 
   handleFindClick = (event: React.SyntheticEvent<any>) => {
@@ -303,6 +317,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       this.convert(entity).then(e => this.setValue(e)).done();
     }).done();
   };
+
   renderFindButton(btn: boolean) {
     if (!this.props.find || this.props.ctx.readOnly)
       return undefined;

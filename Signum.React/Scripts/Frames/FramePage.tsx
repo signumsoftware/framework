@@ -58,13 +58,21 @@ export default function FramePage(p: FramePageProps) {
       return;
 
     loadEntity()
-      .then(a => loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
-        pack: a.pack!,
-        lastEntity: JSON.stringify(a.pack!.entity),
-        createNew: a.createNew,
-        getComponent: getComponent,
-        refreshCount: state ? state.refreshCount + 1 : 0
-      }) : undefined))
+      .then(a => {
+        if (a == undefined) {
+          Navigator.NavigatorManager.onFramePageCreationCancelled();
+        }
+        else {
+
+          loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
+            pack: a.pack!,
+            lastEntity: JSON.stringify(a.pack!.entity),
+            createNew: a.createNew,
+            getComponent: getComponent,
+            refreshCount: state ? state.refreshCount + 1 : 0
+          }) : undefined).done();
+        }
+      })
       .done();
   }, [type, id, p.location.search]);
 
@@ -89,7 +97,7 @@ export default function FramePage(p: FramePageProps) {
   }
 
 
-  function loadEntity(): Promise<{ pack?: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
+  function loadEntity(): Promise<undefined | { pack?: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
 
     const queryString = QueryString.parse(p.location.search);
 
@@ -129,7 +137,7 @@ export default function FramePage(p: FramePageProps) {
         return Operations.API.construct(ti.name, oi.key)
           .then(pack => {
             if (pack == undefined)
-              throw new Error(SelectorMessage.CreationOf0Cancelled.niceToString(ti.niceName));
+              return undefined;
             else
               return ({
                 pack: pack,
@@ -141,7 +149,7 @@ export default function FramePage(p: FramePageProps) {
       return Constructor.constructPack(ti.name)
         .then(pack => {
           if (pack == undefined)
-            throw new Error(SelectorMessage.CreationOf0Cancelled.niceToString(ti.niceName))
+            return undefined;
           else
             return ({
               pack: pack! as EntityPack<Entity>,

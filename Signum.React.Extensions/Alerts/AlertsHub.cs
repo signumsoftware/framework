@@ -45,6 +45,12 @@ public class ConnectionMapping<T> where T : class
 
     public int Count => userToConnection.Count;
 
+    public HashSet<T> AllKeys()
+    {
+        lock (this)
+            return userToConnection.Keys.ToHashSet();
+    }
+
     public void Add(T key, string connectionId)
     {
         lock (this)

@@ -53,6 +53,11 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Korrupt" />
   </Type>
+  <Type Name="DashboardBehaviour" Description="Dashboard-Verhalten">
+    <Member Name="PromoteToDasboardPinnedFilter" Description="Beförderung zum Dasboard-Pinned-Filter" />
+    <Member Name="UseAsInitialSelection" Description="Verwendung als Erstauswahl" />
+    <Member Name="UseWhenNoFilters" Description="Verwenden, wenn keine Filter vorhanden sind" />
+  </Type>
   <Type Name="DeleteLogParametersEmbedded" Description="Lösche log Parameter">
     <Member Name="ChunkSize" Description="Chunk-Größe" />
     <Member Name="DeleteLogs" Description="Protokolle löschen" />
@@ -198,7 +203,6 @@
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="ID ungültig" />
     <Member Name="InvalidFormat" Description="Ungültiges Format" />
-    <Member Name="New_G" Description="Neu[m:er|f:e|n:es]" />
     <Member Name="ToStr" Description="Text" />
     <Member Name="Type0NotFound" Description="Typ {0} wurde nicht gefunden" />
   </Type>
@@ -276,8 +280,6 @@
     <Member Name="Always" Description="Immer" />
     <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
     <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
-    <Member Name="DefaultDashboardFilter" Description="Default Dashboardfilter" />
-    <Member Name="InitialSelectionDashboardFilter" Description="Erstauswahl Dashboard-Filter" />
     <Member Name="WhenHasValue" Description="Wenn er einen Wert hat" />
   </Type>
   <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">

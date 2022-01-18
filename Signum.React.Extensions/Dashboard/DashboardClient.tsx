@@ -15,7 +15,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
-import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation } from './Signum.Entities.Dashboard'
+import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, ImagePartEntity, SeparatorPartEntity } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '@framework/Hooks';
@@ -25,6 +25,8 @@ import { translated } from '../Translation/TranslatedInstanceTools';
 import { DashboardFilterController } from "./View/DashboardFilterController";
 import { EntityFrame } from '../../Signum.React/Scripts/TypeContext';
 import { CachedQueryJS } from './CachedQueryExecutor';
+import { QueryEntity } from '../../Signum.React/Scripts/Signum.Entities.Basics';
+import { Separator } from '../HtmlEditor/HtmlEditorButtons';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -46,6 +48,7 @@ export interface PartRenderer<T extends IPartEntity> {
   defaultIcon: () => IconColor;
   defaultTitle?: (elenent: T) => string;
   withPanel?: (element: T) => boolean;
+  getQueryNames?: (element: T) => QueryEntity[];
   handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
   handleEditClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => Promise<boolean>;
 }
@@ -68,6 +71,9 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('./Admin/UserChartPart')));
   Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('./Admin/CombinedUserChartPart')));
   Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
+  Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
+  Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
+
 
   Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
     isVisible: () => false,
@@ -86,7 +92,8 @@ export function start(options: { routes: JSX.Element[] }) {
 
   registerRenderer(ValueUserQueryListPartEntity, {
     component: () => import('./View/ValueUserQueryListPart').then(a => a.default),
-    defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#21618C" })
+    defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#21618C" }),
+    getQueryNames: p => p.userQueries.map(a => a.element.userQuery?.query).notNull(),
   });
   registerRenderer(LinkListPartEntity, {
     component: () => import('./View/LinkListPart').then(a => a.default),
@@ -96,6 +103,7 @@ export function start(options: { routes: JSX.Element[] }) {
     component: () => import('./View/UserChartPart').then(a => a.default),
     defaultIcon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
     defaultTitle: e => translated(e.userChart, uc => uc.displayName),
+    getQueryNames: p => [p.userChart?.query].notNull(),
     handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
@@ -114,6 +122,7 @@ export function start(options: { routes: JSX.Element[] }) {
   registerRenderer(CombinedUserChartPartEntity, {
     component: () => import('./View/CombinedUserChartPart').then(a => a.default),
     defaultIcon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
+    getQueryNames: p => p.userCharts.map(a => a.element.userChart?.query).notNull(),
     handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
@@ -151,6 +160,7 @@ export function start(options: { routes: JSX.Element[] }) {
     defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "#2E86C1" }),
     defaultTitle: e => translated(e.userQuery, uc => uc.displayName),
     withPanel: p => p.renderMode != "BigValue",
+    getQueryNames: p => [p.userQuery?.query].notNull(),
     handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
@@ -171,6 +181,7 @@ export function start(options: { routes: JSX.Element[] }) {
     component: () => import('./View/UserTreePart').then((a: any) => a.default),
     defaultIcon: () => ({ icon: ["far", "network-wired"], iconColor: "#B7950B" }),
     withPanel: p => true,
+    getQueryNames: p => [p.userQuery?.query].notNull(),
     handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
       (p, e, ev) => {
         ev.preventDefault();
@@ -184,6 +195,16 @@ export function start(options: { routes: JSX.Element[] }) {
           .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
           .done()
       }
+  });
+  registerRenderer(ImagePartEntity, {
+    component: () => import('./View/ImagePartView').then(a => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    withPanel: () => false
+  });
+  registerRenderer(SeparatorPartEntity, {
+    component: () => import('./View/SeparatorPartView').then(a => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    withPanel: () => false
   });
 
   onEmbeddedWidgets.push(wc => {
@@ -240,6 +261,10 @@ export function home(): Promise<Lite<DashboardEntity> | null> {
 
 export function defaultIcon(type: PseudoType) {
   return partRenderers[getTypeName(type)].defaultIcon();
+}
+
+export function getQueryNames(part: IPartEntity) {
+  return partRenderers[getTypeName(part)].getQueryNames?.(part) ?? [];
 }
 
 export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>) {

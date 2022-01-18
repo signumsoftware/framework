@@ -680,7 +680,6 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
 
   function toFilterOption(fop: FilterOptionParsed): FilterOption | null {
 
-
     var pinned = fop.pinned && Dic.simplify({ ...fop.pinned }) as PinnedFilter;
     if (isFilterGroupOptionParsed(fop))
       return ({
@@ -688,6 +687,7 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
         groupOperation: fop.groupOperation,
         value: fop.value === "" ? undefined : fop.value,
         pinned: pinned,
+        dashboardBehaviour: fop.dashboardBehaviour,
         filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo),
       }) as FilterGroupOption;
     else {
@@ -699,7 +699,8 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
         operation: fop.operation,
         value: fop.value === "" ? undefined : fop.value,
         frozen: fop.frozen ? true : undefined,
-        pinned: pinned
+        pinned: pinned,
+        dashboardBehaviour: fop.dashboardBehaviour,
       }) as FilterConditionOption;
     }
   }
@@ -875,7 +876,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
   if (fop.pinned && fop.pinned.active == "Checkbox_StartUnchecked")
     return undefined;
 
-  if (fop.pinned && fop.pinned.active == "InitialSelectionDashboardFilter")
+  if (fop.dashboardBehaviour == "UseAsInitialSelection")
     return undefined;
 
   if (fop.pinned && overridenValue == null) {
@@ -1190,6 +1191,7 @@ export class TokenCompleter {
         groupOperation: fo.groupOperation,
         value: fo.value,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
+        dashboardBehaviour: fo.dashboardBehaviour,
         filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
         frozen: false,
         expanded: false,
@@ -1206,6 +1208,7 @@ export class TokenCompleter {
         value: fo.value,
         frozen: fo.frozen || false,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
+        dashboardBehaviour: fo.dashboardBehaviour,
       } as FilterConditionOptionParsed);
     }
   }

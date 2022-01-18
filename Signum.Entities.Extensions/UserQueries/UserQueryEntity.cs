@@ -292,6 +292,8 @@ public class QueryFilterEmbedded : EmbeddedEntity
     
     public PinnedQueryFilterEmbedded? Pinned { get; set; }
 
+    public DashboardBehaviour? DashboardBehaviour { get; set; }
+
     [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
     public int Indentation { get; set; }
 
@@ -361,6 +363,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
                new XAttribute("Indentation", Indentation),
                new XAttribute("GroupOperation", GroupOperation),
                Token == null ? null! : new XAttribute("Token", Token.Token.FullKey()),
+               DashboardBehaviour == null ? null! : new XAttribute("DashboardBehaviour", DashboardBehaviour),
                Pinned?.ToXml(ctx)!);
 
         }
@@ -371,6 +374,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
                 new XAttribute("Token", Token!.Token.FullKey()),
                 new XAttribute("Operation", Operation!),
                 ValueString == null ? null! : new XAttribute("Value", ValueString),
+                DashboardBehaviour == null ? null! : new XAttribute("DashboardBehaviour", DashboardBehaviour),
                 Pinned?.ToXml(ctx)!);
         }
     }
@@ -383,6 +387,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
         Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
         Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
         ValueString = element.Attribute("Value")?.Value;
+        DashboardBehaviour = element.Attribute("DashboardBehaviour")?.Value.ToEnum<DashboardBehaviour>();
         Pinned = element.Element("Pinned")?.Let(p => (this.Pinned ?? new PinnedQueryFilterEmbedded()).FromXml(p, ctx));
     }
 
@@ -458,15 +463,21 @@ public static class UserQueryUtils
         {
             var filter = gr.Key;
 
+            if (filter.DashboardBehaviour == DashboardBehaviour.UseAsInitialSelection ||
+               filter.DashboardBehaviour == DashboardBehaviour.UseWhenNoFilters /*TODO, works for CachedQueries but maybe not in other cases*/)
+                return null;
+
+
             if (filter.Pinned != null)
             {
-                if (filter.Pinned.Active == PinnedFilterActive.Checkbox_StartUnchecked ||
-                  filter.Pinned.Active == PinnedFilterActive.DefaultDashboardFilter /*TODO, works for CachedQueries but maybe not in other cases*/ ||
-                  filter.Pinned.Active == PinnedFilterActive.InitialSelectionDashboardFilter)
+                if (filter.Pinned.Active == PinnedFilterActive.Checkbox_StartUnchecked)
+                    return null;
+
+                if (filter.Pinned.SplitText && !filter.ValueString.HasText())
                     return null;
             }
 
-            if (!gr.Key.IsGroup)
+            if (!filter.IsGroup)
             {
                 if (gr.Count() != 0)
                     throw new InvalidOperationException("Unexpected childrens of condition");
@@ -486,6 +497,25 @@ public static class UserQueryUtils
                 return (Filter)new FilterGroup(filter.GroupOperation!.Value, filter.Token?.Token, gr.ToFilterList(indent + 1).ToList());
             }
         }).NotNull().ToList();
+    }
+
+    public static List<(QueryToken, bool prototedToDashboard)> GetDashboardPinnedFilterTokens(this IEnumerable<QueryFilterEmbedded> filters, int indent = 0)
+    {
+        return filters.GroupWhen(filter => filter.Indentation == indent).SelectMany(gr =>
+        {
+            var filter = gr.Key;
+
+            if (filter.Pinned != null)
+            {
+                var promotedToDashboard = filter.DashboardBehaviour == DashboardBehaviour.PromoteToDasboardPinnedFilter;
+                return gr.PreAnd(filter).Select(a => a.Token?.Token).NotNull().Distinct().Select(t => (t, promotedToDashboard));
+            }
+
+            if (filter.IsGroup)
+                return gr.GetDashboardPinnedFilterTokens(indent + 1);
+            else
+                return Enumerable.Empty<(QueryToken, bool prototedToDashboard)>(); 
+        }).ToList();
     }
 }
 

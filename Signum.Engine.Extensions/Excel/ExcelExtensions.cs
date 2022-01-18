@@ -12,9 +12,14 @@ public static class ExcelExtensions
         return datetime.ToUserInterface().ToOADate().ToString(CultureInfo.InvariantCulture); //Convert to Julean Format
     }
 
+    public static string ToExcelTime(TimeOnly timeOnly)
+    {
+        return timeOnly.ToTimeSpan().TotalDays.ToString(CultureInfo.InvariantCulture);
+    }
+
     public static DateTime FromExcelDate(string datetime)
     {
-        return DateTime.FromOADate(double.Parse(datetime, CultureInfo.InstalledUICulture)).FromUserInterface(); //Convert to Julean Format
+        return DateTime.FromOADate(double.Parse(datetime, CultureInfo.InvariantCulture)).FromUserInterface(); //Convert to Julean Format
     }
 
     public static string ToExcelNumber(decimal number)
