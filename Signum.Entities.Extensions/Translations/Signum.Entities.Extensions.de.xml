@@ -956,7 +956,7 @@
     <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="EmailMasterTemplateMessageEmbedded" Description="Nachricht E-Mail-Vorlage">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="Text" Description="Text" />
   </Type>
   <Type Name="EmailMasterTemplateOperation">
@@ -1022,7 +1022,7 @@
   </Type>
   <Type Name="EmailOwnerData" Description="E-Mailbesitzerdaten">
     <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="DisplayName" Description="Name" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="Owner" Description="Besitzer" />
@@ -1344,6 +1344,7 @@
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Type" Description="Typ" />
   </Type>
+  <Type Name="ImagePartEntity" />
   <Type Name="InboxFilterModel" Description="Posteingangs-filter">
     <Member Name="FromDate" Description="Vom Datum" />
     <Member Name="Range" Description="Bereich" />
@@ -1736,7 +1737,6 @@
     <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="StartColumn" Description="Spalte Start" />
-    <Member Name="Style" Description="Stil" />
     <Member Name="Title" Description="Titel" />
   </Type>
   <Type Name="PasswordExpiresIntervalEntity" Description="Passwortablaufintervall" PluralDescription="Passwortablaufintervalle" Gender="m">
@@ -2185,6 +2185,7 @@
   <Type Name="SendNotificationEmailTaskOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="SeparatorPartEntity" />
   <Type Name="SessionLogEntity" Description="Sitzungsprotokoll" PluralDescription="Sitzungsprotokolle" Gender="n">
     <Member Name="Duration" Description="Dauer" />
     <Member Name="SessionEnd" Description="Sitzungsende" />
@@ -2253,7 +2254,7 @@
     <Member Name="FullClassName" Description="Full Class Name" />
   </Type>
   <Type Name="SMSOwnerData" Description="SMS-Besitzerdaten">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="Owner" Description="Besitzer" />
     <Member Name="TelephoneNumber" Description="Telefonnummer" />
   </Type>
@@ -2284,7 +2285,7 @@
     <Member Name="ToMustBeSetInTheTemplate" Description="'An' muss in der Vorlage gesetzt sein." />
   </Type>
   <Type Name="SMSTemplateMessageEmbedded" Description="SMS-Vorlagennachricht">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="Message" Description="Nachricht" />
   </Type>
   <Type Name="SMSTemplateOperation">
@@ -2452,7 +2453,7 @@
     <Member Name="TranslateInstances" Description="Instanzen übersetzen" />
   </Type>
   <Type Name="TranslationReplacementEntity" Description="Übersetzungersatz" PluralDescription="Übersetzungersätze" Gender="m">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="RightTranslation" Description="Richtige Übersetzung" />
     <Member Name="WrongTranslation" Description="Falsche Übersetzung" />
   </Type>
@@ -2627,7 +2628,7 @@
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
   </Type>
   <Type Name="UserEntity" Description="Benutzer" Gender="m">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="DisabledOn" Description="Deaktiviert auf" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
