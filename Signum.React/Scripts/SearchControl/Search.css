@@ -130,6 +130,7 @@ table.sf-search-results > tbody > tr > td {
     margin: 0px 0px 3px 0px;
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 
 table.sf-search-results th.sf-current-column {
