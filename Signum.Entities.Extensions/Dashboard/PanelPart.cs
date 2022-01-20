@@ -96,7 +96,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             IconColor == null ? null! : new XAttribute("IconColor", IconColor),
             InteractionGroup == null ? null! : new XAttribute("InteractionGroup", InteractionGroup),
             CustomColor == null ? null! : new XAttribute("CustomColor", CustomColor),
-            new XAttribute("SameIconTitleColor", SameIconTitleColor),
+            SameIconTitleColor == false ? null! : new XAttribute("SameIconTitleColor", true),
             Content.ToXml(ctx));
     }
 
