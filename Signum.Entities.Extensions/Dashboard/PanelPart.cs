@@ -74,7 +74,8 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             InteractionGroup = InteractionGroup,
             IconColor = IconColor,
             IconName = IconName,
-            CustomColor = CustomColor
+            CustomColor = CustomColor,
+            SameIconTitleColor = SameIconTitleColor,
         };
     }
 
@@ -94,7 +95,8 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             IconName == null ? null! : new XAttribute("IconName", IconName),
             IconColor == null ? null! : new XAttribute("IconColor", IconColor),
             InteractionGroup == null ? null! : new XAttribute("InteractionGroup", InteractionGroup),
-             CustomColor == null ? null! : new XAttribute("CustomColor", CustomColor),
+            CustomColor == null ? null! : new XAttribute("CustomColor", CustomColor),
+            new XAttribute("SameIconTitleColor", SameIconTitleColor),
             Content.ToXml(ctx));
     }
 
@@ -106,8 +108,9 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         Title = x.Attribute("Title")?.Value;
         IconName = x.Attribute("IconName")?.Value;
         IconColor = x.Attribute("IconColor")?.Value;
-        CustomColor = x.Attribute("CustomColor")?.Value;
         InteractionGroup = x.Attribute("InteractionGroup")?.Value.ToEnum<InteractionGroup>();
+        CustomColor = x.Attribute("CustomColor")?.Value;
+        SameIconTitleColor = x.Attribute("SameIconTitleColor")?.Let(a => bool.Parse(a.Value)) ?? false;
         Content = ctx.GetPart(Content, x.Elements().Single());
     }
 
