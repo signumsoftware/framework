@@ -23,7 +23,7 @@ import { DashboardBehaviour } from '../../../Signum.React/Scripts/Signum.Entitie
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
-  const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity, ...p.deps ?? []]);
+  const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity && liteKey(p.entity), ...p.deps ?? []]);
   const initialSelection = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.dashboardBehaviour == "UseAsInitialSelection"), [chartRequest]);
   const dashboardPinnedFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == "PromoteToDasboardPinnedFilter"), [chartRequest]);
   const useWhenNoFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == "UseWhenNoFilters"), [chartRequest]);
