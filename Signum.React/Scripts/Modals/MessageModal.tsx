@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { openModal, IModalProps, IHandleKeyboard } from '../Modals';
+import { openModal, IModalProps } from '../Modals';
 import { classes } from '../Globals';
 import { JavascriptMessage, BooleanEnum } from '../Signum.Entities'
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
@@ -25,12 +25,11 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   message: React.ReactChild | ((ctx: MessageModalContext) => React.ReactChild);
   style?: MessageModalStyle;
   buttons: MessageModalButtons;
-  icon?: MessageModalIcon;
+  buttonContent?: (button: MessageModalResult) => React.ReactChild | null | undefined;
+  icon?: MessageModalIcon | null;
   customIcon?: IconProp;
   size?: BsSize;
 }
-
-
 
 export default function MessageModal(p: MessageModalProps) {
 
@@ -51,130 +50,107 @@ export default function MessageModal(p: MessageModalProps) {
     p.onExited!(selectedValue.current);
   }
 
-  function setFocus(e: HTMLButtonElement | null) {
+  function getButtonContent(button: MessageModalResult)
+  { 
+    const content = p.buttonContent && p.buttonContent(button);
+    if (content)
+      return content
+
+    switch (button) {
+      case "ok": return JavascriptMessage.ok.niceToString();
+      case "cancel": return JavascriptMessage.cancel.niceToString();
+      case "yes": return BooleanEnum.niceToString("True");
+      case "no": return BooleanEnum.niceToString("False");
+    }
+  }
+
+ function setFocus(e: HTMLButtonElement | null) {
     if (e) {
       setTimeout(() => e.focus(), 200);
     }
   }
 
+  function okButton() {
+    return (
+      <button ref={setFocus}
+        className="btn btn-primary sf-close-button sf-ok-button"
+        onClick={() => handleButtonClicked("ok")}
+        name="accept">
+        {getButtonContent("ok")}
+      </button>
+    );
+  }
+
+  function cancelButton() {
+    return (
+      <button
+        className="btn btn-secondary sf-close-button sf-cancel-button"
+        onClick={() => handleButtonClicked("cancel")}
+        name="cancel">
+        {getButtonContent("cancel")}
+      </button>
+    );
+  }
+
+  function yesButton() {
+    return (
+      <button ref={setFocus}
+        className="btn btn-primary sf-close-button sf-yes-button"
+        onClick={() => handleButtonClicked("yes")}
+        name="yes">
+        {getButtonContent("yes")}
+      </button>
+    );
+  }
+
+  function noButton() {
+    return <button
+              className="btn btn-secondary sf-close-button sf-no-button"
+              onClick={() => handleButtonClicked("no")}
+              name="no">
+      {getButtonContent("no")}
+            </button>
+  }
+
   function renderButtons(buttons: MessageModalButtons) {
     switch (buttons) {
-      case "ok":
-        return (
-          <button ref={setFocus}
-            className="btn btn-primary sf-close-button sf-ok-button"
-            onClick={() => handleButtonClicked("ok")}
-            name="accept">
-            {JavascriptMessage.ok.niceToString()}
-          </button>);
-      case "cancel":
-        return (
-          <button
-            className="btn btn-secondary sf-close-button sf-button"
-            onClick={() => handleButtonClicked("cancel")}
-            name="cancel">
-            {JavascriptMessage.cancel.niceToString()}
-          </button>);
-      case "ok_cancel":
-        return (
-          <div className="btn-toolbar">
-            <button ref={setFocus}
-              className="btn btn-primary sf-close-button sf-ok-button"
-              onClick={() => handleButtonClicked("ok")}
-              name="accept">
-              {JavascriptMessage.ok.niceToString()}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-button"
-              onClick={() => handleButtonClicked("cancel")}
-              name="cancel">
-              {JavascriptMessage.cancel.niceToString()}
-            </button>
-          </div>);
-      case "yes_no":
-        return (
-          <div className="btn-toolbar">
-            <button ref={setFocus}
-              className="btn btn-primary sf-close-button sf-yes-button"
-              onClick={() => handleButtonClicked("yes")}
-              name="yes">
-              {BooleanEnum.niceToString("True")}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-no-button"
-              onClick={() => handleButtonClicked("no")}
-              name="no">
-              {BooleanEnum.niceToString("False")}
-            </button>
-          </div>);
-      case "yes_no_cancel":
-        return (
-          <div className="btn-toolbar">
-            <button ref={setFocus}
-              className="btn btn-primary sf-close-button sf-yes-button"
-              onClick={() => handleButtonClicked("yes")}
-              name="yes">
-              {BooleanEnum.niceToString("True")}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-no-button"
-              onClick={() => handleButtonClicked("no")}
-              name="no">
-              {BooleanEnum.niceToString("False")}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-cancel-button"
-              onClick={() => handleButtonClicked("cancel")}
-              name="cancel">
-              {JavascriptMessage.cancel.niceToString()}
-            </button>
-          </div>);
-      case "yes_cancel":
-        return (
-          <div className="btn-toolbar">
-            <button ref={setFocus}
-              className="btn btn-primary sf-close-button sf-yes-button"
-              onClick={() => handleButtonClicked("yes")}
-              name="yes">
-              {BooleanEnum.niceToString("True")}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-cancel-button"
-              onClick={() => handleButtonClicked("cancel")}
-              name="cancel">
-              {JavascriptMessage.cancel.niceToString()}
-            </button>
-          </div>);
+      case "ok": return okButton();
+      case "cancel": return cancelButton();
+      case "ok_cancel": return (<div className="btn-toolbar"> {okButton()} {cancelButton()} </div>);
+      case "yes_no": return (<div className="btn-toolbar"> {yesButton()} {noButton()} </div>);
+      case "yes_cancel": return (<div className="btn-toolbar"> {yesButton()} {cancelButton()} </div>);
+      case "yes_no_cancel": return (<div className="btn-toolbar"> {yesButton()} {noButton()} {cancelButton()} </div>);
     }
   }
 
-  function getIcon() {
-    var icon: IconProp | undefined;
+  function getIcon(): IconProp | undefined{
 
     if (p.customIcon)
-      icon = p.customIcon;
+      return p.customIcon;
+
 
     if (p.icon) {
       switch (p.icon) {
-        case "info":
-          icon = "info-circle";
-          break;
-        case "error":
-          icon = "exclamation-circle";
-          break;
-        case "question":
-          icon = "question-circle";
-          break;
-        case "success":
-          icon = "check-circle";
-          break;
-        case "warning":
-          icon = "exclamation-triangle";
-          break;
+        case "info": return "info-circle";
+        case "error": return "exclamation-circle";
+        case "question": return "question-circle";
+        case "success": return "check-circle";
+        case "warning": return "exclamation-triangle";
+        case null: return undefined;
       }
     }
 
-    return icon;
+    if (p.style) {
+      switch (p.style) {
+        case "info": return "info-circle";
+        case "error": return "exclamation-circle";
+        //case "question": return "question-circle";
+        case "success": return "check-circle";
+        case "warning": return "exclamation-triangle";
+      }
+    }
+
+    return undefined;
   }
 
   function renderTitle() {
@@ -184,7 +160,7 @@ export default function MessageModal(p: MessageModalProps) {
 
     return (
       <span>
-        {iconSpan && iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{p.title}
+        {iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{p.title}
       </span>
     );
   }
@@ -198,7 +174,7 @@ export default function MessageModal(p: MessageModalProps) {
       </div>
       <div className="modal-body">
         {
-          typeof p.message == "string" ? p.message.split("\n").map((line, i) => <p key={i} >{line}</p>) :
+          typeof p.message == "string" ? p.message.split("\n").map((line, i) => <p key={i}>{line}</p>) :
             typeof p.message == "function" ? p.message({ handleButtonClicked }) :
               p.message
         }
@@ -216,6 +192,7 @@ MessageModal.show = (options: MessageModalProps): Promise<MessageModalResult | u
       title={options.title}
       message={options.message}
       buttons={options.buttons}
+      buttonContent={options.buttonContent}
       icon={options.icon}
       size={options.size}
       customIcon={options.customIcon}
@@ -231,15 +208,11 @@ MessageModal.showError = (message: React.ReactChild, title?: string): Promise<un
 
 function dialogHeaderClass(style: MessageModalStyle | undefined) {
   switch (style) {
-    case "success":
-      return "dialog-header-success";
-    case "info":
-      return "dialog-header-info";
-    case "warning":
-      return "dialog-header-warning";
-    case "error":
-      return "dialog-header-error";
-    default:
-      return "bg-primary text-light";
+    case "success": return "dialog-header-success";
+    case "info": return "dialog-header-info";
+    case "warning": return "dialog-header-warning";
+    case "error": return "dialog-header-error";
+    default: return "bg-primary text-light";
   }
 }
+
