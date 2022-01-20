@@ -25,6 +25,7 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   message: React.ReactChild | ((ctx: MessageModalContext) => React.ReactChild);
   style?: MessageModalStyle;
   buttons: MessageModalButtons;
+  buttonContent?: (button: MessageModalResult) => React.ReactChild | null | undefined;
   icon?: MessageModalIcon;
   customIcon?: IconProp;
   size?: BsSize;
@@ -49,94 +50,76 @@ export default function MessageModal(p: MessageModalProps) {
     p.onExited!(selectedValue.current);
   }
 
+  function getButtonContent(button: MessageModalResult)
+  {
+    
+    const caption = p.buttonContent && p.buttonContent(button);
+    if (caption)
+      return caption
+
+    switch (button) {
+      case "ok":
+        return JavascriptMessage.ok.niceToString();
+      case "cancel":
+        return JavascriptMessage.cancel.niceToString();
+      case "yes":
+        return BooleanEnum.niceToString("True");
+      case "no":
+        return BooleanEnum.niceToString("False");
+    }
+  }
+
+  function okButton() {
+    return <button
+      className="btn btn-primary sf-close-button sf-ok-button"
+      onClick={() => handleButtonClicked("ok")}
+      name="accept">
+      {getButtonContent("ok")}
+    </button>
+  }
+
+  function cancelButton() {
+    return <button
+      className="btn btn-secondary sf-close-button sf-cancel-button"
+      onClick={() => handleButtonClicked("cancel")}
+      name="cancel">
+      {getButtonContent("cancel")}
+    </button>
+  }
+
+  function yesButton() {
+    return <button
+      className="btn btn-primary sf-close-button sf-yes-button"
+      onClick={() => handleButtonClicked("yes")}
+      name="yes">
+      {getButtonContent("yes")}
+    </button>
+  }
+
+  function noButton() {
+    return <button
+      className="btn btn-secondary sf-close-button sf-no-button"
+      onClick={() => handleButtonClicked("no")}
+      name="no">
+      {getButtonContent("no")}
+    </button>
+  }
+
   function renderButtons(buttons: MessageModalButtons) {
     switch (buttons) {
       case "ok":
-        return (
-          <button
-            className="btn btn-primary sf-close-button sf-ok-button"
-            onClick={() => handleButtonClicked("ok")}
-            name="accept">
-            {JavascriptMessage.ok.niceToString()}
-          </button>);
+        return okButton();
       case "cancel":
-        return (
-          <button
-            className="btn btn-secondary sf-close-button sf-button"
-            onClick={() => handleButtonClicked("cancel")}
-            name="cancel">
-            {JavascriptMessage.cancel.niceToString()}
-          </button>);
+        return cancelButton();
       case "ok_cancel":
         return (
-          <div className="btn-toolbar">
-            <button
-              className="btn btn-primary sf-close-button sf-ok-button"
-              onClick={() => handleButtonClicked("ok")}
-              name="accept">
-              {JavascriptMessage.ok.niceToString()}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-button"
-              onClick={() => handleButtonClicked("cancel")}
-              name="cancel">
-              {JavascriptMessage.cancel.niceToString()}
-            </button>
-          </div>);
+          <div className="btn-toolbar"> {okButton()} {cancelButton()} </div>);
       case "yes_no":
-        return (
-          <div className="btn-toolbar">
-            <button
-              className="btn btn-primary sf-close-button sf-yes-button"
-              onClick={() => handleButtonClicked("yes")}
-              name="yes">
-              {BooleanEnum.niceToString("True")}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-no-button"
-              onClick={() => handleButtonClicked("no")}
-              name="no">
-              {BooleanEnum.niceToString("False")}
-            </button>
-          </div>);
-      case "yes_no":
-        return (
-          <div className="btn-toolbar">
-            <button
-              className="btn btn-primary sf-close-button sf-yes-button"
-              onClick={() => handleButtonClicked("yes")}
-              name="yes">
-              {BooleanEnum.niceToString("True")}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-cancel-button"
-              onClick={() => handleButtonClicked("cancel")}
-              name="cancel">
-              {JavascriptMessage.cancel.niceToString()}
-            </button>
-          </div>);
+        return (<div className="btn-toolbar"> {yesButton()} {noButton()} </div>);
+      case "yes_cancel":
+        return (<div className="btn-toolbar"> {yesButton()} {cancelButton()} </div>);
       case "yes_no_cancel":
-        return (
-          <div className="btn-toolbar">
-            <button
-              className="btn btn-primary sf-close-button sf-yes-button"
-              onClick={() => handleButtonClicked("yes")}
-              name="yes">
-              {BooleanEnum.niceToString("True")}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-no-button"
-              onClick={() => handleButtonClicked("no")}
-              name="no">
-              {BooleanEnum.niceToString("False")}
-            </button>
-            <button
-              className="btn btn-secondary sf-close-button sf-cancel-button"
-              onClick={() => handleButtonClicked("cancel")}
-              name="cancel">
-              {JavascriptMessage.cancel.niceToString()}
-            </button>
-          </div>);
+        return (<div className="btn-toolbar"> {yesButton()} {noButton()} {cancelButton()} </div>);
     }
   }
 
@@ -208,6 +191,7 @@ MessageModal.show = (options: MessageModalProps): Promise<MessageModalResult | u
       title={options.title}
       message={options.message}
       buttons={options.buttons}
+      buttonContent={options.buttonContent}
       icon={options.icon}
       size={options.size}
       customIcon={options.customIcon}
