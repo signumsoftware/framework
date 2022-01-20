@@ -53,9 +53,9 @@ export default function MessageModal(p: MessageModalProps) {
   function getButtonContent(button: MessageModalResult)
   {
     
-    const caption = p.buttonContent && p.buttonContent(button);
-    if (caption)
-      return caption
+    const content = p.buttonContent && p.buttonContent(button);
+    if (content)
+      return content
 
     switch (button) {
       case "ok":
