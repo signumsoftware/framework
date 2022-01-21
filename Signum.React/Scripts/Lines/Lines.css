@@ -471,6 +471,16 @@ body:not(.rtl) .sf-mandatory-widget .rw-input {
     border-left: 2px solid red;
 }
 
+body.rtl .sf-mandatory-warning,
+body.rtl .sf-mandatory-warning-widget .rw-input {
+    border-right: 2px solid #ffdd00;
+}
+
+body:not(.rtl) .sf-mandatory-warning,
+body:not(.rtl) .sf-mandatory-warning-widget .rw-input {
+    border-left: 2px solid #ffdd00;
+}
+
 .sf-no-padding {
     padding: 1px !important;
 }
