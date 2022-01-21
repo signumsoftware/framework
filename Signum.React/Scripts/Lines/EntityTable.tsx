@@ -154,20 +154,25 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
         });
 
       if (focusable.last() == e.target) {
-        var pr = this.props.ctx.propertyRoute!.addLambda(a => a[0]);
-        const promise = p.onCreate ? p.onCreate(pr) : this.defaultCreate(pr);
-        if (promise == null)
-          return;
-
-        promise.then(entity => {
-          if (!entity)
-            return;
-
-          this.recentlyCreated.current = entity;
-          this.addElement(entity);
-        }).done();
+        this.createLastRow();
       }
     }
+  }
+
+  createLastRow() {
+    const p = this.props;
+    var pr = this.props.ctx.propertyRoute!.addLambda(a => a[0]);
+    const promise = p.onCreate ? p.onCreate(pr) : this.defaultCreate(pr);
+    if (promise == null)
+      return;
+
+    promise.then(entity => {
+      if (!entity)
+        return;
+
+      this.recentlyCreated.current = entity;
+      this.addElement(entity);
+    }).done();
   }
 
   handleViewElement = (event: React.MouseEvent<any>, index: number) => {
