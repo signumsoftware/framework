@@ -449,8 +449,8 @@ public static class SeleniumExtensions
     public static IWebElement ScrollTo(this IWebElement element)
     {
         IJavaScriptExecutor js = (IJavaScriptExecutor)element.GetDriver();
-        js.ExecuteScript("arguments[0].scrollIntoView(false);", element);
-        Thread.Sleep(500);
+        js.ExecuteScript("arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});", element);
+        Thread.Sleep(1000);
         return element;
     }
 
