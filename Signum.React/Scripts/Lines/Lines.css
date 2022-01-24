@@ -485,7 +485,8 @@ body.rtl .sf-mandatory-widget .rw-input {
 }
 
 body:not(.rtl) .sf-mandatory,
-body:not(.rtl) .sf-mandatory-widget .rw-input {
+body:not(.rtl) .sf-mandatory-widget .rw-input,
+body:not(.rtl) .sf-mandatory-widget .rw-widget-input {
     border-left: 2px solid red;
 }
 
@@ -495,7 +496,8 @@ body.rtl .sf-mandatory-warning-widget .rw-input {
 }
 
 body:not(.rtl) .sf-mandatory-warning,
-body:not(.rtl) .sf-mandatory-warning-widget .rw-input {
+body:not(.rtl) .sf-mandatory-warning-widget .rw-input,
+body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     border-left: 2px solid #ffdd00;
 }
 
