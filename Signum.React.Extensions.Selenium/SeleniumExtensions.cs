@@ -12,6 +12,7 @@ namespace Signum.React.Selenium;
 
 public static class SeleniumExtensions
 {
+    public static TimeSpan ScrollToTimeout = TimeSpan.FromMilliseconds(500);
     public static TimeSpan DefaultTimeout = TimeSpan.FromMilliseconds(20 * 1000);
     public static TimeSpan ThrowExceptionForDeveloperAfter = TimeSpan.FromMilliseconds(5 * 1000);
     public static TimeSpan DefaultPoolingInterval = TimeSpan.FromMilliseconds(200);
@@ -448,9 +449,11 @@ public static class SeleniumExtensions
 
     public static IWebElement ScrollTo(this IWebElement element)
     {
+        var y = (element.Location.Y - 20);
         IJavaScriptExecutor js = (IJavaScriptExecutor)element.GetDriver();
-        js.ExecuteScript("arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});", element);
-        Thread.Sleep(1000);
+        js.ExecuteScript($"setTimeout(function() {{ window.scrollTo({{ top: {y}, left: 0, behavior: 'smooth'}}), 100}});", element);
+        Thread.Sleep(ScrollToTimeout);
+
         return element;
     }
 
