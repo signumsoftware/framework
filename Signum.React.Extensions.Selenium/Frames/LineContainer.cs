@@ -270,7 +270,7 @@ public static class LineContainerExtensions
 
     public static void SelectTab(this ILineContainer lineContainer, string eventKey)
     {
-        var element = lineContainer.Element.WaitElementVisible(By.CssSelector($"a.nav-item[data-rb-event-key='{eventKey}']"));
+        var element = lineContainer.Element.WaitElementVisible(By.CssSelector($".nav-tabs .nav-item .nav-link[data-rr-ui-event-key='{eventKey}']"));
 
         element.ScrollTo();
         element.Click();

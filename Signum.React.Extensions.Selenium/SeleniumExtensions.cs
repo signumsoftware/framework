@@ -253,7 +253,7 @@ public static class SeleniumExtensions
         if (element.Selected == isChecked)
             return;
 
-        element.Click();
+        element.SafeClick();
 
         element.GetDriver().Wait(() => element.Selected == isChecked, () => "Set Checkbox to " + isChecked);
     }

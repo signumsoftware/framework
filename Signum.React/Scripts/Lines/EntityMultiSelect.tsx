@@ -13,6 +13,7 @@ import * as Finder from '../Finder'
 import { normalizeEmptyArray } from './EntityCombo';
 import { useMounted } from '../Hooks';
 import { FormGroup } from './FormGroup';
+import { classes } from '../Globals';
 
 export interface EntityMultiSelectProps extends EntityListBaseProps {
   vertical?: boolean;
@@ -154,14 +155,12 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
   }
 
   return (
-
     <FormGroup ctx={p.ctx!}
       labelText={p.labelText}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-
-
+      <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined)}>
       <Multiselect
         readOnly={p.ctx.readOnly}
         dataKey={item => isMListElement(item) ? liteKey(getLite(item.element)) : liteKey((item as ResultRow).entity!)}
@@ -173,7 +172,8 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
         renderTagValue={({ item }) => isMListElement(item) ? getLite(item.element).toStr  :
           p.onRenderItem ? p.onRenderItem(item) : item.entity?.toStr
         }
-      />
+        />
+      </div>
     </FormGroup>
   );
 
