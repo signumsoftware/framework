@@ -32,7 +32,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 
     public string? CustomColor { get; set; }
 
-    public bool SameIconTitleColor { get; set; }
+    public bool UseIconColorForTitle { get; set; }
 
     [ImplementedBy(
         typeof(UserChartPartEntity),
@@ -75,7 +75,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             IconColor = IconColor,
             IconName = IconName,
             CustomColor = CustomColor,
-            SameIconTitleColor = SameIconTitleColor,
+            UseIconColorForTitle = UseIconColorForTitle,
         };
     }
 
@@ -96,7 +96,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             IconColor == null ? null! : new XAttribute("IconColor", IconColor),
             InteractionGroup == null ? null! : new XAttribute("InteractionGroup", InteractionGroup),
             CustomColor == null ? null! : new XAttribute("CustomColor", CustomColor),
-            SameIconTitleColor == false ? null! : new XAttribute("SameIconTitleColor", true),
+            UseIconColorForTitle == false ? null! : new XAttribute("UseIconColorForTitle", true),
             Content.ToXml(ctx));
     }
 
@@ -110,7 +110,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         IconColor = x.Attribute("IconColor")?.Value;
         InteractionGroup = x.Attribute("InteractionGroup")?.Value.ToEnum<InteractionGroup>();
         CustomColor = x.Attribute("CustomColor")?.Value;
-        SameIconTitleColor = x.Attribute("SameIconTitleColor")?.Let(a => bool.Parse(a.Value)) ?? false;
+        UseIconColorForTitle = x.Attribute("UseIconColorForTitle")?.Let(a => bool.Parse(a.Value)) ?? false;
         Content = ctx.GetPart(Content, x.Elements().Single());
     }
 

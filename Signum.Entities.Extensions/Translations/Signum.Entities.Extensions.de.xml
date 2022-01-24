@@ -566,6 +566,7 @@
     <Member Name="EmbeddedInEntity" Description="Eingebettet in Entität" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="HideDisplayName" Description="Anzeigename ausblenden" />
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parts" Description="Teile" />
@@ -1344,7 +1345,11 @@
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Type" Description="Typ" />
   </Type>
-  <Type Name="ImagePartEntity" />
+  <Type Name="ImagePartEntity" Description="Bildteil" PluralDescription="Bildteile" Gender="m">
+    <Member Name="ClickActionURL" Description="Aktions-URL" />
+    <Member Name="ImageSrcContent" Description="Bild src Inhalt" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
   <Type Name="InboxFilterModel" Description="Posteingangs-filter">
     <Member Name="FromDate" Description="Vom Datum" />
     <Member Name="Range" Description="Bereich" />
@@ -1732,12 +1737,14 @@
   <Type Name="PanelPartEmbedded" Description="Dashboardteil">
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Content" Description="Inhalt" />
+    <Member Name="CustomColor" Description="Benutzerdefinierte Farbe" />
     <Member Name="IconColor" Description="Symbolfarbe" />
     <Member Name="IconName" Description="Symbolname" />
     <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="StartColumn" Description="Spalte Start" />
     <Member Name="Title" Description="Titel" />
+    <Member Name="UseIconColorForTitle" Description="Symbolfarbe für Titel verwenden" />
   </Type>
   <Type Name="PasswordExpiresIntervalEntity" Description="Passwortablaufintervall" PluralDescription="Passwortablaufintervalle" Gender="m">
     <Member Name="Days" Description="Tage" />
@@ -2071,7 +2078,7 @@
   <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln" Gender="m">
     <Member Name="Conditions" Description="Bedingungen" />
   </Type>
-  <Type Name="ScheduledTaskEntity" Description="Geplanter Task">
+  <Type Name="ScheduledTaskEntity" Description="Geplante Task" PluralDescription="Geplanten Tasks" Gender="f">
     <Member Name="ApplicationName" Description="Anwendungsname" />
     <Member Name="MachineName" Description="Computername" />
     <Member Name="Rule" Description="Regel" />
@@ -2185,7 +2192,10 @@
   <Type Name="SendNotificationEmailTaskOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="SeparatorPartEntity" />
+  <Type Name="SeparatorPartEntity" Description="Trennzeichenteil" PluralDescription="Separatorteile" Gender="n">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="Title" Description="Titel" />
+  </Type>
   <Type Name="SessionLogEntity" Description="Sitzungsprotokoll" PluralDescription="Sitzungsprotokolle" Gender="n">
     <Member Name="Duration" Description="Dauer" />
     <Member Name="SessionEnd" Description="Sitzungsende" />
@@ -2198,7 +2208,7 @@
   <Type Name="SessionLogPermission">
     <Member Name="TrackSession" Description="Sitzungskontrolle" />
   </Type>
-  <Type Name="SimpleTaskSymbol" Description="Einfacher Task" />
+  <Type Name="SimpleTaskSymbol" Description="Einfache Task" PluralDescription="Einfache Tasks" Gender="f" />
   <Type Name="SMSCharactersMessage">
     <Member Name="Insert" Description="Einfügen" />
     <Member Name="Language" Description="Sprache" />
@@ -2626,6 +2636,9 @@
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
+  </Type>
+  <Type Name="UserCondition">
+    <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
   </Type>
   <Type Name="UserEntity" Description="Benutzer" Gender="m">
     <Member Name="CultureInfo" Description="Sprache" />

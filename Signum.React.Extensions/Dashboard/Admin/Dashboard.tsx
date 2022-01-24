@@ -98,7 +98,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
                 <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
               </div>
               <div className="col-sm-3">
-                <ValueLine ctx={tcs.subCtx(t => t.sameIconTitleColor)} onChange={() => forceUpdate()} />
+                <ValueLine ctx={tcs.subCtx(t => t.useIconColorForTitle)} onChange={() => forceUpdate()} />
               </div>
             </div>
           </div>

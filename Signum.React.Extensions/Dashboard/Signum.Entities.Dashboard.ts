@@ -152,7 +152,7 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   columns: number;
   interactionGroup: InteractionGroup | null;
   customColor: string | null;
-  sameIconTitleColor: boolean;
+  useIconColorForTitle: boolean;
   content: IPartEntity;
 }
 
