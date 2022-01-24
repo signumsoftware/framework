@@ -21,6 +21,7 @@ export interface ValueLineProps extends LineBaseProps {
   autoFixString?: boolean;
   inlineCheckbox?: boolean | "block";
   optionItems?: (OptionItem | MemberInfo | string)[];
+  datalist?: string[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
@@ -485,7 +486,13 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211
           onInput={isIE11() ? handleTextOnChange : undefined}
           placeholder={vl.getPlaceholder()}
+          list={s.datalist ? s.ctx.getUniqueId("dataList") : undefined}
           ref={vl.inputElement as React.RefObject<HTMLInputElement>} />)
+      }
+      {s.datalist &&
+        <datalist id={s.ctx.getUniqueId("dataList")}>
+          {s.datalist.map(item => <option value={item} />)}
+        </datalist>
       }
     </FormGroup>
   );
