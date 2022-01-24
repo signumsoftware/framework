@@ -217,11 +217,11 @@ export function PanelPart(p: PanelPartProps) {
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
   const defaultIcon = renderer.defaultIcon();
   const icon = coalesceIcon(parseIcon(part.iconName), defaultIcon?.icon);
-  const color = part.iconColor ?? defaultIcon?.iconColor;
+  const iconColor = part.iconColor ?? defaultIcon?.iconColor;
 
   const title = !icon ? titleText :
     <span>
-      <FontAwesomeIcon icon={icon} color={color} className="me-1" />{titleText}
+      <FontAwesomeIcon icon={icon} color={iconColor} className="me-1" />{titleText}
     </span>;
 
   var style = part.customColor != null ?  "customColor": "light";
@@ -247,7 +247,7 @@ export function PanelPart(p: PanelPartProps) {
           </a>
         }
         {renderer.handleTitleClick == undefined ? title :
-          <a className="sf-pointer" style={{ color: part.sameIconTitleColor ? color : (part.customColor != null ? getColorContrasColorBWByHex(part.customColor) : "black"), textDecoration:"none"}} onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
+          <a className="sf-pointer" style={{ color: part.useIconColorForTitle ? iconColor : (part.customColor != null ? getColorContrasColorBWByHex(part.customColor) : "black"), textDecoration:"none"}} onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
         }
         {
           dashboardFilter && <span className="badge bg-light text-dark border ms-2 sf-filter-pill">

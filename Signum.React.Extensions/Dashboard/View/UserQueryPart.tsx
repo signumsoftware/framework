@@ -54,7 +54,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
       deps={p.deps}
       cachedQuery={cachedQuery}
       customColor={p.partEmbedded.customColor}
-      sameColor={p.partEmbedded.sameIconTitleColor}
+      sameColor={p.partEmbedded.useIconColorForTitle}
     />;
   }
 
