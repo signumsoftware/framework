@@ -484,6 +484,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
+  showOnSaveChangesModal?: boolean;
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
@@ -516,6 +517,7 @@ export interface EntityOperationOptions<T extends Entity> {
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
+  showOnSaveChangesModal?: boolean;
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;

@@ -12,7 +12,7 @@ import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage,
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
-import { EntityOperationContext, notifySuccess, operationInfos } from '../Operations'
+import { EntityOperationContext, notifySuccess, operationInfos, operationSettings, Defaults } from '../Operations'
 import { ViewPromise } from "../Navigator";
 import { BsSize, ErrorBoundary } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -125,6 +125,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       .filter(oi => oi.canBeNew || !pack.entity.isNew)
       .filter(oi => oi.operationType == "Execute" && oi.canBeModified)
       .map(oi => EntityOperationContext.fromEntityPack(frame, pack as EntityPack<Entity>, oi.key)!)
+      .filter(eoc => (eoc.settings?.showOnSaveChangesModal ?? Defaults.isSave(eoc.operationInfo)))
       .filter(eoc => eoc.isVisibleInButtonBar(buttonContext));
   }
 
