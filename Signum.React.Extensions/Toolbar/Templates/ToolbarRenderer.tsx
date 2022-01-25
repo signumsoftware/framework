@@ -6,7 +6,7 @@ import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
-import { Nav} from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useUpdatedRef, useHistoryListen, useForceUpdate } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
@@ -86,7 +86,7 @@ export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSid
       </Nav.Link>
     </Nav.Item>
 
-    <WorkflowDropdown sidebarExpanded={p.sidebarExpanded} onClose={p.closeSidebar} fullScreenExpanded={p.sidebarFullScreen} onRefresh={() => { setTimeout(() => setRefresh(!refresh), 500); }}/>
+    <WorkflowDropdown sidebarExpanded={p.sidebarExpanded} onClose={p.closeSidebar} fullScreenExpanded={p.sidebarFullScreen} onRefresh={() => { setTimeout(() => setRefresh(!refresh), 500); }} />
 
     <React.Suspense fallback={JavascriptMessage.loading.niceToString()}><WorkflowDropdown sidebarExpanded={p.sidebarExpanded} onClose={p.closeSidebar} fullScreenExpanded={p.sidebarFullScreen} onRefresh={() => { setTimeout(() => setRefresh(!refresh), 500); }} /></React.Suspense>
     {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => withKey(renderNavItem(res, false, () => setTimeout(() => setRefresh(!refresh), 500)), i))}
@@ -97,7 +97,7 @@ export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSid
 
     switch (res.type) {
       case "Divider":
-        return <hr style={{ margin: "10px 0 5px 0px"}}></hr>;
+        return <hr style={{ margin: "10px 0 5px 0px" }}></hr>;
       case "Header":
       case "Item":
         if (res.elements && res.elements.length) {
@@ -146,10 +146,12 @@ export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSid
 
         if (res.type == "Header") {
           return (
-            <Nav.Item title={res.label}>
-              {getIcon(res)}<span>{res.label}</span>
+            <div className={"nav-item-header" + (p.sidebarExpanded ? "" : " mini")}>
+              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor) || <FontAwesomeIcon icon={["far", "circle"]} />}
+              {p.sidebarExpanded && <span>{res.label}</span>}
+
               {!p.sidebarExpanded && <div className={"nav-item-float"}>{res.label}</div>}
-            </Nav.Item>
+            </div>
           );
         }
 
