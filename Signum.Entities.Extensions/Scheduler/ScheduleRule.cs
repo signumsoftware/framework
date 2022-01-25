@@ -1,9 +1,11 @@
 using System.Globalization;
 using System.ComponentModel;
+using Signum.Entities.UserAssets;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Scheduler;
 
-public interface IScheduleRuleEntity : IEntity
+public interface IScheduleRuleEntity : IEntity, IUserAssetEntity
 {
     DateTime StartingOn { get; }
 
@@ -15,6 +17,8 @@ public interface IScheduleRuleEntity : IEntity
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
 {
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
     public DateTime StartingOn { get; set; } = Clock.Now.Date;
 
     public DateTime Next(DateTime now)
@@ -47,11 +51,27 @@ public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
             EachMinutes = EachMinutes,
         };
     }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("ScheduleRuleMinutely",
+                       new XAttribute("Guid", this.Guid),
+                       new XAttribute("StartingOn", this.StartingOn.ToString("o", CultureInfo.InvariantCulture)),
+                       new XAttribute("EachMinutes", this.EachMinutes));
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        this.StartingOn = DateTime.ParseExact(element.Attribute("StartingOn")!.Value, "o", CultureInfo.InvariantCulture);
+        this.EachMinutes = Convert.ToInt32(element.Attribute("EachMinutes")!.Value);
+    }
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class ScheduleRuleWeekDaysEntity :  Entity, IScheduleRuleEntity
+public class ScheduleRuleWeekDaysEntity : Entity, IScheduleRuleEntity
 {
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
     public DateTime StartingOn { get; set; } = Clock.Now.Date;
 
     public bool Monday { get; set; }
@@ -143,12 +163,44 @@ public class ScheduleRuleWeekDaysEntity :  Entity, IScheduleRuleEntity
             StartingOn = StartingOn
         };
     }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("ScheduleRuleWeekDays",
+                       new XAttribute("Guid", this.Guid),
+                       new XAttribute("StartingOn", this.StartingOn.ToString("o", CultureInfo.InvariantCulture)),
+                       new XAttribute("Monday", this.Monday),
+                       new XAttribute("Tuesday", this.Monday),
+                       new XAttribute("Wednesday", this.Monday),
+                       new XAttribute("Thursday", this.Monday),
+                       new XAttribute("Friday", this.Monday),
+                       new XAttribute("Saturday", this.Monday),
+                       new XAttribute("Sunday", this.Monday),
+                       new XAttribute("Holiday", this.Holiday),
+                       this.Calendar == null ? null! : new XAttribute("HolidayCalendar", ctx.Include(this.Calendar)));
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        this.StartingOn = DateTime.ParseExact(element.Attribute("StartingOn")!.Value, "o", CultureInfo.InvariantCulture);
+        this.Monday = element.Attribute("Monday")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.Tuesday = element.Attribute("Tuesday")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.Wednesday = element.Attribute("Wednesday")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.Thursday = element.Attribute("Thursday")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.Friday = element.Attribute("Friday")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.Saturday = element.Attribute("Saturday")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.Sunday = element.Attribute("Sunday")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.Holiday = element.Attribute("Holiday")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.Calendar = element.Attribute("HolidayCalendar")?.Let(a => (HolidayCalendarEntity)ctx.GetEntity(Guid.Parse(a.Value)));
+    }
 }
 
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class ScheduleRuleMonthsEntity : Entity, IScheduleRuleEntity
 {
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
     public DateTime StartingOn { get; set; } = Clock.Now.Date;
 
     public bool January { get; set; }
@@ -158,7 +210,7 @@ public class ScheduleRuleMonthsEntity : Entity, IScheduleRuleEntity
     public bool May { get; set; }
     public bool June { get; set; }
     public bool July { get; set; }
-    public bool August{ get; set; }
+    public bool August { get; set; }
     public bool September { get; set; }
     public bool October { get; set; }
     public bool November { get; set; }
@@ -230,6 +282,42 @@ public class ScheduleRuleMonthsEntity : Entity, IScheduleRuleEntity
             December = December,
             StartingOn = StartingOn,
         };
+    }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("ScheduleRuleMonths",
+                       new XAttribute("Guid", this.Guid),
+                       new XAttribute("StartingOn", this.StartingOn.ToString("o", CultureInfo.InvariantCulture)),
+                       new XAttribute("January", this.January),
+                       new XAttribute("February", this.February),
+                       new XAttribute("March", this.March),
+                       new XAttribute("April", this.April),
+                       new XAttribute("May", this.May),
+                       new XAttribute("June", this.June),
+                       new XAttribute("July", this.July),
+                       new XAttribute("August", this.August),
+                       new XAttribute("September", this.September),
+                       new XAttribute("October", this.October),
+                       new XAttribute("November", this.November),
+                       new XAttribute("December", this.December));
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        this.StartingOn = DateTime.ParseExact(element.Attribute("StartingOn")!.Value, "o", CultureInfo.InvariantCulture);
+        this.January = element.Attribute("January")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.February = element.Attribute("February")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.March = element.Attribute("March")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.April = element.Attribute("April")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.May = element.Attribute("May")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.June = element.Attribute("June")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.July = element.Attribute("July")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.August = element.Attribute("August")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.September = element.Attribute("September")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.October = element.Attribute("October")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.November = element.Attribute("November")?.Let(a => bool.Parse(a.Value)) ?? false;
+        this.December = element.Attribute("December")?.Let(a => bool.Parse(a.Value)) ?? false;
     }
 }
 

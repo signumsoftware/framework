@@ -225,7 +225,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
           {result &&
             <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} (
             <span
-              className={maxRowsReached ? "text-danger font-weight-bold" : undefined}
+              className={maxRowsReached ? "text-danger fw-bold" : undefined}
               title={maxRowsReached ? ChartMessage.QueryResultReachedMaxRows0.niceToString(result.chartRequest.maxRows) : undefined}>
                 {(result.chartResult.resultTable.rows.length)}
               </span>

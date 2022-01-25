@@ -402,11 +402,6 @@ public static class QueryTokenSynchronizer
 
             int startingIndex = 0;
 
-            SafeConsole.WriteColor(ConsoleColor.Cyan, "  " + token?.FullKey());
-            if (remainingText.HasText())
-                Console.Write(" " + remainingText);
-            Console.WriteLine();
-
             bool isRoot = token == null;
 
         retry:

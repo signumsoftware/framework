@@ -41,7 +41,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
 
     const rt = p.searchControl.state.resultTable;
 
-    if (request.pagination.mode == "Firsts" || request.pagination.mode == "Paginate") {
+    if (request.pagination.mode == "Firsts" || request.pagination.mode == "Paginate" && (rt == null || rt!.totalElements! > rt!.rows.length)) {
 
       SelectorModal.chooseElement<PaginationMode>([request.pagination.mode, "All"], {
         buttonDisplay: a => <span>{PaginationMode.niceToString(a)} {rt && SearchMessage._0Results_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(

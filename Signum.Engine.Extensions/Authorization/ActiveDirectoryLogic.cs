@@ -89,7 +89,7 @@ public static class ActiveDirectoryLogic
                 if (user == null)
                 {
                     user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == acuCtx.UserName) ??
-                           (config.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == acuCtx.EmailAddress) : null);
+                           (config.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == acuCtx.EmailAddress && acuCtx.EmailAddress != null) : null);
                 }
 
                 if (user != null)

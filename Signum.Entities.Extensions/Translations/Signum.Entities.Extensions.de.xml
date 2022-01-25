@@ -566,9 +566,11 @@
     <Member Name="EmbeddedInEntity" Description="Eingebettet in Entität" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="HideDisplayName" Description="Anzeigename ausblenden" />
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parts" Description="Teile" />
+    <Member Name="TokenEquivalencesGroups" Description="Tokenäquivalenzengruppen" />
   </Type>
   <Type Name="DashboardMessage">
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
@@ -955,7 +957,7 @@
     <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="EmailMasterTemplateMessageEmbedded" Description="Nachricht E-Mail-Vorlage">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="Text" Description="Text" />
   </Type>
   <Type Name="EmailMasterTemplateOperation">
@@ -1021,7 +1023,7 @@
   </Type>
   <Type Name="EmailOwnerData" Description="E-Mailbesitzerdaten">
     <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="DisplayName" Description="Name" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="Owner" Description="Besitzer" />
@@ -1319,6 +1321,7 @@
     <Member Name="UnorderedListItem" Description="Ungeordnetes Listenelement" />
   </Type>
   <Type Name="HolidayCalendarEntity" Description="Ferienkalender" Gender="m">
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Holidays" Description="Urlaub" />
     <Member Name="Name" Description="Name" />
   </Type>
@@ -1341,6 +1344,11 @@
     <Member Name="File" Description="Datei" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="ImagePartEntity" Description="Bildteil" PluralDescription="Bildteile" Gender="m">
+    <Member Name="ClickActionURL" Description="Aktions-URL" />
+    <Member Name="ImageSrcContent" Description="Bild src Inhalt" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
   <Type Name="InboxFilterModel" Description="Posteingangs-filter">
     <Member Name="FromDate" Description="Vom Datum" />
@@ -1729,13 +1737,14 @@
   <Type Name="PanelPartEmbedded" Description="Dashboardteil">
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Content" Description="Inhalt" />
+    <Member Name="CustomColor" Description="Benutzerdefinierte Farbe" />
     <Member Name="IconColor" Description="Symbolfarbe" />
     <Member Name="IconName" Description="Symbolname" />
     <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="StartColumn" Description="Spalte Start" />
-    <Member Name="Style" Description="Stil" />
     <Member Name="Title" Description="Titel" />
+    <Member Name="UseIconColorForTitle" Description="Symbolfarbe für Titel verwenden" />
   </Type>
   <Type Name="PasswordExpiresIntervalEntity" Description="Passwortablaufintervall" PluralDescription="Passwortablaufintervalle" Gender="m">
     <Member Name="Days" Description="Tage" />
@@ -1950,6 +1959,7 @@
     <Member Name="NiceName" Description="Schöner Name" />
   </Type>
   <Type Name="QueryFilterEmbedded" Description="Abfragefilter">
+    <Member Name="DashboardBehaviour" Description="Dashboard-Verhalten" />
     <Member Name="GroupOperation" Description="Gruppenoperation" />
     <Member Name="Indentation" Description="Einrückung" />
     <Member Name="IsGroup" Description="Ist Gruppe" />
@@ -2068,7 +2078,7 @@
   <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln" Gender="m">
     <Member Name="Conditions" Description="Bedingungen" />
   </Type>
-  <Type Name="ScheduledTaskEntity" Description="Geplante Aufgabe">
+  <Type Name="ScheduledTaskEntity" Description="Geplante Task" PluralDescription="Geplanten Tasks" Gender="f">
     <Member Name="ApplicationName" Description="Anwendungsname" />
     <Member Name="MachineName" Description="Computername" />
     <Member Name="Rule" Description="Regel" />
@@ -2086,7 +2096,7 @@
     <Member Name="Remarks" Description="Bemerkungen" />
     <Member Name="ScheduledTask" Description="Geplante Task" />
     <Member Name="StartTime" Description="Startzeit" />
-    <Member Name="Task" Description="Aufgabe" />
+    <Member Name="Task" Description="Task" />
     <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="ScheduledTaskLogOperation">
@@ -2121,6 +2131,7 @@
   </Type>
   <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich">
     <Member Name="EachMinutes" Description="Alle Minuten" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="IsAligned" Description="Ist ausgerichtet" />
     <Member Name="StartingOn" Description="Beginnend am" />
   </Type>
@@ -2129,6 +2140,7 @@
     <Member Name="August" Description="August" />
     <Member Name="December" Description="Dezember" />
     <Member Name="February" Description="Februar" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="January" Description="Januar" />
     <Member Name="July" Description="Juli" />
     <Member Name="June" Description="Juni" />
@@ -2142,6 +2154,7 @@
   <Type Name="ScheduleRuleWeekDaysEntity" Description="Schedule-Regel Wochentage" PluralDescription="Schedule-Regeln Wochentage">
     <Member Name="Calendar" Description="Kalender" />
     <Member Name="Friday" Description="Freitag" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Holiday" Description="Feiertag" />
     <Member Name="Monday" Description="Montag" />
     <Member Name="Saturday" Description="Samstag" />
@@ -2179,6 +2192,10 @@
   <Type Name="SendNotificationEmailTaskOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="SeparatorPartEntity" Description="Trennzeichenteil" PluralDescription="Separatorteile" Gender="n">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="Title" Description="Titel" />
+  </Type>
   <Type Name="SessionLogEntity" Description="Sitzungsprotokoll" PluralDescription="Sitzungsprotokolle" Gender="n">
     <Member Name="Duration" Description="Dauer" />
     <Member Name="SessionEnd" Description="Sitzungsende" />
@@ -2191,7 +2208,7 @@
   <Type Name="SessionLogPermission">
     <Member Name="TrackSession" Description="Sitzungskontrolle" />
   </Type>
-  <Type Name="SimpleTaskSymbol" Description="Einfache Aufgabe" />
+  <Type Name="SimpleTaskSymbol" Description="Einfache Task" PluralDescription="Einfache Tasks" Gender="f" />
   <Type Name="SMSCharactersMessage">
     <Member Name="Insert" Description="Einfügen" />
     <Member Name="Language" Description="Sprache" />
@@ -2247,7 +2264,7 @@
     <Member Name="FullClassName" Description="Full Class Name" />
   </Type>
   <Type Name="SMSOwnerData" Description="SMS-Besitzerdaten">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="Owner" Description="Besitzer" />
     <Member Name="TelephoneNumber" Description="Telefonnummer" />
   </Type>
@@ -2278,7 +2295,7 @@
     <Member Name="ToMustBeSetInTheTemplate" Description="'An' muss in der Vorlage gesetzt sein." />
   </Type>
   <Type Name="SMSTemplateMessageEmbedded" Description="SMS-Vorlagennachricht">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="Message" Description="Nachricht" />
   </Type>
   <Type Name="SMSTemplateOperation">
@@ -2345,6 +2362,15 @@
     <Member Name="Hours" Description="Stunden" />
     <Member Name="Minutes" Description="Minuten" />
     <Member Name="Seconds" Description="Sekunden" />
+  </Type>
+  <Type Name="TokenEquivalenceEmbedded" Description="Token-Äquivalenz">
+    <Member Name="Query" Description="Abfrage" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="TokenEquivalenceGroupEntity" Description="Tokenäquivalenzgruppe">
+    <Member Name="Dashboard" Description="Dashboard" />
+    <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
+    <Member Name="TokenEquivalences" Description="Token-Äquivalenzen" />
   </Type>
   <Type Name="ToolbarElementEmbedded" Description="Toolbar-element">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
@@ -2437,7 +2463,7 @@
     <Member Name="TranslateInstances" Description="Instanzen übersetzen" />
   </Type>
   <Type Name="TranslationReplacementEntity" Description="Übersetzungersatz" PluralDescription="Übersetzungersätze" Gender="m">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="RightTranslation" Description="Richtige Übersetzung" />
     <Member Name="WrongTranslation" Description="Falsche Übersetzung" />
   </Type>
@@ -2592,6 +2618,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="MaxRows" Description="Max. Zeilen" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parameters" Description="Parameter" />
@@ -2610,8 +2637,11 @@
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
   </Type>
+  <Type Name="UserCondition">
+    <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
+  </Type>
   <Type Name="UserEntity" Description="Benutzer" Gender="m">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="DisabledOn" Description="Deaktiviert auf" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />

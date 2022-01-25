@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { classes } from '@framework/Globals'
+import { classes, getColorContrasColorBWByHex} from '@framework/Globals'
 import { Entity, getToString, is, Lite, MListElement, SearchMessage, toLite } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as DashboardClient from '../DashboardClient'
@@ -217,14 +217,14 @@ export function PanelPart(p: PanelPartProps) {
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
   const defaultIcon = renderer.defaultIcon();
   const icon = coalesceIcon(parseIcon(part.iconName), defaultIcon?.icon);
-  const color = part.iconColor ?? defaultIcon?.iconColor;
+  const iconColor = part.iconColor ?? defaultIcon?.iconColor;
 
   const title = !icon ? titleText :
     <span>
-      <FontAwesomeIcon icon={icon} color={color} className="me-1" />{titleText}
+      <FontAwesomeIcon icon={icon} color={iconColor} className="me-1" />{titleText}
     </span>;
 
-  var style = part.style == undefined ? undefined : part.style.toLowerCase();
+  var style = part.customColor != null ?  "customColor": "light";
 
   var dashboardFilter = p.filterController?.filters.get(p.ctx.value);
 
@@ -233,18 +233,21 @@ export function PanelPart(p: PanelPartProps) {
   }
 
   return (
-    <div className={classes("card", style && ("border-" + style), "shadow-sm", "mb-4")}>
+
+
+    <div className={classes("card", style && style != "customColor" && ("border-" + style), "shadow-sm", "mb-4")}>
       <div className={classes("card-header", "sf-show-hover",
-        style && style != "light" && "text-white",
-        style && ("bg-" + style)
-      )}>
+        style != "customColor" && ("bg-" + style)
+      )}
+        style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor != null ? getColorContrasColorBWByHex(part.customColor) : "black"  }}
+      >
         {renderer.handleEditClick &&
           <a className="sf-pointer float-end flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
             <FontAwesomeIcon icon="edit" className="me-1" />Edit
           </a>
         }
         {renderer.handleTitleClick == undefined ? title :
-          <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
+          <a className="sf-pointer" style={{ color: part.useIconColorForTitle ? iconColor : (part.customColor != null ? getColorContrasColorBWByHex(part.customColor) : "black"), textDecoration:"none"}} onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
         }
         {
           dashboardFilter && <span className="badge bg-light text-dark border ms-2 sf-filter-pill">

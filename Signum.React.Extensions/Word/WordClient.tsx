@@ -102,7 +102,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
 export function getEntityWordButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {
 
   if (Navigator.isViewable(WordTemplateEntity) && ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0)
-    return [{ button: <WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} /> }];
+    return [{ button: <WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} />, order: 1000 }];
 
   return undefined;
 }

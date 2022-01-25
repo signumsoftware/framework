@@ -243,7 +243,7 @@ public class GroupByTest
     {
         var songsAlbum = (from a in Database.Query<ArtistEntity>()
                           group a by a.Sex into g
-                          select new { Sex = g.Key, Max = g.Sum(a => a.Name.Length) }).ToList();
+                          select new { Sex = g.Key, Sum = g.Sum(a => a.Name.Length) }).ToList();
     }
 
     [Fact]
@@ -260,6 +260,22 @@ public class GroupByTest
         var songsAlbum = (from a in Database.Query<ArtistEntity>()
                           group a by a.Sex into g
                           select new { Sex = g.Key, Min = g.Min(a => a.Name.Length) }).ToList();
+    }
+
+    [Fact]
+    public void GroupMaxBy()
+    {
+        var songsAlbum = (from a in Database.Query<ArtistEntity>()
+                          group a by a.Sex into g
+                          select new { Sex = g.Key, MaxBy = g.MaxBy(a => a.Name.Length) }).ToList();
+    }
+
+    [Fact]
+    public void GroupMinBy()
+    {
+        var songsAlbum = (from a in Database.Query<ArtistEntity>()
+                          group a by a.Sex into g
+                          select new { Sex = g.Key, MinBy = g.MinBy(a => a.Name.Length) }).ToList();
     }
 
     [Fact]
@@ -354,6 +370,19 @@ public class GroupByTest
     public void RootMin()
     {
         var songsAlbum = Database.Query<ArtistEntity>().Min(a => a.Name.Length);
+    }
+
+    [Fact]
+    public void RootMinBy()
+    {
+        var songsAlbum = Database.Query<ArtistEntity>().MinBy(a => a.Name.Length);
+    }
+
+
+    [Fact]
+    public void RootMaxBy()
+    {
+        var songsAlbum = Database.Query<ArtistEntity>().MaxBy(a => a.Name.Length);
     }
 
     [Fact]

@@ -2,8 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
-import { Entity, parseLite, getToString, JavascriptMessage, EntityPack, liteKey } from '@framework/Signum.Entities'
-import * as Finder from '@framework/Finder'
+import { Entity, parseLite, getToString, JavascriptMessage, EntityPack } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { DashboardEntity, DashboardMessage } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
@@ -14,8 +13,6 @@ import { QueryString } from '@framework/QueryString'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import * as DashboardClient from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
-import { downloadFile } from '../../Files/FileDownloader'
-import { CachedQueryJS } from '../CachedQueryExecutor'
 
 interface DashboardPageProps extends RouteComponentProps<{ dashboardId: string }> {
 
@@ -44,10 +41,7 @@ export default function DashboardPage(p: DashboardPageProps) {
 
   }, [refreshCounter]);
 
-  var cachedQueries = React.useMemo(() => dashboardWithQueries?.cachedQueries
-    .map(a => ({ userAssets: a.userAssets, promise: downloadFile(a.file).then(r => r.json() as Promise<CachedQueryJS>).then(cq => { Finder.decompress(cq.resultTable); return cq; })})) //share promise
-    .flatMap(a => a.userAssets.map(mle => ({ ua: mle.element, promise: a.promise })))
-    .toObject(a => liteKey(a.ua), a => a.promise), [dashboardWithQueries]);
+  var cachedQueries = React.useMemo(() => DashboardClient.toCachedQueries(dashboardWithQueries), [dashboardWithQueries]);
 
   return (
     <div>
@@ -62,7 +56,7 @@ export default function DashboardPage(p: DashboardPageProps) {
               <Link className="sf-hide " style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="edit" />&nbsp;Edit</Link>
             </div>
           }
-          <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>
+          {dashboard.hideDisplayName && <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>}
         </div>}
 
       {entityKey &&

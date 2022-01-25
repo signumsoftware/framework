@@ -324,7 +324,7 @@ public static class CacheLogic
                     }
                     catch (InvalidOperationException ex)
                     {
-                        string databaseName = database?.ToString() ?? Connector.Current.DatabaseName();
+                        string databaseName = database?.Name ?? Connector.Current.DatabaseName();
 
                         if (ex.Message.Contains("SQL Server Service Broker"))
                         {

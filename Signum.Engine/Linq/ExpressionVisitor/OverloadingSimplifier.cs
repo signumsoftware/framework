@@ -30,6 +30,18 @@ internal class OverloadingSimplifier : ExpressionVisitor
     static MethodInfo miGroupJoinQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupJoin((IQueryable<string>)null!, (IQueryable<string>)null!, a => a, a => a, (a, g) => a)).GetGenericMethodDefinition();
     static MethodInfo miGroupJoinE = ReflectionTools.GetMethodInfo(() => Enumerable.GroupJoin((IEnumerable<string>)null!, (IEnumerable<string>)null!, a => a, a => a, (a, g) => a)).GetGenericMethodDefinition();
 
+    static MethodInfo miMinByE = ReflectionTools.GetMethodInfo(() => Enumerable.MinBy((IEnumerable<string>)null!, a => a)).GetGenericMethodDefinition();
+    static MethodInfo miMinByQ = ReflectionTools.GetMethodInfo(() => Queryable.MinBy((IQueryable<string>)null!, a => a)).GetGenericMethodDefinition();
+
+    static MethodInfo miMaxByE = ReflectionTools.GetMethodInfo(() => Enumerable.MaxBy((IEnumerable<string>)null!, a => a)).GetGenericMethodDefinition();
+    static MethodInfo miMaxByQ = ReflectionTools.GetMethodInfo(() => Queryable.MaxBy((IQueryable<string>)null!, a => a)).GetGenericMethodDefinition();
+
+    static MethodInfo miOrderByE = ReflectionTools.GetMethodInfo(() => Enumerable.OrderBy((IQueryable<string>)null!, a => a)).GetGenericMethodDefinition();
+    static MethodInfo miOrderByDescendingE = ReflectionTools.GetMethodInfo(() => Enumerable.OrderByDescending((IQueryable<string>)null!, a => a)).GetGenericMethodDefinition();
+
+    static MethodInfo miOrderByQ = ReflectionTools.GetMethodInfo(() => Queryable.OrderBy((IQueryable<string>)null!, a => a)).GetGenericMethodDefinition();
+    static MethodInfo miOrderByDescendingQ = ReflectionTools.GetMethodInfo(() => Queryable.OrderByDescending((IQueryable<string>)null!, a => a)).GetGenericMethodDefinition();
+
     static MethodInfo miJoinQ = ReflectionTools.GetMethodInfo(() => Queryable.Join((IQueryable<string>)null!, (IQueryable<string>)null!, a => a, a => a, (a, g) => a)).GetGenericMethodDefinition();
     static MethodInfo miJoinE = ReflectionTools.GetMethodInfo(() => Enumerable.Join((IEnumerable<string>)null!, (IEnumerable<string>)null!, a => a, a => a, (a, g) => a)).GetGenericMethodDefinition();
 
@@ -231,6 +243,26 @@ internal class OverloadingSimplifier : ExpressionVisitor
                     Expression.Call(mij, outer, group, outerKeySelector,
                         Expression.Lambda(Expression.MakeMemberAccess(g, groupingType.GetProperty("Key")!), g),
                         newResult);
+            }
+
+            if(ReflectionTools.MethodEqual(mi, miMinByE) || ReflectionTools.MethodEqual(mi, miMinByQ) ||
+               ReflectionTools.MethodEqual(mi, miMaxByE) || ReflectionTools.MethodEqual(mi, miMaxByQ))
+            {
+                var source = Visit(m.GetArgument("source"));
+
+                var keySelector = (LambdaExpression)Visit(m.GetArgument("keySelector")).StripQuotes();
+
+                Type elemType = source.Type.ElementType()!;
+
+                var orderByMethod = mi.Name == "MinBy" ? 
+                    (query ? miOrderByQ : miOrderByE) : 
+                    (query ? miOrderByDescendingQ : miOrderByDescendingE);
+
+                var orderByCall = Expression.Call(orderByMethod.MakeGenericMethod(elemType, keySelector.Body.Type), source, keySelector);
+
+                var firstOrDefaultMethod = query ? miFirstOrDefaultQ : miFirstOrDefaultE;
+
+                return Expression.Call(firstOrDefaultMethod.MakeGenericMethod(elemType), orderByCall);
             }
 
             if (ReflectionTools.MethodEqual(mi, miCastE) || ReflectionTools.MethodEqual(mi, miCastQ))

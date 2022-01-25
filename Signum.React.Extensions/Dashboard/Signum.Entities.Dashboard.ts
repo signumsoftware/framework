@@ -8,7 +8,6 @@ import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
-import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
@@ -73,6 +72,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   dashboardPriority: number | null;
   autoRefreshPeriod: number | null;
   displayName: string;
+  hideDisplayName: boolean;
   combineSimilarRows: boolean;
   cacheQueryConfiguration: CacheQueryConfigurationEmbedded | null;
   parts: Entities.MList<PanelPartEmbedded>;
@@ -102,6 +102,14 @@ export module DashboardOperation {
 
 export module DashboardPermission {
   export const ViewDashboard : Authorization.PermissionSymbol = registerSymbol("Permission", "DashboardPermission.ViewDashboard");
+}
+
+export const ImagePartEntity = new Type<ImagePartEntity>("ImagePart");
+export interface ImagePartEntity extends Entities.Entity, IPartEntity {
+  Type: "ImagePart";
+  imageSrcContent: string;
+  clickActionURL: string | null;
+  requiresTitle: boolean;
 }
 
 export const InteractionGroup = new EnumType<InteractionGroup>("InteractionGroup");
@@ -143,8 +151,16 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   startColumn: number;
   columns: number;
   interactionGroup: InteractionGroup | null;
-  style: Signum.BootstrapStyle;
+  customColor: string | null;
+  useIconColorForTitle: boolean;
   content: IPartEntity;
+}
+
+export const SeparatorPartEntity = new Type<SeparatorPartEntity>("SeparatorPart");
+export interface SeparatorPartEntity extends Entities.Entity, IPartEntity {
+  Type: "SeparatorPart";
+  title: string | null;
+  requiresTitle: boolean;
 }
 
 export const TokenEquivalenceEmbedded = new Type<TokenEquivalenceEmbedded>("TokenEquivalenceEmbedded");

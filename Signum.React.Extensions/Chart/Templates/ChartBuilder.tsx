@@ -93,7 +93,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
               </div>)}
           </div>
           <div className="card-body">
-            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="ExtraSmall" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger font-weight-bold" : undefined }} />
+            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="ExtraSmall" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
           </div>
         </div>
       </div >

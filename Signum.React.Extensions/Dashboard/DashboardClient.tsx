@@ -15,7 +15,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
-import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity } from './Signum.Entities.Dashboard'
+import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, ImagePartEntity, SeparatorPartEntity } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { useAPI } from '@framework/Hooks';
@@ -26,6 +26,7 @@ import { DashboardFilterController } from "./View/DashboardFilterController";
 import { EntityFrame } from '../../Signum.React/Scripts/TypeContext';
 import { CachedQueryJS } from './CachedQueryExecutor';
 import { QueryEntity } from '../../Signum.React/Scripts/Signum.Entities.Basics';
+import { downloadFile } from '../Files/FileDownloader';
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -70,6 +71,8 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('./Admin/UserChartPart')));
   Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('./Admin/CombinedUserChartPart')));
   Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
+  Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
+  Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
 
 
   Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
@@ -193,6 +196,16 @@ export function start(options: { routes: JSX.Element[] }) {
           .done()
       }
   });
+  registerRenderer(ImagePartEntity, {
+    component: () => import('./View/ImagePartView').then(a => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    withPanel: () => false
+  });
+  registerRenderer(SeparatorPartEntity, {
+    component: () => import('./View/SeparatorPartView').then(a => a.default),
+    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    withPanel: () => false
+  });
 
   onEmbeddedWidgets.push(wc => {
     if (!wc.frame.pack.embeddedDashboards)
@@ -308,5 +321,18 @@ export function DashboardWidget(p: DashboardWidgetProps) {
     reload: () => p.frame.onReload(),
     cachedQueries: {} /*for now*/
   });
+}
+
+export function toCachedQueries(dashboardWithQueries?: DashboardWithCachedQueries | null) {
+
+  if (!dashboardWithQueries)
+    return undefined;
+
+  const result = dashboardWithQueries.cachedQueries
+    .map(a => ({ userAssets: a.userAssets, promise: downloadFile(a.file).then(r => r.json() as Promise<CachedQueryJS>).then(cq => { Finder.decompress(cq.resultTable); return cq; }) })) //share promise
+    .flatMap(a => a.userAssets.map(mle => ({ ua: mle.element, promise: a.promise })))
+    .toObject(a => liteKey(a.ua), a => a.promise);
+
+  return result;
 }
 

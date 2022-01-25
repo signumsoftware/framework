@@ -16,7 +16,7 @@ export interface IContentStateConverter {
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
-  mandatory?: boolean;
+  mandatory?: boolean | "warning";
   converter?: IContentStateConverter;
   innerRef?: React.Ref<draftjs.Editor>;
   decorators?: draftjs.DraftDecorator[],
@@ -173,9 +173,17 @@ export default React.forwardRef(function HtmlEditor({
 
   plugins.forEach(p => p.expandEditorProps && p.expandEditorProps(editorProps, c));
 
+  const error = binding.getError();
+
   return (
     <>
-      <div className={classes("sf-html-editor", mandatory && !c.editorState.getCurrentContent().hasText() && "sf-mandatory")} onClick={() => c.editor.focus()} {...htmlAttributes}>
+      <div
+        className={classes("sf-html-editor",
+          mandatory && !c.editorState.getCurrentContent().hasText() && (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
+          error && "has-error",
+        )}
+        title={error}
+        onClick={() => c.editor.focus()} {...htmlAttributes}>
         {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
 
         <draftjs.Editor

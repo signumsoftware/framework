@@ -50,12 +50,10 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
 
   function renderShowPeriod() {
     return (
-      <div className="form-check form-check-inline ms-3">
-        <label className="form-check-label" >
-          <input className="form-check-input" type="checkbox" checked={isPeriodChecked()} onChange={handlePeriodClicked} />
-          {JavascriptMessage.showPeriod.niceToString()}
-        </label>
-      </div>
+      <label className="ms-3">
+        <input className="form-check-input me-1" type="checkbox" checked={isPeriodChecked()} onChange={handlePeriodClicked} />
+        {JavascriptMessage.showPeriod.niceToString()}
+      </label>
     );
   }
 
@@ -89,12 +87,10 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
 
   function renderShowOperations() {
     return (
-      <div className="form-check form-check-inline ms-3">
-        <label className="form-check-label" >
-          <input className="form-check-input" type="checkbox" checked={isPreviousOperationChecked()} onChange={handlePreviousOperationClicked} />
-          {JavascriptMessage.showPreviousOperation.niceToString()}
-        </label>
-      </div>
+      <label className="ms-3" >
+        <input className="form-check-input me-1" type="checkbox" checked={isPreviousOperationChecked()} onChange={handlePreviousOperationClicked} />
+        {JavascriptMessage.showPreviousOperation.niceToString()}
+      </label>
     );
   }
 
