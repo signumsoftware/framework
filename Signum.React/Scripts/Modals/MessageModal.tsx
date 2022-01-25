@@ -17,7 +17,7 @@ export type MessageModalButtons = "ok" | "cancel" | "ok_cancel" | "yes_no" | "ye
 export type MessageModalResult = "ok" | "cancel" | "yes" | "no";
 
 interface MessageModalContext {
-  handleButtonClicked(m: MessageModalResult) : void;
+  handleButtonClicked(m: MessageModalResult): void;
 }
 
 interface MessageModalProps extends IModalProps<MessageModalResult | undefined> {
@@ -51,8 +51,7 @@ export default function MessageModal(p: MessageModalProps) {
     p.onExited!(selectedValue.current);
   }
 
-  function getButtonContent(button: MessageModalResult)
-  {
+  function getButtonContent(button: MessageModalResult) {
     const content = p.buttonContent && p.buttonContent(button);
     if (content)
       return content
@@ -65,26 +64,28 @@ export default function MessageModal(p: MessageModalProps) {
     }
   }
 
- function setFocus(e: HTMLButtonElement | null) {
+  function setFocus(e: HTMLButtonElement | null) {
     if (e) {
       setTimeout(() => e.focus(), 200);
     }
   }
-  function getButton(res: MessageModalResult) {
 
+  function getButton(res: MessageModalResult) {
 
     const htmlAtts = p.buttonHtmlAttributes && p.buttonHtmlAttributes(res);
 
     const baseButtonClass = classes("btn", res == 'yes' || res == 'ok' ? "btn-primary" : "btn-secondary", `sf-close-button sf-${res}-button`)
 
-    return <button
-      {...htmlAtts}
-      ref={res == 'yes' || res == 'ok' ? setFocus : undefined} 
-      className={addClass(htmlAtts, baseButtonClass)}
-      onClick={() => handleButtonClicked(res)}
-      name={res}>
-      {getButtonContent(res)}
-    </button>
+    return (
+      <button
+        {...htmlAtts}
+        ref={res == 'yes' || res == 'ok' ? setFocus : undefined}
+        className={addClass(htmlAtts, baseButtonClass)}
+        onClick={() => handleButtonClicked(res)}
+        name={res}>
+        {getButtonContent(res)}
+      </button>
+    );
   }
 
   function renderButtons(buttons: MessageModalButtons) {
@@ -98,7 +99,7 @@ export default function MessageModal(p: MessageModalProps) {
     }
   }
 
-  function getIcon(): IconProp | undefined{
+  function getIcon(): IconProp | undefined {
 
     if (p.customIcon)
       return p.customIcon;
@@ -123,7 +124,7 @@ export default function MessageModal(p: MessageModalProps) {
         case "success": return "check-circle";
         case "warning": return "exclamation-triangle";
       }
-  }
+    }
 
     return undefined;
   }
