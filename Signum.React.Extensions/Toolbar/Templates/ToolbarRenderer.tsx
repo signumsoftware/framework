@@ -147,7 +147,7 @@ export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSid
         if (res.type == "Header") {
           return (
             <div className={"nav-item-header" + (p.sidebarExpanded ? "" : " mini")}>
-              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor) || <FontAwesomeIcon icon={["far", "circle"]} />}
+              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
               {p.sidebarExpanded && <span>{res.label}</span>}
 
               {!p.sidebarExpanded && <div className={"nav-item-float"}>{res.label}</div>}

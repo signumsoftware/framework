@@ -31,20 +31,15 @@ li.menu-item-1 > a {
 
 .nav-item-header {
     padding: 5px;
-    border-radius: 10px;
-    text-align: center;
-    margin: 30px 15px 7px 15px;
-    background-color: #ffffff;
-    border: 1px solid #d7d7d7;
-    border-top: 2px solid black;
-    box-shadow: 0px 1px 5px #e5e5e5;
+    margin-top: 30px;
     transition: all ease 250ms;
-    width: calc(100% - 30px);
 }
 
     .nav-item-header span {
-        margin-left: 11px;
         margin-right: 25px;
+        margin-left: 23px;
+        color: gray;
+        font-weight: bold;
     }
 
     .nav-item-header svg {
@@ -70,8 +65,10 @@ li.menu-item-1 > a {
     }
 
     .nav-item-header.mini {
-        width: 37px;
         margin-left: 11px;
+        padding: 0;
+        height: 0;
+        margin-top: 17px;
     }
 
 .sidebar .divider {
