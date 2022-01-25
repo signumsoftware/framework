@@ -33,6 +33,6 @@ export default function CultureDropdown(p: { fullName?: boolean }) {
   );
 }
 
-function simplifyName(name: string) {
+export function simplifyName(name: string) {
   return name.tryBefore("(")?.trim() ?? name;
 }

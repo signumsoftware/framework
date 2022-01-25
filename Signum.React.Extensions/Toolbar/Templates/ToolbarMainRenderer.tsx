@@ -1,8 +1,6 @@
 import * as React from 'react'
-import { Link } from 'react-router-dom'
-import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import { ToolbarLocation, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
@@ -10,10 +8,7 @@ import './Toolbar.css'
 import * as PropTypes from "prop-types";
 import { Collapse, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI } from '@framework/Hooks';
-import * as Reflection from '@framework/Reflection';
-import * as Finder from '@framework/Finder';
 import { JavascriptMessage, getToString, SearchMessage } from '@framework/Signum.Entities';
 import { IModalProps, openModal } from '@framework/Modals';
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
@@ -22,7 +17,7 @@ export interface ToolbarMainRendererProps {
 }
 
 export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
-  var response = useAPI(signal => ToolbarClient.API.getCurrentToolbar("Main").then(t => t ?? null), []);
+  var response = useAPI(signal => ToolbarClient.API.getAllToolbars().then(t => t ?? null), []);
 
   if (response === undefined)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;

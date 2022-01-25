@@ -1,23 +1,19 @@
 import * as React from 'react'
 import * as History from 'history'
-import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
 import { ToolbarLocation } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
-import { ToolbarEntity } from "../Signum.Entities.Toolbar";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
-import * as PropTypes from "prop-types";
-import { NavDropdown, Dropdown } from 'react-bootstrap';
-import { Nav, Navbar } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useUpdatedRef, useHistoryListen, useForceUpdate } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
+import { JavascriptMessage } from '@framework/Signum.Entities'
 
+const WorkflowDropdown = React.lazy(() => import("./ToolbarWorkflowDropdown"));
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
   if (r.url)
@@ -43,13 +39,13 @@ function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Lo
   return null;
 }
 
-export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
-  const forceUpdate = useForceUpdate();
-  const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
+export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSidebar?: () => void; sidebarFullScreen?: boolean; appTitle: string, logoExpanded: string, logoMini?: string }): React.ReactElement | null {
+  const response = useAPI(() => ToolbarClient.API.getAllToolbars(), []);
   const responseRef = useUpdatedRef(response);
-  const [expanded, setExpanded] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
-  const [avoidCollapse, setAvoidCollapse] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
 
+  console.log(response);
+
+  const [refresh, setRefresh] = React.useState(false);
   const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
   const activeRef = useUpdatedRef(active);
 
@@ -71,77 +67,59 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
   React.useEffect(() => changeActive(AppContext.history.location), [response]);
 
-  if (!response)
-    return null;
+  return <div className={"sidebar-inner " + (p.sidebarExpanded ? "" : " sidebar-collapsed")} style={{ paddingTop: "0px" }}>
+    <div style={{ display: "flex", transition: "all 200ms", alignItems: "center", padding: p.sidebarExpanded === true ? "5px 25px 16px" : "0px 13px 10px" }}>
+      <img className={"sidebar-brand-icon" + (p.sidebarExpanded ? "" : " sidebar-brand-icon-mini")} src={p.sidebarExpanded ? p.logoExpanded : (p.logoMini || p.logoExpanded)} />
+      <h5 className={"sidebar-app-title"}>{p.appTitle}</h5>
+    </div>
 
-  if (p.location == "Top") {
+    <div className={"close-sidebar"} onClick={() => { if (p.closeSidebar) p.closeSidebar() }}><FontAwesomeIcon icon={"angle-double-left"} /></div>
 
-    var navItems = response.elements && response.elements.map((res, i) => withKey(renderNavItem(res, i), i));
+    <Nav.Item>
+      <Nav.Link style={{ paddingLeft: p.sidebarExpanded === true ? "25px" : "13px" }}
+        onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(AppContext.toAbsoluteUrl("~/"), e); setRefresh(!refresh); if (p.sidebarFullScreen === true) if (p.closeSidebar) p.closeSidebar(); }}
+        onAuxClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(AppContext.toAbsoluteUrl("~/"), e); setRefresh(!refresh); if (p.sidebarFullScreen === true) if (p.closeSidebar) p.closeSidebar(); }}
+        active={false}>
+        <FontAwesomeIcon icon={"home"} />
+        <span>{"Inicio"}</span>
+        {!p.sidebarExpanded && <div className={"nav-item-float"}>{"Inicio"}</div>}
+      </Nav.Link>
+    </Nav.Item>
 
-    return (
-      <div className={classes("nav navbar-nav")}>
-        {navItems}
-      </div>
-    );
-  }
-  else
-    return (
-      <div className="nav">
-        {response.elements && response.elements.flatMap(sr => renderDropdownItem(sr, 0, false, response)).map((sr, i) => withKey(sr, i))}
-      </div>
-    );
+    <WorkflowDropdown sidebarExpanded={p.sidebarExpanded} onClose={p.closeSidebar} fullScreenExpanded={p.sidebarFullScreen} onRefresh={() => { setTimeout(() => setRefresh(!refresh), 500); }} />
 
+    <React.Suspense fallback={JavascriptMessage.loading.niceToString()}><WorkflowDropdown sidebarExpanded={p.sidebarExpanded} onClose={p.closeSidebar} fullScreenExpanded={p.sidebarFullScreen} onRefresh={() => { setTimeout(() => setRefresh(!refresh), 500); }} /></React.Suspense>
+    {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => withKey(renderNavItem(res, false, () => setTimeout(() => setRefresh(!refresh), 500)), i))}
+  </div>;
 
-  function handleOnToggle(res: ToolbarClient.ToolbarResponse<any>) {
-
-    if (avoidCollapse.contains(res))
-      avoidCollapse.remove(res);
-    else
-    if (!expanded.contains(res))
-      expanded.push(res);
-    else
-      expanded.clear();
-
-    forceUpdate();
-  }
-
-  function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, index: number) {
+  function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, additionalPaddingDropdown?: boolean, onRefresh?: () => void, key?: string) {
+    let activeCheck = isCompatibleWithUrl(res, AppContext.history.location, QueryString.parse(AppContext.history.location.search));
 
     switch (res.type) {
-
       case "Divider":
-        return (
-          <Nav.Item>{"|"}</Nav.Item>
-        );
-
+        return <hr style={{ margin: "10px 0 5px 0px" }}></hr>;
       case "Header":
       case "Item":
         if (res.elements && res.elements.length) {
           var title = res.label || res.content!.toStr;
           var icon = getIcon(res);
 
-          return (
-            <Dropdown
-              onToggle={() => handleOnToggle(res)}
-              show={expanded.contains(res)}>
-              <Dropdown.Toggle id="dropdown-toolbar" as={CustomToggle} onClick={() => handleOnToggle(res)}>
-                {!icon ? title : (<span>{icon}{title}</span>)}
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {res.elements && res.elements.flatMap(sr => renderDropdownItem(sr, 0, true, res)).map((sr, i) => withKey(sr, i))}
-              </Dropdown.Menu>
-            </Dropdown>
-          );
+          return <CustomSidebarDropdown parentTitle={title} icon={icon} key={"c" + (Math.random() * 1250)} sidebarExpanded={p.sidebarExpanded}>
+            {res.elements && res.elements.map(sr => renderNavItem(sr, true, onRefresh, "e" + (Math.random() * 1250)))}
+          </CustomSidebarDropdown>;
         }
 
         if (res.url) {
           return (
             <Nav.Item>
               <Nav.Link
+                title={res.label}
+                style={{ paddingLeft: p.sidebarExpanded === true ? "25px" : "13px" }}
                 onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
                 onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
-                active={res == active}>
-                {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
+                active={activeCheck || res == active}>
+                {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}<span>{res.label}</span>
+                {!p.sidebarExpanded && <div className={"nav-item-float"}>{res.label}</div>}
               </Nav.Link>
             </Nav.Item>
           );
@@ -155,9 +133,12 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
           return (
             <Nav.Item>
               <Nav.Link
+                title={res.label}
+                style={{ paddingLeft: p.sidebarExpanded === true ? "25px" : "13px" }}
                 onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
                 onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} active={res == active}>
-                {config.getIcon(res)}{res.label}
+                {config.getIcon(res)}<span title={res.label}>{res.label}</span>
+                {!p.sidebarExpanded && <div className={"nav-item-float"}>{res.label}</div>}
               </Nav.Link>
             </Nav.Item>
           );
@@ -165,7 +146,12 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
         if (res.type == "Header") {
           return (
-            <Nav.Item>{getIcon(res)}{res.label}</Nav.Item>
+            <div className={"nav-item-header" + (p.sidebarExpanded ? "" : " mini")}>
+              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
+              {p.sidebarExpanded && <span>{res.label}</span>}
+
+              {!p.sidebarExpanded && <div className={"nav-item-float"}>{res.label}</div>}
+            </div>
           );
         }
 
@@ -173,99 +159,6 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
       default:
         throw new Error("Unexpected " + res.type);
-    }
-  }
-
-
-
-  function handleClick(e: React.MouseEvent<any>, res: ToolbarClient.ToolbarResponse<any>, topRes: ToolbarClient.ToolbarResponse<any>) {
-
-    avoidCollapse.push(topRes);
-
-    var path = findPath(res, [topRes]);
-
-    if (!path)
-      throw new Error("Path not found");
-
-    if (expanded.contains(res))
-      path.pop();
-
-    setExpanded(path);
-  }
-
-  function renderDropdownItem(res: ToolbarClient.ToolbarResponse<any>, indent: number, isNavbar: boolean, topRes: ToolbarClient.ToolbarResponse<any>): React.ReactElement<any>[] {
-
-    const menuItemN = "menu-item-" + indent;
-
-    switch (res.type) {
-
-      case "Divider":
-        return [
-          isNavbar ?
-            <NavDropdown.Divider className={menuItemN} /> :
-            <Dropdown.Divider className={menuItemN} />
-        ];
-
-      case "Header":
-      case "Item":
-
-        var HeaderOrItem: typeof Dropdown.Item =
-          (isNavbar ?
-            (res.type == "Header" ? NavDropdown.Header as any : NavDropdown.Item) :
-            (res.type == "Header" ? Dropdown.Header as any : Dropdown.Item));
-
-        if (res.elements && res.elements.length) {
-          return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => handleClick(e, res, topRes)}
-              className={classes(menuItemN, "sf-cursor-pointer")}>
-              {getIcon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={expanded.contains(res) ? "chevron-down" : "chevron-right"} className="arrow-align" />
-            </HeaderOrItem>
-          ].concat(res.elements && res.elements.length && expanded.contains(res) ? res.elements.flatMap(r => renderDropdownItem(r, indent + 1, isNavbar, topRes)) : [])
-        }
-
-        if (res.url) {
-          return [
-            <HeaderOrItem
-              onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
-              onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
-              className={classes("sf-cursor-pointer", menuItemN, res == active && "active")} >
-              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
-            </HeaderOrItem>
-          ];
-        }
-
-        if (res.content) {
-          var config = ToolbarClient.configs[res.content!.EntityType];
-          if (!config) {
-            return [
-              <HeaderOrItem style={{ color: "red" }} className={menuItemN}>
-                {res.content!.EntityType + "ToolbarConfig not registered"}
-              </HeaderOrItem>
-            ];
-          }
-
-          return [
-            <HeaderOrItem
-              onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
-              onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
-              className={classes("sf-cursor-pointer", menuItemN, res == active && "active")}>
-              {config.getIcon(res)}{res.label}
-            </HeaderOrItem>
-          ];
-        }
-
-        if (res.type == "Header")
-          return [
-            <HeaderOrItem className={menuItemN}>{getIcon(res)}{res.label}</HeaderOrItem>
-          ];
-
-        return [
-          <Dropdown.Item style={{ color: "red" }} className={menuItemN}>
-            {"No Content or Url found"}
-          </Dropdown.Item>
-        ];
-
-      default: throw new Error("Unexpected " + res.type);
     }
   }
 
@@ -283,41 +176,28 @@ function withKey(e: React.ReactElement<any>, index: number) {
   return React.cloneElement(e, { key: index });
 }
 
-function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClient.ToolbarResponse<any>[]): ToolbarClient.ToolbarResponse<any>[] | null {
-
-  const last = list.last();
-
-  if (last.elements) {
-    for (let i = 0; i < last.elements.length; i++) {
-      const elem = last.elements[i];
-
-      list.push(elem);
-
-      if (elem == target)
-        return list;
-
-      var result = findPath(target, list);
-
-      if (result)
-        return result;
-
-      list.pop();
-    }
-  }
-
-  return null;
-}
-
-const CustomToggle = React.forwardRef(function CustomToggle(p: { children: React.ReactNode, onClick: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
+function CustomSidebarDropdown(props: { parentTitle: string | undefined, sidebarExpanded: boolean | undefined, icon: any, children: any }) {
+  var [show, setShow] = React.useState(false);
 
   return (
-    <a
-      ref={ref}
-      className="dropdown-toggle nav-link"
-      href="#"
-      onClick={e => { e.preventDefault(); p.onClick(e); }}>
-      {p.children}
-    </a>
+    <div>
+      <div className="nav-item">
+        <div
+          title={props.parentTitle}
+          className={"nav-link"}
+          onClick={() => setShow(!show)}
+          style={{ paddingLeft: props.sidebarExpanded === true ? 25 : 13, cursor: 'pointer' }}>
+          <div style={{ display: 'inline-block', position: 'relative' }}>
+            <div style={{ position: 'absolute', opacity: 0.2 }}>{props.icon}</div>
+            {show ? <FontAwesomeIcon icon={"caret-up"} /> : <FontAwesomeIcon icon={"caret-down"} />}
+          </div>
+          <span style={{ marginLeft: "16px", verticalAlign: "middle" }}>{props.parentTitle}</span>
+          {!props.sidebarExpanded && <div className={"nav-item-float"}>{props.parentTitle}</div>}
+        </div>
+      </div>
+      <div style={{ display: show ? "block" : "none" }}>
+        {show && props.children}
+      </div>
+    </div>
   );
-});
-
+}
