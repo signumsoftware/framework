@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
-import { classes } from '../Globals';
+import { addClass, classes } from '../Globals';
 import { JavascriptMessage, BooleanEnum } from '../Signum.Entities'
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -26,6 +26,7 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   style?: MessageModalStyle;
   buttons: MessageModalButtons;
   buttonContent?: (button: MessageModalResult) => React.ReactChild | null | undefined;
+  buttonHtmlAttributes?: (button: MessageModalResult) => React.ButtonHTMLAttributes<any> | null | undefined;
   icon?: MessageModalIcon | null;
   customIcon?: IconProp;
   size?: BsSize;
@@ -51,7 +52,7 @@ export default function MessageModal(p: MessageModalProps) {
   }
 
   function getButtonContent(button: MessageModalResult)
-  { 
+  {
     const content = p.buttonContent && p.buttonContent(button);
     if (content)
       return content
@@ -69,57 +70,31 @@ export default function MessageModal(p: MessageModalProps) {
       setTimeout(() => e.focus(), 200);
     }
   }
+  function getButton(res: MessageModalResult) {
 
-  function okButton() {
-    return (
-      <button ref={setFocus}
-        className="btn btn-primary sf-close-button sf-ok-button"
-        onClick={() => handleButtonClicked("ok")}
-        name="accept">
-        {getButtonContent("ok")}
-      </button>
-    );
-  }
 
-  function cancelButton() {
-    return (
-      <button
-        className="btn btn-secondary sf-close-button sf-cancel-button"
-        onClick={() => handleButtonClicked("cancel")}
-        name="cancel">
-        {getButtonContent("cancel")}
-      </button>
-    );
-  }
+    const htmlAtts = p.buttonHtmlAttributes && p.buttonHtmlAttributes(res);
 
-  function yesButton() {
-    return (
-      <button ref={setFocus}
-        className="btn btn-primary sf-close-button sf-yes-button"
-        onClick={() => handleButtonClicked("yes")}
-        name="yes">
-        {getButtonContent("yes")}
-      </button>
-    );
-  }
+    const baseButtonClass = classes("btn", res == 'yes' || res == 'ok' ? "btn-primary" : "btn-secondary", `sf-close-button sf-${res}-button`)
 
-  function noButton() {
     return <button
-              className="btn btn-secondary sf-close-button sf-no-button"
-              onClick={() => handleButtonClicked("no")}
-              name="no">
-      {getButtonContent("no")}
-            </button>
+      {...htmlAtts}
+      ref={res == 'yes' || res == 'ok' ? setFocus : undefined} 
+      className={addClass(htmlAtts, baseButtonClass)}
+      onClick={() => handleButtonClicked(res)}
+      name={res}>
+      {getButtonContent(res)}
+    </button>
   }
 
   function renderButtons(buttons: MessageModalButtons) {
     switch (buttons) {
-      case "ok": return okButton();
-      case "cancel": return cancelButton();
-      case "ok_cancel": return (<div className="btn-toolbar"> {okButton()} {cancelButton()} </div>);
-      case "yes_no": return (<div className="btn-toolbar"> {yesButton()} {noButton()} </div>);
-      case "yes_cancel": return (<div className="btn-toolbar"> {yesButton()} {cancelButton()} </div>);
-      case "yes_no_cancel": return (<div className="btn-toolbar"> {yesButton()} {noButton()} {cancelButton()} </div>);
+      case "ok": return getButton('ok');
+      case "cancel": return getButton('cancel');
+      case "ok_cancel": return (<div className="btn-toolbar"> {getButton('ok')} {getButton('cancel')} </div>);
+      case "yes_no": return (<div className="btn-toolbar"> {getButton('yes')} {getButton('no')} </div>);
+      case "yes_cancel": return (<div className="btn-toolbar"> {getButton('yes')} {getButton('cancel')} </div>);
+      case "yes_no_cancel": return (<div className="btn-toolbar"> {getButton('yes')} {getButton('no')} {getButton('cancel')} </div>);
     }
   }
 
@@ -148,7 +123,7 @@ export default function MessageModal(p: MessageModalProps) {
         case "success": return "check-circle";
         case "warning": return "exclamation-triangle";
       }
-    }
+  }
 
     return undefined;
   }
@@ -193,6 +168,7 @@ MessageModal.show = (options: MessageModalProps): Promise<MessageModalResult | u
       message={options.message}
       buttons={options.buttons}
       buttonContent={options.buttonContent}
+      buttonHtmlAttributes={options.buttonHtmlAttributes}
       icon={options.icon}
       size={options.size}
       customIcon={options.customIcon}
