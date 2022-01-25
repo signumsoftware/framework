@@ -56,22 +56,6 @@
         }
 }
 
-.btn.btn-light {
-    color: var(--sidebar-principal);
-}
-
-.btn.btn-light svg{
-    color: var(--sidebar-principal);
-}
-
-    .btn.btn-light:hover {
-        color: var(--sidebar-accent);
-    }
-
-        .btn.btn-light:hover svg {
-            color: var(--sidebar-accent);
-        }
-
 .sidebar-inner {
     padding-top: 5px;
 }
