@@ -43,8 +43,10 @@ li.menu-item-1 > a {
     }
 
     .nav-item-header svg {
+        margin-left: 24px;
+        margin-right: -9px;
         height: 16px;
-        width: 15px;
+        opacity: 0.6;
     }
 
     .nav-item-header .nav-item-float {
@@ -69,6 +71,10 @@ li.menu-item-1 > a {
         padding: 0;
         height: 0;
         margin-top: 17px;
+    }
+
+    .nav-item-header.mini svg{
+        display: none;
     }
 
 .sidebar .divider {
