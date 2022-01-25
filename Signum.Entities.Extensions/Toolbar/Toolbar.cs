@@ -57,8 +57,8 @@ public class ToolbarEntity : Entity, IUserAssetEntity
 public enum ToolbarLocation
 {
     Top,
-    Side,
-    Main,
+    Middle,
+    Bottom,
 }
 
 [AutoInit]

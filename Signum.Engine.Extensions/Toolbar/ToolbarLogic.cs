@@ -195,6 +195,17 @@ public static class ToolbarLogic
         return result;
     }
 
+    public static List<ToolbarEntity> GetCombined()
+    {
+        var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: false);
+
+        return Toolbars.Value.Values
+            .Where(t => isAllowed(t))
+            .OrderByDescending(a => a.Priority)
+            .OrderBy(a => a.Location)
+            .ToList();
+    }
+
     public static ToolbarResponse? GetCurrentToolbarResponse(ToolbarLocation location)
     {
         var curr = GetCurrent(location);
@@ -216,6 +227,24 @@ public static class ToolbarLogic
         };
     }
 
+    public static ToolbarResponse? GetCurrentToolbarResponse()
+    {
+        var curr = GetCombined();
+
+        if (curr == null)
+            return null;
+
+        var responses = curr.Select(curr => ToResponseList(TranslatedInstanceLogic.TranslatedMList(curr, c => c.Elements).ToList())).ToList();
+        if (responses.Count == 0 ||responses.All(r => r.Count == 0))
+            return null;
+
+        return new ToolbarResponse
+        {
+            type = ToolbarElementType.Header,
+            elements = responses.SelectMany(r => r).ToList(),
+        };
+    }
+
     private static List<ToolbarResponse> ToResponseList(List<TranslatableElement<ToolbarElementEmbedded>> elements)
     {
         var result = elements.SelectMany(a => ToResponse(a) ?? Enumerable.Empty<ToolbarResponse>()).NotNull().ToList();
@@ -229,7 +258,7 @@ public static class ToolbarLogic
         result.RemoveAll(extraDividers.Contains);
         var extraHeaders = result.Where((a, i) => IsPureHeader(a) && (
             i == result.Count - 1 ||
-            IsPureHeader(result[i + 1]) ||
+            IsPureHeader(result[i + 1]) || 
             result[i + 1].type == ToolbarElementType.Divider ||
             result[i + 1].type == ToolbarElementType.Header && result[i + 1].content is Lite<ToolbarMenuEntity>
         )).ToList();

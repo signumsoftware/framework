@@ -83,6 +83,10 @@ export namespace API {
   export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any> | null> {
     return ajaxGet({ url: `~/api/toolbar/current/${location}` });
   }
+
+  export function getAllToolbars(): Promise<ToolbarResponse<any> | null> {
+    return ajaxGet({ url: `~/api/toolbar/all` });
+  }
 }
 
 export interface ToolbarResponse<T extends Entity> {

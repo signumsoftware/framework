@@ -11,5 +11,11 @@ public class ToolbarController : ControllerBase
     {
         return ToolbarLogic.GetCurrentToolbarResponse(location);
     }
+
+    [HttpGet("api/toolbar/all")]
+    public ToolbarResponse? All()
+    {
+        return ToolbarLogic.GetCurrentToolbarResponse();
+    }
 }
 
