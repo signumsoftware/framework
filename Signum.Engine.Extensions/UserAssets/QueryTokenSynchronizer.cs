@@ -347,7 +347,7 @@ public static class QueryTokenSynchronizer
         while (true)
         {
             var tempToken = current!;
-            var result = SelectInteractive(ref tempToken, qd, options, remainingText, allowRemoveToken, allowReGenerate);
+            var result = SelectInteractive(ref tempToken, qd, options, allowRemoveToken, allowReGenerate);
             current = tempToken;
             switch (result)
             {
@@ -389,7 +389,7 @@ public static class QueryTokenSynchronizer
         }
     }
 
-    static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReGenerate)
+    static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, bool allowRemoveToken, bool allowReGenerate)
     {
         var top = Console.CursorTop;
 
