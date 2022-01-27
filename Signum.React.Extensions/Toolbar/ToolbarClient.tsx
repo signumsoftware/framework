@@ -9,11 +9,9 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
 import { Type } from '@framework/Reflection'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation } from './Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType } from './Signum.Entities.Toolbar'
 import * as Constructor from '@framework/Constructor'
-import * as Operations from '@framework/Operations'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
-import { ValueSearchControl } from '@framework/Search';
 import { parseIcon } from '../Basics/Templates/IconTypeahead';
 
 export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarConfig<any>[]) {
@@ -80,12 +78,8 @@ export function registerConfig<T extends Entity>(config: ToolbarConfig<T>) {
 }
 
 export namespace API {
-  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any> | null> {
-    return ajaxGet({ url: `~/api/toolbar/current/${location}` });
-  }
-
-  export function getAllToolbars(): Promise<ToolbarResponse<any> | null> {
-    return ajaxGet({ url: `~/api/toolbar/all` });
+  export function getCurrentToolbar(): Promise<ToolbarResponse<any> | null> {
+    return ajaxGet({ url: `~/api/toolbar/current` });
   }
 }
 

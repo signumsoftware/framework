@@ -38,6 +38,8 @@ public static class ToolbarLogic
                     e.Priority
                 });
 
+            sb.Schema.EntityEvents<ToolbarEntity>().PreSaving += ValidateToolbarSave;
+
             sb.Include<ToolbarMenuEntity>()
                 .WithSave(ToolbarMenuOperation.Save)
                 .WithDelete(ToolbarMenuOperation.Delete)
@@ -61,6 +63,10 @@ public static class ToolbarLogic
             RegisterContentConfig<ToolbarMenuEntity>(
                 lite => true,
                 lite => TranslatedInstanceLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name));
+
+            RegisterContentConfig<ToolbarEntity>(
+                lite => true,
+                lite => TranslatedInstanceLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name));
 
             RegisterContentConfig<UserQueryEntity>(
                 lite => { var uq = UserQueryLogic.UserQueries.Value.GetOrCreate(lite); return InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); },
@@ -104,6 +110,34 @@ public static class ToolbarLogic
             ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToDictionary(a => a.ToLite()),
                new InvalidateWith(typeof(ToolbarMenuEntity)));
         }
+    }
+
+    private static void ValidateToolbarSave(ToolbarEntity ent, PreSavingContext ctx)
+    {
+        if (ent.Elements.Any()) //Check recursion
+        {
+            List<Lite<Entity>> list = new List<Lite<Entity>>() { ent.ToLiteFat() };
+
+            if (ent.Elements.Any(e => e.Content != null && RecursionCheck(list, e.Content)))
+                throw new InvalidOperationException(ToolbarMessage.RecursionDetected.NiceToString());
+        }
+    }
+
+    private static bool RecursionCheck(List<Lite<Entity>> list, Lite<Entity> ent)
+    {
+        if (ent is Lite<ToolbarMenuEntity> || ent is Lite<ToolbarEntity>)
+        {
+            if (list.Any(l => l.Is(ent)))
+                return true;
+
+            list.Add(ent);
+
+            return ((ent as Lite<ToolbarMenuEntity>)?.Retrieve().Elements ?? (ent as Lite<ToolbarEntity>)?.Retrieve().Elements).EmptyIfNull()
+                .Where(e => e.Content != null && (e.Content is Lite<ToolbarMenuEntity> || e.Content is Lite<ToolbarEntity>))
+                .Any(e => RecursionCheck(list, e.Content!));
+        }
+
+        return false;
     }
 
     public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
@@ -183,32 +217,21 @@ public static class ToolbarLogic
         TranslatedInstanceLogic.AddRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
     }
 
-    public static ToolbarEntity? GetCurrent(ToolbarLocation location)
+    public static ToolbarEntity? GetCurrent()
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: false);
 
         var result = Toolbars.Value.Values
-            .Where(t => isAllowed(t) && t.Location == location)
+            .Where(t => isAllowed(t))
             .OrderByDescending(a => a.Priority)
             .FirstOrDefault();
 
         return result;
     }
 
-    public static List<ToolbarEntity> GetCombined()
+    public static ToolbarResponse? GetCurrentToolbarResponse()
     {
-        var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: false);
-
-        return Toolbars.Value.Values
-            .Where(t => isAllowed(t))
-            .OrderByDescending(a => a.Priority)
-            .OrderBy(a => a.Location)
-            .ToList();
-    }
-
-    public static ToolbarResponse? GetCurrentToolbarResponse(ToolbarLocation location)
-    {
-        var curr = GetCurrent(location);
+        var curr = GetCurrent();
 
         if (curr == null)
             return null;
@@ -224,24 +247,6 @@ public static class ToolbarLogic
             content = curr.ToLite(),
             label = TranslatedInstanceLogic.TranslatedField(curr, a => a.Name),
             elements = responses,
-        };
-    }
-
-    public static ToolbarResponse? GetCurrentToolbarResponse()
-    {
-        var curr = GetCombined();
-
-        if (curr == null)
-            return null;
-
-        var responses = curr.Select(curr => ToResponseList(TranslatedInstanceLogic.TranslatedMList(curr, c => c.Elements).ToList())).ToList();
-        if (responses.Count == 0 ||responses.All(r => r.Count == 0))
-            return null;
-
-        return new ToolbarResponse
-        {
-            type = ToolbarElementType.Header,
-            elements = responses.SelectMany(r => r).ToList(),
         };
     }
 
@@ -309,6 +314,16 @@ public static class ToolbarLogic
             result.elements = ToResponseList(TranslatedInstanceLogic.TranslatedMList(tme, t => t.Elements).ToList());
             if (result.elements.Count == 0)
                 return null;
+        }
+
+        if (element.Content is Lite<ToolbarEntity>)
+        {
+            var tme = Toolbars.Value.GetOrThrow((Lite<ToolbarEntity>)element.Content);
+            var res = ToResponseList(TranslatedInstanceLogic.TranslatedMList(tme, t => t.Elements).ToList());
+            if (res.Count == 0)
+                return null;
+
+            return res;
         }
 
         return new[] { result };

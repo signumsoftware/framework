@@ -1,19 +1,23 @@
 import * as React from 'react'
 import * as History from 'history'
 import * as AppContext from '@framework/AppContext'
-import { ToolbarLocation } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useHistoryListen, useForceUpdate } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
-import { JavascriptMessage } from '@framework/Signum.Entities'
+import * as SidebarContainer from '../SidebarContainer'
 
-const WorkflowDropdown = React.lazy(() => import("./ToolbarWorkflowDropdown"));
+interface ToolbarEngineProps {
+  sideMenuExpanded: boolean | undefined;
+  setSideMenuExpanded: (to: boolean) => void | undefined;
+  sideMenuHide: boolean | undefined;
+  fullSidebarView: boolean | undefined;
+}
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
   if (r.url)
@@ -39,11 +43,9 @@ function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Lo
   return null;
 }
 
-export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSidebar?: () => void; sidebarFullScreen?: boolean; appTitle: string, logoExpanded: string, logoMini?: string }): React.ReactElement | null {
-  const response = useAPI(() => ToolbarClient.API.getAllToolbars(), []);
+export default function ToolbarRenderer(p: { engine: ToolbarEngineProps, appTitle: React.ReactNode, logoExpanded: React.ReactNode, logoMini?: React.ReactNode, children: React.ReactNode }): React.ReactElement | null {
+  const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(), []);
   const responseRef = useUpdatedRef(response);
-
-  console.log(response);
 
   const [refresh, setRefresh] = React.useState(false);
   const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
@@ -61,35 +63,26 @@ export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSid
     }
   }
 
+  const randomKey = () => ("c" + (Math.random() * 1250));
+
   useHistoryListen((location: History.Location, action: History.Action) => {
     changeActive(location);
   }, response != null);
 
   React.useEffect(() => changeActive(AppContext.history.location), [response]);
 
-  return <div className={"sidebar-inner " + (p.sidebarExpanded ? "" : " sidebar-collapsed")} style={{ paddingTop: "0px" }}>
-    <div style={{ display: "flex", transition: "all 200ms", alignItems: "center", padding: p.sidebarExpanded === true ? "5px 25px 16px" : "0px 13px 10px" }}>
-      <img className={"sidebar-brand-icon" + (p.sidebarExpanded ? "" : " sidebar-brand-icon-mini")} src={p.sidebarExpanded ? p.logoExpanded : (p.logoMini || p.logoExpanded)} />
+  return <div className={"sidebar-inner " + (p.engine.sideMenuExpanded ? "" : " sidebar-collapsed")} style={{ paddingTop: "0px" }}>
+    <div style={{ display: "flex", transition: "all 200ms", alignItems: "center", padding: p.engine.sideMenuExpanded === true ? "5px 25px 16px" : "0px 13px 10px" }}>
+      <div className={"sidebar-brand-icon" + (p.engine.sideMenuExpanded ? "" : " sidebar-brand-icon-mini")}>{p.engine.sideMenuExpanded ? p.logoExpanded : (p.logoMini || p.logoExpanded)}</div>
       <h5 className={"sidebar-app-title"}>{p.appTitle}</h5>
     </div>
 
-    <div className={"close-sidebar"} onClick={() => { if (p.closeSidebar) p.closeSidebar() }}><FontAwesomeIcon icon={"angle-double-left"} /></div>
+    <div className={"close-sidebar"} onClick={() => { if (p.engine.setSideMenuExpanded) p.engine.setSideMenuExpanded(false) }}><FontAwesomeIcon icon={"angle-double-left"} /></div>
 
-    <Nav.Item>
-      <Nav.Link style={{ paddingLeft: p.sidebarExpanded === true ? "25px" : "13px" }}
-        onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(AppContext.toAbsoluteUrl("~/"), e); setRefresh(!refresh); if (p.sidebarFullScreen === true) if (p.closeSidebar) p.closeSidebar(); }}
-        onAuxClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(AppContext.toAbsoluteUrl("~/"), e); setRefresh(!refresh); if (p.sidebarFullScreen === true) if (p.closeSidebar) p.closeSidebar(); }}
-        active={false}>
-        <FontAwesomeIcon icon={"home"} />
-        <span>{"Inicio"}</span>
-        {!p.sidebarExpanded && <div className={"nav-item-float"}>{"Inicio"}</div>}
-      </Nav.Link>
-    </Nav.Item>
-
-    <WorkflowDropdown sidebarExpanded={p.sidebarExpanded} onClose={p.closeSidebar} fullScreenExpanded={p.sidebarFullScreen} onRefresh={() => { setTimeout(() => setRefresh(!refresh), 500); }} />
-
-    <React.Suspense fallback={JavascriptMessage.loading.niceToString()}><WorkflowDropdown sidebarExpanded={p.sidebarExpanded} onClose={p.closeSidebar} fullScreenExpanded={p.sidebarFullScreen} onRefresh={() => { setTimeout(() => setRefresh(!refresh), 500); }} /></React.Suspense>
-    {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => withKey(renderNavItem(res, false, () => setTimeout(() => setRefresh(!refresh), 500)), i))}
+    <div onClick={(ev) => { if ((ev.target as any).className != "nav-item-dropdown-elem") sidebarItemAction() }}>
+      {p.children}
+      {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => withKey(renderNavItem(res, false, () => setTimeout(() => setRefresh(!refresh), 500)), i))}
+    </div>
   </div>;
 
   function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, additionalPaddingDropdown?: boolean, onRefresh?: () => void, key?: string) {
@@ -104,22 +97,22 @@ export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSid
           var title = res.label || res.content!.toStr;
           var icon = getIcon(res);
 
-          return <CustomSidebarDropdown parentTitle={title} icon={icon} key={"c" + (Math.random() * 1250)} sidebarExpanded={p.sidebarExpanded}>
+          return <CustomSidebarDropdown parentTitle={title} icon={icon} key={randomKey()} sideMenuExpanded={p.engine.sideMenuExpanded}>
             {res.elements && res.elements.map(sr => renderNavItem(sr, true, onRefresh, "e" + (Math.random() * 1250)))}
           </CustomSidebarDropdown>;
         }
 
         if (res.url) {
           return (
-            <Nav.Item>
+            <Nav.Item key={key ?? randomKey()}>
               <Nav.Link
                 title={res.label}
-                style={{ paddingLeft: p.sidebarExpanded === true ? "25px" : "13px" }}
+                style={{ paddingLeft: p.engine.sideMenuExpanded === true ? "25px" : "13px" }}
                 onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
                 onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
                 active={activeCheck || res == active}>
                 {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}<span>{res.label}</span>
-                {!p.sidebarExpanded && <div className={"nav-item-float"}>{res.label}</div>}
+                {!p.engine.sideMenuExpanded && !p.engine.fullSidebarView && <div className={"nav-item-float"}>{res.label}</div>}
               </Nav.Link>
             </Nav.Item>
           );
@@ -131,14 +124,14 @@ export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSid
             return <Nav.Item style={{ color: "red" }}>{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
           return (
-            <Nav.Item>
+            <Nav.Item key={key ?? randomKey()}>
               <Nav.Link
                 title={res.label}
-                style={{ paddingLeft: p.sidebarExpanded === true ? "25px" : "13px" }}
+                style={{ paddingLeft: p.engine.sideMenuExpanded === true ? "25px" : "13px" }}
                 onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
                 onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} active={res == active}>
                 {config.getIcon(res)}<span title={res.label}>{res.label}</span>
-                {!p.sidebarExpanded && <div className={"nav-item-float"}>{res.label}</div>}
+                {!p.engine.sideMenuExpanded && !p.engine.fullSidebarView && <div className={"nav-item-float"}>{res.label}</div>}
               </Nav.Link>
             </Nav.Item>
           );
@@ -146,20 +139,25 @@ export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSid
 
         if (res.type == "Header") {
           return (
-            <div className={"nav-item-header" + (p.sidebarExpanded ? "" : " mini")}>
+            <div key={key ?? randomKey()} className={"nav-item-header" + (p.engine.sideMenuExpanded ? "" : " mini")}>
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
-              {p.sidebarExpanded && <span>{res.label}</span>}
+              {p.engine.sideMenuExpanded && <span>{res.label}</span>}
 
-              {!p.sidebarExpanded && <div className={"nav-item-float"}>{res.label}</div>}
+              {!p.engine.sideMenuExpanded && !p.engine.fullSidebarView && <div className={"nav-item-float"}>{res.label}</div>}
             </div>
           );
         }
 
-        return <Nav.Item style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
+        return <Nav.Item key={key ?? randomKey()} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
 
       default:
         throw new Error("Unexpected " + res.type);
     }
+  }
+
+  function sidebarItemAction() {
+    if (p.engine.fullSidebarView === true && p.engine.setSideMenuExpanded)
+        p.engine.setSideMenuExpanded(false);
   }
 
   function getIcon(res: ToolbarClient.ToolbarResponse<any>) {
@@ -170,13 +168,11 @@ export default function ToolbarRenderer(p: { sidebarExpanded?: boolean; closeSid
   }
 }
 
-ToolbarRenderer.defaultProps = { location: "Top" as ToolbarLocation, tag: true };
-
 function withKey(e: React.ReactElement<any>, index: number) {
   return React.cloneElement(e, { key: index });
 }
 
-function CustomSidebarDropdown(props: { parentTitle: string | undefined, sidebarExpanded: boolean | undefined, icon: any, children: any }) {
+function CustomSidebarDropdown(props: { parentTitle: string | undefined, sideMenuExpanded: boolean | undefined, icon: any, children: any }) {
   var [show, setShow] = React.useState(false);
 
   return (
@@ -186,13 +182,13 @@ function CustomSidebarDropdown(props: { parentTitle: string | undefined, sidebar
           title={props.parentTitle}
           className={"nav-link"}
           onClick={() => setShow(!show)}
-          style={{ paddingLeft: props.sidebarExpanded === true ? 25 : 13, cursor: 'pointer' }}>
+          style={{ paddingLeft: props.sideMenuExpanded === true ? 25 : 13, cursor: 'pointer' }}>
           <div style={{ display: 'inline-block', position: 'relative' }}>
             <div style={{ position: 'absolute', opacity: 0.2 }}>{props.icon}</div>
             {show ? <FontAwesomeIcon icon={"caret-up"} /> : <FontAwesomeIcon icon={"caret-down"} />}
           </div>
-          <span style={{ marginLeft: "16px", verticalAlign: "middle" }}>{props.parentTitle}</span>
-          {!props.sidebarExpanded && <div className={"nav-item-float"}>{props.parentTitle}</div>}
+          <span className={"nav-item-dropdown-elem"} style={{ marginLeft: "16px", verticalAlign: "middle" }}>{props.parentTitle}</span>
+          {!props.sideMenuExpanded && <div className={"nav-item-float"}>{props.parentTitle}</div>}
         </div>
       </div>
       <div style={{ display: show ? "block" : "none" }}>

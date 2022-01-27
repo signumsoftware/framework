@@ -118,11 +118,12 @@
             opacity: 0.5;
         }
 
-.sidebar-brand-icon {
+.sidebar-brand-icon, .sidebar-brand-icon img{
     width: 37px;
     height: 37px;
     border-radius: 8px;
     transition: all 200ms;
+    display: inline-block;
 }
 
 .sidebar-brand-icon-mini {
@@ -216,6 +217,10 @@
     .navbar-toggle {
         display: block !important;
     }
+}
+
+.sidebar.sidebar-nav{
+    user-select: none;
 }
 
 .main-toopbar {

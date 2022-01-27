@@ -31,17 +31,10 @@ export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEnt
   Type: "Toolbar";
   owner: Entities.Lite<Entities.Entity> | null;
   name: string;
-  location: ToolbarLocation;
   priority: number | null;
   elements: Entities.MList<ToolbarElementEmbedded>;
   guid: string /*Guid*/;
 }
-
-export const ToolbarLocation = new EnumType<ToolbarLocation>("ToolbarLocation");
-export type ToolbarLocation =
-  "Top" |
-  "Middle" |
-  "Bottom";
 
 export const ToolbarMenuEntity = new Type<ToolbarMenuEntity>("ToolbarMenu");
 export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
@@ -55,6 +48,10 @@ export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAsse
 export module ToolbarMenuOperation {
   export const Save : Entities.ExecuteSymbol<ToolbarMenuEntity> = registerSymbol("Operation", "ToolbarMenuOperation.Save");
   export const Delete : Entities.DeleteSymbol<ToolbarMenuEntity> = registerSymbol("Operation", "ToolbarMenuOperation.Delete");
+}
+
+export module ToolbarMessage {
+  export const RecursionDetected = new MessageKey("ToolbarMessage", "RecursionDetected");
 }
 
 export module ToolbarOperation {

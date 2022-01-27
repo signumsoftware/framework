@@ -2,7 +2,6 @@ import * as React from 'react'
 import { ValueLine, EntityLine, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ToolbarEntity, ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
-import * as Dashboard from '../../Dashboard/Admin/Dashboard';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MList } from '@framework/Signum.Entities';
 import { parseIcon } from '../../Basics/Templates/IconTypeahead';
@@ -19,7 +18,6 @@ export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
         </div>
 
         <div className="col-sm-5">
-          <ValueLine ctx={ctx3.subCtx(f => f.location)} />
           <ValueLine ctx={ctx3.subCtx(e => e.priority)} />
         </div>
       </div>
