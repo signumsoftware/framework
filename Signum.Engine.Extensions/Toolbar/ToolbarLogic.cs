@@ -10,8 +10,10 @@ using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.Toolbar;
+using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Workflow;
+using Signum.Utilities.DataStructures;
 using System.Text.Json.Serialization;
 
 namespace Signum.Engine.Toolbar;
@@ -38,7 +40,8 @@ public static class ToolbarLogic
                     e.Priority
                 });
 
-            sb.Schema.EntityEvents<ToolbarEntity>().PreSaving += ValidateToolbarSave;
+            sb.Schema.EntityEvents<ToolbarEntity>().Saving += IToolbar_Saving;
+            sb.Schema.EntityEvents<ToolbarMenuEntity>().Saving += IToolbar_Saving;
 
             sb.Include<ToolbarMenuEntity>()
                 .WithSave(ToolbarMenuOperation.Save)
@@ -112,32 +115,24 @@ public static class ToolbarLogic
         }
     }
 
-    private static void ValidateToolbarSave(ToolbarEntity ent, PreSavingContext ctx)
+    private static void IToolbar_Saving(IToolbarEntity tool)
     {
-        if (ent.Elements.Any()) //Check recursion
+        if (!tool.IsNew && tool.Elements.IsGraphModified)
         {
-            List<Lite<Entity>> list = new List<Lite<Entity>>() { ent.ToLiteFat() };
+            using (new EntityCache(EntityCacheType.ForceNew))
+            {
+                EntityCache.AddFullGraph((Entity)tool);
 
-            if (ent.Elements.Any(e => e.Content != null && RecursionCheck(list, e.Content)))
-                throw new InvalidOperationException(ToolbarMessage.RecursionDetected.NiceToString());
+                var toolbarGraph = DirectedGraph<IToolbarEntity>.Generate(tool, t => t.Elements.Select(a => a.Content).Where(c => c is Lite<IToolbarEntity>).Select(t => (IToolbarEntity)t!.Retrieve()));
+
+                var problems = toolbarGraph.FeedbackEdgeSet().Edges.ToList();
+
+                if (problems.Count > 0)
+                    throw new ApplicationException(
+                        ToolbarMessage._0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
+                        problems.ToString("\r\n"));
+            }
         }
-    }
-
-    private static bool RecursionCheck(List<Lite<Entity>> list, Lite<Entity> ent)
-    {
-        if (ent is Lite<ToolbarMenuEntity> || ent is Lite<ToolbarEntity>)
-        {
-            if (list.Any(l => l.Is(ent)))
-                return true;
-
-            list.Add(ent);
-
-            return ((ent as Lite<ToolbarMenuEntity>)?.Retrieve().Elements ?? (ent as Lite<ToolbarEntity>)?.Retrieve().Elements).EmptyIfNull()
-                .Where(e => e.Content != null && (e.Content is Lite<ToolbarMenuEntity> || e.Content is Lite<ToolbarEntity>))
-                .Any(e => RecursionCheck(list, e.Content!));
-        }
-
-        return false;
     }
 
     public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)

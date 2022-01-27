@@ -6,11 +6,17 @@ using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using System.Xml.Linq;
 using Signum.Utilities.Reflection;
+using System.ComponentModel;
 
 namespace Signum.Entities.Toolbar;
 
+public interface IToolbarEntity: IEntity
+{
+    MList<ToolbarElementEmbedded> Elements { get; }
+}
+
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class ToolbarEntity : Entity, IUserAssetEntity
+public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
 {
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
@@ -158,7 +164,7 @@ public enum ToolbarElementType
 }
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
-public class ToolbarMenuEntity : Entity, IUserAssetEntity
+public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
 {
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
@@ -204,5 +210,7 @@ public static class ToolbarMenuOperation
 
 public enum ToolbarMessage
 {
-    RecursionDetected
+    RecursionDetected,
+    [Description(@"{0} cycles have been found in the Toolbar due to the relationships:")]
+    _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships
 }
