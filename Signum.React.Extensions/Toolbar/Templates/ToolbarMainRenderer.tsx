@@ -17,7 +17,7 @@ export interface ToolbarMainRendererProps {
 }
 
 export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
-  var response = useAPI(signal => ToolbarClient.API.getAllToolbars().then(t => t ?? null), []);
+  var response = useAPI(signal => ToolbarClient.API.getCurrentToolbar().then(t => t ?? null), []);
 
   if (response === undefined)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;

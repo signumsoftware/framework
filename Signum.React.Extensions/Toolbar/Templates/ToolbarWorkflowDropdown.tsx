@@ -8,7 +8,7 @@ import { Nav } from 'react-bootstrap'
 import { CaseActivityQuery, WorkflowEntity, WorkflowMainEntityStrategy } from '../../Workflow/Signum.Entities.Workflow'
 import * as WorkflowClient from '../../Workflow/WorkflowClient'
 
-export default function WorkflowDropdown(props: { sidebarExpanded: boolean | undefined, onRefresh?: () => void | undefined, onClose?: () => void, fullScreenExpanded?: boolean }) {
+export default function ToolbarWorkflowDropdown(props: { sidebarExpanded: boolean | undefined, onRefresh?: () => void | undefined, onClose?: () => void, fullScreenExpanded?: boolean }) {
 
   if (!Navigator.isViewable(WorkflowEntity))
     return null;
