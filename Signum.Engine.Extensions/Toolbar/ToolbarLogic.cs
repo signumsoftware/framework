@@ -116,7 +116,7 @@ public static class ToolbarLogic
     {
         if (ent.Elements.Any()) //Check recursion
         {
-            List<Lite<Entity>> list = new List<Lite<Entity>>() { ent.ToLite() };
+            List<Lite<Entity>> list = new List<Lite<Entity>>() { ent.ToLiteFat() };
 
             if (ent.Elements.Any(e => e.Content != null && RecursionCheck(list, e.Content)))
                 throw new InvalidOperationException(ToolbarMessage.RecursionDetected.NiceToString());
