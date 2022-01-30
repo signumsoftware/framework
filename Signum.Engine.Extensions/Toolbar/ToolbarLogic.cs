@@ -24,6 +24,9 @@ public static class ToolbarLogic
     public static ResetLazy<Dictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars = null!;
     public static ResetLazy<Dictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus = null!;
 
+    public static Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>> CustomPermissionResponse = 
+        new Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>>();
+
     public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -88,8 +91,18 @@ public static class ToolbarLogic
               lite => TranslatedInstanceLogic.TranslatedField(DashboardLogic.Dashboards.Value.GetOrCreate(lite), a => a.DisplayName));
 
             RegisterContentConfig<PermissionSymbol>(
-                lite => PermissionAuthLogic.IsAuthorized(SymbolLogic< PermissionSymbol>.ToSymbol(lite.ToString()!)),
+                lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)),
                 lite => SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!).NiceToString());
+
+            ToolbarLogic.GetContentConfig<PermissionSymbol>().CustomResponses = lite =>
+            {
+                var action = CustomPermissionResponse.TryGetC(lite.Retrieve());
+
+                if (action != null)
+                    return action();
+
+                return null;
+            };
 
             RegisterContentConfig<WorkflowEntity>(
               lite => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); },
@@ -359,7 +372,17 @@ public static class ToolbarLogic
 
         bool IContentConfig.IsAuhorized(Lite<Entity> lite) => IsAuthorized((Lite<T>)lite);
         string IContentConfig.DefaultLabel(Lite<Entity> lite) => DefaultLabel((Lite<T>)lite);
-        List<ToolbarResponse>? IContentConfig.CustomResponses(Lite<Entity> lite) => CustomResponses?.Invoke((Lite<T>)lite);
+        List<ToolbarResponse>? IContentConfig.CustomResponses(Lite<Entity> lite)
+        {
+            foreach (var item in CustomResponses.GetInvocationListTyped())
+            {
+                var resp = item.Invoke((Lite<T>)lite);
+                if (resp != null)
+                    return resp;
+            }
+
+            return null;
+        }
     }
 
     static bool IsQueryAllowed(Lite<QueryEntity> query)
