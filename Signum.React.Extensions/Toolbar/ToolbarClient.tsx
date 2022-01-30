@@ -87,7 +87,7 @@ export abstract class ToolbarConfig<T extends Entity> {
       <Nav.Item key={key}>
         <Nav.Link
           title={res.label}
-          className={p.sidebarMode.firstLower()}
+          className={sidebarMode.firstLower()}
           onClick={(e: React.MouseEvent<any>) => this.handleNavigateClick(e, res)}
           onAuxClick={(e: React.MouseEvent<any>) => this.handleNavigateClick(e, res)} active={isActive}>
           {this.getIcon(res)}<span title={res.label}>{res.label}</span>
