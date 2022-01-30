@@ -11,6 +11,7 @@ import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { SidebarMode  } from '../SidebarContainer'
+import { isActive } from '@framework/FindOptions';
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
   if (r.url)
@@ -19,7 +20,7 @@ function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: Hi
   if (!r.content)
     return false;
 
-  var config = ToolbarClient.configs[r.content.EntityType];
+  var config = ToolbarClient.getConfig(r);
   if (!config)
     return false;
 
@@ -60,8 +61,6 @@ export default function ToolbarRenderer(p: {
     }
   }
 
-  const randomKey = () => ("c" + (Math.random() * 1250));
-
   useHistoryListen((location: History.Location, action: History.Action) => {
     changeActive(location);
   }, response != null);
@@ -81,17 +80,17 @@ export default function ToolbarRenderer(p: {
           p.onAutoClose && p.onAutoClose();
         }
       }}>
-        {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => withKey(renderNavItem(res, false, () => setTimeout(() => setRefresh(!refresh), 500)), i))}
+        {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => renderNavItem(res, () => setTimeout(() => setRefresh(!refresh), 500), i))}
       </div>
     </div>
   );
 
-  function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, additionalPaddingDropdown?: boolean, onRefresh?: () => void, key?: string) {
+  function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, onRefresh: () => void, key: string | number) {
     let activeCheck = isCompatibleWithUrl(res, AppContext.history.location, QueryString.parse(AppContext.history.location.search));
 
     switch (res.type) {
       case "Divider":
-        return <hr style={{ margin: "10px 0 5px 0px" }}></hr>;
+        return <hr style={{ margin: "10px 0 5px 0px" }} key={key}></hr>;
       case "Header":
       case "Item":
         if (res.elements && res.elements.length) {
@@ -99,18 +98,18 @@ export default function ToolbarRenderer(p: {
           var icon = getIcon(res);
 
           return (
-            <CustomSidebarDropdown parentTitle={title} icon={icon} key={randomKey()} sidebarMode={p.sidebarMode}>
-              {res.elements && res.elements.map(sr => renderNavItem(sr, true, onRefresh, "e" + (Math.random() * 1250)))}
+            <CustomSidebarDropdown parentTitle={title} icon={icon} sidebarMode={p.sidebarMode} key={key}>
+              {res.elements && res.elements.map((sr, i) => renderNavItem(sr, onRefresh, i))}
             </CustomSidebarDropdown>
           );
         }
 
         if (res.url) {
           return (
-            <Nav.Item key={key ?? randomKey()}>
+            <Nav.Item key={key}>
               <Nav.Link
                 title={res.label}
-                style={{ paddingLeft: p.sidebarMode == "Wide" ? "25px" : "13px" }}
+                className={p.sidebarMode.firstLower()}
                 onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
                 onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
                 active={activeCheck || res == active}>
@@ -122,27 +121,16 @@ export default function ToolbarRenderer(p: {
         }
 
         if (res.content) {
-          var config = ToolbarClient.configs[res.content!.EntityType];
+          var config = ToolbarClient.getConfig(res);
           if (!config)
             return <Nav.Item style={{ color: "red" }}>{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
-          return (
-            <Nav.Item key={key ?? randomKey()}>
-              <Nav.Link
-                title={res.label}
-                style={{ paddingLeft: p.sidebarMode == "Wide" ? "25px" : "13px" }}
-                onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
-                onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} active={res == active}>
-                {config.getIcon(res)}<span title={res.label}>{res.label}</span>
-                {p.sidebarMode == "Narrow" && <div className={"nav-item-float"}>{res.label}</div>}
-              </Nav.Link>
-            </Nav.Item>
-          );
+          return config.getMenuItem(res, res == active, p.sidebarMode, key);
         }
 
         if (res.type == "Header") {
           return (
-            <div key={key ?? randomKey()} className={"nav-item-header" + (p.sidebarMode == "Wide" ? "" : " mini")}>
+            <div key={key} className={"nav-item-header" + (p.sidebarMode == "Wide" ? "" : " mini")}>
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
               {p.sidebarMode == "Wide" && <span>{res.label}</span>}
               {p.sidebarMode == "Narrow" && <div className={"nav-item-float"}>{res.label}</div>}
@@ -150,7 +138,7 @@ export default function ToolbarRenderer(p: {
           );
         }
 
-        return <Nav.Item key={key ?? randomKey()} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
+        return <Nav.Item key={key} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
 
       default:
         throw new Error("Unexpected " + res.type);
@@ -163,10 +151,6 @@ export default function ToolbarRenderer(p: {
 
     return icon && <FontAwesomeIcon icon={icon} className={"icon"} color={res.iconColor} fixedWidth />
   }
-}
-
-function withKey(e: React.ReactElement<any>, index: number) {
-  return React.cloneElement(e, { key: index });
 }
 
 function CustomSidebarDropdown(props: { parentTitle: string | undefined, sidebarMode: SidebarMode, icon: any, children: any }) {

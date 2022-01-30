@@ -123,3 +123,11 @@ body.rtl .sidebar .dropdown-item .icon {
     width: 260px;
     padding: 1rem;
 }
+
+.nav-link.wide {
+    padding-left: 25px;
+}
+
+.nav-link.narrow {
+    padding-left: 10px;
+}
