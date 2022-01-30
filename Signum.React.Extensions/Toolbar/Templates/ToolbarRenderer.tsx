@@ -69,7 +69,7 @@ export default function ToolbarRenderer(p: {
   React.useEffect(() => changeActive(AppContext.history.location), [response]);
 
   return (
-    <div className={"sidebar-inner " + (p.sidebarMode == "Wide" ? "" : " sidebar-collapsed")} style={{ paddingTop: "0px" }}>
+    <div className={"sidebar-inner " + (p.sidebarMode == "Wide" ? "" : " sidebar-collapsed")}>
       {p.appTitle}
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>

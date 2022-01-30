@@ -348,7 +348,7 @@ export const Breakpoints = {
 }
 
 export function getBreakpoint(): number {
-  var width = window.innerWidth;
+  var width = window.outerWidth;
   if (width < Breakpoints.sm) return 0;
   if (width < Breakpoints.md) return Breakpoints.sm;
   if (width < Breakpoints.lg) return Breakpoints.md;
@@ -365,7 +365,6 @@ export function useBreakpoint(): number {
 
   useWindowEvent("resize", (ev) => {
     var newBreakpoint = getBreakpoint();
-
     if (breakpointRef.current != newBreakpoint) {
       forceUpdate();
     }

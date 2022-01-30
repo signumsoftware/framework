@@ -23,7 +23,7 @@ export function SidebarContainer(p: SidebarContainerProps){
     return (
       <div className="sidebar sidebar-nav"
         role="navigation"
-        style={{ paddingTop: "10px", width: width, minWidth: width }}>
+        style={{ width: width, minWidth: width }}>
         {p.sidebarContent}
       </div>
     );
@@ -32,7 +32,7 @@ export function SidebarContainer(p: SidebarContainerProps){
   return (
     <div className="sidebar-container">
       {p.sidebarContent && renderSideBar()}
-      <div className="container-fluid sf-page-container" style={{ paddingTop: "10px" }}>
+      <div className="container-fluid sf-page-container">
         <ErrorBoundary>
           {p.children}
         </ErrorBoundary>
@@ -43,7 +43,7 @@ export function SidebarContainer(p: SidebarContainerProps){
 
 export function SidebarToggleItem(p: { isMobile: boolean; mode: SidebarMode, setMode: (mode: SidebarMode) => void }) {
   return (
-    <a className="main-sidebar-button" onClick={(ev) => {
+    <a className="main-sidebar-button nav-link" onClick={(ev) => {
       window.dispatchEvent(new CustomEvent("sidebarMove"));
       switch (p.mode) {
         case "Hidden": p.setMode("Wide"); break;
