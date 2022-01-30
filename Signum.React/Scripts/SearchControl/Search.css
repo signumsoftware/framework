@@ -1,17 +1,20 @@
 ﻿.sf-search-footer {
-    min-height: 50px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
-body:not(.rtl) .sf-search-footer > div {
-    float: left;
-    width: 33%;
-}
+    .sf-search-footer > div {
+        flex: 1;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 
-body.rtl .sf-search-footer > div {
-    float: right;
-    width: 33%;
+.sf-query-button-bar .btn-toolbar {
+    align-content: flex-start;
 }
-
 
 .btn-toolbar-small .btn {
     padding-top: 1px;
@@ -102,10 +105,6 @@ table.sf-search-results > tbody > tr > td {
 }
 
 
-#divSearchPage .sf-search-footer {
-    margin-top: 10px;
-}
-
 
 /* Multiply */
 
@@ -158,6 +157,7 @@ table.sf-search-results th.sf-current-column {
 
 .sf-scroll-table-container {
     overflow-x: auto;
+    max-width: calc(100vw - 26px); /*Not sure why is necessary*/
 }
 
     /*Avoid EntityLines to get on top of sticky headers*/
