@@ -16,7 +16,7 @@ import { PanelPartContentProps } from '../DashboardClient'
 import { getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { DashboardFilter, DashboardController, DashboardFilterRow, DashboardPinnedFilters, equalsDFR } from "./DashboardFilterController"
-import { filterOperations, FilterOptionParsed, isFilterGroupOption, isFilterGroupOptionParsed, QueryToken } from '@framework/FindOptions'
+import { filterOperations, FilterOptionParsed, isActive, isFilterGroupOption, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions'
 import { CachedQueryJS, executeChartCached } from '../CachedQueryExecutor'
 import { DashboardBehaviour } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery'
 
@@ -38,11 +38,11 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       return fs.flatMap(f => isFilterGroupOptionParsed(f) ? [f.token, ...allTokens(f.filters)].notNull() : [f.token].notNull())
     }
 
-    var tokens = allTokens(dashboardFilters);
+    var tokens = allTokens(dashboardFilters.filter(df => isActive(df)));
 
     chartRequest.filterOptions = [
       ...simpleFilters!,
-      ...useWhenNoFilters!.filter(a => !tokens.some(t => t.fullKey == a.token?.fullKey)),
+      ...useWhenNoFilters!.filter(a => !tokens.some(t => tokenStartsWith(a.token!, t))),
       ...dashboardFilters,
     ];
   }
