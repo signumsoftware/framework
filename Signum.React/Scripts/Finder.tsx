@@ -646,11 +646,11 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefi
 }
 
 export function getDefaultFilter(qd: QueryDescription | undefined, qs: QuerySettings | undefined): FilterOption[] | undefined {
-  if (qs?.simpleFilterBuilder)
-    return undefined;
-
   if (qs?.defaultFilters)
     return qs.defaultFilters;
+
+  if (qs?.simpleFilterBuilder)
+    return undefined;
 
   if (qd == null || qd.columns["Entity"]) {
     return [
