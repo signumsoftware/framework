@@ -148,7 +148,7 @@ export class DashboardController {
     const useWhenNoFilters = fo.filterOptions?.filter(a => a && a.dashboardBehaviour == "UseWhenNoFilters") as FilterOption[] ?? [];
 
 
-    var tokens = allTokens(dashboardFilters.filter(df => isActive(df))):
+    var tokens = allTokens(dashboardFilters.filter(df => isActive(df)));
 
     return {
       ...fo,
