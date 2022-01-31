@@ -209,6 +209,11 @@
     <Member Name="RefreshTokenEvery" Description="Aktualisieren Sie jeden Token" />
   </Type>
   <Type Name="AutoconfigureNeuralNetworkEntity" />
+  <Type Name="AutoUpdate" Description="Automatische Aktualisierung">
+    <Member Name="Dashboard" Description="Dashboard" />
+    <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
+    <Member Name="None" Description="Nichts" />
+  </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Rolle" />
     <Member Name="Rules" Description="Regeln" />
@@ -2699,6 +2704,7 @@
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
+    <Member Name="AutoUpdate" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
     <Member Name="RenderMode" Description="Render-Modus" />
