@@ -22,7 +22,7 @@ import { useAPI } from '@framework/Hooks';
 import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 import SelectorModal from '@framework/SelectorModal';
 import { translated } from '../Translation/TranslatedInstanceTools';
-import { DashboardFilterController } from "./View/DashboardFilterController";
+import { DashboardController } from "./View/DashboardFilterController";
 import { EntityFrame } from '../../Signum.React/Scripts/TypeContext';
 import { CachedQueryJS } from './CachedQueryExecutor';
 import { QueryEntity } from '../../Signum.React/Scripts/Signum.Entities.Basics';
@@ -34,7 +34,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
   part: T;
   entity?: Lite<Entity>;
   deps?: React.DependencyList;
-  filterController: DashboardFilterController;
+  dashboardController: DashboardController;
   cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }
 }
 

@@ -9,7 +9,7 @@ import { getQueryKey } from '@framework/Reflection';
 import { Dic, softCast } from '../../../Signum.React/Scripts/Globals';
 
 
-export class DashboardFilterController {
+export class DashboardController {
 
   forceUpdate: () => void;
 
