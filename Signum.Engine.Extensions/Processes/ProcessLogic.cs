@@ -100,13 +100,13 @@ public static class ProcessLogic
             ProcessGraph.Register();
 
             QueryLogic.Expressions.Register((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
-            QueryLogic.Expressions.Register((ProcessAlgorithmSymbol p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
+            QueryLogic.Expressions.Register((ProcessAlgorithmSymbol p) => p.LastProcess(), ProcessMessage.LastProcess);
 
             QueryLogic.Expressions.Register((IProcessDataEntity p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
-            QueryLogic.Expressions.Register((IProcessDataEntity p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
+            QueryLogic.Expressions.Register((IProcessDataEntity p) => p.LastProcess(), ProcessMessage.LastProcess);
 
-            QueryLogic.Expressions.Register((ProcessEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
-            QueryLogic.Expressions.Register((IProcessLineDataEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
+            QueryLogic.Expressions.Register((ProcessEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
+            QueryLogic.Expressions.Register((IProcessLineDataEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
 
             PropertyAuthLogic.SetMaxAutomaticUpgrade(PropertyRoute.Construct((ProcessEntity p) => p.User), PropertyAllowed.Read);
 

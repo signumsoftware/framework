@@ -128,10 +128,10 @@ public static class SchedulerLogic
                     Holidays = st.Holidays.Count,
                 });
 
-            QueryLogic.Expressions.Register((ITaskEntity ct) => ct.Executions(), () => ITaskMessage.Executions.NiceToString());
-            QueryLogic.Expressions.Register((ITaskEntity ct) => ct.LastExecution(), () => ITaskMessage.LastExecution.NiceToString());
-            QueryLogic.Expressions.Register((ScheduledTaskEntity ct) => ct.Executions(), () => ITaskMessage.Executions.NiceToString());
-            QueryLogic.Expressions.Register((ScheduledTaskLogEntity ct) => ct.ExceptionLines(), () => ITaskMessage.ExceptionLines.NiceToString());
+            QueryLogic.Expressions.Register((ITaskEntity ct) => ct.Executions(), ITaskMessage.Executions);
+            QueryLogic.Expressions.Register((ITaskEntity ct) => ct.LastExecution(), ITaskMessage.LastExecution);
+            QueryLogic.Expressions.Register((ScheduledTaskEntity ct) => ct.Executions(), ITaskMessage.Executions);
+            QueryLogic.Expressions.Register((ScheduledTaskLogEntity ct) => ct.ExceptionLines(), ITaskMessage.ExceptionLines);
 
             new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.Save)
             {

@@ -66,8 +66,8 @@ public static class DisconnectedLogic
                     dm.Exception,
                 });
             
-            QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Imports(), () => DisconnectedMessage.Imports.NiceToString());
-            QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Exports(), () => DisconnectedMessage.Exports.NiceToString());
+            QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Imports(), DisconnectedMessage.Imports);
+            QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Exports(), DisconnectedMessage.Exports);
 
             MachineGraph.Register();
 

@@ -269,7 +269,7 @@ public static class CaseActivityLogic
                     e.BoundaryEvent,
                 });
 
-            QueryLogic.Expressions.Register((WorkflowActivityEntity a) => a.AverageDuration(), () => WorkflowActivityMessage.AverageDuration.NiceToString());
+            QueryLogic.Expressions.Register((WorkflowActivityEntity a) => a.AverageDuration(), WorkflowActivityMessage.AverageDuration);
 
             SimpleTaskLogic.Register(CaseActivityTask.Timeout, (ScheduledTaskContext ctx) =>
             {
@@ -316,11 +316,11 @@ public static class CaseActivityLogic
             ProcessLogic.Register(CaseActivityProcessAlgorithm.Timeout, new PackageExecuteAlgorithm<CaseActivityEntity>(CaseActivityOperation.Timer));
 
             QueryLogic.Expressions.Register((CaseEntity c) => c.DecompositionSurrogateActivity());
-            QueryLogic.Expressions.Register((CaseActivityEntity ca) => ca.CurrentUserHasNotification(), () => CaseActivityMessage.CurrentUserHasNotification.NiceToString());
+            QueryLogic.Expressions.Register((CaseActivityEntity ca) => ca.CurrentUserHasNotification(), CaseActivityMessage.CurrentUserHasNotification);
             QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CaseActivities(), () => typeof(CaseActivityEntity).NicePluralName());
             QueryLogic.Expressions.Register((ICaseMainEntity a) => a.Cases(), () => typeof(CaseEntity).NicePluralName());
-            QueryLogic.Expressions.Register((ICaseMainEntity a) => a.LastCaseActivity(), () => CaseActivityMessage.LastCaseActivity.NiceToString());
-            QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CurrentUserHasNotification(), () => CaseActivityMessage.CurrentUserHasNotification.NiceToString());
+            QueryLogic.Expressions.Register((ICaseMainEntity a) => a.LastCaseActivity(), CaseActivityMessage.LastCaseActivity);
+            QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CurrentUserHasNotification(), CaseActivityMessage.CurrentUserHasNotification);
 
             sb.Include<CaseNotificationEntity>()
                 .WithExpressionFrom((CaseActivityEntity c) => c.Notifications())
