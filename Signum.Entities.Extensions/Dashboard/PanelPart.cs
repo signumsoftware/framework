@@ -146,6 +146,8 @@ public class UserQueryPartEntity : Entity, IPartEntity
 
     public UserQueryPartRenderMode RenderMode { get; set; }
 
+    public AutoUpdate AutoUpdate { get; set; }
+
     public bool AllowSelection { get; set; }
 
     public bool ShowFooter { get; set; }
@@ -195,6 +197,13 @@ public class UserQueryPartEntity : Entity, IPartEntity
         CreateNew = element.Attribute(nameof(CreateNew))?.Value.ToBool() ?? false;
         IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
     }
+}
+
+public enum AutoUpdate
+{
+    None,
+    InteractionGroup,
+    Dashboard,
 }
 
 public enum InteractionGroup

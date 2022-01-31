@@ -92,6 +92,9 @@ public class ExpressionContainer
         return extensionsTokens.Concat(dicExtensionsTokens);
     }
 
+    public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Enum niceName) =>
+        Register(lambdaToMethodOrProperty, () => niceName.NiceToString());
+
     public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string>? niceName = null)
     {
         using (HeavyProfiler.LogNoStackTrace("RegisterExpression"))

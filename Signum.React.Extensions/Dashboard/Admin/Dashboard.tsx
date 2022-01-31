@@ -119,11 +119,9 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
     <div>
       <div>
         <div className="row">
-          <div className="col-sm-6">
-            <ValueLine ctx={ctxBasic.subCtx(cp => cp.displayName)} />
-          </div>
-          <div className="col-sm-2">
-            <ValueLine ctx={ctxBasic.subCtx(cp => cp.hideDisplayName)} />
+          <div className="col-sm-4">
+            <ValueLine ctx={ctxBasic.subCtx(cp => cp.displayName)}
+              helpText={<ValueLine ctx={ctxBasic.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />} />
           </div>
           <div className="col-sm-2">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.dashboardPriority)} />

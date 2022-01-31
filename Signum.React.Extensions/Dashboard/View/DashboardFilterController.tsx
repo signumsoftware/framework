@@ -1,4 +1,4 @@
-import { DashboardEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard';
+import { DashboardEntity, InteractionGroup, PanelPartEmbedded } from '../Signum.Entities.Dashboard';
 import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOptionParsed, FindOptions, isFilterGroupOptionParsed, QueryToken } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart';
@@ -19,12 +19,26 @@ export class DashboardController {
   dashboard: DashboardEntity;
   queriesWithEquivalences: string/*queryKey*/[];
 
+
+  invalidationMap: Map<PanelPartEmbedded, () => void> = new Map();
+
   constructor(forceUpdate: () => void, dashboard: DashboardEntity) {
     this.forceUpdate = forceUpdate;
     this.dashboard = dashboard;
 
     this.queriesWithEquivalences = dashboard.tokenEquivalencesGroups.flatMap(a => a.element.tokenEquivalences.map(a => a.element.query.key)).distinctBy(a => a);
     
+  }
+
+  registerInvalidations(embedded: PanelPartEmbedded, invalidation: () => void) {
+    this.invalidationMap.set(embedded, invalidation);
+  }
+
+  invalidate(source: PanelPartEmbedded, interactionGroup: InteractionGroup | null | undefined) {
+    Array.from(this.invalidationMap.keys())
+      .filter(p => p != source && (interactionGroup == null || p.interactionGroup == interactionGroup))
+      .forEach(p => this.invalidationMap.get(p)!());
+
   }
 
   setFilter(filter: DashboardFilter) {
