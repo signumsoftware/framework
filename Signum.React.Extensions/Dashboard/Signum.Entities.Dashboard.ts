@@ -13,6 +13,12 @@ import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const AutoUpdate = new EnumType<AutoUpdate>("AutoUpdate");
+export type AutoUpdate =
+  "None" |
+  "InteractionGroup" |
+  "Dashboard";
+
 export const CachedQueryEntity = new Type<CachedQueryEntity>("CachedQuery");
 export interface CachedQueryEntity extends Entities.Entity {
   Type: "CachedQuery";
@@ -196,6 +202,7 @@ export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
   userQuery: UserQueries.UserQueryEntity;
   isQueryCached: boolean;
   renderMode: UserQueryPartRenderMode;
+  autoUpdate: AutoUpdate;
   allowSelection: boolean;
   showFooter: boolean;
   createNew: boolean;

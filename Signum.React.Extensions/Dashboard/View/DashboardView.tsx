@@ -12,7 +12,7 @@ import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 
-import { DashboardFilterController } from './DashboardFilterController'
+import { DashboardController } from './DashboardFilterController'
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files'
 import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '../../../Signum.React/Scripts/SearchControl/PinnedFilterBuilder'
@@ -20,8 +20,7 @@ import PinnedFilterBuilder from '../../../Signum.React/Scripts/SearchControl/Pin
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; }) {
 
   const forceUpdate = useForceUpdate();
-  var filterController = React.useMemo(() => new DashboardFilterController(forceUpdate, p.dashboard), [p.dashboard]);
-
+  const dashboardController = React.useMemo(() => new DashboardController(forceUpdate, p.dashboard), [p.dashboard]);
 
   function renderBasic() {
     const db = p.dashboard;
@@ -44,7 +43,8 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
 
                     return (
                       <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
-                        <PanelPart ctx={c} entity={p.entity} filterController={filterController} reload={p.reload} cachedQueries={p.cachedQueries} />
+                        <PanelPart ctx={c} entity={p.entity}
+                          dashboardController={dashboardController} reload={p.reload} cachedQueries={p.cachedQueries} deps={p.deps} />
                       </div>
                     );
                   })}
@@ -81,7 +81,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
               const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
               return (
                 <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`}>
-                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} filterController={filterController} reload={p.reload} cachedQueries={p.cachedQueries} />)}
+                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} dashboardController={dashboardController} reload={p.reload} cachedQueries={p.cachedQueries} deps={p.deps} />)}
                 </div>
               );
             })}
@@ -94,8 +94,8 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
 
   return (
     <div>
-      {filterController.pinnedFilters.size > 0 && <PinnedFilterBuilder
-        filterOptions={Array.from(filterController.pinnedFilters.values()).flatMap(a => a.pinnedFilters)}
+      {dashboardController.pinnedFilters.size > 0 && <PinnedFilterBuilder
+        filterOptions={Array.from(dashboardController.pinnedFilters.values()).flatMap(a => a.pinnedFilters)}
         onFiltersChanged={forceUpdate} />}
       {
         p.dashboard.combineSimilarRows ?
@@ -183,7 +183,7 @@ export interface PanelPartProps {
   ctx: TypeContext<PanelPartEmbedded>;
   entity?: Entity;
   deps?: React.DependencyList;
-  filterController: DashboardFilterController;
+  dashboardController: DashboardController;
   reload: () => void;
   cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }
 }
@@ -209,7 +209,7 @@ export function PanelPart(p: PanelPartProps) {
       part: content,
       entity: lite,
       deps: p.deps,
-      filterController: p.filterController,
+      dashboardController: p.dashboardController,
       cachedQueries: p.cachedQueries
     } as DashboardClient.PanelPartContentProps<IPartEntity>);
   }
@@ -226,10 +226,10 @@ export function PanelPart(p: PanelPartProps) {
 
   var style = part.customColor != null ?  "customColor": "light";
 
-  var dashboardFilter = p.filterController?.filters.get(p.ctx.value);
+  var dashboardFilter = p.dashboardController?.filters.get(p.ctx.value);
 
   function handleClearFilter(e: React.MouseEvent) {
-    p.filterController.clearFilters(p.ctx.value);
+    p.dashboardController.clearFilters(p.ctx.value);
   }
 
   return (
@@ -264,7 +264,7 @@ export function PanelPart(p: PanelPartProps) {
               part: content,
               entity: lite,
               deps: p.deps,
-              filterController: p.filterController,
+              dashboardController: p.dashboardController,
               cachedQueries: p.cachedQueries,
             } as DashboardClient.PanelPartContentProps<IPartEntity>)
           }

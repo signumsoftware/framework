@@ -18,11 +18,13 @@ import SelectorModal from '@framework/SelectorModal'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import { CachedQueryJS, executeQueryCached, executeQueryValueCached } from '../CachedQueryExecutor'
-import { DashboardPinnedFilters } from './DashboardFilterController'
+import { DashboardController, DashboardPinnedFilters } from './DashboardFilterController'
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
   let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
+
+  const [refreshKey, setRefreshKey] = React.useState<number>(0);
 
   React.useEffect(() => {
 
@@ -32,41 +34,56 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
       if (dashboardPinnedFilters.length) {
         Finder.getQueryDescription(fo.queryName)
           .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd))
-          .then(fops => p.filterController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops)))
+          .then(fops => p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops)))
           .done();
       }
     }
   }, [fo]);
+
+  React.useEffect(() => {
+    p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
+  }, [p.partEmbedded])
 
   const cachedQuery = p.cachedQueries[liteKey(toLite(p.part.userQuery))];
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
-  fo = p.filterController.applyToFindOptions(p.partEmbedded, fo);
+  const foExpanded = p.dashboardController.applyToFindOptions(p.partEmbedded, fo);
 
   if (p.part.renderMode == "BigValue") {
     return <BigValueSearchCounter
-      findOptions={fo}
+      findOptions={foExpanded}
       text={translated(p.partEmbedded, a => a.title) || translated(p.part.userQuery, a => a.displayName)}
       iconName={p.partEmbedded.iconName ?? undefined}
       iconColor={p.partEmbedded.iconColor ?? undefined}
-      deps={p.deps}
+      deps={[...p.deps ?? [], refreshKey]}
       cachedQuery={cachedQuery}
       customColor={p.partEmbedded.customColor}
       sameColor={p.partEmbedded.useIconColorForTitle}
     />;
   }
 
-  return <SearchContolInPart
-    part={p.part}
-    findOptions={fo}
-    deps={p.deps}
-    cachedQuery={cachedQuery} />;
+  return (
+    <SearchContolInPart
+      part={p.part}
+      findOptions={foExpanded}
+      deps={[...p.deps ?? [], refreshKey]}
+      onDataChanged={() => {
+        if (p.part.autoUpdate == "Dashboard") {
+          p.dashboardController.invalidate(p.partEmbedded, null);
+        }
+        else if (p.part.autoUpdate == "InteractionGroup" && p.partEmbedded.interactionGroup != null) {
+          p.dashboardController.invalidate(p.partEmbedded, p.partEmbedded.interactionGroup)
+        }
+      }}
+      cachedQuery={cachedQuery} />
+  );
 }
 
-function SearchContolInPart({ findOptions, part, deps, cachedQuery }: {
+function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChanged }: {
   findOptions: FindOptions,
+  onDataChanged: () => void,
   part: UserQueryPartEntity,
   cachedQuery?: Promise<CachedQueryJS>,
   deps?: React.DependencyList
@@ -84,7 +101,10 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery }: {
         .then(ti => ti && Finder.getPropsFromFilters(ti, fop)
           .then(props => Constructor.constructPack(ti.name, props)))
         .then(pack => pack && Navigator.view(pack))
-        .then(() => setRefreshCount(a => a + 1)))
+        .then(() => {
+          onDataChanged();
+          setRefreshCount(a => a + 1);
+        }))
       .done();
   }
 
@@ -100,6 +120,8 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery }: {
         defaultRefreshMode={part.userQuery.refreshMode}
         searchOnLoad={part.userQuery.refreshMode == "Auto"}
         customRequest={cachedQuery && ((req, fop) => cachedQuery!.then(cq => executeQueryCached(req, fop, cq)))}
+        onSearch={(fo, dataChange) => dataChange && onDataChanged()}
+        
       />
     </FullscreenComponent>
   );

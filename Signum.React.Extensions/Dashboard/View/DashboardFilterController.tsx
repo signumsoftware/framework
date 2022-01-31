@@ -1,5 +1,5 @@
-import { DashboardEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard';
-import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOptionParsed, FindOptions, isFilterGroupOptionParsed, QueryToken } from '@framework/FindOptions';
+import { DashboardEntity, InteractionGroup, PanelPartEmbedded } from '../Signum.Entities.Dashboard';
+import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, FindOptions, isActive, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart';
 import { ChartRow } from '../../Chart/ChartClient';
@@ -9,7 +9,7 @@ import { getQueryKey } from '@framework/Reflection';
 import { Dic, softCast } from '../../../Signum.React/Scripts/Globals';
 
 
-export class DashboardFilterController {
+export class DashboardController {
 
   forceUpdate: () => void;
 
@@ -19,12 +19,26 @@ export class DashboardFilterController {
   dashboard: DashboardEntity;
   queriesWithEquivalences: string/*queryKey*/[];
 
+
+  invalidationMap: Map<PanelPartEmbedded, () => void> = new Map();
+
   constructor(forceUpdate: () => void, dashboard: DashboardEntity) {
     this.forceUpdate = forceUpdate;
     this.dashboard = dashboard;
 
     this.queriesWithEquivalences = dashboard.tokenEquivalencesGroups.flatMap(a => a.element.tokenEquivalences.map(a => a.element.query.key)).distinctBy(a => a);
     
+  }
+
+  registerInvalidations(embedded: PanelPartEmbedded, invalidation: () => void) {
+    this.invalidationMap.set(embedded, invalidation);
+  }
+
+  invalidate(source: PanelPartEmbedded, interactionGroup: InteractionGroup | null | undefined) {
+    Array.from(this.invalidationMap.keys())
+      .filter(p => p != source && (interactionGroup == null || p.interactionGroup == interactionGroup))
+      .forEach(p => this.invalidationMap.get(p)!());
+
   }
 
   setFilter(filter: DashboardFilter) {
@@ -119,16 +133,29 @@ export class DashboardFilterController {
  
 
   applyToFindOptions(partEmbedded: PanelPartEmbedded, fo: FindOptions): FindOptions {
-    var fops = this.getFilterOptions(partEmbedded, getQueryKey(fo.queryName));
-    if (fops.length == 0)
+
+    var dashboardFilters = this.getFilterOptions(partEmbedded, getQueryKey(fo.queryName));
+    if (dashboardFilters.length == 0)
       return fo;
 
-    var newFilters = Finder.toFilterOptions(fops);
+    var dashboardFOs = Finder.toFilterOptions(dashboardFilters);
+
+    function allTokens(fs: FilterOptionParsed[]): QueryToken[] {
+      return fs.flatMap(f => isFilterGroupOptionParsed(f) ? [f.token, ...allTokens(f.filters)].notNull() : [f.token].notNull())
+    }
+
+    const simpleFilters = fo.filterOptions?.filter(a => a && a.dashboardBehaviour == null) ?? [];
+    const useWhenNoFilters = fo.filterOptions?.filter(a => a && a.dashboardBehaviour == "UseWhenNoFilters") as FilterOption[] ?? [];
+
+
+    var tokens = allTokens(dashboardFilters.filter(df => isActive(df))):
+
     return {
       ...fo,
       filterOptions: [
-        ...fo.filterOptions ?? [],
-        ...newFilters
+        ...simpleFilters!,
+        ...useWhenNoFilters!.filter(a => !tokens.some(t => tokenStartsWith(a.token!, t))),
+        ...dashboardFOs,
       ]
     };
   }

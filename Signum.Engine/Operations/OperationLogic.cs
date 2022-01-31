@@ -92,7 +92,7 @@ public static class OperationLogic
                     os.Key
                 });
 
-            QueryLogic.Expressions.Register((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
+            QueryLogic.Expressions.Register((OperationSymbol o) => o.Logs(), OperationMessage.Logs);
             QueryLogic.Expressions.Register((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
 
 

@@ -227,7 +227,7 @@ public static class WorkflowLogic
 
             WorkflowGraph.Register();
             QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.WorkflowStartEvent());
-            QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.HasExpired(), () => WorkflowMessage.HasExpired.NiceToString());
+            QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.HasExpired(), WorkflowMessage.HasExpired);
             sb.AddIndex((WorkflowEntity wf) => wf.ExpirationDate);
 
             DynamicCode.GetCustomErrors += GetCustomErrors;
