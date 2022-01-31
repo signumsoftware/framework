@@ -101,7 +101,7 @@ function anyPinned(filterOptions?: FilterOption[]): boolean {
 
 
 namespace SearchPage {
-  export let marginDown = 130;
+  export let marginDown = 90;
   export let minHeight = 600;
   export let showFilters = (fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined) => {
     return false;

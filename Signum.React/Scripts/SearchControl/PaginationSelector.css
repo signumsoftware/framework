@@ -1,6 +1,10 @@
 ﻿
 /*Pagination*/
 
+.sf-pagination-left{
+    white-space: nowrap;
+}
+
 body:not(.rtl) .sf-pagination-left {
     text-align: left;
 }
@@ -9,8 +13,6 @@ body:not(.rtl) .sf-pagination-left {
 body.rtl .sf-pagination-left {
     text-align: right;
 }
-
-
 
 .sf-pagination-center {
     display: flex;

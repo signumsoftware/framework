@@ -6,19 +6,23 @@ using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using System.Xml.Linq;
 using Signum.Utilities.Reflection;
+using System.ComponentModel;
 
 namespace Signum.Entities.Toolbar;
 
+public interface IToolbarEntity: IEntity
+{
+    MList<ToolbarElementEmbedded> Elements { get; }
+}
+
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class ToolbarEntity : Entity, IUserAssetEntity
+public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
 {
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
 
     [StringLengthValidator(Min = 3, Max = 100)]
     public string Name { get; set; }
-
-    public ToolbarLocation Location { get; set; }
 
     public int? Priority { get; set; }
 
@@ -34,7 +38,6 @@ public class ToolbarEntity : Entity, IUserAssetEntity
         return new XElement("Toolbar",
             new XAttribute("Guid", Guid),
             new XAttribute("Name", Name),
-            new XAttribute("Location", Location),
             Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
             Priority == null ? null! : new XAttribute("Priority", Priority.Value.ToString()),
             new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
@@ -43,7 +46,6 @@ public class ToolbarEntity : Entity, IUserAssetEntity
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         Name = element.Attribute("Name")!.Value;
-        Location = element.Attribute("Location")!.Value.ToEnum<ToolbarLocation>();
         Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
         Priority = element.Attribute("Priority")?.Let(a => int.Parse(a.Value));
         Elements.Synchronize(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
@@ -52,13 +54,6 @@ public class ToolbarEntity : Entity, IUserAssetEntity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
-}
-
-public enum ToolbarLocation
-{
-    Top,
-    Side,
-    Main,
 }
 
 [AutoInit]
@@ -81,7 +76,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
     [StringLengthValidator(Min = 3, Max = 100)]
     public string? IconColor { get; set; }
 
-    [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]
+    [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity), typeof(PermissionSymbol), typeof(ToolbarEntity))]
     public Lite<Entity>? Content { get; set; }
 
     [StringLengthValidator(Min = 1, Max = int.MaxValue), URLValidator(absolute: true, aspNetSiteRelative: true)]
@@ -169,7 +164,7 @@ public enum ToolbarElementType
 }
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
-public class ToolbarMenuEntity : Entity, IUserAssetEntity
+public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
 {
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
@@ -213,3 +208,9 @@ public static class ToolbarMenuOperation
     public static readonly DeleteSymbol<ToolbarMenuEntity> Delete;
 }
 
+public enum ToolbarMessage
+{
+    RecursionDetected,
+    [Description(@"{0} cycles have been found in the Toolbar due to the relationships:")]
+    _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships
+}

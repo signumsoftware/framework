@@ -9,12 +9,13 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
 import { Type } from '@framework/Reflection'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation } from './Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType } from './Signum.Entities.Toolbar'
 import * as Constructor from '@framework/Constructor'
-import * as Operations from '@framework/Operations'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
-import { ValueSearchControl } from '@framework/Search';
 import { parseIcon } from '../Basics/Templates/IconTypeahead';
+import { Nav } from 'react-bootstrap';
+import { SidebarMode } from './SidebarContainer';
+import { Dic } from '../../Signum.React/Scripts/Globals';
 
 export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarConfig<any>[]) {
   Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
@@ -25,12 +26,18 @@ export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarCon
 
   Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Item" }));
 
+  AppContext.clearSettingsActions.push(cleanConfigs);
+
   configs.forEach(c => registerConfig(c));
 
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(ToolbarEntity);
 
   Navigator.entityChanged.push((cleanName) => document.dispatchEvent(new RefreshCounterEvent(cleanName)));
+}
+
+export function cleanConfigs() {
+  Dic.clear(configs);
 }
 
 export class RefreshCounterEvent extends Event {
@@ -70,18 +77,41 @@ export abstract class ToolbarConfig<T extends Entity> {
       AppContext.pushOrOpenInTab(url, e);
     }).done();
   }
+
+  isApplicableTo(element: ToolbarResponse<T>) {
+    return true;
+  }
+
+  getMenuItem(res: ToolbarResponse<T>, isActive: boolean, sidebarMode: SidebarMode, key: number | string) {
+    return (
+      <Nav.Item key={key}>
+        <Nav.Link
+          title={res.label}
+          className={sidebarMode.firstLower()}
+          onClick={(e: React.MouseEvent<any>) => this.handleNavigateClick(e, res)}
+          onAuxClick={(e: React.MouseEvent<any>) => this.handleNavigateClick(e, res)} active={isActive}>
+          {this.getIcon(res)}<span title={res.label}>{res.label}</span>
+          {sidebarMode == "Narrow" && <div className={"nav-item-float"}>{res.label}</div>}
+        </Nav.Link>
+      </Nav.Item>
+    );
+  }
 }
 
 
-export const configs: { [type: string]: ToolbarConfig<any> } = {};
+export const configs: { [type: string]: ToolbarConfig<any>[] } = {};
 
 export function registerConfig<T extends Entity>(config: ToolbarConfig<T>) {
-  configs[config.type.typeName] = config;
+  (configs[config.type.typeName] ??= []).push(config);
+}
+
+export function getConfig(res: ToolbarResponse<any>) {
+  return configs[res.content!.EntityType].filter(c => c.isApplicableTo(res)).singleOrNull();
 }
 
 export namespace API {
-  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any> | null> {
-    return ajaxGet({ url: `~/api/toolbar/current/${location}` });
+  export function getCurrentToolbar(): Promise<ToolbarResponse<any> | null> {
+    return ajaxGet({ url: `~/api/toolbar/current` });
   }
 }
 

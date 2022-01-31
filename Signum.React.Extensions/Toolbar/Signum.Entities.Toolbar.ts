@@ -7,6 +7,10 @@ import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 
+export interface IToolbarEntity extends Entities.Entity {
+  elements: Entities.MList<ToolbarElementEmbedded>;
+}
+
 export const ToolbarElementEmbedded = new Type<ToolbarElementEmbedded>("ToolbarElementEmbedded");
 export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ToolbarElementEmbedded";
@@ -27,24 +31,17 @@ export type ToolbarElementType =
   "Item";
 
 export const ToolbarEntity = new Type<ToolbarEntity>("Toolbar");
-export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
+export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEntity, IToolbarEntity {
   Type: "Toolbar";
   owner: Entities.Lite<Entities.Entity> | null;
   name: string;
-  location: ToolbarLocation;
   priority: number | null;
   elements: Entities.MList<ToolbarElementEmbedded>;
   guid: string /*Guid*/;
 }
 
-export const ToolbarLocation = new EnumType<ToolbarLocation>("ToolbarLocation");
-export type ToolbarLocation =
-  "Top" |
-  "Side" |
-  "Main";
-
 export const ToolbarMenuEntity = new Type<ToolbarMenuEntity>("ToolbarMenu");
-export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
+export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity, IToolbarEntity {
   Type: "ToolbarMenu";
   owner: Entities.Lite<Entities.Entity> | null;
   guid: string /*Guid*/;
@@ -55,6 +52,11 @@ export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAsse
 export module ToolbarMenuOperation {
   export const Save : Entities.ExecuteSymbol<ToolbarMenuEntity> = registerSymbol("Operation", "ToolbarMenuOperation.Save");
   export const Delete : Entities.DeleteSymbol<ToolbarMenuEntity> = registerSymbol("Operation", "ToolbarMenuOperation.Delete");
+}
+
+export module ToolbarMessage {
+  export const RecursionDetected = new MessageKey("ToolbarMessage", "RecursionDetected");
+  export const _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships = new MessageKey("ToolbarMessage", "_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships");
 }
 
 export module ToolbarOperation {

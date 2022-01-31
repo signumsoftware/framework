@@ -1,4 +1,6 @@
-﻿
+.nav-item {
+    position: relative;
+}
 
 
 .dropdown-divider {
@@ -10,7 +12,7 @@
     padding-right: 10px;
 }
 
-body:not(.rtl) .menu-item-1{
+body:not(.rtl) .menu-item-1 {
     padding-left: 30px;
 }
 
@@ -25,18 +27,78 @@ body.rtl .menu-item-1 {
 li.menu-item-1 > a {
     padding-top: 5px;
     padding-bottom: 5px;
-
 }
+
+.nav-item-header {
+    padding: 5px;
+    margin-top: 30px;
+    transition: all ease 250ms;
+}
+
+    .nav-item-header span {
+        margin-right: 25px;
+        margin-left: 23px;
+        color: gray;
+        font-weight: bold;
+    }
+
+    .nav-item-header svg {
+        margin-left: 24px;
+        margin-right: -9px;
+        height: 16px;
+        opacity: 0.6;
+    }
+
+    .nav-item-header .nav-item-float {
+        position: fixed;
+        left: 69px;
+        background-color: #ffffffe6;
+        padding: 5px 20px;
+        border-radius: 6px;
+        transform: translateY(-29px);
+        box-shadow: 2px 2px 6px #00000052;
+        font-weight: bold;
+        border-left: 4px solid;
+        display: none;
+    }
+
+    .nav-item-header:hover .nav-item-float {
+        display: block;
+    }
+
+    .nav-item-header.mini {
+        margin-left: 11px;
+        padding: 0;
+        height: 0;
+        margin-top: 17px;
+    }
+
+    .nav-item-header.mini svg{
+        display: none;
+    }
 
 .sidebar .divider {
     height: 2px;
     background-color: #e7e7e7;
 }
 
-.sidebar .dropdown-header{
+.sidebar .dropdown-header {
     width: 100%;
 }
 
+.menu-item-1 {
+    background-color: #f3f3f3;
+}
+
+li.menu-item-1 > a {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.sidebar .divider {
+    height: 2px;
+    background-color: #e7e7e7;
+}
 
 body:not(.rtl) .sidebar .dropdown-item .icon {
     width: 20px;
@@ -47,8 +109,8 @@ body.rtl .sidebar .dropdown-item .icon {
     width: 20px;
 }
 
-.sf-cursor-pointer{
-    cursor:pointer;
+.sf-cursor-pointer {
+    cursor: pointer;
 }
 
 .toolbar-card {
@@ -60,4 +122,12 @@ body.rtl .sidebar .dropdown-item .icon {
 .toolbar-card-container {
     width: 260px;
     padding: 1rem;
+}
+
+.nav-link.wide {
+    padding-left: 25px;
+}
+
+.nav-link.narrow {
+    padding-left: 10px;
 }
