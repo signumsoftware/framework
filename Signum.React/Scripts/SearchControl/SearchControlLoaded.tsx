@@ -473,7 +473,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           </div>
         }
         {p.showHeader == true && !this.state.showFilters && !sfb && this.renderPinnedFilters(true)}
-        {p.showHeader == "PinnedFilters" && this.renderPinnedFilters(true)}
+        {p.showHeader == "PinnedFilters" && (sfb ?? this.renderPinnedFilters(true))}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
