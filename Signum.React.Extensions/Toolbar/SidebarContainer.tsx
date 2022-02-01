@@ -15,12 +15,6 @@ interface SidebarContainerProps {
 
 export function SidebarContainer(p: SidebarContainerProps){
   function renderSideBar() {
-    //let width =
-    //  p.mode == "Hidden" ? "0px" :
-    //    p.mode == "Narrow" ? (p.isMobile ? "0px" : "59px") :
-    //      p.mode == "Wide" ? (p.isMobile ? "100%" : "250px") :
-    //        "0px";
-
     return (
       <nav
         className={classes("sidebar sidebar-nav", p.mode.firstLower(), p.isMobile && "mobile")}
