@@ -207,9 +207,34 @@
     }
 }
 
-.sidebar.sidebar-nav{
+.sidebar.sidebar-nav {
     user-select: none;
 }
+
+    .sidebar.sidebar-nav.hidden {
+        width: 0px;
+        min-width: 0px;
+    }
+
+    .sidebar.sidebar-nav.narrow.mobile {
+        width: 0px;
+        min-width: 0px;
+    }
+
+    .sidebar.sidebar-nav.narrow:not(.mobile) {
+        width: 56px;
+        min-width: 56px;
+    }
+
+    .sidebar.sidebar-nav.wide.mobile {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .sidebar.sidebar-nav.wide:not(.mobile) {
+        width: 250px;
+        min-width: 250px;
+    }
 
 .main-toolbar {
     width: calc(100% + 27px);

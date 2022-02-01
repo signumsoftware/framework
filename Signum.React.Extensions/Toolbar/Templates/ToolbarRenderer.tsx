@@ -86,7 +86,6 @@ export default function ToolbarRenderer(p: {
   );
 
   function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, onRefresh: () => void, key: string | number) {
-    let activeCheck = isCompatibleWithUrl(res, AppContext.history.location, QueryString.parse(AppContext.history.location.search));
 
     switch (res.type) {
       case "Divider":
@@ -112,7 +111,7 @@ export default function ToolbarRenderer(p: {
                 className={p.sidebarMode.firstLower()}
                 onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
                 onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
-                active={activeCheck || res == active}>
+                active={res == active}>
                 {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}<span>{res.label}</span>
                 {p.sidebarMode == "Narrow" && <div className={"nav-item-float"}>{res.label}</div>}
               </Nav.Link>

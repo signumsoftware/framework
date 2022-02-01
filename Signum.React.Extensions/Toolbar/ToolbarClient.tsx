@@ -106,7 +106,7 @@ export function registerConfig<T extends Entity>(config: ToolbarConfig<T>) {
 }
 
 export function getConfig(res: ToolbarResponse<any>) {
-  return configs[res.content!.EntityType].filter(c => c.isApplicableTo(res)).singleOrNull();
+  return configs[res.content!.EntityType]?.filter(c => c.isApplicableTo(res)).singleOrNull();
 }
 
 export namespace API {

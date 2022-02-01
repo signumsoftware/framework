@@ -2,6 +2,7 @@ import * as React from 'react'
 import { ErrorBoundary } from '@framework/Components';
 import "./Sidebar.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { classes } from '../../Signum.React/Scripts/Globals';
 
 export type SidebarMode = "Wide" | "Narrow" | "Hidden";   
 
@@ -14,18 +15,18 @@ interface SidebarContainerProps {
 
 export function SidebarContainer(p: SidebarContainerProps){
   function renderSideBar() {
-    let width =
-      p.mode == "Hidden" ? "0px" :
-        p.mode == "Narrow" ? (p.isMobile ? "0px" : "59px") :
-          p.mode == "Wide" ? (p.isMobile ? "100%" : "250px") :
-            "0px";
+    //let width =
+    //  p.mode == "Hidden" ? "0px" :
+    //    p.mode == "Narrow" ? (p.isMobile ? "0px" : "59px") :
+    //      p.mode == "Wide" ? (p.isMobile ? "100%" : "250px") :
+    //        "0px";
 
     return (
-      <div className="sidebar sidebar-nav"
-        role="navigation"
-        style={{ width: width, minWidth: width }}>
+      <nav
+        className={classes("sidebar sidebar-nav", p.mode.firstLower(), p.isMobile && "mobile")}
+        role="navigation">
         {p.sidebarContent}
-      </div>
+      </nav>
     );
   }
 
