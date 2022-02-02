@@ -38,7 +38,7 @@ function simplifyName(name: string) {
 export function CultureDropdownMenuItem(props: { fullName?: boolean }) {
   var [show, setShow] = React.useState(false);
 
-  var cultures = useAPI(signal => CultureClient.getCultures(null), []);
+  var cultures = useAPI(signal => CultureClient.getCultures(false), []);
 
   if (!cultures)
     return null;
