@@ -27,17 +27,7 @@ public class WorkflowNodeGraph
 
         var act = Events.Values.Where(a => a.Type == WorkflowEventType.Start);
 
-        return act.Any(a =>
-        {
-            if (a.Lane.ActorsEval != null)
-            {
-                var actors = a.Lane.ActorsEval.Algorithm.GetActors(null!, new WorkflowTransitionContext(null, null, null));
-
-                return actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
-            }
-
-            return a.Lane.Actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a));
-        });
+        return act.Any(a => a.Lane.Actors.Any(a => WorkflowLogic.IsUserActor(UserEntity.Current, a)));
     }
 
     public IWorkflowNodeEntity GetNode(Lite<IWorkflowNodeEntity> lite)
