@@ -197,7 +197,7 @@ public static class ParsedModel
     {
         var members = new List<MemberInfo>();
         var type = modelType;
-        foreach (var field in (fieldOrPropertyChain ?? "").Trim().Split('.'))
+        foreach (var field in (fieldOrPropertyChain ?? "").Trim().SplitNoEmpty('.'))
         {
             var info = (MemberInfo?)type.GetField(field, Flags) ??
                        (MemberInfo?)type.GetProperty(field, Flags) ??
