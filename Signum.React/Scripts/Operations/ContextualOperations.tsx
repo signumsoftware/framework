@@ -320,7 +320,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         return getSetters(coc)
           .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {
-              coc.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
+              coc.raiseEntityChanged();
               notifySuccess();
               coc.context.markRows(report.errors);
             })));
@@ -328,7 +328,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         return getSetters(coc)
           .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {
-              coc.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
+              coc.raiseEntityChanged();
               notifySuccess();
               coc.context.markRows(report.errors);
             })));

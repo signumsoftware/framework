@@ -298,6 +298,10 @@ export class ContextualOperationContext<T extends Entity> {
 
     return [<OperationMenuItem coc={this} />];
   }
+
+  raiseEntityChanged() {
+    return this.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
+  }
 }
 
 export class EntityOperationContext<T extends Entity> {
