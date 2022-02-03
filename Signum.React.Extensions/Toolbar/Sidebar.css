@@ -74,11 +74,21 @@
             color: var(--sidebar-accent);
         }
 
-            .sidebar-inner .nav-item .nav-link.active svg {
+            .sidebar-inner .nav-item .nav-link.active svg.icon {
                 color: var(--sidebar-accent);
             }
 
-        .sidebar-inner .nav-item .nav-link svg {
+            .sidebar-inner .nav-item .nav-link.active span.icon.count-search {
+                background-color: var(--sidebar-accent);
+            }
+
+        .sidebar-inner .nav-item .nav-link span.icon.count-search {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sidebar-inner .nav-item .nav-link .icon {
             height: 25px;
             width: 25px;
             vertical-align: middle;
