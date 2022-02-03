@@ -33,7 +33,7 @@ export function start(options: { routes: JSX.Element[] }) {
   AppContext.clearSettingsActions.push(clearWidgets)
   AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
   AppContext.clearSettingsActions.push(clearCustomConstructors);
-  AppContext.clearSettingsActions.push()
+  AppContext.clearSettingsActions.push(cleanEntityChanged);
   ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
   ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
 }
