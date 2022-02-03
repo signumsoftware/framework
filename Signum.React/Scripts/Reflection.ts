@@ -734,6 +734,8 @@ export class Binding<T> implements IBinding<T> {
         (this.parentObject as ModifiableEntity).modified = true;
       }
     }
+
+    this.initialValue = val;
   }
 
   deleteValue() {
