@@ -77,6 +77,22 @@ li.menu-item-1 > a {
         display: none;
     }
 
+.nav-arrow-icon {
+}
+
+.nav-icon-with-arrow {
+    opacity: .3;
+}
+
+
+.sidebar-nav.wide .nav-arrow-icon {
+    margin-left: -20px;
+}
+
+.sidebar-nav.wide .nav-icon-with-arrow {
+    opacity: .8;
+}
+
 .sidebar .divider {
     height: 2px;
     background-color: #e7e7e7;

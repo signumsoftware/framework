@@ -68,7 +68,7 @@ export default function ToolbarRenderer(p: {
   React.useEffect(() => changeActive(AppContext.history.location), [response]);
 
   return (
-    <div className={"sidebar-inner " + (p.sidebarMode == "Wide" ? "" : " sidebar-collapsed")}>
+    <div className={"sidebar-inner"}>
       {p.appTitle}
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
@@ -94,7 +94,7 @@ export default function ToolbarRenderer(p: {
       case "Item":
         if (res.elements && res.elements.length) {
           var title = res.label || res.content!.toStr;
-          var icon = getIcon(res);
+          var icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
 
           return (
             <CustomSidebarDropdown parentTitle={title} icon={icon} sidebarMode={p.sidebarMode} key={key}>
@@ -164,8 +164,10 @@ function CustomSidebarDropdown(props: { parentTitle: string | undefined, sidebar
           onClick={() => setShow(!show)}
           style={{ paddingLeft: props.sidebarMode == "Wide" ? 25 : 13, cursor: 'pointer' }}>
           <div style={{ display: 'inline-block', position: 'relative' }}>
-            <div style={{ position: 'absolute', opacity: 0.2 }}>{props.icon}</div>
-            {show ? <FontAwesomeIcon icon={"caret-up"} /> : <FontAwesomeIcon icon={"caret-down"} />}
+            <div className="nav-arrow-icon" style={{ position: 'absolute' }}>{show ? <FontAwesomeIcon icon={"caret-down"} /> : <FontAwesomeIcon icon={"caret-right"} />}</div>
+            <div className="nav-icon-with-arrow">
+              {props.icon}
+            </div>
           </div>
           <span className={"nav-item-dropdown-elem"} style={{ marginLeft: "16px", verticalAlign: "middle" }}>{props.parentTitle}</span>
           {props.sidebarMode == "Narrow" && <div className={"nav-item-float"}>{props.parentTitle}</div>}
