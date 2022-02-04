@@ -19,11 +19,16 @@ import { DashboardFilter, DashboardController, DashboardFilterRow, DashboardPinn
 import { filterOperations, FilterOptionParsed, isActive, isFilterGroupOption, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions'
 import { CachedQueryJS, executeChartCached } from '../CachedQueryExecutor'
 import { DashboardBehaviour } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery'
+import { softCast } from '../../../Signum.React/Scripts/Globals'
+
+export interface UserChartPartHandler {
+  chartRequest: ChartRequestModel | undefined;
+  reloadQuery: () => void;
+}
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>) {
 
-  const qd = useAPI(() => Finder.getQueryDescription(p.part.userChart.query.key), [p.part.userChart.query.key]);
-  const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.part.userChart, p.entity), [p.part.userChart, p.entity && liteKey(p.entity), ...p.deps ?? []]);
+  const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.content.userChart, p.entity), [p.content.userChart, p.entity && liteKey(p.entity), ...p.deps ?? []]);
   const initialSelection = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.dashboardBehaviour == "UseAsInitialSelection"), [chartRequest]);
   const dashboardPinnedFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == "PromoteToDasboardPinnedFilter"), [chartRequest]);
   const useWhenNoFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == "UseWhenNoFilters"), [chartRequest]);
@@ -73,7 +78,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }, [initialSelection, dashboardPinnedFilters]);
 
   
-  const cachedQuery = p.cachedQueries[liteKey(toLite(p.part.userChart))];
+  const cachedQuery = p.cachedQueries[liteKey(toLite(p.content.userChart))];
 
   const [resultOrError, reloadQuery] = useAPIWithReload<undefined | { error?: any, result?: ChartClient.API.ExecuteChartResult }>(() => {
     if (chartRequest == null)
@@ -90,7 +95,12 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   }, [chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(chartRequest, null)), ...p.deps ?? []], { avoidReset: true });
 
-  const [showData, setShowData] = React.useState(p.part.showData);
+  p.customDataRef.current = softCast<UserChartPartHandler>({
+    chartRequest,
+    reloadQuery
+  });
+
+  const [showData, setShowData] = React.useState(p.content.showData);
   
   function renderError(e: any) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
@@ -124,24 +134,10 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     reloadQuery();
   }
 
-  const typeInfos = qd && getTypeInfos(qd.columns["Entity"].type).filter(ti => Navigator.isCreable(ti, { isSearch: true }));
-  const handleOnCreateNew = p.part.createNew && typeInfos && typeInfos.length > 0 ? handleCreateNew : undefined;
-
-  function handleCreateNew(e: React.MouseEvent<any>) {
-    e.preventDefault();
-
-    return SelectorModal.chooseType(typeInfos!)
-      .then(ti => ti && Finder.getPropsFromFilters(ti, chartRequest!.filterOptions)
-        .then(props => Constructor.constructPack(ti.name, props)))
-      .then(pack => pack && Navigator.view(pack))
-      .then(() => reloadQuery())
-      .done();
-  }
-
   return (
     <div>
       <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => reloadQuery()} pinnedFilterVisible={fop => fop.dashboardBehaviour == null} extraSmall={true} />
-      {p.part.allowChangeShowData &&
+      {p.content.allowChangeShowData &&
         <label>
           <input type="checkbox" className="form-check-input" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
           {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
@@ -156,8 +152,6 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
             resultTable={result.resultTable!}
             onOrderChanged={() => reloadQuery()}
             onReload={handleReload}
-            typeInfos={typeInfos}
-            onCreateNew={handleOnCreateNew}
           />) :
         <ChartRenderer
           chartRequest={chartRequest}
@@ -200,9 +194,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
             }
           }}
           onReload={handleReload}
-          autoRefresh={p.part.autoRefresh}
-          typeInfos={typeInfos}
-          onCreateNew={handleOnCreateNew}
+          autoRefresh={p.content.autoRefresh}
         />
       }
     </div>

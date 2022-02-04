@@ -7,7 +7,7 @@ import { SeparatorPartEntity } from '../Signum.Entities.Dashboard';
 export default function SeparatorPart(p: PanelPartContentProps<SeparatorPartEntity>) {
   return (
     <div>
-      <h1>{p.part.title}</h1>
+      <h1>{p.content.title}</h1>
     </div>
   );
 }

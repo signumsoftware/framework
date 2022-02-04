@@ -1,4 +1,3 @@
-
 import * as React from 'react'
 import { Tabs, Tab } from 'react-bootstrap'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,8 +18,6 @@ import { withClassName } from '../../Dynamic/View/HtmlAttributesExpression';
 import { classes } from '../../../Signum.React/Scripts/Globals';
 import { OperationButton } from '../../../Signum.React/Scripts/Operations/EntityOperations';
 import { EntityOperationContext } from '../../../Signum.React/Scripts/Operations';
-import { addAdditionalTabs } from '../../../Signum.React/Scripts/Frames/WidgetEmbedded';
-import a from 'bpmn-js/lib/features/search';
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';
 
