@@ -164,7 +164,7 @@ function CustomSidebarDropdown(props: { parentTitle: string | undefined, sidebar
           onClick={() => setShow(!show)}
           style={{ paddingLeft: props.sidebarMode == "Wide" ? 25 : 13, cursor: 'pointer' }}>
           <div style={{ display: 'inline-block', position: 'relative' }}>
-            <div className="nav-arrow-icon" style={{ position: 'absolute' }}>{show ? <FontAwesomeIcon icon={"caret-down"} /> : <FontAwesomeIcon icon={"caret-right"} />}</div>
+            <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
             <div className="nav-icon-with-arrow">
               {props.icon}
             </div>
