@@ -51,7 +51,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
-+ [2022.02.07 New Responsive Sidebar](https://github.com/signumsoftware/framework/commit/2a613da38e306011b5e9efcbf0c90fbf948da39a#commitcomment-66136445)
+* [2022.02.07 New Responsive Sidebar](https://github.com/signumsoftware/framework/commit/2a613da38e306011b5e9efcbf0c90fbf948da39a#commitcomment-66136445)
 * [2022.01.08 Dashboard V: Dashboard Pinned Filters](https://github.com/signumsoftware/framework/commit/552079543443bff685e0a5b2fbe48dbefaaf149b#commitcomment-63148535)
 * [2022.01.08 Dashboard IV: Dashboard IV: Token Equivalences](https://github.com/signumsoftware/framework/commit/85b2648205a6cd1e3a84ffdac955b74585cddfa2#comments)
 * [2021.12.19 Split between Size and Precission and Microsoft.Data.SqlClient 4.0.0](https://github.com/signumsoftware/framework/commit/fe17abd91b3e319d78c7ae2b4dfb0c70c7c4f276)
