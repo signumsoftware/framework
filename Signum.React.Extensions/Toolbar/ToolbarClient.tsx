@@ -16,6 +16,7 @@ import { parseIcon } from '../Basics/Templates/IconTypeahead';
 import { Nav } from 'react-bootstrap';
 import { SidebarMode } from './SidebarContainer';
 import { Dic } from '../../Signum.React/Scripts/Globals';
+import { ToolbarNavItem } from './Templates/ToolbarRenderer';
 
 export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarConfig<any>[]) {
   Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
@@ -82,18 +83,13 @@ export abstract class ToolbarConfig<T extends Entity> {
     return true;
   }
 
-  getMenuItem(res: ToolbarResponse<T>, isActive: boolean, sidebarMode: SidebarMode, key: number | string) {
+  getMenuItem(res: ToolbarResponse<T>, isActive: boolean, key: number | string) {
     return (
-      <Nav.Item key={key}>
-        <Nav.Link
-          title={res.label}
-          className={sidebarMode.firstLower()}
-          onClick={(e: React.MouseEvent<any>) => this.handleNavigateClick(e, res)}
-          onAuxClick={(e: React.MouseEvent<any>) => this.handleNavigateClick(e, res)} active={isActive}>
-          {this.getIcon(res)}<span title={res.label}>{res.label}</span>
-          {sidebarMode == "Narrow" && <div className={"nav-item-float"}>{res.label}</div>}
-        </Nav.Link>
-      </Nav.Item>
+      <ToolbarNavItem key={key}
+        title={res.label}
+        onClick={(e: React.MouseEvent<any>) => this.handleNavigateClick(e, res)}
+        active={isActive}
+        icon={this.getIcon(res)}/>
     );
   }
 }

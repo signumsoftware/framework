@@ -199,6 +199,7 @@ public static class WorkflowLogic
         {
             PermissionAuthLogic.RegisterPermissions(WorkflowPermission.ViewWorkflowPanel);
             PermissionAuthLogic.RegisterPermissions(WorkflowPermission.ViewCaseFlow);
+            PermissionAuthLogic.RegisterPermissions(WorkflowPermission.WorkflowToolbarMenu);
 
             WorkflowLogic.getConfiguration = getConfiguration;
 
