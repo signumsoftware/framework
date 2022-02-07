@@ -25,7 +25,7 @@ export interface ValueLineProps extends LineBaseProps {
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
-  initiallyFocused?: boolean;
+  initiallyFocused?: boolean | number;
 
   incrementWithArrow?: boolean | number;
 
@@ -76,7 +76,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
               element.setSelectionRange(0, element.value.length);
             element.focus();
           }
-        }, 0);
+        }, this.props.initiallyFocused  == true ? 0 : this.props.initiallyFocused as number);
       }
 
     }, []);
