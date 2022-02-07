@@ -68,6 +68,14 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
     var icon = parseIcon(tc.value.iconName);
 
+    var avoidDrag: React.HTMLAttributes<any> = {
+      draggable: true,
+      onDragStart: e => {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
     const title = (
       <div>
         <div className="d-flex">
@@ -76,26 +84,26 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
             <div className="row">
               <div className="col-sm-8">
-                < ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
+                < ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag} />
               </div>
               <div className="col-sm-4">
-                <ValueLine ctx={tcs.subCtx(pp => pp.interactionGroup)}
+                <ValueLine ctx={tcs.subCtx(pp => pp.interactionGroup)} valueHtmlAttributes={avoidDrag}
                   onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
               </div>
             </div>
 
             <div className="row">
-                <div className="col-sm-3">
-                  <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
+              <div className="col-sm-3">
+                <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} inputAttrs={avoidDrag} onChange={() => forceUpdate()} />
                 </div>
               <div className="col-sm-3">
-                <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => forceUpdate()} />
+                <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} inputAttrs={avoidDrag} onChange={() => forceUpdate()} />
               </div>
               <div className="col-sm-3">
-                <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
+                <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} inputAttrs={avoidDrag} onChange={() => forceUpdate()} />
               </div>
               <div className="col-sm-3">
-                <ValueLine ctx={tcs.subCtx(t => t.useIconColorForTitle)} onChange={() => forceUpdate()} />
+                <ValueLine ctx={tcs.subCtx(t => t.useIconColorForTitle)} valueHtmlAttributes={avoidDrag} onChange={() => forceUpdate()} />
               </div>
             </div>
           </div>

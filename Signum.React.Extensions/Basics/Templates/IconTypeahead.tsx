@@ -14,6 +14,7 @@ export interface IconTypeaheadLineProps {
   ctx: TypeContext<string | null | undefined>;
   onChange?: () => void;
   extraIcons?: string[];
+  inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 export function IconTypeaheadLine(p : IconTypeaheadLineProps){
@@ -33,6 +34,7 @@ export function IconTypeaheadLine(p : IconTypeaheadLineProps){
         placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined}
         extraIcons={p.extraIcons}
         formControlClass={ctx.formControlClass}
+        inputAttrs={p.inputAttrs}
         onChange={handleChange} />
     </FormGroup>
   );
@@ -44,6 +46,8 @@ export interface IconTypeaheadProps {
   extraIcons?: string[];
   formControlClass: string | undefined;
   placeholder?: string;
+
+  inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 export function IconTypeahead(p: IconTypeaheadProps) {
@@ -92,7 +96,7 @@ export function IconTypeahead(p: IconTypeaheadProps) {
   return (
     <Typeahead
       value={(p.icon ?? "")}
-      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete"), placeholder: p.placeholder }}
+      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete"), placeholder: p.placeholder, ...p.inputAttrs }}
       getItems={handleGetItems}
       onSelect={handleSelect}
       onChange={handleSelect}
