@@ -38,9 +38,9 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   const forceUpdate = useForceUpdate();
 
-  const infos = React.useMemo<CombinedUserChartInfoTemp[]>(() => p.part.userCharts.map(uc => ({ userChart: uc.element.userChart } as CombinedUserChartInfoTemp)), [p.part]);
+  const infos = React.useMemo<CombinedUserChartInfoTemp[]>(() => p.content.userCharts.map(uc => ({ userChart: uc.element.userChart } as CombinedUserChartInfoTemp)), [p.content]);
 
-  const [showData, setShowData] = React.useState(p.part.showData);
+  const [showData, setShowData] = React.useState(p.content.showData);
 
   
 
@@ -115,13 +115,13 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       abortController.abort();
     };
 
-  }, [p.part, ...p.deps ?? []]);
+  }, [p.content, ...p.deps ?? []]);
 
   React.useEffect(() => {
     infos.forEach(inf => {
       inf.makeQuery?.().done();
     });
-  }, [p.part, ...p.deps ?? [], infos.max(e => p.dashboardController.getLastChange(e.userChart.query.key))]);
+  }, [p.content, ...p.deps ?? [], infos.max(e => p.dashboardController.getLastChange(e.userChart.query.key))]);
 
   function renderError(e: any, key: number) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
@@ -160,7 +160,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
         pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
         onFiltersChanged={() => info.makeQuery!()} extraSmall={true} />
       )}
-      {p.part.allowChangeShowData &&
+      {p.content.allowChangeShowData &&
         <label>
           <input type="checkbox" className="form-check-input" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
         {" "}{CombinedUserChartPartEntity.nicePropertyName(a => a.showData)}
@@ -177,7 +177,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
         <ChartRendererCombined
           infos={infos.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript!, memo: c.memo }))}
           onReload={e => { infos.forEach(a => a.makeQuery!()) }}
-          useSameScale={p.part.useSameScale}
+          useSameScale={p.content.useSameScale}
         />
       }
     </div>

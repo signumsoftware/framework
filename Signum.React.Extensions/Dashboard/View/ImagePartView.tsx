@@ -7,9 +7,9 @@ import { ImagePartEntity } from '../Signum.Entities.Dashboard';
 export default function ImagePart(p: PanelPartContentProps<ImagePartEntity>) {
   return (
     <div>
-      <a href={p.part.clickActionURL ? AppContext.toAbsoluteUrl(p.part.clickActionURL!) : undefined}
-        onClick={p.part.clickActionURL?.startsWith("~") ? (e => { e.preventDefault(); AppContext.history.push(p.part.clickActionURL!) }) : undefined}>
-        <img src={p.part.imageSrcContent} style={{ width: "100%" }} />
+      <a href={p.content.clickActionURL ? AppContext.toAbsoluteUrl(p.content.clickActionURL!) : undefined}
+        onClick={p.content.clickActionURL?.startsWith("~") ? (e => { e.preventDefault(); AppContext.history.push(p.content.clickActionURL!) }) : undefined}>
+        <img src={p.content.imageSrcContent} style={{ width: "100%" }} />
       </a>
     </div>
   );

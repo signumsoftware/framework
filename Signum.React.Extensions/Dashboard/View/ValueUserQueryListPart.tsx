@@ -14,7 +14,7 @@ import { DashboardController } from './DashboardFilterController'
 import { CachedQueryJS, executeQueryValueCached } from '../CachedQueryExecutor'
 
 export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUserQueryListPartEntity>) {
-  const entity = p.part;
+  const entity = p.content;
   const ctx = TypeContext.root(entity, { formGroupStyle: "None" });
   return (
     <div>

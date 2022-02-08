@@ -12,6 +12,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   onNavigated?: (lite: Lite<Entity>) => void;
   getViewPromise?: (e: ModifiableEntity | null) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   innerRef?: React.Ref<HTMLAnchorElement>;
+  extraProps?: any;
 }
 
 export default function EntityLink(p: EntityLinkProps) {
@@ -57,7 +58,7 @@ export default function EntityLink(p: EntityLinkProps) {
       var vp = p.getViewPromise && p.getViewPromise(null);
       AppContext.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
     } else {
-      Navigator.view(lite, { getViewPromise: p.getViewPromise, buttons: "close" }).then(() => {
+      Navigator.view(lite, { getViewPromise: p.getViewPromise, buttons: "close", extraProps: p.extraProps }).then(() => {
         p.onNavigated && p.onNavigated(lite);
       }).done();
     }

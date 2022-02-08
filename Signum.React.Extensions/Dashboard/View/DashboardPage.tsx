@@ -46,7 +46,7 @@ export default function DashboardPage(p: DashboardPageProps) {
   return (
     <div>
       {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
-        <div className="sf-show-hover d-flex">
+        <div className="d-flex">
           {!dashboard.hideDisplayName && <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>}
           {!Navigator.isReadOnly(DashboardEntity) &&
             <div className="ms-auto">

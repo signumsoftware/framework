@@ -25,7 +25,7 @@ static class DelayedConsole
 
 public static class QueryTokenSynchronizer
 {
-   
+
 
 
     static void Remember(Replacements replacements, string tokenString, QueryToken token)
@@ -169,10 +169,10 @@ public static class QueryTokenSynchronizer
     public static FixTokenResult FixValue(Replacements replacements, Type type, ref string? valueString, bool allowRemoveToken, bool isList)
     {
         var res = FilterValueConverter.TryParse(valueString, type, isList);
-        
+
         if (res is Result<object>.Success)
             return FixTokenResult.Nothing;
-        
+
         DelayedConsole.Flush();
 
         if (isList && valueString!.Contains('|'))
@@ -347,7 +347,7 @@ public static class QueryTokenSynchronizer
         while (true)
         {
             var tempToken = current!;
-            var result = SelectInteractive(ref tempToken, qd, options, allowRemoveToken, allowReGenerate);
+            var result = SelectInteractive(ref tempToken, qd, options, remainingText, allowRemoveToken, allowReGenerate);
             current = tempToken;
             switch (result)
             {
@@ -389,7 +389,7 @@ public static class QueryTokenSynchronizer
         }
     }
 
-    static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, bool allowRemoveToken, bool allowReGenerate)
+    static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReGenerate)
     {
         var top = Console.CursorTop;
 
@@ -398,9 +398,14 @@ public static class QueryTokenSynchronizer
             if (Console.Out == null)
                 throw new InvalidOperationException("Unable to ask for renames to synchronize query tokens without interactive Console. Please use your Terminal application.");
 
-            var subTokens = token.SubTokens(qd, options).OrderBy(a => a.Parent != null).ThenByDescending(a=>a.Priority).ThenBy(a => a.Key).ToList();
+            var subTokens = token.SubTokens(qd, options).OrderBy(a => a.Parent != null).ThenByDescending(a => a.Priority).ThenBy(a => a.Key).ToList();
 
             int startingIndex = 0;
+
+            SafeConsole.WriteColor(ConsoleColor.Cyan, "  " + token?.FullKey());
+            if (remainingText.HasText())
+                Console.Write(" " + remainingText);
+            Console.WriteLine();
 
             bool isRoot = token == null;
 

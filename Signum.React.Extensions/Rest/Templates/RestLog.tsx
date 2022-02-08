@@ -7,6 +7,7 @@ import { RestLogDiff, API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
 import * as AppContext from '@framework/AppContext'
 import { Tab, Tabs, Button } from 'react-bootstrap';
+import { FormatJson } from '../../../Signum.React/Scripts/Exceptions/Exception';
 
 export interface RestLogState {
   diff?: RestLogDiff,
@@ -92,14 +93,14 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
     return (
       <fieldset>
         <legend>{ctx.niceName()}</legend>
-        {this.renderPre(ctx.value!)}
+        <FormatJson code={ctx.value!} />
       </fieldset>
     );
 
   }
 
   renderPre(text: string) {
-    return <pre><code>{text}</code></pre>
+    return <pre style={{ whiteSpace: "pre-wrap" }}><code>{text}</code></pre>
   }
 }
 

@@ -693,6 +693,7 @@ export module WorkflowOperation {
 export module WorkflowPermission {
   export const ViewWorkflowPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewWorkflowPanel");
   export const ViewCaseFlow : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewCaseFlow");
+  export const WorkflowToolbarMenu : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.WorkflowToolbarMenu");
 }
 
 export const WorkflowPoolEntity = new Type<WorkflowPoolEntity>("WorkflowPool");
