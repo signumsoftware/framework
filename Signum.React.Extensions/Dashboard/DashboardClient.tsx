@@ -254,7 +254,7 @@ export function start(options: { routes: JSX.Element[] }) {
         position: d.embeddedInEntity as "Top" | "Tab" | "Bottom",
         embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} frame={wc.frame} />,
         eventKey: liteKey(toLite(d)),
-        title: d.displayName,
+        title: translated(d, d => d.displayName),
       } as EmbeddedWidget;
     });
   });
