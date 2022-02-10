@@ -78,7 +78,7 @@ public class CodeFile
 
     public static Encoding DetectUTFBOM(byte[] bytes)
     {
-        if (Encoding.UTF8.Preamble.SequenceEqual(bytes[0..Encoding.UTF8.Preamble.Length]))
+        if (bytes.Length >= Encoding.UTF8.Preamble.Length && Encoding.UTF8.Preamble.SequenceEqual(bytes[0..Encoding.UTF8.Preamble.Length]))
             return Encoding.UTF8;
 
         return UTF8NoBOM;
