@@ -157,7 +157,7 @@ function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, ch
           </div>
         }
       />
-      <div style={{ display: show ? "block" : "none" }}>
+      <div style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
         {show && props.children}
       </div>
     </div>
