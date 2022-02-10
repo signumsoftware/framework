@@ -17,11 +17,18 @@ export function loadCurrentCulture(): Promise<void> {
     });
 }
 
+export let onCultureChanged: (previousCulture: Lite<CultureInfoEntity>, newCulture: Lite<CultureInfoEntity>) => void = (pci, nci) => { };
+export function setOnCultureChanged(onChanged: (previousCulture: Lite<CultureInfoEntity>, newCulture: Lite<CultureInfoEntity>) => void) {
+  onCultureChanged = onChanged;
+}
+
 export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
+  const previousCulture = currentCulture;
   API.setCurrentCulture(newCulture)
     .then(() => loadCurrentCulture())
     .then(() => reloadTypes())
     .then(() => AppContext.resetUI())
+    .then(() => onCultureChanged(toLite(previousCulture), newCulture))
     .done();
 }
 
