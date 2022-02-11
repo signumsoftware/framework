@@ -133,13 +133,6 @@ export default function ToolbarRenderer(p: {
         throw new Error("Unexpected " + res.type);
     }
   }
-
-  function getIcon(res: ToolbarClient.ToolbarResponse<any>) {
-
-    var icon = parseIcon(res.iconName);
-
-    return icon && <FontAwesomeIcon icon={icon} className={"icon"} color={res.iconColor} fixedWidth />
-  }
 }
 
 function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, children: any }) {

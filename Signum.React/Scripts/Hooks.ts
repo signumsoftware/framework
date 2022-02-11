@@ -348,12 +348,12 @@ export const Breakpoints = {
 }
 
 export function getBreakpoint(): number {
-  var width = window.outerWidth;
-  if (width < Breakpoints.sm) return 0;
-  if (width < Breakpoints.md) return Breakpoints.sm;
-  if (width < Breakpoints.lg) return Breakpoints.md;
-  if (width < Breakpoints.xl) return Breakpoints.lg;
-  if (width < Breakpoints.xxl) return Breakpoints.xl;
+  var width = window.innerWidth;
+  if (width <= Breakpoints.sm) return 0;
+  if (width <= Breakpoints.md) return Breakpoints.sm;
+  if (width <= Breakpoints.lg) return Breakpoints.md;
+  if (width <= Breakpoints.xl) return Breakpoints.lg;
+  if (width <= Breakpoints.xxl) return Breakpoints.xl;
   return Breakpoints.xxl;
 }
 
