@@ -112,8 +112,8 @@ public class BrowserProxy
 
     public virtual void Logout()
     {
-        Selenium.WaitElementPresent(By.Id("sfLoginDropdown")).SafeClick();
-        Selenium.WaitElementPresent(By.Id("sf-auth-logout")).SafeClick();    //SelectElement();
+        Selenium.WaitElementVisible(By.Id("sfLoginDropdown")).SafeClick();
+        Selenium.WaitElementVisible(By.Id("sf-auth-logout")).SafeClick();    //SelectElement();
         Selenium.Wait(() => GetCurrentUser() == null);
         Selenium.Url = Url("Auth/Login");
         Selenium.WaitElementVisible(By.CssSelector(".sf-login"));
