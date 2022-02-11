@@ -636,7 +636,7 @@ export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event:
     return Promise.resolve();
   }
   else {
-    return view(pack).then(() => undefined);
+    return view(pack, { buttons: "close" }).then(() => undefined);
   }
 }
 
