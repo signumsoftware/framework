@@ -449,9 +449,8 @@ public static class SeleniumExtensions
 
     public static IWebElement ScrollTo(this IWebElement element)
     {
-        var y = (element.Location.Y - 20);
         IJavaScriptExecutor js = (IJavaScriptExecutor)element.GetDriver();
-        js.ExecuteScript($"setTimeout(function() {{ window.scrollTo({{ top: {y}, left: 0, behavior: 'smooth'}}), 100}});", element);
+        js.ExecuteScript("arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});", element);
         Thread.Sleep(ScrollToTimeout);
 
         return element;
