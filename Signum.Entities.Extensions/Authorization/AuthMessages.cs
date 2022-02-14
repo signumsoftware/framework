@@ -28,8 +28,8 @@ public enum LoginAuthMessage
     Username,
     [Description("E-Mail Address")]
     EMailAddress,
-    [Description("Username or E-Mail Address")]
-    UsernameOrEmailAddress,
+    [Description("E-Mail Address or Username")]
+    EmailAddressOrUsername,
     RememberMe,
     IHaveForgottenMyPassword,
 
