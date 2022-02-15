@@ -629,6 +629,8 @@ export interface WorkflowLaneEntity extends Entities.Entity, IWorkflowObjectEnti
   pool: WorkflowPoolEntity;
   actors: Entities.MList<Entities.Lite<Entities.Entity>>;
   actorsEval: WorkflowLaneActorsEval | null;
+  useActorEvalForStart: boolean;
+  combineActorAndActorEvalWhenContinuing: boolean;
 }
 
 export const WorkflowLaneModel = new Type<WorkflowLaneModel>("WorkflowLaneModel");
@@ -638,6 +640,8 @@ export interface WorkflowLaneModel extends Entities.ModelEntity {
   name: string;
   actors: Entities.MList<Entities.Lite<Entities.Entity>>;
   actorsEval: WorkflowLaneActorsEval | null;
+  useActorEvalForStart: boolean;
+  combineActorAndActorEvalWhenContinuing: boolean;
 }
 
 export module WorkflowLaneOperation {

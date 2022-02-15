@@ -28,6 +28,21 @@ public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
     [NotifyChildProperty]
     public WorkflowLaneActorsEval? ActorsEval { get; set; }
 
+    public bool UseActorEvalForStart { get; set; }
+
+    public bool CombineActorAndActorEvalWhenContinuing { get; set; }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(UseActorEvalForStart) && UseActorEvalForStart == true && ActorsEval == null)
+            return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), false);
+
+        if (pi.Name == nameof(CombineActorAndActorEvalWhenContinuing) && CombineActorAndActorEvalWhenContinuing == true && (ActorsEval == null || Actors.IsEmpty()))
+            return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), false);
+
+        return base.PropertyValidation(pi);
+    }
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
 
@@ -40,6 +55,8 @@ public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
         model.Actors.AssignMList(this.Actors);
         model.ActorsEval = this.ActorsEval;
         model.Name = this.Name;
+        model.UseActorEvalForStart = this.UseActorEvalForStart;
+        model.CombineActorAndActorEvalWhenContinuing = this.CombineActorAndActorEvalWhenContinuing;
         model.CopyMixinsFrom(this);
         return model;
     }
@@ -50,6 +67,8 @@ public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
         this.Name = wModel.Name;
         this.ActorsEval = wModel.ActorsEval;
         this.Actors.AssignMList(wModel.Actors);
+        this.UseActorEvalForStart = wModel.UseActorEvalForStart;
+        this.CombineActorAndActorEvalWhenContinuing = wModel.CombineActorAndActorEvalWhenContinuing;
         this.CopyMixinsFrom(wModel);
     }
 }
@@ -114,4 +133,19 @@ public class WorkflowLaneModel : ModelEntity
     public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
     public WorkflowLaneActorsEval? ActorsEval { get; set; }
+
+    public bool UseActorEvalForStart { get; set; }
+
+    public bool CombineActorAndActorEvalWhenContinuing { get; set; }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(UseActorEvalForStart) && UseActorEvalForStart == true && ActorsEval == null)
+            return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), false);
+
+        if (pi.Name == nameof(CombineActorAndActorEvalWhenContinuing) && CombineActorAndActorEvalWhenContinuing == true && (ActorsEval == null || Actors.IsEmpty()))
+            return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), false);
+
+        return base.PropertyValidation(pi);
+    }
 }
