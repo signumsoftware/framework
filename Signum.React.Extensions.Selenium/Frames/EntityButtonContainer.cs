@@ -113,7 +113,7 @@ public static class EntityButtonContainerExtensions
 
     public static void WaitReload(this IEntityButtonContainer container, Action action)
     {
-        var oldCount = container.RefreshCount()!.Value;
+        var oldCount = container.RefreshCount();
         action();
         container.Element.GetDriver().Wait(() =>
         {
