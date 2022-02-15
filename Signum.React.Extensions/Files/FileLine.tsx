@@ -80,6 +80,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
           onFileLoaded={c.handleFileLoaded}
           typeName={p.ctx.propertyRoute!.typeReference().name}
           buttonCss={p.ctx.buttonClass}
+          fileDropCssClass={c.mandatoryClass ?? undefined}
           divHtmlAttributes={{ className: "sf-file-line-new" }} />
       }
     </FormGroup>

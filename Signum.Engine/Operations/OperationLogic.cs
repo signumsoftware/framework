@@ -610,6 +610,17 @@ Consider the following options:
         return null;
     }
 
+    public static string? ShouldBe<T>(this T state, string propName, params T[] fromStates)
+    {
+        if (!fromStates.Contains(state))
+            return ValidationMessage._0ShouldBe1InsteadOf2.NiceToString().FormatWith(
+                propName,
+                fromStates.CommaOr(v =>  v is Enum e ? e.NiceToString() : v?.ToString()),
+                state is Enum e ? e.NiceToString() : state?.ToString());
+
+        return null;
+    }
+
 
 
     public static List<Type> FindTypes(OperationSymbol operation)
