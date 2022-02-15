@@ -80,6 +80,7 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
   Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
   Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
+  Navigator.addSettings(new EntitySettings(UserTreePartEntity, e => import('./Admin/UserTreePart')));
 
 
   Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
