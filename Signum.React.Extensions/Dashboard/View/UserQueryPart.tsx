@@ -6,7 +6,7 @@ import { Entity, Lite, is, JavascriptMessage, toLite, liteKey } from '@framework
 import { SearchControl, ValueSearchControl } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { UserQueryPartEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
-import { classes, getColorContrasColorBWByHex } from '@framework/Globals';
+import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
@@ -20,9 +20,14 @@ import { translated } from '../../Translation/TranslatedInstanceTools'
 import { CachedQueryJS, executeQueryCached, executeQueryValueCached } from '../CachedQueryExecutor'
 import { DashboardController, DashboardPinnedFilters } from './DashboardFilterController'
 
+export interface UserQueryPartHandler {
+  findOptions: FindOptions;
+  refresh: () => void;
+}
+
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
-  let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.part.userQuery, p.entity), [p.part.userQuery, p.entity]);
+  let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity]);
 
   const [refreshKey, setRefreshKey] = React.useState<number>(0);
 
@@ -44,17 +49,22 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
     p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
   }, [p.partEmbedded])
 
-  const cachedQuery = p.cachedQueries[liteKey(toLite(p.part.userQuery))];
+  const cachedQuery = p.cachedQueries[liteKey(toLite(p.content.userQuery))];
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
   const foExpanded = p.dashboardController.applyToFindOptions(p.partEmbedded, fo);
 
-  if (p.part.renderMode == "BigValue") {
+  p.customDataRef.current = softCast<UserQueryPartHandler>({
+    findOptions: foExpanded,
+    refresh: handleOnRefresh,
+  });
+
+  if (p.content.renderMode == "BigValue") {
     return <BigValueSearchCounter
       findOptions={foExpanded}
-      text={translated(p.partEmbedded, a => a.title) || translated(p.part.userQuery, a => a.displayName)}
+      text={translated(p.partEmbedded, a => a.title) || translated(p.content.userQuery, a => a.displayName)}
       iconName={p.partEmbedded.iconName ?? undefined}
       iconColor={p.partEmbedded.iconColor ?? undefined}
       deps={[...p.deps ?? [], refreshKey]}
@@ -64,54 +74,46 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
     />;
   }
 
+  function handleOnRefresh() {
+    setRefreshKey(a => a + 1);
+    handleOnDataChanged();
+  }
+
+  function handleOnDataChanged() {
+
+    if (p.content.autoUpdate == "Dashboard") {
+      p.dashboardController.invalidate(p.partEmbedded, null);
+    }
+    else if (p.content.autoUpdate == "InteractionGroup" && p.partEmbedded.interactionGroup != null) {
+      p.dashboardController.invalidate(p.partEmbedded, p.partEmbedded.interactionGroup)
+    }
+
+  }
+
   return (
     <SearchContolInPart
-      part={p.part}
+      part={p.content}
       findOptions={foExpanded}
       deps={[...p.deps ?? [], refreshKey]}
-      onDataChanged={() => {
-        if (p.part.autoUpdate == "Dashboard") {
-          p.dashboardController.invalidate(p.partEmbedded, null);
-        }
-        else if (p.part.autoUpdate == "InteractionGroup" && p.partEmbedded.interactionGroup != null) {
-          p.dashboardController.invalidate(p.partEmbedded, p.partEmbedded.interactionGroup)
-        }
-      }}
+      onReload={() => setRefreshKey(a => a + 1)}
+      onDataChanged={handleOnDataChanged}
       cachedQuery={cachedQuery} />
   );
 }
 
-function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChanged }: {
+function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChanged, onReload }: {
   findOptions: FindOptions,
   onDataChanged: () => void,
   part: UserQueryPartEntity,
   cachedQuery?: Promise<CachedQueryJS>,
-  deps?: React.DependencyList
+  deps?: React.DependencyList;
+  onReload: () => void;
 }) {
 
-  const [refreshCount, setRefreshCount] = React.useState<number>(0)
-  const qd = useAPI(() => Finder.getQueryDescription(part.userQuery.query.key), [part.userQuery.query.key]);
-  const typeInfos = qd && getTypeInfos(qd.columns["Entity"].type).filter(ti => Navigator.isCreable(ti, { isSearch: true }));
-
-  function handleCreateNew(e: React.MouseEvent<any>) {
-    e.preventDefault();
-
-    return Finder.parseFilterOptions(findOptions.filterOptions ?? [], findOptions.groupResults ?? false, qd!)
-      .then(fop => SelectorModal.chooseType(typeInfos!)
-        .then(ti => ti && Finder.getPropsFromFilters(ti, fop)
-          .then(props => Constructor.constructPack(ti.name, props)))
-        .then(pack => pack && Navigator.view(pack))
-        .then(() => {
-          onDataChanged();
-          setRefreshCount(a => a + 1);
-        }))
-      .done();
-  }
-
   return (
-    <FullscreenComponent onReload={e => { e.preventDefault(); setRefreshCount(a => a + 1); }} onCreateNew={part.createNew ? handleCreateNew : undefined} typeInfos={typeInfos}>
+    <FullscreenComponent onReload={e => { e.preventDefault(); onReload(); }}>
       <SearchControl
-        deps={[refreshCount, ...deps ?? []]}
+        deps={deps}
         findOptions={findOptions}
         showHeader={"PinnedFilters"}
         pinnedFilterVisible={fop => fop.dashboardBehaviour == null}

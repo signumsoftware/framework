@@ -25,7 +25,7 @@ export interface ValueLineProps extends LineBaseProps {
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
-  initiallyFocused?: boolean;
+  initiallyFocused?: boolean | number;
 
   incrementWithArrow?: boolean | number;
 
@@ -76,7 +76,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
               element.setSelectionRange(0, element.value.length);
             element.focus();
           }
-        }, 0);
+        }, this.props.initiallyFocused  == true ? 0 : this.props.initiallyFocused as number);
       }
 
     }, []);
@@ -344,13 +344,14 @@ function internalDropDownList(vl: ValueLineController) {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
-          <DropdownList className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems} onChange={handleOptionItem} value={oi}
+          <DropdownList<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems} onChange={handleOptionItem} value={oi}
             filter={false}
             autoComplete="off"
             dataKey="value"
             textField="label"
             renderValue={a => vl.props.onRenderDropDownListItem!(a.item)}
             renderListItem={a => vl.props.onRenderDropDownListItem!(a.item)}
+            {...(s.valueHtmlAttributes as any)}
           />)
         }
       </FormGroup>
@@ -421,12 +422,13 @@ function internalComboBoxText(vl: ValueLineController) {
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <Combobox className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
+        <Combobox<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
           dataKey="value"
           textField="label"
           focusFirstItem
           autoSelectMatches
           renderListItem={renderItem}
+          {...(s.valueHtmlAttributes as any)}
         />)
       }
     </FormGroup>
@@ -768,7 +770,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
-          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
+          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(vl.props.initiallyFocused)}
             valueEditFormat={luxonFormat}
             valueDisplayFormat={luxonFormat}
             includeTime={showTime}

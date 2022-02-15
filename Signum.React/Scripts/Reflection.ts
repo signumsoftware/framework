@@ -254,19 +254,27 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
 
   const f = format.toUpperCase();
 
+  function parseIntDefault(str: string, defaultValue: number) {
+    var result = parseInt(str);
+    if (isNaN(result))
+      return defaultValue;
+
+    return result;
+  }
+
   if (f.startsWith("C")) //unit comes separated
     return {
       style: "decimal",
-      minimumFractionDigits: parseInt(f.after("C")) || 2,
-      maximumFractionDigits: parseInt(f.after("C")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("C"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("C"), 2),
       useGrouping: true,
     }
 
   if (f.startsWith("N"))
     return {
       style: "decimal",
-      minimumFractionDigits: parseInt(f.after("N")) || 2,
-      maximumFractionDigits: parseInt(f.after("N")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("N"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("N"), 2),
       useGrouping: true,
     }
 
@@ -274,15 +282,15 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
     return {
       style: "decimal",
       maximumFractionDigits: 0,
-      minimumIntegerDigits: parseInt(f.after("D")) || 1,
+      minimumIntegerDigits: parseIntDefault(f.after("D"), 1),
       useGrouping: false,
     }
 
   if (f.startsWith("F"))
     return {
       style: "decimal",
-      minimumFractionDigits: parseInt(f.after("F")) || 2,
-      maximumFractionDigits: parseInt(f.after("F")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("F"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("F"), 2),
       useGrouping: false,
     }
 
@@ -290,18 +298,19 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
     return {
       style: "decimal",
       notation: "scientific",
-      minimumFractionDigits: parseInt(f.after("E")) || 6,
-      maximumFractionDigits: parseInt(f.after("E")) || 6,
+      minimumFractionDigits: parseIntDefault(f.after("E"), 6),
+      maximumFractionDigits: parseIntDefault(f.after("E"), 6),
       useGrouping: false,
     } as any;
 
-  if (f.startsWith("P"))
+  if (f.startsWith("P")) {
     return {
       style: "percent",
-      minimumFractionDigits: parseInt(f.after("P")) || 2,
-      maximumFractionDigits: parseInt(f.after("P")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("P"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("P"), 2),
       useGrouping: false,
     }
+  }
 
   //simple heuristic
   var style = f.endsWith("%") ? "percent" : "decimal";

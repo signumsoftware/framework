@@ -191,6 +191,8 @@ export interface PanelPartProps {
 export function PanelPart(p: PanelPartProps) {
   const content = p.ctx.value.content;
 
+  const customDataRef = React.useRef();
+
   const state = useAPI(signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
     [content.Type], { avoidReset: true });
 
@@ -206,11 +208,12 @@ export function PanelPart(p: PanelPartProps) {
   if (renderer.withPanel && !renderer.withPanel(content)) {
     return React.createElement(state.component, {
       partEmbedded: part,
-      part: content,
+      content: content,
       entity: lite,
       deps: p.deps,
       dashboardController: p.dashboardController,
-      cachedQueries: p.cachedQueries
+      cachedQueries: p.cachedQueries,
+      customDataRef: customDataRef,
     } as DashboardClient.PanelPartContentProps<IPartEntity>);
   }
 
@@ -233,21 +236,17 @@ export function PanelPart(p: PanelPartProps) {
   }
 
   return (
-
-
-    <div className={classes("card", style && style != "customColor" && ("border-" + style), "shadow-sm", "mb-4")}>
-      <div className={classes("card-header", "sf-show-hover",
-        style != "customColor" && ("bg-" + style)
-      )}
-        style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor != null ? getColorContrasColorBWByHex(part.customColor) : "black"  }}
+    <div className={classes("card", !part.customColor && "border-light", "shadow-sm", "mb-4")}>
+      <div className={classes("card-header", "sf-show-hover", "d-flex", !part.customColor && ("bg-light"))}
+        style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined}}
       >
-        {renderer.handleEditClick &&
-          <a className="sf-pointer float-end flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e).then(v => v && p.reload()).done()}>
-            <FontAwesomeIcon icon="edit" className="me-1" />Edit
-          </a>
-        }
+
         {renderer.handleTitleClick == undefined ? title :
-          <a className="sf-pointer" style={{ color: part.useIconColorForTitle ? iconColor : (part.customColor != null ? getColorContrasColorBWByHex(part.customColor) : "black"), textDecoration:"none"}} onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>
+          <a className="sf-pointer"
+            style={{ color: part.useIconColorForTitle ? iconColor : part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined, textDecoration: "none" }}
+            onClick={e => { e.preventDefault(); renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
+          {title}
+          </a>
         }
         {
           dashboardFilter && <span className="badge bg-light text-dark border ms-2 sf-filter-pill">
@@ -255,17 +254,28 @@ export function PanelPart(p: PanelPartProps) {
             <button type="button" aria-label="Close" className="btn-close" onClick={handleClearFilter}/>
           </span>
         }
+
+        <div className="ms-auto">
+          {renderer.customTitleButtons?.(content, lite, customDataRef)}
+          {
+            renderer.handleEditClick &&
+            <a className="sf-pointer sf-hide" onClick={e => { e.preventDefault(); renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()).done(); }}>
+              <FontAwesomeIcon icon="edit" className="me-1" />Edit
+            </a>
+          }
+        </div>
       </div>
       <div className="card-body py-2 px-3">
         <ErrorBoundary>
           {
             React.createElement(state.component, {
               partEmbedded: part,
-              part: content,
+              content: content,
               entity: lite,
               deps: p.deps,
               dashboardController: p.dashboardController,
               cachedQueries: p.cachedQueries,
+              customDataRef: customDataRef,
             } as DashboardClient.PanelPartContentProps<IPartEntity>)
           }
         </ErrorBoundary>

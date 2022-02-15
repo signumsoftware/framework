@@ -9,9 +9,13 @@ import { useStateWithPromise } from '@framework/Hooks'
 
 export default function ChangePasswordSucessPage() {
   return (
-    <div>
-      <h2 className="sf-entity-title">{LoginAuthMessage.PasswordChanged.niceToString()}</h2>
-      <p>{LoginAuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
+    <div className="container sf-change-password-success">
+      <div className="row">
+        <div className="col-md-6 offset-md-3">
+          <h2 className="sf-entity-title">{LoginAuthMessage.PasswordChanged.niceToString()}</h2>
+          <p>{LoginAuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
+        </div>
+      </div>
     </div>
   );
 }

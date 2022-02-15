@@ -40,7 +40,12 @@ public class FilterGroup : Filter
 
     public override Expression GetExpression(BuildExpressionContext ctx)
     {
-        if (Token is not CollectionAnyAllToken anyAll)
+        var anyAll = Token?.Follow(a => a.Parent)
+                .OfType<CollectionAnyAllToken>()
+                .TakeWhile(c => !ctx.Replacemens.ContainsKey(c))
+                .LastOrDefault();
+
+        if (anyAll == null)
         {
             return this.GroupOperation == FilterGroupOperation.And ?
                 Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
@@ -52,15 +57,14 @@ public class FilterGroup : Filter
             Type elementType = collection.Type.ElementType()!;
 
             var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-            ctx.Replacemens.Add(anyAll, p.BuildLite().Nullify());
+            ctx.Replacemens.Add(anyAll, p.BuildLiteNullifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! }));
 
-            var body = this.GroupOperation == FilterGroupOperation.And ?
-                Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
-                Filters.Select(f => f.GetExpression(ctx)).AggregateOr();
+            Expression body = GetExpression(ctx);
 
             ctx.Replacemens.Remove(anyAll);
 
             return anyAll.BuildAnyAll(collection, p, body);
+
         }
     }
 

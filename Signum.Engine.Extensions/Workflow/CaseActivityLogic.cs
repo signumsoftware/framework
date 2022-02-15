@@ -595,8 +595,15 @@ public static class CaseActivityLogic
                 var lane = caseActivity.WorkflowActivity.Lane;
                 var actors = lane.Actors.ToList();
                 if (lane.ActorsEval != null)
-                    actors.AddRange(lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList());
+                {
+                    var newActors = lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList();
 
+                    if (lane.CombineActorAndActorEvalWhenContinuing)
+                        actors.AddRange(newActors);
+                    else
+                        actors = newActors;
+                }
+                
                 var notifications = actors.Distinct().SelectMany(a =>
                 Database.Query<UserEntity>()
                 .Where(u => WorkflowLogic.IsUserActorForNotifications.Evaluate(u, a))

@@ -59,10 +59,13 @@
 .sidebar-inner {
 }
 
+    .sidebar-inner .nav-item-sub-menu {
+        background-color: #f3f3f3;
+    }
+
     .sidebar-inner .nav-item .nav-link {
-        height: 45px;
+        padding: 5px 5px 5px 14px;
         transition: all 200ms;
-        padding-top: 10px;
         color: var(--sidebar-principal);
         border-left: 4px solid transparent;
     }
@@ -73,6 +76,10 @@
             font-weight: bold;
             color: var(--sidebar-accent);
         }
+
+    .sidebar-inner .nav-item-sub-menu .nav-item .nav-link.active {
+        background-color: #dfdfdf;
+    }
 
             .sidebar-inner .nav-item .nav-link.active svg.icon {
                 color: var(--sidebar-accent);
@@ -89,8 +96,8 @@
         }
 
         .sidebar-inner .nav-item .nav-link .icon {
-            height: 25px;
-            width: 25px;
+            height: 20px;
+            width: 20px;
             vertical-align: middle;
             margin-right: 0px;
             margin-left: 0;
@@ -105,6 +112,10 @@
             background-color: #ececec;
             color: var(--principal);
         }
+
+    .sidebar-inner .nav-item-sub-menu .nav-item .nav-link:hover {
+        background-color: #c9c9c9;
+    }
 
             .sidebar-inner .nav-item .nav-link:hover svg {
                 color: var(--principal);
@@ -127,13 +138,15 @@
             opacity: 0.5;
         }
 
-.sidebar-brand-icon, .sidebar-brand-icon img{
-    width: 37px;
-    height: 37px;
-    border-radius: 8px;
-    transition: all 200ms;
-    display: inline-block;
-}
+
+
+    .sidebar-brand-icon, .sidebar-brand-icon img {
+        width: 37px;
+        height: 37px;
+        border-radius: 8px;
+        transition: all 200ms;
+        display: inline-block;
+    }
 
 .sidebar-brand-icon-mini {
     width: 33px !important;
@@ -159,7 +172,7 @@
 
 
 .sidebar-nav.wide .nav-arrow-icon {
-    margin-left: -20px;
+    margin-left: -18px;
 }
 
 .sidebar-nav.wide .nav-icon-with-arrow {
@@ -305,21 +318,20 @@
 }
 
 
-.nav-item {
+.sidebar-nav .nav-item {
     padding: 0 !important;
     border-radius: 5px;
     transition-duration: 150ms;
     transition-property: all;
 }
 
-    .nav-item span {
+    .sidebar-nav .nav-item span {
         padding: 0 !important;
         border-radius: 5px;
         transition-duration: 150ms;
         transition-property: all;
         margin-left: 16px;
         vertical-align: middle;
-
         text-overflow: ellipsis;
         white-space: nowrap;
         width: 82%;
@@ -346,13 +358,13 @@
 }
 
 
-.nav-item-header {
+.sidebar-nav .nav-item-header {
     padding: 5px;
     margin-top: 15px;
     transition: all ease 250ms;
 }
 
-    .nav-item-header span {
+    .sidebar-nav .nav-item-header span {
         margin-right: 25px;
         margin-left: 23px;
         color: gray;
@@ -364,7 +376,7 @@
     margin-left: 23px;
 }
 
-.nav-item-header svg {
+.sidebar-nav .nav-item-header svg {
     margin-left: 24px;
     margin-right: -9px;
     height: 16px;

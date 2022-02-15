@@ -20,6 +20,12 @@ class Upgrade_20211109_SimplifyNamespaces : CodeUpgradeBase
                     return false;
                 }
 
+                if (lines[index].EndsWith(";"))
+                {
+                    file.Warning($"File {file.FilePath} already simplified");
+                    return false;
+                }
+
                 var ns = lines[index].After("namespace ");
 
                 var startIndex = lines.FindIndex(index, a => a.Trim() == "{");
