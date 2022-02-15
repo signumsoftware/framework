@@ -79,7 +79,7 @@ It's common that you want to start a query from a `Lite<T>` or entity:
 
 ```C#
 Lite<BugEntity> bug = //...
-Databas.Query<BugEntity>().Where(b => b.ToLite() == bug).Select(b => b.Comments.Count).SingleEx();
+Databas.Query<BugEntity>().Where(b => b.ToLite().Is(bug)).Select(b => b.Comments.Count).SingleEx();
 ```
 
 The following pattern can be simplified using `InDB` method:
@@ -200,7 +200,7 @@ Sometimes you need to get the `MListElement<E, V>` of a particular entity. Inste
 
 ```C#
 BugEntity bug;
-Database.MListQuery((BugEntity b) => b.Comments).Where(mle => mle.Parent == bug);
+Database.MListQuery((BugEntity b) => b.Comments).Where(mle => mle.Parent.Is(bug));
 ```
 
 You can use `MListElements(mListProperty)` defined as:
