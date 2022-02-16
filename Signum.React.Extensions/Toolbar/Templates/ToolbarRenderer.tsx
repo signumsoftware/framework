@@ -145,7 +145,7 @@ function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, ch
           <div style={{ display: 'inline-block', position: 'relative' }}>
             <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
             <div className="nav-icon-with-arrow">
-              {props.icon}
+              {props.icon ?? <div className="icon"/>}
             </div>
           </div>
         }
