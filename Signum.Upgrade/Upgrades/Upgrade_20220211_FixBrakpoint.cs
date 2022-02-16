@@ -10,7 +10,7 @@ class Upgrade_20220211_FixBrakpoint : CodeUpgradeBase
     {
         uctx.ChangeCodeFile(@"Southwind.React\App\Layout.tsx", file =>
         {
-            file.Replace("Breakpoints.sm", "Breakpoints.md"); 
+            file.Replace("Breakpoints.md", "Breakpoints.sm"); 
         });
     }
 }
