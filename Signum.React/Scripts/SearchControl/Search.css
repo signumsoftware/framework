@@ -143,6 +143,10 @@ table.sf-search-results th.sf-current-column {
         border-bottom: 2px solid #a94442;
     }
 
+.text-cell {
+    text-align: left
+}
+
 .date-cell {
     text-align: right
 }

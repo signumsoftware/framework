@@ -133,13 +133,6 @@ export default function ToolbarRenderer(p: {
         throw new Error("Unexpected " + res.type);
     }
   }
-
-  function getIcon(res: ToolbarClient.ToolbarResponse<any>) {
-
-    var icon = parseIcon(res.iconName);
-
-    return icon && <FontAwesomeIcon icon={icon} className={"icon"} color={res.iconColor} fixedWidth />
-  }
 }
 
 function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, children: any }) {
@@ -157,7 +150,7 @@ function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, ch
           </div>
         }
       />
-      <div style={{ display: show ? "block" : "none" }}>
+      <div style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
         {show && props.children}
       </div>
     </div>

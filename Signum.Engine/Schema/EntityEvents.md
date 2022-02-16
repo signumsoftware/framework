@@ -130,7 +130,7 @@ This event is really useful for cascade deleting and cache invalidation:
 
 ```C#
 Schema.Current.EntityEvents<ProjectEntity>().PreUnsafeDelete += query => 
-	query.SelectMany(proj => Database.Query<BugEntity>().Where(b=>b.Project.RefersTo(proj)))
+	query.SelectMany(proj => Database.Query<BugEntity>().Where(b=>b.Project.Is(proj)))
     .UnsafeDelete();
 ```
 ## PreUnsafeMListDelete

@@ -112,6 +112,7 @@ export const SendNotificationEmailTaskEntity = new Type<SendNotificationEmailTas
 export interface SendNotificationEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEntity {
   Type: "SendNotificationEmailTask";
   sendNotificationsOlderThan: number;
+  ignoreNotificationsOlderThan: number | null;
   sendBehavior: SendAlertTypeBehavior;
   alertTypes: Entities.MList<AlertTypeSymbol>;
 }

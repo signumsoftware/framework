@@ -232,7 +232,7 @@ public class QueryColumnEmbedded : EmbeddedEntity
         Token = new QueryTokenEmbedded(element.Attribute("Token")!.Value);
         SummaryToken = element.Attribute("SummaryToken")?.Value.Let(val => new QueryTokenEmbedded(val));
         DisplayName = element.Attribute("DisplayName")?.Value;
-        HiddenColumn = element.Attribute("HiddenColumn")?.Value.ToBool() == false;
+        HiddenColumn = element.Attribute("HiddenColumn")?.Value.ToBool() ?? false;
     }
 
     public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)

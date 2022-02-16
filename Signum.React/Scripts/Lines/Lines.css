@@ -326,10 +326,15 @@ input[type=checkbox].form-control-xs {
     min-height: 24px;
 }
 
+
+.rw-dropdown-list-input {
+    padding: 0 0 0 0.4em;
+}
+
 .form-control-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-combobox-input {
-    padding: 0 0.4em;
+    padding: 0 0 0 0.3em;
 }
 
 .form-control.form-control-sm.rw-combobox.rw-widget {
@@ -385,6 +390,7 @@ input[type=checkbox].form-control-xs {
 .form-control-sm.rw-dropdown-list.rw-widget,
 .form-control-sm.rw-combobox.rw-widget {
     padding: 0px;
+    min-height: initial;
 }
 
 .form-control-sm .rw-widget-picker {

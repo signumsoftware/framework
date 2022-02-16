@@ -64,11 +64,11 @@ public static class AuthTokenServer
     {
         var authHeader = ctx.HttpContext.Request.Headers[AuthHeader].FirstOrDefault();
         if (authHeader == null || !AuthenticateHeader(authHeader))
-        {
             return null;
-        }
-
+        
         var token = DeserializeAuthHeaderToken(authHeader);
+        if (token.User == null)
+            return null;
 
         var c = Configuration();
 

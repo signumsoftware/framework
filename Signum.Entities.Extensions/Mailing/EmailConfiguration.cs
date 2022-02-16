@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Mailing;
 
@@ -16,7 +16,7 @@ public class EmailConfigurationEmbedded : EmbeddedEntity
     [StringLengthValidator(Min = 3, Max = 100), EMailValidator]
     public string? OverrideEmailAddress { get; set; }
 
-    [Unit("hs")]
+    [Unit("hrs")]
     public double? AvoidSendingEmailsOlderThan { get; set; }
 
     public int ChunkSizeSendingEmails { get; set; } = 100;
