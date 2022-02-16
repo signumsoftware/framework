@@ -41,7 +41,7 @@ export default function ToolbarRenderer(p: {
   onAutoClose?: () => void | undefined;
   appTitle: React.ReactNode
 }): React.ReactElement | null {
-  const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(), []);
+  const response = useAPI(() => ToolbarClient.API.getCurrentToolbar("Side"), []);
   const responseRef = useUpdatedRef(response);
 
   const [refresh, setRefresh] = React.useState(false);
