@@ -8,6 +8,9 @@ public class SendNotificationEmailTaskEntity : Entity, ITaskEntity
     [Unit("mins"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
     public int SendNotificationsOlderThan { get; set; }
 
+    [Unit("days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
+    public int? IgnoreNotificationsOlderThan { get; set; }
+
     public SendAlertTypeBehavior SendBehavior { get; set; }
 
     [PreserveOrder, NoRepeatValidator]
