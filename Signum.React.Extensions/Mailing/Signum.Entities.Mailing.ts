@@ -338,8 +338,8 @@ export const MicrosoftGraphEmbedded = new Type<MicrosoftGraphEmbedded>("Microsof
 export interface MicrosoftGraphEmbedded extends Entities.EmbeddedEntity {
   Type: "MicrosoftGraphEmbedded";
   useActiveDirectoryConfiguration: boolean;
-  azure_ApplicationID: string | null;
-  azure_DirectoryID: string | null;
+  azure_ApplicationID: string /*Guid*/ | null;
+  azure_DirectoryID: string /*Guid*/ | null;
   azure_ClientSecret: string | null;
 }
 

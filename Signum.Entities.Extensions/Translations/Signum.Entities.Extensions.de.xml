@@ -8,7 +8,7 @@
     <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
     <Member Name="AutoUpdateUsers" Description="Benutzer automatisch aktualisieren" />
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
-    <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
     <Member Name="DefaultRole" Description="Standardrolle" />
     <Member Name="DirectoryRegistry_Password" Description="DirectoryRegistry Passwort" />
@@ -1596,7 +1596,7 @@
   </Type>
   <Type Name="MicrosoftGraphEmbedded" Description="Microsoft Graph">
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
-    <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
     <Member Name="UseActiveDirectoryConfiguration" Description="Active Directory-Konfiguration verwenden" />
   </Type>
