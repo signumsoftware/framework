@@ -276,7 +276,7 @@ public static class AzureADLogic
             value is DateOnly date ? $"'{date.ToIsoString()}'" :
             value is DateTime dt ? $"'{dt.ToIsoString()}'" :
             value is DateTimeOffset dto ? $"'{dto.DateTime.ToIsoString()}'" :
-            value is Guid guid ? $"'{guid.ToString()}'" :
+            value is Guid guid ? $"'{guid}'" :
             value is bool b ? b.ToString().ToLower() :
             value?.ToString() ?? "";
     }
