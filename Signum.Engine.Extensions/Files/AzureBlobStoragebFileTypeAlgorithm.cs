@@ -105,6 +105,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
                 ex.Data.Add("Suffix", fp.Suffix);
                 ex.Data.Add("AccountName", client.AccountName);
                 ex.Data.Add("ContainerName", client.Name);
+                throw;
             }
         }
     }
@@ -130,6 +131,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
                 ex.Data.Add("Suffix", fp.Suffix);
                 ex.Data.Add("AccountName", client.AccountName);
                 ex.Data.Add("ContainerName", client.Name);
+                throw;
             }
         }
     }
