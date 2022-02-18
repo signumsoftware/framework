@@ -682,7 +682,7 @@ export function setTypes(types: TypeInfoDictionary) {
 
   _queryNames = Dic.getValues(types).filter(t => t.kind == "Query")
     .flatMap(a => Dic.getValues(a.members))
-    .toObject(m => m.name.toLocaleLowerCase(), m => m);
+    .toObject(m => m.name.toLowerCase(), m => m);
 
   Object.freeze(_queryNames);
 
