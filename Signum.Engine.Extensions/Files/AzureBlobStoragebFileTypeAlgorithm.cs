@@ -97,7 +97,9 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
             try
             {
                 var action = this.BlobAction(fp);
-                client.GetBlobClient(fp.Suffix).Upload(new MemoryStream(fp.BinaryFile),
+                var binaryFile = fp.BinaryFile; //For consistency with async
+                fp.BinaryFile = null!;
+                client.GetBlobClient(fp.Suffix).Upload(new MemoryStream(binaryFile),
                     httpHeaders: GetBlobHttpHeaders(fp, action));
             }
             catch (Exception ex)
@@ -123,7 +125,9 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
             try
             {
                 var action = this.BlobAction(fp);
-                await client.GetBlobClient(fp.Suffix).UploadAsync(new MemoryStream(fp.BinaryFile),
+                var binaryFile = fp.BinaryFile;
+                fp.BinaryFile = null!; //So the entity is not modified after await
+                await client.GetBlobClient(fp.Suffix).UploadAsync(new MemoryStream(binaryFile),
                     httpHeaders: GetBlobHttpHeaders(fp, action), cancellationToken: cancellationToken);
             }
             catch (Exception ex)
