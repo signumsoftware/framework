@@ -41,13 +41,15 @@ export interface MixinComboProps {
 export function MixinCombo(p : MixinComboProps){
   const forceUpdate = useForceUpdate();
   function handleGetItems(query: string) {
-    return Finder.fetchLitesWithFilters(
-      DynamicTypeEntity,
-      [
+    return Finder.fetchLitesWithFilters({
+      queryName: DynamicTypeEntity,
+      filterOptions: [
         { token: DynamicTypeEntity.token(e => e.entity.baseType), operation: "EqualTo", value: "MixinEntity" },
         { token: DynamicTypeEntity.token(e => e.entity.typeName), operation: "StartsWith", value: query },
-      ], [], 5)
-      .then(lites => lites?.map(a => a.toStr));
+      ],
+      orderOptions: [],
+      count: 5
+    }).then(lites => lites?.map(a => a.toStr));
   }
 
   function handleOnChange(newValue: string) {
