@@ -18,6 +18,7 @@ interface ModalHeaderButtonsProps {
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   closeButtonProps?: ModalIconProps;
   children?: React.ReactNode;
+  stickyHeader?: boolean;
 }
 
 export function ModalHeaderButtons(p: ModalHeaderButtonsProps) {
@@ -26,7 +27,7 @@ export function ModalHeaderButtons(p: ModalHeaderButtonsProps) {
     <button type="button" className="btn-close" aria-label="Close" onClick={p.onClose}/>
 
   return (
-    <div className="modal-header align-items-start" {...p.htmlAttributes}>
+    <div className={classes("modal-header align-items-start", p.stickyHeader && "sf-sticky-header")} {...p.htmlAttributes } >
       {p.closeBeforeTitle && close}
       <h4 className="modal-title" >
         {p.children}

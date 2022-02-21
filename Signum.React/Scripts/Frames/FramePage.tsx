@@ -20,6 +20,7 @@ import WidgetEmbedded from './WidgetEmbedded'
 import { useTitle } from '../AppContext'
 import { FunctionalAdapter } from '../Modals'
 import { QueryString } from '../QueryString'
+import { classes } from '../Globals'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -264,6 +265,7 @@ export default function FramePage(p: FramePageProps) {
   };
 
   const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, "framePage"));
+  const settings = Navigator.getSettings(ti);
 
   const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
 
@@ -298,7 +300,7 @@ export default function FramePage(p: FramePageProps) {
     const entity = state.pack.entity;
 
     return (
-      <h4 className="border-bottom pb-3 mb-2">
+      <h4 className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")}>
         <span className="display-6 sf-entity-title">{getToString(entity)}</span>
         <br />
         <small className="sf-type-nice-name text-muted">{Navigator.getTypeSubTitle(entity, undefined)}</small>
