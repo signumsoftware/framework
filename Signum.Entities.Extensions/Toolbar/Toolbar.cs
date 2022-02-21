@@ -24,6 +24,8 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
     [StringLengthValidator(Min = 3, Max = 100)]
     public string Name { get; set; }
 
+    public ToolbarLocation Location { get; set; }
+
     public int? Priority { get; set; }
 
     [PreserveOrder]
@@ -38,6 +40,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
         return new XElement("Toolbar",
             new XAttribute("Guid", Guid),
             new XAttribute("Name", Name),
+            new XAttribute("Location", Location),
             Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
             Priority == null ? null! : new XAttribute("Priority", Priority.Value.ToString()),
             new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
@@ -46,6 +49,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         Name = element.Attribute("Name")!.Value;
+        Location = element.Attribute("Location")?.Value.ToEnum<ToolbarLocation>() ?? ToolbarLocation.Side;
         Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
         Priority = element.Attribute("Priority")?.Let(a => int.Parse(a.Value));
         Elements.Synchronize(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
@@ -54,6 +58,12 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
+}
+
+public enum ToolbarLocation
+{
+    Side,
+    Main,
 }
 
 [AutoInit]

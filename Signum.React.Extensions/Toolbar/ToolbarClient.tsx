@@ -9,7 +9,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
 import { Type } from '@framework/Reflection'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType } from './Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation } from './Signum.Entities.Toolbar'
 import * as Constructor from '@framework/Constructor'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { parseIcon } from '../Basics/Templates/IconTypeahead';
@@ -106,8 +106,8 @@ export function getConfig(res: ToolbarResponse<any>) {
 }
 
 export namespace API {
-  export function getCurrentToolbar(): Promise<ToolbarResponse<any> | null> {
-    return ajaxGet({ url: `~/api/toolbar/current` });
+  export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any> | null> {
+    return ajaxGet({ url: `~/api/toolbar/current/${location}` });
   }
 }
 

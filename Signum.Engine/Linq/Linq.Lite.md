@@ -85,36 +85,36 @@ The result of this query will be statically typed to `List<Lite<IBugDiscoverer>>
 
 ### Comparing Lite\<T>
 
-Just as entities, `Lite<T>` can be compared with `==` and `!=` operators and `Is` extension method. Both operands have to be `Lite<T>`.  
+Just as entities, `Lite<T>` can be compared with `==` and `!=` operators to `null` and `Is` extension method to everithing else (including `null`). This is to prevent unintended reference equality.
 
 ```C#
 Lite<DeveloperEntity> dev = //...
 
 var discovererComments = from b in Database.Query<BugEntity>()
-                         where b.Discoverer.ToLite() == discoverer
+                         where b.Discoverer.ToLite().Is(discoverer)
                          select c.Date;
 ```
 
-You can also use `RefersTo` extension method to compare a `Lite<T>` with a `T`: 
+You can also use `Is` extension method to compare a `Lite<T>` with a `T`: 
 
 ```C#
 Lite<DeveloperEntity> dev = //...
 
 var discovererComments = from b in Database.Query<BugEntity>()
-                         where discoverer.RefersTo(b.Discoverer)
+                         where discoverer.Is(b.Discoverer)
                          select c.Date;
 ```
 
-One annoying consequence of `Lite<T>` being co-variant, (and implemented as an `interface`) is that now the C# compiler is happy comparing `Lite<T>` with `T`, so this **unfortunately compiles**, throwing an exception: 
+One annoying consequence of `Lite<T>` being co-variant, (and implemented as an `interface`) is that the C# compiler is happy comparing `Lite<T>` with `T`, so this **unfortunately compiles**, throwing an exception: 
 
 ```C#
 Lite<DeveloperEntity> dev = //...
 
 var result = from b in Database.Query<BugEntity>()
-              select b.Discoverer == dev; //Polymorphic lite
+              select b.Discoverer.Is(dev); //Polymorphic lite
 
 //throws InvalidOperationException("Imposible to compare expressions of type IBugDiscoverer == Lite<DeveloperEntity>");
 ```
 
-```Note:``` Signum.Analyzer restores the compile-time errors when he finds comparishons between `Lite<T>` and `T`, or between `Lite<OrangeEntity>` and `Lite<AppleEntity>`. 
+```Note:``` Signum.Analyzer restores the compile-time errors when he finds comparishons between `Lite<OrangeEntity>` and `AppleEntity`, or between `Lite<OrangeEntity>` and `Lite<AppleEntity>`. 
 

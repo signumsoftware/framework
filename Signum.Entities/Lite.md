@@ -113,9 +113,12 @@ Also, be careful when comparing lites and references because **unfortunately it 
 animalLite == animal // returns false BUT COMPILES
 //theoretically a class inheriting from Animal could also implement Lite<T>
 
-animalLite.RefersTo(animal) // Ok
+animalLite.Is(animal) // Ok
 animalLite.Is(animal.ToLite()) // Ok
 ```
+
+```Note:``` Signum.Analyzer restores the compile-time errors when he finds comparishons between `Lite<OrangeEntity>` and `AppleEntity`, or between `Lite<OrangeEntity>` and `Lite<AppleEntity>`. 
+
 
 ### Lite Keys
 
