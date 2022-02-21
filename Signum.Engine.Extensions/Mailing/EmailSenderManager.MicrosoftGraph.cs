@@ -96,8 +96,8 @@ public static class MicrosoftGraphExtensions
                 throw new InvalidOperationException("AuthLogic.Authorizer is not an ActiveDirectoryAuthorizer");
 
         IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
-        .Create(microsoftGraph.Azure_ApplicationID)
-        .WithTenantId(microsoftGraph.Azure_DirectoryID)
+        .Create(microsoftGraph.Azure_ApplicationID.ToString())
+        .WithTenantId(microsoftGraph.Azure_DirectoryID.ToString())
         .WithClientSecret(microsoftGraph.Azure_ClientSecret)
         .Build();
 
@@ -111,8 +111,8 @@ public static class MicrosoftGraphExtensions
     public static ClientCredentialProvider GetAuthProvider(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
     {
         IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
-        .Create(activeDirectoryConfig.Azure_ApplicationID)
-        .WithTenantId(activeDirectoryConfig.Azure_DirectoryID)
+        .Create(activeDirectoryConfig.Azure_ApplicationID.ToString())
+        .WithTenantId(activeDirectoryConfig.Azure_DirectoryID.ToString())
         .WithClientSecret(activeDirectoryConfig.Azure_ClientSecret)
         .Build();
 

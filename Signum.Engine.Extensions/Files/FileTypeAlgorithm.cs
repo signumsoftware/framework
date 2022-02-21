@@ -84,9 +84,9 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         using (HeavyProfiler.Log("SaveFileInDisk", () => fullPhysicalPath))
             try
             {
-
-                File.WriteAllBytes(fullPhysicalPath, fp.BinaryFile);
-                fp.BinaryFile = null!;
+                var binaryFile = fp.BinaryFile;
+                fp.BinaryFile = null!; //For consistency with async
+                File.WriteAllBytes(fullPhysicalPath, binaryFile);
             }
             catch (IOException ex)
             {
@@ -103,9 +103,9 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         using (HeavyProfiler.Log("SaveFileInDisk", () => fullPhysicalPath))
             try
             {
-
-                await File.WriteAllBytesAsync(fullPhysicalPath, fp.BinaryFile);
-                fp.BinaryFile = null!;
+                var binaryFile = fp.BinaryFile;
+                fp.BinaryFile = null!; //So the entity is not modified after await
+                await File.WriteAllBytesAsync(fullPhysicalPath, binaryFile);
             }
             catch (IOException ex)
             {
