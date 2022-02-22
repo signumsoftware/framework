@@ -38,7 +38,20 @@ public class CollectionElementToken : QueryToken
 
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
     {
-        return SubTokensBase(Type, options, GetImplementations());
+        var st = SubTokensBase(Type, options, GetImplementations());
+
+        var ept = MListElementPropertyToken.AsMListEntityProperty(this.parent);
+        if (ept != null)
+        {
+            var mleType = MListElementPropertyToken.MListEelementType(ept);
+
+            st.Add(new MListElementPropertyToken(this, mleType.GetProperty("RowId")!, ept.PropertyRoute, "RowId", () => QueryTokenMessage.RowId.NiceToString()) { Priority = -5 });
+
+            if (MListElementPropertyToken.HasAttribute(ept.PropertyRoute, typeof(PreserveOrderAttribute)))
+                st.Add(new MListElementPropertyToken(this, mleType.GetProperty("RowOrder")!, ept.PropertyRoute, "RowOrder", () => QueryTokenMessage.RowOrder.NiceToString()) { Priority = -5 });
+        }
+
+        return st;
     }
 
     public override Implementations? GetImplementations()
@@ -110,16 +123,6 @@ public class CollectionElementToken : QueryToken
         throw new InvalidOperationException("CollectionElementToken should have a replacement at this stage");
     }
 
-
-    internal ParameterExpression CreateParameter()
-    {
-        return Expression.Parameter(elementType);
-    }
-
-    internal Expression CreateExpression(ParameterExpression parameter)
-    {
-        return parameter.BuildLite().Nullify();
-    }
 
     public static List<CollectionElementToken> GetElements(HashSet<QueryToken> allTokens)
     {

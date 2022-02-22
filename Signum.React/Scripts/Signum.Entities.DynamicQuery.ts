@@ -126,6 +126,8 @@ export module QueryTokenMessage {
   export const Not = new MessageKey("QueryTokenMessage", "Not");
   export const Distinct = new MessageKey("QueryTokenMessage", "Distinct");
   export const _0Of1 = new MessageKey("QueryTokenMessage", "_0Of1");
+  export const RowOrder = new MessageKey("QueryTokenMessage", "RowOrder");
+  export const RowId = new MessageKey("QueryTokenMessage", "RowId");
 }
 
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");

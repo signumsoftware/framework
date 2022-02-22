@@ -254,7 +254,7 @@ public static class DQueryable
 
         var dic = description.Columns.ToDictionary(
             cd => (QueryToken)new ColumnToken(cd, description.QueryName),
-            cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!));
+            cd => new ExpressionBox(Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!), null));
 
         return new DQueryable<T>(query.Select(a => (object)a!), new BuildExpressionContext(typeof(T), pe, dic));
     }
@@ -356,7 +356,11 @@ public static class DQueryable
 
         newContext = new BuildExpressionContext(
                 ctor.Type, pe,
-                tokens.Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(Expression.Convert(pe, ctor.Type), i) }).ToDictionary(t => t.Token!, t => t.Expr!)); /*CSBUG*/
+                tokens.Select((t, i) => new 
+                { 
+                    Token = t, 
+                    Expr = TupleReflection.TupleChainProperty(Expression.Convert(pe, ctor.Type), i) 
+                }).ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr!, null))); /*CSBUG*/
 
         return Expression.Lambda<Func<object, object>>(
                 (Expression)Expression.Convert(ctor, typeof(object)), context.Parameter);
@@ -375,7 +379,7 @@ public static class DQueryable
 
         var dic = description.Columns.ToDictionary(
             cd => (QueryToken)new ColumnToken(cd, description.QueryName),
-            cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!));
+            cd => new ExpressionBox(Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!), null));
 
         return new DEnumerable<T>(query.Select(a => (object)a!), new BuildExpressionContext(typeof(T), pe, dic));
     }
@@ -407,16 +411,21 @@ public static class DQueryable
 
     public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, CollectionElementToken cet)
     {
-        Type elementType = cet.Parent!.Type.ElementType()!;
+        var eptML = MListElementPropertyToken.AsMListEntityProperty(cet.Parent!);
+
+        Type elementType = eptML  != null ?
+            MListElementPropertyToken.MListEelementType(eptML) : 
+            cet.Parent!.Type.ElementType()!;
 
         var collectionSelector = Expression.Lambda(typeof(Func<,>).MakeGenericType(typeof(object), typeof(IEnumerable<>).MakeGenericType(elementType)),
             Expression.Call(miDefaultIfEmptyE.MakeGenericMethod(elementType),
+               eptML != null ? MListElementPropertyToken.BuildMListElements(eptML, query.Context) :
                 cet.Parent!.BuildExpression(query.Context)),
             query.Context.Parameter);
 
-        var elementParameter = cet.CreateParameter();
+        var elementParameter = Expression.Parameter(elementType);
 
-        var properties = query.Context.Replacemens.Values.And(cet.CreateExpression(elementParameter));
+        var properties = query.Context.Replacements.Values.Select(box => box.RawExpression).And(elementParameter.BuildLite().Nullify()).ToList();
 
         var ctor = TupleReflection.TupleChainConstructor(properties);
 
@@ -427,14 +436,21 @@ public static class DQueryable
 
         var parameter = Expression.Parameter(typeof(object));
 
-        var newReplacements = query.Context.Replacemens.Keys.And(cet).Select((a, i) => new
+        var newReplacements = query.Context.Replacements.Select((kvp, i) => new
         {
-            Token = a,
-            Expression = TupleReflection.TupleChainProperty(Expression.Convert(parameter, ctor.Type), i)
-        }).ToDictionary(a => a.Token!, a => a.Expression!); /*CSBUG*/
+            Token = kvp.Key,
+            Expression = new ExpressionBox(TupleReflection.TupleChainProperty(Expression.Convert(parameter, ctor.Type), i),
+                 kvp.Value.MListElementRoute)
+        }).ToDictionary(a => a.Token, a => a.Expression);
 
-        return new DQueryable<T>(resultQuery,
-            new BuildExpressionContext(ctor.Type, parameter, newReplacements));
+        newReplacements.Add(cet,
+            new ExpressionBox(TupleReflection.TupleChainProperty(Expression.Convert(parameter, ctor.Type), query.Context.Replacements.Keys.Count),
+            eptML != null ? cet.GetPropertyRoute() : null
+            ));
+
+        var newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements);
+
+        return new DQueryable<T>(resultQuery, newContext);
     }
 
     #endregion
@@ -894,7 +910,7 @@ public static class DQueryable
         {
             if (isQueryable)
             {
-                var tempContext = new BuildExpressionContext(keyTupleType, pk, rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, TupleReflection.TupleChainProperty(pk, i))).ToDictionary());
+                var tempContext = new BuildExpressionContext(keyTupleType, pk, rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, new ExpressionBox(TupleReflection.TupleChainProperty(pk, i), null))).ToDictionary());
                 resultExpressions.AddRange(redundantKeyTokens.Select(t => KeyValuePair.Create(t, t.BuildExpression(tempContext))));
             }
             else
@@ -921,7 +937,7 @@ public static class DQueryable
 
         ParameterExpression pg = Expression.Parameter(typeof(object), "gr");
         newContext = new BuildExpressionContext(resultConstructor.Type, pg,
-            resultExpressions.Keys.Select((t, i) => KeyValuePair.Create(t, TupleReflection.TupleChainProperty(Expression.Convert(pg, resultConstructor.Type), i))).ToDictionary());
+            resultExpressions.Keys.Select((t, i) => KeyValuePair.Create(t, new ExpressionBox(TupleReflection.TupleChainProperty(Expression.Convert(pg, resultConstructor.Type), i), null))).ToDictionary());
 
         return Expression.Lambda(Expression.Convert(resultConstructor, typeof(object)), pk, pe);
     }
@@ -1097,18 +1113,18 @@ public static class DQueryable
 
     public static DEnumerable<T> ReplaceColumns<T>(this DEnumerable<T> query, params IExpandColumn[] newColumns)
     {
-        var entity = query.Context.Replacemens.Single(a => a.Key.FullKey() == "Entity").Value;
+        var entity = query.Context.Replacements.Single(a => a.Key.FullKey() == "Entity").Value.GetExpression();
         var newColumnsDic = newColumns.ToDictionary(a => a.Token, a => a.GetExpression(entity));
 
-        List<QueryToken> tokens = query.Context.Replacemens.Keys.Union(newColumns.Select(a => a.Token)).ToList();
-        List<Expression> expressions = tokens.Select(t => newColumnsDic.TryGetC(t) ?? query.Context.Replacemens.GetOrThrow(t)).ToList();
+        List<QueryToken> tokens = query.Context.Replacements.Keys.Union(newColumns.Select(a => a.Token)).ToList();
+        List<Expression> expressions = tokens.Select(t => newColumnsDic.TryGetC(t) ?? query.Context.Replacements.GetOrThrow(t).GetExpression()).ToList();
         Expression ctor = TupleReflection.TupleChainConstructor(expressions);
 
         var pe = Expression.Parameter(typeof(object));
 
         var newContext = new BuildExpressionContext(
                 ctor.Type, pe,
-                tokens.Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(Expression.Convert(pe, ctor.Type), i) }).ToDictionary(t => t.Token!, t => t.Expr!)); /*CSBUG*/
+                tokens.Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(Expression.Convert(pe, ctor.Type), i) }).ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr!, null))); /*CSBUG*/
 
         var selector = Expression.Lambda<Func<object, object>>(
                 (Expression)Expression.Convert(ctor, typeof(object)), query.Context.Parameter);
