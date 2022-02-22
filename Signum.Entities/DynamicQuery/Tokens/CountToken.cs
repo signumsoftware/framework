@@ -70,7 +70,7 @@ public class CountToken : QueryToken
 
     public override string NiceName()
     {
-        return ToString() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
+        return QueryTokenMessage._0Of1.NiceToString(ToString(), parent.ToString());
     }
 
     public override QueryToken Clone()

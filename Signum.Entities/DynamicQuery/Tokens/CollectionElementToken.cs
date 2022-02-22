@@ -97,7 +97,7 @@ public class CollectionElementToken : QueryToken
         if (parentElement.IsModifiableEntity())
             return parentElement.NiceName();
 
-        return "Element of " + Parent?.NiceName();
+        return QueryTokenMessage._0Of1.NiceToString(this.CollectionElementType.NiceToString(), Parent?.NiceName());
     }
 
     public override QueryToken Clone()

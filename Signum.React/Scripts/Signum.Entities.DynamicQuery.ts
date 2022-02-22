@@ -111,7 +111,6 @@ export module QueryTokenMessage {
   export const TimeOfDay = new MessageKey("QueryTokenMessage", "TimeOfDay");
   export const MoreThanOneColumnNamed0 = new MessageKey("QueryTokenMessage", "MoreThanOneColumnNamed0");
   export const Number = new MessageKey("QueryTokenMessage", "Number");
-  export const Of = new MessageKey("QueryTokenMessage", "Of");
   export const Second = new MessageKey("QueryTokenMessage", "Second");
   export const Text = new MessageKey("QueryTokenMessage", "Text");
   export const Year = new MessageKey("QueryTokenMessage", "Year");
@@ -126,6 +125,7 @@ export module QueryTokenMessage {
   export const Null = new MessageKey("QueryTokenMessage", "Null");
   export const Not = new MessageKey("QueryTokenMessage", "Not");
   export const Distinct = new MessageKey("QueryTokenMessage", "Distinct");
+  export const _0Of1 = new MessageKey("QueryTokenMessage", "_0Of1");
 }
 
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");

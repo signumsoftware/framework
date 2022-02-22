@@ -98,7 +98,7 @@ public class CollectionAnyAllToken : QueryToken
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
-        throw new InvalidOperationException("CollectionElementToken should have a replacement at this stage");
+        throw new InvalidOperationException("CollectionAnyAllToken should have a replacement at this stage");
     }
 
 

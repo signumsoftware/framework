@@ -578,8 +578,6 @@ public enum QueryTokenMessage
     MoreThanOneColumnNamed0,
     [Description("number")]
     Number,
-    [Description(" of ")]
-    Of,
     Second,
     [Description("text")]
     Text,
@@ -601,4 +599,6 @@ public enum QueryTokenMessage
     Null,
     Not,
     Distinct,
+    [Description("{0} of {1}")]
+    _0Of1,
 }
