@@ -44,7 +44,7 @@ public class CollectionAnyAllToken : QueryToken
         var ept = MListElementPropertyToken.AsMListEntityProperty(this.parent);
         if (ept != null)
         {
-            var mleType = MListElementPropertyToken.MListEelementType(ept);
+            var mleType = MListElementPropertyToken.MListElementType(ept);
 
             st.Add(new MListElementPropertyToken(this, mleType.GetProperty("RowId")!, ept.PropertyRoute, "RowId", () => QueryTokenMessage.RowId.NiceToString()) { Priority = -5 });
 

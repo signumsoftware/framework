@@ -99,29 +99,43 @@ public class MListElementPropertyToken : QueryToken
         //user.Friends
         //user.MListElement<UserEntity, UserEntity>(u => u.Friends)
 
-        var parentExpr = ept.Parent!.BuildExpression(ctx);
+        var entityParent = FindEntityParent(ept)!;
+        var entityParentType = entityParent.Type.CleanType();
 
-        var param = Expression.Parameter(ept.Parent.Type.CleanType(), ept.Parent!.Type.Name.Substring(0, 1).ToLower());
+        var parentExpr = entityParent.BuildExpression(ctx);
+
+        var param = Expression.Parameter(entityParentType, entityParentType.Name.Substring(0, 1).ToLower());
 
         var ctxTemp = new BuildExpressionContext(ctx.TupleType, ctx.Parameter, new Dictionary<QueryToken, ExpressionBox>
         {
-            {  ept.Parent, new ExpressionBox(param , null)}
+            {  entityParent, new ExpressionBox(param , null)}
         });
 
         var lambda = Expression.Lambda(ept.BuildExpression(ctxTemp), param);
 
-        var mi = miMListElementsLite.MakeGenericMethod(ept.Parent.Type.CleanType()!, ept.Type.ElementType()!);
+        var mi = miMListElementsLite.MakeGenericMethod(entityParentType, ept.Type.ElementType()!);
 
         return Expression.Call(mi, parentExpr, lambda);
     }
 
     public static EntityPropertyToken? AsMListEntityProperty(QueryToken token)
     {
-        return token is EntityPropertyToken ept && ept.Type.IsMList() && !HasAttribute(ept.PropertyRoute, typeof(IgnoreAttribute)) /*VirtualMList*/ ? ept : null;
+        return token is EntityPropertyToken ept && ept.Type.IsMList() && !HasAttribute(ept.PropertyRoute, typeof(IgnoreAttribute)) /*VirtualMList*/ && FindEntityParent(ept) != null ? ept : null;
     }
 
-    public static Type MListEelementType(EntityPropertyToken eptML)
+    public static Type MListElementType(EntityPropertyToken eptML)
     {
-        return typeof(MListElement<,>).MakeGenericType(eptML.Parent!.Type.CleanType(), eptML.Type.ElementType()!);
+        return typeof(MListElement<,>).MakeGenericType(FindEntityParent(eptML)!.Type.CleanType(), eptML.Type.ElementType()!);
+    }
+
+    public static QueryToken? FindEntityParent(EntityPropertyToken ept)
+    {
+        if (ept.Parent!.Type.CleanType().IsEntity())
+            return ept.Parent;
+
+        if (ept.Parent is EntityPropertyToken ept2)
+            return FindEntityParent(ept2);
+
+        return null;
     }
 }

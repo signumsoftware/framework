@@ -414,7 +414,7 @@ public static class DQueryable
         var eptML = MListElementPropertyToken.AsMListEntityProperty(cet.Parent!);
 
         Type elementType = eptML  != null ?
-            MListElementPropertyToken.MListEelementType(eptML) : 
+            MListElementPropertyToken.MListElementType(eptML) : 
             cet.Parent!.Type.ElementType()!;
 
         var collectionSelector = Expression.Lambda(typeof(Func<,>).MakeGenericType(typeof(object), typeof(IEnumerable<>).MakeGenericType(elementType)),
