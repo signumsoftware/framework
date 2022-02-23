@@ -824,6 +824,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   modalSize?: BsSize;
 
+  stickyHeader?: boolean;
+
   autocomplete?: (fo: FindOptions | undefined) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
   autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
@@ -888,6 +890,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   allowWrapEntityLink?: boolean;
 
   modalSize?: BsSize;
+
+  stickyHeader?: boolean;
 
   autocomplete?: (fo: FindOptions | undefined) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;

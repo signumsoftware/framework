@@ -107,14 +107,14 @@ public class QueryController : ControllerBase
         return result;
     }
 
-    [HttpPost("api/query/litesWithFilter"), ProfilerActionSplitter]
-    public async Task<List<Lite<Entity>>> GetLitesWithFilter([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
+    [HttpPost("api/query/lites"), ProfilerActionSplitter]
+    public async Task<List<Lite<Entity>>> GetLites([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
     {
         return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }
 
-    [HttpPost("api/query/entitiesWithFilter"), ProfilerActionSplitter]
-    public async Task<List<Entity>> GetEntitiesWithFilter([Required, FromBody] QueryEntitiesRequestTS request, CancellationToken token)
+    [HttpPost("api/query/entities"), ProfilerActionSplitter]
+    public async Task<List<Entity>> GetEntities([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
     {
         return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }

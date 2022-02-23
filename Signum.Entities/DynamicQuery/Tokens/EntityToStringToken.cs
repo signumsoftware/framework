@@ -74,7 +74,7 @@ public class EntityToStringToken : QueryToken
 
     public override string NiceName()
     {
-        return LiteMessage.ToStr.NiceToString() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
+        return QueryTokenMessage._0Of1.NiceToString(LiteMessage.ToStr.NiceToString(), parent.ToString());
     }
 
     public override QueryToken Clone()

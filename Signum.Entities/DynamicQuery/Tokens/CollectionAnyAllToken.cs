@@ -1,3 +1,4 @@
+using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.DynamicQuery;
@@ -20,6 +21,7 @@ public class CollectionAnyAllToken : QueryToken
         this.CollectionAnyAllType = type;
     }
 
+
     public override Type Type
     {
         get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); }
@@ -37,7 +39,20 @@ public class CollectionAnyAllToken : QueryToken
 
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
     {
-        return SubTokensBase(Type, options, GetImplementations());
+        var st = SubTokensBase(Type, options, GetImplementations());
+
+        var ept = MListElementPropertyToken.AsMListEntityProperty(this.parent);
+        if (ept != null)
+        {
+            var mleType = MListElementPropertyToken.MListEelementType(ept);
+
+            st.Add(new MListElementPropertyToken(this, mleType.GetProperty("RowId")!, ept.PropertyRoute, "RowId", () => QueryTokenMessage.RowId.NiceToString()) { Priority = -5 });
+
+            if (MListElementPropertyToken.HasAttribute(ept.PropertyRoute, typeof(PreserveOrderAttribute)))
+                st.Add(new MListElementPropertyToken(this, mleType.GetProperty("RowOrder")!, ept.PropertyRoute, "RowOrder", () => QueryTokenMessage.RowOrder.NiceToString()) { Priority = -5 });
+        }
+
+        return st; 
     }
 
     public override Implementations? GetImplementations()
@@ -98,7 +113,7 @@ public class CollectionAnyAllToken : QueryToken
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
-        throw new InvalidOperationException("CollectionElementToken should have a replacement at this stage");
+        throw new InvalidOperationException("CollectionAnyAllToken should have a replacement at this stage");
     }
 
 

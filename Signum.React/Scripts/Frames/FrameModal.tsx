@@ -224,7 +224,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
   return (
     <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" >
-      <ModalHeaderButtons onClose={p.buttons == "close" ? handleCancelClicked : undefined}>
+      <ModalHeaderButtons onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
         <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise} />
       </ModalHeaderButtons>
       {packComponent && renderBody(packComponent)}

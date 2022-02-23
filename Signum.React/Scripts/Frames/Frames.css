@@ -207,3 +207,10 @@ a.expand-window:hover {
 .sf-page-container > div{
     flex-grow: 1;
 }
+
+.sf-sticky-header {
+    position: sticky;
+    top: 0px;
+    z-index: 900;
+    background: white;
+}
