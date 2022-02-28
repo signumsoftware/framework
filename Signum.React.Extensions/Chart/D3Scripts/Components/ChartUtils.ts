@@ -47,11 +47,18 @@ export function matrix(a: number, b: number, c: number, d: number, e: number, f:
 
 export function scaleFor(column: ChartColumn<any>, values: number[], minRange: number, maxRange: number, scaleName: string | null | undefined): d3.ScaleContinuousNumeric<number, number> {
 
-  if (scaleName == "ZeroMax")
+  if (scaleName == "ZeroMax") {
+
+    let max = d3.max(values)!;
+    if (max == 0) // To keep the color or 0 stable
+      max = 1;
+
     return d3.scaleLinear()
-      .domain([0, d3.max(values)!])
+      .domain([0, max])
       .range([minRange, maxRange])
       .nice();
+
+  }
 
   if (scaleName == "MinMax") {
     if (column.type == "DateOnly" || column.type == "DateTime") {
