@@ -81,20 +81,35 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       return token?.toString();
     }
 
-    if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions) &&
-      toString(this.props.valueToken) == toString(newProps.valueToken)) {
-
-      if (!Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? []))
-        this.refreshValue(newProps, this.state.valueToken)
+    if (newProps.initialValue !== undefined) {
+      if (
+        //when initialValue is set, changing findOptions or token can not force a refresh because it will break reusing ValueSearchControls inside of SearchControl cells
+        //Finder.findOptionsPath(this.props.findOptions) != Finder.findOptionsPath(newProps.findOptions) ||
+        !Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? []))
+        this.loadToken(newProps)
+          .then(valTok => {
+            if (newProps.initialValue == undefined)
+              this.refreshValue(newProps, valTok);
+          })
+          .done();
+      else if (newProps.initialValue !== this.props.initialValue)
+        this.setState({ value: newProps.initialValue });
 
     } else {
-      this.loadToken(newProps)
-        .then(valTok => {
-          if (newProps.initialValue == undefined)
-            this.refreshValue(newProps, valTok);
-        })
-        .done();
-      
+      if (toString(this.props.valueToken) == toString(newProps.valueToken)) {
+
+        if (Finder.findOptionsPath(this.props.findOptions) != Finder.findOptionsPath(newProps.findOptions) ||
+          !Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? []))
+          this.refreshValue(newProps, this.state.valueToken);
+
+      } else {
+        this.loadToken(newProps)
+          .then(valTok => {
+            if (newProps.initialValue == undefined)
+              this.refreshValue(newProps, valTok);
+          })
+          .done();
+      }
     }
   }
 

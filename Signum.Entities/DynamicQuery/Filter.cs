@@ -22,9 +22,10 @@ public abstract class Filter
 
     protected Expression GetExpressionWithAnyAll(BuildExpressionContext ctx, CollectionAnyAllToken anyAll)
     {
-        if (anyAll.Parent is EntityPropertyToken ept && ept!.Type.IsMList())
+        var ept = MListElementPropertyToken.AsMListEntityProperty(anyAll.Parent!);
+        if (ept != null)
         {
-            Expression collection = MListElementPropertyToken.BuildMListElements((EntityPropertyToken)anyAll.Parent!, ctx);
+            Expression collection = MListElementPropertyToken.BuildMListElements(ept, ctx);
             Type mleType = collection.Type.ElementType()!;
 
             var p = Expression.Parameter(mleType, mleType.Name.Substring(0, 1).ToLower());

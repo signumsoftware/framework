@@ -39,7 +39,9 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
             EnsureDirectory(fp);
 
-            SaveFileInDisk(fp);
+            var binaryFile = fp.BinaryFile;
+            fp.BinaryFile = null!; //For consistency with async
+            SaveFileInDisk(fp.FullPhysicalPath(), binaryFile);
         }
     }
 
@@ -54,7 +56,9 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
             EnsureDirectory(fp);
 
-            return SaveFileInDiskAsync(fp, token);
+            var binaryFile = fp.BinaryFile;
+            fp.BinaryFile = null!; //So the entity is not modified after await
+            return SaveFileInDiskAsync(fp.FullPhysicalPath(), binaryFile, token);
         }
     }
 
@@ -78,14 +82,12 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         }
     }
 
-    public virtual void SaveFileInDisk(IFilePath fp)
+    static void SaveFileInDisk(string fullPhysicalPath, byte[] binaryFile)
     {
-        var fullPhysicalPath = fp.FullPhysicalPath();
         using (HeavyProfiler.Log("SaveFileInDisk", () => fullPhysicalPath))
+        {
             try
             {
-                var binaryFile = fp.BinaryFile;
-                fp.BinaryFile = null!; //For consistency with async
                 File.WriteAllBytes(fullPhysicalPath, binaryFile);
             }
             catch (IOException ex)
@@ -95,16 +97,15 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
                 throw;
             }
+        }
     }
 
-    public virtual async Task SaveFileInDiskAsync(IFilePath fp, CancellationToken token = default)
+    static async Task SaveFileInDiskAsync(string fullPhysicalPath, byte[] binaryFile, CancellationToken token = default)
     {
-        var fullPhysicalPath = fp.FullPhysicalPath();
-        using (HeavyProfiler.Log("SaveFileInDisk", () => fullPhysicalPath))
+        using (HeavyProfiler.Log("SaveFileInDiskAsync", () => fullPhysicalPath))
+        {
             try
             {
-                var binaryFile = fp.BinaryFile;
-                fp.BinaryFile = null!; //So the entity is not modified after await
                 await File.WriteAllBytesAsync(fullPhysicalPath, binaryFile);
             }
             catch (IOException ex)
@@ -114,6 +115,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
                 throw;
             }
+        }
     }
 
     private static string EnsureDirectory(IFilePath fp)

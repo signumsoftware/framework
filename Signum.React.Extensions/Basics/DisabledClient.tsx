@@ -43,6 +43,7 @@ export function start(options: { routes: JSX.Element[] }) {
       }
 
       querySettings.hiddenColumns = [
+        ...(querySettings.hiddenColumns ?? []),
         { token: DisabledMixin.token(e => e.entity.isDisabled) }
       ];
 

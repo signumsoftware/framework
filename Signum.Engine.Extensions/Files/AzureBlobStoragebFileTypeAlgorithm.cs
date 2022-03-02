@@ -96,11 +96,11 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
             try
             {
-                var action = this.BlobAction(fp);
+                var blobHeaders = GetBlobHttpHeaders(fp, this.BlobAction(fp));
+                var blobClient = client.GetBlobClient(fp.Suffix);
                 var binaryFile = fp.BinaryFile; //For consistency with async
                 fp.BinaryFile = null!;
-                client.GetBlobClient(fp.Suffix).Upload(new MemoryStream(binaryFile),
-                    httpHeaders: GetBlobHttpHeaders(fp, action));
+                SaveFileInAzure(blobClient, blobHeaders, binaryFile);
             }
             catch (Exception ex)
             {
@@ -112,23 +112,31 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         }
     }
 
-    public virtual async Task SaveFileAsync(IFilePath fp, CancellationToken cancellationToken = default)
+    private static void SaveFileInAzure(BlobClient blobClient, BlobHttpHeaders blobHeaders, byte[] binaryFile)
+    {
+        blobClient.Upload(new MemoryStream(binaryFile), httpHeaders: blobHeaders);
+    }
+
+    //Initial exceptions (like connection string problems) should happen synchronously
+    public virtual /*async*/ Task SaveFileAsync(IFilePath fp, CancellationToken cancellationToken = default)
     {
         using (HeavyProfiler.Log("AzureBlobStorage SaveFile"))
         using (new EntityCache(EntityCacheType.ForceNew))
         {
             if (WeakFileReference)
-                return;
+                return Task.CompletedTask;
 
             BlobContainerClient client = CalculateSuffixWithRenames(fp);
 
             try
             {
-                var action = this.BlobAction(fp);
+                var headers = GetBlobHttpHeaders(fp, this.BlobAction(fp));
+                var blobClient = client.GetBlobClient(fp.Suffix);
+
                 var binaryFile = fp.BinaryFile;
                 fp.BinaryFile = null!; //So the entity is not modified after await
-                await client.GetBlobClient(fp.Suffix).UploadAsync(new MemoryStream(binaryFile),
-                    httpHeaders: GetBlobHttpHeaders(fp, action), cancellationToken: cancellationToken);
+                
+                return SaveFileInAzureAsync(blobClient, binaryFile, headers, fp.Suffix, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -137,6 +145,21 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
                 ex.Data.Add("ContainerName", client.Name);
                 throw;
             }
+        }
+    }
+
+    static async Task SaveFileInAzureAsync(BlobClient blobClient, byte[] binaryFile, BlobHttpHeaders headers, string suffixForException, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await blobClient.UploadAsync(new MemoryStream(binaryFile), httpHeaders: headers, cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            ex.Data.Add("Suffix", suffixForException);
+            ex.Data.Add("AccountName", blobClient.AccountName);
+            ex.Data.Add("ContainerName", blobClient.Name);
+            throw;
         }
     }
 
@@ -179,11 +202,12 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
     private static BlobHttpHeaders GetBlobHttpHeaders(IFilePath fp, BlobAction action)
     {
+        var contentType = action == Files.BlobAction.Download ? "application/octet-stream" :
+                ContentTypesDict.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream");
+
         return new BlobHttpHeaders
         {
-            ContentType = action == Files.BlobAction.Download
-                            ? "application/octet-stream"
-                            : ContentTypesDict.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream"),
+            ContentType = contentType,
             ContentDisposition = action == Files.BlobAction.Download ? "attachment" : "inline"
         };
     }
