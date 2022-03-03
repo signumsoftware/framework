@@ -786,13 +786,13 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
 public class MListElement<E, V> where E : Entity
 {
     public PrimaryKey RowId { get; set; }
-    public int Order { get; set; }
+    public int RowOrder { get; set; }
     public E Parent { get; set; }
     public V Element { get; set; }
 
     public override string ToString()
     {
-        return $"MListEntity: ({nameof(RowId)}:{RowId}, {nameof(Order)}:{Order}, {nameof(Parent)}:{Parent}, {nameof(Element)}:{Element})";
+        return $"MListEntity: ({nameof(RowId)}:{RowId}, {nameof(RowOrder)}:{RowOrder}, {nameof(Parent)}:{Parent}, {nameof(Element)}:{Element})";
     }
 }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.

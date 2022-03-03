@@ -17,7 +17,7 @@ public class ActiveDirectoryController : ControllerBase
     public Task<List<ActiveDirectoryUser>> FindADUsers(string subString, int count, CancellationToken token)
     {
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
-        if (config.Azure_ApplicationID.HasText())
+        if (config.Azure_ApplicationID != null)
             return AzureADLogic.FindActiveDirectoryUsers(subString, count, token);
 
         if (config.DomainName.HasText())
@@ -32,7 +32,7 @@ public class ActiveDirectoryController : ControllerBase
     {
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
-        if (config.Azure_ApplicationID.HasText())
+        if (config.Azure_ApplicationID != null)
             return AzureADLogic.CreateUserFromAD(user).ToLite();
 
         if (config.DomainName.HasText())

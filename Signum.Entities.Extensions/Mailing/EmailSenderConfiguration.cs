@@ -157,23 +157,23 @@ public class MicrosoftGraphEmbedded : EmbeddedEntity
 {
     public bool UseActiveDirectoryConfiguration { get; set; }
 
-    [StringLengthValidator(Max = 100), Description("Azure Application (client) ID")]
-    public string? Azure_ApplicationID { get; set; }
+    [Description("Azure Application (client) ID")]
+    public Guid? Azure_ApplicationID { get; set; }
 
-    [StringLengthValidator(Max = 100), Description("Azure Directory (tenant) ID")]
-    public string? Azure_DirectoryID { get; set; }
+    [Description("Azure Directory (tenant) ID")]
+    public Guid? Azure_DirectoryID { get; set; }
 
-    [StringLengthValidator(Max = 100), Description("Azure Client Secret ID")]
+    [StringLengthValidator(Max = 100), Description("Azure Client Secret Value")]
     public string? Azure_ClientSecret { get; set; }
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if (!UseActiveDirectoryConfiguration)
         {
-            if (pi.Name == nameof(Azure_ApplicationID) && !Azure_ApplicationID.HasText())
+            if (pi.Name == nameof(Azure_ApplicationID) && Azure_ApplicationID == null)
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
-            if (pi.Name == nameof(Azure_DirectoryID) && !Azure_DirectoryID.HasText())
+            if (pi.Name == nameof(Azure_DirectoryID) && Azure_DirectoryID == null)
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
             if (pi.Name == nameof(Azure_ClientSecret) && !Azure_ClientSecret.HasText())

@@ -92,7 +92,7 @@ public class NetPropertyToken : QueryToken
 
     public override string NiceName()
     {
-        return DisplayName() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
+        return QueryTokenMessage._0Of1.NiceToString(DisplayName(), parent.ToString());
     }
 
     public override QueryToken Clone()
