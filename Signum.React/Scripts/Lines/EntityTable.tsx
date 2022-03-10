@@ -283,7 +283,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
 
     return (
       <div ref={c.containerDiv}
-        className={p.scrollable ? "sf-scroll-table-container table-responsive" : undefined}
+        className={classes(p.scrollable ? "sf-scroll-table-container" : undefined, "table-responsive")}
         style={{ maxHeight: p.scrollable ? p.maxResultsHeight : undefined }}>
         <table className={classes("table table-sm sf-table", p.tableClasses)} >
           {
