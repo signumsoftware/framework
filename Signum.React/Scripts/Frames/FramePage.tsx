@@ -277,7 +277,6 @@ export default function FramePage(p: FramePageProps) {
       {renderTitle()}
       <div style={state.executing == true ? { opacity: ".7" } : undefined}>
         <div className="sf-button-widget-container">
-          {renderWidgets(wc)}
           {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
         </div>
         <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
@@ -300,11 +299,14 @@ export default function FramePage(p: FramePageProps) {
     const entity = state.pack.entity;
 
     return (
-      <h4 className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")}>
-        <span className="display-6 sf-entity-title">{getToString(entity)}</span>
-        <br />
-        <small className="sf-type-nice-name text-muted">{Navigator.getTypeSubTitle(entity, undefined)}</small>
-      </h4>
+      <>
+        <h4 className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")}>
+          <span className="display-6 sf-entity-title">{getToString(entity)}</span>
+          <br />
+          <small className="sf-type-nice-name text-muted">{Navigator.getTypeSubTitle(entity, undefined)}</small>
+          {renderWidgets(wc, settings?.stickyHeader)}
+        </h4>
+      </>
     );
   }
 }

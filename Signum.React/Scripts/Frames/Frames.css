@@ -44,20 +44,18 @@
     }
 }
 
-.sf-button-widget-container{
+.sf-button-widget-container {
 }
 
 .sf-button-bar {
     margin-bottom: 16px;
 }
 
-.modal-body > .sf-button-bar
-{
+.modal-body > .sf-button-bar {
     margin-top: -5px;
 }
 
-.validaton-summary li
-{
+.validaton-summary li {
     list-style: none;
 }
 
@@ -68,13 +66,11 @@
 
 .sf-ok-button,
 .sf-yes-button,
-.sf-no-button
-{
+.sf-no-button {
     min-width: 70px;
 }
 
-.sf-chooser-button
-{
+.sf-chooser-button {
     width: 100%;
     margin-bottom: 6px;
 }
@@ -83,8 +79,9 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
-.modal-title{
+.modal-title {
     overflow: hidden;
+    width: 100%;
 }
 
 .sf-entity-title {
@@ -96,11 +93,12 @@
 button.dropdown-item:not(:disabled):not(.disabled) {
     cursor: pointer;
 }
+
 .sf-pointer {
     cursor: pointer;
 }
 
-.sf-pointer-events{
+.sf-pointer-events {
     pointer-events: initial !important;
 }
 
@@ -125,17 +123,17 @@ a.expand-window {
     z-index: 1000;
 }
 
-a.expand-window:hover {
-    color:gray;
-}
+    a.expand-window:hover {
+        color: gray;
+    }
 
 .btn-toolbar.right .btn,
 .btn-toolbar.right .btn-group,
 .btn-toolbar.right .input-group {
-  float: right;
+    float: right;
 }
 
-.btn.disabled[data-operation]{
+.btn.disabled[data-operation] {
     pointer-events: initial;
 }
 
@@ -179,14 +177,21 @@ a.expand-window:hover {
     text-decoration: none;
 }
 
+@media (max-width: 768px) {
+    .sf-quicklinks {
+        max-width: 300px;
+        overflow: hidden;
+    }
+}
+
 .sf-guid-id {
     opacity: 0;
     transition: opacity 1s ease;
 }
 
-.sf-guid-id:hover{
-    opacity: 1;
-}
+    .sf-guid-id:hover {
+        opacity: 1;
+    }
 
 .card.card-sm .card-header,
 .card.card-sm .card-body {
@@ -200,17 +205,27 @@ a.expand-window:hover {
 
 
 .sf-page-container {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
-.sf-page-container > div{
-    flex-grow: 1;
-}
+    .sf-page-container > div {
+        flex-grow: 1;
+    }
 
 .sf-sticky-header {
     position: sticky;
     top: 0px;
     z-index: 900;
     background: white;
+}
+
+.sf-entity-sub-title {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.sf-frame-modal .modal-title {
+    margin-right: -25px;
+    overflow: inherit;
 }
