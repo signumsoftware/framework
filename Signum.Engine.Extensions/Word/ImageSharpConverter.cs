@@ -30,7 +30,8 @@ public class ImageSharpConverter : IImageConverter<Image>
             {
                 Size = new Size(maxWidth, maxHeight),
                 Mode = ResizeMode.Max,
-            });
+            })
+            .BackgroundColor(Color.White);
         });
     }
 
