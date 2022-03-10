@@ -247,7 +247,7 @@ public static class BulkInserter
                 var mlistElements = (from e in entities
                                      from mle in func(e).EmptyIfNull().Select((iw, i) => new MListElement<E, V>
                                      {
-                                         Order = i,
+                                         RowOrder = i,
                                          Element = iw,
                                          Parent = e,
                                      })
@@ -298,7 +298,7 @@ public static class BulkInserter
 
             foreach (var e in list)
             {
-                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.Order));
+                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.RowOrder));
             }
 
             using (var tr = new Transaction())

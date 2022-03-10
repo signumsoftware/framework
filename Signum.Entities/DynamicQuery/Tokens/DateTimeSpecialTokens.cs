@@ -61,7 +61,7 @@ public class DatePartStartToken : QueryToken
 
     public override string NiceName()
     {
-        return this.Name.NiceToString() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
+        return QueryTokenMessage._0Of1.NiceToString(this.Name.NiceToString(), parent.ToString());
     }
 
     public override string? Format

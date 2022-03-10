@@ -789,7 +789,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
-    return Promise.all(filters.map(fs => Finder.fetchLitesWithFilters(resFO.queryKey, fs, [], null))).then(fss => fss.flatMap(fs => fs));
+    return Promise.all(filters.map(fs => Finder.fetchLites({ queryName: resFO.queryKey, filterOptions: fs, orderOptions: [], count: null })))
+      .then(fss => fss.flatMap(fs => fs));
   }
 
   // SELECT BUTTON

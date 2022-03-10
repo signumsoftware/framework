@@ -13,26 +13,27 @@ namespace Signum.Entities;
 [TypeConverter(typeof(PrimaryKeyTypeConverter))]
 public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<PrimaryKey>, ISerializable
 {
-    public static Polymorphic<Type> PrimaryKeyType = new Polymorphic<Type>(minimumType: typeof(Entity));
+    public static Dictionary<Type, Type> PrimaryKeyType = new Dictionary<Type, Type>();
+    public static Dictionary<PropertyRoute, Type> MListPrimaryKeyType = new Dictionary<PropertyRoute, Type>();
 
     public static Type Type(Type entityType)
     {
-        return PrimaryKeyType.GetValue(entityType);
+        return PrimaryKeyType.GetOrThrow(entityType);
+    }
+
+    public static Type MListType(PropertyRoute mlistPropertyRoute)
+    {
+        return MListPrimaryKeyType.GetOrThrow(mlistPropertyRoute);
     }
 
     public static void SetType(Type entityType, Type primaryKeyType)
     {
-        PrimaryKeyType.SetDefinition(entityType, primaryKeyType);
+        PrimaryKeyType.Add(entityType, primaryKeyType);
     }
 
-    public static Dictionary<Type, Type> Export()
+    public static void SetMListType(PropertyRoute mlistPropertyRoute, Type primaryKeyType)
     {
-        return PrimaryKeyType.ExportDefinitions();
-    }
-
-    public static void Import(Dictionary<Type, Type> dic)
-    {
-        PrimaryKeyType.ImportDefinitions(dic);
+        MListPrimaryKeyType.Add(mlistPropertyRoute, primaryKeyType);
     }
 
     public readonly string? VariableName; //Used for Sync scenarios

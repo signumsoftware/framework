@@ -24,8 +24,8 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   domainServer: string | null;
   directoryRegistry_Username: string | null;
   directoryRegistry_Password: string | null;
-  azure_ApplicationID: string | null;
-  azure_DirectoryID: string | null;
+  azure_ApplicationID: string /*Guid*/ | null;
+  azure_DirectoryID: string /*Guid*/ | null;
   azure_ClientSecret: string | null;
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
@@ -107,6 +107,7 @@ export module AuthAdminMessage {
   export const _0RulesFor1 = new MessageKey("AuthAdminMessage", "_0RulesFor1");
   export const TheUserStateMustBeDisabled = new MessageKey("AuthAdminMessage", "TheUserStateMustBeDisabled");
   export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships = new MessageKey("AuthAdminMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");
+  export const ConflictMergingTypeConditions = new MessageKey("AuthAdminMessage", "ConflictMergingTypeConditions");
   export const Save = new MessageKey("AuthAdminMessage", "Save");
 }
 

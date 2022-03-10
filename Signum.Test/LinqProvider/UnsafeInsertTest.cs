@@ -85,7 +85,7 @@ public class UpdateInsertTest
             {
                 Parent = mle.Parent,
                 Element = mle.Element,
-                Order = mle.Order,
+                RowOrder = mle.RowOrder,
             });
             //tr.Commit();
         }
@@ -102,7 +102,7 @@ public class UpdateInsertTest
                 {
                     Parent = mle.Parent,
                     Element = mle.Element,
-                    Order = mle.Order,
+                    RowOrder = mle.RowOrder,
                 })
                 .UnsafeInsertMList((AlbumEntity a) => a.Songs, mle => mle);
             //tr.Commit();
@@ -123,7 +123,7 @@ public class UpdateInsertTest
                         Parent = mle.Parent,
                         Element = mle.Element,
                         RowId = (int)mle.RowId + 1000,
-                        Order = mle.Order,
+                        RowOrder = mle.RowOrder,
                     });
             }
             //tr.Commit();

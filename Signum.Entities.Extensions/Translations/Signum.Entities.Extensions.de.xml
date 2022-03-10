@@ -8,7 +8,7 @@
     <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
     <Member Name="AutoUpdateUsers" Description="Benutzer automatisch aktualisieren" />
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
-    <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
     <Member Name="DefaultRole" Description="Standardrolle" />
     <Member Name="DirectoryRegistry_Password" Description="DirectoryRegistry Passwort" />
@@ -1426,6 +1426,9 @@
     <Member Name="ExecuteAsync" Description="Async ausführen" />
     <Member Name="ExecuteSync" Description="Sync ausführen" />
   </Type>
+  <Type Name="IToolbarEntity">
+    <Member Name="Elements" Description="Elemente" />
+  </Type>
   <Type Name="IUserAssetEntity">
     <Member Name="Guid" Description="Guid" />
   </Type>
@@ -1525,6 +1528,7 @@
     <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
     <Member Name="CurrentPassword" Description="Aktuelles Kennwort" />
     <Member Name="EMailAddress" Description="E-Mail Adresse" />
+    <Member Name="EmailAddressOrUsername" Description="E-Mail-Adresse oder Benutzername" />
     <Member Name="EnterActualPasswordAndNewOne" Description="Geben Sie Ihr aktuelles Passwort und das neue ein" />
     <Member Name="EnterTheNewPassword" Description="Geben Sie das neue Passwort ein" />
     <Member Name="EnterYourUserEmail" Description="Geben Sie Ihre Benutzer-E-Mail ein" />
@@ -1564,7 +1568,6 @@
     <Member Name="Username" Description="Benutzername" />
     <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
     <Member Name="UserNameMustHaveAValue" Description="Sie müssen den Benutzernamen eingeben" />
-    <Member Name="UsernameOrEmailAddress" Description="Benutzername oder E-Mail Adresse" />
     <Member Name="WeHaveSentYouAnEmailToResetYourPassword" Description="Wir haben Ihnen eine E-Mail mit einem Link geschickt, mit dem Sie Ihr Passwort zurücksetzen können." />
   </Type>
   <Type Name="MapMessage">
@@ -1596,7 +1599,7 @@
   </Type>
   <Type Name="MicrosoftGraphEmbedded" Description="Microsoft Graph">
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
-    <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
     <Member Name="UseActiveDirectoryConfiguration" Description="Active Directory-Konfiguration verwenden" />
   </Type>
@@ -2191,6 +2194,7 @@
   </Type>
   <Type Name="SendNotificationEmailTaskEntity" Description="Benachrichtigung per E-Mail senden Task" Gender="f">
     <Member Name="AlertTypes" Description="Alert-Typen" />
+    <Member Name="IgnoreNotificationsOlderThan" Description="Benachrichtigungen ignorieren, die älter sind als" />
     <Member Name="SendBehavior" Description="Senden-Verhalten" />
     <Member Name="SendNotificationsOlderThan" Description="Benachrichtigungen senden älter als" />
   </Type>
@@ -2403,7 +2407,6 @@
   <Type Name="ToolbarLocation" Description="Toolbar-Position">
     <Member Name="Main" Description="Haupt" />
     <Member Name="Side" Description="Seite" />
-    <Member Name="Top" Description="Oben" />
   </Type>
   <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü" PluralDescription="Toolbar-Menüs" Gender="f">
     <Member Name="Elements" Description="Elemente" />
@@ -2414,6 +2417,10 @@
   <Type Name="ToolbarMenuOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ToolbarMessage">
+    <Member Name="_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships" Description="{0} Zyklen wurden aufgrund der Beziehungen in der Toolbar gefunden:" />
+    <Member Name="RecursionDetected" Description="Rekursion erkannt" />
   </Type>
   <Type Name="ToolbarOperation">
     <Member Name="Delete" Description="Löschen" />
