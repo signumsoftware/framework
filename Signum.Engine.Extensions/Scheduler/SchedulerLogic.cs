@@ -174,7 +174,7 @@ public static class SchedulerLogic
 
             ScheduledTasksLazy = sb.GlobalLazy(() =>
                 Database.Query<ScheduledTaskEntity>().Where(a => !a.Suspended &&
-                    (a.MachineName == ScheduledTaskEntity.None || a.MachineName == Environment.MachineName && a.ApplicationName == Schema.Current.ApplicationName)).ToList(),
+                    (a.MachineName == ScheduledTaskEntity.None || a.MachineName == Schema.Current.MachineName && a.ApplicationName == Schema.Current.ApplicationName)).ToList(),
                 new InvalidateWith(typeof(ScheduledTaskEntity)));
 
             ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
@@ -232,7 +232,7 @@ public static class SchedulerLogic
     public static void StartScheduledTasks()
     {
         if (running)
-            throw new InvalidOperationException("SchedulerLogic is already Running in {0}".FormatWith(Environment.MachineName));
+            throw new InvalidOperationException("SchedulerLogic is already Running in {0}".FormatWith(Schema.Current.MachineName));
 
         running = true;
 
@@ -254,7 +254,7 @@ public static class SchedulerLogic
     public static void StopScheduledTasks()
     {
         if (!running)
-            throw new InvalidOperationException("SchedulerLogic is already Stopped in {0}".FormatWith(Environment.MachineName));
+            throw new InvalidOperationException("SchedulerLogic is already Stopped in {0}".FormatWith(Schema.Current.MachineName));
 
         lock (priorityQueue)
         {
@@ -414,7 +414,7 @@ public static class SchedulerLogic
                 Task = task,
                 ScheduledTask = scheduledTask,
                 StartTime = Clock.Now,
-                MachineName = Environment.MachineName,
+                MachineName = Schema.Current.MachineName,
                 ApplicationName = Schema.Current.ApplicationName,
                 User = entityIUser.ToLite(),
             };
@@ -489,7 +489,7 @@ public static class SchedulerLogic
             Running = Running,
             SchedulerMargin = SchedulerMargin,
             NextExecution = NextExecution,
-            MachineName = Environment.MachineName,
+            MachineName = Schema.Current.MachineName,
             ApplicationName = Schema.Current.ApplicationName,
             Queue = priorityQueue.GetOrderedList().Select(p => new SchedulerItemState
             {
