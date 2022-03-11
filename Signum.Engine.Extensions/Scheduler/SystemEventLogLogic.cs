@@ -59,7 +59,7 @@ public static class SystemEventLogLogic
                     new SystemEventLogEntity
                     {
                         Date = Clock.Now,
-                        MachineName = Environment.MachineName,
+                        MachineName = Schema.Current.MachineName,
                         User = UserHolder.Current?.ToLite(),
                         EventType = eventType,
                         Exception = exception?.ToLite()

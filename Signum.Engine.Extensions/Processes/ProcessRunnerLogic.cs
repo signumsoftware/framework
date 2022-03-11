@@ -40,7 +40,7 @@ public static class ProcessRunnerLogic
             MaxDegreeOfParallelism = MaxDegreeOfParallelism,
             NextPlannedExecution = nextPlannedExecution,
             JustMyProcesses = ProcessLogic.JustMyProcesses,
-            MachineName = Environment.MachineName,
+            MachineName = Schema.Current.MachineName,
             ApplicationName = Schema.Current.ApplicationName,
             Executing = executing.Values.Select(p => new ExecutionState
             {
@@ -77,7 +77,7 @@ public static class ProcessRunnerLogic
         .Set(p => p.Status, p => null)
         .Set(p => p.Exception, p => null)
         .Set(p => p.ExceptionDate, p => null)
-        .Set(p => p.MachineName, p => ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessEntity.None)
+        .Set(p => p.MachineName, p => ProcessLogic.JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None)
         .Set(p => p.ApplicationName, p => ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None)
         .Execute();
     }
@@ -93,13 +93,13 @@ public static class ProcessRunnerLogic
         process.Status = null;
         process.Exception = null;
         process.ExceptionDate = null;
-        process.MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
+        process.MachineName = ProcessLogic.JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None;
         process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
     }
 
     [AutoExpressionField]
     public static bool IsMine(this ProcessEntity p) => 
-        As.Expression(() => p.MachineName == Environment.MachineName && p.ApplicationName == Schema.Current.ApplicationName);
+        As.Expression(() => p.MachineName == Schema.Current.MachineName && p.ApplicationName == Schema.Current.ApplicationName);
 
     [AutoExpressionField]
     public static bool IsShared(this ProcessEntity p) => 
@@ -182,7 +182,7 @@ public static class ProcessRunnerLogic
                                             .ToListWakeup("Planned dependency");
 
                                         var afordable = queued
-                                            .OrderByDescending(p => p.MachineName == Environment.MachineName)
+                                            .OrderByDescending(p => p.MachineName == Schema.Current.MachineName)
                                             .OrderBy(a => a.QueuedDate)
                                             .Take(remaining).ToList();
 
@@ -195,7 +195,7 @@ public static class ProcessRunnerLogic
                                                 Database.Query<ProcessEntity>()
                                                     .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessEntity.None)
                                                     .UnsafeUpdate()
-                                                    .Set(p => p.MachineName, p => Environment.MachineName)
+                                                    .Set(p => p.MachineName, p => Schema.Current.MachineName)
                                                     .Set(p => p.ApplicationName, p => Schema.Current.ApplicationName)
                                                     .Execute();
 
@@ -435,7 +435,7 @@ public sealed class ExecutingProcess
         CurrentProcess.ExecutionStart = Clock.Now;
         CurrentProcess.ExecutionEnd = null;
         CurrentProcess.Progress = 0;
-        CurrentProcess.MachineName = Environment.MachineName;
+        CurrentProcess.MachineName = Schema.Current.MachineName;
         CurrentProcess.ApplicationName = Schema.Current.ApplicationName;
 
         using (var tr = new Transaction())

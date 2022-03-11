@@ -135,9 +135,9 @@ export default function MessageModal(p: MessageModalProps) {
     var iconSpan = icon && <FontAwesomeIcon icon={icon} />;
 
     return (
-      <span>
+      <h5 className="modal-title">
         {iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{p.title}
-      </span>
+      </h5>
     );
   }
 

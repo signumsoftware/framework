@@ -49,6 +49,10 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
         <br />
         JustMyProcesses: {s.justMyProcesses.toString()}
         <br />
+        MachineName: {s.machineName}
+        <br />
+        ApplicatonName: {s.applicationName}
+        <br />
         MaxDegreeOfParallelism: {s.maxDegreeOfParallelism}
         <br />
         InitialDelayMiliseconds: {s.initialDelayMiliseconds}
