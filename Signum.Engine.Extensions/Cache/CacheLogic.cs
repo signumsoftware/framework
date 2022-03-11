@@ -320,6 +320,7 @@ public static class CacheLogic
                 {
                     try
                     {
+                        //InvalidOperationException throw?...just continue the catch will probably fix it!
                         SqlDependency.Start(sub.ConnectionString);
                     }
                     catch (InvalidOperationException ex)
