@@ -62,9 +62,19 @@ export function ChartColumn(p: ChartColumnProps) {
       var dragIndex = parseInt(txt.after("chartColumn_"));
 
       if (dropIndex != dragIndex) {
-        var temp = cols[dropIndex].element.token;
-        cols[dropIndex].element.token = cols[dragIndex].element.token;
-        cols[dragIndex].element.token = temp;
+
+
+        var dropToken = cols[dropIndex].element.token;
+        var dragToken = cols[dragIndex].element.token;
+        cols[dropIndex].element.token = dragToken;
+        cols[dragIndex].element.token = dropToken;
+
+        cols[dropIndex].element.modified = true;
+        cols[dragIndex].element.modified = true;
+
+        if (dragToken) dragToken.modified = true;
+        if (dropToken) dropToken.modified = true;
+
         p.onTokenChange();
       }
 
