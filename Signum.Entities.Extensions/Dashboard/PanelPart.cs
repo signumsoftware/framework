@@ -34,6 +34,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 
     public bool SameIconTitleColor { get; set; }
 
+    [NotifyChildProperty]
     [ImplementedBy(
         typeof(UserChartPartEntity),
         typeof(CombinedUserChartPartEntity),
