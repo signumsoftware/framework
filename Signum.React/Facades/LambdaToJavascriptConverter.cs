@@ -65,6 +65,12 @@ internal class LambdaToJavascriptConverter
                     return a;
             }
 
+            if (me.Expression.Type.IsEntity())
+            {
+                if (me.Member.Name == "IdOrNull")
+                    return a + "." + "id";
+            }
+
             return a + "." + me.Member.Name.FirstLower();
         }
 
