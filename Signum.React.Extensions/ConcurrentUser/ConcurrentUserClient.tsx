@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ConcurrentUserEntity } from './Signum.Entities.ConcurrentUser'
-import { Entity, toLite } from '@framework/Signum.Entities'
+import { Entity, isEntity, toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import * as Widgets from '@framework/Frames/Widgets';
 import ConcurrentUser from './ConcurrentUser'
@@ -9,13 +9,15 @@ import { ajaxGet } from '@framework/Services'
 export function start(options: { routes: JSX.Element[] }) {
   Widgets.onWidgets.push(ctx => {
 
-    var entity = ctx.ctx.value;
+    var me = ctx.ctx.value;
 
-    if (!entity.isNew)
-      return <ConcurrentUser entity={entity as Entity} onReload={() =>
-        Navigator.API.fetchEntityPack(toLite(entity as Entity))
+    if (isEntity(me) && !me.isNew) {
+      const entity = me;
+      return <ConcurrentUser entity={entity} onReload={() =>
+        Navigator.API.fetchEntityPack(toLite(entity))
           .then(pack => ctx.frame.onReload(pack))
           .done()} />;
+    }
 
     return undefined;
   });
