@@ -158,7 +158,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
         lites: [toLiteFat(entity as Entity)],
         widgetContext: p.wc as WidgetContext<Entity>
       });
-  }, [entity]);
+  }, [entity], { avoidReset: true });
 
   if (links == undefined)
     return <span>…</span>;
@@ -169,7 +169,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
   const DDToggle = Dropdown.Toggle as any;
 
   return (
-    <div style={{ display: "flex", flexDirection: "row-reverse" }}>
+    <>
       {!links ? [] : links.filter(a => a.group !== undefined).orderBy(a => a.order)
         .groupBy(a => a.group?.name ?? a.name)
         .map((gr, i) => {
@@ -210,7 +210,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
             );
           }
         })}
-    </div>
+    </>
   );
 }
 

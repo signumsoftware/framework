@@ -313,16 +313,24 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
   }
 
   //simple heuristic
-  var style = f.endsWith("%") ? "percent" : "decimal";
-  var afterDot = (f.tryBefore("%") ?? f).tryAfter(".") ?? "";
+
+  var regex = /(?<plus>\+)?(?<body>[0#,.]+)(?<suffix>[%MKB])?/
+
+  const match = regex.exec(f);
+
+  var body = match?.groups?.body ?? f;
+  const suffix = match?.groups?.suffix;
+
+  var afterDot = body.tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
-    style: style,
+    style: suffix == "%" ? "percent" : "decimal",
+    notation: suffix == "K" || suffix == "M" || suffix == "B" ? "compact": undefined,
     minimumFractionDigits: afterDot.replaceAll("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
   };
 
-  if (f.startsWith("+"))
+  if (match?.groups?.plus)
     (result as any).signDisplay = "always";
 
   return result;

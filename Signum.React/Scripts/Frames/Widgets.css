@@ -1,48 +1,25 @@
-﻿ul.sf-widgets {
+﻿.sf-widgets {
     list-style-type: none;
-    margin-top: -34px;
     display: flex;
     flex-direction: row-reverse;
-    float:right;
+    font-size: 1rem!important;
+    margin-left:auto;
+    padding:0px;
+    margin-bottom: 0px;
+    background: none;
+    flex-wrap: wrap;
+    align-items: baseline;
 }
 
-body.rtl ul.sf-widgets {
+body.rtl .sf-widgets {
    float:left;
 }
 
-.modal-body > div > ul.sf-widgets {
-    margin-top: -45px;
-}
-
-ul.sf-widgets > li {
+.sf-widgets > * {
     display: block;
     position: relative;
     margin-left: 4px;
 }
-
-ul.dropdown-menu li a span.sf-alert-active {
-    font-weight: bold;
-}
-
-ul.dropdown-menu li a span.sf-alert-alerted.sf-alert-active {
-    color: #FF4400;
-}
-
-span.sf-widget-count {
-    padding: 2px;
-}
-
-a.badge span.sf-alert-active {
-    background: #999;
-    border-radius: 10px;
-    border: 2px solid #999;
-}
-
-    a.badge span.sf-alert-active.sf-alert-alerted {
-        font-size: 15px;
-        padding: 4px;
-        background: #FF4400;
-    }
 
 badge.badge-pill{
     border-radius: 50rem;

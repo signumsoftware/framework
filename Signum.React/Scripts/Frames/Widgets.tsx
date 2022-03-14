@@ -3,6 +3,7 @@ import { EntityPack, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, EntityFrame } from '../TypeContext'
 import "./Widgets.css"
 import { ErrorBoundary } from '../Components';
+import { classes } from "../Globals";
 
 export interface WidgetContext<T extends ModifiableEntity> {
   ctx: TypeContext<T>;
@@ -18,7 +19,7 @@ export function clearWidgets() {
   onEmbeddedWidgets.clear();
 }
 
-export function renderWidgets(wc: WidgetContext<ModifiableEntity>): React.ReactNode | undefined {
+export function renderWidgets(wc: WidgetContext<ModifiableEntity>, stickyHeader?: boolean): React.ReactNode | undefined {
   const widgets = onWidgets.map(a => a(wc)).filter(a => a != undefined);
 
   if (widgets.length == 0)
@@ -26,9 +27,9 @@ export function renderWidgets(wc: WidgetContext<ModifiableEntity>): React.ReactN
 
   return (
     <ErrorBoundary>
-      <ul className="sf-widgets">
-        {widgets.map((w, i) => <li key={i}>{w}</li>)}
-      </ul>
+      <div className={classes("sf-widgets", stickyHeader && "sf-sticky-header")}>
+        {widgets.map((w, i) => React.cloneElement((w as React.ReactElement<any>), { key: i }))}
+      </div>
     </ErrorBoundary>
   );
 }
