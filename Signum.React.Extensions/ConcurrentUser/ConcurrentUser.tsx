@@ -97,7 +97,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   }, [ticks !== p.entity.ticks]);
 
 
-  var otherUsers = concurrentUsers?.filter(u => liteKey(u.user) !== userKey || u.startTime !== startTime);
+  var otherUsers = concurrentUsers?.filter(u => u.signalRConnectionID !== conn?.connectionId);
 
   if (otherUsers == null || otherUsers.length == 0)
     return null;
