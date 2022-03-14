@@ -127,13 +127,19 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
   render() {
 
+    if (!this.state.pack)
+      return null;
+
     var pack = this.state.pack;
+    var mainEntity = pack!.activity.case.mainEntity;
+    var settings = mainEntity && Navigator.getSettings(mainEntity.Type);
 
     return (
       <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked} className="sf-popup-control" >
         <ModalHeaderButtons
-          onClose={this.handleCloseClicked}>
+          onClose={this.handleCloseClicked} stickyHeader={settings?.stickyHeader}>
           {this.renderTitle()}
+
         </ModalHeaderButtons>
         {pack && this.renderBody()}
       </Modal>
@@ -224,6 +230,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     var pack = this.state.pack!;
     var mainEntity = pack.activity.case.mainEntity;
+
     const mainFrame: EntityFrame = {
       tabs: undefined,
       frameComponent: this,
@@ -271,15 +278,9 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, this.prefix));
 
-    const wc: WidgetContext<ICaseMainEntity> = {
-      ctx: ctx,
-      frame: mainFrame,
-    };
-
     return (
       <div className="sf-main-entity case-main-entity" style={this.state.executing == true ? { opacity: ".7" } : undefined} data-main-entity={entityInfo(mainEntity)}>
         <div className="sf-button-widget-container">
-          {renderWidgets(wc)}
           {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = bb} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
         </div>
         <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix={this.prefix} />
@@ -297,14 +298,80 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     if (!this.state.pack)
       return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
 
-    const activity = this.state.pack.activity;
+    var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
+    var pack = this.state.pack;
+    var mainEntity = pack!.activity.case.mainEntity;
+
+    const mainFrame: EntityFrame = {
+      tabs: undefined,
+      frameComponent: this,
+      entityComponent: this.entityComponent,
+      pack: pack! && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity, ...extension },
+      onReload: (newPack, reloadComponent, callback) => {
+        if (newPack) {
+          pack!.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
+          pack!.canExecuteMainEntity = newPack.canExecute;
+        }
+        this.setState({ refreshCount: this.state.refreshCount + 1 }, callback);
+      },
+      onClose: () => this.props.onExited!(undefined),
+      revalidate: () => {
+        this.validationErrorsTop && this.validationErrorsTop.forceUpdate();
+        this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
+      },
+      setError: (ms, initialPrefix) => {
+        GraphExplorer.setModelState(mainEntity, ms, initialPrefix || "");
+        this.forceUpdate()
+      },
+      refreshCount: this.state.refreshCount,
+      allowExchangeEntity: false,
+      prefix: this.prefix,
+      isExecuting: () => this.state.executing == true,
+      execute: async action => {
+        if (this.state.executing)
+          return;
+
+        this.setState({ executing: true });
+        try {
+          await action();
+        } finally {
+          this.setState({ executing: undefined })
+        }
+      }
+    };
+
+    var ti = this.getMainTypeInfo();
+
+    const styleOptions: StyleOptions = {
+      readOnly: Navigator.isReadOnly(ti) || Boolean(pack!.activity.doneDate),
+      frame: mainFrame
+    };
+
+    const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, this.prefix));
+
+    const widgets: WidgetContext<ICaseMainEntity> = {
+      ctx: ctx,
+      frame: mainFrame,
+    };
+
+    const subTitle = Navigator.getTypeSubTitle(activity, undefined);
+    var settings = mainEntity && Navigator.getSettings(mainEntity.Type);
 
     return (
-      <span>
-        <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;{this.renderExpandLink()}
-        <br />
-        <small className="sf-type-nice-name text-muted"> {Navigator.getTypeSubTitle(activity, undefined)}</small>
-      </span>
+      <div>
+        {this.props.title && <>
+          <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;
+          {this.renderExpandLink()}
+        </>
+        }
+        {
+          (subTitle || widgets) &&
+          <div className="sf-entity-sub-title">
+              {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
+              {widgets && renderWidgets(widgets, settings?.stickyHeader)}
+          </div>
+        }
+      </div>
     );
   }
 
