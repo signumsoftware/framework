@@ -97,7 +97,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   }, [ticks !== p.entity.ticks]);
 
 
-  var otherUsers = concurrentUsers?.filter(u => u.signalRConnectionID !== conn?.connectionId);
+  var otherUsers = concurrentUsers?.filter(u => u.connectionID !== conn?.connectionId);
 
   if (otherUsers == null || otherUsers.length == 0)
     return null;
@@ -108,7 +108,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
       placement={"bottom-end"}
       overlay={
         <Popover>
-          <Popover.Header as="h3">{ConcurrentUserEntity.nicePluralName()}</Popover.Header>
+          <Popover.Header as="h3">{ConcurrentUserMessage.ConcurrentUsers.niceToString()}</Popover.Header>
           <Popover.Body>
             
             {otherUsers.map((a, i) =>
