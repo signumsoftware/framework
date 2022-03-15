@@ -3,7 +3,6 @@ using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using Signum.Entities.DynamicQuery;
-using Signum.Engine.Basics;
 
 namespace Signum.Engine.DynamicQuery;
 
@@ -49,13 +48,10 @@ public static class AutocompleteUtils
         if (match.Success)
             return PrimaryKey.TryParse(match.Groups[1].ToString(), type, out id);
 
-        match = Regex.Match(value, "^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$", RegexOptions.IgnoreCase);
-        if (match.Success)
-        {
-            var typeName = TypeLogic.NameToType.Keys.SingleOrDefaultEx(k => k.ToLower() == match.Groups[1].ToString().ToLower());
-            var parsedType = TypeLogic.TryGetType(typeName ?? "");
-            if (parsedType != null && type == parsedType)
-                return PrimaryKey.TryParse(match.Groups[2].ToString(), type, out id);
+        Lite.TryParseLite(value, out Lite<Entity>? lite);
+        if (lite != null && lite.EntityType == type) {
+            id = lite.Id;
+            return true;
         }
 
         id = default;
