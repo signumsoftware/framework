@@ -3,7 +3,7 @@ import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription, QueryRequest, FilterOption, ResultTable } from '../FindOptions'
 import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLite } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
 import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
@@ -185,6 +185,18 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       var defaultFilters = Finder.getDefaultFilter(qd, qs);
       if (defaultFilters)
         filters = [...defaultFilters, ...filters];
+    }
+
+    if (/^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/.test(subStr)) {
+      const lite = parseLite(subStr);
+      if (lite.EntityType.toLowerCase() == qd.queryKey.toLowerCase()) {
+        filters.insertAt(0, {
+          token: "Entity.Id",
+          operation: "EqualTo",
+          value: lite.id
+        });
+        return filters;
+      }
     }
 
     if (/^id[: ]/.test(subStr)) {

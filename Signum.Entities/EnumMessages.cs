@@ -107,8 +107,9 @@ public enum NormalWindowMessage
     New0_G,
     [Description("{0} {1}")]
     Type0Id1,
-    Main
-
+    Main,
+    Copied,
+    Paste,
 }
 
 public enum EntityControlMessage

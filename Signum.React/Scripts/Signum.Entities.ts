@@ -397,6 +397,8 @@ export module NormalWindowMessage {
   export const New0_G = new MessageKey("NormalWindowMessage", "New0_G");
   export const Type0Id1 = new MessageKey("NormalWindowMessage", "Type0Id1");
   export const Main = new MessageKey("NormalWindowMessage", "Main");
+  export const Copied = new MessageKey("NormalWindowMessage", "Copied");
+  export const Paste = new MessageKey("NormalWindowMessage", "Paste");
 }
 
 export module OperationMessage {
