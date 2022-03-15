@@ -179,12 +179,12 @@ a.expand-window:hover {
     text-decoration: none;
 }
 
-.sf-guid-id {
+.sf-hide-id {
     opacity: 0;
     transition: opacity 1s ease;
 }
 
-.sf-guid-id:hover{
+.sf-hide-id:hover{
     opacity: 1;
 }
 
