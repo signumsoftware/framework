@@ -175,6 +175,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   abortableRequest = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
+  static liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
 
   static filtersWithSubStr(fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined, subStr: string): FilterOption[] {
 
@@ -187,7 +188,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
         filters = [...defaultFilters, ...filters];
     }
 
-    if (/^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/.test(subStr)) {
+    if (FindOptionsAutocompleteConfig.liteKeyRegEx.test(subStr)) {
       const lite = parseLite(subStr);
       if (lite.EntityType.toLowerCase() == qd.queryKey.toLowerCase()) {
         filters.insertAt(0, {
