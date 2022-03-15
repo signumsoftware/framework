@@ -1,5 +1,6 @@
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Maps;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.DynamicQuery;
 

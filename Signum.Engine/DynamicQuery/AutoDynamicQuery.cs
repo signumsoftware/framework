@@ -23,9 +23,14 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
     {
         using (SystemTime.Override(request.SystemTime))
         {
-            DQueryable<T> query = GetDQueryable(request);
+            DQueryable<T> query = GetDQueryable(request, out var inMemoryOrders);
 
             var result = query.TryPaginate(request.Pagination, request.SystemTime);
+
+            if (inMemoryOrders != null)
+            {
+                result = result.OrderBy(inMemoryOrders);
+            }
 
             return result.ToResultTable(request);
         }
@@ -35,9 +40,14 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
     {
         using (SystemTime.Override(request.SystemTime))
         {
-            DQueryable<T> query = GetDQueryable(request);
+            DQueryable<T> query = GetDQueryable(request, out var inMemoryOrders);
 
             var result = await query.TryPaginateAsync(request.Pagination, request.SystemTime, token);
+
+            if(inMemoryOrders != null)
+            {
+                result = result.OrderBy(inMemoryOrders);
+            }
 
             return result.ToResultTable(request);
         }
@@ -47,9 +57,14 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
     {
         using (SystemTime.Override(request.SystemTime))
         {
-            DQueryable<T> query = GetDQueryable(request);
+            DQueryable<T> query = GetDQueryableGroup(request, out var inMemoryOrders);
 
             var result = query.TryPaginate(request.Pagination, request.SystemTime);
+
+            if (inMemoryOrders != null)
+            {
+                result = result.OrderBy(inMemoryOrders);
+            }
 
             return result.ToResultTable(request);
         }
@@ -59,46 +74,75 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
     {
         using (SystemTime.Override(request.SystemTime))
         {
-            DQueryable<T> query = GetDQueryable(request);
+            DQueryable<T> query = GetDQueryableGroup(request, out var inMemoryOrders);
 
             var result = await query.TryPaginateAsync(request.Pagination, request.SystemTime, token);
+
+            if (inMemoryOrders != null)
+            {
+                result = result.OrderBy(inMemoryOrders);
+            }
 
             return result.ToResultTable(request);
         }
     }
 
-    private DQueryable<T> GetDQueryable(QueryRequest request)
+    private DQueryable<T> GetDQueryable(QueryRequest request, out List<Order>? inMemoryOrders)
     {
-        if (!request.GroupResults)
-        {
-            if(!request.Columns.Where(c => c is _EntityColumn).Any())
-                request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
+        if (!request.Columns.Where(c => c is _EntityColumn).Any())
+            request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
-            return Query
-                .ToDQueryable(GetQueryDescription())
-                .SelectMany(request.Multiplications())
-                .Where(request.Filters)
-                .OrderBy(request.Orders)
-                .Select(request.Columns);
+        var query = Query
+            .ToDQueryable(GetQueryDescription())
+            .SelectMany(request.Multiplications())
+            .Where(request.Filters);
+
+        if (request.Pagination is Pagination.All)
+        {
+            var allColumns = request.Columns.Select(a => a.Token)
+                .Concat(request.Orders.Select(a => a.Token))
+                .Distinct()
+                .Select(t => new Column(t, null)).ToList();
+
+            inMemoryOrders = request.Orders.ToList();
+
+            return query.Select(allColumns);
         }
         else
         {
-            var simpleFilters = request.Filters.Where(f => !f.IsAggregate()).ToList();
-            var aggregateFilters = request.Filters.Where(f => f.IsAggregate()).ToList();
+            inMemoryOrders = null;
 
-            var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
+            return query
+                .OrderBy(request.Orders)
+                .Select(request.Columns);
+        }
+    }
 
-            var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
+    private DQueryable<T> GetDQueryableGroup(QueryRequest request, out List<Order>? inMemoryOrders)
+    {
+        var simpleFilters = request.Filters.Where(f => !f.IsAggregate()).ToList();
+        var aggregateFilters = request.Filters.Where(f => f.IsAggregate()).ToList();
 
-            DQueryable<T> query = Query
-                .ToDQueryable(GetQueryDescription())
-                .SelectMany(request.Multiplications())
-                .Where(simpleFilters)
-                .GroupBy(keys, allAggregates)
-                .Where(aggregateFilters)
-                .OrderBy(request.Orders);
+        var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
 
+        var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
+
+        DQueryable<T> query = Query
+            .ToDQueryable(GetQueryDescription())
+            .SelectMany(request.Multiplications())
+            .Where(simpleFilters)
+            .GroupBy(keys, allAggregates)
+            .Where(aggregateFilters);
+
+        if(request.Pagination is Pagination.All)
+        {
+            inMemoryOrders = request.Orders.ToList();
             return query;
+        }
+        else
+        {
+            inMemoryOrders = null;
+            return query.OrderBy(request.Orders);
         }
     }
 

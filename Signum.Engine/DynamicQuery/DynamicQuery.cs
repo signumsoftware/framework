@@ -272,6 +272,8 @@ public static class DQueryable
 
     public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request)
     {
+  
+
         return query
             .SelectMany(request.Multiplications())
             .Where(request.Filters)
