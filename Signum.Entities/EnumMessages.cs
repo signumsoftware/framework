@@ -109,7 +109,6 @@ public enum NormalWindowMessage
     Type0Id1,
     Main,
     Copied,
-    Paste,
 }
 
 public enum EntityControlMessage
