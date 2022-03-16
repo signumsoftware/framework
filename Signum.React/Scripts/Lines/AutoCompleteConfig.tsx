@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription, QueryRequest, FilterOption, ResultTable } from '../FindOptions'
-import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName } from '../Reflection'
+import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLite } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
 import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
@@ -190,14 +190,20 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
     if (FindOptionsAutocompleteConfig.liteKeyRegEx.test(subStr)) {
       const lite = parseLite(subStr);
-      if (lite.EntityType.toLowerCase() == qd.queryKey.toLowerCase()) {
+      const tis = getTypeInfos(qd.columns["Entity"].type);
+      const ti = tis.singleOrNull(ti => ti.name == lite.EntityType);
+      if (ti && tis.length > 1)
         filters.insertAt(0, {
-          token: "Entity.Id",
-          operation: "EqualTo",
-          value: lite.id
+          token: `Entity.(${ti.name})`,
+          operation: "DistinctTo"
         });
-        return filters;
-      }
+
+      filters.insertAt(0, {
+        token: "Entity.Id",
+        operation: "EqualTo",
+        value: ti ? lite.id : null
+      });
+      return filters;
     }
 
     if (/^id[: ]/.test(subStr)) {
