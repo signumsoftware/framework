@@ -27,6 +27,8 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
             var result = query.TryPaginate(request.Pagination, request.SystemTime);
 
+            result = result.SelectManySubQueries();
+
             if (inMemoryOrders != null)
             {
                 result = result.OrderBy(inMemoryOrders);
@@ -44,7 +46,9 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
             var result = await query.TryPaginateAsync(request.Pagination, request.SystemTime, token);
 
-            if(inMemoryOrders != null)
+            result = result.SelectManySubQueries();
+
+            if (inMemoryOrders != null)
             {
                 result = result.OrderBy(inMemoryOrders);
             }
@@ -92,29 +96,48 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         if (!request.Columns.Where(c => c is _EntityColumn).Any())
             request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
-        var query = Query
-            .ToDQueryable(GetQueryDescription())
-            .SelectMany(request.Multiplications())
-            .Where(request.Filters);
-
-        if (request.Pagination is Pagination.All)
+        if (request.MultiplicationsInSubQueries())
         {
-            var allColumns = request.Columns.Select(a => a.Token)
-                .Concat(request.Orders.Select(a => a.Token))
-                .Distinct()
-                .Select(t => new Column(t, null)).ToList();
+            var columnAndOrderTokens = request.Columns.Select(a => a.Token)
+                 .Concat(request.Orders.Select(a => a.Token))
+                 .Distinct()
+                 .ToHashSet();
 
-            inMemoryOrders = request.Orders.ToList();
+            inMemoryOrders = request.Orders;
 
-            return query.Select(allColumns);
+            var query = Query
+              .ToDQueryable(GetQueryDescription())
+              .Where(request.Filters)
+              .SelectWithSubQueries(columnAndOrderTokens);
+
+            return query;
         }
         else
         {
-            inMemoryOrders = null;
+            var query = Query
+                .ToDQueryable(GetQueryDescription())
+                .SelectMany(request.Multiplications())
+                .Where(request.Filters);
 
-            return query
-                .OrderBy(request.Orders)
-                .Select(request.Columns);
+            if (request.Pagination is Pagination.All)
+            {
+                var allColumns = request.Columns.Select(a => a.Token)
+                    .Concat(request.Orders.Select(a => a.Token))
+                    .Distinct()
+                    .Select(t => new Column(t, null)).ToList();
+
+                inMemoryOrders = request.Orders.ToList();
+
+                return query.Select(allColumns);
+            }
+            else
+            {
+                inMemoryOrders = null;
+
+                return query
+                    .OrderBy(request.Orders)
+                    .Select(request.Columns);
+            }
         }
     }
 

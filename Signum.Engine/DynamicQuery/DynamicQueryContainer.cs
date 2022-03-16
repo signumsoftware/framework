@@ -226,3 +226,46 @@ public class DynamicQueryContainer
         }));
     }
 }
+
+public class DynamicQueryBucket
+{
+    public ResetLazy<IDynamicQueryCore> Core { get; private set; }
+
+    public object QueryName { get; private set; }
+
+    public Implementations EntityImplementations { get; private set; }
+
+    public DynamicQueryBucket(object queryName, Func<IDynamicQueryCore> lazyQueryCore, Implementations entityImplementations)
+    {
+        if (lazyQueryCore == null)
+            throw new ArgumentNullException(nameof(lazyQueryCore));
+
+        this.QueryName = queryName ?? throw new ArgumentNullException(nameof(queryName));
+        this.EntityImplementations = entityImplementations;
+
+        this.Core = new ResetLazy<IDynamicQueryCore>(() =>
+        {
+            var core = lazyQueryCore();
+
+            core.QueryName = QueryName;
+
+            core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column on {0}".FormatWith(QueryUtils.GetKey(QueryName)));
+
+            core.EntityColumnFactory().Implementations = entityImplementations;
+
+            var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIEntity());
+
+            if (errors.Any())
+                throw new InvalidOperationException("Column {0} of query '{1}' do(es) not have implementations defined. Use Column extension method".FormatWith(errors.CommaAnd(a => $"'{a.Name}'"), QueryUtils.GetKey(QueryName)));
+
+            return core;
+        });
+    }
+
+
+    public QueryDescription GetDescription()
+    {
+        return Core.Value.GetQueryDescription();
+    }
+}
+

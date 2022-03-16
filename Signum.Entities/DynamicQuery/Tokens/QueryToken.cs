@@ -507,14 +507,22 @@ public class BuildExpressionContext
     public readonly ParameterExpression Parameter;
     public readonly Dictionary<QueryToken, ExpressionBox> Replacements;
 
-    public Expression<Func<object, Lite<Entity>>> GetEntitySelector()
+    public LambdaExpression GetEntitySelector()
     {
-        return Expression.Lambda<Func<object, Lite<Entity>>>(Replacements.Single(a=>a.Key.FullKey() == "Entity").Value.GetExpression(), Parameter);
+        return Expression.Lambda(Replacements.Single(a=>a.Key.FullKey() == "Entity").Value.GetExpression(), Parameter);
     }
 
-    public Expression<Func<object, Entity>> GetEntityFullSelector()
+    public LambdaExpression GetEntityFullSelector()
     {
-        return Expression.Lambda<Func<object, Entity>>(Replacements.Single(a => a.Key.FullKey() == "Entity").Value.GetExpression().ExtractEntity(false), Parameter);
+        return Expression.Lambda(Replacements.Single(a => a.Key.FullKey() == "Entity").Value.GetExpression().ExtractEntity(false), Parameter);
+    }
+
+    internal List<CollectionElementToken> SubQueries()
+    {
+        return Replacements
+            .Where(a => a.Value.SubQueryContext != null)
+            .Select(a => (CollectionElementToken)a.Key)
+            .ToList();
     }
 }
 
@@ -522,9 +530,13 @@ public struct ExpressionBox
 {
     public readonly Expression RawExpression;
     public readonly PropertyRoute? MListElementRoute;
+    public readonly BuildExpressionContext? SubQueryContext;
+
+    public ExpressionBox(Expression rawExpression, PropertyRoute? mlistElementRoute = null, BuildExpressionContext? subQueryContext = null)
     {
         this.RawExpression = rawExpression;
         this.MListElementRoute = mlistElementRoute;
+        this.SubQueryContext = subQueryContext;
     }
 
     public Expression GetExpression()
@@ -533,6 +545,11 @@ public struct ExpressionBox
             return Expression.Property(RawExpression, "Element").BuildLiteNullifyUnwrapPrimaryKey(new[] { MListElementRoute! });
 
         return RawExpression;
+    }
+
+    public override string ToString()
+    {
+        return new { RawExpression, MListElementRoute, SubQueryContext }.ToString()!;
     }
 }
 
