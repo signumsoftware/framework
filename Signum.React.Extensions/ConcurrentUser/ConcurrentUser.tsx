@@ -6,7 +6,7 @@ import { ConcurrentUserEntity, ConcurrentUserMessage } from './Signum.Entities.C
 import { OverlayTrigger, Popover } from 'react-bootstrap';
 import { Entity, Lite, liteKey, toLite } from '@framework/Signum.Entities'
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization'
-import { useAPI, useUpdatedRef } from '../../Signum.React/Scripts/Hooks'
+import { useAPI, useForceUpdate, useUpdatedRef } from '../../Signum.React/Scripts/Hooks'
 import { GraphExplorer } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -23,7 +23,11 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   const userKey = liteKey(toLite(AppContext.currentUser! as UserEntity))
   const startTime = React.useMemo(() => DateTime.utc().toISO(), [entityKey]);
 
-  const [ticks, setTicks] = React.useState(p.entity.ticks);
+  const [ticks, setTicks] = React.useState<string>(p.entity.ticks);
+  const forceUpdate = useForceUpdate();
+  React.useEffect(() => {
+    setTicks(p.entity.ticks);
+  }, [entityKey]);
 
   useSignalRGroup(conn, {
     enterGroup: co => p.entity == null ? Promise.resolve(undefined) : co.send("EnterEntity", entityKey, startTime, userKey),
@@ -57,7 +61,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
 
   var [refreshKey, setRefreshKey] = React.useState(0);
 
-  var concurrentUsers = useAPI(() => ConcurrentUserClient.API.getUsers(entityKey), [refreshKey, isModified.current]);
+  var concurrentUsers = useAPI(() => ConcurrentUserClient.API.getUsers(entityKey), [refreshKey, isModified.current, entityKey]);
 
   useSignalRCallback(conn, "EntitySaved", (a: string) => setTicks(a), []);
 
@@ -69,7 +73,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
 
   React.useEffect(() => {
     const handle = setTimeout(() => {
-      if (ticksRef.current != entityRef.current.ticks) {
+      if (ticksRef.current != null && ticksRef.current != entityRef.current.ticks) {
         MessageModal.show({
           title: ConcurrentUserMessage.DatabaseChangesDetected.niceToString(),
           style: "warning",
@@ -97,7 +101,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   }, [ticks !== p.entity.ticks]);
 
 
-  var otherUsers = concurrentUsers?.filter(u => u.signalRConnectionID !== conn?.connectionId);
+  var otherUsers = concurrentUsers?.filter(u => u.connectionID !== conn?.connectionId);
 
   if (otherUsers == null || otherUsers.length == 0)
     return null;
@@ -105,10 +109,11 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   return (
     <OverlayTrigger
       trigger="click"
+      onToggle={show => forceUpdate()}
       placement={"bottom-end"}
       overlay={
         <Popover>
-          <Popover.Header as="h3">{ConcurrentUserEntity.nicePluralName()}</Popover.Header>
+          <Popover.Header as="h3">{ConcurrentUserMessage.ConcurrentUsers.niceToString()}</Popover.Header>
           <Popover.Body>
             
             {otherUsers.map((a, i) =>
