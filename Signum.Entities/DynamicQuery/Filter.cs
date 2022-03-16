@@ -29,7 +29,7 @@ public abstract class Filter
             Type mleType = collection.Type.ElementType()!;
 
             var p = Expression.Parameter(mleType, mleType.Name.Substring(0, 1).ToLower());
-            ctx.Replacements.Add(anyAll, new ExpressionBox(p, anyAll.GetPropertyRoute()));
+            ctx.Replacements.Add(anyAll, new ExpressionBox(p, mlistElementRoute: anyAll.GetPropertyRoute()));
             var body = GetExpression(ctx);
             ctx.Replacements.Remove(anyAll);
 
@@ -42,7 +42,7 @@ public abstract class Filter
             Type elementType = collection.Type.ElementType()!;
 
             var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-            ctx.Replacements.Add(anyAll, new ExpressionBox(p.BuildLiteNullifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! }), null));
+            ctx.Replacements.Add(anyAll, new ExpressionBox(p.BuildLiteNullifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! })));
             var body = GetExpression(ctx);
             ctx.Replacements.Remove(anyAll);
 

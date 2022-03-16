@@ -115,7 +115,9 @@ public class ManualDynamicQueryCore<T> : DynamicQueryCore<T>
 
         DEnumerable<T> mr = await Execute(req, GetQueryDescription(), cancellationToken);
 
-        return (Lite<Entity>?)mr.Collection.Select(entitySelector.Value).Unique(request.UniqueType);
+        var lites = (IEnumerable<Lite<Entity>?>)Untyped.Select(mr.Collection, mr.Context.GetEntitySelector().Compile());
+
+        return lites.Unique(request.UniqueType);
     }
 
     static readonly Lazy<Func<object, Lite<IEntity>>> entitySelector = new Lazy<Func<object, Lite<IEntity>>>(() =>

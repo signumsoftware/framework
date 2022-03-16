@@ -106,9 +106,9 @@ public class MListElementPropertyToken : QueryToken
 
         var param = Expression.Parameter(entityParentType, entityParentType.Name.Substring(0, 1).ToLower());
 
-        var ctxTemp = new BuildExpressionContext(ctx.TupleType, ctx.Parameter, new Dictionary<QueryToken, ExpressionBox>
+        var ctxTemp = new BuildExpressionContext(ctx.ElementType, ctx.Parameter, new Dictionary<QueryToken, ExpressionBox>
         {
-            {  entityParent, new ExpressionBox(param , null)}
+            {  entityParent, new ExpressionBox(param)}
         });
 
         var lambda = Expression.Lambda(ept.BuildExpression(ctxTemp), param);

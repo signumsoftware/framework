@@ -496,14 +496,14 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
 public class BuildExpressionContext
 {
-    public BuildExpressionContext(Type tupleType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements)
+    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements)
     {
-        this.TupleType = tupleType;
+        this.ElementType = elementType;
         this.Parameter = parameter;
         this.Replacements = replacements;
     }
 
-    public readonly Type TupleType;
+    public readonly Type ElementType;
     public readonly ParameterExpression Parameter;
     public readonly Dictionary<QueryToken, ExpressionBox> Replacements;
 
@@ -520,15 +520,12 @@ public class BuildExpressionContext
 
 public struct ExpressionBox
 {
-    public ExpressionBox(Expression rawExpression, PropertyRoute? mlistElementRoute)
+    public readonly Expression RawExpression;
+    public readonly PropertyRoute? MListElementRoute;
     {
         this.RawExpression = rawExpression;
-        this.MListElementRoute = mlistElementRoute;            
+        this.MListElementRoute = mlistElementRoute;
     }
-
-    public readonly PropertyRoute? MListElementRoute;
-
-    public readonly Expression RawExpression;
 
     public Expression GetExpression()
     {

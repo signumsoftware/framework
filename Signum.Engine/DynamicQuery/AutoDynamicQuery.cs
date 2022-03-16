@@ -155,7 +155,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             .Where(request.Filters);
 
             if (request.ValueToken == null)
-                return query.Query.Count();
+                return Untyped.Count(query.Query, query.Context.ElementType);
 
             if (request.ValueToken is AggregateToken at)
                 return query.SimpleAggregate(at);
@@ -173,7 +173,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             .Where(request.Filters);
 
             if (request.ValueToken == null)
-                return await query.Query.CountAsync(token);
+                return await Untyped.CountAsync(query.Query, token, query.Context.ElementType);
 
             if (request.ValueToken is AggregateToken at)
                 return await query.SimpleAggregateAsync(at, token);
@@ -230,7 +230,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
          .Where(request.Filters)
          .Select(new List<Column> { ex });
 
-        var result = query.Query.Select(query.Context.GetEntitySelector());
+        var result = (IQueryable<Lite<Entity>>)Untyped.Select(query.Query, query.Context.GetEntitySelector());
 
         if (request.Multiplications.Any())
             result = result.Distinct();
@@ -249,7 +249,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
          .Where(request.Filters)
          .Select(new List<Column> { ex });
 
-        var result = query.Query.Select(query.Context.GetEntityFullSelector());
+        var result = (IQueryable<Entity>)Untyped.Select(query.Query, query.Context.GetEntityFullSelector());
 
         if (request.Multiplications.Any())
             result = result.Distinct();
