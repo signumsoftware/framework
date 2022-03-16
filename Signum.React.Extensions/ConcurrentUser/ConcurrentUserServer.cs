@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.SignalR;
 using Signum.Engine.Authorization;
 using Signum.Engine.Cache;
 using Signum.Engine.ConcurrentUser;
+using Signum.Entities.ConcurrentUser;
+using Signum.React.Facades;
 using Signum.Utilities.Reflection;
 
 namespace Signum.React.ConcurrentUser;
@@ -15,6 +17,7 @@ public static class ConcurrentUserServer
     public static void Start(IApplicationBuilder app)
     {
         SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+        ReflectionServer.RegisterLike(typeof(ConcurrentUserMessage), () => true);
     }
 
     public static void MapConcurrentUserHub(IEndpointRouteBuilder endpoints)

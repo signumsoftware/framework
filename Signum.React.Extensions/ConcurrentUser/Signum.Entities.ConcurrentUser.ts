@@ -18,6 +18,7 @@ export interface ConcurrentUserEntity extends Entities.Entity {
 }
 
 export module ConcurrentUserMessage {
+  export const ConcurrentUsers = new MessageKey("ConcurrentUserMessage", "ConcurrentUsers");
   export const CurrentlyEditing = new MessageKey("ConcurrentUserMessage", "CurrentlyEditing");
   export const DatabaseChangesDetected = new MessageKey("ConcurrentUserMessage", "DatabaseChangesDetected");
   export const LooksLikeSomeoneJustSaved0ToTheDatabase = new MessageKey("ConcurrentUserMessage", "LooksLikeSomeoneJustSaved0ToTheDatabase");
