@@ -81,6 +81,10 @@ export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | un
   }
 }
 
+export function supportsClipboard() {
+  return navigator.clipboard && window.isSecureContext;
+}
+
 let renderId = (entity: Entity): React.ReactChild => {
   const guid = getTypeInfo(entity.Type).members["Id"].type!.name == "Guid";
   return (

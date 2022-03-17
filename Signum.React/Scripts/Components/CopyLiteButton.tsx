@@ -3,6 +3,7 @@ import { Overlay, Tooltip } from "react-bootstrap";
 import { Entity, liteKey, NormalWindowMessage, toLite } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useInterval } from '../Hooks';
+import { supportsClipboard } from '../Navigator';
 
 interface CopyLiteButtonProps {
   entity: Entity;
@@ -11,7 +12,7 @@ interface CopyLiteButtonProps {
 
 export default function CopyLiteButton(p: CopyLiteButtonProps) {
 
-  if (p.entity.isNew)
+  if (p.entity.isNew || !supportsClipboard())
     return null;
 
   const lk = liteKey(toLite(p.entity as Entity));
