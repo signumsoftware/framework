@@ -88,10 +88,12 @@ export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | un
 let renderId = (entity: Entity): React.ReactChild => {
   const guid = getTypeInfo(entity.Type).members["Id"].type!.name == "Guid";
   return (
-    <span className={guid ? "sf-hide-id" : ""}>
-      {entity.id}
-      <CopyLiteButton className={guid ? "" : "sf-hide-id"} entity={entity} />
-    </span>
+    <>
+      <span className={guid ? "sf-hide-id" : ""}>
+        {entity.id}
+      </span>
+      <CopyLiteButton className={"sf-hide-id"} entity={entity} />
+    </>
   );
 }
 

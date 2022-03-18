@@ -189,7 +189,7 @@ a.expand-window:hover {
     transition: opacity 1s ease;
 }
 
-.sf-hide-id:hover{
+.sf-entity-sub-title:hover .sf-hide-id {
     opacity: 1;
 }
 
