@@ -273,10 +273,11 @@ export function getSimpleTypeNiceName(name: string) {
 
   switch (name) {
     case "string":
-    case "guid":
+    case "Guid":
       return QueryTokenMessage.Text.niceToString();
-    case "datetime": return QueryTokenMessage.DateTime.niceToString();
-    case "datetimeoffset": return QueryTokenMessage.DateTimeOffset.niceToString();
+    case "Date": return QueryTokenMessage.Date.niceToString();
+    case "DateTime": return QueryTokenMessage.DateTime.niceToString();
+    case "DateTimeOffset": return QueryTokenMessage.DateTimeOffset.niceToString();
     case "number": return QueryTokenMessage.Number.niceToString();
     case "decimal": return QueryTokenMessage.DecimalNumber.niceToString();
     case "boolean": return QueryTokenMessage.Check.niceToString();

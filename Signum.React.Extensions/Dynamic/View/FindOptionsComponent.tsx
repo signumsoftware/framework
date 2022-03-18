@@ -516,7 +516,7 @@ class FilterOptionsComponent extends BaseOptionsComponent<FilterOptionExpr> {
     if (tr.isCollection || tr.isLite || tr.isEmbedded)
       return null;
 
-    if (tr.name == "string" || tr.name == "Guid" || tr.name == "datetime")
+    if (tr.name == "string" || tr.name == "Guid" || tr.name == "DateTime")
       return "string";
 
     if (tr.name == "number")
