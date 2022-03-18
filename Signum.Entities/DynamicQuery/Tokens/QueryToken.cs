@@ -509,12 +509,16 @@ public class BuildExpressionContext
 
     public LambdaExpression GetEntitySelector()
     {
-        return Expression.Lambda(Replacements.Single(a=>a.Key.FullKey() == "Entity").Value.GetExpression(), Parameter);
+        var entityColumn = Replacements.Single(a => a.Key.FullKey() == "Entity").Value;
+
+        return Expression.Lambda(Expression.Convert(entityColumn.GetExpression(), typeof(Lite<Entity>)       ), Parameter);
     }
 
     public LambdaExpression GetEntityFullSelector()
     {
-        return Expression.Lambda(Replacements.Single(a => a.Key.FullKey() == "Entity").Value.GetExpression().ExtractEntity(false), Parameter);
+        var entityColumn = Replacements.Single(a => a.Key.FullKey() == "Entity").Value;
+
+        return Expression.Lambda(Expression.Convert(entityColumn.GetExpression().ExtractEntity(false), typeof(Entity)), Parameter);
     }
 
     internal List<CollectionElementToken> SubQueries()
