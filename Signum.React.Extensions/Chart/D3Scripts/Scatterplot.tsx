@@ -162,10 +162,10 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
         const active = detector?.(r);
 
         return (
-          <g key={keyColumns.map(c => c.getValueKey(r)).join("/")} className="shape-serie sf-transition"
+          <g key={keyColumns.map(c => c.getValueKey(r)).join("/")} className="shape-serie sf-transition shadow-group"
             opacity={active == false ? .5 : undefined}
             transform={translate(xRule.start('content'), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
-            <circle className="shape sf-transition"
+            <circle className="shape sf-transition shadow"
               cx={x(horizontalColumn.getValue(r))!}
               cy={-y(verticalColumn.getValue(r))!}
               stroke={active == true ? "black" : colorKeyColumn.getValueColor(r) ?? color(r)}

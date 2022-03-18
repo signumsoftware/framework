@@ -83,40 +83,40 @@ export default function renderBubblePack({ data, width, height, parameters, load
         nodes.orderByDescending(a => a.r).map(d => {
           const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);
           return (
-            <g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x, d.y) + (initialLoad ? scale(0, 0) : scale(1, 1))} cursor="pointer"
-            onClick={e => isFolder(d.data) ? onDrillDown({ c2: d.data.folder }, e) : onDrillDown(d.data, e)}>
-            <circle className="sf-transition" shapeRendering="initial" r={d.r}
-              opacity={active == false ? .5 : undefined}
-              fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
-              fillOpacity={parameters["FillOpacity"] ?? undefined}
-              stroke={active == true ? "black" : parameters["StrokeColor"] ?? (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) ?? undefined))}
-              strokeWidth={parameters["StrokeWidth"]} strokeOpacity={1} />
-            {!isFolder(d.data) &&
-              <TextEllipsis maxWidth={d.r * 2} padding={1} etcText=""
-                dominantBaseline="middle" textAnchor="middle" dy={showNumber && d.r > numberSizeLimit ? "-0.5em" : undefined}>
-                {keyColumn.getValueNiceName(d.data as ChartRow)}
-              </TextEllipsis>
-            }
-            {showNumber && d.r > numberSizeLimit && !isFolder(d.data) &&
-              <text fill={parameters["NumberColor"] ?? "#000"}
-                dominantBaseline="middle"
-                textAnchor="middle"
-                fontWeight="bold"
-                opacity={parseFloat(parameters["NumberOpacity"]) * d.r / 30}
-                dy=".5em">
-                {valueColumn.getValueNiceName(d.data as ChartRow)}
-              </text>
-            }
-            <title>
-              {isFolder(d.data) ? parentColumn!.getNiceName(d.data.folder) :
-                (keyColumn.getValueNiceName(d.data as ChartRow) + (parentColumn == null ? '' : (' (' + parentColumn.getValueNiceName(d.data as ChartRow) + ')')))}:
-              {isFolder(d.data) ? format(size.invert(d.value!)) :
-                (valueColumn.getValueNiceName(d.data)
-                  + (colorScaleColumn == null ? '' : (' (' + colorScaleColumn.getValueNiceName(d.data) + ')'))
-                  + (colorSchemeColumn == null ? '' : (' (' + colorSchemeColumn.getValueNiceName(d.data) + ')'))
-                )}
-            </title>
-          </g>);
+            <g key={getNodeKey(d)} className="node sf-transition shadow-group" transform={translate(d.x, d.y) + (initialLoad ? scale(0, 0) : scale(1, 1))} cursor="pointer"
+              onClick={e => isFolder(d.data) ? onDrillDown({ c2: d.data.folder }, e) : onDrillDown(d.data, e)}>
+              <circle className="sf-transition shadow" shapeRendering="initial" r={d.r}
+                opacity={active == false ? .5 : undefined}
+                fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
+                fillOpacity={parameters["FillOpacity"] ?? undefined}
+                stroke={active == true ? "black" : parameters["StrokeColor"] ?? (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) ?? undefined))}
+                strokeWidth={parameters["StrokeWidth"]} strokeOpacity={1} />
+              {!isFolder(d.data) &&
+                <TextEllipsis maxWidth={d.r * 2} padding={1} etcText=""
+                  dominantBaseline="middle" textAnchor="middle" dy={showNumber && d.r > numberSizeLimit ? "-0.5em" : undefined}>
+                  {keyColumn.getValueNiceName(d.data as ChartRow)}
+                </TextEllipsis>
+              }
+              {showNumber && d.r > numberSizeLimit && !isFolder(d.data) &&
+                <text fill={parameters["NumberColor"] ?? "#000"}
+                  dominantBaseline="middle"
+                  textAnchor="middle"
+                  fontWeight="bold"
+                  opacity={parseFloat(parameters["NumberOpacity"]) * d.r / 30}
+                  dy=".5em">
+                  {valueColumn.getValueNiceName(d.data as ChartRow)}
+                </text>
+              }
+              <title>
+                {isFolder(d.data) ? parentColumn!.getNiceName(d.data.folder) :
+                  (keyColumn.getValueNiceName(d.data as ChartRow) + (parentColumn == null ? '' : (' (' + parentColumn.getValueNiceName(d.data as ChartRow) + ')')))}:
+                {isFolder(d.data) ? format(size.invert(d.value!)) :
+                  (valueColumn.getValueNiceName(d.data)
+                    + (colorScaleColumn == null ? '' : (' (' + colorScaleColumn.getValueNiceName(d.data) + ')'))
+                    + (colorSchemeColumn == null ? '' : (' (' + colorSchemeColumn.getValueNiceName(d.data) + ')'))
+                  )}
+              </title>
+            </g>);
         })
       }
       <InitialMessage data={data} x={width / 2} y={height / 2} loading={loading} />

@@ -165,44 +165,35 @@ export default function renderMultiLines({ data, width, height, parameters, load
                 var key = keyColumn.getKey(r.rowValue);
 
                 return (
-                  <circle key={key} className="point sf-transition"
-                    opacity={active == false ? .5 : undefined}
-                    stroke={active == true ? "black" : s.color || color(s.key)}
-                    strokeWidth={active == true ? 3 : circleStroke}
-                    fill="white"
-                    transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(key)!, -y(row.value)!)}
-                    r={circleRadius}
-                    shapeRendering="initial"
-                    onClick={e => onDrillDown(row.rowClick, e)}
-                    cursor="pointer">
-                    <title>
-                      {row.valueTitle}
-                    </title>
-                  </circle>
+                  <g className="shadow-group" key={key}>
+                    <circle className="point sf-transition shadow"
+                      opacity={active == false ? .5 : undefined}
+                      stroke={active == true ? "black" : s.color || color(s.key)}
+                      strokeWidth={active == true ? 3 : circleStroke}
+                      fill="white"
+                      transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(key)!, -y(row.value)!)}
+                      r={circleRadius}
+                      shapeRendering="initial"
+                      onClick={e => onDrillDown(row.rowClick, e)}
+                      cursor="pointer">
+                      <title>
+                        {row.valueTitle}
+                      </title>
+                    </circle>
+                    {numberOpacity > 0 &&
+                      <text className="point-label sf-transition"
+                        textAnchor="middle"
+                        opacity={active == false ? .5 : active == true ? 1 : numberOpacity}
+                        transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(row.value)! - 8)}
+                        onClick={e => onDrillDown(row.rowClick, e)}
+                        cursor="pointer"
+                        shapeRendering="initial">
+                        {row.valueNiceName}
+                      </text>
+                    }
+                  </g>
                 );
               })}
-            {numberOpacity > 0 &&
-              rowsInOrder
-                .map(r => {
-
-                  var row = r.values[s.key];
-                  if (row == null)
-                    return undefined;
-
-                  var active = detector?.(row.rowClick);
-                  return (
-                    <text key={keyColumn.getKey(r.rowValue)} className="point-label sf-transition"
-                      textAnchor="middle"
-                      opacity={active == false ? .5 : active == true ? 1 : numberOpacity}
-                      transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(row.value)! - 8)}
-                      onClick={e => onDrillDown(row.rowClick, e)}
-                      cursor="pointer"
-                      shapeRendering="initial">
-                      {row.valueNiceName}
-                    </text>
-                  );
-                })
-            }
           </g>
         )
       }
