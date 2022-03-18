@@ -297,16 +297,24 @@ export default function FramePage(p: FramePageProps) {
       return <h3 className="display-6 sf-entity-title">{JavascriptMessage.loading.niceToString()}</h3>;
 
     const entity = state.pack.entity;
+    const title = getToString(entity);
+    const subTitle = Navigator.getTypeSubTitle(entity, undefined);
+    const widgets = renderWidgets(wc, settings?.stickyHeader);
 
     return (
-      <>
-        <h4 className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")}>
-          <span className="display-6 sf-entity-title">{getToString(entity)}</span>
-          <br />
-          <small className="sf-type-nice-name text-muted">{Navigator.getTypeSubTitle(entity, undefined)}</small>
-          {renderWidgets(wc, settings?.stickyHeader)}
-        </h4>
+      <div className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")} >
+      {title && <>
+        <span className="sf-entity-title">{title}</span>&nbsp;
       </>
+      }
+      {(subTitle || widgets) &&
+        <div className="sf-entity-sub-title">
+          {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
+            {widgets}
+            <br/>
+        </div>
+      }
+    </div>
     );
   }
 }
