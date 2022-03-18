@@ -97,8 +97,8 @@ export default function renderStackedLines({ data, width, height, parameters, lo
   var columnsByKey = pivot.columns.toObject(a => a.key);
 
   var format = pStack == "expand" ? d3.format(".0%") :
-    pStack == "zero" ? d3.format("") :
-      (n: number) => d3.format("")(n) + "?";
+    pStack == "zero" ? valueColumn0.getNiceName :
+      (n: number) => valueColumn0.getNiceName(n) + "?";;
 
   var rectRadious = 2;
 
@@ -129,60 +129,52 @@ export default function renderStackedLines({ data, width, height, parameters, lo
             if (row == undefined)
               return null;
 
+            if ((y(v[1])! - y(v[0])!)! <= 10)
+              return null;
 
             var active = detector?.(row.rowClick);
 
             return (
-              <rect key={dataKey} className="point sf-transition"
-                transform={translate(x(dataKey)! - rectRadious, -y(v[1])!)}
-                width={2 * rectRadious}
-                fillOpacity={active == true ? undefined : .1}
-                fill={active == true ? "black" : "#fff"}
-                height={y(v[1])! - y(v[0])!}
-                onClick={e => onDrillDown(row.rowClick, e)}
-                cursor="pointer">
-                <title>
-                  {row.valueTitle}
-                </title>
-              </rect>
+              <g className="shadow-group" key={dataKey} >
+                <rect className="point sf-transition shadow"
+                  transform={translate(x(dataKey)! - rectRadious, -y(v[1])!)}
+                  width={2 * rectRadious}
+                  fillOpacity={active == true ? undefined : .2}
+                  fill={active == true ? "black" : colorByKey[s.key]?? color(s.key)}
+                  height={y(v[1])! - y(v[0])!}
+                  onClick={e => onDrillDown(row.rowClick, e)}
+                  cursor="pointer">
+                  <title>
+                    {row.valueTitle}
+                  </title>
+                </rect>
+
+                {x.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
+                  <TextRectangle className="number-label sf-transition"
+                    rectangleAtts={{
+                      fill: colorByKey[s.key] ?? color(s.key),
+                      opacity: active == false ? .5 : parameters["NumberOpacity"],
+                      stroke: active == true ? "black" : "none",
+                      strokeWidth: active == true ? 2 : undefined,
+                      className: "shadow"
+                    }}
+                    transform={translate(x(dataKey)!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
+                    fill={parameters["NumberColor"]}
+                    dominantBaseline="middle"
+                    onClick={e => onDrillDown(row.rowClick, e)}
+                    textAnchor="middle"
+                    fontWeight="bold">
+                    {row.valueNiceName}
+                    <title>
+                      {row.valueTitle}
+                    </title>
+                  </TextRectangle>
+                }
+
+              </g>
             );
           })}
 
-        {x.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
-          s.orderBy(v => keyColumn.getKey(v.data))
-          .map(v => {
-            var dataKey = keyColumn.getKey(v.data);
-            var row = rowsByKey[dataKey]?.values[s.key];
-            if (row == undefined)
-              return null;
-
-            if ((y(v[1])! - y(v[0])!)! <= 10)
-              return null;
-
-            const active = detector?.(row.rowClick);
-
-            return (
-              <TextRectangle key={dataKey}
-                className="number-label sf-transition"
-                rectangleAtts={{
-                  fill: colorByKey[s.key] ?? color(s.key),
-                  opacity: active == false ? .5 : parameters["NumberOpacity"],
-                  stroke: active == true ? "black" : "none",
-                  strokeWidth: active == true ? 2 : undefined
-                }}
-                transform={translate(x(dataKey)!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
-                fill={parameters["NumberColor"]}
-                dominantBaseline="middle"
-                onClick={e => onDrillDown(row.rowClick, e)}
-                textAnchor="middle"
-                fontWeight="bold">
-                {row.valueNiceName}
-                <title>
-                  {row.valueTitle}
-                </title>
-              </TextRectangle>)
-          })
-        }
       </g>
       )}
       <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} isActive={c.c1 && detector && (row => detector!({c1: row.value }))} onDrillDown={c.c1 && ((s, e) => onDrillDown({ c1: s.value }, e))} />

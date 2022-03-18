@@ -11,7 +11,7 @@ export function YScaleTicks({ xRule, yRule, valueColumn, y, format }: { xRule: R
   var availableHeight = yRule.size("content");
 
   var yTicks = y.ticks(availableHeight / 50);
-  var yTickFormat = format ?? y.tickFormat(availableHeight / 50);
+  var yTickFormat = format ?? valueColumn.getNiceName; //  y.tickFormat(availableHeight / 50);
 
   return (
     <>
@@ -30,12 +30,13 @@ export function YScaleTicks({ xRule, yRule, valueColumn, y, format }: { xRule: R
       </g>
 
       <g className="y-label-group" transform={translate(xRule.end('labels'), yRule.end('content'))}>
-        {yTicks.map(t => <text key={t} className="y-label sf-transition"
+        {yTicks.map(t => <TextEllipsis key={t} className="y-label sf-transition"
           transform={translate(0, -y(t)!)}
+          maxWidth={xRule.end('labels')}
           dominantBaseline="middle"
           textAnchor="end">
           {yTickFormat(t)}
-        </text>)}
+        </TextEllipsis>)}
       </g>
 
       <g className="y-title-group" transform={translate(xRule.middle('title'), yRule.middle('content')) + rotate(270)}>
@@ -91,7 +92,7 @@ export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: R
   var availableWidth = yRule.size("content");
 
   var xTicks = x.ticks(availableWidth / 50);
-  var xTickFormat = format ?? x.tickFormat(availableWidth / 50);
+  var xTickFormat = format ?? valueColumn.getNiceName;//  x.tickFormat(availableWidth / 50);
 
   return (
     <>

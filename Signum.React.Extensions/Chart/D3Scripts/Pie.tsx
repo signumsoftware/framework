@@ -6,6 +6,7 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import { ChartRow, ChartTable } from '../ChartClient';
 import InitialMessage from './Components/InitialMessage';
 import { KeyCodes } from '@framework/Components';
+import { TextRectangle } from './StackedLines';
 
 export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
@@ -41,9 +42,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
     .outerRadius(outerRadious)
     .innerRadius(rInner);
 
-  var cx = (width / 2),
-    cy = (height / 2),
-    legendRadius = 1.2;
+  var legendRadius = 1.2;
 
   var detector = dashboardFilter?.getActiveDetector(chartRequest);
 
@@ -54,9 +53,12 @@ export default function renderPie({ data, width, height, parameters, loading, on
       <g className="shape" transform={translate(width / 2, height / 2)}>
         {orderedPie.map(slice => {
           var active = detector?.(slice.data);
+          var m = (slice.endAngle + slice.startAngle) / 2;
+          var cuadr = Math.floor(12 * m / (2 * Math.PI));
+          var active = detector?.(slice.data);
           return (
-            <g key={slice.index} className="slice">
-              <path className="shape sf-transition" d={arc(slice)!}
+            <g key={slice.index} className="slice shadow-group">
+              <path className="shape sf-transition shadow" d={arc(slice)!}
                 opacity={active == false ? .5 : undefined}
                 stroke={active == true ? "black" : undefined}
                 strokeWidth={active == true ? 3 : undefined}
@@ -64,35 +66,29 @@ export default function renderPie({ data, width, height, parameters, loading, on
                 fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
                 shapeRendering="initial"
                 onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
-                <title>
+                <div className="bg-success ">
                   {keyColumn.getValueNiceName(slice.data) + ': ' + valueColumn.getValueNiceName(slice.data)}
-                </title>
+                </div>
               </path>
+              <g key={slice.index} className="color-legend">
+                <TextRectangle className="color-legend sf-chart-strong sf-transition"
+                  rectangleAtts={{fill: "transparent"}}
+                  transform={translate(
+                    Math.sin(m) * outerRadious * legendRadius,
+                    -Math.cos(m) * outerRadious * legendRadius)}
+                  opacity={active == false ? .5 : undefined}
+                  textAnchor='middle'
+                  dominantBaseline="middle"
+                  fontWeight={active == true ? "bold" : undefined}
+                  fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
+                  onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
+                  {((slice.endAngle - slice.startAngle) < (Math.PI / 16)) ? '' : pValueAsPercent == "Yes" ?
+                    `${keyColumn.getValueNiceName(slice.data)} : ${Number(valueColumn.getValue(slice.data) / dataTotal).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 1 })}` :
+                    keyColumn.getValueNiceName(slice.data)}
+                </TextRectangle>
+              </g>
             </g>
           );
-        })}
-      </g>
-      <g className="color-legend" transform={translate(cx, cy)}>
-        {orderedPie.orderBy(r => keyColumn.getValueKey(r.data)).map(slice => {
-
-          var m = (slice.endAngle + slice.startAngle) / 2;
-          var cuadr = Math.floor(12 * m / (2 * Math.PI));
-          var active = detector?.(slice.data);
-          return <g key={slice.index} className="color-legend">
-            <text className="color-legend sf-chart-strong sf-transition"
-              transform={translate(
-                Math.sin(m) * outerRadious * legendRadius,
-                -Math.cos(m) * outerRadious * legendRadius)}
-              opacity={active == false ? .5 : undefined}
-              textAnchor={(1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle'}
-              fontWeight={active == true ? "bold" : undefined}
-              fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
-              onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
-              {((slice.endAngle - slice.startAngle) < (Math.PI / 16)) ? '' : pValueAsPercent == "Yes" ?
-                `${keyColumn.getValueNiceName(slice.data)} : ${Number(valueColumn.getValue(slice.data) / dataTotal).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 1 })}` :
-                keyColumn.getValueNiceName(slice.data)}
-            </text>
-          </g>;
         })}
       </g>
       <InitialMessage data={data} x={width / 2} y={height / 2} loading={loading} />

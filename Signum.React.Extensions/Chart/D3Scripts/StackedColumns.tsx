@@ -11,6 +11,7 @@ import { XAxis, YAxis } from './Components/Axis';
 import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import TextIfFits from './Components/TextIfFits';
 
 
 export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
@@ -87,8 +88,8 @@ export default function renderStackedColumns({ data, width, height, parameters, 
   var colorByKey = pivot.columns.toObject(a => a.key, a => a.color);
 
   var format = pStack == "expand" ? d3.format(".0%") :
-    pStack == "zero" ? d3.format("") :
-      (n: number) => d3.format("")(n) + "?";
+    pStack == "zero" ? valueColumn0.getNiceName :
+      (n: number) => valueColumn0.getNiceName(n) + "?";
 
   var labelMargin = 10;
   var size = yRule.size('content');
@@ -112,43 +113,41 @@ export default function renderStackedColumns({ data, width, height, parameters, 
           var active = detector?.(row.rowClick);
 
           return (
-            <rect key={keyColumn.getKey(r.data.rowValue)} className="shape sf-transition"
-              transform={translate(x(keyColumn.getKey(r.data.rowValue))!, -y(r[1])!) + (initialLoad ? scale(1, 0) : scale(1, 1))}
-              opacity={active == false ? .5 : undefined}
-              stroke={active == true ? "black" : x.bandwidth() > 4 ? '#fff' : undefined}
-              strokeWidth={active == true ? 3 : undefined}
-              fill={colorByKey[s.key] ?? color(s.key)}
-              width={x.bandwidth()}
-              height={y(r[1])! - y(r[0])!}
-              onClick={e => onDrillDown(row.rowClick, e)}
-              cursor="pointer">
-              <title>
-                {row.valueTitle}
-              </title>
-            </rect>
+            <g className="shadow-group" key={keyColumn.getKey(r.data.rowValue)}>
+              <rect className="shape sf-transition shadow"
+                transform={translate(x(keyColumn.getKey(r.data.rowValue))!, -y(r[1])!) + (initialLoad ? scale(1, 0) : scale(1, 1))}
+                opacity={active == false ? .5 : undefined}
+                fill={colorByKey[s.key] ?? color(s.key)}
+                width={x.bandwidth()}
+                height={y(r[1])! - y(r[0])!}
+                onClick={e => onDrillDown(row.rowClick, e)}
+                cursor="pointer">
+                <title>
+                  {row.valueTitle}
+                </title>
+              </rect>
+              {parseFloat(parameters["NumberOpacity"]) > 0 && x.bandwidth() > 15 &&
+                <TextIfFits className="number-label sf-transition"
+                  maxWidth={y(r[1])! - y(r[0])!}
+                  transform={translate(
+                    x(keyColumn.getKey(r.data.rowValue))! + x.bandwidth() / 2,
+                    -y(r[0])! * 0.5 - y(r[1])! * 0.5
+                  ) + rotate(-90)}
+                  onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
+                  fill={parameters["NumberColor"]}
+                  dominantBaseline="middle"
+                  opacity={parameters["NumberOpacity"]}
+                  textAnchor="middle"
+                  fontWeight="bold">
+                  {r.data.values[s.key].valueNiceName}
+                  <title>
+                    {r.data.values[s.key].valueTitle}
+                  </title>
+                </TextIfFits>}
+            </g>
           );
         }).notNull()}
 
-        {parseFloat(parameters["NumberOpacity"]) > 0 && x.bandwidth() > 15 &&
-          s.orderBy(r => keyColumn.getKey(r.data.rowValue))
-            .filter(r => (y(r[1])! - y(r[0])!) > 10)
-            .map(r => <text key={keyColumn.getKey(r.data.rowValue)} className="number-label sf-transition"
-              transform={translate(
-                x(keyColumn.getKey(r.data.rowValue))! + x.bandwidth() / 2,
-                -y(r[0])! * 0.5 - y(r[1])! * 0.5
-              )}
-              onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
-              fill={parameters["NumberColor"]}
-              dominantBaseline="middle"
-              opacity={parameters["NumberOpacity"]}
-              textAnchor="middle"
-              fontWeight="bold">
-              {r.data.values[s.key].valueNiceName}
-              <title>
-                {r.data.values[s.key].valueTitle}
-              </title>
-            </text>)
-        }
       </g>)}
 
       {x.bandwidth() > 15 && (

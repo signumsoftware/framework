@@ -484,7 +484,6 @@ public class TypeReferenceTS
             case TypeCode.Single:
             case TypeCode.Double:
             case TypeCode.Decimal: return "decimal";
-            case TypeCode.DateTime: return "datetime";
             case TypeCode.String: return "string";
         }
         return null;
