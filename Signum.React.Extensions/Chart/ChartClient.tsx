@@ -27,6 +27,7 @@ import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 import { MemoRepository } from './D3Scripts/Components/ReactChart';
 import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
+import { softCast } from '../../Signum.React/Scripts/Globals';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
 
@@ -663,8 +664,8 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
-        return date == null ? String(null) : toFormatWithFixes(DateTime.fromISO(date), format);
+        var luxonFormat = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
+        return date == null ? String(null) : toFormatWithFixes(DateTime.fromISO(date), luxonFormat);
       };
 
     if (token.filterType == "Time")
@@ -674,11 +675,12 @@ export module API {
         return date == null ? String(null) : timeToString(date, format);
       };
 
-    if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
+    if ((token.filterType == "Decimal" || token.filterType == "Integer"))
       return v => {
         var number = v as number | null;
-        var format = toNumberFormat(chartColumn.format ?? token.format ?? "0")
-        return number == null ? String(null) : format.format(number);
+        var format = chartColumn.format || (token.key == "Sum" ? "0.#K" : undefined) || token.format || "0";
+        var numFormat = toNumberFormat(format);
+        return number == null ? String(null) : numFormat.format(number);
       };
 
     return v => String(v);
@@ -706,15 +708,15 @@ export module API {
 
       const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
       const key = getKey(token);
+
       const niceName = getNiceName(token, mle.element /*capture format by ref*/);
       const color = getColor(token, palettes);
 
-      return {
+      return softCast<ChartColumn<unknown>>({
         name: "c" + i,
         displayName: scriptCol.displayName,
         title: (mle.element.displayName || token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
         token: token,
-        format: mle.element.format || token?.format,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,
         orderByType: mle.element.orderByType,
@@ -725,7 +727,7 @@ export module API {
         getValueKey: row => key(value(row)),
         getValueNiceName: row => niceName(value(row)),
         getValueColor: row => color(value(row)),
-      } as ChartColumn<unknown>
+      })
     });
 
     var index = 0;
@@ -864,7 +866,7 @@ export interface ChartColumn<V> {
   title: string;
   displayName: string;
   token?: QueryToken; //Null for QueryToken
-  type: ChartColumnType;
+  type: ChartColumnType | null;
   orderByIndex?: number | null;
   orderByType?: OrderType | null;
 
@@ -875,7 +877,7 @@ export interface ChartColumn<V> {
   getValue: (row: ChartRow) => V;
   getValueKey: (row: ChartRow) => string;
   getValueNiceName: (row: ChartRow) => string;
-  getValueColor: (row: ChartRow) => string;
+  getValueColor: (row: ChartRow) => string | null;
 }
 
 declare module '@framework/SearchControl/SearchControlLoaded' {
