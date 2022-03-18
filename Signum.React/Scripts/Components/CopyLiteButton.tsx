@@ -11,7 +11,8 @@ interface CopyLiteButtonProps {
 
 export default function CopyLiteButton(p: CopyLiteButtonProps) {
 
-  if (p.entity.isNew)
+  const supportsClipboard = (navigator.clipboard && window.isSecureContext);
+  if (p.entity.isNew || !supportsClipboard)
     return null;
 
   const lk = liteKey(toLite(p.entity as Entity));
