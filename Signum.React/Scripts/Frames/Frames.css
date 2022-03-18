@@ -44,7 +44,7 @@
     }
 }
 
-.sf-button-widget-container {
+.sf-button-widget-container{
 }
 
 .sf-button-bar {
@@ -79,7 +79,7 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
-.modal-title {
+.modal-title{
     overflow: hidden;
     width: 100%;
 }
@@ -98,7 +98,7 @@ button.dropdown-item:not(:disabled):not(.disabled) {
     cursor: pointer;
 }
 
-.sf-pointer-events {
+.sf-pointer-events{
     pointer-events: initial !important;
 }
 
@@ -123,17 +123,17 @@ a.expand-window {
     z-index: 1000;
 }
 
-    a.expand-window:hover {
-        color: gray;
-    }
+a.expand-window:hover {
+    color:gray;
+}
 
 .btn-toolbar.right .btn,
 .btn-toolbar.right .btn-group,
 .btn-toolbar.right .input-group {
-    float: right;
+  float: right;
 }
 
-.btn.disabled[data-operation] {
+.btn.disabled[data-operation]{
     pointer-events: initial;
 }
 
@@ -184,14 +184,14 @@ a.expand-window {
     }
 }
 
-.sf-guid-id {
+.sf-hide-id {
     opacity: 0;
     transition: opacity 1s ease;
 }
 
-    .sf-guid-id:hover {
-        opacity: 1;
-    }
+.sf-hide-id:hover{
+    opacity: 1;
+}
 
 .card.card-sm .card-header,
 .card.card-sm .card-body {
@@ -205,13 +205,13 @@ a.expand-window {
 
 
 .sf-page-container {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
-    .sf-page-container > div {
-        flex-grow: 1;
-    }
+.sf-page-container > div{
+    flex-grow: 1;
+}
 
 .sf-sticky-header {
     position: sticky;

@@ -316,6 +316,7 @@ public partial class WorkflowBuilder
                 Xml = c.Entity.Xml,
                 From = nodes.GetOrThrow(c.Entity.From),
                 To = nodes.GetOrThrow(c.Entity.To),
+                DecisionOptionName = c.Entity.DecisionOptionName,
             }).SaveList();
         }
 

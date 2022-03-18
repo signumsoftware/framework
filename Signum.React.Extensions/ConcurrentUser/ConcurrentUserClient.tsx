@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { ConcurrentUserEntity } from './Signum.Entities.ConcurrentUser'
-import { Entity, isEntity, toLite } from '@framework/Signum.Entities'
+import { Entity, isEntity, Lite, toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import * as Widgets from '@framework/Frames/Widgets';
 import ConcurrentUser from './ConcurrentUser'
 import { ajaxGet } from '@framework/Services'
+import { UserEntity } from '../Authorization/Signum.Entities.Authorization';
 
 export function start(options: { routes: JSX.Element[] }) {
   Widgets.onWidgets.push(ctx => {
@@ -24,7 +25,14 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export module API {
-  export function getUsers(key: string): Promise<ConcurrentUserEntity[]> {
+  export function getUsers(key: string): Promise<ConcurrentUserResponse[]> {
     return ajaxGet({ url: "~/api/concurrentUser/getUsers/" + key});
   }
+}
+
+export interface ConcurrentUserResponse {
+  user : Lite<UserEntity>;
+  startTime : string /*DateTime*/;
+  connectionID: string;
+  isModified: boolean;
 }

@@ -29,6 +29,8 @@ public static class ConcurrentUserOperation
 
 public enum ConcurrentUserMessage
 {
+    ConcurrentUsers,
+
     CurrentlyEditing,
 
     [Description("Database changes detected!")]

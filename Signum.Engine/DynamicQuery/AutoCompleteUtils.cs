@@ -48,6 +48,12 @@ public static class AutocompleteUtils
         if (match.Success)
             return PrimaryKey.TryParse(match.Groups[1].ToString(), type, out id);
 
+        Lite.TryParseLite(value, out Lite<Entity>? lite);
+        if (lite != null && lite.EntityType == type) {
+            id = lite.Id;
+            return true;
+        }
+
         id = default;
         return false;
     }
