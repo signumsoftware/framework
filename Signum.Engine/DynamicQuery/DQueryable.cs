@@ -215,7 +215,7 @@ public static class DQueryable
 
             var subQueryCtx = new BuildExpressionContext(pe2.Type, pe2, new Dictionary<QueryToken, ExpressionBox>
             {
-                { child.Value.Key, new ExpressionBox(pe2) }
+                { child.Value.Key, new ExpressionBox(pe2.BuildLiteNullifyUnwrapPrimaryKey(new []{child.Value.Key.GetPropertyRoute() }.NotNull().ToArray())) }
             });
 
             var subQueryExp = SubQueryConstructor(subQueryCtx, child, out var newSubContext);
