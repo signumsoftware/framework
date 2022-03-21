@@ -18,12 +18,15 @@ export default function renderBars({ data, width, height, parameters, loading, o
   const isInside = parameters["Labels"] == "Inside" || parameters["Labels"] == "InsideAll";
   const isAll = parameters["Labels"] == "MarginAll" || parameters["Labels"] == "InsideAll";
 
+  var labelsMargin = parseInt(parameters["LabelsMargin"]);
+  var labelsPadding = 5;
+
   var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
-    labels: isMargin ? parseInt(parameters["LabelsMargin"]) : 0,
-    _3: isMargin ? 5 : 0,
+    labels: isMargin ? labelsMargin : 0,
+    _3: isMargin ? labelsPadding : 0,
     ticks: 4,
     content: '*',
     _4: 5,
@@ -53,7 +56,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
   var valueColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
 
 
-  var x = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, xRule.size('content'), parameters['Scale']);
+  var x = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, xRule.size('content') - (isInside ? labelsMargin + labelsPadding : 0), parameters['Scale']);
 
   var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn));
 
@@ -65,7 +68,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
   var color = ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)), memo);
 
   var size = xRule.size('content');
-  var labelMargin = 10;
+  var labelsPadding = 10;
 
   var rowsByKey = data.rows.toObject(r => keyColumn.getValueKey(r));
 
@@ -89,7 +92,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
           var row: ChartRow | undefined = rowsByKey[key];
           var active = detector?.(row);
 
-          var posx = x(row ? valueColumn.getValue(row) : 0)!;
+          var posx = row ? x(valueColumn.getValue(row))! : 0;
 
           return (
             <g className="hover-group" key={key}>
@@ -108,11 +111,10 @@ export default function renderBars({ data, width, height, parameters, loading, o
               }
               {y.bandwidth() > 15 && (isAll || row != null) &&
                 (isMargin ?
-                <g className="y-label" transform={translate(-labelMargin, y.bandwidth() / 2)}>
+                <g className="y-label" transform={translate(-labelsPadding, y.bandwidth() / 2)}>
                     <TextEllipsis 
                       transform={translate(0, y(keyColumn.getKey(key))!)}
                       maxWidth={xRule.size('labels')}
-                      padding={labelMargin}
                       className="y-label sf-transition"
                       fill={(keyColumn.getColor(key) ?? color(keyColumn.getKey(key)))}
                       dominantBaseline="middle"
@@ -124,13 +126,12 @@ export default function renderBars({ data, width, height, parameters, loading, o
                     </TextEllipsis>)
                   </g> :
                   isInside ?
-                  <g className="y-label" transform={translate(labelMargin, y.bandwidth() / 2)}>
+                  <g className="y-label" transform={translate(labelsPadding, y.bandwidth() / 2)}>
                       <TextEllipsis 
-                        transform={translate(posx >= size / 2 ? 0 : posx, y(keyColumn.getKey(key))!)}
-                        maxWidth={posx >= size / 2 ? posx : size - posx}
-                        padding={labelMargin}
+                        transform={translate(posx, y(keyColumn.getKey(key))!)}
+                        maxWidth={size - posx}
                         className="y-label sf-transition"
-                        fill={posx >= size / 2 ? '#fff' : (keyColumn.getColor(key) ?? color(keyColumn.getKey(key)))}
+                        fill={(keyColumn.getColor(key) ?? color(keyColumn.getKey(key)))}
                         dominantBaseline="middle"
                         fontWeight="bold"
                         onClick={e => onDrillDown({ c0: key }, e)}
@@ -144,7 +145,6 @@ export default function renderBars({ data, width, height, parameters, loading, o
                   <TextIfFits
                     transform={translate(x(valueColumn.getValue(row))! / 2, y(keyColumn.getValueKey(row))! + y.bandwidth() / 2)}
                     maxWidth={x(valueColumn.getValue(row))!}
-                    padding={labelMargin}
                     className="number-label sf-transition"
                     fill={parameters["NumberColor"] ?? "#000"}
                     dominantBaseline="middle"
