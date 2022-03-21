@@ -100,9 +100,9 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
             var key = keyColumn.getKey(r.rowValue);
 
             return (
-              <g className="shadow-group" key={key}>
+              <g className="hover-group" key={key}>
                 <rect
-                  className="shape sf-transition shadow"
+                  className="shape sf-transition hover-target"
                   opacity={active == false ? .5 : undefined}
                   fill={s.color || color(s.key)}
                   transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(

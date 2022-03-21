@@ -120,9 +120,9 @@ export default function renderStackedBars({ data, width, height, parameters, loa
             var active = detector?.(row.rowClick);
 
             return (
-              <g className="shadow-group" key={key}>
-                <rect className="shape sf-transition shadow"
-                  transform={translate(x(r[0])!, y(key)!) + (initialLoad ? scale(0, 1) : scale(1, 1))}
+              <g className="hover-group" key={key}>
+                <rect className="shape sf-transition hover-target"
+                  transform={translate(x(r[0])!, y(key)! + bandMargin) + (initialLoad ? scale(0, 1) : scale(1, 1))}
                   opacity={active == false ? .5 : undefined}
                   fill={colorByKey[s.key] ?? color(s.key)}
                   height={y.bandwidth()}

@@ -169,10 +169,10 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
             var row = rowByKey[key];
             var active = detector?.(row);
             return (
-              <g className="shadow-group" key={key}>
+              <g className="hover-group" key={key}>
                 <circle
                   transform={translate(x(key)!, -y(valueColumn.getValue(r))!)}
-                  className="point sf-transition shadow"
+                  className="point sf-transition hover-target"
                   opacity={active == false ? .5 : undefined}
                   stroke={active == true ? "black" : color}
                   strokeWidth={active == true ? 3 : circleStroke}

@@ -135,8 +135,8 @@ export default function renderStackedLines({ data, width, height, parameters, lo
             var active = detector?.(row.rowClick);
 
             return (
-              <g className="shadow-group" key={dataKey} >
-                <rect className="point sf-transition shadow"
+              <g className="hover-group" key={dataKey} >
+                <rect className="point sf-transition hover-target"
                   transform={translate(x(dataKey)! - rectRadious, -y(v[1])!)}
                   width={2 * rectRadious}
                   fillOpacity={active == true ? undefined : .2}
@@ -156,7 +156,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
                       opacity: active == false ? .5 : parameters["NumberOpacity"],
                       stroke: active == true ? "black" : "none",
                       strokeWidth: active == true ? 2 : undefined,
-                      className: "shadow"
+                      className: "hover-target"
                     }}
                     transform={translate(x(dataKey)!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
                     fill={parameters["NumberColor"]}

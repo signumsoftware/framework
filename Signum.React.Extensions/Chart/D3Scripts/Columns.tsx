@@ -124,8 +124,8 @@ export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, 
           const posy = y(row ? valueColumn.getValue(row) : 0)!;
 
           return (
-            <g className="shadow-group" key={key}>
-              {row && <rect className="shape sf-transition shadow"
+            <g className="hover-group" key={key}>
+              {row && <rect className="shape sf-transition hover-target"
                 opacity={active == false ? .5 : undefined}
                 transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(key)!, -y(valueColumn.getValue(row))!)}
                 height={y(valueColumn.getValue(row))}

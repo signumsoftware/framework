@@ -113,8 +113,8 @@ export default function renderStackedColumns({ data, width, height, parameters, 
           var active = detector?.(row.rowClick);
 
           return (
-            <g className="shadow-group" key={keyColumn.getKey(r.data.rowValue)}>
-              <rect className="shape sf-transition shadow"
+            <g className="hover-group" key={keyColumn.getKey(r.data.rowValue)}>
+              <rect className="shape sf-transition hover-target"
                 transform={translate(x(keyColumn.getKey(r.data.rowValue))!, -y(r[1])!) + (initialLoad ? scale(1, 0) : scale(1, 1))}
                 opacity={active == false ? .5 : undefined}
                 fill={colorByKey[s.key] ?? color(s.key)}

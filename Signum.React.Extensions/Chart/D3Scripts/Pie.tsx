@@ -57,8 +57,8 @@ export default function renderPie({ data, width, height, parameters, loading, on
           var cuadr = Math.floor(12 * m / (2 * Math.PI));
           var active = detector?.(slice.data);
           return (
-            <g key={slice.index} className="slice shadow-group">
-              <path className="shape sf-transition shadow" d={arc(slice)!}
+            <g key={slice.index} className="slice hover-group">
+              <path className="shape sf-transition hover-target" d={arc(slice)!}
                 opacity={active == false ? .5 : undefined}
                 stroke={active == true ? "black" : undefined}
                 strokeWidth={active == true ? 3 : undefined}

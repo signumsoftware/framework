@@ -92,8 +92,8 @@ export default function renderBars({ data, width, height, parameters, loading, o
           var posx = x(row ? valueColumn.getValue(row) : 0)!;
 
           return (
-            <g className="shadow-group" key={key}>
-              {row && <rect className="shape sf-transition shadow"
+            <g className="hover-group" key={key}>
+              {row && <rect className="shape sf-transition hover-target"
                 opacity={active == false ? .5 : undefined}
                 transform={translate(0, y(key)! + bandMargin) + (initialLoad ? scale(0, 1) : scale(1, 1))}
                 width={x(valueColumn.getValue(row))}

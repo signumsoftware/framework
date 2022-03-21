@@ -165,8 +165,8 @@ export default function renderMultiLines({ data, width, height, parameters, load
                 var key = keyColumn.getKey(r.rowValue);
 
                 return (
-                  <g className="shadow-group" key={key}>
-                    <circle className="point sf-transition shadow"
+                  <g className="hover-group" key={key}>
+                    <circle className="point sf-transition hover-target"
                       opacity={active == false ? .5 : undefined}
                       stroke={active == true ? "black" : s.color || color(s.key)}
                       strokeWidth={active == true ? 3 : circleStroke}

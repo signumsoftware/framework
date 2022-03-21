@@ -83,9 +83,9 @@ export default function renderBubblePack({ data, width, height, parameters, load
         nodes.orderByDescending(a => a.r).map(d => {
           const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);
           return (
-            <g key={getNodeKey(d)} className="node sf-transition shadow-group" transform={translate(d.x, d.y) + (initialLoad ? scale(0, 0) : scale(1, 1))} cursor="pointer"
+            <g key={getNodeKey(d)} className="node sf-transition hover-group" transform={translate(d.x, d.y) + (initialLoad ? scale(0, 0) : scale(1, 1))} cursor="pointer"
               onClick={e => isFolder(d.data) ? onDrillDown({ c2: d.data.folder }, e) : onDrillDown(d.data, e)}>
-              <circle className="sf-transition shadow" shapeRendering="initial" r={d.r}
+              <circle className="sf-transition hover-target" shapeRendering="initial" r={d.r}
                 opacity={active == false ? .5 : undefined}
                 fill={isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!}
                 fillOpacity={parameters["FillOpacity"] ?? undefined}
