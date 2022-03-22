@@ -29,7 +29,14 @@ public static class FilePathEmbeddedLogic
                     Transaction.PreRealCommit += data =>
                     {
                         var a = efp; //For debugging
+                        if (task.Status == TaskStatus.WaitingForActivation)
+                        {
+                            Task.Run(() => { });
+                        }
+                        else
                         task.Wait();
+
+                     
                     };
                 }
             };
