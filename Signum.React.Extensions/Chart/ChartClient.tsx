@@ -302,32 +302,30 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
 
   var allChartScriptParameters = chartScript.parameterGroups.flatMap(a => a.parameters);
 
-  if (chart.parameters.map(a => a.element.name!).orderBy(n => n).join(" ") !=
-    allChartScriptParameters.map(a => a.name!).orderBy(n => n).join(" ")) {
 
-    const byName = chart.parameters.map(a => a.element).toObject(a => a.name!);
-    chart.parameters.clear();
+  const byName = chart.parameters.map(a => a.element).toObject(a => a.name!);
+  chart.parameters.clear();
 
-    allChartScriptParameters.forEach(sp => {
-      let cp = byName[sp.name!];
+  allChartScriptParameters.forEach(sp => {
+    let cp = byName[sp.name!];
 
-      if (cp == undefined) {
-        cp = ChartParameterEmbedded.New();
-        cp.name = sp.name;
-        const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
+    if (cp == undefined) {
+      cp = ChartParameterEmbedded.New();
+      cp.name = sp.name;
+      const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
+      cp.value = defaultParameterValue(sp, column?.token && column.token.token);
+    }
+    else {
+      const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
+      if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
         cp.value = defaultParameterValue(sp, column?.token && column.token.token);
       }
-      else {
-        const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
-        if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
-          cp.value = defaultParameterValue(sp, column?.token && column.token.token);
-        }
-        cp.modified = true;
-      }
+      cp.modified = true;
+    }
 
-      chart.parameters!.push({ rowId: null, element: cp });
-    });
-  }
+    chart.parameters!.push({ rowId: null, element: cp });
+  });
+
 }
 
 function isValidParameterValue(value: string | null | undefined, scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
