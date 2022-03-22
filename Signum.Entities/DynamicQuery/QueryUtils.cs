@@ -470,11 +470,11 @@ public static class QueryUtils
 
     internal static Expression UnwrapPrimaryKey(Expression expression, PropertyRoute[] routes)
     {
-        if (expression.Type.UnNullify() == typeof(PrimaryKey))
-        {
-            var unwrappedType = routes.Select(r => PrimaryKey.Type(r.RootType)).Distinct().SingleEx();
+        var pkType = UnwrapPrimaryKey(expression.Type, routes);
 
-            return Expression.Convert(Expression.Field(expression.UnNullify(), "Object"), unwrappedType.Nullify());
+        if (pkType != expression.Type)
+        {
+            return Expression.Convert(Expression.Field(expression.UnNullify(), "Object"), pkType.Nullify());
         }
 
         return expression;
@@ -484,13 +484,11 @@ public static class QueryUtils
     {
         if (type.UnNullify() == typeof(PrimaryKey))
         {
-            return routes.Select(r => PrimaryKey.Type(r.RootType)).Distinct().SingleEx().Nullify();
+            return routes.Select(r => r.Type.IsMList() ? PrimaryKey.MListType(r) : PrimaryKey.Type(r.RootType)).Distinct().SingleEx();
         }
 
         return type;
     }
-
-
 
     internal static Expression BuildLite(this Expression expression)
     {

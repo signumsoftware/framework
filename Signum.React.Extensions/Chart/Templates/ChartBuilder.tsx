@@ -180,7 +180,6 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
   const token = scriptParameter.columnIndex == undefined ? undefined :
     chart.columns[scriptParameter.columnIndex].element.token?.token;
 
-  let resetValue: string | undefined = undefined;
 
   const vl: ValueLineProps = {
     ctx: ctx.subCtx(a => a.value),
@@ -200,10 +199,6 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     if (compatible.length <= 1)
       vl.ctx.styleOptions.readOnly = true;
 
-    if (!compatible.some(c => c.name == ctx.value.value)) {
-      resetValue = compatible.firstOrNull()?.name;
-    }
-
     vl.optionItems = compatible.map(ev => ({
       value: ev.name,
       label: ev.name
@@ -215,17 +210,6 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
 
   if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
     vl.labelHtmlAttributes = { style: { fontWeight: "bold" } };
-
-  React.useEffect(() => {
-    if (resetValue !== undefined) {
-      ctx.value.value = resetValue;
-      forceUpdate();
-      if (onRedraw) {
-        onRedraw();
-      }
-    }
-
-  }, [resetValue])
 
   return <ValueLine {...vl} />;
 }

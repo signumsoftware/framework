@@ -126,33 +126,23 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   }
 
   render() {
-
     var pack = this.state.pack;
 
-    return (
-      <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked} className="sf-popup-control" >
-        <ModalHeaderButtons
-          onClose={this.handleCloseClicked}>
-          {this.renderTitle()}
-        </ModalHeaderButtons>
-        {pack && this.renderBody()}
-      </Modal>
-    );
-  }
-
-  entityComponent?: React.Component<any, any>;
-
-  setComponent(c: React.Component<any, any> | null) {
-    if (c && this.entityComponent != c) {
-      this.entityComponent = c;
-      this.forceUpdate();
+    if(pack == null){
+      return (
+        <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked} className="sf-popup-control" >
+          <ModalHeaderButtons
+            onClose={this.handleCloseClicked} stickyHeader={settings?.stickyHeader}>
+            <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>
+          </ModalHeaderButtons>
+        </Modal>
+      );
     }
-  }
 
-  buttonBar?: ButtonBarHandle | null;
+    var mainEntity = pack.activity.case.mainEntity;
+    var settings = mainEntity && Navigator.getSettings(mainEntity.Type);
 
-  renderBody() {
-    var pack = this.state.pack!;
+    var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
 
     var activityFrame: EntityFrame = {
       tabs: undefined,
@@ -161,8 +151,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       pack: pack && { entity: pack.activity, canExecute: pack.canExecuteActivity },
       onReload: (newPack, reloadComponent, callback) => {
         if (newPack) {
-          pack.activity = newPack.entity as CaseActivityEntity;
-          pack.canExecuteActivity = newPack.canExecute;
+          pack!.activity = newPack.entity as CaseActivityEntity;
+          pack!.canExecuteActivity = newPack.canExecute;
         }
         this.setState({ refreshCount: this.state.refreshCount + 1 }, callback);
       },
@@ -172,7 +162,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.validationErrorsBottom && this.validationErrorsBottom.forceUpdate();
       },
       setError: (modelState, initialPrefix) => {
-        GraphExplorer.setModelState(pack.activity, modelState, initialPrefix || "");
+        GraphExplorer.setModelState(pack!.activity, modelState, initialPrefix || "");
         this.forceUpdate();
       },
       refreshCount: this.state.refreshCount,
@@ -194,45 +184,15 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
 
-    return (
-      <>
-        <div className="case-activity-widgets mt-2 me-2">
-          {!pack.activity.case.isNew && <div className="mx-2"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
-          {!pack.activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) && <CaseFlowButton caseActivity={pack.activity} />}
-        </div>
-        <CaseFromSenderInfo current={pack.activity} />
-        <div className="modal-body">
-          <div className="sf-main-control" data-refresh-count={this.state.refreshCount} data-activity-entity={entityInfo(pack.activity)}>
-            {this.renderMainEntity()}
-          </div>
-          {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
-        </div>
-      </>
-    );
-  }
-
-  validationErrorsTop?: ValidationErrorsHandle | null;
-  validationErrorsBottom?: ValidationErrorsHandle | null;
-
-  getMainTypeInfo(): TypeInfo {
-    return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
-  }
-
-  renderMainEntity() {
-
-    var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
-
-    var pack = this.state.pack!;
-    var mainEntity = pack.activity.case.mainEntity;
-    const mainFrame: EntityFrame = {
+    const mainFrame: EntityFrame | undefined = pack && {
       tabs: undefined,
       frameComponent: this,
       entityComponent: this.entityComponent,
-      pack: pack && { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity, ...extension },
+      pack: { entity: pack.activity.case.mainEntity, canExecute: pack.canExecuteMainEntity, ...extension },
       onReload: (newPack, reloadComponent, callback) => {
         if (newPack) {
-          pack.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
-          pack.canExecuteMainEntity = newPack.canExecute;
+          pack!.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
+          pack!.canExecuteMainEntity = newPack.canExecute;
         }
         this.setState({ refreshCount: this.state.refreshCount + 1 }, callback);
       },
@@ -262,7 +222,9 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       }
     };
 
-    var ti = this.getMainTypeInfo();
+    var mainEntity = pack.activity.case.mainEntity;
+
+    var ti = getTypeInfo(pack.activity.case.mainEntity.Type);
 
     const styleOptions: StyleOptions = {
       readOnly: Navigator.isReadOnly(ti) || Boolean(pack.activity.doneDate),
@@ -271,50 +233,89 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, this.prefix));
 
+    return (
+      <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked} className="sf-popup-control">
+        <ModalHeaderButtons
+          onClose={this.handleCloseClicked} stickyHeader={settings?.stickyHeader}>
+          {this.renderTitle(mainFrame, pack, ctx)}
+        </ModalHeaderButtons>
+
+        <div className="case-activity-widgets mt-2 me-2">
+          {!pack.activity.case.isNew && <div className="mx-2"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
+          {!pack.activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) && <CaseFlowButton caseActivity={pack.activity} />}
+        </div>
+        <CaseFromSenderInfo current={pack.activity} />
+        <div className="modal-body">
+          <div className="sf-main-control" data-refresh-count={this.state.refreshCount} data-activity-entity={entityInfo(pack.activity)}>
+            <div className="sf-main-entity case-main-entity" style={this.state.executing == true ? { opacity: ".7" } : undefined} data-main-entity={entityInfo(mainEntity)}>
+              <div className="sf-button-widget-container">
+                {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = bb} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
+              </div>
+              <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix={this.prefix} />
+              <ErrorBoundary>
+                {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
+              </ErrorBoundary>
+              <br />
+              <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsBottom = ve} prefix={this.prefix} />
+            </div>
+          </div>
+          {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
+        </div>
+
+      </Modal>
+    );
+  }
+
+  entityComponent?: React.Component<any, any>;
+
+  setComponent(c: React.Component<any, any> | null) {
+    if (c && this.entityComponent != c) {
+      this.entityComponent = c;
+      this.forceUpdate();
+    }
+  }
+
+  buttonBar?: ButtonBarHandle | null;
+
+  validationErrorsTop?: ValidationErrorsHandle | null;
+  validationErrorsBottom?: ValidationErrorsHandle | null;
+
+
+  renderTitle(mainFrame: EntityFrame, pack: WorkflowClient.CaseEntityPack, ctx: TypeContext<ICaseMainEntity>) {
+
+    var mainEntity = pack.activity.case.mainEntity;
+
     const wc: WidgetContext<ICaseMainEntity> = {
       ctx: ctx,
       frame: mainFrame,
     };
 
+    const widgets = renderWidgets(wc, settings?.stickyHeader);
+    const subTitle = Navigator.getTypeSubTitle(pack.activity, undefined);
+    var settings = mainEntity && Navigator.getSettings(mainEntity.Type);
+
     return (
-      <div className="sf-main-entity case-main-entity" style={this.state.executing == true ? { opacity: ".7" } : undefined} data-main-entity={entityInfo(mainEntity)}>
-        <div className="sf-button-widget-container">
-          {renderWidgets(wc)}
-          {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar ref={bb => this.buttonBar = bb} frame={mainFrame} pack={mainFrame.pack} /> : <br />}
-        </div>
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsTop = ve} prefix={this.prefix} />
-        <ErrorBoundary>
-          {this.state.getComponent && <AutoFocus>{FunctionalAdapter.withRef(this.state.getComponent(ctx), c => this.setComponent(c))}</AutoFocus>}
-        </ErrorBoundary>
-        <br />
-        <ValidationErrors entity={mainEntity} ref={ve => this.validationErrorsBottom = ve} prefix={this.prefix} />
+      <div>
+        <span className="sf-entity-title">{this.props.title || getToString(pack.activity)}</span>&nbsp;
+        {this.renderExpandLink(pack)}
+        {
+          (subTitle || widgets) &&
+          <div className="sf-entity-sub-title">
+            {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
+            {widgets}
+          </div>
+        }
       </div>
     );
   }
 
-  renderTitle() {
+  renderExpandLink(pack: WorkflowClient.CaseEntityPack) {
+    const activity = pack.activity;
 
-    if (!this.state.pack)
-      return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
-
-    const activity = this.state.pack.activity;
-
-    return (
-      <span>
-        <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;{this.renderExpandLink()}
-        <br />
-        <small className="sf-type-nice-name text-muted"> {Navigator.getTypeSubTitle(activity, undefined)}</small>
-      </span>
-    );
-  }
-
-  renderExpandLink() {
-    const entity = this.state.pack!.activity;
-
-    if (entity == null || entity.isNew)
+    if (activity == null || activity.isNew)
       return null;
 
-    const ti = getTypeInfo(entity.Type);
+    const ti = getTypeInfo(activity.Type);
 
     if (!Navigator.isViewable(ti, { buttons: "close" })) //Embedded
       return null;

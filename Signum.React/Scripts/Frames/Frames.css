@@ -51,13 +51,11 @@
     margin-bottom: 16px;
 }
 
-.modal-body > .sf-button-bar
-{
+.modal-body > .sf-button-bar {
     margin-top: -5px;
 }
 
-.validaton-summary li
-{
+.validaton-summary li {
     list-style: none;
 }
 
@@ -68,13 +66,11 @@
 
 .sf-ok-button,
 .sf-yes-button,
-.sf-no-button
-{
+.sf-no-button {
     min-width: 70px;
 }
 
-.sf-chooser-button
-{
+.sf-chooser-button {
     width: 100%;
     margin-bottom: 6px;
 }
@@ -85,6 +81,7 @@
 
 .modal-title{
     overflow: hidden;
+    width: 100%;
 }
 
 .sf-entity-title {
@@ -96,6 +93,7 @@
 button.dropdown-item:not(:disabled):not(.disabled) {
     cursor: pointer;
 }
+
 .sf-pointer {
     cursor: pointer;
 }
@@ -179,12 +177,19 @@ a.expand-window:hover {
     text-decoration: none;
 }
 
-.sf-guid-id {
+@media (max-width: 768px) {
+    .sf-quicklinks {
+        max-width: 300px;
+        overflow: hidden;
+    }
+}
+
+.sf-hide-id {
     opacity: 0;
     transition: opacity 1s ease;
 }
 
-.sf-guid-id:hover{
+.sf-entity-sub-title:hover .sf-hide-id {
     opacity: 1;
 }
 
@@ -206,4 +211,21 @@ a.expand-window:hover {
 
 .sf-page-container > div{
     flex-grow: 1;
+}
+
+.sf-sticky-header {
+    position: sticky;
+    top: 0px;
+    z-index: 900;
+    background: white;
+}
+
+.sf-entity-sub-title {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.sf-frame-modal .modal-title {
+    margin-right: -25px;
+    overflow: inherit;
 }

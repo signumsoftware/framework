@@ -789,7 +789,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
-    return Promise.all(filters.map(fs => Finder.fetchLitesWithFilters(resFO.queryKey, fs, [], null))).then(fss => fss.flatMap(fs => fs));
+    return Promise.all(filters.map(fs => Finder.fetchLites({ queryName: resFO.queryKey, filterOptions: fs, orderOptions: [], count: null })))
+      .then(fss => fss.flatMap(fs => fs));
   }
 
   // SELECT BUTTON
@@ -1229,7 +1230,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               {this.orderIcon(co)}
               {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
                 <FontAwesomeIcon icon="key" className="me-1"
-                  color={rootKeys.contains(co) ? undefined : "gray"}
+                  color={rootKeys.contains(co) ? "gray" : "lightgray"}
                   title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
               {co.displayName}
             </div>

@@ -19,6 +19,16 @@ export default function WorkflowLaneModelComponent(p : WorkflowLaneModelComponen
     forceUpdate();
   }
 
+  function handleFixBooleans() {
+    if (ctx.value.actorsEval == null)
+      ctx.value.useActorEvalForStart = false;
+
+    if (ctx.value.actorsEval == null || ctx.value.actors.length == 0)
+      ctx.value.combineActorAndActorEvalWhenContinuing = false;
+
+    ctx.value.modified = true;
+  }
+
   function renderActorEval(ectx: TypeContext<WorkflowLaneActorsEval>) {
     var mainEntityName = p.ctx.value.mainEntityType.cleanName;
     return (
@@ -41,11 +51,14 @@ export default function WorkflowLaneModelComponent(p : WorkflowLaneModelComponen
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
-      <EntityStrip ctx={ctx.subCtx(wc => wc.actors)} />
+      <EntityStrip ctx={ctx.subCtx(wc => wc.actors)} onChange={handleFixBooleans}/>
       {ctx.value.mainEntityType ?
-        <EntityDetail ctx={ctx.subCtx(wc => wc.actorsEval)} getComponent={renderActorEval} onCreate={() => Promise.resolve(WorkflowLaneActorsEval.New({ script: "new List<Lite<Entity>>{ e.YourProperty }" }))} />
-        :
+        <EntityDetail ctx={ctx.subCtx(wc => wc.actorsEval)} getComponent={renderActorEval} onCreate={() => Promise.resolve(WorkflowLaneActorsEval.New({ script: "new List<Lite<Entity>>{ e.YourProperty }" }))}
+          onChange={handleFixBooleans}
+        /> :
         <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.actorsEval), ctx.niceName(e => e.mainEntityType))}</div>}
+      {ctx.value.actorsEval && <ValueLine ctx={ctx.subCtx(wc => wc.useActorEvalForStart)} inlineCheckbox />}
+      {ctx.value.actorsEval && ctx.value.actors.length > 0 && < ValueLine ctx={ctx.subCtx(wc => wc.combineActorAndActorEvalWhenContinuing)} inlineCheckbox/>}
     </div>
   );
 }

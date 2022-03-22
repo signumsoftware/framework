@@ -47,11 +47,18 @@ export function matrix(a: number, b: number, c: number, d: number, e: number, f:
 
 export function scaleFor(column: ChartColumn<any>, values: number[], minRange: number, maxRange: number, scaleName: string | null | undefined): d3.ScaleContinuousNumeric<number, number> {
 
-  if (scaleName == "ZeroMax")
+  if (scaleName == "ZeroMax") {
+
+    let max = d3.max(values)!;
+    if (max == 0) // To keep the color or 0 stable
+      max = 1;
+
     return d3.scaleLinear()
-      .domain([0, d3.max(values)!])
+      .domain([0, max])
       .range([minRange, maxRange])
       .nice();
+
+  }
 
   if (scaleName == "MinMax") {
     if (column.type == "DateOnly" || column.type == "DateTime") {
@@ -114,7 +121,6 @@ export function insertPoint(keyColumn: ChartColumn<any>, valueColumn: ChartColum
 
 
 export function completeValues(column: ChartColumn<unknown>, values: unknown[], completeValues: string | null | undefined, filterOptions: FilterOptionParsed[], insertPoint: "Middle" | "Before" | "After"): unknown[] {
-
   if (completeValues == null || completeValues == "No")
     return values;
 
@@ -183,17 +189,17 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 
   const columnNomalized = normalizeToken(column.token!);  
 
-  const machingFilters = column.token && (completeValues == "FromFilters" || completeValues == "Auto") ?
+  const matchingFilters = column.token && (completeValues == "FromFilters" || completeValues == "Auto") ?
     (filterOptions.filter(f => !isFilterGroupOptionParsed(f)) as FilterConditionOptionParsed[])
       .filter(f => f.token && normalizeToken(f.token).normalized.fullKey == columnNomalized.normalized.fullKey) :
     [];
 
-  if (completeValues == "FromFilters" && machingFilters.length == 0)
+  if (completeValues == "FromFilters" && matchingFilters.length == 0)
     return values;
 
   const isAuto = completeValues == "Auto";
 
-  const isInFilter = machingFilters.firstOrNull(a => a.operation == "IsIn");
+  const isInFilter = matchingFilters.firstOrNull(a => a.operation == "IsIn");
 
   if (isInFilter)
     return complete(values, isInFilter.value as unknown[], column, insertPoint);
@@ -209,7 +215,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     if (unit == null)
       return values;
 
-    const min = d3.max(machingFilters.filter(a => a.operation == "GreaterThan" || a.operation == "GreaterThanOrEqual" || a.operation == "EqualTo")
+    const min = d3.max(matchingFilters.filter(a => a.operation == "GreaterThan" || a.operation == "GreaterThanOrEqual" || a.operation == "EqualTo")
       .map(f => {
         const pair = normalizeToken(f.token!);
 
@@ -231,7 +237,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         return floor(newValue, unit).toISO();
       }).notNull()) ?? tryFloor(d3.min(values as string[]), unit);
 
-    const max = d3.min(machingFilters.filter(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual" || a.operation == "EqualTo")
+    const max = d3.min(matchingFilters.filter(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual" || a.operation == "EqualTo")
       .map(f => {
         const pair = normalizeToken(f.token!);
         let value = DateTime.fromISO(f.value);
@@ -267,7 +273,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(column.token!.type.name == "DateOnly" ? date.toISODate() : date.toISO());
+      allValues.push(column.token!.type.name == "DateOnly" ? date.toISODate() : date.toISO(({ suppressMilliseconds: true })));
       date = date.plus({ [unit]: 1 });
     }
 
@@ -301,12 +307,12 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     if (step == null)
       return values;
 
-    const minFilter = machingFilters.firstOrNull(a => a.operation == "GreaterThan" || a.operation == "GreaterThanOrEqual");
+    const minFilter = matchingFilters.firstOrNull(a => a.operation == "GreaterThan" || a.operation == "GreaterThanOrEqual");
     const min = minFilter == null ? d3.min(values as number[]) :
       minFilter.operation == "GreaterThan" ? minFilter.value as number + step :
         minFilter.operation == "GreaterThanOrEqual" ? minFilter.value : undefined;
 
-    const maxFilter = machingFilters.firstOrNull(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual");
+    const maxFilter = matchingFilters.firstOrNull(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual");
     const max = maxFilter == null ? d3.max(values as number[]) :
       maxFilter.operation == "LessThan" ? maxFilter.value as number - step :
         maxFilter.operation == "LessThanOrEqual" ? maxFilter.value : undefined; 

@@ -11,6 +11,7 @@ import { XAxis, YAxis } from './Components/Axis';
 import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import TextIfFits from './Components/TextIfFits';
 
 
 export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
@@ -27,14 +28,18 @@ export default function renderStackedColumns({ data, width, height, parameters, 
   }, width);
   //xRule.debugX(chart)
 
+  var labelsPadding = 5;
+  var labelsMargin = parseInt(parameters["LabelsMargin"]);
+
   var yRule = Rule.create({
     _1: 10,
     legend: 15,
     _2: 5,
+    _labelTopMargin: parameters["Labels"] == "Inside" ? labelsPadding + labelsMargin : 0,
     content: '*',
     ticks: 4,
-    _3: parameters["Labels"] == "Margin" ? 5 : 0,
-    labels: parameters["Labels"] == "Margin" ? parseInt(parameters["LabelsMargin"]) : 0,
+    _3: parameters["Labels"] == "Margin" ? labelsPadding : 0,
+    labels: parameters["Labels"] == "Margin" ? labelsMargin : 0,
     _4: 10,
     title: 15,
     _5: 5,
@@ -75,6 +80,8 @@ export default function renderStackedColumns({ data, width, height, parameters, 
 
   var stackedSeries = stack(pivot.rows);
 
+  var rowsByKey = pivot.rows.toObject(r => keyColumn.getKey(r.rowValue));
+
   var max = d3.max(stackedSeries, s => d3.max(s, vs => vs[1]))!;
   var min = d3.min(stackedSeries, s => d3.min(s, vs => vs[0]))!;
 
@@ -87,13 +94,14 @@ export default function renderStackedColumns({ data, width, height, parameters, 
   var colorByKey = pivot.columns.toObject(a => a.key, a => a.color);
 
   var format = pStack == "expand" ? d3.format(".0%") :
-    pStack == "zero" ? d3.format("") :
-      (n: number) => d3.format("")(n) + "?";
+    pStack == "zero" ? valueColumn0.getNiceName :
+      (n: number) => valueColumn0.getNiceName(n) + "?";
 
-  var labelMargin = 10;
-  var size = yRule.size('content');
+  var size = yRule.size('content') + yRule.size("_labelTopMargin");
 
   var detector = dashboardFilter?.getActiveDetector(chartRequest);
+
+  const bandMargin = x.bandwidth() > 20 ? 2 : x.bandwidth() > 10 ? 1 : 0;
 
   return (
     <svg direction="ltr" width={width} height={height}>
@@ -112,43 +120,41 @@ export default function renderStackedColumns({ data, width, height, parameters, 
           var active = detector?.(row.rowClick);
 
           return (
-            <rect key={keyColumn.getKey(r.data.rowValue)} className="shape sf-transition"
-              transform={translate(x(keyColumn.getKey(r.data.rowValue))!, -y(r[1])!) + (initialLoad ? scale(1, 0) : scale(1, 1))}
-              opacity={active == false ? .5 : undefined}
-              stroke={active == true ? "black" : x.bandwidth() > 4 ? '#fff' : undefined}
-              strokeWidth={active == true ? 3 : undefined}
-              fill={colorByKey[s.key] ?? color(s.key)}
-              width={x.bandwidth()}
-              height={y(r[1])! - y(r[0])!}
-              onClick={e => onDrillDown(row.rowClick, e)}
-              cursor="pointer">
-              <title>
-                {row.valueTitle}
-              </title>
-            </rect>
+            <g className="hover-group" key={keyColumn.getKey(r.data.rowValue)}>
+              <rect className="shape sf-transition hover-target"
+                transform={translate(x(keyColumn.getKey(r.data.rowValue))! + bandMargin, -y(r[1])!) + (initialLoad ? scale(1, 0) : scale(1, 1))}
+                opacity={active == false ? .5 : undefined}
+                fill={colorByKey[s.key] ?? color(s.key)}
+                width={x.bandwidth() - bandMargin * 2}
+                height={y(r[1])! - y(r[0])!}
+                onClick={e => onDrillDown(row.rowClick, e)}
+                cursor="pointer">
+                <title>
+                  {row.valueTitle}
+                </title>
+              </rect>
+              {parseFloat(parameters["NumberOpacity"]) > 0 && x.bandwidth() > 15 &&
+                <TextIfFits className="number-label sf-transition"
+                  maxWidth={y(r[1])! - y(r[0])!}
+                  transform={translate(
+                    x(keyColumn.getKey(r.data.rowValue))! + x.bandwidth() / 2,
+                    -y(r[0])! * 0.5 - y(r[1])! * 0.5
+                  ) + rotate(-90)}
+                  onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
+                  fill={parameters["NumberColor"]}
+                  dominantBaseline="middle"
+                  opacity={parameters["NumberOpacity"]}
+                  textAnchor="middle"
+                  fontWeight="bold">
+                  {r.data.values[s.key].valueNiceName}
+                  <title>
+                    {r.data.values[s.key].valueTitle}
+                  </title>
+                </TextIfFits>}
+            </g>
           );
         }).notNull()}
 
-        {parseFloat(parameters["NumberOpacity"]) > 0 && x.bandwidth() > 15 &&
-          s.orderBy(r => keyColumn.getKey(r.data.rowValue))
-            .filter(r => (y(r[1])! - y(r[0])!) > 10)
-            .map(r => <text key={keyColumn.getKey(r.data.rowValue)} className="number-label sf-transition"
-              transform={translate(
-                x(keyColumn.getKey(r.data.rowValue))! + x.bandwidth() / 2,
-                -y(r[0])! * 0.5 - y(r[1])! * 0.5
-              )}
-              onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
-              fill={parameters["NumberColor"]}
-              dominantBaseline="middle"
-              opacity={parameters["NumberOpacity"]}
-              textAnchor="middle"
-              fontWeight="bold">
-              {r.data.values[s.key].valueNiceName}
-              <title>
-                {r.data.values[s.key].valueTitle}
-              </title>
-            </text>)
-        }
       </g>)}
 
       {x.bandwidth() > 15 && (
@@ -163,7 +169,6 @@ export default function renderStackedColumns({ data, width, height, parameters, 
               return (
                 <TextEllipsis key={key}
                   maxWidth={yRule.size('labels')}
-                  padding={labelMargin}
                   className="x-label sf-transition sf-pointer"
                   onClick={e => onDrillDown({ c0: k }, e)}
                   opacity={active == false ? .5 : undefined}
@@ -181,22 +186,22 @@ export default function renderStackedColumns({ data, width, height, parameters, 
           parameters["Labels"] == "Inside" ?
             <g className="x-label" transform={translate(xRule.start('content'), yRule.end('content'))}>
               {keyValues.map((k, i) => {
-                var maxValue = stackedSeries[stackedSeries.length - 1][i][1];
-                var posy = y(maxValue)!;
+                var dataKey = keyColumn.getKey(k);
+                var row = rowsByKey[dataKey];
+                var posy = row == null ? 0 :  y(stackedSeries[stackedSeries.length - 1][pivot.rows.indexOf(row)][1])!;
 
                 var active = detector?.({ c0: k });
 
                 return (<TextEllipsis key={keyColumn.getKey(k)}
-                  maxWidth={posy >= size / 2 ? posy : size - posy}
-                  padding={labelMargin}
+                  maxWidth={size - posy}
                   onClick={e => onDrillDown({ c0: k }, e)}
                   opacity={active == false ? .5 : undefined}
                   fontWeight={active == true ? "bold" : undefined}
                   className="x-label sf-transition sf-pointer"
-                  transform={translate(x(keyColumn.getKey(k))! + x.bandwidth() / 2, posy >= size / 2 ? 0 : -posy) + rotate(-90)}
+                  transform={translate(x(keyColumn.getKey(k))! + x.bandwidth() / 2,  -posy) + rotate(-90)}
                   dominantBaseline="middle"
-                  fill={posy >= size / 2 ? '#fff' : '#000'}
-                  dx={labelMargin}
+                  fill={'#000'}
+                  dx={labelsPadding}
                   textAnchor="start">
                   {keyColumn.getNiceName(k)}
                 </TextEllipsis>);

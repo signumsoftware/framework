@@ -182,38 +182,14 @@ public static class ProcessLogic
                 }
             }.Register();
 
-            new Execute(ProcessOperation.Plan)
-            {
-                FromStates = { ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended },
-                ToStates = { ProcessState.Planned },
-                Execute = (p, args) =>
-                {
-                    p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
-                    p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
-
-                    p.State = ProcessState.Planned;
-                    p.PlannedDate = args.GetArg<DateTime>();
-                }
-            }.Register();
-
-            new Execute(ProcessOperation.Cancel)
-            {
-                FromStates = { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended, ProcessState.Queued, ProcessState.Executing, ProcessState.Suspending },
-                ToStates = { ProcessState.Canceled },
-                Execute = (p, _) =>
-                {
-                    p.State = ProcessState.Canceled;
-                    p.CancelationDate = Clock.Now;
-                }
-            }.Register();
-
+         
             new Execute(ProcessOperation.Execute)
             {
                 FromStates = { ProcessState.Created, ProcessState.Planned, ProcessState.Canceled, ProcessState.Suspended },
                 ToStates = { ProcessState.Queued },
                 Execute = (p, _) =>
                 {
-                    p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
+                    p.MachineName = JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None;
                     p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
 
                     p.SetAsQueued();
@@ -230,6 +206,31 @@ public static class ProcessLogic
                 {
                     p.State = ProcessState.Suspending;
                     p.SuspendDate = Clock.Now;
+                }
+            }.Register();
+
+            new Execute(ProcessOperation.Cancel)
+            {
+                FromStates = { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended, ProcessState.Queued, ProcessState.Executing, ProcessState.Suspending },
+                ToStates = { ProcessState.Canceled },
+                Execute = (p, _) =>
+                {
+                    p.State = ProcessState.Canceled;
+                    p.CancelationDate = Clock.Now;
+                }
+            }.Register();
+
+            new Execute(ProcessOperation.Plan)
+            {
+                FromStates = { ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended },
+                ToStates = { ProcessState.Planned },
+                Execute = (p, args) =>
+                {
+                    p.MachineName = JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None;
+                    p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
+
+                    p.State = ProcessState.Planned;
+                    p.PlannedDate = args.GetArg<DateTime>();
                 }
             }.Register();
 
@@ -250,7 +251,7 @@ public static class ProcessLogic
             {
                 State = ProcessState.Created,
                 Data = processData,
-                MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None,
+                MachineName = JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None,
                 ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None,
                 User = UserHolder.Current.ToLite(),
             };

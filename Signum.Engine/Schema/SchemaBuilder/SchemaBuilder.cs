@@ -3,6 +3,7 @@ using Signum.Engine.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Maps;
 
@@ -28,6 +29,8 @@ public class SchemaBuilder
                 cleanName => schema.NameToType.TryGetC(cleanName));
 
             FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
+            MListElementPropertyToken.miMListElementsLite = ReflectionTools.GetMethodInfo(() => Database.MListElementsLite<Entity, Entity>(null!, null!)).GetGenericMethodDefinition();
+            MListElementPropertyToken.HasAttribute = (pr, type) => this.Settings.FieldAttributes(pr)?.Any(a => a.GetType() == type) ?? false;
         }
 
         Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
@@ -521,7 +524,7 @@ public class SchemaBuilder
     {
         var attr = GetPrimaryKeyAttribute(table.Type);
 
-        PrimaryKey.PrimaryKeyType.SetDefinition(table.Type, attr.Type);
+        PrimaryKey.PrimaryKeyType.Add(table.Type, attr.Type);
 
         DbTypePair pair = Settings.GetSqlDbType(attr, attr.Type);
 
@@ -717,6 +720,8 @@ public class SchemaBuilder
         var keyAttr = Settings.FieldAttribute<PrimaryKeyAttribute>(route) ?? Settings.DefaultPrimaryKeyAttribute;
         TableMList.PrimaryKeyColumn primaryKey;
         {
+            PrimaryKey.MListPrimaryKeyType.Add(route, keyAttr.Type);
+
             var pair = Settings.GetSqlDbType(keyAttr, keyAttr.Type);
 
             primaryKey = new TableMList.PrimaryKeyColumn(keyAttr.Type, keyAttr.Name)

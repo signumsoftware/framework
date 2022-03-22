@@ -18,15 +18,15 @@ public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
 
     //Azure Portal -> Azure Active Directory -> App Registrations -> + New Registration
 
-    [StringLengthValidator(Max = 100), Description("Azure Application (client) ID")]
-    public string? Azure_ApplicationID { get; set; } 
+    [Description("Azure Application (client) ID")]
+    public Guid? Azure_ApplicationID { get; set; } 
 
-    [StringLengthValidator(Max = 100), Description("Azure Directory (tenant) ID")]
-    public string? Azure_DirectoryID { get; set; }
+    [Description("Azure Directory (tenant) ID")]
+    public Guid? Azure_DirectoryID { get; set; }
 
     //Only for Microsoft Graph / Sending Emails 
     //Your App Registration -> Certificates & secrets -> + New client secret
-    [StringLengthValidator(Max = 100), Description("Azure Client Secret ID")]
+    [StringLengthValidator(Max = 100), Description("Azure Client Secret Value")]
     public string? Azure_ClientSecret { get; set; } 
 
     public bool LoginWithWindowsAuthenticator { get; set; }
@@ -60,10 +60,10 @@ public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
 
         if (LoginWithAzureAD)
         {
-            if (pi.Name == nameof(Azure_ApplicationID) && !Azure_ApplicationID.HasText())
+            if (pi.Name == nameof(Azure_ApplicationID) && Azure_ApplicationID == null)
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
-            if (pi.Name == nameof(Azure_DirectoryID) && !Azure_DirectoryID.HasText())
+            if (pi.Name == nameof(Azure_DirectoryID) && Azure_DirectoryID == null)
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
         }
 

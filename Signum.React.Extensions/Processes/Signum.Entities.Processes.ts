@@ -92,11 +92,11 @@ export module ProcessMessage {
 }
 
 export module ProcessOperation {
-  export const Plan : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Plan");
   export const Save : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Save");
-  export const Cancel : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Cancel");
   export const Execute : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Execute");
   export const Suspend : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Suspend");
+  export const Cancel : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Cancel");
+  export const Plan : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Plan");
   export const Retry : Entities.ConstructSymbol_From<ProcessEntity, ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Retry");
 }
 

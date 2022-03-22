@@ -73,7 +73,7 @@ public class AzureADAuthenticationServer
         OpenIdConnectConfiguration config = configManager.GetConfigurationAsync().Result;
         TokenValidationParameters validationParameters = new TokenValidationParameters
         {
-            ValidAudience = ada.GetConfig().Azure_ApplicationID,
+            ValidAudience = ada.GetConfig().Azure_ApplicationID.ToString(),
             ValidIssuer = "https://login.microsoftonline.com/" + ada.GetConfig().Azure_DirectoryID + "/v2.0",
 
             ValidateAudience = true,

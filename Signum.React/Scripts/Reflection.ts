@@ -314,16 +314,24 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
   }
 
   //simple heuristic
-  var style = f.endsWith("%") ? "percent" : "decimal";
-  var afterDot = (f.tryBefore("%") ?? f).tryAfter(".") ?? "";
+
+  var regex = /(?<plus>\+)?(?<body>[0#,.]+)(?<suffix>[%MKB])?/
+
+  const match = regex.exec(f);
+
+  var body = match?.groups?.body ?? f;
+  const suffix = match?.groups?.suffix;
+
+  var afterDot = body.tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
-    style: style,
+    style: suffix == "%" ? "percent" : "decimal",
+    notation: suffix == "K" || suffix == "M" || suffix == "B" ? "compact": undefined,
     minimumFractionDigits: afterDot.replaceAll("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
   };
 
-  if (f.startsWith("+"))
+  if (match?.groups?.plus)
     (result as any).signDisplay = "always";
 
   return result;
@@ -659,7 +667,7 @@ export function setTypes(types: TypeInfoDictionary) {
 
   _queryNames = Dic.getValues(types).filter(t => t.kind == "Query")
     .flatMap(a => Dic.getValues(a.members))
-    .toObject(m => m.name.toLocaleLowerCase(), m => m);
+    .toObject(m => m.name.toLowerCase(), m => m);
 
   Object.freeze(_queryNames);
 

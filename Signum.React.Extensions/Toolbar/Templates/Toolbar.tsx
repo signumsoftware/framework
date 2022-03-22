@@ -18,6 +18,7 @@ export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
         </div>
 
         <div className="col-sm-5">
+          <ValueLine ctx={ctx3.subCtx(f => f.location)} />
           <ValueLine ctx={ctx3.subCtx(e => e.priority)} />
         </div>
       </div>

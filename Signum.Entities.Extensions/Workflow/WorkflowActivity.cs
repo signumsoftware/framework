@@ -204,6 +204,15 @@ public class ButtonOptionEmbedded : EmbeddedEntity
                 new XAttribute("Style", Style.ToString())
             );
     }
+
+    public ButtonOptionEmbedded Clone()
+    {
+        return new ButtonOptionEmbedded()
+        {
+            Name = this.Name,
+            Style = this.Style,
+        };
+    }
 }
 
 public class WorkflowActivityInfo

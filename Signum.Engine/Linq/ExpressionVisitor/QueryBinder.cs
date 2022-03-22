@@ -1943,7 +1943,7 @@ internal class QueryBinder : ExpressionVisitor
                                     {
                                         "RowId" => mle.RowId.UnNullify(),
                                         "Parent" => mle.Parent,
-                                        "Order" => mle.Order.ThrowIfNull(() => "{0} has no {1}".FormatWith(mle.Table.Name, m.Member.Name)),
+                                        "RowOrder" => mle.Order.ThrowIfNull(() => "{0} has no {1}".FormatWith(mle.Table.Name, m.Member.Name)),
                                         "Element" => mle.Element,
                                         _ => throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member)),
                                     };

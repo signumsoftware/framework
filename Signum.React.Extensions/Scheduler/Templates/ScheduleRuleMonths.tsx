@@ -18,7 +18,7 @@ export default function ScheduleRuleMonths(p : { ctx: TypeContext<ScheduleRuleMo
         </div>
         <div className="col-sm-3">
           <ValueLine ctx={ctx4.subCtx(f => f.april)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.march)} />
+          <ValueLine ctx={ctx4.subCtx(f => f.may)} />
           <ValueLine ctx={ctx4.subCtx(f => f.june)} />
         </div>
         <div className="col-sm-3">

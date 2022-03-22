@@ -492,7 +492,7 @@ internal static class TranslatorBuilder
             };
 
             if (mle.Order != null)
-                bindings.Add(Expression.Bind(type.GetProperty("Order")!, Visit(mle.Order)));
+                bindings.Add(Expression.Bind(type.GetProperty("RowOrder")!, Visit(mle.Order)));
 
             bindings.Add(Expression.Bind(type.GetProperty("Element")!, Visit(mle.Element)));
 

@@ -225,21 +225,21 @@ public static class ToolbarLogic
         TranslatedInstanceLogic.AddRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
     }
 
-    public static ToolbarEntity? GetCurrent()
+    public static ToolbarEntity? GetCurrent(ToolbarLocation location)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<ToolbarEntity>(userInterface: false);
 
         var result = Toolbars.Value.Values
-            .Where(t => isAllowed(t))
+            .Where(t => isAllowed(t) && t.Location == location)
             .OrderByDescending(a => a.Priority)
             .FirstOrDefault();
 
         return result;
     }
 
-    public static ToolbarResponse? GetCurrentToolbarResponse()
+    public static ToolbarResponse? GetCurrentToolbarResponse(ToolbarLocation location)
     {
-        var curr = GetCurrent();
+        var curr = GetCurrent(location);
 
         if (curr == null)
             return null;

@@ -415,7 +415,7 @@ public partial class WorkflowBuilder
                     Xml = a.Xml,
                     Type = a.Type,
                     ViewName = a.ViewName,
-                    ViewNameProps = a.ViewNameProps.Select(p=> new ViewNamePropEmbedded
+                    ViewNameProps = a.ViewNameProps.Select(p => new ViewNamePropEmbedded
                     {
                         Name = p.Name,
                         Expression = p.Expression
@@ -426,6 +426,12 @@ public partial class WorkflowBuilder
                     SubWorkflow = a.SubWorkflow?.Clone(),
                     UserHelp = a.UserHelp,
                     Comments = a.Comments,
+                    DecisionOptions = a.DecisionOptions.Select(p => new ButtonOptionEmbedded
+                    {
+                        Name = p.Name,
+                        Style = p.Style,
+                    }).ToMList(),
+                    CustomNextButton = a.CustomNextButton?.Clone(), 
                 };
                 na.BoundaryTimers  = a.BoundaryTimers.Select(t => newEvents.GetOrThrow(t)).ToMList();
                 return na;

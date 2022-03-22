@@ -18,6 +18,7 @@ import { toFilterRequests } from '@framework/Finder';
 import { PseudoType, getTypeName, getTypeInfo, tryGetTypeInfo } from '@framework/Reflection';
 import { asFieldFunction } from '../../Dynamic/View/NodeUtils';
 import MessageModal from '@framework/Modals/MessageModal';
+import { notifySuccess } from '../../../Signum.React/Scripts/Operations';
 
 export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(ChartPaletteModel, e => import('./ChartPaletteControl')));
@@ -29,7 +30,12 @@ export function navigatePalette(type: PseudoType): Promise<void> {
       if (cp == null)
         return MessageModal.showError(ChartMessage.Type0NotFoundInTheDatabase.niceToString(getTypeName(type)), ChartMessage.TypeNotFound.niceToString());
 
-      return Navigator.view(cp).then(() => undefined);
+      return Navigator.view(cp,).then(pal => {
+        if (pal) {
+          API.saveColorPalette(pal);
+          notifySuccess();
+        }
+      });
     });
 }
 
