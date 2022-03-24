@@ -189,7 +189,7 @@ public static class ProcessLogic
                 ToStates = { ProcessState.Queued },
                 Execute = (p, _) =>
                 {
-                    p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
+                    p.MachineName = JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None;
                     p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
 
                     p.SetAsQueued();
@@ -226,7 +226,7 @@ public static class ProcessLogic
                 ToStates = { ProcessState.Planned },
                 Execute = (p, args) =>
                 {
-                    p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
+                    p.MachineName = JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None;
                     p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
 
                     p.State = ProcessState.Planned;
@@ -251,7 +251,7 @@ public static class ProcessLogic
             {
                 State = ProcessState.Created,
                 Data = processData,
-                MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None,
+                MachineName = JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None,
                 ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None,
                 User = UserHolder.Current.ToLite(),
             };

@@ -166,5 +166,7 @@ public enum AuthAdminMessage
     [Description(@"{0} cycles have been found in the graph of Roles due to the relationships:")]
     _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships,
 
+    ConflictMergingTypeConditions,
+
     Save,
 }

@@ -120,6 +120,9 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
 
         if ("conditions".startsWith(pair.token.after("!")) && rule.availableConditions.length)
           return pair.isPositive;
+
+        if ("error".startsWith(pair.token.after("!")) && rule.allowed.fallback == null)
+          return pair.isPositive;
       }
 
       if (str.toLowerCase().contains(pair.token.toLowerCase()))
@@ -142,7 +145,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
           <tr>
             <th>
               <div style={{ marginBottom: "-2px" }}>
-                <input type="text" className="form-control form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions" value={filter} onChange={handleSetFilter} />
+                <input type="text" className="form-control form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions+!error" value={filter} onChange={handleSetFilter} />
               </div>
             </th>
 
@@ -221,14 +224,15 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     let fallback = Binding.create(tctx.value.allowed, a => a.fallback);
     return [
       <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions")}>
-        <td>
+        <td className={tctx.value.allowed.fallback == null ? "text-danger fw-bold" : undefined} title={AuthAdminMessage.ConflictMergingTypeConditions.niceToString()}>
           {remaining.length > 0 ?
             <span className="sf-condition-icon" onClick={() => handleAddConditionClick(remaining, tctx.value.allowed)}>
               <FontAwesomeIcon icon="plus-circle" />
             </span> :
             <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>}
           &nbsp;
-                    {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
+          {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
+          {tctx.value.allowed.fallback == null && <FontAwesomeIcon icon="exclamation-triangle" className="ms-2 text-warning" />}
         </td>
         <td style={{ textAlign: "center" }} className={masterClass}>
           {colorRadio(fallback, "Write", "green")}

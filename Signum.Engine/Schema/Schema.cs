@@ -42,6 +42,13 @@ public class Schema : IImplementationsFinder
         set { applicationName = value; }
     }
 
+    string? machineName;
+    public string MachineName
+    {
+        get { return machineName ??= Environment.MachineName; }
+        set { machineName = value; }
+    }
+
     public SchemaSettings Settings { get; private set; }
 
     public SchemaAssets Assets { get; private set; }
