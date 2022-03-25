@@ -140,7 +140,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
           </Popover.Body>
         </Popover>
       }>
-      <div className={(otherUsers.some(u => u.isModified) || ticks !== p.entity.ticks) && isModified.current ? "blinking" : undefined}>
+      <div className={classes("sf-pointer", (otherUsers.some(u => u.isModified) || ticks !== p.entity.ticks) && isModified.current ? "blinking" : undefined)}>
         <FontAwesomeIcon icon={otherUsers.length == 1 ? "user" : otherUsers.length == 2 ? "user-friends" : "users"}
           color={ticks !== p.entity.ticks ? "#E4032E" : otherUsers.some(u => u.isModified) ? "#FFAA44" : "#6BB700"} />
         <strong className="ms-1 me-3" style={{ userSelect: "none" }}>{UserEntity.niceCount(otherUsers.length)}</strong>

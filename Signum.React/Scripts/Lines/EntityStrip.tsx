@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { classes } from '../Globals'
+import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
@@ -9,8 +9,10 @@ import { EntityListBaseController, EntityListBaseProps, DragConfig } from './Ent
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
-import { useController } from './LineBase'
-import { getTypeInfo, getTypeName } from '../Reflection'
+import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
+import { getTypeInfo, getTypeInfos, getTypeName, tryGetTypeInfos } from '../Reflection'
+import { FilterOperation } from '../Signum.Entities.DynamicQuery'
+import { FindOptions } from '../Search'
 
 
 export interface EntityStripProps extends EntityListBaseProps {
@@ -21,6 +23,7 @@ export interface EntityStripProps extends EntityListBaseProps {
   showType?: boolean;
   onItemHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  avoidDuplicates?: boolean;
 }
 
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
@@ -31,12 +34,32 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
       if (p.showType == undefined)
         p.showType = p.type.name.contains(",");
 
+
       if (p.autocomplete === undefined) {
+
+        var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
+        if (avoidDuplicates) {
+          var types = getTypeInfos(p.type);
+          if (types.length == 1)
+            p.findOptions = withAvoidDuplicates(p.findOptions ?? { queryName: types.single().name }, types.single().name);
+          else {
+            p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? { queryName: a.name }, a.name));
+          }
+        }
+
         p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create!, p.showType);
       }
       if (p.iconStart == undefined && p.vertical)
         p.iconStart = true;
+
     }
+
+    function withAvoidDuplicates(fo: FindOptions,  typeName: string): FindOptions {
+
+      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
+
+      return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible }] };
+      }
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
@@ -303,3 +326,13 @@ export function EntityStripElement(p: EntityStripElementProps) {
   }
 }
 
+//tasks.push(taskSetAvoidDuplicates);
+//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps) {
+//  if (lineBase instanceof EntityStripController &&
+//    (state as EntityStripProps).avoidDuplicates == undefined &&
+//    state.ctx.propertyRoute &&
+//    state.ctx.propertyRoute.propertyRouteType == "Field" &&
+//    state.ctx.propertyRoute.member!.avoidDuplicates) {
+//    (state as EntityStripProps).avoidDuplicates = true;
+//  }
+//}

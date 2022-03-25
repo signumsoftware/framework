@@ -11,16 +11,20 @@ import { XAxis, YAxis } from './Components/Axis';
 import TextEllipsis from './Components/TextEllipsis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import TextIfFits from './Components/TextIfFits';
 
 
 export default function renderStackedBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+
+  var labelsMargin = parseInt(parameters["LabelsMargin"]);
+  var labelsPadding = 5;
 
   var xRule = Rule.create({
     _1: 5,
     title: 15,
     _2: 10,
-    labels: parameters["Labels"] == "Margin" ? parseInt(parameters["LabelsMargin"]) : 0,
-    _3: parameters["Labels"] == "Margin" ? 5 : 0,
+    labels: parameters["Labels"] == "Margin" ? labelsMargin: 0,
+    _3: parameters["Labels"] == "Margin" ? labelsPadding : 0,
     ticks: 4,
     content: '*',
     _4: 5,
@@ -76,26 +80,30 @@ export default function renderStackedBars({ data, width, height, parameters, loa
 
   var stackedSeries = stack(pivot.rows);
 
+  var rowsByKey = pivot.rows.toObject(r => keyColumn.getKey(r.rowValue));
+
   var max = d3.max(stackedSeries, s => d3.max(s, v => v[1]))!;
   var min = d3.min(stackedSeries, s => d3.min(s, v => v[0]))!;
 
+
   var x = d3.scaleLinear()
     .domain([min, max])
-    .range([0, xRule.size('content')]);
+    .range([0, xRule.size('content') - (parameters["Labels"] == "Inside" ? (labelsMargin + labelsPadding) : 0)]);
 
-  var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
   var color = ChartUtils.colorCategory(parameters, pivot.columns.map(s => s.key), memo);
   var colorByKey = pivot.columns.toObject(a => a.key, a => a.color);
 
   var format = pStack == "expand" ? d3.format(".0%") :
-    pStack == "zero" ? d3.format("") :
-      (n: number) => d3.format("")(n) + "?";
+    pStack == "zero" ? valueColumn0.getNiceName :
+      (n: number) => valueColumn0.getNiceName(n) + "?";
 
-  var labelMargin = 5;
+  var labelPadding = 5;
 
   var size = xRule.size('content');
 
   var detector = dashboardFilter?.getActiveDetector(chartRequest);
+
+  const bandMargin = y.bandwidth() > 20 ? 2 : y.bandwidth() > 10 ? 1 : 0;
 
   return (
     <svg direction="ltr" width={width} height={height}>
@@ -119,47 +127,43 @@ export default function renderStackedBars({ data, width, height, parameters, loa
             var active = detector?.(row.rowClick);
 
             return (
-              <rect key={key} className="shape sf-transition"
-                transform={translate(x(r[0])!, y(key)!) + (initialLoad ? scale(0, 1) : scale(1, 1))}
-                opacity={active == false ? .5 : undefined}
-                stroke={active == true ? "black" : y.bandwidth() > 4 ? '#fff' : undefined}
-                strokeWidth={active == true ? 3 : undefined}
-                fill={colorByKey[s.key] ?? color(s.key)}
-                height={y.bandwidth()}
-                width={x(r[1])! - x(r[0])!}
-                onClick={e => onDrillDown(row.rowClick, e)}
-                cursor="pointer">
-                <title>
-                  {row.valueTitle}
-                </title>
-              </rect>
+              <g className="hover-group" key={key}>
+                <rect className="shape sf-transition hover-target"
+                  transform={translate(x(r[0])!, y(key)! + bandMargin) + (initialLoad ? scale(0, 1) : scale(1, 1))}
+                  opacity={active == false ? .5 : undefined}
+                  fill={colorByKey[s.key] ?? color(s.key)}
+                  height={y.bandwidth() - bandMargin * 2}
+                  width={x(r[1])! - x(r[0])!}
+                  onClick={e => onDrillDown(row.rowClick, e)}
+                  cursor="pointer">
+                  <title>
+                    {row.valueTitle}
+                  </title>
+                </rect>
+                {y.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
+                  <TextIfFits className="number-label sf-transition"
+                    transform={translate(
+                      x(r[0])! * 0.5 + x(r[1])! * 0.5,
+                      y(keyColumn.getKey(r.data.rowValue))! + y.bandwidth() / 2
+                    )}
+                    maxWidth={x(r[1])! - x(r[0])!}
+                    onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
+                    fill={parameters["NumberColor"]}
+                    dominantBaseline="middle"
+                    opacity={parameters["NumberOpacity"]}
+                    textAnchor="middle"
+                    fontWeight="bold">
+                    {r.data.values[s.key].valueNiceName}
+                    <title>
+                      {r.data.values[s.key].valueTitle}
+                    </title>
+                  </TextIfFits>
+                }
+
+              </g>
             );
           }).notNull()}
 
-        {y.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
-          s.orderBy(r => keyColumn.getKey(r.data.rowValue))
-            .filter(r => (x(r[1])! - x(r[0])!) > 20)
-            .map(r => {
-              return (
-                <text key={keyColumn.getKey(r.data.rowValue)} className="number-label sf-transition"
-                transform={translate(
-                  x(r[0])! * 0.5 + x(r[1])! * 0.5,
-                  y(keyColumn.getKey(r.data.rowValue))! + y.bandwidth() / 2
-                )}
-                onClick={e => onDrillDown(r.data.values[s.key].rowClick, e)}
-                fill={parameters["NumberColor"]}
-                dominantBaseline="middle"
-                opacity={parameters["NumberOpacity"]}
-                textAnchor="middle"
-                fontWeight="bold">
-                {r.data.values[s.key].valueNiceName}
-                <title>
-                  {r.data.values[s.key].valueTitle}
-                </title>
-                </text>
-              );
-            })
-        }
       </g>)}
 
       {y.bandwidth() > 15 && pivot.columns.length > 0 && (
@@ -171,7 +175,6 @@ export default function renderStackedBars({ data, width, height, parameters, loa
               return (
                 <TextEllipsis key={key}
                   maxWidth={xRule.size('labels')}
-                  padding={labelMargin}
                   className="y-label sf-transition sf-pointer"
                   onClick={e => onDrillDown({ c0: k }, e)}
                   opacity={active == false ? .5 : undefined}
@@ -188,20 +191,20 @@ export default function renderStackedBars({ data, width, height, parameters, loa
             <g className="y-axis-tick-label" transform={translate(xRule.start('content'), yRule.start('content') + y.bandwidth() / 2)}>
               {keyValues.map((k, i) => {
                 var key = keyColumn.getKey(k);
+                var row = rowsByKey[key];
+                var posx = row == null ? 0 : x(stackedSeries[stackedSeries.length - 1][pivot.rows.indexOf(row)][1])!;
+
                 var active = detector?.({ c0: k });
-                var maxValue = stackedSeries[stackedSeries.length - 1][i][1];
-                var posx = x(maxValue)!;
                 return (<TextEllipsis key={key}
-                  transform={translate(posx >= size / 2 ? 0 : posx, y(key)!)}
-                  maxWidth={posx >= size / 2 ? posx : size - posx}
+                  transform={translate(posx, y(key)!)}
+                  maxWidth={size - posx}
                   onClick={e => onDrillDown({ c0: k }, e)}
                   opacity={active == false ? .5 : undefined}
                   fontWeight={active == true ? "bold" : undefined}
-                  padding={labelMargin}
                   className="y-axis-tick-label sf-chart-strong sf-transition sf-pointer"
-                  dx={labelMargin}
+                  dx={labelsPadding}
                   textAnchor="start"
-                  fill={posx >= size / 2 ? '#fff' : '#000'}
+                  fill={'#000'}
                   dominantBaseline="middle">
                   {keyColumn.getNiceName(k)}
                 </TextEllipsis>);

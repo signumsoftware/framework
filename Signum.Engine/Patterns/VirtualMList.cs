@@ -82,8 +82,14 @@ public static class VirtualMList
 
         var mListPropertRoute = PropertyRoute.Construct(mListField);
         var backReferenceRoute = PropertyRoute.Construct(backReference, avoidLastCasting: true);
-        if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
-            throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
+
+        if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null ||
+            mListPropertRoute.PropertyInfo!.GetCustomAttribute<QueryablePropertyAttribute>() == null)
+            throw new InvalidOperationException($"The property {mListPropertRoute} should have the attributes [Ignore, QueryableProperty] to be used as VirtualMList");
+
+        var nn = Validator.TryGetPropertyValidator(backReferenceRoute)?.Validators.OfType<NotNullValidatorAttribute>().SingleOrDefaultEx();
+        if (nn == null || nn.Disabled == false)
+            throw new InvalidOperationException($"The property {backReferenceRoute} should have an [NotNullValidator(Disabled = true)] to be used as back reference or a VirtualMList");
 
         RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
 

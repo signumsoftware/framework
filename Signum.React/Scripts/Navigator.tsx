@@ -21,6 +21,7 @@ import { clearCustomConstructors } from "./Constructor";
 import { toAbsoluteUrl, currentUser } from "./AppContext";
 import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
 import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessageDefault, RenderMessageDefault } from "./Modals/ErrorModal";
+import CopyLiteButton from "./Components/CopyLiteButton";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || currentUser.toStr == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -84,7 +85,17 @@ export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | un
   }
 }
 
-let renderId = (entity: Entity): React.ReactChild => <span className={classes(getTypeInfo(entity.Type).members["Id"].type!.name == "Guid" ? "sf-guid-id" : "")}>{entity.id}</span>;
+let renderId = (entity: Entity): React.ReactChild => {
+  const guid = getTypeInfo(entity.Type).members["Id"].type!.name == "Guid";
+  return (
+    <>
+      <span className={guid ? "sf-hide-id" : ""}>
+        {entity.id}
+      </span>
+      <CopyLiteButton className={"sf-hide-id"} entity={entity} />
+    </>
+  );
+}
 
 export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactChild) {
   renderId = newFunction;

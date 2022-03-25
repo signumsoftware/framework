@@ -10,6 +10,7 @@ import { XScaleTicks, YKeyTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
+import TextIfFits from './Components/TextIfFits';
 
 
 export default function renderMultiBars({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
@@ -102,48 +103,48 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
 
 
               return (
-                <rect key={key} className="shape sf-transition"
-                  opacity={active == false ? .5 : undefined}
-                  stroke={active == true ? "black" : ySubscale.bandwidth() > 4 ? '#fff' : undefined}
-                  strokeWidth={active == true ? 3 : undefined}
-                  fill={s.color || color(s.key)}
-                  transform={translate(0, -y(key)! - ySubscale(s.key)! - ySubscale.bandwidth()) + (initialLoad ? scale(0, 1) : scale(1, 1))}
-                  height={ySubscale.bandwidth()}
-                  width={x(row.value)}
-                  onClick={e => onDrillDown(row.rowClick, e)}
-                  cursor="pointer">
-                  <title>
-                    {row.valueTitle}
-                  </title>
-                </rect>
+                <g className="hover-group" key={key}>
+                  <rect className="shape sf-transition hover-target"
+                    opacity={active == false ? .5 : undefined}
+                    fill={s.color || color(s.key)}
+                    transform={translate(0, -y(key)! - ySubscale(s.key)! - ySubscale.bandwidth()) + (initialLoad ? scale(0, 1) : scale(1, 1))}
+                    height={ySubscale.bandwidth()}
+                    width={x(row.value)}
+                    onClick={e => onDrillDown(row.rowClick, e)}
+                    cursor="pointer">
+                    <title>
+                      {row.valueTitle}
+                    </title>
+                  </rect>
+                  {
+                    ySubscale.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
+                    <TextIfFits className="number-label sf-transition"
+                      maxWidth={x(r.values[s.key]?.value)}
+                      transform={translate(
+                        x(r.values[s.key]?.value)! / 2,
+                        -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth() / 2
+                      )}
+                      onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
+                      opacity={parameters["NumberOpacity"]}
+                      fill={parameters["NumberColor"]}
+                      dominantBaseline="middle"
+                      textAnchor="middle"
+                      fontWeight="bold">
+                      {r.values[s.key].valueNiceName}
+                      <title>
+                        {r.values[s.key].valueTitle}
+                      </title>
+                    </TextIfFits>
+                  }
+
+                </g>
               )
             })
         }
 
-        {
-          ySubscale.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
-          rowsInOrder
-            .filter(r => r.values[s.key] != undefined && x(r.values[s.key] && r.values[s.key].value)! > 16)
-            .map(r => <text key={keyColumn.getKey(r.rowValue)} className="number-label sf-transition"
-              transform={translate(
-                x(r.values[s.key]?.value)! / 2,
-                -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth() / 2
-              )}
-              onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
-              opacity={parameters["NumberOpacity"]}
-              fill={parameters["NumberColor"]}
-              dominantBaseline="middle"
-              textAnchor="middle"
-              fontWeight="bold">
-              {r.values[s.key].valueNiceName}
-              <title>
-                {r.values[s.key].valueTitle}
-              </title>
-            </text>)
-        }
       </g>)}
 
-      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} isActive={c.c1 && detector && (row => detector!({ c1: row.value }))} onDrillDown={c.c1 && ((s, e) => onDrillDown({ c1: s.value }, e))}/>
+      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} isActive={c.c1 && detector && (row => detector!({ c1: row.value }))} onDrillDown={c.c1 && ((s, e) => onDrillDown({ c1: s.value }, e))} />
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
       <g opacity={dashboardFilter ? .5 : undefined}>

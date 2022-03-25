@@ -1230,7 +1230,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               {this.orderIcon(co)}
               {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
                 <FontAwesomeIcon icon="key" className="me-1"
-                  color={rootKeys.contains(co) ? undefined : "gray"}
+                  color={rootKeys.contains(co) ? "gray" : "lightgray"}
                   title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
               {co.displayName}
             </div>

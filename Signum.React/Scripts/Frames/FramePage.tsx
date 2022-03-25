@@ -302,19 +302,19 @@ export default function FramePage(p: FramePageProps) {
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 
     return (
-      <div className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")} >
-      {title && <>
-        <span className="sf-entity-title">{title}</span>&nbsp;
-      </>
-      }
-      {(subTitle || widgets) &&
-        <div className="sf-entity-sub-title">
-          {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
+      <h4 className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")} >
+        {title && <>
+          <span className="sf-entity-title">{title}</span>&nbsp;
+        </>
+        }
+        {(subTitle || widgets) &&
+          <div className="sf-entity-sub-title mt-2">
+            {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
             {widgets}
-            <br/>
-        </div>
-      }
-    </div>
+            <br />
+          </div>
+        }
+      </h4>
     );
   }
 }

@@ -30,6 +30,13 @@ public class QueryRequest : BaseQueryRequest
 
     public SystemTime? SystemTime { get; set; }
 
+    public bool MultiplicationsInSubQueries()
+    {
+        return GroupResults == false && Pagination is Pagination.All &&
+            Orders.Select(a => a.Token).Concat(Columns.Select(a => a.Token)).Any(a => a.HasElement()) &&
+            !Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token).Any(t => t.HasElement());
+    }
+
     public List<CollectionElementToken> Multiplications()
     {
         HashSet<QueryToken> allTokens = new HashSet<QueryToken>(this.AllTokens());
