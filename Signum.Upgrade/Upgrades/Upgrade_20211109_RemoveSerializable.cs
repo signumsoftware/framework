@@ -12,11 +12,5 @@ class Upgrade_20211109_RemoveSerializable : CodeUpgradeBase
             file.Replace(new Regex(@"\[\s*Serializable\s*\]\s*"), "");
             file.Replace(new Regex(@"Serializable\s*,\s*"), "");
         });
-        uctx.ForeachCodeFile(@"*.cs", @"C:\SignumProjects\SalesPersonPortal\Mars\Mars.Entities", file =>
-        {
-            file.RemoveAllLines(a => a.Trim() == "[Serializable]");
-            file.Replace(new Regex(@"\[\s*Serializable\s*\]\s*"), "");
-            file.Replace(new Regex(@"Serializable\s*,\s*"), "");
-        });
     }
 }
