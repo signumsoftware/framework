@@ -10,5 +10,9 @@ class Upgrade_20211111_ReplaceDefaultExecute : CodeUpgradeBase
         {
             file.Replace("eoc.defaultClick(", "/*TODO: fix*/ eoc.defaultClick(");
         });
+        uctx.ForeachCodeFile($@"*.tsx", @"C:\SignumProjects\SalesPersonPortal\Mars\Mars.React", file =>
+        {
+            file.Replace("eoc.defaultClick(", "/*TODO: fix*/ eoc.defaultClick(");
+        });
     }
 }
