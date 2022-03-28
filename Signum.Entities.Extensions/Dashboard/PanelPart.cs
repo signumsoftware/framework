@@ -464,6 +464,8 @@ namespace Signum.Entities.Dashboard
         [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(Max = int.MaxValue)]
         public string Link { get; set; }
 
+        public bool OpensInNewTab { get; set; }
+
         public LinkElementEmbedded Clone()
         {
             return new LinkElementEmbedded

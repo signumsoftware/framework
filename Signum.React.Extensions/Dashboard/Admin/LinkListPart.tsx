@@ -14,7 +14,9 @@ export default function ValueSearchControlPart(p : { ctx: TypeContext<LinkListPa
           <div>
             <ValueLine ctx={tc.subCtx(cuq => cuq.label)} />
             &nbsp;
-              <ValueLine ctx={tc.subCtx(cuq => cuq.link)} />
+            <ValueLine ctx={tc.subCtx(cuq => cuq.link)} />
+            &nbsp;
+            <ValueLine ctx={tc.subCtx(cuq => cuq.opensInNewTab)} />
           </div>
         );
       }} />
