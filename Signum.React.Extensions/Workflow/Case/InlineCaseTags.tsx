@@ -14,6 +14,7 @@ export interface InlineCaseTagsProps {
   case: Lite<CaseEntity>;
   defaultTags?: CaseTagTypeEntity[];
   avoidHideIcon?: boolean;
+  wrap?: boolean;
 }
 
 export default function InlineCaseTags(p: InlineCaseTagsProps) {
@@ -54,7 +55,7 @@ export default function InlineCaseTags(p: InlineCaseTagsProps) {
   }
 
   return (
-    <a href="#" onClick={handleTagsClick} className={classes("case-icon", tags.length == 0 && !p.avoidHideIcon && "case-icon-ghost")}>
+    <a href="#" onClick={handleTagsClick} className={classes("case-icon", tags.length == 0 && !p.avoidHideIcon && "case-icon-ghost")} style={{ flexWrap: p.wrap ? "wrap" : undefined }}>
       {
         tags.length == 0 ? <FontAwesomeIcon icon={"tags"} /> :
           tags.map((t, i) => <Tag key={i} tag={t} />)

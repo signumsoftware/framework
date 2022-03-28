@@ -25,7 +25,7 @@ export const ButtonBar = React.forwardRef(function ButtonBar(p: ButtonBarProps, 
 
   var shortcuts = buttons.filter(a => a!.shortcut != null).map(a => a!.shortcut!);
 
-  function handleKeyDown(e: KeyboardEvent) {
+    function handleKeyDown(e: KeyboardEvent) {
     var s = shortcuts;
     if (s != null) {
       for (var i = 0; i < s.length; i++) {

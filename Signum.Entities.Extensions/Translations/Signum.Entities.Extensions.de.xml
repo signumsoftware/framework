@@ -8,7 +8,7 @@
     <Member Name="AutoCreateUsers" Description="Benutzer automatisch erstellen" />
     <Member Name="AutoUpdateUsers" Description="Benutzer automatisch aktualisieren" />
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
-    <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
     <Member Name="DefaultRole" Description="Standardrolle" />
     <Member Name="DirectoryRegistry_Password" Description="DirectoryRegistry Passwort" />
@@ -40,6 +40,9 @@
   </Type>
   <Type Name="ActiveDirectoryPermission">
     <Member Name="InviteUsersFromAD" Description="Benutzer aus AD einladen" />
+  </Type>
+  <Type Name="ActiveDirectoryTask">
+    <Member Name="DeactivateUsers" Description="Benutzer deaktivieren" />
   </Type>
   <Type Name="ActivityWithRemarks" Description="Aktivität mit Bemerkungen">
     <Member Name="Alerts" Description="Benachrichtigungen" />
@@ -206,6 +209,11 @@
     <Member Name="RefreshTokenEvery" Description="Aktualisieren Sie jeden Token" />
   </Type>
   <Type Name="AutoconfigureNeuralNetworkEntity" />
+  <Type Name="AutoUpdate" Description="Automatische Aktualisierung">
+    <Member Name="Dashboard" Description="Dashboard" />
+    <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
+    <Member Name="None" Description="Nichts" />
+  </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Rolle" />
     <Member Name="Rules" Description="Regeln" />
@@ -238,9 +246,27 @@
     <Member Name="Name" Description="Name" />
     <Member Name="Style" Description="Stil" />
   </Type>
+  <Type Name="CachedQueryEntity" Description="Cached-Abfrage">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Dashboard" Description="Dashboard" />
+    <Member Name="File" Description="Datei" />
+    <Member Name="NumColumns" Description="Anzahl Spalten" />
+    <Member Name="NumRows" Description="Anzahl Zeilen" />
+    <Member Name="QueryDuration" Description="Dauer der Abfrage" />
+    <Member Name="UploadDuration" Description="Dauer des Uploads" />
+    <Member Name="UserAssets" Description="Benutzer-Assets" />
+  </Type>
+  <Type Name="CachedQueryFileType">
+    <Member Name="CachedQuery" Description="Cached-Abfrage" />
+  </Type>
   <Type Name="CachePermission">
     <Member Name="InvalidateCache" Description="Cache ungültig" />
     <Member Name="ViewCache" Description="Cache sehen" />
+  </Type>
+  <Type Name="CacheQueryConfigurationEmbedded" Description="Konfiguration der Cached-Abfrage">
+    <Member Name="AutoRegenerateWhenOlderThan" Description="Automatisch regenerieren, wenn älter als" />
+    <Member Name="MaxRows" Description="Max. Zeilen" />
+    <Member Name="TimeoutForQueries" Description="Timeout für Abfragen" />
   </Type>
   <Type Name="CalendarDayEntity" Description="Kalendertag" Gender="m">
     <Member Name="Date" Description="Datum" />
@@ -348,6 +374,7 @@
     <Member Name="From" Description="Von" />
     <Member Name="To" Description="An" />
   </Type>
+  <Type Name="CaseMessage" />
   <Type Name="CaseNotificationEntity" Description="Fall Benachrichtigung">
     <Member Name="Actor" Description="Akteur" />
     <Member Name="CaseActivity" Description="Fall-Aktivität" />
@@ -403,7 +430,7 @@
     <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="ChartColumnType">
-    <Member Name="Date" Description="Datum" />
+    <Member Name="DateOnly" Description="Datum" />
     <Member Name="DateTime" Description="Datum Uhrzeit" />
     <Member Name="Enum" Description="Enum" />
     <Member Name="Groupable" Description="Gruppierbar" />
@@ -484,6 +511,10 @@
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
+  <Type Name="CombinedUserChartElementEmbedded" Description="Kombiniertes Benutzerdiagrammelement">
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
+    <Member Name="UserChart" Description="Benutzerdiagramm" />
+  </Type>
   <Type Name="CombinedUserChartPartEntity" Description="Kombinierter Benutzerdiagrammteil" Gender="m">
     <Member Name="AllowChangeShowData" Description="Daten anzeigen ändern lassen" />
     <Member Name="CombinePinnedFiltersWithSameLabel" Description="Kombinieren Vorgewahlter Filter Bezeichnung" />
@@ -533,20 +564,25 @@
   </Type>
   <Type Name="DashboardEntity" Description="Dashboard" PluralDescription="Dashboards" Gender="n">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
+    <Member Name="CacheQueryConfiguration" Description="Konfiguration der Cache-Abfrage" />
     <Member Name="CombineSimilarRows" Description="Ähnliche Zeilen kombinieren" />
     <Member Name="DashboardPriority" Description="Dashboard-Priorität" />
     <Member Name="DisplayName" Description="Name" />
     <Member Name="EmbeddedInEntity" Description="Eingebettet in Entität" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="HideDisplayName" Description="Anzeigename ausblenden" />
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parts" Description="Teile" />
+    <Member Name="TokenEquivalencesGroups" Description="Tokenäquivalenzengruppen" />
   </Type>
   <Type Name="DashboardMessage">
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
     <Member Name="CreateNewPart" Description="Neues Teil erstellen" />
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Titel muss angegeben werden für {0}" />
+    <Member Name="ForPerformanceReasonsThisDashboardMayShowOutdatedInformation" Description="Aus Leistungsgründen kann dieses Dashboard veraltete Informationen anzeigen" />
+    <Member Name="LasUpdateWasOn0" Description="Die letzte Aktualisierung erfolgte am {0}" />
     <Member Name="Part0IsTooLarge" Description="Teil {0} ist zu groß" />
     <Member Name="Part0OverlapsWith1" Description="Teil {0} überschneidet sich mit {1}" />
     <Member Name="Preview" Description="Vorschau" />
@@ -555,6 +591,7 @@
   <Type Name="DashboardOperation">
     <Member Name="Clone" Description="Klonen" />
     <Member Name="Delete" Description="Löschen" />
+    <Member Name="RegenerateCachedQueries" Description="Cache-Abfragen neu generieren" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="DashboardPermission">
@@ -925,7 +962,7 @@
     <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="EmailMasterTemplateMessageEmbedded" Description="Nachricht E-Mail-Vorlage">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="Text" Description="Text" />
   </Type>
   <Type Name="EmailMasterTemplateOperation">
@@ -991,7 +1028,7 @@
   </Type>
   <Type Name="EmailOwnerData" Description="E-Mailbesitzerdaten">
     <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="DisplayName" Description="Name" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="Owner" Description="Besitzer" />
@@ -1289,6 +1326,7 @@
     <Member Name="UnorderedListItem" Description="Ungeordnetes Listenelement" />
   </Type>
   <Type Name="HolidayCalendarEntity" Description="Ferienkalender" Gender="m">
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Holidays" Description="Urlaub" />
     <Member Name="Name" Description="Name" />
   </Type>
@@ -1311,6 +1349,11 @@
     <Member Name="File" Description="Datei" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="ImagePartEntity" Description="Bildteil" PluralDescription="Bildteile" Gender="m">
+    <Member Name="ClickActionURL" Description="Aktions-URL" />
+    <Member Name="ImageSrcContent" Description="Bild src Inhalt" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
   <Type Name="InboxFilterModel" Description="Posteingangs-filter">
     <Member Name="FromDate" Description="Vom Datum" />
@@ -1382,6 +1425,9 @@
   <Type Name="ITaskOperation">
     <Member Name="ExecuteAsync" Description="Async ausführen" />
     <Member Name="ExecuteSync" Description="Sync ausführen" />
+  </Type>
+  <Type Name="IToolbarEntity">
+    <Member Name="Elements" Description="Elemente" />
   </Type>
   <Type Name="IUserAssetEntity">
     <Member Name="Guid" Description="Guid" />
@@ -1481,6 +1527,8 @@
     <Member Name="ChangePassword" Description="Passwort ändern" />
     <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
     <Member Name="CurrentPassword" Description="Aktuelles Kennwort" />
+    <Member Name="EMailAddress" Description="E-Mail Adresse" />
+    <Member Name="EmailAddressOrUsername" Description="E-Mail-Adresse oder Benutzername" />
     <Member Name="EnterActualPasswordAndNewOne" Description="Geben Sie Ihr aktuelles Passwort und das neue ein" />
     <Member Name="EnterTheNewPassword" Description="Geben Sie das neue Passwort ein" />
     <Member Name="EnterYourUserEmail" Description="Geben Sie Ihre Benutzer-E-Mail ein" />
@@ -1551,7 +1599,7 @@
   </Type>
   <Type Name="MicrosoftGraphEmbedded" Description="Microsoft Graph">
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
-    <Member Name="Azure_ClientSecret" Description="Azure Client Secret ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
     <Member Name="UseActiveDirectoryConfiguration" Description="Active Directory-Konfiguration verwenden" />
   </Type>
@@ -1697,13 +1745,14 @@
   <Type Name="PanelPartEmbedded" Description="Dashboardteil">
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Content" Description="Inhalt" />
+    <Member Name="CustomColor" Description="Benutzerdefinierte Farbe" />
     <Member Name="IconColor" Description="Symbolfarbe" />
     <Member Name="IconName" Description="Symbolname" />
     <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="StartColumn" Description="Spalte Start" />
-    <Member Name="Style" Description="Stil" />
     <Member Name="Title" Description="Titel" />
+    <Member Name="UseIconColorForTitle" Description="Symbolfarbe für Titel verwenden" />
   </Type>
   <Type Name="PasswordExpiresIntervalEntity" Description="Passwortablaufintervall" PluralDescription="Passwortablaufintervalle" Gender="m">
     <Member Name="Days" Description="Tage" />
@@ -1918,6 +1967,7 @@
     <Member Name="NiceName" Description="Schöner Name" />
   </Type>
   <Type Name="QueryFilterEmbedded" Description="Abfragefilter">
+    <Member Name="DashboardBehaviour" Description="Dashboard-Verhalten" />
     <Member Name="GroupOperation" Description="Gruppenoperation" />
     <Member Name="Indentation" Description="Einrückung" />
     <Member Name="IsGroup" Description="Ist Gruppe" />
@@ -2036,7 +2086,7 @@
   <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln" Gender="m">
     <Member Name="Conditions" Description="Bedingungen" />
   </Type>
-  <Type Name="ScheduledTaskEntity" Description="Geplante Aufgabe">
+  <Type Name="ScheduledTaskEntity" Description="Geplante Task" PluralDescription="Geplanten Tasks" Gender="f">
     <Member Name="ApplicationName" Description="Anwendungsname" />
     <Member Name="MachineName" Description="Computername" />
     <Member Name="Rule" Description="Regel" />
@@ -2054,7 +2104,7 @@
     <Member Name="Remarks" Description="Bemerkungen" />
     <Member Name="ScheduledTask" Description="Geplante Task" />
     <Member Name="StartTime" Description="Startzeit" />
-    <Member Name="Task" Description="Aufgabe" />
+    <Member Name="Task" Description="Task" />
     <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="ScheduledTaskLogOperation">
@@ -2089,6 +2139,7 @@
   </Type>
   <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich">
     <Member Name="EachMinutes" Description="Alle Minuten" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="IsAligned" Description="Ist ausgerichtet" />
     <Member Name="StartingOn" Description="Beginnend am" />
   </Type>
@@ -2097,6 +2148,7 @@
     <Member Name="August" Description="August" />
     <Member Name="December" Description="Dezember" />
     <Member Name="February" Description="Februar" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="January" Description="Januar" />
     <Member Name="July" Description="Juli" />
     <Member Name="June" Description="Juni" />
@@ -2110,6 +2162,7 @@
   <Type Name="ScheduleRuleWeekDaysEntity" Description="Schedule-Regel Wochentage" PluralDescription="Schedule-Regeln Wochentage">
     <Member Name="Calendar" Description="Kalender" />
     <Member Name="Friday" Description="Freitag" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Holiday" Description="Feiertag" />
     <Member Name="Monday" Description="Montag" />
     <Member Name="Saturday" Description="Samstag" />
@@ -2141,11 +2194,16 @@
   </Type>
   <Type Name="SendNotificationEmailTaskEntity" Description="Benachrichtigung per E-Mail senden Task" Gender="f">
     <Member Name="AlertTypes" Description="Alert-Typen" />
+    <Member Name="IgnoreNotificationsOlderThan" Description="Benachrichtigungen ignorieren, die älter sind als" />
     <Member Name="SendBehavior" Description="Senden-Verhalten" />
     <Member Name="SendNotificationsOlderThan" Description="Benachrichtigungen senden älter als" />
   </Type>
   <Type Name="SendNotificationEmailTaskOperation">
     <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="SeparatorPartEntity" Description="Trennzeichenteil" PluralDescription="Separatorteile" Gender="n">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="Title" Description="Titel" />
   </Type>
   <Type Name="SessionLogEntity" Description="Sitzungsprotokoll" PluralDescription="Sitzungsprotokolle" Gender="n">
     <Member Name="Duration" Description="Dauer" />
@@ -2159,7 +2217,7 @@
   <Type Name="SessionLogPermission">
     <Member Name="TrackSession" Description="Sitzungskontrolle" />
   </Type>
-  <Type Name="SimpleTaskSymbol" Description="Einfache Aufgabe" />
+  <Type Name="SimpleTaskSymbol" Description="Einfache Task" PluralDescription="Einfache Tasks" Gender="f" />
   <Type Name="SMSCharactersMessage">
     <Member Name="Insert" Description="Einfügen" />
     <Member Name="Language" Description="Sprache" />
@@ -2215,7 +2273,7 @@
     <Member Name="FullClassName" Description="Full Class Name" />
   </Type>
   <Type Name="SMSOwnerData" Description="SMS-Besitzerdaten">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="Owner" Description="Besitzer" />
     <Member Name="TelephoneNumber" Description="Telefonnummer" />
   </Type>
@@ -2246,7 +2304,7 @@
     <Member Name="ToMustBeSetInTheTemplate" Description="'An' muss in der Vorlage gesetzt sein." />
   </Type>
   <Type Name="SMSTemplateMessageEmbedded" Description="SMS-Vorlagennachricht">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="Message" Description="Nachricht" />
   </Type>
   <Type Name="SMSTemplateOperation">
@@ -2314,6 +2372,15 @@
     <Member Name="Minutes" Description="Minuten" />
     <Member Name="Seconds" Description="Sekunden" />
   </Type>
+  <Type Name="TokenEquivalenceEmbedded" Description="Token-Äquivalenz">
+    <Member Name="Query" Description="Abfrage" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="TokenEquivalenceGroupEntity" Description="Tokenäquivalenzgruppe">
+    <Member Name="Dashboard" Description="Dashboard" />
+    <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
+    <Member Name="TokenEquivalences" Description="Token-Äquivalenzen" />
+  </Type>
   <Type Name="ToolbarElementEmbedded" Description="Toolbar-element">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
     <Member Name="Content" Description="Inhalt" />
@@ -2340,7 +2407,6 @@
   <Type Name="ToolbarLocation" Description="Toolbar-Position">
     <Member Name="Main" Description="Haupt" />
     <Member Name="Side" Description="Seite" />
-    <Member Name="Top" Description="Oben" />
   </Type>
   <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü" PluralDescription="Toolbar-Menüs" Gender="f">
     <Member Name="Elements" Description="Elemente" />
@@ -2351,6 +2417,10 @@
   <Type Name="ToolbarMenuOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ToolbarMessage">
+    <Member Name="_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships" Description="{0} Zyklen wurden aufgrund der Beziehungen in der Toolbar gefunden:" />
+    <Member Name="RecursionDetected" Description="Rekursion erkannt" />
   </Type>
   <Type Name="ToolbarOperation">
     <Member Name="Delete" Description="Löschen" />
@@ -2405,7 +2475,7 @@
     <Member Name="TranslateInstances" Description="Instanzen übersetzen" />
   </Type>
   <Type Name="TranslationReplacementEntity" Description="Übersetzungersatz" PluralDescription="Übersetzungersätze" Gender="m">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="RightTranslation" Description="Richtige Übersetzung" />
     <Member Name="WrongTranslation" Description="Falsche Übersetzung" />
   </Type>
@@ -2560,6 +2630,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="MaxRows" Description="Max. Zeilen" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parameters" Description="Parameter" />
@@ -2573,12 +2644,16 @@
     <Member Name="AllowChangeShowData" Description="Änderungsdaten anzeigen lassen" />
     <Member Name="AutoRefresh" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
   </Type>
+  <Type Name="UserCondition">
+    <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
+  </Type>
   <Type Name="UserEntity" Description="Benutzer" Gender="m">
-    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="DisabledOn" Description="Deaktiviert auf" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
@@ -2636,7 +2711,9 @@
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
+    <Member Name="AutoUpdate" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
     <Member Name="RenderMode" Description="Render-Modus" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowFooter" Description="Show-Fußzeile" />
@@ -2666,6 +2743,7 @@
   </Type>
   <Type Name="ValueUserQueryElementEmbedded" Description="Wert der Benutzerabfrage">
     <Member Name="Href" Description="Href" />
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>

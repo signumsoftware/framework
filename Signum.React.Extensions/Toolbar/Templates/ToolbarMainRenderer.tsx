@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import { ToolbarLocation, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
@@ -100,7 +100,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarClient.ToolbarResponse<any> }) {
     );
   }
 
-  const config = ToolbarClient.configs[tr.content!.EntityType];
+  const config = ToolbarClient.getConfig(tr);
   if (config == null)
     return (
       <div className="card toolbar-card text-danger">
@@ -148,9 +148,7 @@ function ToolbarMainModalModal(p: ToolbarMainModalModalProps) {
     <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
       <div className="modal-header">
         <h5 className="modal-title">{p.tr.label ?? getToString(p.tr.content!)}</h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
       </div>
       <div className="modal-body">
         <ToolbarMainRendererPrivate response={p.tr} />

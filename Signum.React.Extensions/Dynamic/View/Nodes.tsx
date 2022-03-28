@@ -1448,7 +1448,6 @@ export interface ButtonNode extends BaseNode {
   canExecute?: ExpressionOrValue<string>;
   text?: ExpressionOrValue<string>;
   active?: ExpressionOrValue<boolean>;
-  block?: ExpressionOrValue<boolean>;
   color?: ExpressionOrValue<string>;
   icon?: ExpressionOrValue<string>;
   iconColor?: ExpressionOrValue<string>;
@@ -1472,7 +1471,6 @@ NodeUtils.register<ButtonNode>({
     onOperationClick: node.onOperationClick,
     canExecute: node.canExecute,
     active: node.active,
-    block: node.block,
     color: node.color,
     icon: node.icon,
     iconColor: node.iconColor,
@@ -1489,7 +1487,7 @@ NodeUtils.register<ButtonNode>({
     var iconColor = NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.iconColor, NodeUtils.isStringOrNull);
 
     var children = pIcon || iconColor ? <>
-      {pIcon && <FontAwesomeIcon icon={pIcon} color={iconColor} className="mr-2" />}
+      {pIcon && <FontAwesomeIcon icon={pIcon} color={iconColor} className="me-2" />}
       {NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.text, NodeUtils.isStringOrNull)}
     </> : undefined;
 
@@ -1512,7 +1510,6 @@ NodeUtils.register<ButtonNode>({
     return (
       <Button
         active={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.active, NodeUtils.isBooleanOrNull)}
-        block={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.block, NodeUtils.isBooleanOrNull)}
         disabled={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.disabled, NodeUtils.isBooleanOrNull)}
         onClick={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onClick, NodeUtils.isFunctionOrNull)}
         className={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.className, NodeUtils.isStringOrNull)}
@@ -1546,7 +1543,6 @@ NodeUtils.register<ButtonNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.icon)} type="string" defaultValue={null} onRenderValue={(val, e) => <IconTypeahead icon={val as string | null | undefined} formControlClass="form-control form-control-xs" onChange={newIcon => e.updateValue(newIcon)} />} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconColor)} type="string" defaultValue={null} onRenderValue={(val, e) => <ColorTypeahead color={val as string | null | undefined} formControlClass="form-control form-control-xs" onChange={newColor => e.updateValue(newColor)} />} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.active)} type="boolean" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.block)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.disabled)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onClick)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n(e) => locals.forceUpdate()"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.className)} type="string" defaultValue={null} />

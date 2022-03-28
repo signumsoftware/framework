@@ -338,3 +338,37 @@ export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: Reac
     }
   }, [click, doubleClick, options.timeout]);
 };
+
+export const Breakpoints = {
+  sm: 576, /*Phone*/
+  md: 768, /*Tablet*/
+  lg: 992,
+  xl: 1200,
+  xxl: 1400,
+}
+
+export function getBreakpoint(): number {
+  var width = window.innerWidth;
+  if (width <= Breakpoints.sm) return 0;
+  if (width <= Breakpoints.md) return Breakpoints.sm;
+  if (width <= Breakpoints.lg) return Breakpoints.md;
+  if (width <= Breakpoints.xl) return Breakpoints.lg;
+  if (width <= Breakpoints.xxl) return Breakpoints.xl;
+  return Breakpoints.xxl;
+}
+
+export function useBreakpoint(): number {
+
+  var breakpointRef = useUpdatedRef(getBreakpoint());
+
+  const forceUpdate = useForceUpdate();
+
+  useWindowEvent("resize", (ev) => {
+    var newBreakpoint = getBreakpoint();
+    if (breakpointRef.current != newBreakpoint) {
+      forceUpdate();
+    }
+  }, []);
+
+  return breakpointRef.current;
+}

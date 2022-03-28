@@ -846,7 +846,7 @@ export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetCo
     let value = this.props.binding.getValue();
     return (
       <fieldset style={{ marginTop: "-5px" }}>
-        <legend><input type="checkbox" checked={!!value} onChange={this.handleChecked} /> {this.props.title ?? this.props.binding.member.toString().firstUpper()}</legend>
+        <legend><input type="checkbox" className="form-check-input" checked={!!value} onChange={this.handleChecked} /> {this.props.title ?? this.props.binding.member.toString().firstUpper()}</legend>
         {value && this.props.renderContent(value)}
       </fieldset>
     );
@@ -1398,8 +1398,8 @@ function isDateTime(type: string) {
   return type == "DateTime";
 }
 
-function isDate(type: string) {
-  return type == "Date";
+function isDateOnly(type: string) {
+  return type == "DateOnly";
 }
 
 function isTimeSpan(type: string) {
@@ -1444,7 +1444,7 @@ function allowFormat(type: string) {
     isDecimal(type) ||
     isReal(type) ||
     isDateTime(type) ||
-    isDate(type) ||
+    isDateOnly(type) ||
     isTimeSpan(type);
 }
 
@@ -1530,7 +1530,7 @@ registerValidator<Validators.CountIs>({
     </div>
 });
 
-registerValidator<Validators.DynamicValidator>({ name: "DateInPast", allowed: p => !p.isMList && isDateTime(p.type) || isDate(p.type) });
+registerValidator<Validators.DynamicValidator>({ name: "DateInPast", allowed: p => !p.isMList && isDateTime(p.type) || isDateOnly(p.type) });
 registerValidator<Validators.DateTimePrecision>({
   name: "DateTimePrecision",
   allowed: p => !p.isMList && isDateTime(p.type),

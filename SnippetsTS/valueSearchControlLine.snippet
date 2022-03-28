@@ -1,0 +1,31 @@
+﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <Header>
+    <Title>ValueSearchControlLine</Title>
+    <Author>Signum Software</Author>
+    <Shortcut>vscl</Shortcut>
+    <Description>Code snippet for adding a ValueSearchControlLine</Description>
+    <SnippetTypes>
+      <SnippetType>Expansion</SnippetType>
+    </SnippetTypes>
+  </Header>
+  <Snippet>
+    <Imports>
+      <Import>
+        <Namespace>
+          import { ValueSearchControlLine } from '@framework/Search'
+        </Namespace>
+      </Import>
+    </Imports>
+    <Declarations>
+      <Literal>
+        <ID>entityType</ID>
+        <ToolTip>Name of the main entity</ToolTip>
+        <Default>FooEntity</Default>
+      </Literal>
+    </Declarations>
+    <Code Language="TypeScript">
+      <![CDATA[
+	  {!ctx.value.isNew && <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: $entityType$, filterOptions: [{ token: $entityType$.token(a => a.$end$), value: ctx.value}]}} />}]]>
+    </Code>
+  </Snippet>
+</CodeSnippet>

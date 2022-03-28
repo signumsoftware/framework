@@ -18,7 +18,7 @@ export const PackageEntity = new Type<PackageEntity>("Package");
 export interface PackageEntity extends Entities.Entity, IProcessDataEntity {
   Type: "Package";
   name: string | null;
-  operationArguments: string | null;
+  operationArguments: string /*Byte[]*/ | null;
 }
 
 export const PackageLineEntity = new Type<PackageLineEntity>("PackageLine");
@@ -27,7 +27,7 @@ export interface PackageLineEntity extends Entities.Entity, IProcessLineDataEnti
   package: Entities.Lite<PackageEntity>;
   target: Entities.Entity;
   result: Entities.Lite<Entities.Entity> | null;
-  finishTime: string | null;
+  finishTime: string /*DateTime*/ | null;
 }
 
 export const PackageOperationEntity = new Type<PackageOperationEntity>("PackageOperation");
@@ -59,14 +59,14 @@ export interface ProcessEntity extends Entities.Entity {
   applicationName: string;
   user: Entities.Lite<Basics.IUserEntity>;
   state: ProcessState;
-  creationDate: string;
-  plannedDate: string | null;
-  cancelationDate: string | null;
-  queuedDate: string | null;
-  executionStart: string | null;
-  executionEnd: string | null;
-  suspendDate: string | null;
-  exceptionDate: string | null;
+  creationDate: string /*DateTime*/;
+  plannedDate: string /*DateTime*/ | null;
+  cancelationDate: string /*DateTime*/ | null;
+  queuedDate: string /*DateTime*/ | null;
+  executionStart: string /*DateTime*/ | null;
+  executionEnd: string /*DateTime*/ | null;
+  suspendDate: string /*DateTime*/ | null;
+  exceptionDate: string /*DateTime*/ | null;
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
   progress: number | null;
   status: string | null;
@@ -92,11 +92,11 @@ export module ProcessMessage {
 }
 
 export module ProcessOperation {
-  export const Plan : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Plan");
   export const Save : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Save");
-  export const Cancel : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Cancel");
   export const Execute : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Execute");
   export const Suspend : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Suspend");
+  export const Cancel : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Cancel");
+  export const Plan : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Plan");
   export const Retry : Entities.ConstructSymbol_From<ProcessEntity, ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Retry");
 }
 

@@ -1,80 +1,75 @@
-using Signum.Utilities;
-using System;
-using System.Linq.Expressions;
 
-namespace Signum.Entities.Workflow
-{
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class WorkflowGatewayEntity : Entity, IWorkflowNodeEntity, IWithModel
-    {   
-        public WorkflowLaneEntity Lane { get; set; }
+namespace Signum.Entities.Workflow;
 
-        [StringLengthValidator(Min = 3, Max = 100)]
-        public string? Name { get; set; }
-        
-        public string? GetName() => Name;
+[EntityKind(EntityKind.String, EntityData.Master)]
+public class WorkflowGatewayEntity : Entity, IWorkflowNodeEntity, IWithModel
+{   
+    public WorkflowLaneEntity Lane { get; set; }
 
-        [StringLengthValidator(Min = 1, Max = 100)]
-        public string BpmnElementId { get; set; }
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string? Name { get; set; }
+    
+    public string? GetName() => Name;
 
-        public WorkflowGatewayType Type { get; set; }
-        public WorkflowGatewayDirection Direction { get; set; }
+    [StringLengthValidator(Min = 1, Max = 100)]
+    public string BpmnElementId { get; set; }
 
-        [AvoidDump]
-        public WorkflowXmlEmbedded Xml { get; set; }
+    public WorkflowGatewayType Type { get; set; }
+    public WorkflowGatewayDirection Direction { get; set; }
 
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
-        public ModelEntity GetModel()
+    [AvoidDump]
+    public WorkflowXmlEmbedded Xml { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name ?? BpmnElementId);
+    public ModelEntity GetModel()
+    {
+        var model = new WorkflowGatewayModel()
         {
-            var model = new WorkflowGatewayModel()
-            {
-                Name = this.Name,
-                Type = this.Type,
-                Direction = this.Direction
-            };
-            model.CopyMixinsFrom(this);
-            return model;
-        }
-
-        public void SetModel(ModelEntity model)
-        {
-            var wModel = (WorkflowGatewayModel)model;
-            this.Name = wModel.Name;
-            this.Type = wModel.Type;
-            this.Direction = wModel.Direction;
-            this.CopyMixinsFrom(wModel);
-        }
+            Name = this.Name,
+            Type = this.Type,
+            Direction = this.Direction
+        };
+        model.CopyMixinsFrom(this);
+        return model;
     }
 
-    public enum WorkflowGatewayType
+    public void SetModel(ModelEntity model)
     {
-       Exclusive, // 1
-       Inclusive, // 1...N
-       Parallel   // N
+        var wModel = (WorkflowGatewayModel)model;
+        this.Name = wModel.Name;
+        this.Type = wModel.Type;
+        this.Direction = wModel.Direction;
+        this.CopyMixinsFrom(wModel);
     }
-
-    public enum WorkflowGatewayDirection
-    {
-        Split,
-        Join,
-    }
-
-    [AutoInit]
-    public static class WorkflowGatewayOperation
-    {
-        public static readonly ExecuteSymbol<WorkflowGatewayEntity> Save;
-        public static readonly DeleteSymbol<WorkflowGatewayEntity> Delete;
-    }
-
-    [Serializable]
-    public class WorkflowGatewayModel : ModelEntity
-    {
-        [StringLengthValidator(Min = 3, Max = 100)]
-        public string? Name { get; set; }
-
-        public WorkflowGatewayType Type { get; set; }
-        public WorkflowGatewayDirection Direction { get; set; }
-    }
-
 }
+
+public enum WorkflowGatewayType
+{
+   Exclusive, // 1
+   Inclusive, // 1...N
+   Parallel   // N
+}
+
+public enum WorkflowGatewayDirection
+{
+    Split,
+    Join,
+}
+
+[AutoInit]
+public static class WorkflowGatewayOperation
+{
+    public static readonly ExecuteSymbol<WorkflowGatewayEntity> Save;
+    public static readonly DeleteSymbol<WorkflowGatewayEntity> Delete;
+}
+
+public class WorkflowGatewayModel : ModelEntity
+{
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string? Name { get; set; }
+
+    public WorkflowGatewayType Type { get; set; }
+    public WorkflowGatewayDirection Direction { get; set; }
+}
+

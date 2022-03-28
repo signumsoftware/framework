@@ -1,355 +1,348 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using Signum.Utilities.Reflection;
 using System.Globalization;
-using System.Reflection;
 using System.Collections;
 
-namespace Signum.Utilities
+namespace Signum.Utilities;
+
+public static class Tsv
 {
-    public static class Tsv
+    // Default changed since Excel exports not to UTF8 and https://stackoverflow.com/questions/49215791/vs-code-c-sharp-system-notsupportedexception-no-data-is-available-for-encodin
+    public static Encoding DefaultEncoding = Encoding.UTF8;
+    public static CultureInfo DefaultCulture = CultureInfo.InvariantCulture;
+
+    public static string ToTsvFile<T>(T[,] collection, string fileName, Encoding? encoding = null, bool autoFlush = false, bool append = false,
+        Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory = null)
     {
-        // Default changed since Excel exports not to UTF8 and https://stackoverflow.com/questions/49215791/vs-code-c-sharp-system-notsupportedexception-no-data-is-available-for-encodin
-        public static Encoding DefaultEncoding = Encoding.UTF8;
-        public static CultureInfo DefaultCulture = CultureInfo.InvariantCulture;
+        encoding = encoding ?? DefaultEncoding;
 
-        public static string ToTsvFile<T>(T[,] collection, string fileName, Encoding? encoding = null, bool autoFlush = false, bool append = false,
-            Func<TsvColumnInfo<T>, Func<object, string>>? toStringFactory = null)
-        {
-            encoding = encoding ?? DefaultEncoding;
-
-            using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
-            { 
-                using (StreamWriter sw = new StreamWriter(fs, encoding) { AutoFlush = autoFlush })
+        using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
+        { 
+            using (StreamWriter sw = new StreamWriter(fs, encoding) { AutoFlush = autoFlush })
+            {
+                for (int i = 0; i < collection.GetLength(0); i++)
                 {
-                    for (int i = 0; i < collection.GetLength(0); i++)
+                    for (int j = 0; j < collection.GetLength(1); j++)
                     {
-                        for (int j = 0; j < collection.GetLength(1); j++)
-                        {
-                            sw.Write(collection[i, j]);
+                        sw.Write(collection[i, j]);
+                        sw.Write(tab);
+                    }
+                    if (i < collection.GetLength(0))
+                        sw.WriteLine();
+                }
+            }
+        }
+    
+        return fileName;
+    }
+
+    public static string ToTsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
+        Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory = null)
+    {
+        using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
+            ToTsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush, toStringFactory);
+
+        return fileName;
+    }
+
+    public static byte[] ToTsvBytes<T>(this IEnumerable<T> collection, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
+        Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory = null)
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            collection.ToTsv(ms, encoding, culture, writeHeaders, autoFlush, toStringFactory);
+            return ms.ToArray();
+        }
+    }
+
+    private const string tab = "\t";
+
+    public static void ToTsv<T>(this IEnumerable<T> collection, Stream stream, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
+        Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory = null)
+    {
+        encoding = encoding ?? DefaultEncoding;
+
+        var defCulture = culture ?? DefaultCulture;
+
+        if (typeof(IList).IsAssignableFrom(typeof(T)))
+        {
+            using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
+            {
+                foreach (IList? row in collection)
+                {
+                    for (int i = 0; i < row!.Count; i++)
+                    {
+                        var obj = row![i];
+
+                        var str = ConvertToString(obj, defCulture);
+
+                        sw.Write(str);
+                        if (i < row!.Count - 1)
                             sw.Write(tab);
-                        }
-                        if (i < collection.GetLength(0))
+                        else
                             sw.WriteLine();
                     }
                 }
             }
-        
-            return fileName;
         }
-
-        public static string ToTsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
-            Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory = null)
+        else
         {
-            using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
-                ToTsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush, toStringFactory);
-
-            return fileName;
-        }
-
-        public static byte[] ToTsvBytes<T>(this IEnumerable<T> collection, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory = null)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                collection.ToTsv(ms, encoding, culture, writeHeaders, autoFlush, toStringFactory);
-                return ms.ToArray();
-            }
-        }
-
-        private const string tab = "\t";
-
-        public static void ToTsv<T>(this IEnumerable<T> collection, Stream stream, Encoding? encoding = null, CultureInfo? culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory = null)
-        {
-            encoding = encoding ?? DefaultEncoding;
-
-            var defCulture = culture ?? DefaultCulture;
-
-            if (typeof(IList).IsAssignableFrom(typeof(T)))
-            {
-                using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
-                {
-                    foreach (IList? row in collection)
-                    {
-                        for (int i = 0; i < row!.Count; i++)
-                        {
-                            var obj = row![i];
-
-                            var str = ConvertToString(obj, defCulture);
-
-                            sw.Write(str);
-                            if (i < row!.Count - 1)
-                                sw.Write(tab);
-                            else
-                                sw.WriteLine();
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var columns = ColumnInfoCache<T>.Columns;
-                var members = columns.Select(c => c.MemberEntry).ToList();
-                var toString = columns.Select(c => GetToString(c, defCulture, toStringFactory)).ToList();
-
-                using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
-                {
-                    if (writeHeaders)
-                        sw.WriteLine(members.ToString(m => HandleSpaces(m.Name), tab));
-
-                    foreach (var item in collection)
-                    {
-                        for (int i = 0; i < members.Count; i++)
-                        {
-                            var obj = members[i].Getter!(item);
-
-                            var str = toString[i](obj);
-
-                            sw.Write(str);
-                            if (i < members.Count - 1)
-                                sw.Write(tab);
-                            else
-                                sw.WriteLine();
-                        }
-                    }
-                }
-            }
-        }
-
-        private static Func<object?, string?> GetToString<T>(TsvColumnInfo<T> column, CultureInfo culture, Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory)
-        {
-            if (toStringFactory != null)
-            {
-                var result = toStringFactory(column);
-
-                if (result != null)
-                    return result;
-            }
-
-            return obj => ConvertToString(obj, culture);
-        }
-
-        static string ConvertToString(object? obj, CultureInfo culture)
-        {
-            if (obj == null)
-                return "";
-
-            if (obj is IFormattable f)
-                return f.ToString(null, culture);
-            else
-            {
-                var p = obj!.ToString();
-                if (p != null && p.Contains(tab))
-                    throw new InvalidDataException("TSV fields can't contain the tab character, found one in value: " + p);
-                return p!;
-            }
-        }
-
-        static string HandleSpaces(string p)
-        {
-            return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
-        }
-
-        public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, int skipLines = 1, CultureInfo? culture = null, TsvReadOptions<T>? options = null) where T : class, new()
-        {
-            encoding = encoding ?? DefaultEncoding;
-
-            using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, skipLines, culture, options).ToList();
-        }
-
-        public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, int skipLines = 1, CultureInfo? culture = null, TsvReadOptions<T>? options = null) where T : class, new()
-        {
-            using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, skipLines, culture, options).ToList();
-        }
-
-        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, int skipLines = 1, CultureInfo? culture = null, TsvReadOptions<T>? options = null) where T : class, new()
-        {
-            encoding = encoding ?? DefaultEncoding;
-            var defOptions = options ?? new TsvReadOptions<T>();
-
-            var defCulture = culture ?? DefaultCulture;
-
             var columns = ColumnInfoCache<T>.Columns;
             var members = columns.Select(c => c.MemberEntry).ToList();
-            var parsers = columns.Select(c => GetParser(c, defCulture, defOptions.ParserFactory)).ToList();
+            var toString = columns.Select(c => GetToString(c, defCulture, toStringFactory)).ToList();
 
-
-            using (StreamReader sr = new StreamReader(stream, encoding))
+            using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
             {
-                for (int i = 0; i < skipLines; i++)
-                    sr.ReadLine();
+                if (writeHeaders)
+                    sw.WriteLine(members.ToString(m => HandleSpaces(m.Name), tab));
 
-                var line = skipLines;
-                while (true)
+                foreach (var item in collection)
                 {
-                    string? tsvLine = sr.ReadLine();
-
-                    if (tsvLine == null)
-                        yield break;
-
-                    T? t = null;
-                    try
+                    for (int i = 0; i < members.Count; i++)
                     {
-                        t = ReadObject<T>(tsvLine, members, parsers);
-                    }
-                    catch (Exception e)
-                    {
-                        e.Data["row"] = line;
+                        var obj = members[i].Getter!(item);
 
-                        if (defOptions.SkipError?.Invoke(e, tsvLine) != true)
-                            throw new ParseCsvException(e);
-                    }
+                        var str = toString[i](obj);
 
-                    if (t != null)
-                        yield return t;
+                        sw.Write(str);
+                        if (i < members.Count - 1)
+                            sw.Write(tab);
+                        else
+                            sw.WriteLine();
+                    }
                 }
             }
         }
+    }
 
-        public static T ReadLine<T>(string tsvLine, CultureInfo? culture = null, TsvReadOptions<T>? options = null)
-            where T : class, new()
+    private static Func<object?, string?> GetToString<T>(TsvColumnInfo<T> column, CultureInfo culture, Func<TsvColumnInfo<T>, Func<object?, string?>>? toStringFactory)
+    {
+        if (toStringFactory != null)
         {
-            var defOptions = options ?? new TsvReadOptions<T>();
-            var defCulture = culture ?? DefaultCulture;
+            var result = toStringFactory(column);
 
-            var columns = ColumnInfoCache<T>.Columns;
-
-            return ReadObject<T>(tsvLine,
-                columns.Select(c => c.MemberEntry).ToList(),
-                columns.Select(c => GetParser(c, defCulture, defOptions.ParserFactory)).ToList());
+            if (result != null)
+                return result;
         }
 
-        private static Func<string, object?> GetParser<T>(TsvColumnInfo<T> column, CultureInfo culture, Func<TsvColumnInfo<T>, Func<string, object?>>? parserFactory)
+        return obj => ConvertToString(obj, culture);
+    }
+
+    static string ConvertToString(object? obj, CultureInfo culture)
+    {
+        if (obj == null)
+            return "";
+
+        if (obj is IFormattable f)
+            return f.ToString(null, culture);
+        else
         {
-            if (parserFactory != null)
-            {
-                var result = parserFactory(column);
-
-                if (result != null)
-                    return result;
-            }
-
-            return str => ConvertTo(str, column.MemberInfo.ReturningType(), column.Format, culture);
+            var p = obj!.ToString();
+            if (p != null && p.Contains(tab))
+                throw new InvalidDataException("TSV fields can't contain the tab character, found one in value: " + p);
+            return p!;
         }
+    }
 
-        static T ReadObject<T>(string line, List<MemberEntry<T>> members, List<Func<string, object?>> parsers) where T : new()
+    static string HandleSpaces(string p)
+    {
+        return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
+    }
+
+    public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, int skipLines = 1, CultureInfo? culture = null, TsvReadOptions<T>? options = null) where T : class, new()
+    {
+        encoding = encoding ?? DefaultEncoding;
+
+        using (FileStream fs = File.OpenRead(fileName))
+            return ReadStream<T>(fs, encoding, skipLines, culture, options).ToList();
+    }
+
+    public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, int skipLines = 1, CultureInfo? culture = null, TsvReadOptions<T>? options = null) where T : class, new()
+    {
+        using (MemoryStream ms = new MemoryStream(data))
+            return ReadStream<T>(ms, encoding, skipLines, culture, options).ToList();
+    }
+
+    public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, int skipLines = 1, CultureInfo? culture = null, TsvReadOptions<T>? options = null) where T : class, new()
+    {
+        encoding = encoding ?? DefaultEncoding;
+        var defOptions = options ?? new TsvReadOptions<T>();
+
+        var defCulture = culture ?? DefaultCulture;
+
+        var columns = ColumnInfoCache<T>.Columns;
+        var members = columns.Select(c => c.MemberEntry).ToList();
+        var parsers = columns.Select(c => GetParser(c, defCulture, defOptions.ParserFactory)).ToList();
+
+
+        using (StreamReader sr = new StreamReader(stream, encoding))
         {
-            var vals = line.Split(new[] { tab }, StringSplitOptions.None).ToList();
+            for (int i = 0; i < skipLines; i++)
+                sr.ReadLine();
 
-            if (vals.Count < members.Count)
-                throw new FormatException("Only {0} columns found (instead of {1}) in line: {2}".FormatWith(vals.Count, members.Count, line));
-
-            T t = new T();
-            for (int i = 0; i < members.Count; i++)
+            var line = skipLines;
+            while (true)
             {
-                string? str = null;
+                string? tsvLine = sr.ReadLine();
+
+                if (tsvLine == null)
+                    yield break;
+
+                T? t = null;
                 try
                 {
-                    str = vals[i];
-                    object? val = parsers[i](str);
-                    members[i].Setter!(t, val);
+                    t = ReadObject<T>(tsvLine, members, parsers);
                 }
                 catch (Exception e)
                 {
-                    e.Data["value"] = str;
-                    e.Data["member"] = members[i].MemberInfo.Name;
-                    throw;
+                    e.Data["row"] = line;
+
+                    if (defOptions.SkipError?.Invoke(e, tsvLine) != true)
+                        throw new ParseCsvException(e);
                 }
+
+                if (t != null)
+                    yield return t;
             }
-            return t;
+        }
+    }
+
+    public static T ReadLine<T>(string tsvLine, CultureInfo? culture = null, TsvReadOptions<T>? options = null)
+        where T : class, new()
+    {
+        var defOptions = options ?? new TsvReadOptions<T>();
+        var defCulture = culture ?? DefaultCulture;
+
+        var columns = ColumnInfoCache<T>.Columns;
+
+        return ReadObject<T>(tsvLine,
+            columns.Select(c => c.MemberEntry).ToList(),
+            columns.Select(c => GetParser(c, defCulture, defOptions.ParserFactory)).ToList());
+    }
+
+    private static Func<string, object?> GetParser<T>(TsvColumnInfo<T> column, CultureInfo culture, Func<TsvColumnInfo<T>, Func<string, object?>>? parserFactory)
+    {
+        if (parserFactory != null)
+        {
+            var result = parserFactory(column);
+
+            if (result != null)
+                return result;
         }
 
+        return str => ConvertTo(str, column.MemberInfo.ReturningType(), column.Format, culture);
+    }
 
+    static T ReadObject<T>(string line, List<MemberEntry<T>> members, List<Func<string, object?>> parsers) where T : new()
+    {
+        var vals = line.Split(new[] { tab }, StringSplitOptions.None).ToList();
 
-        
-        static class ColumnInfoCache<T>
+        if (vals.Count < members.Count)
+            throw new FormatException("Only {0} columns found (instead of {1}) in line: {2}".FormatWith(vals.Count, members.Count, line));
+
+        T t = new T();
+        for (int i = 0; i < members.Count; i++)
         {
-            public static List<TsvColumnInfo<T>> Columns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Setters | MemberOptions.Getter)
-                .Select((me, i) => new TsvColumnInfo<T>(i, me, me.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format)).ToList();
-        }
-
-        static object? ConvertTo(string s, Type type, string? format, CultureInfo culture)
-        {
-            Type? baseType = Nullable.GetUnderlyingType(type);
-            if (baseType != null)
+            string? str = null;
+            try
             {
-                if (!s.HasText())
-                    return null;
-
-                type = baseType;
+                str = vals[i];
+                object? val = parsers[i](str);
+                members[i].Setter!(t, val);
             }
-
-            if (type.IsEnum)
-                return Enum.Parse(type, s);
-
-            if (type == typeof(DateTime))
-                if (format == null)
-                    return DateTime.Parse(s, culture);
-                else
-                    return DateTime.ParseExact(s, format, culture);
-
-            return Convert.ChangeType(s, type, culture);
-        }
-    }
-
-    public class TsvReadOptions<T> where T : class
-    {
-        public Func<TsvColumnInfo<T>, Func<string, object>>? ParserFactory;
-        public Func<Exception, string, bool>? SkipError;
-    }
-
-    public class TsvColumnInfo<T>
-    {
-        public readonly int Index;
-        public readonly MemberEntry<T> MemberEntry;
-        public readonly string? Format;
-
-        public MemberInfo MemberInfo
-        {
-            get { return this.MemberEntry.MemberInfo; }
-        }
-
-        internal TsvColumnInfo(int index, MemberEntry<T> memberEntry, string? format)
-        {
-            this.Index = index;
-            this.MemberEntry = memberEntry;
-            this.Format = format;
-        }
-    }
-
-
-    [Serializable]
-    public class ParseTsvException : Exception
-    {
-        public int? Row { get; set; }
-        public string? Member { get; set; }
-        public string? Value { get; set; }
-
-        public ParseTsvException() { }
-        public ParseTsvException(Exception inner) : base(inner.Message, inner)
-        {
-            this.Row = (int?)inner.Data["row"];
-            this.Value = (string)inner.Data["value"]!;
-            this.Member = (string)inner.Data["member"]!;
-
-        }
-        protected ParseTsvException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        { }
-
-        public override string Message
-        {
-            get
+            catch (Exception e)
             {
-                return $"(Row: {this.Row}, Member: {this.Member}, Value: '{this.Value}') {base.Message})";
+                e.Data["value"] = str;
+                e.Data["member"] = members[i].MemberInfo.Name;
+                throw;
             }
+        }
+        return t;
+    }
+
+
+
+    
+    static class ColumnInfoCache<T>
+    {
+        public static List<TsvColumnInfo<T>> Columns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Setters | MemberOptions.Getter)
+            .Select((me, i) => new TsvColumnInfo<T>(i, me, me.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format)).ToList();
+    }
+
+    static object? ConvertTo(string s, Type type, string? format, CultureInfo culture)
+    {
+        Type? baseType = Nullable.GetUnderlyingType(type);
+        if (baseType != null)
+        {
+            if (!s.HasText())
+                return null;
+
+            type = baseType;
+        }
+
+        if (type.IsEnum)
+            return Enum.Parse(type, s);
+
+        if (type == typeof(DateTime))
+            if (format == null)
+                return DateTime.Parse(s, culture);
+            else
+                return DateTime.ParseExact(s, format, culture);
+
+        return Convert.ChangeType(s, type, culture);
+    }
+}
+
+public class TsvReadOptions<T> where T : class
+{
+    public Func<TsvColumnInfo<T>, Func<string, object>>? ParserFactory;
+    public Func<Exception, string, bool>? SkipError;
+}
+
+public class TsvColumnInfo<T>
+{
+    public readonly int Index;
+    public readonly MemberEntry<T> MemberEntry;
+    public readonly string? Format;
+
+    public MemberInfo MemberInfo
+    {
+        get { return this.MemberEntry.MemberInfo; }
+    }
+
+    internal TsvColumnInfo(int index, MemberEntry<T> memberEntry, string? format)
+    {
+        this.Index = index;
+        this.MemberEntry = memberEntry;
+        this.Format = format;
+    }
+}
+
+
+public class ParseTsvException : Exception
+{
+    public int? Row { get; set; }
+    public string? Member { get; set; }
+    public string? Value { get; set; }
+
+    public ParseTsvException() { }
+    public ParseTsvException(Exception inner) : base(inner.Message, inner)
+    {
+        this.Row = (int?)inner.Data["row"];
+        this.Value = (string)inner.Data["value"]!;
+        this.Member = (string)inner.Data["member"]!;
+
+    }
+    protected ParseTsvException(
+      System.Runtime.Serialization.SerializationInfo info,
+      System.Runtime.Serialization.StreamingContext context) : base(info, context)
+    { }
+
+    public override string Message
+    {
+        get
+        {
+            return $"(Row: {this.Row}, Member: {this.Member}, Value: '{this.Value}') {base.Message})";
         }
     }
 }

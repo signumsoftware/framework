@@ -49,6 +49,10 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
         <br />
         JustMyProcesses: {s.justMyProcesses.toString()}
         <br />
+        MachineName: {s.machineName}
+        <br />
+        ApplicatonName: {s.applicationName}
+        <br />
         MaxDegreeOfParallelism: {s.maxDegreeOfParallelism}
         <br />
         InitialDelayMiliseconds: {s.initialDelayMiliseconds}
@@ -68,8 +72,8 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
           </thead>
           <tbody>
             <tr>
-              <td colSpan={4}>
-                <b> {s.executing.length} processes executing in {s.machineName}</b>
+              <td colSpan={6}>
+                <b> {s.executing.length} processes executing in {s.machineName} / {s.applicationName}</b>
               </td>
             </tr>
             {s.executing.map((item, i) =>

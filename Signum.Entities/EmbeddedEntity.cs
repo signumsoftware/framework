@@ -1,9 +1,6 @@
-﻿using System;
+﻿
+namespace Signum.Entities;
 
-namespace Signum.Entities
+public abstract class EmbeddedEntity : ModifiableEntity
 {
-    [Serializable]
-    public abstract class EmbeddedEntity : ModifiableEntity
-    {
-    }
 }

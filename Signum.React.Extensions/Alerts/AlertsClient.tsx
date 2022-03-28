@@ -52,19 +52,22 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
   }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Delay, {
-    onClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.toISO())).done(),
+    onClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.toISO())),
     hideOnCanExecute: true,
-    contextual: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() },
-    contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())).done() },
+    contextual: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())) },
+    contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())) },
   }));
 
   var cellFormatter = new Finder.CellFormatter((cell, ctx) => {
+
+    if (cell == null)
+      return undefined;
 
     var alert: Partial<AlertEntity> = {
       target: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.target).toString())],
       textArguments: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.entity.textArguments).toString())]
     };
-    return formatText(cell, alert);
+    return  formatText(cell, alert);
   });
 
   Finder.registerPropertyFormatter(PropertyRoute.tryParse(AlertEntity, "Text"), cellFormatter);
@@ -120,10 +123,13 @@ export function getTitle(titleField: string | null, type: AlertTypeSymbol | null
   if (titleField)
     return titleField;
 
-  if (type!.key)
+  if (type == null)
+    return " - ";
+
+  if (type.key)
     return symbolNiceName(type! as Entity & ISymbol);
 
-  return type!.name;
+  return type.name;
 }
 export function formatText(text: string, alert: Partial<AlertEntity>, onNavigated?: () => void): React.ReactElement {
   var nodes: (string | React.ReactElement)[] = [];

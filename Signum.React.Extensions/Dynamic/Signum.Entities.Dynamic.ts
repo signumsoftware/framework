@@ -112,7 +112,7 @@ export module DynamicPanelPermission {
 export const DynamicRenameEntity = new Type<DynamicRenameEntity>("DynamicRename");
 export interface DynamicRenameEntity extends Entities.Entity {
   Type: "DynamicRename";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   replacementKey: string;
   oldName: string;
   newName: string;
@@ -121,9 +121,9 @@ export interface DynamicRenameEntity extends Entities.Entity {
 export const DynamicSqlMigrationEntity = new Type<DynamicSqlMigrationEntity>("DynamicSqlMigration");
 export interface DynamicSqlMigrationEntity extends Entities.Entity {
   Type: "DynamicSqlMigration";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   createdBy: Entities.Lite<Basics.IUserEntity>;
-  executionDate: string | null;
+  executionDate: string /*DateTime*/ | null;
   executedBy: Entities.Lite<Basics.IUserEntity> | null;
   comment: string;
   script: string;

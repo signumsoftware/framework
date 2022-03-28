@@ -4,6 +4,8 @@ import { RouteComponentProps } from 'react-router-dom'
 import { Tab, Tabs } from 'react-bootstrap'
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
+import { SearchControl } from '../../Signum.React/Scripts/Search'
+import { ExceptionEntity } from '../../Signum.React/Scripts/Signum.Entities.Basics'
 
 export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
 
@@ -37,6 +39,12 @@ export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
         {state.isEnabled == false && <button onClick={handleEnabled} className="sf-button btn btn-light" style={{ color: "green" }}>Enabled</button>}
         {<button onClick={handleClear} className="sf-button btn btn-light" style={{ color: "blue" }}>Clear</button>}
       </div >
+      <div className="m-2">
+        <strong>Server Broadcast:</strong> <code>{state.serverBroadcast}</code>
+        <br />
+        <strong>SqlDependency:</strong> <code>{state.sqlDependency.toString()}</code>
+        <br />
+      </div>
       <Tabs id="tabs">
         {state.tables &&
           <Tab title="Tables" eventKey="table">
@@ -45,6 +53,17 @@ export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
         {state.lazies &&
           <Tab title="Lazies" eventKey="lazy">
             {renderLazies(state)}
+          </Tab>
+        }
+
+        {state.serverBroadcast &&
+          <Tab title="Invalidation Exceptions" eventKey="exceptions">
+            <SearchControl findOptions={{
+              queryName: ExceptionEntity,
+              filterOptions: [
+                { token: ExceptionEntity.token(a => a.entity.controllerName), value: state.serverBroadcast.before("(") }
+              ]
+            }} />
           </Tab>
         }
       </Tabs>

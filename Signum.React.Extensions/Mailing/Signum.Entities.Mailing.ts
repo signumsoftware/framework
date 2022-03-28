@@ -83,7 +83,7 @@ export module EmailFileType {
 export const EmailFromEmbedded = new Type<EmailFromEmbedded>("EmailFromEmbedded");
 export interface EmailFromEmbedded extends EmailAddressEmbedded {
   Type: "EmailFromEmbedded";
-  azureUserId: string | null;
+  azureUserId: string /*Guid*/ | null;
 }
 
 export const EmailMasterTemplateEntity = new Type<EmailMasterTemplateEntity>("EmailMasterTemplate");
@@ -92,7 +92,7 @@ export interface EmailMasterTemplateEntity extends Entities.Entity, UserAssets.I
   name: string;
   isDefault: boolean;
   messages: Entities.MList<EmailMasterTemplateMessageEmbedded>;
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export const EmailMasterTemplateMessageEmbedded = new Type<EmailMasterTemplateMessageEmbedded>("EmailMasterTemplateMessageEmbedded");
@@ -114,19 +114,19 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
   target: Entities.Lite<Entities.Entity> | null;
   from: EmailFromEmbedded;
   template: Entities.Lite<EmailTemplateEntity> | null;
-  creationDate: string;
-  sent: string | null;
-  receptionNotified: string | null;
+  creationDate: string /*DateTime*/;
+  sent: string /*DateTime*/ | null;
+  receptionNotified: string /*DateTime*/ | null;
   subject: string | null;
   body: Signum.BigStringEmbedded;
   bodyHash: string | null;
   isBodyHtml: boolean;
   exception: Entities.Lite<Signum.ExceptionEntity> | null;
   state: EmailMessageState;
-  uniqueIdentifier: string | null;
+  uniqueIdentifier: string /*Guid*/ | null;
   editableMessage: boolean;
   package: Entities.Lite<EmailPackageEntity> | null;
-  processIdentifier: string | null;
+  processIdentifier: string /*Guid*/ | null;
   sendRetries: number;
   attachments: Entities.MList<EmailAttachmentEmbedded>;
 }
@@ -186,9 +186,9 @@ export interface EmailReceptionInfoEmbedded extends Entities.EmbeddedEntity {
   uniqueId: string;
   reception: Entities.Lite<Pop3ReceptionEntity>;
   rawContent: string;
-  sentDate: string;
-  receivedDate: string;
-  deletionDate: string | null;
+  sentDate: string /*DateTime*/;
+  receivedDate: string /*DateTime*/;
+  deletionDate: string /*DateTime*/ | null;
 }
 
 export const EmailReceptionMixin = new Type<EmailReceptionMixin>("EmailReceptionMixin");
@@ -233,7 +233,7 @@ export interface EmailTemplateAddressEmbedded extends Entities.EmbeddedEntity {
 export const EmailTemplateEntity = new Type<EmailTemplateEntity>("EmailTemplate");
 export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "EmailTemplate";
-  guid: string;
+  guid: string /*Guid*/;
   name: string;
   editableMessage: boolean;
   disableAuthorization: boolean;
@@ -256,7 +256,7 @@ export interface EmailTemplateFromEmbedded extends EmailTemplateAddressEmbedded 
   Type: "EmailTemplateFromEmbedded";
   whenNone: WhenNoneFromBehaviour;
   whenMany: WhenManyFromBehaviour;
-  azureUserId: string | null;
+  azureUserId: string /*Guid*/ | null;
 }
 
 export module EmailTemplateMessage {
@@ -338,8 +338,8 @@ export const MicrosoftGraphEmbedded = new Type<MicrosoftGraphEmbedded>("Microsof
 export interface MicrosoftGraphEmbedded extends Entities.EmbeddedEntity {
   Type: "MicrosoftGraphEmbedded";
   useActiveDirectoryConfiguration: boolean;
-  azure_ApplicationID: string | null;
-  azure_DirectoryID: string | null;
+  azure_ApplicationID: string /*Guid*/ | null;
+  azure_DirectoryID: string /*Guid*/ | null;
   azure_ClientSecret: string | null;
 }
 
@@ -372,8 +372,8 @@ export const Pop3ReceptionEntity = new Type<Pop3ReceptionEntity>("Pop3Reception"
 export interface Pop3ReceptionEntity extends Entities.Entity {
   Type: "Pop3Reception";
   pop3Configuration: Entities.Lite<Pop3ConfigurationEntity>;
-  startDate: string;
-  endDate: string | null;
+  startDate: string /*DateTime*/;
+  endDate: string /*DateTime*/ | null;
   newEmails: number;
   serverEmails: number;
   lastServerMessageUID: string | null;

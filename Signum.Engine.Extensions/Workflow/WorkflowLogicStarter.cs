@@ -1,17 +1,14 @@
-﻿using Signum.Engine.Maps;
-using Signum.Entities.Workflow;
-using System;
+﻿using Signum.Entities.Workflow;
 
-namespace Signum.Engine.Workflow
+namespace Signum.Engine.Workflow;
+
+
+public static class WorkflowLogicStarter
 {
-
-    public static class WorkflowLogicStarter
+    public static void Start(SchemaBuilder sb, Func<WorkflowConfigurationEmbedded> getConfiguration)
     {
-        public static void Start(SchemaBuilder sb, Func<WorkflowConfigurationEmbedded> getConfiguration)
-        {
-            WorkflowLogic.Start(sb, getConfiguration);
-            CaseActivityLogic.Start(sb);
-            WorkflowEventTaskLogic.Start(sb);
-        }
+        WorkflowLogic.Start(sb, getConfiguration);
+        CaseActivityLogic.Start(sb);
+        WorkflowEventTaskLogic.Start(sb);
     }
 }

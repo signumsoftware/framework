@@ -74,7 +74,7 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 
   function renderButtons() {
     return (
-      <span className="ml-2">
+      <span className="ms-2">
         {c.renderCreateButton(false)}
         {c.renderFindButton(false)}
       </span>

@@ -80,7 +80,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
           </Tabs>
         </div>
 
-        <div className="row">
+        <div className="row mb-3">
           <div className="col-sm-4">
             <ValueLine ctx={ec.subCtx(e => e.isBodyHtml)} inlineCheckbox={true} />
           </div>

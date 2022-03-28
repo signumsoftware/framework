@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Dic, classes, } from './Globals';
+import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
@@ -8,8 +8,9 @@ import { TypeContext } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
+import * as Constructor from './Constructor';
 import { ViewReplacer } from './Frames/ReactVisitor'
-import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, getLitesWithSubStr, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import { NormalWindowMessage } from "./Signum.Entities";
@@ -20,6 +21,7 @@ import { clearCustomConstructors } from "./Constructor";
 import { toAbsoluteUrl, currentUser } from "./AppContext";
 import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
 import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessageDefault, RenderMessageDefault } from "./Modals/ErrorModal";
+import CopyLiteButton from "./Components/CopyLiteButton";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || currentUser.toStr == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -32,7 +34,7 @@ export function start(options: { routes: JSX.Element[] }) {
   AppContext.clearSettingsActions.push(clearWidgets)
   AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
   AppContext.clearSettingsActions.push(clearCustomConstructors);
-
+  AppContext.clearSettingsActions.push(cleanEntityChanged);
   ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
   ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
 }
@@ -45,9 +47,26 @@ export namespace NavigatorManager {
   export function getFrameModal() {
     return import("./Frames/FrameModal");
   }
+
+  export function onFramePageCreationCancelled() {
+    AppContext.history.replace("~/");
+  }
 }
 
-export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
+export const entityChanged: Array<(cleanName: string, entity?: Entity) => void> = [];
+
+function cleanEntityChanged() {
+  entityChanged.clear();
+}
+
+export function raiseEntityChanged(cleanNameOrEntity: string | Entity) {
+  var cleanName = isEntity(cleanNameOrEntity) ? cleanNameOrEntity.Type : cleanNameOrEntity;
+  var entity = isEntity(cleanNameOrEntity) ? cleanNameOrEntity : undefined;
+
+  entityChanged.forEach(a => a(cleanName, entity));
+}
+
+export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
 
   if (isTypeEntity(entity.Type)) {
 
@@ -57,20 +76,26 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
       return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
     return renderTitle(typeInfo, entity);
-
   }
   else if (isTypeModel(entity.Type)) {
-
-    const typeInfo = getTypeInfo(entity.Type);
-    return typeInfo.niceName;
+    return undefined;
 
   } else {
-
     return pr!.typeReference().typeNiceName;
   }
 }
 
-let renderId = (entity: Entity): React.ReactChild => <span className={classes(getTypeInfo(entity.Type).members["Id"].type!.name == "Guid" ? "sf-guid-id" : "")}>{entity.id}</span>;
+let renderId = (entity: Entity): React.ReactChild => {
+  const guid = getTypeInfo(entity.Type).members["Id"].type!.name == "Guid";
+  return (
+    <>
+      <span className={guid ? "sf-hide-id" : ""}>
+        {entity.id}
+      </span>
+      <CopyLiteButton className={"sf-hide-id"} entity={entity} />
+    </>
+  );
+}
 
 export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactChild) {
   renderId = newFunction;
@@ -511,7 +536,7 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
   return undefined;
 }
 
-export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, ctx: TypeContext<any>, create: boolean, showType?: boolean): AutocompleteConfig<any> | null {
+export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, findOptionsDictionary: { [typeName: string]: FindOptions } | undefined, ctx: TypeContext<any>, create: boolean, showType?: boolean): AutocompleteConfig<any> | null {
   if (type.isEmbedded || type.name == IsByAll)
     return null;
 
@@ -526,7 +551,28 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   }
 
   if (!result) {
-    if (findOptions)
+    if (findOptionsDictionary) {
+      result = new LiteAutocompleteConfig((signal, subStr) =>
+        Promise.all(
+          types.map(type => {
+            if (type == null)
+              return Promise.resolve([]);
+
+            var fo: FindOptions = (findOptionsDictionary && findOptionsDictionary[type?.name]) ?? defaultFindOptions({ name: type?.name }) ?? { queryName: type.name } as FindOptions;
+
+            return getLitesWithSubStr(fo, subStr, signal);
+          })
+        ).then(arr => {
+          var lites = arr.flatMap(a => a);
+
+          return [
+            ...lites,
+            ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
+          ]
+        })
+      );
+    }
+    else if (findOptions)
       result = new FindOptionsAutocompleteConfig(findOptions, {
         getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
       });
@@ -548,7 +594,8 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
 }
 
 export interface ViewOptions {
-  title?: string;
+  title?: React.ReactNode | null;
+  subTitle?: React.ReactNode | null;
   propertyRoute?: PropertyRoute;
   readOnly?: boolean;
   modalSize?: BsSize;
@@ -600,7 +647,7 @@ export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event:
     return Promise.resolve();
   }
   else {
-    return view(pack).then(() => undefined);
+    return view(pack, { buttons: "close" }).then(() => undefined);
   }
 }
 
@@ -784,12 +831,15 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isReadOnly?: boolean;
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
+  allowWrapEntityLink?: boolean;
 
   modalSize?: BsSize;
 
+  stickyHeader?: boolean;
+
   autocomplete?: (fo: FindOptions | undefined) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
-  autocompleteConstructor?: (str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null;
+  autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
 
   getViewPromise?: (entity: T) => ViewPromise<T>;
   onNavigateRoute?: (typeName: string, id: string | number) => string;
@@ -820,7 +870,17 @@ export interface AutocompleteConstructor<T extends ModifiableEntity> {
 export function getAutocompleteConstructors(tr: TypeReference, str: string, aac: AutocompleteConstructorContext): AutocompleteConstructor<ModifiableEntity>[]{
   return getTypeInfos(tr.name).map(ti => {
     var es = getSettings(ti);
-    return es?.autocompleteConstructor && es.autocompleteConstructor(str, aac);
+
+    if (es == null || es.autocompleteConstructor == null)
+      return null;
+
+    if (typeof es.autocompleteConstructor == "string")
+      return softCast<AutocompleteConstructor<ModifiableEntity>>({
+        type: ti.name,
+        onClick: () => Constructor.construct(ti.name, { [es!.autocompleteConstructor as string]: str }).then(a=>a && view(a))
+      });
+
+    return es.autocompleteConstructor(str, aac);
   }).notNull();
 }
 
@@ -838,11 +898,15 @@ export class EntitySettings<T extends ModifiableEntity> {
   avoidPopup!: boolean;
   supportsAdditionalTabs?: boolean;
 
+  allowWrapEntityLink?: boolean;
+
   modalSize?: BsSize;
+
+  stickyHeader?: boolean;
 
   autocomplete?: (fo: FindOptions | undefined) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
-  autocompleteConstructor?: (str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null;
+  autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
 
   findOptions?: FindOptions;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;

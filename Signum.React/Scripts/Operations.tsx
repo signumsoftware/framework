@@ -176,7 +176,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
   createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
-  onClick?: (coc: ContextualOperationContext<T>) => void;
+  onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
   icon?: IconProp;
@@ -196,7 +196,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
-  onClick?: (coc: ContextualOperationContext<T>) => void;
+  onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
@@ -219,8 +219,8 @@ export class ContextualOperationContext<T extends Entity> {
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
 
 
-  defaultContextualClick(...args: any[]) {
-    defaultContextualClick(this, ...args);
+  defaultContextualClick(...args: any[]): Promise<void> {
+    return defaultContextualClick(this, ...args);
   }
 
   constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>) {
@@ -298,10 +298,29 @@ export class ContextualOperationContext<T extends Entity> {
 
     return [<OperationMenuItem coc={this} />];
   }
+
+  raiseEntityChanged() {
+    return this.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
+  }
 }
 
 export class EntityOperationContext<T extends Entity> {
   
+
+  static fromChildTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string, canExecute: string | undefined): EntityOperationContext<T> | undefined {
+
+    const operationKey = (operation as OperationSymbol).key || operation as string;
+    const oi = getTypeInfo(ctx.value.Type).operations![operationKey];
+
+    if (oi == null)
+      return undefined;
+
+    const result = new EntityOperationContext<T>(ctx.frame!, ctx.value, oi);
+    result.settings = getSettings(operationKey) as EntityOperationSettings<T>;
+    result.canExecute = canExecute ?? (ctx.value.isNew && !oi.canBeNew ? EngineMessage.TheEntity0IsNew.niceToString(getToString(ctx.value)) : undefined);
+    result.complete();
+    return result;
+  }
 
   static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string): EntityOperationContext<T> | undefined {
     if (!ctx.frame)
@@ -335,9 +354,9 @@ export class EntityOperationContext<T extends Entity> {
   settings?: EntityOperationSettings<T>;
   canExecute?: string;
   event?: React.MouseEvent<any>;
-  onExecuteSuccess?: (pack: EntityPack<T>) => void;
-  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
-  onDeleteSuccess?: () => void;
+  onExecuteSuccess?: (pack: EntityPack<T>) => Promise<void>;
+  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => Promise<void>;
+  onDeleteSuccess?: () => Promise<void>;
 
   color?: BsColor;
   icon?: IconProp;
@@ -401,17 +420,16 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   defaultClick(...args: any[]) {
-    defaultOnClick(this, ...args);
+    return defaultOnClick(this, ...args);
   }
 
   click() {
-    if (this.frame.avoidPrompt) //othwersie FrontPage will prompt then executing and navigating
-      this.frame.avoidPrompt();
-
-    if (this.settings && this.settings.onClick)
-      this.settings.onClick(this);
-    else
-      defaultOnClick(this);
+    this.frame.execute(() => {
+      if (this.settings && this.settings.onClick)
+        return this.settings.onClick(this);
+      else
+        return defaultOnClick(this);
+    }).done();
   }
 
   textOrNiceName() {
@@ -466,10 +484,11 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
-  onClick?: (eoc: EntityOperationContext<T>) => void;
+  onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
+  showOnSaveChangesModal?: boolean;
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
@@ -498,10 +517,11 @@ export interface EntityOperationOptions<T extends Entity> {
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
-  onClick?: (eoc: EntityOperationContext<T>) => void;
+  onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
+  showOnSaveChangesModal?: boolean;
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;

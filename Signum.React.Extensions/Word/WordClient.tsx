@@ -60,7 +60,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
     onClick: ctx => {
 
       var promise: Promise<string | undefined> = ctx.entity.model ? API.getConstructorType(ctx.entity.model) : Promise.resolve(undefined);
-      promise
+      return promise
         .then<Response | undefined>(ct => {
           var template = toLite(ctx.entity);
 
@@ -77,8 +77,8 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
           if (!response)
             return;
 
-          saveFile(response);
-        }).done();
+          return saveFile(response);
+        });
     }
   }));
 
@@ -102,7 +102,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
 export function getEntityWordButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {
 
   if (Navigator.isViewable(WordTemplateEntity) && ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0)
-    return [{ button: <WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} /> }];
+    return [{ button: <WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} />, order: 1000 }];
 
   return undefined;
 }

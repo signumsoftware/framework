@@ -87,13 +87,14 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
     return last;
   };
+  var format = d3.format(",d");
 
   return (
     <svg direction="ltr" width={width} height={height} >
       {nodes.map((d, i) => {
         const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);
 
-        return (<g key={getNodeKey(d)} className="node sf-transition" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
+        return (<g key={getNodeKey(d)} className="node sf-transition hover-group" transform={translate(d.x0 - p2, d.y0 - p2) + scaleTransform}>
           {isFolder(d.data) &&
             <rect className="folder sf-transition" shapeRendering="initial"
               opacity={active == false ? .5 : undefined}
@@ -104,12 +105,12 @@ export default function renderTreeMap({ data, width, height, parameters, loading
               strokeWidth={active == true ? 3 : undefined}
               onClick={e => onDrillDown({ c2: (d.data as Folder).folder }, e)} cursor="pointer">
               <title>
-                {folderColor!(((d.data as Folder).folder))}
+                {parentColumn!.getNiceName(d.data.folder)}: {format(size.invert(d.value!))}
               </title>
             </rect>
           }
           {!isFolder(d.data) &&
-            <rect className="leaf sf-transition"
+            <rect className="leaf sf-transition hover-target"
               shapeRendering="initial"
               opacity={active == false ? .5 * opacity : opacity}
               width={nodeWidth(d)}

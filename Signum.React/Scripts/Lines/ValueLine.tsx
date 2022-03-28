@@ -3,7 +3,7 @@ import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import { DateTimePicker, DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes, softCast } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toDurationFormat, toNumberFormat, isTypeEnum, durationToString, TypeInfo, parseDuration, tryGetTypeInfo } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -21,10 +21,11 @@ export interface ValueLineProps extends LineBaseProps {
   autoFixString?: boolean;
   inlineCheckbox?: boolean | "block";
   optionItems?: (OptionItem | MemberInfo | string)[];
+  datalist?: string[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
-  initiallyFocused?: boolean;
+  initiallyFocused?: boolean | number;
 
   incrementWithArrow?: boolean | number;
 
@@ -52,7 +53,7 @@ export type ValueLineType =
   "Number" |
   "Decimal" |
   "Color" |
-  "TimeSpan" |
+  "Time" |
   "RadioGroup" |
   "Password";
 
@@ -75,7 +76,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
               element.setSelectionRange(0, element.value.length);
             element.focus();
           }
-        }, 0);
+        }, this.props.initiallyFocused  == true ? 0 : this.props.initiallyFocused as number);
       }
 
     }, []);
@@ -117,7 +118,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "boolean")
       return "Checkbox";
 
-    if (t.name == "datetime" || t.name == "DateTimeOffset" || t.name == "Date")
+    if (t.name == "DateTime" || t.name == "DateTimeOffset" || t.name == "DateOnly")
       return "DateTime";
 
     if (t.name == "string" || t.name == "Guid")
@@ -129,8 +130,8 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "decimal")
       return "Decimal";
 
-    if (t.name == "TimeSpan")
-      return "TimeSpan";
+    if (t.name == "TimeSpan" || t.name == "TimeOnly")
+      return "Time";
 
     return undefined;
   }
@@ -142,21 +143,17 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     return (
       <div className={this.props.ctx.inputGroupClass}>
         {input}
-        {
-          (this.props.unitText != null || this.props.extraButtons != null) &&
-          <div className="input-group-append">
-            {this.props.unitText && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unitText}</span>}
-            {this.props.extraButtons && this.props.extraButtons(this)}
-          </div>
-        }
+        {this.props.unitText && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unitText}</span>}
+        {this.props.extraButtons && this.props.extraButtons(this)}
       </div>
     );
   }
 
   getPlaceholder(): string | undefined {
     const p = this.props;
-    return p.ctx.placeholderLabels ? asString(p.labelText) :
-      p.valueHtmlAttributes && p.valueHtmlAttributes!.placeholder;
+    return p.valueHtmlAttributes?.placeholder ??
+      (p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.labelText) :
+      undefined;
   }
 }
 
@@ -210,7 +207,7 @@ export function isNumber(e: React.KeyboardEvent<any>) {
     (e.ctrlKey && c == 67) /*Ctrl + c*/);
 }
 
-function isDecimal(e: React.KeyboardEvent<any>): boolean {
+export function isDecimal(e: React.KeyboardEvent<any>): boolean {
   const c = e.keyCode;
   return (isNumber(e) ||
     (c == 110) /*NumPad Decimal*/ ||
@@ -232,9 +229,13 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
   };
 
   if (s.inlineCheckbox) {
+
+    var atts = { ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes, ...s.labelHtmlAttributes };
     return (
-      <label className={vl.props.ctx.error} style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...vl.baseHtmlAttributes()} {...s.formGroupHtmlAttributes} {...s.labelHtmlAttributes}>
-        <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly} />
+      <label style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...atts} className={classes(s.ctx.labelClass, vl.props.ctx.errorClass, atts.className)}>
+        <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
+          className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))}
+        />
         {" "}{s.labelText}
         {s.helpText && <small className="form-text text-muted">{s.helpText}</small>}
       </label>
@@ -244,7 +245,7 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
-          className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} disabled={s.ctx.readOnly} />
+          className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))} disabled={s.ctx.readOnly} />
       </FormGroup>
     );
   }
@@ -343,13 +344,14 @@ function internalDropDownList(vl: ValueLineController) {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
-          <DropdownList className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems} onChange={handleOptionItem} value={oi}
+          <DropdownList<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems} onChange={handleOptionItem} value={oi}
             filter={false}
             autoComplete="off"
             dataKey="value"
             textField="label"
             renderValue={a => vl.props.onRenderDropDownListItem!(a.item)}
             renderListItem={a => vl.props.onRenderDropDownListItem!(a.item)}
+            {...(s.valueHtmlAttributes as any)}
           />)
         }
       </FormGroup>
@@ -365,7 +367,7 @@ function internalDropDownList(vl: ValueLineController) {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
-          <select {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} onChange={handleEnumOnChange} >
+          <select {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formSelectClass, vl.mandatoryClass))} onChange={handleEnumOnChange} >
             {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
           </select>)
         }
@@ -420,12 +422,13 @@ function internalComboBoxText(vl: ValueLineController) {
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <Combobox className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
+        <Combobox<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
           dataKey="value"
           textField="label"
           focusFirstItem
           autoSelectMatches
           renderListItem={renderItem}
+          {...(s.valueHtmlAttributes as any)}
         />)
       }
     </FormGroup>
@@ -485,7 +488,13 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211
           onInput={isIE11() ? handleTextOnChange : undefined}
           placeholder={vl.getPlaceholder()}
+          list={s.datalist ? s.ctx.getUniqueId("dataList") : undefined}
           ref={vl.inputElement as React.RefObject<HTMLInputElement>} />)
+      }
+      {s.datalist &&
+        <datalist id={s.ctx.getUniqueId("dataList")}>
+          {s.datalist.map(item => <option value={item} />)}
+        </datalist>
       }
     </FormGroup>
   );
@@ -724,16 +733,16 @@ export function NumericTextBox(p: NumericTextBoxProps) {
 ValueLineRenderers.renderers.set("DateTime", (vl) => {
 
   const s = vl.props;
-  const type = vl.props.type!.name as "Date" | "DateTime";
+  const type = vl.props.type!.name as "DateOnly" | "DateTime";
   const luxonFormat = toLuxonFormat(s.formatText, type);
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
-  const showTime = s.showTimeBox != null ? s.showTimeBox : type != "Date" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
+  const showTime = s.showTimeBox != null ? s.showTimeBox : type != "DateOnly" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
-          {m?.toFormatFixed(luxonFormat)}
+          {m && toFormatWithFixes(m, luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
     );
@@ -747,7 +756,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
 
     // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
     vl.setValue(m == null || !m.isValid ? null :
-      type == "Date" ? m.toISODate() :
+      type == "DateOnly" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss", { locale: 'en-GB' }/*No Z*/) :
           m.toISO());
   };
@@ -761,7 +770,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
-          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
+          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(vl.props.initiallyFocused)}
             valueEditFormat={luxonFormat}
             valueDisplayFormat={luxonFormat}
             includeTime={showTime}
@@ -785,7 +794,7 @@ function defaultRenderDay({ date, label }: { date: Date; label: string }) {
   return <span className={today? "sf-today" : undefined}>{label}</span>;
 }
 
-export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", format: string | undefined): DateTime {
+export function trimDateToFormat(date: DateTime, type: "DateOnly" | "DateTime", format: string | undefined): DateTime {
 
   const luxonFormat = toLuxonFormat(format, type);
 
@@ -797,22 +806,20 @@ export function trimDateToFormat(date: DateTime, type: "Date" | "DateTime", form
   return DateTime.fromFormat(formatted, luxonFormat,{locale:'en-GB'}); 
 }
 
-ValueLineRenderers.renderers.set("TimeSpan", (vl) => {
-  return durationTextBox(vl, isDuration);
+ValueLineRenderers.renderers.set("Time", (vl) => {
+  return timeTextBox(vl, isDuration);
 });
 
-function durationTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
+function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
 
   const s = vl.props;
-
-  const durationFormat = toDurationFormat(s.formatText);
 
   if (s.ctx.readOnly) {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.props.valueHtmlAttributes, "numeric")} innerRef={vl.inputElement}>
-            {durationToString(s.ctx.value, durationFormat)}
+            {timeToString(s.ctx.value, s.formatText)}
           </FormControlReadonly>
         )}
       </FormGroup>
@@ -829,17 +836,17 @@ function durationTextBox(vl: ValueLineController, validateKey: (e: React.Keyboar
   } as React.AllHTMLAttributes<any>;
 
   if (htmlAttributes.placeholder == undefined)
-    htmlAttributes.placeholder = durationFormat;
+    htmlAttributes.placeholder = s.formatText?.replaceAll("H", "h").replaceAll("\\:", ":");
 
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <DurationTextBox htmlAttributes={htmlAttributes}
+        <TimeTextBox htmlAttributes={htmlAttributes}
           value={s.ctx.value}
           onChange={handleOnChange}
           validateKey={validateKey}
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
-          format={durationFormat}
+          format={s.formatText}
           innerRef={vl.inputElement as React.RefObject<HTMLInputElement>} />
       )}
     </FormGroup>
@@ -856,12 +863,12 @@ export interface DurationTextBoxProps {
   innerRef?: React.RefObject<HTMLInputElement>;
 }
 
-export function DurationTextBox(p: DurationTextBoxProps) {
+export function TimeTextBox(p: DurationTextBoxProps) {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 
   const value = text != undefined ? text :
-    p.value != undefined ? durationToString(p.value, p.format) :
+    p.value != undefined ? timeToString(p.value, p.format) :
       "";
 
   return <input ref={p.innerRef}
@@ -889,10 +896,11 @@ export function DurationTextBox(p: DurationTextBoxProps) {
 
   function handleOnBlur(e: React.FocusEvent<any>) {
 
-    var format = p.format!;
-
     const input = e.currentTarget as HTMLInputElement;
-    const result = input.value == undefined || input.value.length == 0 ? null : parseDurationRelaxed(input.value, format)?.toFormat(format) ?? null;
+
+    var duration = input.value == undefined || input.value.length == 0 ? null : Duration.fromISOTime(fixCasual(input.value));
+
+    const result = duration && duration.toISOTime();
     setText(undefined);
     if (p.value != result)
       p.onChange(result);
@@ -911,38 +919,24 @@ export function DurationTextBox(p: DurationTextBoxProps) {
   }
 }
 
-export function parseDurationRelaxed(timeStampOrHumanStr: string, format: string = "hh:mm:ss"): Duration | null {
-  var valParts = timeStampOrHumanStr.split(":");
-  var formatParts = format.split(":").map(p => p.length == 1 ? p + p : p); //"h -> hh"
-  if (valParts.length == 1 && formatParts.length > 1) {
-    const validFormats = Array.range(0, formatParts.length).map(i => Array.range(0, i + 1).map(j => formatParts[j]).join("")); //hh:mm:ss -> "" "hh" "hhmm" "hhmmss"
+function fixCasual(val: string) {
 
-    var inferedFormat = validFormats.firstOrNull(f => f.length >= timeStampOrHumanStr.length);
-    if (inferedFormat == null)
-      return null;
+  if (val.contains(":"))
+    return val.split(":").map(a => a.padStart(2, "0")).join(":");
 
-    var fixedVal = timeStampOrHumanStr.padStart(inferedFormat.length, '0');
+  if (val.length == 1)
+    return "0" + val + "00";
 
-    const getPart = (part: string) => {
-      var index = inferedFormat!.indexOf(part);
-      if (index == -1)
-        return 0;
+  if (val.length == 2)
+    return  val + "00";
 
-      return parseInt(fixedVal.substr(index, part.length));
-    }
+  if (val.length == 3)
+    return "0" + val;
 
-    return Duration.fromObject({
-      hour: getPart("hh"),
-      minute: getPart("mm"),
-      second: getPart("ss"),
-    });
-
-  } else {
-    return parseDuration(timeStampOrHumanStr, format);
-  }
+  return val;
 }
 
-DurationTextBox.defaultProps = {
+TimeTextBox.defaultProps = {
   format: "hh:mm:ss"
 };
 
@@ -966,7 +960,7 @@ function internalRadioGroup(vl: ValueLineController) {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       <div style={getColumnStyle()}>
         {optionItems.map((oi, i) =>
-          <label {...vl.props.valueHtmlAttributes} className={classes("sf-radio-element", vl.props.ctx.error)}>
+          <label {...vl.props.valueHtmlAttributes} className={classes("sf-radio-element", vl.props.ctx.errorClass)}>
             <input type="radio" key={i} value={oi.value} checked={s.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={s.ctx.readOnly} />
             {" " + oi.label}
           </label>)}

@@ -2,385 +2,375 @@ using Microsoft.Data.SqlClient;
 using Npgsql;
 using NpgsqlTypes;
 using Signum.Engine.Connection;
-using Signum.Engine.Engine;
 using Signum.Engine.Maps;
 using Signum.Engine.PostgresCatalog;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Signum.Engine
+namespace Signum.Engine;
+
+
+public static class PostgresVersionDetector
 {
-
-    public static class PostgresVersionDetector
+    public static Version Detect(string connectionString)
     {
-        public static Version Detect(string connectionString)
+        return SqlServerRetry.Retry(() =>
         {
-            return SqlServerRetry.Retry(() =>
+            using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
             {
-                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                var sql = @"SHOW server_version;";
+
+                using (NpgsqlCommand cmd = new NpgsqlCommand(sql, con))
                 {
-                    var sql = @"SHOW server_version;";
+                    NpgsqlDataAdapter da = new NpgsqlDataAdapter(cmd);
 
-                    using (NpgsqlCommand cmd = new NpgsqlCommand(sql, con))
-                    {
-                        NpgsqlDataAdapter da = new NpgsqlDataAdapter(cmd);
+                    DataTable result = new DataTable();
+                    da.Fill(result);
 
-                        DataTable result = new DataTable();
-                        da.Fill(result);
+                    var version = (string)result.Rows[0]["server_version"]!;
 
-                        var version = (string)result.Rows[0]["server_version"]!;
-
-                        return new Version(version.TryBefore("(") ?? version);
-                    }
+                    return new Version(version.TryBefore("(") ?? version);
                 }
-            });
+            }
+        });
+    }
+}
+
+public class PostgreSqlConnector : Connector
+{
+    public override ParameterBuilder ParameterBuilder { get; protected set; }
+
+    public Version? PostgresVersion { get; set; }
+
+    public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion) : base(schema.Do(s => s.Settings.IsPostgres = true))
+    {
+        this.ConnectionString = connectionString;
+        this.ParameterBuilder = new PostgreSqlParameterBuilder();
+        this.PostgresVersion = postgresVersion;
+    }
+
+    public override int MaxNameLength => 63;
+
+    public int? CommandTimeout { get; set; } = null;
+    public string ConnectionString { get; set; }
+
+    public override bool AllowsMultipleQueries => true;
+
+    public override bool SupportsScalarSubquery => true;
+
+    public override bool SupportsScalarSubqueryInAggregates => true;
+
+    public override bool AllowsSetSnapshotIsolation => false;
+
+    public override bool AllowsConvertToDate => true;
+
+    public override bool AllowsConvertToTime => true;
+
+    public override bool SupportsSqlDependency => false;
+
+    public override bool SupportsFormat => true;
+
+    public override bool SupportsTemporalTables => true;
+
+    public override bool RequiresRetry => false;
+
+    public override bool AllowsIndexWithWhere(string where) => true;
+
+    public override Connector ForDatabase(Maps.DatabaseName? database)
+    {
+        if (database == null)
+            return this;
+
+        throw new NotImplementedException("ForDatabase " + database);
+    }
+
+    public override void CleanDatabase(DatabaseName? database)
+    {
+        PostgreSqlConnectorScripts.RemoveAllScript(database).ExecuteNonQuery();
+    }
+
+    public override DbParameter CloneParameter(DbParameter p)
+    {
+        NpgsqlParameter sp = (NpgsqlParameter)p;
+        return new NpgsqlParameter(sp.ParameterName, sp.Value) { IsNullable = sp.IsNullable, NpgsqlDbType = sp.NpgsqlDbType };
+    }
+
+    public override DbConnection CreateConnection()
+    {
+        return new NpgsqlConnection(ConnectionString);
+    }
+
+    public override string DatabaseName()
+    {
+        return new NpgsqlConnection(ConnectionString).Database!;
+    }
+
+    public override string DataSourceName()
+    {
+        return new NpgsqlConnection(ConnectionString).DataSource;
+    }
+
+    public override string GetSqlDbType(DbParameter p)
+    {
+        return ((NpgsqlParameter)p).NpgsqlDbType.ToString().ToUpperInvariant();
+    }
+
+    public override void RollbackTransactionPoint(DbTransaction transaction, string savePointName)
+    {
+        ((NpgsqlTransaction)transaction).Rollback(savePointName);
+    }
+
+    public override void SaveTransactionPoint(DbTransaction transaction, string savePointName)
+    {
+        ((NpgsqlTransaction)transaction).Save(savePointName);
+    }
+
+    T EnsureConnectionRetry<T>(Func<NpgsqlConnection?, T> action)
+    {
+        if (Transaction.HasTransaction)
+            return action(null);
+
+        using (NpgsqlConnection con = new NpgsqlConnection(this.ConnectionString))
+        {
+            con.Open();
+
+            return action(con);
         }
     }
 
-    public class PostgreSqlConnector : Connector
+    NpgsqlCommand NewCommand(SqlPreCommandSimple preCommand, NpgsqlConnection? overridenConnection, CommandType commandType)
     {
-        public override ParameterBuilder ParameterBuilder { get; protected set; }
+        NpgsqlCommand cmd = new NpgsqlCommand { CommandType = commandType };
 
-        public Version? PostgresVersion { get; set; }
+        int? timeout = Connector.ScopeTimeout ?? CommandTimeout;
+        if (timeout.HasValue)
+            cmd.CommandTimeout = timeout.Value;
 
-        public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion) : base(schema.Do(s => s.Settings.IsPostgres = true))
+        if (overridenConnection != null)
+            cmd.Connection = overridenConnection;
+        else
         {
-            this.ConnectionString = connectionString;
-            this.ParameterBuilder = new PostgreSqlParameterBuilder();
-            this.PostgresVersion = postgresVersion;
+            cmd.Connection = (NpgsqlConnection)Transaction.CurrentConnection!;
+            cmd.Transaction = (NpgsqlTransaction)Transaction.CurrentTransaccion!;
         }
 
-        public override int MaxNameLength => 63;
+        cmd.CommandText = preCommand.Sql;
 
-        public int? CommandTimeout { get; set; } = null;
-        public string ConnectionString { get; set; }
-
-        public override bool AllowsMultipleQueries => true;
-
-        public override bool SupportsScalarSubquery => true;
-
-        public override bool SupportsScalarSubqueryInAggregates => true;
-
-        public override bool AllowsSetSnapshotIsolation => false;
-
-        public override bool AllowsConvertToDate => true;
-
-        public override bool AllowsConvertToTime => true;
-
-        public override bool SupportsSqlDependency => false;
-
-        public override bool SupportsFormat => true;
-
-        public override bool SupportsTemporalTables => true;
-
-        public override bool RequiresRetry => false;
-
-        public override bool AllowsIndexWithWhere(string where) => true;
-
-        public override Connector ForDatabase(Maps.DatabaseName? database)
+        if (preCommand.Parameters != null)
         {
-            if (database == null)
-                return this;
-
-            throw new NotImplementedException("ForDatabase " + database);
-        }
-
-        public override void CleanDatabase(DatabaseName? database)
-        {
-            PostgreSqlConnectorScripts.RemoveAllScript(database).ExecuteNonQuery();
-        }
-
-        public override DbParameter CloneParameter(DbParameter p)
-        {
-            NpgsqlParameter sp = (NpgsqlParameter)p;
-            return new NpgsqlParameter(sp.ParameterName, sp.Value) { IsNullable = sp.IsNullable, NpgsqlDbType = sp.NpgsqlDbType };
-        }
-
-        public override DbConnection CreateConnection()
-        {
-            return new NpgsqlConnection(ConnectionString);
-        }
-
-        public override string DatabaseName()
-        {
-            return new NpgsqlConnection(ConnectionString).Database!;
-        }
-
-        public override string DataSourceName()
-        {
-            return new NpgsqlConnection(ConnectionString).DataSource;
-        }
-
-        public override string GetSqlDbType(DbParameter p)
-        {
-            return ((NpgsqlParameter)p).NpgsqlDbType.ToString().ToUpperInvariant();
-        }
-
-        public override void RollbackTransactionPoint(DbTransaction transaction, string savePointName)
-        {
-            ((NpgsqlTransaction)transaction).Rollback(savePointName);
-        }
-
-        public override void SaveTransactionPoint(DbTransaction transaction, string savePointName)
-        {
-            ((NpgsqlTransaction)transaction).Save(savePointName);
-        }
-
-        T EnsureConnectionRetry<T>(Func<NpgsqlConnection?, T> action)
-        {
-            if (Transaction.HasTransaction)
-                return action(null);
-
-            using (NpgsqlConnection con = new NpgsqlConnection(this.ConnectionString))
+            foreach (NpgsqlParameter param in preCommand.Parameters)
             {
-                con.Open();
-
-                return action(con);
+                cmd.Parameters.Add(param);
             }
         }
 
-        NpgsqlCommand NewCommand(SqlPreCommandSimple preCommand, NpgsqlConnection? overridenConnection, CommandType commandType)
+        Log(preCommand);
+
+        return cmd;
+    }
+
+    protected internal override void BulkCopy(DataTable dt, List<IColumn> columns, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
+    {
+        EnsureConnectionRetry(con =>
         {
-            NpgsqlCommand cmd = new NpgsqlCommand { CommandType = commandType };
+            con = con ?? (NpgsqlConnection)Transaction.CurrentConnection!;
 
-            int? timeout = Connector.ScopeTimeout ?? CommandTimeout;
-            if (timeout.HasValue)
-                cmd.CommandTimeout = timeout.Value;
+            bool isPostgres = true;
 
-            if (overridenConnection != null)
-                cmd.Connection = overridenConnection;
-            else
+            var columnsSql = dt.Columns.Cast<DataColumn>().ToString(a => a.ColumnName.SqlEscape(isPostgres), ", ");
+            using (var writer = con.BeginBinaryImport($"COPY {destinationTable} ({columnsSql}) FROM STDIN (FORMAT BINARY)"))
             {
-                cmd.Connection = (NpgsqlConnection)Transaction.CurrentConnection!;
-                cmd.Transaction = (NpgsqlTransaction)Transaction.CurrentTransaccion!;
-            }
-
-            cmd.CommandText = preCommand.Sql;
-
-            if (preCommand.Parameters != null)
-            {
-                foreach (NpgsqlParameter param in preCommand.Parameters)
+                for (int i = 0; i < dt.Rows.Count; i++)
                 {
-                    cmd.Parameters.Add(param);
-                }
-            }
-
-            Log(preCommand);
-
-            return cmd;
-        }
-
-        protected internal override void BulkCopy(DataTable dt, List<IColumn> columns, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
-        {
-            EnsureConnectionRetry(con =>
-            {
-                con = con ?? (NpgsqlConnection)Transaction.CurrentConnection!;
-
-                bool isPostgres = true;
-
-                var columnsSql = dt.Columns.Cast<DataColumn>().ToString(a => a.ColumnName.SqlEscape(isPostgres), ", ");
-                using (var writer = con.BeginBinaryImport($"COPY {destinationTable} ({columnsSql}) FROM STDIN (FORMAT BINARY)"))
-                {
-                    for (int i = 0; i < dt.Rows.Count; i++)
+                    var row = dt.Rows[i];
+                    writer.StartRow();
+                    for (int j = 0; j < dt.Columns.Count; j++)
                     {
-                        var row = dt.Rows[i];
-                        writer.StartRow();
-                        for (int j = 0; j < dt.Columns.Count; j++)
-                        {
-                            var col = dt.Columns[j];
-                            writer.Write(row[col], columns[j].DbType.PostgreSql);
-                        }
-                    }
-
-                    writer.Complete();
-                    return 0;
-                }
-            });
-        }
-
-        protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand, CommandType commandType)
-        {
-            return EnsureConnectionRetry(con =>
-            {
-                using (NpgsqlCommand cmd = NewCommand(preCommand, con, commandType))
-                using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
-                {
-                    try
-                    {
-                        NpgsqlDataAdapter da = new NpgsqlDataAdapter(cmd);
-
-                        DataTable result = new DataTable();
-                        da.Fill(result);
-                        return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        var nex = HandleException(ex, preCommand);
-                        if (nex == ex)
-                            throw;
-
-                        throw nex;
+                        var col = dt.Columns[j];
+                        writer.Write(row[col], columns[j].DbType.PostgreSql);
                     }
                 }
-            });
-        }
 
-        protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType)
+                writer.Complete();
+                return 0;
+            }
+        });
+    }
+
+    protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand, CommandType commandType)
+    {
+        return EnsureConnectionRetry(con =>
         {
-            return EnsureConnectionRetry(con =>
+            using (NpgsqlCommand cmd = NewCommand(preCommand, con, commandType))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
-                using (NpgsqlCommand cmd = NewCommand(preCommand, con, commandType))
-                using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
+                try
                 {
-                    try
-                    {
-                        int result = cmd.ExecuteNonQuery();
-                        return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        var nex = HandleException(ex, preCommand);
-                        if (nex == ex)
-                            throw;
+                    NpgsqlDataAdapter da = new NpgsqlDataAdapter(cmd);
 
-                        throw nex;
-                    }
+                    DataTable result = new DataTable();
+                    da.Fill(result);
+                    return result;
                 }
-            });
-        }
-
-        protected internal override object? ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType)
-        {
-            return EnsureConnectionRetry(con =>
-            {
-                using (NpgsqlCommand cmd = NewCommand(preCommand, con, commandType))
-                using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        object? result = cmd.ExecuteScalar();
+                    var nex = HandleException(ex, preCommand);
+                    if (nex == ex)
+                        throw;
 
-                        if (result == null || result == DBNull.Value)
-                            return null;
-
-                        return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        var nex = HandleException(ex, preCommand);
-                        if (nex == ex)
-                            throw;
-
-                        throw nex;
-                    }
+                    throw nex;
                 }
-            });
-        }
-
-        protected internal override DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType)
-        {
-            try
-            {
-                var cmd = NewCommand(preCommand, null, commandType);
-
-                var reader = cmd.ExecuteReader();
-
-                return new DbDataReaderWithCommand(cmd, reader);
             }
-            catch (Exception ex)
+        });
+    }
+
+    protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType)
+    {
+        return EnsureConnectionRetry(con =>
+        {
+            using (NpgsqlCommand cmd = NewCommand(preCommand, con, commandType))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
-                var nex = HandleException(ex, preCommand);
-                if (nex == ex)
-                    throw;
+                try
+                {
+                    int result = cmd.ExecuteNonQuery();
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    var nex = HandleException(ex, preCommand);
+                    if (nex == ex)
+                        throw;
 
-                throw nex;
+                    throw nex;
+                }
             }
-        }
+        });
+    }
 
-        protected internal override async Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token)
+    protected internal override object? ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType)
+    {
+        return EnsureConnectionRetry(con =>
         {
-            try
+            using (NpgsqlCommand cmd = NewCommand(preCommand, con, commandType))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
-                var cmd = NewCommand(preCommand, null, commandType);
+                try
+                {
+                    object? result = cmd.ExecuteScalar();
 
-                var reader = await cmd.ExecuteReaderAsync(token);
+                    if (result == null || result == DBNull.Value)
+                        return null;
 
-                return new DbDataReaderWithCommand(cmd, reader);
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    var nex = HandleException(ex, preCommand);
+                    if (nex == ex)
+                        throw;
+
+                    throw nex;
+                }
             }
-            catch (Exception ex)
-            {
-                var nex = HandleException(ex, preCommand);
-                if (nex == ex)
-                    throw;
+        });
+    }
 
-                throw nex;
-            }
-        }
-
-        public Exception HandleException(Exception ex, SqlPreCommandSimple command)
+    protected internal override DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType)
+    {
+        try
         {
-            var nex = ReplaceException(ex, command);
-            nex.Data["Sql"] = command.sp_executesql();
-            return nex;
+            var cmd = NewCommand(preCommand, null, commandType);
+
+            var reader = cmd.ExecuteReader();
+
+            return new DbDataReaderWithCommand(cmd, reader);
         }
-
-        Exception ReplaceException(Exception ex, SqlPreCommandSimple command)
+        catch (Exception ex)
         {
-            //if (ex is Npgsql.PostgresException se)
-            //{
-            //    switch (se.Number)
-            //    {
-            //        case -2: return new TimeoutException(ex.Message, ex);
-            //        case 2601: return new UniqueKeyException(ex);
-            //        case 547: return new ForeignKeyException(ex);
-            //        default: return ex;
-            //    }
-            //}
+            var nex = HandleException(ex, preCommand);
+            if (nex == ex)
+                throw;
 
-            //if (ex is SqlTypeException ste && ex.Message.Contains("DateTime"))
-            //{
-            //    var mins = command.Parameters.Where(a => DateTime.MinValue.Equals(a.Value));
-
-            //    if (mins.Any())
-            //    {
-            //        return new ArgumentOutOfRangeException("{0} {1} not initialized and equal to DateTime.MinValue".FormatWith(
-            //            mins.CommaAnd(a => a.ParameterName),
-            //            mins.Count() == 1 ? "is" : "are"), ex);
-            //    }
-            //}
-
-            return ex;
-        }
-
-
-        public override string ToString() => $"PostgreSqlConnector({PostgresVersion}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
-
-        public override bool HasTables()
-        {
-            return (from ns in Database.View<PgNamespace>()
-                    where !ns.IsInternal()
-                    from t in ns.Tables()
-                    select t).Any();
+            throw nex;
         }
     }
 
-    public static class PostgreSqlConnectorScripts 
+    protected internal override async Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token)
     {
-        public static SqlPreCommandSimple RemoveAllScript(DatabaseName? databaseName)
+        try
         {
-            if (databaseName != null)
-                throw new NotSupportedException();
+            var cmd = NewCommand(preCommand, null, commandType);
 
-            return new SqlPreCommandSimple(@"-- Copyright © 2019
+            var reader = await cmd.ExecuteReaderAsync(token);
+
+            return new DbDataReaderWithCommand(cmd, reader);
+        }
+        catch (Exception ex)
+        {
+            var nex = HandleException(ex, preCommand);
+            if (nex == ex)
+                throw;
+
+            throw nex;
+        }
+    }
+
+    public Exception HandleException(Exception ex, SqlPreCommandSimple command)
+    {
+        var nex = ReplaceException(ex, command);
+        nex.Data["Sql"] = command.sp_executesql();
+        return nex;
+    }
+
+    Exception ReplaceException(Exception ex, SqlPreCommandSimple command)
+    {
+        //if (ex is Npgsql.PostgresException se)
+        //{
+        //    switch (se.Number)
+        //    {
+        //        case -2: return new TimeoutException(ex.Message, ex);
+        //        case 2601: return new UniqueKeyException(ex);
+        //        case 547: return new ForeignKeyException(ex);
+        //        default: return ex;
+        //    }
+        //}
+
+        //if (ex is SqlTypeException ste && ex.Message.Contains("DateTime"))
+        //{
+        //    var mins = command.Parameters.Where(a => DateTime.MinValue.Equals(a.Value));
+
+        //    if (mins.Any())
+        //    {
+        //        return new ArgumentOutOfRangeException("{0} {1} not initialized and equal to DateTime.MinValue".FormatWith(
+        //            mins.CommaAnd(a => a.ParameterName),
+        //            mins.Count() == 1 ? "is" : "are"), ex);
+        //    }
+        //}
+
+        return ex;
+    }
+
+
+    public override string ToString() => $"PostgreSqlConnector({PostgresVersion}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
+
+    public override bool HasTables()
+    {
+        return (from ns in Database.View<PgNamespace>()
+                where !ns.IsInternal()
+                from t in ns.Tables()
+                select t).Any();
+    }
+}
+
+public static class PostgreSqlConnectorScripts
+{
+    public static SqlPreCommandSimple RemoveAllScript(DatabaseName? databaseName)
+    {
+        if (databaseName != null)
+            throw new NotSupportedException();
+
+        return new SqlPreCommandSimple(@"-- Copyright © 2019
 --      mirabilos <t.glaser@tarent.de>
 --
 -- Provided that these terms and disclaimer and all copyright notices
@@ -504,71 +494,68 @@ BEGIN
         END LOOP;
         -- voilà
         RAISE NOTICE 'Database cleared!';
-END; $$;"); 
+END; $$;");
+    }
+}
+
+public class PostgreSqlParameterBuilder : ParameterBuilder
+{
+    public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value)
+    {
+        if (dbType.IsDate())
+        {
+            if (value is DateTime dt)
+                AssertDateTime(dt);
         }
+
+        var result = new Npgsql.NpgsqlParameter(parameterName, value ?? DBNull.Value)
+        {
+            IsNullable = nullable
+        };
+
+        result.NpgsqlDbType = dbType.PostgreSql;
+        if (udtTypeName != null)
+            result.DataTypeName = udtTypeName;
+
+
+        return result;
     }
 
-    public class PostgreSqlParameterBuilder : ParameterBuilder
+    public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, Expression value)
     {
-        public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value)
-        {
-            if (dbType.IsDate())
-            {
-                if (value is DateTime dt)
-                    AssertDateTime(dt);
-                else if (value is Date d)
-                    value = new NpgsqlDate((DateTime)d);
-            }
+        Expression valueExpr = Expression.Convert(
+          !dbType.IsDate() ? value :
+          value.Type.UnNullify() == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
+      value.Type.UnNullify() == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly?)), Expression.Constant(Schema.Current.DateTimeKind)) :
+          value,
+          typeof(object));
 
-            var result = new Npgsql.NpgsqlParameter(parameterName, value ?? DBNull.Value)
-            {
-                IsNullable = nullable
-            };
+        if (nullable)
+            valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),
+                        Expression.Constant(DBNull.Value, typeof(object)),
+                        valueExpr);
 
-            result.NpgsqlDbType = dbType.PostgreSql;
-            if (udtTypeName != null)
-                result.DataTypeName = udtTypeName;
+        NewExpression newExpr = Expression.New(typeof(NpgsqlParameter).GetConstructor(new[] { typeof(string), typeof(object) })!, parameterName, valueExpr);
 
 
-            return result;
-        }
-
-        public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, Expression value)
-        {
-            Expression valueExpr = Expression.Convert(
-              !dbType.IsDate() ? value :
-              value.Type.UnNullify() == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
-              value.Type.UnNullify() == typeof(Date) ? Expression.Convert(Expression.Convert(value, typeof(Date?)), typeof(DateTime?)) : //Converting from Date -> DateTime? directly produces null always
-              value,
-              typeof(object));
-
-            if (nullable)
-                valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),
-                            Expression.Constant(DBNull.Value, typeof(object)),
-                            valueExpr);
-
-            NewExpression newExpr = Expression.New(typeof(NpgsqlParameter).GetConstructor(new[] { typeof(string), typeof(object) })!, parameterName, valueExpr);
-
-
-            List<MemberBinding> mb = new List<MemberBinding>()
+        List<MemberBinding> mb = new List<MemberBinding>()
             {
                 Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.IsNullable))!, Expression.Constant(nullable)),
                 Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)),
             };
 
-            if (size != null)
-                mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Size))!, Expression.Constant(size)));
+        if (size != null)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Size))!, Expression.Constant(size)));
 
-            if (precision != null)
-                mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Precision))!, Expression.Constant(precision)));
+        if (precision != null)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Precision))!, Expression.Constant(precision)));
 
-            if (scale != null)
-                mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Scale))!, Expression.Constant(scale)));
+        if (scale != null)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Scale))!, Expression.Constant(scale)));
 
-            if (udtTypeName != null)
-                mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.DataTypeName))!, Expression.Constant(udtTypeName)));
+        if (udtTypeName != null)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.DataTypeName))!, Expression.Constant(udtTypeName)));
 
-            return Expression.MemberInit(newExpr, mb);
-        }
+        return Expression.MemberInit(newExpr, mb);
     }
 }

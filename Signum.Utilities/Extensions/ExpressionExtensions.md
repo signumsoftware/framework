@@ -25,7 +25,7 @@ public static T Evaluate<A0, A1, A2, A3, T>(this Expression<Func<A0, A1, A2, A3,
 
 ```C#
 static Expression<Func<Entity, IQueryable<NoteEntity>>> NotesExpression =
-    ident => Database.Query<NoteEntity>().Where(n => n.Target.RefersTo(ident));
+    ident => Database.Query<NoteEntity>().Where(n => n.Target.Is(ident));
 [ExpressionField]
 public static IQueryable<NoteEntity> Notes(this Entity ident)
 {

@@ -50,12 +50,10 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
 
   function renderShowPeriod() {
     return (
-      <div className="form-check form-check-inline ml-3">
-        <label className="form-check-label" >
-          <input className="form-check-input" type="checkbox" checked={isPeriodChecked()} onChange={handlePeriodClicked} />
-          {JavascriptMessage.showPeriod.niceToString()}
-        </label>
-      </div>
+      <label className="ms-3">
+        <input className="form-check-input me-1" type="checkbox" checked={isPeriodChecked()} onChange={handlePeriodClicked} />
+        {JavascriptMessage.showPeriod.niceToString()}
+      </label>
     );
   }
 
@@ -89,12 +87,10 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
 
   function renderShowOperations() {
     return (
-      <div className="form-check form-check-inline ml-3">
-        <label className="form-check-label" >
-          <input className="form-check-input" type="checkbox" checked={isPreviousOperationChecked()} onChange={handlePreviousOperationClicked} />
-          {JavascriptMessage.showPreviousOperation.niceToString()}
-        </label>
-      </div>
+      <label className="ms-3" >
+        <input className="form-check-input me-1" type="checkbox" checked={isPreviousOperationChecked()} onChange={handlePreviousOperationClicked} />
+        {JavascriptMessage.showPreviousOperation.niceToString()}
+      </label>
     );
   }
 
@@ -123,7 +119,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
   function renderMode() {
 
     return (
-      <select value={p.findOptions.systemTime!.mode} className="form-control form-control-sm ml-1" style={{ width: "auto" }} onChange={handleChangeMode}>
+      <select value={p.findOptions.systemTime!.mode} className="form-select form-select-sm ms-1" style={{ width: "auto" }} onChange={handleChangeMode}>
         {SystemTimeMode.values().map((stm, i) => <option key={i} value={stm}>{SystemTimeMode.niceToString(stm)}</option>)}
       </select>
     );
@@ -132,7 +128,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
   function renderJoinMode() {
     
     return (
-      <select value={p.findOptions.systemTime!.joinMode} className="form-control form-control-sm ml-1" style={{ width: "auto" }} onChange={handleChangeJoinMode}>
+      <select value={p.findOptions.systemTime!.joinMode} className="form-select form-select-sm ms-1" style={{ width: "auto" }} onChange={handleChangeJoinMode}>
         {SystemTimeJoinMode.values().map((stjm, i) => <option key={i} value={stjm}>{SystemTimeJoinMode.niceToString(stjm)}</option>)}
       </select>
     );
@@ -153,7 +149,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
     var m = utcDate == null ? null : DateTime.fromISO(utcDate);
     var luxonFormat = toLuxonFormat("o", "DateTime");
     return (
-      <div className="rw-widget-sm ml-1" style={{ width: "230px" }}>
+      <div className="rw-widget-sm ms-1" style={{ width: "230px" }}>
         <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange}
           valueEditFormat={luxonFormat} valueDisplayFormat={luxonFormat} includeTime={true} messages={{ dateButton: JavascriptMessage.Date.niceToString() }} />
       </div>
@@ -170,7 +166,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
       {(mode == "Between" || mode == "ContainedIn" || mode == "AsOf") && renderDateTime("startDate")}
       {(mode == "Between" || mode == "ContainedIn") && renderDateTime("endDate")}
       {isInterval(mode) && <>
-        <span style={{ paddingTop: "3px" }} className="ml-3">{JavascriptMessage.joinMode.niceToString()}</span>
+        <span style={{ paddingTop: "3px" }} className="ms-3">{JavascriptMessage.joinMode.niceToString()}</span>
         {renderJoinMode()}
         </>}
       {renderShowPeriod()}

@@ -5,14 +5,16 @@ import { toNumberFormat } from '@framework/Reflection';
 
 interface ProgressBarProps {
   value?: number | null; /*0...1*/
-  showPercentageInMessage?: boolean | null;
+  showPercentageInMessage?: boolean | string | null;
   message?: string | null;
   color?: BsColor | null;
   striped?: boolean;
   animated?: boolean;
+  containerHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  progressHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-export default function ProgressBar(p : ProgressBarProps){
+export default function ProgressBar(p: ProgressBarProps) {
   let { value, showPercentageInMessage, message, color, striped, animated } = p;
 
   if (striped == null)
@@ -23,7 +25,7 @@ export default function ProgressBar(p : ProgressBarProps){
 
   const progressStyle = color != null ? "bg-" + color : "";
 
-  var numberFormat = toNumberFormat("P2");
+  var numberFormat = toNumberFormat(typeof showPercentageInMessage == "string" ? showPercentageInMessage : "P2");
 
   const fullMessage = [
     (value == null || showPercentageInMessage === false ? undefined : numberFormat.format(value)),
@@ -31,18 +33,23 @@ export default function ProgressBar(p : ProgressBarProps){
   ].filter(a => a != null).join(" - ");
 
   return (
-    <div className={classes("progress")}>
-      <div className={classes(
-        "progress-bar",
-        progressStyle,
-        striped && "progress-bar-striped",
-        animated && "progress-bar-animated"
-      )}
+    <div
+      {...p.containerHtmlAttributes}
+      className={classes("progress", p.containerHtmlAttributes?.className)}>
+      <div
+        {...p.progressHtmlAttributes}
+        className={classes(
+          "progress-bar",
+          progressStyle,
+          striped && "progress-bar-striped",
+          animated && "progress-bar-animated",
+          p.progressHtmlAttributes?.className,
+        )}
         role="progressbar" id="progressBar"
         aria-valuenow={value == null ? undefined : value * 100}
         aria-valuemin={value == null ? undefined : 0}
         aria-valuemax={value == null ? undefined : 100}
-        style={{ width: value == null ? "100%" : (value * 100) + "%" }}>
+        style={{ width: value == null ? "100%" : (value * 100) + "%", userSelect: "none", ...p.progressHtmlAttributes?.style }}>
         <span>{fullMessage}</span>
       </div>
     </div>

@@ -2,8 +2,8 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription, QueryRequest, FilterOption, ResultTable } from '../FindOptions'
-import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage } from '../Signum.Entities'
+import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLite } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
 import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
@@ -122,6 +122,28 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   }
 }
 
+//Usefull to make a MultiFindOptions autocomplete using 
+export async function getLitesWithSubStr(fo: FindOptions, subStr: string, signal: AbortSignal): Promise<Lite<Entity>[]> {
+
+  const foClean = Finder.defaultNoColumnsAllRows(fo, 5);
+
+  const qd = await Finder.getQueryDescription(fo.queryName);
+  const qs = Finder.getSettings(fo.queryName);
+
+  const fop = await Finder.parseFindOptions({
+    ...fo,
+    filterOptions: FindOptionsAutocompleteConfig.filtersWithSubStr(fo, qd, qs, subStr),
+    includeDefaultFilters: false,
+  }, qd, true);
+
+  var qr = Finder.getQueryRequest(fop);
+
+  const rt = await Finder.API.executeQuery(qr, signal);
+
+  return rt.rows.map(a => a.entity).notNull();
+}
+
+
 interface FindOptionsAutocompleteConfigOptions extends AutocompleteConfigOptions {
   getAutocompleteConstructor?: (str: string, foundRows: ResultRow[]) => AutocompleteConstructor<Entity>[],
   count?: number,
@@ -153,6 +175,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   abortableRequest = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
+  static liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
 
   static filtersWithSubStr(fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined, subStr: string): FilterOption[] {
 
@@ -163,6 +186,24 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       var defaultFilters = Finder.getDefaultFilter(qd, qs);
       if (defaultFilters)
         filters = [...defaultFilters, ...filters];
+    }
+
+    if (FindOptionsAutocompleteConfig.liteKeyRegEx.test(subStr)) {
+      const lite = parseLite(subStr);
+      const tis = getTypeInfos(qd.columns["Entity"].type);
+      const ti = tis.singleOrNull(ti => ti.name == lite.EntityType);
+      if (ti && tis.length > 1)
+        filters.insertAt(0, {
+          token: `Entity.(${ti.name})`,
+          operation: "DistinctTo"
+        });
+
+      filters.insertAt(0, {
+        token: "Entity.Id",
+        operation: "EqualTo",
+        value: ti ? lite.id : null
+      });
+      return filters;
     }
 
     if (/^id[: ]/.test(subStr)) {

@@ -1,15 +1,12 @@
-﻿using System;
+﻿
+namespace Signum.Entities.Templating;
 
-namespace Signum.Entities.Templating
+public class ModelConverterSymbol : Symbol
 {
-    [Serializable]
-    public class ModelConverterSymbol : Symbol
-    {
-        private ModelConverterSymbol() { }
+    private ModelConverterSymbol() { }
 
-        public ModelConverterSymbol(Type declaringType, string fieldName) :
-            base(declaringType, fieldName)
-        {
-        }
+    public ModelConverterSymbol(Type declaringType, string fieldName) :
+        base(declaringType, fieldName)
+    {
     }
 }

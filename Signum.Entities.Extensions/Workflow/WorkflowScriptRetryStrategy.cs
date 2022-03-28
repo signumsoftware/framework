@@ -1,15 +1,10 @@
 using Signum.Entities.UserAssets;
-using Signum.Utilities;
-using System;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Workflow
-{
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+namespace Signum.Entities.Workflow;
+
+[EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowScriptRetryStrategyEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
@@ -46,10 +41,10 @@ namespace Signum.Entities.Workflow
 
             switch (unit.ToLower())
             {
-                case "s": return TimeZoneManager.Now.AddSeconds(value);
-                case "m": return TimeZoneManager.Now.AddMinutes(value);
-                case "h": return TimeZoneManager.Now.AddHours(value);
-                case "d": return TimeZoneManager.Now.AddDays(value);
+            case "s": return Clock.Now.AddSeconds(value);
+            case "m": return Clock.Now.AddMinutes(value);
+            case "h": return Clock.Now.AddHours(value);
+            case "d": return Clock.Now.AddDays(value);
                 default: throw new InvalidOperationException("Unexpected unit " + unit);
             }
         }
@@ -74,4 +69,3 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<WorkflowScriptRetryStrategyEntity> Save;
         public static readonly DeleteSymbol<WorkflowScriptRetryStrategyEntity> Delete;
     }
-}

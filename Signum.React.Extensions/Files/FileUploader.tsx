@@ -19,6 +19,7 @@ export interface FileUploaderProps {
   accept?: string;
   multiple?: boolean;
   buttonCss?: string;
+  fileDropCssClass?: string;
   divHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   maxSizeInBytes?: number;
 }
@@ -86,21 +87,21 @@ export function FileUploader(p: FileUploaderProps) {
   return (
     <div {...p.divHtmlAttributes}>
       {isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString()}</div> :
-        (p.dragAndDrop ? <div className={classes("sf-file-drop", isOver ? "sf-file-drop-over" : undefined)}
+        (p.dragAndDrop ? <div className={classes("sf-file-drop", p.fileDropCssClass, isOver ? "sf-file-drop-over" : undefined)}
           onDragEnter={handleDragOver}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
           <div className={classes("sf-upload btn btn-light", p.buttonCss)}>
-            <FontAwesomeIcon icon="upload" />
+            <FontAwesomeIcon icon="upload" className="me-2" />
             {FileMessage.SelectFile.niceToString()}
             <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
           </div>
           &nbsp;{p.dragAndDropMessage ?? FileMessage.OrDragAFileHere.niceToString()}
         </div> :
           <div className={classes("sf-upload btn btn-light", p.buttonCss)}>
-            <FontAwesomeIcon icon="upload" className="mr-1" />
+            <FontAwesomeIcon icon="upload" className="me-1" />
             {FileMessage.SelectFile.niceToString()}
             <input type='file' accept={p.accept} onChange={handleFileChange} multiple={p.multiple} />
           </div>

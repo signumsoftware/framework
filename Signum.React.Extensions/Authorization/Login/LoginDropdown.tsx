@@ -4,7 +4,8 @@ import { LoginAuthMessage, UserEntity } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 import { LinkContainer } from '@framework/Components';
 import { Dropdown, NavItem, NavDropdown, Nav } from 'react-bootstrap';
-import { toLite } from '@framework/Signum.Entities';
+import { Lite, toLite, is } from '@framework/Signum.Entities';
+import * as CultureClient from '../../Translation/CultureClient'
 
 
 export default function LoginDropdown(p: {
@@ -12,9 +13,10 @@ export default function LoginDropdown(p: {
   changePasswordVisible?: boolean;
   switchUserVisible?: boolean;
   profileVisible?: boolean;
-  extraButons?: (user: UserEntity) => React.ReactNode;
+  extraMenuItems?: (user: UserEntity) => React.ReactNode;
 }) {
 
+  const currentCulture = CultureClient.currentCulture;
   const user = AuthClient.currentUser();
 
   if (!user)
@@ -38,21 +40,23 @@ export default function LoginDropdown(p: {
       .done();
   }
 
-  var extraButtons = p.extraButons && p.extraButons(user);
+  var extraButtons = p.extraMenuItems && p.extraMenuItems(user);
 
   return (
-    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={p.renderName ? p.renderName(user) : user.userName!} alignRight >
-      {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-edit" fixedWidth className="mr-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
+    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={p.renderName ? p.renderName(user) : user.userName!} align="end">
+      {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-edit" fixedWidth className="me-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
       {cpv && <LinkContainer to="~/auth/changePassword">
-        <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth className="mr-2" /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
+        <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth className="me-2" /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
       </LinkContainer>} 
       {extraButtons}
       {(cpv || pv || extraButtons) && <NavDropdown.Divider />}
-      {suv && <LinkContainer to="~/auth/login"><NavDropdown.Item><FontAwesomeIcon icon="user-friends" className="mr-2" /> {LoginAuthMessage.SwitchUser.niceToString()}</NavDropdown.Item></LinkContainer>}
-      <NavDropdown.Item id="sf-auth-logout" onClick={() => AuthClient.logout()}><FontAwesomeIcon icon="sign-out-alt" fixedWidth className="mr-2"/> {LoginAuthMessage.Logout.niceToString()}</NavDropdown.Item>
+      {suv && <LinkContainer to="~/auth/login"><NavDropdown.Item><FontAwesomeIcon icon="user-friends" className="me-2" /> {LoginAuthMessage.SwitchUser.niceToString()}</NavDropdown.Item></LinkContainer>}
+      <NavDropdown.Item id="sf-auth-logout" onClick={() => AuthClient.logout()}><FontAwesomeIcon icon="sign-out-alt" fixedWidth className="me-2"/> {LoginAuthMessage.Logout.niceToString()}</NavDropdown.Item>
     </NavDropdown>
   );
 }
+
+
 
 
 

@@ -152,13 +152,14 @@ Array.prototype.groupBy = function (this: any[],
   for (const elem of this) {
 
     var key = keySelector(elem);
+    var elem2 = elementSelector == null ? elem : elementSelector(elem);
     var gr = obj[keyStringifier(key)];
     if (gr) {
-      gr.push(elem);
+      gr.push(elem2);
     } else {
       var group = {
         key: key,
-        elements: [elem]
+        elements: [elem2]
       };
       result.push(group);
       obj[keyStringifier(key)] = group.elements;
@@ -326,6 +327,8 @@ Array.prototype.toObjectDistinct = function (this: any[], keySelector: (element:
 
 Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) => any): any[] {
   const obj: any = {};
+
+  keySelector ??= a => a.toString();
 
   this.forEach(item => {
     const key = keySelector(item);
@@ -1232,4 +1235,14 @@ export function roundTwoDecimals(num: number) {
     round3m100 -= 0.001;
 
   return Math.round(round3m100) / 100; //https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-only-if-necessary
+}
+
+
+export function getColorContrasColorBWByHex (hexcolor: string) {
+  hexcolor = hexcolor.replace("#", "");
+  var r = parseInt(hexcolor.substr(0, 2), 16);
+  var g = parseInt(hexcolor.substr(2, 2), 16);
+  var b = parseInt(hexcolor.substr(4, 2), 16);
+  var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return (yiq >= 128) ? 'black' : 'white';
 }

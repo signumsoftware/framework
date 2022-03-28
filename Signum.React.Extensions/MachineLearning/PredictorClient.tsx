@@ -68,20 +68,18 @@ export function start(options: { routes: JSX.Element[] }) {
 
   Operations.addSettings(new EntityOperationSettings(PredictorOperation.Publish, {
     hideOnCanExecute: true,
-    onClick: eoc => {
+    onClick: eoc =>
       API.publications(eoc.entity.mainQuery.query!.key)
         .then(pubs => SelectorModal.chooseElement(pubs, { buttonDisplay: a => symbolNiceName(a), buttonName: a => a.key }))
         .then(pps => pps && eoc.defaultClick(pps))
-        .done();
-    },
+    ,
     contextual: {
-      onClick: coc => {
+      onClick: coc =>
         Navigator.API.fetch(coc.context.lites[0])
           .then(p => API.publications(p.mainQuery.query!.key))
           .then(pubs => SelectorModal.chooseElement(pubs, { buttonDisplay: a => symbolNiceName(a), buttonName: a => a.key }))
           .then(pps => pps && coc.defaultContextualClick(pps))
-          .done();
-      }
+
     }
   }));
 

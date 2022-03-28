@@ -59,9 +59,9 @@ using (new EntityCache())
 {
     EntityCache.Add(developer); //added to the internal dictionary
 
-    var bug = Database.Query<BugEntity>().Where(b => b.Fixer == developer).First(); //Fixer retrieved from the internal dicitonary
+    var bug = Database.Query<BugEntity>().Where(b => b.Fixer.Is(developer)).First(); //Fixer retrieved from the internal dicitonary
     
-    bug.Fixer == developer; //returns true!
+    object.ReferenceEquals(bug.Fixer, developer); //returns true!
 }
 ```
 
@@ -80,7 +80,7 @@ using(new EntityCache())
 	   var bugB = Database.Retrieve<BugEntity>(1);
 	   
 	   bugA.Equals(bugB); //returns true
-	   bugA == bugB; //returns false
+	   object.ReferenceEquals(bugA, bugB); //returns false
 	}
 }
 ```
@@ -99,7 +99,7 @@ using(new EntityCache())
 	   var bugB = Database.Retrieve<BugEntity>(1);
 	   
 	   bugA.Equals(bugB); //returns true
-	   bugA == bugB; //returns false
+	   object.ReferenceEquals(bugA, bugB); //returns false
 
        bugB.Description = "Changed"; // throws new InvalidOperationException("The instance Bug is sealed and can not be modified");
 	}

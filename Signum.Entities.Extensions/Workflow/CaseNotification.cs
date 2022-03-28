@@ -1,67 +1,64 @@
 using Signum.Entities.Authorization;
-using System;
 
-namespace Signum.Entities.Workflow
+namespace Signum.Entities.Workflow;
+
+[EntityKind(EntityKind.System, EntityData.Transactional)]
+public class CaseNotificationEntity : Entity
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class CaseNotificationEntity : Entity
-    {
-        
-        public Lite<CaseActivityEntity> CaseActivity { get; set; }
 
-        
-        public Lite<UserEntity> User { get; set; }
-
-        [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        public Lite<Entity> Actor { get; internal set; }
-
-        [StringLengthValidator(MultiLine = true)]
-        public string? Remarks { get; set; }
-
-        public CaseNotificationState State { get; set; }
-    }
-
-    public enum CaseNotificationState
-    {
-        New,
-        Opened,
-        InProgress,
-        Done,
-        DoneByOther,
-    }
+    public Lite<CaseActivityEntity> CaseActivity { get; set; }
 
 
+    public Lite<UserEntity> User { get; set; }
 
-    [AutoInit]
-    public static class CaseNotificationOperation
-    {
-        public static readonly ExecuteSymbol<CaseNotificationEntity> SetRemarks;
-    }
+    [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
+    public Lite<Entity> Actor { get; internal set; }
 
-    [Serializable]
-    public class InboxFilterModel : ModelEntity
-    {
-        public DateFilterRange Range { get; set; }
-        public MList<CaseNotificationState> States { get; set; }
-        public DateTime? FromDate { get; set; }
-        public DateTime? ToDate { get; set; }
+    [StringLengthValidator(MultiLine = true)]
+    public string? Remarks { get; set; }
 
-    }
+    public CaseNotificationState State { get; set; }
+}
 
-    public enum InboxMessage
-    {
-        Clear,
-        Activity,
-        SenderNote,
-        Sender,
-        Filters,
-    }
+public enum CaseNotificationState
+{
+    New,
+    Opened,
+    InProgress,
+    Done,
+    DoneByOther,
+}
 
-    public enum DateFilterRange
-    {
-        All,
-        LastWeek,
-        LastMonth,
-        CurrentYear,
-    }
+[AutoInit]
+public static class CaseNotificationOperation
+{
+    public static readonly ExecuteSymbol<CaseNotificationEntity> SetRemarks;
+    public static readonly DeleteSymbol<CaseNotificationEntity> Delete;
+    public static readonly ConstructSymbol<CaseNotificationEntity>.From<CaseActivityEntity> CreteCaseNotificationFromCaseActivity;
+}
+
+public class InboxFilterModel : ModelEntity
+{
+    public DateFilterRange Range { get; set; }
+    public MList<CaseNotificationState> States { get; set; }
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+
+}
+
+public enum InboxMessage
+{
+    Clear,
+    Activity,
+    SenderNote,
+    Sender,
+    Filters,
+}
+
+public enum DateFilterRange
+{
+    All,
+    LastWeek,
+    LastMonth,
+    CurrentYear,
 }

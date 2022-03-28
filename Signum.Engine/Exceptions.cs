@@ -1,325 +1,331 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using Signum.Utilities;
 using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Entities.Reflection;
 using System.Collections.Concurrent;
-using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
-using System.Linq.Expressions;
-using Signum.Utilities.ExpressionTrees;
 
-namespace Signum.Engine
+namespace Signum.Engine;
+
+public class UniqueKeyException : ApplicationException
 {
-    [Serializable]
-    public class UniqueKeyException : ApplicationException
+    public string? TableName { get; private set; }
+    public Table? Table { get; private set; }
+
+    public string? IndexName { get; private set; }
+    public UniqueTableIndex? Index { get; private set; }
+    public List<PropertyInfo>? Properties { get; private set; }
+
+    public string? Values { get; private set; }
+    public object?[]? HumanValues { get; private set; }
+
+    protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
+    static Regex[] regexes = new[]
     {
-        public string? TableName { get; private set; }
-        public Table? Table { get; private set; }
-
-        public string? IndexName { get; private set; }
-        public UniqueTableIndex? Index { get; private set; }
-        public List<PropertyInfo>? Properties { get; private set; }
-
-        public string? Values { get; private set; }
-        public object?[]? HumanValues { get; private set; }
-
-        protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-
-        static Regex[] regexes = new []
-        {
             new Regex(@"Cannot insert duplicate key row in object '(?<table>.*)' with unique index '(?<index>.*)'\. The duplicate key value is \((?<value>.*)\)"),
             new Regex(@"Eine Zeile mit doppeltem Schlüssel kann in das Objekt ""(?<table>.*)"" mit dem eindeutigen Index ""(?<index>.*)"" nicht eingefügt werden. Der doppelte Schlüsselwert ist \((?<value>.*)\)")
         };
 
-        public UniqueKeyException(Exception inner) : base(null, inner)
+    public UniqueKeyException(Exception inner) : base(null, inner)
+    {
+        foreach (var rx in regexes)
         {
-            foreach (var rx in regexes)
+            Match m = rx.Match(inner.Message);
+            if (m.Success)
             {
-                Match m = rx.Match(inner.Message);
-                if (m.Success)
+                TableName = m.Groups["table"].Value;
+                IndexName = m.Groups["index"].Value;
+                Values = m.Groups["value"].Value;
+
+                Table = cachedTables.GetOrAdd(TableName, tn => Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToString() == tn));
+
+                if (Table != null)
                 {
-                    TableName = m.Groups["table"].Value;
-                    IndexName = m.Groups["index"].Value;
-                    Values = m.Groups["value"].Value;
-
-                    Table = cachedTables.GetOrAdd(TableName, tn => Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToString() == tn));
-
-                    if(Table != null)
+                    var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup =>
                     {
-                        var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup=>
+                        var index = tup.table.GeneratAllIndexes().OfType<UniqueTableIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
+
+                        if (index == null)
+                            return null;
+
+                        var properties = (from f in tup.table.Fields.Values
+                                          let cols = f.Field.Columns()
+                                          where cols.Any() && cols.All(c => index.Columns.Contains(c))
+                                          select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
+
+                        if (properties.IsEmpty())
+                            return null;
+
+                        return (index, properties);
+                    });
+
+                    if (tuple != null)
+                    {
+                        Index = tuple.Value.index;
+                        Properties = tuple.Value.properties;
+
+                        try
                         {
-                            var index = tup.table.GeneratAllIndexes().OfType<UniqueTableIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
+                            var values = Values.Split(", ");
 
-                            if(index == null)
-                                return null;
-
-                            var properties = (from f in tup.table.Fields.Values
-                                              let cols = f.Field.Columns()
-                                              where cols.Any() && cols.All(c => index.Columns.Contains(c))
-                                              select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
-
-                            if (properties.IsEmpty())
-                                return null;
-
-                            return (index, properties);
-                        });
-
-                        if(tuple != null)
-                        {
-                            Index = tuple.Value.index;
-                            Properties = tuple.Value.properties;
-
-                            try
+                            if (values.Length == Index.Columns.Length)
                             {
-                                var values = Values.Split(", ");
+                                var colValues = Index.Columns.Zip(values).ToDictionary(a => a.First, a => a.Second == "<NULL>" ? null : a.Second.Trim().Trim('\''));
 
-                                if(values.Length == Index.Columns.Length)
+                                HumanValues = Properties.Select(p =>
                                 {
-                                    var colValues = Index.Columns.Zip(values).ToDictionary(a => a.First, a => a.Second == "<NULL>" ? null : a.Second.Trim().Trim('\''));
+                                    var f = Table.GetField(p);
+                                    if (f is FieldValue fv)
+                                        return colValues.GetOrThrow(fv);
 
-                                    HumanValues = Properties.Select(p =>
+                                    if (f is FieldEnum fe)
+                                        return colValues.GetOrThrow(fe)?.Let(a => ReflectionTools.ChangeType(a, fe.Type));
+
+                                    if (f is FieldReference fr)
+                                        return colValues.GetOrThrow(fr)?.Let(a => Database.RetrieveLite(fr.Type, PrimaryKey.Parse(a, fr.Type)));
+
+                                    if (f is FieldImplementedBy ib)
                                     {
-                                        var f = Table.GetField(p);
-                                        if (f is FieldValue fv)
-                                            return colValues.GetOrThrow(fv);
+                                        var imp = ib.ImplementationColumns.SingleOrDefault(ic => colValues.TryGetCN(ic.Value) != null);
+                                        if (imp.Key == null)
+                                            return null;
 
-                                        if (f is FieldEnum fe)
-                                            return colValues.GetOrThrow(fe)?.Let(a => ReflectionTools.ChangeType(a, fe.Type));
+                                        return Database.RetrieveLite(imp.Key, PrimaryKey.Parse(colValues.GetOrThrow(imp.Value)!, imp.Key));
+                                    }
 
-                                        if (f is FieldReference fr)
-                                            return colValues.GetOrThrow(fr)?.Let(a => Database.RetrieveLite(fr.Type, PrimaryKey.Parse(a, fr.Type)));
+                                    if (f is FieldImplementedByAll iba)
+                                    {
+                                        var typeId = colValues.GetOrThrow(iba.ColumnType);
+                                        if (typeId == null)
+                                            return null;
 
-                                        if (f is FieldImplementedBy ib)
-                                        {
-                                            var imp = ib.ImplementationColumns.SingleOrDefault(ic => colValues.TryGetCN(ic.Value) != null);
-                                            if (imp.Key == null)
-                                                return null;
+                                        var type = TypeLogic.IdToType.GetOrThrow(PrimaryKey.Parse(typeId, typeof(TypeEntity)));
 
-                                            return Database.RetrieveLite(imp.Key, PrimaryKey.Parse(colValues.GetOrThrow(imp.Value)!, imp.Key));
-                                        }
+                                        return Database.RetrieveLite(type, PrimaryKey.Parse(colValues.GetOrThrow(iba.Column)!, type));
+                                    }
 
-                                        if (f is FieldImplementedByAll iba)
-                                        {
-                                            var typeId = colValues.GetOrThrow(iba.ColumnType);
-                                            if (typeId == null)
-                                                return null;
-
-                                            var type = TypeLogic.IdToType.GetOrThrow(PrimaryKey.Parse(typeId, typeof(TypeEntity)));
-
-                                            return Database.RetrieveLite(type, PrimaryKey.Parse(colValues.GetOrThrow(iba.Column)!, type));
-                                        }
-
-                                        throw new UnexpectedValueException(f);
-                                    }).ToArray();
-                                }
-
-                            }
-                            catch
-                            {
-                                //
+                                    throw new UnexpectedValueException(f);
+                                }).ToArray();
                             }
 
                         }
+                        catch
+                        {
+                            //
+                        }
+
                     }
                 }
             }
         }
+    }
 
-        static ConcurrentDictionary<string, Table?> cachedTables = new ConcurrentDictionary<string, Table?>();
-        static ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?> cachedLookups =
-            new ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?>();
+    static ConcurrentDictionary<string, Table?> cachedTables = new ConcurrentDictionary<string, Table?>();
+    static ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?> cachedLookups =
+        new ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?>();
 
-        public override string Message
+    public override string Message
+    {
+        get
         {
-            get
-            {
-                if (Table == null)
-                    return InnerException!.Message;
+            if (Table == null)
+                return InnerException!.Message;
 
-                return EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table?.Type.GetGender()).FormatWith(
-                    Table == null ? TableName : Table.Type.NiceName(),
-                    Index == null ? IndexName :
-                    Properties != null  ? Properties!.CommaAnd(p => p.NiceName()) :
-                    Index.Columns.CommaAnd(c => c.Name),
-                    HumanValues != null ? HumanValues.CommaAnd(a => a is string? $"'{a}'" : a == null ? "NULL" : a.ToString()) : 
-                    Values);
-            }
+            return EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table?.Type.GetGender()).FormatWith(
+                Table == null ? TableName : Table.Type.NiceName(),
+                Index == null ? IndexName :
+                Properties != null ? Properties!.CommaAnd(p => p.NiceName()) :
+                Index.Columns.CommaAnd(c => c.Name),
+                HumanValues != null ? HumanValues.CommaAnd(a => a is string ? $"'{a}'" : a == null ? "NULL" : a.ToString()) :
+                Values);
         }
+    }
 
-        public static void AssertNoOne<T>(IQueryable<T> query, Expression<Func<T, bool>> expression)
-            where T : Entity
+    public static void AssertNoOne<T>(IQueryable<T> query, Expression<Func<T, bool>> expression)
+        where T : Entity
+    {
+        if (query.Any(expression))
         {
-            if (query.Any(expression))
+
+            var param = expression.Parameters.SingleEx();
+
+            IEnumerable<(PropertyInfo pi, object? value)> PropPairs(Expression exp)
             {
-
-                var param = expression.Parameters.SingleEx();
-
-                IEnumerable<(PropertyInfo pi, object? value)> PropPairs(Expression exp)
+                return exp switch
                 {
-                    return exp switch
+                    BinaryExpression { NodeType: ExpressionType.And or ExpressionType.AndAlso } be => PropPairs(be.Left).Concat(PropPairs(be.Right)),
+
+                    BinaryExpression
                     {
-                        BinaryExpression { NodeType: ExpressionType.And or ExpressionType.AndAlso } be => PropPairs(be.Left).Concat(PropPairs(be.Right)),
+                        NodeType: ExpressionType.Equal,
+                        Left: MemberExpression { Member: PropertyInfo pi, Expression: ParameterExpression p },
+                        Right: var other
+                    } when p.Equals(param) => new[] { (pi, ExpressionEvaluator.Eval(other)) },
 
-                        BinaryExpression
-                        {
-                            NodeType: ExpressionType.Equal,
-                            Left: MemberExpression { Member: PropertyInfo pi, Expression: ParameterExpression p },
-                            Right: var other
-                        } when p.Equals(param) => new[] { (pi, ExpressionEvaluator.Eval(other)) },
+                    BinaryExpression
+                    {
+                        NodeType: ExpressionType.Equal,
+                        Left: var other,
+                        Right: MemberExpression { Member: PropertyInfo pi, Expression: ParameterExpression p },
+                    } when p.Equals(param) => new[] { (pi, ExpressionEvaluator.Eval(other)) },
 
-                        BinaryExpression
-                        {
-                            NodeType: ExpressionType.Equal,
-                            Left: var other,
-                            Right: MemberExpression { Member: PropertyInfo pi, Expression: ParameterExpression p },
-                        } when p.Equals(param) => new[] { (pi, ExpressionEvaluator.Eval(other)) },
+                    _ => throw new UnexpectedValueException(exp)
+                };
+            }
 
-                        _ => throw new UnexpectedValueException(exp)
-                    };
+            var pairs = PropPairs(expression.Body);
+
+            throw new InvalidOperationException(EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(typeof(T).GetGender()).FormatWith(
+                typeof(T).NiceName(),
+                pairs.CommaAnd(a => a.pi.NiceName()),
+                pairs.CommaAnd(a => a.value is string ? $"'{a}'" : a.value == null ? "NULL" : a.value.ToString())));
+
+        }
+    }
+}
+
+
+public class ForeignKeyException : ApplicationException
+{
+    public string? TableName { get; private set; }
+    public Type? TableType { get; private set; }
+    public string? ColumnName { get; private set; }
+    public PropertyInfo? PropertyInfo { get; private set; }
+
+
+    public string? ReferedTableName { get; private set; }
+    public Type? ReferedTableType { get; private set; }
+
+    public bool IsInsert { get; private set; }
+
+    static Regex indexRegex = new Regex(@"['""]FK_(?<parts>.+?)['""]");
+
+    static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
+
+    protected ForeignKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
+    public ForeignKeyException(Exception inner) : base(null, inner)
+    {
+        Match m = indexRegex.Match(inner.Message);
+
+        if (m.Success)
+        {
+            var parts = m.Groups["parts"].Value.Split("_");
+
+            for (int i = 1; i < parts.Length; i++)
+            {
+                TableName = parts.Take(i).ToString("_");
+                ColumnName = parts.Skip(i).ToString("_");
+
+                var table = Schema.Current.GetDatabaseTables().FirstOrDefault(table => table.Name.Name == TableName);
+
+                if (table is TableMList tmle)
+                {
+                    var column = tmle.Columns.TryGetC(ColumnName);
+                    TableType = tmle.BackReference.ReferenceTable.Type;
+                    PropertyInfo = 
+                         tmle.Field == column ? tmle.PropertyRoute.PropertyInfo :
+                         tmle.Field is FieldEmbedded fe ?
+                         (from f in fe.EmbeddedFields.Values
+                          where f.Field.Columns().Contains(column)
+                          select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().FirstOrDefault() :
+                          null;
+                         
+                    break;
                 }
+                else if (table is Table t)
+                {
+                    var column = t.Columns.TryGetC(ColumnName);
+                    TableType = t.Type;
+                    PropertyInfo = (from f in t.Fields.Values
+                                    where f.Field.Columns().Contains(column)
+                                    select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().FirstOrDefault();
+                    break;
+                }
+            }
+        }
 
-                var pairs = PropPairs(expression.Body);
+        if (inner.Message.Contains("INSERT") || inner.Message.Contains("UPDATE"))
+        {
+            IsInsert = true;
 
-                throw new InvalidOperationException(EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(typeof(T).GetGender()).FormatWith(
-                    typeof(T).NiceName(),
-                    pairs.CommaAnd(a => a.pi.NiceName()),
-                    pairs.CommaAnd(a => a.value is string ? $"'{a}'" : a.value == null ? "NULL" : a.value.ToString())));
+            Match m2 = referedTable.Match(inner.Message);
+            if (m2.Success)
+            {
+                ReferedTableName = m2.Groups["referedTable"].Value.Split('.').Last();
+                ReferedTableType = Schema.Current.Tables
+                                .Where(kvp => kvp.Value.Name.Name == ReferedTableName)
+                                .Select(p => p.Key)
+                                .SingleOrDefaultEx();
 
+                ReferedTableType = ReferedTableType == null ? null : EnumEntity.Extract(ReferedTableType) ?? ReferedTableType;
             }
         }
     }
 
-
-    [Serializable]
-    public class ForeignKeyException : ApplicationException
+    public override string Message
     {
-        public string? TableName { get; private set; }
-        public string? ColumnName { get; private set; }
-        public Type? TableType { get; private set; }
-
-        public string? ReferedTableName { get; private set; }
-        public Type? ReferedTableType { get; private set; }
-
-        public bool IsInsert { get; private set; }
-
-        static Regex indexRegex = new Regex(@"['""]FK_(?<parts>.+?)['""]");
-
-        static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
-
-        protected ForeignKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-
-        public ForeignKeyException(Exception inner) : base(null, inner)
+        get
         {
-            Match m = indexRegex.Match(inner.Message);
-            
-            if (m.Success)
-            {
-                var parts = m.Groups["parts"].Value.Split("_");
+            if (TableName == null)
+                return InnerException!.Message;
 
-                for (int i = 1; i < parts.Length; i++)
-                {
-                    TableName = parts.Take(i).ToString("_");
-                    ColumnName = parts.Skip(i).ToString("_");
-                    TableType = Schema.Current.Tables
-                        .Where(kvp => kvp.Value.Name.Name == TableName)
-                        .Select(p => p.Key)
-                        .SingleOrDefaultEx();
-
-                    if (TableType != null)
-                        break;
-                }
-            }
-
-            if(inner.Message.Contains("INSERT"))
-            {
-                IsInsert = true;
-
-                Match m2 = referedTable.Match(inner.Message);
-                if (m2.Success)
-                {
-                    ReferedTableName = m2.Groups["referedTable"].Value.Split('.').Last();
-                    ReferedTableType = Schema.Current.Tables
-                                    .Where(kvp => kvp.Value.Name.Name == ReferedTableName)
-                                    .Select(p => p.Key)
-                                    .SingleOrDefaultEx();
-
-                    ReferedTableType = ReferedTableType == null ? null : EnumEntity.Extract(ReferedTableType) ?? ReferedTableType;
-                }
-            }
-        }
-
-        public override string Message
-        {
-            get
-            {
-                if (TableName == null)
-                    return InnerException!.Message;
-
-                if (IsInsert)
-                    return (TableType == null || ReferedTableType == null) ?
-                        "The column {0} on table {1} does not reference {2}".FormatWith(ColumnName, TableName, ReferedTableName) :
-                        "The column {0} of the {1} does not refer to a valid {2}".FormatWith(ColumnName, TableType.NiceName(), ReferedTableType.NiceName());
-                else
-                    return (TableType == null) ?
-                        EngineMessage.ThereAreRecordsIn0PointingToThisTableByColumn1.NiceToString().FormatWith(TableName, ColumnName) :
-                        EngineMessage.ThereAre0ThatReferThisEntity.NiceToString().FormatWith(TableType.NicePluralName());
-            }
+            if (IsInsert)
+                return (TableType == null || ReferedTableType == null) ?
+                    "The column {0} on table {1} does not reference {2}".FormatWith(ColumnName, TableName, ReferedTableName) :
+                    "The column {0} of the {1} does not refer to a valid {2}".FormatWith(ColumnName, TableType.NiceName(), ReferedTableType.NiceName());
+            else
+                return (TableType == null) ?
+                    EngineMessage.ThereAreRecordsIn0PointingToThisTableByColumn1.NiceToString().FormatWith(TableName, ColumnName) :
+                    EngineMessage.ThereAre0ThatReferThisEntityByProperty1.NiceToString().FormatWith(TableType.NicePluralName(), PropertyInfo?.NiceName() ?? ColumnName);
         }
     }
+}
 
 
-    [Serializable]
-    public class EntityNotFoundException : Exception
-    {
-        public Type Type { get; private set; }
-        public PrimaryKey[] Ids { get; private set; }
+public class EntityNotFoundException : Exception
+{
+    public Type Type { get; private set; }
+    public PrimaryKey[] Ids { get; private set; }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-        protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
-        public EntityNotFoundException(Type type, params PrimaryKey[] ids)
-            : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
-        {
-            this.Type = type;
-            this.Ids = ids;
-        }
-    }
-
-    [Serializable]
-    public class ConcurrencyException: Exception
+    public EntityNotFoundException(Type type, params PrimaryKey[] ids)
+        : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
     {
-        public Type Type { get; private set; }
-        public PrimaryKey[] Ids { get; private set; }
+        this.Type = type;
+        this.Ids = ids;
+    }
+}
+
+public class ConcurrencyException : Exception
+{
+    public Type Type { get; private set; }
+    public PrimaryKey[] Ids { get; private set; }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-        protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
-        public ConcurrencyException(Type type, params PrimaryKey[] ids)
-            : base(EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1.NiceToString().FormatWith(type.NiceName(), ids.ToString(", ")))
-        {
-            this.Type = type;
-            this.Ids = ids;
-        }
-    }
-
-
-    [Serializable]
-    public class ModelRequestedException : Exception
+    public ConcurrencyException(Type type, params PrimaryKey[] ids)
+        : base(EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1.NiceToString().FormatWith(type.NiceName(), ids.ToString(", ")))
     {
-        public ModelRequestedException(ModelEntity model) : base("Model Requested")
-        {
-            this.Model = model;
-        }
-
-        public ModelEntity Model { get; set; }
+        this.Type = type;
+        this.Ids = ids;
     }
+}
+
+
+public class ModelRequestedException : Exception
+{
+    public ModelRequestedException(ModelEntity model) : base("Model Requested")
+    {
+        this.Model = model;
+    }
+
+    public ModelEntity Model { get; set; }
 }

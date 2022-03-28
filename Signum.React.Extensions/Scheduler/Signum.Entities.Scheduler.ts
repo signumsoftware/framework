@@ -12,7 +12,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const HolidayCalendarEntity = new Type<HolidayCalendarEntity>("HolidayCalendar");
 export interface HolidayCalendarEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "HolidayCalendar";
-  guid: string;
+  guid: string /*Guid*/;
   name: string;
   holidays: Entities.MList<HolidayEmbedded>;
 }
@@ -25,12 +25,12 @@ export module HolidayCalendarOperation {
 export const HolidayEmbedded = new Type<HolidayEmbedded>("HolidayEmbedded");
 export interface HolidayEmbedded extends Entities.EmbeddedEntity {
   Type: "HolidayEmbedded";
-  date: string;
+  date: string /*DateOnly*/;
   name: string | null;
 }
 
 export interface IScheduleRuleEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-  startingOn: string;
+  startingOn: string /*DateTime*/;
 }
 
 export interface ITaskEntity extends Entities.Entity {
@@ -65,8 +65,8 @@ export interface ScheduledTaskLogEntity extends Entities.Entity {
   task: ITaskEntity;
   scheduledTask: ScheduledTaskEntity | null;
   user: Entities.Lite<Basics.IUserEntity>;
-  startTime: string;
-  endTime: string | null;
+  startTime: string /*DateTime*/;
+  endTime: string /*DateTime*/ | null;
   machineName: string;
   applicationName: string;
   productEntity: Entities.Lite<Entities.Entity> | null;
@@ -114,8 +114,8 @@ export interface SchedulerTaskExceptionLineEntity extends Entities.Entity {
 export const ScheduleRuleMinutelyEntity = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
 export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRuleEntity, UserAssets.IUserAssetEntity {
   Type: "ScheduleRuleMinutely";
-  guid: string;
-  startingOn: string;
+  guid: string /*Guid*/;
+  startingOn: string /*DateTime*/;
   eachMinutes: number;
   isAligned: boolean;
 }
@@ -123,8 +123,8 @@ export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRu
 export const ScheduleRuleMonthsEntity = new Type<ScheduleRuleMonthsEntity>("ScheduleRuleMonths");
 export interface ScheduleRuleMonthsEntity extends Entities.Entity, IScheduleRuleEntity, UserAssets.IUserAssetEntity {
   Type: "ScheduleRuleMonths";
-  guid: string;
-  startingOn: string;
+  guid: string /*Guid*/;
+  startingOn: string /*DateTime*/;
   january: boolean;
   february: boolean;
   march: boolean;
@@ -142,8 +142,8 @@ export interface ScheduleRuleMonthsEntity extends Entities.Entity, IScheduleRule
 export const ScheduleRuleWeekDaysEntity = new Type<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDays");
 export interface ScheduleRuleWeekDaysEntity extends Entities.Entity, IScheduleRuleEntity, UserAssets.IUserAssetEntity {
   Type: "ScheduleRuleWeekDays";
-  guid: string;
-  startingOn: string;
+  guid: string /*Guid*/;
+  startingOn: string /*DateTime*/;
   monday: boolean;
   tuesday: boolean;
   wednesday: boolean;
@@ -164,7 +164,7 @@ export const SystemEventLogEntity = new Type<SystemEventLogEntity>("SystemEventL
 export interface SystemEventLogEntity extends Entities.Entity {
   Type: "SystemEventLog";
   machineName: string;
-  date: string;
+  date: string /*DateTime*/;
   user: Entities.Lite<Basics.IUserEntity> | null;
   eventType: string;
   exception: Entities.Lite<Basics.ExceptionEntity> | null;

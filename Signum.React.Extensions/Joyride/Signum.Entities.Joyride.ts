@@ -19,7 +19,7 @@ export interface JoyrideEntity extends Entities.Entity, UserAssets.IUserAssetEnt
   showStepsProgress: boolean;
   keyboardNavigation: boolean;
   debug: boolean;
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export module JoyrideMessage {
@@ -37,7 +37,7 @@ export module JoyrideOperation {
 export const JoyrideStepEntity = new Type<JoyrideStepEntity>("JoyrideStep");
 export interface JoyrideStepEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "JoyrideStep";
-  guid: string;
+  guid: string /*Guid*/;
   culture: Entities.Lite<Basics.CultureInfoEntity> | null;
   title: string;
   text: string;
@@ -72,7 +72,7 @@ export interface JoyrideStepStyleEntity extends Entities.Entity, UserAssets.IUse
   borderRadius: string | null;
   textAlign: string | null;
   width: string | null;
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export module JoyrideStepStyleOperation {

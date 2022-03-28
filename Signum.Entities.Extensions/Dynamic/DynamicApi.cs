@@ -1,59 +1,52 @@
-using Signum.Entities;
 using Signum.Entities.Basics;
-using Signum.Utilities;
-using System;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 
-namespace Signum.Entities.Dynamic
+namespace Signum.Entities.Dynamic;
+
+[EntityKind(EntityKind.Main, EntityData.Master)]
+[Mixin(typeof(DisabledMixin))]
+public class DynamicApiEntity : Entity
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    [Mixin(typeof(DisabledMixin))]
-    public class DynamicApiEntity : Entity
+    [UniqueIndex]
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Name { get; set; }
+
+    [NotifyChildProperty]
+    public DynamicApiEval Eval { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name);
+}
+
+[AutoInit]
+public static class DynamicApiOperation
+{
+    public static readonly ConstructSymbol<DynamicApiEntity>.From<DynamicApiEntity> Clone;
+    public static readonly ExecuteSymbol<DynamicApiEntity> Save;
+    public static readonly DeleteSymbol<DynamicApiEntity> Delete;
+}
+
+public class DynamicApiEval : EvalEmbedded<IDynamicApiEvaluator>
+{
+    protected override CompilationResult Compile()
     {
-        [UniqueIndex]
-        [StringLengthValidator(Min = 3, Max = 100)]
-        public string Name { get; set; }
+        var script = this.Script.Trim();
 
-        [NotifyChildProperty]
-        public DynamicApiEval Eval { get; set; }
-
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => Name);
-    }
-
-    [AutoInit]
-    public static class DynamicApiOperation
-    {
-        public static readonly ConstructSymbol<DynamicApiEntity>.From<DynamicApiEntity> Clone;
-        public static readonly ExecuteSymbol<DynamicApiEntity> Save;
-        public static readonly DeleteSymbol<DynamicApiEntity> Delete;
-    }
-
-    public class DynamicApiEval : EvalEmbedded<IDynamicApiEvaluator>
-    {
-        protected override CompilationResult Compile()
-        {
-            var script = this.Script.Trim();
-
-            return Compile(DynamicCode.GetCoreMetadataReferences()
-                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+        return Compile(DynamicCode.GetCoreMetadataReferences()
+            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Dynamic
 {
-    class Evaluator : ControllerBase, Signum.Entities.Dynamic.IDynamicApiEvaluator
-    {
-        " + script + @"
+class Evaluator : ControllerBase, Signum.Entities.Dynamic.IDynamicApiEvaluator
+{
+    " + script + @"
 
-        public bool DummyEvaluate() => true;
-    }
+    public bool DummyEvaluate() => true;
+}
 }");
-        }
     }
+}
 
-    public interface IDynamicApiEvaluator
-    {
-        bool DummyEvaluate();
-    }
+public interface IDynamicApiEvaluator
+{
+    bool DummyEvaluate();
 }

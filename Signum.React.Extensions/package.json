@@ -17,15 +17,17 @@
     "@types/react": "file:../Signum.React/node_modules/@types/react"
   },
   "dependencies": {
-    "@types/codemirror": "0.0.108",
-    "@types/draft-js": "0.11.1",
+    "@types/codemirror": "5.60.5",
+    "@types/draft-js": "0.11.6",
     "@types/googlemaps": "3.43.3",
+    "@microsoft/signalr": "6.0.0",
     "draft-js": "0.11.7",
     "draftjs-to-html": "0.9.1",
     "html-to-draftjs": "1.5.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "@azure/msal-browser": "2.14.1",
-    "@types/react": "file:../Signum.React/node_modules/@types/react"
+    "@azure/msal-browser": "2.19.0",
+    "@types/react": "file:../Signum.React/node_modules/@types/react",
+    "immutable": "3.8.2"
   }
 }

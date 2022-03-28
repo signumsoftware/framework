@@ -1,33 +1,30 @@
-﻿using System;
-using Signum.Utilities;
 
-namespace Signum.Entities.DynamicQuery
+namespace Signum.Entities.DynamicQuery;
+
+public class Order: IEquatable<Order>
 {
-    [Serializable]
-    public class Order
+    public QueryToken Token { get;  }
+    public OrderType OrderType { get; }
+
+    public Order(QueryToken token, OrderType orderType)
     {
-        QueryToken token;
-        public QueryToken Token { get { return token; } }
-
-        OrderType orderType;
-        public OrderType OrderType { get { return orderType; } }
-
-        public Order(QueryToken token, OrderType orderType)
-        {
-            this.token = token;
-            this.orderType = orderType;
-        }
-
-        public override string ToString()
-        {
-            return "{0} {1}".FormatWith(token.FullKey(), orderType);
-        }
+        this.Token = token;
+        this.OrderType = orderType;
     }
 
-    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
-    public enum OrderType
+    public override string ToString()
     {
-        Ascending,
-        Descending
+        return "{0} {1}".FormatWith(Token.FullKey(), OrderType);
     }
+
+    public override int GetHashCode() => Token.GetHashCode();
+    public override bool Equals(object? obj) => obj is Order order && Equals(order);
+    public bool Equals(Order? other) => other is Order o && o.Token.Equals(Token) && o.OrderType.Equals(OrderType);
+}
+
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+public enum OrderType
+{
+    Ascending,
+    Descending
 }

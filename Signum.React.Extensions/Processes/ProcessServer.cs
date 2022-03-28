@@ -1,14 +1,12 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 
-namespace Signum.React.Processes
+namespace Signum.React.Processes;
+
+public static class ProcessServer
 {
-    public static class ProcessServer
+    public static void Start(IApplicationBuilder app)
     {
-        public static void Start(IApplicationBuilder app)
-        {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-        }
     }
 }

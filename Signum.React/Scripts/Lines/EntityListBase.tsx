@@ -67,7 +67,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "btn input-group-text" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
         onClick={e => { e.preventDefault(); this.moveUp(index); }}
         title={this.props.ctx.titleLabels ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-up" />
@@ -93,7 +93,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
       return undefined;
 
     return (
-      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "btn input-group-text" : undefined)}
+      <a href="#" className={classes("sf-line-button", "sf-move", "sf-move-step", btn ? "input-group-text" : undefined)}
         onClick={e => { e.preventDefault(); this.moveDown(index); }}
         title={this.props.ctx.titleLabels ? EntityControlMessage.MoveUp.niceToString() : undefined}>
         <FontAwesomeIcon icon="chevron-down" />
@@ -334,10 +334,12 @@ export interface DragConfig {
 
 tasks.push(taskSetMove);
 export function taskSetMove(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof EntityListBaseController && (state as EntityListBaseProps).move == undefined &&
+  if (lineBase instanceof EntityListBaseController &&
+    (state as EntityListBaseProps).move == undefined &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.preserveOrder) {
     (state as EntityListBaseProps).move = true;
   }
 }
+

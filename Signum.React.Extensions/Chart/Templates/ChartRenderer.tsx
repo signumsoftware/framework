@@ -26,8 +26,6 @@ export interface ChartRendererProps {
   lastChartRequest?: ChartRequestModel;
   onReload?: (e?: React.MouseEvent<any>) => void;
   autoRefresh: boolean;
-  onCreateNew?: (e: React.MouseEvent<any>) => void;
-  typeInfos?: TypeInfo[];
   dashboardFilter?: DashboardFilter;
   onDrillDown?: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onBackgroundClick?: (e: React.MouseEvent) => void;
@@ -47,7 +45,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
   var parameters = cs && ChartClient.API.getParameterWithDefault(p.chartRequest, cs.chartScript)
 
   return (
-    <FullscreenComponent onReload={p.onReload} onCreateNew={p.onCreateNew} typeInfos={p.typeInfos}>
+    <FullscreenComponent onReload={p.onReload}>
       <ErrorBoundary deps={[p.data]}>
         {cs && parameters &&
           <ReactChart

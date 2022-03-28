@@ -1,6 +1,6 @@
-import { DateTime, Duration, DurationObjectUnits, Settings } from 'luxon';
+import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
-import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
+import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
@@ -40,7 +40,6 @@ export interface TypeInfo {
 export interface MemberInfo {
   name: string,
   niceName: string;
-  typeNiceName: string;
   type: TypeReference;
   isReadOnly?: boolean;
   isIgnoredEnum?: boolean;
@@ -51,6 +50,7 @@ export interface MemberInfo {
   isMultiline?: boolean;
   isVirtualMList?: boolean;
   preserveOrder?: boolean;
+  avoidDuplicates?: boolean;
   notVisible?: boolean;
   id?: any; //symbols
 }
@@ -74,12 +74,12 @@ export type OperationType =
 
 //https://moment.github.io/luxon/docs/manual/formatting.html#formatting-with-tokens--strings-for-cthulhu-
 //https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings
-export function toLuxonFormat(format: string | undefined, type: "Date" | "DateTime"): string {
+export function toLuxonFormat(netFormat: string | undefined, type: "DateOnly" | "DateTime"): string {
 
-  if (!format)
-    return type == "Date" ? "D" : "F";
+  if (!netFormat)
+    return type == "DateOnly" ? "D" : "F";
   
-  switch (format) {
+  switch (netFormat) {
     case "d": return "D"; // toFormatWithFixes
     case "D": return "DDDD";
     case "f": return "fff"
@@ -96,7 +96,7 @@ export function toLuxonFormat(format: string | undefined, type: "Date" | "DateTi
     case "y": return "LLLL yyyy";
     case "Y": return "LLLL yyyy";
     default: {
-      const result = format
+      const result = netFormat
         .replaceAll("f", "S")
         .replaceAll("tt", "A")
         .replaceAll("t", "a")
@@ -108,13 +108,6 @@ export function toLuxonFormat(format: string | undefined, type: "Date" | "DateTi
         .replaceAll("T", "'T'");
       return result;
     }
-  }
-}
-
-
-declare module "luxon" {
-  interface DateTime {
-    toFormatFixed(format: string, options?: DateTimeFormatOptions): string;
   }
 }
 
@@ -210,36 +203,36 @@ const oneDigitCulture = new Set([
   "zu", "zu-ZA"
 ]);
 
-DateTime.prototype.toFormatFixed = function toFormatWithFixes(this: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
+export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
 
-  if (!oneDigitCulture.has(this.locale)) {
+  if (!oneDigitCulture.has(dt.locale)) {
 
     if (format == "D")
-      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });
+      return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });
 
     if (format == "f")
-      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", ...options });
+      return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", ...options });
 
     if (format == "F")
-      return this.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", second: "numeric", ...options });
+      return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", hour: "numeric", minute: "numeric", second: "numeric", ...options });
   }
 
   if (format == "EE") //missing
-    return this.toFormat("EEE", options).substr(0, 2);
+    return dt.toFormat("EEE", options).substr(0, 2);
 
-  return this.toFormat(format, options)
+  return dt.toFormat(format, options)
 
 }
 
 
 //https://msdn.microsoft.com/en-us/library/ee372286(v=vs.110).aspx
 //https://github.com/jsmreese/moment-duration-format
-export function toDurationFormat(format: string | undefined): string | undefined {
+export function toLuxonDurationFormat(netFormat: string | undefined): string | undefined {
 
-  if (format == undefined)
+  if (netFormat == undefined)
     return undefined;
 
-  return format.replace("\\:", ":");
+  return netFormat.replaceAll("\\:", ":").replaceAll("H", "h");
 }
 
 export namespace NumberFormatSettings {
@@ -262,19 +255,27 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
 
   const f = format.toUpperCase();
 
+  function parseIntDefault(str: string, defaultValue: number) {
+    var result = parseInt(str);
+    if (isNaN(result))
+      return defaultValue;
+
+    return result;
+  }
+
   if (f.startsWith("C")) //unit comes separated
     return {
       style: "decimal",
-      minimumFractionDigits: parseInt(f.after("C")) || 2,
-      maximumFractionDigits: parseInt(f.after("C")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("C"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("C"), 2),
       useGrouping: true,
     }
 
   if (f.startsWith("N"))
     return {
       style: "decimal",
-      minimumFractionDigits: parseInt(f.after("N")) || 2,
-      maximumFractionDigits: parseInt(f.after("N")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("N"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("N"), 2),
       useGrouping: true,
     }
 
@@ -282,15 +283,15 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
     return {
       style: "decimal",
       maximumFractionDigits: 0,
-      minimumIntegerDigits: parseInt(f.after("D")) || 1,
+      minimumIntegerDigits: parseIntDefault(f.after("D"), 1),
       useGrouping: false,
     }
 
   if (f.startsWith("F"))
     return {
       style: "decimal",
-      minimumFractionDigits: parseInt(f.after("F")) || 2,
-      maximumFractionDigits: parseInt(f.after("F")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("F"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("F"), 2),
       useGrouping: false,
     }
 
@@ -298,30 +299,39 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
     return {
       style: "decimal",
       notation: "scientific",
-      minimumFractionDigits: parseInt(f.after("E")) || 6,
-      maximumFractionDigits: parseInt(f.after("E")) || 6,
+      minimumFractionDigits: parseIntDefault(f.after("E"), 6),
+      maximumFractionDigits: parseIntDefault(f.after("E"), 6),
       useGrouping: false,
     } as any;
 
-  if (f.startsWith("P"))
+  if (f.startsWith("P")) {
     return {
       style: "percent",
-      minimumFractionDigits: parseInt(f.after("P")) || 2,
-      maximumFractionDigits: parseInt(f.after("P")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("P"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("P"), 2),
       useGrouping: false,
     }
+  }
 
   //simple heuristic
-  var style = f.endsWith("%") ? "percent" : "decimal";
-  var afterDot = (f.tryBefore("%") ?? f).tryAfter(".") ?? "";
+
+  var regex = /(?<plus>\+)?(?<body>[0#,.]+)(?<suffix>[%MKB])?/
+
+  const match = regex.exec(f);
+
+  var body = match?.groups?.body ?? f;
+  const suffix = match?.groups?.suffix;
+
+  var afterDot = body.tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
-    style: style,
+    style: suffix == "%" ? "percent" : "decimal",
+    notation: suffix == "K" || suffix == "M" || suffix == "B" ? "compact": undefined,
     minimumFractionDigits: afterDot.replaceAll("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
   };
 
-  if (f.startsWith("+"))
+  if (match?.groups?.plus)
     (result as any).signDisplay = "always";
 
   return result;
@@ -341,45 +351,20 @@ export function numberToString(val: any, format?: string) {
   return toNumberFormat(format).format(val);
 }
 
-export function dateToString(val: any, type: "Date" | "DateTime", format?: string) {
+export function dateToString(val: any, type: "DateOnly" | "DateTime", netFormat?: string) {
   if (val == null)
     return "";
 
   var m = DateTime.fromISO(val);
-  return m.toFormat(toLuxonFormat(format, type));
+  return m.toFormat(toLuxonFormat(netFormat, type));
 }
 
-export function durationToString(val: any, format?: string) {
+export function timeToString(val: any, netFormat?: string) {
   if (val == null)
     return "";
 
-  var duration = parseDuration(val);
-  return duration.toFormat(format ?? "hh:mm:ss");
-}
-
-export function parseDuration(timeStampToStr: string, format: string = "hh:mm:ss") {
-  var valParts = timeStampToStr.split(":");
-  var formatParts = format.split(":");
-
-  if (valParts.length > formatParts.length)
-    throw new Error("Invalid Format")
-
-  const result: DurationObjectUnits = {};
-
-  for (let i = 0; i < formatParts.length; i++) {
-    const formP = formatParts[i];
-    const value = parseInt(valParts[i] || "0");
-    switch (formP) {
-      case "h":
-      case "hh": result.hour = value; break;
-      case "m":
-      case "mm": result.minute = value; break;
-      case "s":
-      case "ss": result.second = value; break;
-      default: throw new Error("Unexpected " + formP);
-    }
-  }
-  return Duration.fromObject(result);
+  var duration = Duration.fromISOTime(val);
+  return duration.toFormat(toLuxonDurationFormat(netFormat) ?? "hh:mm:ss");
 }
 
 
@@ -767,6 +752,8 @@ export class Binding<T> implements IBinding<T> {
         (this.parentObject as ModifiableEntity).modified = true;
       }
     }
+
+    this.initialValue = val;
   }
 
   deleteValue() {
@@ -922,9 +909,8 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
   }
 }
 
-
-const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*(var [^;]*;)?\s*return\s*([^;]*)\s*;?\s*}$/;
-const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(return\s+)?([^;]*)\s*;?\s*}?$/;
+const functionRegex = /^function\s*\(\s*(?<param>[$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*(var [^;]*;)?\s*return\s*(?<body>[^;]*)\s*;?\s*}$/;
+const lambdaRegex = /^\s*\(?\s*(?<param>[$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*(({\s*(\"use strict\"\;)?\s*(var [^;]*;)?\s*return\s*(?<body>[^;]*)\s*;?\s*})|(?<body2>[^;]*))\s*$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
 const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
@@ -932,6 +918,7 @@ const getMixinRegexOld = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z
 const getMixinRegex = /^\(0,[^.]+\.getMixin\)\((.+),[^.]+\.([$a-zA-Z_][0-9a-zA-Z_$]*)\)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const fixNullPropagator = /^\(([_\w]+)\s*=\s(.*?)\s*\)\s*===\s*null\s*\|\|\s*\1\s*===\s*void 0\s*\?\s*void 0\s*:\s*\1$/;
+const fixNullPropagatorProd = /^\s*null\s*===\(([_\w]+)\s*=\s*(.*?)\s*\)\s*\|\|\s*void 0\s*===\s*\1\s*\?\s*void 0\s*:\s*\1$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[] {
 
@@ -942,8 +929,8 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
   if (lambdaMatch == undefined)
     throw Error("invalid function");
 
-  const parameter = lambdaMatch[1];
-  let body = lambdaMatch[4];
+  const parameter = lambdaMatch.groups!.param;
+  let body = lambdaMatch.groups!.body ?? lambdaMatch.groups!.body2;
   let result: LambdaMember[] = [];
 
   while (body != parameter) {
@@ -964,7 +951,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
       result.push({ name: m[2], type: "Indexer" });
       body = m[1];
     }
-    else if (m = fixNullPropagator.exec(body)) {
+    else if (m = fixNullPropagator.exec(body) ?? fixNullPropagatorProd.exec(body)) {
       body = m[2];
     }
     else {
@@ -1536,8 +1523,6 @@ export interface ISymbol {
 }
 
 let missingSymbols: ISymbol[] = [];
-
-
 
 function getMember(key: string): MemberInfo | undefined {
 

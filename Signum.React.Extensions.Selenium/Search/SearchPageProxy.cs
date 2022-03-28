@@ -1,81 +1,79 @@
 using System;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Remote;
 using Signum.Entities;
 
-namespace Signum.React.Selenium
+namespace Signum.React.Selenium;
+
+public class SearchPageProxy : IDisposable
 {
-    public class SearchPageProxy : IDisposable
+    public WebDriver Selenium { get; private set; }
+    public SearchControlProxy SearchControl { get; private set; }
+    public ResultTableProxy Results { get { return SearchControl.Results; } }
+    public FiltersProxy Filters { get { return SearchControl.Filters; } }
+    public PaginationSelectorProxy Pagination { get { return SearchControl.Pagination; } }
+
+    public SearchPageProxy(WebDriver selenium)
     {
-        public WebDriver Selenium { get; private set; }
-        public SearchControlProxy SearchControl { get; private set; }
-        public ResultTableProxy Results { get { return SearchControl.Results; } }
-        public FiltersProxy Filters { get { return SearchControl.Filters; } }
-        public PaginationSelectorProxy Pagination { get { return SearchControl.Pagination; } }
+        this.Selenium = selenium;
+        this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.CssSelector(".sf-search-page .sf-search-control")));
+    }
 
-        public SearchPageProxy(WebDriver selenium)
-        {
-            this.Selenium = selenium;
-            this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.CssSelector(".sf-search-page .sf-search-control")));
-        }
+    public FrameModalProxy<T> Create<T>() where T : ModifiableEntity
+    {
+        var popup = SearchControl.CreateButton.Find().CaptureOnClick();
 
-        public FrameModalProxy<T> Create<T>() where T : ModifiableEntity
-        {
-            var popup = SearchControl.CreateButton.Find().CaptureOnClick();
+        if (SelectorModalProxy.IsSelector(popup))
+            popup = popup.AsSelectorModal().SelectAndCapture<T>();
 
-            if (SelectorModalProxy.IsSelector(popup))
-                popup = popup.AsSelectorModal().SelectAndCapture<T>();
+        return new FrameModalProxy<T>(popup);
+    }
 
-            return new FrameModalProxy<T>(popup);
-        }
+    public FramePageProxy<T> CreateInPlace<T>() where T : ModifiableEntity
+    {
+        SearchControl.CreateButton.Find().Click();
 
-        public FramePageProxy<T> CreateInPlace<T>() where T : ModifiableEntity
-        {
-            SearchControl.CreateButton.Find().Click();
-
-            var result = new FramePageProxy<T>(this.Selenium);
+        var result = new FramePageProxy<T>(this.Selenium);
  
-            return result;
-        }
+        return result;
+    }
 
-        public FramePageProxy<T> CreateInTab<T>() where T : ModifiableEntity
+    public FramePageProxy<T> CreateInTab<T>() where T : ModifiableEntity
+    {
+        var oldCount = Selenium.WindowHandles.Count;
+
+        SearchControl.CreateButton.Find().Click();
+
+        Selenium.Wait(() => Selenium.WindowHandles.Count > oldCount);
+
+        var windowHandles = Selenium.WindowHandles;
+
+        var currentIndex = windowHandles.IndexOf(Selenium.CurrentWindowHandle);
+
+        Selenium.SwitchTo().Window(windowHandles[currentIndex +1]);
+
+        var result = new FramePageProxy<T>(this.Selenium);
+
+        result.OnDisposed += () =>
         {
-            var oldCount = Selenium.WindowHandles.Count;
+            Selenium.SwitchTo().Window(windowHandles[currentIndex]);
+        };
 
-            SearchControl.CreateButton.Find().Click();
-
-            Selenium.Wait(() => Selenium.WindowHandles.Count > oldCount);
-
-            var windowHandles = Selenium.WindowHandles;
-
-            var currentIndex = windowHandles.IndexOf(Selenium.CurrentWindowHandle);
-
-            Selenium.SwitchTo().Window(windowHandles[currentIndex +1]);
-
-            var result = new FramePageProxy<T>(this.Selenium);
-
-            result.OnDisposed += () =>
-            {
-                Selenium.SwitchTo().Window(windowHandles[currentIndex]);
-            };
-
-            return result;
-        }
+        return result;
+    }
 
 
-        public void Dispose()
-        {
-        }
+    public void Dispose()
+    {
+    }
 
-        public void Search()
-        {
-            this.SearchControl.Search();
-        }
+    public void Search()
+    {
+        this.SearchControl.Search();
+    }
 
-        internal SearchPageProxy WaitLoaded()
-        {
-            this.Selenium.Wait(() => this.SearchControl.SearchButton != null);
-            return this;
-        }
+    internal SearchPageProxy WaitLoaded()
+    {
+        this.Selenium.Wait(() => this.SearchControl.SearchButton != null);
+        return this;
     }
 }

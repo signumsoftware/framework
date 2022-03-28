@@ -39,6 +39,8 @@ export module API {
 
 export interface CacheState {
   isEnabled: boolean;
+  serverBroadcast: string | undefined;
+  sqlDependency: boolean;
   tables: CacheTableStats[];
   lazies: ResetLazyStats[];
 }

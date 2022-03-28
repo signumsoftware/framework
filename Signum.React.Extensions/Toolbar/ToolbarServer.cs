@@ -1,13 +1,11 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 
-namespace Signum.React.Toolbar
+namespace Signum.React.Toolbar;
+
+public static class ToolbarServer
 {
-    public static class ToolbarServer
+    public static void Start(IApplicationBuilder app)
     {
-        public static void Start(IApplicationBuilder app)
-        {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-        }
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
     }
 }

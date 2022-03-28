@@ -1,36 +1,33 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
 using Signum.Entities.Omnibox;
 using Signum.React.Filters;
 
-namespace Signum.React.Omnibox
+namespace Signum.React.Omnibox;
+
+[ValidateModelFilter]
+public class OmniboxController : ControllerBase
 {
-    [ValidateModelFilter]
-    public class OmniboxController : ControllerBase
+    [HttpPost("api/omnibox")]
+    public List<OmniboxResult> OmniboxResults([Required, FromBody]OmniboxRequest request)
     {
-        [HttpPost("api/omnibox")]
-        public List<OmniboxResult> OmniboxResults([Required, FromBody]OmniboxRequest request)
+        OmniboxPermission.ViewOmnibox.AssertAuthorized();
+
+        var generator = new SpecialOmniboxGenerator<ReactSpecialOmniboxAction>()
         {
-            OmniboxPermission.ViewOmnibox.AssertAuthorized();
+            Actions = request.specialActions.ToDictionary(a => a, a => new ReactSpecialOmniboxAction { Key = a })
+        };
 
-            var generator = new SpecialOmniboxGenerator<ReactSpecialOmniboxAction>()
-            {
-                Actions = request.specialActions.ToDictionary(a => a, a => new ReactSpecialOmniboxAction { Key = a })
-            };
-
-            using (ReactSpecialOmniboxGenerator.OverrideClientGenerator(generator))
-            {
-                return OmniboxParser.Results(request.query, new System.Threading.CancellationToken());
-            }
-        }
-
-        public class OmniboxRequest
+        using (ReactSpecialOmniboxGenerator.OverrideClientGenerator(generator))
         {
-            public string query;
-            public string[] specialActions;
+            return OmniboxParser.Results(request.query, new System.Threading.CancellationToken());
         }
+    }
+
+    public class OmniboxRequest
+    {
+        public string query;
+        public string[] specialActions;
     }
 }

@@ -1,17 +1,18 @@
 import * as React from 'react'
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import { areEqual, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toDurationFormat, durationToString } from '../Reflection'
+import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toLuxonDurationFormat, timeToString } from '../Reflection'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
-import { BsColor } from '../Components';
+import { BsColor, BsSize } from '../Components';
 import { toFilterRequests } from '../Finder';
 import { PropertyRoute } from '../Lines'
 import * as Hooks from '../Hooks'
+
 export interface ValueSearchControlProps extends React.Props<ValueSearchControl> {
   valueToken?: string | QueryTokenString<any>;
   findOptions: FindOptions;
@@ -32,16 +33,18 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
   avoidNotifyPendingRequest?: boolean;
   deps?: React.DependencyList;
   searchControlProps?: Partial<SearchControlProps>;
+  modalSize?: BsSize;
   onRender?: (value: any | undefined, vsc: ValueSearchControl) => React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLElement>,
+  customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token?: QueryToken) => Promise<any>,
 }
 
 export interface ValueSearchControlState {
   value?: any;
-  token?: QueryToken;
+  valueToken?: QueryToken;
 }
 
-function getQueryRequest(fo: FindOptionsParsed, valueToken?: string | QueryTokenString<any>, multipleValues?: boolean): QueryValueRequest {
+function getQueryRequestValue(fo: FindOptionsParsed, valueToken?: string | QueryTokenString<any>, multipleValues?: boolean): QueryValueRequest {
 
   return {
     queryKey: fo.queryKey,
@@ -66,8 +69,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
   componentDidMount() {
     if (this.props.initialValue == undefined) {
-      this.loadToken(this.props);
-      this.refreshValue(this.props);
+      this.loadToken(this.props)
+        .then(t => this.refreshValue(this.props, t))
+        .done();
     }
   }
 
@@ -77,48 +81,85 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       return token?.toString();
     }
 
-    if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions) &&
-      toString(this.props.valueToken) == toString(newProps.valueToken)) {
-
-      if (!Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? []))
-        this.refreshValue(newProps)
+    if (newProps.initialValue !== undefined) {
+      if (
+        //when initialValue is set, changing findOptions or token can not force a refresh because it will break reusing ValueSearchControls inside of SearchControl cells
+        //Finder.findOptionsPath(this.props.findOptions) != Finder.findOptionsPath(newProps.findOptions) ||
+        !Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? []))
+        this.loadToken(newProps)
+          .then(valTok => {
+            if (newProps.initialValue == undefined)
+              this.refreshValue(newProps, valTok);
+          })
+          .done();
+      else if (newProps.initialValue !== this.props.initialValue)
+        this.setState({ value: newProps.initialValue });
 
     } else {
-      this.loadToken(newProps);
+      if (toString(this.props.valueToken) == toString(newProps.valueToken)) {
 
-      if (newProps.initialValue == undefined)
-        this.refreshValue(newProps);
+        if (Finder.findOptionsPath(this.props.findOptions) != Finder.findOptionsPath(newProps.findOptions) ||
+          !Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? []))
+          this.refreshValue(newProps, this.state.valueToken);
+
+      } else {
+        this.loadToken(newProps)
+          .then(valTok => {
+            if (newProps.initialValue == undefined)
+              this.refreshValue(newProps, valTok);
+          })
+          .done();
+      }
     }
   }
 
-  loadToken(props: ValueSearchControlProps) {
+  loadToken(props: ValueSearchControlProps): Promise<QueryToken | undefined> {
 
-    if (props.valueToken == (this.state.token && this.state.token.fullKey))
-      return;
+    if (props.valueToken?.toString() == this.state.valueToken?.fullKey)
+      return Promise.resolve(this.state.valueToken);
 
-    this.setState({ token: undefined, value: undefined });
-    if (props.valueToken)
-      Finder.parseSingleToken(props.findOptions.queryName, props.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)
-        .then(st => {
-          this.setState({ token: st });
-          this.props.onTokenLoaded && this.props.onTokenLoaded();
-        })
-        .done();
+    this.setState({ valueToken: undefined, value: undefined });
+    if (!props.valueToken)
+      return Promise.resolve(undefined);
+
+    return Finder.parseSingleToken(props.findOptions.queryName, props.valueToken.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement)
+      .then(st => {
+        this.setState({ valueToken: st });
+        this.props.onTokenLoaded && this.props.onTokenLoaded();
+        return st;
+      });
   }
 
   componentWillUnmount() {
     this.abortableQuery.abort();
   }
 
-  abortableQuery = new AbortableRequest<{ findOptions: FindOptions; valueToken?: string | QueryTokenString<any>, multipleValues: boolean | undefined, avoidNotify: boolean | undefined }, number>(
+  abortableQuery = new AbortableRequest<{
+    findOptions: FindOptions;
+    valueToken?: QueryToken,
+    multipleValues: boolean | undefined,
+    avoidNotify: boolean | undefined,
+    customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | undefined) => any
+  }, any>(
     (abortSignal, a) =>
       Finder.getQueryDescription(a.findOptions.queryName)
         .then(qd => Finder.parseFindOptions(a.findOptions, qd, false))
-        .then(fop => Finder.API.queryValue(getQueryRequest(fop, a.valueToken, a.multipleValues), a.avoidNotify, abortSignal)));
+        .then(fop => {
+          var req = getQueryRequestValue(fop, a.valueToken?.fullKey, a.multipleValues);
 
-  refreshValue(props?: ValueSearchControlProps) {
-    if (!props)
+          if (a.customRequest)
+            return a.customRequest(req, fop, a.valueToken);
+          else
+            return Finder.API.queryValue(req, a.avoidNotify, abortSignal);
+        }));
+
+  refreshValue(props?: ValueSearchControlProps, token?: QueryToken | null) {
+
+    if (props === undefined)
       props = this.props;
+
+    if (token === undefined)
+      token = this.state.valueToken;
 
     var fo = props.findOptions;
 
@@ -131,7 +172,13 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (Finder.validateNewEntities(fo))
       return;
 
-    this.abortableQuery.getData({ findOptions: fo, valueToken: props.valueToken, avoidNotify: props!.avoidNotifyPendingRequest, multipleValues: Boolean(props.multipleValues) })
+    this.abortableQuery.getData({
+      findOptions: fo,
+      valueToken: this.state.valueToken,
+      avoidNotify: props!.avoidNotifyPendingRequest,
+      multipleValues: Boolean(props.multipleValues),
+      customRequest: props.customRequest
+    })
       .then(value => {
         const fixedValue = value === undefined ? null : value;
         this.setState({ value: fixedValue });
@@ -141,12 +188,12 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
   }
 
   isNumeric() {
-    let token = this.state.token;
+    let token = this.state.valueToken;
     return token && (token.filterType == "Integer" || token.filterType == "Decimal");
   }
 
   isMultiLine() {
-    let token = this.state.token;
+    let token = this.state.valueToken;
     return token && token.filterType == "String" && token.propertyRoute && PropertyRoute.parseFull(token.propertyRoute).member?.isMultiline;
   }
 
@@ -180,7 +227,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       if (value == null)
         return null;
 
-      let token = this.state.token;
+      let token = this.state.valueToken;
       if (!token)
         return null;
 
@@ -219,20 +266,24 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
       }
     }
 
+    function bg(color: BsColor) {
+      return p.isLink ? "btn-" + color : "bg-" + color;
+    }
+
     let className = classes(
       p.valueToken == undefined && "count-search",
       p.valueToken == undefined && (this.state.value > 0 ? "count-with-results" : "count-no-results"),
-      s.token && (s.token.type.isLite || s.token!.type.isEmbedded) && "sf-entity-line-entity",
+      s.valueToken && (s.valueToken.type.isLite || s.valueToken!.type.isEmbedded) && "sf-entity-line-entity",
       p.formControlClass,
       p.formControlClass && this.isNumeric() && "numeric",
       p.formControlClass && this.isMultiLine() && "sf-multi-line",
 
       p.isBadge == false ? "" :
         "badge badge-pill " +
-        (p.isBadge == "MoreThanZero" && (this.state.value == 0 || this.state.value == null) ? "badge-light text-muted" :
-          p.badgeColor && typeof p.badgeColor == "function" ? "badge-" + p.badgeColor(this.state.value) :
-            p.badgeColor ? "badge-" + p.badgeColor :
-              "badge-secondary"),
+        (p.isBadge == "MoreThanZero" && (this.state.value == 0 || this.state.value == null) ? bg("light") + " text-muted" :
+          p.badgeColor && typeof p.badgeColor == "function" ? bg(p.badgeColor(this.state.value)) :
+            p.badgeColor ? bg(p.badgeColor) :
+              bg("secondary")),
 
       p.customClass && typeof p.customClass == "function" ? p.customClass(this.state.value) : p.customClass
     );
@@ -268,7 +319,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     }
 
     Navigator.view(lite)
-      .then(() => { this.refreshValue(); this.props.onExplored && this.props.onExplored(); })
+      .then(() => { this.refreshValue(this.props, this.state.valueToken); this.props.onExplored && this.props.onExplored(); })
       .done();
   }
 
@@ -283,25 +334,31 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (!this.props.valueToken)
       return value;
 
-    let token = this.state.token;
+    let token = this.state.valueToken;
     if (!token)
       return null;
 
     switch (token.filterType) {
       case "Integer":
       case "Decimal":
-        const numbroFormat = toNumberFormat(this.props.format ?? token.format);
-        return numbroFormat.format(value);
+        {
+          const numberFormat = toNumberFormat(this.props.format ?? token.format);
+          return numberFormat.format(value);
+        }
       case "DateTime":
-        const momentFormat = toLuxonFormat(this.props.format ?? token.format, token.type.name as "Date" | "DateTime");
-        return DateTime.fromISO(value).toFormatFixed(momentFormat);
+        {
+          const luxonFormat = toLuxonFormat(this.props.format ?? token.format, token.type.name as "DateOnly" | "DateTime");
+          return toFormatFixed(DateTime.fromISO(value), luxonFormat);
+        }
       case "Time":
-        const durationFormat = toDurationFormat(this.props.format ?? token.format);
-        return durationToString(value, durationFormat);
+        {
+          const luxonFormat = toLuxonDurationFormat(this.props.format ?? token.format);
+          return Duration.fromISOTime(value).toFormat(luxonFormat ?? "hh:mm:ss");
+        }
       case "String": return value;
       case "Lite": return (value as Lite<Entity>).toStr;
       case "Embedded": return getToString(value as EmbeddedEntity);
-      case "Boolean": return <input type="checkbox" disabled={true} checked={value} />
+      case "Boolean": return <input type="checkbox" className="form-check-input" disabled={true} checked={value} />
       case "Enum": return getEnumInfo(token!.type.name, value).niceName;
       case "Guid":
         let str = value as string;
@@ -317,12 +374,16 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     if (e.ctrlKey || e.button == 1)
       window.open(Finder.findOptionsPath(this.props.findOptions));
     else
-      Finder.explore(this.props.findOptions, { searchControlProps: this.props.searchControlProps }).then(() => {
+      Finder.explore(this.props.findOptions, { searchControlProps: this.props.searchControlProps, modalSize: this.props.modalSize }).then(() => {
         if (!this.props.avoidAutoRefresh)
-          this.refreshValue(this.props);
+          this.refreshValue(this.props, this.state.valueToken);
 
         if (this.props.onExplored)
           this.props.onExplored();
       }).done();
   }
+}
+
+function toFormatFixed(arg0: DateTime, momentFormat: string) {
+    throw new Error('Function not implemented.')
 }

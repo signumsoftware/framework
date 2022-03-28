@@ -62,9 +62,19 @@ export function ChartColumn(p: ChartColumnProps) {
       var dragIndex = parseInt(txt.after("chartColumn_"));
 
       if (dropIndex != dragIndex) {
-        var temp = cols[dropIndex].element.token;
-        cols[dropIndex].element.token = cols[dragIndex].element.token;
-        cols[dragIndex].element.token = temp;
+
+
+        var dropToken = cols[dropIndex].element.token;
+        var dragToken = cols[dragIndex].element.token;
+        cols[dropIndex].element.token = dragToken;
+        cols[dragIndex].element.token = dropToken;
+
+        cols[dropIndex].element.modified = true;
+        cols[dragIndex].element.modified = true;
+
+        if (dragToken) dragToken.modified = true;
+        if (dropToken) dropToken.modified = true;
+
         p.onTokenChange();
       }
 
@@ -139,7 +149,7 @@ export function ChartColumn(p: ChartColumnProps) {
           }} title={getTitle(sc.columnType).map(a => ChartColumnType.niceToString(a)).join("\n")}>
             {ChartColumnType.niceToString(sc.columnType)}
           </span>
-          <a className={classes("sf-chart-token-config-trigger", numParameters > 0 && ctx.value.token && "font-weight-bold")} onClick={handleExpanded}>{ChartMessage.ToggleInfo.niceToString()} {numParameters > 0 && ctx.value.token && <span>({numParameters})</span>} </a>
+          <a className={classes("sf-chart-token-config-trigger", numParameters > 0 && ctx.value.token && "fw-bold")} onClick={handleExpanded}>{ChartMessage.ToggleInfo.niceToString()} {numParameters > 0 && ctx.value.token && <span>({numParameters})</span>} </a>
         </td>
       </tr>
       {expanded && <tr className="sf-chart-token-config">
@@ -170,9 +180,9 @@ export function ChartColumn(p: ChartColumnProps) {
 
 function getTitle(ct: ChartColumnType): ChartColumnType[] {
   switch (ct) {
-    case "Groupable": return ["String", "Lite", "Enum", "Date", "Integer", "RealGroupable"];
+    case "Groupable": return ["String", "Lite", "Enum", "DateOnly", "Integer", "RealGroupable"];
     case "Magnitude": return ["Integer", "Real", "RealGroupable"];
-    case "Positionable": return ["Integer", "Real", "RealGroupable", "Date", "DateTime"];
+    case "Positionable": return ["Integer", "Real", "RealGroupable", "DateOnly", "DateTime"];
     default: return [];
   }
 }

@@ -78,11 +78,9 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
     <form onSubmit={handleSearch} className="input-group">
       <input type="text" className="form-control"
         placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} />
-      <div className="input-group-append">
-        <button className="btn btn-outline-secondary" type="submit" title={TranslationMessage.Search.niceToString()}>
-          <FontAwesomeIcon icon="search" />
-        </button>
-      </div>
+      <button className="btn btn-outline-secondary" type="submit" title={TranslationMessage.Search.niceToString()}>
+        <FontAwesomeIcon icon="search" />
+      </button>
     </form>
   );
 }

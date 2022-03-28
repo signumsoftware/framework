@@ -10,7 +10,7 @@ import { Entity, JavascriptMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TimeMachineMessage } from '../Signum.Entities.DiffLog'
 import { Lite } from '@framework/Signum.Entities'
-import { newLite, QueryTokenString, toLuxonFormat } from '@framework/Reflection'
+import { newLite, QueryTokenString, toFormatWithFixes, toLuxonFormat } from '@framework/Reflection'
 import { EngineMessage } from '@framework/Signum.Entities'
 import { NormalWindowMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
@@ -133,7 +133,7 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
   return (
     <Tabs id="timeMachineTabs">
       {p.versionDatesUTC.orderBy(a => a).flatMap((d, i, dates) => [
-        <Tab title={DateTime.fromISO(d).toFormatFixed(luxonFormat)} key={d} eventKey={d}>
+        <Tab title={toFormatWithFixes(DateTime.fromISO(d), luxonFormat)} key={d} eventKey={d}>
           <RenderEntityVersion lite={p.lite} asOf={d} />
         </Tab>,
         (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i + 1]}>
@@ -167,9 +167,7 @@ export function TimeMachineModal(p: TimeMachineModalProps) {
     <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
       <div className="modal-header">
         <h5 className="modal-title">{TimeMachineMessage.CompareVersions.niceToString()}</h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
       </div>
       <div className="modal-body">
         <TimeMachineTabs lite={p.lite} versionDatesUTC={p.versionDatesUTC} />

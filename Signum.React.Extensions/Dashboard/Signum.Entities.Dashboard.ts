@@ -6,16 +6,55 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
-import * as Signum from '../Basics/Signum.Entities.Basics'
+import * as Files from '../Files/Signum.Entities.Files'
+import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const AutoUpdate = new EnumType<AutoUpdate>("AutoUpdate");
+export type AutoUpdate =
+  "None" |
+  "InteractionGroup" |
+  "Dashboard";
+
+export const CachedQueryEntity = new Type<CachedQueryEntity>("CachedQuery");
+export interface CachedQueryEntity extends Entities.Entity {
+  Type: "CachedQuery";
+  dashboard: Entities.Lite<DashboardEntity>;
+  userAssets: Entities.MList<Entities.Lite<UserAssets.IUserAssetEntity>>;
+  file: Files.FilePathEmbedded;
+  numRows: number;
+  numColumns: number;
+  creationDate: string /*DateTime*/;
+  queryDuration: number;
+  uploadDuration: number;
+}
+
+export module CachedQueryFileType {
+  export const CachedQuery : Files.FileTypeSymbol = registerSymbol("FileType", "CachedQueryFileType.CachedQuery");
+}
+
+export const CacheQueryConfigurationEmbedded = new Type<CacheQueryConfigurationEmbedded>("CacheQueryConfigurationEmbedded");
+export interface CacheQueryConfigurationEmbedded extends Entities.EmbeddedEntity {
+  Type: "CacheQueryConfigurationEmbedded";
+  timeoutForQueries: number;
+  maxRows: number;
+  autoRegenerateWhenOlderThan: number | null;
+}
+
+export const CombinedUserChartElementEmbedded = new Type<CombinedUserChartElementEmbedded>("CombinedUserChartElementEmbedded");
+export interface CombinedUserChartElementEmbedded extends Entities.EmbeddedEntity {
+  Type: "CombinedUserChartElementEmbedded";
+  userChart: Chart.UserChartEntity;
+  isQueryCached: boolean;
+}
+
 export const CombinedUserChartPartEntity = new Type<CombinedUserChartPartEntity>("CombinedUserChartPart");
 export interface CombinedUserChartPartEntity extends Entities.Entity, IPartEntity {
   Type: "CombinedUserChartPart";
-  userCharts: Entities.MList<Chart.UserChartEntity>;
+  userCharts: Entities.MList<CombinedUserChartElementEmbedded>;
   showData: boolean;
   allowChangeShowData: boolean;
   combinePinnedFiltersWithSameLabel: boolean;
@@ -31,7 +70,7 @@ export type DashboardEmbedededInEntity =
   "Tab";
 
 export const DashboardEntity = new Type<DashboardEntity>("Dashboard");
-export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
+export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity, Scheduler.ITaskEntity {
   Type: "Dashboard";
   entityType: Entities.Lite<Basics.TypeEntity> | null;
   embeddedInEntity: DashboardEmbedededInEntity | null;
@@ -39,9 +78,12 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   dashboardPriority: number | null;
   autoRefreshPeriod: number | null;
   displayName: string;
+  hideDisplayName: boolean;
   combineSimilarRows: boolean;
+  cacheQueryConfiguration: CacheQueryConfigurationEmbedded | null;
   parts: Entities.MList<PanelPartEmbedded>;
-  guid: string;
+  tokenEquivalencesGroups: Entities.MList<TokenEquivalenceGroupEntity>;
+  guid: string /*Guid*/;
   key: string | null;
 }
 
@@ -53,16 +95,27 @@ export module DashboardMessage {
   export const Part0IsTooLarge = new MessageKey("DashboardMessage", "Part0IsTooLarge");
   export const Part0OverlapsWith1 = new MessageKey("DashboardMessage", "Part0OverlapsWith1");
   export const RowsSelected = new MessageKey("DashboardMessage", "RowsSelected");
+  export const ForPerformanceReasonsThisDashboardMayShowOutdatedInformation = new MessageKey("DashboardMessage", "ForPerformanceReasonsThisDashboardMayShowOutdatedInformation");
+  export const LasUpdateWasOn0 = new MessageKey("DashboardMessage", "LasUpdateWasOn0");
 }
 
 export module DashboardOperation {
   export const Save : Entities.ExecuteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Save");
+  export const RegenerateCachedQueries : Entities.ExecuteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.RegenerateCachedQueries");
   export const Clone : Entities.ConstructSymbol_From<DashboardEntity, DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Clone");
   export const Delete : Entities.DeleteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Delete");
 }
 
 export module DashboardPermission {
   export const ViewDashboard : Authorization.PermissionSymbol = registerSymbol("Permission", "DashboardPermission.ViewDashboard");
+}
+
+export const ImagePartEntity = new Type<ImagePartEntity>("ImagePart");
+export interface ImagePartEntity extends Entities.Entity, IPartEntity {
+  Type: "ImagePart";
+  imageSrcContent: string;
+  clickActionURL: string | null;
+  requiresTitle: boolean;
 }
 
 export const InteractionGroup = new EnumType<InteractionGroup>("InteractionGroup");
@@ -105,14 +158,38 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   startColumn: number;
   columns: number;
   interactionGroup: InteractionGroup | null;
-  style: Signum.BootstrapStyle;
+  customColor: string | null;
+  useIconColorForTitle: boolean;
   content: IPartEntity;
+}
+
+export const SeparatorPartEntity = new Type<SeparatorPartEntity>("SeparatorPart");
+export interface SeparatorPartEntity extends Entities.Entity, IPartEntity {
+  Type: "SeparatorPart";
+  title: string | null;
+  requiresTitle: boolean;
+}
+
+export const TokenEquivalenceEmbedded = new Type<TokenEquivalenceEmbedded>("TokenEquivalenceEmbedded");
+export interface TokenEquivalenceEmbedded extends Entities.EmbeddedEntity {
+  Type: "TokenEquivalenceEmbedded";
+  query: Basics.QueryEntity;
+  token: UserAssets.QueryTokenEmbedded;
+}
+
+export const TokenEquivalenceGroupEntity = new Type<TokenEquivalenceGroupEntity>("TokenEquivalenceGroup");
+export interface TokenEquivalenceGroupEntity extends Entities.Entity {
+  Type: "TokenEquivalenceGroup";
+  dashboard: Entities.Lite<DashboardEntity>;
+  interactionGroup: InteractionGroup | null;
+  tokenEquivalences: Entities.MList<TokenEquivalenceEmbedded>;
 }
 
 export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
   Type: "UserChartPart";
   userChart: Chart.UserChartEntity;
+  isQueryCached: boolean;
   showData: boolean;
   allowChangeShowData: boolean;
   createNew: boolean;
@@ -124,7 +201,9 @@ export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart"
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
   Type: "UserQueryPart";
   userQuery: UserQueries.UserQueryEntity;
+  isQueryCached: boolean;
   renderMode: UserQueryPartRenderMode;
+  autoUpdate: AutoUpdate;
   allowSelection: boolean;
   showFooter: boolean;
   createNew: boolean;
@@ -148,6 +227,7 @@ export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ValueUserQueryElementEmbedded";
   label: string | null;
   userQuery: UserQueries.UserQueryEntity;
+  isQueryCached: boolean;
   href: string | null;
 }
 

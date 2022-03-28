@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import * as Constructor from '../Constructor'
-import { FindOptions, QueryDescription } from '../FindOptions'
+import { FindOptions, FindOptionsParsed, QueryDescription, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
 import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
@@ -10,7 +10,7 @@ import { StyleContext, TypeContext } from '../TypeContext'
 import ValueSearchControl from './ValueSearchControl'
 import { FormGroup } from '../Lines/FormGroup'
 import { SearchControlProps } from "./SearchControl";
-import { BsColor } from '../Components';
+import { BsColor, BsSize } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines/EntityBase'
 import SelectorModal from '../SelectorModal'
@@ -41,9 +41,11 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   onCreate?: () => Promise<any>;
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
   searchControlProps?: Partial<SearchControlProps>;
+  modalSize?: BsSize;
   onExplored?: () => void;
   onViewEntity?: (entity: Lite<Entity>) => void;
   onValueChanged?: (value: any) => void;
+  customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token?: QueryToken) => Promise<any>,
 }
 
 export default class ValueSearchControlLine extends React.Component<ValueSearchControlLineProps> {
@@ -100,7 +102,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
       );
     }
 
-    var token = this.valueSearchControl && this.valueSearchControl.state.token;
+    var token = this.valueSearchControl && this.valueSearchControl.state.valueToken;
 
     const isQuery = this.props.valueToken == undefined || token?.queryTokenType == "Aggregate";
 
@@ -163,23 +165,16 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             onTokenLoaded={() => this.forceUpdate()}
             onExplored={this.props.onExplored}
             searchControlProps={this.props.searchControlProps}
+            modalSize={this.props.modalSize}
             deps={this.props.deps}
+            customRequest={this.props.customRequest}
           />
 
-          {(view || extra || find || unit) && (isFormControl ?
-            <div className="input-group-append">
-              {unit}
-              {view}
-              {find}
-              {create}
-              {extra}
-            </div> : <span>
-              {unit}
-              {view}
-              {find}
-              {create}
-              {extra}
-            </span>)}
+          {unit}
+          {view}
+          {find}
+          {create}
+          {extra}
         </div>
       </FormGroup>
     );

@@ -109,7 +109,7 @@ export class EntityListController extends EntityListBaseController<EntityListPro
 
     const pr = this.props.ctx.propertyRoute;
 
-    const type = pr?.member?.typeNiceName || (e as Lite<Entity>).EntityType || (e as ModifiableEntity).Type;
+    const type = pr?.member?.niceName || (e as Lite<Entity>).EntityType || (e as ModifiableEntity).Type;
 
     const id = (e as Lite<Entity>).id || (e as Entity).id;
 
@@ -134,10 +134,10 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
       labelHtmlAttributes={p.labelHtmlAttributes}>
       <div className="sf-entity-line">
         <div className={p.ctx.inputGroupClass}>
-          <select className={p.ctx.formControlClass} size={p.size ?? 30} style={{ height:"120px", overflow: "auto" }} onChange={c.handleOnSelect} ref={c.handleSelectLoad}>
+          <select className={p.ctx.formSelectClass} size={p.size ?? 30} style={{ height: "120px", overflow: "auto" }} onChange={c.handleOnSelect} ref={c.handleSelectLoad}>
             {list.map(mle => <option key={c.keyGenerator.getKey(mle)} title={p.ctx.titleLabels ? c.getTitle(mle.element) : undefined} {...EntityListBaseController.entityHtmlAttributes(mle.element)}>{getToString(mle.element)}</option>)}
           </select>
-          <span className="input-group-append input-group-vertical">
+          <span className="input-group-vertical">
             {c.renderCreateButton(true)}
             {c.renderFindButton(true)}
             {selectedIndex != undefined && c.renderViewButton(true, list[selectedIndex].element)}

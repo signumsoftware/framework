@@ -26,7 +26,7 @@ export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEnt
       <EntityLine ctx={ctx.subCtx(e => e.user)} />
       <ValueLine ctx={ctx.subCtx(e => e.apiKey)}
         extraButtons={vl =>
-          <a href="#" className={classes("sf-line-button", "sf-view", "btn btn-light")}
+          <a href="#" className={classes("sf-line-button", "sf-view", "input-group-text")}
             onClick={generateApiKey}>
             <FontAwesomeIcon icon="key" />
           </a>} />

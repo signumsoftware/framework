@@ -1,850 +1,847 @@
 using Signum.Engine.Basics;
 using Signum.Engine.Linq;
-using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.Reflection;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 
-namespace Signum.Engine.Maps
+namespace Signum.Engine.Maps;
+
+public class Schema : IImplementationsFinder
 {
-    public class Schema : IImplementationsFinder
+    public CultureInfo? ForceCultureInfo { get; set; }
+
+    public TimeZoneMode TimeZoneMode { get; set; }
+
+    public DateTimeKind DateTimeKind => TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
+    public Func<Entity, Expression<Func<Entity, bool>>?>? AttachToUniqueFilter = null;
+
+    Version? version;
+    public Version Version
     {
-        public CultureInfo? ForceCultureInfo { get; set; }
-
-        public TimeZoneMode TimeZoneMode { get; set; }
-
-        public Func<Entity, Expression<Func<Entity, bool>>?>? AttachToUniqueFilter = null;
-
-        Version? version;
-        public Version Version
+        get
         {
-            get
-            {
-                if (version == null)
-                    throw new InvalidOperationException("Schema.Version is not set");
+            if (version == null)
+                throw new InvalidOperationException("Schema.Version is not set");
 
-                return version;
-            }
-            set { this.version = value; }
+            return version;
+        }
+        set { this.version = value; }
+    }
+
+    public event Action? OnMetadataInvalidated;
+    public void InvalidateMetadata()
+    {
+        this.OnMetadataInvalidated?.Invoke();
+    }
+
+    string? applicationName;
+    public string ApplicationName
+    {
+        get { return applicationName ??= AppDomain.CurrentDomain.FriendlyName; }
+        set { applicationName = value; }
+    }
+
+    string? machineName;
+    public string MachineName
+    {
+        get { return machineName ??= Environment.MachineName; }
+        set { machineName = value; }
+    }
+
+    public SchemaSettings Settings { get; private set; }
+
+    public SchemaAssets Assets { get; private set; }
+
+    public ViewBuilder ViewBuilder { get; set; }
+
+    Dictionary<Type, Table> tables = new Dictionary<Type, Table>();
+    public Dictionary<Type, Table> Tables
+    {
+        get { return tables; }
+    }
+
+    public List<string> PostgresExtensions = new List<string>()
+    {
+        "uuid-ossp"
+    };
+
+    #region Events
+
+    public event Func<Type, bool, string?>? IsAllowedCallback;
+
+    public string? IsAllowed(Type type, bool inUserInterface)
+    {
+        foreach (var f in IsAllowedCallback.GetInvocationListTyped())
+        {
+            string? result = f(type, inUserInterface);
+
+            if (result != null)
+                return result;
         }
 
-        public event Action? OnMetadataInvalidated;
-        public void InvalidateMetadata()
-        {
-            this.OnMetadataInvalidated?.Invoke();
-        }
+        return null;
+    }
 
-        string? applicationName;
-        public string ApplicationName
-        {
-            get { return applicationName ??= AppDomain.CurrentDomain.FriendlyName; }
-            set { applicationName = value; }
-        }
+    internal Dictionary<string, Type> NameToType = new Dictionary<string, Type>();
+    internal Dictionary<Type, string> TypeToName = new Dictionary<Type, string>();
 
-        public SchemaSettings Settings { get; private set; }
+    internal ResetLazy<TypeCaches> typeCachesLazy;
 
-        public SchemaAssets Assets { get; private set; }
+    public void AssertAllowed(Type type, bool inUserInterface)
+    {
+        string? error = IsAllowed(type, inUserInterface);
 
-        public ViewBuilder ViewBuilder { get; set; }
+        if (error != null)
+            throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().FormatWith(type.NiceName(), error));
+    }
 
-        Dictionary<Type, Table> tables = new Dictionary<Type, Table>();
-        public Dictionary<Type, Table> Tables
-        {
-            get { return tables; }
-        }
+    readonly IEntityEvents entityEventsGlobal = new EntityEvents<Entity>();
+    public EntityEvents<Entity> EntityEventsGlobal
+    {
+        get { return (EntityEvents<Entity>)entityEventsGlobal; }
+    }
 
-        public List<string> PostgresExtensions = new List<string>()
-        {
-            "uuid-ossp"
-        };
+    Dictionary<Type, IEntityEvents> entityEvents = new Dictionary<Type, IEntityEvents>();
+    public EntityEvents<T> EntityEvents<T>()
+        where T : Entity
+    {
+        return (EntityEvents<T>)entityEvents.GetOrCreate(typeof(T), () => new EntityEvents<T>());
+    }
 
-        #region Events
 
-        public event Func<Type, bool, string?>? IsAllowedCallback;
+    internal void OnPreSaving(Entity entity, PreSavingContext ctx)
+    {
+        AssertAllowed(entity.GetType(), inUserInterface: false);
 
-        public string? IsAllowed(Type type, bool inUserInterface)
-        {
-            foreach (var f in IsAllowedCallback.GetInvocationListTyped())
-            {
-                string? result = f(type, inUserInterface);
+        IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
-                if (result != null)
-                    return result;
-            }
+        if (ee != null)
+            ee.OnPreSaving(entity, ctx);
 
+        entityEventsGlobal.OnPreSaving(entity, ctx);
+    }
+
+    internal Entity? OnAlternativeRetriving(Type entityType, PrimaryKey id)
+    {
+        AssertAllowed(entityType, inUserInterface: false);
+
+        IEntityEvents? ee = entityEvents.TryGetC(entityType);
+
+        if (ee == null)
             return null;
-        }
 
-        internal Dictionary<string, Type> NameToType = new Dictionary<string, Type>();
-        internal Dictionary<Type, string> TypeToName = new Dictionary<Type, string>();
+        return ee.OnAlternativeRetrieving(id);
+    }
 
-        internal ResetLazy<TypeCaches> typeCachesLazy;
+    internal void OnSaving(Entity entity)
+    {
+        AssertAllowed(entity.GetType(), inUserInterface: false);
 
-        public void AssertAllowed(Type type, bool inUserInterface)
-        {
-            string? error = IsAllowed(type, inUserInterface);
+        IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
-            if (error != null)
-                throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().FormatWith(type.NiceName(), error));
-        }
+        if (ee != null)
+            ee.OnSaving(entity);
 
-        readonly IEntityEvents entityEventsGlobal = new EntityEvents<Entity>();
-        public EntityEvents<Entity> EntityEventsGlobal
-        {
-            get { return (EntityEvents<Entity>)entityEventsGlobal; }
-        }
-
-        Dictionary<Type, IEntityEvents> entityEvents = new Dictionary<Type, IEntityEvents>();
-        public EntityEvents<T> EntityEvents<T>()
-            where T : Entity
-        {
-            return (EntityEvents<T>)entityEvents.GetOrCreate(typeof(T), () => new EntityEvents<T>());
-        }
+        entityEventsGlobal.OnSaving(entity);
+    }
 
 
-        internal void OnPreSaving(Entity entity, PreSavingContext ctx)
-        {
-            AssertAllowed(entity.GetType(), inUserInterface: false);
+    internal void OnSaved(Entity entity, SavedEventArgs args)
+    {
+        AssertAllowed(entity.GetType(), inUserInterface: false);
 
-            IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
+        IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
-            if (ee != null)
-                ee.OnPreSaving(entity, ctx);
+        if (ee != null)
+            ee.OnSaved(entity, args);
 
-            entityEventsGlobal.OnPreSaving(entity, ctx);
-        }
+        entityEventsGlobal.OnSaved(entity, args);
+    }
 
-        internal Entity? OnAlternativeRetriving(Type entityType, PrimaryKey id)
-        {
-            AssertAllowed(entityType, inUserInterface: false);
+    internal void OnRetrieved(Entity entity, PostRetrievingContext ctx)
+    {
+        AssertAllowed(entity.GetType(), inUserInterface: false);
 
-            IEntityEvents? ee = entityEvents.TryGetC(entityType);
+        IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
-            if (ee == null)
-                return null;
+        if (ee != null)
+            ee.OnRetrieved(entity, ctx);
 
-            return ee.OnAlternativeRetrieving(id);
-        }
+        entityEventsGlobal.OnRetrieved(entity, ctx);
+    }
 
-        internal void OnSaving(Entity entity)
-        {
-            AssertAllowed(entity.GetType(), inUserInterface: false);
+    internal IDisposable? OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity
+    {
+        AssertAllowed(typeof(T), inUserInterface: false);
 
-            IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
+        EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
 
-            if (ee != null)
-                ee.OnSaving(entity);
+        if (ee == null)
+            return null;
 
-            entityEventsGlobal.OnSaving(entity);
-        }
+        return Disposable.Combine(ee?.OnPreUnsafeDelete(entityQuery), entityEventsGlobal.OnPreUnsafeDelete(entityQuery));
+    }
 
+    internal IDisposable? OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
+    {
+        AssertAllowed(typeof(T), inUserInterface: false);
 
-        internal void OnSaved(Entity entity, SavedEventArgs args)
-        {
-            AssertAllowed(entity.GetType(), inUserInterface: false);
+        EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
 
-            IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
+        if (ee == null)
+            return null;
 
-            if (ee != null)
-                ee.OnSaved(entity, args);
+        return ee.OnPreUnsafeMListDelete(mlistQuery, entityQuery);
+    }
 
-            entityEventsGlobal.OnSaved(entity, args);
-        }
+    internal IDisposable? OnPreUnsafeUpdate(IUpdateable update)
+    {
+        var type = update.EntityType;
+        if (type.IsInstantiationOf(typeof(MListElement<,>)))
+            type = type.GetGenericArguments().First();
 
-        internal void OnRetrieved(Entity entity, PostRetrievingContext ctx)
-        {
-            AssertAllowed(entity.GetType(), inUserInterface: false);
+        AssertAllowed(type, inUserInterface: false);
 
-            IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
+        var ee = entityEvents.TryGetC(type);
 
-            if (ee != null)
-                ee.OnRetrieved(entity, ctx);
+        if (ee == null)
+            return null;
 
-            entityEventsGlobal.OnRetrieved(entity, ctx);
-        }
+        return ee.OnPreUnsafeUpdate(update);
+    }
 
-        internal IDisposable? OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity
-        {
-            AssertAllowed(typeof(T), inUserInterface: false);
+    internal LambdaExpression OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
+    {
+        AssertAllowed(type, inUserInterface: false);
 
-            EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
+        var ee = entityEvents.TryGetC(type);
 
-            if (ee == null)
-                return null;
+        if (ee == null)
+            return constructor;
 
-            return Disposable.Combine(ee?.OnPreUnsafeDelete(entityQuery), entityEventsGlobal.OnPreUnsafeDelete(entityQuery));
-        }
+        return ee.OnPreUnsafeInsert(query, constructor, entityQuery);
+    }
 
-        internal IDisposable? OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
-        {
-            AssertAllowed(typeof(T), inUserInterface: false);
+    internal void OnPreBulkInsert(Type type, bool inMListTable)
+    {
+        AssertAllowed(type, inUserInterface: false);
 
-            EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
+        var ee = entityEvents.TryGetC(type);
 
-            if (ee == null)
-                return null;
+        if (ee != null)
+            ee.OnPreBulkInsert(inMListTable);
+    }
 
-            return ee.OnPreUnsafeMListDelete(mlistQuery, entityQuery);
-        }
+    public ICacheController? CacheController(Type type)
+    {
+        IEntityEvents? ee = entityEvents.TryGetC(type);
 
-        internal IDisposable? OnPreUnsafeUpdate(IUpdateable update)
-        {
-            var type = update.EntityType;
-            if (type.IsInstantiationOf(typeof(MListElement<,>)))
-                type = type.GetGenericArguments().First();
+        if (ee == null)
+            return null;
 
-            AssertAllowed(type, inUserInterface: false);
+        return ee.CacheController;
+    }
 
-            var ee = entityEvents.TryGetC(type);
+    internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, EntityContextInfo entityContext, IntervalExpression? period)
+    {
+        //AssertAllowed(parent.RootType, inUserInterface: false);
 
-            if (ee == null)
-                return null;
+        var ee = entityEvents.TryGetC(parent.RootType);
+        if (ee == null || ee.AdditionalBindings == null)
+            return Enumerable.Empty<FieldBinding>();
 
-            return ee.OnPreUnsafeUpdate(update);
-        }
+        return ee.AdditionalBindings
+            .Where(kvp => kvp.Key.Parent!.Equals(parent))
+            .Select(kvp => new FieldBinding(kvp.Key.FieldInfo!, new AdditionalFieldExpression(kvp.Key.FieldInfo!.FieldType, entityContext.EntityId, entityContext.MListRowId, period, kvp.Key)))
+            .ToList();
+    }
 
-        internal LambdaExpression OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
-        {
-            AssertAllowed(type, inUserInterface: false);
+    public List<IAdditionalBinding>? GetAdditionalBindings(Type rootType)
+    {
+        var ee = entityEvents.TryGetC(rootType);
+        if (ee == null || ee.AdditionalBindings == null)
+            return null;
 
-            var ee = entityEvents.TryGetC(type);
+        return ee.AdditionalBindings.Values.ToList();
+    }
 
-            if (ee == null)
-                return constructor;
+    internal LambdaExpression? GetAdditionalQueryBinding(PropertyRoute pr, bool entityCompleter)
+    {
+        //AssertAllowed(pr.Type, inUserInterface: false);
 
-            return ee.OnPreUnsafeInsert(query, constructor, entityQuery);
-        }
+        var ee = entityEvents.GetOrThrow(pr.RootType);
 
-        internal void OnPreBulkInsert(Type type, bool inMListTable)
-        {
-            AssertAllowed(type, inUserInterface: false);
+        var ab = ee.AdditionalBindings!.GetOrThrow(pr);
 
-            var ee = entityEvents.TryGetC(type);
+        if (entityCompleter && !ab.ShouldSet())
+            return null;
 
-            if (ee != null)
-                ee.OnPreBulkInsert(inMListTable);
-        }
+        return ab.ValueExpression;
+    }
 
-        public ICacheController? CacheController(Type type)
-        {
-            IEntityEvents? ee = entityEvents.TryGetC(type);
+    internal CacheControllerBase<T>? CacheController<T>() where T : Entity
+    {
+        EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
 
-            if (ee == null)
-                return null;
+        if (ee == null)
+            return null;
 
-            return ee.CacheController;
-        }
+        return ee.CacheController;
+    }
 
-        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, EntityContextInfo entityContext, IntervalExpression? period)
-        {
-            //AssertAllowed(parent.RootType, inUserInterface: false);
+    internal FilterQueryResult<T>? OnFilterQuery<T>()
+        where T : Entity
+    {
+        AssertAllowed(typeof(T), inUserInterface: false);
 
-            var ee = entityEvents.TryGetC(parent.RootType);
-            if (ee == null || ee.AdditionalBindings == null)
-                return Enumerable.Empty<FieldBinding>();
+        EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
+        if (ee == null)
+            return null;
 
-            return ee.AdditionalBindings
-                .Where(kvp => kvp.Key.Parent!.Equals(parent))
-                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo!, new AdditionalFieldExpression(kvp.Key.FieldInfo!.FieldType, entityContext.EntityId, entityContext.MListRowId, period, kvp.Key)))
-                .ToList();
-        }
+        FilterQueryResult<T>? result = null;
+        foreach (var item in ee.OnFilterQuery())
+            result = CombineFilterResult(result, item);
 
-        public List<IAdditionalBinding>? GetAdditionalBindings(Type rootType)
-        {
-            var ee = entityEvents.TryGetC(rootType);
-            if (ee == null || ee.AdditionalBindings == null)
-                return null;
+        return result;
+    }
 
-            return ee.AdditionalBindings.Values.ToList();
-        }
+    static FilterQueryResult<T>? CombineFilterResult<T>(FilterQueryResult<T>? one, FilterQueryResult<T> two)
+        where T : Entity
+    {
+        if (one == null)
+            return two;
 
-        internal LambdaExpression? GetAdditionalQueryBinding(PropertyRoute pr, bool entityCompleter)
-        {
-            //AssertAllowed(pr.Type, inUserInterface: false);
+        if (two == null)
+            return one;
+        
+        return new FilterQueryResult<T>(
+            a => one!.InDatabaseExpresson.Evaluate(a) && two.InDatabaseExpresson.Evaluate(a),
+            a => one!.InMemoryFunction!(a) && two!.InMemoryFunction!(a));
+    }
 
-            var ee = entityEvents.GetOrThrow(pr.RootType);
-
-            var ab = ee.AdditionalBindings!.GetOrThrow(pr);
-
-            if (entityCompleter && !ab.ShouldSet())
-                return null;
-
-            return ab.ValueExpression;
-        }
-
-        internal CacheControllerBase<T>? CacheController<T>() where T : Entity
+    public Func<T, bool> GetInMemoryFilter<T>(bool userInterface)
+        where T : Entity
+    {
+        using (userInterface ? ExecutionMode.UserInterface() : null)
         {
             EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
-
             if (ee == null)
-                return null;
+                return a => true;
 
-            return ee.CacheController;
-        }
+            Func<T, bool>? result = null;
+            foreach (var item in ee.OnFilterQuery().NotNull())
+            {
+                if (item.InMemoryFunction == null)
+                    throw new InvalidOperationException("FilterQueryResult with InDatabaseExpresson '{0}' has no equivalent InMemoryFunction"
+                    .FormatWith(item.InDatabaseExpresson.ToString()));
 
-        internal FilterQueryResult<T>? OnFilterQuery<T>()
-            where T : Entity
-        {
-            AssertAllowed(typeof(T), inUserInterface: false);
+                result = CombineFunc(result, item.InMemoryFunction);
+            }
 
-            EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
-            if (ee == null)
-                return null;
-
-            FilterQueryResult<T>? result = null;
-            foreach (var item in ee.OnFilterQuery())
-                result = CombineFilterResult(result, item);
+            if (result == null)
+                return a => true;
 
             return result;
         }
+    }
 
-        static FilterQueryResult<T>? CombineFilterResult<T>(FilterQueryResult<T>? one, FilterQueryResult<T> two)
-            where T : Entity
+    private static Func<T, bool>? CombineFunc<T>(Func<T, bool>? one, Func<T, bool>? two) where T : Entity
+    {
+        if (one == null)
+            return two;
+
+        if (two == null)
+            return one;
+
+        return a => one!(a) && two!(a);
+    }
+
+    public Expression<Func<T, bool>>? GetInDatabaseFilter<T>()
+       where T : Entity
+    {
+        EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
+        if (ee == null)
+            return null;
+
+        Expression<Func<T, bool>>? result = null;
+        foreach (var item in ee.OnFilterQuery().NotNull())
         {
-            if (one == null)
-                return two;
-
-            if (two == null)
-                return one;
-            
-            return new FilterQueryResult<T>(
-                a => one!.InDatabaseExpresson.Evaluate(a) && two.InDatabaseExpresson.Evaluate(a),
-                a => one!.InMemoryFunction!(a) && two!.InMemoryFunction!(a));
+            result = CombineExpr(result, item.InDatabaseExpresson);
         }
 
-        public Func<T, bool> GetInMemoryFilter<T>(bool userInterface)
-            where T : Entity
+        if (result == null)
+            return null;
+
+        return result;
+    }
+
+    private static Expression<Func<T, bool>>? CombineExpr<T>(Expression<Func<T, bool>>? one, Expression<Func<T, bool>>? two) where T : Entity
+    {
+        if (one == null)
+            return two;
+
+        if (two == null)
+            return one;
+
+        return a => one!.Evaluate(a) && two!.Evaluate(a);
+    }
+
+    public event Func<Replacements, SqlPreCommand?> Synchronizing;
+    public SqlPreCommand? SynchronizationScript(bool interactive = true, bool schemaOnly = false, string? replaceDatabaseName = null)
+    {
+        OnBeforeDatabaseAccess();
+
+        if (Synchronizing == null)
+            return null;
+
+        using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
+        using (ExecutionMode.Global())
         {
-            using (userInterface ? ExecutionMode.UserInterface() : null)
+            Replacements replacements = new Replacements()
             {
-                EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
-                if (ee == null)
-                    return a => true;
-
-                Func<T, bool>? result = null;
-                foreach (var item in ee.OnFilterQuery().NotNull())
+                Interactive = interactive,
+                ReplaceDatabaseName = replaceDatabaseName,
+                SchemaOnly = schemaOnly
+            };
+            SqlPreCommand? command = Synchronizing
+                .GetInvocationListTyped()
+                .Select(e =>
                 {
-                    if (item.InMemoryFunction == null)
-                        throw new InvalidOperationException("FilterQueryResult with InDatabaseExpresson '{0}' has no equivalent InMemoryFunction"
-                        .FormatWith(item.InDatabaseExpresson.ToString()));
+                    try
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType!.TypeName());
+                        Console.Write(".");
+                        SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
+                        Console.Write("...");
 
-                    result = CombineFunc(result, item.InMemoryFunction);
-                }
+                        var result = e(replacements);
 
-                if (result == null)
-                    return a => true;
+                        if (result == null)
+                            SafeConsole.WriteLineColor(ConsoleColor.Green, "OK");
+                        else
+                            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Changes");
 
-                return result;
-            }
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.Red, "Error");
+                        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, " (...it's probably ok, execute this script and try again)");
+
+                        return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType!.Name, e.Method.Name, ex.Message.Indent(2, '-')));
+                    }
+                })
+                .Combine(Spacing.Triple);
+
+            return command;
+        }
+    }
+
+    public Table View<T>() where T : IView
+    {
+        return View(typeof(T));
+    }
+
+    ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
+    public Table View(Type viewType)
+    {
+        var tn = this.Settings.TypeAttribute<CacheViewMetadataAttribute>(viewType);
+
+        if (tn != null)
+            return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
+
+        return ViewBuilder.NewView(viewType);
+    }
+
+    public event Func<SqlPreCommand?> Generating;
+    internal SqlPreCommand? GenerationScipt()
+    {
+        OnBeforeDatabaseAccess();
+
+        if (Generating == null)
+            return null;
+
+        using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
+        using (ExecutionMode.Global())
+        {
+            return Generating
+                .GetInvocationListTyped()
+                .Select(e => e())
+                .Combine(Spacing.Triple);
+        }
+    }
+
+
+
+    public event Action? SchemaCompleted;
+
+    public bool IsCompleted { get; private set; }
+    public void OnSchemaCompleted()
+    {
+        if (SchemaCompleted != null)
+        {
+            using (ExecutionMode.Global())
+                foreach (var item in SchemaCompleted.GetInvocationListTyped())
+                    item();
+        }
+           
+        SchemaCompleted = null;
+        IsCompleted = true;
+    }
+
+    public void WhenIncluded<T>(Action action) where T : Entity
+    {
+        SchemaCompleted += () =>
+        {
+            if (this.Tables.ContainsKey(typeof(T)))
+                action();
+        };
+    }
+
+    public event Action? BeforeDatabaseAccess;
+
+    public void OnBeforeDatabaseAccess()
+    {
+        if (IsCompleted == false)
+            throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method");
+
+        if (BeforeDatabaseAccess == null)
+            return;
+
+        using (ExecutionMode.Global())
+            foreach (var item in BeforeDatabaseAccess.GetInvocationListTyped())
+                item();
+
+        BeforeDatabaseAccess = null;
+    }
+
+    public event Action? InvalidateCache; 
+
+    public event Action? Initializing;
+
+    public void Initialize()
+    {
+        OnBeforeDatabaseAccess();
+
+        if (Initializing == null)
+            return;
+
+        if (InvalidateCache != null)
+        {
+            foreach (var ic in InvalidateCache.GetInvocationListTyped())
+                using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
+                    ic();
         }
 
-        private static Func<T, bool>? CombineFunc<T>(Func<T, bool>? one, Func<T, bool>? two) where T : Entity
+        using (ExecutionMode.Global())
+            foreach (var init in Initializing.GetInvocationListTyped())
+                using (HeavyProfiler.Log("Initialize", () => init.Method.DeclaringType!.ToString()))
+                    init();
+
+        Initializing = null;
+    }
+
+    #endregion
+
+    static Schema()
+    {
+        PropertyRoute.SetFindImplementationsCallback(pr => Schema.Current.FindImplementations(pr));
+        ModifiableEntity.SetIsRetrievingFunc(() => EntityCache.HasRetriever);
+    }
+
+
+
+    internal Schema(SchemaSettings settings)
+    {
+        this.typeCachesLazy = null!;
+        this.Settings = settings;
+        this.Assets = new SchemaAssets();
+        this.ViewBuilder = new Maps.ViewBuilder(this);
+
+        Generating += SchemaGenerator.SnapshotIsolation;
+        Generating += SchemaGenerator.PostgresExtensions;
+        Generating += SchemaGenerator.PostgreeTemporalTableScript;
+        Generating += SchemaGenerator.CreateSchemasScript;
+        Generating += SchemaGenerator.CreateTablesScript;
+        Generating += SchemaGenerator.InsertEnumValuesScript;
+        Generating += TypeLogic.Schema_Generating;
+        Generating += Assets.Schema_Generating;
+
+        Synchronizing += SchemaSynchronizer.SnapshotIsolation;
+        Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
+        Synchronizing += TypeLogic.Schema_Synchronizing;
+        Synchronizing += Assets.Schema_Synchronizing;
+
+        InvalidateCache += GlobalLazy.ResetAll;
+    }
+
+    public static Schema Current
+    {
+        get { return Connector.Current.Schema; }
+    }
+
+    public Table Table<T>() where T : Entity
+    {
+        return Table(typeof(T));
+    }
+
+    public TableMList TableMList<E, V>(Expression<Func<E, MList<V>>> mListProperty)
+        where E : Entity
+    {
+        var list = (FieldMList)Field(mListProperty);
+
+        return list.TableMList;
+    }
+
+    public Table Table(Type type)
+    {
+        return Tables.GetOrThrow(type, "Table {0} not included in the schema. Consider sb.Include<{0}>()");
+    }
+
+    internal static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members)
+    {
+        IFieldFinder? current = fieldFinder;
+        Field? result = null;
+        foreach (var mi in members)
         {
-            if (one == null)
-                return two;
+            if (current == null)
+                throw new InvalidOperationException("{0} does not implement {1}".FormatWith(result, typeof(IFieldFinder).Name));
 
-            if (two == null)
-                return one;
+            result = current.GetField(mi);
 
-            return a => one!(a) && two!(a);
+            current = result as IFieldFinder;
         }
 
-        public Expression<Func<T, bool>>? GetInDatabaseFilter<T>()
-           where T : Entity
+        return result!;
+    }
+
+    internal static Field? TryFindField(IFieldFinder fieldFinder, MemberInfo[] members)
+    {
+        IFieldFinder? current = fieldFinder;
+        Field? result = null;
+        foreach (var mi in members)
         {
-            EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
-            if (ee == null)
+            if (current == null)
                 return null;
 
-            Expression<Func<T, bool>>? result = null;
-            foreach (var item in ee.OnFilterQuery().NotNull())
-            {
-                result = CombineExpr(result, item.InDatabaseExpresson);
-            }
+            result = current.TryGetField(mi);
 
             if (result == null)
                 return null;
 
-            return result;
+            current = result as IFieldFinder;
         }
 
-        private static Expression<Func<T, bool>>? CombineExpr<T>(Expression<Func<T, bool>>? one, Expression<Func<T, bool>>? two) where T : Entity
-        {
-            if (one == null)
-                return two;
-
-            if (two == null)
-                return one;
-
-            return a => one!.Evaluate(a) && two!.Evaluate(a);
-        }
-
-        public event Func<Replacements, SqlPreCommand?> Synchronizing;
-        public SqlPreCommand? SynchronizationScript(bool interactive = true, bool schemaOnly = false, string? replaceDatabaseName = null)
-        {
-            OnBeforeDatabaseAccess();
-
-            if (Synchronizing == null)
-                return null;
-
-            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
-            using (ExecutionMode.Global())
-            {
-                Replacements replacements = new Replacements()
-                {
-                    Interactive = interactive,
-                    ReplaceDatabaseName = replaceDatabaseName,
-                    SchemaOnly = schemaOnly
-                };
-                SqlPreCommand? command = Synchronizing
-                    .GetInvocationListTyped()
-                    .Select(e =>
-                    {
-                        try
-                        {
-                            SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType!.TypeName());
-                            Console.Write(".");
-                            SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
-                            Console.Write("...");
-
-                            var result = e(replacements);
-
-                            if (result == null)
-                                SafeConsole.WriteLineColor(ConsoleColor.Green, "OK");
-                            else
-                                SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Changes");
-
-                            return result;
-                        }
-                        catch (Exception ex)
-                        {
-                            SafeConsole.WriteColor(ConsoleColor.Red, "Error");
-                            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, " (...it's probably ok, execute this script and try again)");
-
-                            return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType!.Name, e.Method.Name, ex.Message.Indent(2, '-')));
-                        }
-                    })
-                    .Combine(Spacing.Triple);
-
-                return command;
-            }
-        }
-
-        public Table View<T>() where T : IView
-        {
-            return View(typeof(T));
-        }
-
-        ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
-        public Table View(Type viewType)
-        {
-            var tn = this.Settings.TypeAttribute<CacheViewMetadataAttribute>(viewType);
-
-            if (tn != null)
-                return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
-
-            return ViewBuilder.NewView(viewType);
-        }
-
-        public event Func<SqlPreCommand?> Generating;
-        internal SqlPreCommand? GenerationScipt()
-        {
-            OnBeforeDatabaseAccess();
-
-            if (Generating == null)
-                return null;
-
-            using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
-            using (ExecutionMode.Global())
-            {
-                return Generating
-                    .GetInvocationListTyped()
-                    .Select(e => e())
-                    .Combine(Spacing.Triple);
-            }
-        }
-
-
-
-        public event Action? SchemaCompleted;
-
-        public bool IsCompleted { get; private set; }
-        public void OnSchemaCompleted()
-        {
-            if (SchemaCompleted != null)
-            {
-                using (ExecutionMode.Global())
-                    foreach (var item in SchemaCompleted.GetInvocationListTyped())
-                        item();
-            }
-               
-            SchemaCompleted = null;
-            IsCompleted = true;
-        }
-
-        public void WhenIncluded<T>(Action action) where T : Entity
-        {
-            SchemaCompleted += () =>
-            {
-                if (this.Tables.ContainsKey(typeof(T)))
-                    action();
-            };
-        }
-
-        public event Action? BeforeDatabaseAccess;
-
-        public void OnBeforeDatabaseAccess()
-        {
-            if (IsCompleted == false)
-                throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method");
-
-            if (BeforeDatabaseAccess == null)
-                return;
-
-            using (ExecutionMode.Global())
-                foreach (var item in BeforeDatabaseAccess.GetInvocationListTyped())
-                    item();
-
-            BeforeDatabaseAccess = null;
-        }
-
-        public event Action? InvalidateCache; 
-
-        public event Action? Initializing;
-
-        public void Initialize()
-        {
-            OnBeforeDatabaseAccess();
-
-            if (Initializing == null)
-                return;
-
-            if (InvalidateCache != null)
-            {
-                foreach (var ic in InvalidateCache.GetInvocationListTyped())
-                    using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
-                        ic();
-            }
-
-            using (ExecutionMode.Global())
-                foreach (var init in Initializing.GetInvocationListTyped())
-                    using (HeavyProfiler.Log("Initialize", () => init.Method.DeclaringType!.ToString()))
-                        init();
-
-            Initializing = null;
-        }
-
-        #endregion
-
-        static Schema()
-        {
-            PropertyRoute.SetFindImplementationsCallback(pr => Schema.Current.FindImplementations(pr));
-            ModifiableEntity.SetIsRetrievingFunc(() => EntityCache.HasRetriever);
-        }
-
-
-
-        internal Schema(SchemaSettings settings)
-        {
-            this.typeCachesLazy = null!;
-            this.Settings = settings;
-            this.Assets = new SchemaAssets();
-            this.ViewBuilder = new Maps.ViewBuilder(this);
-
-            Generating += SchemaGenerator.SnapshotIsolation;
-            Generating += SchemaGenerator.PostgresExtensions;
-            Generating += SchemaGenerator.PostgreeTemporalTableScript;
-            Generating += SchemaGenerator.CreateSchemasScript;
-            Generating += SchemaGenerator.CreateTablesScript;
-            Generating += SchemaGenerator.InsertEnumValuesScript;
-            Generating += TypeLogic.Schema_Generating;
-            Generating += Assets.Schema_Generating;
-
-            Synchronizing += SchemaSynchronizer.SnapshotIsolation;
-            Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
-            Synchronizing += TypeLogic.Schema_Synchronizing;
-            Synchronizing += Assets.Schema_Synchronizing;
-
-            InvalidateCache += GlobalLazy.ResetAll;
-        }
-
-        public static Schema Current
-        {
-            get { return Connector.Current.Schema; }
-        }
-
-        public Table Table<T>() where T : Entity
-        {
-            return Table(typeof(T));
-        }
-
-        public TableMList TableMList<E, V>(Expression<Func<E, MList<V>>> mListProperty)
-            where E : Entity
-        {
-            var list = (FieldMList)Field(mListProperty);
-
-            return list.TableMList;
-        }
-
-        public Table Table(Type type)
-        {
-            return Tables.GetOrThrow(type, "Table {0} not included in the schema. Consider sb.Include<{0}>()");
-        }
-
-        internal static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members)
-        {
-            IFieldFinder? current = fieldFinder;
-            Field? result = null;
-            foreach (var mi in members)
-            {
-                if (current == null)
-                    throw new InvalidOperationException("{0} does not implement {1}".FormatWith(result, typeof(IFieldFinder).Name));
-
-                result = current.GetField(mi);
-
-                current = result as IFieldFinder;
-            }
-
-            return result!;
-        }
-
-        internal static Field? TryFindField(IFieldFinder fieldFinder, MemberInfo[] members)
-        {
-            IFieldFinder? current = fieldFinder;
-            Field? result = null;
-            foreach (var mi in members)
-            {
-                if (current == null)
-                    return null;
-
-                result = current.TryGetField(mi);
-
-                if (result == null)
-                    return null;
-
-                current = result as IFieldFinder;
-            }
-
-            return result;
-        }
-
-        public Dictionary<PropertyRoute, Implementations>? FindAllImplementations(Type root)
-        {
-            try
-            {
-                if (!Tables.ContainsKey(root))
-                    return null;
-
-                var table = Table(root);
-
-                return PropertyRoute.GenerateRoutes(root)
-                    .Select(r => r.Type.IsMList() ? r.Add("Item") : r)
-                    .Where(r => r.Type.CleanType().IsIEntity())
-                    .ToDictionary(r => r, r => FindImplementations(r));
-            }
-            catch (Exception e)
-            {
-                e.Data["rootType"] = root.TypeName();
-                throw;
-            }
-        }
-
-        public Implementations FindImplementations(PropertyRoute route)
-        {
-            if (route.PropertyRouteType == PropertyRouteType.LiteEntity)
-                route = route.Parent!;
-
-            Type type = route.RootType;
-
-            if (!Tables.ContainsKey(type))
-                return Schema.Current.Settings.GetImplementations(route);
-
-            Field? field = TryFindField(Table(type), route.Members);
-            //if (field == null)
-            //    return Implementations.ByAll;
-
-            if (field is FieldReference refField)
-                return Implementations.By(refField.FieldType.CleanType());
-
-            if (field is FieldImplementedBy ibField)
-                return Implementations.By(ibField.ImplementationColumns.Keys.ToArray());
-
-            if (field is FieldImplementedByAll ibaField)
-                return Implementations.ByAll;
-
-            Implementations? implementations = CalculateExpressionImplementations(route);
-
-            if (implementations != null)
-                return implementations.Value;
-
-            var ss = Schema.Current.Settings;
-            if (route.Follow(r => r.Parent)
-                .TakeWhile(t => t.PropertyRouteType != PropertyRouteType.Root)
-                .Any(r => ss.FieldAttribute<IgnoreAttribute>(r) != null))
-            {
-                var ib = ss.FieldAttribute<ImplementedByAttribute>(route);
-                var iba = ss.FieldAttribute<ImplementedByAllAttribute>(route);
-
-                return Implementations.TryFromAttributes(route.Type.CleanType(), route, ib, iba) ?? Implementations.By();
-            }
-
-            throw new InvalidOperationException("Impossible to determine implementations for {0}".FormatWith(route, typeof(IEntity).Name));
-        }
-
-        private static Implementations? CalculateExpressionImplementations(PropertyRoute route)
-        {
-            if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
-                return null;
-
-            var lambda = ExpressionCleaner.GetFieldExpansion(route.Parent!.Type, route.PropertyInfo!);
-            if (lambda == null)
-                return null;
-
-            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent!.Type, new CleanMeta(route.Parent!.TryGetImplementations(), new[] { route.Parent! })));
-
-            MetaExpression? me = e as MetaExpression;
-
-            return me?.Meta.Implementations;
-        }
-
-        /// <summary>
-        /// Uses a lambda navigate in a strongly-typed way, you can acces field using the property and collections using Single().
-        /// </summary>
-        public Field Field<T, V>(Expression<Func<T, V>> lambdaToField)
-            where T : Entity
-        {
-            return FindField(Table(typeof(T)), Reflector.GetMemberList(lambdaToField));
-        }
-
-        public Field Field(PropertyRoute route)
-        {
-            return FindField(Table(route.RootType), route.Members);
-        }
-
-        public Field? TryField(PropertyRoute route)
-        {
-            return TryFindField(Table(route.RootType), route.Members);
-        }
-
-        public bool HasSomeIndex(PropertyRoute route)
-        {
-            var field = TryField(route);
-
-            if (field == null)
-                return false;
-
-            if (field.UniqueIndex != null)
-                return true;
-
-            var cols = field.Columns();
-
-            if (cols.Any(c => c.ReferenceTable != null))
-                return true;
-
-            var mlistPr = route.GetMListItemsRoute();
-
-            ITable table = mlistPr == null ?
-                (ITable)Table(route.RootType) :
-                (ITable)((FieldMList)Field(mlistPr.Parent!)).TableMList;
-
-            return table.MultiColumnIndexes != null && table.MultiColumnIndexes.Any(index => index.Columns.Any(c => cols.Contains(c)));
-        }
-
-        public override string ToString()
-        {
-            return "Schema ( tables: {0} )".FormatWith(tables.Count);
-        }
-
-        public IEnumerable<ITable> GetDatabaseTables()
-        {
-            foreach (var table in this.Tables.Values)
-            {
-                yield return table;
-
-                foreach (var subTable in table.TablesMList().Cast<ITable>())
-                    yield return subTable;
-            }
-        }
-
-        public Func<DatabaseName?, bool> IsExternalDatabase = db => false;
-
-        public List<DatabaseName?> DatabaseNames()
-        {
-            return GetDatabaseTables().Select(a => a.Name.Schema?.Database).Where(a => !IsExternalDatabase(a)).Distinct().ToList();
-        }
-
-        public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()
-        {
-            return DirectedEdgedGraph<Table, RelationInfo>.Generate(Tables.Values, t => t.DependentTables());
-        }
-
-        public Type GetType(PrimaryKey id)
-        {
-            return typeCachesLazy.Value.IdToType[id];
-        }
-
-
+        return result;
     }
 
-    public class RelationInfo
+    public Dictionary<PropertyRoute, Implementations>? FindAllImplementations(Type root)
     {
-        public bool IsLite { get; set; }
-        public bool IsNullable { get; set; }
-        public bool IsCollection { get; set; }
-        public bool IsEnum { get; set; }
-        public bool IsImplementedByAll { get; set; }
+        try
+        {
+            if (!Tables.ContainsKey(root))
+                return null;
 
-        public PropertyRoute PropertyRoute { get; set; } = null!;
+            var table = Table(root);
+
+            return PropertyRoute.GenerateRoutes(root)
+                .Select(r => r.Type.IsMList() ? r.Add("Item") : r)
+                .Where(r => r.Type.CleanType().IsIEntity())
+                .ToDictionary(r => r, r => FindImplementations(r));
+        }
+        catch (Exception e)
+        {
+            e.Data["rootType"] = root.TypeName();
+            throw;
+        }
     }
 
-
-
-    public interface ICacheController
+    public Implementations FindImplementations(PropertyRoute route)
     {
-        bool Enabled { get; }
-        void Load();
+        if (route.PropertyRouteType == PropertyRouteType.LiteEntity)
+            route = route.Parent!;
 
-        IEnumerable<PrimaryKey> GetAllIds();
+        Type type = route.RootType;
 
-        void Complete(Entity entity, IRetriever retriver);
+        if (!Tables.ContainsKey(type))
+            return Schema.Current.Settings.GetImplementations(route);
 
-        string GetToString(PrimaryKey id);
-        string? TryGetToString(PrimaryKey?/*CSBUG*/ id);
+        Field? field = TryFindField(Table(type), route.Members);
+        //if (field == null)
+        //    return Implementations.ByAll;
+
+        if (field is FieldReference refField)
+            return Implementations.By(refField.FieldType.CleanType());
+
+        if (field is FieldImplementedBy ibField)
+            return Implementations.By(ibField.ImplementationColumns.Keys.ToArray());
+
+        if (field is FieldImplementedByAll ibaField)
+            return Implementations.ByAll;
+
+        Implementations? implementations = CalculateExpressionImplementations(route);
+
+        if (implementations != null)
+            return implementations.Value;
+
+        var ss = Schema.Current.Settings;
+        if (route.Follow(r => r.Parent)
+            .TakeWhile(t => t.PropertyRouteType != PropertyRouteType.Root)
+            .Any(r => ss.FieldAttribute<IgnoreAttribute>(r) != null))
+        {
+            var ib = ss.FieldAttribute<ImplementedByAttribute>(route);
+            var iba = ss.FieldAttribute<ImplementedByAllAttribute>(route);
+
+            return Implementations.TryFromAttributes(route.Type.CleanType(), route, ib, iba) ?? Implementations.By();
+        }
+
+        throw new InvalidOperationException("Impossible to determine implementations for {0}".FormatWith(route, typeof(IEntity).Name));
     }
 
-    public class InvalidateEventArgs : EventArgs { }
-    public class InvaludateEventArgs : EventArgs { }
+    private static Implementations? CalculateExpressionImplementations(PropertyRoute route)
+    {
+        if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
+            return null;
 
-    public abstract class CacheControllerBase<T> : ICacheController
+        var lambda = ExpressionCleaner.GetFieldExpansion(route.Parent!.Type, route.PropertyInfo!);
+        if (lambda == null)
+            return null;
+
+        Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent!.Type, new CleanMeta(route.Parent!.TryGetImplementations(), new[] { route.Parent! })));
+
+        MetaExpression? me = e as MetaExpression;
+
+        return me?.Meta.Implementations;
+    }
+
+    /// <summary>
+    /// Uses a lambda navigate in a strongly-typed way, you can acces field using the property and collections using Single().
+    /// </summary>
+    public Field Field<T, V>(Expression<Func<T, V>> lambdaToField)
         where T : Entity
     {
-        public abstract bool Enabled { get; }
-        public abstract void Load();
-
-        public abstract IEnumerable<PrimaryKey> GetAllIds();
-
-        void ICacheController.Complete(Entity entity, IRetriever retriver)
-        {
-            Complete((T)entity, retriver);
-        }
-
-        public abstract void Complete(T entity, IRetriever retriver);
-
-        public abstract string GetToString(PrimaryKey id);
-
-        public virtual string? TryGetToString(PrimaryKey?/*CSBUG*/ id) => null;
-
-        public abstract List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
-            where R : Entity;
+        return FindField(Table(typeof(T)), Reflector.GetMemberList(lambdaToField));
     }
+
+    public Field Field(PropertyRoute route)
+    {
+        return FindField(Table(route.RootType), route.Members);
+    }
+
+    public Field? TryField(PropertyRoute route)
+    {
+        return TryFindField(Table(route.RootType), route.Members);
+    }
+
+    public bool HasSomeIndex(PropertyRoute route)
+    {
+        var field = TryField(route);
+
+        if (field == null)
+            return false;
+
+        if (field.UniqueIndex != null)
+            return true;
+
+        var cols = field.Columns();
+
+        if (cols.Any(c => c.ReferenceTable != null))
+            return true;
+
+        var mlistPr = route.GetMListItemsRoute();
+
+        ITable table = mlistPr == null ?
+            (ITable)Table(route.RootType) :
+            (ITable)((FieldMList)Field(mlistPr.Parent!)).TableMList;
+
+        return table.MultiColumnIndexes != null && table.MultiColumnIndexes.Any(index => index.Columns.Any(c => cols.Contains(c)));
+    }
+
+    public override string ToString()
+    {
+        return "Schema ( tables: {0} )".FormatWith(tables.Count);
+    }
+
+    public IEnumerable<ITable> GetDatabaseTables()
+    {
+        foreach (var table in this.Tables.Values)
+        {
+            yield return table;
+
+            foreach (var subTable in table.TablesMList().Cast<ITable>())
+                yield return subTable;
+        }
+    }
+
+    public Func<DatabaseName?, bool> IsExternalDatabase = db => false;
+
+    public List<DatabaseName?> DatabaseNames()
+    {
+        return GetDatabaseTables().Select(a => a.Name.Schema?.Database).Where(a => !IsExternalDatabase(a)).Distinct().ToList();
+    }
+
+    public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()
+    {
+        return DirectedEdgedGraph<Table, RelationInfo>.Generate(Tables.Values, t => t.DependentTables());
+    }
+
+    public Type GetType(PrimaryKey id)
+    {
+        return typeCachesLazy.Value.IdToType[id];
+    }
+
+
+}
+
+public class RelationInfo
+{
+    public bool IsLite { get; set; }
+    public bool IsNullable { get; set; }
+    public bool IsCollection { get; set; }
+    public bool IsEnum { get; set; }
+    public bool IsImplementedByAll { get; set; }
+
+    public PropertyRoute PropertyRoute { get; set; } = null!;
+}
+
+
+
+public interface ICacheController
+{
+    bool Enabled { get; }
+    void Load();
+
+    IEnumerable<PrimaryKey> GetAllIds();
+
+    void Complete(Entity entity, IRetriever retriver);
+
+    string GetToString(PrimaryKey id);
+    string? TryGetToString(PrimaryKey?/*CSBUG*/ id);
+}
+
+public class InvalidateEventArgs : EventArgs { }
+public class InvaludateEventArgs : EventArgs { }
+
+public abstract class CacheControllerBase<T> : ICacheController
+    where T : Entity
+{
+    public abstract bool Enabled { get; }
+    public abstract void Load();
+
+    public abstract IEnumerable<PrimaryKey> GetAllIds();
+
+    void ICacheController.Complete(Entity entity, IRetriever retriver)
+    {
+        Complete((T)entity, retriver);
+    }
+
+    public abstract void Complete(T entity, IRetriever retriver);
+
+    public abstract string GetToString(PrimaryKey id);
+
+    public virtual string? TryGetToString(PrimaryKey?/*CSBUG*/ id) => null;
+
+    public abstract List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
+        where R : Entity;
 }

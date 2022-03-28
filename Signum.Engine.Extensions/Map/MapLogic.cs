@@ -1,19 +1,16 @@
-﻿using Signum.Engine.Maps;
-using Signum.Engine.Authorization;
-using System.Reflection;
+﻿using Signum.Engine.Authorization;
 using Signum.Entities.Map;
 
-namespace Signum.Engine.Map
+namespace Signum.Engine.Map;
+
+public static class MapLogic
 {
-    public static class MapLogic
+   
+    public static void Start(SchemaBuilder sb)
     {
-       
-        public static void Start(SchemaBuilder sb)
+        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                PermissionAuthLogic.RegisterPermissions(MapPermission.ViewMap);
-            }
+            PermissionAuthLogic.RegisterPermissions(MapPermission.ViewMap);
         }
     }
 }

@@ -1,15 +1,12 @@
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Utilities;
 using System.Text.RegularExpressions;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Maps;
 
-namespace Signum.Engine
+namespace Signum.Engine;
+
+public static class SqlUtils
 {
-    public static class SqlUtils
-    {
-        static HashSet<string> KeywordsSqlServer =
+    static HashSet<string> KeywordsSqlServer =
 @"ADD
 ALL
 ALTER
@@ -210,7 +207,7 @@ WITH
 WORK
 WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
 
-        static HashSet<string> KeywordsPostgres =
+    static HashSet<string> KeywordsPostgres =
 @"A
 ABORT
 ABS
@@ -840,70 +837,69 @@ YEAR
 ZONE".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
 
 
-        public static string SqlEscape(this string ident, bool isPostgres)
+    public static string SqlEscape(this string ident, bool isPostgres)
+    {
+        if (isPostgres)
         {
-            if (isPostgres)
-            {
-                if (ident.ToLowerInvariant() != ident || KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"[^a-zA-Z]"))
-                    return "\"" + ident + "\"";
+            if (ident.ToLowerInvariant() != ident || KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"[^a-zA-Z]"))
+                return "\"" + ident + "\"";
 
-                return ident;
-            }
-            else
-            {
-                if (KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"[^a-zA-Z]"))
-                    return "[" + ident + "]";
-
-                return ident;
-            }
+            return ident;
         }
-
-        public static SqlPreCommand? RemoveDuplicatedIndices()
+        else
         {
-            var isPostgres = Schema.Current.Settings.IsPostgres;
-            var sqlBuilder = Connector.Current.SqlBuilder;
-            var plainData = (from s in Database.View<SysSchemas>()
-                             from t in s.Tables()
-                             from ix in t.Indices()
-                             from ic in ix.IndexColumns()
-                             from c in t.Columns()
-                             where ic.column_id == c.column_id
-                             select new
-                             {
-                                 table = new ObjectName(new SchemaName(null, s.name, isPostgres), t.name, isPostgres),
-                                 index = ix.name,
-                                 ix.is_unique,
-                                 column = c.name,
-                                 ic.is_descending_key,
-                                 ic.is_included_column,
-                                 ic.index_column_id
-                             }).ToList();
+            if (KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"[^a-zA-Z]"))
+                return "[" + ident + "]";
 
-            var tables = plainData.AgGroupToDictionary(a => a.table,
-                gr => gr.AgGroupToDictionary(a => new { a.index, a.is_unique }, 
-                    gr2 => gr2.OrderBy(a => a.index_column_id)
-                        .Select(a => a.column + (a.is_included_column ? "(K)" : "(I)") + (a.is_descending_key ? "(D)" : "(A)"))
-                        .ToString("|")));
-
-            var result = tables.SelectMany(t =>
-                t.Value.GroupBy(a => a.Value, a => a.Key)
-                .Where(gr => gr.Count() > 1)
-                .Select(gr =>
-                {
-                    var best = gr.OrderByDescending(a => a.is_unique).ThenByDescending(a => a.index!/*CSBUG*/.StartsWith("IX")).ThenByDescending(a => a.index).First();
-
-                    return gr.Where(g => g != best)
-                        .Select(g => sqlBuilder.DropIndex(t.Key!, g.index!))
-                        .PreAnd(new SqlPreCommandSimple("-- DUPLICATIONS OF {0}".FormatWith(best.index))).Combine(Spacing.Simple);
-                })
-            ).Combine(Spacing.Double);
-
-            if (result == null)
-                return null;
-
-            return SqlPreCommand.Combine(Spacing.Double,
-                 new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
-                 result);
+            return ident;
         }
+    }
+
+    public static SqlPreCommand? RemoveDuplicatedIndices()
+    {
+        var isPostgres = Schema.Current.Settings.IsPostgres;
+        var sqlBuilder = Connector.Current.SqlBuilder;
+        var plainData = (from s in Database.View<SysSchemas>()
+                         from t in s.Tables()
+                         from ix in t.Indices()
+                         from ic in ix.IndexColumns()
+                         from c in t.Columns()
+                         where ic.column_id == c.column_id
+                         select new
+                         {
+                             table = new ObjectName(new SchemaName(null, s.name, isPostgres), t.name, isPostgres),
+                             index = ix.name,
+                             ix.is_unique,
+                             column = c.name,
+                             ic.is_descending_key,
+                             ic.is_included_column,
+                             ic.index_column_id
+                         }).ToList();
+
+        var tables = plainData.AgGroupToDictionary(a => a.table,
+            gr => gr.AgGroupToDictionary(a => new { a.index, a.is_unique }, 
+                gr2 => gr2.OrderBy(a => a.index_column_id)
+                    .Select(a => a.column + (a.is_included_column ? "(K)" : "(I)") + (a.is_descending_key ? "(D)" : "(A)"))
+                    .ToString("|")));
+
+        var result = tables.SelectMany(t =>
+            t.Value.GroupBy(a => a.Value, a => a.Key)
+            .Where(gr => gr.Count() > 1)
+            .Select(gr =>
+            {
+                var best = gr.OrderByDescending(a => a.is_unique).ThenByDescending(a => a.index!/*CSBUG*/.StartsWith("IX")).ThenByDescending(a => a.index).First();
+
+                return gr.Where(g => g != best)
+                    .Select(g => sqlBuilder.DropIndex(t.Key!, g.index!))
+                    .PreAnd(new SqlPreCommandSimple("-- DUPLICATIONS OF {0}".FormatWith(best.index))).Combine(Spacing.Simple);
+            })
+        ).Combine(Spacing.Double);
+
+        if (result == null)
+            return null;
+
+        return SqlPreCommand.Combine(Spacing.Double,
+             new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
+             result);
     }
 }

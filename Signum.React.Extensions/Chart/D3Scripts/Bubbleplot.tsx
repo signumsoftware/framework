@@ -95,13 +95,13 @@ export default function renderBubbleplot({ data, width, height, parameters, load
 
           return (
             <g key={keyColumns.map(c => c.getValueKey(r)).join("/")}
-              className="shape-serie sf-transition"
+              className="shape-serie sf-transition hover-group"
               opacity={active == false ? .5 : undefined}
               transform={translate(x(horizontalColumn.getValue(r))!, -y(verticalColumn.getValue(r))!) + (initialLoad ? scale(0, 0) : scale(1, 1))}
               cursor="pointer"
               onClick={e => onDrillDown(r, e)}
             >
-              <circle className="shape sf-transition"
+              <circle className="shape sf-transition hover-target"
                 stroke={active == true ? "black" : colorKeyColumn.getValueColor(r) ?? color(r)}
                 strokeWidth={3} fill={colorKeyColumn.getValueColor(r) ?? color(r)}
                 fillOpacity={parseFloat(parameters["FillOpacity"])}

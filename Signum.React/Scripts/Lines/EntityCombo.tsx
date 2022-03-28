@@ -21,7 +21,7 @@ export interface EntityComboProps extends EntityBaseProps {
   deps?: React.DependencyList;
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: ResultRow | undefined, resultTable?: ResultTable) => React.ReactChild;
+  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem") => React.ReactChild;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
@@ -83,14 +83,14 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
     return null;
 
   const buttons = (
-    <span className="input-group-append">
+    <>
       {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
       {!hasValue && c.renderCreateButton(true)}
       {!hasValue && c.renderFindButton(true)}
       {hasValue && c.renderViewButton(true, c.props.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, c.props.ctx.value!)}
       {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
-    </span>
+    </>
   );
 
   function getLabelText() {
@@ -145,7 +145,7 @@ export interface EntityComboSelectProps {
   onDataLoaded?: (data: Lite<Entity>[] | ResultTable | undefined) => void;
   deps?: React.DependencyList;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: ResultRow | undefined) => React.ReactNode;
+  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem") => React.ReactNode;
   liteToString?: (e: Entity) => string;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
@@ -223,13 +223,13 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     return (
       <DropdownList className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionRows()} onChange={row => p.onChange(row?.entity ?? null)} value={getResultRow(lite)}
         title={lite?.toStr}
-        renderValue={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item)}
-        renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined: a.item)}
+        renderValue={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "Value")}
+        renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "ListItem")}
       />
     );
   } else {
     return (
-      <select className={classes(ctx.formControlClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
+      <select className={classes(ctx.formSelectClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
         title={lite?.toStr}
         onClick={() => setLoadData(true)}
         disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >

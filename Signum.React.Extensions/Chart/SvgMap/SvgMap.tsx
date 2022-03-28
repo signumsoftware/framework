@@ -13,12 +13,13 @@ export default function renderSvgMap(p: ChartClient.ChartScriptProps) {
   return <SvgMap {...p} />
 }
 
-function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest }: ChartClient.ChartScriptProps) {
+function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps) {
 
   const memo = React.useMemo(() => new MemoRepository(), [chartRequest]);
 
   const divRef = React.useRef<HTMLDivElement>(null);
 
+  var noDataColor = parameters["NoDataColor"];
 
   var svgUrl = parameters["SvgUrl"];
   var locationSelector = parameters["LocationSelector"];
@@ -51,6 +52,7 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest }: 
       svgElement.style.maxHeight = height + "px";
     }
   }, [width, height, svgBox]);
+
 
   React.useEffect(() => {
 
@@ -113,6 +115,10 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest }: 
           };
       }
 
+
+      var detector = dashboardFilter?.getActiveDetector(chartRequest);
+
+
       var svg = divRef.current!.getElementsByTagName("svg")[0] as SVGElement;
       svg.querySelectorAll<SVGPathElement>(locationSelector).forEach(elem => {
         var attr = elem.getAttribute(locationAttribute);
@@ -122,15 +128,32 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest }: 
 
         var row = getRow(attr);
 
-        if (strokeWidth)
+        const active =
+          row == null ? (detector == null ? undefined : false) :
+          detector?.(row);
+
+        if (active)
+          elem.setAttribute("stroke-width", "3px");
+        else if (strokeWidth)
           elem.setAttribute("stroke-width", strokeWidth);
         else
-          elem.removeAttribute("stoke-width");
+          elem.removeAttribute("stroke-width");
 
-        if (strokeColor)
+        if (active)
+          elem.setAttribute("stroke", "black");
+        else if (strokeColor)
           elem.setAttribute("stroke", strokeColor);
         else
           elem.removeAttribute("stroke");
+
+        if (active == false)
+          elem.setAttribute("opacity", ".5");
+        else if (opacityColumn) {
+          var opa = row == null ? 0 : opacity!(opacityColumn!.getValue(row))!;
+          elem.setAttribute("opacity", opa.toString());
+        }
+        else
+          elem.removeAttribute("opacity");
 
         var titleElement = elem.querySelector("title") ?? elem.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
 
@@ -145,8 +168,10 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest }: 
             + (opacityColumn == null ? '' : (' (' + opacityColumn.getValueNiceName(row) + ')'));
         }
         else {
-          elem.removeAttribute("fill");
+          elem.setAttribute("fill", noDataColor);
           elem.removeAttribute("cursor");
+
+          titleElement.textContent = "No Data for " + attr;
         }
       });
 
@@ -170,7 +195,7 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest }: 
       return () => svg.removeEventListener("click", onClick);
     }
 
-  }, [svgBox, data, locationSelector, locationAttribute, locationMatch, strokeColor, strokeWidth, opacityScale, colorScaleMaxValue, colorScale, colorInterpolate]);
+  }, [svgBox, data, locationSelector, locationAttribute, locationMatch, strokeColor, strokeWidth, opacityScale, colorScaleMaxValue, colorScale, colorInterpolate, dashboardFilter?.rows.lastOrNull()]);
   
   return (
     <div ref={divRef} style={{ imageRendering: "-webkit-optimize-contrast", userSelect: "none", display: "flex", justifyContent: "center" }}>

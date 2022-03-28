@@ -10,7 +10,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { TypeaheadOptions } from '@framework/Components/Typeahead'
 
 
-export function ColorTypeaheadLine(p : { ctx: TypeContext<string | null | undefined>; onChange?: () => void }){
+export function ColorTypeaheadLine(p: { ctx: TypeContext<string | null | undefined>; onChange?: () => void, inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>; }){
 
   const forceUpdate = useForceUpdate();
 
@@ -27,6 +27,7 @@ export function ColorTypeaheadLine(p : { ctx: TypeContext<string | null | undefi
   return (
     <FormGroup ctx={ctx} labelText={ctx.niceName()} >
       <ColorTypeahead color={ctx.value}
+        inputAttrs={p.inputAttrs}
         formControlClass={ctx.formControlClass}
         onChange={handleOnChange}
         placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined} />
@@ -39,6 +40,7 @@ interface ColorTypeaheadProps {
   onChange: (newColor: string | null | undefined) => void;
   formControlClass: string | undefined;
   placeholder?: string;
+  inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 export function ColorTypeahead(p : ColorTypeaheadProps){
@@ -81,7 +83,7 @@ export function ColorTypeahead(p : ColorTypeaheadProps){
   return (
     <Typeahead
       value={p.color ?? ""}
-      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete"), placeholder: p.placeholder }}
+      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete"), placeholder: p.placeholder, ...p.inputAttrs }}
       getItems={handleGetItems}
       onSelect={handleSelect}
       onChange={handleSelect}

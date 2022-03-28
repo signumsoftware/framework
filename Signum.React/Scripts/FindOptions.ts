@@ -1,6 +1,6 @@
 import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
 import { BsSize } from './Components';
 
@@ -63,6 +63,7 @@ export interface FilterConditionOption {
   operation?: FilterOperation;
   value?: any;
   pinned?: PinnedFilter;
+  dashboardBehaviour?: DashboardBehaviour;
 }
 
 export interface FilterGroupOption {
@@ -70,6 +71,7 @@ export interface FilterGroupOption {
   groupOperation: FilterGroupOperation;
   filters: FilterOption[];
   pinned?: PinnedFilter;
+  dashboardBehaviour?: DashboardBehaviour;
   value?: string; /*For search in multiple columns*/
 }
 
@@ -88,7 +90,7 @@ export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterG
 }
 
 export function isActive(fo: FilterOptionParsed) {
-  return !(fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
 }
 
 export interface FilterConditionOptionParsed {
@@ -97,6 +99,7 @@ export interface FilterConditionOptionParsed {
   operation?: FilterOperation;
   value: any;
   pinned?: PinnedFilterParsed;
+  dashboardBehaviour?: DashboardBehaviour;
 }
 
 export interface PinnedFilterParsed {
@@ -124,6 +127,7 @@ export interface FilterGroupOptionParsed {
   token?: QueryToken;
   filters: FilterOptionParsed[];
   pinned?: PinnedFilterParsed;
+  dashboardBehaviour?: DashboardBehaviour;
   value?: string; /*For search in multiple columns*/
 }
 
@@ -183,6 +187,24 @@ export interface QueryToken {
   queryTokenType?: QueryTokenType;
   parent?: QueryToken;
   propertyRoute?: string;
+}
+
+function getFullKey(token: QueryToken | QueryTokenString<any> | string) : string {
+  if (token instanceof QueryTokenString)
+    return token.token;
+
+  if (typeof token == "object")
+    return token.fullKey;
+
+  return token;
+}
+
+export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | string, tokenStart: QueryToken | QueryTokenString<any> | string) {
+
+  token = getFullKey(token);
+  tokenStart = getFullKey(token);
+
+  return token == tokenStart || token.startsWith(tokenStart + ".");
 }
 
 export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll";
@@ -348,20 +370,13 @@ export interface QueryValueRequest {
   systemTime?: SystemTime;
 }
 
-export interface ResultColumn {
-  displayName: string;
-  token: QueryToken;
-}
-
 export interface ResultTable {
-  queryKey: string;
-  entityColumn: string;
   columns: string[];
+  uniqueValues: { [token: string]: any[] }
   rows: ResultRow[];
   pagination: Pagination
   totalElements?: number;
 }
-
 
 export interface ResultRow {
   entity?: Lite<Entity>;

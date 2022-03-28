@@ -11,17 +11,6 @@
       </SnippetTypes>
     </Header>
     <Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Entities</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Utilities</Namespace>
-        </Import>
-        <Import>
-          <Namespace>System.Linq.Expressions</Namespace>
-        </Import>
-      </Imports>
       <Declarations>
         <Literal>
           <ID>methodName</ID>
@@ -41,7 +30,7 @@
       </Declarations>
       <Code Language="csharp">
         <![CDATA[[AutoExpressionField]
-        public override string ToString() => As.Expression(() => $field$);]]>
+public override string ToString() => As.Expression(() => $field$);]]>
       </Code>
     </Snippet>
   </CodeSnippet>

@@ -1,5 +1,4 @@
 using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.React.ApiControllers;
@@ -9,48 +8,47 @@ using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace Signum.React.Processes
+namespace Signum.React.Processes;
+
+[ValidateModelFilter]
+public class ProcessController : ControllerBase
 {
-    [ValidateModelFilter]
-    public class ProcessController : ControllerBase
+    [HttpPost("api/processes/constructFromMany")]
+    public EntityPackTS ConstructFromMany([Required, FromBody]OperationController.MultiOperationRequest request)
     {
-        [HttpPost("api/processes/constructFromMany")]
-        public EntityPackTS ConstructFromMany([Required, FromBody]OperationController.MultiOperationRequest request)
-        {
-            var type = request.Type == null ? null : TypeLogic.GetType(request.Type);
+        var type = request.Type == null ? null : TypeLogic.GetType(request.Type);
 
-            var op = request.GetOperationSymbol(type!);
-            var entity = PackageLogic.CreatePackageOperation(request.Lites, op, request.ParseArgs(op));
+        var op = request.GetOperationSymbol(type!);
+        var entity = PackageLogic.CreatePackageOperation(request.Lites, op, request.ParseArgs(op));
 
-            return SignumServer.GetEntityPack(entity);
-        }
+        return SignumServer.GetEntityPack(entity);
+    }
 
-        [HttpGet("api/processes/view")]
-        public ProcessLogicState View()
-        {
-            ProcessLogicState state = ProcessRunnerLogic.ExecutionState();
+    [HttpGet("api/processes/view")]
+    public ProcessLogicState View()
+    {
+        ProcessLogicState state = ProcessRunnerLogic.ExecutionState();
 
-            return state;
-        }
+        return state;
+    }
 
-        [HttpPost("api/processes/start")]
-        public void Start()
-        {
-            ProcessPermission.ViewProcessPanel.AssertAuthorized();
+    [HttpPost("api/processes/start")]
+    public void Start()
+    {
+        ProcessPermission.ViewProcessPanel.AssertAuthorized();
 
-            ProcessRunnerLogic.StartRunningProcesses();
+        ProcessRunnerLogic.StartRunningProcesses();
 
-            Thread.Sleep(1000);
-        }
+        Thread.Sleep(1000);
+    }
 
-        [HttpPost("api/processes/stop")]
-        public void Stop()
-        {
-            ProcessPermission.ViewProcessPanel.AssertAuthorized();
+    [HttpPost("api/processes/stop")]
+    public void Stop()
+    {
+        ProcessPermission.ViewProcessPanel.AssertAuthorized();
 
-            ProcessRunnerLogic.Stop();
+        ProcessRunnerLogic.Stop();
 
-            Thread.Sleep(1000);
-        }
+        Thread.Sleep(1000);
     }
 }

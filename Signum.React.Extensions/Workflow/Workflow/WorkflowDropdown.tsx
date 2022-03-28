@@ -1,6 +1,5 @@
 
 import * as React from 'react'
-import { isRtl } from '@framework/AppContext'
 import { getTypeInfo } from '@framework/Reflection'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { WorkflowEntity, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
@@ -35,7 +34,7 @@ function WorkflowDropdownImp(props: {}) {
 
 
   return (
-    <NavDropdown className="sf-workflow" id="workflowDropdown" title={WorkflowEntity.nicePluralName()} {...{ alignRight: isRtl()} as any}>
+    <NavDropdown className="sf-workflow" id="workflowDropdown" title={WorkflowEntity.nicePluralName()}>
         <LinkContainer exact to={Options.getInboxUrl()}><Dropdown.Item>{CaseActivityQuery.Inbox.niceName()}</Dropdown.Item></LinkContainer>
         {starts.length > 0 && <Dropdown.Divider />}
         {starts.length > 0 && <Dropdown.Item disabled>{JavascriptMessage.create.niceToString()}</Dropdown.Item>}

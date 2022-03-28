@@ -1,5 +1,4 @@
-﻿using Signum.Utilities;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 [assembly: DefaultAssemblyCulture("en")]
 [assembly: InternalsVisibleTo("Signum.Engine.Extensions")]

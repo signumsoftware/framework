@@ -4,10 +4,10 @@ import { WorkflowScriptRetryStrategyEntity } from '../Signum.Entities.Workflow';
 
 export default function WorkflowScriptRetryStrategy(p: { ctx: TypeContext<WorkflowScriptRetryStrategyEntity> }) {
   const ctx = p.ctx;
-  
+
   return (
     <div>
-        <ValueLine ctx={ctx.subCtx(e => e.rule)} />
+      <ValueLine ctx={ctx.subCtx(e => e.rule)} />
     </div>
   );
 }

@@ -1,66 +1,60 @@
-using Signum.Entities;
 using Signum.Entities.Basics;
-using Signum.Utilities;
-using System;
-using System.Linq;
-using System.Linq.Expressions;
 
-namespace Signum.Entities.Dynamic
+namespace Signum.Entities.Dynamic;
+
+[EntityKind(EntityKind.Main, EntityData.Transactional)]
+public class DynamicTypeConditionEntity : Entity
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class DynamicTypeConditionEntity : Entity
+    
+    public DynamicTypeConditionSymbolEntity SymbolName { get; set; }
+
+    
+    public TypeEntity EntityType { get; set; }
+
+    [NotifyChildProperty]
+    public DynamicTypeConditionEval Eval { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => (EntityType == null ? "" : EntityType.CleanName + " : ") + SymbolName);
+}
+
+[AutoInit]
+public static class DynamicTypeConditionOperation
+{
+    public static readonly ConstructSymbol<DynamicTypeConditionEntity>.From<DynamicTypeConditionEntity> Clone;
+    public static readonly ExecuteSymbol<DynamicTypeConditionEntity> Save;
+}
+
+public class DynamicTypeConditionEval : EvalEmbedded<IDynamicTypeConditionEvaluator>
+{
+    protected override CompilationResult Compile()
     {
-        
-        public DynamicTypeConditionSymbolEntity SymbolName { get; set; }
+        var script = this.Script.Trim();
+        script = script.Contains(';') ? script : ("return " + script + ";");
+        var entityTypeName = this.GetParentEntity<DynamicTypeConditionEntity>().EntityType.ToType().FullName;
 
-        
-        public TypeEntity EntityType { get; set; }
-
-        [NotifyChildProperty]
-        public DynamicTypeConditionEval Eval { get; set; }
-
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => (EntityType == null ? "" : EntityType.CleanName + " : ") + SymbolName);
-    }
-
-    [AutoInit]
-    public static class DynamicTypeConditionOperation
-    {
-        public static readonly ConstructSymbol<DynamicTypeConditionEntity>.From<DynamicTypeConditionEntity> Clone;
-        public static readonly ExecuteSymbol<DynamicTypeConditionEntity> Save;
-    }
-
-    public class DynamicTypeConditionEval : EvalEmbedded<IDynamicTypeConditionEvaluator>
-    {
-        protected override CompilationResult Compile()
-        {
-            var script = this.Script.Trim();
-            script = script.Contains(';') ? script : ("return " + script + ";");
-            var entityTypeName = this.GetParentEntity<DynamicTypeConditionEntity>().EntityType.ToType().FullName;
-
-            return Compile(DynamicCode.GetCoreMetadataReferences()
-                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+        return Compile(DynamicCode.GetCoreMetadataReferences()
+            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Dynamic
 {
-    class Evaluator : Signum.Entities.Dynamic.IDynamicTypeConditionEvaluator
+class Evaluator : Signum.Entities.Dynamic.IDynamicTypeConditionEvaluator
+{
+    public bool EvaluateUntyped(ModifiableEntity e)
     {
-        public bool EvaluateUntyped(ModifiableEntity e)
-        {
-            return this.Evaluate((" + entityTypeName + @")e);
-        }
+        return this.Evaluate((" + entityTypeName + @")e);
+    }
 
-        bool Evaluate(" + entityTypeName + @" e)
-        {
-            " + script + @"
-        }
-    }                   
+    bool Evaluate(" + entityTypeName + @" e)
+    {
+        " + script + @"
+    }
+}                   
 }");
-        }
     }
+}
 
-    public interface IDynamicTypeConditionEvaluator
-    {
-        bool EvaluateUntyped(ModifiableEntity c);
-    }
+public interface IDynamicTypeConditionEvaluator
+{
+    bool EvaluateUntyped(ModifiableEntity c);
 }

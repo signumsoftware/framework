@@ -1,15 +1,12 @@
-﻿using System;
+﻿
+namespace Signum.Entities.Basics;
 
-namespace Signum.Entities.Basics
+public class TypeConditionSymbol : Symbol
 {
-    [Serializable]
-    public class TypeConditionSymbol : Symbol
-    {
-        private TypeConditionSymbol() { }
+    private TypeConditionSymbol() { }
 
-        public TypeConditionSymbol(Type declaringType, string fieldName) :
-            base(declaringType, fieldName)
-        {
-        }
+    public TypeConditionSymbol(Type declaringType, string fieldName) :
+        base(declaringType, fieldName)
+    {
     }
 }

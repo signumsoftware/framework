@@ -57,6 +57,7 @@ export interface SearchControlLoadedProps {
   hideButtonBar: boolean;
   hideFullScreenButton: boolean;
   showHeader: boolean | "PinnedFilters";
+  pinnedFilterVisible?: (fop: FilterOptionParsed) => boolean;
   showBarExtension: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
   showFilters: boolean;
@@ -79,8 +80,8 @@ export interface SearchControlLoadedProps {
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
-  onCreate?: (scl: SearchControlLoaded) => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
-  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined, scl: SearchControlLoaded) => void;
+  onCreate?: (scl: SearchControlLoaded) => Promise<undefined | void | EntityPack<any> | ModifiableEntity | "no_change">;
+  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
@@ -89,6 +90,7 @@ export interface SearchControlLoadedProps {
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
   styleContext?: StyleContext;
+  customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
 }
 
 export interface SearchControlLoadedState {
@@ -225,8 +227,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }, continuation);
   }
 
-  abortableSearch = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
-  abortableSearchSummary = new AbortableRequest((signal, request: QueryRequest) => Finder.API.executeQuery(request, signal));
+  abortableSearch = new AbortableRequest((signal, a: {
+    request: QueryRequest;
+    fop: FindOptionsParsed,
+    customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>
+  }) => a.customRequest ? a.customRequest(a.request, a.fop) : Finder.API.executeQuery(a.request, signal));
+
+  abortableSearchSummary = new AbortableRequest((signal, a: {
+    request: QueryRequest;
+    fop: FindOptionsParsed,
+    customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>
+  }) => a.customRequest ? a.customRequest(a.request, a.fop) : Finder.API.executeQuery(a.request, signal));
 
   dataChanged(): Promise<void> {
     if (this.isManualRefreshOrAllPagination()) {
@@ -253,13 +264,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.simpleFilterBuilderInstance.onDataChanged();
 
       this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
-      var resultFindOptions = JSON.parse(JSON.stringify(this.props.findOptions));
+      var resultFindOptions = JSON.parse(JSON.stringify(fop));
 
       const qr = this.getQueryRequest();
       const qrSummary = this.getSummaryQueryRequest();
 
-      return Promise.all([this.abortableSearch.getData(qr),
-        qrSummary == null ? Promise.resolve<ResultTable | undefined>(undefined) : this.abortableSearchSummary.getData(qrSummary)
+      const customRequest = this.props.customRequest;
+
+      return Promise.all([this.abortableSearch.getData({ request: qr, fop, customRequest }),
+        qrSummary ? this.abortableSearchSummary.getData({ request: qrSummary, fop, customRequest }) : Promise.resolve<ResultTable | undefined>(undefined) 
       ]).then(([rt, summaryRt]) => {
         this.setState({
           resultTable: rt,
@@ -460,7 +473,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           </div>
         }
         {p.showHeader == true && !this.state.showFilters && !sfb && this.renderPinnedFilters(true)}
-        {p.showHeader == "PinnedFilters" && this.renderPinnedFilters(true)}
+        {p.showHeader == "PinnedFilters" && (sfb ?? this.renderPinnedFilters(true))}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
@@ -616,7 +629,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       {
         order: -3,
-        button: < button className={classes("sf-query-button sf-search btn ml-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
+        button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
           <FontAwesomeIcon icon={"search"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
         </button>
       },
@@ -625,7 +638,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       p.create && {
         order: -2,
-        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ml-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
+        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },
@@ -666,7 +679,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       .then(ti => ti ? ti.name : undefined);
   }
 
-  handleCreated = (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined) => {
+  handleCreated = (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void) => {
     if (this.props.onCreateFinished) {
       this.props.onCreateFinished(entity, this);
     } else {
@@ -776,7 +789,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
-    return Promise.all(filters.map(fs => Finder.fetchEntitiesLiteWithFilters(resFO.queryKey, fs, [], null))).then(fss => fss.flatMap(fs => fs));
+    return Promise.all(filters.map(fs => Finder.fetchLites({ queryName: resFO.queryKey, filterOptions: fs, orderOptions: [], count: null })))
+      .then(fss => fss.flatMap(fs => fs));
   }
 
   // SELECT BUTTON
@@ -829,7 +843,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <Dropdown
           show={this.state.isSelectOpen}
           onToggle={this.handleSelectedToggle}>
-          <Dropdown.Toggle id="selectedButton" variant="light" className="sf-query-button sf-tm-selected ml-2" disabled={this.state.selectedRows!.length == 0}>
+          <Dropdown.Toggle id="selectedButton" variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
             {title}
           </Dropdown.Toggle>
           <Dropdown.Menu>
@@ -1189,7 +1203,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return (
       <tr>
         {this.props.allowSelection && <th className="sf-th-selection">
-          <input type="checkbox" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
@@ -1215,8 +1229,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             <div className="d-flex" style={{ alignItems: "center" }}>
               {this.orderIcon(co)}
               {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
-                <FontAwesomeIcon icon="key" className="mr-1"
-                  color={rootKeys.contains(co) ? undefined : "gray"}
+                <FontAwesomeIcon icon="key" className="me-1"
+                  color={rootKeys.contains(co) ? "gray" : "lightgray"}
                   title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
               {co.displayName}
             </div>
@@ -1259,7 +1273,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (orders.indexOf(o))
       asc += " l" + orders.indexOf(o);
 
-    return <span className={"mr-1 sf-header-sort " + asc} />;
+    return <span className={"me-1 sf-header-sort " + asc} />;
   }
 
   //ROWS
@@ -1450,7 +1464,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           className={classes(mark?.className, ra?.className)}>
           {this.props.allowSelection &&
             <td style={{ textAlign: "center" }}>
-              <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
+              <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
             </td>
           }
 
@@ -1490,6 +1504,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return <AutoFocus disabled={!this.props.enableAutoFocus}>
       <PinnedFilterBuilder
         filterOptions={fo.filterOptions}
+        pinnedFilterVisible={this.props.pinnedFilterVisible}
         onFiltersChanged={this.handlePinnedFilterChanged}
         onSearch={() => this.doSearchPage1(true)}
         showSearchButton={this.state.refreshMode == "Manual" && this.props.showHeader != true}

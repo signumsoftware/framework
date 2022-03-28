@@ -57,10 +57,10 @@ export interface CaseActivityEntity extends Entities.Entity {
   case: CaseEntity;
   workflowActivity: IWorkflowNodeEntity;
   originalWorkflowActivityName: string;
-  startDate: string;
+  startDate: string /*DateTime*/;
   previous: Entities.Lite<CaseActivityEntity> | null;
   note: string | null;
-  doneDate: string | null;
+  doneDate: string /*DateTime*/ | null;
   duration: number | null;
   doneBy: Entities.Lite<Authorization.UserEntity> | null;
   doneType: DoneType | null;
@@ -71,7 +71,7 @@ export interface CaseActivityEntity extends Entities.Entity {
 export const CaseActivityExecutedTimerEntity = new Type<CaseActivityExecutedTimerEntity>("CaseActivityExecutedTimer");
 export interface CaseActivityExecutedTimerEntity extends Entities.Entity {
   Type: "CaseActivityExecutedTimer";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   caseActivity: Entities.Lite<CaseActivityEntity>;
   boundaryEvent: Entities.Lite<WorkflowEventEntity>;
 }
@@ -149,8 +149,8 @@ export interface CaseEntity extends Entities.Entity {
   parentCase: Entities.Lite<CaseEntity> | null;
   description: string;
   mainEntity: ICaseMainEntity;
-  startDate: string;
-  finishDate: string | null;
+  startDate: string /*DateTime*/;
+  finishDate: string /*DateTime*/ | null;
 }
 
 export const CaseFlowColor = new EnumType<CaseFlowColor>("CaseFlowColor");
@@ -167,6 +167,12 @@ export interface CaseJunctionEntity extends Entities.Entity {
   to: Entities.Lite<CaseActivityEntity>;
 }
 
+export module CaseMessage {
+  export const DeleteMainEntity = new MessageKey("CaseMessage", "DeleteMainEntity");
+  export const DoYouWAntToAlsoDeleteTheMainEntity0 = new MessageKey("CaseMessage", "DoYouWAntToAlsoDeleteTheMainEntity0");
+  export const DoYouWAntToAlsoDeleteTheMainEntities = new MessageKey("CaseMessage", "DoYouWAntToAlsoDeleteTheMainEntities");
+}
+
 export const CaseNotificationEntity = new Type<CaseNotificationEntity>("CaseNotification");
 export interface CaseNotificationEntity extends Entities.Entity {
   Type: "CaseNotification";
@@ -179,6 +185,8 @@ export interface CaseNotificationEntity extends Entities.Entity {
 
 export module CaseNotificationOperation {
   export const SetRemarks : Entities.ExecuteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.SetRemarks");
+  export const Delete : Entities.DeleteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.Delete");
+  export const CreteCaseNotificationFromCaseActivity : Entities.ConstructSymbol_From<CaseNotificationEntity, CaseActivityEntity> = registerSymbol("Operation", "CaseNotificationOperation.CreteCaseNotificationFromCaseActivity");
 }
 
 export const CaseNotificationState = new EnumType<CaseNotificationState>("CaseNotificationState");
@@ -193,12 +201,13 @@ export module CaseOperation {
   export const SetTags : Entities.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.SetTags");
   export const Cancel : Entities.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.Cancel");
   export const Reactivate : Entities.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.Reactivate");
+  export const Delete : Entities.DeleteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.Delete");
 }
 
 export const CaseTagEntity = new Type<CaseTagEntity>("CaseTag");
 export interface CaseTagEntity extends Entities.Entity {
   Type: "CaseTag";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   case: Entities.Lite<CaseEntity>;
   tagType: CaseTagTypeEntity;
   createdBy: Entities.Lite<Basics.IUserEntity>;
@@ -253,8 +262,8 @@ export interface InboxFilterModel extends Entities.ModelEntity {
   Type: "InboxFilterModel";
   range: DateFilterRange;
   states: Entities.MList<CaseNotificationState>;
-  fromDate: string | null;
-  toDate: string | null;
+  fromDate: string /*DateTime*/ | null;
+  toDate: string /*DateTime*/ | null;
 }
 
 export module InboxMessage {
@@ -285,9 +294,9 @@ export interface NewTasksEmbedded extends Entities.EmbeddedEntity {
 export const ScriptExecutionEmbedded = new Type<ScriptExecutionEmbedded>("ScriptExecutionEmbedded");
 export interface ScriptExecutionEmbedded extends Entities.EmbeddedEntity {
   Type: "ScriptExecutionEmbedded";
-  nextExecution: string;
+  nextExecution: string /*DateTime*/;
   retryCount: number;
-  processIdentifier: string | null;
+  processIdentifier: string /*Guid*/ | null;
 }
 
 export const SubEntitiesEval = new Type<SubEntitiesEval>("SubEntitiesEval");
@@ -319,7 +328,7 @@ export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowActi
 export interface WorkflowActionEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowAction";
   name: string;
-  guid: string;
+  guid: string /*Guid*/;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowActionEval;
 }
@@ -417,7 +426,7 @@ export const WorkflowConditionEntity = new Type<WorkflowConditionEntity>("Workfl
 export interface WorkflowConditionEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowCondition";
   name: string;
-  guid: string;
+  guid: string /*Guid*/;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowConditionEval;
 }
@@ -482,8 +491,8 @@ export interface WorkflowEntity extends Entities.Entity, UserAssets.IUserAssetEn
   name: string;
   mainEntityType: Basics.TypeEntity;
   mainEntityStrategies: Entities.MList<WorkflowMainEntityStrategy>;
-  expirationDate: string | null;
-  guid: string;
+  expirationDate: string /*DateTime*/ | null;
+  guid: string /*Guid*/;
 }
 
 export const WorkflowEventEntity = new Type<WorkflowEventEntity>("WorkflowEvent");
@@ -527,7 +536,7 @@ export interface WorkflowEventTaskConditionEval extends Dynamic.EvalEmbedded<IWo
 export const WorkflowEventTaskConditionResultEntity = new Type<WorkflowEventTaskConditionResultEntity>("WorkflowEventTaskConditionResult");
 export interface WorkflowEventTaskConditionResultEntity extends Entities.Entity {
   Type: "WorkflowEventTaskConditionResult";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   workflowEventTask: Entities.Lite<WorkflowEventTaskEntity> | null;
   result: boolean;
 }
@@ -620,6 +629,8 @@ export interface WorkflowLaneEntity extends Entities.Entity, IWorkflowObjectEnti
   pool: WorkflowPoolEntity;
   actors: Entities.MList<Entities.Lite<Entities.Entity>>;
   actorsEval: WorkflowLaneActorsEval | null;
+  useActorEvalForStart: boolean;
+  combineActorAndActorEvalWhenContinuing: boolean;
 }
 
 export const WorkflowLaneModel = new Type<WorkflowLaneModel>("WorkflowLaneModel");
@@ -629,6 +640,8 @@ export interface WorkflowLaneModel extends Entities.ModelEntity {
   name: string;
   actors: Entities.MList<Entities.Lite<Entities.Entity>>;
   actorsEval: WorkflowLaneActorsEval | null;
+  useActorEvalForStart: boolean;
+  combineActorAndActorEvalWhenContinuing: boolean;
 }
 
 export module WorkflowLaneOperation {
@@ -684,6 +697,7 @@ export module WorkflowOperation {
 export module WorkflowPermission {
   export const ViewWorkflowPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewWorkflowPanel");
   export const ViewCaseFlow : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewCaseFlow");
+  export const WorkflowToolbarMenu : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.WorkflowToolbarMenu");
 }
 
 export const WorkflowPoolEntity = new Type<WorkflowPoolEntity>("WorkflowPool");
@@ -724,7 +738,7 @@ export interface WorkflowReplacementModel extends Entities.ModelEntity {
 export const WorkflowScriptEntity = new Type<WorkflowScriptEntity>("WorkflowScript");
 export interface WorkflowScriptEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowScript";
-  guid: string;
+  guid: string /*Guid*/;
   name: string;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowScriptEval;
@@ -753,7 +767,7 @@ export const WorkflowScriptRetryStrategyEntity = new Type<WorkflowScriptRetryStr
 export interface WorkflowScriptRetryStrategyEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowScriptRetryStrategy";
   rule: string;
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export module WorkflowScriptRetryStrategyOperation {
@@ -765,7 +779,7 @@ export const WorkflowTimerConditionEntity = new Type<WorkflowTimerConditionEntit
 export interface WorkflowTimerConditionEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowTimerCondition";
   name: string;
-  guid: string;
+  guid: string /*Guid*/;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowTimerConditionEval;
 }

@@ -32,7 +32,7 @@ export interface DeleteLogsTypeOverridesEmbedded extends Entities.EmbeddedEntity
 export const ExceptionEntity = new Type<ExceptionEntity>("Exception");
 export interface ExceptionEntity extends Entities.Entity {
   Type: "Exception";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   exceptionType: string | null;
   exceptionMessage: string;
   exceptionMessageHash: number;
@@ -69,8 +69,8 @@ export interface OperationLogEntity extends Entities.Entity {
   origin: Entities.Lite<Entities.Entity> | null;
   operation: Entities.OperationSymbol;
   user: Entities.Lite<IUserEntity>;
-  start: string;
-  end: string | null;
+  start: string /*DateTime*/;
+  end: string /*DateTime*/ | null;
   exception: Entities.Lite<ExceptionEntity> | null;
 }
 

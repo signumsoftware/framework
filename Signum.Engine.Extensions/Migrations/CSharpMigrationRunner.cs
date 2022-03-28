@@ -1,170 +1,164 @@
-using Signum.Entities;
 using Signum.Entities.Migrations;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Data.SqlClient;
 
-namespace Signum.Engine.Migrations
+namespace Signum.Engine.Migrations;
+
+public class CSharpMigrationRunner: IEnumerable<CSharpMigrationRunner.MigrationInfo>
 {
-    public class CSharpMigrationRunner: IEnumerable<CSharpMigrationRunner.MigrationInfo>
+    public List<MigrationInfo> Migrations = new List<MigrationInfo>();
+
+    public void Add(Action action, string? uniqueName = null)
     {
-        public List<MigrationInfo> Migrations = new List<MigrationInfo>();
+        Migrations.Add(new MigrationInfo(action, uniqueName ?? GetUniqueName(action)));
+    }
 
-        public void Add(Action action, string? uniqueName = null)
+    private string GetUniqueName(Action action)
+    {
+        return action.Method.Name;
+    }
+
+    public void Run(bool autoRun)
+    {
+        while (true)
         {
-            Migrations.Add(new MigrationInfo(action, uniqueName ?? GetUniqueName(action)));
+            SetExecuted();
+
+            if (!Prompt(autoRun) || autoRun)
+                return;
         }
+    }
 
-        private string GetUniqueName(Action action)
+    void SetExecuted()
+    {
+        SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Reading C# migrations...");
+
+        MigrationLogic.EnsureMigrationTable<CSharpMigrationEntity>();
+
+        var database = Database.Query<CSharpMigrationEntity>().Select(m => m.UniqueName).OrderBy().ToHashSet();
+
+        foreach (var v in this.Migrations)
         {
-            return action.Method.Name;
+            v.IsExecuted = database.Contains(v.UniqueName);
         }
+    }
 
-        public void Run(bool autoRun)
+    bool Prompt(bool autoRun)
+    {
+        Draw(null);
+
+
+        if (Migrations.All(a=>a.IsExecuted))
         {
-            while (true)
-            {
-                SetExecuted();
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "All migrations are executed!");
 
-                if (!Prompt(autoRun) || autoRun)
-                    return;
-            }
+            return false;
         }
-
-        void SetExecuted()
+        else
         {
-            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Reading C# migrations...");
-
-            MigrationLogic.EnsureMigrationTable<CSharpMigrationEntity>();
-
-            var database = Database.Query<CSharpMigrationEntity>().Select(m => m.UniqueName).OrderBy().ToHashSet();
-
-            foreach (var v in this.Migrations)
-            {
-                v.IsExecuted = database.Contains(v.UniqueName);
-            }
-        }
-
-        bool Prompt(bool autoRun)
-        {
-            Draw(null);
-
-
-            if (Migrations.All(a=>a.IsExecuted))
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.Green, "All migrations are executed!");
-
+            if (!autoRun && !SafeConsole.Ask("Run migrations ({0})?".FormatWith(Migrations.Count(a => !a.IsExecuted))))
                 return false;
-            }
-            else
-            {
-                if (!autoRun && !SafeConsole.Ask("Run migrations ({0})?".FormatWith(Migrations.Count(a => !a.IsExecuted))))
-                    return false;
 
-                try
-                {
-                    foreach (var item in this.Migrations.AsEnumerable().Where(a => !a.IsExecuted))
-                    {
-                        Draw(item);
-
-                        Execute(item);
-                    }
-
-                    return true;
-
-                }
-                catch (ExecuteSqlScriptException)
-                {
-                    if (autoRun)
-                        throw;
-
-                    return true;
-                }
-            }
-
-        }
-
-        private void Execute(MigrationInfo mi)
-        {
             try
             {
-                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, mi.UniqueName + " executing ...");
-                mi.Action();
-                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, mi.UniqueName + " finished!");
+                foreach (var item in this.Migrations.AsEnumerable().Where(a => !a.IsExecuted))
+                {
+                    Draw(item);
+
+                    Execute(item);
+                }
+
+                return true;
+
             }
-            catch (Exception e)
+            catch (ExecuteSqlScriptException)
             {
-                Console.WriteLine();
-                Console.WriteLine();
-                SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.GetType().Name + (e is SqlException ? " (Number {0}): ".FormatWith(((SqlException)e).Number) : ": "));
-                SafeConsole.WriteLineColor(ConsoleColor.Red, e.Message);
-                SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.StackTrace);
+                if (autoRun)
+                    throw;
 
-                Console.WriteLine();
-
-                throw new ExecuteSqlScriptException(e.Message, e);
+                return true;
             }
-
-            CSharpMigrationEntity m = new CSharpMigrationEntity
-            {
-                ExecutionDate = TimeZoneManager.Now,
-                UniqueName = mi.UniqueName,
-            }.Save();
-
-            mi.IsExecuted = true;
         }
 
-        private void Draw(MigrationInfo? current)
+    }
+
+    private void Execute(MigrationInfo mi)
+    {
+        try
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, mi.UniqueName + " executing ...");
+            mi.Action();
+            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, mi.UniqueName + " finished!");
+        }
+        catch (Exception e)
         {
             Console.WriteLine();
-
-            foreach (var mi in this.Migrations)
-            {
-                ConsoleColor color = mi.IsExecuted ? ConsoleColor.DarkGreen :
-                                     current == mi ? ConsoleColor.Green :
-                                     ConsoleColor.White;
-
-                SafeConsole.WriteColor(color,  
-                    mi.IsExecuted?  "- " : 
-                    current == mi ? "->" : 
-                                    "  ");
-
-                SafeConsole.WriteLineColor(color, mi.UniqueName);
-            }
+            Console.WriteLine();
+            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.GetType().Name + (e is SqlException ? " (Number {0}): ".FormatWith(((SqlException)e).Number) : ": "));
+            SafeConsole.WriteLineColor(ConsoleColor.Red, e.Message);
+            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.StackTrace);
 
             Console.WriteLine();
+
+            throw new ExecuteSqlScriptException(e.Message, e);
         }
 
-        public class MigrationInfo
+        CSharpMigrationEntity m = new CSharpMigrationEntity
         {
-            public Action Action;
-            public string UniqueName;
-            public bool IsExecuted;
+            ExecutionDate = Clock.Now,
+            UniqueName = mi.UniqueName,
+        }.Save();
 
-            public MigrationInfo(Action action, string uniqueName)
-            {
-                Action = action;
-                UniqueName = uniqueName;
-            }
+        mi.IsExecuted = true;
+    }
 
-            public override string ToString()
-            {
-                return UniqueName;
-            }
+    private void Draw(MigrationInfo? current)
+    {
+        Console.WriteLine();
 
-        }
-
-
-        public IEnumerator<CSharpMigrationRunner.MigrationInfo> GetEnumerator()
+        foreach (var mi in this.Migrations)
         {
-            return this.Migrations.GetEnumerator();
+            ConsoleColor color = mi.IsExecuted ? ConsoleColor.DarkGreen :
+                                 current == mi ? ConsoleColor.Green :
+                                 ConsoleColor.White;
+
+            SafeConsole.WriteColor(color,  
+                mi.IsExecuted?  "- " : 
+                current == mi ? "->" : 
+                                "  ");
+
+            SafeConsole.WriteLineColor(color, mi.UniqueName);
         }
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        Console.WriteLine();
+    }
+
+    public class MigrationInfo
+    {
+        public Action Action;
+        public string UniqueName;
+        public bool IsExecuted;
+
+        public MigrationInfo(Action action, string uniqueName)
         {
-            return this.Migrations.GetEnumerator();
+            Action = action;
+            UniqueName = uniqueName;
         }
+
+        public override string ToString()
+        {
+            return UniqueName;
+        }
+
+    }
+
+
+    public IEnumerator<CSharpMigrationRunner.MigrationInfo> GetEnumerator()
+    {
+        return this.Migrations.GetEnumerator();
+    }
+
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+    {
+        return this.Migrations.GetEnumerator();
     }
 }

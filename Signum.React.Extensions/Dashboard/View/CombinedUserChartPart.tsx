@@ -3,7 +3,7 @@ import { ServiceError } from '@framework/Services'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import * as Constructor from '@framework/Constructor'
-import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
+import { Entity, Lite, is, JavascriptMessage, toLite, liteKey } from '@framework/Signum.Entities'
 import * as UserChartClient from '../../Chart/UserChart/UserChartClient'
 import * as ChartClient from '../../Chart/ChartClient'
 import { ChartRequestModel, UserChartEntity } from '../../Chart/Signum.Entities.Chart'
@@ -18,6 +18,9 @@ import { QueryDescription } from '@framework/FindOptions'
 import { ErrorBoundary } from '@framework/Components'
 import ChartRendererCombined from '../../Chart/Templates/ChartRendererCombined'
 import { MemoRepository } from '../../Chart/D3Scripts/Components/ReactChart'
+import { getQueryKey } from '@framework/Reflection'
+import { executeChartCached } from '../CachedQueryExecutor'
+import { FilePathOperation } from '../../Files/Signum.Entities.Files'
 
 
 export interface CombinedUserChartInfoTemp {
@@ -35,9 +38,9 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   const forceUpdate = useForceUpdate();
 
-  const infos = React.useMemo<CombinedUserChartInfoTemp[]>(() => p.part.userCharts.map(uc => ({ userChart: uc.element } as CombinedUserChartInfoTemp)), [p.part]);
+  const infos = React.useMemo<CombinedUserChartInfoTemp[]>(() => p.content.userCharts.map(uc => ({ userChart: uc.element.userChart } as CombinedUserChartInfoTemp)), [p.content]);
 
-  const [showData, setShowData] = React.useState(p.part.showData);
+  const [showData, setShowData] = React.useState(p.content.showData);
 
   
 
@@ -65,9 +68,27 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
                   if (chartRequest != null) {
                     chartRequest.filterOptions.splice(originalFilters);
                     chartRequest.filterOptions.push(
-                      ...p.filterController.getFilterOptions(p.partEmbedded, chartRequest!.queryKey),
+                      ...p.dashboardController.getFilterOptions(p.partEmbedded, chartRequest!.queryKey),
                     );
                   }
+
+                  var cachedQuery = p.cachedQueries[liteKey(toLite(c.userChart))];
+
+                  if (cachedQuery)
+                    return ChartClient.getChartScript(chartRequest!.chartScript)
+                      .then(cs => cachedQuery.then(cq => executeChartCached(chartRequest, cs, cq)))
+                      .then(result => {
+                        if (!signal.aborted) {
+                          c.result = result;
+                          forceUpdate();
+                        }
+                      })
+                      .catch(error => {
+                        if (!signal.aborted) {
+                          c.error = error;
+                          forceUpdate();
+                        }
+                      });
 
                   return ChartClient.API.executeChart(chartRequest!, c.chartScript!, signal)
                     .then(result => {
@@ -94,8 +115,13 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       abortController.abort();
     };
 
-  }, [p.part, ...p.deps ?? [], infos.max(e => p.filterController.lastChange.get(e.userChart.query.key))]);
+  }, [p.content, ...p.deps ?? []]);
 
+  React.useEffect(() => {
+    infos.forEach(inf => {
+      inf.makeQuery?.().done();
+    });
+  }, [p.content, ...p.deps ?? [], infos.max(e => p.dashboardController.getLastChange(e.userChart.query.key))]);
 
   function renderError(e: any, key: number) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
@@ -131,11 +157,12 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
     <div>
       {infos.map((info, i) => <PinnedFilterBuilder key={i}
         filterOptions={info.chartRequest!.filterOptions}
+        pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
         onFiltersChanged={() => info.makeQuery!()} extraSmall={true} />
       )}
-      {p.part.allowChangeShowData &&
+      {p.content.allowChangeShowData &&
         <label>
-        <input type="checkbox" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
+          <input type="checkbox" className="form-check-input" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
         {" "}{CombinedUserChartPartEntity.nicePropertyName(a => a.showData)}
         </label>}
       {showData ?
@@ -150,7 +177,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
         <ChartRendererCombined
           infos={infos.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript!, memo: c.memo }))}
           onReload={e => { infos.forEach(a => a.makeQuery!()) }}
-          useSameScale={p.part.useSameScale}
+          useSameScale={p.content.useSameScale}
         />
       }
     </div>

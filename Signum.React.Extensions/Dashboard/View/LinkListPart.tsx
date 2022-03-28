@@ -8,7 +8,7 @@ export default function LinkListPart(p: PanelPartContentProps<LinkListPartEntity
   return (
     <ul className="sf-cp-link-list">
       {
-        p.part.links.map(mle => mle.element)
+        p.content.links.map(mle => mle.element)
           .map((le, i) =>
             <li key={i} >
               <a href={AppContext.toAbsoluteUrl(le.link!)}

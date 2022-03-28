@@ -23,7 +23,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
   getIcon(element: ToolbarResponse<UserQueryEntity>) {
 
     if (element.iconName == "count")
-      return <CountUserQueryIcon userQuery={element.content!} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
+      return <CountUserQueryIcon userQuery={element.content!} color={element.iconColor} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
     return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), ["far", "list-alt"]), element.iconColor ?? "dodgerblue");
   }

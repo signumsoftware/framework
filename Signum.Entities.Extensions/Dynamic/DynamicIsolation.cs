@@ -1,25 +1,18 @@
-using Signum.Entities;
 using Signum.Entities.Isolation;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Signum.Entities.Dynamic
+namespace Signum.Entities.Dynamic;
+
+public class DynamicIsolationMixin : MixinEntity
 {
-    [Serializable]
-    public class DynamicIsolationMixin : MixinEntity
+    DynamicIsolationMixin(ModifiableEntity mainEntity, MixinEntity? next)
+        : base(mainEntity, next)
     {
-        DynamicIsolationMixin(ModifiableEntity mainEntity, MixinEntity? next)
-            : base(mainEntity, next)
-        {
-        }
+    }
 
-        public IsolationStrategy IsolationStrategy { get; set; } = IsolationStrategy.None;
-        
-        protected override void CopyFrom(MixinEntity mixin, object[] args)
-        {
-            this.IsolationStrategy = ((DynamicIsolationMixin)mixin).IsolationStrategy;
-        }
+    public IsolationStrategy IsolationStrategy { get; set; } = IsolationStrategy.None;
+    
+    protected override void CopyFrom(MixinEntity mixin, object[] args)
+    {
+        this.IsolationStrategy = ((DynamicIsolationMixin)mixin).IsolationStrategy;
     }
 }

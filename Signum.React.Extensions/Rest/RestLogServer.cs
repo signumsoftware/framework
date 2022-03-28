@@ -1,15 +1,13 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 
-namespace Signum.React.RestLog
+namespace Signum.React.RestLog;
+
+public static class RestLogServer
 {
-    public static class RestLogServer
+    public static void Start(IApplicationBuilder app)
     {
-        public static void Start(IApplicationBuilder app)
-        {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
 
-        }
     }
 }

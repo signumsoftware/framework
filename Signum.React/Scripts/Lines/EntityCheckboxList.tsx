@@ -82,7 +82,7 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
 
   function renderButtons() {
     return (
-      <span className="float-right">
+      <span className="float-end">
         {c.renderCreateButton(false)}
         {c.renderFindButton(false)}
       </span>
@@ -190,6 +190,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
       return (
         <label className="sf-checkbox-element" key={i}>
           <input type="checkbox"
+            className="form-check-input"
             checked={checked}
             disabled={p.ctx.readOnly}
             name={liteKey(row.entity!)}

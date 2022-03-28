@@ -11,29 +11,6 @@
       </SnippetTypes>
     </Header>
     <Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Engine</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Entities</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Utilities</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Engine.DynamicQuery</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Engine.Maps</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Engine.Operations</Namespace>
-        </Import>
-        <Import>
-          <Namespace>System.Reflection</Namespace>
-        </Import>
-      </Imports>
       <Declarations>
         <Literal>
           <ID>entityName</ID>
@@ -48,22 +25,22 @@
       </Declarations>
       <Code Language="csharp">
         <![CDATA[public static class $entityName$Logic
+{
+    public static void Start(SchemaBuilder sb)
     {
-        public static void Start(SchemaBuilder sb)
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
-            if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-            {
-                sb.Include<$entityName$Entity>()
-                    .WithSave($entityName$Operation.Save)
-                    .WithQuery(() => $entityParam$ => new
-                    {
-                        Entity = $entityParam$,
-                        $entityParam$.Id,
-                        $entityParam$.$end$
-                    });
-            }
+            sb.Include<$entityName$Entity>()
+                .WithSave($entityName$Operation.Save)
+                .WithQuery(() => $entityParam$ => new
+                {
+                    Entity = $entityParam$,
+                    $entityParam$.Id,
+                    $entityParam$.$end$
+                });
         }
-    }]]>
+    }
+}]]>
       </Code>
     </Snippet>
   </CodeSnippet>

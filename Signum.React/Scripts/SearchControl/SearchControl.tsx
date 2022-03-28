@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
-import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription } from '../FindOptions'
+import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, QueryRequest } from '../FindOptions'
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
@@ -33,6 +33,7 @@ export interface SearchControlProps {
   hideFullScreenButton?: boolean;
   defaultIncludeDefaultFilters?: boolean;
   showHeader?: boolean | "PinnedFilters";
+  pinnedFilterVisible?: (fop: FilterOptionParsed) => boolean;
   showBarExtension?: boolean;
   showBarExtensionOption?: ShowBarExtensionOption;
   showFilters?: boolean;
@@ -62,9 +63,10 @@ export interface SearchControlProps {
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
   onResult?: (table: ResultTable, dataChange: boolean) => void;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
-  onCreate?: (scl: SearchControlLoaded) => Promise<undefined | EntityPack<any> | ModifiableEntity | "no_change">;
-  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined, scl: SearchControlLoaded) => void;
+  onCreate?: (scl: SearchControlLoaded) => Promise<undefined | void | EntityPack<any> | ModifiableEntity | "no_change">;
+  onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
   styleContext?: StyleContext;
+  customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
 }
 
 export interface SearchControlState {
@@ -181,6 +183,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         defaultIncudeDefaultFilters={p.defaultIncludeDefaultFilters!}
         searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
         showHeader={p.showHeader != null ? p.showHeader : true}
+        pinnedFilterVisible={p.pinnedFilterVisible}
         showFilters={p.showFilters != null ? p.showFilters : false}
         showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
         showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
@@ -221,6 +224,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         onResult={p.onResult}
 
         styleContext={p.styleContext}
+        customRequest={p.customRequest}
       />
     </ErrorBoundary>
   );

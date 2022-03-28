@@ -1,34 +1,31 @@
-﻿using System;
+﻿
+namespace Signum.Entities.Authorization;
 
-namespace Signum.Entities.Authorization
+[EntityKind(EntityKind.Main, EntityData.Master)]
+public class PasswordExpiresIntervalEntity : Entity
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class PasswordExpiresIntervalEntity : Entity
-    {
-        public decimal Days { get; set; }
+    public decimal Days { get; set; }
 
-        public decimal DaysWarning { get; set; }
+    public decimal DaysWarning { get; set; }
 
-        public bool Enabled { get; set; }
-    }
+    public bool Enabled { get; set; }
+}
 
-    [AutoInit]
-    public static class PasswordExpiresIntervalOperation
-    {
-        public static ExecuteSymbol<PasswordExpiresIntervalEntity> Save;
-    }
+[AutoInit]
+public static class PasswordExpiresIntervalOperation
+{
+    public static ExecuteSymbol<PasswordExpiresIntervalEntity> Save;
+}
 
-    [Serializable]
-    public class PasswordExpiredException : ApplicationException
-    {
-        public PasswordExpiredException() { }
-        public PasswordExpiredException(string message) : base(message) { }
-        public PasswordExpiredException(string message, Exception inner) : base(message, inner) { }
-        protected PasswordExpiredException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context)
-        { }
-    }
+public class PasswordExpiredException : ApplicationException
+{
+    public PasswordExpiredException() { }
+    public PasswordExpiredException(string message) : base(message) { }
+    public PasswordExpiredException(string message, Exception inner) : base(message, inner) { }
+    protected PasswordExpiredException(
+      System.Runtime.Serialization.SerializationInfo info,
+      System.Runtime.Serialization.StreamingContext context)
+        : base(info, context)
+    { }
 }
 

@@ -1,14 +1,11 @@
-using System;
 
-namespace Signum.Entities.Authorization
+namespace Signum.Entities.Authorization;
+
+public class AuthTokenConfigurationEmbedded : EmbeddedEntity
 {
-    [Serializable]
-    public class AuthTokenConfigurationEmbedded : EmbeddedEntity
-    {
-        [Unit("mins")]
-        public int RefreshTokenEvery { get; set; } = 30;
+    [Unit("mins")]
+    public int RefreshTokenEvery { get; set; } = 30;
 
-        [DateInPastValidator]
-        public DateTime? RefreshAnyTokenPreviousTo { get; set; }
-    }
+    [DateInPastValidator]
+    public DateTime? RefreshAnyTokenPreviousTo { get; set; }
 }

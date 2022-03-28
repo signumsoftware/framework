@@ -1,97 +1,90 @@
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.UserAssets;
-using Signum.Utilities;
-using System;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Workflow
+namespace Signum.Entities.Workflow;
+
+[EntityKind(EntityKind.Shared, EntityData.Master)]
+public class WorkflowActionEntity : Entity, IUserAssetEntity
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class WorkflowActionEntity : Entity, IUserAssetEntity
+    [UniqueIndex]
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string Name { get; set; }
+
+    [UniqueIndex]
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
+    public TypeEntity MainEntityType { get; set; }
+
+    [NotifyChildProperty]
+    public WorkflowActionEval Eval { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name);
+
+    public XElement ToXml(IToXmlContext ctx)
     {
-        [UniqueIndex]
-        [StringLengthValidator(Min = 3, Max = 100)]
-        public string Name { get; set; }
-
-        [UniqueIndex]
-        public Guid Guid { get; set; } = Guid.NewGuid();
-
-        public TypeEntity MainEntityType { get; set; }
-
-        [NotifyChildProperty]
-        public WorkflowActionEval Eval { get; set; }
-
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => Name);
-
-        public XElement ToXml(IToXmlContext ctx)
-        {
-            return new XElement("WorkflowAction",
-                 new XAttribute("Guid", Guid),
-                 new XAttribute("Name", Name),
-                 new XAttribute("MainEntityType", ctx.TypeToName(MainEntityType)),
-                 new XElement("Eval",
-                    new XElement("Script", new XCData(Eval.Script))));
-        }
-
-        public void FromXml(XElement element, IFromXmlContext ctx)
-        {
-            Name = element.Attribute("Name")!.Value;
-            MainEntityType = ctx.GetType(element.Attribute("MainEntityType")!.Value);
-
-            if (Eval == null)
-                Eval = new WorkflowActionEval();
-
-            var xEval = element.Element("Eval")!;
-
-            Eval.Script = xEval.Element("Script")!.Value;
-        }
+        return new XElement("WorkflowAction",
+             new XAttribute("Guid", Guid),
+             new XAttribute("Name", Name),
+             new XAttribute("MainEntityType", ctx.TypeToName(MainEntityType)),
+             new XElement("Eval",
+                new XElement("Script", new XCData(Eval.Script))));
     }
 
-    [AutoInit]
-    public static class WorkflowActionOperation
+    public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        public static readonly ConstructSymbol<WorkflowActionEntity>.From<WorkflowActionEntity> Clone;
-        public static readonly ExecuteSymbol<WorkflowActionEntity> Save;
-        public static readonly DeleteSymbol<WorkflowActionEntity> Delete;
+        Name = element.Attribute("Name")!.Value;
+        MainEntityType = ctx.GetType(element.Attribute("MainEntityType")!.Value);
+
+        if (Eval == null)
+            Eval = new WorkflowActionEval();
+
+        var xEval = element.Element("Eval")!;
+
+        Eval.Script = xEval.Element("Script")!.Value;
     }
+}
 
-    [Serializable]
-    public class WorkflowActionEval : EvalEmbedded<IWorkflowActionExecutor>
+[AutoInit]
+public static class WorkflowActionOperation
+{
+    public static readonly ConstructSymbol<WorkflowActionEntity>.From<WorkflowActionEntity> Clone;
+    public static readonly ExecuteSymbol<WorkflowActionEntity> Save;
+    public static readonly DeleteSymbol<WorkflowActionEntity> Delete;
+}
+
+public class WorkflowActionEval : EvalEmbedded<IWorkflowActionExecutor>
+{
+    protected override CompilationResult Compile()
     {
-        protected override CompilationResult Compile()
-        {
-            var parent = this.GetParentEntity<WorkflowActionEntity>();
-            var script = this.Script.Trim();
-            var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
+        var parent = this.GetParentEntity<WorkflowActionEntity>();
+        var script = this.Script.Trim();
+        var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetCoreMetadataReferences()
-                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
-                    @"
-                    namespace Signum.Entities.Workflow
+        return Compile(DynamicCode.GetCoreMetadataReferences()
+            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+                @"
+                namespace Signum.Entities.Workflow
+                {
+                    class MyWorkflowActionEvaluator : IWorkflowActionExecutor
                     {
-                        class MyWorkflowActionEvaluator : IWorkflowActionExecutor
+                        public void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
                         {
-                            public void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
-                            {
-                                this.Execute((" + WorkflowEntityTypeName + @")mainEntity, ctx);
-                            }
-
-                            void Execute(" + WorkflowEntityTypeName + @" e, WorkflowTransitionContext ctx)
-                            {
-                                " + script + @"
-                            }
+                            this.Execute((" + WorkflowEntityTypeName + @")mainEntity, ctx);
                         }
-                    }");
-        }
-    }
 
-    public interface IWorkflowActionExecutor
-    {
-        void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
+                        void Execute(" + WorkflowEntityTypeName + @" e, WorkflowTransitionContext ctx)
+                        {
+                            " + script + @"
+                        }
+                    }
+                }");
     }
+}
+
+public interface IWorkflowActionExecutor
+{
+    void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
 }

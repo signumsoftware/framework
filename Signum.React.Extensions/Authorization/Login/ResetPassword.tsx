@@ -71,44 +71,40 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
 
   if (success || code == "OK") {
     return (
-      <div>
-        <h2 className="sf-entity-title">{LoginAuthMessage.PasswordChanged.niceToString()}</h2>
-        <p>{LoginAuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
+      <div className="container sf-reset-password">
+        <div className="row">
+          <div className="col-md-6 offset-md-3">
+            <h2 className="sf-entity-title">{LoginAuthMessage.PasswordChanged.niceToString()}</h2>
+            <p>{LoginAuthMessage.PasswordHasBeenChangedSuccessfully.niceToString()}</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={(e) => handleSubmit(e)}>
+    <div className="container sf-reset-password">
       <div className="row">
-        <div className="offset-sm-2 col-sm-6">
-          <h2 className="sf-entity-title">{LoginAuthMessage.ChangePassword.niceToString()}</h2>
-          <p>{LoginAuthMessage.NewPassword.niceToString()}</p>
-        </div>
-      </div>
-      <div>
+        <div className="col-md-6 offset-md-3">
+          <form onSubmit={(e) => handleSubmit(e)}>
+            <h2 className="sf-entity-title">{LoginAuthMessage.ChangePassword.niceToString()}</h2>
+            <p>{LoginAuthMessage.NewPassword.niceToString()}</p>
+            <div>
 
-        <div className={classes("form-group row", error("newPassword") && "has-error")}>
-          <label className="col-form-label col-sm-2">{LoginAuthMessage.EnterTheNewPassword.niceToString()}</label>
-          <div className="col-sm-4">
-            <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} />
-            {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
-          </div>
-        </div>
-        <div className={classes("form-group row", error("newPassword") && "has-error")}>
-          <label className="col-form-label col-sm-2">{LoginAuthMessage.ConfirmNewPassword.niceToString()}</label>
-          <div className="col-sm-4">
-            <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} />
-            {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
-          </div>
-        </div>
+              <div className={classes("form-group mb-3", error("newPassword") && "has-error")}>
+                <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} placeholder={LoginAuthMessage.EnterTheNewPassword.niceToString()} />
+                {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
+              </div>
+              <div className={classes("form-group mb-3", error("newPassword") && "has-error")}>
+                <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} />
+                {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
+              </div>
 
-      </div>
-      <div className="row">
-        <div className="offset-sm-2 col-sm-6">
-          <button type="submit" className="btn btn-primary" id="changePassword">{LoginAuthMessage.ChangePassword.niceToString()}</button>
+            </div>
+            <button type="submit" className="btn btn-primary" id="changePassword">{LoginAuthMessage.ChangePassword.niceToString()}</button>
+          </form>
         </div>
       </div>
-    </form>
+    </div>
   );
 }

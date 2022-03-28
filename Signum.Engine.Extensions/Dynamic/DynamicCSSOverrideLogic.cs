@@ -1,39 +1,31 @@
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Engine.Operations;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
-using Signum.Utilities;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
-namespace Signum.Engine.Dynamic
+namespace Signum.Engine.Dynamic;
+
+
+public static class DynamicCSSOverrideLogic
 {
+    public static ResetLazy<List<DynamicCSSOverrideEntity>> Cached = null!;
 
-    public static class DynamicCSSOverrideLogic
+    public static void Start(SchemaBuilder sb)
     {
-        public static ResetLazy<List<DynamicCSSOverrideEntity>> Cached = null!;
-
-        public static void Start(SchemaBuilder sb)
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
-            if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-            {
-                sb.Include<DynamicCSSOverrideEntity>()
-                   .WithSave(DynamicCSSOverrideOperation.Save)
-                   .WithDelete(DynamicCSSOverrideOperation.Delete)
-                   .WithQuery(() => e => new
-                   {
-                       Entity = e,
-                       e.Id,
-                       e.Name,
-                       Script = e.Script.Etc(100),
-                   });
+            sb.Include<DynamicCSSOverrideEntity>()
+               .WithSave(DynamicCSSOverrideOperation.Save)
+               .WithDelete(DynamicCSSOverrideOperation.Delete)
+               .WithQuery(() => e => new
+               {
+                   Entity = e,
+                   e.Id,
+                   e.Name,
+                   Script = e.Script.Etc(100),
+               });
 
-                Cached = sb.GlobalLazy(() =>
-                 Database.Query<DynamicCSSOverrideEntity>().Where(a => !a.Mixin<DisabledMixin>().IsDisabled).ToList(),
-                 new InvalidateWith(typeof(DynamicCSSOverrideEntity)));
-            }
+            Cached = sb.GlobalLazy(() =>
+             Database.Query<DynamicCSSOverrideEntity>().Where(a => !a.Mixin<DisabledMixin>().IsDisabled).ToList(),
+             new InvalidateWith(typeof(DynamicCSSOverrideEntity)));
         }
     }
 }
@@ -45,8 +37,7 @@ namespace Signum.Engine.Dynamic
 
 @{
    ...
-    var cssOverride = String.Join("\r\n", DynamicCSSOverrideLogic.Cached.Value.Select(a => a.Script)); <====*
-}
+var cssOverride = String.Join("\r\n", DynamicCSSOverrideLogic.Cached.Value.Select(a => a.Script)); <====*
 <!doctype html>
 <html>
 <head>

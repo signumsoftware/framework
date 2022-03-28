@@ -2,6 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { UserChartPartEntity, DashboardEntity } from '../Signum.Entities.Dashboard'
+import { IsQueryCachedLine } from './Dashboard';
 
 export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity> }) {
   const ctx = p.ctx;
@@ -13,6 +14,9 @@ export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity>
       <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
       <ValueLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
       <ValueLine ctx={ctx.subCtx(p => p.autoRefresh)} inlineCheckbox="block" />
+      {ctx.findParentCtx(DashboardEntity).value.cacheQueryConfiguration && <IsQueryCachedLine ctx={ctx.subCtx(p => p.isQueryCached)} />}
     </div>
   );
 }
+
+

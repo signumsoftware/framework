@@ -22,6 +22,6 @@ export function IsolationWidget(p: IsolationWidgetProps) {
     mixin.isolation?.toStr ?? IsolationMessage.GlobalEntity.niceToString();
 
   return (
-    <strong className="badge badge-secondary" style={{ display: "flex" }}>{isolation}</strong>
+    <strong className="badge btn-secondary" style={{ display: "flex" }}>{isolation}</strong>
   );
 }

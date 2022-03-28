@@ -40,6 +40,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
           </p>
         </div>
       }
+      <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} />
       <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={p.ctx.value.query.key}
         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
         showPinnedFilterOptions={true}

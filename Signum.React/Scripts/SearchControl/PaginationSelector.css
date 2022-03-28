@@ -1,6 +1,10 @@
 ﻿
 /*Pagination*/
 
+.sf-pagination-left{
+    white-space: nowrap;
+}
+
 body:not(.rtl) .sf-pagination-left {
     text-align: left;
 }
@@ -10,10 +14,10 @@ body.rtl .sf-pagination-left {
     text-align: right;
 }
 
-
-
 .sf-pagination-center {
-    text-align: center;
+    display: flex;
+    align-content: center;
+    justify-content: center;
 }
 
 body:not(.rtl) .sf-pagination-right {
@@ -24,8 +28,6 @@ body.rtl .sf-pagination-right {
     text-align: left;
 }
 
-
-div.sf-pagination-center > div.form-inline,
 div.sf-pagination-right > ul.pagination {
     display: inline-flex;
     padding: 0px;

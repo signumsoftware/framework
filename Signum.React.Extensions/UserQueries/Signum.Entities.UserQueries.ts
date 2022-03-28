@@ -38,6 +38,7 @@ export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
   operation: DynamicQuery.FilterOperation | null;
   valueString: string | null;
   pinned: PinnedQueryFilterEmbedded | null;
+  dashboardBehaviour: DynamicQuery.DashboardBehaviour | null;
   indentation: number;
 }
 
@@ -66,7 +67,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   columns: Entities.MList<QueryColumnEmbedded>;
   paginationMode: DynamicQuery.PaginationMode | null;
   elementsPerPage: number | null;
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export module UserQueryMessage {

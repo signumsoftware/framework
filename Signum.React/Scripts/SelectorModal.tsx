@@ -41,9 +41,7 @@ export default function SelectorModal(p: SelectorModalProps) {
             {p.title}
           </h4>
         }
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
       </div>
 
       <div className="modal-body">

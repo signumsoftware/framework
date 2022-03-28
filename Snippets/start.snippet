@@ -11,26 +11,14 @@
       </SnippetTypes>
     </Header>
     <Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Engine</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Entities</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Utilities</Namespace>
-        </Import>
-      </Imports>
       <Code Language="csharp">
-        <![CDATA[
-        public static void Start(SchemaBuilder sb)
-        {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
+        <![CDATA[public static void Start(SchemaBuilder sb)
+{
+    if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+    {
                 
-            }
-        }]]>
+    }
+}]]>
       </Code>
     </Snippet>
   </CodeSnippet>

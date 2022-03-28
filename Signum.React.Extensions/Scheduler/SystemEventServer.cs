@@ -1,20 +1,18 @@
 using Signum.Engine.Scheduler;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Signum.React.Scheduler
-{
-    public static class SystemEventServer
-    {
-        public static void LogStartStop(IApplicationBuilder app, IHostApplicationLifetime lifetime)
-        {
-            SystemEventLogLogic.Log("Application Start");
+namespace Signum.React.Scheduler;
 
-            lifetime.ApplicationStopping.Register(() =>
-            {
-                SystemEventLogLogic.Log("Application Stop");
-            });
-        }
+public static class SystemEventServer
+{
+    public static void LogStartStop(IApplicationBuilder app, IHostApplicationLifetime lifetime)
+    {
+        SystemEventLogLogic.Log("Application Start");
+
+        lifetime.ApplicationStopping.Register(() =>
+        {
+            SystemEventLogLogic.Log("Application Stop");
+        });
     }
 }

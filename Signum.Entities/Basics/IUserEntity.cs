@@ -1,33 +1,30 @@
-using Signum.Utilities;
-using System;
 
-namespace Signum.Entities.Basics
+namespace Signum.Entities.Basics;
+
+public interface IUserEntity : IEntity
 {
-    public interface IUserEntity : IEntity
+}
+
+public static class UserHolder
+{
+    public static readonly string UserSessionKey = "user";
+    public static event Action? CurrentUserChanged;
+
+    public static readonly SessionVariable<IUserEntity> CurrentUserVariable = Statics.SessionVariable<IUserEntity>(UserSessionKey);
+    public static IUserEntity Current
     {
+        get { return CurrentUserVariable.Value; }
+        set
+        {
+            CurrentUserVariable.Value = value;
+            CurrentUserChanged?.Invoke();
+        }
     }
 
-    public static class UserHolder
+    public static IDisposable UserSession(IUserEntity user)
     {
-        public static readonly string UserSessionKey = "user";
-        public static event Action? CurrentUserChanged;
-
-        public static readonly SessionVariable<IUserEntity> CurrentUserVariable = Statics.SessionVariable<IUserEntity>(UserSessionKey);
-        public static IUserEntity Current
-        {
-            get { return CurrentUserVariable.Value; }
-            set
-            {
-                CurrentUserVariable.Value = value;
-                CurrentUserChanged?.Invoke();
-            }
-        }
-
-        public static IDisposable UserSession(IUserEntity user)
-        {
-            var result = ScopeSessionFactory.OverrideSession();
-            UserHolder.Current = user;
-            return result;
-        }
+        var result = ScopeSessionFactory.OverrideSession();
+        UserHolder.Current = user;
+        return result;
     }
 }

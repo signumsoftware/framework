@@ -7,6 +7,7 @@ import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
 import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as Mailing from '../Mailing/Signum.Entities.Mailing'
+import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 
 export interface UserEntity {
     newPassword: string;
@@ -23,8 +24,8 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   domainServer: string | null;
   directoryRegistry_Username: string | null;
   directoryRegistry_Password: string | null;
-  azure_ApplicationID: string | null;
-  azure_DirectoryID: string | null;
+  azure_ApplicationID: string /*Guid*/ | null;
+  azure_DirectoryID: string /*Guid*/ | null;
   azure_ClientSecret: string | null;
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
@@ -57,6 +58,10 @@ export module ActiveDirectoryMessage {
 
 export module ActiveDirectoryPermission {
   export const InviteUsersFromAD : PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
+}
+
+export module ActiveDirectoryTask {
+  export const DeactivateUsers : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "ActiveDirectoryTask.DeactivateUsers");
 }
 
 export const ADGroupEntity = new Type<ADGroupEntity>("ADGroup");
@@ -102,6 +107,7 @@ export module AuthAdminMessage {
   export const _0RulesFor1 = new MessageKey("AuthAdminMessage", "_0RulesFor1");
   export const TheUserStateMustBeDisabled = new MessageKey("AuthAdminMessage", "TheUserStateMustBeDisabled");
   export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships = new MessageKey("AuthAdminMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");
+  export const ConflictMergingTypeConditions = new MessageKey("AuthAdminMessage", "ConflictMergingTypeConditions");
   export const Save = new MessageKey("AuthAdminMessage", "Save");
 }
 
@@ -132,7 +138,7 @@ export const AuthTokenConfigurationEmbedded = new Type<AuthTokenConfigurationEmb
 export interface AuthTokenConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "AuthTokenConfigurationEmbedded";
   refreshTokenEvery: number;
-  refreshAnyTokenPreviousTo: string | null;
+  refreshAnyTokenPreviousTo: string /*DateTime*/ | null;
 }
 
 export interface BaseRulePack<T> extends Entities.ModelEntity {
@@ -162,6 +168,8 @@ export module LoginAuthMessage {
   export const Logout = new MessageKey("LoginAuthMessage", "Logout");
   export const EnterYourUserNameAndPassword = new MessageKey("LoginAuthMessage", "EnterYourUserNameAndPassword");
   export const Username = new MessageKey("LoginAuthMessage", "Username");
+  export const EMailAddress = new MessageKey("LoginAuthMessage", "EMailAddress");
+  export const EmailAddressOrUsername = new MessageKey("LoginAuthMessage", "EmailAddressOrUsername");
   export const RememberMe = new MessageKey("LoginAuthMessage", "RememberMe");
   export const IHaveForgottenMyPassword = new MessageKey("LoginAuthMessage", "IHaveForgottenMyPassword");
   export const ShowLoginForm = new MessageKey("LoginAuthMessage", "ShowLoginForm");
@@ -311,7 +319,7 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
   Type: "ResetPasswordRequest";
   code: string;
   user: UserEntity;
-  requestDate: string;
+  requestDate: string /*DateTime*/;
   used: boolean;
 }
 
@@ -382,8 +390,8 @@ export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
   Type: "SessionLog";
   user: Entities.Lite<UserEntity>;
-  sessionStart: string;
-  sessionEnd: string | null;
+  sessionStart: string /*DateTime*/;
+  sessionEnd: string /*DateTime*/ | null;
   sessionTimeOut: boolean;
   userHostAddress: string | null;
   userAgent: string | null;
@@ -448,7 +456,7 @@ export module UserADMessage {
 export const UserADMixin = new Type<UserADMixin>("UserADMixin");
 export interface UserADMixin extends Entities.MixinEntity {
   Type: "UserADMixin";
-  oID: string | null;
+  oID: string /*Guid*/ | null;
   sID: string | null;
 }
 
@@ -457,15 +465,19 @@ export module UserADQuery {
   export const ActiveDirectoryGroups = new QueryKey("UserADQuery", "ActiveDirectoryGroups");
 }
 
+export module UserCondition {
+  export const DeactivatedUsers : Signum.TypeConditionSymbol = registerSymbol("TypeCondition", "UserCondition.DeactivatedUsers");
+}
+
 export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
   userName: string;
-  passwordHash: string | null;
+  passwordHash: string /*Byte[]*/ | null;
   role: Entities.Lite<RoleEntity>;
   email: string | null;
   cultureInfo: Signum.CultureInfoEntity | null;
-  disabledOn: string | null;
+  disabledOn: string /*DateTime*/ | null;
   state: UserState;
   loginFailedCounter: number;
 }
@@ -494,7 +506,7 @@ export interface UserTicketEntity extends Entities.Entity {
   Type: "UserTicket";
   user: Entities.Lite<UserEntity>;
   ticket: string;
-  connectionDate: string;
+  connectionDate: string /*DateTime*/;
   device: string;
 }
 

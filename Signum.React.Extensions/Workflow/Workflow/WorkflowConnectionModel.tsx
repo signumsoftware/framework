@@ -22,7 +22,7 @@ export default function WorkflowConnectionModelComponent(p : { ctx: TypeContext<
       {ctx.value.type == "Decision" &&
         < FormGroup ctx={ctx.subCtx(e => e.decisionOptionName)} labelText={ctx.niceName(e => e.decisionOptionName)}>
         {
-          <select value={ctx.value.decisionOptionName ? ctx.value.decisionOptionName : ""} className="form-control" onChange={handleDecisionNameChange} >
+          <select value={ctx.value.decisionOptionName ? ctx.value.decisionOptionName : ""} className="form-select" onChange={handleDecisionNameChange} >
             <option value="" />
             {(ctx.value.decisionOptions ?? []).map((d, i) => <option key={i} value={d.element.name} selected={d.element.name == ctx.value.decisionOptionName}>{d.element.name}</option>)}
             </select>

@@ -11,20 +11,6 @@
       </SnippetTypes>
     </Header>
     <Snippet>
-      <Imports>
-        <Import>
-          <Namespace>Signum.Engine</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Engine.Operations</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Entities</Namespace>
-        </Import>
-        <Import>
-          <Namespace>Signum.Utilities</Namespace>
-        </Import>
-      </Imports>
       <Declarations>
         <Literal>
           <ID>entityName</ID>
@@ -39,11 +25,11 @@
       </Declarations>
       <Code Language="csharp">
         <![CDATA[new Graph<$entityName$Entity>.Execute($entityName$Operation.Save)
-                {
-                    CanBeNew = true,
-                    CanBeModified = true,
-                    Execute = ($entityParam$, _) => { },
-                }.Register();]]>
+{
+    CanBeNew = true,
+    CanBeModified = true,
+    Execute = ($entityParam$, _) => { },
+}.Register();]]>
       </Code>
     </Snippet>
   </CodeSnippet>

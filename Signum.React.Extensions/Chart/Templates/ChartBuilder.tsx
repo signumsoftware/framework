@@ -80,7 +80,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
   var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
 
   return (
-    <div className="row sf-chart-builder">
+    <div className="row sf-chart-builder gx-2">
       <div className="col-lg-2">
         <div className="sf-chart-type card">
           <div className="card-header">
@@ -93,7 +93,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
               </div>)}
           </div>
           <div className="card-body">
-            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="ExtraSmall" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger font-weight-bold" : undefined }} />
+            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="ExtraSmall" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
           </div>
         </div>
       </div >
@@ -180,7 +180,6 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
   const token = scriptParameter.columnIndex == undefined ? undefined :
     chart.columns[scriptParameter.columnIndex].element.token?.token;
 
-  let resetValue: string | undefined = undefined;
 
   const vl: ValueLineProps = {
     ctx: ctx.subCtx(a => a.value),
@@ -200,10 +199,6 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     if (compatible.length <= 1)
       vl.ctx.styleOptions.readOnly = true;
 
-    if (!compatible.some(c => c.name == ctx.value.value)) {
-      resetValue = compatible.firstOrNull()?.name;
-    }
-
     vl.optionItems = compatible.map(ev => ({
       value: ev.name,
       label: ev.name
@@ -215,17 +210,6 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
 
   if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
     vl.labelHtmlAttributes = { style: { fontWeight: "bold" } };
-
-  React.useEffect(() => {
-    if (resetValue !== undefined) {
-      ctx.value.value = resetValue;
-      forceUpdate();
-      if (onRedraw) {
-        onRedraw();
-      }
-    }
-
-  }, [resetValue])
 
   return <ValueLine {...vl} />;
 }

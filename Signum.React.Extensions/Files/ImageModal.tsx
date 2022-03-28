@@ -31,9 +31,7 @@ export function ImageModal(p: ImageModalProps) {
         <h4 className="modal-title">
           {p.title || p.file.fileName}
         </h4>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}>
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
       </div>
       <div className="modal-body">
         <FileImage file={p.file} style={{ maxWidth: "100%", marginLeft: "auto", marginRight: "auto", display: "block" }} {...p.imageHtmlAttributes} />

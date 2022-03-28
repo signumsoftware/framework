@@ -1,174 +1,166 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Signum.Entities.Reflection;
-using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
-using System.Reflection;
-using Signum.Utilities;
 
-namespace Signum.Entities.DynamicQuery
+namespace Signum.Entities.DynamicQuery;
+
+public class EntityPropertyToken : QueryToken
 {
-    [Serializable]
-    public class EntityPropertyToken : QueryToken
+    public PropertyInfo PropertyInfo { get; private set; }
+
+    public PropertyRoute PropertyRoute { get; private set; }
+
+    static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity e) => e.Id);
+
+    public static QueryToken IdProperty(QueryToken parent)
     {
-        public PropertyInfo PropertyInfo { get; private set; }
+        return new EntityPropertyToken(parent, piId, PropertyRoute.Root(parent.Type.CleanType()).Add(piId)) { Priority = 10 };
+    }
 
-        public PropertyRoute PropertyRoute { get; private set; }
+    QueryToken parent;
+    public override QueryToken? Parent => parent;
+   
+   internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr)
+    {
+        this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        this.PropertyInfo = pi ?? throw new ArgumentNullException(nameof(pi));
+        this.PropertyRoute = pr;
+    }
 
-        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity e) => e.Id);
+    public override Type Type
+    {
+        get { return PropertyInfo.PropertyType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); }
+    }
 
-        public static QueryToken IdProperty(QueryToken parent)
+    public override string ToString()
+    {
+        return PropertyInfo.NiceName();
+    }
+
+    public override string Key
+    {
+        get { return PropertyInfo.Name; }
+    }
+
+    protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+    {
+        var baseExpression = parent.BuildExpression(context);
+
+        if (PropertyInfo.Name == nameof(Entity.Id) ||
+            PropertyInfo.Name == nameof(Entity.ToStringProperty))
         {
-            return new EntityPropertyToken(parent, piId, PropertyRoute.Root(parent.Type.CleanType()).Add(piId)) { Priority = 10 };
+            var entityExpression = baseExpression.ExtractEntity(true);
+
+            return Expression.Property(entityExpression, PropertyInfo.Name).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.PropertyRoute }); // Late binding over Lite or Identifiable
         }
-
-        QueryToken parent;
-        public override QueryToken? Parent => parent;
-       
-       internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr)
+        else
         {
-            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
-            this.PropertyInfo = pi ?? throw new ArgumentNullException(nameof(pi));
-            this.PropertyRoute = pr;
+            var entityExpression = baseExpression.ExtractEntity(false);
+
+            if (PropertyRoute.Parent != null && PropertyRoute.Parent.PropertyRouteType == PropertyRouteType.Mixin)
+                entityExpression = Expression.Call(entityExpression, MixinDeclarations.miMixin.MakeGenericMethod(PropertyRoute.Parent.Type));
+
+            Expression result = Expression.Property(entityExpression, PropertyInfo);
+
+            return result.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.PropertyRoute });
         }
+    }
 
-        public override Type Type
+    protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
+    {
+        var type = this.Type;
+        var uType = type.UnNullify();
+
+        if (uType == typeof(DateTime) || uType == typeof(DateTimeOffset))
         {
-            get { return PropertyInfo.PropertyType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); }
-        }
+            PropertyRoute? route = this.GetPropertyRoute();
 
-        public override string ToString()
-        {
-            return PropertyInfo.NiceName();
-        }
-
-        public override string Key
-        {
-            get { return PropertyInfo.Name; }
-        }
-
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
-        {
-            var baseExpression = parent.BuildExpression(context);
-
-            if (PropertyInfo.Name == nameof(Entity.Id) ||
-                PropertyInfo.Name == nameof(Entity.ToStringProperty))
+            if (route != null)
             {
-                var entityExpression = baseExpression.ExtractEntity(true);
-
-                return Expression.Property(entityExpression, PropertyInfo.Name).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.PropertyRoute }); // Late binding over Lite or Identifiable
-            }
-            else
-            {
-                var entityExpression = baseExpression.ExtractEntity(false);
-
-                if (PropertyRoute.Parent != null && PropertyRoute.Parent.PropertyRouteType == PropertyRouteType.Mixin)
-                    entityExpression = Expression.Call(entityExpression, MixinDeclarations.miMixin.MakeGenericMethod(PropertyRoute.Parent.Type));
-
-                Expression result = Expression.Property(entityExpression, PropertyInfo);
-
-                return result.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.PropertyRoute });
-            }
-        }
-
-        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
-        {
-            var type = this.Type;
-            var uType = type.UnNullify();
-
-            if (uType == typeof(DateTime) || uType == typeof(DateTimeOffset))
-            {
-                PropertyRoute? route = this.GetPropertyRoute();
-
-                if (route != null)
+                var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
+                if (att != null)
                 {
-                    var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
-                    if (att != null)
-                    {
-                        return DateTimeProperties(this, att.Precision).AndHasValue(this);
-                    }
+                    return DateTimeProperties(this, att.Precision).AndHasValue(this);
                 }
             }
+        }
 
-            if (uType == typeof(TimeSpan))
+        if (uType == typeof(TimeSpan))
+        {
+            PropertyRoute? route = this.GetPropertyRoute();
+
+            if (route != null)
             {
-                PropertyRoute? route = this.GetPropertyRoute();
-
-                if (route != null)
+                var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<TimePrecisionValidatorAttribute>().SingleOrDefaultEx();
+                if (att != null)
                 {
-                    var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators.OfType<TimeSpanPrecisionValidatorAttribute>().SingleOrDefaultEx();
-                    if (att != null)
-                    {
-                        return TimeSpanProperties(this, att.Precision).AndHasValue(this);
-                    }
+                    return TimeSpanProperties(this, att.Precision).AndHasValue(this);
                 }
             }
+        }
 
-            if (uType == typeof(double) ||
-                uType == typeof(float) ||
-                uType == typeof(decimal))
+        if (uType == typeof(double) ||
+            uType == typeof(float) ||
+            uType == typeof(decimal))
+        {
+            PropertyRoute? route = this.GetPropertyRoute();
+
+            if (route != null)
             {
-                PropertyRoute? route = this.GetPropertyRoute();
-
-                if (route != null)
+                var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators
+                    .OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
+                if (att != null)
                 {
-                    var att = Validator.TryGetPropertyValidator(route.Parent!.Type, route.PropertyInfo!.Name)?.Validators
-                        .OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
-                    if (att != null)
-                    {
-                        return StepTokens(this, att.DecimalPlaces).AndHasValue(this);
-                    }
-
-                    var format = Reflector.FormatString(route);
-                    if (format != null)
-                        return StepTokens(this, Reflector.NumDecimals(format)).AndHasValue(this);
+                    return StepTokens(this, att.DecimalPlaces).AndHasValue(this);
                 }
+
+                var format = Reflector.FormatString(route);
+                if (format != null)
+                    return StepTokens(this, Reflector.NumDecimals(format)).AndHasValue(this);
             }
-
-            return SubTokensBase(this.Type, options, GetImplementations());
         }
 
-        public override Implementations? GetImplementations()
-        {
-            return GetPropertyRoute()!.TryGetImplementations();
-        }
+        return SubTokensBase(this.Type, options, GetImplementations());
+    }
 
-        public override string? Format
-        {
-            get { return Reflector.FormatString(this.GetPropertyRoute()!); }
-        }
+    public override Implementations? GetImplementations()
+    {
+        return GetPropertyRoute()!.TryGetImplementations();
+    }
 
-        public override string? Unit
-        {
-            get { return PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName; }
-        }
+    public override string? Format
+    {
+        get { return Reflector.FormatString(this.GetPropertyRoute()!); }
+    }
 
-        public override string? IsAllowed()
-        {
-            string? parent = this.parent.IsAllowed();
+    public override string? Unit
+    {
+        get { return PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName; }
+    }
 
-            string? route = GetPropertyRoute()?.IsAllowed();
+    public override string? IsAllowed()
+    {
+        string? parent = this.parent.IsAllowed();
 
-            if (parent.HasText() && route.HasText())
-                return QueryTokenMessage.And.NiceToString().Combine(parent!, route!);
+        string? route = GetPropertyRoute()?.IsAllowed();
 
-            return parent ?? route;
-        }
+        if (parent.HasText() && route.HasText())
+            return QueryTokenMessage.And.NiceToString().Combine(parent!, route!);
 
-        public override PropertyRoute? GetPropertyRoute()
-        {
-            return PropertyRoute;
-        }
+        return parent ?? route;
+    }
 
-        public override string NiceName()
-        {
-            return PropertyInfo.NiceName();
-        }
+    public override PropertyRoute? GetPropertyRoute()
+    {
+        return PropertyRoute;
+    }
 
-        public override QueryToken Clone()
-        {
-            return new EntityPropertyToken(parent.Clone(), PropertyInfo, PropertyRoute);
-        }
+    public override string NiceName()
+    {
+        return PropertyInfo.NiceName();
+    }
+
+    public override QueryToken Clone()
+    {
+        return new EntityPropertyToken(parent.Clone(), PropertyInfo, PropertyRoute);
     }
 }

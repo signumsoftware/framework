@@ -208,7 +208,9 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   const target = p.ctx.value.target;
   return (
     <div>
-      <label><input type="checkbox" checked={simplify} onChange={e => setSimplify(e.currentTarget.checked)} /> Simplify Changes</label>
+      <label>
+        <input type="checkbox" className="form-check-input" checked={simplify} onChange={e => setSimplify(e.currentTarget.checked)} /> Simplify Changes
+      </label>
       <Tabs id="diffTabs" defaultActiveKey="diff" key={p.ctx.value.id}>
         {result?.prev ? renderPrev(result.prev) : renderPrevDisabled() }
         {result?.diffPrev ? renderPrevDiff(result.diffPrev) : renderPrevDiffDisabled()}

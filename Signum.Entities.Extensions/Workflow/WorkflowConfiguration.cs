@@ -1,16 +1,13 @@
-﻿using System;
+﻿
+namespace Signum.Entities.Workflow;
 
-namespace Signum.Entities.Workflow
+public class WorkflowConfigurationEmbedded : EmbeddedEntity
 {
-    [Serializable]
-    public class WorkflowConfigurationEmbedded : EmbeddedEntity
-    {
-        [Unit("sec")]
-        public int ScriptRunnerPeriod { get; set; } = 5 * 60; //5 minutes
+    [Unit("sec")]
+    public int ScriptRunnerPeriod { get; set; } = 5 * 60; //5 minutes
 
-        [Unit("hs")]
-        public double? AvoidExecutingScriptsOlderThan { get; set; }
+    [Unit("hrs")]
+    public double? AvoidExecutingScriptsOlderThan { get; set; }
 
-        public int ChunkSizeRunningScripts { get; set; } = 100;
-    }
+    public int ChunkSizeRunningScripts { get; set; } = 100;
 }

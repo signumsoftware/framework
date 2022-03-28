@@ -1,13 +1,11 @@
-using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 
-namespace Signum.React.Help
+namespace Signum.React.Help;
+
+public static class HelpServer
 {
-    public static class HelpServer
+    public static void Start(IApplicationBuilder app)
     {
-        public static void Start(IApplicationBuilder app)
-        {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-        }
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
     }
 }

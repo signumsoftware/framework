@@ -20,6 +20,7 @@ export interface EntityLineProps extends EntityBaseProps {
   autocomplete?: AutocompleteConfig<unknown> | null;
   renderItem?: React.ReactNode;
   showType?: boolean;
+  inputAttributes?: React.InputHTMLAttributes<HTMLInputElement>,
   itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
@@ -84,7 +85,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
   overrideProps(p: EntityLineProps, overridenProps: EntityLineProps) {
     super.overrideProps(p, overridenProps);
     if (p.autocomplete === undefined && p.type) {
-      p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.ctx, p.create!, p.showType);
+      p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary,  p.ctx, p.create!, p.showType);
     }
   }
 
@@ -130,14 +131,14 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
   const hasValue = !!p.ctx.value;
 
   const buttons = (
-    <span className="input-group-append">
+    <>
       {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
       {!hasValue && !p.avoidViewButton && c.renderCreateButton(true)}
       {!hasValue && c.renderFindButton(true)}
       {hasValue && !p.avoidViewButton && c.renderViewButton(true, p.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, p.ctx.value!)}
       {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
-    </span>
+    </>
   );
 
   return (
@@ -176,7 +177,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     return (
       <Typeahead ref={c.typeahead}
-        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass) }}
+        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined, ...p.inputAttributes }}
         getItems={query => ac!.getItems(query)}
         getItemsDelay={ac.getItemsDelay}
         minLength={ac.minLength}

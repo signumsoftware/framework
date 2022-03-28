@@ -158,7 +158,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
         lites: [toLiteFat(entity as Entity)],
         widgetContext: p.wc as WidgetContext<Entity>
       });
-  }, [entity]);
+  }, [entity], { avoidReset: true });
 
   if (links == undefined)
     return <span>…</span>;
@@ -169,7 +169,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
   const DDToggle = Dropdown.Toggle as any;
 
   return (
-    <div style={{ display: "flex", flexDirection: "row-reverse" }}>
+    <>
       {!links ? [] : links.filter(a => a.group !== undefined).orderBy(a => a.order)
         .groupBy(a => a.group?.name ?? a.name)
         .map((gr, i) => {
@@ -178,7 +178,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
           if (first.group == null)
             return (
               <a key={i}
-                className={classes("badge badge-pill sf-quicklinks", "badge-" + first.color)}
+                className={classes("badge badge-pill sf-quicklinks", "btn-" + first.color)}
                 title={StyleContext.default.titleLabels ? gr.elements[0].text() : undefined}
                 role="button"
                 href="#"
@@ -203,24 +203,26 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
                   {dd.icon && "\u00A0"}
                   {dd.text(gr.elements)}
                 </>} />
-                <Dropdown.Menu alignRight>
+                <Dropdown.Menu align="end">
                   {gr.elements.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
                 </Dropdown.Menu>
               </Dropdown>
             );
           }
         })}
-    </div>
+    </>
   );
 }
 
 
-const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: string }, ref: React.Ref<HTMLAnchorElement>) {
+const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor }, ref: React.Ref<HTMLAnchorElement>) {
+
+  var textColor = p.badgeColor == "warning" || p.badgeColor == "info" || p.badgeColor == "light" ? "text-dark" : undefined;
 
   return (
     <a
       ref={ref}
-      className={classes("badge badge-pill sf-quicklinks", "badge-" + p.badgeColor)}
+      className={classes("badge badge-pill sf-quicklinks", "btn-" + p.badgeColor, textColor)}
       title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
       role="button"
       href="#"

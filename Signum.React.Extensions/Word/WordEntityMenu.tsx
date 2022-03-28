@@ -37,7 +37,7 @@ export default function WordEntityMenu(p : WordEntityMenuProps){
   const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{WordTemplateMessage.WordReport.niceToString()}</span>;
 
   return (
-    <DropdownButton id="wordMenu" className="sf-word-dropdown" title={label}> 
+    <DropdownButton id="wordMenu" className="sf-word-dropdown" variant="outline-info" title={label}> 
         {
           p.entityPack.wordTemplates!.map((wt, i) =>
             <Dropdown.Item key={i}

@@ -1,99 +1,109 @@
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Utilities;
-using System;
-using System.Linq.Expressions;
+using System.ComponentModel;
 
-namespace Signum.Entities.Workflow
+namespace Signum.Entities.Workflow;
+
+[EntityKind(EntityKind.System, EntityData.Transactional)]
+public class CaseEntity : Entity
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class CaseEntity : Entity
-    {
-        
-        public WorkflowEntity Workflow { get; set; }
 
-        public Lite<CaseEntity>? ParentCase { get; set; }
+    public WorkflowEntity Workflow { get; set; }
 
-        [StringLengthValidator(Min = 1, Max = 100)]
-        public string Description { get; set; }
+    public Lite<CaseEntity>? ParentCase { get; set; }
 
-        [ImplementedByAll]
-        
-        public ICaseMainEntity MainEntity { get; set; }
+    [StringLengthValidator(Min = 1, Max = 100)]
+    public string Description { get; set; }
 
-        public DateTime StartDate { get; set; } = TimeZoneManager.Now;
-        public DateTime? FinishDate { get; set; }
+    [ImplementedByAll]
 
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => Description);
-    }
+    public ICaseMainEntity MainEntity { get; set; }
 
-    [AutoInit]
-    public static class CaseOperation
-    {
-        public static readonly ExecuteSymbol<CaseEntity> SetTags;
-        public static readonly ExecuteSymbol<CaseEntity> Cancel;
-        public static readonly ExecuteSymbol<CaseEntity> Reactivate;
-    }
+    public DateTime StartDate { get; set; } = Clock.Now;
+    public DateTime? FinishDate { get; set; }
 
-    public interface ICaseMainEntity : IEntity
-    {
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Description);
+}
 
-    }
+[AutoInit]
+public static class CaseOperation
+{
+    public static readonly ExecuteSymbol<CaseEntity> SetTags;
+    public static readonly ExecuteSymbol<CaseEntity> Cancel;
+    public static readonly ExecuteSymbol<CaseEntity> Reactivate;
+    public static readonly DeleteSymbol<CaseEntity> Delete;
+}
 
-    [Serializable]
-    public class CaseTagsModel : ModelEntity
-    {
-        [PreserveOrder]
-        [NoRepeatValidator]
-        public MList<CaseTagTypeEntity> CaseTags { get; set; } = new MList<CaseTagTypeEntity>();
+public interface ICaseMainEntity : IEntity
+{
 
-        [PreserveOrder]
-        [NoRepeatValidator]
-        public MList<CaseTagTypeEntity> OldCaseTags { get; set; } = new MList<CaseTagTypeEntity>();
-    }
+}
+
+public class CaseTagsModel : ModelEntity
+{
+    [PreserveOrder]
+    [NoRepeatValidator]
+    public MList<CaseTagTypeEntity> CaseTags { get; set; } = new MList<CaseTagTypeEntity>();
+
+    [PreserveOrder]
+    [NoRepeatValidator]
+    public MList<CaseTagTypeEntity> OldCaseTags { get; set; } = new MList<CaseTagTypeEntity>();
+}
 
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class CaseTagEntity : Entity
-    {
-        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+[EntityKind(EntityKind.System, EntityData.Transactional)]
+public class CaseTagEntity : Entity
+{
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
-        
-        public Lite<CaseEntity> Case { get; set; }
 
-        
-        public CaseTagTypeEntity TagType { get; set; }
+    public Lite<CaseEntity> Case { get; set; }
 
-        [ImplementedBy(typeof(UserEntity))]
-        public Lite<IUserEntity> CreatedBy { get; set; }
-    }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class CaseTagTypeEntity : Entity
-    {
-        [UniqueIndex]
-        [StringLengthValidator(Min = 2, Max = 100)]
-        public string Name { get; set; }
+    public CaseTagTypeEntity TagType { get; set; }
 
-        [StringLengthValidator(Min = 3, Max = 12)]
-        public string Color { get; set; }
+    [ImplementedBy(typeof(UserEntity))]
+    public Lite<IUserEntity> CreatedBy { get; set; }
+}
 
-        [AutoExpressionField]
-        public override string ToString() => As.Expression(() => Name);
-    }
+[EntityKind(EntityKind.Main, EntityData.Master)]
+public class CaseTagTypeEntity : Entity
+{
+    [UniqueIndex]
+    [StringLengthValidator(Min = 2, Max = 100)]
+    public string Name { get; set; }
 
-    [AutoInit]
-    public static class CaseTagTypeOperation
-    {
-        public static readonly ExecuteSymbol<CaseTagTypeEntity> Save;
-    }
+    [StringLengthValidator(Min = 3, Max = 12)]
+    public string Color { get; set; }
 
-    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
-    public enum CaseFlowColor
-    {
-        CaseMaxDuration,
-        AverageDuration,
-        EstimatedDuration
-    }
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name);
+}
+
+[AutoInit]
+public static class CaseTagTypeOperation
+{
+    public static readonly ExecuteSymbol<CaseTagTypeEntity> Save;
+}
+
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
+public enum CaseFlowColor
+{
+    CaseMaxDuration,
+    AverageDuration,
+    EstimatedDuration
+}
+
+
+public enum CaseMessage
+{
+    [Description("Delete Main Entity")]
+    DeleteMainEntity,
+
+    [Description("Do you want to also delete the main entity: {0}")]
+    DoYouWAntToAlsoDeleteTheMainEntity0,
+
+    [Description("Do you want to also delete the main entities?")]
+    DoYouWAntToAlsoDeleteTheMainEntities,
 }

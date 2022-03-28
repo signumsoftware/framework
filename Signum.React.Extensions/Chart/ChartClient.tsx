@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
-import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, toDurationFormat, durationToString } from '@framework/Reflection'
+import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
 } from '@framework/FindOptions'
@@ -27,11 +27,14 @@ import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 import { MemoRepository } from './D3Scripts/Components/ReactChart';
 import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
+import { softCast } from '../../Signum.React/Scripts/Globals';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
 
   options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
 
+  AppContext.clearSettingsActions.push(ButtonBarChart.clearOnButtonBarElements);
+ 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
     if (!ctx.searchControl.props.showBarExtension ||
       !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ||
@@ -119,6 +122,10 @@ export namespace ButtonBarChart {
 
   export function getButtonBarElements(ctx: ButtonBarChartContext): React.ReactElement<any>[] {
     return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a!);
+  }
+
+  export function clearOnButtonBarElements() {
+    ButtonBarChart.onButtonBarElements.clear();
   }
 }
 
@@ -236,7 +243,7 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
     case "Groupable": return [
       "RealGroupable",
       "Integer",
-      "Date",
+      "DateOnly",
       "String",
       "Lite",
       "Enum"].contains(type);
@@ -250,7 +257,7 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
       "Integer",
       "Real",
       "RealGroupable",
-      "Date",
+      "DateOnly",
       "DateTime",
       "Time"].contains(type);
   }
@@ -269,7 +276,7 @@ export function getChartColumnType(token: QueryToken): ChartColumnType | undefin
     case "Guid": return "String";
     case "Integer": return "Integer";
     case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
-    case "DateTime": return token.isGroupable ? "Date" : "DateTime";
+    case "DateTime": return token.isGroupable ? "DateOnly" : "DateTime";
     case "Time": return "Time";
   }
 
@@ -295,32 +302,30 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
 
   var allChartScriptParameters = chartScript.parameterGroups.flatMap(a => a.parameters);
 
-  if (chart.parameters.map(a => a.element.name!).orderBy(n => n).join(" ") !=
-    allChartScriptParameters.map(a => a.name!).orderBy(n => n).join(" ")) {
 
-    const byName = chart.parameters.map(a => a.element).toObject(a => a.name!);
-    chart.parameters.clear();
+  const byName = chart.parameters.map(a => a.element).toObject(a => a.name!);
+  chart.parameters.clear();
 
-    allChartScriptParameters.forEach(sp => {
-      let cp = byName[sp.name!];
+  allChartScriptParameters.forEach(sp => {
+    let cp = byName[sp.name!];
 
-      if (cp == undefined) {
-        cp = ChartParameterEmbedded.New();
-        cp.name = sp.name;
-        const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
+    if (cp == undefined) {
+      cp = ChartParameterEmbedded.New();
+      cp.name = sp.name;
+      const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
+      cp.value = defaultParameterValue(sp, column?.token && column.token.token);
+    }
+    else {
+      const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
+      if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
         cp.value = defaultParameterValue(sp, column?.token && column.token.token);
       }
-      else {
-        const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
-        if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
-          cp.value = defaultParameterValue(sp, column?.token && column.token.token);
-        }
-        cp.modified = true;
-      }
+      cp.modified = true;
+    }
 
-      chart.parameters!.push({ rowId: null, element: cp });
-    });
-  }
+    chart.parameters!.push({ rowId: null, element: cp });
+  });
+
 }
 
 function isValidParameterValue(value: string | null | undefined, scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
@@ -386,6 +391,7 @@ export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isSh
     cr.columns.forEach(a => {
       a.element.orderByType = null;
       a.element.orderByIndex = null;
+      a.element.modified = true;
     });
 
     col.orderByType = newOrder;
@@ -592,7 +598,7 @@ export module API {
       case "Guid": return "String";
       case "Integer": return "Integer";
       case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
-      case "DateTime": return token.isGroupable ? "Date" : "DateTime";
+      case "DateTime": return token.isGroupable ? "DateOnly" : "DateTime";
       case "Time": return "Time";
       default: return null;
     }
@@ -656,22 +662,23 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = toLuxonFormat(chartColumn.format || token.format, token.type.name as "Date" | "DateTime");
-        return date == null ? String(null) : DateTime.fromISO(date).toFormatFixed(format);
+        var luxonFormat = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
+        return date == null ? String(null) : toFormatWithFixes(DateTime.fromISO(date), luxonFormat);
       };
 
     if (token.filterType == "Time")
       return v => {
         var date = v as string | null;
-        var format = toDurationFormat(chartColumn.format || token.format);
-        return date == null ? String(null) : durationToString(date, format);
+        var format = chartColumn.format || token.format;
+        return date == null ? String(null) : timeToString(date, format);
       };
 
-    if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
+    if ((token.filterType == "Decimal" || token.filterType == "Integer"))
       return v => {
         var number = v as number | null;
-        var format = toNumberFormat(chartColumn.format ?? token.format ?? "0")
-        return number == null ? String(null) : format.format(number);
+        var format = chartColumn.format || (token.key == "Sum" ? "0.#K" : undefined) || token.format || "0";
+        var numFormat = toNumberFormat(format);
+        return number == null ? String(null) : numFormat.format(number);
       };
 
     return v => String(v);
@@ -699,15 +706,15 @@ export module API {
 
       const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
       const key = getKey(token);
+
       const niceName = getNiceName(token, mle.element /*capture format by ref*/);
       const color = getColor(token, palettes);
 
-      return {
+      return softCast<ChartColumn<unknown>>({
         name: "c" + i,
         displayName: scriptCol.displayName,
         title: (mle.element.displayName || token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
         token: token,
-        format: mle.element.format || token?.format,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,
         orderByType: mle.element.orderByType,
@@ -718,7 +725,7 @@ export module API {
         getValueKey: row => key(value(row)),
         getValueNiceName: row => niceName(value(row)),
         getValueColor: row => color(value(row)),
-      } as ChartColumn<unknown>
+      })
     });
 
     var index = 0;
@@ -785,24 +792,28 @@ export module API {
 
 
   export function executeChart(request: ChartRequestModel, chartScript: ChartScript, abortSignal?: AbortSignal): Promise<ExecuteChartResult> {
-    return Navigator.API.validateEntity(cleanedChartRequest(request)).then(cr => {
-      const queryRequest = getRequest(request);
 
-      var allTypes = request.columns
-        .map(c => c.element.token)
-        .notNull()
-        .map(a => a.token && a.token.type.name)
-        .notNull()
-        .flatMap(a => tryGetTypeInfos(a))
-        .notNull()
-        .distinctBy(a => a.name);
+    var palettesPromise = getPalletes(request);
 
-      var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
-        .then(list => list.toObject(a => a.type, a => a.palette));
+    const queryRequest = getRequest(request);
+    return Finder.API.executeQuery(queryRequest, abortSignal)
+      .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
+  }
 
-      return Finder.API.executeQuery(queryRequest, abortSignal)
-        .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
-    });
+  export function getPalletes(request: ChartRequestModel): Promise<{ [type: string]: ChartPaletteClient.ColorPalette | null }> {
+    var allTypes = request.columns
+      .map(c => c.element.token)
+      .notNull()
+      .map(a => a.token && a.token.type.name)
+      .notNull()
+      .flatMap(a => tryGetTypeInfos(a))
+      .notNull()
+      .distinctBy(a => a.name);
+
+    var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
+      .then(list => list.toObject(a => a.type, a => a.palette));
+
+    return palettesPromise;
   }
 
   export interface ExecuteChartResult {
@@ -853,7 +864,7 @@ export interface ChartColumn<V> {
   title: string;
   displayName: string;
   token?: QueryToken; //Null for QueryToken
-  type: ChartColumnType;
+  type: ChartColumnType | null;
   orderByIndex?: number | null;
   orderByType?: OrderType | null;
 
@@ -864,7 +875,7 @@ export interface ChartColumn<V> {
   getValue: (row: ChartRow) => V;
   getValueKey: (row: ChartRow) => string;
   getValueNiceName: (row: ChartRow) => string;
-  getValueColor: (row: ChartRow) => string;
+  getValueColor: (row: ChartRow) => string | null;
 }
 
 declare module '@framework/SearchControl/SearchControlLoaded' {

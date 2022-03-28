@@ -1,17 +1,20 @@
 ﻿.sf-search-footer {
-    min-height: 50px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
-body:not(.rtl) .sf-search-footer > div {
-    float: left;
-    width: 33%;
-}
+    .sf-search-footer > div {
+        flex: 1;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 
-body.rtl .sf-search-footer > div {
-    float: right;
-    width: 33%;
+.sf-query-button-bar .btn-toolbar {
+    align-content: flex-start;
 }
-
 
 .btn-toolbar-small .btn {
     padding-top: 1px;
@@ -73,8 +76,7 @@ table.sf-search-results > tbody > tr > td {
 }
 
 .sf-search-results > thead > tr > th {
-    border-left: 1px solid #eee;
-    border-right: 1px solid #eee;
+    box-shadow: inset 1px 1px 0 #eee, inset -1px -1px 0 #eee;
     cursor: pointer;
     background-color: #f8f8f8;
     position: sticky;
@@ -98,10 +100,10 @@ table.sf-search-results > tbody > tr > td {
     padding-right: 10px;
 }
 
-
-#divSearchPage .sf-search-footer {
-    margin-top: 10px;
+.sf-search-results > tbody{
+    border-top: none !important;
 }
+
 
 
 /* Multiply */
@@ -127,6 +129,7 @@ table.sf-search-results > tbody > tr > td {
     margin: 0px 0px 3px 0px;
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 
 table.sf-search-results th.sf-current-column {
@@ -139,6 +142,10 @@ table.sf-search-results th.sf-current-column {
         background-color: #f2dede;
         border-bottom: 2px solid #a94442;
     }
+
+.text-cell {
+    text-align: left
+}
 
 .date-cell {
     text-align: right
@@ -154,13 +161,14 @@ table.sf-search-results th.sf-current-column {
 
 .sf-scroll-table-container {
     overflow-x: auto;
+    max-width: calc(100vw - 26px); /*Not sure why is necessary*/
 }
 
     /*Avoid EntityLines to get on top of sticky headers*/
     .sf-scroll-table-container .form-control,
     .sf-scroll-table-container .input-group,
-    .sf-scroll-table-container .input-group-prepend .btn,
-    .sf-scroll-table-container .input-group-append .btn {
+    .sf-scroll-table-container .btn,
+    .sf-scroll-table-container .btn {
         position: static !important;
         z-index: initial !important;
     }
@@ -320,7 +328,6 @@ span.sf-search-entity-error {
 .count-search {
     margin-right: 4px;
     margin-left: 4px;
-    width: initial !important;
 }
 
 ul.sf-context-menu li a:not([disabled]) {

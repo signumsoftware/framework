@@ -283,13 +283,11 @@ export function QueryKeyLine(p : { queryKey: string | undefined, label: string; 
         <span className="form-control btn-light sf-entity-line-entity">
           {p.queryKey}
         </span>
-        <span className="input-group-append">
-          <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
-            onClick={() => p.onChange(undefined)}
-            title={EntityControlMessage.Remove.niceToString()}>
-            <FontAwesomeIcon icon="times" />
-          </a>
-        </span>
+        <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
+          onClick={() => p.onChange(undefined)}
+          title={EntityControlMessage.Remove.niceToString()}>
+          <FontAwesomeIcon icon="times" />
+        </a>
       </div>
     );
   }
@@ -518,7 +516,7 @@ class FilterOptionsComponent extends BaseOptionsComponent<FilterOptionExpr> {
     if (tr.isCollection || tr.isLite || tr.isEmbedded)
       return null;
 
-    if (tr.name == "string" || tr.name == "Guid" || tr.name == "datetime")
+    if (tr.name == "string" || tr.name == "Guid" || tr.name == "DateTime")
       return "string";
 
     if (tr.name == "number")

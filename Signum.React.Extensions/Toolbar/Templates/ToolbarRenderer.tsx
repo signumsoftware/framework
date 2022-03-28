@@ -1,23 +1,17 @@
 import * as React from 'react'
 import * as History from 'history'
-import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
-import { ToolbarLocation } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
-import { ToolbarEntity } from "../Signum.Entities.Toolbar";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
-import * as PropTypes from "prop-types";
-import { NavDropdown, Dropdown } from 'react-bootstrap';
-import { Nav, Navbar } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useAPI, useUpdatedRef, useHistoryListen, useForceUpdate } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
-
+import { SidebarMode  } from '../SidebarContainer'
+import { isActive } from '@framework/FindOptions';
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
   if (r.url)
@@ -26,7 +20,7 @@ function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: Hi
   if (!r.content)
     return false;
 
-  var config = ToolbarClient.configs[r.content.EntityType];
+  var config = ToolbarClient.getConfig(r);
   if (!config)
     return false;
 
@@ -43,13 +37,14 @@ function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Lo
   return null;
 }
 
-export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): React.ReactElement | null {
-  const forceUpdate = useForceUpdate();
-  const response = useAPI(() => ToolbarClient.API.getCurrentToolbar(p.location!), [p.location]);
+export default function ToolbarRenderer(p: {
+  onAutoClose?: () => void | undefined;
+  appTitle: React.ReactNode
+}): React.ReactElement | null {
+  const response = useAPI(() => ToolbarClient.API.getCurrentToolbar("Side"), []);
   const responseRef = useUpdatedRef(response);
-  const [expanded, setExpanded] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
-  const [avoidCollapse, setAvoidCollapse] = React.useState<ToolbarClient.ToolbarResponse<any>[]>([]);
 
+  const [refresh, setRefresh] = React.useState(false);
   const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
   const activeRef = useUpdatedRef(active);
 
@@ -71,253 +66,105 @@ export default function ToolbarRenderer(p: { location?: ToolbarLocation; }): Rea
 
   React.useEffect(() => changeActive(AppContext.history.location), [response]);
 
-  if (!response)
-    return null;
-
-  if (p.location == "Top") {
-
-    var navItems = response.elements && response.elements.map((res, i) => withKey(renderNavItem(res, i), i));
-
-    return (
-      <div className={classes("nav navbar-nav")}>
-        {navItems}
+  return (
+    <div className={"sidebar-inner"}>
+      {p.appTitle}
+      <div className={"close-sidebar"}
+        onClick={() => p.onAutoClose && p.onAutoClose()}>
+        <FontAwesomeIcon icon={"angle-double-left"} />
       </div>
-    );
-  }
-  else
-    return (
-      <div className="nav">
-        {response.elements && response.elements.flatMap(sr => renderDropdownItem(sr, 0, false, response)).map((sr, i) => withKey(sr, i))}
+
+      <div onClick={(ev) => {
+        if ((ev.target as any).className != "nav-item-dropdown-elem") {
+          p.onAutoClose && p.onAutoClose();
+        }
+      }}>
+        {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => renderNavItem(res, () => setTimeout(() => setRefresh(!refresh), 500), i))}
       </div>
-    );
+    </div>
+  );
 
-
-  function handleOnToggle(res: ToolbarClient.ToolbarResponse<any>) {
-
-    if (avoidCollapse.contains(res))
-      avoidCollapse.remove(res);
-    else
-    if (!expanded.contains(res))
-      expanded.push(res);
-    else
-      expanded.clear();
-
-    forceUpdate();
-  }
-
-  function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, index: number) {
+  function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, onRefresh: () => void, key: string | number) {
 
     switch (res.type) {
-
       case "Divider":
-        return (
-          <Nav.Item>{"|"}</Nav.Item>
-        );
-
+        return <hr style={{ margin: "10px 0 5px 0px" }} key={key}></hr>;
       case "Header":
       case "Item":
         if (res.elements && res.elements.length) {
           var title = res.label || res.content!.toStr;
-          var icon = getIcon(res);
+          var icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
 
           return (
-            <Dropdown
-              onToggle={() => handleOnToggle(res)}
-              show={expanded.contains(res)}>
-              <Dropdown.Toggle id="dropdown-toolbar" as={CustomToggle} onClick={() => handleOnToggle(res)}>
-                {!icon ? title : (<span>{icon}{title}</span>)}
-              </Dropdown.Toggle>
-              <Dropdown.Menu alignRight={AppContext.isRtl()}>
-                {res.elements && res.elements.flatMap(sr => renderDropdownItem(sr, 0, true, res)).map((sr, i) => withKey(sr, i))}
-              </Dropdown.Menu>
-            </Dropdown>
+            <ToolbarDropdown parentTitle={title} icon={icon} key={key}>
+              {res.elements && res.elements.map((sr, i) => renderNavItem(sr, onRefresh, i))}
+            </ToolbarDropdown>
           );
         }
 
         if (res.url) {
           return (
-            <Nav.Item>
-              <Nav.Link
-                onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
-                onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
-                active={res == active}>
-                {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
-              </Nav.Link>
-            </Nav.Item>
+            <ToolbarNavItem key={key} title={res.label} onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
+            active={res == active} icon={ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)} />
           );
         }
 
         if (res.content) {
-          var config = ToolbarClient.configs[res.content!.EntityType];
+          var config = ToolbarClient.getConfig(res);
           if (!config)
             return <Nav.Item style={{ color: "red" }}>{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
-          return (
-            <Nav.Item>
-              <Nav.Link
-                onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
-                onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)} active={res == active}>
-                {config.getIcon(res)}{res.label}
-              </Nav.Link>
-            </Nav.Item>
-          );
+          return config.getMenuItem(res, res == active, key);
         }
 
         if (res.type == "Header") {
           return (
-            <Nav.Item>{getIcon(res)}{res.label}</Nav.Item>
+            <div key={key} className={"nav-item-header"}>
+              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
+              <span className={"nav-item-text"}>{res.label}</span>
+              <div className={"nav-item-float"}>{res.label}</div>
+            </div>
           );
         }
 
-        return <Nav.Item style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
+        return <Nav.Item key={key} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
 
       default:
         throw new Error("Unexpected " + res.type);
     }
   }
-
-
-
-  function handleClick(e: React.MouseEvent<any>, res: ToolbarClient.ToolbarResponse<any>, topRes: ToolbarClient.ToolbarResponse<any>) {
-
-    avoidCollapse.push(topRes);
-
-    var path = findPath(res, [topRes]);
-
-    if (!path)
-      throw new Error("Path not found");
-
-    if (expanded.contains(res))
-      path.pop();
-
-    setExpanded(path);
-  }
-
-  function renderDropdownItem(res: ToolbarClient.ToolbarResponse<any>, indent: number, isNavbar: boolean, topRes: ToolbarClient.ToolbarResponse<any>): React.ReactElement<any>[] {
-
-    const menuItemN = "menu-item-" + indent;
-
-    switch (res.type) {
-
-      case "Divider":
-        return [
-          isNavbar ?
-            <NavDropdown.Divider className={menuItemN} /> :
-            <Dropdown.Divider className={menuItemN} />
-        ];
-
-      case "Header":
-      case "Item":
-
-        var HeaderOrItem: typeof Dropdown.Item =
-          (isNavbar ?
-            (res.type == "Header" ? NavDropdown.Header as any : NavDropdown.Item) :
-            (res.type == "Header" ? Dropdown.Header as any : Dropdown.Item));
-
-        if (res.elements && res.elements.length) {
-          return [
-            <HeaderOrItem onClick={(e: React.MouseEvent<any>) => handleClick(e, res, topRes)}
-              className={classes(menuItemN, "sf-cursor-pointer")}>
-              {getIcon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={expanded.contains(res) ? "chevron-down" : "chevron-right"} className="arrow-align" />
-            </HeaderOrItem>
-          ].concat(res.elements && res.elements.length && expanded.contains(res) ? res.elements.flatMap(r => renderDropdownItem(r, indent + 1, isNavbar, topRes)) : [])
-        }
-
-        if (res.url) {
-          return [
-            <HeaderOrItem
-              onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
-              onAuxClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
-              className={classes("sf-cursor-pointer", menuItemN, res == active && "active")} >
-              {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}{res.label}
-            </HeaderOrItem>
-          ];
-        }
-
-        if (res.content) {
-          var config = ToolbarClient.configs[res.content!.EntityType];
-          if (!config) {
-            return [
-              <HeaderOrItem style={{ color: "red" }} className={menuItemN}>
-                {res.content!.EntityType + "ToolbarConfig not registered"}
-              </HeaderOrItem>
-            ];
-          }
-
-          return [
-            <HeaderOrItem
-              onClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
-              onAuxClick={(e: React.MouseEvent<any>) => config.handleNavigateClick(e, res)}
-              className={classes("sf-cursor-pointer", menuItemN, res == active && "active")}>
-              {config.getIcon(res)}{res.label}
-            </HeaderOrItem>
-          ];
-        }
-
-        if (res.type == "Header")
-          return [
-            <HeaderOrItem className={menuItemN}>{getIcon(res)}{res.label}</HeaderOrItem>
-          ];
-
-        return [
-          <Dropdown.Item style={{ color: "red" }} className={menuItemN}>
-            {"No Content or Url found"}
-          </Dropdown.Item>
-        ];
-
-      default: throw new Error("Unexpected " + res.type);
-    }
-  }
-
-  function getIcon(res: ToolbarClient.ToolbarResponse<any>) {
-
-    var icon = parseIcon(res.iconName);
-
-    return icon && <FontAwesomeIcon icon={icon} className={"icon"} color={res.iconColor} fixedWidth />
-  }
 }
 
-ToolbarRenderer.defaultProps = { location: "Top" as ToolbarLocation, tag: true };
-
-function withKey(e: React.ReactElement<any>, index: number) {
-  return React.cloneElement(e, { key: index });
-}
-
-function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClient.ToolbarResponse<any>[]): ToolbarClient.ToolbarResponse<any>[] | null {
-
-  const last = list.last();
-
-  if (last.elements) {
-    for (let i = 0; i < last.elements.length; i++) {
-      const elem = last.elements[i];
-
-      list.push(elem);
-
-      if (elem == target)
-        return list;
-
-      var result = findPath(target, list);
-
-      if (result)
-        return result;
-
-      list.pop();
-    }
-  }
-
-  return null;
-}
-
-const CustomToggle = React.forwardRef(function CustomToggle(p: { children: React.ReactNode, onClick: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
+function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, children: any }) {
+  var [show, setShow] = React.useState(false);
 
   return (
-    <a
-      ref={ref}
-      className="dropdown-toggle nav-link"
-      href="#"
-      onClick={e => { e.preventDefault(); p.onClick(e); }}>
-      {p.children}
-    </a>
+    <div>
+      <ToolbarNavItem title={props.parentTitle} onClick={() => setShow(!show)}
+        icon={
+          <div style={{ display: 'inline-block', position: 'relative' }}>
+            <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
+            <div className="nav-icon-with-arrow">
+              {props.icon ?? <div className="icon"/>}
+            </div>
+          </div>
+        }
+      />
+      <div style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
+        {show && props.children}
+      </div>
+    </div>
   );
-});
+}
 
+export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode }) {
+  return (
+    <Nav.Item >
+      <Nav.Link title={p.title} onClick={p.onClick} active={p.active}>
+        {p.icon} 
+        <span className={"nav-item-text"}>{p.title}</span>
+        <div className={"nav-item-float"}>{p.title}</div>
+      </Nav.Link>
+    </Nav.Item >
+  );
+}

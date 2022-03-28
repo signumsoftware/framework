@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
+  pinnedFilterVisible?: (fo: FilterOptionParsed) => boolean 
   onSearch?: () => void;
   showSearchButton?: boolean;
   extraSmall?: boolean;
@@ -23,7 +24,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
   const timeoutWriteText = React.useRef<number | null>(null);
 
-  var allPinned = getAllPinned(p.filterOptions);
+  var allPinned = getAllPinned(p.filterOptions).filter(fop => p.pinnedFilterVisible == null || p.pinnedFilterVisible(fop));
 
   if (allPinned.length == 0)
     return null;
@@ -33,7 +34,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
       <div className={classes("row", p.extraSmall ? "" : "mt-3 mb-3")}>
         {
           allPinned
-            .groupBy(a => (a.pinned!.column ?? 0).toString())
+            .groupBy(fo => (fo.pinned!.column ?? 0).toString())
             .orderBy(gr => parseInt(gr.key))
             .map(gr => <div className="col-sm-3" key={gr.key}>
               {gr.elements.orderBy(a => a.pinned!.row).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
@@ -57,7 +58,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
     if (f.pinned && (f.pinned.active == "Checkbox_StartChecked" || f.pinned.active == "Checkbox_StartUnchecked")) {
       return (
         <div className="checkbox mt-4">
-          <label><input type="checkbox" className="mr-1" checked={f.pinned.active == "Checkbox_StartChecked"} readOnly={readOnly} onChange={() => {
+          <label><input type="checkbox" className="form-check-input me-1" checked={f.pinned.active == "Checkbox_StartChecked"} readOnly={readOnly} onChange={() => {
             f.pinned!.active = f.pinned!.active == "Checkbox_StartChecked" ? "Checkbox_StartUnchecked" : "Checkbox_StartChecked";
             p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
           }} />{labelText}</label>

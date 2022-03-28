@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
 import { Dic, classes, softCast } from './Globals'
@@ -8,21 +8,21 @@ import { ajaxGet, ajaxPost } from './Services';
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
-  QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
+  QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
   isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage } from './Signum.Entities';
-import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement } from './Signum.Entities';
+import { TypeEntity, QueryEntity, ExceptionEntity } from './Signum.Entities.Basics';
 
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
-  Anonymous, toDurationFormat, durationToString
+  Anonymous, toLuxonDurationFormat, timeToString, toFormatWithFixes
 } from './Reflection';
 
 import SearchModal from './SearchControl/SearchModal';
@@ -51,7 +51,7 @@ export function start(options: { routes: JSX.Element[] }) {
   AppContext.clearSettingsActions.push(clearQuerySettings);
   AppContext.clearSettingsActions.push(clearQueryDescriptionCache);
   AppContext.clearSettingsActions.push(ButtonBarQuery.clearButtonBarElements);
-
+  AppContext.clearSettingsActions.push(resetFormatRules);
   onReloadTypesActions.push(clearQueryDescriptionCache);
 }
 
@@ -117,7 +117,7 @@ export function defaultFind(fo: FindOptions, modalOptions?: ModalFindOptions): P
     .then(a => a?.row.entity);
 
   if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
-    return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions ?? [], fo.orderOptions ?? [], 2)
+    return fetchLites({ queryName: fo.queryName, filterOptions: fo.filterOptions ?? [], orderOptions: fo.orderOptions ?? [], count: 2 })
       .then(data => {
         if (data.length == 1 && modalOptions?.autoSelectIfOne)
           return Promise.resolve(data[0]);
@@ -144,7 +144,7 @@ export namespace Options {
   export let tokenCanSetPropery = (qt: QueryToken) =>
     qt.filterType == "Lite" && qt.key != "Entity" ||
     qt.filterType == "Enum" && !isState(qt.type) ||
-    qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "Date";
+    qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "DateOnly";
 
   export let isState = (ti: TypeReference) => ti.name.endsWith("State");
 
@@ -188,7 +188,7 @@ export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptions
     .then(a => a?.rows.map(a => a.entity!));
 
   if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
-    return fetchEntitiesLiteWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
+    return fetchLites({ queryName: fo.queryName, filterOptions: fo.filterOptions || [], orderOptions: fo.orderOptions || [], count: 2 })
       .then(data => {
         if (data.length == 1 && modalOptions?.autoSelectIfOne)
           return Promise.resolve(data);
@@ -273,10 +273,11 @@ export function getSimpleTypeNiceName(name: string) {
 
   switch (name) {
     case "string":
-    case "guid":
+    case "Guid":
       return QueryTokenMessage.Text.niceToString();
-    case "datetime": return QueryTokenMessage.DateTime.niceToString();
-    case "datetimeoffset": return QueryTokenMessage.DateTimeOffset.niceToString();
+    case "Date": return QueryTokenMessage.Date.niceToString();
+    case "DateTime": return QueryTokenMessage.DateTime.niceToString();
+    case "DateTimeOffset": return QueryTokenMessage.DateTimeOffset.niceToString();
     case "number": return QueryTokenMessage.Number.niceToString();
     case "decimal": return QueryTokenMessage.DecimalNumber.niceToString();
     case "boolean": return QueryTokenMessage.Check.niceToString();
@@ -514,7 +515,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
     return undefined;
   }
 
-  if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti?.kind == "Enum") {
+  if (type.name == "string" || type.name == "Guid" || type.name == "DateOnly" || ti?.kind == "Enum") {
     if (typeof value === "string")
       return Promise.resolve(value);
 
@@ -646,11 +647,11 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings | undefi
 }
 
 export function getDefaultFilter(qd: QueryDescription | undefined, qs: QuerySettings | undefined): FilterOption[] | undefined {
-  if (qs?.simpleFilterBuilder)
-    return undefined;
-
   if (qs?.defaultFilters)
     return qs.defaultFilters;
+
+  if (qs?.simpleFilterBuilder)
+    return undefined;
 
   if (qd == null || qd.columns["Entity"]) {
     return [
@@ -680,7 +681,6 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
 
   function toFilterOption(fop: FilterOptionParsed): FilterOption | null {
 
-
     var pinned = fop.pinned && Dic.simplify({ ...fop.pinned }) as PinnedFilter;
     if (isFilterGroupOptionParsed(fop))
       return ({
@@ -688,6 +688,7 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
         groupOperation: fop.groupOperation,
         value: fop.value === "" ? undefined : fop.value,
         pinned: pinned,
+        dashboardBehaviour: fop.dashboardBehaviour,
         filters: fop.filters.map(fp => toFilterOption(fp)).filter(fo => !!fo),
       }) as FilterGroupOption;
     else {
@@ -699,7 +700,8 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
         operation: fop.operation,
         value: fop.value === "" ? undefined : fop.value,
         frozen: fop.frozen ? true : undefined,
-        pinned: pinned
+        pinned: pinned,
+        dashboardBehaviour: fop.dashboardBehaviour,
       }) as FilterConditionOption;
     }
   }
@@ -843,7 +845,7 @@ function getTypeIfNew(val: any): string[] {
 
 
 export function exploreOrView(findOptions: FindOptions): Promise<void> {
-  return fetchEntitiesLiteWithFilters(findOptions.queryName, findOptions.filterOptions ?? [], [], 2).then(list => {
+  return fetchLites({ queryName: findOptions.queryName, filterOptions: findOptions.filterOptions ?? [], orderOptions: [], count: 2}).then(list => {
     if (list.length == 1)
       return Navigator.view(list[0], { buttons: "close" }).then(() => undefined);
     else
@@ -873,6 +875,9 @@ interface OverridenValue {
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
 
   if (fop.pinned && fop.pinned.active == "Checkbox_StartUnchecked")
+    return undefined;
+
+  if (fop.dashboardBehaviour == "UseAsInitialSelection")
     return undefined;
 
   if (fop.pinned && overridenValue == null) {
@@ -978,54 +983,49 @@ function isValidGuid(str : string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 }
 
-export function fetchEntitiesLiteWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<T>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]>;
-export function fetchEntitiesLiteWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Lite<Entity>[]> {
-  return getQueryDescription(queryName).then(qd =>
-    parseFilterOptions(filterOptions, false, qd)
-      .then(fops =>
-        parseOrderOptions(orderOptions, false, qd).then(oop =>
-          API.fetchEntitiesLiteWithFilters({
+export async function fetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>): Promise<Lite<T>[]> {
 
-            queryKey: qd.queryKey,
+  var qd = await getQueryDescription(fo.queryName);
+  var filters = await parseFilterOptions(fo.filterOptions ?? [], false, qd);
+  var orders = await parseOrderOptions(fo.orderOptions ?? [], false, qd);
 
-            filters: toFilterRequests(fops),
+  var result = await API.fetchLites({
 
-            orders: oop.map(oo => ({
-              token: oo.token!.fullKey,
-              orderType: oo.orderType
-            }) as OrderRequest),
+    queryKey: qd.queryKey,
 
-            count: count
-          })
-        )
-      )
-  );
+    filters: toFilterRequests(filters),
+
+    orders: orders.map(oo => ({
+      token: oo.token!.fullKey,
+      orderType: oo.orderType
+    }) as OrderRequest),
+
+    count: fo.count ?? null
+  });
+
+  return result as Lite<T>[];
 }
 
-export function fetchEntitiesFullWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<T[]>;
-export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]>;
-export function fetchEntitiesFullWithFilters(queryName: PseudoType | QueryKey, filterOptions: (FilterOption | null | undefined)[], orderOptions: (OrderOption | null | undefined)[], count: number | null): Promise<Entity[]> {
-  return getQueryDescription(queryName).then(qd =>
-    parseFilterOptions(filterOptions, false, qd)
-      .then(fops =>
-        parseOrderOptions(orderOptions, false, qd).then(oop =>
-          API.fetchEntitiesFullWithFilters({
+export async function fetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>): Promise<T[]> {
+  const qd = await getQueryDescription(fo.queryName);
+  const filters = await parseFilterOptions(fo.filterOptions ?? [], false, qd);
+  const orders = await parseOrderOptions(fo.orderOptions ?? [], false, qd);
+  
+  const entities = await API.fetchEntities({
 
-            queryKey: qd.queryKey,
+    queryKey: qd.queryKey,
 
-            filters: toFilterRequests(fops),
+    filters: toFilterRequests(filters),
 
-            orders: oop.map(oo => ({
-              token: oo.token!.fullKey,
-              orderType: oo.orderType
-            }) as OrderRequest),
+    orders: orders.map(oo => ({
+      token: oo.token!.fullKey,
+      orderType: oo.orderType
+    }) as OrderRequest),
 
-            count: count
-          })
-        )
-      )
-  );
+    count: fo.count ?? null,
+  });
+
+  return entities as T[];
 }
 
 export function defaultNoColumnsAllRows(fo: FindOptions, count: number | undefined): FindOptions {
@@ -1187,6 +1187,7 @@ export class TokenCompleter {
         groupOperation: fo.groupOperation,
         value: fo.value,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
+        dashboardBehaviour: fo.dashboardBehaviour,
         filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
         frozen: false,
         expanded: false,
@@ -1203,6 +1204,7 @@ export class TokenCompleter {
         value: fo.value,
         frozen: fo.frozen || false,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
+        dashboardBehaviour: fo.dashboardBehaviour,
       } as FilterConditionOptionParsed);
     }
   }
@@ -1257,20 +1259,20 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
         if (val.length == 10 && token.type.name == "DateTime") //Date -> DateTime
           return dt.toISO();
 
-        if (val.length > 10 && token.type.name == "Date") //DateTime -> Date
+        if (val.length > 10 && token.type.name == "DateOnly") //DateTime -> Date
           return dt.toISODate();
 
         return val;
       }
 
       if (val instanceof DateTime) {
-        if (token.type.name == "Date") //DateTime -> Date
+        if (token.type.name == "DateOnly") //DateTime -> Date
           return val.toISODate();
         return val.toISO();
       }
 
       if (val instanceof Date) {
-        if (token.type.name == "Date") //DateTime -> Date
+        if (token.type.name == "DateOnly") //DateTime -> Date
           return DateTime.fromJSDate(val).toISODate();
         return DateTime.fromJSDate(val).toISO();
       }
@@ -1299,7 +1301,7 @@ function nanToNull(n: number) {
   return n;
 }
 
-function convertToLite(val: string | Lite<Entity> | Entity | undefined): Lite<Entity> | undefined {
+function convertToLite(val: string | Lite<Entity> | Entity | MListElement<Entity> | MListElement<Lite<Entity>> | undefined): Lite<Entity> | undefined {
   if (val == undefined || val == "")
     return undefined;
 
@@ -1315,6 +1317,9 @@ function convertToLite(val: string | Lite<Entity> | Entity | undefined): Lite<En
 
   if (typeof val === "string")
     return parseLite(val);
+
+  if (isMListElement(val))
+    return convertToLite(val.element);
 
   throw new Error(`Impossible to convert ${val} to Lite`);
 }
@@ -1379,6 +1384,32 @@ export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options
     signal => fo == null ? Promise.resolve<ResultTable | null>(null) : getResultTable(fo, signal),
     [fo && findOptionsPath(fo), ...(additionalDeps || [])],
     options);
+
+}
+
+interface FetchEntitiesOptions<T extends Entity = any> {
+  queryName: Type<T> | QueryKey | PseudoType;
+  filterOptions?: (FilterOption | null | undefined)[];
+  orderOptions?: (OrderOption | null | undefined)[];
+  count?: number | null;
+}
+
+
+
+
+export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined | null {
+  return useAPI(() => fetchLites(fo),
+    [
+      findOptionsPath({
+        queryName: fo.queryName,
+        filterOptions: fo.filterOptions,
+        orderOptions: fo.orderOptions,
+        pagination: fo.count == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: fo.count }
+      }),
+      ...additionalDeps ?? []
+    ],
+    options,
+  );
 }
 
 export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
@@ -1409,6 +1440,25 @@ export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): 
   return useAPI(() => API.fetchAllLites({ types: type.typeName }), deps ?? []) as Lite<T>[] | undefined;
 }
 
+export function decompress(rt: ResultTable): ResultTable {
+  var rows = rt.rows;
+  var columns = rt.columns;
+
+  for (var i = 0; i < columns.length; i++) {
+    var uniqueValues = rt.uniqueValues[columns[i]];
+
+    if (uniqueValues != null) {
+      for (var j = 0; j < rows.length; j++) {
+        var row = rows[j];
+        var index = row.columns[i] as number | null;
+        if (index != null)
+          row.columns[i] = uniqueValues[index];
+      }
+    }
+  }
+  return rt;
+}
+
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
@@ -1426,20 +1476,21 @@ export module API {
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
   
     const queryUrl = AppContext.history.location.pathname + AppContext.history.location.search;
-    const qr: QueryRequestUrl = { ...request, queryUrl: queryUrl};
-    return ajaxPost({ url: "~/api/query/executeQuery", signal }, qr);
+    const qr: QueryRequestUrl = { ...request, queryUrl: queryUrl };
+    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, qr)
+      .then(rt => decompress(rt));
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
     return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
-  export function fetchEntitiesLiteWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost({ url: "~/api/query/entitiesLiteWithFilter" }, request);
+  export function fetchLites(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
+    return ajaxPost({ url: "~/api/query/lites" }, request);
   }
 
-  export function fetchEntitiesFullWithFilters(request: QueryEntitiesRequest): Promise<Entity[]>{
-    return ajaxPost({ url: "~/api/query/entitiesFullWithFilter" }, request);
+  export function fetchEntities(request: QueryEntitiesRequest): Promise<Entity[]>{
+    return ajaxPost({ url: "~/api/query/entities" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
@@ -1777,6 +1828,16 @@ export function getCellFormatter(qs: QuerySettings | undefined, qt: QueryToken, 
   return rule.formatter(qt, sc);
 }
 
+function resetFormatRules() {
+  Dic.clear(registeredPropertyFormatters);
+
+  formatRules.clear();
+  formatRules.push(...initFormatRules());
+
+  entityFormatRules.clear();
+  entityFormatRules.push(...initEntityFormatRules());
+}
+
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
 
 export function registerPropertyFormatter(pr: PropertyRoute | string/*For expressions*/ |undefined, formater: CellFormatter) {
@@ -1785,125 +1846,130 @@ export function registerPropertyFormatter(pr: PropertyRoute | string/*For expres
   registeredPropertyFormatters[pr.toString()] = formater;
 }
 
-export const formatRules: FormatRule[] = [
-  {
-    name: "Object",
-    isApplicable: qt => true,
-    formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell.toStr ?? cell.toString()}</span> : undefined)
-  },
-  {
-    name: "MultiLine",
-    isApplicable: qt => {
-      if (qt.type.name == "string" && qt.propertyRoute != null) {
-        var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
-        if (pr != null && pr.member != null && (pr.member.isMultiline || pr.member.maxLength != null && pr.member.maxLength > 150))
-          return true;
-      }
+export const formatRules: FormatRule[] = initFormatRules();
 
-      return false;
+function initFormatRules(): FormatRule[] {
+  return [
+    {
+      name: "Object",
+      isApplicable: qt => true,
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell.toStr ?? cell.toString()}</span> : undefined)
     },
-    formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{cell.toStr ?? cell.toString()}</span> : undefined)
-  },
-  {
-    name: "Password",
-    isApplicable: qt => qt.format == "Password",
-    formatter: qt => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined)
-  },
-  {
-    name: "Enum",
-    isApplicable: qt => qt.filterType == "Enum",
-    formatter: qt => new CellFormatter(cell => {
-      if (cell == undefined)
-        return undefined;
+    {
+      name: "MultiLine",
+      isApplicable: qt => {
+        if (qt.type.name == "string" && qt.propertyRoute != null) {
+          var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+          if (pr != null && pr.member != null && (pr.member.isMultiline || pr.member.maxLength != null && pr.member.maxLength > 150))
+            return true;
+        }
 
-      var ei = getEnumInfo(qt.type.name, cell);
+        return false;
+      },
+      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{cell.toStr ?? cell.toString()}</span> : undefined)
+    },
+    {
+      name: "Password",
+      isApplicable: qt => qt.format == "Password",
+      formatter: qt => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined)
+    },
+    {
+      name: "Enum",
+      isApplicable: qt => qt.filterType == "Enum",
+      formatter: qt => new CellFormatter(cell => {
+        if (cell == undefined)
+          return undefined;
 
-      return <span className="try-no-wrap">{ei ? ei.niceName : cell}</span>
-    })
-  },
-  {
-    name: "Lite",
-    isApplicable: qt => qt.filterType == "Lite",
-    formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
-  },
+        var ei = getEnumInfo(qt.type.name, cell);
 
-  {
-    name: "Guid",
-    isApplicable: qt => qt.filterType == "Guid",
-    formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid try-no-wrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
-  },
-  {
-    name: "Date",
-    isApplicable: qt => qt.filterType == "DateTime",
-    formatter: qt => {
-      const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
-    }
-  },
-  {
-    name: "Time",
-    isApplicable: qt => qt.filterType == "Time",
-    formatter: qt => {
-      const durationFormat = toDurationFormat(qt.format);
-      return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{durationToString(cell, durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
-    }
-  },
-  {
-    name: "SystemValidFrom",
-    isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidFrom",
-    formatter: qt => {
-      return new CellFormatter((cell: string | undefined, ctx) => {
-        if (cell == undefined || cell == "")
-          return "";
+        return <span className="try-no-wrap">{ei ? ei.niceName : cell}</span>
+      })
+    },
+    {
+      name: "Lite",
+      isApplicable: qt => qt.filterType == "Lite",
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
+    },
 
-        var className = cell.startsWith("0001-") ? "date-start" :
-          ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
-            undefined;
+    {
+      name: "Guid",
+      isApplicable: qt => qt.filterType == "Guid",
+      formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid try-no-wrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
+    },
+    {
+      name: "DateTime",
+      isApplicable: qt => qt.filterType == "DateTime",
+      formatter: qt => {
+        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
+        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      }
+    },
+    {
+      name: "Time",
+      isApplicable: qt => qt.filterType == "Time",
+      formatter: qt => {
+        const durationFormat = toLuxonDurationFormat(qt.format) ?? "hh:mm:ss";
 
-        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-        return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormatFixed(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-      }, "date-cell");
-    }
-  },
-  {
-    name: "SystemValidTo",
-    isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidTo",
-    formatter: qt => {
-      return new CellFormatter((cell: string | undefined, ctx) => {
-        if (cell == undefined || cell == "")
-          return "";
+        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      }
+    },
+    {
+      name: "SystemValidFrom",
+      isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidFrom",
+      formatter: qt => {
+        return new CellFormatter((cell: string | undefined, ctx) => {
+          if (cell == undefined || cell == "")
+            return "";
 
-        var className = cell.startsWith("9999-") ? "date-end" :
-          ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
-            undefined;
+          var className = cell.startsWith("0001-") ? "date-start" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
+              undefined;
 
-        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "Date" | "DateTime");
-        return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-      }, "date-cell");
-    }
-  },
-  {
-    name: "Number",
-    isApplicable: qt => qt.filterType == "Integer" || qt.filterType == "Decimal",
-    formatter: qt => {
-      const numberFormat = toNumberFormat(qt.format);
-      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, "numeric-cell");
-    }
-  },
-  {
-    name: "Number with Unit",
-    isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
-    formatter: qt => {
-      const numberFormat = toNumberFormat(qt.format);
-      return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, "numeric-cell");
-    }
-  },
-  {
-    name: "Bool",
-    isApplicable: qt => qt.filterType == "Boolean",
-    formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell} />, "centered-cell")
-  },
-];
+          const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
+          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        }, "date-cell");
+      }
+    },
+    {
+      name: "SystemValidTo",
+      isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidTo",
+      formatter: qt => {
+        return new CellFormatter((cell: string | undefined, ctx) => {
+          if (cell == undefined || cell == "")
+            return "";
+
+          var className = cell.startsWith("9999-") ? "date-end" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
+              undefined;
+
+          const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
+          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
+        }, "date-cell");
+      }
+    },
+    {
+      name: "Number",
+      isApplicable: qt => qt.filterType == "Integer" || qt.filterType == "Decimal",
+      formatter: qt => {
+        const numberFormat = toNumberFormat(qt.format);
+        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, "numeric-cell");
+      }
+    },
+    {
+      name: "Number with Unit",
+      isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
+      formatter: qt => {
+        const numberFormat = toNumberFormat(qt.format);
+        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, "numeric-cell");
+      }
+    },
+    {
+      name: "Bool",
+      isApplicable: qt => qt.filterType == "Boolean",
+      formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, "centered-cell")
+    },
+  ];
+}
 
 export interface EntityFormatRule {
   name: string;
@@ -1918,32 +1984,36 @@ export class EntityFormatter {
   }
 }
 
-export const entityFormatRules: EntityFormatRule[] = [
-  {
-    name: "View",
-    isApplicable: sc => true,
-    formatter: new EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
-      <EntityLink lite={row.entity}
-        inSearch={true}
-        onNavigated={sc?.handleOnNavigated}
-        getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
-        inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
-        <span title={EntityControlMessage.View.niceToString()}>
-          {EntityBaseController.viewIcon}
-        </span>
-      </EntityLink>, "centered-cell")
-  },
-  {
-    name: "View",
-    isApplicable: sc => sc?.state.resultFindOptions?.groupResults == true,
-    formatter: new EntityFormatter((row, columns, sc) => 
-      <a href="#"
-        className="sf-line-button sf-view"
-        onClick={e => { e.preventDefault(); sc!.openRowGroup(row); }}
-      >
-        <span title={JavascriptMessage.ShowGroup.niceToString()}>
-          <FontAwesomeIcon icon="layer-group"/>
-        </span>
-      </a>, "centered-cell")
-  },
-];
+export const entityFormatRules: EntityFormatRule[] = initEntityFormatRules();
+
+function initEntityFormatRules(): EntityFormatRule[] {
+  return [
+    {
+      name: "View",
+      isApplicable: sc => true,
+      formatter: new EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
+        <EntityLink lite={row.entity}
+          inSearch={true}
+          onNavigated={sc?.handleOnNavigated}
+          getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
+          inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
+          <span title={EntityControlMessage.View.niceToString()}>
+            {EntityBaseController.viewIcon}
+          </span>
+        </EntityLink>, "centered-cell")
+    },
+    {
+      name: "View",
+      isApplicable: sc => sc?.state.resultFindOptions?.groupResults == true,
+      formatter: new EntityFormatter((row, columns, sc) =>
+        <a href="#"
+          className="sf-line-button sf-view"
+          onClick={e => { e.preventDefault(); sc!.openRowGroup(row); }}
+        >
+          <span title={JavascriptMessage.ShowGroup.niceToString()}>
+            <FontAwesomeIcon icon="layer-group" />
+          </span>
+        </a>, "centered-cell")
+    },
+  ]
+}

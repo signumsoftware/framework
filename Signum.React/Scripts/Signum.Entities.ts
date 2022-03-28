@@ -50,6 +50,11 @@ export function newMListElement<T>(element: T): MListElement<T> {
   return { rowId: null, element };
 }
 
+export function isMListElement(obj: unknown): obj is MListElement<unknown> {
+  return obj != null && (obj as MListElement<unknown>).rowId !== undefined;
+}
+
+
 export function toMList<T>(array: T[]): MList<T> {
   return array.map(newMListElement);
 }
@@ -86,6 +91,10 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 
 import * as Reflection from './Reflection'
 
+export function newNiceName(ti: Reflection.TypeInfo) {
+  return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
+}
+
 function getOrCreateToStringFunction(type: string) {
   let f = toStringDictionary[type];
   if (f || f === null)
@@ -94,13 +103,16 @@ function getOrCreateToStringFunction(type: string) {
   const ti = Reflection.tryGetTypeInfo(type);
 
   const getToString2 = getToString;
+  const newNiceName2 = newNiceName;
 
   try {
     const getToString = getToString2;
     const valToString = Reflection.valToString;
     const numberToString = Reflection.numberToString;
     const dateToString = Reflection.dateToString;
-    const durationToString = Reflection.durationToString;
+    const timeToString = Reflection.timeToString;
+    const getTypeInfo = Reflection.getTypeInfo;
+    const newNiceName = newNiceName2;
 
     f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
   } catch (e) {
@@ -280,7 +292,7 @@ export module EngineMessage {
   export const EntityWithType0AndId1NotFound = new MessageKey("EngineMessage", "EntityWithType0AndId1NotFound");
   export const NoWayOfMappingType0Found = new MessageKey("EngineMessage", "NoWayOfMappingType0Found");
   export const TheEntity0IsNew = new MessageKey("EngineMessage", "TheEntity0IsNew");
-  export const ThereAre0ThatReferThisEntity = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntity");
+  export const ThereAre0ThatReferThisEntityByProperty1 = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntityByProperty1");
   export const ThereAreRecordsIn0PointingToThisTableByColumn1 = new MessageKey("EngineMessage", "ThereAreRecordsIn0PointingToThisTableByColumn1");
   export const UnauthorizedAccessTo0Because1 = new MessageKey("EngineMessage", "UnauthorizedAccessTo0Because1");
   export const TheresAlreadyA0With1EqualsTo2_G = new MessageKey("EngineMessage", "TheresAlreadyA0With1EqualsTo2_G");
@@ -355,7 +367,6 @@ export module JavascriptMessage {
 export module LiteMessage {
   export const IdNotValid = new MessageKey("LiteMessage", "IdNotValid");
   export const InvalidFormat = new MessageKey("LiteMessage", "InvalidFormat");
-  export const New_G = new MessageKey("LiteMessage", "New_G");
   export const Type0NotFound = new MessageKey("LiteMessage", "Type0NotFound");
   export const ToStr = new MessageKey("LiteMessage", "ToStr");
 }
@@ -386,6 +397,7 @@ export module NormalWindowMessage {
   export const New0_G = new MessageKey("NormalWindowMessage", "New0_G");
   export const Type0Id1 = new MessageKey("NormalWindowMessage", "Type0Id1");
   export const Main = new MessageKey("NormalWindowMessage", "Main");
+  export const Copied = new MessageKey("NormalWindowMessage", "Copied");
 }
 
 export module OperationMessage {

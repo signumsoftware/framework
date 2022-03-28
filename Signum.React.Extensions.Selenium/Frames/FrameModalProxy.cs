@@ -4,99 +4,98 @@ using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
 
-namespace Signum.React.Selenium
+namespace Signum.React.Selenium;
+
+public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer where T : ModifiableEntity
 {
-    public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer where T : ModifiableEntity
+    public PropertyRoute Route { get; private set; }
+
+    public FrameModalProxy(IWebElement element, PropertyRoute? route = null)
+        : base(element)
     {
-        public PropertyRoute Route { get; private set; }
+        this.Route = route?? PropertyRoute.Root(typeof(T)) ;
+    }
 
-        public FrameModalProxy(IWebElement element, PropertyRoute? route = null)
-            : base(element)
+    public IWebElement ContainerElement()
+    {
+        return this.Element;
+    }
+
+    //public void CloseDiscardChanges()   not in use
+    //{
+    //    this.CloseButton.Find().Click();
+
+    //    Selenium.ConsumeAlert();
+
+    //    this.WaitNotVisible();
+    //}
+
+    public override void Dispose()
+    {
+        if (!AvoidClose)
         {
-            this.Route = route?? PropertyRoute.Root(typeof(T)) ;
-        }
-
-        public IWebElement ContainerElement()
-        {
-            return this.Element;
-        }
-
-        //public void CloseDiscardChanges()   not in use
-        //{
-        //    this.CloseButton.Find().Click();
-
-        //    Selenium.ConsumeAlert();
-
-        //    this.WaitNotVisible();
-        //}
-
-        public override void Dispose()
-        {
-            if (!AvoidClose)
+            string? confirmationMessage = null;
+            Selenium.Wait(() =>
             {
-                string? confirmationMessage = null;
-                Selenium.Wait(() =>
+                if (this.Element.IsStale())
+                    return true;
+
+                if (TryToClose())
+                    return true;
+
+                if (MessageModalProxyExtensions.IsMessageModalPresent(this.Selenium))
                 {
-                    if (this.Element.IsStale())
-                        return true;
-
-                    if (TryToClose())
-                        return true;
-
-                    if (MessageModalProxyExtensions.IsMessageModalPresent(this.Selenium))
-                    {
-                        var alert = MessageModalProxyExtensions.GetMessageModal(this.Selenium)!;
-                        alert.Click(MessageModalButton.Yes);
-                    }
-
-                    return false;
-
-                }, () => "popup {0} to disapear with or without confirmation".FormatWith(this.Element));
-
-                if (confirmationMessage != null)
-                    throw new InvalidOperationException(confirmationMessage);
-            }
-
-            Disposing?.Invoke(this.OkPressed);
-        }
-
-        [DebuggerStepThrough]
-        private bool TryToClose()
-        {
-            try
-            {
-                var close = this.CloseButton.TryFind();
-                if (close?.Displayed == true)
-                {
-                    close.Click();
+                    var alert = MessageModalProxyExtensions.GetMessageModal(this.Selenium)!;
+                    alert.Click(MessageModalButton.Yes);
                 }
 
                 return false;
-            }
-            catch (StaleElementReferenceException)
+
+            }, () => "popup {0} to disapear with or without confirmation".FormatWith(this.Element));
+
+            if (confirmationMessage != null)
+                throw new InvalidOperationException(confirmationMessage);
+        }
+
+        Disposing?.Invoke(this.OkPressed);
+    }
+
+    [DebuggerStepThrough]
+    private bool TryToClose()
+    {
+        try
+        {
+            var close = this.CloseButton.TryFind();
+            if (close?.Displayed == true)
             {
-                return true;
+                close.Click();
             }
-        }
 
-        public EntityInfoProxy EntityInfo()
-        {
-            return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetAttribute("data-main-entity"))!;
+            return false;
         }
-
-        public FrameModalProxy<T> WaitLoaded()
+        catch (StaleElementReferenceException)
         {
-            this.Element.WaitElementPresent(By.CssSelector("div.sf-main-control"));
-            return this;
+            return true;
         }
     }
 
-    public static class FrameModalProxyExtension
+    public EntityInfoProxy EntityInfo()
     {
-        public static FrameModalProxy<T> AsFrameModal<T>(this IWebElement element) 
-            where T: ModifiableEntity
-        {
-            return new FrameModalProxy<T>(element);
-        }
+        return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetAttribute("data-main-entity"))!;
+    }
+
+    public FrameModalProxy<T> WaitLoaded()
+    {
+        this.Element.WaitElementPresent(By.CssSelector("div.sf-main-control"));
+        return this;
+    }
+}
+
+public static class FrameModalProxyExtension
+{
+    public static FrameModalProxy<T> AsFrameModal<T>(this IWebElement element) 
+        where T: ModifiableEntity
+    {
+        return new FrameModalProxy<T>(element);
     }
 }

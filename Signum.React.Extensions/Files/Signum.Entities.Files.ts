@@ -40,7 +40,7 @@ export const FileEmbedded = new Type<FileEmbedded>("FileEmbedded");
 export interface FileEmbedded extends Entities.EmbeddedEntity {
   Type: "FileEmbedded";
   fileName: string;
-  binaryFile: string;
+  binaryFile: string /*Byte[]*/;
 }
 
 export const FileEntity = new Type<FileEntity>("File");
@@ -48,7 +48,7 @@ export interface FileEntity extends Entities.ImmutableEntity {
   Type: "File";
   fileName: string;
   hash: string;
-  binaryFile: string;
+  binaryFile: string /*Byte[]*/;
 }
 
 export module FileMessage {
@@ -75,7 +75,7 @@ export const FilePathEmbedded = new Type<FilePathEmbedded>("FilePathEmbedded");
 export interface FilePathEmbedded extends Entities.EmbeddedEntity {
   Type: "FilePathEmbedded";
   fileName: string;
-  binaryFile: string;
+  binaryFile: string /*Byte[]*/;
   hash: string | null;
   fileLength: number;
   suffix: string;
@@ -86,9 +86,9 @@ export interface FilePathEmbedded extends Entities.EmbeddedEntity {
 export const FilePathEntity = new Type<FilePathEntity>("FilePath");
 export interface FilePathEntity extends Entities.Entity {
   Type: "FilePath";
-  creationDate: string;
+  creationDate: string /*DateTime*/;
   fileName: string;
-  binaryFile: string;
+  binaryFile: string /*Byte[]*/;
   hash: string | null;
   fileLength: number;
   suffix: string;

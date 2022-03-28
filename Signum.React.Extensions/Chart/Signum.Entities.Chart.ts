@@ -48,7 +48,7 @@ export const ChartColumnType = new EnumType<ChartColumnType>("ChartColumnType");
 export type ChartColumnType =
   "Integer" |
   "Real" |
-  "Date" |
+  "DateOnly" |
   "DateTime" |
   "String" |
   "Lite" |
@@ -181,12 +181,13 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   hideQuickLink: boolean;
   owner: Entities.Lite<Entities.Entity> | null;
   displayName: string;
+  includeDefaultFilters: boolean | null;
   maxRows: number | null;
   chartScript: ChartScriptSymbol;
   parameters: Entities.MList<ChartParameterEmbedded>;
   columns: Entities.MList<ChartColumnEmbedded>;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-  guid: string;
+  guid: string /*Guid*/;
 }
 
 export module UserChartOperation {
