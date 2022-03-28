@@ -506,6 +506,8 @@ public class LinkElementEmbedded : EmbeddedEntity
     [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(Max = int.MaxValue)]
     public string Link { get; set; }
 
+    public bool OpensInNewTab { get; set; }
+
     public LinkElementEmbedded Clone()
     {
         return new LinkElementEmbedded
@@ -519,13 +521,15 @@ public class LinkElementEmbedded : EmbeddedEntity
     {
         return new XElement("LinkElement",
             new XAttribute("Label", Label),
-            new XAttribute("Link", Link));
+            new XAttribute("Link", Link),
+            OpensInNewTab == false ? null! : new XAttribute("OpensInNewTab", OpensInNewTab));
     }
 
     internal void FromXml(XElement element)
     {
         Label = element.Attribute("Label")!.Value;
         Link = element.Attribute("Link")!.Value;
+        OpensInNewTab = (bool?)element.Attribute("OpensInNewTab") ?? false;
     }
 }
 

@@ -138,6 +138,7 @@ export interface LinkElementEmbedded extends Entities.EmbeddedEntity {
   Type: "LinkElementEmbedded";
   label: string;
   link: string;
+  opensInNewTab: boolean;
 }
 
 export const LinkListPartEntity = new Type<LinkListPartEntity>("LinkListPart");
