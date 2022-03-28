@@ -3,7 +3,7 @@ import * as React from 'react'
 import { FindOptions } from '@framework/FindOptions'
 import { getQueryKey, getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage, toLite, liteKey } from '@framework/Signum.Entities'
-import { SearchControl, ValueSearchControl } from '@framework/Search'
+import { SearchControl, ValueSearchControl, ValueSearchControlController } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { UserQueryPartEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
 import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
@@ -142,7 +142,7 @@ interface BigValueBadgeProps {
 
 export function BigValueSearchCounter(p: BigValueBadgeProps) {
 
-  const vsc = React.useRef<ValueSearchControl>(null);
+  const vsc = React.useRef<ValueSearchControlController>(null);
 
   return (
     <div className={classes(

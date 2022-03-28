@@ -29,7 +29,7 @@ export function executeQueryCached(request: QueryRequest, fop: FindOptionsParsed
   return resultTable;
 }
 
-export function executeQueryValueCached(request: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | undefined, cachedQuery: CachedQueryJS): unknown {
+export function executeQueryValueCached(request: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, cachedQuery: CachedQueryJS): unknown {
 
   if (token == null)
     token = {

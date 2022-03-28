@@ -15,13 +15,13 @@ import type { SearchControlLoadedProps } from './SearchControl/SearchControlLoad
 export { SearchControlLoaded, SearchControlLoadedProps };
 
 import ValueSearchControl from './SearchControl/ValueSearchControl'
-import type { ValueSearchControlProps } from './SearchControl/ValueSearchControl'
-export { ValueSearchControl, ValueSearchControlProps };
+import type { ValueSearchControlProps, ValueSearchControlController } from './SearchControl/ValueSearchControl'
+export { ValueSearchControl, ValueSearchControlProps, ValueSearchControlController };
 
 import ValueSearchControlLine from './SearchControl/ValueSearchControlLine'
-import type { ValueSearchControlLineProps } from './SearchControl/ValueSearchControlLine'
+import type { ValueSearchControlLineProps, ValueSearchControlLineController } from './SearchControl/ValueSearchControlLine'
 import { QueryTokenString } from './Reflection';
-export { ValueSearchControlLine, ValueSearchControlLineProps };
+export { ValueSearchControlLine, ValueSearchControlLineProps, ValueSearchControlLineController };
 import { AddToLite } from './Finder';
 import { bool } from 'prop-types';
 

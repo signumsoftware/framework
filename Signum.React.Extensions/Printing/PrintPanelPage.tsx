@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ValueSearchControl, SearchControl, ValueSearchControlLine } from '@framework/Search'
+import { ValueSearchControl, SearchControl, ValueSearchControlLine, ValueSearchControlController } from '@framework/Search'
 import { StyleContext } from '@framework/Lines'
 import { API, PrintStat } from './PrintClient'
 import * as Navigator from '@framework/Navigator'
@@ -14,8 +14,8 @@ export default function PrintPanelPage(p: {}) {
 
   const stats = useAPI(() => API.getStats(), []);
 
-  function renderStateButton(vsc: ValueSearchControl, fileType: FileTypeSymbol) {
-    if (vsc.state.value == undefined || vsc.state.value == 0)
+  function renderStateButton(vsc: ValueSearchControlController, fileType: FileTypeSymbol) {
+    if (vsc.value == undefined || vsc.value == 0)
       return undefined;
 
     return (
@@ -25,7 +25,7 @@ export default function PrintPanelPage(p: {}) {
     );
   }
 
-  function handlePrintClick(e: React.MouseEvent<any>, fileType: FileTypeSymbol, vsc: ValueSearchControl) {
+  function handlePrintClick(e: React.MouseEvent<any>, fileType: FileTypeSymbol, vsc: ValueSearchControlController) {
     e.preventDefault();
     API.createPrintProcess(fileType)
       .then(p => p && Navigator.view(p))

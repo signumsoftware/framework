@@ -7,15 +7,16 @@ import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.
 import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { StyleContext, TypeContext } from '../TypeContext'
-import ValueSearchControl from './ValueSearchControl'
+import ValueSearchControl, { ValueSearchControlController } from './ValueSearchControl'
 import { FormGroup } from '../Lines/FormGroup'
 import { SearchControlProps } from "./SearchControl";
 import { BsColor, BsSize } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines/EntityBase'
 import SelectorModal from '../SelectorModal'
+import { useForceUpdate } from '../Hooks'
 
-export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
+export interface ValueSearchControlLineProps {
   ctx: StyleContext;
   findOptions?: FindOptions;
   valueToken?: string | QueryTokenString<any>;
@@ -24,19 +25,19 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   unitText?: React.ReactChild;
   formGroupHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
-  helpText?: (valueSearchControl: ValueSearchControl) => React.ReactChild | undefined;
+  helpText?: (vscc: ValueSearchControlController) => React.ReactChild | undefined;
   initialValue?: any;
   isLink?: boolean;
   isBadge?: boolean | "MoreThanZero";
   badgeColor?: BsColor;
-  customClass?: string | ((value: any | undefined) => (string | undefined ));
+  customClass?: string | ((value: any | undefined) => (string | undefined));
   customStyle?: React.CSSProperties;
   isFormControl?: boolean;
   findButton?: boolean;
   viewEntityButton?: boolean;
   avoidAutoRefresh?: boolean;
   deps?: React.DependencyList;
-  extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode;
+  extraButtons?: (vscc: ValueSearchControlController) => React.ReactNode;
   create?: boolean;
   onCreate?: () => Promise<any>;
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
@@ -45,22 +46,34 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
   onExplored?: () => void;
   onViewEntity?: (entity: Lite<Entity>) => void;
   onValueChanged?: (value: any) => void;
-  customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token?: QueryToken) => Promise<any>,
+  customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, signal: AbortSignal) => Promise<any>,
 }
 
-export default class ValueSearchControlLine extends React.Component<ValueSearchControlLineProps> {
+export interface ValueSearchControlLineController {
+  valueSearchControl: ValueSearchControlController | null | undefined;
+  refreshValue(): void;
+}
 
-  valueSearchControl?: ValueSearchControl | null;
+const ValueSearchControlLine = React.forwardRef(function ValueSearchControlLine(p: ValueSearchControlLineProps, ref?: React.Ref<ValueSearchControlLineController>) {
 
-  handleValueSearchControlLoaded = (vsc: ValueSearchControl | null) => {
+  var vscRef = React.useRef<ValueSearchControlController | null>();
 
-    if (vsc != this.valueSearchControl)
-      this.forceUpdate();
+  React.useImperativeHandle(ref, () => ({
+    valueSearchControl: vscRef.current,
+    refreshValue: () => vscRef.current?.refreshValue(),
+  }), [vscRef.current]);
 
-    this.valueSearchControl = vsc;
+  const forceUpdate = useForceUpdate();
+
+  function handleValueSearchControlLoaded(vsc: ValueSearchControlController | null) {
+
+    if (vsc != vscRef.current)
+      forceUpdate();
+
+    vscRef.current = vsc;
   }
 
-  getFindOptions(props: ValueSearchControlLineProps): FindOptions {
+  function getFindOptions(props: ValueSearchControlLineProps): FindOptions {
     if (props.findOptions)
       return props.findOptions;
 
@@ -69,151 +82,146 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     if (isEntity(ctx.value))
       return {
         queryName: ctx.value.Type,
-        filterOptions: [{ token: QueryTokenString.entity(), value: ctx.value}]
+        filterOptions: [{ token: QueryTokenString.entity(), value: ctx.value }]
       };
 
     if (isLite(ctx.value))
       return {
         queryName: ctx.value.EntityType,
-        filterOptions: [{ token: QueryTokenString.entity(), value: ctx.value}]
+        filterOptions: [{ token: QueryTokenString.entity(), value: ctx.value }]
       };
 
     throw new Error("Impossible to determine 'findOptions' because 'ctx' is not a 'TypeContext<Entity>'. Set it explicitly");
   }
 
-  refreshValue() {
-    this.valueSearchControl && this.valueSearchControl.refreshValue()
-  }
+  var fo = getFindOptions(p);
 
-  render() {
+  if (!Finder.isFindable(fo.queryName, false))
+    return null;
 
-    var fo = this.getFindOptions(this.props);
-
-    if (!Finder.isFindable(fo.queryName, false))
-      return null;
-
-    var errorMessage = Finder.validateNewEntities(fo);
-    if (errorMessage) {
-      return (
-        <div className="alert alert-danger" role="alert">
-          <strong>Error in ValueSearchControlLine ({getQueryKey(fo.queryName)}): </strong>
-          {errorMessage}
-        </div>
-      );
-    }
-
-    var token = this.valueSearchControl && this.valueSearchControl.state.valueToken;
-
-    const isQuery = this.props.valueToken == undefined || token?.queryTokenType == "Aggregate";
-
-    const isBadge = (this.props.isBadge ?? this.props.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
-    const isFormControl = (this.props.isFormControl ?? this.props.valueToken != undefined);
-
-    const unit = isFormControl && (this.props.unitText ?? (token?.unit && <span className="input-group-text">{token.unit}</span>));
-
-    const ctx = this.props.ctx;
-
-    const value = this.valueSearchControl && this.valueSearchControl.state.value;
-    const find = value != undefined && (this.props.findButton ?? isQuery) &&
-      <a href="#" className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
-        onClick={this.valueSearchControl!.handleClick}
-        title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
-        {EntityBaseController.findIcon}
-      </a>;
-
-    const create = (this.props.create ?? false) &&
-      <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
-        onClick={this.handleCreateClick}
-        title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
-        {EntityBaseController.createIcon}
-      </a>;
-
-    const view = value != undefined && (this.props.viewEntityButton ?? (isLite(value) && Navigator.isViewable(value.EntityType))) &&
-      <a href="#" className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
-        onClick={this.handleViewEntityClick}
-        title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
-        {EntityBaseController.viewIcon}
-      </a>
-
-    let extra = this.valueSearchControl && this.props.extraButtons && this.props.extraButtons(this.valueSearchControl);
-
-    var labelText = this.props.labelText == undefined ? undefined :
-      typeof this.props.labelText == "function" ? this.props.labelText() :
-        this.props.labelText;
-
+  var errorMessage = Finder.validateNewEntities(fo);
+  if (errorMessage) {
     return (
-      <FormGroup ctx={this.props.ctx}
-        labelText={labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
-        labelHtmlAttributes={this.props.labelHtmlAttributes}
-        htmlAttributes={{ ...this.props.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
-        helpText={this.props.helpText && this.valueSearchControl && this.props.helpText(this.valueSearchControl)}
-      >
-        <div className={isFormControl ? ((unit || view || extra || find || create) ? this.props.ctx.inputGroupClass : undefined) : this.props.ctx.formControlPlainTextClass}>
-          <ValueSearchControl
-            ref={this.handleValueSearchControlLoaded}
-            findOptions={fo}
-            initialValue={this.props.initialValue}
-            multipleValues={this.props.multipleValues}
-            isBadge={isBadge}
-            customClass={this.props.customClass ?? (this.props.multipleValues ? this.props.ctx.labelClass : undefined)}
-            customStyle={this.props.customStyle}
-            badgeColor={this.props.badgeColor}
-            isLink={this.props.isLink ?? Boolean(this.props.multipleValues)}
-            formControlClass={isFormControl && !this.props.multipleValues ? this.props.ctx.formControlClass + " readonly" : undefined}
-            valueToken={this.props.valueToken}
-            onValueChange={v => { this.forceUpdate(); this.props.onValueChanged && this.props.onValueChanged(v); }}
-            onTokenLoaded={() => this.forceUpdate()}
-            onExplored={this.props.onExplored}
-            searchControlProps={this.props.searchControlProps}
-            modalSize={this.props.modalSize}
-            deps={this.props.deps}
-            customRequest={this.props.customRequest}
-          />
-
-          {unit}
-          {view}
-          {find}
-          {create}
-          {extra}
-        </div>
-      </FormGroup>
+      <div className="alert alert-danger" role="alert">
+        <strong>Error in ValueSearchControlLine ({getQueryKey(fo.queryName)}): </strong>
+        {errorMessage}
+      </div>
     );
   }
 
-  handleViewEntityClick = (e: React.MouseEvent<any>) => {
+
+  var token = vscRef.current?.valueToken;
+
+  const isQuery = p.valueToken == undefined || token?.queryTokenType == "Aggregate";
+
+  const isBadge = (p.isBadge ?? p.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
+  const isFormControl = (p.isFormControl ?? p.valueToken != undefined);
+
+  const unit = isFormControl && (p.unitText ?? (token?.unit && <span className="input-group-text">{token.unit}</span>));
+
+  const ctx = p.ctx;
+
+  const value = vscRef.current?.value;
+  const find = value != undefined && (p.findButton ?? isQuery) &&
+    <a href="#" className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
+      onClick={vscRef.current!.handleClick}
+      title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
+      {EntityBaseController.findIcon}
+    </a>;
+
+  const create = (p.create ?? false) &&
+    <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
+      onClick={handleCreateClick}
+      title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
+      {EntityBaseController.createIcon}
+    </a>;
+
+  const view = value != undefined && (p.viewEntityButton ?? (isLite(value) && Navigator.isViewable(value.EntityType))) &&
+    <a href="#" className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
+      onClick={handleViewEntityClick}
+      title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
+      {EntityBaseController.viewIcon}
+    </a>
+
+  let extra = vscRef.current && p.extraButtons && p.extraButtons(vscRef.current);
+
+  var labelText = p.labelText == undefined ? undefined :
+    typeof p.labelText == "function" ? p.labelText() :
+      p.labelText;
+
+  return (
+    <FormGroup ctx={p.ctx}
+      labelText={labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
+      labelHtmlAttributes={p.labelHtmlAttributes}
+      htmlAttributes={{ ...p.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
+      helpText={p.helpText && vscRef.current && p.helpText(vscRef.current)}
+    >
+      <div className={isFormControl ? ((unit || view || extra || find || create) ? p.ctx.inputGroupClass : undefined) : p.ctx.formControlPlainTextClass}>
+        <ValueSearchControl
+          ref={handleValueSearchControlLoaded}
+          findOptions={fo}
+          initialValue={p.initialValue}
+          multipleValues={p.multipleValues}
+          isBadge={isBadge}
+          customClass={p.customClass ?? (p.multipleValues ? p.ctx.labelClass : undefined)}
+          customStyle={p.customStyle}
+          badgeColor={p.badgeColor}
+          isLink={p.isLink ?? Boolean(p.multipleValues)}
+          formControlClass={isFormControl && !p.multipleValues ? p.ctx.formControlClass + " readonly" : undefined}
+          valueToken={p.valueToken}
+          onValueChange={v => { forceUpdate(); p.onValueChanged && p.onValueChanged(v); }}
+          onTokenLoaded={() => forceUpdate()}
+          onExplored={p.onExplored}
+          searchControlProps={p.searchControlProps}
+          modalSize={p.modalSize}
+          deps={p.deps}
+          customRequest={p.customRequest}
+        />
+
+        {unit}
+        {view}
+        {find}
+        {create}
+        {extra}
+      </div>
+    </FormGroup>
+  );
+
+
+  function handleViewEntityClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    var entity = this.valueSearchControl!.state.value as Lite<Entity>;
-    if (this.props.onViewEntity)
-      this.props.onViewEntity(entity);
+    var entity = vscRef.current!.value as Lite<Entity>;
+    if (p.onViewEntity)
+      p.onViewEntity(entity);
 
     Navigator.view(entity)
       .then(() => {
-        this.refreshValue();
-        this.props.onExplored && this.props.onExplored();
+        vscRef.current!.refreshValue();
+        p.onExplored && p.onExplored();
       }).done();
   }
 
-  handleCreateClick = (e: React.MouseEvent<any>) => {
+  function handleCreateClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    if (this.props.onCreate) {
-      this.props.onCreate().then(() => {
-        if (!this.props.avoidAutoRefresh)
-          this.valueSearchControl?.refreshValue();
+    if (p.onCreate) {
+      p.onCreate().then(() => {
+        if (!p.avoidAutoRefresh)
+          vscRef.current!.refreshValue();
       }).done();
     } else {
 
-      var fo = this.props.findOptions!;
+      var fo = p.findOptions!;
       const isWindowsOpen = e.button == 1 || e.ctrlKey;
       Finder.getQueryDescription(fo.queryName).then(qd => {
-        this.chooseType(qd).then(tn => {
+        chooseType(qd).then(tn => {
           if (tn == null)
             return;
 
           var s = Navigator.getSettings(tn);
           var qs = Finder.getSettings(fo.queryName);
-          var getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
+          var getViewPromise = p.getViewPromise ?? qs?.getViewPromise;
 
           if (isWindowsOpen || (s != null && s.avoidPopup)) {
             var vp = getViewPromise && getViewPromise(null)
@@ -228,7 +236,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                   createNew: () => Finder.getPropsFromFilters(tn, fos)
                     .then(props => Constructor.constructPack(tn, props)!),
                 })))
-              .then(() => this.props.avoidAutoRefresh ? undefined : this.valueSearchControl!.refreshValue())
+              .then(() => p.avoidAutoRefresh ? undefined : vscRef.current!.refreshValue())
               .done();
           }
         }).done();
@@ -236,7 +244,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     }
   }
 
-  chooseType(qd: QueryDescription): Promise<string | undefined> {
+  function chooseType(qd: QueryDescription): Promise<string | undefined> {
 
     const tis = getTypeInfos(qd.columns["Entity"].type)
       .filter(ti => Navigator.isCreable(ti, { isSearch: true }));
@@ -244,4 +252,8 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
     return SelectorModal.chooseType(tis)
       .then(ti => ti ? ti.name : undefined);
   }
-}
+
+});
+
+
+export default ValueSearchControlLine; 
