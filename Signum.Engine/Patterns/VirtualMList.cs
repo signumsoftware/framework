@@ -88,7 +88,7 @@ public static class VirtualMList
             throw new InvalidOperationException($"The property {mListPropertRoute} should have the attributes [Ignore, QueryableProperty] to be used as VirtualMList");
 
         var nn = Validator.TryGetPropertyValidator(backReferenceRoute)?.Validators.OfType<NotNullValidatorAttribute>().SingleOrDefaultEx();
-        if (nn == null || nn.Disabled == false)
+        if (nn != null && !nn.Disabled)
             throw new InvalidOperationException($"The property {backReferenceRoute} should have an [NotNullValidator(Disabled = true)] to be used as back reference or a VirtualMList");
 
         RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
