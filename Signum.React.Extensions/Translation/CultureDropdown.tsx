@@ -54,7 +54,7 @@ export function CultureDropdownMenuItem(props: { fullName?: boolean }) {
       <div className={"dropdown-item"}
         style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center" }}
         onClick={() => setShow(!show)}>
-        <FontAwesomeIcon icon="globe" fixedWidth className="mr-2" /> <span style={{ width: "100%" }}>{CultureInfoEntity.niceName()}</span> <FontAwesomeIcon icon={!show ? "caret-down" : "caret-up"} />
+        <FontAwesomeIcon icon="globe" fixedWidth className="me-2" /> <span style={{ width: "100%" }}>{CultureInfoEntity.niceName()}</span> <FontAwesomeIcon icon={!show ? "caret-down" : "caret-up"} />
       </div>
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>
