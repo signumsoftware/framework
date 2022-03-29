@@ -5,7 +5,7 @@ public static class ConcurrentUserLogic
 {
     public static Func<Type, bool> WatchSaveFor = null!; 
 
-    public static void Start(SchemaBuilder sb, Func<Type, bool>? activatedFor)
+    public static void Start(SchemaBuilder sb, Func<Type, bool>? activatedFor = null)
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
