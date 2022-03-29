@@ -97,7 +97,10 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
 
     Finder.find<CaseEntity>({
       queryName: CaseEntity,
-      filterOptions: [{ token: CaseEntity.token(e => e.entity.parentCase), value: p.caseEntity, frozen: true }]
+      filterOptions: [
+        { token: CaseEntity.token(e => e.entity.parentCase), value: p.caseEntity, frozen: true },
+        { token: CaseEntity.token(e => e.entity).expression<CaseActivityEntity>("DecompositionSurrogateActivity"), value: p.stats.caseActivity },
+      ]
     }, { autoSelectIfOne: true })
       .then(c => c && Navigator.view(c))
       .done();
