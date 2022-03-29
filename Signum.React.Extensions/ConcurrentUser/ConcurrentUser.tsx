@@ -14,6 +14,7 @@ import { classes } from '@framework/Globals';
 import MessageModal from '@framework/Modals/MessageModal'
 import './ConcurrentUser.css'
 import * as ConcurrentUserClient from './ConcurrentUserClient';
+import { exploreWindowsOpen } from '../../Signum.React/Scripts/Finder'
 
 export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }) {
   
@@ -100,6 +101,8 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
     return () => clearTimeout(handle);
   }, [ticks !== p.entity.ticks]);
 
+  if (window.__disableSignalR) 
+    return <FontAwesomeIcon icon="exclamation-triangle" color={"#ddd"} title={window.__disableSignalR} />
 
   var otherUsers = concurrentUsers?.filter(u => u.connectionID !== conn?.connectionId);
 
@@ -116,7 +119,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
           <Popover.Header as="h3">{ConcurrentUserMessage.ConcurrentUsers.niceToString()}</Popover.Header>
           <Popover.Body>
             
-            {otherUsers.map((a, i) =>
+            {otherUsers?.map((a, i) =>
               <div key={i} style={{ whiteSpace: "nowrap" }} >
                 <UserCircle user={a.user} /> {a.user.toStr} ({DateTime.fromISO(a.startTime).toRelative()})
                 {a.isModified && <FontAwesomeIcon icon="edit" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
@@ -140,7 +143,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
           </Popover.Body>
         </Popover>
       }>
-      <div className={classes("sf-pointer", (otherUsers.some(u => u.isModified) || ticks !== p.entity.ticks) && isModified.current ? "blinking" : undefined)}>
+      <div className={classes("sf-pointer", (otherUsers.some(u => u.isModified) || ticks !== p.entity.ticks) && isModified.current ? "blinking" : undefined)} title={window.__disableSignalR ?? undefined}>
         <FontAwesomeIcon icon={otherUsers.length == 1 ? "user" : otherUsers.length == 2 ? "user-friends" : "users"}
           color={ticks !== p.entity.ticks ? "#E4032E" : otherUsers.some(u => u.isModified) ? "#FFAA44" : "#6BB700"} />
         <strong className="ms-1 me-3" style={{ userSelect: "none" }}>{UserEntity.niceCount(otherUsers.length)}</strong>

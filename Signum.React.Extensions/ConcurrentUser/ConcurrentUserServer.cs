@@ -7,17 +7,29 @@ using Signum.Engine.ConcurrentUser;
 using Signum.Entities.ConcurrentUser;
 using Signum.React.Facades;
 using Signum.Utilities.Reflection;
+using System.Diagnostics;
 
 namespace Signum.React.ConcurrentUser;
 
 public static class ConcurrentUserServer
 {
+    public static string? DisableSignalR;
+
     public static IHubContext<ConcurrentUserHub, IConcurrentUserClient> ConcurrentUserHub { get; private set; } = null!;
 
     public static void Start(IApplicationBuilder app)
     {
         SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         ReflectionServer.RegisterLike(typeof(ConcurrentUserMessage), () => true);
+
+        //No easy way to check if its a Server OS https://stackoverflow.com/questions/2819934/detect-windows-version-in-net
+        //so instead we check for DEBUG compilation
+#if DEBUG 
+        if (Process.GetCurrentProcess().ProcessName == "w3wp") /*ISS*/
+            DisableSignalR = @"SignalR is disabled to prevent IIS connection limit on Windows Client OS. 
+Consider using IIS Express.
+More info: https://docs.microsoft.com/en-us/iis/troubleshoot/request-restrictions";
+#endif
     }
 
     public static void MapConcurrentUserHub(IEndpointRouteBuilder endpoints)
