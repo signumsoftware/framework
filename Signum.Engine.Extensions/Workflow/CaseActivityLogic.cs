@@ -151,8 +151,16 @@ public static class CaseActivityLogic
             new Graph<CaseEntity>.Execute(CaseOperation.Cancel)
             {
                 CanExecute = c => c.FinishDate == null ? null : CaseActivityMessage.AlreadyFinished.NiceToString(),
-                Execute = (c, _) =>
+                Execute = (c, args) =>
                 {
+
+                    var avoidRecompose = args.TryGetArgS<bool>() ?? false;
+
+                    foreach (var sc in c.SubCases().Where(a => a.FinishDate == null))
+                    {
+                        sc.Execute(CaseOperation.Cancel, true);
+                    }
+
                     var currentActivities = c.CaseActivities().Where(a => a.DoneBy == null).ToList();
 
                     foreach (var ca in currentActivities)
@@ -171,7 +179,11 @@ public static class CaseActivityLogic
                     }
 
                     c.FinishDate = Clock.Now;
+                    CancelEntity(c.MainEntity, c);
                     c.Save();
+
+                    if (c.ParentCase != null && !avoidRecompose)
+                        CaseActivityGraph.TryToRecompose(c);
                 }
             }.Register();
 
@@ -443,15 +455,17 @@ public static class CaseActivityLogic
     {
         public Func<ICaseMainEntity>? Constructor;
         public Action<ICaseMainEntity> SaveEntity;
+        public Action<ICaseMainEntity, CaseEntity>? Cancel;
 
-        public WorkflowOptions(Func<ICaseMainEntity>? constructor, Action<ICaseMainEntity> saveEntity)
+        public WorkflowOptions(Func<ICaseMainEntity>? constructor, Action<ICaseMainEntity> saveEntity, Action<ICaseMainEntity, CaseEntity>? cancel)
         {
             Constructor = constructor;
             SaveEntity = saveEntity;
+            Cancel = cancel;
         }
     }
 
-    public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T>? constructor, Action<T> save)
+    public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T>? constructor, Action<T> save, Action<T, CaseEntity>? cancel = null)
         where T : Entity, ICaseMainEntity
     {
         fi.SchemaBuilder.Schema.EntityEvents<T>().Saved += (e, args) =>
@@ -462,7 +476,9 @@ public static class CaseActivityLogic
             e.NotifyInProgress();
         };
 
-        Options[typeof(T)] = new WorkflowOptions(constructor, e => save((T)e));
+        Options[typeof(T)] = new WorkflowOptions(constructor,
+            saveEntity: e => save((T)e),
+            cancel: cancel  == null ? null : ((e, c) => cancel((T)e, c)));
 
         return fi;
     }
@@ -568,6 +584,13 @@ public static class CaseActivityLogic
         var options = CaseActivityLogic.Options.GetOrThrow(mainEntity.GetType());
         using (AvoidNotifyInProgress())
             options.SaveEntity(mainEntity);
+    }
+
+    static void CancelEntity(ICaseMainEntity mainEntity, CaseEntity caseEntity)
+    {
+        var options = CaseActivityLogic.Options.GetOrThrow(mainEntity.GetType());
+        using (AvoidNotifyInProgress())
+            options.Cancel?.Invoke(mainEntity, caseEntity);
     }
 
     public static CaseActivityEntity RetrieveForViewing(Lite<CaseActivityEntity> lite)
@@ -806,25 +829,6 @@ public static class CaseActivityLogic
                     CreateNextActivities(ca.Case, ctx, ca);
                 }
             }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
-
-
-            new Execute(CaseActivityOperation.Finish)
-            {
-                CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() :
-                !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
-
-                FromStates = { CaseActivityState.Pending },
-                ToStates = { CaseActivityState.Done },
-                CanBeModified = true,
-                Execute = (ca, args) =>
-                {
-                    CheckRequiresOpen(ca);
-                    var to = args.GetArg<Lite<IWorkflowNodeEntity>>();
-                    var jump = ca.WorkflowActivity.NextConnectionsFromCache(null).SingleEx(c => to.Is(c.To));
-                    ExecuteStep(ca, DoneType.Jump, null, jump);
-                },
-            }.Register();
-
 
             new Execute(CaseActivityOperation.Timer)
             {
@@ -1166,7 +1170,7 @@ public static class CaseActivityLogic
             } : null;
         }
 
-        private static void TryToRecompose(CaseEntity childCase)
+        internal static void TryToRecompose(CaseEntity childCase)
         {
             if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow.Is(childCase.Workflow)).All(a => a.FinishDate.HasValue))
             {
