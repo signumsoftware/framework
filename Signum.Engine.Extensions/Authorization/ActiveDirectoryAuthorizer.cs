@@ -260,7 +260,7 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
 
         user.UserName = ctx.UserName;
 
-        if (user.Mixin<UserMixin>().AvoidRolesUpdate == false)
+        if (ctx.EmailAddress.HasText())
             user.Email = ctx.EmailAddress;
     }
 

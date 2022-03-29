@@ -42,7 +42,6 @@
 		<EmbeddedResource Include="Excel\plainExcelTemplate.xlsx" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\BPMPortal.Entities\BPMPortal.Entities.csproj" />
 		<ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj" />
 		<ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
 		<ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
