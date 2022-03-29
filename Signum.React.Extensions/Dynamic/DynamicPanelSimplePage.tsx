@@ -6,7 +6,7 @@ import { StyleContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { WebApiHttpError } from '@framework/Services'
-import { ValueSearchControl, FindOptions, ValueSearchControlLine } from '@framework/Search'
+import { SearchValue, FindOptions, SearchValueLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { QueryEntitiesRequest } from '@framework/FindOptions'
 import { getQueryNiceName, QueryTokenString } from '@framework/Reflection'
@@ -144,7 +144,7 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
 
   return (
     <FormGroup ctx={p.ctx} labelText={getQueryNiceName(p.findOptions.queryName)}>
-      <ValueSearchControl findOptions={p.findOptions} isLink={true} />
+      <SearchValue findOptions={p.findOptions} isLink={true} />
       {
         state == "loading" ?
           <FontAwesomeIcon icon="sync" spin={true} /> :

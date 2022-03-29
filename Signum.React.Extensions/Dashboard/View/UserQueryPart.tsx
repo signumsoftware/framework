@@ -3,7 +3,7 @@ import * as React from 'react'
 import { FindOptions } from '@framework/FindOptions'
 import { getQueryKey, getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage, toLite, liteKey } from '@framework/Signum.Entities'
-import { SearchControl, ValueSearchControl } from '@framework/Search'
+import { SearchControl, SearchValue, SearchValueController } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { UserQueryPartEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
 import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
@@ -142,7 +142,7 @@ interface BigValueBadgeProps {
 
 export function BigValueSearchCounter(p: BigValueBadgeProps) {
 
-  const vsc = React.useRef<ValueSearchControl>(null);
+  const vsc = React.useRef<SearchValueController>(null);
 
   return (
     <div className={classes(
@@ -158,7 +158,7 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
           </div>
           <div className={classes("col-9 flip", "text-end")}>
             <h1>
-              <ValueSearchControl ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
+              <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
                 customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}
               />
             </h1>

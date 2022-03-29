@@ -258,7 +258,9 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         }
 
         user.UserName = ctx.UserName;
-        user.Email = ctx.EmailAddress;
+
+        if (ctx.EmailAddress.HasText())
+            user.Email = ctx.EmailAddress;
     }
 
     public virtual void UpdateUser(UserEntity user, IAutoCreateUserContext ctx)

@@ -227,8 +227,8 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
 
   const handleOnClick = (me: React.MouseEvent<any>) => {
     coc.event = me;
+    onClick?.(me);
     operationClickOrDefault(coc)
-      .finally(() => onClick?.(me))
       .done();
   }
 

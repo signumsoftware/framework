@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import { ValueSearchControlLine } from '@framework/Search'
+import { SearchValueLine } from '@framework/Search'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { Entity } from '@framework/Signum.Entities'

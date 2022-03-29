@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { DateTime } from 'luxon'
 import * as Navigator from '@framework/Navigator'
-import { SearchControl, ValueSearchControlLine } from '@framework/Search'
+import { SearchControl, SearchValueLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import * as Operations from '@framework/Operations'
 import { tryGetTypeInfos, getTypeInfos } from '@framework/Reflection'
@@ -76,7 +76,7 @@ export default function SchedulerPanelPage(p: SchedulerPanelProps) {
         <h4>Available Tasks</h4>
         <div>
           {getTypeInfos(ScheduledTaskEntity.memberInfo(a => a.task).type).map(t =>
-            <ValueSearchControlLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} onExplored={reloadState} />)}
+            <SearchValueLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} onExplored={reloadState} />)}
         </div>
         <h4>{ScheduledTaskEntity.niceName()}</h4>
         <SearchControl

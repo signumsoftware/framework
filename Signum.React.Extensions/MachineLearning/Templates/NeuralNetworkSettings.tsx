@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, EntityTable, StyleContext, OptionItem, LineBaseProps } from '@framework/Lines'
-import { ValueSearchControl } from '@framework/Search'
+import { SearchValue } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { NeuralNetworkSettingsEntity, PredictorEntity, PredictorColumnUsage, PredictorCodificationEntity, NeuralNetworkHidenLayerEmbedded, PredictorAlgorithmSymbol, TensorFlowOptimizer } from '../Signum.Entities.MachineLearning'
 import { API } from '../PredictorClient';
@@ -50,7 +50,7 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
   function renderCount(ctx: StyleContext, p: PredictorEntity, usage: PredictorColumnUsage) {
     return (
       <FormGroup ctx={ctx} labelText={PredictorColumnUsage.niceToString(usage) + " columns"}>
-        {p.state != "Trained" ? <FormControlReadonly ctx={ctx}>?</FormControlReadonly> : <ValueSearchControl isBadge={true} isLink={true} findOptions={{
+        {p.state != "Trained" ? <FormControlReadonly ctx={ctx}>?</FormControlReadonly> : <SearchValue isBadge={true} isLink={true} findOptions={{
           queryName: PredictorCodificationEntity,
           filterOptions: [
             { token: PredictorCodificationEntity.token(e => e.predictor), value: p },

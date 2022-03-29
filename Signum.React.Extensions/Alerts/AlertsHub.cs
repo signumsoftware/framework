@@ -64,7 +64,7 @@ public class ConnectionMapping<T> where T : class
 
             connections.Add(connectionId);
 
-            connectionToUser.Add(connectionId, key);
+            connectionToUser[connectionId] = key; //reconnects with same id 
         }
     }
 
