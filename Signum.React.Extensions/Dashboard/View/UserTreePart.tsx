@@ -4,7 +4,7 @@ import { FindOptions } from '@framework/FindOptions'
 import * as Finder from '@framework/Finder'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
-import { SearchControl, ValueSearchControl } from '@framework/Search'
+import { SearchControl, SearchValue } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { UserTreePartEntity } from '../Signum.Entities.Dashboard'
 import { classes } from '@framework/Globals';

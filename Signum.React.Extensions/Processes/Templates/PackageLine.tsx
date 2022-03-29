@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
-import { SearchControl, ValueSearchControlLine } from '@framework/Search'
+import { SearchControl, SearchValueLine } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PackageLineEntity, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
 
@@ -13,7 +13,7 @@ export default function Package(p : { ctx: TypeContext<PackageLineEntity> }){
       <EntityLine ctx={ctx.subCtx(f => f.target)} />
       <EntityLine ctx={ctx.subCtx(f => f.result)} />
       <ValueLine ctx={ctx.subCtx(f => f.finishTime)} />
-      <ValueSearchControlLine ctx={ctx}
+      <SearchValueLine ctx={ctx}
         badgeColor="danger"
         findOptions={{
           queryName: ProcessExceptionLineEntity,

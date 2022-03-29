@@ -13,7 +13,7 @@ import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
-import { ValueSearchControlLine } from '../../../Signum.React/Scripts/Search';
+import { SearchValueLine } from '../../../Signum.React/Scripts/Search';
 import { withClassName } from '../../Dynamic/View/HtmlAttributesExpression';
 import { classes } from '../../../Signum.React/Scripts/Globals';
 import { OperationButton } from '../../../Signum.React/Scripts/Operations/EntityOperations';
@@ -162,7 +162,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
             <ValueLine ctx={ectx.subCtx(cp => cp.autoRegenerateWhenOlderThan)} />
           </div>
           <div className="col-sm-2">
-            {!ctx.value.isNew && <ValueSearchControlLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
+            {!ctx.value.isNew && <SearchValueLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
           </div>
           <div className="col-sm-3 pt-4">
             {!ctx.value.isNew && <OperationButton eoc={EntityOperationContext.fromTypeContext(ctx, DashboardOperation.RegenerateCachedQueries)} hideOnCanExecute className="w-100" />}

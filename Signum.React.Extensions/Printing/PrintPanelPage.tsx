@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ValueSearchControl, SearchControl, ValueSearchControlLine, ValueSearchControlController } from '@framework/Search'
+import { SearchValue, SearchControl, SearchValueLine, SearchValueController } from '@framework/Search'
 import { StyleContext } from '@framework/Lines'
 import { API, PrintStat } from './PrintClient'
 import * as Navigator from '@framework/Navigator'
@@ -14,7 +14,7 @@ export default function PrintPanelPage(p: {}) {
 
   const stats = useAPI(() => API.getStats(), []);
 
-  function renderStateButton(vsc: ValueSearchControlController, fileType: FileTypeSymbol) {
+  function renderStateButton(vsc: SearchValueController, fileType: FileTypeSymbol) {
     if (vsc.value == undefined || vsc.value == 0)
       return undefined;
 
@@ -25,7 +25,7 @@ export default function PrintPanelPage(p: {}) {
     );
   }
 
-  function handlePrintClick(e: React.MouseEvent<any>, fileType: FileTypeSymbol, vsc: ValueSearchControlController) {
+  function handlePrintClick(e: React.MouseEvent<any>, fileType: FileTypeSymbol, vsc: SearchValueController) {
     e.preventDefault();
     API.createPrintProcess(fileType)
       .then(p => p && Navigator.view(p))
@@ -41,7 +41,7 @@ export default function PrintPanelPage(p: {}) {
           <legend>Ready To Print</legend>
           {stats == null ? JavascriptMessage.loading.niceToString() :
             stats.map((s, i) =>
-            <ValueSearchControlLine ctx={ctx} key={i} initialValue={s.count}
+            <SearchValueLine ctx={ctx} key={i} initialValue={s.count}
               labelText={s.fileType.toStr.after(".")}
               extraButtons={vsc => renderStateButton(vsc, s.fileType)}
               findOptions={{

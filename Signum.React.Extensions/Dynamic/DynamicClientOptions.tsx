@@ -4,7 +4,7 @@ import { StyleContext } from '@framework/TypeContext'
 import { FindOptions, FilterConditionOption, ColumnOption } from '@framework/FindOptions';
 import { Type, QueryTokenString } from '@framework/Reflection';
 import { Entity } from '@framework/Signum.Entities';
-import { ValueSearchControlLine } from '@framework/Search';
+import { SearchValueLine } from '@framework/Search';
 import { CellFormatter } from '@framework/Finder';
 import { expandNumbers, DiffDocument } from '../DiffLog/Templates/DiffDocument';
 
@@ -32,7 +32,7 @@ export namespace Options {
 
 
       return (
-        <ValueSearchControlLine ctx={ctx} findOptions={findOptions} searchControlProps={{
+        <SearchValueLine ctx={ctx} findOptions={findOptions} searchControlProps={{
           formatters: columns.toObjectDistinct(a => a.token.toString(), a => new CellFormatter((cell, cfc) => cell && <HighlightText search={search} text={cell} type={a.type} />))
         }} />
       );
