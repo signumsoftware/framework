@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
-import { ValueSearchControlLine } from '@framework/Search'
+import { SearchValueLine, SearchValueLineController } from '@framework/Search'
 import { toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TypeContext } from '@framework/TypeContext'
@@ -13,11 +13,11 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
   const isActive = ctx.value.state == "Executing" || ctx.value.state == "Queued";
 
   const tick = useInterval(isActive ? 500 : null, 0, n => n + 1);
-  const vscl = React.useRef<ValueSearchControlLine>(null);
+  const vscl = React.useRef<SearchValueLineController>(null);
   React.useEffect(() => {
     if (isActive) {
       const lite = toLite(ctx.value);
-      vscl.current && vscl.current.refreshValue();
+      vscl.current && vscl.current.valueSearchControl!.refreshValue();
       Navigator.API.fetchEntityPack(lite)
         .then(pack => ctx.frame!.onReload(pack))
         .done();
@@ -57,7 +57,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
 
       <ProcessProgressBar p={ctx.value}/>
 
-      <ValueSearchControlLine ctx={ctx3}
+      <SearchValueLine ctx={ctx3}
         badgeColor="danger"
         ref={vscl}
         findOptions={{

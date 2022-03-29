@@ -4,7 +4,7 @@ import { EntityCheckboxList, ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { AlertEntity, AlertState, AlertTypeSymbol, SendNotificationEmailTaskEntity } from '../Signum.Entities.Alerts'
 import { useForceUpdate } from '../../../Signum.React/Scripts/Hooks';
-import { ValueSearchControlLine } from '../../../Signum.React/Scripts/Search';
+import { SearchValueLine } from '../../../Signum.React/Scripts/Search';
 import { toLite } from '@framework/Signum.Entities'
 
 export default function SendNotificationEmailTask(p: { ctx: TypeContext<SendNotificationEmailTaskEntity> }) {
@@ -17,7 +17,7 @@ export default function SendNotificationEmailTask(p: { ctx: TypeContext<SendNoti
       <ValueLine ctx={ctx.subCtx(n => n.ignoreNotificationsOlderThan)} labelColumns={4} onChange={forceUpdate} valueColumns={2}/>
       <ValueLine ctx={ctx.subCtx(n => n.sendBehavior)} labelColumns={4} onChange={forceUpdate} />
       {(ctx.value.sendBehavior == "Exclude" || ctx.value.sendBehavior == "Include") && < EntityCheckboxList ctx={ctx.subCtx(n => n.alertTypes)} columnCount={1} onChange={forceUpdate}/>}
-      <ValueSearchControlLine ctx={ctx} findOptions={{
+      <SearchValueLine ctx={ctx} findOptions={{
         queryName: AlertEntity,
         filterOptions: [
           { token: AlertEntity.token(a => a.entity.state), value: AlertState.value("Saved") },

@@ -4,13 +4,13 @@ using Signum.React.Selenium;
 
 namespace Signum.React.Extensions.Selenium.Search;
 
-public class ValueSearchControlLineProxy
+public class SearchValueLineProxy
 {
     public WebDriver Selenium { get; private set; }
 
     public IWebElement Element { get; private set; }
 
-    public ValueSearchControlLineProxy(IWebElement element)
+    public SearchValueLineProxy(IWebElement element)
     {
         this.Selenium = element.GetDriver();
         this.Element = element;

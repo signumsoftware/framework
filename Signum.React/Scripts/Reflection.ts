@@ -1974,6 +1974,11 @@ export type GraphExplorerMode = "collect" | "set" | "clean";
 
 export class GraphExplorer {
 
+  static hasChanges(m: ModifiableEntity) {
+    this.propagateAll(m);
+    return m.modified;
+  }
+
   static propagateAll(...args: any[]): GraphExplorer {
     const ge = new GraphExplorer("clean", {});
     args.forEach(o => ge.isModified(o, ""));

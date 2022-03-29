@@ -1,9 +1,9 @@
 ﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
   <Header>
-    <Title>ValueSearchControlLine</Title>
+    <Title>SearchValueLine</Title>
     <Author>Signum Software</Author>
-    <Shortcut>vscl</Shortcut>
-    <Description>Code snippet for adding a ValueSearchControlLine</Description>
+    <Shortcut>svl</Shortcut>
+    <Description>Code snippet for adding a SearchValueLine</Description>
     <SnippetTypes>
       <SnippetType>Expansion</SnippetType>
     </SnippetTypes>
@@ -12,8 +12,8 @@
     <Imports>
       <Import>
         <Namespace>
-          import { ValueSearchControlLine } from '@framework/Search'
-        </Namespace>
+			import { SearchValueLine } from '@framework/Search'
+		</Namespace>
       </Import>
     </Imports>
     <Declarations>
@@ -25,7 +25,7 @@
     </Declarations>
     <Code Language="TypeScript">
       <![CDATA[
-	  {!ctx.value.isNew && <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: $entityType$, filterOptions: [{ token: $entityType$.token(a => a.$end$), value: ctx.value}]}} />}]]>
+	  {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={{ queryName: $entityType$, filterOptions: [{ token: $entityType$.token(a => a.$end$), value: ctx.value}]}} />}]]>
     </Code>
   </Snippet>
 </CodeSnippet>
