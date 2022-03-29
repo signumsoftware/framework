@@ -1,3 +1,4 @@
+using BPMPortal.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Reflection;
 using Signum.Services;
@@ -258,7 +259,9 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         }
 
         user.UserName = ctx.UserName;
-        user.Email = ctx.EmailAddress;
+
+        if (user.Mixin<UserMixin>().AvoidRolesUpdate == false)
+            user.Email = ctx.EmailAddress;
     }
 
     public virtual void UpdateUser(UserEntity user, IAutoCreateUserContext ctx)

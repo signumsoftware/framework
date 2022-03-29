@@ -11,7 +11,10 @@ export function YScaleTicks({ xRule, yRule, valueColumn, y, format }: { xRule: R
   var availableHeight = yRule.size("content");
 
   var yTicks = y.ticks(availableHeight / 50);
-  var yTickFormat = format ?? valueColumn.getNiceName; //  y.tickFormat(availableHeight / 50);
+
+  var isDate = valueColumn.type == "DateOnly" || valueColumn.type == "DateTime";
+
+  var yTickFormat = format ?? (isDate ? y.tickFormat(availableHeight / 50) : valueColumn.getNiceName);
 
   return (
     <>
@@ -55,7 +58,10 @@ export function YScaleTicksEnd({ xRule, yRule, valueColumn, y, format }: { xRule
   var availableHeight = yRule.size("content");
 
   var yTicks = y.ticks(availableHeight / 50);
-  var yTickFormat = format ?? y.tickFormat(availableHeight / 50);
+
+  var isDate = valueColumn.type == "DateOnly" || valueColumn.type == "DateTime";
+
+  var yTickFormat = format ?? (isDate ? y.tickFormat(availableHeight / 50) : valueColumn.getNiceName);
 
   return (
     <>
@@ -92,7 +98,10 @@ export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: R
   var availableWidth = yRule.size("content");
 
   var xTicks = x.ticks(availableWidth / 50);
-  var xTickFormat = format ?? valueColumn.getNiceName;//  x.tickFormat(availableWidth / 50);
+
+  var isDate = valueColumn.type == "DateOnly" || valueColumn.type == "DateTime";
+
+  var xTickFormat = format ?? (isDate ? x.tickFormat(availableWidth / 50) : valueColumn.getNiceName);
 
   return (
     <>

@@ -235,9 +235,9 @@ export function CalendarYear({ year, rules, rowByDate, width, height, onDrillDow
           const r: ChartRow | undefined = rowByDate[cleanDate(d)];
           const active = r && detector?.(r);
           return (
-            <g className="shadow-group" key={d.toISOString()}>
+            <g className="hover-group" key={d.toISOString()}>
               <rect
-                className="sf-transition shadow"
+                className="sf-transition hover-target"
                 opacity={active == false ? .5 : undefined}
                 stroke={active == true ? "black" : "#ccc"}
                 strokeWidth={active == true ? 2 : undefined}

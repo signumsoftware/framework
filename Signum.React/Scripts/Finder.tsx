@@ -15,7 +15,7 @@ import {
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement } from './Signum.Entities';
 import { TypeEntity, QueryEntity, ExceptionEntity } from './Signum.Entities.Basics';
 
 import {
@@ -1301,7 +1301,7 @@ function nanToNull(n: number) {
   return n;
 }
 
-function convertToLite(val: string | Lite<Entity> | Entity | undefined): Lite<Entity> | undefined {
+function convertToLite(val: string | Lite<Entity> | Entity | MListElement<Entity> | MListElement<Lite<Entity>> | undefined): Lite<Entity> | undefined {
   if (val == undefined || val == "")
     return undefined;
 
@@ -1317,6 +1317,9 @@ function convertToLite(val: string | Lite<Entity> | Entity | undefined): Lite<En
 
   if (typeof val === "string")
     return parseLite(val);
+
+  if (isMListElement(val))
+    return convertToLite(val.element);
 
   throw new Error(`Impossible to convert ${val} to Lite`);
 }

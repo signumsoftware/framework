@@ -50,6 +50,7 @@ export interface MemberInfo {
   isMultiline?: boolean;
   isVirtualMList?: boolean;
   preserveOrder?: boolean;
+  avoidDuplicates?: boolean;
   notVisible?: boolean;
   id?: any; //symbols
 }

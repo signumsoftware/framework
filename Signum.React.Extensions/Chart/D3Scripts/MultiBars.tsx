@@ -103,8 +103,8 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
 
 
               return (
-                <g className="shadow-group" key={key}>
-                  <rect className="shape sf-transition shadow"
+                <g className="hover-group" key={key}>
+                  <rect className="shape sf-transition hover-target"
                     opacity={active == false ? .5 : undefined}
                     fill={s.color || color(s.key)}
                     transform={translate(0, -y(key)! - ySubscale(s.key)! - ySubscale.bandwidth()) + (initialLoad ? scale(0, 1) : scale(1, 1))}

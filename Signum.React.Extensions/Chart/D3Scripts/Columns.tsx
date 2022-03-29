@@ -22,7 +22,7 @@ export default function renderColumns({ data, width, height, parameters, loading
     _1: 5,
     title: 15,
     _2: 10,
-    labels: parseInt(parameters["UnitMargin"]), 
+    labels: parseInt(parameters["UnitMargin"]),
     _3: 5,
     ticks: 4,
     content: '*',
@@ -30,14 +30,18 @@ export default function renderColumns({ data, width, height, parameters, loading
   }, width);
   //xRule.debugX(chart)
 
+  var labelsPadding = 5;
+  var labelsMargin = parseInt(parameters["LabelsMargin"]);
+
   var yRule = Rule.create({
     _1: 10,
     legend: 15,
     _2: 5,
+    _labelTopMargin: parameters["Labels"] == "Inside" ? labelsPadding + labelsMargin : 0,
     content: '*',
     ticks: 4,
-    _3: isMargin ? 5 : 0,
-    labels: isMargin ? parseInt(parameters["LabelsMargin"]) : 0,
+    _3: isMargin ? labelsPadding : 0,
+    labels: isMargin ? labelsMargin : 0,
     _4: 10,
     title: 15,
     _5: 5,
@@ -70,7 +74,7 @@ export default function renderColumns({ data, width, height, parameters, loading
     <svg direction="ltr" width={width} height={height}>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
-        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y}  />
+        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
       </g>
 
       {paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, initialLoad, onDrillDown, colIndex: 0, colCount: 1, memo, detector })}
@@ -89,6 +93,9 @@ export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, 
   colIndex: number, colCount: number
 }) {
 
+  var labelsPadding = 5;
+  var labelsMargin = parseInt(parameters["LabelsMargin"]);
+
   const isMargin = parameters["Labels"] == "Margin" || parameters["Labels"] == "MarginAll";
   const isInside = parameters["Labels"] == "Inside" || parameters["Labels"] == "InsideAll";
   const isAll = parameters["Labels"] == "MarginAll" || parameters["Labels"] == "InsideAll";
@@ -100,10 +107,9 @@ export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, 
   var color = parameters["ForceColor"] ? () => parameters["ForceColor"] :
     ChartUtils.colorCategory(parameters, orderedRows.map(r => keyColumn.getValueKey(r)!), memo);
 
-  var size = yRule.size('content');
-  var labelMargin = 10;
+  var size = yRule.size('content') + (yRule.size("_labelTopMargin" as any) ?? 0);
 
-  const bandMargin = x.bandwidth() > 20 ? 2 : 0;
+  const bandMargin = x.bandwidth() > 20 ? 2 : x.bandwidth() > 10 ? 1 : 0;
 
   const bandwidth = ((x.bandwidth() - bandMargin * 2) / colCount);
   const bandOffset = bandwidth * colIndex + bandMargin;
@@ -124,8 +130,8 @@ export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, 
           const posy = y(row ? valueColumn.getValue(row) : 0)!;
 
           return (
-            <g className="shadow-group" key={key}>
-              {row && <rect className="shape sf-transition shadow"
+            <g className="hover-group" key={key}>
+              {row && <rect className="shape sf-transition hover-target"
                 opacity={active == false ? .5 : undefined}
                 transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(key)!, -y(valueColumn.getValue(row))!)}
                 height={y(valueColumn.getValue(row))}
@@ -139,8 +145,8 @@ export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, 
               </rect>}
               {bandwidth > 15 &&
                 (isMargin ?
-                  <g className="x-label" transform={translate(0, labelMargin)} >
-                    <TextEllipsis maxWidth={yRule.size('labels')} padding={labelMargin} className="x-label sf-transition"
+                  <g className="x-label" transform={translate(0, labelsPadding)} >
+                    <TextEllipsis maxWidth={yRule.size('labels')} className="x-label sf-transition"
                       transform={translate(x(keyColumn.getKey(key))! + bandwidth / 2, 0) + rotate(-90)}
                       dominantBaseline="middle"
                       fontWeight="bold"
@@ -154,13 +160,13 @@ export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, 
                   isInside ?
                     <g className="x-label" >
                       <TextEllipsis
-                        maxWidth={posy >= size / 2 ? posy : size - posy} padding={labelMargin} className="x-label sf-transition"
+                        maxWidth={size - posy} className="x-label sf-transition"
                         transform={translate(x(keyColumn.getKey(key))! + bandwidth / 2, -posy) + rotate(-90)}
                         dominantBaseline="middle"
                         fontWeight="bold"
-                        fill={posy >= size / 2 ? '#fff' : (keyColumn.getColor(key) ?? color(keyColumn.getKey(key)))}
-                        dx={posy >= size / 2 ? -labelMargin : labelMargin}
-                        textAnchor={posy >= size / 2 ? 'end' : 'start'}
+                        fill={(keyColumn.getColor(key) ?? color(keyColumn.getKey(key)))}
+                        dx={labelsPadding}
+                        textAnchor={'start'}
                         onClick={e => onDrillDown({ c0: key }, e)}
                         cursor="pointer">
                         {keyColumn.getNiceName(key)}
@@ -170,7 +176,6 @@ export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, 
               {parseFloat(parameters["NumberOpacity"]) > 0 && bandwidth > 15 && row &&
                 <g className="numbers-label" >
                   <TextIfFits className="number-label sf-transition"
-                    transform={translate(x(keyColumn.getValueKey(row))! + bandwidth / 2, -y(valueColumn.getValue(row))! / 2) + rotate(-90)}
                     maxWidth={y(valueColumn.getValue(row))!}
                     fill={parameters["NumberColor"] ?? "#000"}
                     dominantBaseline="middle"

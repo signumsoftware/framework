@@ -213,6 +213,7 @@ public static class ReflectionServer
                                     IsVirtualMList = p.IsVirtualMList(),
                                     MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                     PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
+                                    AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
                                 };
 
                                 return KeyValuePair.Create(p.PropertyString(), OnPropertyRouteExtension(mi, p)!);
@@ -228,7 +229,7 @@ public static class ReflectionServer
                       }, type)))
                       .Where(kvp => kvp.Value != null)
                       .ToDictionaryEx("entities");
-
+        
         return result;
     }
 
@@ -380,7 +381,8 @@ public class MemberInfoTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsVirtualMList { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public int? MaxLength { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsMultiline { get; set; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool PreserveOrder { get; internal set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool PreserveOrder { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool AvoidDuplicates { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public object? Id { get; set; }
 
     [JsonExtensionData]

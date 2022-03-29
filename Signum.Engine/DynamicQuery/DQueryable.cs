@@ -206,16 +206,27 @@ public static class DQueryable
         List<BuildExpressionContext> subContext = new List<BuildExpressionContext>();
         foreach (var child in node.Children)
         {
-            var collectionToken = child.Value.Key!.Parent!;
-            var colExpre = collectionToken.BuildExpression(context);
+            var cet = child.Value.Key!;
 
-            var elemType = colExpre.Type.ElementType()!;
+            var collectionToken = cet.Parent!;
+            var eptML = MListElementPropertyToken.AsMListEntityProperty(collectionToken);
 
-            var pe2 = Expression.Parameter(elemType, elemType.CleanType().Name.Substring(0, 1).ToLower());
+            var colExpre = eptML != null ? MListElementPropertyToken.BuildMListElements(eptML, context) :
+                collectionToken.BuildExpression(context);
+
+            var elementType = colExpre.Type.ElementType()!;
+
+            var pe2 = Expression.Parameter(elementType, elementType.CleanType().Name.Substring(0, 1).ToLower());
 
             var subQueryCtx = new BuildExpressionContext(pe2.Type, pe2, new Dictionary<QueryToken, ExpressionBox>
             {
-                { child.Value.Key, new ExpressionBox(pe2.BuildLiteNullifyUnwrapPrimaryKey(new []{child.Value.Key.GetPropertyRoute() }.NotNull().ToArray())) }
+                { 
+                    cet, 
+                    new ExpressionBox(
+                        pe2.BuildLiteNullifyUnwrapPrimaryKey(new []{ cet.GetPropertyRoute() }.NotNull().ToArray()),
+                        mlistElementRoute: eptML != null ? cet.GetPropertyRoute() : null
+                    )
+                }
             });
 
             var subQueryExp = SubQueryConstructor(subQueryCtx, child, out var newSubContext);

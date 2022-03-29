@@ -137,11 +137,11 @@ body.rtl .sf-chart-token .sf-query-token {
 }
 
 .sf-chart-animable .sf-transition {
-    transition: all 0.3s cubic-bezier(0.92, 0.02, 0.21, 1.01), filter 0.1s linear
+    transition: all 0.3s cubic-bezier(0.92, 0.02, 0.21, 1.01), filter 0s linear
 }
 
-.shadow-group:hover .shadow {
-    filter: drop-shadow( 1px 1px 3px rgba(0, 0, 0, .4));
+.hover-group:hover .hover-target {
+    filter: brightness(1.2);
 }
 
 text.sf-initial-message {

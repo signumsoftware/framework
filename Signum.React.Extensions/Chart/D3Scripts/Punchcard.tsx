@@ -184,7 +184,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   
   var mainShape = configureShape(sizeColumn, r => sizeColumn ? sizeColumn.getValue(r) : 0,
     r => ({
-      className:"punch sf-transition shadow",
+      className:"punch sf-transition hover-target",
       shapeRendering: "initial",
       fillOpacity: fillOpacity(r),
       fill: color == null ? (parameters["FillColor"] ?? 'black') : color(colorColumn!.getValue(r)),
@@ -225,7 +225,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
           .map(r => {
             const active = detector?.(r);
             return (
-              <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition shadow-group"
+              <g key={horizontalColumn.getValueKey(r) + "-" + verticalColumn.getValueKey(r)} className="chart-groups sf-transition hover-group"
                 cursor="pointer"
                 opacity={active == false ? .5 : undefined}
                 onClick={e => onDrillDown(r, e)}>
