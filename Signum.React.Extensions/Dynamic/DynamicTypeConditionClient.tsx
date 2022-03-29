@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { ajaxPost } from '@framework/Services';
-import { ValueSearchControlLine } from '@framework/Search'
+import { SearchValueLine } from '@framework/Search'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
@@ -20,8 +20,8 @@ export function start(options: { routes: JSX.Element[] }) {
   }))
 
   Constructor.registerConstructor(DynamicTypeConditionEntity, () => DynamicTypeConditionEntity.New({ eval: DynamicTypeConditionEval.New() }));
-  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
+  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
+  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
     queryName: DynamicTypeConditionEntity,
     filterOptions: [{ token: DynamicTypeConditionEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);

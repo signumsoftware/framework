@@ -59,7 +59,7 @@ public static class AlertsServer
             }
             else
             {
-                users.Chunk(100).ToList().ForEach(list =>
+                users.Chunk(NotifyChunkSize).ToList().ForEach(list =>
                 {
                     var ids = list.ToString(a => a.Id.ToString(), "/");
 

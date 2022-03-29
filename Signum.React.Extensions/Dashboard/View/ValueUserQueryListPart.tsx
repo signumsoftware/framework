@@ -4,7 +4,7 @@ import { FormGroup } from '@framework/Lines'
 import { FindOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage, liteKey, toLite } from '@framework/Signum.Entities'
-import { ValueSearchControlLine } from '@framework/Search'
+import { SearchValueLine } from '@framework/Search'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, PanelPartEmbedded, CachedQueryEntity } from '../Signum.Entities.Dashboard'
@@ -60,7 +60,7 @@ export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
             <span>{ctx.value.label ?? getQueryNiceName(fo.queryName)}</span>
           </div>
           <div className="col-auto">
-          <ValueSearchControlLine ctx={ctx2} findOptions={fo}
+          <SearchValueLine ctx={ctx2} findOptions={fo}
             customRequest={p.cachedQuery && ((qr, fo, token) => p.cachedQuery!.then(cq => executeQueryValueCached(qr, fo, token, cq)))} />
           </div>
         </div>

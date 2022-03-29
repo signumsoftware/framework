@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
-import { SearchControl, ValueSearchControlLine } from '@framework/Search'
+import { SearchControl, SearchValueLine } from '@framework/Search'
 import * as Finder from '@framework/Finder'
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
@@ -61,8 +61,8 @@ export function start(options: { routes: JSX.Element[] }) {
       iconColor: "purple",
     }));
 
-  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
-  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
+  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
   DynamicClientOptions.Options.getDynaicMigrationsStep = () =>
     <>
       <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>

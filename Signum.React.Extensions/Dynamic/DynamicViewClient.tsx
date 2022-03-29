@@ -3,7 +3,7 @@ import * as ReactBootstrap from "react-bootstrap";
 import { globalModules } from './View/GlobalModules'
 import { ajaxGet } from '@framework/Services';
 import * as Search from '@framework/Search'
-import { ValueSearchControlLine } from '@framework/Search'
+import { SearchValueLine } from '@framework/Search'
 import { EntitySettings, ViewPromise } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
@@ -32,12 +32,12 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));
   Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => import('./View/DynamicViewOverride')));
 
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
+  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
     queryName: DynamicViewEntity,
     filterOptions: [{ token: DynamicViewEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
 
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
+  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
     queryName: DynamicViewSelectorEntity,
     filterOptions: [{ token: DynamicViewSelectorEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
@@ -362,8 +362,8 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   // Search
   var SearchControl = Search.SearchControl;
   var SearchControlLoaded = Search.SearchControlLoaded;
-  var ValueSearchControl = Search.ValueSearchControl;
-  var ValueSearchControlLine = Search.ValueSearchControlLine;
+  var SearchValue = Search.SearchValue;
+  var SearchValueLine = Search.SearchValueLine;
 
   // Components
   var Button = ReactBootstrap.Button;
