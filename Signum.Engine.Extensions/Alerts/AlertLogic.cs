@@ -395,6 +395,17 @@ public static class AlertLogic
         }
     }
 
+    public static void AttendAllAlerts(this IQueryable<AlertEntity> alerts)
+    {
+        using (AuthLogic.Disable())
+        {
+            alerts
+                 .Where(a => a.State == AlertState.Saved)
+                .ToList()
+                .ForEach(a => a.Execute(AlertOperation.Attend));
+        }
+    }
+
     public static void DeleteAllAlerts(Lite<Entity> target)
     {
         using (AuthLogic.Disable())

@@ -107,7 +107,6 @@ public static class CaseActivityOperation
     public static readonly ExecuteSymbol<CaseActivityEntity> Next;
     public static readonly ExecuteSymbol<CaseActivityEntity> Jump;
     public static readonly ExecuteSymbol<CaseActivityEntity> FreeJump;
-    public static readonly ExecuteSymbol<CaseActivityEntity> Finish;
     public static readonly ExecuteSymbol<CaseActivityEntity> Timer;
     public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;
     public static readonly ExecuteSymbol<CaseActivityEntity> Undo;
