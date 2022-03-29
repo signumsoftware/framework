@@ -1,4 +1,3 @@
-using BPMPortal.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Reflection;
 using Signum.Services;
