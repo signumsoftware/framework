@@ -34,7 +34,7 @@ export interface SearchValueProps {
   deps?: React.DependencyList;
   searchControlProps?: Partial<SearchControlProps>;
   modalSize?: BsSize;
-  onRender?: (value: any | undefined, vsc: SearchValueController) => React.ReactElement;
+  onRender?: (value: any | undefined, vsc: SearchValueController) => React.ReactElement | null | undefined | false;
   htmlAttributes?: React.HTMLAttributes<HTMLElement>,
   customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, signal: AbortSignal) => Promise<any>,
 }
@@ -43,6 +43,7 @@ export interface SearchValueController {
   props: SearchValueProps;
   valueToken: QueryToken | null | undefined;
   value: unknown | undefined;
+  renderValue(): React.ReactChild | null;
   refreshValue: () => void;
   handleClick: (e: React.MouseEvent<any>) => void;
 }
@@ -127,6 +128,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
   controller.props = p;
   controller.value = value;
   controller.valueToken = valueToken;
+  controller.renderValue = renderValue;
   controller.refreshValue = refreshValue;
   controller.handleClick = handleClick;
 
@@ -155,8 +157,13 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     );
   }
 
-  if (p.onRender)
-    return p.onRender(value, controller)!;
+  if (p.onRender) {
+    var result = p.onRender(value, controller)!;
+    if (result == null || result == false)
+      return null;
+
+    return result;
+  }
 
   if (p.multipleValues) {
     if (value == null)
@@ -258,7 +265,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       .done();
   }
 
-  function renderValue() {
+  function renderValue(): React.ReactChild | null{
 
     if (value === undefined)
       return "…";
@@ -291,7 +298,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
           return Duration.fromISOTime(value).toFormat(luxonFormat ?? "hh:mm:ss");
         }
       case "String": return value;
-      case "Lite": return (value as Lite<Entity>).toStr;
+      case "Lite": return (value as Lite<Entity>).toStr ?? null;
       case "Embedded": return getToString(value as EmbeddedEntity);
       case "Boolean": return <input type="checkbox" className="form-check-input" disabled={true} checked={value} />
       case "Enum": return getEnumInfo(token!.type.name, value).niceName;
