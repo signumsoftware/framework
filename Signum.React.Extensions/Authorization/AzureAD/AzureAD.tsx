@@ -47,11 +47,15 @@ export function signIn(ctx: LoginContext) {
   msalClient.loginPopup(userRequest)
     .then(a => {
       localStorage.setItem('msalAccount', a.account!.username);
-      return AuthClient.API.loginWithAzureAD(a.idToken, true);
-    }).then(r => {
-      AuthClient.setAuthToken(r!.token, r!.authenticationType);
-      AuthClient.setCurrentUser(r!.userEntity);
-      AuthClient.Options.onLogin()
+      return AuthClient.API.loginWithAzureAD(a.idToken, true)
+        .then(r => {
+          if (r == null)
+            throw new Error("User " + a.account?.username + " not found in the database");
+
+          AuthClient.setAuthToken(r!.token, r!.authenticationType);
+          AuthClient.setCurrentUser(r!.userEntity);
+          AuthClient.Options.onLogin()
+        })
     })
     .catch(e => {
       ctx.setLoading(undefined);
@@ -82,17 +86,18 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
     account: ai,
   };
 
-  return msalClient.acquireTokenSilent(userRequest).then(res => {
-    const rawIdToken = res.idToken;
+  return adquireTokenSilentOrPopup(userRequest)
+    .then(res => {
+      const rawIdToken = res.idToken;
 
-    return AuthClient.API.loginWithAzureAD(rawIdToken, false);
-  }, e => {
-    if (e instanceof msal.InteractionRequiredAuthError || e instanceof msal.BrowserAuthError && e.errorCode == "user_login_error")
+      return AuthClient.API.loginWithAzureAD(rawIdToken, false);
+    }, e => {
+      if (e instanceof msal.InteractionRequiredAuthError || e instanceof msal.BrowserAuthError && e.errorCode == "user_login_error")
+        return Promise.resolve(undefined);
+
+      console.log(e);
       return Promise.resolve(undefined);
-
-    console.log(e);
-    return Promise.resolve(undefined);
-  });
+    });
 }
 
 export function getAccountInfo() {
@@ -103,7 +108,7 @@ export function getAccountInfo() {
   return msalClient.getAccountByUsername(account) ?? undefined;
 }
 
-export function getAccessToken() {
+export function getAccessToken(): Promise<string>{
 
   var ai = getAccountInfo();
 
@@ -115,7 +120,21 @@ export function getAccessToken() {
     account: ai,
   };
 
-  return msalClient.acquireTokenSilent(userRequest).then(res => res.accessToken);
+  return adquireTokenSilentOrPopup(userRequest)
+    .then(res => res.accessToken);
+}
+
+function adquireTokenSilentOrPopup(userRequest: msal.SilentRequest) {
+    return msalClient.acquireTokenSilent(userRequest)
+        .catch(e => {
+            if (e.errorCode === "consent_required"
+                || e.errorCode === "interaction_required"
+                || e.errorCode === "login_required")
+                return msalClient.acquireTokenPopup(userRequest);
+
+            else
+                throw e;
+        });
 }
 
 export function signOut() {

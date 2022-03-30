@@ -5,9 +5,27 @@ import * as AuthClient from '../Authorization/AuthClient'
 import { HubConnectionState } from '@microsoft/signalr'
 import { useForceUpdate } from '../../Signum.React/Scripts/Hooks';
 
-//Orifinally from https://github.com/pguilbert/react-use-signalr/
+//Originally from https://github.com/pguilbert/react-use-signalr/
 
+declare global {
+  interface Window {
+    __disableSignalR: string | null;
+  }
+}
+
+let messageShownFor: string[] = [];
 export function useSignalRConnection(url: string, options?: signalR.IHttpConnectionOptions) {
+
+  if (window.__disableSignalR) {
+
+    if (!messageShownFor.contains(url)) {
+      console.warn("Skipped:" + url);
+      console.warn(window.__disableSignalR);
+      messageShownFor.push(url);
+    }
+
+    return undefined;
+  }
 
   const connection = React.useMemo<signalR.HubConnection | undefined>(() => {
 
