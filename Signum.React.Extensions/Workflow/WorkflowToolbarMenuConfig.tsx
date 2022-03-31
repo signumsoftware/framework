@@ -23,8 +23,8 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     return is(element.content, WorkflowPermission.WorkflowToolbarMenu);
   }
 
-  getMenuItem() {
-    return <WorkflowDropdownImp />
+  getMenuItem(res: ToolbarResponse<PermissionSymbol>, isActive: boolean, key: number | string) {
+    return <WorkflowDropdownImp key={ key}/>
   }
 
   isCompatibleWithUrl() {
@@ -85,7 +85,7 @@ function WorkflowDropdownImp() {
             icon={ToolbarConfig.coloredIcon("inbox", "steelblue")}/>
 
           {getStarts(starts).flatMap((kvp, i) => kvp.elements.map((val, j) =>
-            <ToolbarNavItem title={val.workflow.toStr + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
+            <ToolbarNavItem key={ i + "-" + j} title={val.workflow.toStr + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
               onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`, e); }}
               active={false}
               icon={ToolbarConfig.coloredIcon("plus-square", "seagreen")}
