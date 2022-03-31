@@ -83,11 +83,15 @@ export abstract class ToolbarConfig<T extends Entity> {
     return true;
   }
 
-  getMenuItem(res: ToolbarResponse<T>, isActive: boolean, key: number | string) {
+  getMenuItem(res: ToolbarResponse<T>, isActive: boolean, key: number | string, onAutoClose?: () => void) {
     return (
       <ToolbarNavItem key={key}
         title={res.label}
-        onClick={(e: React.MouseEvent<any>) => this.handleNavigateClick(e, res)}
+        onClick={(e: React.MouseEvent<any>) => {
+          this.handleNavigateClick(e, res);
+          if (onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+            onAutoClose();
+        }}
         active={isActive}
         icon={this.getIcon(res)}/>
     );
