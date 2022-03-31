@@ -180,6 +180,9 @@ export function getChartScripts(): Promise<ChartScript[]> {
 }
 
 export function getChartScript(symbol: ChartScriptSymbol): Promise<ChartScript> {
+  if (symbol.key == null)
+    throw new Error("User has not access to ChartScriptSymbol");
+
   return getChartScripts().then(cs => cs.single(a => a.symbol.key == symbol.key));
 }
 
