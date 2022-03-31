@@ -37,7 +37,7 @@ export default function ErrorModal(p: ErrorModalProps) {
 
   return (
     <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg">
-      <div className="modal-header dialog-header-error text-danger">
+      <div className="modal-header dialog-header-error">
         <h5 className="modal-title">
           {
             se ? renderServiceTitle(se) :

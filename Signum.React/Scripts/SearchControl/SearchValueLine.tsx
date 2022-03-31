@@ -50,27 +50,27 @@ export interface SearchValueLineProps {
 }
 
 export interface SearchValueLineController {
-  valueSearchControl: SearchValueController | null | undefined;
+  searchValue: SearchValueController | null | undefined;
   refreshValue(): void;
 }
 
 const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValueLineProps, ref?: React.Ref<SearchValueLineController>) {
 
-  var vscRef = React.useRef<SearchValueController | null>();
+  var svRef = React.useRef<SearchValueController | null>();
 
   React.useImperativeHandle(ref, () => ({
-    valueSearchControl: vscRef.current,
-    refreshValue: () => vscRef.current?.refreshValue(),
-  }), [vscRef.current]);
+    searchValue: svRef.current,
+    refreshValue: () => svRef.current?.refreshValue(),
+  }), [svRef.current]);
 
 
   const forceUpdate = useForceUpdate();
 
   var handleSearchValueLoaded = React.useCallback((vsc: SearchValueController | null) => {
-    if (vsc != vscRef.current) {
+    if (vsc != svRef.current) {
       forceUpdate();
     }
-    vscRef.current = vsc;
+    svRef.current = vsc;
   }, []);
 
   function getFindOptions(props: SearchValueLineProps): FindOptions {
@@ -110,7 +110,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
   }
 
 
-  var token = vscRef.current?.valueToken;
+  var token = svRef.current?.valueToken;
 
   const isQuery = p.valueToken == undefined || token?.queryTokenType == "Aggregate";
 
@@ -121,10 +121,10 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
 
   const ctx = p.ctx;
 
-  const value = vscRef.current?.value;
+  const value = svRef.current?.value;
   const find = value != undefined && (p.findButton ?? isQuery) &&
     <a href="#" className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
-      onClick={vscRef.current!.handleClick}
+      onClick={svRef.current!.handleClick}
       title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
       {EntityBaseController.findIcon}
     </a>;
@@ -143,7 +143,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       {EntityBaseController.viewIcon}
     </a>
 
-  let extra = vscRef.current && p.extraButtons && p.extraButtons(vscRef.current);
+  let extra = svRef.current && p.extraButtons && p.extraButtons(svRef.current);
 
   var labelText = p.labelText == undefined ? undefined :
     typeof p.labelText == "function" ? p.labelText() :
@@ -154,7 +154,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       labelText={labelText ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...p.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
-      helpText={p.helpText && vscRef.current && p.helpText(vscRef.current)}
+      helpText={p.helpText && svRef.current && p.helpText(svRef.current)}
     >
       <div className={isFormControl ? ((unit || view || extra || find || create) ? p.ctx.inputGroupClass : undefined) : p.ctx.formControlPlainTextClass}>
         <SearchValue
@@ -191,13 +191,13 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
   function handleViewEntityClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    var entity = vscRef.current!.value as Lite<Entity>;
+    var entity = svRef.current!.value as Lite<Entity>;
     if (p.onViewEntity)
       p.onViewEntity(entity);
 
     Navigator.view(entity)
       .then(() => {
-        vscRef.current!.refreshValue();
+        svRef.current!.refreshValue();
         p.onExplored && p.onExplored();
       }).done();
   }
@@ -208,7 +208,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
     if (p.onCreate) {
       p.onCreate().then(() => {
         if (!p.avoidAutoRefresh)
-          vscRef.current!.refreshValue();
+          svRef.current!.refreshValue();
       }).done();
     } else {
 
@@ -236,7 +236,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
                   createNew: () => Finder.getPropsFromFilters(tn, fos)
                     .then(props => Constructor.constructPack(tn, props)!),
                 })))
-              .then(() => p.avoidAutoRefresh ? undefined : vscRef.current!.refreshValue())
+              .then(() => p.avoidAutoRefresh ? undefined : svRef.current!.refreshValue())
               .done();
           }
         }).done();

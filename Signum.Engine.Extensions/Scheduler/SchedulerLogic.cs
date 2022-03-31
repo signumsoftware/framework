@@ -157,7 +157,9 @@ public static class SchedulerLogic
                 Delete = (st, _) =>
                 {
                     st.Executions().UnsafeUpdate().Set(l => l.ScheduledTask, l => null).Execute();
-                    var rule = st.Rule; st.Delete(); rule.Delete();
+                    var rule = st.Rule; 
+                    st.Delete(); 
+                    rule.Delete();
                 },
             }.Register();
 
