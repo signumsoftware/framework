@@ -5,10 +5,10 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
-import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos } from '../Reflection'
+import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
@@ -1537,6 +1537,40 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     else {
       return m;
     }
+  }
+
+  getSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
+
+    var result = this.tryGetSelectedValue(token, automaticEntityPrefix);
+    if (result == null)
+      throw new Error(`No column '${token}' found`);
+
+    return result.value;
+  }
+
+  tryGetSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): { value: Finder.AddToLite<T> | undefined } | undefined {
+    
+    const tokenName = token.toString();
+
+    const sc = this;
+    const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
+    if (colIndex != -1) {
+      const row = sc.state.selectedRows!.first();
+      const val = row.columns[colIndex];
+      return { value: val };
+    }
+
+    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
+    if (filter != null)
+      return { value: filter?.value };
+
+    if (automaticEntityPrefix) {
+      var result = this.tryGetSelectedValue(tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false);
+      if (result != null)
+        return result as any;
+    }
+
+    return undefined;
   }
 }
 

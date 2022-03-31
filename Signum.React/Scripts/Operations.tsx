@@ -230,38 +230,17 @@ export class ContextualOperationContext<T extends Entity> {
 
   getValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
 
-    var result = this.tryGetValueFromSearchControl(token, automaticEntityPrefix);
-    if (result == null)
-      throw new Error(`No column '${token}' found`);
+    if (!(this.context.container instanceof SearchControlLoaded))
+      throw new Error(`No SearchControl found`);
 
-    return result.value;
+    return this.context.container.getSelectedValue(token, automaticEntityPrefix);
   }
 
   tryGetValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): { value: Finder.AddToLite<T> | undefined } | undefined {
     if (!(this.context.container instanceof SearchControlLoaded))
-      return undefined;
+      throw new Error(`No SearchControl found`);
 
-    const tokenName = token.toString();
-
-    const sc = this.context.container;
-    const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
-    if (colIndex != -1) {
-      const row = sc.state.selectedRows!.first();
-      const val = row.columns[colIndex];
-      return { value: val };
-    }
-
-    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
-    if (filter != null)
-      return { value: filter?.value };
-
-    if (automaticEntityPrefix) {
-      var result = this.tryGetValueFromSearchControl(tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false);
-      if (result != null)
-        return result as any;
-    }
-
-    return undefined;
+    return this.context.container.tryGetSelectedValue(token, automaticEntityPrefix);
   }
 
   isVisibleInContextualMenu(): boolean {
