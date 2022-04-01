@@ -36,10 +36,10 @@ public class AzureADAuthenticationServer
 
                 if (user == null)
                 {
-                    user = ada.OnAutoCreateUser(ctx);
-
-                    if (user == null)
+                    if (!ada.GetConfig().AutoCreateUsers)
                         return false;
+
+                    user = ada.OnCreateUser(ctx);
                 }
                 else
                 {

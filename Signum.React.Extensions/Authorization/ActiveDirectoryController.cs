@@ -16,6 +16,8 @@ public class ActiveDirectoryController : ControllerBase
     [HttpGet("api/findADUsers")]
     public Task<List<ActiveDirectoryUser>> FindADUsers(string subString, int count, CancellationToken token)
     {
+        ActiveDirectoryPermission.InviteUsersFromAD.AssertAuthorized();
+
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
         if (config.Azure_ApplicationID != null)
             return AzureADLogic.FindActiveDirectoryUsers(subString, count, token);
@@ -30,6 +32,8 @@ public class ActiveDirectoryController : ControllerBase
     [HttpPost("api/createADUser")]
     public Lite<UserEntity> CreateADUser([FromBody][Required] ActiveDirectoryUser user)
     {
+        ActiveDirectoryPermission.InviteUsersFromAD.AssertAuthorized();
+
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
         if (config.Azure_ApplicationID != null)
@@ -42,8 +46,10 @@ public class ActiveDirectoryController : ControllerBase
     }
 
     [HttpPost("api/createADGroup")]
-    public Lite<ADGroupEntity> CreateADUser([FromBody][Required] ADGroupRequest groupRequest)
+    public Lite<ADGroupEntity> CreateADGroup([FromBody][Required] ADGroupRequest groupRequest)
     {
+        ActiveDirectoryPermission.InviteUsersFromAD.AssertAuthorized();
+
         var group = Database.Query<ADGroupEntity>().SingleOrDefault(a => a.Id == groupRequest.Id);
         if (group != null)
             return group.ToLite();
