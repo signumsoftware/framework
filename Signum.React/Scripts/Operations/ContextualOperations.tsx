@@ -261,10 +261,7 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
 OperationMenuItem.getText = (coc: ContextualOperationContext<any>): React.ReactNode => {
 
   if (coc.settings && coc.settings.text)
-    return coc.settings.text();
-
-  if (coc.entityOperationSettings?.text)
-    return coc.entityOperationSettings.text();
+    return coc.settings.text(coc);
 
   return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ms-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
 

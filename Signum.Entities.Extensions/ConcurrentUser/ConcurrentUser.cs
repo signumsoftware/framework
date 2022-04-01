@@ -42,12 +42,20 @@ public enum ConcurrentUserMessage
     [Description("Do you want to reload it?")]
     DoYouWantToReloadIt,
 
-    [Description("You have local changes but the entity has been saved in the database... you will not be able to save changes.")]
-    YouHaveLocalChangesButTheEntityHasBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges,
+    [Description("You have local changes in {0} which is currently open by other users. So far no one else has made modifications. ")]
+    YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications,
 
     [Description("Looks like you are not the only one currently modifying {0}... only the first one will be able to save changes!")]
     LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges,
-    
+
+    [Description("You have local changes but {0} has already been saved in the database... you will not be able to save changes :(")]
+    YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges,
+
+    [Description("This is not the latest version of {0}")]
+    ThisIsNotTheLatestVersionOf0,
+
+    [Description("Reload it!")] 
+    ReloadIt,
 
     [Description("WARNING: You will lost your current changes.")]
     WarningYouWillLostYourCurrentChanges,
