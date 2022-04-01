@@ -118,7 +118,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
       filterOptions: toFilterOptions(filters),
       includeDefaultFilters: false,
       columnOptions: columns,
-      columnOptionsMode: "InsertStart",
+      columnOptionsMode: "Add",
     };
 
     if (newWindow)
