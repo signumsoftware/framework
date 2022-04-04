@@ -81,7 +81,7 @@ export function FileUploader(p: FileUploaderProps) {
   }
 
   function setNewError(newError: string) {
-    setErrors([...errors, newError]);
+    setErrors(errors => [...errors, newError]);
   }
 
   return (
