@@ -672,11 +672,13 @@ public class SchemaBuilder
     {
         var nullable = Settings.GetIsNullable(route, forceNull);
 
-        var column = new ImplementationStringColumn(preName.ToString())
+        var primaryKeyTypes = Settings.ImplementedByAllPrimaryKeyTypes;
+
+        var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementationIdColumn(preName.Add("_" + t.Name).ToString(), t, Settings.DefaultSqlType(t))
         {
-            Nullable = nullable,
+            Nullable = primaryKeyTypes.Count() > 1 && nullable == IsNullable.No ? IsNullable.Forced : nullable,
             Size = Settings.DefaultImplementedBySize,
-        };
+        });
 
         var columnType = new ImplementationColumn(preName.Add("Type").ToString(), Include(typeof(TypeEntity), route))
         {
@@ -684,7 +686,7 @@ public class SchemaBuilder
             AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
         };
 
-        return new FieldImplementedByAll(route, column, columnType)
+        return new FieldImplementedByAll(route, columns, columnType)
         {
             IsLite = route.Type.IsLite(),
             AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null

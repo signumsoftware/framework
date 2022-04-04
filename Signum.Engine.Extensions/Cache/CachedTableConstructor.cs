@@ -141,7 +141,7 @@ internal class CachedTableConstructor
             if (field is FieldImplementedByAll iba)
             {
                 Expression id = GetTupleProperty(iba.Column);
-                Expression typeId = GetTupleProperty(iba.ColumnType);
+                Expression typeId = GetTupleProperty(iba.TypeColumn);
 
                 if (isLite)
                 {

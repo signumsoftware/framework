@@ -264,27 +264,25 @@ internal class ImplementedByExpression : DbExpression//, IPropertyInitExpression
 
 internal class ImplementedByAllExpression : DbExpression
 {
-    public readonly Expression Id;
+    public readonly ReadOnlyDictionary<Type/*PrimaryKey type*/, Expression> Ids;
     public readonly TypeImplementedByAllExpression TypeId;
     public readonly IntervalExpression? ExternalPeriod;
 
 
-    public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, IntervalExpression? externalPeriod)
+    public ImplementedByAllExpression(Type type, ReadOnlyDictionary<Type/*PrimaryKey type*/, Expression> ids, TypeImplementedByAllExpression typeId, IntervalExpression? externalPeriod)
         : base(DbExpressionType.ImplementedByAll, type)
     {
-        if (id == null)
-            throw new ArgumentNullException(nameof(id));
-
-        if (id.Type != typeof(string))
-            throw new ArgumentException("string");
-        this.Id = id;
+        if (ids == null)
+            throw new ArgumentNullException(nameof(ids));
+        
+        this.Ids = ids;
         this.TypeId = typeId ?? throw new ArgumentNullException(nameof(typeId));
         this.ExternalPeriod = externalPeriod;
     }
 
     public override string ToString()
     {
-        return "ImplementedByAll{{ ID = {0}, Type = {1} }}".FormatWith(Id, TypeId);
+        return "ImplementedByAll{{ Ids = {0}, Type = {1} }}".FormatWith(Ids, TypeId);
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)

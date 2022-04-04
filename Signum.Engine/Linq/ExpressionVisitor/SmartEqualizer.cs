@@ -517,7 +517,8 @@ internal static class SmartEqualizer
     {
         var joins = (from imp1 in typeIb1.TypeImplementations
                      join imp2 in typeIb2.TypeImplementations on imp1.Key equals imp2.Key
-                     select Expression.And(NotEqualToNull(imp1.Value), NotEqualToNull(imp2.Value))).ToList();
+                     select Expression.And(Expression.And(NotEqualToNull(imp1.Value), NotEqualToNull(imp2.Value)), EqualNullable(imp1.Value, imp2.Value))
+                     ).ToList();
 
         return joins.AggregateOr();
     }
@@ -650,7 +651,7 @@ internal static class SmartEqualizer
         if (newItem is ImplementedByAllExpression iba)
             return entityIDs.Select(kvp => Expression.And(
                 EqualNullable(new PrimaryKeyExpression(QueryBinder.TypeConstant(kvp.Key).Nullify()), iba.TypeId.TypeColumn),
-                InPrimaryKey(iba.Id, kvp.Value))).AggregateOr();
+                InPrimaryKey(iba.Ids.GetOrThrow(PrimaryKey.Type(kvp.Key)), kvp.Value))).AggregateOr();
 
         throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".FormatWith(newItem.Type.Name));
     }
@@ -773,7 +774,7 @@ internal static class SmartEqualizer
     static Expression EntityIbaEquals(EntityExpression ee, ImplementedByAllExpression iba)
     {
         return Expression.And(
-            ee.ExternalId.Value == NewId ? False : EqualNullable(new SqlCastExpression(typeof(string), ee.ExternalId.Value), iba.Id),
+            ee.ExternalId.Value == NewId ? False : EqualNullable(ee.ExternalId.Value, iba.Ids.GetOrThrow(PrimaryKey.Type(ee.Type))),
             EqualNullable(QueryBinder.TypeConstant(ee.Type), iba.TypeId.TypeColumn.Value))
             .And(ee.ExternalPeriod.Overlaps(iba.ExternalPeriod));
     }
@@ -789,8 +790,9 @@ internal static class SmartEqualizer
     {
         var list = ib.Implementations.Values.Select(i =>
             Expression.And(
-            i.ExternalId.Value == NewId ? (Expression)False : EqualNullable(iba.Id, new SqlCastExpression(typeof(string), i.ExternalId.Value)),
-            EqualNullable(iba.TypeId.TypeColumn.Value, QueryBinder.TypeConstant(i.Type)))).ToList();
+                EqualNullable(iba.TypeId.TypeColumn.Value, QueryBinder.TypeConstant(i.Type)),
+                i.ExternalId.Value == NewId ? (Expression)False : EqualNullable(iba.Ids.GetOrThrow(PrimaryKey.Type(i.Type)), i.ExternalId.Value))
+            ).ToList();
 
         return list.AggregateOr();
     }
@@ -798,7 +800,16 @@ internal static class SmartEqualizer
 
     static Expression IbaIbaEquals(ImplementedByAllExpression iba, ImplementedByAllExpression iba2)
     {
-        return Expression.And(EqualNullable(iba.Id, iba2.Id), EqualNullable(iba.TypeId.TypeColumn.Value, iba2.TypeId.TypeColumn.Value));
+        var joins = (from id1 in iba.Ids
+                     join id2 in iba2.Ids on id1.Key equals id2.Key
+                     select Expression.And(Expression.And(
+                         NotEqualToNull(id1.Value, new SqlConstantExpression(null, id1.Value.Type)), 
+                         NotEqualToNull(id2.Value, new SqlConstantExpression(null, id2.Value.Type)),
+                         EqualNullable(id1.Value, id2.Value)))
+                         )).ToList();
+
+
+        return Expression.And(EqualNullable(iba.TypeId.TypeColumn.Value, iba2.TypeId.TypeColumn.Value), joins);
     }
 
     static Expression EqualsToNull(PrimaryKeyExpression exp)

@@ -340,10 +340,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
     public FieldTicks Ticks { get; internal set; }
     public FieldPrimaryKey PrimaryKey { get; internal set; }
 
-    IColumn ITable.PrimaryKey
-    {
-        get { return PrimaryKey; }
-    }
+    IColumn ITable.PrimaryKey => PrimaryKey;
 
     public IEnumerable<EntityField> AllFields()
     {
@@ -512,19 +509,19 @@ public interface IFieldReference
 public partial class FieldPrimaryKey : Field, IColumn
 {
     public string Name { get; set; }
-    IsNullable IColumn.Nullable { get { return IsNullable.No; } }
+    IsNullable IColumn.Nullable => IsNullable.No;
     public AbstractDbType DbType { get; set; }
     public string? UserDefinedTypeName { get; set; }
-    bool IColumn.PrimaryKey { get { return true; } }
+    bool IColumn.PrimaryKey => true;
     public bool Identity { get; set; }
-    bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
+    bool IColumn.IdentityBehaviour => table.IdentityBehaviour;
     public int? Size { get; set; }
-    byte? IColumn.Precision { get { return null; } }
-    byte? IColumn.Scale { get { return null; } }
+    byte? IColumn.Precision => null;
+    byte? IColumn.Scale => null;
     public string? Collation { get; set; }
-    Table? IColumn.ReferenceTable { get { return null; } }
+    Table? IColumn.ReferenceTable => null;
     public Type Type { get; set; }
-    public bool AvoidForeignKey { get { return false; } }
+    public bool AvoidForeignKey => false;
     public string? Default { get; set; }
 
     Table table;
@@ -572,14 +569,14 @@ public partial class FieldValue : Field, IColumn
     public AbstractDbType DbType { get; set; }
     public string? UserDefinedTypeName { get; set; }
     public bool PrimaryKey { get; set; }
-    bool IColumn.Identity { get { return false; } }
-    bool IColumn.IdentityBehaviour { get { return false; } }
+    bool IColumn.Identity => false;
+    bool IColumn.IdentityBehaviour => false;
     public int? Size { get; set; }
     public string? Collation { get; set; }
     public byte? Precision { get; set; }
     public byte? Scale { get; set; }
-    Table? IColumn.ReferenceTable { get { return null; } }
-    public bool AvoidForeignKey { get { return false; } }
+    Table? IColumn.ReferenceTable => null;
+    public bool AvoidForeignKey => false;
     public string? Default { get; set; }
 
     public FieldValue(PropertyRoute route, Type? fieldType, string name)
@@ -614,10 +611,7 @@ public partial class FieldValue : Field, IColumn
         return Enumerable.Empty<TableMList>();
     }
 
-    public virtual Type Type
-    {
-        get { return this.Nullable.ToBool() ? this.FieldType.Nullify() : this.FieldType; }
-    }
+    public virtual Type Type => this.Nullable.ToBool() ? this.FieldType.Nullify() : this.FieldType;
 }
 
 public partial class FieldTicks : FieldValue
@@ -636,19 +630,19 @@ public partial class FieldEmbedded : Field, IFieldFinder
     public partial class EmbeddedHasValueColumn : IColumn
     {
         public string Name { get; set; }
-        public IsNullable Nullable { get { return IsNullable.No; } } //even on neasted embeddeds
+        public IsNullable Nullable => IsNullable.No;  //even on neasted embeddeds
         public AbstractDbType DbType => new AbstractDbType(SqlDbType.Bit, NpgsqlDbType.Boolean);
-        string? IColumn.UserDefinedTypeName { get { return null; } }
-        bool IColumn.PrimaryKey { get { return false; } }
-        bool IColumn.Identity { get { return false; } }
-        bool IColumn.IdentityBehaviour { get { return false; } }
-        int? IColumn.Size { get { return null; } }
-        byte? IColumn.Precision { get { return null; } }
-        byte? IColumn.Scale { get { return null; } }
-        string? IColumn.Collation { get { return null; } }
-        public Table? ReferenceTable { get { return null; } }
-        Type IColumn.Type { get { return typeof(bool); } }
-        public bool AvoidForeignKey { get { return false; } }
+        string? IColumn.UserDefinedTypeName => null;
+        bool IColumn.PrimaryKey => false;
+        bool IColumn.Identity => false;
+        bool IColumn.IdentityBehaviour => false;
+        int? IColumn.Size => null;
+        byte? IColumn.Precision => null;
+        byte? IColumn.Scale => null;
+        string? IColumn.Collation => null;
+        public Table? ReferenceTable => null;
+        Type IColumn.Type => typeof(bool);
+        public bool AvoidForeignKey => false;
         public string? Default { get; set; }
 
         public EmbeddedHasValueColumn(string name)
@@ -908,17 +902,17 @@ public partial class FieldReference : Field, IColumn, IFieldReference
     public IsNullable Nullable { get; set; }
 
     public bool PrimaryKey { get; set; } //For View
-    bool IColumn.Identity { get { return false; } }
-    bool IColumn.IdentityBehaviour { get { return false; } }
-    int? IColumn.Size { get { return this.ReferenceTable.PrimaryKey.Size; } }
-    byte? IColumn.Precision { get { return null; } }
-    byte? IColumn.Scale { get { return null; } }
+    bool IColumn.Identity => false;
+    bool IColumn.IdentityBehaviour => false;
+    int? IColumn.Size => this.ReferenceTable.PrimaryKey.Size;
+    byte? IColumn.Precision => null;
+    byte? IColumn.Scale => null;
     public Table ReferenceTable { get; set; }
     Table? IColumn.ReferenceTable => ReferenceTable;
-    public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
-    public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
-    public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
-    public virtual Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+    public AbstractDbType DbType => ReferenceTable.PrimaryKey.DbType;
+    public string? Collation => ReferenceTable.PrimaryKey.Collation;
+    public string? UserDefinedTypeName => ReferenceTable.PrimaryKey.UserDefinedTypeName;
+    public virtual Type Type => this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type;
 
     public bool AvoidForeignKey { get; set; }
 
@@ -1099,25 +1093,25 @@ public partial class FieldImplementedByAll : Field, IFieldReference
 
     public bool AvoidExpandOnRetrieving { get; internal set; }
 
-    public ImplementationStringColumn Column { get; set; }
-    public ImplementationColumn ColumnType { get; set; }
+    public Dictionary<Type, ImplementationIdColumn> IdColumns { get; set; }
+    public ImplementationColumn TypeColumn { get; set; }
 
-    public FieldImplementedByAll(PropertyRoute route, ImplementationStringColumn column, ImplementationColumn columnType) : base(route)
+    public FieldImplementedByAll(PropertyRoute route, IEnumerable<ImplementationIdColumn> columnIds, ImplementationColumn columnType) : base(route)
     {
-        this.Column = column;
-        this.ColumnType = columnType;
+        this.IdColumns = columnIds.ToDictionaryEx(a => a.Type);
+        this.TypeColumn = columnType;
     }
 
     public override IEnumerable<IColumn> Columns()
     {
-        return new IColumn[] { Column, ColumnType };
+        return IdColumns.Values.Cast<IColumn>().And(TypeColumn);
     }
 
     internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
     {
-        yield return KeyValuePair.Create(ColumnType.ReferenceTable, new RelationInfo
+        yield return KeyValuePair.Create(TypeColumn.ReferenceTable, new RelationInfo
         {
-            IsNullable = this.ColumnType.Nullable.ToBool(),
+            IsNullable = this.TypeColumn.Nullable.ToBool(),
             IsLite = this.IsLite,
             IsImplementedByAll = true,
             PropertyRoute = this.Route
@@ -1142,7 +1136,7 @@ public partial class FieldImplementedByAll : Field, IFieldReference
     public override IEnumerable<TableIndex> GenerateIndexes(ITable table)
     {
         if (UniqueIndex == null)
-            return new[] { new TableIndex(table, (IColumn)this.Column, (IColumn)this.ColumnType) };
+            return new[] { new TableIndex(table, this.IdColumns.Values.Select(c => (IColumn)c).And((IColumn)this.TypeColumn).ToArray()) };
 
         return base.GenerateIndexes(table);
     }
@@ -1157,18 +1151,18 @@ public partial class ImplementationColumn : IColumn
 {
     public string Name { get; set; }
     public IsNullable Nullable { get; set; }
-    bool IColumn.PrimaryKey { get { return false; } }
-    bool IColumn.Identity { get { return false; } }
-    bool IColumn.IdentityBehaviour { get { return false; } }
-    int? IColumn.Size { get { return null; } }
-    byte? IColumn.Precision { get { return null; } }
-    byte? IColumn.Scale { get { return null; } }
+    bool IColumn.PrimaryKey => false;
+    bool IColumn.Identity => false;
+    bool IColumn.IdentityBehaviour => false;
+    int? IColumn.Size => null;
+    byte? IColumn.Precision => null;
+    byte? IColumn.Scale => null;
     public Table ReferenceTable { get; private set; }
     Table? IColumn.ReferenceTable => ReferenceTable;
-    public AbstractDbType DbType { get { return ReferenceTable.PrimaryKey.DbType; } }
-    public string? Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
-    public string? UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
-    public Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+    public AbstractDbType DbType => ReferenceTable.PrimaryKey.DbType;
+    public string? Collation => ReferenceTable.PrimaryKey.Collation;
+    public string? UserDefinedTypeName => ReferenceTable.PrimaryKey.UserDefinedTypeName;
+    public Type Type => this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type;
     public bool AvoidForeignKey { get; set; }
     public string? Default { get; set; }
 
@@ -1179,27 +1173,29 @@ public partial class ImplementationColumn : IColumn
     }
 }
 
-public partial class ImplementationStringColumn : IColumn
+public partial class ImplementationIdColumn : IColumn
 {
     public string Name { get; set; }
     public IsNullable Nullable { get; set; }
-    string? IColumn.UserDefinedTypeName { get { return null; } }
-    bool IColumn.PrimaryKey { get { return false; } }
-    bool IColumn.Identity { get { return false; } }
-    bool IColumn.IdentityBehaviour { get { return false; } }
+    string? IColumn.UserDefinedTypeName => null;
+    bool IColumn.PrimaryKey => false;
+    bool IColumn.Identity => false;
+    bool IColumn.IdentityBehaviour => false;
     public int? Size { get; set; }
-    byte? IColumn.Precision { get { return null; } }
-    byte? IColumn.Scale { get { return null; } }
+    byte? IColumn.Precision => null;
+    byte? IColumn.Scale => null;
     public string? Collation { get; set; }
-    public Table? ReferenceTable { get { return null; } }
-    public AbstractDbType DbType => new AbstractDbType(SqlDbType.NVarChar, NpgsqlDbType.Varchar);
-    public Type Type { get { return typeof(string); } }
-    public bool AvoidForeignKey { get { return false; } }
+    public Table? ReferenceTable => null;
+    public AbstractDbType DbType { get; private set; }
+    public Type Type { get; private set;  }
+    public bool AvoidForeignKey => false;
     public string? Default { get; set; }
 
-    public ImplementationStringColumn(string name)
+    public ImplementationIdColumn(string name, Type type, AbstractDbType dbType)
     {
         Name = name;
+        this.DbType = dbType;
+        this.Type = type;
     }
 }
 
@@ -1275,19 +1271,19 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
     public class PrimaryKeyColumn : IColumn
     {
         public string Name { get; set; }
-        IsNullable IColumn.Nullable { get { return IsNullable.No; } }
+        IsNullable IColumn.Nullable => IsNullable.No;
         public AbstractDbType DbType { get; set; }
         public string? Collation { get; set; }
         public string? UserDefinedTypeName { get; set; }
-        bool IColumn.PrimaryKey { get { return true; } }
+        bool IColumn.PrimaryKey => true;
         public bool Identity { get; set; }
-        bool IColumn.IdentityBehaviour { get { return true; } }
-        int? IColumn.Size { get { return null; } }
-        byte? IColumn.Precision { get { return null; } }
-        byte? IColumn.Scale { get { return null; } }
-        Table? IColumn.ReferenceTable { get { return null; } }
+        bool IColumn.IdentityBehaviour => true;
+        int? IColumn.Size => null;
+        byte? IColumn.Precision => null;
+        byte? IColumn.Scale => null;
+        Table? IColumn.ReferenceTable => null;
         public Type Type { get; set; }
-        public bool AvoidForeignKey { get { return false; } }
+        public bool AvoidForeignKey => false;
         public string? Default { get; set; }
 
         public PrimaryKeyColumn(Type type, string name)
@@ -1413,10 +1409,7 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
     }
 
 
-    IColumn ITable.PrimaryKey
-    {
-        get { return PrimaryKey; }
-    }
+    IColumn ITable.PrimaryKey => PrimaryKey;
 
     public bool IdentityBehaviour => true; //For now
 

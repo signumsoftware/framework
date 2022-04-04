@@ -97,15 +97,16 @@ public class UniqueKeyException : ApplicationException
 
                                     if (f is FieldImplementedByAll iba)
                                     {
-                                        var typeId = colValues.GetOrThrow(iba.ColumnType);
+                                        var typeId = colValues.GetOrThrow(iba.TypeColumn);
                                         if (typeId == null)
                                             return null;
 
                                         var type = TypeLogic.IdToType.GetOrThrow(PrimaryKey.Parse(typeId, typeof(TypeEntity)));
 
-                                        return Database.RetrieveLite(type, PrimaryKey.Parse(colValues.GetOrThrow(iba.Column)!, type));
-                                    }
+                                        var id = iba.IdColumns.Values.Select(c => colValues.GetOrThrow(c)).NotNull().Single();
 
+                                        return Database.RetrieveLite(type, PrimaryKey.Parse(id, type));
+                                    }
                                     throw new UnexpectedValueException(f);
                                 }).ToArray();
                             }

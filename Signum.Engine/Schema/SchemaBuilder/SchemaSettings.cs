@@ -24,6 +24,8 @@ public class SchemaSettings
     public int MaxNumberOfParameters = 2000;
     public int MaxNumberOfStatementsInSaveQueries = 16;
 
+    public List<Type> ImplementedByAllPrimaryKeyTypes = new List<Type> { typeof(Guid), typeof(int) };
+    
     public ConcurrentDictionary<PropertyRoute, AttributeCollection?> FieldAttributesCache = new ConcurrentDictionary<PropertyRoute, AttributeCollection?>();
     public ConcurrentDictionary<Type, AttributeCollection> TypeAttributesCache = new ConcurrentDictionary<Type, AttributeCollection>();
 
