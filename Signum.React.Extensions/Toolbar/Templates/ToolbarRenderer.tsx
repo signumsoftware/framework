@@ -74,11 +74,7 @@ export default function ToolbarRenderer(p: {
         <FontAwesomeIcon icon={"angle-double-left"} />
       </div>
 
-      <div onClick={(ev) => {
-        if ((ev.target as any).className != "nav-item-dropdown-elem") {
-          p.onAutoClose && p.onAutoClose();
-        }
-      }}>
+      <div>
         {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => renderNavItem(res, () => setTimeout(() => setRefresh(!refresh), 500), i))}
       </div>
     </div>
@@ -104,7 +100,11 @@ export default function ToolbarRenderer(p: {
 
         if (res.url) {
           return (
-            <ToolbarNavItem key={key} title={res.label} onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
+            <ToolbarNavItem key={key} title={res.label} onClick={(e: React.MouseEvent<any>) => {
+              AppContext.pushOrOpenInTab(res.url!, e);
+              if (p.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+                p.onAutoClose();
+            }}
             active={res == active} icon={ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)} />
           );
         }
@@ -114,7 +114,7 @@ export default function ToolbarRenderer(p: {
           if (!config)
             return <Nav.Item style={{ color: "red" }}>{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
-          return config.getMenuItem(res, res == active, key);
+          return config.getMenuItem(res, res == active, key, p.onAutoClose);
         }
 
         if (res.type == "Header") {

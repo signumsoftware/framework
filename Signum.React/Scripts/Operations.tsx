@@ -107,7 +107,6 @@ export function notifySuccess(message?: string, timeout?: number) {
  */
 export abstract class OperationSettings {
 
-  text?: () => string;
   operationSymbol: string;
 
   constructor(operationSymbol: OperationSymbol | string) {
@@ -122,6 +121,7 @@ export abstract class OperationSettings {
  */
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
+  text?: (coc: ConstructorOperationContext<T>) => string;
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
   onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
@@ -133,7 +133,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
 }
 
 export interface ConstructorOperationOptions<T extends Entity> {
-  text?: () => string;
+  text?: (coc: ConstructorOperationContext<T>) => string;
   isVisible?: (coc: ConstructorOperationContext<T>) => boolean;
   onConstruct?: (coc: ConstructorOperationContext<T>, props?: Partial<T>) => Promise<EntityPack<T> | undefined> | undefined;
 }
@@ -170,7 +170,7 @@ export type SettersConfig = "NoButton" | "NoDialog" | "Optional" | "Mandatory";
  * Contextual Operation Settings
  */
 export class ContextualOperationSettings<T extends Entity> extends OperationSettings {
-
+  text?: (coc: ContextualOperationContext<T>) => string;
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
@@ -191,7 +191,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
 }
 
 export interface ContextualOperationOptions<T extends Entity> {
-  text?: () => string;
+  text?: (coc: ContextualOperationContext<T>) => string;
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
@@ -230,38 +230,17 @@ export class ContextualOperationContext<T extends Entity> {
 
   getValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
 
-    var result = this.tryGetValueFromSearchControl(token, automaticEntityPrefix);
-    if (result == null)
-      throw new Error(`No column '${token}' found`);
+    if (!(this.context.container instanceof SearchControlLoaded))
+      throw new Error(`No SearchControl found`);
 
-    return result.value;
+    return this.context.container.getSelectedValue(token, automaticEntityPrefix);
   }
 
   tryGetValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): { value: Finder.AddToLite<T> | undefined } | undefined {
     if (!(this.context.container instanceof SearchControlLoaded))
-      return undefined;
+      throw new Error(`No SearchControl found`);
 
-    const tokenName = token.toString();
-
-    const sc = this.context.container;
-    const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
-    if (colIndex != -1) {
-      const row = sc.state.selectedRows!.first();
-      const val = row.columns[colIndex];
-      return { value: val };
-    }
-
-    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
-    if (filter != null)
-      return { value: filter?.value };
-
-    if (automaticEntityPrefix) {
-      var result = this.tryGetValueFromSearchControl(tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false);
-      if (result != null)
-        return result as any;
-    }
-
-    return undefined;
+    return this.context.container.tryGetSelectedValue(token, automaticEntityPrefix);
   }
 
   isVisibleInContextualMenu(): boolean {
@@ -433,7 +412,7 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   textOrNiceName() {
-    return (this.settings && this.settings.text && this.settings.text()) ?? this.operationInfo.niceName
+    return (this.settings?.text?.(this)) ?? this.operationInfo.niceName
   }
 
   onKeyDown(e: KeyboardEvent): boolean {
@@ -463,7 +442,7 @@ export class EntityOperationContext<T extends Entity> {
 
 export interface AlternativeOperationSetting<T extends Entity> {
   name: string;
-  text: () => string;
+  text: string;
   color?: BsColor;
   classes?: string;
   icon?: IconProp;
@@ -481,6 +460,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   contextual?: ContextualOperationSettings<T>;
   contextualFromMany?: ContextualOperationSettings<T>;
 
+  text?: (coc: EntityOperationContext<T>) => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
@@ -513,7 +493,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 export interface EntityOperationOptions<T extends Entity> {
   contextual?: ContextualOperationOptions<T>;
   contextualFromMany?: ContextualOperationOptions<T>;
-  text?: () => string;
+  text?: (coc: EntityOperationContext<T>) => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
