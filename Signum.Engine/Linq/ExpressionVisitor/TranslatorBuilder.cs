@@ -476,7 +476,7 @@ internal static class TranslatorBuilder
 
             Type type = schema.GetType(typeId.Value);
 
-            return Lite.Create(type, id.Value, toString);
+            return Lite.Create(type, id!.Value, toString);
         }
 
         static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, null));
