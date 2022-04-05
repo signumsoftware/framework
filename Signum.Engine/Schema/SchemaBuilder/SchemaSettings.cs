@@ -17,7 +17,6 @@ public class SchemaSettings
     public bool PostresVersioningFunctionNoChecks { get; set; }
 
     public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "ID");
-    public int DefaultImplementedBySize = 40;
 
     public Action<Type> AssertNotIncluded = null!;
 
@@ -25,6 +24,7 @@ public class SchemaSettings
     public int MaxNumberOfStatementsInSaveQueries = 16;
 
     public List<Type> ImplementedByAllPrimaryKeyTypes = new List<Type> { typeof(Guid), typeof(int) };
+    public int ImplementedByAllStringSize = 40;
     
     public ConcurrentDictionary<PropertyRoute, AttributeCollection?> FieldAttributesCache = new ConcurrentDictionary<PropertyRoute, AttributeCollection?>();
     public ConcurrentDictionary<Type, AttributeCollection> TypeAttributesCache = new ConcurrentDictionary<Type, AttributeCollection>();

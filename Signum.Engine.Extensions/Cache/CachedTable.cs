@@ -215,7 +215,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
                     {
                         object obj = rowReader(fr);
                         result[idGetter(obj)] = obj; //Could be repeated joins
-                });
+                    });
                     tr.Commit();
                 }
 

@@ -648,7 +648,7 @@ public class SchemaBuilder
 
         bool avoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null;
 
-        var implementations = types.ToDictionary<Type, Type, ImplementationColumn>(t => t, t =>
+        var implementations = types.ToDictionary(t => t, t =>
         {
             var rt = Include(t, route);
 
@@ -674,10 +674,13 @@ public class SchemaBuilder
 
         var primaryKeyTypes = Settings.ImplementedByAllPrimaryKeyTypes;
 
-        var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementationIdColumn(preName.Add("_" + t.Name).ToString(), t, Settings.DefaultSqlType(t))
+        if(primaryKeyTypes.Count() > 1 && nullable == IsNullable.No)
+            nullable = IsNullable.Forced;
+
+        var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(preName.Add(t.Name).ToString(), nullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t))
         {
-            Nullable = primaryKeyTypes.Count() > 1 && nullable == IsNullable.No ? IsNullable.Forced : nullable,
-            Size = Settings.DefaultImplementedBySize,
+            Nullable = nullable,
+            Size = t == typeof(string) ? Settings.ImplementedByAllStringSize : null,
         });
 
         var columnType = new ImplementationColumn(preName.Add("Type").ToString(), Include(typeof(TypeEntity), route))

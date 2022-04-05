@@ -30,10 +30,7 @@ internal class EntityCompleter : DbExpressionVisitor
         if (lite.EagerEntity)
             return base.VisitLiteReference(lite);
 
-        var id = lite.Reference is ImplementedByAllExpression ||
-            lite.Reference is ImplementedByExpression ib && ib.Implementations.Select(imp=>imp.Value.ExternalId.ValueType.Nullify()).Distinct().Count() > 1 ?
-            (Expression)binder.GetIdString(lite.Reference) :
-            (Expression)binder.GetId(lite.Reference);
+        var id = binder.GetId(lite.Reference);
 
         var typeId = binder.GetEntityType(lite.Reference);
         var toStr = LiteToString(lite, typeId);

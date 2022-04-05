@@ -11,7 +11,7 @@ public interface IRetriever : IDisposable
 
     T? Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity;
     T? Request<T>(PrimaryKey? id) where T : Entity;
-    T? RequestIBA<T>(PrimaryKey? typeId, string? id) where T : class, IEntity;
+    T? RequestIBA<T>(PrimaryKey? typeId, IComparable? id) where T : class, IEntity;
     Lite<T>? RequestLite<T>(Lite<T>? lite) where T : class, IEntity;
     T? ModifiablePostRetrieving<T>(T? entity) where T : Modifiable;
     IRetriever? Parent { get; }
@@ -119,14 +119,14 @@ class RealRetriever : IRetriever
         return entity;
     }
 
-    public T? RequestIBA<T>(PrimaryKey? typeId, string? id) where T : class, IEntity
+    public T? RequestIBA<T>(PrimaryKey? typeId, IComparable? id) where T : class, IEntity
     {
         if (id == null)
             return null;
 
         Type type = TypeLogic.IdToType[typeId!.Value];
 
-        var parsedId = PrimaryKey.Parse(id, type);
+        var parsedId = new PrimaryKey(id);
 
         return (T)(IEntity)giRequest.GetInvoker(type)(this, parsedId);
     }
@@ -358,7 +358,7 @@ class ChildRetriever : IRetriever
         return parent.Request<T>(id);
     }
 
-    public T? RequestIBA<T>(PrimaryKey? typeId, string? id) where T : class, IEntity
+    public T? RequestIBA<T>(PrimaryKey? typeId, IComparable? id) where T : class, IEntity
     {
         return parent.RequestIBA<T>(typeId, id);
     }

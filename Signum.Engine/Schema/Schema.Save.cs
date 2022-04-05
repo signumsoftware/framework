@@ -1502,11 +1502,7 @@ public partial class FieldImplementedByAll
             var instructions = new List<Expression>();
             instructions.Add(Expression.Assign(id, Expression.Call(miUnWrap, this.GetIdFactory(value, forbidden))));
             instructions.Add(Expression.Call(Expression.Constant(this), miAssertPrimaryKeyTypes, id));
-            instructions.Add(Expression.Condition(
-                    Expression.And(
-                        Expression.NotEqual(id, Expression.Constant(null, typeof(IComparable))),
-                        Expression.TypeIs(id, col.Type)),
-                    Expression.Convert(id, col.Type), Expression.Constant(id, col.Type)));
+            instructions.Add(Expression.Condition(Expression.TypeIs(id, col.Type), Expression.Convert(id, col.Type), Expression.Constant(null, col.Type)));
 
             trios.Add(new Table.Trio(col, Expression.Block(col.Type, variables, instructions), suffix));
         }

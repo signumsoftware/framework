@@ -1093,18 +1093,23 @@ public partial class FieldImplementedByAll : Field, IFieldReference
 
     public bool AvoidExpandOnRetrieving { get; internal set; }
 
-    public Dictionary<Type, ImplementationIdColumn> IdColumns { get; set; }
+    public Dictionary<Type, ImplementedByAllIdColumn> IdColumns { get; set; }
     public ImplementationColumn TypeColumn { get; set; }
 
-    public FieldImplementedByAll(PropertyRoute route, IEnumerable<ImplementationIdColumn> columnIds, ImplementationColumn columnType) : base(route)
+    public FieldImplementedByAll(PropertyRoute route, IEnumerable<ImplementedByAllIdColumn> columnIds, ImplementationColumn columnType) : base(route)
     {
-        this.IdColumns = columnIds.ToDictionaryEx(a => a.Type);
+        this.IdColumns = columnIds.ToDictionaryEx(a => a.Type.UnNullify());
         this.TypeColumn = columnType;
     }
 
     public override IEnumerable<IColumn> Columns()
     {
-        return IdColumns.Values.Cast<IColumn>().And(TypeColumn);
+        yield return TypeColumn;
+
+        foreach (var item in IdColumns.Values)
+        {
+            yield return item;
+        }
     }
 
     internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -1171,9 +1176,14 @@ public partial class ImplementationColumn : IColumn
         Name = name;
         ReferenceTable = referenceTable;
     }
+
+    public override string ToString()
+    {
+        return this.Name;
+    }
 }
 
-public partial class ImplementationIdColumn : IColumn
+public partial class ImplementedByAllIdColumn : IColumn
 {
     public string Name { get; set; }
     public IsNullable Nullable { get; set; }
@@ -1191,11 +1201,16 @@ public partial class ImplementationIdColumn : IColumn
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
 
-    public ImplementationIdColumn(string name, Type type, AbstractDbType dbType)
+    public ImplementedByAllIdColumn(string name, Type type, AbstractDbType dbType)
     {
         Name = name;
         this.DbType = dbType;
         this.Type = type;
+    }
+
+    public override string ToString()
+    {
+        return this.Name;
     }
 }
 

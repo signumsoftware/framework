@@ -69,7 +69,7 @@ internal class DbExpressionVisitor : ExpressionVisitor
     protected internal virtual Expression VisitLiteValue(LiteValueExpression lite)
     {
         var newTypeId = Visit(lite.TypeId);
-        var newId = Visit(lite.Id);
+        var newId = (PrimaryKeyExpression)Visit(lite.Id);
         var newToStr = Visit(lite.ToStr);
         if (newTypeId != lite.TypeId || newId != lite.Id || newToStr != lite.ToStr)
             return new LiteValueExpression(lite.Type, newTypeId, newId, newToStr);
@@ -205,12 +205,12 @@ internal class DbExpressionVisitor : ExpressionVisitor
 
     protected internal virtual Expression VisitImplementedByAll(ImplementedByAllExpression iba)
     {
-        var id = Visit(iba.Id);
+        var ids = Visit(iba.Ids, v => Visit(v));
         var typeId = (TypeImplementedByAllExpression)Visit(iba.TypeId);
         var externalPeriod = (IntervalExpression?)Visit(iba.ExternalPeriod);
 
-        if (id != iba.Id || typeId != iba.TypeId || externalPeriod != iba.ExternalPeriod)
-            return new ImplementedByAllExpression(iba.Type, id, typeId, externalPeriod);
+        if (ids != iba.Ids || typeId != iba.TypeId || externalPeriod != iba.ExternalPeriod)
+            return new ImplementedByAllExpression(iba.Type, ids, typeId, externalPeriod);
         return iba;
     }
 

@@ -517,7 +517,7 @@ internal static class SmartEqualizer
     {
         var joins = (from imp1 in typeIb1.TypeImplementations
                      join imp2 in typeIb2.TypeImplementations on imp1.Key equals imp2.Key
-                     select Expression.And(Expression.And(NotEqualToNull(imp1.Value), NotEqualToNull(imp2.Value)), EqualNullable(imp1.Value, imp2.Value))
+                     select EqualNullable(imp1.Value, imp2.Value)
                      ).ToList();
 
         return joins.AggregateOr();
@@ -802,14 +802,10 @@ internal static class SmartEqualizer
     {
         var joins = (from id1 in iba.Ids
                      join id2 in iba2.Ids on id1.Key equals id2.Key
-                     select Expression.And(Expression.And(
-                         NotEqualToNull(id1.Value, new SqlConstantExpression(null, id1.Value.Type)), 
-                         NotEqualToNull(id2.Value, new SqlConstantExpression(null, id2.Value.Type)),
-                         EqualNullable(id1.Value, id2.Value)))
-                         )).ToList();
+                     select (Expression)EqualNullable(id1.Value, id2.Value)).ToList();
 
 
-        return Expression.And(EqualNullable(iba.TypeId.TypeColumn.Value, iba2.TypeId.TypeColumn.Value), joins);
+        return Expression.And(EqualNullable(iba.TypeId.TypeColumn.Value, iba2.TypeId.TypeColumn.Value), joins.AggregateOr());
     }
 
     static Expression EqualsToNull(PrimaryKeyExpression exp)

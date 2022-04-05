@@ -370,7 +370,7 @@ internal static class TranslatorBuilder
         {
             return Expression.Call(retriever, miRequestIBA.MakeGenericMethod(rba.Type),
                 Visit(NullifyColumn(rba.TypeId.TypeColumn)),
-                Visit(NullifyColumn(rba.Id)));
+                Visit(rba.Ids.Values.Select(a => (Expression)Expression.Convert(NullifyColumn(a), typeof(IComparable))).Aggregate((a, b) => Expression.Coalesce(a, b))));
         }
 
         static readonly ConstantExpression NullType = Expression.Constant(null, typeof(Type));
@@ -452,7 +452,7 @@ internal static class TranslatorBuilder
             else if (typeId is TypeImplementedByAllExpression tiba)
             {
                 var tid = Visit(NullifyColumn(tiba.TypeColumn));
-                liteConstructor = Expression.Convert(Expression.Call(miLiteCreateParse, Expression.Constant(Schema.Current), tid, id.UnNullify(), toStringOrNull), lite.Type);
+                liteConstructor = Expression.Convert(Expression.Call(miTryLiteCreate, Expression.Constant(Schema.Current), tid, id.Nullify(), toStringOrNull), lite.Type);
             }
             else
             {
@@ -467,16 +467,16 @@ internal static class TranslatorBuilder
                 return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(lite.Type)!), liteConstructor);
         }
 
-        static readonly MethodInfo miLiteCreateParse = ReflectionTools.GetMethodInfo(() => LiteCreateParse(null!, null, null!, null!));
+        static readonly MethodInfo miTryLiteCreate = ReflectionTools.GetMethodInfo(() => TryLiteCreate(null!, null, null!, null!));
 
-        static Lite<Entity>? LiteCreateParse(Schema schema, PrimaryKey? typeId, string id, string toString)
+        static Lite<Entity>? TryLiteCreate(Schema schema, PrimaryKey? typeId, PrimaryKey? id, string toString)
         {
             if (typeId == null)
                 return null;
 
             Type type = schema.GetType(typeId.Value);
 
-            return Lite.Create(type, PrimaryKey.Parse(id, type), toString);
+            return Lite.Create(type, id.Value, toString);
         }
 
         static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, null));
