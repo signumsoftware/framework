@@ -55,7 +55,7 @@ public static class MusicStarter
         }
 
         sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version!;
-
+        sb.Schema.Settings.ImplementedByAllPrimaryKeyTypes.Add(typeof(long));
         sb.Schema.Settings.FieldAttributes((OperationLogEntity ol) => ol.User).Add(new ImplementedByAttribute());
         sb.Schema.Settings.FieldAttributes((ExceptionEntity e) => e.User).Add(new ImplementedByAttribute());
 

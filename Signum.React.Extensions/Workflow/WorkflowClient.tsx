@@ -323,7 +323,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
         return wa.decisionOptions.map(mle => ({
           order: s?.order ?? 0,
           shortcut: undefined,
-          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationButton>,
+          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(mle.element.name).done()} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationButton>,
         }));
       }
       else

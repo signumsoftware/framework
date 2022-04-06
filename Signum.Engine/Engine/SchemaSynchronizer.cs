@@ -56,9 +56,14 @@ public static class SchemaSynchronizer
         {
             var key = Replacements.KeyColumnsForTable(tn);
 
+            //START IBA Migration 2022.04.04
+            var newIBAs = tab.Columns.OfType<ImplementedByAllIdColumn>().Where(a => !diff.Columns.ContainsKey(a.Name) && diff.Columns.ContainsKey(a.Name.BeforeLast("_"))).Select(a => a.Name).ToList();
+            var oldIBAs = diff.Columns.Values.Where(c => !tab.Columns.ContainsKey(c.Name) && Schema.Current.Settings.ImplementedByAllPrimaryKeyTypes.All(t => tab.Columns.TryGetC(c.Name + "_" + t.Name) is ImplementedByAllIdColumn)).Select(a => a.Name).ToList();
+            //END
+
             replacements.AskForReplacements(
-                diff.Columns.Keys.ToHashSet(),
-                tab.Columns.Keys.ToHashSet(), key);
+                diff.Columns.Keys.Except(oldIBAs).ToHashSet(),
+                tab.Columns.Keys.Except(newIBAs).ToHashSet(), key);
 
             var incompatibleTypes = diff.Columns.JoinDictionary(tab.Columns, (cn, diff, col) => new { cn, diff, col }).Values.Where(a => !a.diff.CompatibleTypes(a.col) || a.diff.Identity != a.col.Identity).ToList();
 
@@ -233,15 +238,55 @@ public static class SchemaSynchronizer
                                 tab.Columns,
                                 dif.Columns,
 
-                                createNew: (cn, tabCol) => SqlPreCommand.Combine(Spacing.Simple,
-                                    tabCol.PrimaryKey && dif.PrimaryKeyName != null ? sqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
-                                    AlterTableAddColumnDefault(sqlBuilder, tab, tabCol, replacements,
-                                        forceDefaultValue: cn.EndsWith("_HasValue") && dif.Columns.Values.Any(c => c.Name.StartsWith(cn.Before("HasValue")) && c.Nullable == false) ? "1" : null,
-                                        hasValueFalse: hasValueFalse)),
+                                createNew: (cn, tabCol) =>
+                                {
+                                    //START IBA Migration 2022.04.04
+                                    var settings = Schema.Current.Settings;
+                                    var isNewImplementedIBAColumn = tabCol is ImplementedByAllIdColumn && settings.ImplementedByAllPrimaryKeyTypes.Any(t =>
+                                    {
+                                        var before = tabCol.Name.TryBefore("_" + t.Name);
+                                        return before != null && dif.Columns.ContainsKey(before) && !tab.Columns.ContainsKey(before);
+                                    }); 
+                                    //END
 
-                                removeOld: (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple,
-                                     difCol.DefaultConstraint != null && difCol.DefaultConstraint.Name != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint!.Name) : null,
-                                    sqlBuilder.AlterTableDropColumn(tab, cn)),
+                                    var result = SqlPreCommand.Combine(Spacing.Simple,
+                                        tabCol.PrimaryKey && dif.PrimaryKeyName != null ? sqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
+                                        AlterTableAddColumnDefault(sqlBuilder, tab, tabCol, replacements,
+                                            forceDefaultValue: cn.EndsWith("_HasValue") && dif.Columns.Values.Any(c => c.Name.StartsWith(cn.Before("HasValue")) && c.Nullable == false) ? "1" : null,
+                                            hasValueFalse: hasValueFalse,
+                                            avoidDefault: isNewImplementedIBAColumn && tabCol.Nullable == IsNullable.Forced));
+
+                                    return result;
+                                },
+
+                                removeOld: (cn, difCol) =>
+                                {
+
+                                    var result = SqlPreCommand.Combine(Spacing.Simple,
+                                         difCol.DefaultConstraint != null && difCol.DefaultConstraint.Name != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint!.Name) : null,
+                                        sqlBuilder.AlterTableDropColumn(tab, cn));
+
+
+                                    //START IBA Migration 2022.04.04
+                                    if (difCol.DbType.IsString())
+                                    {
+                                        var settings = Schema.Current.Settings;
+
+                                        var update = (from t in settings.ImplementedByAllPrimaryKeyTypes
+                                                      let c = tab.Columns.TryGetC(difCol.Name + "_" + t.Name)
+                                                      where c is ImplementedByAllIdColumn
+                                                      select new SqlPreCommandSimple($"UPDATE {tab.Name} SET {c.Name} = TRY_CONVERT({settings.GetSqlDbTypePair(t).DbType}, {difCol.Name})")).Combine(Spacing.Simple);
+
+                                        if (update != null)
+                                        {
+                                            update.GoBefore = true;
+                                            return SqlPreCommandSimple.Combine(Spacing.Double, update, result);
+                                        }
+                                    } 
+                                    //END
+
+                                    return result;
+                                },
 
                                 mergeBoth: (cn, tabCol, difCol) =>
                                 {
@@ -539,9 +584,9 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
 
     public static Func<SchemaName, bool> IgnoreSchema = s => s.Name.Contains("\\");
 
-    private static SqlPreCommand AlterTableAddColumnDefault(SqlBuilder sqlBuilder, ITable table, IColumn column, Replacements rep, string? forceDefaultValue, HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse)
+    private static SqlPreCommand AlterTableAddColumnDefault(SqlBuilder sqlBuilder, ITable table, IColumn column, Replacements rep, string? forceDefaultValue, bool avoidDefault, HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse)
     {
-        if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn)
+        if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn || avoidDefault)
             return sqlBuilder.AlterTableAddColumn(table, column);
 
         if (column.Nullable == IsNullable.Forced)

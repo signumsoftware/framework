@@ -91,7 +91,7 @@ More info: https://docs.microsoft.com/en-us/iis/troubleshoot/request-restriction
         {
             newTicks.Chunk(100).ToList().ForEach(list =>
             {
-                var newKeyChunk = list.ToString(a => a.Key.ToString() + "-" + a.Value, "/");
+                var newKeyChunk = list.ToString(a => a.Key.Key() + "-" + a.Value, "/");
 
                 CacheLogic.ServerBroadcast!.Send("EntitySaved", newKeyChunk);
             });

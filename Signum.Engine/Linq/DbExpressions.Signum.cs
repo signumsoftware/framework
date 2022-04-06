@@ -57,8 +57,8 @@ internal class EntityExpression : DbExpression
             ExternalId.ToString());
 
         return constructor +
-            (Bindings == null ? null : ("\r\n{\r\n " + Bindings.ToString(",\r\n ").Indent(4) + "\r\n}")) +
-            (Mixins == null ? null : ("\r\n" + Mixins.ToString(m => ".Mixin({0})".FormatWith(m), "\r\n")));
+            (Bindings == null ? null : ("\n{\n " + Bindings.ToString(",\n ").Indent(4) + "\n}")) +
+            (Mixins == null ? null : ("\n" + Mixins.ToString(m => ".Mixin({0})".FormatWith(m), "\n")));
     }
 
     public Expression GetBinding(FieldInfo fi)
@@ -131,10 +131,10 @@ internal class EmbeddedEntityExpression : DbExpression
     {
         string constructor = "new {0}".FormatWith(Type.TypeName());
 
-        string bindings = Bindings?.Let(b => b.ToString(",\r\n ")) ?? "";
+        string bindings = Bindings?.Let(b => b.ToString(",\n ")) ?? "";
 
         return bindings.HasText() ?
-            constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
+            constructor + "\n{" + bindings.Indent(4) + "\n}" :
             constructor;
     }
 
@@ -197,10 +197,10 @@ internal class MixinEntityExpression : DbExpression
     {
         string constructor = "new {0}".FormatWith(Type.TypeName());
 
-        string bindings = Bindings?.Let(b => b.ToString(",\r\n ")) ?? "";
+        string bindings = Bindings?.Let(b => b.ToString(",\n ")) ?? "";
 
         return bindings.HasText() ?
-            constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
+            constructor + "\n{" + bindings.Indent(4) + "\n}" :
             constructor;
     }
 
@@ -251,8 +251,8 @@ internal class ImplementedByExpression : DbExpression//, IPropertyInitExpression
 
     public override string ToString()
     {
-        return "ImplementedBy({0}){{\r\n{1}\r\n}}".FormatWith(Strategy,
-            Implementations.ToString(kvp => "{0} ->  {1}".FormatWith(kvp.Key.TypeName(), kvp.Value.ToString()), "\r\n").Indent(4)
+        return "ImplementedBy({0}){{\n{1}\n}}".FormatWith(Strategy,
+            Implementations.ToString(kvp => "{0} ->  {1}".FormatWith(kvp.Key.TypeName(), kvp.Value.ToString()), "\n").Indent(4)
             );
     }
 
@@ -264,27 +264,27 @@ internal class ImplementedByExpression : DbExpression//, IPropertyInitExpression
 
 internal class ImplementedByAllExpression : DbExpression
 {
-    public readonly Expression Id;
+    public readonly ReadOnlyDictionary<Type/*PrimaryKey type*/, Expression> Ids;
     public readonly TypeImplementedByAllExpression TypeId;
     public readonly IntervalExpression? ExternalPeriod;
 
 
-    public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, IntervalExpression? externalPeriod)
+    public ImplementedByAllExpression(Type type, IDictionary<Type/*PrimaryKey type*/, Expression> ids, TypeImplementedByAllExpression typeId, IntervalExpression? externalPeriod)
         : base(DbExpressionType.ImplementedByAll, type)
     {
-        if (id == null)
-            throw new ArgumentNullException(nameof(id));
-
-        if (id.Type != typeof(string))
-            throw new ArgumentException("string");
-        this.Id = id;
+        if (ids == null)
+            throw new ArgumentNullException(nameof(ids));
+        
+        this.Ids = ids.ToReadOnly();
         this.TypeId = typeId ?? throw new ArgumentNullException(nameof(typeId));
         this.ExternalPeriod = externalPeriod;
     }
 
     public override string ToString()
     {
-        return "ImplementedByAll{{ ID = {0}, Type = {1} }}".FormatWith(Id, TypeId);
+        return "ImplementedByAll{{\n  Ids = {0},\n  Type = {1}\n}}".FormatWith(
+            Ids.ToString(kvp => "{0} ->  {1}".FormatWith(kvp.Key.TypeName(), kvp.Value.ToString()), "\n"), 
+            TypeId);
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -347,11 +347,11 @@ internal class LiteReferenceExpression : DbExpression
 internal class LiteValueExpression : DbExpression
 {
     public readonly Expression TypeId;
-    public readonly Expression Id;
+    public readonly PrimaryKeyExpression Id;
     public readonly Expression? ToStr;
 
 
-    public LiteValueExpression(Type type, Expression typeId, Expression id, Expression? toStr) :
+    public LiteValueExpression(Type type, Expression typeId, PrimaryKeyExpression id, Expression? toStr) :
         base(DbExpressionType.LiteValue, type)
     {
         this.TypeId = typeId ?? throw new ArgumentNullException(nameof(typeId));
@@ -370,7 +370,15 @@ internal class LiteValueExpression : DbExpression
     }
 }
 
-internal class TypeEntityExpression : DbExpression
+internal abstract class TypeDbExpression : DbExpression
+{
+    public TypeDbExpression(DbExpressionType dbType, Type type)
+       : base(dbType, type)
+    {
+    }
+}
+
+internal class TypeEntityExpression : TypeDbExpression
 {
     public readonly PrimaryKeyExpression ExternalId;
     public readonly Type TypeValue;
@@ -393,7 +401,7 @@ internal class TypeEntityExpression : DbExpression
     }
 }
 
-internal class TypeImplementedByExpression : DbExpression
+internal class TypeImplementedByExpression : TypeDbExpression
 {
     public readonly ReadOnlyDictionary<Type, PrimaryKeyExpression> TypeImplementations;
 
@@ -417,7 +425,8 @@ internal class TypeImplementedByExpression : DbExpression
     }
 }
 
-internal class TypeImplementedByAllExpression : DbExpression
+
+internal class TypeImplementedByAllExpression : TypeDbExpression
 {
     public readonly PrimaryKeyExpression TypeColumn;
 
@@ -541,7 +550,7 @@ internal class MListElementExpression : DbExpression
 
     public override string ToString()
     {
-        return "MListElement({0})\r\n{{\r\nParent={1},\r\nOrder={2},\r\nElement={3}}})".FormatWith(
+        return "MListElement({0})\n{{\nParent={1},\nOrder={2},\nElement={3}}})".FormatWith(
             RowId.ToString(),
             Parent.ToString(),
             Order?.ToString(),

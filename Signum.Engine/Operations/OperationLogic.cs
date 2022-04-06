@@ -186,7 +186,7 @@ Consider the following options:
     static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
     {
         var table = Schema.Current.Table<OperationLogEntity>();
-        var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Target)).ColumnType;
+        var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Target)).TypeColumn;
         return Administrator.DeleteWhereScript(table, column, ((TypeEntity)arg).Id);
     }
 
