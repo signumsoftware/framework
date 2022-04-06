@@ -67,10 +67,14 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
 
   useSignalRCallback(conn, "ConcurrentUsersChanged", () => setRefreshKey(a => a + 1), []);
 
+  if (window.__disableSignalR)
+    return <FontAwesomeIcon icon="exclamation-triangle" color={"#ddd"} title={window.__disableSignalR} />;
 
   const ticksRef = useUpdatedRef(ticks);
   const entityRef = useUpdatedRef(p.entity);
 
+
+  //Is conditionally but the condition is a constant
   React.useEffect(() => {
     const handle = setTimeout(() => {
       if (ticksRef.current != null && ticksRef.current != entityRef.current.ticks) {
@@ -99,9 +103,6 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
     }, 1000);
     return () => clearTimeout(handle);
   }, [ticks !== p.entity.ticks]);
-
-  if (window.__disableSignalR) 
-    return <FontAwesomeIcon icon="exclamation-triangle" color={"#ddd"} title={window.__disableSignalR} />
 
   var otherUsers = concurrentUsers?.filter(u => u.connectionID !== conn?.connectionId);
 
