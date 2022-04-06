@@ -1413,6 +1413,9 @@ export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, add
 }
 
 export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
+
+  fo = defaultNoColumnsAllRows(fo, undefined);
+
   return getQueryDescription(fo.queryName)
     .then(qd => parseFindOptions(fo!, qd, false))
     .then(fop => API.executeQuery(getQueryRequest(fop), signal));
