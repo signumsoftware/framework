@@ -2938,9 +2938,17 @@ internal class QueryBinder : ExpressionVisitor
 
         if (expression is ImplementedByExpression ib)
         {
-            var type = ib.Implementations.Select(imp => imp.Value.ExternalId.ValueType.Nullify()).Distinct().SingleOrDefaultEx() ?? typeof(IComparable);
-            var aggregate = new PrimaryKeyExpression(Coalesce(type, ib.Implementations.Select(imp => imp.Value.ExternalId.Value)));
-            return aggregate;
+            var type = ib.Implementations.Select(imp => imp.Value.ExternalId.ValueType.Nullify()).Distinct().Only();
+            if(type != null)
+            {
+                var aggregate = new PrimaryKeyExpression(Coalesce(type, ib.Implementations.Select(imp => imp.Value.ExternalId.Value)));
+                return aggregate;
+            }
+            else
+            {
+                var aggregate = new PrimaryKeyExpression(Coalesce(typeof(IComparable), ib.Implementations.Select(imp => Expression.Convert(imp.Value.ExternalId.Value, typeof(IComparable)))));
+                return aggregate;
+            }
         }
 
         if (expression is ImplementedByAllExpression iba)
