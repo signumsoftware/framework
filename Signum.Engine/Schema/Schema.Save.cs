@@ -1497,12 +1497,16 @@ public partial class FieldImplementedByAll
         {
 
             var id = Expression.Parameter(typeof(IComparable), "id");
-            var variables = new [] { id};
+            var variables = new[] { id };
 
             var instructions = new List<Expression>();
             instructions.Add(Expression.Assign(id, Expression.Call(miUnWrap, this.GetIdFactory(value, forbidden))));
             instructions.Add(Expression.Call(Expression.Constant(this), miAssertPrimaryKeyTypes, id));
-            instructions.Add(Expression.Condition(Expression.TypeIs(id, col.Type), Expression.Convert(id, col.Type), Expression.Constant(null, col.Type)));
+
+            if (IdColumns.Count > 1)
+                instructions.Add(Expression.Condition(Expression.TypeIs(id, col.Type), Expression.Convert(id, col.Type), Expression.Constant(null, col.Type)));
+            else
+                instructions.Add(Expression.Convert(id, col.Type));
 
             trios.Add(new Table.Trio(col, Expression.Block(col.Type, variables, instructions), suffix));
         }
