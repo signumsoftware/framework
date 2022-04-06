@@ -33,7 +33,7 @@ public class ConcurrentUserHub : Hub<IConcurrentUserClient>
         return base.OnDisconnectedAsync(exception);
     }
 
-    public Task EnterEntity(string liteKey, DateTime startTime, string userKey)
+    public Task EnterEntity(string liteKey, string userKey)
     {
         var lite = Lite.Parse(liteKey);
         var user = (Lite<UserEntity>)Lite.Parse(userKey);
@@ -44,7 +44,7 @@ public class ConcurrentUserHub : Hub<IConcurrentUserClient>
             {
                 TargetEntity = lite,
                 User = user,
-                StartTime = startTime,
+                StartTime = Clock.Now,
                 SignalRConnectionID = this.Context.ConnectionId,
             }.Save();
         };
@@ -54,14 +54,14 @@ public class ConcurrentUserHub : Hub<IConcurrentUserClient>
         return this.Groups.AddToGroupAsync(this.Context.ConnectionId, liteKey);
     }
 
-    public Task EntityModified(string liteKey, DateTime startTime, string userKey, bool modified)
+    public Task EntityModified(string liteKey, string userKey, bool modified)
     {
         var lite = Lite.Parse(liteKey);
         var user = (Lite<UserEntity>)Lite.Parse(userKey);
         using (AuthLogic.Disable())
         {
             Database.Query<ConcurrentUserEntity>()
-                .Where(a => a.TargetEntity.Is(lite) && a.User.Is(user) && a.SignalRConnectionID == this.Context.ConnectionId && a.StartTime == startTime)
+                .Where(a => a.TargetEntity.Is(lite) && a.User.Is(user) && a.SignalRConnectionID == this.Context.ConnectionId)
                 .UnsafeUpdate(a => a.IsModified, a => modified);
         };
 
@@ -70,7 +70,7 @@ public class ConcurrentUserHub : Hub<IConcurrentUserClient>
         return Task.CompletedTask;
     }
 
-    public Task ExitEntity(string liteKey, DateTime startTime, string userKey)
+    public Task ExitEntity(string liteKey, string userKey)
     {
         var lite = Lite.Parse(liteKey);
         var user = (Lite<UserEntity>)Lite.Parse(userKey);
@@ -78,7 +78,7 @@ public class ConcurrentUserHub : Hub<IConcurrentUserClient>
         using (AuthLogic.Disable())
         {
             Database.Query<ConcurrentUserEntity>()
-                .Where(a => a.TargetEntity.Is(lite) && a.User.Is(user) && a.SignalRConnectionID == this.Context.ConnectionId && a.StartTime == startTime)
+                .Where(a => a.TargetEntity.Is(lite) && a.User.Is(user) && a.SignalRConnectionID == this.Context.ConnectionId)
                 .UnsafeDelete();
 
             if (Database.Query<ConcurrentUserEntity>().Any(a => a.TargetEntity.Is(lite) && a.User.Is(user) && a.SignalRConnectionID == this.Context.ConnectionId))

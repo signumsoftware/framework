@@ -17,7 +17,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
   React.useEffect(() => {
     if (isActive) {
       const lite = toLite(ctx.value);
-      vscl.current && vscl.current.valueSearchControl!.refreshValue();
+      vscl.current && vscl.current.searchValue!.refreshValue();
       Navigator.API.fetchEntityPack(lite)
         .then(pack => ctx.frame!.onReload(pack))
         .done();

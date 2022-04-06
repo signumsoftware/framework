@@ -22,7 +22,6 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
 
   const entityKey = liteKey(toLite(p.entity));
   const userKey = liteKey(toLite(AppContext.currentUser! as UserEntity))
-  const startTime = React.useMemo(() => DateTime.utc().toISO(), [entityKey]);
 
   const [ticks, setTicks] = React.useState<string>(p.entity.ticks);
   const forceUpdate = useForceUpdate();
@@ -31,8 +30,8 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   }, [entityKey]);
 
   useSignalRGroup(conn, {
-    enterGroup: co => p.entity == null ? Promise.resolve(undefined) : co.send("EnterEntity", entityKey, startTime, userKey),
-    exitGroup: co => p.entity == null ? Promise.resolve(undefined) : co.send("ExitEntity", entityKey, startTime, userKey),
+    enterGroup: co => p.entity == null ? Promise.resolve(undefined) : co.send("EnterEntity", entityKey, userKey),
+    exitGroup: co => p.entity == null ? Promise.resolve(undefined) : co.send("ExitEntity", entityKey, userKey),
     deps: [entityKey]
   });
 
@@ -46,7 +45,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
         GraphExplorer.propagateAll(p.entity);
 
         if (p.entity.modified != isModified.current) {
-          conn?.send("EntityModified", entityKey, startTime, userKey, p.entity.modified).done();
+          conn?.send("EntityModified", entityKey, userKey, p.entity.modified).done();
           isModified.current = p.entity.modified;
         }
       }
@@ -125,11 +124,11 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
                 {a.isModified && <FontAwesomeIcon icon="edit" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
               </div>)}
 
-            {isModified.current &&
+            {isModified.current ?
               (ticks !== p.entity.ticks ?
                 <div className="mt-3">
                   <small>
-                    {ConcurrentUserMessage.YouHaveLocalChangesButTheEntityHasBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}
+                  {ConcurrentUserMessage.YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}
                     {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{p.entity.toStr}</a>)}
                   </small>
                 </div> :
@@ -137,13 +136,22 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
                   <div className="mt-3">
                     <small>{ConcurrentUserMessage.LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}</small>
                   </div>
-                  : null
-              )
+                : 
+                <div className="mt-3">
+                  <small>{ConcurrentUserMessage.YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}</small>
+                </div>
+              ) : ticks !== p.entity.ticks ? 
+                <div className="mt-3">
+                  <small>
+                    {ConcurrentUserMessage.ThisIsNotTheLatestVersionOf0.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}
+                    <button className="btn btn-primary btn-sm" onClick={p.onReload}>{ConcurrentUserMessage.ReloadIt.niceToString()}</button>
+                  </small>
+                </div> : null
             }
           </Popover.Body>
         </Popover>
       }>
-      <div className={classes("sf-pointer", (otherUsers.some(u => u.isModified) || ticks !== p.entity.ticks) && isModified.current ? "blinking" : undefined)} title={window.__disableSignalR ?? undefined}>
+      <div className={classes("sf-pointer", isModified.current ? "blinking" : undefined)} title={window.__disableSignalR ?? undefined}>
         <FontAwesomeIcon icon={otherUsers.length == 1 ? "user" : otherUsers.length == 2 ? "user-friends" : "users"}
           color={ticks !== p.entity.ticks ? "#E4032E" : otherUsers.some(u => u.isModified) ? "#FFAA44" : "#6BB700"} />
         <strong className="ms-1 me-3" style={{ userSelect: "none" }}>{UserEntity.niceCount(otherUsers.length)}</strong>
@@ -152,13 +160,16 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   );
 }
 
-const colors = "#750b1c #a4262c #d13438 #ca5010 #986f0b #498205 #0b6a0b #038387 #005b70 #0078d4 #004e8c #4f6bed #5c2e91 #8764b8 #881798 #c239b3 #e3008c #8e562e #7a7574 #69797e".split(" ");
+export namespace Options {
 
-export function getUserColor(u: Lite<UserEntity>): string {
+  export let colors = "#750b1c #a4262c #d13438 #ca5010 #986f0b #498205 #0b6a0b #038387 #005b70 #0078d4 #004e8c #4f6bed #5c2e91 #8764b8 #881798 #c239b3 #e3008c #8e562e #7a7574 #69797e".split(" ");
 
-  var id = u.id as number;
+  export function getUserColor(u: Lite<UserEntity>): string {
 
-  return colors[id % colors.length];
+    var id = u.id as number;
+
+    return colors[id % colors.length];
+  }
 }
 
 export function getUserInitials(u: Lite<UserEntity>): string {
@@ -166,9 +177,9 @@ export function getUserInitials(u: Lite<UserEntity>): string {
 }
 
 export function UserCircle(p: { user: Lite<UserEntity>, className?: string }) {
-  var color = getUserColor(p.user);
+  var color = Options.getUserColor(p.user);
   return (
-    <span className={classes("user-circle", p.className)} style={{ color: "white", backgroundColor: color }} title={p.user.toStr}>
+    <span className={classes("concurrent-user-circle", p.className)} style={{ color: "white", backgroundColor: color }} title={p.user.toStr}>
       {getUserInitials(p.user)}
     </span>
   );
