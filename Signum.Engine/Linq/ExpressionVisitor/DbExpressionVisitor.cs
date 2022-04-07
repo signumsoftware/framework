@@ -514,15 +514,6 @@ internal class DbExpressionVisitor : ExpressionVisitor
         return new PrimaryKeyExpression(e);
     }
 
-    protected internal virtual Expression VisitPrimaryKeyString(PrimaryKeyStringExpression pk)
-    {
-        var typeId = Visit(pk.TypeId);
-        var id = Visit(pk.Id);
-        if (typeId == pk && pk.Id == id)
-            return pk;
-
-        return new PrimaryKeyStringExpression(id, (TypeImplementedByAllExpression)typeId);
-    }
 
     protected internal virtual Expression VisitInterval(IntervalExpression interval)
     {
