@@ -509,14 +509,6 @@ public class SelectTest
         var list = Database.Query<ArtistEntity>().Select(a => a.LastAward.Try(la => la.Id)).ToList();
     }
 
-    [Fact]
-    public void SelectIBAIdObject()
-    {
-        var e = Assert.Throws<InvalidOperationException>(() =>
-            Database.Query<ArtistEntity>().Select(a => a.LastAward.Try(la => (int?)la.Id).InSql()).ToList());
-
-        Assert.Contains("translated", e.Message);
-    }
 
     [Fact]
     public void SelectToStrField()

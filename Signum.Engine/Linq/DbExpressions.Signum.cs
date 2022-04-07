@@ -598,31 +598,3 @@ internal class PrimaryKeyExpression : DbExpression
     }
 }
 
-internal class PrimaryKeyStringExpression : DbExpression
-{
-    public readonly Expression Id;
-    public readonly TypeImplementedByAllExpression TypeId;
-
-    public PrimaryKeyStringExpression(Expression id, TypeImplementedByAllExpression typeId)
-        : base(DbExpressionType.PrimaryKeyString, typeof(PrimaryKey?))
-    {
-        if (id == null)
-            throw new ArgumentNullException(nameof(id));
-
-        if(id.Type != typeof(string))
-            throw new ArgumentException("id should be a string");
-
-        this.Id = id;
-        this.TypeId = typeId ?? throw new ArgumentNullException(nameof(typeId));
-    }
-
-    public override string ToString()
-    {
-        return "(PrimaryKeyString?)(" + Id.ToString() + ", " + TypeId.ToString() + ")";
-    }
-
-    protected override Expression Accept(DbExpressionVisitor visitor)
-    {
-        return visitor.VisitPrimaryKeyString(this);
-    }
-}
