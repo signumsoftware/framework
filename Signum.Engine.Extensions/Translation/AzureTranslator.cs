@@ -78,11 +78,11 @@ public static class ExtendedHttpClient
         if (!String.IsNullOrEmpty(proxy))
         {
             HttpClientHandler handler = new HttpClientHandler() { Proxy = new WebProxy() { Address = new Uri(proxy) } };
-            client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(2) };
+            client = new HttpClient(handler);
         }
         else
         {
-            client = new HttpClient() { Timeout = TimeSpan.FromSeconds(2) };
+            client = new HttpClient();
         }
 
         return client;
