@@ -219,6 +219,7 @@
     <Member Name="Cancel" Description="Abbrechen" />
     <Member Name="ContinueAnyway" Description="Trotzdem fortsetzen?" />
     <Member Name="ContinueWithErrors" Description="Weiter mit Fehlern?" />
+    <Member Name="Copied" Description="Kopiert" />
     <Member Name="FixErrors" Description="Fehler beheben" />
     <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="Unmöglich zu speichern, Integritätsprüfung fehlgeschlagen:&#xD;&#xA;&#xD;&#xA;" />
     <Member Name="Loading0" Description="{0} läd gerade..." />
