@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime, Duration, DurationObjectUnits } from 'luxon'
-import { DateTimePicker, DatePicker, DropdownList, Combobox } from 'react-widgets'
+import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes, softCast } from '../Globals'
 import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes } from '../Reflection'
@@ -738,6 +738,8 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
   const showTime = s.showTimeBox != null ? s.showTimeBox : type != "DateOnly" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
+  const monthOnly = luxonFormat == "LLLL yyyy";
+
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -770,7 +772,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
-          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(vl.props.initiallyFocused)}
+          <DatePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(vl.props.initiallyFocused)}
             valueEditFormat={luxonFormat}
             valueDisplayFormat={luxonFormat}
             includeTime={showTime}
@@ -778,7 +780,11 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
             messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
             min={s.minDate}
             max={s.maxDate}
-            calendarProps={{ renderDay: defaultRenderDay, ...s.calendarProps }}
+            calendarProps={{
+              renderDay: defaultRenderDay,
+              views: monthOnly ? ["year", "decade", "century"] : undefined,
+              ...s.calendarProps
+            }}
           />
         </div>
       )}
