@@ -352,7 +352,7 @@ export class TypeContext<T> extends StyleContext {
     if (property == undefined)
       return this.propertyRoute.member;
 
-    return this.propertyRoute.addLambda(property).member;
+    return this.propertyRoute.tryAddLambda(property)?.member;
   }
 
   getUniqueId(suffix?: string): string {
