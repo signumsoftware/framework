@@ -95,10 +95,10 @@ export default function renderBars({ data, width, height, parameters, loading, o
           var posx = row ? x(valueColumn.getValue(row))! : 0;
 
           return (
-            <g className="hover-group" key={key}>
+            <g className="hover-group" key={key} transform={translate(0, y(key)! + bandMargin)}>
               {row && <rect className="shape sf-transition hover-target"
                 opacity={active == false ? .5 : undefined}
-                transform={translate(0, y(key)! + bandMargin) + (initialLoad ? scale(0, 1) : scale(1, 1))}
+                transform={(initialLoad ? scale(0, 1) : scale(1, 1))}
                 width={x(valueColumn.getValue(row))}
                 height={y.bandwidth() - bandMargin * 2}
                 fill={keyColumn.getValueColor(row) ?? color(key)}
@@ -113,37 +113,36 @@ export default function renderBars({ data, width, height, parameters, loading, o
                 (isMargin ?
                 <g className="y-label" transform={translate(-labelsPadding, y.bandwidth() / 2)}>
                     <TextEllipsis 
-                      transform={translate(0, y(keyColumn.getKey(key))!)}
                       maxWidth={xRule.size('labels')}
                       className="y-label sf-transition"
-                      fill={(keyColumn.getColor(key) ?? color(keyColumn.getKey(key)))}
+                      fill={(keyColumn.getColor(k) ?? color(key))}
                       dominantBaseline="middle"
                       textAnchor="end"
                       fontWeight="bold"
-                      onClick={e => onDrillDown({ c0: key }, e)}
+                      onClick={e => onDrillDown({ c0: k }, e)}
                       cursor="pointer">
-                      {keyColumn.getNiceName(key)}
+                      {keyColumn.getNiceName(k)}
                     </TextEllipsis>)
                   </g> :
                   isInside ?
                   <g className="y-label" transform={translate(labelsPadding, y.bandwidth() / 2)}>
                       <TextEllipsis 
-                        transform={translate(posx, y(keyColumn.getKey(key))!)}
+                        transform={translate(posx, 0)}
                         maxWidth={size - posx}
                         className="y-label sf-transition"
-                        fill={(keyColumn.getColor(key) ?? color(keyColumn.getKey(key)))}
+                        fill={(keyColumn.getColor(k) ?? color(key))}
                         dominantBaseline="middle"
                         fontWeight="bold"
-                        onClick={e => onDrillDown({ c0: key }, e)}
+                        onClick={e => onDrillDown({ c0: k }, e)}
                         cursor="pointer">
-                        {keyColumn.getNiceName(key)}
+                        {keyColumn.getNiceName(k)}
                       </TextEllipsis>
                     </g> : null
                 )}
               {y.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 && row &&
                 <g className="numbers-label">
                   <TextIfFits
-                    transform={translate(x(valueColumn.getValue(row))! / 2, y(keyColumn.getValueKey(row))! + y.bandwidth() / 2)}
+                    transform={translate(x(valueColumn.getValue(row))! / 2, y.bandwidth() / 2)}
                     maxWidth={x(valueColumn.getValue(row))!}
                     className="number-label sf-transition"
                     fill={parameters["NumberColor"] ?? "#000"}
