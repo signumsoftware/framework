@@ -519,6 +519,7 @@
   <Type Name="CombinedUserChartPartEntity" Description="Kombinierter Benutzerdiagrammteil" Gender="m">
     <Member Name="AllowChangeShowData" Description="Daten anzeigen ändern lassen" />
     <Member Name="CombinePinnedFiltersWithSameLabel" Description="Kombinieren Vorgewahlter Filter Bezeichnung" />
+    <Member Name="MinHeight" Description="Min height" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserCharts" Description="Benutzerdiagramme" />
@@ -2671,6 +2672,7 @@
     <Member Name="AutoRefresh" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
+    <Member Name="MinHeight" Description="Min height" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
