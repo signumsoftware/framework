@@ -177,7 +177,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
                 if (already) {
                   dashboardFilter!.rows.remove(already);
                   if (dashboardFilter!.rows.length == 0)
-                    p.dashboardController.filters.delete(dashboardFilter!.partEmbedded);
+                    p.dashboardController.clearFilters(dashboardFilter!.partEmbedded);
                   else
                     p.dashboardController.setFilter(dashboardFilter!);
                 }
@@ -187,9 +187,14 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
                   p.dashboardController.setFilter(db);
                 }
               } else {
-                const db = new DashboardFilter(p.partEmbedded, chartRequest.queryKey);
-                db.rows.push(filterRow);
-                p.dashboardController.setFilter(db);
+                const already = dashboardFilter?.rows.firstOrNull(fr => equalsDFR(fr, filterRow));
+                if (already && dashboardFilter?.rows.length == 1) {
+                  p.dashboardController.clearFilters(dashboardFilter!.partEmbedded);
+                } else {
+                  const db = new DashboardFilter(p.partEmbedded, chartRequest.queryKey);
+                  db.rows.push(filterRow);
+                  p.dashboardController.setFilter(db);
+                }
               }
             }
           }}
