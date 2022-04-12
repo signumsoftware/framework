@@ -10,11 +10,22 @@ export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity>
   return (
     <div >
       <EntityLine ctx={ctx.subCtx(p => p.userChart)} create={false} onChange={() => ctx.findParentCtx(DashboardEntity).frame!.entityComponent!.forceUpdate()} />
-      <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
-      <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
-      <ValueLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
-      <ValueLine ctx={ctx.subCtx(p => p.autoRefresh)} inlineCheckbox="block" />
-      {ctx.findParentCtx(DashboardEntity).value.cacheQueryConfiguration && <IsQueryCachedLine ctx={ctx.subCtx(p => p.isQueryCached)} />}
+
+      <div className="row">
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
+          <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
+          <ValueLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
+          <ValueLine ctx={ctx.subCtx(p => p.autoRefresh)} inlineCheckbox="block" />
+          {ctx.findParentCtx(DashboardEntity).value.cacheQueryConfiguration && <IsQueryCachedLine ctx={ctx.subCtx(p => p.isQueryCached)} />}
+        </div>
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx.subCtx(p => p.minHeight)} formGroupStyle="Basic" />
+        </div>
+      </div>
+
+
+     
     </div>
   );
 }

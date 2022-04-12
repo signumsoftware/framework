@@ -29,6 +29,7 @@ export interface ChartRendererProps {
   dashboardFilter?: DashboardFilter;
   onDrillDown?: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onBackgroundClick?: (e: React.MouseEvent) => void;
+  minHeigh: number | null;
 }
 
 export default function ChartRenderer(p: ChartRendererProps) {
@@ -49,15 +50,17 @@ export default function ChartRenderer(p: ChartRendererProps) {
       <ErrorBoundary deps={[p.data]}>
         {cs && parameters &&
           <ReactChart
-            chartRequest={p.chartRequest}
-            data={p.data}
-            dashboardFilter={p.dashboardFilter}
-            loading={p.loading}
-            onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined))}
-            onBackgroundClick={p.onBackgroundClick}
-            parameters={parameters}
-            onReload={p.onReload}
-            onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />
+          chartRequest={p.chartRequest}
+          data={p.data}
+          dashboardFilter={p.dashboardFilter}
+          loading={p.loading}
+          onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined))}
+          onBackgroundClick={p.onBackgroundClick}
+          parameters={parameters}
+          onReload={p.onReload}
+          onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)}
+          minHeigh={p.minHeigh}
+        />
         }
       </ErrorBoundary>
     </FullscreenComponent>

@@ -102,7 +102,6 @@ body.rtl .sf-chart-token .sf-query-token {
 
 .sf-chart-container {
     width: 100%;
-    min-height: 400px;
     height: auto;
     position: relative;
     overflow: auto;
