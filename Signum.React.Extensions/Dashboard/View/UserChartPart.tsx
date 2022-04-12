@@ -135,7 +135,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }
 
   return (
-    <div>
+    <div className="d-flex flex-column flex-grow-1">
       <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => reloadQuery()} pinnedFilterVisible={fop => fop.dashboardBehaviour == null} extraSmall={true} />
       {p.content.allowChangeShowData &&
         <label>

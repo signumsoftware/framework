@@ -80,8 +80,8 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
               const last = j == 0 ? undefined : list[j - 1];
               const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
               return (
-                <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`}>
-                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} dashboardController={dashboardController} reload={p.reload} cachedQueries={p.cachedQueries} deps={p.deps} />)}
+                <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`} style={{ display: "flex", flexDirection: "column" }}>
+                  {c.parts.map((pctx, i) => <PanelPart key={i} ctx={pctx} entity={p.entity} dashboardController={dashboardController} reload={p.reload} cachedQueries={p.cachedQueries} deps={p.deps} flex />)}
                 </div>
               );
             })}
@@ -184,8 +184,9 @@ export interface PanelPartProps {
   entity?: Entity;
   deps?: React.DependencyList;
   dashboardController: DashboardController;
+  flex?: boolean;
   reload: () => void;
-  cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }
+  cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS>, }
 }
 
 export function PanelPart(p: PanelPartProps) {
@@ -236,7 +237,7 @@ export function PanelPart(p: PanelPartProps) {
   }
 
   return (
-    <div className={classes("card", !part.customColor && "border-light", "shadow-sm", "mb-4")}>
+    <div className={classes("card", !part.customColor && "border-light", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined }}>
       <div className={classes("card-header", "sf-show-hover", "d-flex", !part.customColor && ("bg-light"))}
         style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined}}
       >
@@ -265,7 +266,7 @@ export function PanelPart(p: PanelPartProps) {
           }
         </div>
       </div>
-      <div className="card-body py-2 px-3">
+      <div className="card-body py-2 px-3 d-flex flex-column">
         <ErrorBoundary>
           {
             React.createElement(state.component, {

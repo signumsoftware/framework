@@ -22,7 +22,7 @@ export function FullscreenComponent(p: FullscreenComponentProps) {
   }
 
   return (
-    <div className="sf-fullscreen-component" style={!isFullScreen ? { display: "flex" } : ({
+    <div className="sf-fullscreen-component" style={!isFullScreen ? { display: "flex", flex: 1 } : ({
       display: "flex",
       position: "fixed",
       background: "white",
