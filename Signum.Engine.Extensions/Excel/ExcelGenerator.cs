@@ -94,7 +94,7 @@ public static class ExcelGenerator
         var resultsCols = results.Columns.ToDictionary(c => c.Column.DisplayName!);
 
         var headerCells = sheetData.Descendants<Row>().FirstEx().Descendants<Cell>().ToList();
-        var templateCols = headerCells.ToDictionary(c => document.GetCellValue(c));
+        var templateCols = headerCells.ToDictionary(c => document.GetCellValue(c)!);
 
         var rowDataCellTemplates = sheetData.Descendants<Row>()
             .FirstEx(r => IsValidRowDataTemplate(r, headerCells))
