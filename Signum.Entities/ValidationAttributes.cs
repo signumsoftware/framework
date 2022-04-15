@@ -323,7 +323,7 @@ public class NumericTextValidatorAttribute : RegexValidatorAttribute
 public class URLValidatorAttribute : RegexValidatorAttribute
 {
     public static Regex AbsoluteUrlRegex = new Regex(
-            "^(https?://)"
+          "^(https?://)"
         + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //user@
         + @"(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP- 199.194.52.184
         + "|" // allows either IP or domain
