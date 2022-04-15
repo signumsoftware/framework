@@ -12,6 +12,8 @@ import { QueryString } from '@framework/QueryString'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { SidebarMode  } from '../SidebarContainer'
 import { isActive } from '@framework/FindOptions';
+import { Dic } from '@framework/Globals';
+import { urlVariables } from '../../Dashboard/UrlVariables';
 
 function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
   if (r.url)
@@ -101,7 +103,12 @@ export default function ToolbarRenderer(p: {
         if (res.url) {
           return (
             <ToolbarNavItem key={key} title={res.label} onClick={(e: React.MouseEvent<any>) => {
-              AppContext.pushOrOpenInTab(res.url!, e);
+              var url = res.url!;
+              Dic.getKeys(urlVariables).forEach(v => {
+                url = url.replaceAll(v, urlVariables[v]());
+              });
+
+              AppContext.pushOrOpenInTab(url, e);
               if (p.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
                 p.onAutoClose();
             }}
