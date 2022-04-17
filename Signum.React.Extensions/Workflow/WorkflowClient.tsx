@@ -665,10 +665,9 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
 
 }
 
-export const newCaseFindOptions: { [strategy: string]: { [typeName: string]: FindOptions } } = {};
-export function registerNewCaseFindOptions(strategy: "SelectByUser" | "Clone", typeName: string, fo: FindOptions) {
-  var dic = newCaseFindOptions[strategy] ??= {};
-  dic[typeName] = fo;
+export const newCaseFindOptions: { [typeName: string]: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => FindOptions | null } = {};
+export function registerNewCaseFindOptions(typeName: string, getFindOptions: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => FindOptions | null) {
+  newCaseFindOptions[typeName] = getFindOptions; 
 }
 
 export function createNewCase(workflowId: number | string, mainEntityStrategy: WorkflowMainEntityStrategy): Promise<CaseEntityPack | undefined> {
@@ -684,7 +683,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
       }
 
       const typeName = wf.mainEntityType!.cleanName;
-      const fo = newCaseFindOptions[mainEntityStrategy]?.[typeName] ?? { queryName: typeName };
+      const fo = newCaseFindOptions[typeName]?.(toLite(wf), mainEntityStrategy) ?? { queryName: typeName };
       return Finder.find(fo)
         .then(lite => {
           if (!lite)
