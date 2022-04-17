@@ -44,7 +44,7 @@ import InboxFilter from './Case/InboxFilter'
 import Workflow, { WorkflowHandle } from './Workflow/Workflow'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "@framework/AsyncImport";
-import { FilterRequest, ColumnRequest } from '@framework/FindOptions';
+import { FilterRequest, ColumnRequest, FindOptions } from '@framework/FindOptions';
 import { BsColor } from '@framework/Components/Basic';
 import { GraphExplorer } from '@framework/Reflection';
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
@@ -59,6 +59,7 @@ import { UserEntity } from '../Authorization/Signum.Entities.Authorization';
 import { SearchControl } from '../../Signum.React/Scripts/Search';
 import SearchModal from '../../Signum.React/Scripts/SearchControl/SearchModal';
 import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal';
+import { DynamicTypeConditionSymbolEntity } from '../Dynamic/Signum.Entities.Dynamic';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
@@ -665,6 +666,12 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
 
 }
 
+export const newCaseFindOptions: { [strategy: string]: { [typeName: string]: FindOptions } } = {};
+export function registerNewCaseFindOptions(strategy: "SelectByUser" | "Clone", typeName: string, fo: FindOptions) {
+  var dic = newCaseFindOptions[strategy] ??= {};
+  dic[typeName] = fo;
+}
+
 export function createNewCase(workflowId: number | string, mainEntityStrategy: WorkflowMainEntityStrategy): Promise<CaseEntityPack | undefined> {
   return Navigator.API.fetchEntity(WorkflowEntity, workflowId)
     .then(wf => {
@@ -677,7 +684,9 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
         coi = Operations.getOperationInfo(`${wf.mainEntityType!.cleanName}Operation.Clone`, wf.mainEntityType!.cleanName);
       }
 
-      return Finder.find({ queryName: wf.mainEntityType!.cleanName })
+      const typeName = wf.mainEntityType!.cleanName;
+      const fo = newCaseFindOptions[mainEntityStrategy]?.[typeName] ?? { queryName: typeName };
+      return Finder.find(fo)
         .then(lite => {
           if (!lite)
             return Promise.resolve(undefined);
