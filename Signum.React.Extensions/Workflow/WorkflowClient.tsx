@@ -59,7 +59,6 @@ import { UserEntity } from '../Authorization/Signum.Entities.Authorization';
 import { SearchControl } from '../../Signum.React/Scripts/Search';
 import SearchModal from '../../Signum.React/Scripts/SearchControl/SearchModal';
 import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal';
-import { DynamicTypeConditionSymbolEntity } from '../Dynamic/Signum.Entities.Dynamic';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
