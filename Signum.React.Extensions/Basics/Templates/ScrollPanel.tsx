@@ -34,6 +34,7 @@ export interface ScrollPanelProps {
   id: string;
   title: React.ReactNode;
   backId?: string;
+  children: React.ReactNode;
 }
 
 export class ScrollPanel extends React.Component<ScrollPanelProps> {

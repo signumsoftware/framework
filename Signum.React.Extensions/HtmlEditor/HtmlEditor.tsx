@@ -98,7 +98,7 @@ export class HtmlEditorController {
     }
   }
 
-  extraButtons(): React.ReactFragment | null {
+  extraButtons(): React.ReactElement | null {
 
     var buttons = this.plugins.map(p => p.getToolbarButtons && p.getToolbarButtons(this)).notNull();
 
