@@ -12,6 +12,7 @@ import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FindOptionsAutocompleteConfig } from './AutoCompleteConfig'
+import { FilterOption } from '../Search'
 
 export interface EntityBaseProps extends LineBaseProps {
   view?: boolean | ((item: any/*T*/) => boolean);
@@ -277,8 +278,23 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
           return;
 
         const lite = lites[0];
-        Navigator.API.fillToStrings(lite)
-          .then(() => this.convert(lite).then(m => this.setValue(m)));
+        const ti = getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lite.EntityType);
+        if (!ti)
+          return;
+
+        const fo = this.getFindOptions(ti.name);
+        if (!fo)
+          return Navigator.API.fillToStrings(lite)
+            .then(() => this.convert(lite).then(m => this.setValue(m)));
+
+        const fos = [fo.filterOptions, { token: "Entity", operation: "EqualTo", value: lite }] as FilterOption[];
+        return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
+          .then(lites => {
+            if (lites.length == 0)
+              return;
+
+            return this.convert(lites[0]).then(m => this.setValue(m));
+          })
       })
       .done();
   }

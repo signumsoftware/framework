@@ -3,12 +3,13 @@ import { classes, KeyGenerator } from '../Globals'
 import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import * as Navigator from '../Navigator'
-import { FindOptions } from '../FindOptions'
+import { FilterOption, FindOptions } from '../FindOptions'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 import { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutoCompleteConfig'
+import { getTypeInfos } from '../Reflection'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -162,6 +163,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
   }
 
   handlePasteClick = (event: React.SyntheticEvent<any>) => {
+
     event.preventDefault();
 
     navigator.clipboard.readText()
@@ -170,9 +172,26 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
         if (lites.length == 0)
           return;
 
-        Navigator.API.fillToStrings(...lites)
-          .then(() => Promise.all(lites.map(l => this.convert(l)))
-            .then(entities => entities.forEach(e => this.addElement(e))));
+        const lite = lites[0];
+        const ti = getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lite.EntityType);
+        if (!ti)
+          return;
+
+        const fo = this.getFindOptions(ti.name);
+        if (!fo)
+          return Navigator.API.fillToStrings(...lites)
+            .then(() => Promise.all(lites.map(l => this.convert(l))))
+            .then(entities => entities.forEach(e => this.addElement(e)));
+
+        const fos = [fo.filterOptions, { token: "Entity", operation: "IsIn", value: lites }] as FilterOption[];
+        return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
+          .then(lites => {
+            if (lites.length == 0)
+              return;
+
+            return Promise.all(lites.map(l => this.convert(l)))
+              .then(entities => entities.forEach(e => this.addElement(e)));
+          })
       })
       .done();
   }
