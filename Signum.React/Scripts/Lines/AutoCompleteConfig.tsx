@@ -188,21 +188,34 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
         filters = [...defaultFilters, ...filters];
     }
 
-    if (FindOptionsAutocompleteConfig.liteKeyRegEx.test(subStr)) {
-      const lite = parseLite(subStr);
-      const tis = getTypeInfos(qd.columns["Entity"].type);
-      const ti = tis.singleOrNull(ti => ti.name == lite.EntityType);
+    const lines = subStr.split("|");
+    const liteKeys = lines.map(l => FindOptionsAutocompleteConfig.liteKeyRegEx.test(l) ? l : null).notNull();
+    const lites = liteKeys.map(m => parseLite(m)).filter(l => isLite(l));
+    if (lites.length > 0) {
+      const type = qd.columns["Entity"].type;
+      const tis = getTypeInfos(type);
+      const ti = tis.singleOrNull(ti => ti.name == lites[0].EntityType);
       if (ti && tis.length > 1)
         filters.insertAt(0, {
           token: `Entity.(${ti.name})`,
           operation: "DistinctTo"
         });
 
+      if (!ti) {
+        filters.insertAt(0, {
+          token: "Entity.Id",
+          operation: "EqualTo",
+        });
+
+        return filters;
+      }
+
       filters.insertAt(0, {
         token: "Entity.Id",
-        operation: "EqualTo",
-        value: ti ? lite.id : null
+        operation: lites.length > 1 ? "IsIn" : "EqualTo",
+        value: lites.length > 1 ? lites.map(l => l.id) : lites[0].id,
       });
+
       return filters;
     }
 

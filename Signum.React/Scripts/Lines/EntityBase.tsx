@@ -6,11 +6,12 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo, getTypeInfos } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite, parseLite, isLite } from '../Signum.Entities'
 import { LineBaseController, LineBaseProps } from './LineBase'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FindOptionsAutocompleteConfig } from './AutoCompleteConfig'
 
 export interface EntityBaseProps extends LineBaseProps {
   view?: boolean | ((item: any/*T*/) => boolean);
@@ -43,6 +44,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
   static removeIcon = <FontAwesomeIcon icon="times" />;
   static viewIcon = <FontAwesomeIcon icon="arrow-right" />;
   static moveIcon = <FontAwesomeIcon icon="bars" />;
+  static pasteIcon = <FontAwesomeIcon icon="clipboard" />;
 
   static hasChildrens(element: React.ReactElement<any>) {
     return element.props.children && React.Children.toArray(element.props.children).length;
@@ -264,6 +266,25 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     }).done();
   };
 
+  handlePasteClick = (event: React.SyntheticEvent<any>) => {
+
+    event.preventDefault();
+
+    navigator.clipboard.readText()
+      .then(text => {
+        const lines = text.split("|");
+        const liteKeys = lines.map(l => FindOptionsAutocompleteConfig.liteKeyRegEx.test(l) ? l : null).notNull();
+        const lites = liteKeys.map(m => parseLite(m)).filter(l => isLite(l));
+        if (lites.length == 0)
+          return;
+
+        const lite = lites[0];
+        Navigator.API.fillToStrings(lite)
+          .then(() => this.convert(lite).then(m => this.setValue(m)));
+      })
+      .done();
+  }
+
   renderCreateButton(btn: boolean, createMessage?: string) {
     if (!this.props.create || this.props.ctx.readOnly)
       return undefined;
@@ -273,6 +294,19 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         onClick={this.handleCreateClick}
         title={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() : undefined}>
         {EntityBaseController.createIcon}
+      </a>
+    );
+  }
+
+  renderPasteButton(btn: boolean) {
+    if (this.props.ctx.readOnly || !this.props.type || (this.props.type.name != IsByAll && !this.props.type.isCollection))
+      return undefined;
+
+    return (
+      <a href="#" className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
+        onClick={this.handlePasteClick}
+        title={EntityControlMessage.Paste.niceToString()}>
+        {EntityBaseController.pasteIcon}
       </a>
     );
   }

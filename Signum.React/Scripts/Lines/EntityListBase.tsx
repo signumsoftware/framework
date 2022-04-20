@@ -1,12 +1,14 @@
 import * as React from 'react'
 import { classes, KeyGenerator } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLite, getToString } from '../Signum.Entities'
 import * as Finder from '../Finder'
+import * as Navigator from '../Navigator'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
+import { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutoCompleteConfig'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -159,6 +161,23 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     this.setValue(list);
   }
 
+  handlePasteClick = (event: React.SyntheticEvent<any>) => {
+    event.preventDefault();
+
+    navigator.clipboard.readText()
+      .then(text => {
+        const lines = text.split("|");
+        const liteKeys = lines.map(l => FindOptionsAutocompleteConfig.liteKeyRegEx.test(l) ? l : null).notNull();
+        const lites = liteKeys.map(m => parseLite(m)).filter(l => isLite(l));
+        if (lites.length == 0)
+          return;
+
+        Navigator.API.fillToStrings(...lites)
+          .then(() => Promise.all(lites.map(l => this.convert(l)))
+            .then(entities => entities.forEach(e => this.addElement(e))));
+      })
+      .done();
+  }
 
   handleFindClick = (event: React.SyntheticEvent<any>) => {
 

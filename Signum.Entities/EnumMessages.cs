@@ -124,7 +124,7 @@ public enum EntityControlMessage
     View,
     [Description("Add…")]
     Add,
-
+    Paste,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
@@ -246,6 +246,8 @@ public enum SearchMessage
 
     GroupKey,
     DerivedGroupKey,
+
+    Copy,
 }
 
 public enum SelectorMessage

@@ -309,6 +309,7 @@ export module EntityControlMessage {
   export const Remove = new MessageKey("EntityControlMessage", "Remove");
   export const View = new MessageKey("EntityControlMessage", "View");
   export const Add = new MessageKey("EntityControlMessage", "Add");
+  export const Paste = new MessageKey("EntityControlMessage", "Paste");
 }
 
 export interface ImmutableEntity extends Entity {
@@ -550,6 +551,7 @@ export module SearchMessage {
   export const HideHiddenColumns = new MessageKey("SearchMessage", "HideHiddenColumns");
   export const GroupKey = new MessageKey("SearchMessage", "GroupKey");
   export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
+  export const Copy = new MessageKey("SearchMessage", "Copy");
 }
 
 export module SelectorMessage {
