@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, KeyGenerator } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLite, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import * as Navigator from '../Navigator'
 import { FindOptions } from '../FindOptions'
@@ -166,9 +166,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
 
     navigator.clipboard.readText()
       .then(text => {
-        const lines = text.split("|");
-        const liteKeys = lines.map(l => FindOptionsAutocompleteConfig.liteKeyRegEx.test(l) ? l : null).notNull();
-        const lites = liteKeys.map(m => parseLite(m)).filter(l => isLite(l));
+        const lites = parseLiteList(text);
         if (lites.length == 0)
           return;
 

@@ -6,7 +6,7 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo, getTypeInfos } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite, parseLite, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite, parseLiteList } from '../Signum.Entities'
 import { LineBaseController, LineBaseProps } from './LineBase'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
@@ -272,9 +272,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
     navigator.clipboard.readText()
       .then(text => {
-        const lines = text.split("|");
-        const liteKeys = lines.map(l => FindOptionsAutocompleteConfig.liteKeyRegEx.test(l) ? l : null).notNull();
-        const lites = liteKeys.map(m => parseLite(m)).filter(l => isLite(l));
+        const lites = parseLiteList(text);
         if (lites.length == 0)
           return;
 

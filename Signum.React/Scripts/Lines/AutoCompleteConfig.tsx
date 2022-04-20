@@ -3,7 +3,7 @@ import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription, QueryRequest, FilterOption, ResultTable } from '../FindOptions'
 import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLiteList } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
 import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
@@ -175,8 +175,6 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   abortableRequest = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
-  static liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
-
   static filtersWithSubStr(fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined, subStr: string): FilterOption[] {
 
     var filters = [...fo.filterOptions?.notNull() ?? []];
@@ -188,9 +186,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
         filters = [...defaultFilters, ...filters];
     }
 
-    const lines = subStr.split("|");
-    const liteKeys = lines.map(l => FindOptionsAutocompleteConfig.liteKeyRegEx.test(l) ? l : null).notNull();
-    const lites = liteKeys.map(m => parseLite(m)).filter(l => isLite(l));
+    const lites = parseLiteList(subStr);
     if (lites.length > 0) {
       const type = qd.columns["Entity"].type;
       const tis = getTypeInfos(type);
