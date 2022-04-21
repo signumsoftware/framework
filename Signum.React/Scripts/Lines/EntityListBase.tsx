@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { classes, KeyGenerator } from '../Globals'
+import { classes, Dic, KeyGenerator } from '../Globals'
 import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import * as Navigator from '../Navigator'
@@ -168,24 +168,28 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
 
     navigator.clipboard.readText()
       .then(text => {
-        const lites = parseLiteList(text);
+        var lites = parseLiteList(text);
         if (lites.length == 0)
           return;
 
-        const ti = this.props.type!.name == IsByAll ? getTypeInfo(lites[0].EntityType) : getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lites[0].EntityType);
-        if (!ti)
+        const tis = getTypeInfos(this.props.type!);
+        lites = lites.filter(lite => tis.length == 0 || tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
+        if (lites.length == 0)
           return;
 
-        const fo = this.getFindOptions(ti.name) ?? { queryName: ti.name };
-        const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "IsIn", value: lites }]);
-        return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
-          .then(lites => {
-            if (lites.length == 0)
-              return;
+        const dic = lites.groupBy(lite => lite.EntityType);
+        return Promise.all(dic.map(kvp => {
+          const fo = this.getFindOptions(kvp.key) ?? { queryName: kvp.key };
+          const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "IsIn", value: kvp.elements }]);
+          return Finder.fetchEntitiesLiteWithFilters(kvp.key, fos, [], null)
+            .then(lites => {
+              if (lites.length == 0)
+                return;
 
-            return Promise.all(lites.map(lite => this.convert(lite)))
-              .then(entities => entities.forEach(e => this.addElement(e)));
-          })
+              return Promise.all(lites.map(lite => this.convert(lite)))
+                .then(entities => entities.forEach(e => this.addElement(e)));
+            });
+        }));
       })
       .done();
   }

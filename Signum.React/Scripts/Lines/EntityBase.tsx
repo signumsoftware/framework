@@ -21,6 +21,7 @@ export interface EntityBaseProps extends LineBaseProps {
   createOnFind?: boolean;
   find?: boolean;
   remove?: boolean | ((item: any /*T*/) => boolean);
+  paste?: boolean;
 
   onView?: (entity: any /*T*/, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined;
   onCreate?: (pr: PropertyRoute) => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
@@ -92,6 +93,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
       state.viewOnCreate = true;
       state.remove = true;
+      state.paste = (type.name == IsByAll);
     }
   }
 
@@ -273,23 +275,33 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
     navigator.clipboard.readText()
       .then(text => {
-        const lites = parseLiteList(text);
+        var lites = parseLiteList(text);
         if (lites.length == 0)
           return;
 
-        const ti = this.props.type!.name == IsByAll ? getTypeInfo(lites[0].EntityType) : getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lites[0].EntityType);
-        if (!ti)
+        var tis = getTypeInfos(this.props.type!);
+        lites = lites.filter(lite => tis.length == 0 || tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
+        if (lites.length == 0)
           return;
 
-        return Navigator.API.fillToStrings(...lites)
-          .then(() => SelectorModal.chooseLite(ti.name, lites))
+        tis = lites.map(lite => lite.EntityType).distinctBy().map(tn => getTypeInfo(tn));
+        return SelectorModal.chooseType(tis)
+          .then(ti => {
+            if (!ti)
+              return;
+
+            lites = lites.filter(lite => lite.EntityType == ti.name);
+            return Navigator.API.fillToStrings(...lites)
+              .then(() => SelectorModal.chooseLite(ti.name, lites));
+          })
           .then(lite => {
             if (!lite)
               return;
 
-            const fo = this.getFindOptions(ti.name) ?? { queryName: ti.name };
+            const typeName = lite.EntityType;
+            const fo = this.getFindOptions(typeName) ?? { queryName: typeName };
             const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "EqualTo", value: lite }]);
-            return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
+            return Finder.fetchEntitiesLiteWithFilters(typeName, fos, [], null)
               .then(lites => {
                 if (lites.length == 0)
                   return;
@@ -315,7 +327,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
   }
 
   renderPasteButton(btn: boolean) {
-    if (this.props.ctx.readOnly || !this.props.type || (this.props.type.name != IsByAll && !this.props.type.isCollection))
+    if (!this.props.paste || this.props.ctx.readOnly)
       return undefined;
 
     return (

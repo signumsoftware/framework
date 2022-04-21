@@ -186,30 +186,14 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
         filters = [...defaultFilters, ...filters];
     }
 
-    const lites = parseLiteList(subStr);
+    var lites = parseLiteList(subStr);
     if (lites.length > 0) {
-      const type = qd.columns["Entity"].type;
-      const tis = getTypeInfos(type);
-      const ti = tis.singleOrNull(ti => ti.name == lites[0].EntityType);
-      if (ti && tis.length > 1)
-        filters.insertAt(0, {
-          token: `Entity.(${ti.name})`,
-          operation: "DistinctTo"
-        });
-
-      if (!ti) {
-        filters.insertAt(0, {
-          token: "Entity.Id",
-          operation: "EqualTo",
-        });
-
-        return filters;
-      }
-
+      const tis = getTypeInfos(qd.columns["Entity"].type);
+      lites = lites.filter(lite => tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
       filters.insertAt(0, {
-        token: "Entity.Id",
-        operation: lites.length > 1 ? "IsIn" : "EqualTo",
-        value: lites.length > 1 ? lites.map(l => l.id) : lites[0].id,
+        token: "Entity",
+        operation: lites.length == 0 ? "EqualTo" : "IsIn",
+        value: lites.length == 0 ? null : lites,
       });
 
       return filters;
