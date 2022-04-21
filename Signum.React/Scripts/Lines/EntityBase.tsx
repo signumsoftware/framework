@@ -5,7 +5,7 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
-import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo, getTypeInfos } from '../Reflection'
+import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo, getTypeInfos, Type } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite, parseLiteList } from '../Signum.Entities'
 import { LineBaseController, LineBaseProps } from './LineBase'
 import SelectorModal from '../SelectorModal'
@@ -277,20 +277,28 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         if (lites.length == 0)
           return;
 
-        const lite = lites[0];
-        const ti = this.props.type!.name == IsByAll ? getTypeInfo(lite.EntityType) : getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lite.EntityType);
+        const ti = this.props.type!.name == IsByAll ? getTypeInfo(lites[0].EntityType) : getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lites[0].EntityType);
         if (!ti)
           return;
 
-        const fo = this.getFindOptions(ti.name) ?? { queryName: ti.name };
-        const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "EqualTo", value: lite }]);
-        return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
-          .then(lites => {
-            if (lites.length == 0)
-              return;
+        const promise = lites.length == 1 ? Promise.resolve(lites[0]) : 
+          Navigator.API.fillToStrings(...lites)
+            .then(() => SelectorModal.chooseLite(new Type<Entity>(lites[0].EntityType), lites));
 
-            return this.convert(lites[0]).then(m => this.setValue(m));
-          })
+        return promise.then(lite => {
+          if (!lite)
+            return;
+
+          const fo = this.getFindOptions(ti.name) ?? { queryName: ti.name };
+          const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "EqualTo", value: lite }]);
+          return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
+            .then(lites => {
+              if (lites.length == 0)
+                return;
+
+              return this.convert(lites[0]).then(m => this.setValue(m));
+            })
+        });
       })
       .done();
   }
