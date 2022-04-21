@@ -282,12 +282,8 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         if (!ti)
           return;
 
-        const fo = this.getFindOptions(ti.name);
-        if (!fo)
-          return Navigator.API.fillToStrings(lite)
-            .then(() => this.convert(lite).then(m => this.setValue(m)));
-
-        const fos = [fo.filterOptions, { token: "Entity", operation: "EqualTo", value: lite }] as FilterOption[];
+        const fo = this.getFindOptions(ti.name) ?? { queryName: ti.name };
+        const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "EqualTo", value: lite }]);
         return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
           .then(lites => {
             if (lites.length == 0)

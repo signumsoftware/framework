@@ -172,24 +172,18 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
         if (lites.length == 0)
           return;
 
-        const lite = lites[0];
-        const ti = getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lite.EntityType);
+        const ti = getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lites[0].EntityType);
         if (!ti)
           return;
 
-        const fo = this.getFindOptions(ti.name);
-        if (!fo)
-          return Navigator.API.fillToStrings(...lites)
-            .then(() => Promise.all(lites.map(l => this.convert(l))))
-            .then(entities => entities.forEach(e => this.addElement(e)));
-
-        const fos = [fo.filterOptions, { token: "Entity", operation: "IsIn", value: lites }] as FilterOption[];
+        const fo = this.getFindOptions(ti.name) ?? { queryName: ti.name };
+        const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "IsIn", value: lites }]);
         return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
           .then(lites => {
             if (lites.length == 0)
               return;
 
-            return Promise.all(lites.map(l => this.convert(l)))
+            return Promise.all(lites.map(lite => this.convert(lite)))
               .then(entities => entities.forEach(e => this.addElement(e)));
           })
       })
