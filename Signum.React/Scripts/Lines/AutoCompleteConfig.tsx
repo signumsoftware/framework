@@ -186,7 +186,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
         filters = [...defaultFilters, ...filters];
     }
 
-    var lites = parseLiteList(subStr);
+    var lites = parseLiteList(subStr, "|");
     if (lites.length > 0) {
       const tis = getTypeInfos(qd.columns["Entity"].type);
       lites = lites.filter(lite => tis.singleOrNull(ti => ti.name == lite.EntityType) != null);

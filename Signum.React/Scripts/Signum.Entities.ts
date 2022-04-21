@@ -191,8 +191,8 @@ export function parseLite(lite: string): Lite<Entity> {
 }
 
 export const liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
-export function parseLiteList(text: string): Lite<Entity>[] {
-  const lines = text.split("|");
+export function parseLiteList(text: string, separator: string): Lite<Entity>[] {
+  const lines = text.split(separator);
   const liteKeys = lines.map(l => liteKeyRegEx.test(l) ? l : null).notNull();
   const lites = liteKeys.map(lk => parseLite(lk)).filter(l => isLite(l));
 
