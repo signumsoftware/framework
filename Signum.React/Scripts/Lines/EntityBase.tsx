@@ -273,7 +273,6 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
     navigator.clipboard.readText()
       .then(text => {
-        debugger;
         const lites = parseLiteList(text);
         if (lites.length == 0)
           return;
