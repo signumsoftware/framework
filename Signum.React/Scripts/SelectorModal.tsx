@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage, Lite, getToString, liteKey, Entity } from './Signum.Entities'
-import { TypeInfo, EnumType, Type } from './Reflection'
+import { TypeInfo, EnumType, Type, PseudoType, getTypeInfo } from './Reflection'
 import * as Finder from './Finder'
 import { BsSize } from './Components';
 import { Modal } from 'react-bootstrap';
@@ -105,14 +105,15 @@ SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>, values?: T[
       });
 };
 
-SelectorModal.chooseLite = <T extends Entity>(type: Type<T>, values?: Lite<T>[], config?: SelectorConfig<Lite<T>>): Promise<Lite<T> | undefined> => {
-  return (values ? Promise.resolve(values):  Finder.API.fetchAllLites({ types: type.typeName }))
+SelectorModal.chooseLite = <T extends Entity>(type: Type<T> | TypeInfo | string, values?: Lite<T>[], config?: SelectorConfig<Lite<T>>): Promise<Lite<T> | undefined> => {
+  const ti = getTypeInfo(type);
+  return (values ? Promise.resolve(values) : Finder.API.fetchAllLites({ types: ti.name }))
     .then(lites => SelectorModal.chooseElement<Lite<T>>(lites as Lite<T>[],
       {
         buttonDisplay: a => getToString(a),
         buttonName: a => liteKey(a),
-        title: SelectorMessage._0Selector.niceToString(type.niceName()),
-        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(type.niceName()),
+        title: SelectorMessage._0Selector.niceToString(ti.niceName),
+        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(ti.niceName),
         size: "md",
         ...config
       }));

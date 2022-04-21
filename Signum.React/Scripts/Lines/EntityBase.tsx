@@ -281,24 +281,22 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         if (!ti)
           return;
 
-        const promise = lites.length == 1 ? Promise.resolve(lites[0]) : 
-          Navigator.API.fillToStrings(...lites)
-            .then(() => SelectorModal.chooseLite(new Type<Entity>(lites[0].EntityType), lites));
+        return Navigator.API.fillToStrings(...lites)
+          .then(() => SelectorModal.chooseLite(ti.name, lites))
+          .then(lite => {
+            if (!lite)
+              return;
 
-        return promise.then(lite => {
-          if (!lite)
-            return;
+            const fo = this.getFindOptions(ti.name) ?? { queryName: ti.name };
+            const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "EqualTo", value: lite }]);
+            return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
+              .then(lites => {
+                if (lites.length == 0)
+                  return;
 
-          const fo = this.getFindOptions(ti.name) ?? { queryName: ti.name };
-          const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "EqualTo", value: lite }]);
-          return Finder.fetchEntitiesLiteWithFilters(ti.name, fos, [], null)
-            .then(lites => {
-              if (lites.length == 0)
-                return;
-
-              return this.convert(lites[0]).then(m => this.setValue(m));
-            })
-        });
+                return this.convert(lites[0]).then(m => this.setValue(m));
+              })
+          });
       })
       .done();
   }
