@@ -273,12 +273,13 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
     navigator.clipboard.readText()
       .then(text => {
+        debugger;
         const lites = parseLiteList(text);
         if (lites.length == 0)
           return;
 
         const lite = lites[0];
-        const ti = getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lite.EntityType);
+        const ti = this.props.type!.name == IsByAll ? getTypeInfo(lite.EntityType) : getTypeInfos(this.props.type!).singleOrNull(ti => ti.name == lite.EntityType);
         if (!ti)
           return;
 
