@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage, Lite, getToString, liteKey, Entity } from './Signum.Entities'
-import { TypeInfo, EnumType, Type, PseudoType, getTypeInfo } from './Reflection'
+import { TypeInfo, EnumType, Type, getTypeInfo } from './Reflection'
 import * as Finder from './Finder'
 import { BsSize } from './Components';
 import { Modal } from 'react-bootstrap';
