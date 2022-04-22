@@ -3,7 +3,7 @@ import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription, QueryRequest, FilterOption, ResultTable } from '../FindOptions'
 import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLiteList } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
 import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
@@ -175,8 +175,6 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   abortableRequest = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
-  static liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
-
   static filtersWithSubStr(fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined, subStr: string): FilterOption[] {
 
     var filters = [...fo.filterOptions?.notNull() ?? []];
@@ -188,21 +186,16 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
         filters = [...defaultFilters, ...filters];
     }
 
-    if (FindOptionsAutocompleteConfig.liteKeyRegEx.test(subStr)) {
-      const lite = parseLite(subStr);
+    var lites = parseLiteList(subStr);
+    if (lites.length > 0) {
       const tis = getTypeInfos(qd.columns["Entity"].type);
-      const ti = tis.singleOrNull(ti => ti.name == lite.EntityType);
-      if (ti && tis.length > 1)
-        filters.insertAt(0, {
-          token: `Entity.(${ti.name})`,
-          operation: "DistinctTo"
-        });
-
+      lites = lites.filter(lite => tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
       filters.insertAt(0, {
-        token: "Entity.Id",
-        operation: "EqualTo",
-        value: ti ? lite.id : null
+        token: "Entity",
+        operation: lites.length == 0 ? "EqualTo" : "IsIn",
+        value: lites.length == 0 ? null : lites,
       });
+
       return filters;
     }
 
