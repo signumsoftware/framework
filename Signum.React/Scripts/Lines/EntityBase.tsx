@@ -296,7 +296,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         const typeName = lite.EntityType;
         const fo = this.getFindOptions(typeName) ?? { queryName: typeName };
         const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "EqualTo", value: lite }]);
-        return Finder.fetchEntitiesLiteWithFilters(typeName, fos, [], null)
+        return Finder.fetchLites({ queryName: typeName, filterOptions: fos })
           .then(lites => {
             if (lites.length == 0)
               return;

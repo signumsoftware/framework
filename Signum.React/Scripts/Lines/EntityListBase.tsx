@@ -176,7 +176,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     return dic.map(kvp => {
       const fo = this.getFindOptions(kvp.key) ?? { queryName: kvp.key };
       const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "IsIn", value: kvp.elements }]);
-      return Finder.fetchEntitiesLiteWithFilters(kvp.key, fos, [], null)
+      return Finder.fetchLites({ queryName: kvp.key, filterOptions: fos })
         .then(lites => {
           if (lites.length == 0)
             return;
