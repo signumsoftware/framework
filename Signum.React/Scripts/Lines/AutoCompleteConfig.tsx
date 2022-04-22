@@ -68,7 +68,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     var toStr = getToString(item);
     var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.showType)
-      return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
+      return <span style={{ wordBreak: "break-all" }} title={toStr}><TypeBadge entity={item} />{text}</span>;
     else
       return text;
   }
@@ -273,7 +273,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     var toStr = getToString(item.entity!);
     var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.showType)
-      return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
+      return <span style={{ wordBreak: "break-all" }} title={toStr}><TypeBadge entity={item.entity!} />{text}</span>;
     else
       return text;
   }
@@ -333,4 +333,11 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
     throw new Error("Impossible to convert to Lite");
   }
+export function TypeBadge(p: { entity: Lite<Entity> | Entity }) {
+
+  const ti = getTypeInfo(isEntity(p.entity) ? p.entity.Type : p.entity.EntityType);
+
+  return <span className="sf-type-badge me-1">{ti.niceName}</span>;
+}
+
 }

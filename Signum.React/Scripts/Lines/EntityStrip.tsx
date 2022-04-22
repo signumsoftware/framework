@@ -256,10 +256,9 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   function getToStr() {
     const toStr = getToString(p.ctx.value);
-    return !p.showType ? toStr :
+    return !p.showType || !(isEntity(p.ctx.value) || isLite(p.ctx.value)) ? toStr :
       <span style={{ wordBreak: "break-all" }} title={toStr}>
-        <span className="sf-type-badge">{getTypeInfo(getTypeName(p.ctx.value)).niceName}</span>
-        &nbsp;{toStr}
+        <TypeBadge entity={p.ctx.value}/>{toStr}
       </span>;
   }
 
