@@ -45,7 +45,10 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
 
         var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
         if (avoidDuplicates) {
-          var types = getTypeInfos(p.type);
+          var types = tryGetTypeInfos(p.type).notNull();
+          if (types.length == 0)
+            return;
+
           if (types.length == 1)
             p.findOptions = withAvoidDuplicates(p.findOptions ?? { queryName: types.single().name }, types.single().name);
           else {
