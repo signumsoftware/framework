@@ -168,7 +168,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
 
     navigator.clipboard.readText()
       .then(text => {
-        var lites = parseLiteList(text, "|");
+        var lites = parseLiteList(text);
         if (lites.length == 0)
           return;
 
