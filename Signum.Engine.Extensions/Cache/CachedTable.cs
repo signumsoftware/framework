@@ -151,7 +151,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
 
     public override IColumn? ParentColumn { get; set; }
 
-    SemiCachedController<T>? semiCachedController;
+    internal SemiCachedController<T>? semiCachedController;
 
     public CachedTable(ICacheLogicController controller, AliasGenerator? aliasGenerator, string? lastPartialJoin, string? remainingJoins)
         : base(controller)
@@ -215,7 +215,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
                     {
                         object obj = rowReader(fr);
                         result[idGetter(obj)] = obj; //Could be repeated joins
-                });
+                    });
                     tr.Commit();
                 }
 

@@ -1492,11 +1492,42 @@ public partial class FieldImplementedByAll
 
     protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
     {
-        trios.Add(new Table.Trio(Column, Expression.Call(miUnWrapToString, this.GetIdFactory(value, forbidden)), suffix));
-        trios.Add(new Table.Trio(ColumnType, Expression.Call(miConvertType, this.GetTypeFactory(value, forbidden)), suffix));
+        trios.Add(new Table.Trio(TypeColumn, Expression.Call(miConvertType, this.GetTypeFactory(value, forbidden)), suffix));
+        foreach (var (k, col) in IdColumns)
+        {
+
+            var id = Expression.Parameter(typeof(IComparable), "id");
+            var variables = new[] { id };
+
+            var instructions = new List<Expression>();
+            instructions.Add(Expression.Assign(id, Expression.Call(miUnWrap, this.GetIdFactory(value, forbidden))));
+            instructions.Add(Expression.Call(Expression.Constant(this), miAssertPrimaryKeyTypes, id));
+
+            if (IdColumns.Count > 1)
+                instructions.Add(Expression.Condition(Expression.TypeIs(id, col.Type), Expression.Convert(id, col.Type), Expression.Constant(null, col.Type)));
+            else
+                instructions.Add(Expression.Convert(id, col.Type));
+
+            trios.Add(new Table.Trio(col, Expression.Block(col.Type, variables, instructions), suffix));
+        }
     }
 
-    static MethodInfo miUnWrapToString = ReflectionTools.GetMethodInfo(() => PrimaryKey.UnwrapToString(null));
+    void AssertPrimaryKeyTypes(IComparable? c)
+    {
+        if (c == null)
+            return;
+
+        var col = this.IdColumns.TryGetC(c.GetType());
+
+        if(col == null)
+        {
+            throw new InvalidOperationException($"Attempt to save a value of type {c.GetType().TypeName()} into the ImplementedByAll field {this.Route}, " +
+                $"but {nameof(SchemaSettings)}.{nameof(SchemaSettings.ImplementedByAllPrimaryKeyTypes)} is configured for only {Schema.Current.Settings.ImplementedByAllPrimaryKeyTypes.CommaAnd(a => a.TypeName())}");
+        }
+    }
+
+    static MethodInfo miUnWrap = ReflectionTools.GetMethodInfo(() => PrimaryKey.Unwrap(null));
+    static MethodInfo miAssertPrimaryKeyTypes = ReflectionTools.GetMethodInfo((FieldImplementedByAll iba) => iba.AssertPrimaryKeyTypes(null));
     static MethodInfo miConvertType = ReflectionTools.GetMethodInfo(() => ConvertType(null!));
 
     static IComparable? ConvertType(Type type)

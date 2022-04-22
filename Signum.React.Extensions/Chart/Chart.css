@@ -102,7 +102,6 @@ body.rtl .sf-chart-token .sf-query-token {
 
 .sf-chart-container {
     width: 100%;
-    min-height: 400px;
     height: auto;
     position: relative;
     overflow: auto;
@@ -137,7 +136,11 @@ body.rtl .sf-chart-token .sf-query-token {
 }
 
 .sf-chart-animable .sf-transition {
-    transition: all 0.3s cubic-bezier(0.92, 0.02, 0.21, 1.01)
+    transition: all 0.3s cubic-bezier(0.92, 0.02, 0.21, 1.01), filter 0s linear
+}
+
+.hover-group:hover .hover-target {
+    filter: brightness(1.2);
 }
 
 text.sf-initial-message {

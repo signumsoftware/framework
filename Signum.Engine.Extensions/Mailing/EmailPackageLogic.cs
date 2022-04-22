@@ -35,9 +35,9 @@ public static class EmailPackageLogic
                     e.Name,
                 });
 
-            QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.Messages(), () => EmailMessageMessage.Messages.NiceToString());
-            QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.RemainingMessages(), () => EmailMessageMessage.RemainingMessages.NiceToString());
-            QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.ExceptionMessages(), () => EmailMessageMessage.ExceptionMessages.NiceToString());
+            QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.Messages(), EmailMessageMessage.Messages);
+            QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.RemainingMessages(), EmailMessageMessage.RemainingMessages);
+            QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.ExceptionMessages(), EmailMessageMessage.ExceptionMessages);
 
             ProcessLogic.AssertStarted(sb);
             ProcessLogic.Register(EmailMessageProcess.CreateEmailsSendAsync, new CreateEmailsSendAsyncProcessAlgorithm());

@@ -97,15 +97,16 @@ public class UniqueKeyException : ApplicationException
 
                                     if (f is FieldImplementedByAll iba)
                                     {
-                                        var typeId = colValues.GetOrThrow(iba.ColumnType);
+                                        var typeId = colValues.GetOrThrow(iba.TypeColumn);
                                         if (typeId == null)
                                             return null;
 
                                         var type = TypeLogic.IdToType.GetOrThrow(PrimaryKey.Parse(typeId, typeof(TypeEntity)));
 
-                                        return Database.RetrieveLite(type, PrimaryKey.Parse(colValues.GetOrThrow(iba.Column)!, type));
-                                    }
+                                        var id = iba.IdColumns.Values.Select(c => colValues.GetOrThrow(c)).NotNull().Single();
 
+                                        return Database.RetrieveLite(type, PrimaryKey.Parse(id, type));
+                                    }
                                     throw new UnexpectedValueException(f);
                                 }).ToArray();
                             }
@@ -190,8 +191,10 @@ public class UniqueKeyException : ApplicationException
 public class ForeignKeyException : ApplicationException
 {
     public string? TableName { get; private set; }
-    public string? ColumnName { get; private set; }
     public Type? TableType { get; private set; }
+    public string? ColumnName { get; private set; }
+    public PropertyInfo? PropertyInfo { get; private set; }
+
 
     public string? ReferedTableName { get; private set; }
     public Type? ReferedTableType { get; private set; }
@@ -216,13 +219,32 @@ public class ForeignKeyException : ApplicationException
             {
                 TableName = parts.Take(i).ToString("_");
                 ColumnName = parts.Skip(i).ToString("_");
-                TableType = Schema.Current.Tables
-                    .Where(kvp => kvp.Value.Name.Name == TableName)
-                    .Select(p => p.Key)
-                    .SingleOrDefaultEx();
 
-                if (TableType != null)
+                var table = Schema.Current.GetDatabaseTables().FirstOrDefault(table => table.Name.Name == TableName);
+
+                if (table is TableMList tmle)
+                {
+                    var column = tmle.Columns.TryGetC(ColumnName);
+                    TableType = tmle.BackReference.ReferenceTable.Type;
+                    PropertyInfo = 
+                         tmle.Field == column ? tmle.PropertyRoute.PropertyInfo :
+                         tmle.Field is FieldEmbedded fe ?
+                         (from f in fe.EmbeddedFields.Values
+                          where f.Field.Columns().Contains(column)
+                          select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().FirstOrDefault() :
+                          null;
+                         
                     break;
+                }
+                else if (table is Table t)
+                {
+                    var column = t.Columns.TryGetC(ColumnName);
+                    TableType = t.Type;
+                    PropertyInfo = (from f in t.Fields.Values
+                                    where f.Field.Columns().Contains(column)
+                                    select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().FirstOrDefault();
+                    break;
+                }
             }
         }
 
@@ -258,7 +280,7 @@ public class ForeignKeyException : ApplicationException
             else
                 return (TableType == null) ?
                     EngineMessage.ThereAreRecordsIn0PointingToThisTableByColumn1.NiceToString().FormatWith(TableName, ColumnName) :
-                    EngineMessage.ThereAre0ThatReferThisEntity.NiceToString().FormatWith(TableType.NicePluralName());
+                    EngineMessage.ThereAre0ThatReferThisEntityByProperty1.NiceToString().FormatWith(TableType.NicePluralName(), PropertyInfo?.NiceName() ?? ColumnName);
         }
     }
 }

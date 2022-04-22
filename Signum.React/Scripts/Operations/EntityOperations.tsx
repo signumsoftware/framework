@@ -72,7 +72,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDro
 
   return ({
     name: "andClose",
-    text: () => OperationMessage._0AndClose.niceToString(eoc.textOrNiceName()),
+    text: OperationMessage._0AndClose.niceToString(eoc.textOrNiceName()),
     icon: "times",
     keyboardShortcut: eoc.keyboardShortcut && { shiftKey: true, ...eoc.keyboardShortcut },
     isVisible: true,
@@ -93,7 +93,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
 
   return ({
     name: "andNew",
-    text: () => OperationMessage._0AndNew.niceToString(eoc.textOrNiceName()),
+    text: OperationMessage._0AndNew.niceToString(eoc.textOrNiceName()),
     icon: "plus",
     keyboardShortcut: eoc.keyboardShortcut && { altKey: true, ...eoc.keyboardShortcut },
     isVisible: eoc.frame!.allowExchangeEntity && eoc.frame.createNew != null && Navigator.isCreable(eoc.entity.Type, { customComponent: true, isSearch: true }),
@@ -219,7 +219,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
               variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
               className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
               onClick={() => aos.onClick(eoc)}
-              title={aos.text() + (aos.keyboardShortcut ? (" (" + getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
+              title={aos.text + (aos.keyboardShortcut ? (" (" + getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
               <small><FontAwesomeIcon icon={aos.icon!} color={aos.iconColor} fixedWidth /></small>
             </Button>
           )}
@@ -252,7 +252,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
         title={aos.keyboardShortcut && getShortcutToString(aos.keyboardShortcut)}
         onClick={() => aos.onClick(eoc!)}
         data-alternative={aos.name}>
-        {withIcon(aos.text(), aos.icon, aos.iconColor, aos.iconAlign)}
+        {withIcon(aos.text, aos.icon, aos.iconColor, aos.iconAlign)}
       </Dropdown.Item>
     );
   }
@@ -261,7 +261,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     if (props.children)
       return props.children;
 
-    let text: string = eoc.settings && eoc.settings.text ? eoc.settings.text() :
+    let text: string = eoc.settings?.text ? eoc.settings.text(eoc) :
       group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
         eoc.operationInfo.niceName;
 

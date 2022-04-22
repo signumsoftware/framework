@@ -227,8 +227,8 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
 
   const handleOnClick = (me: React.MouseEvent<any>) => {
     coc.event = me;
+    onClick?.(me);
     operationClickOrDefault(coc)
-      .finally(() => onClick?.(me))
       .done();
   }
 
@@ -261,10 +261,7 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
 OperationMenuItem.getText = (coc: ContextualOperationContext<any>): React.ReactNode => {
 
   if (coc.settings && coc.settings.text)
-    return coc.settings.text();
-
-  if (coc.entityOperationSettings?.text)
-    return coc.entityOperationSettings.text();
+    return coc.settings.text(coc);
 
   return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ms-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
 
@@ -320,7 +317,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         return getSetters(coc)
           .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {
-              coc.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
+              coc.raiseEntityChanged();
               notifySuccess();
               coc.context.markRows(report.errors);
             })));
@@ -328,7 +325,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
         return getSetters(coc)
           .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
             .then(coc.onContextualSuccess ?? (report => {
-              coc.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
+              coc.raiseEntityChanged();
               notifySuccess();
               coc.context.markRows(report.errors);
             })));

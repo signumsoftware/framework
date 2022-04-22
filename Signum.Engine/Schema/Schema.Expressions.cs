@@ -305,8 +305,8 @@ public partial class FieldImplementedByAll
     {
         Expression result = new ImplementedByAllExpression(
             IsLite ? Lite.Extract(FieldType)! : FieldType,
-            new ColumnExpression(Column.Type, tableAlias, Column.Name),
-            new TypeImplementedByAllExpression(new PrimaryKeyExpression(new ColumnExpression(ColumnType.Type.Nullify(), tableAlias, ColumnType.Name))),
+            IdColumns.SelectDictionary(t => t, (t, col) => (Expression)new ColumnExpression(col.Type, tableAlias, col.Name)),
+            new TypeImplementedByAllExpression(new PrimaryKeyExpression(new ColumnExpression(TypeColumn.Type.Nullify(), tableAlias, TypeColumn.Name))),
             period);
 
         if (this.IsLite)

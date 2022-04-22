@@ -51,6 +51,13 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2022.04.05 ImplementedByAll with multiple ID columns](https://github.com/signumsoftware/framework/commit/51321d1a236925fbf874c39ea0c9445f96a46089#commitcomment-70655266)
+* [2022.03.29 ValueSearchControl(Line) renamed to SearchValue(Line)](https://github.com/signumsoftware/framework/commit/8057968f8f7b5aed429487364cb83c1f5be21937#comments)
+* [2022.03.18 Improvements in Charting](https://github.com/signumsoftware/framework/commit/740b67b0d509410e2a87b202954a9ee58bf84d6e#comments)
+* [2022.03.16 Faster queries using @foreach on WordTemplate / EmailTemplate](https://github.com/signumsoftware/framework/commit/b4922d08f89e731c5d3b5201e8ef14008c638928#comments)
+* [2022.03.16 Cleaner translation from dynamic queries to LINQ](https://github.com/signumsoftware/framework/commit/c11a80be0a2cb52823718c746a59af3501bef133#comments)
+* [2022.03.15 Presenting ConcurrentUser](https://github.com/signumsoftware/framework/commit/4031bfb6d1e57c9ab2ad1f682ddf1c6f11c25059#comments)
+* [2022.02.07 New Responsive Sidebar](https://github.com/signumsoftware/framework/commit/2a613da38e306011b5e9efcbf0c90fbf948da39a#commitcomment-66136445)
 * [2022.01.08 Dashboard V: Dashboard Pinned Filters](https://github.com/signumsoftware/framework/commit/552079543443bff685e0a5b2fbe48dbefaaf149b#commitcomment-63148535)
 * [2022.01.08 Dashboard IV: Dashboard IV: Token Equivalences](https://github.com/signumsoftware/framework/commit/85b2648205a6cd1e3a84ffdac955b74585cddfa2#comments)
 * [2021.12.19 Split between Size and Precission and Microsoft.Data.SqlClient 4.0.0](https://github.com/signumsoftware/framework/commit/fe17abd91b3e319d78c7ae2b4dfb0c70c7c4f276)

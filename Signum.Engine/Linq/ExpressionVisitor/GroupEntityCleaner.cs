@@ -1,3 +1,4 @@
+using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -96,7 +97,10 @@ internal class GroupEntityCleaner : DbExpressionVisitor
 
     private static ImplementedByAllExpression CombineIBA(ImplementedByAllExpression a, ImplementedByAllExpression b, Type type, Func<Expression, Expression, Expression> combiner)
     {
-        return new ImplementedByAllExpression(type, combiner(a.Id, b.Id),
+        var keys = a.Ids.Keys.Union(b.Ids.Keys).ToList();
+
+        return new ImplementedByAllExpression(type,
+            keys.ToDictionary(t => t, t => combiner(a.Ids.GetOrThrow(t), b.Ids.GetOrThrow(t))),
             new TypeImplementedByAllExpression(new PrimaryKeyExpression(combiner(a.TypeId.TypeColumn, b.TypeId.TypeColumn))), null);
     }
 
@@ -115,19 +119,21 @@ internal class GroupEntityCleaner : DbExpressionVisitor
 
     static ImplementedByAllExpression ToIBA(Expression node, Type type)
     {
+        var types = Schema.Current.Settings.TypeValues.Keys.ToList();
+
         if (node.IsNull())
-            return new ImplementedByAllExpression(type, 
-                Expression.Constant(null, typeof(string)), 
+            return new ImplementedByAllExpression(type,
+                types.ToDictionary(t => t, t => (Expression)new SqlConstantExpression(null, t.Nullify())), 
                 new TypeImplementedByAllExpression(new PrimaryKeyExpression(Expression.Constant(null, PrimaryKey.Type(typeof(TypeEntity))))), null);
 
         if (node is EntityExpression e)
-            return new ImplementedByAllExpression(type, 
-                new SqlCastExpression(typeof(string), e.ExternalId.Value), 
+            return new ImplementedByAllExpression(type,
+                types.ToDictionary(t => t, t =>  t == PrimaryKey.Type(e.Type) ? e.ExternalId.Value : new SqlConstantExpression(null, t.Nullify())),
                 new TypeImplementedByAllExpression(new PrimaryKeyExpression(QueryBinder.TypeConstant(e.Type))), null);
 
         if (node is ImplementedByExpression ib)
             return new ImplementedByAllExpression(type,
-                new PrimaryKeyExpression(QueryBinder.Coalesce(ib.Implementations.Values.Select(a => a.ExternalId.ValueType.Nullify()).Distinct().SingleEx(), ib.Implementations.Select(e => e.Value.ExternalId))),
+                types.ToDictionary(t => t, t => QueryBinder.Coalesce(t, ib.Implementations.Values.Where(e => PrimaryKey.Type(e.Type) == t))),
                 new TypeImplementedByAllExpression(new PrimaryKeyExpression(
                  ib.Implementations.Select(imp => new When(imp.Value.ExternalId.NotEqualsNulll(), QueryBinder.TypeConstant(imp.Key))).ToList()
                  .ToCondition(PrimaryKey.Type(typeof(TypeEntity)).Nullify()))), null);

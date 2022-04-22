@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import { ToolbarLocation, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
@@ -100,7 +100,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarClient.ToolbarResponse<any> }) {
     );
   }
 
-  const config = ToolbarClient.configs[tr.content!.EntityType];
+  const config = ToolbarClient.getConfig(tr);
   if (config == null)
     return (
       <div className="card toolbar-card text-danger">

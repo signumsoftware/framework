@@ -14,7 +14,7 @@ public class ExtensionDictionaryToken<T, K, V> : QueryToken
         PropertyRoute? propertyRoute, 
         Expression<Func<T, V>> lambda)
     {
-        this.keyValue= key;
+        this.KeyValue= key;
         this.unit = unit;
         this.format = format;
         this.implementations = implementations;
@@ -26,18 +26,18 @@ public class ExtensionDictionaryToken<T, K, V> : QueryToken
     
     public override string ToString()
     {
-        return "[" + (keyValue is Enum e ? e.NiceToString() : keyValue.ToString()) + "]";
+        return "[" + (KeyValue is Enum e ? e.NiceToString() : KeyValue.ToString()) + "]";
     }
 
     public override string NiceName()
     {
-        return keyValue is Enum e ? e.NiceToString() : keyValue.ToString()!;
+        return KeyValue is Enum e ? e.NiceToString() : KeyValue.ToString()!;
     }
 
     public override Type Type { get { return typeof(V).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute()! }); } }
 
-    K keyValue;
-    public override string Key => "[" + keyValue.ToString() + "]";
+    public K KeyValue { get; }
+    public override string Key => "[" + KeyValue.ToString() + "]";
 
     string? format;
     public override string? Format => format;
@@ -81,6 +81,6 @@ public class ExtensionDictionaryToken<T, K, V> : QueryToken
 
     public override QueryToken Clone()
     {
-        return new ExtensionDictionaryToken<T, K, V>(this.parent.Clone(), keyValue, unit, format, implementations, propertyRoute, Lambda);
+        return new ExtensionDictionaryToken<T, K, V>(this.parent.Clone(), KeyValue, unit, format, implementations, propertyRoute, Lambda);
     }
 }

@@ -190,8 +190,8 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
       <Typeahead ref={c.typeahead}
         inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined, onPaste: p.paste == false ? undefined : handleOnPaste, ...p.inputAttributes }}
         getItems={query => ac!.getItems(query)}
-        getItemsDelay={ac.getItemsDelay}
-        minLength={ac.minLength}
+        itemsDelay={ac.getItemsDelay()}
+        minLength={ac.getMinLength()}
         renderItem={(item, query) => ac!.renderItem(item, query)}
         renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}

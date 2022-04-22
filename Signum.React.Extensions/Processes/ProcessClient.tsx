@@ -45,7 +45,28 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
 
   Operations.addSettings(new EntityOperationSettings(ProcessOperation.Cancel, {
     confirmMessage: ctx => ctx.entity.state == "Executing" || ctx.entity.state == "Suspending" ? ProcessMessage.SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway.niceToString() : undefined,
-    color: "warning"
+    color: "danger",
+    icon: "stop",
+  }));
+
+  Operations.addSettings(new EntityOperationSettings(ProcessOperation.Execute, {
+    color: "success",
+    icon: "play",
+  }));
+
+  Operations.addSettings(new EntityOperationSettings(ProcessOperation.Plan, {
+    icon: "calendar",
+  }));
+
+  Operations.addSettings(new EntityOperationSettings(ProcessOperation.Suspend, {
+    icon: "pause",
+    color: "warning",
+  }));
+
+  Operations.addSettings(new EntityOperationSettings(ProcessOperation.Retry, {
+    group: null,
+    icon: "clone",
+    color: "info",
   }));
 }
 

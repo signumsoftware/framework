@@ -294,4 +294,5 @@ public static class WorkflowPermission
 {
     public static PermissionSymbol ViewWorkflowPanel;
     public static PermissionSymbol ViewCaseFlow;
+    public static PermissionSymbol WorkflowToolbarMenu;
 }

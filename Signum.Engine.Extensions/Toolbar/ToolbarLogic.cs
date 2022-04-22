@@ -10,8 +10,10 @@ using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.Toolbar;
+using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Workflow;
+using Signum.Utilities.DataStructures;
 using System.Text.Json.Serialization;
 
 namespace Signum.Engine.Toolbar;
@@ -21,6 +23,9 @@ public static class ToolbarLogic
 {
     public static ResetLazy<Dictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars = null!;
     public static ResetLazy<Dictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus = null!;
+
+    public static Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>> CustomPermissionResponse = 
+        new Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>>();
 
     public static void Start(SchemaBuilder sb)
     {
@@ -37,6 +42,9 @@ public static class ToolbarLogic
                     e.Owner,
                     e.Priority
                 });
+
+            sb.Schema.EntityEvents<ToolbarEntity>().Saving += IToolbar_Saving;
+            sb.Schema.EntityEvents<ToolbarMenuEntity>().Saving += IToolbar_Saving;
 
             sb.Include<ToolbarMenuEntity>()
                 .WithSave(ToolbarMenuOperation.Save)
@@ -62,6 +70,10 @@ public static class ToolbarLogic
                 lite => true,
                 lite => TranslatedInstanceLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name));
 
+            RegisterContentConfig<ToolbarEntity>(
+                lite => true,
+                lite => TranslatedInstanceLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name));
+
             RegisterContentConfig<UserQueryEntity>(
                 lite => { var uq = UserQueryLogic.UserQueries.Value.GetOrCreate(lite); return InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); },
                 lite => TranslatedInstanceLogic.TranslatedField(UserQueryLogic.UserQueries.Value.GetOrCreate(lite), a => a.DisplayName));
@@ -79,8 +91,18 @@ public static class ToolbarLogic
               lite => TranslatedInstanceLogic.TranslatedField(DashboardLogic.Dashboards.Value.GetOrCreate(lite), a => a.DisplayName));
 
             RegisterContentConfig<PermissionSymbol>(
-                lite => PermissionAuthLogic.IsAuthorized(SymbolLogic< PermissionSymbol>.ToSymbol(lite.ToString()!)),
+                lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)),
                 lite => SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!).NiceToString());
+
+            ToolbarLogic.GetContentConfig<PermissionSymbol>().CustomResponses = lite =>
+            {
+                var action = CustomPermissionResponse.TryGetC(lite.Retrieve());
+
+                if (action != null)
+                    return action();
+
+                return null;
+            };
 
             RegisterContentConfig<WorkflowEntity>(
               lite => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); },
@@ -103,6 +125,26 @@ public static class ToolbarLogic
 
             ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToDictionary(a => a.ToLite()),
                new InvalidateWith(typeof(ToolbarMenuEntity)));
+        }
+    }
+
+    private static void IToolbar_Saving(IToolbarEntity tool)
+    {
+        if (!tool.IsNew && tool.Elements.IsGraphModified)
+        {
+            using (new EntityCache(EntityCacheType.ForceNew))
+            {
+                EntityCache.AddFullGraph((Entity)tool);
+
+                var toolbarGraph = DirectedGraph<IToolbarEntity>.Generate(tool, t => t.Elements.Select(a => a.Content).Where(c => c is Lite<IToolbarEntity>).Select(t => (IToolbarEntity)t!.Retrieve()));
+
+                var problems = toolbarGraph.FeedbackEdgeSet().Edges.ToList();
+
+                if (problems.Count > 0)
+                    throw new ApplicationException(
+                        ToolbarMessage._0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships.NiceToString().FormatWith(problems.Count) +
+                        problems.ToString("\r\n"));
+            }
         }
     }
 
@@ -229,7 +271,7 @@ public static class ToolbarLogic
         result.RemoveAll(extraDividers.Contains);
         var extraHeaders = result.Where((a, i) => IsPureHeader(a) && (
             i == result.Count - 1 ||
-            IsPureHeader(result[i + 1]) ||
+            IsPureHeader(result[i + 1]) || 
             result[i + 1].type == ToolbarElementType.Divider ||
             result[i + 1].type == ToolbarElementType.Header && result[i + 1].content is Lite<ToolbarMenuEntity>
         )).ToList();
@@ -282,6 +324,16 @@ public static class ToolbarLogic
                 return null;
         }
 
+        if (element.Content is Lite<ToolbarEntity>)
+        {
+            var tme = Toolbars.Value.GetOrThrow((Lite<ToolbarEntity>)element.Content);
+            var res = ToResponseList(TranslatedInstanceLogic.TranslatedMList(tme, t => t.Elements).ToList());
+            if (res.Count == 0)
+                return null;
+
+            return res;
+        }
+
         return new[] { result };
     }
 
@@ -320,7 +372,17 @@ public static class ToolbarLogic
 
         bool IContentConfig.IsAuhorized(Lite<Entity> lite) => IsAuthorized((Lite<T>)lite);
         string IContentConfig.DefaultLabel(Lite<Entity> lite) => DefaultLabel((Lite<T>)lite);
-        List<ToolbarResponse>? IContentConfig.CustomResponses(Lite<Entity> lite) => CustomResponses?.Invoke((Lite<T>)lite);
+        List<ToolbarResponse>? IContentConfig.CustomResponses(Lite<Entity> lite)
+        {
+            foreach (var item in CustomResponses.GetInvocationListTyped())
+            {
+                var resp = item.Invoke((Lite<T>)lite);
+                if (resp != null)
+                    return resp;
+            }
+
+            return null;
+        }
     }
 
     static bool IsQueryAllowed(Lite<QueryEntity> query)

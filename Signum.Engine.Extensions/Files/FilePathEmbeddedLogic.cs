@@ -195,17 +195,15 @@ public static class FilePathEmbeddedLogic
         var alg = efp.FileType.GetAlgorithm();
         alg.ValidateFile(efp);
         alg.SaveFile(efp);
-        efp.BinaryFile = null!;
         return efp;
     }
 
 
-    public static async Task SaveFileAsync(this FilePathEmbedded efp)
+    public static Task SaveFileAsync(this FilePathEmbedded efp)
     {
         var alg = efp.FileType.GetAlgorithm();
         alg.ValidateFile(efp);
-        await alg.SaveFileAsync(efp);
-        efp.BinaryFile = null!;
+        return alg.SaveFileAsync(efp);
     }
 
     public static void DeleteFileOnCommit(this FilePathEmbedded efp)

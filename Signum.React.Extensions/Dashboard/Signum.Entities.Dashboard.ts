@@ -13,6 +13,12 @@ import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const AutoUpdate = new EnumType<AutoUpdate>("AutoUpdate");
+export type AutoUpdate =
+  "None" |
+  "InteractionGroup" |
+  "Dashboard";
+
 export const CachedQueryEntity = new Type<CachedQueryEntity>("CachedQuery");
 export interface CachedQueryEntity extends Entities.Entity {
   Type: "CachedQuery";
@@ -53,6 +59,7 @@ export interface CombinedUserChartPartEntity extends Entities.Entity, IPartEntit
   allowChangeShowData: boolean;
   combinePinnedFiltersWithSameLabel: boolean;
   useSameScale: boolean;
+  minHeight: number | null;
   requiresTitle: boolean;
 }
 
@@ -132,6 +139,7 @@ export interface LinkElementEmbedded extends Entities.EmbeddedEntity {
   Type: "LinkElementEmbedded";
   label: string;
   link: string;
+  opensInNewTab: boolean;
 }
 
 export const LinkListPartEntity = new Type<LinkListPartEntity>("LinkListPart");
@@ -152,7 +160,7 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   columns: number;
   interactionGroup: InteractionGroup | null;
   customColor: string | null;
-  sameIconTitleColor: boolean;
+  useIconColorForTitle: boolean;
   content: IPartEntity;
 }
 
@@ -187,6 +195,7 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
   allowChangeShowData: boolean;
   createNew: boolean;
   autoRefresh: boolean;
+  minHeight: number | null;
   requiresTitle: boolean;
 }
 
@@ -196,6 +205,7 @@ export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
   userQuery: UserQueries.UserQueryEntity;
   isQueryCached: boolean;
   renderMode: UserQueryPartRenderMode;
+  autoUpdate: AutoUpdate;
   allowSelection: boolean;
   showFooter: boolean;
   createNew: boolean;

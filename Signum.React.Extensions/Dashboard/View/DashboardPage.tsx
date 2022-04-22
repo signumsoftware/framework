@@ -46,9 +46,10 @@ export default function DashboardPage(p: DashboardPageProps) {
   return (
     <div>
       {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
-        <div className="sf-show-hover">
+        <div className="d-flex">
+          {!dashboard.hideDisplayName && <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>}
           {!Navigator.isReadOnly(DashboardEntity) &&
-            <div className="float-end mt-3">
+            <div className="ms-auto">
               {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +
                 DashboardMessage.LasUpdateWasOn0.niceToString(DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS))}>
                 <FontAwesomeIcon icon="history" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
@@ -56,7 +57,6 @@ export default function DashboardPage(p: DashboardPageProps) {
               <Link className="sf-hide " style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="edit" />&nbsp;Edit</Link>
             </div>
           }
-          {dashboard.hideDisplayName && <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>}
         </div>}
 
       {entityKey &&

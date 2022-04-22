@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime, Duration, DurationObjectUnits } from 'luxon'
-import { DateTimePicker, DatePicker, DropdownList, Combobox } from 'react-widgets'
+import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes, softCast } from '../Globals'
 import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes } from '../Reflection'
@@ -21,10 +21,11 @@ export interface ValueLineProps extends LineBaseProps {
   autoFixString?: boolean;
   inlineCheckbox?: boolean | "block";
   optionItems?: (OptionItem | MemberInfo | string)[];
+  datalist?: string[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
-  initiallyFocused?: boolean;
+  initiallyFocused?: boolean | number;
 
   incrementWithArrow?: boolean | number;
 
@@ -75,7 +76,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
               element.setSelectionRange(0, element.value.length);
             element.focus();
           }
-        }, 0);
+        }, this.props.initiallyFocused  == true ? 0 : this.props.initiallyFocused as number);
       }
 
     }, []);
@@ -117,7 +118,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     if (t.name == "boolean")
       return "Checkbox";
 
-    if (t.name == "datetime" || t.name == "DateTimeOffset" || t.name == "DateOnly")
+    if (t.name == "DateTime" || t.name == "DateTimeOffset" || t.name == "DateOnly")
       return "DateTime";
 
     if (t.name == "string" || t.name == "Guid")
@@ -343,13 +344,14 @@ function internalDropDownList(vl: ValueLineController) {
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
-          <DropdownList className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems} onChange={handleOptionItem} value={oi}
+          <DropdownList<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems} onChange={handleOptionItem} value={oi}
             filter={false}
             autoComplete="off"
             dataKey="value"
             textField="label"
             renderValue={a => vl.props.onRenderDropDownListItem!(a.item)}
             renderListItem={a => vl.props.onRenderDropDownListItem!(a.item)}
+            {...(s.valueHtmlAttributes as any)}
           />)
         }
       </FormGroup>
@@ -420,12 +422,13 @@ function internalComboBoxText(vl: ValueLineController) {
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <Combobox className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
+        <Combobox<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
           dataKey="value"
           textField="label"
           focusFirstItem
           autoSelectMatches
           renderListItem={renderItem}
+          {...(s.valueHtmlAttributes as any)}
         />)
       }
     </FormGroup>
@@ -485,7 +488,13 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211
           onInput={isIE11() ? handleTextOnChange : undefined}
           placeholder={vl.getPlaceholder()}
+          list={s.datalist ? s.ctx.getUniqueId("dataList") : undefined}
           ref={vl.inputElement as React.RefObject<HTMLInputElement>} />)
+      }
+      {s.datalist &&
+        <datalist id={s.ctx.getUniqueId("dataList")}>
+          {s.datalist.map(item => <option value={item} />)}
+        </datalist>
       }
     </FormGroup>
   );
@@ -729,6 +738,8 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
   const showTime = s.showTimeBox != null ? s.showTimeBox : type != "DateOnly" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
+  const monthOnly = luxonFormat == "LLLL yyyy";
+
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -761,7 +772,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
-          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={vl.props.initiallyFocused}
+          <DatePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(vl.props.initiallyFocused)}
             valueEditFormat={luxonFormat}
             valueDisplayFormat={luxonFormat}
             includeTime={showTime}
@@ -769,7 +780,11 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
             messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
             min={s.minDate}
             max={s.maxDate}
-            calendarProps={{ renderDay: defaultRenderDay, ...s.calendarProps }}
+            calendarProps={{
+              renderDay: defaultRenderDay,
+              views: monthOnly ? ["year", "decade", "century"] : undefined,
+              ...s.calendarProps
+            }}
           />
         </div>
       )}
@@ -827,7 +842,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
   } as React.AllHTMLAttributes<any>;
 
   if (htmlAttributes.placeholder == undefined)
-    htmlAttributes.placeholder = s.formatText?.replace("H", "h");
+    htmlAttributes.placeholder = s.formatText?.replaceAll("H", "h").replaceAll("\\:", ":");
 
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>

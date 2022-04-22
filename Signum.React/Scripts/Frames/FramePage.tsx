@@ -20,6 +20,7 @@ import WidgetEmbedded from './WidgetEmbedded'
 import { useTitle } from '../AppContext'
 import { FunctionalAdapter } from '../Modals'
 import { QueryString } from '../QueryString'
+import { classes } from '../Globals'
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
 
@@ -58,13 +59,21 @@ export default function FramePage(p: FramePageProps) {
       return;
 
     loadEntity()
-      .then(a => loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
-        pack: a.pack!,
-        lastEntity: JSON.stringify(a.pack!.entity),
-        createNew: a.createNew,
-        getComponent: getComponent,
-        refreshCount: state ? state.refreshCount + 1 : 0
-      }) : undefined))
+      .then(a => {
+        if (a == undefined) {
+          Navigator.NavigatorManager.onFramePageCreationCancelled();
+        }
+        else {
+
+          loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
+            pack: a.pack!,
+            lastEntity: JSON.stringify(a.pack!.entity),
+            createNew: a.createNew,
+            getComponent: getComponent,
+            refreshCount: state ? state.refreshCount + 1 : 0
+          }) : undefined).done();
+        }
+      })
       .done();
   }, [type, id, p.location.search]);
 
@@ -89,7 +98,7 @@ export default function FramePage(p: FramePageProps) {
   }
 
 
-  function loadEntity(): Promise<{ pack?: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
+  function loadEntity(): Promise<undefined | { pack?: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
 
     const queryString = QueryString.parse(p.location.search);
 
@@ -129,7 +138,7 @@ export default function FramePage(p: FramePageProps) {
         return Operations.API.construct(ti.name, oi.key)
           .then(pack => {
             if (pack == undefined)
-              throw new Error(SelectorMessage.CreationOf0Cancelled.niceToString(ti.niceName));
+              return undefined;
             else
               return ({
                 pack: pack,
@@ -141,7 +150,7 @@ export default function FramePage(p: FramePageProps) {
       return Constructor.constructPack(ti.name)
         .then(pack => {
           if (pack == undefined)
-            throw new Error(SelectorMessage.CreationOf0Cancelled.niceToString(ti.niceName))
+            return undefined;
           else
             return ({
               pack: pack! as EntityPack<Entity>,
@@ -256,6 +265,7 @@ export default function FramePage(p: FramePageProps) {
   };
 
   const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, "framePage"));
+  const settings = Navigator.getSettings(ti);
 
   const wc: WidgetContext<Entity> = { ctx: ctx, frame: frame };
 
@@ -267,7 +277,6 @@ export default function FramePage(p: FramePageProps) {
       {renderTitle()}
       <div style={state.executing == true ? { opacity: ".7" } : undefined}>
         <div className="sf-button-widget-container">
-          {renderWidgets(wc)}
           {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
         </div>
         <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
@@ -288,12 +297,23 @@ export default function FramePage(p: FramePageProps) {
       return <h3 className="display-6 sf-entity-title">{JavascriptMessage.loading.niceToString()}</h3>;
 
     const entity = state.pack.entity;
+    const title = getToString(entity);
+    const subTitle = Navigator.getTypeSubTitle(entity, undefined);
+    const widgets = renderWidgets(wc, settings?.stickyHeader);
 
     return (
-      <h4 className="border-bottom pb-3 mb-2">
-        <span className="display-6 sf-entity-title">{getToString(entity)}</span>
-        <br />
-        <small className="sf-type-nice-name text-muted">{Navigator.getTypeSubTitle(entity, undefined)}</small>
+      <h4 className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")} >
+        {title && <>
+          <span className="sf-entity-title">{title}</span>&nbsp;
+        </>
+        }
+        {(subTitle || widgets) &&
+          <div className="sf-entity-sub-title mt-2">
+            {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
+            {widgets}
+            <br />
+          </div>
+        }
       </h4>
     );
   }

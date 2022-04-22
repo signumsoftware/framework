@@ -74,7 +74,7 @@ export default function MessageModal(p: MessageModalProps) {
 
     const htmlAtts = p.buttonHtmlAttributes && p.buttonHtmlAttributes(res);
 
-    const baseButtonClass = classes("btn", res == 'yes' || res == 'ok' ? "btn-primary" : "btn-secondary", `sf-close-button sf-${res}-button`)
+    const baseButtonClass = classes("btn", res == 'yes' || res == 'ok' ? "btn-primary" : "btn-secondary", `sf-close-button sf-${res}-button ms-1`)
 
     return (
       <button
@@ -135,9 +135,9 @@ export default function MessageModal(p: MessageModalProps) {
     var iconSpan = icon && <FontAwesomeIcon icon={icon} />;
 
     return (
-      <span>
+      <h5 className="modal-title">
         {iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{p.title}
-      </span>
+      </h5>
     );
   }
 
@@ -192,3 +192,4 @@ function dialogHeaderClass(style: MessageModalStyle | undefined) {
     default: return "bg-primary text-light";
   }
 }
+

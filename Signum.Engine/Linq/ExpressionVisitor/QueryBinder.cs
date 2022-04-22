@@ -374,14 +374,14 @@ internal class QueryBinder : ExpressionVisitor
     }
 
 
-    static MethodInfo miSplitCase = ReflectionTools.GetMethodInfo((Entity e) => e.CombineCase()).GetGenericMethodDefinition();
-    static MethodInfo miSplitUnion = ReflectionTools.GetMethodInfo((Entity e) => e.CombineUnion()).GetGenericMethodDefinition();
+    static MethodInfo miCombineCase = ReflectionTools.GetMethodInfo((Entity e) => e.CombineCase()).GetGenericMethodDefinition();
+    static MethodInfo miCombineUnion = ReflectionTools.GetMethodInfo((Entity e) => e.CombineUnion()).GetGenericMethodDefinition();
     private static CombineStrategy GetStrategy(MethodInfo methodInfo)
     {
-        if (methodInfo.IsInstantiationOf(miSplitCase))
+        if (methodInfo.IsInstantiationOf(miCombineCase))
             return CombineStrategy.Case;
 
-        if (methodInfo.IsInstantiationOf(miSplitUnion))
+        if (methodInfo.IsInstantiationOf(miCombineUnion))
             return CombineStrategy.Union;
 
         throw new InvalidOperationException("Method {0} not expected".FormatWith(methodInfo.Name));
@@ -641,6 +641,7 @@ internal class QueryBinder : ExpressionVisitor
         }
     }
 
+    static MethodInfo miToString = ReflectionTools.GetMethodInfo((object obj) => obj.ToString());
     static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
 
     static (Expression newSource, LambdaExpression? selector, bool distinct) DisassembleAggregate(AggregateSqlFunction aggregate, Expression source, LambdaExpression? selectorOrPredicate, bool isRoot)
@@ -1249,16 +1250,18 @@ internal class QueryBinder : ExpressionVisitor
         this.thenBys = null;
         ProjectionExpression projection = this.VisitCastProjection(source);
 
-        List<OrderExpression> orderings = new List<OrderExpression>
-        {
-            new OrderExpression(orderType, GetOrderExpression(orderSelector, projection))
-        };
+        List<OrderExpression> orderings = GetOrderExpression(orderSelector, projection).Select(a => new OrderExpression(orderType, a)).ToList();
         if (myThenBys != null)
         {
             for (int i = myThenBys.Count - 1; i >= 0; i--)
             {
                 OrderExpression tb = myThenBys[i];
-                orderings.Add(new OrderExpression(tb.OrderType, GetOrderExpression((LambdaExpression)tb.Expression, projection)));
+                var columns = GetOrderExpression((LambdaExpression)tb.Expression, projection);
+
+                foreach (var c in columns)
+                {
+                    orderings.Add(new OrderExpression(tb.OrderType, c));
+                }
             }
         }
 
@@ -1269,7 +1272,7 @@ internal class QueryBinder : ExpressionVisitor
             pc.Projector, null, resultType);
     }
 
-    private Expression GetOrderExpression(LambdaExpression lambda, ProjectionExpression projection)
+    private Expression[] GetOrderExpression(LambdaExpression lambda, ProjectionExpression projection)
     {
         using (SetCurrentSource(projection.Select))
         {
@@ -1292,40 +1295,32 @@ internal class QueryBinder : ExpressionVisitor
                 return BindMethodCall(Expression.Call(exp, EntityExpression.ToStringMethod));
             }
 
-            if (expr is LiteReferenceExpression lite)
+            Expression[] results = expr switch
             {
-                expr = lite.Reference is ImplementedByAllExpression iba ? iba.Id :
-                    lite.Reference is EntityExpression e ? GetExpressionOrder(e) :
-                    lite.Reference is ImplementedByExpression ib ? DispatchIb(ib, typeof(string), ee => GetExpressionOrder(ee)) :
-                    throw new NotImplementedException("");
-            }
-            else if (expr is EntityExpression e)
-            {
-                expr = GetExpressionOrder(e);
-            }
-            else if (expr is ImplementedByExpression ib)
-            {
-                expr = DispatchIb(ib, typeof(string), ee => GetExpressionOrder(ee));
-            }
-            else if (expr is ImplementedByAllExpression iba)
-            {
-                expr = iba.Id;
-            }
-            else if (expr is MethodCallExpression mce && ReflectionTools.MethodEqual(mce.Method, miToUserInterface))
-            {
-                expr = mce.Arguments[0];
-            }
-            else if (expr.Type == typeof(Type))
-            {
-                expr = ExtractTypeId(expr);
-            }
+                LiteReferenceExpression lite => lite.Reference is ImplementedByAllExpression iba ? iba.Ids.Values.PreAnd(iba.TypeId).ToArray() :
+                    lite.Reference is EntityExpression e ? new[] { GetExpressionOrder(e), e.ExternalId } :
+                    lite.Reference is ImplementedByExpression ib ? ib.Implementations.Values.SelectMany(e => new[] { GetExpressionOrder(e), e.ExternalId }).ToArray() :
+                    throw new NotImplementedException(""),
 
-            if (expr.Type.UnNullify() == typeof(PrimaryKey))
-            {
-                expr = SmartEqualizer.UnwrapPrimaryKey(expr);
-            }
+                EntityExpression e => new[] { GetExpressionOrder(e), e.ExternalId },
 
-            return DbExpressionNominator.FullNominate(expr)!;
+                ImplementedByExpression ib => ib.Implementations.Values.SelectMany(e => new[] { GetExpressionOrder(e), e.ExternalId }).ToArray(),
+
+                ImplementedByAllExpression iba => iba.Ids.Values.PreAnd(iba.TypeId).ToArray(),
+
+                MethodCallExpression mce when ReflectionTools.MethodEqual(mce.Method, miToUserInterface) => new[] { mce.Arguments[0] },
+
+                var e when e.Type == typeof(Type) => new[] { ExtractTypeId(expr) },
+
+                var e => new[] { e },
+            };
+            
+            return results.Select(e =>
+            {
+                var clean = e.Type.UnNullify() == typeof(PrimaryKey) ? SmartEqualizer.UnwrapPrimaryKey(e) : e;
+
+                return DbExpressionNominator.FullNominate(clean);
+            }).ToArray();
         }
     }
 
@@ -1931,7 +1926,9 @@ internal class QueryBinder : ExpressionVisitor
                                     ImplementedByAllExpression iba = (ImplementedByAllExpression)source;
                                     FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(iba.Type, (PropertyInfo)m.Member);
                                     if (fi != null && fi.FieldEquals((Entity ie) => ie.id))
-                                        return new PrimaryKeyStringExpression(iba.Id, iba.TypeId).UnNullify();
+                                        return new PrimaryKeyExpression(
+                                            Coalesce(typeof(IConvertible), iba.Ids.Values.Select(a => (Expression)Expression.Convert(a, typeof(IConvertible))))
+                                        ).UnNullify();
 
                                     throw new InvalidOperationException("The member {0} of ImplementedByAll is not accesible on queries".FormatWith(m.Member));
                                 }
@@ -1943,7 +1940,7 @@ internal class QueryBinder : ExpressionVisitor
                                     {
                                         "RowId" => mle.RowId.UnNullify(),
                                         "Parent" => mle.Parent,
-                                        "Order" => mle.Order.ThrowIfNull(() => "{0} has no {1}".FormatWith(mle.Table.Name, m.Member.Name)),
+                                        "RowOrder" => mle.Order.ThrowIfNull(() => "{0} has no {1}".FormatWith(mle.Table.Name, m.Member.Name)),
                                         "Element" => mle.Element,
                                         _ => throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member)),
                                     };
@@ -2072,11 +2069,13 @@ internal class QueryBinder : ExpressionVisitor
 
         if (expressions.Any(e => e.Value is ImplementedByAllExpression))
         {
-            Expression id = CombineImplementations(strategy, expressions.SelectDictionary(w => GetIdString(w)), typeof(string));
+            var ids = Schema.Current.Settings.ImplementedByAllPrimaryKeyTypes.ToDictionary(t => t, t => 
+                CombineImplementations(strategy, expressions.SelectDictionary(w => GetIdAsType(w, t)), t.Nullify()));
+
             TypeImplementedByAllExpression typeId = (TypeImplementedByAllExpression)
                 CombineImplementations(strategy, expressions.SelectDictionary(w => GetEntityType(w)), typeof(Type));
 
-            return new ImplementedByAllExpression(returnType, id, typeId, null);
+            return new ImplementedByAllExpression(returnType, ids, typeId, null);
         }
 
         if (expressions.All(e => e.Value is EntityExpression || e.Value is ImplementedByExpression))
@@ -2178,20 +2177,11 @@ internal class QueryBinder : ExpressionVisitor
             return new PrimaryKeyExpression(value);
         }
 
-        if (expressions.All(i => i.Value is PrimaryKeyStringExpression))
-        {
-            var type = expressions.Select(i => i.Value.Type).Distinct().SingleEx();
 
-            var dicType = expressions.SelectDictionary(exp => (Expression)((PrimaryKeyStringExpression)exp).TypeId);
 
-            var valueType = (TypeImplementedByAllExpression)CombineImplementations(strategy, dicType, typeof(Type));
 
-            var dicId = expressions.SelectDictionary(exp => ((PrimaryKeyStringExpression)exp).Id);
 
-            var valueId = CombineImplementations(strategy, dicId, typeof(string));
 
-            return new PrimaryKeyStringExpression(valueId, valueType);
-        }
 
         if (!schema.Settings.IsDbType(returnType.UnNullify()))
             throw new InvalidOperationException("Impossible to CombineImplementations of {0}".FormatWith(returnType.TypeName()));
@@ -2384,12 +2374,14 @@ internal class QueryBinder : ExpressionVisitor
         else if (operand is ImplementedByAllExpression iba)
         {
             if (uType.IsAssignableFrom(iba.Type))
-                return new ImplementedByAllExpression(uType, iba.Id, iba.TypeId, iba.ExternalPeriod);
+                return new ImplementedByAllExpression(uType, iba.Ids, iba.TypeId, iba.ExternalPeriod);
+
+            var pkType = PrimaryKey.Type(uType);
 
             var conditionalId = new PrimaryKeyExpression(
                 Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn.Value, TypeConstant(uType)),
-                new SqlCastExpression(PrimaryKey.Type(uType).Nullify(), iba.Id),
-                Expression.Constant(null, PrimaryKey.Type(uType).Nullify())));
+                new SqlCastExpression(pkType.Nullify(), iba.Ids.GetOrThrow(pkType)),
+                Expression.Constant(null, pkType.Nullify())));
 
             return new EntityExpression(uType, conditionalId, iba.ExternalPeriod, null, null, null, null, avoidExpandOnRetrieving: false);
         }
@@ -2752,11 +2744,11 @@ internal class QueryBinder : ExpressionVisitor
         }
         else if (colExpression is ImplementedByAllExpression colIba && expression is ImplementedByAllExpression expIba)
         {
-            return new[]
-            {
-                AssignColumn(colIba.Id, expIba.Id),
-                AssignColumn(colIba.TypeId.TypeColumn.Value, expIba.TypeId.TypeColumn.Value)
-            };
+            var ids = colIba.Ids
+    .Select(idc => AssignColumn(idc.Value, expIba.Ids.GetOrThrow(idc.Key)))
+    .ToArray();
+
+            return ids.PreAnd(AssignColumn(colIba.TypeId.TypeColumn.Value, expIba.TypeId.TypeColumn.Value)).ToArray();
         }
 
         throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".FormatWith(colExpression.Type.TypeName(), expression.ToString()));
@@ -2936,8 +2928,22 @@ internal class QueryBinder : ExpressionVisitor
 
         if (expression is ImplementedByExpression ib)
         {
-            var type = ib.Implementations.Select(imp => imp.Value.ExternalId.ValueType.Nullify()).Distinct().SingleOrDefaultEx() ?? typeof(int?);
-            var aggregate = new PrimaryKeyExpression(Coalesce(type, ib.Implementations.Select(imp => imp.Value.ExternalId.Value)));
+            var type = ib.Implementations.Select(imp => imp.Value.ExternalId.ValueType.Nullify()).Distinct().Only();
+            if(type != null)
+            {
+                var aggregate = new PrimaryKeyExpression(Coalesce(type, ib.Implementations.Select(imp => imp.Value.ExternalId.Value)));
+                return aggregate;
+            }
+            else
+            {
+                var aggregate = new PrimaryKeyExpression(Coalesce(typeof(IComparable), ib.Implementations.Select(imp => Expression.Convert(imp.Value.ExternalId.Value, typeof(IComparable)))));
+                return aggregate;
+            }
+        }
+
+        if (expression is ImplementedByAllExpression iba)
+        {
+            var aggregate = new PrimaryKeyExpression(Coalesce(typeof(IComparable), iba.Ids.Values.Select(id => Expression.Convert(id, typeof(IComparable)))));
             return aggregate;
         }
 
@@ -2968,21 +2974,28 @@ internal class QueryBinder : ExpressionVisitor
         throw new NotSupportedException("Id for {0}".FormatWith(expression.ToString()));
     }
 
-    public Expression GetIdString(Expression expression)
+    public Expression GetIdAsType(Expression expression, Type primaryKeyType)
     {
         if (expression is EntityExpression ee)
-            return Expression.Convert(ee.ExternalId.Value, typeof(string));
+        {
+            if (PrimaryKey.Type(ee.Type) == primaryKeyType)
+                return ee.ExternalId.Value;
+
+            return new SqlConstantExpression(null, primaryKeyType.Nullify());
+        }
 
         if (expression is ImplementedByExpression ib)
         {
-            var aggregate = Coalesce(typeof(string),
-                ib.Implementations.Select(imp => new SqlCastExpression(typeof(string), imp.Value.ExternalId.Value)));
+            var aggregate = ib.Implementations.Where(imp => PrimaryKey.Type(imp.Key) == primaryKeyType).Select(imp => imp.Value.ExternalId.Value);
 
-            return aggregate;
+            if (aggregate.Any())
+                return aggregate.Aggregate((a, b) => Expression.Coalesce(a, b));
+
+            return new SqlConstantExpression(null, primaryKeyType.Nullify());
         }
 
         if (expression is ImplementedByAllExpression iba)
-            return iba.Id;
+            return iba.Ids.GetOrThrow(primaryKeyType);
 
         if (expression.NodeType == ExpressionType.Conditional)
         {
@@ -2994,16 +3007,14 @@ internal class QueryBinder : ExpressionVisitor
         {
             var bin = (BinaryExpression)expression;
 
-            var left = GetIdString(bin.Left);
-            var right = GetIdString(bin.Right);
+            var left = GetIdAsType(bin.Left, primaryKeyType);
+            var right = GetIdAsType(bin.Right, primaryKeyType);
 
-            return Condition(Expression.NotEqual(left.Nullify(), Expression.Constant(null, typeof(string))),
-                left.Nullify(),
-                right.Nullify());
+            return Expression.Coalesce(left, right);
         }
 
         if (expression.IsNull())
-            return Expression.Constant(null, typeof(string));
+            return new SqlConstantExpression(null, primaryKeyType.Nullify());
 
         throw new NotSupportedException("Id for {0}".FormatWith(expression.ToString()));
     }
@@ -3629,7 +3640,7 @@ class AssignAdapterExpander : DbExpressionVisitor
         if (colExpression is ImplementedByAllExpression)
             return Combiner<ImplementedByAllExpression>(ifTrue, ifFalse, (col, t, f) =>
                 new ImplementedByAllExpression(col.Type,
-                    Expression.Condition(test, t.Id.Nullify(), f.Id.Nullify()),
+                    col.Ids.ToDictionary(a => a.Key, a => (Expression)Expression.Condition(test, t.Ids.GetOrThrow(a.Key).Nullify(), f.Ids.GetOrThrow(a.Key).Nullify())),
                     new TypeImplementedByAllExpression(
                         new PrimaryKeyExpression(ConditionFlexible(test,
                             t.TypeId.TypeColumn.Value.Nullify(),
@@ -3766,7 +3777,7 @@ class AssignAdapterExpander : DbExpressionVisitor
         if (colExpression is ImplementedByAllExpression)
             return Combiner<ImplementedByAllExpression>(left, right, (col, l, r) =>
                 new ImplementedByAllExpression(col.Type,
-                    Expression.Coalesce(l.Id, r.Id),
+                    col.Ids.Keys.ToDictionary(t => t, t => (Expression)Expression.Coalesce(l.Ids.GetOrThrow(t), r.Ids.GetOrThrow(t))),
                     new TypeImplementedByAllExpression(new PrimaryKeyExpression(CoalesceFlexible(
                         l.TypeId.TypeColumn.Value.Nullify(),
                         r.TypeId.TypeColumn.Value.Nullify()))), null));
@@ -3845,9 +3856,9 @@ class AssignAdapterExpander : DbExpressionVisitor
 
     protected internal override Expression VisitEntity(EntityExpression ee)
     {
-        if (colExpression is ImplementedByAllExpression)
+        if (colExpression is ImplementedByAllExpression iba)
             return new ImplementedByAllExpression(colExpression.Type,
-                new SqlCastExpression(typeof(string), ee.ExternalId.Value),
+                iba.Ids.Keys.ToDictionary(a=>a, a => PrimaryKey.Type(ee.Type)  == a ? ee.ExternalId.Value : new SqlConstantExpression(null, a)),
                 new TypeImplementedByAllExpression(new PrimaryKeyExpression(
                     Expression.Condition(Expression.Equal(ee.ExternalId.Value.Nullify(), new SqlConstantExpression(null, ee.ExternalId.ValueType.Nullify())),
                     new SqlConstantExpression(null, PrimaryKey.Type(typeof(TypeEntity)).Nullify()),
@@ -3873,10 +3884,15 @@ class AssignAdapterExpander : DbExpressionVisitor
 
     protected internal override Expression VisitImplementedBy(ImplementedByExpression ib)
     {
-        if (colExpression is ImplementedByAllExpression)
+        if (colExpression is ImplementedByAllExpression iba)
         {
             return new ImplementedByAllExpression(colExpression.Type,
-                new PrimaryKeyExpression(QueryBinder.Coalesce(ib.Implementations.Values.Select(a => a.ExternalId.ValueType.Nullify()).Distinct().SingleEx(), ib.Implementations.Select(e => e.Value.ExternalId))),
+                iba.Ids.Keys.ToDictionary(a => a, a =>
+                {
+                    var imp = ib.Implementations.Values.Where(e => PrimaryKey.Type(e.Type) == a).Select(a => a.ExternalId.Value);
+
+                    return imp.Any() ? imp.Aggregate((a, b) => Expression.Coalesce(a, b)) : new SqlConstantExpression(null, a);
+                }),
                 new TypeImplementedByAllExpression(new PrimaryKeyExpression(
                  ib.Implementations.Select(imp => new When(imp.Value.ExternalId.NotEqualsNulll(), QueryBinder.TypeConstant(imp.Key))).ToList()
                  .ToCondition(PrimaryKey.Type(typeof(TypeEntity)).Nullify()))), null);
@@ -3923,7 +3939,7 @@ class AssignAdapterExpander : DbExpressionVisitor
 
                 var entity = GetEntityConstant(
                     lite == null ? Expression.Constant(null, type) : Expression.Constant(lite.Id.Object, type),
-                    lite?.GetType().CleanType());
+                    lite?.EntityType);
 
                 return new LiteReferenceExpression(colLite.Type, entity, null, false, false);
             }
@@ -3942,9 +3958,9 @@ class AssignAdapterExpander : DbExpressionVisitor
             return new EntityExpression(colExpression.Type, new PrimaryKeyExpression(id), null, null, null, null, null, false);
         }
 
-        if (colExpression is ImplementedByAllExpression)
+        if (colExpression is ImplementedByAllExpression iba)
             return new ImplementedByAllExpression(colExpression.Type,
-                new SqlCastExpression(typeof(string), id),
+                iba.Ids.Keys.ToDictionary(t => t, t => type != null && PrimaryKey.Type(type) == t ? id : new SqlConstantExpression(null, t)),
                 new TypeImplementedByAllExpression(new PrimaryKeyExpression(id.IsNull() ?
                     Expression.Constant(null, PrimaryKey.Type(typeof(TypeEntity)).Nullify()) :
                     QueryBinder.TypeConstant(type!).Nullify())), null);

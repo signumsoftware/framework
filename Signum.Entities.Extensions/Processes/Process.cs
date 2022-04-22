@@ -168,11 +168,11 @@ public enum ProcessState
 [AutoInit]
 public static class ProcessOperation
 {
-    public static ExecuteSymbol<ProcessEntity> Plan;
     public static ExecuteSymbol<ProcessEntity> Save;
-    public static ExecuteSymbol<ProcessEntity> Cancel;
     public static ExecuteSymbol<ProcessEntity> Execute;
     public static ExecuteSymbol<ProcessEntity> Suspend;
+    public static ExecuteSymbol<ProcessEntity> Cancel;
+    public static ExecuteSymbol<ProcessEntity> Plan;
     public static ConstructSymbol<ProcessEntity>.From<ProcessEntity> Retry;
 }
 

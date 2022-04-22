@@ -11,7 +11,7 @@ import {
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "@framework/AsyncImport";
-import { ValueSearchControlLine } from '@framework/Search';
+import { SearchValueLine } from '@framework/Search';
 
 export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/scheduler/view" onImportModule={() => import("./SchedulerPanelPage")} />);
@@ -30,7 +30,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   var es = new EntitySettings(ScheduledTaskLogEntity, undefined);
   es.overrideView(vr => vr.insertAfterLine(a => a.exception, ctx => [
-    <ValueSearchControlLine ctx={ctx} findOptions={{
+    <SearchValueLine ctx={ctx} findOptions={{
       queryName: SchedulerTaskExceptionLineEntity,
       filterOptions: [{ token: SchedulerTaskExceptionLineEntity.token(e => e.schedulerTaskLog), value: ctx.value}],
     }} />

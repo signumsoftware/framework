@@ -370,10 +370,12 @@ export interface DragConfig {
 
 tasks.push(taskSetMove);
 export function taskSetMove(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof EntityListBaseController && (state as EntityListBaseProps).move == undefined &&
+  if (lineBase instanceof EntityListBaseController &&
+    (state as EntityListBaseProps).move == undefined &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.preserveOrder) {
     (state as EntityListBaseProps).move = true;
   }
 }
+

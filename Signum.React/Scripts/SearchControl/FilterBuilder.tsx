@@ -122,14 +122,14 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
                 lastToken={p.lastToken} onHeightChanged={handleHeightChanged} renderValue={p.renderValue}
                 showPinnedFiltersOptions={showPinnedFiltersOptions}
-                showDashboardBehaviour={p.showDashboardBehaviour ?? true}
+                showDashboardBehaviour={(p.showDashboardBehaviour ?? true) && showPinnedFiltersOptions}
                 disableValue={false} /> :
               <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged} renderValue={p.renderValue}
                 showPinnedFiltersOptions={showPinnedFiltersOptions}
-                showDashboardBehaviour={p.showDashboardBehaviour ?? true}
+                showDashboardBehaviour={(p.showDashboardBehaviour ?? true) && showPinnedFiltersOptions}
                 disableValue={false} />
             )}
             {!p.readOnly &&
@@ -281,7 +281,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
             <FontAwesomeIcon icon="times" />
           </a>}
       </td>
-      <td colSpan={3} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
+      <td colSpan={3 + (p.showPinnedFiltersOptions ? 1 : 0) + (p.showDashboardBehaviour ? 1 : 0)} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
         <div className="justify-content-between d-flex" >
           <div className="row gx-1">
             <div className="col-auto">
@@ -482,8 +482,17 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
         if (f.value) {
           const type = newToken.type.name as "DateOnly" | "DateTime";
-          const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
-          f.value = type == "DateOnly" ? date.toISODate() : date.toISO();
+          if (f.operation && isList(f.operation)) {
+
+            f.value = (f.value as string[]).map(v => {
+              const date = trimDateToFormat(DateTime.fromISO(v), type, newToken.format);
+              return type == "DateOnly" ? date.toISODate() : date.toISO();
+            });
+
+          } else {
+            const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
+            f.value = type == "DateOnly" ? date.toISODate() : date.toISO();
+          }
         }
       }
     }

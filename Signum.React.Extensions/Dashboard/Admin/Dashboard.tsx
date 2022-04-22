@@ -1,4 +1,3 @@
-
 import * as React from 'react'
 import { Tabs, Tab } from 'react-bootstrap'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,13 +13,11 @@ import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
-import { ValueSearchControlLine } from '../../../Signum.React/Scripts/Search';
+import { SearchValueLine } from '../../../Signum.React/Scripts/Search';
 import { withClassName } from '../../Dynamic/View/HtmlAttributesExpression';
 import { classes } from '../../../Signum.React/Scripts/Globals';
 import { OperationButton } from '../../../Signum.React/Scripts/Operations/EntityOperations';
 import { EntityOperationContext } from '../../../Signum.React/Scripts/Operations';
-import { addAdditionalTabs } from '../../../Signum.React/Scripts/Frames/WidgetEmbedded';
-import a from 'bpmn-js/lib/features/search';
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';
 
@@ -71,6 +68,14 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
     var icon = parseIcon(tc.value.iconName);
 
+    var avoidDrag: React.HTMLAttributes<any> = {
+      draggable: true,
+      onDragStart: e => {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
     const title = (
       <div>
         <div className="d-flex">
@@ -79,26 +84,26 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
             <div className="row">
               <div className="col-sm-8">
-                < ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} />
+                < ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag} />
               </div>
               <div className="col-sm-4">
-                <ValueLine ctx={tcs.subCtx(pp => pp.interactionGroup)}
+                <ValueLine ctx={tcs.subCtx(pp => pp.interactionGroup)} valueHtmlAttributes={avoidDrag}
                   onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
               </div>
             </div>
 
             <div className="row">
-                <div className="col-sm-3">
-                  <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
+              <div className="col-sm-3">
+                <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} inputAttrs={avoidDrag} onChange={() => forceUpdate()} />
                 </div>
               <div className="col-sm-3">
-                <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} onChange={() => forceUpdate()} />
+                <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} inputAttrs={avoidDrag} onChange={() => forceUpdate()} />
               </div>
               <div className="col-sm-3">
-                <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
+                <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} inputAttrs={avoidDrag} onChange={() => forceUpdate()} />
               </div>
               <div className="col-sm-3">
-                <ValueLine ctx={tcs.subCtx(t => t.sameIconTitleColor)} onChange={() => forceUpdate()} />
+                <ValueLine ctx={tcs.subCtx(t => t.useIconColorForTitle)} valueHtmlAttributes={avoidDrag} onChange={() => forceUpdate()} />
               </div>
             </div>
           </div>
@@ -119,11 +124,9 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
     <div>
       <div>
         <div className="row">
-          <div className="col-sm-6">
-            <ValueLine ctx={ctxBasic.subCtx(cp => cp.displayName)} />
-          </div>
-          <div className="col-sm-2">
-            <ValueLine ctx={ctxBasic.subCtx(cp => cp.hideDisplayName)} />
+          <div className="col-sm-4">
+            <ValueLine ctx={ctxBasic.subCtx(cp => cp.displayName)}
+              helpText={<ValueLine ctx={ctxBasic.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />} />
           </div>
           <div className="col-sm-2">
             <ValueLine ctx={ctxBasic.subCtx(cp => cp.dashboardPriority)} />
@@ -159,7 +162,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
             <ValueLine ctx={ectx.subCtx(cp => cp.autoRegenerateWhenOlderThan)} />
           </div>
           <div className="col-sm-2">
-            {!ctx.value.isNew && <ValueSearchControlLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
+            {!ctx.value.isNew && <SearchValueLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
           </div>
           <div className="col-sm-3 pt-4">
             {!ctx.value.isNew && <OperationButton eoc={EntityOperationContext.fromTypeContext(ctx, DashboardOperation.RegenerateCachedQueries)} hideOnCanExecute className="w-100" />}

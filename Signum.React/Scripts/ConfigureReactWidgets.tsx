@@ -250,8 +250,3 @@ export const firstDay: { [isoCode: string]: "mon" | "sat" | "sun" | "fri" } = {
   "ZA": "sun",
   "ZW": "sun"
 };
-
-
-function toFormatFixed(arg0: DateTime, arg1: string): string {
-    throw new Error('Function not implemented.');
-}

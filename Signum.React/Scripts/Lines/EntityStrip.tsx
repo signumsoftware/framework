@@ -1,16 +1,19 @@
 import * as React from 'react'
-import { classes } from '../Globals'
+import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
-import { AutocompleteConfig } from './AutoCompleteConfig'
+import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
-import { useController } from './LineBase'
-import { getTypeInfo, getTypeName } from '../Reflection'
+import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
+import { getTypeInfo, getTypeInfos, getTypeName, tryGetTypeInfos } from '../Reflection'
+import { FilterOperation } from '../Signum.Entities.DynamicQuery'
+import { FindOptions } from '../Search'
+import { useForceUpdate } from '../Hooks'
 import { TypeaheadController } from '../Components/Typeahead'
 
 
@@ -22,6 +25,7 @@ export interface EntityStripProps extends EntityListBaseProps {
   showType?: boolean;
   onItemHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  avoidDuplicates?: boolean;
 }
 
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
@@ -36,12 +40,32 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
       if (p.showType == undefined)
         p.showType = p.type.name.contains(",");
 
+
       if (p.autocomplete === undefined) {
+
+        var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
+        if (avoidDuplicates) {
+          var types = getTypeInfos(p.type);
+          if (types.length == 1)
+            p.findOptions = withAvoidDuplicates(p.findOptions ?? { queryName: types.single().name }, types.single().name);
+          else {
+            p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? { queryName: a.name }, a.name));
+          }
+        }
+
         p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create!, p.showType);
       }
       if (p.iconStart == undefined && p.vertical)
         p.iconStart = true;
+
     }
+
+    function withAvoidDuplicates(fo: FindOptions,  typeName: string): FindOptions {
+
+      const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
+
+      return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible }] };
+      }
   }
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
@@ -186,7 +210,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
       <Typeahead ref={c.typeahead}
         inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString(), onPaste: p.paste == false ? undefined : handleOnPaste }}
         getItems={q => ac!.getItems(q)}
-        getItemsDelay={ac.getItemsDelay}
+        itemsDelay={ac.getItemsDelay()}
         renderItem={(e, str) => ac!.renderItem(e, str)}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={c.handleOnSelect}
@@ -210,22 +234,23 @@ export interface EntityStripElementProps {
 }
 
 export function EntityStripElement(p: EntityStripElementProps) {
-  var [currentItem, setCurrentItem] = React.useState<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
+  var currentEntityRef = React.useRef<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
+  const forceUpdate = useForceUpdate();
 
   React.useEffect(() => {
 
     if (p.autoComplete) {
       var newEntity = p.ctx.value;
-      if (!currentItem || currentItem.entity !== newEntity) {
+      if (!currentEntityRef.current || currentEntityRef.current.entity !== newEntity) {
         var ci = { entity: newEntity!, item: undefined }
-        setCurrentItem(ci);
+        currentEntityRef.current = ci;
         var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
           const autocomplete = p.autoComplete;
           autocomplete?.getItemFromEntity(newEntity)
             .then(item => {
               if (autocomplete == p.autoComplete) {
                 ci.item = item;
-                setCurrentItem(ci);
+                forceUpdate();
               } else {
                 fillItem(newEntity);
               }
@@ -233,12 +258,6 @@ export function EntityStripElement(p: EntityStripElementProps) {
             .done();
         };
         fillItem(newEntity);
-        p.autoComplete.getItemFromEntity(newEntity)
-          .then(item => {
-            ci.item = item;
-            setCurrentItem(ci);
-          })
-          .done();
       }
     }
 
@@ -246,15 +265,14 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   const toStr =
     p.onRenderItem ? p.onRenderItem(p.ctx.value) :
-      currentItem?.item ? p.autoComplete!.renderItem(currentItem.item) :
+      currentEntityRef.current?.item ? p.autoComplete!.renderItem(currentEntityRef.current.item) :
         getToStr();
 
   function getToStr() {
     const toStr = getToString(p.ctx.value);
-    return !p.showType ? toStr :
+    return !p.showType || !(isEntity(p.ctx.value) || isLite(p.ctx.value)) ? toStr :
       <span style={{ wordBreak: "break-all" }} title={toStr}>
-        <span className="sf-type-badge">{getTypeInfo(getTypeName(p.ctx.value)).niceName}</span>
-        &nbsp;{toStr}
+        <TypeBadge entity={p.ctx.value}/>{toStr}
       </span>;
   }
 
@@ -321,3 +339,13 @@ export function EntityStripElement(p: EntityStripElementProps) {
   }
 }
 
+//tasks.push(taskSetAvoidDuplicates);
+//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps) {
+//  if (lineBase instanceof EntityStripController &&
+//    (state as EntityStripProps).avoidDuplicates == undefined &&
+//    state.ctx.propertyRoute &&
+//    state.ctx.propertyRoute.propertyRouteType == "Field" &&
+//    state.ctx.propertyRoute.member!.avoidDuplicates) {
+//    (state as EntityStripProps).avoidDuplicates = true;
+//  }
+//}

@@ -301,7 +301,7 @@ export module EngineMessage {
   export const EntityWithType0AndId1NotFound = new MessageKey("EngineMessage", "EntityWithType0AndId1NotFound");
   export const NoWayOfMappingType0Found = new MessageKey("EngineMessage", "NoWayOfMappingType0Found");
   export const TheEntity0IsNew = new MessageKey("EngineMessage", "TheEntity0IsNew");
-  export const ThereAre0ThatReferThisEntity = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntity");
+  export const ThereAre0ThatReferThisEntityByProperty1 = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntityByProperty1");
   export const ThereAreRecordsIn0PointingToThisTableByColumn1 = new MessageKey("EngineMessage", "ThereAreRecordsIn0PointingToThisTableByColumn1");
   export const UnauthorizedAccessTo0Because1 = new MessageKey("EngineMessage", "UnauthorizedAccessTo0Because1");
   export const TheresAlreadyA0With1EqualsTo2_G = new MessageKey("EngineMessage", "TheresAlreadyA0With1EqualsTo2_G");

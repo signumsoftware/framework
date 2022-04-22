@@ -23,7 +23,7 @@ public static class AsyncEmailSenderLogic
         {
             Running = running,
             CurrentProcessIdentifier = processIdentifier,
-            MachineName = Environment.MachineName,
+            MachineName = Schema.Current.MachineName,
             AsyncSenderPeriod = EmailLogic.Configuration.AsyncSenderPeriod,
             NextPlannedExecution = nextPlannedExecution,
             IsCancelationRequested = CancelProcess != null && CancelProcess.IsCancellationRequested,

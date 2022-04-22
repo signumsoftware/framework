@@ -19,7 +19,7 @@ public class DateToken : QueryToken
 
     public override string NiceName()
     {
-        return QueryTokenMessage.Date.NiceToString() + QueryTokenMessage.Of.NiceToString() + parent.ToString();
+        return QueryTokenMessage._0Of1.NiceToString(QueryTokenMessage.Date.NiceToString(), parent.ToString());
     }
 
     public override string? Format

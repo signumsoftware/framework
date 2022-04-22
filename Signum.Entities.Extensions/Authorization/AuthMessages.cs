@@ -28,8 +28,8 @@ public enum LoginAuthMessage
     Username,
     [Description("E-Mail Address")]
     EMailAddress,
-    [Description("Username or E-Mail Address")]
-    UsernameOrEmailAddress,
+    [Description("E-Mail Address or Username")]
+    EmailAddressOrUsername,
     RememberMe,
     IHaveForgottenMyPassword,
 
@@ -165,6 +165,8 @@ public enum AuthAdminMessage
 
     [Description(@"{0} cycles have been found in the graph of Roles due to the relationships:")]
     _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships,
+
+    ConflictMergingTypeConditions,
 
     Save,
 }

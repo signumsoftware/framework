@@ -119,14 +119,16 @@ WHERE (bdn.idFixer) IS NOT NULL
 
 ### Safer than comparing Ids
 
-You can compare two entities using `==` operator (or `!=` operation) and an automatic identity comparison will be done for you. **This is safer than using Ids since you cant get the type wrong.**
+You can compare two entities using `.Is`, `==` operator, or `!=` operation, and an automatic identity comparison will be done for you. **This is safer than using Ids since you cant get the type wrong.**
 
 ```C#
 public IQueryable<BugEntity> DeveloperBugs(DeveloperEntity dev)
 {
     return Database.Query<BugEntity>().Where(b => b.Id == dev.Id); //BUG HARD TO SPOT!!!!!
+    return Database.Query<BugEntity>().Where(b => b.Is(dev)); //Bug easy to spot: compile error :), recommended
     return Database.Query<BugEntity>().Where(b => b == dev); //Bug easy to spot: compile error :)
-    return Database.Query<BugEntity>().Where(b => b.Fixer == dev); //Works!
+    return Database.Query<BugEntity>().Where(b => b.Fixer.Is(dev)); //Works!, recommended
+    return Database.Query<BugEntity>().Where(b => b.Fixer ==  dev); //Works!
 }
 ```
 
@@ -135,7 +137,7 @@ Notice how we are using in-memory variables inside of the query, for example the
 ```C#
 DeveloperEntity dev = new DeveloperEntity { Name = "John" }.Save();
 var bug = from b in Database.Query<BugEntity>()
-          where b.Fixer == dev
+          where b.Fixer.Is(dev)
           select new { b.Description, b.Hours };
 ```
 
@@ -160,7 +162,7 @@ Let's compare the two polymorphic references, `Discoverer` and `Writer`, each of
 ```C#
 var discovererComments = from b in Database.Query<BugEntity>()
                          from c in b.Comments
-                         where b.Discoverer == c.Writer
+                         where b.Discoverer.Is(c.Writer)
                          select c.Date;
 ```
 
@@ -182,12 +184,15 @@ There are more complex cases, comparing an arbitrary `ImplementedBy` reference a
 ### `==` vs `Is`
 `Entity` overrides `Equals` (and `GetHashCode`) to compare by `Id` and `Type`, but does not overload `==` operator. 
 
-That means that, in memory, `==` means referential equality but `object.Equals` return true if two different instances have the same type an Id. 
+That means that, in memory, `==` means referential equality (like `object.ReferenceEquals`) but `object.Equals` return true if two different instances have the same Type an Id. 
 
-Unfortunately, calling `.Equals` in C# is prone to `NullReferenceException` if some object is null, and `object.Equals` static method is just too long, so we added `Is` extension method. 
+Unfortunately, calling `.Equals` in C# is prone to `NullReferenceException` if some object is null, and `object.Equals` static method is just too long, so we added `Is` extension method.
+
+Note: In order to prevent uninteded referencial equality in entities or lites `Signum.Analyzer` now creates a warning when using `==` or `!=` to compare entities and lites, encouraging you to use `.Is`. In the rare case you want to use referencial equality you can always use `object.ReferenceEquals`. 
 
 ```C#
-entititB == entititB; //only referential equality
+entititB == entititB; //referential equality but Signum.Analyzer produces a warning to prevent unintended use.
+object.ReferenceEquals(entititB, entititB); //referential equality, needed in rare cases. No warning produced.
 
 entityA.Equals(entititB); //Type + id equality, but throws NullReferenceException if entityA is null
 
@@ -197,5 +202,5 @@ entityA?.Equals(entityB) == true; // too long
 entityA.Is(entititB); //similar to object.Equals but sorter
 ```
 
-Both `==` and `Is` methods are supported in the LINQ provider, but not `Equals` or `object.Equals`. The semantics in both cases are the same, because referential equality makes no sense at the database level. 
+Both `==` and `Is`, `Equals` or `object.Equals` are supported in the LINQ provider, but only `Is` is recommended. The semantics in any of the case are the same, because referential equality makes no sense at the database level. 
 

@@ -1,0 +1,14 @@
+﻿.blinking {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+.concurrent-user-circle {
+    padding: 1px 6px;
+    border-radius: 100% !important;
+}

@@ -25,10 +25,10 @@ public static class BulkInserter
             var table = Schema.Current.Table(typeof(T));
 
             if (!disableIdentity && table.IdentityBehaviour && table.TablesMList().Any())
-                throw new InvalidOperationException($@"Table {typeof(T)} contains MList but the entities have no IDs. Consider:
-* Using BulkInsertQueryIds, that queries the inserted rows and uses the IDs to insert the MList elements.
-* Set {nameof(disableIdentity)} = true, and set manually the Ids of the entities before inseting using {nameof(UnsafeEntityExtensions.SetId)}.
-* If you know what you doing, call ${nameof(BulkInsertTable)} manually (MList wont be saved)."
+                throw new InvalidOperationException($@"Table {typeof(T)} contains MList but the provided entities have no IDs. Consider:
+* Using {nameof(BulkInsertQueryIds)}. This method will query the inserted rows and use the IDs to insert the MList elements.
+* Set {nameof(disableIdentity)} = true, and set manually the Ids of the entities before calling this method using {nameof(UnsafeEntityExtensions.SetId)}.
+* If you know what you doing, call {nameof(BulkInsertTable)} manually (The MLists won't be saved)."
 );
 
             var list = entities.ToList();
@@ -161,7 +161,8 @@ public static class BulkInserter
                     if (!e.IsNew)
                         throw new InvalidOperationException("Entites should be new");
                     t.SetToStrField(e);
-                    dt.Rows.Add(t.BulkInsertDataRow(e));
+                    var values = t.BulkInsertDataRow(e);
+                    dt.Rows.Add(values);
                 }
             }
 
@@ -247,7 +248,7 @@ public static class BulkInserter
                 var mlistElements = (from e in entities
                                      from mle in func(e).EmptyIfNull().Select((iw, i) => new MListElement<E, V>
                                      {
-                                         Order = i,
+                                         RowOrder = i,
                                          Element = iw,
                                          Parent = e,
                                      })
@@ -298,7 +299,7 @@ public static class BulkInserter
 
             foreach (var e in list)
             {
-                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.Order));
+                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.RowOrder));
             }
 
             using (var tr = new Transaction())

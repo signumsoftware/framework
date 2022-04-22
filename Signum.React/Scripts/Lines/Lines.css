@@ -330,10 +330,15 @@ input[type=checkbox].form-control-xs {
     min-height: 24px;
 }
 
+
+.rw-dropdown-list-input {
+    padding: 0 0 0 0.4em;
+}
+
 .form-control-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-combobox-input {
-    padding: 0 0.4em;
+    padding: 0 0 0 0.3em;
 }
 
 .form-control.form-control-sm.rw-combobox.rw-widget {
@@ -363,24 +368,43 @@ input[type=checkbox].form-control-xs {
     margin-bottom: 0px;
 }
 
-.rw-widget-input {
+.rw-widget-input{
     width: inherit;
 }
 
-.rw-widget-sm .rw-widget-input {
+.rw-widget-sm .rw-multiselect-input {
+    height: inherit;
+}
+
+.rw-widget-sm .rw-multiselect-tag {
+    min-height: inherit;
+}
+
+.rw-widget-sm .rw-widget-input,
+.rw-widget-sm .rw-multiselect-input {
     /*    padding: 3px 6px;*/
     min-height: 28px;
 }
 
+.rw-widget-sm .rw-multiselect-tag-label,
+.rw-widget-sm .rw-multiselect-tag-btn {
+    font-size: 13px;
+}
+
 .form-control-sm.rw-dropdown-list.rw-widget,
-.form-control-sm.rw-combobox.rw-widget
-{
+.form-control-sm.rw-combobox.rw-widget {
     padding: 0px;
+    min-height: initial;
 }
 
 .form-control-sm .rw-widget-picker {
     min-height: 30px;
 }
+
+/*.rw-widget-sm .rw-multiselect-input {
+    padding: 3px 6px;
+    height: 28px;
+}*/
 
 .rw-widget-sm .rw-widget-picker {
     min-height: 28px;
@@ -457,8 +481,8 @@ table.sf-multi-value {
     border: 1px solid gray;
     color: gray;
     display: inline-block;
-    padding: 0.3em 0.4em 0.1em 0.4em;
-    font-size: 75%;
+    padding: 0.2em 0.4em 0.2em 0.4em;
+    font-size: 11px;
     font-weight: 700;
     line-height: 1;
     border-radius: 0.25rem;
@@ -471,8 +495,20 @@ body.rtl .sf-mandatory-widget .rw-input {
 }
 
 body:not(.rtl) .sf-mandatory,
-body:not(.rtl) .sf-mandatory-widget .rw-input {
+body:not(.rtl) .sf-mandatory-widget .rw-input,
+body:not(.rtl) .sf-mandatory-widget .rw-widget-input {
     border-left: 2px solid red;
+}
+
+body.rtl .sf-mandatory-warning,
+body.rtl .sf-mandatory-warning-widget .rw-input {
+    border-right: 2px solid #ffdd00;
+}
+
+body:not(.rtl) .sf-mandatory-warning,
+body:not(.rtl) .sf-mandatory-warning-widget .rw-input,
+body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
+    border-left: 2px solid #ffdd00;
 }
 
 .sf-no-padding {
