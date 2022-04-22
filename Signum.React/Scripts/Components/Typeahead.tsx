@@ -10,7 +10,7 @@ export interface TypeaheadProps {
   onChange?: (newValue: string) => void;
   onBlur?: () => void;
   getItems: (query: string) => Promise<unknown[]>;
-  getItemsDelay?: number;
+  itemsDelay?: number;
   minLength?: number;
   renderList?: (typeahead: TypeaheadController) => React.ReactNode;
   renderItem?: (item: unknown, query: string) => React.ReactNode;
@@ -68,14 +68,14 @@ export class TypeaheadController {
   }
 
   lookup = () => {
-    if (!this.props.getItemsDelay) {
+    if (!this.props.itemsDelay) {
       this.populate();
     }
     else {
       if (this.timeoutHandle != undefined)
         clearTimeout(this.timeoutHandle);
 
-      this.timeoutHandle = setTimeout(() => this.populate(), this.props.getItemsDelay);
+      this.timeoutHandle = setTimeout(() => this.populate(), this.props.itemsDelay);
     }
   }
 
@@ -290,7 +290,7 @@ const CustomToggle = React.forwardRef(function CustomToggle(p: { children?: Reac
 
 Typeahead.defaultProps = {
   getItems: undefined as any,
-  getItemsDelay: 200,
+  itemsDelay: 200,
   minLength: 1,
   renderItem: (item, query) => TypeaheadOptions.highlightedText(item as string, query),
   onSelect: (elem, event) => (elem as string),
@@ -319,7 +319,7 @@ export namespace TypeaheadOptions {
     );
   }
 
-  export function highlightedTextAll(val: string, query?: string): React.ReactNode {
+  export function highlightedTextAll(val: string, query: string | undefined): React.ReactNode {
     if (query == undefined)
       return val;
 

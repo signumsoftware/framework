@@ -6,13 +6,14 @@ import { FormGroup } from '../Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
-import { AutocompleteConfig } from './AutoCompleteConfig'
+import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
 import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
 import { getTypeInfo, getTypeInfos, getTypeName, tryGetTypeInfos } from '../Reflection'
 import { FilterOperation } from '../Signum.Entities.DynamicQuery'
 import { FindOptions } from '../Search'
+import { useForceUpdate } from '../Hooks'
 
 
 export interface EntityStripProps extends EntityListBaseProps {
@@ -192,7 +193,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
       <Typeahead
         inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString() }}
         getItems={q => ac!.getItems(q)}
-        getItemsDelay={ac.getItemsDelay}
+        itemsDelay={ac.getItemsDelay()}
         renderItem={(e, str) => ac!.renderItem(e, str)}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={c.handleOnSelect}
@@ -216,22 +217,23 @@ export interface EntityStripElementProps {
 }
 
 export function EntityStripElement(p: EntityStripElementProps) {
-  var [currentItem, setCurrentItem] = React.useState<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
+  var currentEntityRef = React.useRef<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
+  const forceUpdate = useForceUpdate();
 
   React.useEffect(() => {
 
     if (p.autoComplete) {
       var newEntity = p.ctx.value;
-      if (!currentItem || currentItem.entity !== newEntity) {
+      if (!currentEntityRef.current || currentEntityRef.current.entity !== newEntity) {
         var ci = { entity: newEntity!, item: undefined }
-        setCurrentItem(ci);
+        currentEntityRef.current = ci;
         var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
           const autocomplete = p.autoComplete;
           autocomplete?.getItemFromEntity(newEntity)
             .then(item => {
               if (autocomplete == p.autoComplete) {
                 ci.item = item;
-                setCurrentItem(ci);
+                forceUpdate();
               } else {
                 fillItem(newEntity);
               }
@@ -239,12 +241,6 @@ export function EntityStripElement(p: EntityStripElementProps) {
             .done();
         };
         fillItem(newEntity);
-        p.autoComplete.getItemFromEntity(newEntity)
-          .then(item => {
-            ci.item = item;
-            setCurrentItem(ci);
-          })
-          .done();
       }
     }
 
@@ -252,15 +248,14 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   const toStr =
     p.onRenderItem ? p.onRenderItem(p.ctx.value) :
-      currentItem?.item ? p.autoComplete!.renderItem(currentItem.item) :
+      currentEntityRef.current?.item ? p.autoComplete!.renderItem(currentEntityRef.current.item) :
         getToStr();
 
   function getToStr() {
     const toStr = getToString(p.ctx.value);
-    return !p.showType ? toStr :
+    return !p.showType || !(isEntity(p.ctx.value) || isLite(p.ctx.value)) ? toStr :
       <span style={{ wordBreak: "break-all" }} title={toStr}>
-        <span className="sf-type-badge">{getTypeInfo(getTypeName(p.ctx.value)).niceName}</span>
-        &nbsp;{toStr}
+        <TypeBadge entity={p.ctx.value}/>{toStr}
       </span>;
   }
 
