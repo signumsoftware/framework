@@ -465,10 +465,6 @@ export module UserADQuery {
   export const ActiveDirectoryGroups = new QueryKey("UserADQuery", "ActiveDirectoryGroups");
 }
 
-export module UserCondition {
-  export const DeactivatedUsers : Signum.TypeConditionSymbol = registerSymbol("TypeCondition", "UserCondition.DeactivatedUsers");
-}
-
 export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
   Type: "User";
@@ -508,6 +504,10 @@ export interface UserTicketEntity extends Entities.Entity {
   ticket: string;
   connectionDate: string /*DateTime*/;
   device: string;
+}
+
+export module UserTypeCondition {
+  export const DeactivatedUsers : Signum.TypeConditionSymbol = registerSymbol("TypeCondition", "UserTypeCondition.DeactivatedUsers");
 }
 
 
