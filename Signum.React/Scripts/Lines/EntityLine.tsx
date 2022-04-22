@@ -167,10 +167,12 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
   function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
     const text = e.clipboardData.getData("text");
-    c.paste(text)?.then(() => {
-      c.writeInTypeahead("");
-      e.preventDefault();
-    }).done();
+    const lites = parseLiteList(text);
+    if (lites.length == 0)
+      return;
+    
+    e.preventDefault();
+    c.paste(text)?.done();
   }
 
   function renderAutoComplete(renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {

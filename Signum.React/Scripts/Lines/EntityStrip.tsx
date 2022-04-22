@@ -3,7 +3,7 @@ import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
@@ -163,9 +163,13 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
 
   function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
     const text = e.clipboardData.getData("text");
+    const lites = parseLiteList(text);
+    if (lites.length == 0)
+      return;
+    
+    e.preventDefault();
     c.paste(text)?.then(() => {
       c.typeahead.current?.writeInInput("");
-      e.preventDefault();
     }).done();
   }
 
