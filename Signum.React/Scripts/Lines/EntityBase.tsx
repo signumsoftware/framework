@@ -93,7 +93,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
 
       state.viewOnCreate = true;
       state.remove = true;
-      state.paste = (type.name == IsByAll);
+      state.paste = (type.name == IsByAll ? true : undefined);
     }
   }
 
@@ -269,47 +269,49 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     }).done();
   };
 
+  paste(text: string) {
+    var lites = parseLiteList(text);
+    if (lites.length == 0)
+      return;
+
+    var tis = getTypeInfos(this.props.type!);
+    lites = lites.filter(lite => tis.length == 0 || tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
+    if (lites.length == 0)
+      return;
+
+    tis = lites.map(lite => lite.EntityType).distinctBy().map(tn => getTypeInfo(tn));
+    return SelectorModal.chooseType(tis)
+      .then(ti => {
+        if (!ti)
+          return;
+
+        lites = lites.filter(lite => lite.EntityType == ti.name);
+        return Navigator.API.fillToStrings(...lites)
+          .then(() => SelectorModal.chooseLite(ti.name, lites));
+      })
+      .then(lite => {
+        if (!lite)
+          return;
+
+        const typeName = lite.EntityType;
+        const fo = this.getFindOptions(typeName) ?? { queryName: typeName };
+        const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "EqualTo", value: lite }]);
+        return Finder.fetchEntitiesLiteWithFilters(typeName, fos, [], null)
+          .then(lites => {
+            if (lites.length == 0)
+              return;
+
+            return this.convert(lites[0]).then(m => this.setValue(m));
+          });
+      });
+  }
+
   handlePasteClick = (event: React.SyntheticEvent<any>) => {
 
     event.preventDefault();
 
     navigator.clipboard.readText()
-      .then(text => {
-        var lites = parseLiteList(text);
-        if (lites.length == 0)
-          return;
-
-        var tis = getTypeInfos(this.props.type!);
-        lites = lites.filter(lite => tis.length == 0 || tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
-        if (lites.length == 0)
-          return;
-
-        tis = lites.map(lite => lite.EntityType).distinctBy().map(tn => getTypeInfo(tn));
-        return SelectorModal.chooseType(tis)
-          .then(ti => {
-            if (!ti)
-              return;
-
-            lites = lites.filter(lite => lite.EntityType == ti.name);
-            return Navigator.API.fillToStrings(...lites)
-              .then(() => SelectorModal.chooseLite(ti.name, lites));
-          })
-          .then(lite => {
-            if (!lite)
-              return;
-
-            const typeName = lite.EntityType;
-            const fo = this.getFindOptions(typeName) ?? { queryName: typeName };
-            const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "EqualTo", value: lite }]);
-            return Finder.fetchEntitiesLiteWithFilters(typeName, fos, [], null)
-              .then(lites => {
-                if (lites.length == 0)
-                  return;
-
-                return this.convert(lites[0]).then(m => this.setValue(m));
-              })
-          });
-      })
+      .then(text => this.paste(text))
       .done();
   }
 

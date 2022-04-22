@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
 import { useController } from './LineBase'
 import { getTypeInfo, getTypeName } from '../Reflection'
+import { TypeaheadController } from '../Components/Typeahead'
 
 
 export interface EntityStripProps extends EntityListBaseProps {
@@ -24,8 +25,12 @@ export interface EntityStripProps extends EntityListBaseProps {
 }
 
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
+
+  typeahead!: React.RefObject<TypeaheadController>;
+
   overrideProps(p: EntityStripProps, overridenProps: EntityStripProps) {
     super.overrideProps(p, overridenProps);
+    this.typeahead = React.useRef<TypeaheadController>(null);
 
     if (p.type) {
       if (p.showType == undefined)
@@ -156,6 +161,14 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
     );
   }
 
+  function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const text = e.clipboardData.getData("text");
+    c.paste(text)?.then(() => {
+      c.typeahead.current?.writeInInput("");
+      e.preventDefault();
+    }).done();
+  }
+
   function renderAutoComplete(renderInput?: (input: React.ReactElement<any> | null) => React.ReactElement<any>) {
     var ac = p.autocomplete;
 
@@ -166,8 +179,8 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
       return renderInput == null ? null : renderInput(null);
 
     return (
-      <Typeahead
-        inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString() }}
+      <Typeahead ref={c.typeahead}
+        inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString(), onPaste: p.paste == false ? undefined : handleOnPaste }}
         getItems={q => ac!.getItems(q)}
         getItemsDelay={ac.getItemsDelay}
         renderItem={(e, str) => ac!.renderItem(e, str)}

@@ -4,7 +4,7 @@ import { classes } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite, is } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite, is, parseLiteList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
@@ -165,6 +165,14 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     </FormGroup>
   );
 
+  function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const text = e.clipboardData.getData("text");
+    c.paste(text)?.then(() => {
+      c.writeInTypeahead("");
+      e.preventDefault();
+    }).done();
+  }
+
   function renderAutoComplete(renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {
 
     const ctx = p.ctx;
@@ -178,7 +186,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     return (
       <Typeahead ref={c.typeahead}
-        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined, ...p.inputAttributes }}
+        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined, onPaste: p.paste == false ? undefined : handleOnPaste, ...p.inputAttributes }}
         getItems={query => ac!.getItems(query)}
         getItemsDelay={ac.getItemsDelay}
         minLength={ac.minLength}
