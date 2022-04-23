@@ -160,7 +160,7 @@ public enum UserOIDMessage
 }
 
 [AutoInit]
-public static class UserCondition
+public static class UserTypeCondition
 {
     public static readonly TypeConditionSymbol DeactivatedUsers;
 }

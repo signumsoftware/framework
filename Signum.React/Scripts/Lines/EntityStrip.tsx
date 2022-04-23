@@ -3,7 +3,7 @@ import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
@@ -14,6 +14,7 @@ import { getTypeInfo, getTypeInfos, getTypeName, tryGetTypeInfos } from '../Refl
 import { FilterOperation } from '../Signum.Entities.DynamicQuery'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
+import { TypeaheadController } from '../Components/Typeahead'
 
 
 export interface EntityStripProps extends EntityListBaseProps {
@@ -28,8 +29,12 @@ export interface EntityStripProps extends EntityListBaseProps {
 }
 
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
+
+  typeahead!: React.RefObject<TypeaheadController>;
+
   overrideProps(p: EntityStripProps, overridenProps: EntityStripProps) {
     super.overrideProps(p, overridenProps);
+    this.typeahead = React.useRef<TypeaheadController>(null);
 
     if (p.type) {
       if (p.showType == undefined)
@@ -40,7 +45,10 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
 
         var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
         if (avoidDuplicates) {
-          var types = getTypeInfos(p.type);
+          var types = tryGetTypeInfos(p.type).notNull();
+          if (types.length == 0)
+            return;
+
           if (types.length == 1)
             p.findOptions = withAvoidDuplicates(p.findOptions ?? { queryName: types.single().name }, types.single().name);
           else {
@@ -180,6 +188,18 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
     );
   }
 
+  function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const text = e.clipboardData.getData("text");
+    const lites = parseLiteList(text);
+    if (lites.length == 0)
+      return;
+    
+    e.preventDefault();
+    c.paste(text)?.then(() => {
+      c.typeahead.current?.writeInInput("");
+    }).done();
+  }
+
   function renderAutoComplete(renderInput?: (input: React.ReactElement<any> | null) => React.ReactElement<any>) {
     var ac = p.autocomplete;
 
@@ -190,8 +210,8 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
       return renderInput == null ? null : renderInput(null);
 
     return (
-      <Typeahead
-        inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString() }}
+      <Typeahead ref={c.typeahead}
+        inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString(), onPaste: p.paste == false ? undefined : handleOnPaste }}
         getItems={q => ac!.getItems(q)}
         itemsDelay={ac.getItemsDelay()}
         renderItem={(e, str) => ac!.renderItem(e, str)}

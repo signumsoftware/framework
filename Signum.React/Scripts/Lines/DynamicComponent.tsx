@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
-import { tryGetTypeInfos, TypeReference, TypeInfo } from '../Reflection'
+import { tryGetTypeInfos, TypeReference, TypeInfo, IsByAll } from '../Reflection'
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
@@ -85,7 +85,7 @@ export function getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: Typ
     tis = [];
 
   if (tr.isCollection) {
-    if (tr.name == "[ALL]")
+    if (tr.name == IsByAll)
       return ctx => <EntityStrip ctx={ctx} />;
 
     if (tis.length) {

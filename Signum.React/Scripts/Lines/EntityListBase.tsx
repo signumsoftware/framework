@@ -9,7 +9,7 @@ import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 import { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutoCompleteConfig'
-import { getTypeInfo, getTypeInfos, IsByAll } from '../Reflection'
+import { tryGetTypeInfos } from '../Reflection'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -162,35 +162,37 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     this.setValue(list);
   }
 
+  paste(text: string) {
+    var lites = parseLiteList(text);
+    if (lites.length == 0)
+      return;
+
+    const tis = tryGetTypeInfos(this.props.type!);
+    lites = lites.filter(lite => tis.length == 0 || tis.notNull().singleOrNull(ti => ti.name == lite.EntityType) != null);
+    if (lites.length == 0)
+      return;
+
+    const dic = lites.groupBy(lite => lite.EntityType);
+    return dic.map(kvp => {
+      const fo = this.getFindOptions(kvp.key) ?? { queryName: kvp.key };
+      const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "IsIn", value: kvp.elements }]);
+      return Finder.fetchLites({ queryName: kvp.key, filterOptions: fos })
+        .then(lites => {
+          if (lites.length == 0)
+            return;
+
+          return Promise.all(lites.map(lite => this.convert(lite)))
+            .then(entities => entities.forEach(e => this.addElement(e)))
+        });
+    }).first();
+  }
+
   handlePasteClick = (event: React.SyntheticEvent<any>) => {
 
     event.preventDefault();
 
     navigator.clipboard.readText()
-      .then(text => {
-        var lites = parseLiteList(text);
-        if (lites.length == 0)
-          return;
-
-        const tis = getTypeInfos(this.props.type!);
-        lites = lites.filter(lite => tis.length == 0 || tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
-        if (lites.length == 0)
-          return;
-
-        const dic = lites.groupBy(lite => lite.EntityType);
-        return Promise.all(dic.map(kvp => {
-          const fo = this.getFindOptions(kvp.key) ?? { queryName: kvp.key };
-          const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "IsIn", value: kvp.elements }]);
-          return Finder.fetchEntitiesLiteWithFilters(kvp.key, fos, [], null)
-            .then(lites => {
-              if (lites.length == 0)
-                return;
-
-              return Promise.all(lites.map(lite => this.convert(lite)))
-                .then(entities => entities.forEach(e => this.addElement(e)));
-            });
-        }));
-      })
+      .then(text => this.paste(text))
       .done();
   }
 
