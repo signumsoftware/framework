@@ -540,7 +540,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (type.isEmbedded || type.name == IsByAll)
     return null;
 
-  const types = tryGetTypeInfos(type);
+  const types = tryGetTypeInfos(type).notNull();
   showType ??= types.length > 1;
 
   if (types.length == 0)
