@@ -9,7 +9,7 @@ import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 import { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutoCompleteConfig'
-import { getTypeInfo, getTypeInfos, IsByAll } from '../Reflection'
+import { tryGetTypeInfos } from '../Reflection'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -167,8 +167,8 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     if (lites.length == 0)
       return;
 
-    const tis = getTypeInfos(this.props.type!);
-    lites = lites.filter(lite => tis.length == 0 || tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
+    const tis = tryGetTypeInfos(this.props.type!);
+    lites = lites.filter(lite => tis.length == 0 || tis.notNull().singleOrNull(ti => ti.name == lite.EntityType) != null);
     if (lites.length == 0)
       return;
 
