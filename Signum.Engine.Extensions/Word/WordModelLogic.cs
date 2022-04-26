@@ -21,6 +21,8 @@ public class WordTemplateParameters : TemplateParameters
 
     public WordTemplateEntity Template;
 
+    public TokenNode? CurrentTokenNode; //To copy properties
+
     public override object GetModel()
     {
         if (Model == null)
