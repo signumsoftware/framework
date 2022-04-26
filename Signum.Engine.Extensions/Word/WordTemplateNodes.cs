@@ -348,23 +348,66 @@ public class TokenNode : BaseNode
 
     protected internal override void RenderNode(WordTemplateParameters p)
     {
+        p.CurrentTokenNode = this;
         object? obj = ValueProvider.GetValue(p);
-        string? text = obj is Enum en ? en.NiceToString() :
-            obj is bool b ? (b ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString()) :
-            obj is TimeSpan ts ? ts.ToString(Format?.Replace(":", @"\:") ?? ValueProvider.Format, p.Culture) :
-            obj is IFormattable fo ? fo.ToString(Format ?? ValueProvider.Format, p.Culture) :
-            obj?.ToString();
-        
-        if (text != null && text.Contains('\n'))
-        {
-            var replacements = text.Lines()
-                .Select((line, i) => NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), line, initialBr: i > 0));
+        p.CurrentTokenNode = null;
 
-            this.ReplaceBy(replacements);
+        if (obj is OpenXmlElement oxe)
+        {
+            if (oxe is W.Paragraph)
+            {
+                var par = this.Ancestors().OfType<W.Paragraph>().FirstEx();
+                par.InsertAfterSelf(oxe);
+                this.Remove();
+                if (par.GetFirstChild<W.Run>() == null)
+                    par.Remove();
+            }
+            else
+            {
+                this.ReplaceBy(oxe);
+            }
+        }
+        else if (obj is IEnumerable<OpenXmlElement> oxes)
+        {
+            if (oxes.OfType<W.Paragraph>().Any())
+            {
+                var par = this.Ancestors().OfType<W.Paragraph>().FirstEx();
+                foreach (var ox in oxes.Select(p => p as W.Paragraph ?? new W.Paragraph(p)).Reverse())
+                {
+                    par.InsertAfterSelf(ox);
+                }
+                this.Remove();
+                if (par.GetFirstChild<W.Run>() == null)
+                    par.Remove();
+            }
+            else
+            {
+                foreach (var ox in oxes.Reverse())
+                {
+                    this.InsertAfterSelf(ox);
+                }
+                this.Remove();
+            }
         }
         else
         {
-            this.ReplaceBy(NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), text));
+            string? text = obj is Enum en ? en.NiceToString() :
+                obj is bool b ? (b ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString()) :
+                obj is TimeSpan ts ? ts.ToString(Format?.Replace(":", @"\:") ?? ValueProvider.Format, p.Culture) :
+                obj is IFormattable fo ? fo.ToString(Format ?? ValueProvider.Format, p.Culture) :
+                obj?.ToString();
+
+            if (text != null && text.Contains('\n'))
+            {
+                var replacements = text.Lines()
+                    .Select((line, i) => NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), line, initialBr: i > 0));
+
+                this.ReplaceBy(replacements);
+            }
+            else
+            {
+                this.ReplaceBy(NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), text));
+            }
         }
     }
 
@@ -1155,6 +1198,17 @@ public static class OpenXmlElementExtensions
         {
             element.WriteTo(xtw);
             return sw.ToString();
+        }
+    }
+
+    public static void CopyTo<T>(this T? source, T target) where T : OpenXmlCompositeElement
+    {
+        if (source != null)
+        {
+            foreach (var item in source.ChildElements.EmptyIfNull())
+            {
+                target.AddChild(item.CloneNode(true));
+            }
         }
     }
 }
