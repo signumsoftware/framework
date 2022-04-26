@@ -3,7 +3,7 @@ import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription, QueryRequest, FilterOption, ResultTable } from '../FindOptions'
 import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos, TypeInfo } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLiteList } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
 import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
@@ -72,7 +72,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     return this.abortableRequest.getData(subStr);
   }
 
-  renderItem(item: Lite<T> | AutocompleteConstructor<T>, subStr: string): React.ReactNode {
+  renderItem(item: Lite<T> | AutocompleteConstructor<T>, subStr: string): React.ReactNode{
 
     if (isAutocompleteConstructor<T>(item)) {
       if (item.customElement)
@@ -142,7 +142,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     return isLite(item) ? item.EntityType == typeName :
       isAutocompleteConstructor(item) ? getTypeName(item.type) == typeName :
         false;
-  }
+}
 
   getSortByString(item: Lite<T> | AutocompleteConstructor<T>): string {
     return isLite(item) ? item.toStr! :
@@ -214,8 +214,6 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   abortableRequest = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
-  static liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
-
   static filtersWithSubStr(fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined, subStr: string): FilterOption[] {
 
     var filters = [...fo.filterOptions?.notNull() ?? []];
@@ -227,21 +225,16 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
         filters = [...defaultFilters, ...filters];
     }
 
-    if (FindOptionsAutocompleteConfig.liteKeyRegEx.test(subStr)) {
-      const lite = parseLite(subStr);
+    var lites = parseLiteList(subStr);
+    if (lites.length > 0) {
       const tis = getTypeInfos(qd.columns["Entity"].type);
-      const ti = tis.singleOrNull(ti => ti.name == lite.EntityType);
-      if (ti && tis.length > 1)
+      lites = lites.filter(lite => tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
         filters.insertAt(0, {
-          token: `Entity.(${ti.name})`,
-          operation: "DistinctTo"
+        token: "Entity",
+        operation: lites.length == 0 ? "EqualTo" : "IsIn",
+        value: lites.length == 0 ? null : lites,
         });
 
-      filters.insertAt(0, {
-        token: "Entity.Id",
-        operation: "EqualTo",
-        value: ti ? lite.id : null
-      });
       return filters;
     }
 
@@ -252,7 +245,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       filters.insertAt(0, {
         token: "Entity.Id",
         operation: "EqualTo",
-        value: id
+        value: id 
       });
       return filters;
     }
@@ -277,7 +270,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     return filters;
   }
 
-  resultTable: ResultTable | undefined;
+  resultTable: ResultTable | undefined; 
 
   async getItems(subStr: string): Promise<(ResultRow | AutocompleteConstructor<Entity>)[]> {
 

@@ -155,12 +155,13 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
   );
 
   function renderLastElement() {
-
+    
     const buttons = (
       <>
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {c.renderCreateButton(true)}
         {c.renderFindButton(true)}
+        {c.renderPasteButton(true)}
         {p.extraButtonsAfter && p.extraButtonsAfter(c)}
       </>
     );
