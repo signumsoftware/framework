@@ -44,7 +44,7 @@ import InboxFilter from './Case/InboxFilter'
 import Workflow, { WorkflowHandle } from './Workflow/Workflow'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "@framework/AsyncImport";
-import { FilterRequest, ColumnRequest } from '@framework/FindOptions';
+import { FilterRequest, ColumnRequest, FindOptions } from '@framework/FindOptions';
 import { BsColor } from '@framework/Components/Basic';
 import { GraphExplorer } from '@framework/Reflection';
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
@@ -665,6 +665,11 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
 
 }
 
+export const newCaseFindOptions: { [typeName: string]: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => FindOptions | null } = {};
+export function registerNewCaseFindOptions(typeName: string, getFindOptions: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => FindOptions | null) {
+  newCaseFindOptions[typeName] = getFindOptions; 
+}
+
 export function createNewCase(workflowId: number | string, mainEntityStrategy: WorkflowMainEntityStrategy): Promise<CaseEntityPack | undefined> {
   return Navigator.API.fetchEntity(WorkflowEntity, workflowId)
     .then(wf => {
@@ -677,7 +682,9 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
         coi = Operations.getOperationInfo(`${wf.mainEntityType!.cleanName}Operation.Clone`, wf.mainEntityType!.cleanName);
       }
 
-      return Finder.find({ queryName: wf.mainEntityType!.cleanName })
+      const typeName = wf.mainEntityType!.cleanName;
+      const fo = newCaseFindOptions[typeName]?.(toLite(wf), mainEntityStrategy) ?? { queryName: typeName };
+      return Finder.find(fo)
         .then(lite => {
           if (!lite)
             return Promise.resolve(undefined);

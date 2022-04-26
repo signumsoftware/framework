@@ -9,6 +9,7 @@ import { RenderEntity } from './RenderEntity'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
 import { useController } from './LineBase'
+import { TypeBadge } from './AutoCompleteConfig'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
@@ -91,7 +92,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
               getComponent={p.getComponent}
               getComponentWithIndex={p.getComponentWithIndex ? (ctx => p.getComponentWithIndex!(ctx, mlec.index!)) : undefined}
               getViewPromise={p.getViewPromise}
-              title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type ?? mlec.value.EntityType).niceName}</span> : undefined} />))
+            title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
         }
         {
           p.createAsLink && p.create && !readOnly &&

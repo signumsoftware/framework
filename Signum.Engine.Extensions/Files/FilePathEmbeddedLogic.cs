@@ -7,7 +7,7 @@ using System.IO;
 namespace Signum.Engine.Files;
 
 public static class FilePathEmbeddedLogic
-{ 
+{
     public static void AssertStarted(SchemaBuilder sb)
     {
         sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathEmbeddedLogic.Start(null!)));
@@ -23,7 +23,7 @@ public static class FilePathEmbeddedLogic
 
             FilePathEmbedded.OnPreSaving += efp =>
             {
-                if(efp.BinaryFile != null) //First time
+                if (efp.BinaryFile != null) //First time
                 {
                     var task = efp.SaveFileAsync();
                     Transaction.PreRealCommit += data =>
@@ -70,7 +70,7 @@ public static class FilePathEmbeddedLogic
         var updaters = array.Select(pr => GetUpdater<T>(pr)).ToList();
 
 
-        Schema.Current.EntityEvents<T>().Saved += (e, args)=>
+        Schema.Current.EntityEvents<T>().Saved += (e, args) =>
         {
             foreach (var update in updaters)
             {
@@ -114,7 +114,7 @@ public static class FilePathEmbeddedLogic
             return (e) =>
             {
                 var mlist = mlistFunc(e);
-                if(mlist != null)
+                if (mlist != null)
                 {
                     var list = (IList)mlist;
                     for (int i = 0; i < list.Count; i++)
@@ -122,7 +122,7 @@ public static class FilePathEmbeddedLogic
                         var mod = (ModifiableEntity)list[i]!;
 
                         var fpe = fileFunc(mod);
-                        if(fpe != null)
+                        if (fpe != null)
                         {
                             fpe.EntityId = e.Id;
                             fpe.MListRowId = mlist.GetRowId(i);
@@ -135,7 +135,7 @@ public static class FilePathEmbeddedLogic
         }
     }
 
-   
+
 
     static GenericInvoker<Action<PropertyRoute>> giAddBinding = new(pr => AddBinding<Entity>(pr));
     static void AddBinding<T>(PropertyRoute route)

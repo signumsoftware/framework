@@ -482,8 +482,17 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
         if (f.value) {
           const type = newToken.type.name as "DateOnly" | "DateTime";
-          const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
-          f.value = type == "DateOnly" ? date.toISODate() : date.toISO();
+          if (f.operation && isList(f.operation)) {
+
+            f.value = (f.value as string[]).map(v => {
+              const date = trimDateToFormat(DateTime.fromISO(v), type, newToken.format);
+              return type == "DateOnly" ? date.toISODate() : date.toISO();
+            });
+
+          } else {
+            const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
+            f.value = type == "DateOnly" ? date.toISODate() : date.toISO();
+          }
         }
       }
     }
