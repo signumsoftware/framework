@@ -14,8 +14,8 @@ class Upgrade_20220426_React18 : CodeUpgradeBase
   root.unmount();
 
 root = createRoot(reactDiv);");
-            file.ReplaceLine(a => a == "render(", "root.render(");
-            file.ReplaceLine(a => a == "</Localization>, reactDiv);", "</Localization>);");
+            file.ReplaceLine(a => a.Contains("render("), "root.render(");
+            file.ReplaceLine(a => a.Contains("</Localization>, reactDiv);"), "</Localization>);");
         });
 
         uctx.ChangeCodeFile("Southwind.React/package.json", file =>
