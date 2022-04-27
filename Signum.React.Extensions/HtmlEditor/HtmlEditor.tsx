@@ -19,10 +19,11 @@ export interface HtmlEditorProps {
   mandatory?: boolean | "warning";
   converter?: IContentStateConverter;
   innerRef?: React.Ref<draftjs.Editor>;
-  decorators?: draftjs.DraftDecorator[],
-  plugins?: HtmlEditorPlugin[],
+  decorators?: draftjs.DraftDecorator[];
+  plugins?: HtmlEditorPlugin[];
   toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment | null;
-  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>
+  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  initiallyFocused?: boolean | number;
 }
 
 export interface HtmlEditorControllerProps {
@@ -32,6 +33,7 @@ export interface HtmlEditorControllerProps {
   decorators?: draftjs.DraftDecorator[],
   plugins?: HtmlEditorPlugin[];
   innerRef?: React.Ref<draftjs.Editor>;
+  initiallyFocused?: boolean | number;
 }
 
 export class HtmlEditorController {
@@ -68,6 +70,15 @@ export class HtmlEditorController {
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
 
     React.useEffect(() => {
+      if (p.initiallyFocused) {
+        setTimeout(() => {
+          if (this.editor)
+            this.editor.focus();          
+        }, p.initiallyFocused == true ? 0 : p.initiallyFocused as number);
+      }
+    }, []);
+
+    React.useEffect(() => {
       var contentState = this.converter.textToContentState(this.binding.getValue() ?? "");
       this.initialContentState = contentState;
       this.setEditorState(this.createWithContentAndDecorators(contentState));
@@ -98,7 +109,7 @@ export class HtmlEditorController {
     }
   }
 
-  extraButtons(): React.ReactFragment | null {
+  extraButtons(): React.ReactElement | null {
 
     var buttons = this.plugins.map(p => p.getToolbarButtons && p.getToolbarButtons(this)).notNull();
 
@@ -122,6 +133,7 @@ export default React.forwardRef(function HtmlEditor({
   plugins,
   htmlAttributes,
   mandatory,
+  initiallyFocused,
   ...props }: HtmlEditorProps & Partial<draftjs.EditorProps>, ref?: React.Ref<HtmlEditorController>) {
 
   const textConverter = converter ?? new HtmlContentStateConverter({}, {});
@@ -138,6 +150,7 @@ export default React.forwardRef(function HtmlEditor({
     converter: textConverter,
     innerRef,
     decorators,
+    initiallyFocused,
     plugins,
   });
 

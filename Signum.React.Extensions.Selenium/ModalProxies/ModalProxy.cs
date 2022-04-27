@@ -38,7 +38,7 @@ public class ModalProxy : IDisposable
 
                     var button = this.CloseButton.TryFind();
                     if (button != null && button.Displayed)
-                        button.Click();
+                        button.SafeClick();
                 }
                 catch (ElementNotVisibleException)
                 {
@@ -96,7 +96,7 @@ public class ModalProxy : IDisposable
 
     public void Close()
     {
-        this.CloseButton.Find().Click();
+        this.CloseButton.Find().SafeClick();
         this.WaitNotVisible();
     }
 }

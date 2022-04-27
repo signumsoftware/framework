@@ -2,8 +2,8 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription, QueryRequest, FilterOption, ResultTable } from '../FindOptions'
-import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLite } from '../Signum.Entities'
+import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos, TypeInfo } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLiteList } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
 import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
@@ -11,18 +11,20 @@ import { Dic } from '../Globals'
 
 export interface AutocompleteConfig<T> {
   getItems: (subStr: string) => Promise<T[]>;
-  getItemsDelay?: number;
-  minLength?: number;
+  getItemsDelay(): number | undefined;
+  getMinLength(): number | undefined;
   renderItem(item: T, subStr?: string): React.ReactNode;
   renderList?(typeahead: TypeaheadController): React.ReactNode;
   getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
   getDataKeyFromItem(item: T): string | undefined;
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<T>;
+  isCompatible(item: unknown, type: string): item is T;
+  getSortByString(item: T): string
   abort(): void;
 }
 
 export interface AutocompleteConfigOptions {
-  getItemsDelay?: number;
+  itemsDelay?: number;
   minLength?: number;
 }
 
@@ -32,20 +34,35 @@ export interface LiteAutocomplateConfigOptions extends AutocompleteConfigOptions
 }
 
 export function isAutocompleteConstructor<T extends ModifiableEntity>(a: any): a is AutocompleteConstructor<T> {
-  return (a as AutocompleteConstructor<T>).onClick != null;
+  return typeof a == "object" && (a as AutocompleteConstructor<T>).onClick != null;
+}
+
+export function isResultRow(a: any): a is ResultRow {
+  return typeof a == "object" && (a as ResultRow).entity != null;
 }
 
 export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteConfig<Lite<T> | AutocompleteConstructor<T>>{
   requiresInitialLoad?: boolean;
   showType?: boolean;
+
   constructor(
     public getItemsFunction: (signal: AbortSignal, subStr: string) => Promise<(Lite<T> | AutocompleteConstructor<T>)[]>,
     options?: LiteAutocomplateConfigOptions,
   ) {
     Dic.assign(this, options);
   }
+  itemsDelay?: number | undefined;
+  minLength?: number | undefined;
 
   abortableRequest = new AbortableRequest((signal, subStr: string) => this.getItemsFunction(signal, subStr));
+
+  getItemsDelay() {
+    return this.itemsDelay;
+  }
+
+  getMinLength() {
+    return this.minLength;
+  }
 
   abort() {
     this.abortableRequest.abort();
@@ -68,7 +85,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     var toStr = getToString(item);
     var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.showType)
-      return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
+      return <span style={{ wordBreak: "break-all" }} title={toStr}><TypeBadge entity={item} />{text}</span>;
     else
       return text;
   }
@@ -120,6 +137,18 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
 
     throw new Error("Impossible to convert to Lite {0}".formatWith(entity.Type));
   }
+
+  isCompatible(item: unknown, typeName: string): item is Lite<T> | AutocompleteConstructor<T> {
+    return isLite(item) ? item.EntityType == typeName :
+      isAutocompleteConstructor(item) ? getTypeName(item.type) == typeName :
+        false;
+}
+
+  getSortByString(item: Lite<T> | AutocompleteConstructor<T>): string {
+    return isLite(item) ? item.toStr! :
+      isAutocompleteConstructor(item) ? getTypeName(item.type) :
+        "";
+  }
 }
 
 //Usefull to make a MultiFindOptions autocomplete using 
@@ -159,6 +188,8 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   showType?: boolean;
   count?: number;
   customRenderItem?: (row: ResultRow, table: ResultTable, subStr: string) => React.ReactNode;
+  itemsDelay?: number;
+  minLength?: number;
 
   constructor(
     findOptions: FindOptions | ((subStr: string) => FindOptions),
@@ -169,13 +200,19 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     Dic.assign(this, options);
   }
 
+  getItemsDelay() {
+    return this.itemsDelay;
+  }
+
+  getMinLength() {
+    return this.minLength;
+  }
+
   abort() {
     this.abortableRequest.abort();
   }
 
   abortableRequest = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
-
-  static liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
 
   static filtersWithSubStr(fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined, subStr: string): FilterOption[] {
 
@@ -188,21 +225,16 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
         filters = [...defaultFilters, ...filters];
     }
 
-    if (FindOptionsAutocompleteConfig.liteKeyRegEx.test(subStr)) {
-      const lite = parseLite(subStr);
+    var lites = parseLiteList(subStr);
+    if (lites.length > 0) {
       const tis = getTypeInfos(qd.columns["Entity"].type);
-      const ti = tis.singleOrNull(ti => ti.name == lite.EntityType);
-      if (ti && tis.length > 1)
+      lites = lites.filter(lite => tis.singleOrNull(ti => ti.name == lite.EntityType) != null);
         filters.insertAt(0, {
-          token: `Entity.(${ti.name})`,
-          operation: "DistinctTo"
+        token: "Entity",
+        operation: lites.length == 0 ? "EqualTo" : "IsIn",
+        value: lites.length == 0 ? null : lites,
         });
 
-      filters.insertAt(0, {
-        token: "Entity.Id",
-        operation: "EqualTo",
-        value: ti ? lite.id : null
-      });
       return filters;
     }
 
@@ -273,19 +305,19 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     var toStr = getToString(item.entity!);
     var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.showType)
-      return <span style={{ wordBreak: "break-all" }} title={toStr}><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
+      return <span style={{ wordBreak: "break-all" }} title={toStr}><TypeBadge entity={item.entity!} />{text}</span>;
     else
       return text;
   }
 
-  getEntityFromItem(item: ResultRow): Promise<Lite<Entity> | ModifiableEntity | undefined> {
+  getEntityFromItem(item: ResultRow | AutocompleteConstructor<Entity>): Promise<Lite<Entity> | ModifiableEntity | undefined> {
     if (isAutocompleteConstructor(item))
       return item.onClick() as Promise<Lite<Entity> | ModifiableEntity | undefined>;
 
     return Promise.resolve(item.entity!);
   }
 
-  getDataKeyFromItem(item: ResultRow): string | undefined {
+  getDataKeyFromItem(item: ResultRow | AutocompleteConstructor<Entity>): string | undefined {
     if (isAutocompleteConstructor(item))
       return "create-" + getTypeName(item.type);
 
@@ -332,5 +364,115 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       return toLite(entity, entity.isNew);
 
     throw new Error("Impossible to convert to Lite");
+  }
+
+  isCompatible(item: unknown, typeName: string): item is ResultRow | AutocompleteConstructor<Entity> {
+    return isResultRow(item) ? item.entity?.EntityType == typeName :
+      isAutocompleteConstructor(item) ? getTypeName(item.type) == typeName :
+        false;
+  }
+
+  getSortByString(item: ResultRow | AutocompleteConstructor<Entity>): string {
+    return isResultRow(item) ? item.entity?.toStr! :
+      isAutocompleteConstructor(item) ? getTypeName(item.type) :
+        "";
+  }
+}
+
+export function TypeBadge(p: { entity: Lite<Entity> | Entity }) {
+
+  const ti = getTypeInfo(isEntity(p.entity) ? p.entity.Type : p.entity.EntityType);
+
+  return <span className="sf-type-badge me-1">{ti.niceName}</span>;
+}
+
+export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
+
+  implementations: { [typeName: string]: AutocompleteConfig<unknown> };
+  limit: number;
+  constructor(implementations: { [typeName: string]: AutocompleteConfig<unknown> }, limit: number = 5) {
+    this.implementations = implementations;
+    this.limit = limit;
+  }
+
+
+  async getItems(subStr: string): Promise<unknown[]> {
+    var items = await Promise.all(Object.values(this.implementations).map(a => a.getItems(subStr)));
+    var acc = items.flatMap(r => r).orderBy(item => {
+      for (var type in this.implementations) {
+        var acc = this.implementations[type];
+        if (acc.isCompatible(item, type))
+          return acc.getSortByString(item);
+      }
+    });
+
+    return [
+      ...acc.filter(item => !isAutocompleteConstructor(item)).slice(0, this.limit),
+      ...acc.filter(item => isAutocompleteConstructor(item))
+    ];
+  }
+
+  getItemsDelay() {
+    return Object.values(this.implementations).map(a => a.getItemsDelay()).notNull().max() ?? undefined;
+  }
+
+  getMinLength() {
+    return Object.values(this.implementations).map(a => a.getMinLength()).notNull().max() ?? undefined;
+  }
+
+  renderItem(item: unknown, subStr?: string): React.ReactNode {
+    for (var type in this.implementations) {
+      var acc = this.implementations[type];
+      if (acc.isCompatible(item, type))
+        return acc.renderItem(item, subStr);
+    }
+
+    throw new Error("Unexpected " + JSON.stringify(item));
+  }
+  getEntityFromItem(item: unknown): Promise<ModifiableEntity | Lite<Entity> | undefined> {
+    for (var type in this.implementations) {
+      var acc = this.implementations[type];
+      if (acc.isCompatible(item, type))
+        return acc.getEntityFromItem(item);
+    }
+
+    throw new Error("Unexpected " + JSON.stringify(item));
+  }
+  getDataKeyFromItem(item: unknown): string | undefined {
+    for (var type in this.implementations) {
+      var acc = this.implementations[type];
+      if (acc.isCompatible(item, type))
+        return acc.getDataKeyFromItem(item);
+    }
+
+    throw new Error("Unexpected " + JSON.stringify(item));
+  }
+  getItemFromEntity(entity: ModifiableEntity | Lite<Entity>): Promise<unknown> {
+
+    var type = isLite(entity) ? entity.EntityType : entity.Type;
+
+    var acc = this.implementations[type];
+    if (acc == null)
+      throw new Error("Unexpected " + type);
+
+    return acc.getItemFromEntity(entity);
+  }
+
+  abort(): void {
+    Dic.foreach(this.implementations, (key, acc) => acc.abort());
+  }
+
+  isCompatible(item: unknown, type: string): item is unknown {
+    return Object.values(this.implementations).some(a => a.isCompatible(item, type));
+  }
+
+  getSortByString(item: unknown): string {
+    for (var type in this.implementations) {
+      var acc = this.implementations[type];
+      if (acc.isCompatible(item, type))
+        return acc.getSortByString(item);
+    }
+
+    throw new Error("Unexpected " + JSON.stringify(item));
   }
 }

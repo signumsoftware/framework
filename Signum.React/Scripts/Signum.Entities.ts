@@ -190,6 +190,15 @@ export function parseLite(lite: string): Lite<Entity> {
   };
 }
 
+export const liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
+export function parseLiteList(text: string): Lite<Entity>[] {
+  const lines = text.split("|");
+  const liteKeys = lines.map(l => liteKeyRegEx.test(l) ? l : null).notNull();
+  const lites = liteKeys.map(lk => parseLite(lk)).filter(l => isLite(l));
+
+  return lites;
+}
+
 export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false, assertTypesFound = true) {
 
   if (a == undefined && b == undefined)
@@ -309,6 +318,7 @@ export module EntityControlMessage {
   export const Remove = new MessageKey("EntityControlMessage", "Remove");
   export const View = new MessageKey("EntityControlMessage", "View");
   export const Add = new MessageKey("EntityControlMessage", "Add");
+  export const Paste = new MessageKey("EntityControlMessage", "Paste");
 }
 
 export interface ImmutableEntity extends Entity {
@@ -550,6 +560,7 @@ export module SearchMessage {
   export const HideHiddenColumns = new MessageKey("SearchMessage", "HideHiddenColumns");
   export const GroupKey = new MessageKey("SearchMessage", "GroupKey");
   export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
+  export const Copy = new MessageKey("SearchMessage", "Copy");
 }
 
 export module SelectorMessage {

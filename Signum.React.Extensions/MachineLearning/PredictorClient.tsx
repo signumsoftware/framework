@@ -129,8 +129,8 @@ export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize
   initializers[symbol.key] = initialize;
 }
 
-export const resultRenderers: { [key: string]: (ctx: TypeContext<PredictorEntity>) => React.ReactFragment } = {};
-export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (ctx: TypeContext<PredictorEntity>) => React.ReactFragment) {
+export const resultRenderers: { [key: string]: (ctx: TypeContext<PredictorEntity>) => React.ReactNode } = {};
+export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (ctx: TypeContext<PredictorEntity>) => React.ReactNode) {
   resultRenderers[symbol.key] = renderer;
 }
 

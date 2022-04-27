@@ -1593,7 +1593,7 @@ export namespace NodeConstructor {
     const ti = tis.firstOrNull();
 
     if (tr.isCollection) {
-      if (tr.name == "[ALL]")
+      if (tr.name == IsByAll)
         return { kind: "EntityStrip", field, children: [] } as EntityStripNode;
       else if (!ti && !tr.isEmbedded)
         return { kind: "MultiValueLine", field, children: [] } as MultiValueLineNode;
@@ -1605,7 +1605,7 @@ export namespace NodeConstructor {
         return { kind: "EntityStrip", field, children: [] } as EntityStripNode;
     }
 
-    if (tr.name == "[ALL]")
+    if (tr.name == IsByAll)
       return { kind: "EntityLine", field, children: [] } as EntityLineNode;
 
     if (ti) {

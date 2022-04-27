@@ -94,7 +94,11 @@ export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise
 
 
 
-export class FunctionalAdapter extends React.Component {
+export interface FunctionalAdapterProps {
+  children: React.ReactNode;
+}
+
+export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
 
   innerRef?: any | null;
 
@@ -115,7 +119,7 @@ export class FunctionalAdapter extends React.Component {
     if (typeof type == "string" || type.prototype?.render) {
       return React.cloneElement(element, { ref: ref });
     } else {
-      return <FunctionalAdapter ref={ref}>{element}</FunctionalAdapter>
+      return <FunctionalAdapter ref={ref as React.Ref<FunctionalAdapter>}>{element}</FunctionalAdapter>
     }
   }
 

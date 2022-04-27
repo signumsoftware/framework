@@ -10,7 +10,7 @@ import { QueryTokenString, toLuxonFormat } from '../Reflection';
 import QueryTokenBuilder from './QueryTokenBuilder';
 import { OperationLogEntity } from '../Signum.Entities.Basics';
 
-interface SystemTimeEditorProps extends React.Props<SystemTime> {
+interface SystemTimeEditorProps {
   findOptions: FindOptionsParsed;
   queryDescription: QueryDescription;
   onChanged: () => void;

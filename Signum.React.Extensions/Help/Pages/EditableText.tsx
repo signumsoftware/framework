@@ -11,7 +11,8 @@ export function EditableComponent({ ctx, markdown, defaultText, inline, onChange
   var [editable, setEditable] = React.useState(defaultEditable || false);
   var forceUpdate = useForceUpdate();
 
-  var Tag: React.ReactType = inline ? "span" : "div";
+
+  var Tag: (keyof React.ReactHTML) = inline ? "span" : "div";
 
   return (
     <Tag className="sf-edit-container">

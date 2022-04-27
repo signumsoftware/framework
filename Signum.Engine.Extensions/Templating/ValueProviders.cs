@@ -5,6 +5,7 @@ using Signum.Entities.UserAssets;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Templating;
 
@@ -94,13 +95,15 @@ public abstract class ValueProviderBase
         }
     }
 
- 
 
+    public static readonly Regex TypeTokenRegex = new Regex(@"((?<type>[\w]):)?(?<token>.*)");
 
-    public static ValueProviderBase? TryParse(string typeToken, string variable, ITemplateParser tp)
+    public static ValueProviderBase? TryParse(string typeToken, string? variable, ITemplateParser tp)
     {
-        var type = typeToken.TryBefore(":") ?? "";
-        var token = typeToken.TryAfter(":") ?? typeToken;
+        var match = TypeTokenRegex.Match(typeToken);
+
+        var type = match.Groups["type"].Value;
+        var token = match.Groups["token"].Value;
 
         switch (type)
         {
@@ -117,13 +120,13 @@ public abstract class ValueProviderBase
                         }
 
                         if (!(vp is TokenValueProvider))
-                            return new ContinueValueProvider(token.TryAfter('.'), vp, tp.AddError);
+                            return new ContinueValueProvider(token.TryAfter('.'), vp, tp);
                     }
 
                     ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.QueryDescription, tp.Variables, tp.AddError);
 
                     if (result.QueryToken != null && TranslateInstanceValueProvider.IsTranslateInstanceCanditate(result.QueryToken))
-                        return new TranslateInstanceValueProvider(result, false, tp.AddError) { Variable = variable };
+                        return new TranslateInstanceValueProvider(result, false, tp) { Variable = variable };
                     else
                         return new TokenValueProvider(result, false) { Variable = variable };
                 }
@@ -137,16 +140,16 @@ public abstract class ValueProviderBase
                 {
                     ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.QueryDescription, tp.Variables, tp.AddError);
 
-                    return new TranslateInstanceValueProvider(result, true, tp.AddError) { Variable = variable };
+                    return new TranslateInstanceValueProvider(result, true, tp) { Variable = variable };
                 }
             case "m":
-                return new ModelValueProvider(token, tp.ModelType, tp.AddError) { Variable = variable };
+                return new ModelValueProvider(token, tp.ModelType, tp) { Variable = variable };
             case "g":
-                return new GlobalValueProvider(token, tp.AddError) { Variable = variable };
+                return new GlobalValueProvider(token, tp) { Variable = variable };
             case "d":
-                return new DateValueProvider(token, tp.AddError) { Variable = variable };
+                return new DateValueProvider(token, tp) { Variable = variable };
             default:
-                tp.AddError(false, "{0} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
+                tp.AddError(false, $"{type} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
                 return null;
         }
     }
@@ -197,6 +200,9 @@ public abstract class TemplateParameters
     }
 }
 
+/// <summary>
+/// like @[Entity.UserName]  or @[q:Entity.UserName]
+/// </summary>
 public class TokenValueProvider : ValueProviderBase
 {
     public readonly ParsedToken ParsedToken;
@@ -261,6 +267,9 @@ public class TokenValueProvider : ValueProviderBase
     }
 }
 
+/// <summary>
+/// like @[t:Entity.ProductName]
+/// </summary>
 public class TranslateInstanceValueProvider : ValueProviderBase
 {
     public readonly ParsedToken ParsedToken;
@@ -270,14 +279,14 @@ public class TranslateInstanceValueProvider : ValueProviderBase
 
 
 
-    public TranslateInstanceValueProvider(ParsedToken token, bool isExplicit, Action<bool, string> addError)
+    public TranslateInstanceValueProvider(ParsedToken token, bool isExplicit, ITemplateParser tp)
     {
         this.ParsedToken = token;
         this.IsExplicit = isExplicit;
         if (token.QueryToken != null)
         {
             this.Route = token.QueryToken.GetPropertyRoute();
-            this.EntityToken = DeterminEntityToken(token.QueryToken, addError);
+            this.EntityToken = DeterminEntityToken(token.QueryToken, tp.AddError);
         }
     }
 
@@ -446,22 +455,28 @@ public class ParsedToken
     public override bool Equals(object? obj) => obj is ParsedToken pt && Equals(pt.String, String) && Equals(pt.QueryToken, QueryToken);
 }
 
+
+/// <summary>
+/// like @[m:CurrentCode] where CurrentCode is:
+/// * A property like string CurrrentCode { get; }
+/// * A method like string CurrrentCode(TemplateParameters params)
+/// </summary>
 public class ModelValueProvider : ValueProviderBase
 {
     string? fieldOrPropertyChain;
-    List<MemberInfo>? Members;
+    List<MemberWithArguments>? Members;
 
 
-    public ModelValueProvider(string fieldOrPropertyChain, Type? modelType, Action<bool, string> addError)
+    public ModelValueProvider(string fieldOrPropertyChain, Type? modelType, ITemplateParser tp)
     {
         this.fieldOrPropertyChain = fieldOrPropertyChain;
         if (modelType == null)
         {
-            addError(false, EmailTemplateMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrPropertyChain, "Model"));
+            tp.AddError(false, EmailTemplateMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrPropertyChain, "Model"));
             return;
         }
 
-        this.Members = ParsedModel.GetMembers(modelType, fieldOrPropertyChain, addError);
+        this.Members = ParsedModel.GetMembers(modelType, fieldOrPropertyChain, tp);
     }
 
     public override object? GetValue(TemplateParameters p)
@@ -477,17 +492,18 @@ public class ModelValueProvider : ValueProviderBase
         return value;
     }
 
-    internal static object? Getter(MemberInfo member, object model, TemplateParameters p)
+    internal static object? Getter(MemberWithArguments mwa, object model, TemplateParameters p)
     {
         try
         {
-            if (member is PropertyInfo pi)
+            if (mwa.Member is PropertyInfo pi)
                 return pi.GetValue(model, null);
 
-            if (member is MethodInfo mi)
-                return mi.Invoke(model, new object[] { p });
+            if (mwa.Member is MethodInfo mi)
+                return mi.Invoke(model, mwa.Arguments == null ? new object[] { p } :
+                mwa.Arguments.Select(a => a.GetValue(p)).And(p).ToArray());
 
-            return ((FieldInfo)member).GetValue(model);
+            return ((FieldInfo)mwa.Member).GetValue(model);
         }
         catch (TargetInvocationException e)
         {
@@ -504,17 +520,21 @@ public class ModelValueProvider : ValueProviderBase
 
     public override Type? Type
     {
-        get { return Members?.Let(ms => ms.Last().ReturningType().Nullify()); }
+        get { return Members?.Let(ms => ms.Last().Member.ReturningType().Nullify()); }
     }
 
     public override void FillQueryTokens(List<QueryToken> list)
     {
+        foreach (var item in Members.EmptyIfNull().SelectMany(m => m.Arguments.EmptyIfNull()).NotNull())
+        {
+            item.FillQueryTokens(list);
+        } 
     }
 
     public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
     {
         sb.Append("m:");
-        sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.Name, "."));
+        sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.ToString(variables), "."));
     }
 
     public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
@@ -524,7 +544,7 @@ public class ModelValueProvider : ValueProviderBase
             Members = sc.GetMembers(fieldOrPropertyChain!, sc.ModelType!);
 
             if (Members != null)
-                fieldOrPropertyChain = Members.ToString(a => a.Name, ".");
+                fieldOrPropertyChain = Members.ToString(a => a.ToString(sc.Variables), ".");
         }
 
         Declare(sc.Variables);
@@ -534,6 +554,10 @@ public class ModelValueProvider : ValueProviderBase
     public override bool Equals(object? obj) => obj is ModelValueProvider mvp && Equals(mvp.fieldOrPropertyChain, fieldOrPropertyChain);
 }
 
+
+/// <summary>
+/// like @[g:Now]
+/// </summary>
 public class GlobalValueProvider : ValueProviderBase
 {
     public class GlobalVariable
@@ -560,9 +584,9 @@ public class GlobalValueProvider : ValueProviderBase
 
     string globalKey;
     string? remainingFieldsOrProperties;
-    List<MemberInfo>? Members;
+    List<MemberWithArguments>? Members;
 
-    public GlobalValueProvider(string fieldOrPropertyChain, Action<bool, string> addError)
+    public GlobalValueProvider(string fieldOrPropertyChain, ITemplateParser tp)
     {
         globalKey = fieldOrPropertyChain.TryBefore('.') ?? fieldOrPropertyChain;
         remainingFieldsOrProperties = fieldOrPropertyChain.TryAfter('.');
@@ -570,10 +594,10 @@ public class GlobalValueProvider : ValueProviderBase
         var gv = GlobalVariables.TryGetC(globalKey); 
 
         if (gv == null)
-            addError(false, "The global key {0} was not found".FormatWith(globalKey));
+            tp.AddError(false, "The global key {0} was not found".FormatWith(globalKey));
 
         if (remainingFieldsOrProperties != null && gv != null)
-            this.Members = ParsedModel.GetMembers(gv.Type, remainingFieldsOrProperties, addError);
+            this.Members = ParsedModel.GetMembers(gv.Type, remainingFieldsOrProperties, tp);
     }
 
     public override object? GetValue(TemplateParameters p)
@@ -611,7 +635,7 @@ public class GlobalValueProvider : ValueProviderBase
         get
         {
             if (remainingFieldsOrProperties.HasText())
-                return Members?.Let(ms => ms.Last().ReturningType().Nullify());
+                return Members?.Let(ms => ms.Last().Member.ReturningType().Nullify());
             else
                 return GlobalVariables.TryGetC(globalKey)?.Type;
         }
@@ -619,6 +643,10 @@ public class GlobalValueProvider : ValueProviderBase
 
     public override void FillQueryTokens(List<QueryToken> list)
     {
+        foreach (var item in Members.EmptyIfNull().SelectMany(m => m.Arguments.EmptyIfNull()).NotNull())
+        {
+            item.FillQueryTokens(list);
+        }
     }
 
     public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
@@ -628,7 +656,7 @@ public class GlobalValueProvider : ValueProviderBase
         if (remainingFieldsOrProperties.HasText())
         {
             sb.Append(".");
-            sb.Append(Members == null ? remainingFieldsOrProperties : Members.ToString(a => a.Name, "."));
+            sb.Append(Members == null ? remainingFieldsOrProperties : Members.ToString(a => a.ToString(variables), "."));
         }
     }
 
@@ -641,7 +669,7 @@ public class GlobalValueProvider : ValueProviderBase
             Members = sc.GetMembers(remainingFieldsOrProperties, GlobalVariables[globalKey].Type);
 
             if (Members != null)
-                remainingFieldsOrProperties = Members.ToString(a => a.Name, ".");
+                remainingFieldsOrProperties = Members.ToString(a => a.ToString(sc.Variables), ".");
         }
 
         Declare(sc.Variables);
@@ -653,10 +681,14 @@ public class GlobalValueProvider : ValueProviderBase
         && Equals(gvp.remainingFieldsOrProperties, remainingFieldsOrProperties);
 }
 
+
+/// <summary>
+/// Like @[d:yyyy/mm/-1 00:00:00]
+/// </summary>
 public class DateValueProvider : ValueProviderBase
 {
     string? dateTimeExpression; 
-    public DateValueProvider(string dateTimeExpression, Action<bool, string> addError)
+    public DateValueProvider(string dateTimeExpression, ITemplateParser tp)
     {
         try
         {
@@ -665,7 +697,7 @@ public class DateValueProvider : ValueProviderBase
         }
         catch (Exception e)
         {
-            addError(false, $"Invalid expression {dateTimeExpression}: {e.Message}");
+            tp.AddError(false, $"Invalid expression {dateTimeExpression}: {e.Message}");
         }
     }
 
@@ -700,21 +732,25 @@ public class DateValueProvider : ValueProviderBase
 
 }
 
+
+/// <summary>
+/// like @[$line.Product] inside @foreach[m:Lines] as $line
+/// </summary>
 public class ContinueValueProvider : ValueProviderBase
 {
     string? fieldOrPropertyChain;
-    List<MemberInfo>? Members;
+    List<MemberWithArguments>? Members;
     ValueProviderBase Parent;
 
-    public ContinueValueProvider(string? fieldOrPropertyChain, ValueProviderBase parent, Action<bool, string> addError)
+    public ContinueValueProvider(string? fieldOrPropertyChain, ValueProviderBase parent,  ITemplateParser tp)
     {
         this.Parent = parent;
 
         var pt = ParentType();
         if (pt == null)
-            addError(false, $"Impossible to continue with {fieldOrPropertyChain} (parentType is null)");
+            tp.AddError(false, $"Impossible to continue with {fieldOrPropertyChain} (parentType is null)");
         else
-            this.Members = ParsedModel.GetMembers(pt, fieldOrPropertyChain, addError);
+            this.Members = ParsedModel.GetMembers(pt, fieldOrPropertyChain, tp);
     }
 
     private Type? ParentType()
@@ -732,7 +768,7 @@ public class ContinueValueProvider : ValueProviderBase
 
         foreach (var m in Members!)
         {
-            value = Getter(m, value, p);
+            value = Getter(m.Member, value, p);
             if (value == null)
                 break;
         }
@@ -767,18 +803,22 @@ public class ContinueValueProvider : ValueProviderBase
 
     public override Type? Type
     {
-        get { return Members?.Let(ms => ms.Last().ReturningType().Nullify()); }
+        get { return Members?.Let(ms => ms.Last().Member.ReturningType().Nullify()); }
     }
 
     public override void FillQueryTokens(List<QueryToken> list)
     {
+        foreach (var item in Members.EmptyIfNull().SelectMany(m => m.Arguments.EmptyIfNull()).NotNull())
+        {
+            item.FillQueryTokens(list);
+        }
     }
 
     public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
     {
         sb.Append(Parent.Variable);
         sb.Append(".");
-        sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.Name, "."));
+        sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.ToString(variables)!, "."));
     }
 
     public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
@@ -788,7 +828,7 @@ public class ContinueValueProvider : ValueProviderBase
             Members = sc.GetMembers(fieldOrPropertyChain!, ParentType()!);
 
             if (Members != null)
-                fieldOrPropertyChain = Members.ToString(a => a.Name, ".");
+                fieldOrPropertyChain = Members.ToString(a => a.ToString(sc.Variables), ".");
         }
 
         Declare(sc.Variables);

@@ -89,7 +89,7 @@ public class TranslationServer
             if (culture != null)
                 return culture;
 
-            string? cleanLang = lang.Value.TryBefore('-');
+            string? cleanLang = lang.Value.TryBefore('-') ?? lang.Value;
             if(cleanLang != null)
             {
                 culture = CultureInfoLogic.ApplicationCultures(isNeutral: false).FirstOrDefault(ci => ci.Name.StartsWith(cleanLang));

@@ -1028,6 +1028,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (cm.rowIndex != undefined) {
 
+      menuItems.push(<Dropdown.Item className="sf-paste-menu-item" onClick={() => this.handleCopyClick()}>
+        <FontAwesomeIcon icon="copy" className="icon" color="#21618C" />&nbsp;{SearchMessage.Copy.niceToString()}
+      </Dropdown.Item>);
+
       if (this.state.currentMenuItems == undefined) {
         menuItems.push(<Dropdown.Header>{JavascriptMessage.loading.niceToString()}</Dropdown.Header>);
       } else {
@@ -1048,6 +1052,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     );
   }
 
+  handleCopyClick() {
+    const supportsClipboard = (navigator.clipboard && window.isSecureContext);
+    if (!supportsClipboard)
+      return;
+
+    const text = this.state.selectedRows!.filter(r => !!r.entity)
+      .map(r => liteKey(r.entity!))
+      .join("|");
+
+    navigator.clipboard.writeText(text).done();
+  }
+  
   //SELECTED ROWS
 
   allSelected() {
