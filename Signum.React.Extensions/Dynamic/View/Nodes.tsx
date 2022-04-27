@@ -5,7 +5,7 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityT
 import { ModifiableEntity, Entity, Lite, isEntity, EntityPack } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
 import { SubTokensOptions } from '@framework/FindOptions'
-import { SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable, SearchControlLoaded } from '@framework/Search'
+import { SearchControl, SearchValueLine, FindOptionsParsed, ResultTable, SearchControlLoaded } from '@framework/Search'
 import { TypeInfo, MemberInfo, getTypeInfo, tryGetTypeInfos, PropertyRoute, isTypeEntity, Binding, IsByAll, getAllTypes } from '@framework/Reflection'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
@@ -1347,8 +1347,8 @@ NodeUtils.register<SearchControlNode>({
   </div>
 });
 
-export interface ValueSearchControlLineNode extends BaseNode {
-  kind: "ValueSearchControlLine",
+export interface SearchValueLineNode extends BaseNode {
+  kind: "SearchValueLine",
   findOptions?: FindOptionsExpr;
   valueToken?: string;
   labelText?: ExpressionOrValue<string>;
@@ -1362,8 +1362,8 @@ export interface ValueSearchControlLineNode extends BaseNode {
   formGroupHtmlAttributes?: HtmlAttributesExpression;
 }
 
-NodeUtils.register<ValueSearchControlLineNode>({
-  kind: "ValueSearchControlLine",
+NodeUtils.register<SearchValueLineNode>({
+  kind: "SearchValueLine",
   group: "Search",
   order: 1,
   validate: (dn, ctx) => {
@@ -1386,11 +1386,11 @@ NodeUtils.register<ValueSearchControlLineNode>({
 
     return null;
   },
-  renderTreeNode: dn => <span><small>ValueSearchControlLine:</small> <strong>{
+  renderTreeNode: dn => <span><small>SearchValueLine:</small> <strong>{
     dn.node.valueToken ? dn.node.valueToken :
       dn.node.findOptions ? dn.node.findOptions.queryName : " - "
   }</strong></span>,
-  renderCode: (node, cc) => cc.elementCode("ValueSearchControlLine", {
+  renderCode: (node, cc) => cc.elementCode("SearchValueLine", {
     ref: node.ref,
     ctx: cc.subCtxCode(),
     findOptions: node.findOptions,
@@ -1405,7 +1405,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
     deps: node.deps,
   }),
-  render: (dn, ctx) => <ValueSearchControlLine ctx={ctx}
+  render: (dn, ctx) => <SearchValueLine ctx={ctx}
     ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     findOptions={dn.node.findOptions && toFindOptions(dn, ctx, dn.node.findOptions!)}
     valueToken={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.valueToken, NodeUtils.isStringOrNull)}
@@ -1593,7 +1593,7 @@ export namespace NodeConstructor {
     const ti = tis.firstOrNull();
 
     if (tr.isCollection) {
-      if (tr.name == "[ALL]")
+      if (tr.name == IsByAll)
         return { kind: "EntityStrip", field, children: [] } as EntityStripNode;
       else if (!ti && !tr.isEmbedded)
         return { kind: "MultiValueLine", field, children: [] } as MultiValueLineNode;
@@ -1605,7 +1605,7 @@ export namespace NodeConstructor {
         return { kind: "EntityStrip", field, children: [] } as EntityStripNode;
     }
 
-    if (tr.name == "[ALL]")
+    if (tr.name == IsByAll)
       return { kind: "EntityLine", field, children: [] } as EntityLineNode;
 
     if (ti) {

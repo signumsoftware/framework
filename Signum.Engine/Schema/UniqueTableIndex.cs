@@ -337,13 +337,11 @@ public class IndexWhereExpressionVisitor : ExpressionVisitor
         }
         else if (field is FieldImplementedBy ib)
         {
-            return ib.ImplementationColumns.Values.Select(ic => isNull.FormatWith(ic.Name.SqlEscape(isPostgres))).ToString(equals ? " AND " : " OR ");
+            return ib.ImplementationColumns.Values.ToString(ic => isNull.FormatWith(ic.Name.SqlEscape(isPostgres)), equals ? " AND " : " OR ");
         }
         else if (field is FieldImplementedByAll iba)
         {
-            return isNull.FormatWith(iba.Column.Name.SqlEscape(isPostgres)) +
-                (equals ? " AND " : " OR ") +
-                isNull.FormatWith(iba.ColumnType.Name.SqlEscape(isPostgres));
+            return iba.IdColumns.Values.PreAnd((IColumn)iba.TypeColumn).ToString(ic => isNull.FormatWith(ic.Name), equals ? " AND " : " OR ");
         }
         else if (field is FieldEmbedded fe)
         {

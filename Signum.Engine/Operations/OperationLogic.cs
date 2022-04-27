@@ -92,7 +92,7 @@ public static class OperationLogic
                     os.Key
                 });
 
-            QueryLogic.Expressions.Register((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
+            QueryLogic.Expressions.Register((OperationSymbol o) => o.Logs(), OperationMessage.Logs);
             QueryLogic.Expressions.Register((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
 
 
@@ -186,7 +186,7 @@ Consider the following options:
     static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
     {
         var table = Schema.Current.Table<OperationLogEntity>();
-        var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Target)).ColumnType;
+        var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Target)).TypeColumn;
         return Administrator.DeleteWhereScript(table, column, ((TypeEntity)arg).Id);
     }
 
@@ -606,6 +606,17 @@ Consider the following options:
                 propName,
                 fromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                 ((Enum)(object)state).NiceToString());
+
+        return null;
+    }
+
+    public static string? ShouldBe<T>(this T state, string propName, params T[] fromStates)
+    {
+        if (!fromStates.Contains(state))
+            return ValidationMessage._0ShouldBe1InsteadOf2.NiceToString().FormatWith(
+                propName,
+                fromStates.CommaOr(v =>  v is Enum e ? e.NiceToString() : v?.ToString()),
+                state is Enum e ? e.NiceToString() : state?.ToString());
 
         return null;
     }

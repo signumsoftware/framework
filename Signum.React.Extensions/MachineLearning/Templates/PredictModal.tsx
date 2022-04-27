@@ -49,9 +49,6 @@ export function PredictModal(p: PredictModalProps) {
       .done();
   }
 
-  function componentWillUnmount() {
-    abortableUpdateRequest.abort();
-  }
 
   var e = p.entity;
 

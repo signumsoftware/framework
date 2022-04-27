@@ -145,10 +145,11 @@ public static class AlertLogic
 
         SchedulerLogic.ExecuteTask.Register((SendNotificationEmailTaskEntity task, ScheduledTaskContext ctx) =>
         {
-            var limit = Clock.Now.AddMinutes(-task.SendNotificationsOlderThan);
+            var max = Clock.Now.AddMinutes(-task.SendNotificationsOlderThan);
+            var min = task.IgnoreNotificationsOlderThan == null ? (DateTime?)null : Clock.Now.AddDays(-task.IgnoreNotificationsOlderThan.Value);
 
             var query = Database.Query<AlertEntity>()
-            .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.Recipient != null && a.AlertDate < limit)
+            .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.Recipient != null && (min == null || min < a.AlertDate) && a.AlertDate < max)
             .Where(a => task.SendBehavior == SendAlertTypeBehavior.All ||
                         task.SendBehavior == SendAlertTypeBehavior.Include && task.AlertTypes.Contains(a.AlertType!) ||
                         task.SendBehavior == SendAlertTypeBehavior.Exclude && !task.AlertTypes.Contains(a.AlertType!));
@@ -199,22 +200,29 @@ public static class AlertLogic
 
             var newText = LinkPlaceholder.SplitAfter(text).Select(pair =>
             {
-                var m = pair.match;
-                if (m == null)
-                    return ReplacePlaceHolders(pair.after, alert);
+                try
+                {
+                    var m = pair.match;
+                    if (m == null)
+                        return ReplacePlaceHolders(pair.after, alert);
 
-                var propEx = m.Groups["prop"].Value;
+                    var propEx = m.Groups["prop"].Value;
 
-                var prop = GetPropertyValue(alert, propEx);
+                    var prop = GetPropertyValue(alert, propEx);
 
-                var lite = prop is Entity e ? e.ToLite() :
-                            prop is Lite<Entity> l ? l : null;
+                    var lite = prop is Entity e ? e.ToLite() :
+                                prop is Lite<Entity> l ? l : null;
 
-                var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Replace("~", EmailLogic.Configuration.UrlLeft) ?? (lite != null ? EntityUrl(lite) : "#");
+                    var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Replace("~", EmailLogic.Configuration.UrlLeft) ?? (lite != null ? EntityUrl(lite) : "#");
 
-                var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite?.ToString());
+                    var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite?.ToString());
 
-                return @$"<a href=""{url}"">{text}</a>" + ReplacePlaceHolders(pair.after, alert);
+                    return @$"<a href=""{url}"">{text}</a>" + ReplacePlaceHolders(pair.after, alert);
+                }
+                catch (Exception e)
+                {
+                    return ("<span style='color:red'>ERROR: " + e.Message + "</span>") + pair.match?.Value + pair.after;
+                }
             }).ToString("");
 
             if (text != newText)
@@ -252,7 +260,6 @@ public static class AlertLogic
 
         private static object? GetPropertyValue(AlertEntity alert, string expresion)
         {
-
             var parts = expresion.SplitNoEmpty('.');
 
             var result = SimpleMemberEvaluator.EvaluateExpression(alert, parts);
@@ -383,6 +390,17 @@ public static class AlertLogic
         {
             Database.Query<AlertEntity>()
                 .Where(a => a.Target.Is(target) && a.AlertType.Is(alertType) && a.State == AlertState.Saved)
+                .ToList()
+                .ForEach(a => a.Execute(AlertOperation.Attend));
+        }
+    }
+
+    public static void AttendAllAlerts(this IQueryable<AlertEntity> alerts)
+    {
+        using (AuthLogic.Disable())
+        {
+            alerts
+                 .Where(a => a.State == AlertState.Saved)
                 .ToList()
                 .ForEach(a => a.Execute(AlertOperation.Attend));
         }

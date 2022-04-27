@@ -447,7 +447,7 @@ internal class DbExpressionComparer : ExpressionComparer
     protected virtual bool CompareImplementedByAll(ImplementedByAllExpression a, ImplementedByAllExpression b)
     {
         return Compare(a.TypeId, b.TypeId)
-            && Compare(a.Id, b.Id);
+            && CompareDictionaries<Type, Expression>(a.Ids, b.Ids, Compare);
     }
 
     protected virtual bool CompareLiteReference(LiteReferenceExpression a, LiteReferenceExpression b)

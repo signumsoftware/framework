@@ -76,8 +76,8 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public Expression BuildExpression(BuildExpressionContext context)
     {
-        if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out var result))
-            return result;
+        if (context.Replacements != null && context.Replacements.TryGetValue(this, out var result))
+            return result.GetExpression();
 
         return BuildExpressionInternal(context);
     }
@@ -496,25 +496,64 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
 public class BuildExpressionContext
 {
-    public BuildExpressionContext(Type tupleType, ParameterExpression parameter, Dictionary<QueryToken, Expression> replacemens)
+    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements)
     {
-        this.TupleType = tupleType;
+        this.ElementType = elementType;
         this.Parameter = parameter;
-        this.Replacemens = replacemens;
+        this.Replacements = replacements;
     }
 
-    public readonly Type TupleType;
+    public readonly Type ElementType;
     public readonly ParameterExpression Parameter;
-    public readonly Dictionary<QueryToken, Expression> Replacemens;
+    public readonly Dictionary<QueryToken, ExpressionBox> Replacements;
 
-    public Expression<Func<object, Lite<Entity>>> GetEntitySelector()
+    public LambdaExpression GetEntitySelector()
     {
-        return Expression.Lambda<Func<object, Lite<Entity>>>(Replacemens.Single(a=>a.Key.FullKey() == "Entity").Value, Parameter);
+        var entityColumn = Replacements.Single(a => a.Key.FullKey() == "Entity").Value;
+
+        return Expression.Lambda(Expression.Convert(entityColumn.GetExpression(), typeof(Lite<Entity>)       ), Parameter);
     }
 
-    public Expression<Func<object, Entity>> GetEntityFullSelector()
+    public LambdaExpression GetEntityFullSelector()
     {
-        return Expression.Lambda<Func<object, Entity>>(Replacemens.Single(a => a.Key.FullKey() == "Entity").Value.ExtractEntity(false), Parameter);
+        var entityColumn = Replacements.Single(a => a.Key.FullKey() == "Entity").Value;
+
+        return Expression.Lambda(Expression.Convert(entityColumn.GetExpression().ExtractEntity(false), typeof(Entity)), Parameter);
+    }
+
+    internal List<CollectionElementToken> SubQueries()
+    {
+        return Replacements
+            .Where(a => a.Value.SubQueryContext != null)
+            .Select(a => (CollectionElementToken)a.Key)
+            .ToList();
+    }
+}
+
+public struct ExpressionBox
+{
+    public readonly Expression RawExpression;
+    public readonly PropertyRoute? MListElementRoute;
+    public readonly BuildExpressionContext? SubQueryContext;
+
+    public ExpressionBox(Expression rawExpression, PropertyRoute? mlistElementRoute = null, BuildExpressionContext? subQueryContext = null)
+    {
+        this.RawExpression = rawExpression;
+        this.MListElementRoute = mlistElementRoute;
+        this.SubQueryContext = subQueryContext;
+    }
+
+    public Expression GetExpression()
+    {
+        if (RawExpression.Type.IsInstantiationOf(typeof(MListElement<,>)))
+            return Expression.Property(RawExpression, "Element").BuildLiteNullifyUnwrapPrimaryKey(new[] { MListElementRoute! });
+
+        return RawExpression;
+    }
+
+    public override string ToString()
+    {
+        return new { RawExpression, MListElementRoute, SubQueryContext }.ToString()!;
     }
 }
 
@@ -578,8 +617,6 @@ public enum QueryTokenMessage
     MoreThanOneColumnNamed0,
     [Description("number")]
     Number,
-    [Description(" of ")]
-    Of,
     Second,
     [Description("text")]
     Text,
@@ -601,4 +638,12 @@ public enum QueryTokenMessage
     Null,
     Not,
     Distinct,
+    [Description("{0} of {1}")]
+    _0Of1,
+
+    [Description("RowOrder")]
+    RowOrder,
+
+    [Description("RowID")]
+    RowId,
 }

@@ -235,13 +235,16 @@ public static partial class TextTemplateParser
 
         public override void Synchronize(TemplateSynchronizationContext sc)
         {
-            ValueProvider!.Synchronize(sc, "@foreach[]");
-
             using (sc.NewScope())
             {
-                ValueProvider.Declare(sc.Variables);
+                ValueProvider!.Synchronize(sc, "@foreach[]");
 
-                Block.Synchronize(sc);
+                using (sc.NewScope())
+                {
+                    ValueProvider.Declare(sc.Variables);
+
+                    Block.Synchronize(sc);
+                }
             }
         }
     }
@@ -314,22 +317,25 @@ public static partial class TextTemplateParser
 
         public override void Synchronize(TemplateSynchronizationContext sc)
         {
-            Condition.Synchronize(sc, "@any[]");
-            
             using (sc.NewScope())
             {
-                Condition.Declare(sc.Variables);
+                Condition.Synchronize(sc, "@any[]");
 
-                AnyBlock.Synchronize(sc);
-            }
-
-            if (NotAnyBlock != null)
-            {
                 using (sc.NewScope())
                 {
                     Condition.Declare(sc.Variables);
 
-                    NotAnyBlock.Synchronize(sc);
+                    AnyBlock.Synchronize(sc);
+                }
+
+                if (NotAnyBlock != null)
+                {
+                    using (sc.NewScope())
+                    {
+                        Condition.Declare(sc.Variables);
+
+                        NotAnyBlock.Synchronize(sc);
+                    }
                 }
             }
         }
@@ -398,22 +404,25 @@ public static partial class TextTemplateParser
 
         public override void Synchronize(TemplateSynchronizationContext sc)
         {
-            Condition.Synchronize(sc, "if[]");
-            
             using (sc.NewScope())
             {
-                Condition.Declare(sc.Variables);
+                Condition.Synchronize(sc, "if[]");
 
-                IfBlock.Synchronize(sc);
-            }
-
-            if (ElseBlock != null)
-            {
                 using (sc.NewScope())
                 {
                     Condition.Declare(sc.Variables);
 
-                    ElseBlock.Synchronize(sc);
+                    IfBlock.Synchronize(sc);
+                }
+
+                if (ElseBlock != null)
+                {
+                    using (sc.NewScope())
+                    {
+                        Condition.Declare(sc.Variables);
+
+                        ElseBlock.Synchronize(sc);
+                    }
                 }
             }
         }

@@ -232,7 +232,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
 
   function handleExpressionClick(member: TypeHelpClient.TypeMemberHelp) {
     var paramValue = member.cleanTypeName ? `queryName : "${member.cleanTypeName}Entity"` : `valueToken: "Entity.${member.name}"`;
-    showPropmt("Expression", `modules.React.createElement(ValueSearchControlLine, {ctx: ctx, ${paramValue}})`);
+    showPropmt("Expression", `modules.React.createElement(SearchValueLine, {ctx: ctx, ${paramValue}})`);
   }
 
   function renderExpressionsButtons() {

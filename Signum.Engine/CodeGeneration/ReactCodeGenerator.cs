@@ -392,7 +392,7 @@ public class ReactCodeGenerator
         sb.AppendLine("import * as React from 'react'");
         sb.AppendLine("import { "  + type.Name + " } from '../" + type.Namespace + "'");
         sb.AppendLine("import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityTable, FormGroup } from '@framework/Lines'");
-        sb.AppendLine("import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode } from '@framework/Search'");
+        sb.AppendLine("import { SearchControl, SearchValue, FilterOperation, OrderType, PaginationMode } from '@framework/Search'");
 
         var v = GetVarName(type);
 

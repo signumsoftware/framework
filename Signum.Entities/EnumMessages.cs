@@ -66,8 +66,8 @@ public enum EngineMessage
     NoWayOfMappingType0Found,
     [Description("The entity {0} is new")]
     TheEntity0IsNew,
-    [Description("There are '{0}' that refer to this entity")]
-    ThereAre0ThatReferThisEntity,
+    [Description("There are '{0}' that refer to this entity by property '{1}'")]
+    ThereAre0ThatReferThisEntityByProperty1,
     [Description("There are records in '{0}' referring to this table by column '{1}'")]
     ThereAreRecordsIn0PointingToThisTableByColumn1,
     [Description("Unauthorized access to {0} because {1}")]
@@ -124,7 +124,7 @@ public enum EntityControlMessage
     View,
     [Description("Add…")]
     Add,
-
+    Paste,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
@@ -246,6 +246,8 @@ public enum SearchMessage
 
     GroupKey,
     DerivedGroupKey,
+
+    Copy,
 }
 
 public enum SelectorMessage

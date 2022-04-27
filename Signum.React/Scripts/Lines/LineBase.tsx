@@ -21,7 +21,7 @@ export interface LineBaseProps extends StyleOptions {
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<any>;
   helpText?: React.ReactNode | null;
-  mandatory?: boolean;
+  mandatory?: boolean | "warning";
 }
 
 
@@ -116,8 +116,12 @@ export class LineBaseController<P extends LineBaseProps> {
 
     if (this.props.mandatory && !this.props.readOnly) {
       const val = this.props.ctx.value;
-      if (val == null || val === "" || Array.isArray(val) && val.length == 0)
-        return "sf-mandatory";
+      if (val == null || val === "" || Array.isArray(val) && val.length == 0) {
+        if (this.props.mandatory == "warning")
+          return "sf-mandatory-warning";
+        else
+          return "sf-mandatory";
+      }
     }
 
     return null;

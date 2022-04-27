@@ -58,7 +58,6 @@ internal enum DbExpressionType
     MListElement,
     AdditionalField,
     PrimaryKey,
-    PrimaryKeyString,
     ToDayOfWeek,
     Interval,
 }

@@ -187,7 +187,7 @@ Let's suppose that we have an `expressionMethod` like this one:
 
 ```C#
 static Expression<Func<RegionEntity, IQueryable<TerritoryEntity>>> TerritoriesExpression =
-    r => Database.Query<TerritoryEntity>().Where(a => a.Region == r);
+    r => Database.Query<TerritoryEntity>().Where(a => a.Region.Is(r));
 public static IQueryable<TerritoryEntity> Territories(this RegionEntity r)
 {
     return TerritoriesExpression.Evaluate(r);

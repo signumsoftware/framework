@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivityEntity, WorkflowOperation, NewTasksEmbedded } from '../Signum.Entities.Workflow'
 import { TypeContext } from '@framework/Lines'
-import { ValueSearchControlLine } from '@framework/Search'
+import { SearchValueLine } from '@framework/Search'
 import { symbolNiceName } from '@framework/Reflection'
 import { PreviewTask } from '../WorkflowClient'
 import { is } from "@framework/Signum.Entities";
@@ -24,7 +24,7 @@ export default function WorkflowReplacementComponent(p: { ctx: TypeContext<Workf
             {ctx.mlistItemCtxs(a => a.replacements).map(ectx =>
               <tr>
                 <td>
-                  <ValueSearchControlLine ctx={ectx}
+                  <SearchValueLine ctx={ectx}
                     labelText={ectx.value.oldNode.toStr}
                     findOptions={{
                       queryName: CaseActivityEntity,

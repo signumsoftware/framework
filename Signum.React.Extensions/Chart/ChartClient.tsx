@@ -27,6 +27,7 @@ import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 import { MemoRepository } from './D3Scripts/Components/ReactChart';
 import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
+import { softCast } from '../../Signum.React/Scripts/Globals';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
 
@@ -179,6 +180,9 @@ export function getChartScripts(): Promise<ChartScript[]> {
 }
 
 export function getChartScript(symbol: ChartScriptSymbol): Promise<ChartScript> {
+  if (symbol.key == null)
+    throw new Error("User has not access to ChartScriptSymbol");
+
   return getChartScripts().then(cs => cs.single(a => a.symbol.key == symbol.key));
 }
 
@@ -301,32 +305,30 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
 
   var allChartScriptParameters = chartScript.parameterGroups.flatMap(a => a.parameters);
 
-  if (chart.parameters.map(a => a.element.name!).orderBy(n => n).join(" ") !=
-    allChartScriptParameters.map(a => a.name!).orderBy(n => n).join(" ")) {
 
-    const byName = chart.parameters.map(a => a.element).toObject(a => a.name!);
-    chart.parameters.clear();
+  const byName = chart.parameters.map(a => a.element).toObject(a => a.name!);
+  chart.parameters.clear();
 
-    allChartScriptParameters.forEach(sp => {
-      let cp = byName[sp.name!];
+  allChartScriptParameters.forEach(sp => {
+    let cp = byName[sp.name!];
 
-      if (cp == undefined) {
-        cp = ChartParameterEmbedded.New();
-        cp.name = sp.name;
-        const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
+    if (cp == undefined) {
+      cp = ChartParameterEmbedded.New();
+      cp.name = sp.name;
+      const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
+      cp.value = defaultParameterValue(sp, column?.token && column.token.token);
+    }
+    else {
+      const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
+      if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
         cp.value = defaultParameterValue(sp, column?.token && column.token.token);
       }
-      else {
-        const column = sp.columnIndex == undefined ? undefined : chart.columns![sp.columnIndex].element;
-        if (!isValidParameterValue(cp.value, sp, column?.token && column.token.token)) {
-          cp.value = defaultParameterValue(sp, column?.token && column.token.token);
-        }
-        cp.modified = true;
-      }
+      cp.modified = true;
+    }
 
-      chart.parameters!.push({ rowId: null, element: cp });
-    });
-  }
+    chart.parameters!.push({ rowId: null, element: cp });
+  });
+
 }
 
 function isValidParameterValue(value: string | null | undefined, scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
@@ -663,8 +665,8 @@ export module API {
     if (token.filterType == "DateTime")
       return v => {
         var date = v as string | null;
-        var format = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
-        return date == null ? String(null) : toFormatWithFixes(DateTime.fromISO(date), format);
+        var luxonFormat = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
+        return date == null ? String(null) : toFormatWithFixes(DateTime.fromISO(date), luxonFormat);
       };
 
     if (token.filterType == "Time")
@@ -674,11 +676,12 @@ export module API {
         return date == null ? String(null) : timeToString(date, format);
       };
 
-    if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
+    if ((token.filterType == "Decimal" || token.filterType == "Integer"))
       return v => {
         var number = v as number | null;
-        var format = toNumberFormat(chartColumn.format ?? token.format ?? "0")
-        return number == null ? String(null) : format.format(number);
+        var format = chartColumn.format || (token.key == "Sum" ? "0.#K" : undefined) || token.format || "0";
+        var numFormat = toNumberFormat(format);
+        return number == null ? String(null) : numFormat.format(number);
       };
 
     return v => String(v);
@@ -706,15 +709,15 @@ export module API {
 
       const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
       const key = getKey(token);
+
       const niceName = getNiceName(token, mle.element /*capture format by ref*/);
       const color = getColor(token, palettes);
 
-      return {
+      return softCast<ChartColumn<unknown>>({
         name: "c" + i,
         displayName: scriptCol.displayName,
         title: (mle.element.displayName || token?.niceName) + (token?.unit ? ` (${token.unit})` : ""),
         token: token,
-        format: mle.element.format || token?.format,
         type: token && toChartColumnType(token),
         orderByIndex: mle.element.orderByIndex,
         orderByType: mle.element.orderByType,
@@ -725,7 +728,7 @@ export module API {
         getValueKey: row => key(value(row)),
         getValueNiceName: row => niceName(value(row)),
         getValueColor: row => color(value(row)),
-      } as ChartColumn<unknown>
+      })
     });
 
     var index = 0;
@@ -864,7 +867,7 @@ export interface ChartColumn<V> {
   title: string;
   displayName: string;
   token?: QueryToken; //Null for QueryToken
-  type: ChartColumnType;
+  type: ChartColumnType | null;
   orderByIndex?: number | null;
   orderByType?: OrderType | null;
 
@@ -875,7 +878,7 @@ export interface ChartColumn<V> {
   getValue: (row: ChartRow) => V;
   getValueKey: (row: ChartRow) => string;
   getValueNiceName: (row: ChartRow) => string;
-  getValueColor: (row: ChartRow) => string;
+  getValueColor: (row: ChartRow) => string | null;
 }
 
 declare module '@framework/SearchControl/SearchControlLoaded' {

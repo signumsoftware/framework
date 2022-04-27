@@ -56,7 +56,7 @@ import { getMixin } from '@framework/Signum.Entities'
 import { ${typeName}Entity } from '../[your namespace]'
 import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
          EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable } from '@framework/Lines'
-import { SearchControl, ValueSearchControl } from '@framework/Search'
+import { SearchControl, SearchValue } from '@framework/Search'
 ${Dic.getValues(cc.imports.toObjectDistinct(a => a)).join("\n")}
 
 export default function ${typeName}(p: { ctx: TypeContext<${typeName}Entity> }) {

@@ -127,13 +127,24 @@ public static class CacheLogic
 
     static void ServerBroadcast_InvalidateTable(string cleanName)
     {
-        Type type = TypeEntity.TryGetType(cleanName)!;
+        Type type = TypeLogic.GetType(cleanName);
 
-        var c = controllers.GetOrThrow(type)!;
+        var c = controllers.GetOrThrow(type);
 
-        c.CachedTable.ResetAll(forceReset: false);
-
-        c.NotifyInvalidated();
+        if (c != null)
+        {
+            c.CachedTable.ResetAll(forceReset: false);
+            c.NotifyInvalidated();
+        }
+        else
+        {
+            var list = CacheLogic.semiControllers.GetOrThrow(type);
+            foreach (var sc in list)
+            {
+                sc.ResetAll(forceReset: false);
+                sc.controller.NotifyInvalidated();
+            }
+        }
     }
 
     public static TextWriter? LogWriter;
@@ -320,6 +331,7 @@ public static class CacheLogic
                 {
                     try
                     {
+                        //InvalidOperationException throw?...just continue the catch will probably fix it!
                         SqlDependency.Start(sub.ConnectionString);
                     }
                     catch (InvalidOperationException ex)

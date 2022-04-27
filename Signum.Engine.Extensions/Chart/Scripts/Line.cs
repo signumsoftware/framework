@@ -21,7 +21,7 @@ public class LineChartScript : ChartScript
             },
             new ChartScriptParameterGroup("Margins")
             {
-                new ChartScriptParameter("UnitMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20m } },
+                new ChartScriptParameter("UnitMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 40m } },
             },
             new ChartScriptParameterGroup("Number")
             {

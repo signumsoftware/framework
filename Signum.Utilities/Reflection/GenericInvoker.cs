@@ -13,8 +13,6 @@ public class GenericInvoker<T>
     {
         this.expression = expression;
         this.numParams = GenericParametersVisitor.GenericParameters(expression);
-
-        ParameterExpression tp = Expression.Parameter(typeof(Type[]));
     }
 
     public T GetInvoker(params Type[] types)

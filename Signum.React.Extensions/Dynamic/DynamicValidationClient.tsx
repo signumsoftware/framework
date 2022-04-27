@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ajaxPost } from '@framework/Services';
-import { ValueSearchControlLine } from '@framework/Search'
+import { SearchValueLine } from '@framework/Search'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { Entity } from '@framework/Signum.Entities'
@@ -14,7 +14,7 @@ export function start(options: { routes: JSX.Element[] }) {
   Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New({ eval: DynamicValidationEval.New() }));
 
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: DynamicValidationEntity });
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{
+  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
     queryName: DynamicValidationEntity,
     filterOptions: [{ token: DynamicValidationEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);

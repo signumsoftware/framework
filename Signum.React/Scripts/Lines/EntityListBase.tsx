@@ -1,12 +1,15 @@
 import * as React from 'react'
-import { classes, KeyGenerator } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite } from '../Signum.Entities'
+import { classes, Dic, KeyGenerator } from '../Globals'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList } from '../Signum.Entities'
 import * as Finder from '../Finder'
-import { FindOptions } from '../FindOptions'
+import * as Navigator from '../Navigator'
+import { FilterOption, FindOptions } from '../FindOptions'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
+import { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutoCompleteConfig'
+import { tryGetTypeInfos } from '../Reflection'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -159,6 +162,39 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     this.setValue(list);
   }
 
+  paste(text: string) {
+    var lites = parseLiteList(text);
+    if (lites.length == 0)
+      return;
+
+    const tis = tryGetTypeInfos(this.props.type!);
+    lites = lites.filter(lite => tis.length == 0 || tis.notNull().singleOrNull(ti => ti.name == lite.EntityType) != null);
+    if (lites.length == 0)
+      return;
+
+    const dic = lites.groupBy(lite => lite.EntityType);
+    return dic.map(kvp => {
+      const fo = this.getFindOptions(kvp.key) ?? { queryName: kvp.key };
+      const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "IsIn", value: kvp.elements }]);
+      return Finder.fetchLites({ queryName: kvp.key, filterOptions: fos })
+        .then(lites => {
+          if (lites.length == 0)
+            return;
+
+          return Promise.all(lites.map(lite => this.convert(lite)))
+            .then(entities => entities.forEach(e => this.addElement(e)))
+        });
+    }).first();
+  }
+
+  handlePasteClick = (event: React.SyntheticEvent<any>) => {
+
+    event.preventDefault();
+
+    navigator.clipboard.readText()
+      .then(text => this.paste(text))
+      .done();
+  }
 
   handleFindClick = (event: React.SyntheticEvent<any>) => {
 
@@ -334,10 +370,12 @@ export interface DragConfig {
 
 tasks.push(taskSetMove);
 export function taskSetMove(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof EntityListBaseController && (state as EntityListBaseProps).move == undefined &&
+  if (lineBase instanceof EntityListBaseController &&
+    (state as EntityListBaseProps).move == undefined &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.preserveOrder) {
     (state as EntityListBaseProps).move = true;
   }
 }
+

@@ -50,6 +50,7 @@ export interface MemberInfo {
   isMultiline?: boolean;
   isVirtualMList?: boolean;
   preserveOrder?: boolean;
+  avoidDuplicates?: boolean;
   notVisible?: boolean;
   id?: any; //symbols
 }
@@ -254,19 +255,27 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
 
   const f = format.toUpperCase();
 
+  function parseIntDefault(str: string, defaultValue: number) {
+    var result = parseInt(str);
+    if (isNaN(result))
+      return defaultValue;
+
+    return result;
+  }
+
   if (f.startsWith("C")) //unit comes separated
     return {
       style: "decimal",
-      minimumFractionDigits: parseInt(f.after("C")) || 2,
-      maximumFractionDigits: parseInt(f.after("C")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("C"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("C"), 2),
       useGrouping: true,
     }
 
   if (f.startsWith("N"))
     return {
       style: "decimal",
-      minimumFractionDigits: parseInt(f.after("N")) || 2,
-      maximumFractionDigits: parseInt(f.after("N")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("N"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("N"), 2),
       useGrouping: true,
     }
 
@@ -274,15 +283,15 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
     return {
       style: "decimal",
       maximumFractionDigits: 0,
-      minimumIntegerDigits: parseInt(f.after("D")) || 1,
+      minimumIntegerDigits: parseIntDefault(f.after("D"), 1),
       useGrouping: false,
     }
 
   if (f.startsWith("F"))
     return {
       style: "decimal",
-      minimumFractionDigits: parseInt(f.after("F")) || 2,
-      maximumFractionDigits: parseInt(f.after("F")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("F"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("F"), 2),
       useGrouping: false,
     }
 
@@ -290,30 +299,39 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
     return {
       style: "decimal",
       notation: "scientific",
-      minimumFractionDigits: parseInt(f.after("E")) || 6,
-      maximumFractionDigits: parseInt(f.after("E")) || 6,
+      minimumFractionDigits: parseIntDefault(f.after("E"), 6),
+      maximumFractionDigits: parseIntDefault(f.after("E"), 6),
       useGrouping: false,
     } as any;
 
-  if (f.startsWith("P"))
+  if (f.startsWith("P")) {
     return {
       style: "percent",
-      minimumFractionDigits: parseInt(f.after("P")) || 2,
-      maximumFractionDigits: parseInt(f.after("P")) || 2,
+      minimumFractionDigits: parseIntDefault(f.after("P"), 2),
+      maximumFractionDigits: parseIntDefault(f.after("P"), 2),
       useGrouping: false,
     }
+  }
 
   //simple heuristic
-  var style = f.endsWith("%") ? "percent" : "decimal";
-  var afterDot = (f.tryBefore("%") ?? f).tryAfter(".") ?? "";
+
+  var regex = /(?<plus>\+)?(?<body>[0#,.]+)(?<suffix>[%MKB])?/
+
+  const match = regex.exec(f);
+
+  var body = match?.groups?.body ?? f;
+  const suffix = match?.groups?.suffix;
+
+  var afterDot = body.tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
-    style: style,
+    style: suffix == "%" ? "percent" : "decimal",
+    notation: suffix == "K" || suffix == "M" || suffix == "B" ? "compact": undefined,
     minimumFractionDigits: afterDot.replaceAll("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
   };
 
-  if (f.startsWith("+"))
+  if (match?.groups?.plus)
     (result as any).signDisplay = "always";
 
   return result;
@@ -649,7 +667,7 @@ export function setTypes(types: TypeInfoDictionary) {
 
   _queryNames = Dic.getValues(types).filter(t => t.kind == "Query")
     .flatMap(a => Dic.getValues(a.members))
-    .toObject(m => m.name.toLocaleLowerCase(), m => m);
+    .toObject(m => m.name.toLowerCase(), m => m);
 
   Object.freeze(_queryNames);
 
@@ -734,6 +752,8 @@ export class Binding<T> implements IBinding<T> {
         (this.parentObject as ModifiableEntity).modified = true;
       }
     }
+
+    this.initialValue = val;
   }
 
   deleteValue() {
@@ -1953,6 +1973,11 @@ export type GraphExplorerMode = "collect" | "set" | "clean";
 
 
 export class GraphExplorer {
+
+  static hasChanges(m: ModifiableEntity) {
+    this.propagateAll(m);
+    return m.modified;
+  }
 
   static propagateAll(...args: any[]): GraphExplorer {
     const ge = new GraphExplorer("clean", {});

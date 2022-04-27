@@ -24,6 +24,7 @@ export interface ChartRendererCombinedProps {
   infos: ChartRendererCombinedInfo[]
   onReload?: (e: React.MouseEvent<any>) => void;
   useSameScale: boolean;
+  minHeigh: number | null;
 }
 
 export interface ChartRendererCombinedInfo {
@@ -38,7 +39,7 @@ export default function ChartRendererCombined(p: ChartRendererCombinedProps) {
   return (
     <FullscreenComponent onReload={p.onReload} >
       <ErrorBoundary deps={p.infos.map(a => a.data)}>
-        <ReactChartCombined useSameScale={p.useSameScale} infos={p.infos.map(info => ({
+        <ReactChartCombined useSameScale={p.useSameScale} minHeigh={p.minHeigh} infos={p.infos.map(info => ({
           chartRequest: info.chartRequest,
           onDrillDown: (r, e) => handleDrillDown(r, e, info.chartRequest),
           parameters: ChartClient.API.getParameterWithDefault(info.chartRequest, info.chartScript),

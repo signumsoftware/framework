@@ -59,6 +59,8 @@ public class WorkflowImportExport
             new XAttribute("Pool", la.Pool.BpmnElementId),
             la.Actors.IsEmpty() ? null! : new XElement("Actors", la.Actors.Select(a => new XElement("Actor", a.KeyLong()!))),
             la.ActorsEval == null ? null! : new XElement("ActorsEval", new XCData(la.ActorsEval.Script)),
+            la.UseActorEvalForStart == false ? null! : new XElement("UseActorEvalForStart", la.UseActorEvalForStart),
+            la.CombineActorAndActorEvalWhenContinuing == false ? null! : new XElement("CombineActorAndActorEvalWhenContinuing", la.CombineActorAndActorEvalWhenContinuing),
             la.Xml.ToXml())),
 
            this.activities.Values.Select(a => new XElement("Activity",
@@ -306,6 +308,8 @@ public class WorkflowImportExport
                 lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool")!.Value);
                 lane.Actors.Synchronize((xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => Lite.Parse(a.Value)).ToMList());
                 lane.ActorsEval = lane.ActorsEval.CreateOrAssignEmbedded(xml.Element("ActorsEval"), (ae, aex) => { ae.Script = aex.Value; });
+                lane.UseActorEvalForStart = xml.Attribute("UseActorEvalForStart")?.Value.ToBool() ?? false;
+                lane.CombineActorAndActorEvalWhenContinuing = xml.Attribute("CombineActorAndActorEvalWhenContinuing")?.Value.ToBool() ?? false;
                 SetXmlDiagram(lane, xml);
             }))
             {

@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { ajaxPost } from '@framework/Services';
-import { ValueSearchControlLine } from '@framework/Search'
+import { SearchValueLine } from '@framework/Search'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { Entity } from '@framework/Signum.Entities'
@@ -11,8 +11,8 @@ import { DynamicExpressionEntity } from './Signum.Entities.Dynamic'
 export function start(options: { routes: JSX.Element[] }) {
 
   Navigator.addSettings(new EntitySettings(DynamicExpressionEntity, w => import('./Expression/DynamicExpression')));
-  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity, filterOptions: [{ token: DynamicExpressionEntity.token(e => e.fromType), value: type + "Entity" }]}} />);
+  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);
+  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity, filterOptions: [{ token: DynamicExpressionEntity.token(e => e.fromType), value: type + "Entity" }]}} />);
   DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicExpressionEntity, t => [
     { token: t.append(p => p.entity.body), type: "Code" },
     { token: t.append(p => p.name), type: "Text" },

@@ -82,8 +82,14 @@ public static class VirtualMList
 
         var mListPropertRoute = PropertyRoute.Construct(mListField);
         var backReferenceRoute = PropertyRoute.Construct(backReference, avoidLastCasting: true);
-        if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null)
-            throw new InvalidOperationException($"The property {mListPropertRoute} should have an IgnoreAttribute to be used as Virtual MList");
+
+        if (fi.SchemaBuilder.Settings.FieldAttribute<IgnoreAttribute>(mListPropertRoute) == null ||
+            mListPropertRoute.PropertyInfo!.GetCustomAttribute<QueryablePropertyAttribute>() == null)
+            throw new InvalidOperationException($"The property {mListPropertRoute} should have the attributes [Ignore, QueryableProperty] to be used as VirtualMList");
+
+        var nn = Validator.TryGetPropertyValidator(backReferenceRoute)?.Validators.OfType<NotNullValidatorAttribute>().SingleOrDefaultEx();
+        if (nn != null && !nn.Disabled)
+            throw new InvalidOperationException($"The property {backReferenceRoute} should have an [NotNullValidator(Disabled = true)] to be used as back reference or a VirtualMList");
 
         RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
 
@@ -128,10 +134,10 @@ public static class VirtualMList
         {
             sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mListField,
                  shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                 valueExpression: (e, rowId) => Database.Query<L>().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder(),
+                 valueExpression: (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder(),
                  valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
                  Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder():
-                 Database.Query<L>().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
+                 Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
 
             );
         }
@@ -139,10 +145,10 @@ public static class VirtualMList
         {
             sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
                 shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                valueExpression: (e, rowId) => Database.Query<L>().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList(),
+                valueExpression: (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList(),
                 valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
                 Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList() :
-                Database.Query<L>().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList()
+                Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList()
             );
         }
 
@@ -205,7 +211,7 @@ public static class VirtualMList
             if (!(args.WasNew || ShouldConsiderNew(typeof(T))))
             {
                 var oldElements = mlist.EmptyIfNull().Where(line => !line.IsNew);
-                var query = Database.Query<L>()
+                var query = Database.Query<L>().DisableQueryFilter()
                 .Where(p => backReference.Evaluate(p).Is(e.ToLite()));
 
                 if(onRemove == null)
@@ -245,7 +251,7 @@ public static class VirtualMList
                 return null;
 
             //You can do a VirtualMList to itself at the table level, but there should not be cycles inside the instances
-            var toDelete = Database.Query<L>().Where(se => query.Any(e => backReference.Evaluate(se).Is(e)));
+            var toDelete = Database.Query<L>().DisableQueryFilter().Where(se => query.Any(e => backReference.Evaluate(se).Is(e)));
             if (defLazyDelete)
             {
                 if (toDelete.Any())
@@ -276,7 +282,7 @@ public static class VirtualMList
 
         sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
             shouldSet: () => false,
-            valueExpression: (e, rowId) => Database.Query<L>().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
+            valueExpression: (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
             );
 
         sb.Schema.EntityEvents<T>().Saving += (T e) =>

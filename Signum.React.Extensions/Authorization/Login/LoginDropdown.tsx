@@ -4,7 +4,8 @@ import { LoginAuthMessage, UserEntity } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 import { LinkContainer } from '@framework/Components';
 import { Dropdown, NavItem, NavDropdown, Nav } from 'react-bootstrap';
-import { toLite } from '@framework/Signum.Entities';
+import { Lite, toLite, is } from '@framework/Signum.Entities';
+import * as CultureClient from '../../Translation/CultureClient'
 
 
 export default function LoginDropdown(p: {
@@ -12,9 +13,10 @@ export default function LoginDropdown(p: {
   changePasswordVisible?: boolean;
   switchUserVisible?: boolean;
   profileVisible?: boolean;
-  extraButons?: (user: UserEntity) => React.ReactNode;
+  extraMenuItems?: (user: UserEntity) => React.ReactNode;
 }) {
 
+  const currentCulture = CultureClient.currentCulture;
   const user = AuthClient.currentUser();
 
   if (!user)
@@ -38,7 +40,7 @@ export default function LoginDropdown(p: {
       .done();
   }
 
-  var extraButtons = p.extraButons && p.extraButons(user);
+  var extraButtons = p.extraMenuItems && p.extraMenuItems(user);
 
   return (
     <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={p.renderName ? p.renderName(user) : user.userName!} align="end">
@@ -53,6 +55,8 @@ export default function LoginDropdown(p: {
     </NavDropdown>
   );
 }
+
+
 
 
 

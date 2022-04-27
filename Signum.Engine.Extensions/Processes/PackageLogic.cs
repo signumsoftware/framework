@@ -52,7 +52,7 @@ public static class PackageLogic
                 });
             
             
-            QueryLogic.Expressions.Register((PackageEntity p) => p.Lines(), () => ProcessMessage.Lines.NiceToString());
+            QueryLogic.Expressions.Register((PackageEntity p) => p.Lines(), ProcessMessage.Lines);
 
             if (packages)
             {

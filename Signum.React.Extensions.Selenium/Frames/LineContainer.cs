@@ -285,13 +285,13 @@ public static class LineContainerExtensions
         return new SearchControlProxy(element);
     }
 
-    public static ValueSearchControlLineProxy GetValueSearchControlLine(this ILineContainer lineContainer, object queryName)
+    public static SearchValueLineProxy GetSearchValueLine(this ILineContainer lineContainer, object queryName)
     {
         string queryKey = QueryUtils.GetKey(queryName);
 
         var element = lineContainer.Element.WaitElementVisible(By.CssSelector("[data-value-query-key={0}]".FormatWith(queryKey)));
 
-        return new ValueSearchControlLineProxy(element);
+        return new SearchValueLineProxy(element);
     }
 }
 

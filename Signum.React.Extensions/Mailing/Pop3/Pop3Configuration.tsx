@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValueLine, EntityRepeater } from '@framework/Lines'
-import { ValueSearchControlLine } from '@framework/Search'
+import { SearchValueLine } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { Binding } from '@framework/Reflection'
 import { Pop3ConfigurationEntity, EmailMessageEntity } from '../Signum.Entities.Mailing'

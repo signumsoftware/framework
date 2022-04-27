@@ -26,11 +26,10 @@ export interface ChartRendererProps {
   lastChartRequest?: ChartRequestModel;
   onReload?: (e?: React.MouseEvent<any>) => void;
   autoRefresh: boolean;
-  onCreateNew?: (e: React.MouseEvent<any>) => void;
-  typeInfos?: TypeInfo[];
   dashboardFilter?: DashboardFilter;
   onDrillDown?: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onBackgroundClick?: (e: React.MouseEvent) => void;
+  minHeigh: number | null;
 }
 
 export default function ChartRenderer(p: ChartRendererProps) {
@@ -47,19 +46,21 @@ export default function ChartRenderer(p: ChartRendererProps) {
   var parameters = cs && ChartClient.API.getParameterWithDefault(p.chartRequest, cs.chartScript)
 
   return (
-    <FullscreenComponent onReload={p.onReload} onCreateNew={p.onCreateNew} typeInfos={p.typeInfos}>
+    <FullscreenComponent onReload={p.onReload}>
       <ErrorBoundary deps={[p.data]}>
         {cs && parameters &&
           <ReactChart
-            chartRequest={p.chartRequest}
-            data={p.data}
-            dashboardFilter={p.dashboardFilter}
-            loading={p.loading}
-            onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined))}
-            onBackgroundClick={p.onBackgroundClick}
-            parameters={parameters}
-            onReload={p.onReload}
-            onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />
+          chartRequest={p.chartRequest}
+          data={p.data}
+          dashboardFilter={p.dashboardFilter}
+          loading={p.loading}
+          onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined))}
+          onBackgroundClick={p.onBackgroundClick}
+          parameters={parameters}
+          onReload={p.onReload}
+          onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)}
+          minHeigh={p.minHeigh}
+        />
         }
       </ErrorBoundary>
     </FullscreenComponent>

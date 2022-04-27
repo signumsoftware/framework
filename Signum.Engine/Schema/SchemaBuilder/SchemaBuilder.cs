@@ -3,6 +3,7 @@ using Signum.Engine.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Maps;
 
@@ -28,6 +29,8 @@ public class SchemaBuilder
                 cleanName => schema.NameToType.TryGetC(cleanName));
 
             FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
+            MListElementPropertyToken.miMListElementsLite = ReflectionTools.GetMethodInfo(() => Database.MListElementsLite<Entity, Entity>(null!, null!)).GetGenericMethodDefinition();
+            MListElementPropertyToken.HasAttribute = (pr, type) => this.Settings.FieldAttributes(pr)?.Any(a => a.GetType() == type) ?? false;
         }
 
         Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
@@ -521,7 +524,7 @@ public class SchemaBuilder
     {
         var attr = GetPrimaryKeyAttribute(table.Type);
 
-        PrimaryKey.PrimaryKeyType.SetDefinition(table.Type, attr.Type);
+        PrimaryKey.PrimaryKeyType.Add(table.Type, attr.Type);
 
         DbTypePair pair = Settings.GetSqlDbType(attr, attr.Type);
 
@@ -645,7 +648,7 @@ public class SchemaBuilder
 
         bool avoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null;
 
-        var implementations = types.ToDictionary<Type, Type, ImplementationColumn>(t => t, t =>
+        var implementations = types.ToDictionary(t => t, t =>
         {
             var rt = Include(t, route);
 
@@ -669,11 +672,16 @@ public class SchemaBuilder
     {
         var nullable = Settings.GetIsNullable(route, forceNull);
 
-        var column = new ImplementationStringColumn(preName.ToString())
+        var primaryKeyTypes = Settings.ImplementedByAllPrimaryKeyTypes;
+
+        if(primaryKeyTypes.Count() > 1 && nullable == IsNullable.No)
+            nullable = IsNullable.Forced;
+
+        var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(preName.Add(t.Name).ToString(), nullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t))
         {
             Nullable = nullable,
-            Size = Settings.DefaultImplementedBySize,
-        };
+            Size = t == typeof(string) ? Settings.ImplementedByAllStringSize : null,
+        });
 
         var columnType = new ImplementationColumn(preName.Add("Type").ToString(), Include(typeof(TypeEntity), route))
         {
@@ -681,7 +689,7 @@ public class SchemaBuilder
             AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
         };
 
-        return new FieldImplementedByAll(route, column, columnType)
+        return new FieldImplementedByAll(route, columns, columnType)
         {
             IsLite = route.Type.IsLite(),
             AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null
@@ -717,6 +725,8 @@ public class SchemaBuilder
         var keyAttr = Settings.FieldAttribute<PrimaryKeyAttribute>(route) ?? Settings.DefaultPrimaryKeyAttribute;
         TableMList.PrimaryKeyColumn primaryKey;
         {
+            PrimaryKey.MListPrimaryKeyType.Add(route, keyAttr.Type);
+
             var pair = Settings.GetSqlDbType(keyAttr, keyAttr.Type);
 
             primaryKey = new TableMList.PrimaryKeyColumn(keyAttr.Type, keyAttr.Name)

@@ -231,26 +231,30 @@ export function CalendarYear({ year, rules, rowByDate, width, height, onDrillDow
       </g>
 
       <g transform={translate(rules.daysRule.start("daysContent"), rules.weeksRule.start("weeksContent"))}>
-      {d3.utcDays(new Date(Date.UTC(year, 0, 1)), new Date(Date.UTC(year + 1, 0, 1))).map(d => {
-        const r: ChartRow | undefined = rowByDate[cleanDate(d)];
-        const active = r && detector?.(r);
-        return <rect key={d.toISOString()}
-          className="sf-transition"
-          opacity={active == false ? .5 : undefined}
-          stroke={active == true ? "black" : "#ccc"}
-          strokeWidth={active == true ? 2 : undefined}
-          fill={r == undefined || initialLoad ? "#fff" : color(r)}
-          width={cellSize}
-          height={cellSize}
-          x={day(d) * cellSize}
-          y={week(d) * cellSize}
-          cursor="pointer"
-          onClick={e => r == undefined ? null : onDrillDown(r, e)}>
-          <title>
-            {dateFormat(d) + (r == undefined ? "" : ("(" + valueColumn.getValueNiceName(r) + ")"))}
-          </title>
-        </rect>
-      })}
+        {d3.utcDays(new Date(Date.UTC(year, 0, 1)), new Date(Date.UTC(year + 1, 0, 1))).map(d => {
+          const r: ChartRow | undefined = rowByDate[cleanDate(d)];
+          const active = r && detector?.(r);
+          return (
+            <g className="hover-group" key={d.toISOString()}>
+              <rect
+                className="sf-transition hover-target"
+                opacity={active == false ? .5 : undefined}
+                stroke={active == true ? "black" : "#ccc"}
+                strokeWidth={active == true ? 2 : undefined}
+                fill={r == undefined || initialLoad ? "#fff" : color(r)}
+                width={cellSize}
+                height={cellSize}
+                x={day(d) * cellSize}
+                y={week(d) * cellSize}
+                cursor="pointer"
+                onClick={e => r == undefined ? null : onDrillDown(r, e)}>
+                <title>
+                  {dateFormat(d) + (r == undefined ? "" : ("(" + valueColumn.getValueNiceName(r) + ")"))}
+                </title>
+              </rect>
+            </g>
+          )
+        })}
       </g>
 
       <g transform={translate(rules.daysRule.start("daysContent"), rules.weeksRule.start("weeksContent"))} opacity={detector ? .5 : undefined} >

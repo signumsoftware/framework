@@ -5,10 +5,10 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
-import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos } from '../Reflection'
+import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
@@ -473,7 +473,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           </div>
         }
         {p.showHeader == true && !this.state.showFilters && !sfb && this.renderPinnedFilters(true)}
-        {p.showHeader == "PinnedFilters" && this.renderPinnedFilters(true)}
+        {p.showHeader == "PinnedFilters" && (sfb ?? this.renderPinnedFilters(true))}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
@@ -789,7 +789,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resFO = this.state.resultFindOptions;
     var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
-    return Promise.all(filters.map(fs => Finder.fetchEntitiesLiteWithFilters(resFO.queryKey, fs, [], null))).then(fss => fss.flatMap(fs => fs));
+    return Promise.all(filters.map(fs => Finder.fetchLites({ queryName: resFO.queryKey, filterOptions: fs, orderOptions: [], count: null })))
+      .then(fss => fss.flatMap(fs => fs));
   }
 
   // SELECT BUTTON
@@ -1027,6 +1028,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (cm.rowIndex != undefined) {
 
+      menuItems.push(<Dropdown.Item className="sf-paste-menu-item" onClick={() => this.handleCopyClick()}>
+        <FontAwesomeIcon icon="copy" className="icon" color="#21618C" />&nbsp;{SearchMessage.Copy.niceToString()}
+      </Dropdown.Item>);
+
       if (this.state.currentMenuItems == undefined) {
         menuItems.push(<Dropdown.Header>{JavascriptMessage.loading.niceToString()}</Dropdown.Header>);
       } else {
@@ -1047,6 +1052,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     );
   }
 
+  handleCopyClick() {
+    const supportsClipboard = (navigator.clipboard && window.isSecureContext);
+    if (!supportsClipboard)
+      return;
+
+    const text = this.state.selectedRows!.filter(r => !!r.entity)
+      .map(r => liteKey(r.entity!))
+      .join("|");
+
+    navigator.clipboard.writeText(text).done();
+  }
+  
   //SELECTED ROWS
 
   allSelected() {
@@ -1229,7 +1246,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               {this.orderIcon(co)}
               {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
                 <FontAwesomeIcon icon="key" className="me-1"
-                  color={rootKeys.contains(co) ? undefined : "gray"}
+                  color={rootKeys.contains(co) ? "gray" : "lightgray"}
                   title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
               {co.displayName}
             </div>
@@ -1536,6 +1553,40 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     else {
       return m;
     }
+  }
+
+  getSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
+
+    var result = this.tryGetSelectedValue(token, automaticEntityPrefix);
+    if (result == null)
+      throw new Error(`No column '${token}' found`);
+
+    return result.value;
+  }
+
+  tryGetSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): { value: Finder.AddToLite<T> | undefined } | undefined {
+    
+    const tokenName = token.toString();
+
+    const sc = this;
+    const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
+    if (colIndex != -1) {
+      const row = sc.state.selectedRows!.first();
+      const val = row.columns[colIndex];
+      return { value: val };
+    }
+
+    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
+    if (filter != null)
+      return { value: filter?.value };
+
+    if (automaticEntityPrefix) {
+      var result = this.tryGetSelectedValue(tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false);
+      if (result != null)
+        return result as any;
+    }
+
+    return undefined;
   }
 }
 

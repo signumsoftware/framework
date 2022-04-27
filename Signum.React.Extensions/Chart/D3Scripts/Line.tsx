@@ -65,8 +65,9 @@ export default function renderLine({ data, width, height, parameters, loading, c
 
       <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={x.bandwidth() > 5} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
       <g opacity={dashboardFilter ? .5 : undefined}>
-        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
+        <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y}  />
       </g>
+
       {paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onDrillDown, initialLoad, memo, detector })}
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
@@ -168,46 +169,42 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
             var row = rowByKey[key];
             var active = detector?.(row);
             return (
-              <circle key={key}
-                transform={translate(x(key)!, -y(valueColumn.getValue(r))!)}
-                className="point sf-transition"
-                opacity={active == false ? .5 : undefined}
-                stroke={active == true ? "black" : color}
-                strokeWidth={active == true ? 3 : circleStroke}
-                fill="white"
-                r={circleRadius}
-                onClick={e => onDrillDown(row, e)}
-                cursor="pointer"
-                shapeRendering="initial">
-                <title>
-                  {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
-                </title>
-              </circle>
+              <g className="hover-group" key={key}>
+                <circle
+                  transform={translate(x(key)!, -y(valueColumn.getValue(r))!)}
+                  className="point sf-transition hover-target"
+                  opacity={active == false ? .5 : undefined}
+                  stroke={active == true ? "black" : color}
+                  strokeWidth={active == true ? 3 : circleStroke}
+                  fill="white"
+                  r={circleRadius}
+                  onClick={e => onDrillDown(row, e)}
+                  cursor="pointer"
+                  shapeRendering="initial">
+                  <title>
+                    {keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r)}
+                  </title>
+                </circle>
+                { /*Point labels*/
+                  numberOpacity > 0 &&
+                  <g className="point-label" >
+                    <text transform={translate(x(key)!, -y(valueColumn.getValue(r))! - 10)}
+                      className="point-label sf-transition"
+                      r={5}
+                      opacity={active == false ? .5 : active == true ? 1 : numberOpacity}
+                      textAnchor="middle"
+                      onClick={e => onDrillDown(r, e)}
+                      cursor="pointer"
+                      shapeRendering="initial">
+                      {valueColumn.getValueNiceName(r)}
+                    </text>)
+                  </g>
+                }
+
+              </g>
             );
           })}
       </g>
-      }
-
-      { /*Point labels*/
-        numberOpacity > 0 &&
-        <g className="point-label" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
-          {orderedRows
-            .map(r => {
-              var key = keyColumn.getValueKey(r);
-              var row = rowByKey[key];
-              var active = detector?.(row);
-              return (<text key={key} transform={translate(x(key)!, -y(valueColumn.getValue(r))! - 10)}
-                className="point-label sf-transition"
-                r={5}
-                opacity={active == false ? .5: active == true ? 1 : numberOpacity}
-                textAnchor="middle"
-                onClick={e => onDrillDown(r, e)}
-                cursor="pointer"
-                shapeRendering="initial">
-                {valueColumn.getValueNiceName(r)}
-              </text>)
-            })}
-        </g>
       }
     </>
   );

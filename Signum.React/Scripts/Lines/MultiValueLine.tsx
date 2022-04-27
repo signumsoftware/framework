@@ -15,6 +15,7 @@ interface MultiValueLineProps extends LineBaseProps {
   onRenderItem?: (ctx: TypeContext<any>) => React.ReactElement<any>;
   onCreate?: () => Promise<any[] | any | undefined>;
   addValueText?: string;
+  valueColumClass?: string;
 }
 
 export class MultiValueLineController extends LineBaseController<MultiValueLineProps> {
@@ -24,6 +25,8 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
   getDefaultProps(p: MultiValueLineProps) {
     if (p.ctx.value == undefined)
       p.ctx.value = [];
+
+    p.valueColumClass = "col-sm-12";
 
     super.getDefaultProps(p);
   }
@@ -67,36 +70,37 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
   if (c.isHidden)
     return null;
 
-
-
   return (
     <FormGroup ctx={p.ctx} labelText={p.labelText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-      <table className="sf-multi-value">
-        <tbody>
-          {
-            mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
-              (<ErrorBoundary key={c.keyGenerator.getKey((mlec.binding as MListElementBinding<any>).getMListElement())}>
-                <MultiValueLineElement
-                  ctx={mlec}
-                  onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
-                  onRenderItem={p.onRenderItem} />
-              </ErrorBoundary>))
-          }
-          <tr >
-            <td colSpan={4}>
-              {!p.ctx.readOnly &&
-                <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
-                  className="sf-line-button sf-create"
-                  onClick={c.handleAddValue}>
-                  {EntityBaseController.createIcon}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
-                </a>}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="row">
+      {
+            mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) => {
+              return (
+                
+                <ErrorBoundary key={c.keyGenerator.getKey((mlec.binding as MListElementBinding<any>).getMListElement())}>
+                  <div className={p.valueColumClass!} >
+                    <MultiValueLineElement
+                    ctx={mlec}
+                    onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
+                    onRenderItem={p.onRenderItem}
+                      valueColumClass={p.valueColumClass!} />
+                  </div>
+                  </ErrorBoundary>
+               
+              );
+            })
+      }
+      </div>
+          {!p.ctx.readOnly &&
+            <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
+              className="sf-line-button sf-create"
+              onClick={c.handleAddValue}>
+              {EntityBaseController.createIcon}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
+            </a>}
+       
     </FormGroup>
   );
 });
@@ -105,6 +109,7 @@ export interface MultiValueLineElementProps {
   ctx: TypeContext<any>;
   onRemove: (event: React.MouseEvent<any>) => void;
   onRenderItem?: (ctx: TypeContext<any>) => React.ReactElement<any>;
+  valueColumClass: string;
 }
 
 export function MultiValueLineElement(props: MultiValueLineElementProps) {
@@ -113,19 +118,16 @@ export function MultiValueLineElement(props: MultiValueLineElementProps) {
   var renderItem = props.onRenderItem ?? getAppropiateComponentFactory(ctx.propertyRoute!)
 
   return (
-    <tr>
-      <td className="px-2">
-        {!ctx.readOnly &&
-          <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
-            className="sf-line-button sf-remove"
-            onClick={props.onRemove}>
-            <FontAwesomeIcon icon="times" />
-          </a>}
-      </td>
-      <td className="w-100">
-        {renderItem(ctx)}
-      </td>
-    </tr>
+    <div style={{ display: "flex", alignItems: "center", marginBottom: "2px" }}>
+      {!ctx.readOnly &&
+        <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+          className="sf-line-button sf-remove"
+          onClick={props.onRemove}>
+          <FontAwesomeIcon icon="times" />
+        </a>
+      }
+      {renderItem(ctx)}
+    </div>
   );
 }
 

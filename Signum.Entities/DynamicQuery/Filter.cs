@@ -1,3 +1,4 @@
+using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.ComponentModel;
@@ -18,6 +19,36 @@ public abstract class Filter
     public abstract IEnumerable<FilterCondition> GetFilterConditions();
 
     public abstract bool IsAggregate();
+
+    protected Expression GetExpressionWithAnyAll(BuildExpressionContext ctx, CollectionAnyAllToken anyAll)
+    {
+        var ept = MListElementPropertyToken.AsMListEntityProperty(anyAll.Parent!);
+        if (ept != null)
+        {
+            Expression collection = MListElementPropertyToken.BuildMListElements(ept, ctx);
+            Type mleType = collection.Type.ElementType()!;
+
+            var p = Expression.Parameter(mleType, mleType.Name.Substring(0, 1).ToLower());
+            ctx.Replacements.Add(anyAll, new ExpressionBox(p, mlistElementRoute: anyAll.GetPropertyRoute()));
+            var body = GetExpression(ctx);
+            ctx.Replacements.Remove(anyAll);
+
+            return anyAll.BuildAnyAll(collection, p, body);
+        }
+        else
+        {
+            Expression collection = anyAll.Parent!.BuildExpression(ctx);
+
+            Type elementType = collection.Type.ElementType()!;
+
+            var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
+            ctx.Replacements.Add(anyAll, new ExpressionBox(p.BuildLiteNullifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! })));
+            var body = GetExpression(ctx);
+            ctx.Replacements.Remove(anyAll);
+
+            return anyAll.BuildAnyAll(collection, p, body);
+        }
+    }
 }
 
 public class FilterGroup : Filter
@@ -40,28 +71,17 @@ public class FilterGroup : Filter
 
     public override Expression GetExpression(BuildExpressionContext ctx)
     {
-        if (Token is not CollectionAnyAllToken anyAll)
-        {
+        var anyAll = Token?.Follow(a => a.Parent)
+                .OfType<CollectionAnyAllToken>()
+                .TakeWhile(c => !ctx.Replacements.ContainsKey(c))
+                .LastOrDefault();
+
+        if (anyAll == null)
             return this.GroupOperation == FilterGroupOperation.And ?
                 Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
                 Filters.Select(f => f.GetExpression(ctx)).AggregateOr();
-        }
-        else
-        {
-            Expression collection = anyAll.Parent!.BuildExpression(ctx);
-            Type elementType = collection.Type.ElementType()!;
 
-            var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-            ctx.Replacemens.Add(anyAll, p.BuildLite().Nullify());
-
-            var body = this.GroupOperation == FilterGroupOperation.And ?
-                Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
-                Filters.Select(f => f.GetExpression(ctx)).AggregateOr();
-
-            ctx.Replacemens.Remove(anyAll);
-
-            return anyAll.BuildAnyAll(collection, p, body);
-        }
+        return GetExpressionWithAnyAll(ctx, anyAll);
     }
 
     public override string ToString()
@@ -101,22 +121,17 @@ public class FilterCondition : Filter
     {
         CollectionAnyAllToken? anyAll = Token.Follow(a => a.Parent)
               .OfType<CollectionAnyAllToken>()
-              .TakeWhile(c => !ctx.Replacemens.ContainsKey(c))
+              .TakeWhile(c => !ctx.Replacements.ContainsKey(c))
               .LastOrDefault();
 
         if (anyAll == null)
             return GetConditionExpressionBasic(ctx);
 
-        Expression collection = anyAll.Parent!.BuildExpression(ctx);
-        Type elementType = collection.Type.ElementType()!;
+        return GetExpressionWithAnyAll(ctx, anyAll);
 
-        var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-        ctx.Replacemens.Add(anyAll, p.BuildLiteNullifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! }));
-        var body = GetExpression(ctx);
-        ctx.Replacemens.Remove(anyAll);
-
-        return anyAll.BuildAnyAll(collection, p, body);
     }
+
+   
 
     public static Func<bool> ToLowerString = () => false;
 

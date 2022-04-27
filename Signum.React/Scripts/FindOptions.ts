@@ -189,6 +189,24 @@ export interface QueryToken {
   propertyRoute?: string;
 }
 
+function getFullKey(token: QueryToken | QueryTokenString<any> | string) : string {
+  if (token instanceof QueryTokenString)
+    return token.token;
+
+  if (typeof token == "object")
+    return token.fullKey;
+
+  return token;
+}
+
+export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | string, tokenStart: QueryToken | QueryTokenString<any> | string) {
+
+  token = getFullKey(token);
+  tokenStart = getFullKey(token);
+
+  return token == tokenStart || token.startsWith(tokenStart + ".");
+}
+
 export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll";
 
 export function hasAnyOrAll(token: QueryToken | undefined): boolean {

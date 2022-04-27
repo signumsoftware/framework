@@ -10,8 +10,6 @@ import { TypeInfo } from '@framework/Reflection'
 interface FullscreenComponentProps {
   children: React.ReactNode;
   onReload?: (e: React.MouseEvent<any>) => void;
-  typeInfos?: TypeInfo[];
-  onCreateNew?: (e: React.MouseEvent<any>) => void;
 }
 
 export function FullscreenComponent(p: FullscreenComponentProps) {
@@ -24,7 +22,7 @@ export function FullscreenComponent(p: FullscreenComponentProps) {
   }
 
   return (
-    <div className="sf-fullscreen-component" style={!isFullScreen ? { display: "flex" } : ({
+    <div className="sf-fullscreen-component" style={!isFullScreen ? { display: "flex", flex: 1 } : ({
       display: "flex",
       position: "fixed",
       background: "white",
@@ -48,22 +46,11 @@ export function FullscreenComponent(p: FullscreenComponentProps) {
             <FontAwesomeIcon icon={"redo"} />
           </a>
         }
-        {p.onCreateNew && p.typeInfos &&
-          <a onClick={p.onCreateNew} href="#" className="sf-chart-mini-icon" title={createNewTitle(p.typeInfos)}>
-            <FontAwesomeIcon icon={"plus"} />
-          </a>
-        }
       </div>
 
     </div>
   );
 }
 
-function createNewTitle(tis: TypeInfo[]) {
 
-  const types = tis.map(ti => ti.niceName).join(", ");
-  const gender = tis.first().gender;
-
-  return SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
-}
 

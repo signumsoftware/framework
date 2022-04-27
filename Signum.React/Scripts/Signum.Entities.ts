@@ -190,6 +190,15 @@ export function parseLite(lite: string): Lite<Entity> {
   };
 }
 
+export const liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
+export function parseLiteList(text: string): Lite<Entity>[] {
+  const lines = text.split("|");
+  const liteKeys = lines.map(l => liteKeyRegEx.test(l) ? l : null).notNull();
+  const lites = liteKeys.map(lk => parseLite(lk)).filter(l => isLite(l));
+
+  return lites;
+}
+
 export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false, assertTypesFound = true) {
 
   if (a == undefined && b == undefined)
@@ -292,7 +301,7 @@ export module EngineMessage {
   export const EntityWithType0AndId1NotFound = new MessageKey("EngineMessage", "EntityWithType0AndId1NotFound");
   export const NoWayOfMappingType0Found = new MessageKey("EngineMessage", "NoWayOfMappingType0Found");
   export const TheEntity0IsNew = new MessageKey("EngineMessage", "TheEntity0IsNew");
-  export const ThereAre0ThatReferThisEntity = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntity");
+  export const ThereAre0ThatReferThisEntityByProperty1 = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntityByProperty1");
   export const ThereAreRecordsIn0PointingToThisTableByColumn1 = new MessageKey("EngineMessage", "ThereAreRecordsIn0PointingToThisTableByColumn1");
   export const UnauthorizedAccessTo0Because1 = new MessageKey("EngineMessage", "UnauthorizedAccessTo0Because1");
   export const TheresAlreadyA0With1EqualsTo2_G = new MessageKey("EngineMessage", "TheresAlreadyA0With1EqualsTo2_G");
@@ -309,6 +318,7 @@ export module EntityControlMessage {
   export const Remove = new MessageKey("EntityControlMessage", "Remove");
   export const View = new MessageKey("EntityControlMessage", "View");
   export const Add = new MessageKey("EntityControlMessage", "Add");
+  export const Paste = new MessageKey("EntityControlMessage", "Paste");
 }
 
 export interface ImmutableEntity extends Entity {
@@ -550,6 +560,7 @@ export module SearchMessage {
   export const HideHiddenColumns = new MessageKey("SearchMessage", "HideHiddenColumns");
   export const GroupKey = new MessageKey("SearchMessage", "GroupKey");
   export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
+  export const Copy = new MessageKey("SearchMessage", "Copy");
 }
 
 export module SelectorMessage {

@@ -738,10 +738,15 @@ public static class Administrator
 
     public static SqlPreCommand DeleteWhereScript<T, R>(Expression<Func<T, R>> field, R value)
         where T : Entity
-        where R : Entity
+        where R : IEntity
     {
         var table = Schema.Current.Table<T>();
-        var column = (IColumn)Schema.Current.Field(field);
+        var f = Schema.Current.Field(field);
+
+        var column = f is IColumn c ? c : 
+            f is FieldImplementedBy fib ? fib.ImplementationColumns.GetOrThrow(value.GetType()) : 
+            throw new UnexpectedValueException(f);
+
         return DeleteWhereScript(table, column, value.Id);
     }
 }

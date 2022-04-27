@@ -43,6 +43,7 @@ export function start(options: { routes: JSX.Element[] }) {
       }
 
       querySettings.hiddenColumns = [
+        ...(querySettings.hiddenColumns ?? []),
         { token: DisabledMixin.token(e => e.entity.isDisabled) }
       ];
 
@@ -61,8 +62,8 @@ export function start(options: { routes: JSX.Element[] }) {
         Navigator.addSettings(entitySettings);
       }
 
-      if (!entitySettings.findOptions) {
-        entitySettings.findOptions = {
+      if (!entitySettings.defaultFindOptions) {
+        entitySettings.defaultFindOptions = {
           queryName: ti.name,
           filterOptions: [{ token: DisabledMixin.token(e => e.entity.isDisabled), operation: "EqualTo", value: false, frozen: true }]
         };
