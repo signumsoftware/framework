@@ -2677,9 +2677,6 @@
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
   </Type>
-  <Type Name="UserCondition">
-    <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
-  </Type>
   <Type Name="UserEntity" Description="Benutzer" Gender="m">
     <Member Name="CultureInfo" Description="Sprache" />
     <Member Name="DisabledOn" Description="Deaktiviert auf" />
@@ -2768,6 +2765,9 @@
   <Type Name="UserTreePartEntity" Description="Benutzerbaumteil" PluralDescription="Benutzerbaumteile" Gender="m">
     <Member Name="RequiresTitle" Description="Titel erforderlich" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
+  <Type Name="UserTypeCondition">
+    <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
   </Type>
   <Type Name="ValueUserQueryElementEmbedded" Description="Wert der Benutzerabfrage">
     <Member Name="Href" Description="Href" />
