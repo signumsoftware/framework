@@ -92,6 +92,7 @@
     <Member Name="MoveDown" Description="Nach unten" />
     <Member Name="MoveUp" Description="Nach oben" />
     <Member Name="Navigate" Description="Navigieren" />
+    <Member Name="Paste" Description="Einfügen" />
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="View" Description="Ansehen" />
   </Type>
@@ -403,6 +404,7 @@
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
     <Member Name="Column" Description="Spalte" />
+    <Member Name="Copy" Description="Kopieren" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
     <Member Name="DeleteAllFilter" Description="Alle Filter löschen" />
