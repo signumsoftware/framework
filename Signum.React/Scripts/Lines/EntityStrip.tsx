@@ -275,7 +275,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
     const toStr = getToString(p.ctx.value);
     return !p.showType || !(isEntity(p.ctx.value) || isLite(p.ctx.value)) ? toStr :
       <span style={{ wordBreak: "break-all" }} title={toStr}>
-        <TypeBadge entity={p.ctx.value}/>{toStr}
+        {toStr}<TypeBadge entity={p.ctx.value} />
       </span>;
   }
 

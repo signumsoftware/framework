@@ -183,7 +183,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
               const toStr = getToString(lite);
               var tag = !showType ? toStr :
                 <span style={{ wordBreak: "break-all" }} title={toStr}>
-                  <TypeBadge entity={lite}/>{toStr}
+                  {toStr}<TypeBadge entity={lite} />
                 </span>;
 
               var link = p.isLink && Navigator.isViewable(lite.EntityType) ?
