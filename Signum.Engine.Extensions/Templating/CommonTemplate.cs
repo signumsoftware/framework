@@ -283,7 +283,7 @@ public static class ParsedModel
                 {
                     var miParameters = method.GetParameters();
 
-                    if (miParameters.Length == 0 || typeof(TemplateParameters).IsAssignableFrom(miParameters.Last().ParameterType))
+                    if (miParameters.Length == 0 || !typeof(TemplateParameters).IsAssignableFrom(miParameters.Last().ParameterType))
                     {
                         tp.AddError(false, $"The method {method.Name} in {type.Name} should have a {nameof(TemplateParameters)} as last argument".FormatWith(type.Name, part));
                         return null;

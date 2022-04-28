@@ -84,7 +84,7 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     [AutoExpressionField]
     public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize());
 
-    [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
+    [StringLengthValidator(Min = 1, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
     public string Suffix { get; set; }
 
     [Ignore]
