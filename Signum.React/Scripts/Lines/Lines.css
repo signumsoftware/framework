@@ -45,6 +45,11 @@ input[type=checkbox].form-control {
     text-align: right;
 }
 
+.sf-calendar-end .rw-calendar-popup {
+    left: auto;
+    right: -18px;
+}
+
 span.sf-today {
     font-weight: bold;
 }

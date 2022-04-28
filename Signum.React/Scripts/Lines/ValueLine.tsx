@@ -36,6 +36,7 @@ export interface ValueLineProps extends LineBaseProps {
   minDate?: Date;
   maxDate?: Date;
   calendarProps?: Partial<CalendarProps>;
+  calendarAlignEnd?: boolean;
 }
 
 export interface OptionItem {
@@ -771,7 +772,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined)}>
+        <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined, s.calendarAlignEnd && "sf-calendar-end")}>
           <DatePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(vl.props.initiallyFocused)}
             valueEditFormat={luxonFormat}
             valueDisplayFormat={luxonFormat}
