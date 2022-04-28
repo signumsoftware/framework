@@ -85,7 +85,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     var toStr = getToString(item);
     var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.showType)
-      return <span style={{ wordBreak: "break-all" }} title={toStr}><TypeBadge entity={item} />{text}</span>;
+      return <span style={{ wordBreak: "break-all" }} title={toStr}>{text}<TypeBadge entity={item} /></span>;
     else
       return text;
   }
@@ -305,7 +305,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     var toStr = getToString(item.entity!);
     var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
     if (this.showType)
-      return <span style={{ wordBreak: "break-all" }} title={toStr}><TypeBadge entity={item.entity!} />{text}</span>;
+      return <span style={{ wordBreak: "break-all" }} title={toStr}>{text}<TypeBadge entity={item.entity!} /></span>;
     else
       return text;
   }
@@ -383,7 +383,7 @@ export function TypeBadge(p: { entity: Lite<Entity> | Entity }) {
 
   const ti = getTypeInfo(isEntity(p.entity) ? p.entity.Type : p.entity.EntityType);
 
-  return <span className="sf-type-badge me-1">{ti.niceName}</span>;
+  return <span className="sf-type-badge ms-1">{ti.niceName}</span>;
 }
 
 export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{

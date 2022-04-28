@@ -60,6 +60,13 @@ public static class HtmlToWordConverter
                     rp.Append(new Bold(), new BoldComplexScript());
                 }), addParagraphProperties));
 
+            case "ins":
+            case "u":
+                return htmlNode.ChildNodes.SelectMany(c => HtmlToWordPrivate(c, addRunProperties + ((RunProperties rp) =>
+                {
+                    rp.Append(new Underline() { Val = UnderlineValues.Single });
+                }), addParagraphProperties));
+
             case "#text":
                 var runProperties = new RunProperties();
                 addRunProperties?.Invoke(runProperties);
