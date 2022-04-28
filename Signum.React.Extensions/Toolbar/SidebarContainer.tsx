@@ -36,7 +36,7 @@ export function SidebarContainer(p: SidebarContainerProps){
   );
 }
 
-export function SidebarToggleItem(p: { isMobile: boolean, isNarrowModeAllowed: boolean, mode: SidebarMode, setMode: (mode: SidebarMode) => void }) {
+export function SidebarToggleItem(p: { isMobile: boolean, simpleMode?: boolean, mode: SidebarMode, setMode: (mode: SidebarMode) => void }) {
   return (
     <a className="main-sidebar-button nav-link" onClick={(ev) => {
       window.dispatchEvent(new CustomEvent("sidebarMove"));
@@ -44,13 +44,13 @@ export function SidebarToggleItem(p: { isMobile: boolean, isNarrowModeAllowed: b
         case "Hidden": p.setMode("Wide"); break;
         case "Narrow": p.setMode("Wide"); break;
         case "Wide":
-        default: p.setMode(p.isMobile || !p.isNarrowModeAllowed ? "Hidden" : "Narrow"); break;
+        default: p.setMode(p.isMobile || p.simpleMode ? "Hidden" : "Narrow"); break;
       }
     }}>
       <div style={{ display: "flex", height: "100%", alignItems: "center" }}>
         <FontAwesomeIcon icon={"angle-double-left"} style={{ transition: "all 400ms", width: p.mode == "Wide" ? "15px" : "0.1px" }} />
         <FontAwesomeIcon icon={"bars"} style={{ transition: "all 400ms", width: p.mode == "Hidden" ? "15px" : "0.1px" }} />
-        {p.isNarrowModeAllowed && <FontAwesomeIcon icon={"angle-double-right"} style={{ transition: "all 400ms", width: p.mode == "Narrow" ? "15px" : "0.1px" }} />}
+        {!p.simpleMode && <FontAwesomeIcon icon={"angle-double-right"} style={{ transition: "all 400ms", width: p.mode == "Narrow" ? "15px" : "0.1px" }} />}
       </div>
     </a>
   );
