@@ -204,7 +204,7 @@ public class MemberWithArguments
 
     public string ToString(ScopedDictionary<string, ValueProviderBase> variables)
     {
-        return Member.Name + (Arguments == null ? null : "(" + Arguments.ToString(a => a.ToString(variables, null), ", ") + ")");
+        return Member.Name + (Arguments == null ? null : "(" + Arguments.ToString(a => a.ToStringWithoutBrackets(variables), ", ") + ")");
     }
 }
 
