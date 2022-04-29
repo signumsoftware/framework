@@ -69,7 +69,7 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
   abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
-  abstract isCompatibleWithUrl(element: ToolbarResponse<T>, location: Location, query: any): boolean;
+  abstract isCompatibleWithUrlPrio(element: ToolbarResponse<T>, location: Location, query: any): number;
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
     e.preventDefault();

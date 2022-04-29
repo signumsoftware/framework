@@ -27,8 +27,8 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     return <WorkflowDropdownImp key={ key}/>
   }
 
-  isCompatibleWithUrl() {
-    return false;
+  isCompatibleWithUrlPrio() {
+    return 0;
   }
 
   navigateTo() {
