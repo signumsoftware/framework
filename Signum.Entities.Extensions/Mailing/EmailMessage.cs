@@ -125,6 +125,7 @@ public class EmailReceptionMixin : MixinEntity
     {
     }
 
+    [NotifyChildProperty]
     public EmailReceptionInfoEmbedded? ReceptionInfo { get; set; }
 }
 
@@ -137,8 +138,9 @@ public class EmailReceptionInfoEmbedded : EmbeddedEntity
 
     public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
-    [DbType(Size = int.MaxValue), ForceNotNullable]
-    public string RawContent { get; set; }
+    [NotifyChildProperty]
+    public BigStringEmbedded RawContent { get; set; } = new BigStringEmbedded();
+
 
     public DateTime SentDate { get; set; }
 

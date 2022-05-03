@@ -185,7 +185,7 @@ export interface EmailReceptionInfoEmbedded extends Entities.EmbeddedEntity {
   Type: "EmailReceptionInfoEmbedded";
   uniqueId: string;
   reception: Entities.Lite<Pop3ReceptionEntity>;
-  rawContent: string;
+  rawContent: Signum.BigStringEmbedded;
   sentDate: string /*DateTime*/;
   receivedDate: string /*DateTime*/;
   deletionDate: string /*DateTime*/ | null;
