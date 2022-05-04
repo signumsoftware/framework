@@ -3,6 +3,7 @@ using Signum.Entities.Isolation;
 using Signum.Entities.Templating;
 using Signum.Engine.UserAssets;
 using Signum.Engine.Authorization;
+using System.Globalization;
 
 namespace Signum.Engine.Mailing;
 
@@ -274,7 +275,7 @@ public static class EmailModelLogic
         return entityToType.Value.GetOrThrow(modelEntity, "The EmailModel {0} was not registered");
     }
 
-    public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this IEmailModel emailModel)
+    public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this IEmailModel emailModel, CultureInfo? cultureInfo = null)
     {
         if (emailModel.UntypedEntity == null)
             throw new InvalidOperationException("Entity property not set on EmailModel");
@@ -284,7 +285,7 @@ public static class EmailModelLogic
             var emailModelEntity = ToEmailModelEntity(emailModel.GetType());
             var template = GetCurrentTemplate(emailModelEntity, emailModel.UntypedEntity as Entity);
 
-            return EmailTemplateLogic.CreateEmailMessage(template.ToLite(), model: emailModel);
+            return EmailTemplateLogic.CreateEmailMessage(template.ToLite(), model: emailModel, cultureInfo: cultureInfo);
         }
     }
 
