@@ -32,7 +32,7 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
           <ValueLine ctx={ri.subCtx(f => f.deletionDate)} />
         </fieldset>
 
-        <pre>{ri.value.rawContent}</pre>
+        <pre>{ri.value.rawContent?.text}</pre>
       </Tab>
     );
   };
