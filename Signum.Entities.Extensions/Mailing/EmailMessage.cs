@@ -123,6 +123,7 @@ public class EmailReceptionMixin : MixinEntity
 {
     protected EmailReceptionMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
     {
+        this.RebindEvents();
     }
 
     [NotifyChildProperty]
@@ -131,6 +132,11 @@ public class EmailReceptionMixin : MixinEntity
 
 public class EmailReceptionInfoEmbedded : EmbeddedEntity
 {
+    public EmailReceptionInfoEmbedded()
+    {
+        this.RebindEvents();
+    }
+
     [UniqueIndex(AllowMultipleNulls = true)]
     [StringLengthValidator(Min = 1, Max = 100)]
     public string UniqueId { get; set; }

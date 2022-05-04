@@ -1588,13 +1588,35 @@ public partial class FieldMixin
 {
     protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
     {
-        ParameterExpression mixin = Expression.Parameter(this.FieldType, "mixin");
-
-        assigments.Add(Expression.Assign(mixin, Expression.Call(value, MixinDeclarations.miMixin.MakeGenericMethod(this.FieldType))));
-        foreach (var ef in Fields.Values)
+        if (value.Type.IsEntity())
         {
-            ef.Field.CreateParameter(trios, assigments,
-                Expression.Field(mixin, ef.FieldInfo), forbidden, suffix);
+            ParameterExpression mixin = Expression.Parameter(this.FieldType, "mixin");
+
+            assigments.Add(Expression.Assign(mixin, Expression.Call(value, MixinDeclarations.miMixin.MakeGenericMethod(this.FieldType))));
+            foreach (var ef in Fields.Values)
+            {
+                ef.Field.CreateParameter(trios, assigments,
+                    Expression.Field(mixin, ef.FieldInfo), forbidden, suffix);
+            }
+        }
+        else
+        {
+            ParameterExpression mixin = Expression.Parameter(this.FieldType, "mixin");
+
+            assigments.Add(Expression.Assign(mixin, Expression.Condition(
+                Expression.Equal(value, Expression.Constant(null, value.Type)),
+                Expression.Constant(null, this.FieldType),
+                Expression.Call(value, MixinDeclarations.miMixin.MakeGenericMethod(this.FieldType))
+            )));
+
+            foreach (var ef in Fields.Values)
+            {
+                ef.Field.CreateParameter(trios, assigments,
+                    Expression.Condition(
+                    Expression.Equal(mixin, Expression.Constant(null, this.FieldType)),
+                    Expression.Constant(null, ef.FieldInfo.FieldType.Nullify()),
+                    Expression.Field(mixin, ef.FieldInfo).Nullify()), forbidden, suffix);
+            }
         }
     }
 }
