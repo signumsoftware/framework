@@ -38,7 +38,7 @@ export function SidebarContainer(p: SidebarContainerProps){
 
 export function SidebarToggleItem(p: { isMobile: boolean, simpleMode?: boolean, mode: SidebarMode, setMode: (mode: SidebarMode) => void }) {
   return (
-    <a className="main-sidebar-button nav-link" onClick={(ev) => {
+    <a className={classes("main-sidebar-button", "nav-link", "main-sidebar-button-" + p.mode.toLowerCase())} onClick={(ev) => {
       window.dispatchEvent(new CustomEvent("sidebarMove"));
       switch (p.mode) {
         case "Hidden": p.setMode("Wide"); break;
