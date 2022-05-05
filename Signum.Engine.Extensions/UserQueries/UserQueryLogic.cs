@@ -55,7 +55,7 @@ public static class UserQueryLogic
         }
     }
 
-    public static QueryRequest ToQueryRequest(this UserQueryEntity userQuery)
+    public static QueryRequest ToQueryRequest(this UserQueryEntity userQuery, bool ignoreHidden = false)
     {
         var qr = new QueryRequest()
         {
@@ -64,7 +64,7 @@ public static class UserQueryLogic
         };
 
         qr.Filters = userQuery.Filters.ToFilterList();
-        qr.Columns = MergeColumns(userQuery);
+        qr.Columns = MergeColumns(userQuery, ignoreHidden);
         qr.Orders = userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList();
 
         qr.Pagination = userQuery.GetPagination() ?? new Pagination.All();
@@ -97,15 +97,15 @@ public static class UserQueryLogic
         return qr;
     }
 
-    static List<Column> MergeColumns(UserQueryEntity uq)
+    static List<Column> MergeColumns(UserQueryEntity uq, bool ignoreHidden)
     {
         QueryDescription qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
 
         var result = uq.ColumnsMode switch
         {
-            ColumnOptionsMode.Add => qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(uq.Columns.Select(co => ToColumn(co))).ToList(),
+            ColumnOptionsMode.Add => qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(uq.Columns.Where(a => !a.HiddenColumn || !ignoreHidden).Select(co => ToColumn(co))).ToList(),
             ColumnOptionsMode.Remove => qd.Columns.Where(cd => !cd.IsEntity && !uq.Columns.Any(co => co.Token.TokenString == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList(),
-            ColumnOptionsMode.Replace => uq.Columns.Select(co => ToColumn(co)).ToList(),
+            ColumnOptionsMode.Replace => uq.Columns.Where(a => !a.HiddenColumn || !ignoreHidden).Select(co => ToColumn(co)).ToList(),
             _ => throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".FormatWith(uq.ColumnsMode))
         };
 
