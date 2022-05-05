@@ -32,6 +32,7 @@
         {
             sb.Include<$entityName$Entity>()
                 .WithSave($entityName$Operation.Save)
+                .WithDelete($entityName$Operation.Delete)
                 .WithQuery(() => $entityParam$ => new
                 {
                     Entity = $entityParam$,
