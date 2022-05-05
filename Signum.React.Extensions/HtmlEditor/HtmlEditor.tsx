@@ -16,6 +16,7 @@ export interface IContentStateConverter {
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
+  small?: boolean;
   mandatory?: boolean | "warning";
   converter?: IContentStateConverter;
   innerRef?: React.Ref<draftjs.Editor>;
@@ -29,6 +30,7 @@ export interface HtmlEditorProps {
 export interface HtmlEditorControllerProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
+  small?: boolean;
   converter: IContentStateConverter,
   decorators?: draftjs.DraftDecorator[],
   plugins?: HtmlEditorPlugin[];
@@ -50,6 +52,7 @@ export class HtmlEditorController {
   plugins!: HtmlEditorPlugin[]; 
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
+  small?: boolean;
   initialContentState: draftjs.ContentState = null!;
 
   createWithContentAndDecorators(contentState: draftjs.ContentState): draftjs.EditorState {
@@ -61,6 +64,7 @@ export class HtmlEditorController {
 
     this.binding = p.binding;
     this.readOnly = p.readOnly;
+    this.small = p.small;
     this.converter = p.converter;
     this.plugins = p.plugins ?? [];
     this.decorators = [...p.decorators ?? [], ...this.plugins.flatMap(p => p.getDecorators == null ? [] : p.getDecorators(this))];
@@ -125,6 +129,7 @@ export class HtmlEditorController {
 
 export default React.forwardRef(function HtmlEditor({
   readOnly,
+  small,
   binding,
   converter,
   innerRef,
@@ -147,6 +152,7 @@ export default React.forwardRef(function HtmlEditor({
   c.init({
     binding,
     readOnly,
+    small,
     converter: textConverter,
     innerRef,
     decorators,
@@ -191,13 +197,20 @@ export default React.forwardRef(function HtmlEditor({
   return (
     <>
       <div
+        title={error}
+        onClick={() => c.editor.focus()}
+        {...htmlAttributes}
         className={classes("sf-html-editor",
           mandatory && !c.editorState.getCurrentContent().hasText() && (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
           error && "has-error",
+          c.small ? "small-mode" : "",
+          htmlAttributes?.className,
         )}
-        title={error}
-        onClick={() => c.editor.focus()} {...htmlAttributes}>
-        {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
+      >
+        {c.overrideToolbar ? <div className="sf-draft-toolbar">{c.overrideToolbar}</div> :
+          toolbarButtons ? toolbarButtons(c) :
+            c.readOnly || c.small ? null :
+              defaultToolbarButtons(c)}
 
         <draftjs.Editor
           ref={c.setRefs}
