@@ -1801,7 +1801,7 @@ export interface FormatRule {
 
 export class CellFormatter {
   constructor(
-    public formatter: (cell: any, ctx: CellFormatterContext) => React.ReactChild | undefined,
+    public formatter: (cell: any, ctx: CellFormatterContext, currentToken: QueryToken) => React.ReactChild | undefined,
     public cellClass?: string) {
   }
 }
