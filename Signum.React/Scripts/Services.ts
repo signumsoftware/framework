@@ -237,6 +237,7 @@ export module ThrowErrorFilter {
 }
 
 let a = document.createElement("a");
+a.href = "#";
 document.body.appendChild(a);
 a.style.display = "none";
 

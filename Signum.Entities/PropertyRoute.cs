@@ -650,8 +650,8 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
     /// <returns></returns>
     public Expression<Func<T, R>> GetLambdaExpression<T, R>(bool safeNullAccess, PropertyRoute? skipBefore = null)
     {
-        ParameterExpression pe = Expression.Parameter(typeof(T));
-        Expression? exp = null;
+        ParameterExpression pe = Expression.Parameter(typeof(T), "p");
+        Expression exp = null!;
 
         var steps = this.Follow(a => a.Parent).Reverse();
         if (skipBefore != null)
@@ -667,7 +667,7 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
                     break;
                 case PropertyRouteType.FieldOrProperty:
                     var memberExp = Expression.MakeMemberAccess(exp, (MemberInfo?)p.PropertyInfo ?? p.FieldInfo!);
-                    if (exp!.Type.IsEmbeddedEntity() && safeNullAccess)
+                    if (IsPotentiallyNull(exp) && safeNullAccess)
                         exp = Expression.Condition(
                             Expression.Equal(exp, Expression.Constant(null, exp!.Type)),
                             Expression.Constant(null, memberExp.Type.Nullify()),
@@ -676,10 +676,22 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
                         exp = memberExp;
                     break;
                 case PropertyRouteType.Mixin:
-                    exp = Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type));
+                    if (IsPotentiallyNull(exp) && safeNullAccess)
+                        exp = Expression.Condition(
+                            Expression.Equal(exp!, Expression.Constant(null, exp.Type)),
+                            Expression.Constant(null, p.Type),
+                            Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type)));
+                    else
+                        exp = Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type));
                     break;
                 case PropertyRouteType.LiteEntity:
-                    exp = Expression.Property(exp!, "Entity");
+                    if (exp!.Type.IsEmbeddedEntity() && safeNullAccess)
+                        exp = Expression.Condition(
+                            Expression.Equal(exp, Expression.Constant(null, exp!.Type)),
+                            Expression.Constant(null, exp.Type.CleanType()),
+                            Expression.Property(exp!, "Entity"));
+                    else
+                        exp = Expression.Property(exp!, "Entity");
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected {0}".FormatWith(p.PropertyRouteType));
@@ -688,6 +700,11 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
 
         var selector = Expression.Lambda<Func<T, R>>(exp!, pe);
         return selector;
+
+        static bool IsPotentiallyNull(Expression exp)
+        {
+            return exp!.Type.IsEmbeddedEntity() || exp is ConditionalExpression /*Conditional Embedded with Mixin*/;
+        }
     }
 
 

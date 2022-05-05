@@ -52,6 +52,16 @@ public class UpgradeContext
         return lists.SingleEx(a => Directory.Exists(Path.Combine(rootFolder, a + ".Entities")));
     }
 
+    public CodeFile? TryGetCodeFile(string fileName)
+    {
+        fileName = this.AbsolutePath(fileName.Replace("Southwind", ApplicationName));
+        if (!File.Exists(fileName))
+            return null;
+
+        return new CodeFile(fileName, this);
+    }
+
+
     public void CreateCodeFile(string fileName, string content, WarningLevel showWarning = WarningLevel.Error)
     {
         fileName = this.AbsolutePath(fileName.Replace("Southwind", ApplicationName));
