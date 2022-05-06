@@ -24,6 +24,14 @@ export interface IUserAssetEntity extends Entities.Entity {
   guid: string /*Guid*/;
 }
 
+export const LiteConflictEmbedded = new Type<LiteConflictEmbedded>("LiteConflictEmbedded");
+export interface LiteConflictEmbedded extends Entities.EmbeddedEntity {
+  Type: "LiteConflictEmbedded";
+  propertyRoute: string;
+  from: Entities.Lite<Entities.Entity>;
+  to: Entities.Lite<Entities.Entity> | null;
+}
+
 export const QueryTokenEmbedded = new Type<QueryTokenEmbedded>("QueryTokenEmbedded");
 export interface QueryTokenEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryTokenEmbedded";
@@ -39,6 +47,7 @@ export module UserAssetMessage {
   export const SucessfullyImported = new MessageKey("UserAssetMessage", "SucessfullyImported");
   export const SwitchToValue = new MessageKey("UserAssetMessage", "SwitchToValue");
   export const SwitchToExpression = new MessageKey("UserAssetMessage", "SwitchToExpression");
+  export const LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase = new MessageKey("UserAssetMessage", "LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase");
 }
 
 export module UserAssetPermission {
@@ -54,6 +63,7 @@ export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   overrideEntity: boolean;
   guid: string /*Guid*/;
   customResolution: Entities.ModelEntity | null;
+  liteConflicts: Entities.MList<LiteConflictEmbedded>;
 }
 
 export const UserAssetPreviewModel = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");

@@ -162,7 +162,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
             new XAttribute("Guid", Guid),
             new XAttribute("DisplayName", DisplayName),
             EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
-            Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             HideDisplayName == false ? null! : new XAttribute("HideDisplayName", HideDisplayName.ToString()),
             DashboardPriority == null ? null! : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
             EmbeddedInEntity == null ? null! : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
@@ -178,7 +178,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     {
         DisplayName = element.Attribute("DisplayName")!.Value;
         EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetTypeLite(a.Value));
-        Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
+        Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, d => d.Owner));
         HideDisplayName = element.Attribute("HideDisplayName")?.Let(a => bool.Parse(a.Value)) ?? false;
         DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
         EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());

@@ -132,7 +132,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEnt
         Query = ctx.GetQuery(element.Attribute("Query")!.Value);
         EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetTypeLite(a.Value));
         HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
-        Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
+        Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, uc => uc.Owner))!;
         IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
         ChartScript = ctx.ChartScript(element.Attribute("ChartScript")!.Value);
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());

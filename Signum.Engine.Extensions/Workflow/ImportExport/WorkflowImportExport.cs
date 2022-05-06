@@ -281,6 +281,8 @@ public class WorkflowImportExport
         this.workflow.MainEntityStrategies.Synchronize(element.Attribute("MainEntityStrategies")!.Value.SplitNoEmpty(",").Select(a => a.Trim().ToEnum<WorkflowMainEntityStrategy>()).ToList());
         this.workflow.ExpirationDate = element.Attribute("ExpirationDate")?.Let(ed => DateTime.ParseExact(ed.Value, "o", CultureInfo.InvariantCulture));
 
+        var actorsPr = PropertyRoute.Construct((WorkflowLaneEntity l) => l.Actors);
+
         if (!ctx.IsPreview)
         {
             if (this.workflow.IsNew)
@@ -306,7 +308,7 @@ public class WorkflowImportExport
             {
                 lane.Name = xml.Attribute("Name")!.Value;
                 lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool")!.Value);
-                lane.Actors.Synchronize((xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => Lite.Parse(a.Value)).ToMList());
+                lane.Actors.Synchronize((xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => ctx.ParseLite(a.Value, this.workflow, actorsPr)).NotNull().ToMList());
                 lane.ActorsEval = lane.ActorsEval.CreateOrAssignEmbedded(xml.Element("ActorsEval"), (ae, aex) => { ae.Script = aex.Value; });
                 lane.UseActorEvalForStart = xml.Attribute("UseActorEvalForStart")?.Value.ToBool() ?? false;
                 lane.CombineActorAndActorEvalWhenContinuing = xml.Attribute("CombineActorAndActorEvalWhenContinuing")?.Value.ToBool() ?? false;

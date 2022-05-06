@@ -23,7 +23,7 @@ public static class UserAssetsExporter
 
     class ToXmlContext : IToXmlContext
     {
-        public Dictionary<Guid, XElement> elements = new Dictionary<Guid, XElement>();
+        public Dictionary<Guid, XElement> elements = new();
         public Guid Include(IUserAssetEntity content)
         {
             elements.GetOrCreate(content.Guid, () => content.ToXml(this));
@@ -65,12 +65,12 @@ public static class UserAssetsExporter
 
     public static byte[] ToXml(params IUserAssetEntity[] entities)
     {
-        ToXmlContext ctx = new ToXmlContext();
+        ToXmlContext ctx = new();
 
         foreach (var e in entities)
             ctx.Include(e);
 
-        XDocument doc = new XDocument(
+        XDocument doc = new(
             new XDeclaration("1.0", "UTF8", "yes"),
             new XElement("Entities",
                 ctx.elements.Values));
@@ -83,21 +83,36 @@ public static class UserAssetsExporter
     }
 }
 
+public class LiteConflict
+{
+    public readonly Lite<Entity> From;
+    public readonly Lite<Entity>? To;
+    public readonly PropertyRoute Route;
+
+    public LiteConflict(Lite<Entity> from, Lite<Entity>? to, PropertyRoute route)
+    {
+        From = from;
+        To = to;
+        Route = route;
+    }
+}
+
 public static class UserAssetsImporter
 {
-    public static Dictionary<string, Type> UserAssetNames = new Dictionary<string, Type>();
-    public static Polymorphic<Action<Entity>> SaveEntity = new Polymorphic<Action<Entity>>();
-    public static Dictionary<string, Type> PartNames = new Dictionary<string, Type>();
+    public static Dictionary<string, Type> UserAssetNames = new();
+    public static Polymorphic<Action<Entity>> SaveEntity = new();
+    public static Dictionary<string, Type> PartNames = new();
     public static Func<XDocument, XDocument>? PreImport = null;
 
     class PreviewContext : IFromXmlContext
     {
-        public Dictionary<Guid, IUserAssetEntity> entities = new Dictionary<Guid, IUserAssetEntity>();
+        public Dictionary<Guid, IUserAssetEntity> entities = new();
         public Dictionary<Guid, XElement> elements;
 
-        public Dictionary<Guid, ModelEntity?> customResolutionModel = new Dictionary<Guid, ModelEntity?>();
+        public Dictionary<Guid, ModelEntity?> customResolutionModel = new ();
+        public Dictionary<Guid, List<LiteConflict>> liteConflicts = new();
 
-        public Dictionary<Guid, UserAssetPreviewLineEmbedded> previews = new Dictionary<Guid, UserAssetPreviewLineEmbedded>();
+        public Dictionary<Guid, UserAssetPreviewLineEmbedded> previews = new();
 
         public bool IsPreview => true;
 
@@ -147,6 +162,14 @@ public static class UserAssetsImporter
                              customResolutionModel.ContainsKey(entity.Guid) ? EntityAction.Different :
                              GraphExplorer.FromRootVirtual((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
                              EntityAction.Identical,
+
+                    LiteConflicts = liteConflicts.TryGetC(guid).EmptyIfNull().Select(lc => new LiteConflictEmbedded
+                    {
+                        From = lc.From,
+                        To = lc.To,
+                        PropertyRoute = lc.Route.ToString()
+                    }).ToMList(),
+
                     CustomResolution = customResolutionModel.TryGetCN(entity.Guid),
                 });
 
@@ -224,6 +247,23 @@ public static class UserAssetsImporter
                 this.customResolutionModel.Add(Guid.Parse(element.Attribute("Guid")!.Value), wie.ReplacementModel);
             }
         }
+
+        
+
+
+        public Lite<Entity>? ParseLite(string liteKey, IUserAssetEntity userAsset, PropertyRoute route)
+        {
+            var lite = Lite.Parse(liteKey);
+
+            var newLite = Database.TryRetrieveLite(lite.EntityType, lite.Id);
+
+            if (newLite == null || lite.ToString() != newLite.ToString())
+            {
+                this.liteConflicts.GetOrCreate(userAsset.Guid).Add(new LiteConflict(lite, newLite, route));
+            }
+
+            return lite;
+        }
     }
 
     public static UserAssetPreviewModel Preview(byte[] doc)
@@ -232,7 +272,7 @@ public static class UserAssetsImporter
         if (PreImport != null)
             document = PreImport(document);
 
-        PreviewContext ctx = new PreviewContext(document);
+        PreviewContext ctx = new(document);
 
         foreach (var item in ctx.elements)
             ctx.GetEntity(item.Key);
@@ -243,17 +283,19 @@ public static class UserAssetsImporter
     class ImporterContext : IFromXmlContext
     {
         Dictionary<Guid, bool> overrideEntity;
-        Dictionary<Guid, IUserAssetEntity> entities = new Dictionary<Guid, IUserAssetEntity>();
-        Dictionary<Guid, ModelEntity?> customResolutionModel = new Dictionary<Guid, ModelEntity?>();
-        public List<IPartEntity> toRemove = new List<IPartEntity>();
+        Dictionary<Guid, IUserAssetEntity> entities = new();
+        Dictionary<Guid, ModelEntity?> customResolutionModel = new();
+        Dictionary<Guid, List<LiteConflict>> liteConflicts = new();
+        public List<IPartEntity> toRemove = new();
         public Dictionary<Guid, XElement> elements;
 
         public bool IsPreview => false;
 
-        public ImporterContext(XDocument doc, Dictionary<Guid, bool> overrideEntity, Dictionary<Guid, ModelEntity?> customResolution)
+        public ImporterContext(XDocument doc, Dictionary<Guid, bool> overrideEntity, Dictionary<Guid, ModelEntity?> customResolution, Dictionary<Guid, List<LiteConflict>> liteConflicts)
         {
             this.overrideEntity = overrideEntity;
             this.customResolutionModel = customResolution;
+            this.liteConflicts = liteConflicts;
             elements = doc.Element("Entities")!.Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid")!.Value));
         }
 
@@ -359,6 +401,19 @@ public static class UserAssetsImporter
             };
             wie.FromXml(element, this);
         }
+
+
+        public Lite<Entity>? ParseLite(string liteKey, IUserAssetEntity userAsset, PropertyRoute route)
+        {
+            var lite = Lite.Parse(liteKey);
+
+            var alternative = this.liteConflicts.TryGetC(userAsset.Guid).EmptyIfNull().SingleOrDefault(l => l.From.Is(lite) && l.Route.Equals(route));
+
+            if (alternative != null)
+                return alternative.To;
+
+            return lite;
+        }
     }
 
     public static void ImportConsole(string filePath)
@@ -400,13 +455,16 @@ public static class UserAssetsImporter
             if (PreImport != null)
                 doc = PreImport(doc);
 
-            ImporterContext importer = new ImporterContext(doc,
-                preview.Lines
+            ImporterContext importer = new(doc,
+                overrideEntity: preview.Lines
                 .Where(a => a.Action == EntityAction.Different)
                 .ToDictionary(a => a.Guid, a => a.OverrideEntity),
-                preview.Lines
+                customResolution: preview.Lines
                 .Where(a => a.Action == EntityAction.Different)
-                .ToDictionary(a => a.Guid, a => a.CustomResolution));
+                .ToDictionary(a => a.Guid, a => a.CustomResolution),
+                liteConflicts: preview.Lines
+                .ToDictionary(a => a.Guid, a => a.LiteConflicts.Select(l => new LiteConflict(l.From, l.To, PropertyRoute.Parse(l.PropertyRoute))).ToList())
+                );
 
             foreach (var item in importer.elements)
                 importer.GetEntity(item.Key);
