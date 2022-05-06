@@ -67,11 +67,11 @@ public static class ToolbarLogic
             RegisterDelete<WorkflowEntity>(sb);
 
             RegisterContentConfig<ToolbarMenuEntity>(
-                lite => true,
+                lite => ToolbarMenus.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true),
                 lite => TranslatedInstanceLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name));
 
             RegisterContentConfig<ToolbarEntity>(
-                lite => true,
+                lite => Toolbars.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: true),
                 lite => TranslatedInstanceLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name));
 
             RegisterContentConfig<UserQueryEntity>(
