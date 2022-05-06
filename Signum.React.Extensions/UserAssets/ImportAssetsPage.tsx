@@ -8,9 +8,11 @@ import { API } from './UserAssetClient'
 import { UserAssetMessage, UserAssetPreviewModel, EntityAction, LiteConflictEmbedded } from './Signum.Entities.UserAssets'
 import { useForceUpdate } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
-import { EntityLine, EntityTable, PropertyRoute, ValueLine } from '@framework/Lines'
+import { ChangeEvent, EntityLine, EntityTable, PropertyRoute, ValueLine } from '@framework/Lines'
 import { EntityLink } from '@framework/Search'
-import { liteKey, liteKeyLong } from '@framework/Signum.Entities'
+import { is, liteKey, liteKeyLong, MList } from '@framework/Signum.Entities'
+import SelectorModal from '../../Signum.React/Scripts/SelectorModal'
+import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal'
 
 interface ImportAssetsPageProps extends RouteComponentProps<{}> {
 
@@ -78,6 +80,28 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
         .done();
     }
 
+    function handleChangeConflict(conflict: LiteConflictEmbedded) {
+
+      if (conflict.to != undefined) {
+        var listChange = model!.lines.flatMap(l => l.element.liteConflicts).filter(c => is(c.element.from, conflict.from));
+        if (listChange.length > 1) {
+          return MessageModal.show({
+            title: "",
+            message: UserAssetMessage.SameSelectionForAllConflictsOf0.niceToString(conflict.from.toStr),
+            buttons: "yes_no",
+          }).then(result => {
+            if (result == "yes") {
+              listChange.forEach(element =>
+                element.element.to = conflict.to
+              );
+
+              forceUpdate();
+            }
+          });
+        }
+      }
+    }
+
     const tc = TypeContext.root(model!, { formSize: "ExtraSmall" });
 
     return (
@@ -133,7 +157,12 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
                           columns={EntityTable.typedColumns<LiteConflictEmbedded>([
                             { property: a => a.propertyRoute, template: ctx => <code>{ctx.value.propertyRoute}</code> },
                             { property: a => a.from, template: ctx => <code>{liteKeyLong(ctx.value.from)}</code> },
-                            { property: a => a.to, template: ctx => <EntityLine ctx={ctx.subCtx(a => a.to)} type={PropertyRoute.parseFull(ctx.value.propertyRoute).typeReference()} /> }
+                            {
+                              property: a => a.to, template: ctx =>
+                                <EntityLine ctx={ctx.subCtx(a => a.to)} type={PropertyRoute.parseFull(ctx.value.propertyRoute).typeReference()}
+                                onChange={e =>  handleChangeConflict(ctx.value)}
+                                />
+                            }
                           ])}
                         />
                       </td>

@@ -48,6 +48,7 @@ export module UserAssetMessage {
   export const SwitchToValue = new MessageKey("UserAssetMessage", "SwitchToValue");
   export const SwitchToExpression = new MessageKey("UserAssetMessage", "SwitchToExpression");
   export const LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase = new MessageKey("UserAssetMessage", "LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase");
+  export const SameSelectionForAllConflictsOf0 = new MessageKey("UserAssetMessage", "SameSelectionForAllConflictsOf0");
 }
 
 export module UserAssetPermission {

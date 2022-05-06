@@ -83,20 +83,6 @@ public static class UserAssetsExporter
     }
 }
 
-public class LiteConflict
-{
-    public readonly Lite<Entity> From;
-    public readonly Lite<Entity>? To;
-    public readonly PropertyRoute Route;
-
-    public LiteConflict(Lite<Entity> from, Lite<Entity>? to, PropertyRoute route)
-    {
-        From = from;
-        To = to;
-        Route = route;
-    }
-}
-
 public static class UserAssetsImporter
 {
     public static Dictionary<string, Type> UserAssetNames = new();
@@ -110,7 +96,7 @@ public static class UserAssetsImporter
         public Dictionary<Guid, XElement> elements;
 
         public Dictionary<Guid, ModelEntity?> customResolutionModel = new ();
-        public Dictionary<Guid, List<LiteConflict>> liteConflicts = new();
+        public Dictionary<Guid, Dictionary<(Lite<Entity> from, PropertyRoute route), Lite<Entity>?>> liteConflicts = new();
 
         public Dictionary<Guid, UserAssetPreviewLineEmbedded> previews = new();
 
@@ -163,11 +149,11 @@ public static class UserAssetsImporter
                              GraphExplorer.FromRootVirtual((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
                              EntityAction.Identical,
 
-                    LiteConflicts = liteConflicts.TryGetC(guid).EmptyIfNull().Select(lc => new LiteConflictEmbedded
+                    LiteConflicts = liteConflicts.TryGetC(guid).EmptyIfNull().Select(kvp => new LiteConflictEmbedded
                     {
-                        From = lc.From,
-                        To = lc.To,
-                        PropertyRoute = lc.Route.ToString()
+                        PropertyRoute = kvp.Key.route.ToString(),
+                        From = kvp.Key.from,
+                        To = kvp.Value,
                     }).ToMList(),
 
                     CustomResolution = customResolutionModel.TryGetCN(entity.Guid),
@@ -259,7 +245,7 @@ public static class UserAssetsImporter
 
             if (newLite == null || lite.ToString() != newLite.ToString())
             {
-                this.liteConflicts.GetOrCreate(userAsset.Guid).Add(new LiteConflict(lite, newLite, route));
+                this.liteConflicts.GetOrCreate(userAsset.Guid)[(lite, route)] = newLite;
             }
 
             return lite;
@@ -285,13 +271,13 @@ public static class UserAssetsImporter
         Dictionary<Guid, bool> overrideEntity;
         Dictionary<Guid, IUserAssetEntity> entities = new();
         Dictionary<Guid, ModelEntity?> customResolutionModel = new();
-        Dictionary<Guid, List<LiteConflict>> liteConflicts = new();
+        Dictionary<Guid, Dictionary<(Lite<Entity> from, PropertyRoute route), Lite<Entity>?>> liteConflicts = new();
         public List<IPartEntity> toRemove = new();
         public Dictionary<Guid, XElement> elements;
 
         public bool IsPreview => false;
 
-        public ImporterContext(XDocument doc, Dictionary<Guid, bool> overrideEntity, Dictionary<Guid, ModelEntity?> customResolution, Dictionary<Guid, List<LiteConflict>> liteConflicts)
+        public ImporterContext(XDocument doc, Dictionary<Guid, bool> overrideEntity, Dictionary<Guid, ModelEntity?> customResolution, Dictionary<Guid, Dictionary<(Lite<Entity> from, PropertyRoute route), Lite<Entity>?>> liteConflicts)
         {
             this.overrideEntity = overrideEntity;
             this.customResolutionModel = customResolution;
@@ -407,10 +393,8 @@ public static class UserAssetsImporter
         {
             var lite = Lite.Parse(liteKey);
 
-            var alternative = this.liteConflicts.TryGetC(userAsset.Guid).EmptyIfNull().SingleOrDefault(l => l.From.Is(lite) && l.Route.Equals(route));
-
-            if (alternative != null)
-                return alternative.To;
+            if (this.liteConflicts.TryGetValue(userAsset.Guid, out var dic) && dic.TryGetValue((lite, route), out var alternative))
+                return alternative;
 
             return lite;
         }
@@ -463,7 +447,7 @@ public static class UserAssetsImporter
                 .Where(a => a.Action == EntityAction.Different)
                 .ToDictionary(a => a.Guid, a => a.CustomResolution),
                 liteConflicts: preview.Lines
-                .ToDictionary(a => a.Guid, a => a.LiteConflicts.Select(l => new LiteConflict(l.From, l.To, PropertyRoute.Parse(l.PropertyRoute))).ToList())
+                .ToDictionary(a => a.Guid, a => a.LiteConflicts.ToDictionary(l => (l.From, PropertyRoute.Parse(l.PropertyRoute)), l => l.To))
                 );
 
             foreach (var item in importer.elements)
