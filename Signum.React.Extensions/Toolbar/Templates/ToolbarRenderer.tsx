@@ -15,26 +15,28 @@ import { isActive } from '@framework/FindOptions';
 import { Dic } from '@framework/Globals';
 import { urlVariables } from '../../Dashboard/UrlVariables';
 
-function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
+function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): number {
   if (r.url)
-    return (location.pathname + location.search).startsWith(AppContext.toAbsoluteUrl(r.url));
+    return (location.pathname + location.search).startsWith(AppContext.toAbsoluteUrl(r.url)) ? 1 : 0;
 
   if (!r.content)
-    return false;
+    return 0;
 
   var config = ToolbarClient.getConfig(r);
   if (!config)
-    return false;
+    return 0;
 
-  return config.isCompatibleWithUrl(r, location, query);
+  return config.isCompatibleWithUrlPrio(r, location, query);
 }
 
-function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): ToolbarClient.ToolbarResponse<any> | null {
+function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): { prio: number, response: ToolbarClient.ToolbarResponse<any> } | null {
   if (r.elements)
-    return r.elements.map(e => inferActive(e, location, query)).notNull().onlyOrNull();
+    return r.elements.map(e => inferActive(e, location, query)).notNull().withMax(a => a.prio) ?? null;
 
-  if (isCompatibleWithUrl(r, location, query))
-    return r;
+  var prio = isCompatibleWithUrl(r, location, query);
+
+  if (prio > 0)
+    return { prio, response: r };
 
   return null;
 }
@@ -58,7 +60,7 @@ export default function ToolbarRenderer(p: {
       }
 
       var newActive = inferActive(responseRef.current, location, query);
-      setActive(newActive);
+      setActive(newActive?.response ?? null);
     }
   }
 

@@ -35,6 +35,13 @@ public abstract class ValueProviderBase
 
     public abstract void FillQueryTokens(List<QueryToken> list);
 
+    public string ToStringWithoutBrackets(ScopedDictionary<string, ValueProviderBase> variables)
+    {
+        StringBuilder sb = new StringBuilder();
+        ToStringInternal(sb, variables);
+        return sb.ToString();
+    }
+
     public abstract void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables);
 
     public string ToString(ScopedDictionary<string, ValueProviderBase> variables, string? format)

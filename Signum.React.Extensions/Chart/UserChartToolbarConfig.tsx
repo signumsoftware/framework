@@ -25,7 +25,7 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
       .then(cr => ChartClient.Encoder.chartPathPromise(cr, element.content!));
   }
 
-  isCompatibleWithUrl(res: ToolbarResponse<UserChartEntity>, location: Location, query: any): boolean {
-    return query["userChart"] == liteKey(res.content!);
+  isCompatibleWithUrlPrio(res: ToolbarResponse<UserChartEntity>, location: Location, query: any): number {
+    return query["userChart"] == liteKey(res.content!) ? 2 : 0;
   }
 }

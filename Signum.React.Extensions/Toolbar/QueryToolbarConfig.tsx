@@ -37,8 +37,8 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     return Promise.resolve(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
   }
 
-  isCompatibleWithUrl(res: ToolbarResponse<QueryEntity>, location: Location, query: any): boolean {
-    return location.pathname == AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
+  isCompatibleWithUrlPrio(res: ToolbarResponse<QueryEntity>, location: Location, query: any): number {
+    return location.pathname == AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: res.content!.toStr! })) ? 1 : 0;
   }
 }
 

@@ -40,7 +40,7 @@ public class ExcelAttachmentLogic
             using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
             using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
             {
-                QueryRequest request = UserQueryLogic.ToQueryRequest(ea.UserQuery.RetrieveAndRemember());
+                QueryRequest request = UserQueryLogic.ToQueryRequest(ea.UserQuery.RetrieveAndRemember(), ignoreHidden: true);
 
                 var title = GetTemplateString(ea.Title, ref ea.TitleNode, ctx);
                 var fileName = GetTemplateString(ea.FileName, ref ea.FileNameNode, ctx);

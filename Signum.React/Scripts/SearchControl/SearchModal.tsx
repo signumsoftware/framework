@@ -146,6 +146,7 @@ function SearchModal(p: SearchModalProps) {
           defaultIncludeDefaultFilters={true}
           onSelectionChanged={handleSelectionChanged}
           showGroupButton={p.findMode == "Explore"}
+          showSystemTimeButton={p.findMode == "Explore"}
           largeToolbarButtons={true}
           maxResultsHeight={"none"}
           enableAutoFocus={true}
