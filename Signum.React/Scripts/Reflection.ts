@@ -1951,10 +1951,16 @@ export class PropertyRoute {
   }
 
   toString() {
-    if (this.propertyRouteType == "Root")
-      return `(${this.findRootType().name})`;
+    var rootTypeName = this.findRootType().name;
 
-    return `(${this.findRootType().name}).${this.propertyPath()}`;
+    if (this.propertyRouteType == "Root")
+      return `(${rootTypeName})`;
+
+    var path = this.propertyPath();
+    if (path.startsWith("["))
+      return `(${rootTypeName})${this.propertyPath()}`;
+
+    return `(${rootTypeName}).${this.propertyPath()}`;
   }
 }
 

@@ -86,7 +86,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
   getZeroNode() {
 
-    var { ctx, children, ...extraProps } = this.props;
+    var { ctx, ...extraProps } = this.props;
 
     const context: DesignerContext = {
       refreshView: () => {

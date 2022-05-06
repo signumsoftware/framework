@@ -823,7 +823,7 @@ public class EntityCodeGenerator
             SqlDbType.SmallMoney => typeof(decimal),
             SqlDbType.Text => typeof(string),
             SqlDbType.Time => typeof(TimeSpan),
-            SqlDbType.Timestamp => typeof(TimeSpan),
+            SqlDbType.Timestamp => typeof(byte[]),
             SqlDbType.TinyInt => typeof(byte),
             SqlDbType.UniqueIdentifier => typeof(Guid),
             SqlDbType.VarBinary => typeof(byte[]),

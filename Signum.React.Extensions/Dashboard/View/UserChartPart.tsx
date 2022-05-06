@@ -135,7 +135,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }
 
   return (
-    <div>
+    <div className="d-flex flex-column flex-grow-1">
       <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => reloadQuery()} pinnedFilterVisible={fop => fop.dashboardBehaviour == null} extraSmall={true} />
       {p.content.allowChangeShowData &&
         <label>
@@ -157,6 +157,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           chartRequest={chartRequest}
           lastChartRequest={chartRequest}
           data={result?.chartTable}
+          minHeigh={p.content.minHeight}
           loading={result === null}
           onBackgroundClick={e => {
             if (!e.ctrlKey) {
@@ -177,7 +178,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
                 if (already) {
                   dashboardFilter!.rows.remove(already);
                   if (dashboardFilter!.rows.length == 0)
-                    p.dashboardController.filters.delete(dashboardFilter!.partEmbedded);
+                    p.dashboardController.clearFilters(dashboardFilter!.partEmbedded);
                   else
                     p.dashboardController.setFilter(dashboardFilter!);
                 }
@@ -187,9 +188,14 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
                   p.dashboardController.setFilter(db);
                 }
               } else {
-                const db = new DashboardFilter(p.partEmbedded, chartRequest.queryKey);
-                db.rows.push(filterRow);
-                p.dashboardController.setFilter(db);
+                const already = dashboardFilter?.rows.firstOrNull(fr => equalsDFR(fr, filterRow));
+                if (already && dashboardFilter?.rows.length == 1) {
+                  p.dashboardController.clearFilters(dashboardFilter!.partEmbedded);
+                } else {
+                  const db = new DashboardFilter(p.partEmbedded, chartRequest.queryKey);
+                  db.rows.push(filterRow);
+                  p.dashboardController.setFilter(db);
+                }
               }
             }
           }}

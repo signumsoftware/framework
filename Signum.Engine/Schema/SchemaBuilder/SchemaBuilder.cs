@@ -648,7 +648,7 @@ public class SchemaBuilder
 
         bool avoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null;
 
-        var implementations = types.ToDictionary<Type, Type, ImplementationColumn>(t => t, t =>
+        var implementations = types.ToDictionary(t => t, t =>
         {
             var rt = Include(t, route);
 
@@ -672,11 +672,16 @@ public class SchemaBuilder
     {
         var nullable = Settings.GetIsNullable(route, forceNull);
 
-        var column = new ImplementationStringColumn(preName.ToString())
+        var primaryKeyTypes = Settings.ImplementedByAllPrimaryKeyTypes;
+
+        if(primaryKeyTypes.Count() > 1 && nullable == IsNullable.No)
+            nullable = IsNullable.Forced;
+
+        var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(preName.Add(t.Name).ToString(), nullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t))
         {
             Nullable = nullable,
-            Size = Settings.DefaultImplementedBySize,
-        };
+            Size = t == typeof(string) ? Settings.ImplementedByAllStringSize : null,
+        });
 
         var columnType = new ImplementationColumn(preName.Add("Type").ToString(), Include(typeof(TypeEntity), route))
         {
@@ -684,7 +689,7 @@ public class SchemaBuilder
             AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
         };
 
-        return new FieldImplementedByAll(route, column, columnType)
+        return new FieldImplementedByAll(route, columns, columnType)
         {
             IsLite = route.Type.IsLite(),
             AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null

@@ -161,7 +161,8 @@ public static class BulkInserter
                     if (!e.IsNew)
                         throw new InvalidOperationException("Entites should be new");
                     t.SetToStrField(e);
-                    dt.Rows.Add(t.BulkInsertDataRow(e));
+                    var values = t.BulkInsertDataRow(e);
+                    dt.Rows.Add(values);
                 }
             }
 

@@ -83,6 +83,16 @@
     margin-block-end: 0px;
 }
 
+.sf-html-editor.small-mode {
+    box-shadow: none;
+    margin-bottom: 0px;
+    padding: 0px;
+}
+
+.sf-html-editor.small-mode .public-DraftEditor-content {
+    min-height: 50px;
+}
+
 .sf-html-editor .public-DraftStyleDefault-pre {
     font-size: initial;
     background: #eee;

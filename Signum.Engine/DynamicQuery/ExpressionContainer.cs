@@ -154,12 +154,18 @@ public class ExpressionContainer
         Expression<Func<T, IEnumerable<KVP>>> collectionSelector,
         Expression<Func<KVP, K>> keySelector,
         Expression<Func<KVP, V>> valueSelector,
-        ResetLazy<HashSet<K>>? allKeys = null)
+        Func<QueryToken, IEnumerable<K>>? getKeys = null)
         where T : Entity
         where K : notnull
     {
-        var mei = new ExtensionDictionaryInfo<T, KVP, K, V>(collectionSelector, keySelector, valueSelector,
-            allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector));
+
+        if (getKeys == null)
+        {
+            var lazy = GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector);
+            getKeys = t => lazy.Value;
+        }
+
+        var mei = new ExtensionDictionaryInfo<T, KVP, K, V>(collectionSelector, keySelector, valueSelector, getKeys);
 
         RegisteredExtensionsDictionaries.Add(PropertyRoute.Root(typeof(T)), mei);
 
@@ -171,13 +177,18 @@ public class ExpressionContainer
             Expression<Func<M, IEnumerable<KVP>>> collectionSelector,
             Expression<Func<KVP, K>> keySelector,
             Expression<Func<KVP, V>> valueSelector,
-            ResetLazy<HashSet<K>>? allKeys = null)
+              Func<QueryToken, IEnumerable<K>>? getKeys = null)
         where T : Entity
         where M : ModifiableEntity
         where K : notnull
     {
-        var mei = new ExtensionDictionaryInfo<M, KVP, K, V>(collectionSelector, keySelector, valueSelector,
-            allKeys ?? GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector), keySelector));
+        if (getKeys == null)
+        {
+            var lazy = GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector), keySelector);
+            getKeys = t => lazy.Value;
+        }
+
+        var mei = new ExtensionDictionaryInfo<M, KVP, K, V>(collectionSelector, keySelector, valueSelector, getKeys);
         
         RegisteredExtensionsDictionaries.Add(PropertyRoute.Construct(embeddedSelector), mei);
 
@@ -223,7 +234,7 @@ public interface IExtensionDictionaryInfo
 public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
     where K : notnull
 {
-    public ResetLazy<HashSet<K>> AllKeys;
+    public Func<QueryToken, IEnumerable<K>> AllKeys;
 
     public Expression<Func<T, IEnumerable<KVP>>> CollectionSelector { get; set; }
 
@@ -237,7 +248,7 @@ public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
         Expression<Func<T, IEnumerable<KVP>>> collectionSelector, 
         Expression<Func<KVP, K>> keySelector, 
         Expression<Func<KVP, V>> valueSelector,
-        ResetLazy<HashSet<K>> allKeys)
+        Func<QueryToken, IEnumerable<K>> allKeys)
     {
         CollectionSelector = collectionSelector;
         KeySelector = keySelector;
@@ -268,7 +279,7 @@ public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
             return result;
         });
 
-        return AllKeys.Value.Select(key => new ExtensionDictionaryToken<T, K, V>(parent,
+        return AllKeys(parent).Select(key => new ExtensionDictionaryToken<T, K, V>(parent,
             key: key,
             unit: info.Unit,
             format: info.Format,

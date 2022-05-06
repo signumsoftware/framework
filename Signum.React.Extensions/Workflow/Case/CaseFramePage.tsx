@@ -74,37 +74,36 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
   load(props: CaseFramePageProps) {
     this.loadEntity(props)
-      .then(() => this.state.pack && AppContext.setTitle(this.state.pack!.activity.case.toStr))
-      .then(() => this.loadComponent())
+      .then(pack => {
+        if (pack) {
+
+          this.setState({ pack: pack, refreshCount: 0 });
+          AppContext.setTitle(pack.activity.case.toStr);
+          this.loadComponent(pack);
+
+        } else {
+          AppContext.history.goBack();
+        }
+      })
       .done();
   }
 
-  loadEntity(props: CaseFramePageProps): Promise<void> {
+  loadEntity(props: CaseFramePageProps): Promise<WorkflowClient.CaseEntityPack | undefined> {
 
     const routeParams = props.match.params;
     if (routeParams.caseActivityId) {
       return WorkflowClient.API.fetchActivityForViewing({ EntityType: CaseActivityEntity.typeName, id: routeParams.caseActivityId })
-        .then(pack => this.setState({ pack: pack, refreshCount: 0 }));
 
     } else if (routeParams.workflowId) {
       const ti = getTypeInfo(WorkflowEntity);
-      return WorkflowClient.createNewCase(parseId(ti, routeParams.workflowId), (routeParams.mainEntityStrategy as WorkflowMainEntityStrategy))
-        .then(pack => {
-          if (!pack)
-            AppContext.history.goBack();
-          else
-            this.setState({ pack, refreshCount: 0 });
-        });
+      return WorkflowClient.createNewCase(parseId(ti, routeParams.workflowId), (routeParams.mainEntityStrategy as WorkflowMainEntityStrategy));
 
     } else
       throw new Error("No caseActivityId or workflowId set");
   }
 
-  loadComponent(): Promise<void> {
-    if (!this.state.pack)
-      return Promise.resolve(undefined);
-
-    return WorkflowClient.getViewPromiseCompoment(this.state.pack!.activity)
+  loadComponent(pack: WorkflowClient.CaseEntityPack): Promise<void> {
+    return WorkflowClient.getViewPromiseCompoment(pack.activity)
       .then(c => this.setState({ getComponent: c }));
   }
 

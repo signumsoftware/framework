@@ -12,27 +12,31 @@ import { QueryString } from '@framework/QueryString'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { SidebarMode  } from '../SidebarContainer'
 import { isActive } from '@framework/FindOptions';
+import { Dic } from '@framework/Globals';
+import { urlVariables } from '../../Dashboard/UrlVariables';
 
-function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): boolean {
+function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): number {
   if (r.url)
-    return (location.pathname + location.search).startsWith(AppContext.toAbsoluteUrl(r.url));
+    return (location.pathname + location.search).startsWith(AppContext.toAbsoluteUrl(r.url)) ? 1 : 0;
 
   if (!r.content)
-    return false;
+    return 0;
 
   var config = ToolbarClient.getConfig(r);
   if (!config)
-    return false;
+    return 0;
 
-  return config.isCompatibleWithUrl(r, location, query);
+  return config.isCompatibleWithUrlPrio(r, location, query);
 }
 
-function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): ToolbarClient.ToolbarResponse<any> | null {
+function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): { prio: number, response: ToolbarClient.ToolbarResponse<any> } | null {
   if (r.elements)
-    return r.elements.map(e => inferActive(e, location, query)).notNull().onlyOrNull();
+    return r.elements.map(e => inferActive(e, location, query)).notNull().withMax(a => a.prio) ?? null;
 
-  if (isCompatibleWithUrl(r, location, query))
-    return r;
+  var prio = isCompatibleWithUrl(r, location, query);
+
+  if (prio > 0)
+    return { prio, response: r };
 
   return null;
 }
@@ -56,7 +60,7 @@ export default function ToolbarRenderer(p: {
       }
 
       var newActive = inferActive(responseRef.current, location, query);
-      setActive(newActive);
+      setActive(newActive?.response ?? null);
     }
   }
 
@@ -74,11 +78,7 @@ export default function ToolbarRenderer(p: {
         <FontAwesomeIcon icon={"angle-double-left"} />
       </div>
 
-      <div onClick={(ev) => {
-        if ((ev.target as any).className != "nav-item-dropdown-elem") {
-          p.onAutoClose && p.onAutoClose();
-        }
-      }}>
+      <div>
         {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => renderNavItem(res, () => setTimeout(() => setRefresh(!refresh), 500), i))}
       </div>
     </div>
@@ -104,7 +104,16 @@ export default function ToolbarRenderer(p: {
 
         if (res.url) {
           return (
-            <ToolbarNavItem key={key} title={res.label} onClick={(e: React.MouseEvent<any>) => AppContext.pushOrOpenInTab(res.url!, e)}
+            <ToolbarNavItem key={key} title={res.label} onClick={(e: React.MouseEvent<any>) => {
+              var url = res.url!;
+              Dic.getKeys(urlVariables).forEach(v => {
+                url = url.replaceAll(v, urlVariables[v]());
+              });
+
+              AppContext.pushOrOpenInTab(url, e);
+              if (p.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+                p.onAutoClose();
+            }}
             active={res == active} icon={ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)} />
           );
         }
@@ -114,7 +123,7 @@ export default function ToolbarRenderer(p: {
           if (!config)
             return <Nav.Item style={{ color: "red" }}>{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
-          return config.getMenuItem(res, res == active, key);
+          return config.getMenuItem(res, res == active, key, p.onAutoClose);
         }
 
         if (res.type == "Header") {

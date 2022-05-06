@@ -25,7 +25,7 @@ import { AutoFocus } from '@framework/Components/AutoFocus';
 import { FunctionalAdapter } from '@framework/Modals';
 import * as AuthClient from '../../Authorization/AuthClient'
 
-interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps<CaseActivityEntity | undefined> {
+interface CaseFrameModalProps extends IModalProps<CaseActivityEntity | undefined> {
   title?: string;
   entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
   avoidPromptLooseChange?: boolean;

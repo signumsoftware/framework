@@ -4,7 +4,7 @@ import { ValueLine, EntityStrip, TypeContext } from '@framework/Lines'
 import { useForceUpdate } from '@framework/Hooks'
 import { SearchValue, SearchValueLine } from '@framework/Search';
 
-export default function Role(p : { ctx: TypeContext<RoleEntity> }){
+export default function Role(p: { ctx: TypeContext<RoleEntity> }) {
   const forceUpdate = useForceUpdate();
 
   function rolesMessage() {
@@ -24,6 +24,14 @@ export default function Role(p : { ctx: TypeContext<RoleEntity> }){
           filterOptions: [{ token: RoleEntity.token(a => a.entity), operation: "IsNotIn", value: ctx.value.roles.map(a => a.element) }]
         }}
         onChange={() => forceUpdate()} />
+
+
+      <div className="row mt-4">
+        <div className="offset-sm-2">
+          <h4 className="lead">Referenced by</h4>
+        </div>
+      </div>
+
 
       {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={{
         queryName: UserEntity,

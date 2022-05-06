@@ -79,7 +79,7 @@ public class ArtistEntity : Entity, IAuthorEntity
 
     public MList<Lite<ArtistEntity>> Friends { get; set; } = new MList<Lite<ArtistEntity>>();
 
-    [Ignore]
+    [Ignore, QueryableProperty]
     [NoRepeatValidator]
     public MList<AwardNominationEntity> Nominations { get; set; } = new MList<AwardNominationEntity>();
 

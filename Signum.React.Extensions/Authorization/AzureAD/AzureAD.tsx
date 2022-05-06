@@ -46,7 +46,6 @@ export function signIn(ctx: LoginContext) {
 
   msalClient.loginPopup(userRequest)
     .then(a => {
-      localStorage.setItem('msalAccount', a.account!.username);
       return AuthClient.API.loginWithAzureAD(a.idToken, true)
         .then(r => {
           if (r == null)
@@ -54,7 +53,8 @@ export function signIn(ctx: LoginContext) {
 
           AuthClient.setAuthToken(r!.token, r!.authenticationType);
           AuthClient.setCurrentUser(r!.userEntity);
-          AuthClient.Options.onLogin()
+          AuthClient.Options.onLogin();
+          setMsalAccount(a.account!.username);
         })
     })
     .catch(e => {
@@ -76,7 +76,7 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
   if (location.search.contains("avoidAD"))
     return Promise.resolve(undefined);
 
-  var ai = getAccountInfo();
+  var ai = getMsalAccount();
 
   if (!ai)
     return Promise.resolve(undefined);
@@ -100,7 +100,14 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
     });
 }
 
-export function getAccountInfo() {
+export function setMsalAccount(accountName: string | null) {
+  if (accountName == null)
+    localStorage.removeItem("msalAccount");
+  else
+    localStorage.setItem("msalAccount", accountName);
+}
+
+export function getMsalAccount() {
   let account = localStorage.getItem('msalAccount');
   if (!account)
     return null;
@@ -110,7 +117,7 @@ export function getAccountInfo() {
 
 export function getAccessToken(): Promise<string>{
 
-  var ai = getAccountInfo();
+  var ai = getMsalAccount();
 
   if (!ai)
     throw new Error('User account missing from session. Please sign out and sign in again.');
@@ -138,7 +145,7 @@ function adquireTokenSilentOrPopup(userRequest: msal.SilentRequest) {
 }
 
 export function signOut() {
-  var account = getAccountInfo();
+  var account = getMsalAccount();
   if (account) {
     msalClient.logout({
       account: account

@@ -23,8 +23,11 @@ export module ConcurrentUserMessage {
   export const DatabaseChangesDetected = new MessageKey("ConcurrentUserMessage", "DatabaseChangesDetected");
   export const LooksLikeSomeoneJustSaved0ToTheDatabase = new MessageKey("ConcurrentUserMessage", "LooksLikeSomeoneJustSaved0ToTheDatabase");
   export const DoYouWantToReloadIt = new MessageKey("ConcurrentUserMessage", "DoYouWantToReloadIt");
-  export const YouHaveLocalChangesButTheEntityHasBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges = new MessageKey("ConcurrentUserMessage", "YouHaveLocalChangesButTheEntityHasBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges");
+  export const YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications = new MessageKey("ConcurrentUserMessage", "YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications");
   export const LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges = new MessageKey("ConcurrentUserMessage", "LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges");
+  export const YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges = new MessageKey("ConcurrentUserMessage", "YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges");
+  export const ThisIsNotTheLatestVersionOf0 = new MessageKey("ConcurrentUserMessage", "ThisIsNotTheLatestVersionOf0");
+  export const ReloadIt = new MessageKey("ConcurrentUserMessage", "ReloadIt");
   export const WarningYouWillLostYourCurrentChanges = new MessageKey("ConcurrentUserMessage", "WarningYouWillLostYourCurrentChanges");
   export const ConsiderOpening0InANewTabAndApplyYourChangesManually = new MessageKey("ConcurrentUserMessage", "ConsiderOpening0InANewTabAndApplyYourChangesManually");
 }

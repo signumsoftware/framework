@@ -152,11 +152,11 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                             }
                             else
                             {
-                                user = OnAutoCreateUser(dsacuCtx);
 
-                                if (user == null)
+                                if (!GetConfig().AutoCreateUsers)
                                     throw new InvalidOperationException(ActiveDirectoryAuthorizerMessage.ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication.NiceToString(localName));
 
+                                user = OnCreateUser(dsacuCtx);
                                 AuthLogic.OnUserLogingIn(user);
                                 return user;
                             }
@@ -173,25 +173,25 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         }
     }
 
-    public virtual UserEntity? OnAutoCreateUser(IAutoCreateUserContext ctx)
+    public virtual UserEntity OnCreateUser(IAutoCreateUserContext ctx)
     {
-        if (!GetConfig().AutoCreateUsers)
-            return null;
-
-        var user = this.AutoCreateUserInternal(ctx);
-        if (user != null && user.IsNew)
+        using (var tr = new Transaction())
         {
-            using (ExecutionMode.Global())
-            using (OperationLogic.AllowSave<UserEntity>())
+            var user = this.CreateUserInternal(ctx);
+            if (user.IsNew)
             {
-                user.Save();
+                using (ExecutionMode.Global())
+                using (OperationLogic.AllowSave<UserEntity>())
+                {
+                    user.Save();
+                }
             }
-        }
 
-        return user;
+            return tr.Commit(user); 
+        }
     }
 
-    public virtual UserEntity? AutoCreateUserInternal(IAutoCreateUserContext ctx)
+    public virtual UserEntity CreateUserInternal(IAutoCreateUserContext ctx)
     {
         var result = new UserEntity
         {

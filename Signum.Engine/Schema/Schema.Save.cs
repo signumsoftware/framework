@@ -1492,11 +1492,42 @@ public partial class FieldImplementedByAll
 
     protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
     {
-        trios.Add(new Table.Trio(Column, Expression.Call(miUnWrapToString, this.GetIdFactory(value, forbidden)), suffix));
-        trios.Add(new Table.Trio(ColumnType, Expression.Call(miConvertType, this.GetTypeFactory(value, forbidden)), suffix));
+        trios.Add(new Table.Trio(TypeColumn, Expression.Call(miConvertType, this.GetTypeFactory(value, forbidden)), suffix));
+        foreach (var (k, col) in IdColumns)
+        {
+
+            var id = Expression.Parameter(typeof(IComparable), "id");
+            var variables = new[] { id };
+
+            var instructions = new List<Expression>();
+            instructions.Add(Expression.Assign(id, Expression.Call(miUnWrap, this.GetIdFactory(value, forbidden))));
+            instructions.Add(Expression.Call(Expression.Constant(this), miAssertPrimaryKeyTypes, id));
+
+            if (IdColumns.Count > 1)
+                instructions.Add(Expression.Condition(Expression.TypeIs(id, col.Type), Expression.Convert(id, col.Type), Expression.Constant(null, col.Type)));
+            else
+                instructions.Add(Expression.Convert(id, col.Type));
+
+            trios.Add(new Table.Trio(col, Expression.Block(col.Type, variables, instructions), suffix));
+        }
     }
 
-    static MethodInfo miUnWrapToString = ReflectionTools.GetMethodInfo(() => PrimaryKey.UnwrapToString(null));
+    void AssertPrimaryKeyTypes(IComparable? c)
+    {
+        if (c == null)
+            return;
+
+        var col = this.IdColumns.TryGetC(c.GetType());
+
+        if(col == null)
+        {
+            throw new InvalidOperationException($"Attempt to save a value of type {c.GetType().TypeName()} into the ImplementedByAll field {this.Route}, " +
+                $"but {nameof(SchemaSettings)}.{nameof(SchemaSettings.ImplementedByAllPrimaryKeyTypes)} is configured for only {Schema.Current.Settings.ImplementedByAllPrimaryKeyTypes.CommaAnd(a => a.TypeName())}");
+        }
+    }
+
+    static MethodInfo miUnWrap = ReflectionTools.GetMethodInfo(() => PrimaryKey.Unwrap(null));
+    static MethodInfo miAssertPrimaryKeyTypes = ReflectionTools.GetMethodInfo((FieldImplementedByAll iba) => iba.AssertPrimaryKeyTypes(null));
     static MethodInfo miConvertType = ReflectionTools.GetMethodInfo(() => ConvertType(null!));
 
     static IComparable? ConvertType(Type type)
@@ -1557,13 +1588,35 @@ public partial class FieldMixin
 {
     protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
     {
-        ParameterExpression mixin = Expression.Parameter(this.FieldType, "mixin");
-
-        assigments.Add(Expression.Assign(mixin, Expression.Call(value, MixinDeclarations.miMixin.MakeGenericMethod(this.FieldType))));
-        foreach (var ef in Fields.Values)
+        if (value.Type.IsEntity())
         {
-            ef.Field.CreateParameter(trios, assigments,
-                Expression.Field(mixin, ef.FieldInfo), forbidden, suffix);
+            ParameterExpression mixin = Expression.Parameter(this.FieldType, "mixin");
+
+            assigments.Add(Expression.Assign(mixin, Expression.Call(value, MixinDeclarations.miMixin.MakeGenericMethod(this.FieldType))));
+            foreach (var ef in Fields.Values)
+            {
+                ef.Field.CreateParameter(trios, assigments,
+                    Expression.Field(mixin, ef.FieldInfo), forbidden, suffix);
+            }
+        }
+        else
+        {
+            ParameterExpression mixin = Expression.Parameter(this.FieldType, "mixin");
+
+            assigments.Add(Expression.Assign(mixin, Expression.Condition(
+                Expression.Equal(value, Expression.Constant(null, value.Type)),
+                Expression.Constant(null, this.FieldType),
+                Expression.Call(value, MixinDeclarations.miMixin.MakeGenericMethod(this.FieldType))
+            )));
+
+            foreach (var ef in Fields.Values)
+            {
+                ef.Field.CreateParameter(trios, assigments,
+                    Expression.Condition(
+                    Expression.Equal(mixin, Expression.Constant(null, this.FieldType)),
+                    Expression.Constant(null, ef.FieldInfo.FieldType.Nullify()),
+                    Expression.Field(mixin, ef.FieldInfo).Nullify()), forbidden, suffix);
+            }
         }
     }
 }

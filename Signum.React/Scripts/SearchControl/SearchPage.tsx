@@ -78,6 +78,7 @@ function SearchPage(p: SearchPageProps) {
         largeToolbarButtons={true}
         showFilters={SearchPage.showFilters(fo, qd, qs)}
         showGroupButton={true}
+        showSystemTimeButton={true}
         avoidChangeUrl={false}
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         maxResultsHeight={"none"}

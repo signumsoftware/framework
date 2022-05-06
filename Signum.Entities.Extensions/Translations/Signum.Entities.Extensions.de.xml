@@ -170,6 +170,7 @@
     <Member Name="CanNotBeModified" Description="Kann nicht geändert werden" />
     <Member Name="CanNotBeModifiedBecauseIsA0" Description="Kann nicht geändert werden, da es ein {0} ist." />
     <Member Name="CanNotBeModifiedBecauseIsNotA0" Description="Kann nicht geändert werden, da es kein {0} ist." />
+    <Member Name="ConflictMergingTypeConditions" Description="Konflikt durch Verschmelzung von Typbedingungen" />
     <Member Name="Deny" Description="Verweigern" />
     <Member Name="Everything" Description="Alles" />
     <Member Name="Filter" Description="Filter" />
@@ -518,10 +519,35 @@
   <Type Name="CombinedUserChartPartEntity" Description="Kombinierter Benutzerdiagrammteil" Gender="m">
     <Member Name="AllowChangeShowData" Description="Daten anzeigen ändern lassen" />
     <Member Name="CombinePinnedFiltersWithSameLabel" Description="Kombinieren Vorgewahlter Filter Bezeichnung" />
+    <Member Name="MinHeight" Description="Min height" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserCharts" Description="Benutzerdiagramme" />
     <Member Name="UseSameScale" Description="Verwenden der gleichen Skala" />
+  </Type>
+  <Type Name="ConcurrentUserEntity" Description="gleichzeitige Benutzer" PluralDescription="Gleichzeitige Benutzer" Gender="m">
+    <Member Name="IsModified" Description="Ist modifiziert" />
+    <Member Name="SignalRConnectionID" Description="SignalR Connection-ID" />
+    <Member Name="StartTime" Description="Startzeit" />
+    <Member Name="TargetEntity" Description="Zielentität" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="ConcurrentUserMessage">
+    <Member Name="ConcurrentUsers" Description="Gleichzeitige Benutzer" />
+    <Member Name="ConsiderOpening0InANewTabAndApplyYourChangesManually" Description="Erwägen Sie, {0} in einer neuen Registerkarte zu öffnen und Ihre Änderungen manuell anzuwenden" />
+    <Member Name="CurrentlyEditing" Description="Derzeitige Bearbeitung" />
+    <Member Name="DatabaseChangesDetected" Description="Datenbankänderungen entdeckt!" />
+    <Member Name="DoYouWantToReloadIt" Description="Möchten Sie es neu laden?" />
+    <Member Name="LooksLikeSomeoneJustSaved0ToTheDatabase" Description="Sieht so aus, als hätte jemand gerade {0} in der Datenbank gespeichert." />
+    <Member Name="LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges" Description="Es sieht so aus, als ob Sie nicht der einzige sind, der derzeit {0} ändert... nur der erste kann die Änderungen speichern!" />
+    <Member Name="ReloadIt" Description="Laden Sie es nach!" />
+    <Member Name="ThisIsNotTheLatestVersionOf0" Description="Dies ist nicht die neueste Version von {0}" />
+    <Member Name="WarningYouWillLostYourCurrentChanges" Description="WARNUNG: Sie werden Ihre aktuellen Änderungen verlieren." />
+    <Member Name="YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges" Description="Sie haben lokale Änderungen, aber {0} wurde bereits in der Datenbank gespeichert... Sie können die Änderungen nicht mehr speichern :(" />
+    <Member Name="YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications" Description="Sie haben lokale Änderungen in {0}, die derzeit von anderen Benutzern geöffnet werden. Bisher hat niemand sonst Änderungen vorgenommen. " />
+  </Type>
+  <Type Name="ConcurrentUserOperation">
+    <Member Name="Delete" Description="Löschen" />
   </Type>
   <Type Name="ConnectionType" />
   <Type Name="CSharpMigrationEntity" Description="C-sharp-Migration">
@@ -1507,6 +1533,7 @@
   <Type Name="LinkElementEmbedded" Description="Linkelement">
     <Member Name="Label" Description="Etikett" />
     <Member Name="Link" Description="Link" />
+    <Member Name="OpensInNewTab" Description="Öffnet in neuem Tab" />
   </Type>
   <Type Name="LinkListPartEntity" Description="Linklisten Teil" PluralDescription="Linklisten Teilen" Gender="n">
     <Member Name="Links" Description="Links" />
@@ -2645,12 +2672,10 @@
     <Member Name="AutoRefresh" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
+    <Member Name="MinHeight" Description="Min height" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
-  </Type>
-  <Type Name="UserCondition">
-    <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
   </Type>
   <Type Name="UserEntity" Description="Benutzer" Gender="m">
     <Member Name="CultureInfo" Description="Sprache" />
@@ -2740,6 +2765,9 @@
   <Type Name="UserTreePartEntity" Description="Benutzerbaumteil" PluralDescription="Benutzerbaumteile" Gender="m">
     <Member Name="RequiresTitle" Description="Titel erforderlich" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
+  <Type Name="UserTypeCondition">
+    <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
   </Type>
   <Type Name="ValueUserQueryElementEmbedded" Description="Wert der Benutzerabfrage">
     <Member Name="Href" Description="Href" />

@@ -50,9 +50,9 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
       });
   }
 
-  isCompatibleWithUrl(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any): boolean {
+  isCompatibleWithUrlPrio(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any): number {
     return query["userQuery"] == liteKey(res.content!) ||
-      location.pathname == AppContext.toAbsoluteUrl(UserQueryClient.userQueryUrl(res.content!));
+      location.pathname == AppContext.toAbsoluteUrl(UserQueryClient.userQueryUrl(res.content!)) ? 2 : 0;
   }
 }
 

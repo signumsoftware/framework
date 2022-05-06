@@ -10,7 +10,7 @@ import * as Finder from './Finder';
 import * as Operations from './Operations';
 import * as Constructor from './Constructor';
 import { ViewReplacer } from './Frames/ReactVisitor'
-import { AutocompleteConfig, FindOptionsAutocompleteConfig, getLitesWithSubStr, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, getLitesWithSubStr, LiteAutocompleteConfig, MultiAutoCompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import { NormalWindowMessage } from "./Signum.Entities";
@@ -528,8 +528,8 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
   if (types.length == 1 && types[0] != null) {
     var s = getSettings(types[0]);
 
-    if (s?.findOptions) {
-      return s.findOptions;
+    if (s?.defaultFindOptions) {
+      return s.defaultFindOptions;
     }
   }
 
@@ -540,57 +540,80 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (type.isEmbedded || type.name == IsByAll)
     return null;
 
-  var result: AutocompleteConfig<any> | null | undefined = null;
+  const types = tryGetTypeInfos(type).notNull();
+  showType ??= types.length > 1;
 
-  const types = tryGetTypeInfos(type);
+  if (types.length == 0)
+    return null;
 
-  var s = types.length == 1 && types[0] != null ? getSettings(types[0]) : null;
+  if (types.length == 1)
+    return getAutoCompleteBasic(types[0]!, findOptions, ctx, create, showType);
 
-  if (s && s.autocomplete) {
-    result = s.autocomplete(findOptions)
-  }
+  if (findOptionsDictionary == null && types.every(t => {
+    var s = getSettings(t!);
+    return s?.autocomplete == null && s?.defaultFindOptions == null;
+  })) {
 
-  if (!result) {
-    if (findOptionsDictionary) {
-      result = new LiteAutocompleteConfig((signal, subStr) =>
-        Promise.all(
-          types.map(type => {
-            if (type == null)
-              return Promise.resolve([]);
+    var maxDelay = types.map(t => getSettings(t!)?.autocompleteDelay).notNull().max() ?? undefined;
 
-            var fo: FindOptions = (findOptionsDictionary && findOptionsDictionary[type?.name]) ?? defaultFindOptions({ name: type?.name }) ?? { queryName: type.name } as FindOptions;
-
-            return getLitesWithSubStr(fo, subStr, signal);
-          })
-        ).then(arr => {
-          var lites = arr.flatMap(a => a);
-
-          return [
-            ...lites,
-            ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
-          ]
-        })
-      );
-    }
-    else if (findOptions)
-      result = new FindOptionsAutocompleteConfig(findOptions, {
-        getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
-      });
-    else
-      result = new LiteAutocompleteConfig((signal, subStr: string) => Finder.API.findLiteLike({
+    return new LiteAutocompleteConfig((signal, subStr: string) => {
+      return Finder.API.findLiteLike({
         types: type.name,
         subString: subStr,
         count: 5
       }, signal)
-        .then(lites => [...lites, ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])]),
-        { showType: showType ?? type.name.contains(",") });
+        .then(lites => [
+          ...lites,
+          ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
+        ]);
+    },
+      {
+        showType: showType,
+        itemsDelay: maxDelay,
+      });
   }
 
-  if (!result.getItemsDelay && s?.autocompleteDelay) {
-    result.getItemsDelay = s.autocompleteDelay;
+  return new MultiAutoCompleteConfig(types.toObject(t => t!.name,
+    t => getAutoCompleteBasic(t!, (findOptionsDictionary && findOptionsDictionary[type?.name]), ctx, create, showType!)
+  ));
+}
+
+
+export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | undefined, ctx: TypeContext<any>, create: boolean, showType: boolean) {
+
+  var s = getSettings(type);
+
+  if (s?.autocomplete != null) {
+    var acc = s.autocomplete(findOptions, showType);
+
+    if (acc != null)
+      return acc;
   }
 
-  return result;
+  findOptions ??= s?.defaultFindOptions;
+
+  if (findOptions)
+    return new FindOptionsAutocompleteConfig(findOptions, {
+      itemsDelay: s?.autocompleteDelay,
+      getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
+    });
+
+  return new LiteAutocompleteConfig((signal, subStr: string) => {
+
+    return Finder.API.findLiteLike({
+      types: type.name,
+      subString: subStr,
+      count: 5
+    }, signal)
+      .then(lites => [
+        ...lites,
+        ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
+      ]);
+  },
+    {
+      showType: showType ?? type.name.contains(","),
+      itemsDelay: s?.autocompleteDelay,
+    });
 }
 
 export interface ViewOptions {
@@ -725,6 +748,10 @@ export function useLiteToString<T extends Entity>(type: Type<T>, id: number | st
   return lite;
 }
 
+export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false): void {
+  useAPI(() => lite == null || (lite.toStr != null && !force) ? Promise.resolve(null) : API.fillToStrings(lite), [lite]);
+}
+
 export module API {
 
   export function fillToStrings(...lites: (Lite<Entity> | null | undefined)[]): Promise<void> {
@@ -837,9 +864,10 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   stickyHeader?: boolean;
 
-  autocomplete?: (fo: FindOptions | undefined) => AutocompleteConfig<any> | undefined | null;
+  autocomplete?: (fo: FindOptions | undefined, showType: boolean) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
   autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
+  defaultFindOptions?: FindOptions;
 
   getViewPromise?: (entity: T) => ViewPromise<T>;
   onNavigateRoute?: (typeName: string, id: string | number) => string;
@@ -904,11 +932,11 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   stickyHeader?: boolean;
 
-  autocomplete?: (fo: FindOptions | undefined) => AutocompleteConfig<any> | undefined | null;
+  autocomplete?: (fo: FindOptions | undefined, showType: boolean) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
   autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
+  defaultFindOptions?: FindOptions;
 
-  findOptions?: FindOptions;
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
 

@@ -59,6 +59,7 @@ export interface CombinedUserChartPartEntity extends Entities.Entity, IPartEntit
   allowChangeShowData: boolean;
   combinePinnedFiltersWithSameLabel: boolean;
   useSameScale: boolean;
+  minHeight: number | null;
   requiresTitle: boolean;
 }
 
@@ -194,6 +195,7 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
   allowChangeShowData: boolean;
   createNew: boolean;
   autoRefresh: boolean;
+  minHeight: number | null;
   requiresTitle: boolean;
 }
 

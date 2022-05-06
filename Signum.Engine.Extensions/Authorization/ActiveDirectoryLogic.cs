@@ -83,6 +83,7 @@ public static class ActiveDirectoryLogic
             var acuCtx = new DirectoryServiceAutoCreateUserContext(pc, userPc.SamAccountName, config.DomainName!);
 
             using (ExecutionMode.Global())
+            using (var tr = new Transaction())
             {
                 var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserADMixin>().SID == userPc.Sid.ToString());
 
@@ -96,14 +97,13 @@ public static class ActiveDirectoryLogic
                 {
                     ada.UpdateUser(user, acuCtx);
 
-                    return user;
+                    return tr.Commit(user);
                 }
+
+                var result = ada.OnCreateUser(acuCtx);
+
+                return tr.Commit(result);
             }
-
-            var result = ada.OnAutoCreateUser(acuCtx);
-
-            return result ?? throw new InvalidOperationException(ReflectionTools.GetPropertyInfo((ActiveDirectoryConfigurationEmbedded e) => e.AutoCreateUsers).NiceName() + " is not activated");
-
         }
     }
 }

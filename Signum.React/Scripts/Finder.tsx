@@ -172,8 +172,6 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
     { queryName: findOptions as Type<any> } as FindOptions;
 
-  if (fo.groupResults)
-    throw new Error("Use findManyRows instead");
 
   var qs = getSettings(fo.queryName);
   if (qs?.onFindMany && !(modalOptions?.useDefaultBehaviour))
@@ -184,8 +182,18 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
 
 export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
   let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => Options.getSearchModal()
-    .then(a => a.default.openMany(fo, modalOptions))
-    .then(a => a?.rows.map(a => a.entity!));
+    .then(SearchModal => SearchModal.default.openMany(fo, modalOptions))
+    .then(pair => {
+      if (!pair)
+        return undefined;
+
+      const sc = pair.searchControl!;
+
+      if (sc.props.findOptions.groupResults)
+        return sc.getGroupedSelectedEntities();
+
+      return sc.getSelectedEntities();
+    });
 
   if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
     return fetchLites({ queryName: fo.queryName, filterOptions: fo.filterOptions || [], orderOptions: fo.orderOptions || [], count: 2 })
@@ -1413,6 +1421,9 @@ export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, add
 }
 
 export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
+
+  fo = defaultNoColumnsAllRows(fo, undefined);
+
   return getQueryDescription(fo.queryName)
     .then(qd => parseFindOptions(fo!, qd, false))
     .then(fop => API.executeQuery(getQueryRequest(fop), signal));
@@ -1798,7 +1809,7 @@ export interface FormatRule {
 
 export class CellFormatter {
   constructor(
-    public formatter: (cell: any, ctx: CellFormatterContext) => React.ReactChild | undefined,
+    public formatter: (cell: any, ctx: CellFormatterContext, currentToken: QueryToken) => React.ReactChild | undefined,
     public cellClass?: string) {
   }
 }

@@ -178,6 +178,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
           infos={infos.map(c => ({ chartRequest: c.chartRequest!, data: c.result?.chartTable, chartScript: c.chartScript!, memo: c.memo }))}
           onReload={e => { infos.forEach(a => a.makeQuery!()) }}
           useSameScale={p.content.useSameScale}
+          minHeigh={p.content.minHeight}
         />
       }
     </div>

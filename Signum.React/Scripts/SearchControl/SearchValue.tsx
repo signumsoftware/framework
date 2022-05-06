@@ -12,6 +12,7 @@ import { toFilterRequests } from '../Finder';
 import { PropertyRoute } from '../Lines'
 import { useAPI, usePrevious } from '../Hooks'
 import * as Hooks from '../Hooks'
+import { TypeBadge } from '../Lines/AutoCompleteConfig'
 
 export interface SearchValueProps {
   valueToken?: string | QueryTokenString<any>;
@@ -182,7 +183,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
               const toStr = getToString(lite);
               var tag = !showType ? toStr :
                 <span style={{ wordBreak: "break-all" }} title={toStr}>
-                  <span className="sf-type-badge">{getTypeInfo(lite.EntityType).niceName}</span>&nbsp;{toStr}
+                  {toStr}<TypeBadge entity={lite} />
                 </span>;
 
               var link = p.isLink && Navigator.isViewable(lite.EntityType) ?

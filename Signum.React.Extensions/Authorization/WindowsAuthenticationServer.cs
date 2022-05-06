@@ -64,7 +64,8 @@ public class WindowsAuthenticationServer
 
                             if (user == null)
                             {
-                                user = ada.OnAutoCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                                if (ada.GetConfig().AutoCreateUsers)
+                                    user = ada.OnCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
                             }
                         }
                     }

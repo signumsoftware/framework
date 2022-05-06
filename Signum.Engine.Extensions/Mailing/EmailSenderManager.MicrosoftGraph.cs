@@ -14,15 +14,39 @@ public partial class EmailSenderManager : IEmailSenderManager
 {
     protected virtual void SendMicrosoftGraph(EmailMessageEntity email, MicrosoftGraphEmbedded microsoftGraph)
     {
-        ClientCredentialProvider authProvider = microsoftGraph.GetAuthProvider();
-        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+        try
+        {
+            ClientCredentialProvider authProvider = microsoftGraph.GetAuthProvider();
+            GraphServiceClient graphClient = new GraphServiceClient(authProvider);
 
-        var message = ToGraphMessage(email);
+            var message = ToGraphMessage(email);
 
-        graphClient.Users[email.From.AzureUserId.ToString()]
-                .SendMail(message, false)
-                .Request()
-                .PostAsync().Wait();
+            var user = graphClient.Users[email.From.AzureUserId.ToString()];
+
+            var request = user.SendMail(message, false).Request();
+
+            request.PostAsync().Wait();
+        }
+        catch(AggregateException e)
+        {
+            var only = e.InnerExceptions.Only();
+            if(only != null)
+            {
+                if(only is ServiceException se)
+                {
+                    if (se.StatusCode == System.Net.HttpStatusCode.RequestEntityTooLarge)
+                        throw new InvalidOperationException("Request was rejected by Microsoft Graph for being too large", se);
+                }
+
+                only.PreserveStackTrace();
+                throw only;
+            }
+            else
+            {
+                throw;
+            }
+
+        }
     }
 
     private Message ToGraphMessage(EmailMessageEntity email)

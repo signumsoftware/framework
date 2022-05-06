@@ -16,22 +16,26 @@ export interface IContentStateConverter {
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
+  small?: boolean;
   mandatory?: boolean | "warning";
   converter?: IContentStateConverter;
   innerRef?: React.Ref<draftjs.Editor>;
-  decorators?: draftjs.DraftDecorator[],
-  plugins?: HtmlEditorPlugin[],
+  decorators?: draftjs.DraftDecorator[];
+  plugins?: HtmlEditorPlugin[];
   toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment | null;
-  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>
+  htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
+  initiallyFocused?: boolean | number;
 }
 
 export interface HtmlEditorControllerProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
+  small?: boolean;
   converter: IContentStateConverter,
   decorators?: draftjs.DraftDecorator[],
   plugins?: HtmlEditorPlugin[];
   innerRef?: React.Ref<draftjs.Editor>;
+  initiallyFocused?: boolean | number;
 }
 
 export class HtmlEditorController {
@@ -48,6 +52,7 @@ export class HtmlEditorController {
   plugins!: HtmlEditorPlugin[]; 
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
+  small?: boolean;
   initialContentState: draftjs.ContentState = null!;
 
   createWithContentAndDecorators(contentState: draftjs.ContentState): draftjs.EditorState {
@@ -59,6 +64,7 @@ export class HtmlEditorController {
 
     this.binding = p.binding;
     this.readOnly = p.readOnly;
+    this.small = p.small;
     this.converter = p.converter;
     this.plugins = p.plugins ?? [];
     this.decorators = [...p.decorators ?? [], ...this.plugins.flatMap(p => p.getDecorators == null ? [] : p.getDecorators(this))];
@@ -66,6 +72,15 @@ export class HtmlEditorController {
     [this.editorState, this.setEditorState] = React.useState<draftjs.EditorState>(() => this.createWithContentAndDecorators(this.converter!.textToContentState(this.binding.getValue() ?? "")));
 
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<React.ReactFragment | React.ReactElement | undefined>(undefined);
+
+    React.useEffect(() => {
+      if (p.initiallyFocused) {
+        setTimeout(() => {
+          if (this.editor)
+            this.editor.focus();          
+        }, p.initiallyFocused == true ? 0 : p.initiallyFocused as number);
+      }
+    }, []);
 
     React.useEffect(() => {
       var contentState = this.converter.textToContentState(this.binding.getValue() ?? "");
@@ -98,7 +113,7 @@ export class HtmlEditorController {
     }
   }
 
-  extraButtons(): React.ReactFragment | null {
+  extraButtons(): React.ReactElement | null {
 
     var buttons = this.plugins.map(p => p.getToolbarButtons && p.getToolbarButtons(this)).notNull();
 
@@ -114,6 +129,7 @@ export class HtmlEditorController {
 
 export default React.forwardRef(function HtmlEditor({
   readOnly,
+  small,
   binding,
   converter,
   innerRef,
@@ -122,6 +138,7 @@ export default React.forwardRef(function HtmlEditor({
   plugins,
   htmlAttributes,
   mandatory,
+  initiallyFocused,
   ...props }: HtmlEditorProps & Partial<draftjs.EditorProps>, ref?: React.Ref<HtmlEditorController>) {
 
   const textConverter = converter ?? new HtmlContentStateConverter({}, {});
@@ -135,9 +152,11 @@ export default React.forwardRef(function HtmlEditor({
   c.init({
     binding,
     readOnly,
+    small,
     converter: textConverter,
     innerRef,
     decorators,
+    initiallyFocused,
     plugins,
   });
 
@@ -178,13 +197,20 @@ export default React.forwardRef(function HtmlEditor({
   return (
     <>
       <div
+        title={error}
+        onClick={() => c.editor.focus()}
+        {...htmlAttributes}
         className={classes("sf-html-editor",
           mandatory && !c.editorState.getCurrentContent().hasText() && (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
           error && "has-error",
+          c.small ? "small-mode" : "",
+          htmlAttributes?.className,
         )}
-        title={error}
-        onClick={() => c.editor.focus()} {...htmlAttributes}>
-        {c.overrideToolbar ?? (toolbarButtons ? toolbarButtons(c) : defaultToolbarButtons(c))}
+      >
+        {c.overrideToolbar ? <div className="sf-draft-toolbar">{c.overrideToolbar}</div> :
+          toolbarButtons ? toolbarButtons(c) :
+            c.readOnly || c.small ? null :
+              defaultToolbarButtons(c)}
 
         <draftjs.Editor
           ref={c.setRefs}
