@@ -15,6 +15,10 @@ export interface ModifiableEntity {
   mixins?: { [name: string]: MixinEntity }
 }
 
+export function liteKeyLong(lite: Lite<Entity>) {
+  return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id) + ";" + lite.toStr;
+}
+
 export interface Entity extends ModifiableEntity {
   id: number | string | undefined;
   ticks: string; //max value

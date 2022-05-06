@@ -1191,7 +1191,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var rt = this.state.summaryResultTable;
     var scl = this;
 
-    function getSummary(summaryToken: QueryToken | undefined) {
+    function getSummary(summaryToken: QueryToken | undefined ) {
 
       if (rt == null || summaryToken == undefined)
         return null;
@@ -1212,7 +1212,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           rowIndex: 0,
           refresh: () => scl.dataChanged().done(),
           systemTime: scl.props.findOptions.systemTime
-        })}</div>
+        }, summaryToken)}</div>
       );
     }
 
@@ -1495,7 +1495,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           {
             columns.map((c, j) =>
               <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
+                {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx, c.columnOption!.token!)}
               </td>)
           }
 

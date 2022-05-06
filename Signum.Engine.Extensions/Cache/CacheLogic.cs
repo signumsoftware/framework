@@ -548,11 +548,19 @@ public static class CacheLogic
             return cachedTable.GetToString(id);
         }
 
-        public override string? TryGetToString(PrimaryKey?/*CSBUG*/ id)
+        public override string? TryGetToString(PrimaryKey? id)
         {
             AssertEnabled();
 
             return cachedTable.TryGetToString(id!.Value)!;
+        }
+
+
+        public override bool Exists(PrimaryKey id)
+        {
+            AssertEnabled();
+
+            return cachedTable.Exists(id)!;
         }
 
         public override void Complete(T entity, IRetriever retriver)
@@ -580,6 +588,7 @@ public static class CacheLogic
 
             return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
         }
+
 
         public Type Type
         {
