@@ -66,7 +66,8 @@ export interface SearchControlProps {
   onCreate?: (scl: SearchControlLoaded) => Promise<undefined | void | EntityPack<any> | ModifiableEntity | "no_change">;
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
   styleContext?: StyleContext;
-  customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
+  customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>;
+  onPageSubTitleChanged?: () => void;
 }
 
 export interface SearchControlState {
@@ -225,6 +226,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
 
         styleContext={p.styleContext}
         customRequest={p.customRequest}
+        onPageTitleChanged={p.onPageSubTitleChanged}
       />
     </ErrorBoundary>
   );
