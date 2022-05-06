@@ -183,6 +183,10 @@ export function liteKey(lite: Lite<Entity>) {
   return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id);
 }
 
+export function liteKeyLong(lite: Lite<Entity>) {
+  return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id) + ";" + lite.toStr;
+}
+
 export function parseLite(lite: string): Lite<Entity> {
   return {
     EntityType: lite.before(";"),
