@@ -91,6 +91,7 @@ export interface SearchControlLoadedProps {
   onResult?: (table: ResultTable, dataChange: boolean) => void;
   styleContext?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
+  onPageTitleChanged?: () => void;
 }
 
 export interface SearchControlLoadedState {
@@ -132,7 +133,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     };
   }
 
-  extraParams: () => any = () => null;
+  pageSubTitle?: string;
+  extraUrlParams: { [key: string]: string | undefined } = {};
 
   componentDidMount() {
 
@@ -750,7 +752,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var findOptions = Finder.toFindOptions(this.props.findOptions, this.props.queryDescription, this.props.defaultIncudeDefaultFilters);
 
-    const path = Finder.findOptionsPath(findOptions, this.extraParams());
+    const path = Finder.findOptionsPath(findOptions, this.extraUrlParams);
 
     if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
       window.open(path);

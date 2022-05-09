@@ -4,7 +4,7 @@ import * as Constructor from '@framework/Constructor'
 import { TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EmbeddedEntity } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EmbeddedEntity, EntityControlMessage } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import { FileUploader } from './FileUploader'
@@ -102,9 +102,9 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
               <div className="sf-file-image-container m-2" key={mlec.index}>
                 {p.getComponent ? p.getComponent(mlec) :
                   p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
-                    renderImage(p.getFile ? (mlec as TypeContext<EmbeddedEntity>).subCtx(p.getFile) : mlec as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>)}
+                    renderFile(p.getFile ? (mlec as TypeContext<EmbeddedEntity>).subCtx(p.getFile) : mlec as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>)}
                 {!p.ctx.readOnly &&
-                  <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
+                  <a href="#" title={EntityControlMessage.Remove.niceToString()}
                     className="sf-line-button sf-remove"
                     onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
                     <FontAwesomeIcon icon="times" />
@@ -134,7 +134,7 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
   );
 
 
-  function renderImage(ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>) {
+  function renderFile(ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>) {
     const val = ctx.value!;
 
     return ctx.propertyRoute!.typeReference().isLite ?

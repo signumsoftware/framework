@@ -29,78 +29,90 @@ public class ExpressionComparer
 
     protected virtual bool Compare(Expression? a, Expression? b)
     {
-        if (a == b)
-            return true;
-        if (a == null || b == null)
-            return false;
-        if (a.NodeType != b.NodeType)
-            return false;
-        if (a.Type != b.Type)
-            return false;
-        switch (a.NodeType)
+        var result = CompareInternal(a, b);
+
+        //if(result == false)
+        //{
+        //    result = result;
+        //}
+
+        return result;
+
+        bool CompareInternal(Expression? a, Expression? b)
         {
-            case ExpressionType.Negate:
-            case ExpressionType.NegateChecked:
-            case ExpressionType.Not:
-            case ExpressionType.Convert:
-            case ExpressionType.ConvertChecked:
-            case ExpressionType.ArrayLength:
-            case ExpressionType.Quote:
-            case ExpressionType.TypeAs:
-            case ExpressionType.UnaryPlus:
-                return CompareUnary((UnaryExpression)a, (UnaryExpression)b);
-            case ExpressionType.Add:
-            case ExpressionType.AddChecked:
-            case ExpressionType.Subtract:
-            case ExpressionType.SubtractChecked:
-            case ExpressionType.Multiply:
-            case ExpressionType.MultiplyChecked:
-            case ExpressionType.Divide:
-            case ExpressionType.Modulo:
-            case ExpressionType.And:
-            case ExpressionType.AndAlso:
-            case ExpressionType.Or:
-            case ExpressionType.OrElse:
-            case ExpressionType.LessThan:
-            case ExpressionType.LessThanOrEqual:
-            case ExpressionType.GreaterThan:
-            case ExpressionType.GreaterThanOrEqual:
-            case ExpressionType.Equal:
-            case ExpressionType.NotEqual:
-            case ExpressionType.Coalesce:
-            case ExpressionType.ArrayIndex:
-            case ExpressionType.RightShift:
-            case ExpressionType.LeftShift:
-            case ExpressionType.ExclusiveOr:
-            case ExpressionType.Power:
-                return CompareBinary((BinaryExpression)a, (BinaryExpression)b);
-            case ExpressionType.TypeIs:
-                return CompareTypeIs((TypeBinaryExpression)a, (TypeBinaryExpression)b);
-            case ExpressionType.Conditional:
-                return CompareConditional((ConditionalExpression)a, (ConditionalExpression)b);
-            case ExpressionType.Constant:
-                return CompareConstant((ConstantExpression)a, (ConstantExpression)b);
-            case ExpressionType.Parameter:
-                return CompareParameter((ParameterExpression)a, (ParameterExpression)b);
-            case ExpressionType.MemberAccess:
-                return CompareMemberAccess((MemberExpression)a, (MemberExpression)b);
-            case ExpressionType.Call:
-                return CompareMethodCall((MethodCallExpression)a, (MethodCallExpression)b);
-            case ExpressionType.Lambda:
-                return CompareLambda((LambdaExpression)a, (LambdaExpression)b);
-            case ExpressionType.New:
-                return CompareNew((NewExpression)a, (NewExpression)b);
-            case ExpressionType.NewArrayInit:
-            case ExpressionType.NewArrayBounds:
-                return CompareNewArray((NewArrayExpression)a, (NewArrayExpression)b);
-            case ExpressionType.Invoke:
-                return CompareInvocation((InvocationExpression)a, (InvocationExpression)b);
-            case ExpressionType.MemberInit:
-                return CompareMemberInit((MemberInitExpression)a, (MemberInitExpression)b);
-            case ExpressionType.ListInit:
-                return CompareListInit((ListInitExpression)a, (ListInitExpression)b);
-            default:
-                throw new Exception(string.Format("Unhandled expression type: '{0}'", a.NodeType));
+            if (a == b)
+                return true;
+            if (a == null || b == null)
+                return false;
+            if (a.NodeType != b.NodeType)
+                return false;
+            if (a.Type != b.Type)
+                return false;
+            switch (a.NodeType)
+            {
+                case ExpressionType.Negate:
+                case ExpressionType.NegateChecked:
+                case ExpressionType.Not:
+                case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
+                case ExpressionType.ArrayLength:
+                case ExpressionType.Quote:
+                case ExpressionType.TypeAs:
+                case ExpressionType.UnaryPlus:
+                    return CompareUnary((UnaryExpression)a, (UnaryExpression)b);
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.Divide:
+                case ExpressionType.Modulo:
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                case ExpressionType.Or:
+                case ExpressionType.OrElse:
+                case ExpressionType.LessThan:
+                case ExpressionType.LessThanOrEqual:
+                case ExpressionType.GreaterThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.Equal:
+                case ExpressionType.NotEqual:
+                case ExpressionType.Coalesce:
+                case ExpressionType.ArrayIndex:
+                case ExpressionType.RightShift:
+                case ExpressionType.LeftShift:
+                case ExpressionType.ExclusiveOr:
+                case ExpressionType.Power:
+                    return CompareBinary((BinaryExpression)a, (BinaryExpression)b);
+                case ExpressionType.TypeIs:
+                    return CompareTypeIs((TypeBinaryExpression)a, (TypeBinaryExpression)b);
+                case ExpressionType.Conditional:
+                    return CompareConditional((ConditionalExpression)a, (ConditionalExpression)b);
+                case ExpressionType.Constant:
+                    return CompareConstant((ConstantExpression)a, (ConstantExpression)b);
+                case ExpressionType.Parameter:
+                    return CompareParameter((ParameterExpression)a, (ParameterExpression)b);
+                case ExpressionType.MemberAccess:
+                    return CompareMemberAccess((MemberExpression)a, (MemberExpression)b);
+                case ExpressionType.Call:
+                    return CompareMethodCall((MethodCallExpression)a, (MethodCallExpression)b);
+                case ExpressionType.Lambda:
+                    return CompareLambda((LambdaExpression)a, (LambdaExpression)b);
+                case ExpressionType.New:
+                    return CompareNew((NewExpression)a, (NewExpression)b);
+                case ExpressionType.NewArrayInit:
+                case ExpressionType.NewArrayBounds:
+                    return CompareNewArray((NewArrayExpression)a, (NewArrayExpression)b);
+                case ExpressionType.Invoke:
+                    return CompareInvocation((InvocationExpression)a, (InvocationExpression)b);
+                case ExpressionType.MemberInit:
+                    return CompareMemberInit((MemberInitExpression)a, (MemberInitExpression)b);
+                case ExpressionType.ListInit:
+                    return CompareListInit((ListInitExpression)a, (ListInitExpression)b);
+                default:
+                    throw new Exception(string.Format("Unhandled expression type: '{0}'", a.NodeType));
+            }
         }
     }
 

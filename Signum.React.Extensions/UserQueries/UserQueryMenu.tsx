@@ -35,18 +35,22 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const [currentUserQuery, setCurrentUserQuery] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
+  const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
     let uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl() : p.searchControl.props.extraOptions?.userQuery;
     return uq;
   });
 
+  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined) {
+    p.searchControl.extraUrlParams.userQuery = uq && liteKey(uq);
+    p.searchControl.pageSubTitle = uq?.toStr;
+    setCurrentUserQueryInternal(uq);
+    p.searchControl.props.onPageTitleChanged?.();
+  }
+
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
-  const oldExtraParams = React.useRef(p.searchControl.extraParams);
   
   React.useEffect(() => {
-    oldExtraParams.current = p.searchControl.extraParams;
-    p.searchControl.extraParams = () => ({ ...oldExtraParams.current(), userQuery: currentUserQuery && liteKey(currentUserQuery) });
-    return () => { p.searchControl.extraParams = oldExtraParams.current };
+    p.searchControl.extraUrlParams.userQuery = currentUserQuery && liteKey(currentUserQuery);
   }, []);
 
   React.useEffect(() => {

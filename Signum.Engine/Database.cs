@@ -1710,6 +1710,16 @@ internal class SignumTable<E> : Query<E>, ISignumTable
     {
         this.Table = table;
     }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is SignumTable<E> st && st.Table == this.Table;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.Table.GetHashCode();
+    }
 }
 
 public interface IUpdateable
