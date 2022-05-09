@@ -325,6 +325,11 @@ public class Schema : IImplementationsFinder
     {
         using (userInterface ? ExecutionMode.UserInterface() : null)
         {
+            var error = this.IsAllowed(typeof(T), userInterface);
+
+            if (error.HasText())
+                throw new InvalidOperationException(error);
+
             EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
             if (ee == null)
                 return a => true;
