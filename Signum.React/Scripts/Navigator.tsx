@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
-import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo } from './Reflection';
 import { TypeContext } from './TypeContext';
@@ -13,7 +13,6 @@ import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, getLitesWithSubStr, LiteAutocompleteConfig, MultiAutoCompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
-import { NormalWindowMessage } from "./Signum.Entities";
 import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
@@ -73,7 +72,7 @@ export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | un
     const typeInfo = getTypeInfo(entity.Type);
 
     if (entity.isNew)
-      return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
+      return FrameMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
     return renderTitle(typeInfo, entity);
   }
@@ -103,7 +102,7 @@ export function setRenderIdFunction(newFunction: (entity: Entity) => React.React
 
 
 let renderTitle = (typeInfo: TypeInfo, entity: ModifiableEntity) => {
-  return NormalWindowMessage.Type0Id1.niceToString().formatHtml(typeInfo.niceName, renderId(entity as Entity));
+  return "{0} {1}".formatHtml(typeInfo.niceName, renderId(entity as Entity));
   return null;
 }
 

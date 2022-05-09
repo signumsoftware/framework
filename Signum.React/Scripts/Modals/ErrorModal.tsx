@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as Modals from '../Modals';
 import { Dic } from '../Globals';
 import { ExternalServiceError, ServiceError, ValidationError } from '../Services';
-import { JavascriptMessage, NormalWindowMessage, ConnectionMessage } from '../Signum.Entities'
+import { JavascriptMessage, FrameMessage, ConnectionMessage } from '../Signum.Entities'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
@@ -95,7 +95,7 @@ export default function ErrorModal(p: ErrorModalProps) {
   function renderValidationTitle(ve: ValidationError) {
     return (
       <span>
-        <FontAwesomeIcon icon="exclamation-triangle" /> {NormalWindowMessage.ThereAreErrors.niceToString()}
+        <FontAwesomeIcon icon="exclamation-triangle" /> {FrameMessage.ThereAreErrors.niceToString()}
       </span>
     );
   }

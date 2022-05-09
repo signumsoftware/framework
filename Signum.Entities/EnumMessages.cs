@@ -76,39 +76,14 @@ public enum EngineMessage
     TheresAlreadyA0With1EqualsTo2_G
 }
 
-public enum NormalWindowMessage
+public enum FrameMessage
 {
-    [Description("{0} Errors: {1}")]
-    _0Errors1,
-    [Description("1 Error: {0}")]
-    _1Error,
-    Cancel,
-    [Description("Continue anyway?")]
-    ContinueAnyway,
-    [Description("Continue with errors?")]
-    ContinueWithErrors,
-    [Description("Fix Errors")]
-    FixErrors,
-    [Description(@"Impossible to Save, integrity check failed:
-
-")]
-    ImpossibleToSaveIntegrityCheckFailed,
-    [Description("Loading {0}...")]
-    Loading0,
-    NoDirectErrors,
-    Ok,
-    Reload,
-    [Description(@"The {0} has errors:
-{1}")]
-    The0HasErrors1,
-    ThereAreErrors,
-    Message,
     [Description("New {0}")]
     New0_G,
-    [Description("{0} {1}")]
-    Type0Id1,
-    Main,
     Copied,
+    Fullscreen,
+    ThereAreErrors,
+    Main,
 }
 
 public enum EntityControlMessage

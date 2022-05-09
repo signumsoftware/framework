@@ -12,7 +12,6 @@ import { TimeMachineMessage } from '../Signum.Entities.DiffLog'
 import { Lite } from '@framework/Signum.Entities'
 import { newLite, QueryTokenString, toFormatWithFixes, toLuxonFormat } from '@framework/Reflection'
 import { EngineMessage } from '@framework/Signum.Entities'
-import { NormalWindowMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
 import { Tabs, Tab, Modal } from 'react-bootstrap'
@@ -50,7 +49,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
         <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
         <br />
         <small className="sf-type-nice-name">
-          <EntityLink lite={lite}>{NormalWindowMessage.Type0Id1.niceToString().formatWith(getTypeInfo(lite.EntityType).niceName, lite.id)}</EntityLink>
+          <EntityLink lite={lite}>{"{0} {1}".formatWith(getTypeInfo(lite.EntityType).niceName, lite.id)}</EntityLink>
           &nbsp;<span style={{ color: "#aaa" }}>{lite.toStr}</span>
         </small>
       </h4>

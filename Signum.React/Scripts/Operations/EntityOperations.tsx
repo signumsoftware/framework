@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage, EntityPack, ModifiableEntity } from '../Signum.Entities';
+import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, NormalControlMessage, EntityPack, ModifiableEntity } from '../Signum.Entities';
 import { getTypeInfo, OperationType, GraphExplorer, tryGetTypeInfo } from '../Reflection';
 import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible, ButtonBarElement, FunctionalFrameComponent } from '../TypeContext';

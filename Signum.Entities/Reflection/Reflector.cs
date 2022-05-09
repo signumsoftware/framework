@@ -491,6 +491,6 @@ public static class Reflector
 
     public static string NewNiceName(this Type type)
     {
-        return NormalWindowMessage.New0_G.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName());
+        return FrameMessage.New0_G.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName());
     }
 }
