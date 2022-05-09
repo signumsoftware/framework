@@ -274,56 +274,7 @@ public static class EnumerableUniqueExtensions
         }
     }
 
-    [MethodExpander(typeof(UniqueExExpander))]
-    public static T? SingleOrManyEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
-    {
-        return collection.Where(predicate).FirstEx();
-    }
-
-    [MethodExpander(typeof(UniqueExExpander))]
-    public static T SingleOrManyEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
-    {
-        return query.Where(predicate).FirstEx();
-    }
-
-    public static T? SingleOrManyEx<T>(this IEnumerable<T> collection)
-    {
-        if (collection == null)
-            throw new ArgumentNullException(nameof(collection));
-
-        using (IEnumerator<T> enumerator = collection.GetEnumerator())
-        {
-            if (!enumerator.MoveNext())
-                throw new InvalidOperationException("Sequence contains no {0}".FormatWith(typeof(T).TypeName()));
-
-            T current = enumerator.Current;
-
-            if (enumerator.MoveNext())
-                return default!;
-
-            return current;
-        }
-    }
-
-    public static T? SingleOrManyEx<T>(this IEnumerable<T> collection, Func<string> errorZero, bool forEndUser = false)
-    {
-        if (collection == null)
-            throw new ArgumentNullException(nameof(collection));
-
-        using (IEnumerator<T> enumerator = collection.GetEnumerator())
-        {
-            if (!enumerator.MoveNext())
-                throw NewException(forEndUser, errorZero());
-
-            T current = enumerator.Current;
-
-            if (enumerator.MoveNext())
-                return default!;
-
-            return current;
-        }
-    }
-
+ 
     //returns default if 0 or many, returns if one
     public static T? Only<T>(this IEnumerable<T> collection)
     {
