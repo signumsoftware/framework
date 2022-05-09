@@ -141,16 +141,16 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
   var { size, setContainer } = useSize();
 
   React.useEffect(() => {
-    chartContainer.current!.addEventListener("wheel", handleWeel, { passive: false, capture: true });
+    chartContainer.current!.addEventListener("wheel", handleWheel, { passive: false, capture: true });
     return () => {
-      chartContainer.current!.removeEventListener("wheel", handleWeel);
+      chartContainer.current?.removeEventListener("wheel", handleWheel);
     };
   }, []);
 
-  function handleWeel(e: WheelEvent) {
+  function handleWheel(e: WheelEvent) {
     e.preventDefault();
     e.stopPropagation();
-
+    let elem = e.currentTarget as HTMLElement;
     setMinMax(minMax => {
 
       let dist = minMax.max - minMax.min;
@@ -158,8 +158,6 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
       const inc = 1.2;
 
       let delta = 1 - (e.deltaY > 0 ? (1 / inc) : inc);
-
-      let elem = e.currentTarget as HTMLElement;
 
       let ne = e/*.nativeEvent*/ as MouseEvent;
 
