@@ -256,6 +256,11 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return giRetrieveAsync.GetInvoker(type)(id, token);
     }
 
+    public static Lite<Entity>? TryRetrieveLite(Type type, PrimaryKey id)
+    {
+        return giTryRetrieveLite.GetInvoker(type)(id);
+    }
+
     public static Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
     {
         return giRetrieveLite.GetInvoker(type)(id);
@@ -266,12 +271,44 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return giRetrieveLiteAsync.GetInvoker(type)(id, token);
     }
 
+    static readonly GenericInvoker<Func<PrimaryKey, Lite<Entity>?>> giTryRetrieveLite = new(id => TryRetrieveLite<Entity>(id));
+    public static Lite<T>? TryRetrieveLite<T>(PrimaryKey id)
+        where T : Entity
+    {
+        using (HeavyProfiler.Log("DBRetrieve", () => "TryRetrieveLite<{0}>".FormatWith(typeof(T).TypeName())))
+        {
+            try
+            {
+                var cc = GetCacheController<T>();
+                if (cc != null && GetFilterQuery<T>() == null)
+                {
+                    if (!cc.Exists(id))
+                        return null; 
+                    return new LiteImp<T>(id, cc.GetToString(id));
+                }
+
+                var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
+                if (result == null)
+                    return null;
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                e.Data["type"] = typeof(T).TypeName();
+                e.Data["id"] = id;
+
+                throw;
+            }
+        }
+    }
+
 
     static readonly GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giRetrieveLite = new(id => RetrieveLite<Entity>(id));
     public static Lite<T> RetrieveLite<T>(PrimaryKey id)
         where T : Entity
     {
-        using (HeavyProfiler.Log("DBRetrieve", () => "Lite<{0}>".FormatWith(typeof(T).TypeName())))
+        using (HeavyProfiler.Log("DBRetrieve", () => "RetrieveLite<{0}>".FormatWith(typeof(T).TypeName())))
         {
             try
             {
@@ -302,7 +339,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     public static async Task<Lite<T>> RetrieveLiteAsync<T>(PrimaryKey id, CancellationToken token)
         where T : Entity
     {
-        using (HeavyProfiler.Log("DBRetrieve", () => "Lite<{0}>".FormatWith(typeof(T).TypeName())))
+        using (HeavyProfiler.Log("DBRetrieve", () => "RetrieveLiteAsync<{0}>".FormatWith(typeof(T).TypeName())))
         {
             try
             {

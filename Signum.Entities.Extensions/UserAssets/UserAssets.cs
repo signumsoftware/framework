@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
@@ -12,6 +13,7 @@ public class UserAssetPreviewModel : ModelEntity
 {
     public MList<UserAssetPreviewLineEmbedded> Lines { get; set; } = new MList<UserAssetPreviewLineEmbedded>();
 }
+
 
 public class UserAssetPreviewLineEmbedded : EmbeddedEntity
 {
@@ -33,7 +35,22 @@ public class UserAssetPreviewLineEmbedded : EmbeddedEntity
         get { return Action == EntityAction.Different; }
     }
 
+    [PreserveOrder, NoRepeatValidator]
+    public MList<LiteConflictEmbedded> LiteConflicts { get; set; } = new MList<LiteConflictEmbedded>();
+
     public override string ToString() => $"{Type} {Action}";
+}
+
+public class LiteConflictEmbedded : EmbeddedEntity
+{
+    public string PropertyRoute { get; set; }
+
+    [ImplementedByAll]
+    public Lite<Entity> From { get; set; }
+
+    [ImplementedByAll]
+    public Lite<Entity>? To { get;  set; }
+
 }
 
 public enum EntityAction
@@ -53,6 +70,10 @@ public enum UserAssetMessage
     SucessfullyImported,
     SwitchToValue,
     SwitchToExpression,
+    [Description("Looks like some entities in {0} do not exist or have a different meanign in this database...")]
+    LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase,
+    [Description("Same selection for all conflicts of {0}")]
+    SameSelectionForAllConflictsOf0
 }
 
 [AutoInit]
@@ -100,7 +121,17 @@ public interface IFromXmlContext
     CultureInfoEntity GetCultureInfoEntity(string cultureName);
 
     public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element);
+
+    Lite<Entity>? ParseLite(string liteKey, IUserAssetEntity userAsset, PropertyRoute route);
+
+    Lite<T>? ParseLite<E, T>(string liteKey, E entity, Expression<Func<E, Lite<T>?>> property)
+        where E : Entity, IUserAssetEntity
+        where T : class, IEntity
+    {
+        return (Lite<T>?)ParseLite(liteKey, entity, PropertyRoute.Construct(property));
+    }
 }
+
 
 public interface IUserAssetEntity : IEntity
 {

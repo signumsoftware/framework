@@ -710,7 +710,7 @@ public static class AndOrSimplifierVisitor
 
         public int GetHashCode([DisallowNull] HashSet<T> obj)
         {
-            return obj.Count ; 
+            return obj.Count;
         }
     }
 
@@ -724,21 +724,17 @@ public static class AndOrSimplifierVisitor
     {
         if (expr is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
         {
+            var orGroups = OrAndList(b);
 
-            
-                var orGroups = OrAndList(b);
+            var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og))).ToList();
 
-                var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og))).ToList();
-
-                return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
-
-             
+            return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
         }
 
         return expr;
     }
 
-    static  HashSet<HashSet<Expression>> OrAndList(Expression expression)
+    static HashSet<HashSet<Expression>> OrAndList(Expression expression)
     {
         if (expression is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
         {
@@ -756,7 +752,7 @@ public static class AndOrSimplifierVisitor
         if (expression is BinaryExpression b && (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso))
             return AndList(b.Left).Concat(AndList(b.Right)).ToHashSet(Comparer);
         else
-            return new HashSet<Expression>(Comparer){ expression };
+            return new HashSet<Expression>(Comparer) { expression };
     }
 
     static bool IsMoreSimpleAndGeneralThan(this HashSet<Expression> simple, HashSet<Expression> complex)

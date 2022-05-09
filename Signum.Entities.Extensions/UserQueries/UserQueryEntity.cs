@@ -102,7 +102,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity
             new XAttribute("DisplayName", DisplayName),
             new XAttribute("Query", Query.Key),
             EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
-            Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             !HideQuickLink ? null! : new XAttribute("HideQuickLink", HideQuickLink),
             IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
             !AppendFilters ? null! : new XAttribute("AppendFilters", AppendFilters),
@@ -121,7 +121,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity
         Query = ctx.GetQuery(element.Attribute("Query")!.Value);
         DisplayName = element.Attribute("DisplayName")!.Value;
         EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value).ToLite());
-        Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value))!;
+        Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, uq => uq.Owner))!;
         HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
         IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
         AppendFilters = element.Attribute("AppendFilters")?.Let(a => bool.Parse(a.Value)) ?? false;

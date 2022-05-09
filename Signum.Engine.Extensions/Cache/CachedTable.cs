@@ -284,6 +284,16 @@ class CachedTable<T> : CachedTableBase where T : Entity
         return toStrGetter(id);
     }
 
+    public bool Exists(PrimaryKey id)
+    {
+        Interlocked.Increment(ref hits);
+        var origin = this.GetRows().TryGetC(id);
+        if (origin == null)
+            return false;
+
+        return true;
+    }
+
     public void Complete(T entity, IRetriever retriever)
     {
         Interlocked.Increment(ref hits);

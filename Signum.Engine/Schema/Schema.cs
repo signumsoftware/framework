@@ -845,7 +845,7 @@ public interface ICacheController
     void Complete(Entity entity, IRetriever retriver);
 
     string GetToString(PrimaryKey id);
-    string? TryGetToString(PrimaryKey?/*CSBUG*/ id);
+    string? TryGetToString(PrimaryKey? id);
 }
 
 public class InvalidateEventArgs : EventArgs { }
@@ -866,9 +866,11 @@ public abstract class CacheControllerBase<T> : ICacheController
 
     public abstract void Complete(T entity, IRetriever retriver);
 
+    public abstract bool Exists(PrimaryKey id);
+
     public abstract string GetToString(PrimaryKey id);
 
-    public virtual string? TryGetToString(PrimaryKey?/*CSBUG*/ id) => null;
+    public abstract string? TryGetToString(PrimaryKey? id);
 
     public abstract List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
         where R : Entity;

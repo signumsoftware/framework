@@ -32,8 +32,7 @@ export function navigatePalette(type: PseudoType): Promise<void> {
 
       return Navigator.view(cp,).then(pal => {
         if (pal) {
-          API.saveColorPalette(pal);
-          notifySuccess();
+          API.saveColorPalette(pal).then(() => notifySuccess()).done();
         }
       });
     });
