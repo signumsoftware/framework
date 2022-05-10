@@ -101,7 +101,8 @@ export function start(options: {
   if (options.queryButton)
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
-      if (!ctx.searchControl.props.showBarExtension)
+      if (!ctx.searchControl.props.showBarExtension ||
+        !(ctx.searchControl.props.showBarExtensionOption?.showChartButton ?? ctx.searchControl.props.largeToolbarButtons))
         return undefined;
 
       return { button: <MailingMenu searchControl={ctx.searchControl} /> };

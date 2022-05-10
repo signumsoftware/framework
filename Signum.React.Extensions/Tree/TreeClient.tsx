@@ -54,7 +54,10 @@ export function start(options: { routes: JSX.Element[] }) {
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
     var ti = tryGetTypeInfo(ctx.findOptions.queryKey);
 
-    if (!ctx.searchControl.props.showBarExtension || !ti || !isTree(ti))
+    if (
+      !ti || !isTree(ti) ||
+      !ctx.searchControl.props.showBarExtension ||
+      !(ctx.searchControl.props.showBarExtensionOption?.showTreeButton ?? ctx.searchControl.props.largeToolbarButtons))
       return undefined;
 
     return { button: <TreeButton searchControl={ctx.searchControl} /> };
@@ -234,5 +237,12 @@ export namespace API {
     userFilters: Array<FilterRequest>;
     frozenFilters: Array<FilterRequest>;
     expandedNodes: Array<Lite<TreeEntity>>;
+  }
+}
+
+declare module '@framework/SearchControl/SearchControlLoaded' {
+
+  export interface ShowBarExtensionOption {
+    showTreeButton?: boolean;
   }
 }

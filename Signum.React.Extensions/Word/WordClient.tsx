@@ -88,7 +88,9 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
   if (options.queryButton)
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
-      if (!ctx.searchControl.props.showBarExtension || !Navigator.isViewable(WordTemplateEntity))
+      if (!ctx.searchControl.props.showBarExtension ||
+        !(ctx.searchControl.props.showBarExtensionOption?.showWordReport ?? ctx.searchControl.props.largeToolbarButtons) ||
+        !Navigator.isViewable(WordTemplateEntity))
         return undefined;
 
       return { button: <WordSearchMenu searchControl={ctx.searchControl} /> };
