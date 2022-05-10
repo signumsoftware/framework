@@ -19,6 +19,7 @@ export interface ValueFindOptionsParsed {
 export interface ModalFindOptions {
   title?: React.ReactNode;
   message?: React.ReactNode;
+  forProperty?: string;
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
   autoSkipIfZero?: boolean;

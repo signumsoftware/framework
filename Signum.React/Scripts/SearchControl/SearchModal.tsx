@@ -177,7 +177,7 @@ namespace SearchModal {
       findMode={"Find"}
       isMany={false}
       title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
-      message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, false)}
+      message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, false, modalOptions?.forProperty)}
       size={modalOptions?.modalSize}
       searchControlProps={modalOptions?.searchControlProps}
       onOKClicked={modalOptions?.onOKClicked}
@@ -191,7 +191,7 @@ namespace SearchModal {
       findMode={"Find"}
       isMany={true}
       title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
-      message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, true)}
+      message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, true, modalOptions?.forProperty)}
       size={modalOptions?.modalSize}
       searchControlProps={modalOptions?.searchControlProps}
       onOKClicked={modalOptions?.onOKClicked}
@@ -213,17 +213,17 @@ namespace SearchModal {
 
 export default SearchModal;
 
-export function defaultSelectMessage(queryName: PseudoType | QueryKey, plural: boolean) {
+export function defaultSelectMessage(queryName: PseudoType | QueryKey, plural: boolean, forProperty?: string) {
 
   var type = queryName instanceof QueryKey ? null : getTypeInfo(queryName);
 
   if (plural) {
     return type ?
-      SearchMessage.PleaseSelectOneOrMore0_G.niceToString().forGenderAndNumber(type.gender, 2).formatWith(type.nicePluralName) :
+      SearchMessage.PleaseSelectOneOrMore0_G.niceToString().forGenderAndNumber(type.gender, 2).formatWith(forProperty ?? type.nicePluralName) :
       SearchMessage.PleaseSelectOneOrSeveralEntities.niceToString();
   } else {
     return type ?
-      SearchMessage.PleaseSelectA0_G.niceToString().forGenderAndNumber(type.gender, 2).formatWith(type.niceName) :
+      SearchMessage.PleaseSelectA0_G.niceToString().forGenderAndNumber(type.gender, 2).formatWith(forProperty ?? type.niceName) :
       SearchMessage.PleaseSelectAnEntity.niceToString();
   }
 }
