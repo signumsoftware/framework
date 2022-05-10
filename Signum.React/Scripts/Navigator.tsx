@@ -653,10 +653,16 @@ export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | Enti
     .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions ?? {}));
 }
 
-export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
-  var url = createRoute(pack.entity.Type) + "?waitData=true";
+export function createInNewTab(pack: EntityPack<ModifiableEntity>, viewName?: string) {
+  var url = createRoute(pack.entity.Type, viewName) + "?waitOpenerData=true";
   window.dataForChildWindow = pack;
   var win = window.open(url);
+}
+
+export function createInCurrentTab(pack: EntityPack<ModifiableEntity>, viewName?: string) {
+  var url = createRoute(pack.entity.Type, viewName) + "?waitCurrentData=true";
+  window.dataForCurrentWindow = pack;
+  AppContext.history.push(url);
 }
 
 export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event: React.MouseEvent<any>): Promise<void> {

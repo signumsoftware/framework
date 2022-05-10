@@ -7,7 +7,7 @@ import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
   toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed
 } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
@@ -655,7 +655,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       ...(this.props.hideButtonBar ? [] : buttonBarElements),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
-        button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
+        button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
           <FontAwesomeIcon icon="external-link-alt" />
         </button>
       }
@@ -717,31 +717,36 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
 
-        if (isWindowsOpen || (s != null && s.avoidPopup && this.props.view != "InPlace")) {
-          var vp = getViewPromise && getViewPromise(null)
+        if (isWindowsOpen || s?.avoidPopup  || this.props.view == "InPlace")
+        {
+          Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
+            .then(props => Constructor.constructPack(tn, props))
+            .then(pack => {
+              if (pack) {
+                var vp = getViewPromise && getViewPromise(null);
 
-          window.open(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
+                var viewName = typeof vp == "string" ? vp : undefined;
+
+                if (this.props.view == "InPlace" && !isWindowsOpen)
+                  Navigator.createInCurrentTab(pack, viewName);
+                else
+                  Navigator.createInNewTab(pack, viewName);
+              }
+            }).done();
         } else {
 
-          if (this.props.view == "InPlace") {
-
-            var vp = getViewPromise && getViewPromise(null);
-            AppContext.history.push(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
-
-          } else {
-
-            Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
-              .then(props => Constructor.constructPack(tn, props))
-              .then(pack => pack && Navigator.view(pack!, {
-                getViewPromise: getViewPromise as any,
-                buttons: "close",
-                createNew: () => Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
-                  .then(props => Constructor.constructPack(tn, props)!),
-              }))
-              .then(entity => this.handleCreated(entity))
-              .done();
-          }
+          Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
+            .then(props => Constructor.constructPack(tn, props))
+            .then(pack => pack && Navigator.view(pack!, {
+              getViewPromise: getViewPromise as any,
+              buttons: "close",
+              createNew: () => Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
+                .then(props => Constructor.constructPack(tn, props)!),
+            }))
+            .then(entity => this.handleCreated(entity))
+            .done();
         }
+        
       }).done();
     }
   }
@@ -964,6 +969,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (fo.groupResults) {
       fo.orderOptions.clear();
     }
+    fo.groupResults = false;
 
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
 
@@ -1408,22 +1414,22 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
 
-      const avoidPopup = s != undefined && s.avoidPopup;
+      const isWindowsOpen = e.button == 1 || e.ctrlKey;
 
-      if (e.ctrlKey || e.button == 1 || avoidPopup && this.props.view != "InPlace") {
+      if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
         var vp = getViewPromise && getViewPromise(null);
-        window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+        var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
+        if (this.props.view == "InPlace" && !isWindowsOpen)
+          AppContext.history.push(url);
+        else
+          window.open(url);
       }
       else {
-        if (this.props.view == "InPlace") {
-          var vp = getViewPromise && getViewPromise(null);
-          AppContext.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
-        } else {
-          Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
-            .then(() => {
-              this.handleOnNavigated(lite);
-            }).done();
-        }
+        Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
+          .then(() => {
+            this.handleOnNavigated(lite);
+          }).done();
+
       }
     }
   }
