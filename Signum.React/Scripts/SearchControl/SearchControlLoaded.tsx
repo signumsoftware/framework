@@ -929,17 +929,29 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
-  handleRemoveOthersColumn = () => {
+  handleGroupByThisColumn = () => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
     const col = fo.columnOptions[cm.columnIndex!];
-    fo.columnOptions.clear();
-    fo.columnOptions.push(col);
-    if (fo.groupResults && col.token) {
-      fo.orderOptions.extract(a => a.token.fullKey != col.token!.fullKey);
-    }
 
-    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+    Finder.API.parseTokens(fo.queryKey, [{ token: "Count", options: SubTokensOptions.CanAggregate }])
+      .then(tokens => {
+
+        var count = tokens[0];
+        fo.columnOptions.clear();
+        fo.columnOptions.push({ token: count, displayName: count.niceName });
+        fo.columnOptions.push(col);
+        fo.groupResults = true;
+        fo.orderOptions.clear();
+        fo.orderOptions.push({ token: count, orderType: "Descending" })
+
+        this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+
+        if (this.props.searchOnLoad)
+          this.doSearchPage1();
+
+      }).done();
+  
   }
 
   handleRestoreDefaultColumn = () => {
@@ -949,11 +961,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const col = fo.columnOptions[cm.columnIndex!];
     fo.columnOptions.clear();
     fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));
-    if (fo.groupResults && col.token) {
+    if (fo.groupResults) {
       fo.orderOptions.clear();
     }
 
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+
+    if (this.props.searchOnLoad)
+      this.doSearchPage1();
   }
 
   renderContextualMenu() {
@@ -977,20 +992,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         menuItems.push(<Dropdown.Divider />);
 
       if (cm.columnIndex != null) {
-        menuItems.push(<Dropdown.Item className="sf-insert-header" onClick={this.handleInsertColumn}>
+        menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
           <span className="fa-layers fa-fw icon">
             <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
             <FontAwesomeIcon icon="plus-square" transform="shrink-4 up-8 right-8" color="#008400" />
           </span>&nbsp;{JavascriptMessage.insertColumn.niceToString()}
         </Dropdown.Item>);
 
-        menuItems.push(<Dropdown.Item className="sf-edit-header" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
+        menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
           <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
           <FontAwesomeIcon icon="pen-square" transform="shrink-4 up-8 right-8" color="orange" />
         </span>&nbsp;{JavascriptMessage.editColumn.niceToString()}
         </Dropdown.Item>);
 
-        menuItems.push(<Dropdown.Item className="sf-remove-header" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
+        menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
           <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
           <FontAwesomeIcon icon="minus-square" transform="shrink-4 up-8 right-9" color="#ca0000" />
         </span>&nbsp;{JavascriptMessage.removeColumn.niceToString()}
@@ -998,10 +1013,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         menuItems.push(<Dropdown.Divider />);
 
-        menuItems.push(<Dropdown.Item className="sf-remove-other-header" onClick={this.handleRemoveOthersColumn}><span className="fa-layers fa-fw icon">
+        menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
           <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="times-circle" transform="shrink-4 up-8 right-8" color="black" />
-        </span>&nbsp;{JavascriptMessage.removeOtherColumns.niceToString()}
+          <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
+        </span>&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
         </Dropdown.Item>);
       }
 
