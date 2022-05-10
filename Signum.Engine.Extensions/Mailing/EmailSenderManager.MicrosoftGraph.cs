@@ -5,6 +5,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Graph.Auth;
 using Microsoft.Graph;
 using Signum.Entities.Authorization;
+using System.IO;
 
 namespace Signum.Engine.Mailing;
 
@@ -12,6 +13,7 @@ namespace Signum.Engine.Mailing;
 //https://www.jeancloud.dev/2020/06/05/using-microsoft-graph-as-smtp-server.html
 public partial class EmailSenderManager : IEmailSenderManager
 {
+    static long SmallFileSize = 3 * 1024 * 1024;
     protected virtual void SendMicrosoftGraph(EmailMessageEntity email, MicrosoftGraphEmbedded microsoftGraph)
     {
         try
@@ -19,13 +21,44 @@ public partial class EmailSenderManager : IEmailSenderManager
             ClientCredentialProvider authProvider = microsoftGraph.GetAuthProvider();
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
 
-            var message = ToGraphMessage(email);
+
+            var bigAttachments = email.Attachments.Where(a => a.File.FileLength > SmallFileSize).ToList();
+
+            var message = ToGraphMessageWithSmallAttachments(email);
+            message.IsDraft = bigAttachments.Any();
 
             var user = graphClient.Users[email.From.AzureUserId.ToString()];
 
             var request = user.SendMail(message, false).Request();
 
             request.PostAsync().Wait();
+
+            if (bigAttachments.Any())
+            {
+                foreach (var a in bigAttachments)
+                {
+                    AttachmentItem attachmentItem = new AttachmentItem
+                    {
+                        AttachmentType = AttachmentType.File,
+                        Name = a.File.FileName,
+                        Size = a.File.FileLength,
+                        ContentType = MimeMapping.GetMimeType(a.File.FileName)
+                    };
+
+                    UploadSession uploadSession = graphClient.Me.Messages[message.Id].Attachments.CreateUploadSession(attachmentItem).Request().PostAsync().Result;
+
+                    int maxSliceSize = 320 * 1024;
+
+                    using var fileStream = new MemoryStream(a.File.GetByteArray());
+
+                    var fileUploadTask = new LargeFileUploadTask<FileAttachment>(uploadSession, fileStream, maxSliceSize).UploadAsync().Result;
+
+                    if (!fileUploadTask.UploadSucceeded)
+                        throw new InvalidOperationException("Upload of big files to Microsoft Graph didn't succeed");
+                }
+
+                graphClient.Me.MailFolders["Drafts"].Messages[message.Id].Send().Request().PostAsync().Wait();
+            }
         }
         catch(AggregateException e)
         {
@@ -49,7 +82,7 @@ public partial class EmailSenderManager : IEmailSenderManager
         }
     }
 
-    private Message ToGraphMessage(EmailMessageEntity email)
+    private Message ToGraphMessageWithSmallAttachments(EmailMessageEntity email)
     {
         return new Message
         {
@@ -70,15 +103,17 @@ public partial class EmailSenderManager : IEmailSenderManager
     private IMessageAttachmentsCollectionPage GetAttachments(MList<EmailAttachmentEmbedded> attachments)
     {
         var result = new MessageAttachmentsCollectionPage();
+        
         foreach (var a in attachments)
         {
-            result.Add(new FileAttachment
-            {
-                ContentId = a.ContentId,
-                Name = a.File.FileName,
-                ContentType = MimeMapping.GetMimeType(a.File.FileName),
-                ContentBytes = a.File.GetByteArray(),
-            });
+            if(a.File.FileLength <= SmallFileSize)
+                result.Add(new FileAttachment
+                {
+                    ContentId = a.ContentId,
+                    Name = a.File.FileName,
+                    ContentType = MimeMapping.GetMimeType(a.File.FileName),
+                    ContentBytes = a.File.GetByteArray(),
+                });
         }
         return result;
     }
