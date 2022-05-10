@@ -1430,7 +1430,7 @@ export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<R
 }
 
 export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[], options?: APIHookOptions): AddToLite<R> | null | undefined {
-  var resultTable = useQuery(entity == null ? null : {
+  var resultTable = useQuery(entity == null || isEntity(entity) && entity.isNew ? null : {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
