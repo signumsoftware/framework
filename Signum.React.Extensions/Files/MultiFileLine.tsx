@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
-import { TypeContext } from '@framework/TypeContext'
+import { ButtonBarElement, TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EntityControlMessage, EmbeddedEntity } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EntityControlMessage, EmbeddedEntity, MListElement } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import { FileUploader } from './FileUploader'
@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Files.css"
 import { EntityListBaseController, EntityListBaseProps } from '@framework/Lines/EntityListBase'
 import { useController } from '@framework/Lines/LineBase'
+import { EntityBaseController } from '../../Signum.React/Scripts/Lines'
 
 export { FileTypeSymbol };
 
@@ -32,6 +33,9 @@ interface MultiFileLineProps extends EntityListBaseProps {
 export class MultiFileLineController extends EntityListBaseController<MultiFileLineProps> {
 
   overrideProps(p: MultiFileLineProps, overridenProps: MultiFileLineProps) {
+
+    p.view = EntityBaseController.defaultIsViewable(p.type!, false) && overridenProps.getFileFromElement != null;
+
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
@@ -51,6 +55,7 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
       if (p.maxSizeInBytes == null && m.defaultFileTypeInfo.maxSizeInBytes)
         p.maxSizeInBytes = m.defaultFileTypeInfo.maxSizeInBytes;
     }
+
   }
 
   handleDeleteValue = (index: number) => {
@@ -73,6 +78,21 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
 
   defaultCreate() {
     return Constructor.construct(this.props.type!.name);
+  }
+
+  renderElementViewButton(btn: boolean, entity: ModifiableEntity | Lite<Entity>, index: number) {
+
+    if (!this.canView(entity))
+      return undefined;
+
+    return (
+      <a href="#" className={classes("sf-line-button", "sf-view", btn ? "input-group-text" : undefined)}
+        onClick={e => this.handleViewElement(e, index)}
+        title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
+        {EntityBaseController.viewIcon}
+      </a>
+    );
+
   }
 }
 
@@ -115,6 +135,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                         htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />
                   }
                 </td>
+                {p.view && <td> {c.renderElementViewButton(false, mlec.value, mlec.index!)} </td>}
               </tr>)
           }
           <tr >
