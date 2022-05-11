@@ -16,7 +16,7 @@ import { useController } from '@framework/Lines/LineBase'
 export { FileTypeSymbol };
 
 interface MultiFileLineProps extends EntityListBaseProps {
-  ctx: TypeContext<MList<ModifiableEntity & IFile | Lite<IFile & Entity> | EmbeddedEntity /*implement getFile create Embedded*/>>;
+  ctx: TypeContext<MList<ModifiableEntity & IFile | Lite<IFile & Entity> | ModifiableEntity /*implement getFile create Embedded*/>>;
   download?: DownloadBehaviour;
   showFileIcon?: boolean;
   dragAndDrop?: boolean;
@@ -25,8 +25,8 @@ interface MultiFileLineProps extends EntityListBaseProps {
   accept?: string;
   configuration?: FileDownloaderConfiguration<IFile>;
   maxSizeInBytes?: number;
-  getFile?: (e: any /*EmbeddedEntity*/) => ModifiableEntity & IFile | Lite<IFile & Entity>;
-  createEmbedded?: (file: ModifiableEntity & IFile) => Promise<EmbeddedEntity>;
+  getFileFromElement?: (e: any /*ModifiableEntity*/) => ModifiableEntity & IFile | Lite<IFile & Entity>;
+  createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<ModifiableEntity>;
 }
 
 export class MultiFileLineController extends EntityListBaseController<MultiFileLineProps> {
@@ -35,8 +35,8 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
-    if (pr && p.getFile)
-      pr = pr.addMember("Indexer", "", true).addLambda(p.getFile);
+    if (pr && p.getFileFromElement)
+      pr = pr.addMember("Indexer", "", true).addLambda(p.getFileFromElement);
 
     const m = pr?.member;
     if (m?.defaultFileTypeInfo) {
@@ -61,8 +61,8 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
 
   handleFileLoaded = (file: IFile & ModifiableEntity) => {
 
-    if (this.props.createEmbedded)
-      this.props.createEmbedded(file)
+    if (this.props.createElementFromFile)
+      this.props.createElementFromFile(file)
         .then(em => em && this.addElement(em))
         .done();
     else
@@ -105,13 +105,13 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                   {p.getComponent ? p.getComponent(mlec) :
                     p.download == "None" ?
                       <span className={classes(mlec.formControlClass, "file-control")} >
-                        {p.getFile ? p.getFile(mlec.value).toStr : mlec.value.toStr}
+                        {p.getFileFromElement ? p.getFileFromElement(mlec.value).toStr : mlec.value.toStr}
                       </span > :
                       <FileDownloader
                         configuration={p.configuration}
                         showFileIcon={p.showFileIcon}
                         download={p.download}
-                        entityOrLite={p.getFile ? p.getFile(mlec.value as EmbeddedEntity) : mlec.value as ModifiableEntity & IFile | Lite<IFile & Entity>}
+                        entityOrLite={p.getFileFromElement ? p.getFileFromElement(mlec.value as EmbeddedEntity) : mlec.value as ModifiableEntity & IFile | Lite<IFile & Entity>}
                         htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />
                   }
                 </td>
@@ -128,8 +128,8 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                   dragAndDropMessage={p.dragAndDropMessage}
                   fileType={p.fileType}
                   onFileLoaded={c.handleFileLoaded}
-                  typeName={p.getFile ?
-                    p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFile).typeReference().name! :
+                  typeName={p.getFileFromElement ?
+                    p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFileFromElement).typeReference().name! :
                     p.ctx.propertyRoute!.typeReference().name}
                   buttonCss={p.ctx.buttonClass}
                   divHtmlAttributes={{ className: "sf-file-line-new" }} />}
