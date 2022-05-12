@@ -84,10 +84,8 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     if (state.type) {
       const type = state.type;
 
-      const customComponent = Boolean(state.getComponent || state.getViewPromise);
-
-      state.create = EntityBaseController.defaultIsCreable(type, customComponent);
-      state.view = EntityBaseController.defaultIsViewable(type, customComponent);
+      state.create = EntityBaseController.defaultIsCreable(type, false);
+      state.view = EntityBaseController.defaultIsViewable(type, false);
       state.find = EntityBaseController.defaultIsFindable(type);
       state.findOptions = Navigator.defaultFindOptions(type);
 

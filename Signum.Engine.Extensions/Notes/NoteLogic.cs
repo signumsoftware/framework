@@ -75,7 +75,7 @@ public static class NoteLogic
 
         return new NoteEntity
         {               
-            CreatedBy = user ?? UserEntity.Current.ToLite(),
+            CreatedBy = user ?? UserEntity.Current,
             Text = text,
             Title = title,
             Target = (Lite<Entity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),

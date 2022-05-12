@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, Dic, KeyGenerator } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList, is } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import * as Navigator from '../Navigator'
 import { FilterOption, FindOptions } from '../FindOptions'
@@ -83,6 +83,52 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     return this.props.onView ?
       this.props.onView(entity, pr) :
       this.defaultView(entity, pr);
+  }
+
+  handleViewElement = (event: React.MouseEvent<any>, index: number) => {
+
+    event.preventDefault();
+
+    const p = this.props;
+    const ctx = p.ctx;
+    const list = ctx.value!;
+    const mle = list[index];
+    const entity = mle.element;
+
+    const openWindow = (event.button == 1 || event.ctrlKey) && !p.type!.isEmbedded;
+    if (openWindow) {
+      event.preventDefault();
+      const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
+      window.open(route);
+    }
+    else {
+      const pr = ctx.propertyRoute!.addLambda(a => a[0]);
+
+      const promise = p.onView ?
+        p.onView(entity, pr) :
+        this.defaultView(entity, pr);
+
+      if (promise == null)
+        return;
+
+      promise.then(e => {
+        if (e == undefined)
+          return;
+
+        this.convert(e).then(m => {
+          if (is(list[index].element as Entity, e as Entity)) {
+            list[index].element = m;
+            if (e.modified)
+              this.setValue(list);
+            this.forceUpdate();
+          } else {
+            list[index] = { rowId: null, element: m };
+            this.setValue(list);
+          }
+
+        }).done();
+      }).done();
+    }
   }
 
   moveDown(index: number) {

@@ -250,6 +250,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   );
   return (
     <Dropdown
+      title={[UserQueryEntity.nicePluralName(), currentUserQueryToStr].notNull().join(" - ")}
       onToggle={handleSelectedToggle} show={isOpen}>
       <Dropdown.Toggle id="userQueriesDropDown" className={classes("sf-userquery-dropdown", currentUserQuery ? "border-info" : undefined)} variant={"light"} >
         {label}

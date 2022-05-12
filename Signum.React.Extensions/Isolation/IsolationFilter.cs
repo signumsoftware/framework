@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 using Signum.Entities.Isolation;
 using Signum.React.Filters;
 
@@ -11,12 +12,12 @@ public class IsolationFilter : SignumDisposableResourceFilter
 
     public override IDisposable? GetResource(ResourceExecutingContext context)
     {
-        var user = UserEntity.Current;
+        var user = UserHolder.Current;
 
         if (user == null)
             return null;
 
-        var isolation = user.TryMixin<IsolationMixin>()?.Isolation;
+        var isolation = user.GetClaim("Isolation") as Lite<IsolationEntity>;
 
         if (isolation == null)
         {

@@ -23,7 +23,7 @@ public static class AlertLogic
 
     [AutoExpressionField]
     public static IQueryable<AlertEntity> MyActiveAlerts(this Entity e) => 
-        As.Expression(() => e.Alerts().Where(a => a.Recipient.Is(UserHolder.Current.ToLite()) && a.CurrentState == AlertCurrentState.Alerted));
+        As.Expression(() => e.Alerts().Where(a => a.Recipient.Is(UserHolder.Current.User) && a.CurrentState == AlertCurrentState.Alerted));
 
     public static Func<IUserEntity?> DefaultRecipient = () => null;
 
@@ -309,7 +309,7 @@ public static class AlertLogic
             var result = new AlertEntity
             {
                 AlertDate = alertDate ?? Clock.Now,
-                CreatedBy = createdBy ?? UserHolder.Current?.ToLite(),
+                CreatedBy = createdBy ?? UserHolder.Current?.User,
                 TitleField = title,
                 TextArguments = textArguments?.ToString("\n###\n"),
                 TextField = text,
@@ -330,7 +330,7 @@ public static class AlertLogic
         using (AuthLogic.Disable())
         {
             alertDate ??= Clock.Now;
-            createdBy ??= UserHolder.Current?.ToLite();
+            createdBy ??= UserHolder.Current?.User;
 
             var txtArgumentJoined = textArguments?.ToString("\n###\n");
             return query.UnsafeInsert(tuple => new AlertEntity
@@ -448,7 +448,7 @@ public class AlertGraph : Graph<AlertEntity, AlertState>
             Construct = (a, _) => new AlertEntity
             {
                 AlertDate = Clock.Now,
-                CreatedBy = UserHolder.Current.ToLite(),
+                CreatedBy = UserHolder.Current.User,
                 Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
                 TitleField = null,
                 TextField = null,
@@ -463,7 +463,7 @@ public class AlertGraph : Graph<AlertEntity, AlertState>
             Construct = (_) => new AlertEntity
             {
                 AlertDate = Clock.Now,
-                CreatedBy = UserHolder.Current.ToLite(),
+                CreatedBy = UserHolder.Current.User,
                 Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
                 TitleField = null,
                 TextField = null,
@@ -489,7 +489,7 @@ public class AlertGraph : Graph<AlertEntity, AlertState>
             {
                 a.State = AlertState.Attended;
                 a.AttendedDate = Clock.Now;
-                a.AttendedBy = UserEntity.Current.ToLite();
+                a.AttendedBy = UserHolder.Current.User;
             }
         }.Register();
 

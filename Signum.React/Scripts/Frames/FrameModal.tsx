@@ -8,7 +8,7 @@ import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
 import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges, ButtonsContext } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, FrameMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
@@ -402,7 +402,7 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
       return undefined;
 
     return (
-      <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={handlePopupFullScreen}>
+      <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
         <FontAwesomeIcon icon="external-link-alt" />
       </a>
     );

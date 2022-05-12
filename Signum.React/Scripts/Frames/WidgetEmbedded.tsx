@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { EntityPack, ModifiableEntity, NormalWindowMessage } from '../Signum.Entities'
+import { EntityPack, ModifiableEntity, FrameMessage } from '../Signum.Entities'
 import { TypeContext, EntityFrame } from '../TypeContext'
 import "./Widgets.css"
 import { ErrorBoundary } from '../Components';
@@ -44,7 +44,7 @@ export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
       <>
         {top}
         <Tabs id="appTabs">
-          <Tab eventKey="tabMain1" title={NormalWindowMessage.Main.niceToString()}>
+          <Tab eventKey="tabMain1" title={FrameMessage.Main.niceToString()}>
             {p.children}
           </Tab>
           {tab.map((e, i) => toTab(e))}

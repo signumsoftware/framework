@@ -21,7 +21,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
     if (!ctx.searchControl.props.showBarExtension ||
-      (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showExcelMenu == false))
+      !(ctx.searchControl.props.showBarExtensionOption?.showExcelMenu ?? ctx.searchControl.props.largeToolbarButtons))
       return undefined;
 
     if (!(options.plainExcel && AuthClient.isPermissionAuthorized(ExcelPermission.PlainExcel)) &&

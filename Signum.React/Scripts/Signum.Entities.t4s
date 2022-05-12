@@ -89,7 +89,7 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 import * as Reflection from './Reflection'
 
 export function newNiceName(ti: Reflection.TypeInfo) {
-  return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
+  return FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
 }
 
 function getOrCreateToStringFunction(type: string) {

@@ -1465,71 +1465,6 @@
     <Member Name="BpmnElementId" Description="BPMN Element-id" />
     <Member Name="Xml" Description="XML" />
   </Type>
-  <Type Name="JoyrideEntity" Description="Spritztour">
-    <Member Name="Culture" Description="Kultur" />
-    <Member Name="Debug" Description="Debug" />
-    <Member Name="Guid" Description="Guid" />
-    <Member Name="KeyboardNavigation" Description="Tastaturnavigation zulassen" />
-    <Member Name="Name" Description="Name" />
-    <Member Name="ShowSkipButton" Description="Schaltfläche &quot;Abbrechen&quot; anzeigen" />
-    <Member Name="ShowStepsProgress" Description="Fortschritt anzeigen" />
-    <Member Name="Steps" Description="Schritte" />
-    <Member Name="Type" Description="Typ" />
-  </Type>
-  <Type Name="JoyrideMessage">
-    <Member Name="Back" Description="Zurück" />
-    <Member Name="Close" Description="Schließen" />
-    <Member Name="Last" Description="Beenden" />
-    <Member Name="Next" Description="Weiter" />
-    <Member Name="Skip" Description="Abbrechen" />
-  </Type>
-  <Type Name="JoyrideOperation">
-    <Member Name="Save" Description="Speichern" />
-  </Type>
-  <Type Name="JoyrideStepEntity" Description="Spritztour Schritt" PluralDescription="Spritztour Schritte" Gender="m">
-    <Member Name="AllowClicksThruHole" Description="Klicken in den Bereich zulassen" />
-    <Member Name="Culture" Description="Kultur" />
-    <Member Name="Guid" Description="Guid" />
-    <Member Name="IsFixed" Description="Ist fixiert" />
-    <Member Name="Position" Description="Position" />
-    <Member Name="Selector" Description="Selektor" />
-    <Member Name="Style" Description="Stil" />
-    <Member Name="Text" Description="Text" />
-    <Member Name="Title" Description="Titel" />
-    <Member Name="Type" Description="Typ" />
-  </Type>
-  <Type Name="JoyrideStepOperation">
-    <Member Name="Save" Description="Speichern" />
-  </Type>
-  <Type Name="JoyrideStepPosition" Description="Position">
-    <Member Name="Bottom" Description="Unten" />
-    <Member Name="BottomLeft" Description="Unten links" />
-    <Member Name="BottomRight" Description="Unten rechts" />
-    <Member Name="Top" Description="Oben" />
-    <Member Name="TopLeft" Description="Oben links" />
-    <Member Name="TopRight" Description="Oben rechts" />
-  </Type>
-  <Type Name="JoyrideStepStyleEntity" Description="Spritztour Stil" PluralDescription="Spritztour Stile" Gender="m">
-    <Member Name="BackgroundColor" Description="Hintergrundfarbe" />
-    <Member Name="BorderRadius" Description="Randradius" />
-    <Member Name="Color" Description="Farbe" />
-    <Member Name="Guid" Description="Guid" />
-    <Member Name="MainColor" Description="Hauptfarbe" />
-    <Member Name="Name" Description="Name" />
-    <Member Name="TextAlign" Description="Textausrichtung" />
-    <Member Name="Width" Description="Breite" />
-  </Type>
-  <Type Name="JoyrideStepStyleOperation">
-    <Member Name="Save" Description="Speichern" />
-  </Type>
-  <Type Name="JoyrideStepType" Description="Typ">
-    <Member Name="Click" Description="Klicken" />
-    <Member Name="Hover" Description="Hover" />
-  </Type>
-  <Type Name="JoyrideType" Description="Spritztour-Typ">
-    <Member Name="Continuous" Description="Kontinuierlich" />
-    <Member Name="Single" Description="Einzeln" />
-  </Type>
   <Type Name="LinkElementEmbedded" Description="Linkelement">
     <Member Name="Label" Description="Etikett" />
     <Member Name="Link" Description="Link" />
@@ -1538,6 +1473,11 @@
   <Type Name="LinkListPartEntity" Description="Linklisten Teil" PluralDescription="Linklisten Teilen" Gender="n">
     <Member Name="Links" Description="Links" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
+  <Type Name="LiteConflictEmbedded" Description="Lite-Konflikt">
+    <Member Name="From" Description="Von" />
+    <Member Name="PropertyRoute" Description="Route der Immobilie" />
+    <Member Name="To" Description="An" />
   </Type>
   <Type Name="LoadMethodLogEntity" Description="Log für Load-Methode" PluralDescription="Logs für Load-Methoden" Gender="n">
     <Member Name="ClassName" Description="Klassen Name" />
@@ -2629,6 +2569,8 @@
     <Member Name="ExportToXml" Description="In xml exportieren" />
     <Member Name="ImportPreview" Description="Importvorschau" />
     <Member Name="ImportUserAssets" Description="Benutzer-Assets importieren" />
+    <Member Name="LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase" Description="Sieht so aus, als ob einige Entitäten in {0} in dieser Datenbank nicht existieren oder eine andere Bedeutung haben ..." />
+    <Member Name="SameSelectionForAllConflictsOf0" Description="Gleiche Auswahl für alle Konflikte der {0}" />
     <Member Name="SelectTheEntitiesToOverride" Description="Wählen Sie die Elemente zum Überschreiben aus" />
     <Member Name="SelectTheXmlFileWithTheUserAssetsThatYouWantToImport" Description="Wählen Sie die XML-Datei mit den Benutzer-Assets, die Sie importieren möchten" />
     <Member Name="SucessfullyImported" Description="Erfolgreich importiert" />
@@ -2642,6 +2584,7 @@
     <Member Name="Action" Description="Aktion" />
     <Member Name="CustomResolution" Description="Benutzerdefinierte Auflösung" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="LiteConflicts" Description="Leichte Konflikte" />
     <Member Name="OverrideEntity" Description="Entität überschreiben" />
     <Member Name="Text" Description="Text" />
     <Member Name="Type" Description="Typ" />

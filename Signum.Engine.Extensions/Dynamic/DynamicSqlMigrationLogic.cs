@@ -82,7 +82,7 @@ public static class DynamicSqlMigrationLogic
                         return new DynamicSqlMigrationEntity
                         {
                             CreationDate = Clock.Now,
-                            CreatedBy = UserEntity.Current.ToLite(),
+                            CreatedBy = UserEntity.Current,
                             Script = script?.ToString() ?? "",
                         };
                     }
@@ -111,7 +111,7 @@ public static class DynamicSqlMigrationLogic
                         throw new InvalidOperationException("There is already a migration running");
 
                     e.ExecutionDate = Clock.Now;
-                    e.ExecutedBy = UserEntity.Current.ToLite();
+                    e.ExecutedBy = UserEntity.Current;
 
                     var oldOut = Console.Out;
                     try

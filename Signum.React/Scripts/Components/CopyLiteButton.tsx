@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Overlay, Tooltip } from "react-bootstrap";
-import { Entity, liteKey, NormalWindowMessage, toLite } from '../Signum.Entities';
+import { Entity, FrameMessage, liteKey, toLite } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useInterval } from '../Hooks';
 
@@ -31,7 +31,7 @@ export default function CopyLiteButton(p: CopyLiteButtonProps) {
       </a>
       <Overlay target={link.current} show={showTooltip} placement="bottom">
         <Tooltip id={lk + "_tooltip"}>
-          {NormalWindowMessage.Copied.niceToString()}
+          {FrameMessage.Copied.niceToString()}
         </Tooltip>
       </Overlay>
     </span>

@@ -33,7 +33,7 @@ export function start(options: { routes: JSX.Element[] }) {
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
     if (!ctx.searchControl.props.showBarExtension ||
       !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ||
-      (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showUserQuery == false))
+      !(ctx.searchControl.props.showBarExtensionOption?.showUserQuery ?? ctx.searchControl.props.largeToolbarButtons))
       return undefined;
 
     return { button: <UserQueryMenu searchControl={ctx.searchControl} /> };

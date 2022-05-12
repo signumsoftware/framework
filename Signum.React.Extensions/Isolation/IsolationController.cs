@@ -12,7 +12,7 @@ public class IsolationController : Controller
     [HttpGet("api/isolations")]
     public List<Lite<IsolationEntity>> Isolations()
     {
-        var current = UserEntity.Current.TryMixin<IsolationMixin>()?.Isolation;
+        var current = UserEntity.Current.Retrieve().TryMixin<IsolationMixin>()?.Isolation;
 
         if (current != null)
             throw new UnauthorizedAccessException("User is only allowed to see isolation:" + current);

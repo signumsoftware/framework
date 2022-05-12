@@ -112,7 +112,6 @@ public class WhereTest
         AssertThrows<InvalidOperationException>(typeof(ArtistEntity).Name, () => artists.SingleEx(a => a.Sex == Sex.Male));
         AssertThrows<InvalidOperationException>(typeof(ArtistEntity).Name, () => artists.SingleOrDefaultEx(a => a.Sex == Sex.Male));
         AssertThrows<InvalidOperationException>(typeof(ArtistEntity).Name, () => artists.FirstEx(a => a.Dead && !a.Dead));
-
     }
 
     static void AssertThrows<T>(string message, Action action) where T : Exception

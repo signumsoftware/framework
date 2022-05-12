@@ -48,7 +48,7 @@ public static class TranslationLogic
         var pi = mi as PropertyInfo;
         var type = pi?.ReflectedType ?? mi as Type;
 
-        var typeOccurrences = NonLocalized.GetOrAdd(UserEntity.Current.Role).GetOrAdd(ci).GetOrAdd(type!);
+        var typeOccurrences = NonLocalized.GetOrAdd(RoleEntity.Current).GetOrAdd(ci).GetOrAdd(type!);
 
         if (pi == null)
             typeOccurrences.Ocurrences++;

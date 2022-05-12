@@ -42,9 +42,9 @@ public class CultureController : ControllerBase
             using (AuthLogic.Disable())
             using (OperationLogic.AllowSave<UserEntity>())
             {
-                var user = UserEntity.Current.ToLite().RetrieveAndRemember();
+                var user = UserEntity.Current.RetrieveAndRemember();
                 user.CultureInfo = culture.RetrieveAndRemember();
-                UserEntity.Current = user;
+                UserHolder.Current = new UserWithClaims(user);
                 user.Save();
             }
         }
