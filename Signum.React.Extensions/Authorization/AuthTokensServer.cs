@@ -9,13 +9,15 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Signum.Engine.Json;
 using System.Text.Json;
+using Signum.Entities.Basics;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.Authorization;
 
 public static class AuthTokenServer
 {
     public static Func<AuthTokenConfigurationEmbedded> Configuration;
-    public static Action<UserEntity, AuthToken?, AuthToken?> OnAuthToken;
+    public static Action<UserWithClaims, AuthToken?, AuthToken?> OnAuthToken;
     public static Func<string, bool> AuthenticateHeader = (authHeader) => true;
 
     public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
@@ -38,7 +40,7 @@ public static class AuthTokenServer
     public static SignumAuthenticationResult? AnonymousUserAuthenticator(FilterContext actionContext)
     {
         if (AuthLogic.AnonymousUser != null)
-            return new SignumAuthenticationResult { User = AuthLogic.AnonymousUser };
+            return new SignumAuthenticationResult { UserWithClaims = new UserWithClaims(AuthLogic.AnonymousUser) };
 
         return null;
     }
@@ -46,7 +48,7 @@ public static class AuthTokenServer
 
     public static SignumAuthenticationResult? AllowAnonymousAuthenticator(FilterContext actionContext)
     {
-        if (actionContext.ActionDescriptor is ControllerActionDescriptor cad && 
+        if (actionContext.ActionDescriptor is ControllerActionDescriptor cad &&
             (cad.MethodInfo.HasAttribute<SignumAllowAnonymousAttribute>() || cad.ControllerTypeInfo.HasAttribute<SignumAllowAnonymousAttribute>()))
             return new SignumAuthenticationResult();
 
@@ -65,9 +67,10 @@ public static class AuthTokenServer
         var authHeader = ctx.HttpContext.Request.Headers[AuthHeader].FirstOrDefault();
         if (authHeader == null || !AuthenticateHeader(authHeader))
             return null;
-        
+
+
         var token = DeserializeAuthHeaderToken(authHeader);
-        if (token.User == null)
+        if (token?.User == null)
             return null;
 
         var c = Configuration();
@@ -78,18 +81,19 @@ public static class AuthTokenServer
 
         if (requiresRefresh)
         {
-            ctx.HttpContext.Response.Headers["New_Token"] = RefreshToken(token, out var newUser);
-            return new SignumAuthenticationResult { User = newUser};
+            ctx.HttpContext.Response.Headers["New_Token"] = RefreshToken(token, out var newUserWithClaims);
+            return new SignumAuthenticationResult { UserWithClaims = newUserWithClaims };
         }
         else
         {
-            OnAuthToken?.Invoke(token.User, token, null);
+            var userWithClaims = token.ToUserWithClaims();
+            OnAuthToken?.Invoke(userWithClaims, token, null);
+            return new SignumAuthenticationResult { UserWithClaims = userWithClaims };
         }
 
-        return new SignumAuthenticationResult { User = token.User };
     }
 
-    public static string RefreshToken(AuthToken oldToken, out UserEntity newUser)
+    public static string RefreshToken(AuthToken oldToken, out UserWithClaims newUser)
     {
         var user = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == oldToken.User.Id));
 
@@ -99,27 +103,41 @@ public static class AuthTokenServer
         if (user.State == UserState.Deactivated)
             throw new AuthenticationException(LoginAuthMessage.User0IsDisabled.NiceToString(user));
 
-        if (user.UserName != oldToken.User.UserName)
+        if (user.ToString() != oldToken.User.ToString())
             throw new AuthenticationException(LoginAuthMessage.InvalidUsername.NiceToString());
 
-        if (!user.PasswordHash.EmptyIfNull().SequenceEqual(oldToken.User.PasswordHash.EmptyIfNull()))
+        if (!(user.PasswordHash.EmptyIfNull()).SequenceEqual((oldToken.PasswordHash.EmptyIfNull()).EmptyIfNull()))
             throw new AuthenticationException(LoginAuthMessage.InvalidPassword.NiceToString());
+
+        newUser = new UserWithClaims(user);
 
         AuthToken newToken = new AuthToken
         {
-            User = user,
+            User = newUser.User,
+            Claims = newUser.Claims,
+            PasswordHash = user.PasswordHash,
             CreationDate = Clock.Now,
         };
 
-        OnAuthToken?.Invoke(user, oldToken, newToken);
+        OnAuthToken?.Invoke(newUser, oldToken, newToken);
 
         var result = SerializeToken(newToken);
-        newUser = user;
         return result;
     }
 
 
-    public static Func<string, AuthToken> DeserializeAuthHeaderToken = (string authHeader) => DeserializeToken(authHeader.After("Bearer "));
+    public static Func<string, AuthToken?> DeserializeAuthHeaderToken = (string authHeader) => 
+    {
+        try
+        {
+            return DeserializeToken(authHeader.After("Bearer "));
+
+        }
+        catch (AuthenticationException)
+        {
+            return null;
+        }
+    };
 
     public static AuthToken DeserializeToken(string token)
     {
@@ -133,7 +151,11 @@ public static class AuthTokenServer
             using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
             {
                 var bytes = ds.ReadAllBytes();
-                return JsonExtensions.FromJsonBytes<AuthToken>(bytes, EntityJsonContext.FullJsonSerializerOptions);
+                var authToken = JsonExtensions.FromJsonBytes<AuthToken>(bytes, EntityJsonContext.FullJsonSerializerOptions);
+
+                authToken.Claims = authToken.Claims.SelectDictionary(key => key, obj => obj is JsonElement elem ? OperationController.BaseOperationRequest.ConvertObject(elem, null) : obj);
+
+                return authToken;
             }
         }
         catch (Exception)
@@ -142,11 +164,12 @@ public static class AuthTokenServer
         }
     }
 
-    public static string CreateToken(UserEntity user)
+    public static string CreateToken(UserWithClaims user)
     {
         AuthToken newToken = new AuthToken
         {
-            User = user,
+            User = user.User,
+            Claims = user.Claims,
             CreationDate = Clock.Now,
         };
 
@@ -216,9 +239,12 @@ public static class AuthTokenServer
 
 public class AuthToken
 {
-    public UserEntity User { get; set; }
-
+    public Lite<IUserEntity> User { get; set; }
+    public Dictionary<string, object?> Claims { get; set; }
+    public byte[]? PasswordHash { get; set; } //To check if the password has changed
     public DateTime CreationDate { get; set; }
+
+    public UserWithClaims ToUserWithClaims() => new UserWithClaims(this.User, this.Claims);
 }
 
 public class NewTokenRequiredException : Exception

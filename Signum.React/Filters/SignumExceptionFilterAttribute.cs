@@ -50,7 +50,7 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
                     e.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
                     e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress?.ToString());
                     e.UserHostName = Try(100, () => connFeature.RemoteIpAddress == null ? null : Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
-                    e.User = (UserHolder.Current ?? (IUserEntity?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key])?.ToLite() ?? e.User;
+                    e.User = UserHolder.Current?.User ?? ((UserWithClaims?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key])?.User ?? e.User;
                     e.QueryString = new BigStringEmbedded(Try(int.MaxValue, () => req.QueryString.ToString()));
                     e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
                     e.Session = new BigStringEmbedded();
@@ -70,9 +70,9 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
                         response.StatusCode = (int)statusCode;
                         response.ContentType = "application/json";
 
-                        var user = (IUserEntity?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Key];
+                        var userWithClaims = (UserWithClaims?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key];
 
-                        using (UserHolder.Current == null && user != null ? UserHolder.UserSession(user) : null)
+                        using (UserHolder.Current == null && userWithClaims != null ? UserHolder.UserSession(userWithClaims) : null)
                         {
                             await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
                         }

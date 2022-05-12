@@ -60,7 +60,7 @@ public class Graph<T>
                 {
                     Operation = operationSymbol,
                     Start = Clock.Now,
-                    User = UserHolder.Current?.ToLite()!,
+                    User = UserHolder.Current?.User!,
                 };
 
                 try
@@ -224,7 +224,7 @@ public class Graph<T>
                 {
                     Operation = operationSymbol,
                     Start = Clock.Now,
-                    User = UserHolder.Current?.ToLite()!,
+                    User = UserHolder.Current?.User!,
                     Origin = origin.ToLite(origin.IsNew),
                 };
 
@@ -364,7 +364,7 @@ public class Graph<T>
                 {
                     Operation = operationSymbol,
                     Start = Clock.Now,
-                    User = UserHolder.Current?.ToLite()!
+                    User = UserHolder.Current?.User!
                 };
 
                 try
@@ -514,7 +514,7 @@ public class Graph<T>
                 {
                     Operation = Symbol.Symbol,
                     Start = Clock.Now,
-                    User = UserHolder.Current?.ToLite()!
+                    User = UserHolder.Current?.User!
                 };
 
                 try
@@ -653,7 +653,7 @@ public class Graph<T>
                 {
                     Operation = Symbol.Symbol,
                     Start = Clock.Now,
-                    User = UserHolder.Current?.ToLite()!,
+                    User = UserHolder.Current?.User!,
                 };
 
                 using (OperationLogic.AllowSave(entity.GetType()))

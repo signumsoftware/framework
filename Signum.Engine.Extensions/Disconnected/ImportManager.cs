@@ -101,7 +101,7 @@ public class ImportManager
 
         var cancelationSource = new CancellationTokenSource();
 
-        var user = UserEntity.Current;
+        var user = UserHolder.Current;
 
         var token = cancelationSource.Token;
 

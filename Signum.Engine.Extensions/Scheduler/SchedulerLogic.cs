@@ -166,12 +166,12 @@ public static class SchedulerLogic
 
             new Graph<ScheduledTaskLogEntity>.ConstructFrom<ITaskEntity>(ITaskOperation.ExecuteSync)
             {
-                Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current)
+                Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current.User.Retrieve())
             }.Register();
 
             new Graph<ITaskEntity>.Execute(ITaskOperation.ExecuteAsync)
             {
-                Execute = (task, _) => ExecuteAsync(task, null, UserHolder.Current)
+                Execute = (task, _) => ExecuteAsync(task, null, UserHolder.Current.User.Retrieve())
             }.Register();
 
             ScheduledTasksLazy = sb.GlobalLazy(() =>
@@ -398,16 +398,10 @@ public static class SchedulerLogic
             });
     }
 
-    public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity? user)
+    public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity user)
     {
-        IUserEntity entityIUser = (user ?? (IUserEntity?)scheduledTask?.User.RetrieveAndRemember())!;
-
-        var isolation = entityIUser.TryIsolation();
-        if (isolation == null)
-        {
-            var ientity = task as IEntity;
-            isolation = ientity?.TryIsolation();
-        }
+        var isolation = !Isolation.IsolationLogic.IsStarted ? null :
+                        user.TryIsolation() ?? (task as IEntity).TryIsolation();
 
         using (IsolationEntity.Override(isolation))
         {
@@ -418,7 +412,7 @@ public static class SchedulerLogic
                 StartTime = Clock.Now,
                 MachineName = Schema.Current.MachineName,
                 ApplicationName = Schema.Current.ApplicationName,
-                User = entityIUser.ToLite(),
+                User = user.ToLite(),
             };
 
             using (AuthLogic.Disable())
@@ -436,7 +430,7 @@ public static class SchedulerLogic
                 var ctx = new ScheduledTaskContext(stl);
                 RunningTasks.TryAdd(stl, ctx);
 
-                using (UserHolder.UserSession(entityIUser))
+                using (UserHolder.UserSession(user))
                 {
                     using (var tr = Transaction.ForceNew())
                     {

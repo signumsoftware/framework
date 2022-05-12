@@ -43,11 +43,11 @@ public static class AzureADLogic
 
     public static List<Guid> CurrentADGroups()
     {
-        var oid = UserEntity.Current.Mixin<UserADMixin>().OID;
+        var oid = UserADMixin.CurrentOID;
         if (oid == null)
             return new List<Guid>();
 
-        var tuple = ADGroupsCache.AddOrUpdate(UserEntity.Current.ToLite(),
+        var tuple = ADGroupsCache.AddOrUpdate(UserEntity.Current,
             addValueFactory: user => (Clock.Now, CurrentADGroupsInternal(oid.Value)),
             updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > Clock.Now ? old : (Clock.Now, CurrentADGroupsInternal(oid.Value)));
 

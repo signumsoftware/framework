@@ -10,7 +10,7 @@ namespace Signum.React.Filters;
 
 public class SignumAuthenticationResult
 {
-    public IUserEntity? User { get; set; }
+    public UserWithClaims? UserWithClaims { get; set; }
 }
 
 public class SignumEnableBufferingFilter : IResourceFilter
@@ -40,7 +40,7 @@ public class CleanThreadContextAndAssertFilter : IResourceFilter
 
 public class SignumAuthenticationFilter : SignumDisposableResourceFilter
 {
-    public const string Signum_User_Key = "Signum_User";
+    public const string Signum_User_Holder_Key = "Signum_User_Holder";
 
     public static readonly IList<Func<FilterContext, SignumAuthenticationResult?>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult?>>();
 
@@ -63,9 +63,9 @@ public class SignumAuthenticationFilter : SignumDisposableResourceFilter
         if (result == null)
             return null;
 
-        context.HttpContext.Items[Signum_User_Key] = result.User;
+        context.HttpContext.Items[Signum_User_Holder_Key] = result.UserWithClaims;
 
-        return UserHolder.UserSession(result.User!);
+        return UserHolder.UserSession(result.UserWithClaims!);
     }
 }
 

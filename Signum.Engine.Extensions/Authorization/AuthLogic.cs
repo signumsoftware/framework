@@ -68,6 +68,22 @@ public static class AuthLogic
             SystemUserName = systemUserName;
             AnonymousUserName = anonymousUserName;
 
+            UserWithClaims.FillClaims += (userWithClaims, user)=>
+            {
+                userWithClaims.Claims["Role"] = ((UserEntity)user).Role;
+                userWithClaims.Claims["Culture"] = ((UserEntity)user).CultureInfo?.Name;
+            };
+
+            if(MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)))
+            {
+                UserWithClaims.FillClaims += (userWithClaims, user) =>
+                {
+                    var mixin = ((UserEntity)user).Mixin<UserADMixin>();
+                    userWithClaims.Claims["OID"] = mixin.OID;
+                    userWithClaims.Claims["SID"] = mixin.SID;
+                };
+            }
+
             CultureInfoLogic.AssertStarted(sb);
 
             sb.Include<UserEntity>()

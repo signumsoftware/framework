@@ -18,7 +18,7 @@ public class NoteEntity : Entity
     public string Text { get; set; }
 
     
-    public Lite<IUserEntity> CreatedBy { get; set; } = UserHolder.Current.ToLite();
+    public Lite<IUserEntity> CreatedBy { get; set; } = UserHolder.Current.User;
 
     public override string ToString()
     {

@@ -41,7 +41,7 @@ public class RestLogFilter : ActionFilterAttribute
                 HttpMethod = request.Method.ToString(),
                 Url = request.Path.ToString(),
                 QueryString = queryParams,
-                User = UserHolder.Current?.ToLite(),
+                User = UserHolder.Current?.User,
                 Controller = context.Controller.GetType().FullName!,
                 ControllerName = context.Controller.GetType().Name,
                 Action = ((ControllerActionDescriptor)context.ActionDescriptor).ActionName,

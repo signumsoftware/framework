@@ -142,7 +142,7 @@ public static class CaseActivityLogic
                     {
                         Case = e.ToLite(),
                         TagType = ctt,
-                        CreatedBy = UserHolder.Current.ToLite(),
+                        CreatedBy = UserHolder.Current.User,
                     }).SaveList();
                 },
             }.Register();
@@ -165,7 +165,7 @@ public static class CaseActivityLogic
 
                     foreach (var ca in currentActivities)
                     {
-                        ca.DoneBy = UserEntity.Current.ToLite();
+                        ca.DoneBy = UserEntity.Current;
                         ca.DoneDate = Clock.Now;
                         ca.DoneType = DoneType.Jump;
                         ca.DoneDecision = CaseActivityMessage.CanceledCase.ToString();
@@ -374,7 +374,7 @@ public static class CaseActivityLogic
 
             QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
                     from cn in Database.Query<CaseNotificationEntity>()
-                    where cn.User.Is(UserEntity.Current.ToLite())
+                    where cn.User.Is(UserEntity.Current)
                     let ca = cn.CaseActivity.Entity
                     let previous = ca.Previous!.Entity
                     select new
@@ -497,7 +497,7 @@ public static class CaseActivityLogic
         using (AuthLogic.Disable())
             return Database.Query<CaseNotificationEntity>()
                 .Where(n => n.CaseActivity.Entity.Case.MainEntity == mainEntity && n.CaseActivity.Entity.DoneDate == null)
-                .Where(n => n.User.Is(UserEntity.Current.ToLite()) && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
+                .Where(n => n.User.Is(UserEntity.Current) && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
                 .UnsafeUpdate()
                 .Set(n => n.State, n => CaseNotificationState.InProgress)
                 .Execute();
@@ -599,7 +599,7 @@ public static class CaseActivityLogic
 
         if (ca.DoneBy == null)
             ca.Notifications()
-              .Where(n => n.User.Is(UserEntity.Current.ToLite()) && n.State == CaseNotificationState.New)
+              .Where(n => n.User.Is(UserEntity.Current) && n.State == CaseNotificationState.New)
               .UnsafeUpdate()
               .Set(a => a.State, a => CaseNotificationState.Opened)
               .Execute();
@@ -893,7 +893,7 @@ public static class CaseActivityLogic
                 ToStates = { CaseActivityState.Pending },
                 CanExecute = ca =>
                 {
-                    if (!ca.DoneBy.Is(UserEntity.Current.ToLite()))
+                    if (!ca.DoneBy.Is(UserEntity.Current))
                         return CaseActivityMessage.Only0CanUndoThisOperation.NiceToString(ca.DoneBy);
 
                     if (!ca.NextActivities().All(na => na.IsFreshNew()))
@@ -995,7 +995,7 @@ public static class CaseActivityLogic
         {
             if (((WorkflowActivityEntity)ca.WorkflowActivity).RequiresOpen)
             {
-                if (!ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current.ToLite()) && cn.State != CaseNotificationState.New))
+                if (!ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) && cn.State != CaseNotificationState.New))
                     throw new ApplicationException(CaseActivityMessage.TheActivity0RequiresToBeOpened.NiceToString(ca.WorkflowActivity));
             }
         }
@@ -1535,7 +1535,7 @@ public static class CaseActivityLogic
 
     private static void MakeDone(this CaseActivityEntity ca, DoneType doneType, string? decision)
     {
-        ca.DoneBy = UserEntity.Current.ToLite();
+        ca.DoneBy = UserEntity.Current;
         ca.DoneDate = Clock.Now;
         ca.DoneType = doneType;
         ca.DoneDecision = decision;
@@ -1544,7 +1544,7 @@ public static class CaseActivityLogic
 
         ca.Notifications()
            .UnsafeUpdate()
-           .Set(a => a.State, a => a.User.Is(UserEntity.Current.ToLite()) ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
+           .Set(a => a.State, a => a.User.Is(UserEntity.Current) ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
            .Execute();
     }
 

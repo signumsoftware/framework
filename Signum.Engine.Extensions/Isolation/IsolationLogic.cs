@@ -3,6 +3,7 @@ using Signum.Entities.Isolation;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Isolation;
 
@@ -26,6 +27,12 @@ public static class IsolationLogic
                     iso.Id,
                     iso.Name
                 });
+
+
+            UserWithClaims.FillClaims += (userWithClaims, user) =>
+            {
+                userWithClaims.Claims["Isolation"] = ((UserEntity)user).TryIsolation();
+            };
 
             Schema.Current.AttachToUniqueFilter += entity =>
             {

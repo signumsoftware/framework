@@ -4,6 +4,7 @@ using System.Security.Authentication;
 using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Builder;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Rest;
 
@@ -27,7 +28,7 @@ public static class RestServer
             using (AuthLogic.Disable())
             {
                 var user = RestApiKeyLogic.RestApiKeyCache.Value.GetOrThrow(keys.Single(), $"Could not authenticate with the API Key {keys.Single()}.").User.RetrieveAndRemember();
-                return new SignumAuthenticationResult { User = user };
+                return new SignumAuthenticationResult { UserWithClaims = new UserWithClaims(user) };
             }
         }
         else if (keys.Count() > 1)

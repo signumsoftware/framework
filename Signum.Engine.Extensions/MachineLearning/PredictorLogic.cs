@@ -306,7 +306,7 @@ public static class PredictorLogic
                 p.Execute(PredictorOperation.CancelTraining);
         }
 
-        p.User = UserHolder.Current.ToLite();
+        p.User = UserHolder.Current.User;
         p.State = PredictorState.Training;
         p.Save();
         
@@ -488,7 +488,7 @@ public static class PredictorLogic
                 CanBeModified = true,
                 Execute = (p, _) =>
                 {
-                    p.User = UserHolder.Current.ToLite();
+                    p.User = UserHolder.Current.User;
                     p.State = PredictorState.Training;
                     p.Save();
 

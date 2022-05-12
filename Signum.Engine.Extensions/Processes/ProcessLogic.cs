@@ -253,7 +253,7 @@ public static class ProcessLogic
                 Data = processData,
                 MachineName = JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None,
                 ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None,
-                User = UserHolder.Current.ToLite(),
+                User = UserHolder.Current.User,
             };
 
             if (copyMixinsFrom != null)

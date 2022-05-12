@@ -785,9 +785,9 @@ public static class WorkflowLogic
             .Execute();
     }
 
-    public static Func<UserEntity, Lite<Entity>, bool> IsUserActor = (user, actor) =>
-        actor.Is(user) ||
-        (actor is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(user.Role).Contains((Lite<RoleEntity>)actor));
+    public static Func<Lite<Entity>, bool> IsCurrentUserActor = (actor) =>
+        actor.Is(UserEntity.Current) ||
+        (actor is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(RoleEntity.Current).Contains((Lite<RoleEntity>)actor));
 
     public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserActorForNotifications = (user, actorConstant) =>
         actorConstant.Is(user) ||
