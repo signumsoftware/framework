@@ -38,6 +38,12 @@
                 CanBeModified = true,
                 Execute = ($entityParam$, _) => { },
             }.Register();
+			
+			new Delete($entityName$Operation.Delete)
+            {
+			    FromStates = { $entityName$State.Saved },
+                Delete = ($entityParam$, _) => { $entityParam$.Delete(); },
+            }.Register();
         }
     }]]>
       </Code>
