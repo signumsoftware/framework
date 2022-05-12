@@ -7,6 +7,7 @@ import 'draft-js/dist/Draft.css'
 import { InlineStyleButton, Separator, BlockStyleButton, SubMenuButton } from './HtmlEditorButtons';
 import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
 import { classes } from '../../Signum.React/Scripts/Globals';
+import { KeyCodes } from '../../Signum.React/Scripts/Components';
 
 export interface IContentStateConverter {
   contentStateToText(content: draftjs.ContentState): string;
@@ -162,10 +163,10 @@ export default React.forwardRef(function HtmlEditor({
 
   const editorProps = props as draftjs.EditorProps;
 
-  if (editorProps.keyBindingFn == undefined)
+  if (editorProps.keyBindingFn == undefined) {
     editorProps.keyBindingFn = e => {
 
-      if (e.keyCode === 9) {
+      if (e.keyCode === KeyCodes.tab) {
         const newEditorState = draftjs.RichUtils.onTab(e, c.editorState, 6 /* maxDepth */)
         if (newEditorState !== c.editorState) {
           c.setEditorState(newEditorState)
@@ -174,8 +175,22 @@ export default React.forwardRef(function HtmlEditor({
         return null;
       }
 
+      if (e.ctrlKey && e.key == "s") {
+        c.saveHtml();
+      }
+
       return draftjs.getDefaultKeyBinding(e);;
     };
+  } else {
+    var userKeyBinding = editorProps.keyBindingFn;
+    editorProps.keyBindingFn = e => {
+      if (e.ctrlKey && e.key == "s") {
+        c.saveHtml();
+      }
+      return userKeyBinding(e);
+    }
+  }
+
 
   if (editorProps.handleKeyCommand == undefined)
     editorProps.handleKeyCommand = command => {
