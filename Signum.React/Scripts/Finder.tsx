@@ -1447,6 +1447,24 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
   return resultTable.rows[0]?.columns[0] ?? null;
 }
 
+export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[], options?: APIHookOptions): AddToLite<R>[] | null | undefined {
+  var resultTable = useQuery(entity == null || isEntity(entity) && entity.isNew ? null : {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "All" },
+    columnOptions: [{ token: token }],
+    columnOptionsMode: "Replace",
+  }, additionalDeps, options);
+
+  if (entity == null)
+    return null;
+
+  if (resultTable == null)
+    return undefined;
+
+  return resultTable.rows.map(r => r.columns[0]);
+}
+
 export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {
   return useAPI(() => API.fetchAllLites({ types: type.typeName }), deps ?? []) as Lite<T>[] | undefined;
 }

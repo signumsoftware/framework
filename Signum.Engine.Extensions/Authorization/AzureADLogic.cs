@@ -166,6 +166,9 @@ public static class AzureADLogic
                              u.GivenName,
                              u.Surname,
                              u.JobTitle,
+                             u.Department,
+                             u.OfficeLocation,
+                             u.EmployeeType,
                              OnPremisesExtensionAttributes = u.OnPremisesExtensionAttributes?.Let(ea => new OnPremisesExtensionAttributesModel
                              {
                                  ExtensionAttribute1 = ea.ExtensionAttribute1,

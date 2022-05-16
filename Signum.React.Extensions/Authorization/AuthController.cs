@@ -61,7 +61,7 @@ public class AuthController : ControllerBase
             UserTicketServer.SaveCookie(ControllerContext);
         }
 
-        var token = AuthTokenServer.CreateToken(new UserWithClaims(user));
+        var token = AuthTokenServer.CreateToken(user);
 
         return new LoginResponse { userEntity = user, token = token, authenticationType = authenticationType };
     }
@@ -69,9 +69,11 @@ public class AuthController : ControllerBase
     [HttpGet("api/auth/loginFromApiKey")]
     public LoginResponse LoginFromApiKey(string apiKey)
     {
-        var token = AuthTokenServer.CreateToken(UserHolder.Current);
+        var user = UserEntity.Current.Retrieve();
 
-        return new LoginResponse { userEntity = UserEntity.Current.Retrieve(), token = token, authenticationType = "api-key" };
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "api-key" };
     }
 
     [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]
@@ -80,8 +82,10 @@ public class AuthController : ControllerBase
         if (!UserTicketServer.LoginFromCookie(ControllerContext))
             return null;
 
-        var token = AuthTokenServer.CreateToken(UserHolder.Current);
-        return new LoginResponse { userEntity = UserEntity.Current.Retrieve(), token = token, authenticationType = "cookie" };
+        var user = UserEntity.Current.Retrieve();
+
+        var token = AuthTokenServer.CreateToken(user);
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "cookie" };
     }
 
     [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
@@ -96,9 +100,11 @@ public class AuthController : ControllerBase
             return null;
         }
 
-        var token = AuthTokenServer.CreateToken(UserHolder.Current);
+        var user = UserEntity.Current.Retrieve();
 
-        return new LoginResponse { userEntity = UserEntity.Current.Retrieve(), token = token, authenticationType = "windows" };
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "windows" };
     }
 
     [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
@@ -107,9 +113,11 @@ public class AuthController : ControllerBase
         if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt, throwErrors))
             return null;
 
-        var token = AuthTokenServer.CreateToken(UserHolder.Current);
+        var user = UserEntity.Current.Retrieve();
 
-        return new LoginResponse { userEntity = UserEntity.Current.Retrieve(), token = token, authenticationType = "azureAD" };
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "azureAD" };
     }
 
     [HttpGet("api/auth/currentUser")]
@@ -156,7 +164,7 @@ public class AuthController : ControllerBase
             user.Save();
         }
 
-        return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(new UserWithClaims(user)), authenticationType = "changePassword" };
+        return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(user), authenticationType = "changePassword" };
     }
 
 
@@ -190,7 +198,7 @@ public class AuthController : ControllerBase
 
         var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
 
-        return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(new UserWithClaims(rpr.User)), authenticationType = "resetPassword" };
+        return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
     }
 
     private BadRequestObjectResult ModelError(string field, string error)

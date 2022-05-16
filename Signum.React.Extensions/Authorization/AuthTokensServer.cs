@@ -164,16 +164,19 @@ public static class AuthTokenServer
         }
     }
 
-    public static string CreateToken(UserWithClaims user)
+    public static string CreateToken(UserEntity user)
     {
+        var userWithClaims = new UserWithClaims(user);
+
         AuthToken newToken = new AuthToken
         {
-            User = user.User,
-            Claims = user.Claims,
+            User = userWithClaims.User,
+            Claims = userWithClaims.Claims,
             CreationDate = Clock.Now,
+            PasswordHash = user.PasswordHash,
         };
 
-        OnAuthToken?.Invoke(user, null, newToken);
+        OnAuthToken?.Invoke(userWithClaims, null, newToken);
 
         return SerializeToken(newToken);
     }
