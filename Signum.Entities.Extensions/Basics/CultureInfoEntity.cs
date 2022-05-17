@@ -41,6 +41,9 @@ public class CultureInfoEntity : Entity
         return base.PropertyValidation(pi);
     }
 
+    [AutoExpressionField]
+    public bool IsNeutral => As.Expression(() => !Name.Contains("-"));
+
     protected override void PreSaving(PreSavingContext ctx)
     {
         try
