@@ -11,8 +11,12 @@ class Upgrade_20220513_UserHolder : CodeUpgradeBase
             file.Replace("UserEntity.Current.Role", "RoleEntity.Current");
             file.Replace("UserEntity.Current.ToLite()", "UserEntity.Current");
             file.Replace("UserEntity.Current.Mixin<UserADMixin>().OID", "UserADMixin.CurrentOID");
-            file.Replace("UserEntity.Current?.CultureInfo", "UserEntity.CurrentUserCulture");
-            file.Replace("UserEntity.Current.CultureInfo", "UserEntity.CurrentUserCulture");
+        });
+
+        uctx.ChangeCodeFile("SouthwindReact/Startup.cs", file =>
+        {
+            file.Replace("if (UserEntity.Current?.CultureInfo != null)", "if (UserEntity.CurrentUserCulture is { } ci)");
+            file.Replace("return UserEntity.Current.CultureInfo.ToCultureInfo();", "return ci;");
         });
     }
 }
