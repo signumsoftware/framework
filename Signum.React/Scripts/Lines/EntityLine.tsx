@@ -95,8 +95,11 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 
     super.setValue(val);
 
-    if (val == null)
-      this.writeInTypeahead("");
+    if (val == null) {
+      setTimeout(() => {
+        this.writeInTypeahead("");
+      }, 100);
+    }
   }
 
   writeInTypeahead(query: string) {
@@ -188,7 +191,12 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     return (
       <Typeahead ref={c.typeahead}
-        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined, onPaste: p.paste == false ? undefined : handleOnPaste, ...p.inputAttributes }}
+        inputAttrs={{
+          className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
+          placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined,
+          onPaste: p.paste == false ? undefined : handleOnPaste,
+          ...p.inputAttributes
+        }}
         getItems={query => ac!.getItems(query)}
         itemsDelay={ac.getItemsDelay()}
         minLength={ac.getMinLength()}
