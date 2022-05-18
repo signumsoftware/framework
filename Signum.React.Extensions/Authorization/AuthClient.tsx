@@ -187,6 +187,8 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 
       if (e.httpError.exceptionType?.endsWith(".AuthenticationException")) {
         setAuthToken(undefined, undefined);
+        setCurrentUser(undefined);
+        AppContext.resetUI();
         AppContext.history?.push("~/auth/login");
       }
 
@@ -226,33 +228,39 @@ export function autoLogin(): Promise<UserEntity | undefined> {
       setCurrentUser(u);
       AppContext.resetUI();
       return u;
+    }, e => {
+      console.error(e);
+      setAuthToken(undefined, undefined);
+      return undefined;
     });
 
-  return new Promise<UserEntity | undefined>((resolve) => {
-    setTimeout(() => {
+  return new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 500))
+    .then(() => {
       if (getAuthToken()) {
-        API.fetchCurrentUser()
+        return API.fetchCurrentUser()
           .then(u => {
             setCurrentUser(u);
             AppContext.resetUI();
-            resolve(u);
+            return u;
+          }, e => {
+            console.error(e);
+            setAuthToken(undefined, undefined);
+            return undefined;
           });
       } else {
-        authenticate()
+        return authenticate()
           .then(au => {
-
             if (!au) {
-              resolve(undefined);
+              return undefined;
             } else {
               setAuthToken(au.token, au.authenticationType);
               setCurrentUser(au.userEntity);
               AppContext.resetUI();
-              resolve(au.userEntity);
+              return au.userEntity;
             }
           });
       }
-    }, 500);
-  });
+    });
 }
 
 export function logoutOtherTabs(user: UserEntity) {

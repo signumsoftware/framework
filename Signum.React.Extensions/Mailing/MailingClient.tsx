@@ -148,6 +148,9 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
   if (ctx.lites.length == 0)
     return undefined;
 
+  if (EmailTemplateEntity.tryTypeInfo() == null)
+    return undefined;
+
   return API.getEmailTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single", { lite: (ctx.lites.length == 1 ? ctx.lites[0] : null) })
     .then(wts => {
       if (!wts.length)
