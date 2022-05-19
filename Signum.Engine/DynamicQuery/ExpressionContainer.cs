@@ -54,7 +54,7 @@ public class ExpressionContainer
         }
     }
 
-    public IEnumerable<QueryToken> GetExtensions(QueryToken parent)
+    public IEnumerable<QueryToken> GetExtensionsTokens(QueryToken parent)
     {
         var parentTypeClean = parent.Type.CleanType();
 
@@ -81,15 +81,24 @@ public class ExpressionContainer
             .Where(ei => ei.IsApplicable == null || ei.IsApplicable(parent))
 			.Select(v => v.CreateToken(parent));
 
+       
+        return extensionsTokens;
+    }
+
+    public IEnumerable<QueryToken> GetDictionaryExtensionsTokens(QueryToken parent)
+    {
+        var parentTypeClean = parent.Type.CleanType();
+
         var pr = parentTypeClean.IsEntity() && !parentTypeClean.IsAbstract ? PropertyRoute.Root(parentTypeClean) :
-            parentTypeClean.IsEmbeddedEntity() ? parent.GetPropertyRoute() : null;
+            parentTypeClean.IsEmbeddedEntity() ? parent.GetPropertyRoute() :
+            null;
 
         var edi = pr == null ? null : RegisteredExtensionsDictionaries.TryGetC(pr);
 
         IEnumerable<QueryToken> dicExtensionsTokens = edi == null ? Enumerable.Empty<QueryToken>() :
             edi.GetAllTokens(parent);
 
-        return extensionsTokens.Concat(dicExtensionsTokens);
+        return dicExtensionsTokens;
     }
 
     public ExtensionInfo Register<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Enum niceName) =>
