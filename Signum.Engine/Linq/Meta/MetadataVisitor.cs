@@ -165,7 +165,13 @@ internal class MetadataVisitor : ExpressionVisitor
 
                 var mixinType = m.Method.GetGenericArguments().Single();
 
-                return new MetaExpression(mixinType, new CleanMeta(null, cm.PropertyRoutes.Select(a => a.Add(mixinType)).ToArray()));
+                return new MetaExpression(mixinType, new CleanMeta(null, cm.PropertyRoutes.Select(a =>
+                {
+                    if (me.Type != a.Type) //Casting
+                        return PropertyRoute.Root(me.Type).Add(mixinType);
+                    else
+                        return a.Add(mixinType);
+                }).ToArray()));
             }
         }
 

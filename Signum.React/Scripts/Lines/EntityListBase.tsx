@@ -40,10 +40,16 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
   keyGenerator = new KeyGenerator();
   getDefaultProps(state: T) {
 
-    if (state.onFind)
-      throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
-
     super.getDefaultProps(state);
+  }
+
+  overrideProps(p: T, overridenProps: T) {
+    if (overridenProps.onFind) {
+      debugger;
+      throw new Error(`'onFind' property is not applicable to ${this.constructor.name.before("Controller")} (ctx = ${p.ctx.propertyPath}). Use 'onFindMany' instead`);
+    }
+
+    super.overrideProps(p, overridenProps);
   }
 
   setValue(list: MList<Lite<Entity> | ModifiableEntity>) {

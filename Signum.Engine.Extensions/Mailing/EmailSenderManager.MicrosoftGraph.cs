@@ -29,10 +29,9 @@ public partial class EmailSenderManager : IEmailSenderManager
 
             var user = graphClient.Users[email.From.AzureUserId.ToString()];
 
-            var request = user.SendMail(message, false).Request();
+            var request = user.SendMail(message, false).Request().PostResponseAsync().Result;
 
-            request.PostAsync().Wait();
-
+            var newMessage = user.Messages.Request().AddAsync(message).Result;
             if (bigAttachments.Any())
             {
                 foreach (var a in bigAttachments)
@@ -45,7 +44,7 @@ public partial class EmailSenderManager : IEmailSenderManager
                         ContentType = MimeMapping.GetMimeType(a.File.FileName)
                     };
 
-                    UploadSession uploadSession = graphClient.Me.Messages[message.Id].Attachments.CreateUploadSession(attachmentItem).Request().PostAsync().Result;
+                    UploadSession uploadSession = user.Messages[newMessage.Id].Attachments.CreateUploadSession(attachmentItem).Request().PostAsync().Result;
 
                     int maxSliceSize = 320 * 1024;
 
@@ -57,7 +56,7 @@ public partial class EmailSenderManager : IEmailSenderManager
                         throw new InvalidOperationException("Upload of big files to Microsoft Graph didn't succeed");
                 }
 
-                graphClient.Me.MailFolders["Drafts"].Messages[message.Id].Send().Request().PostAsync().Wait();
+                user.MailFolders["Drafts"].Messages[newMessage.Id].Send().Request().PostAsync().Wait();
             }
         }
         catch(AggregateException e)

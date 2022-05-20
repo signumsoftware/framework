@@ -192,7 +192,7 @@ export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptions
       if (sc.props.findOptions.groupResults)
         return sc.getGroupedSelectedEntities();
 
-      return sc.getSelectedEntities();
+      return pair.rows.map(a => a.entity!);
     });
 
   if (modalOptions?.autoSelectIfOne || modalOptions?.autoSkipIfZero)
