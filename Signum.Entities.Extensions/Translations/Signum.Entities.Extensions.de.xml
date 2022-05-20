@@ -556,6 +556,7 @@
   </Type>
   <Type Name="CultureInfoEntity" Description="Kulturinfo" PluralDescription="Kulturinfos" Gender="f">
     <Member Name="EnglishName" Description="Englischer Name" />
+    <Member Name="IsNeutral" Description="Ist neutral" />
     <Member Name="Name" Description="Name" />
     <Member Name="NativeName" Description="Nativer Name" />
   </Type>
