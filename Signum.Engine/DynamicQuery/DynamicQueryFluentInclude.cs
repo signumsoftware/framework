@@ -59,12 +59,22 @@ public static class DynamicQueryFluentInclude
     /// </summary>
     public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty)
         where F : Entity
-        where T : Entity
+        where T : Entity 
     {
         QueryLogic.Expressions.Register(lambdaToMethodOrProperty, () => typeof(T).NicePluralName());
         return fi;
     }
 
+    /// <summary>
+    /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses typeof(T) NicePluralName as niceName.
+    /// </summary>
+    public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, Expression<Func<F, IQueryable<Lite<T>>>> lambdaToMethodOrProperty)
+        where F : Entity
+        where T : Entity
+    {
+        QueryLogic.Expressions.Register(lambdaToMethodOrProperty, () => typeof(T).NicePluralName());
+        return fi;
+    }
     /// <summary>
     /// Prefer WithExpressionFrom to keep dependencies between modules clean!.
     /// </summary>
