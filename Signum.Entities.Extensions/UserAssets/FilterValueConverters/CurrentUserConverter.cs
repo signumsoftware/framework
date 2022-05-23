@@ -6,6 +6,8 @@ public class CurrentUserConverter : IFilterValueConverter
 {
     static string CurrentUserKey = "[CurrentUser]";
 
+    public static Func<UserEntity> GetCurrentUserEntity = ()=> throw new NotImplementedException("CurrentUserConverter.GetCurrentUserEntity")!;
+
     public Result<string?>? TryToStringValue(object? value, Type type)
     {
         if (value is Lite<UserEntity> lu && lu.Is(UserEntity.Current))
@@ -24,7 +26,10 @@ public class CurrentUserConverter : IFilterValueConverter
 
             string[] parts = after.SplitNoEmpty('.');
 
-            return SimpleMemberEvaluator.EvaluateExpression(UserEntity.Current, parts);
+            if (parts.Length == 0)
+                return new Result<object?>.Success(UserEntity.Current);
+
+            return SimpleMemberEvaluator.EvaluateExpression(GetCurrentUserEntity(), parts);
         }
 
         return null;

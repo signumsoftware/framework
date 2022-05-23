@@ -453,6 +453,8 @@ public class SchemaBuilder
                     return GenerateFieldPrimaryKey((Table)table, route, name);
                 case KindOfField.Ticks:
                     return GenerateFieldTicks((Table)table, route, name);
+                case KindOfField.ToStr:
+                    return GenerateFieldToString((Table)table, route, name);
                 case KindOfField.Value:
                     return GenerateFieldValue(table, route, name, forceNull);
                 case KindOfField.Reference:
@@ -481,6 +483,7 @@ public class SchemaBuilder
     {
         PrimaryKey,
         Ticks,
+        ToStr,
         Value,
         Reference,
         Enum,
@@ -495,6 +498,9 @@ public class SchemaBuilder
 
         if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiTicks))
             return KindOfField.Ticks;
+
+        if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiToStr))
+            return KindOfField.ToStr;
 
         if (Settings.TryGetSqlDbType(Settings.FieldAttribute<DbTypeAttribute>(route), route.Type) != null)
             return KindOfField.Value;
@@ -575,6 +581,29 @@ public class SchemaBuilder
             Precision = Settings.GetSqlPrecision(ticksAttr, null, pair.DbType),
             Scale = Settings.GetSqlScale(ticksAttr, null, pair.DbType),
             Default = ticksAttr?.GetDefault(Settings.IsPostgres),
+        };
+    }
+
+    protected virtual FieldValue GenerateFieldToString(Table table, PropertyRoute route, NameSequence name)
+    {
+        var toStrAttribute = Settings.TypeAttribute<ToStringColumnAttribute>(table.Type);
+
+        Type type = toStrAttribute?.Type ?? route.Type;
+
+        DbTypePair pair = Settings.GetSqlDbType(toStrAttribute, type);
+
+        string toStrName = toStrAttribute?.Name ?? name.ToString();
+
+        return new FieldValue(route, type, toStrName)
+        {
+            DbType = pair.DbType,
+            Collation = Settings.GetCollate(toStrAttribute),
+            UserDefinedTypeName = pair.UserDefinedTypeName,
+            Nullable = toStrAttribute?.Nullable == false ? IsNullable.No : IsNullable.Yes,
+            Size = Settings.GetSqlSize(toStrAttribute, null, pair.DbType),
+            Precision = Settings.GetSqlPrecision(toStrAttribute, null, pair.DbType),
+            Scale = Settings.GetSqlScale(toStrAttribute, null, pair.DbType),
+            Default = toStrAttribute?.GetDefault(Settings.IsPostgres),
         };
     }
 
@@ -864,7 +893,7 @@ public class SchemaBuilder
             case KindOfField.Ticks:
             case KindOfField.Value:
             case KindOfField.Embedded:
-            case KindOfField.MList:  //se usa solo para el nombre de la tabla
+            case KindOfField.MList:  //only used for table name
                 return name;
             case KindOfField.Reference:
             case KindOfField.Enum:
