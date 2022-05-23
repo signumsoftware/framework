@@ -23,6 +23,8 @@ public static class UserQueryLogic
 
             PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
 
+            CurrentUserConverter.GetCurrentUserEntity = () => UserEntity.Current.Retrieve();
+
             UserAssetsImporter.Register<UserQueryEntity>("UserQuery", UserQueryOperation.Save);
 
             sb.Schema.Synchronizing += Schema_Synchronizing;
