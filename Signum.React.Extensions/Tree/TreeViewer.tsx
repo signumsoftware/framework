@@ -8,7 +8,7 @@ import * as Finder from '@framework/Finder'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import * as Operations from '@framework/Operations'
-import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite } from '@framework/Signum.Entities'
+import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
 import { FilterOptionParsed, QueryDescription, SubTokensOptions, FilterOption } from "@framework/FindOptions";
@@ -24,6 +24,7 @@ import { toFilterRequests } from '@framework/Finder';
 import "./TreeViewer.css"
 import { QueryTokenString } from '@framework/Reflection';
 import * as Hooks from '../../Signum.React/Scripts/Hooks'
+import SearchPage from '../../Signum.React/Scripts/SearchControl/SearchPage'
 
 interface TreeViewerProps {
   typeName: string;
@@ -262,6 +263,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       Navigator.isViewable(type, { isSearch: true }) && <Dropdown.Item onClick={this.handleView} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
       Operations.tryGetOperationInfo(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
       Operations.tryGetOperationInfo(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
+      <Dropdown.Item onClick={this.handleCopyClick}><FontAwesomeIcon icon="copy" />&nbsp;{SearchMessage.Copy.niceToString()}</Dropdown.Item>,
     ].filter(a => a != false) as React.ReactElement<any>[];
 
     if (this.state.currentMenuItems == undefined) {
@@ -371,6 +373,15 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         this.selectNode(newNode);
       })
       .done();
+  }
+
+  handleCopyClick = () => {
+    const supportsClipboard = (navigator.clipboard && window.isSecureContext);
+    if (!supportsClipboard || !this.state.selectedNode)
+      return;
+
+    const text = liteKey(this.state.selectedNode!.lite);
+    navigator.clipboard.writeText(text).done();
   }
 
   findParent(childNode: TreeNode) {

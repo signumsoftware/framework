@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType, tryGetTypeInfo } from './Reflection'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType, tryGetTypeInfo, MemberInfo } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity, ModelEntity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
@@ -342,6 +342,17 @@ export class TypeContext<T> extends StyleContext {
       return this.propertyRoute.member!.niceName;
 
     return this.propertyRoute.addLambda(property).member!.niceName;
+  }
+
+  tryMemberInfo(property?: (val: T) => any): MemberInfo | undefined {
+
+    if (this.propertyRoute == undefined)
+      throw new Error("No propertyRoute");
+
+    if (property == undefined)
+      return this.propertyRoute.member;
+
+    return this.propertyRoute.tryAddLambda(property)?.member;
   }
 
   getUniqueId(suffix?: string): string {

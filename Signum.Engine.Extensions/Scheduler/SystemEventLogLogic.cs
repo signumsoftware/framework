@@ -60,7 +60,7 @@ public static class SystemEventLogLogic
                     {
                         Date = Clock.Now,
                         MachineName = Schema.Current.MachineName,
-                        User = UserHolder.Current?.ToLite(),
+                        User = UserHolder.Current?.User,
                         EventType = eventType,
                         Exception = exception?.ToLite()
                     }.Save();

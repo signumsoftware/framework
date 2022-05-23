@@ -3,16 +3,18 @@ import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
-import { AutocompleteConfig } from './AutoCompleteConfig'
+import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
 import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
 import { getTypeInfo, getTypeInfos, getTypeName, tryGetTypeInfos } from '../Reflection'
 import { FilterOperation } from '../Signum.Entities.DynamicQuery'
 import { FindOptions } from '../Search'
+import { useForceUpdate } from '../Hooks'
+import { TypeaheadController } from '../Components/Typeahead'
 
 
 export interface EntityStripProps extends EntityListBaseProps {
@@ -27,8 +29,12 @@ export interface EntityStripProps extends EntityListBaseProps {
 }
 
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
+
+  typeahead!: React.RefObject<TypeaheadController>;
+
   overrideProps(p: EntityStripProps, overridenProps: EntityStripProps) {
     super.overrideProps(p, overridenProps);
+    this.typeahead = React.useRef<TypeaheadController>(null);
 
     if (p.type) {
       if (p.showType == undefined)
@@ -39,7 +45,10 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
 
         var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
         if (avoidDuplicates) {
-          var types = getTypeInfos(p.type);
+          var types = tryGetTypeInfos(p.type).notNull();
+          if (types.length == 0)
+            return;
+
           if (types.length == 1)
             p.findOptions = withAvoidDuplicates(p.findOptions ?? { queryName: types.single().name }, types.single().name);
           else {
@@ -71,49 +80,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
     return "";
   }
 
-  handleViewElement = (event: React.MouseEvent<any>, index: number) => {
-
-    event.preventDefault();
-
-    const ctx = this.props.ctx;
-    const list = ctx.value!;
-    const mle = list[index];
-    const entity = mle.element;
-
-    const openWindow = (event.button == 1 || event.ctrlKey) && !this.props.type!.isEmbedded;
-    if (openWindow) {
-      event.preventDefault();
-      const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
-      window.open(route);
-    }
-    else {
-      const pr = ctx.propertyRoute!.addLambda(a => a[0]);
-
-      const promise = this.props.onView ?
-        this.props.onView(entity, pr) :
-        this.defaultView(entity, pr);
-
-      if (promise == null)
-        return;
-
-      promise.then(e => {
-        if (e == undefined)
-          return;
-
-        this.convert(e).then(m => {
-          if (is(list[index].element as Entity, e as Entity)) {
-            list[index].element = m;
-            if (e.modified)
-              this.setValue(list);
-            this.forceUpdate();
-          } else {
-            list[index] = { rowId: null, element: m };
-            this.setValue(list);
-          }
-        }).done();
-      }).done();
-    }
-  }
+  
 }
 
 export const EntityStrip = React.forwardRef(function EntityStrip(props: EntityStripProps, ref: React.Ref<EntityStripController>) {
@@ -154,12 +121,13 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
   );
 
   function renderLastElement() {
-
+    
     const buttons = (
       <>
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {c.renderCreateButton(true)}
         {c.renderFindButton(true)}
+        {c.renderPasteButton(true)}
         {p.extraButtonsAfter && p.extraButtonsAfter(c)}
       </>
     );
@@ -178,6 +146,18 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
     );
   }
 
+  function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const text = e.clipboardData.getData("text");
+    const lites = parseLiteList(text);
+    if (lites.length == 0)
+      return;
+    
+    e.preventDefault();
+    c.paste(text)?.then(() => {
+      c.typeahead.current?.writeInInput("");
+    }).done();
+  }
+
   function renderAutoComplete(renderInput?: (input: React.ReactElement<any> | null) => React.ReactElement<any>) {
     var ac = p.autocomplete;
 
@@ -188,10 +168,10 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
       return renderInput == null ? null : renderInput(null);
 
     return (
-      <Typeahead
-        inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString() }}
+      <Typeahead ref={c.typeahead}
+        inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString(), onPaste: p.paste == false ? undefined : handleOnPaste }}
         getItems={q => ac!.getItems(q)}
-        getItemsDelay={ac.getItemsDelay}
+        itemsDelay={ac.getItemsDelay()}
         renderItem={(e, str) => ac!.renderItem(e, str)}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={c.handleOnSelect}
@@ -215,22 +195,23 @@ export interface EntityStripElementProps {
 }
 
 export function EntityStripElement(p: EntityStripElementProps) {
-  var [currentItem, setCurrentItem] = React.useState<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
+  var currentEntityRef = React.useRef<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
+  const forceUpdate = useForceUpdate();
 
   React.useEffect(() => {
 
     if (p.autoComplete) {
       var newEntity = p.ctx.value;
-      if (!currentItem || currentItem.entity !== newEntity) {
+      if (!currentEntityRef.current || currentEntityRef.current.entity !== newEntity) {
         var ci = { entity: newEntity!, item: undefined }
-        setCurrentItem(ci);
+        currentEntityRef.current = ci;
         var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
           const autocomplete = p.autoComplete;
           autocomplete?.getItemFromEntity(newEntity)
             .then(item => {
               if (autocomplete == p.autoComplete) {
                 ci.item = item;
-                setCurrentItem(ci);
+                forceUpdate();
               } else {
                 fillItem(newEntity);
               }
@@ -238,12 +219,6 @@ export function EntityStripElement(p: EntityStripElementProps) {
             .done();
         };
         fillItem(newEntity);
-        p.autoComplete.getItemFromEntity(newEntity)
-          .then(item => {
-            ci.item = item;
-            setCurrentItem(ci);
-          })
-          .done();
       }
     }
 
@@ -251,15 +226,14 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   const toStr =
     p.onRenderItem ? p.onRenderItem(p.ctx.value) :
-      currentItem?.item ? p.autoComplete!.renderItem(currentItem.item) :
+      currentEntityRef.current?.item ? p.autoComplete!.renderItem(currentEntityRef.current.item) :
         getToStr();
 
   function getToStr() {
     const toStr = getToString(p.ctx.value);
-    return !p.showType ? toStr :
+    return !p.showType || !(isEntity(p.ctx.value) || isLite(p.ctx.value)) ? toStr :
       <span style={{ wordBreak: "break-all" }} title={toStr}>
-        <span className="sf-type-badge">{getTypeInfo(getTypeName(p.ctx.value)).niceName}</span>
-        &nbsp;{toStr}
+        {toStr}<TypeBadge entity={p.ctx.value} />
       </span>;
   }
 

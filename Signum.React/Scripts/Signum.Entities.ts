@@ -15,6 +15,10 @@ export interface ModifiableEntity {
   mixins?: { [name: string]: MixinEntity }
 }
 
+export function liteKeyLong(lite: Lite<Entity>) {
+  return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id) + ";" + lite.toStr;
+}
+
 export interface Entity extends ModifiableEntity {
   id: number | string | undefined;
   ticks: string; //max value
@@ -92,7 +96,7 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 import * as Reflection from './Reflection'
 
 export function newNiceName(ti: Reflection.TypeInfo) {
-  return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
+  return FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
 }
 
 function getOrCreateToStringFunction(type: string) {
@@ -188,6 +192,15 @@ export function parseLite(lite: string): Lite<Entity> {
     EntityType: lite.before(";"),
     id: lite.after(";"),
   };
+}
+
+export const liteKeyRegEx = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
+export function parseLiteList(text: string): Lite<Entity>[] {
+  const lines = text.split("|");
+  const liteKeys = lines.map(l => liteKeyRegEx.test(l) ? l : null).notNull();
+  const lites = liteKeys.map(lk => parseLite(lk)).filter(l => isLite(l));
+
+  return lites;
 }
 
 export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false, assertTypesFound = true) {
@@ -309,6 +322,15 @@ export module EntityControlMessage {
   export const Remove = new MessageKey("EntityControlMessage", "Remove");
   export const View = new MessageKey("EntityControlMessage", "View");
   export const Add = new MessageKey("EntityControlMessage", "Add");
+  export const Paste = new MessageKey("EntityControlMessage", "Paste");
+}
+
+export module FrameMessage {
+  export const New0_G = new MessageKey("FrameMessage", "New0_G");
+  export const Copied = new MessageKey("FrameMessage", "Copied");
+  export const Fullscreen = new MessageKey("FrameMessage", "Fullscreen");
+  export const ThereAreErrors = new MessageKey("FrameMessage", "ThereAreErrors");
+  export const Main = new MessageKey("FrameMessage", "Main");
 }
 
 export interface ImmutableEntity extends Entity {
@@ -343,7 +365,7 @@ export module JavascriptMessage {
   export const insertColumn = new MessageKey("JavascriptMessage", "insertColumn");
   export const editColumn = new MessageKey("JavascriptMessage", "editColumn");
   export const removeColumn = new MessageKey("JavascriptMessage", "removeColumn");
-  export const removeOtherColumns = new MessageKey("JavascriptMessage", "removeOtherColumns");
+  export const groupByThisColumn = new MessageKey("JavascriptMessage", "groupByThisColumn");
   export const restoreDefaultColumns = new MessageKey("JavascriptMessage", "restoreDefaultColumns");
   export const saved = new MessageKey("JavascriptMessage", "saved");
   export const search = new MessageKey("JavascriptMessage", "search");
@@ -377,27 +399,6 @@ export interface ModelEntity extends ModifiableEntity {
 export module NormalControlMessage {
   export const ViewForType0IsNotAllowed = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
   export const SaveChangesFirst = new MessageKey("NormalControlMessage", "SaveChangesFirst");
-}
-
-export module NormalWindowMessage {
-  export const _0Errors1 = new MessageKey("NormalWindowMessage", "_0Errors1");
-  export const _1Error = new MessageKey("NormalWindowMessage", "_1Error");
-  export const Cancel = new MessageKey("NormalWindowMessage", "Cancel");
-  export const ContinueAnyway = new MessageKey("NormalWindowMessage", "ContinueAnyway");
-  export const ContinueWithErrors = new MessageKey("NormalWindowMessage", "ContinueWithErrors");
-  export const FixErrors = new MessageKey("NormalWindowMessage", "FixErrors");
-  export const ImpossibleToSaveIntegrityCheckFailed = new MessageKey("NormalWindowMessage", "ImpossibleToSaveIntegrityCheckFailed");
-  export const Loading0 = new MessageKey("NormalWindowMessage", "Loading0");
-  export const NoDirectErrors = new MessageKey("NormalWindowMessage", "NoDirectErrors");
-  export const Ok = new MessageKey("NormalWindowMessage", "Ok");
-  export const Reload = new MessageKey("NormalWindowMessage", "Reload");
-  export const The0HasErrors1 = new MessageKey("NormalWindowMessage", "The0HasErrors1");
-  export const ThereAreErrors = new MessageKey("NormalWindowMessage", "ThereAreErrors");
-  export const Message = new MessageKey("NormalWindowMessage", "Message");
-  export const New0_G = new MessageKey("NormalWindowMessage", "New0_G");
-  export const Type0Id1 = new MessageKey("NormalWindowMessage", "Type0Id1");
-  export const Main = new MessageKey("NormalWindowMessage", "Main");
-  export const Copied = new MessageKey("NormalWindowMessage", "Copied");
 }
 
 export module OperationMessage {
@@ -550,6 +551,7 @@ export module SearchMessage {
   export const HideHiddenColumns = new MessageKey("SearchMessage", "HideHiddenColumns");
   export const GroupKey = new MessageKey("SearchMessage", "GroupKey");
   export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
+  export const Copy = new MessageKey("SearchMessage", "Copy");
 }
 
 export module SelectorMessage {

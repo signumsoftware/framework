@@ -1,5 +1,6 @@
 using System.Security.Authentication;
 using System.Collections.Specialized;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Authorization;
 
@@ -48,11 +49,11 @@ public class RoleEntity : Entity
     {
         get
         {
-            UserEntity user = UserEntity.Current;
-            if (user == null)
+            var userHolder = UserHolder.Current;
+            if (userHolder == null)
                 throw new AuthenticationException(LoginAuthMessage.NotUserLogged.NiceToString());
 
-            return user.Role;
+            return (Lite<RoleEntity>)userHolder.GetClaim("Role")!;
         }
     }
 }

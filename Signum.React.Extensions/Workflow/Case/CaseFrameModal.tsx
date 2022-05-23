@@ -6,7 +6,7 @@ import { TypeInfo, getTypeInfo, GraphExplorer, PropertyRoute, ReadonlyBinding, }
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
-import { Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity, SaveChangesMessage } from '@framework/Signum.Entities'
+import { Lite, JavascriptMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity, SaveChangesMessage } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
@@ -25,7 +25,7 @@ import { AutoFocus } from '@framework/Components/AutoFocus';
 import { FunctionalAdapter } from '@framework/Modals';
 import * as AuthClient from '../../Authorization/AuthClient'
 
-interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps<CaseActivityEntity | undefined> {
+interface CaseFrameModalProps extends IModalProps<CaseActivityEntity | undefined> {
   title?: string;
   entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
   avoidPromptLooseChange?: boolean;

@@ -10,7 +10,7 @@ import SearchControl, { SearchControlHandler } from './SearchControl'
 import { namespace } from 'd3'
 import { useTitle } from '../AppContext'
 import { QueryString } from '../QueryString'
-import { useAPI } from '../Hooks'
+import { useAPI, useForceUpdate, useUpdatedRef } from '../Hooks'
 
 interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 
@@ -20,8 +20,9 @@ function SearchPage(p: SearchPageProps) {
 
   const fo = Finder.parseFindOptionsPath(p.match.params.queryName, QueryString.parse(p.location.search));
   const qd = useAPI(() => Finder.getQueryDescription(fo.queryName), [fo.queryName]);
+  const forceUpdate = useForceUpdate();
+  
 
-  useTitle(getQueryNiceName(p.match.params.queryName));
   React.useEffect(() => {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
@@ -41,10 +42,14 @@ function SearchPage(p: SearchPageProps) {
 
   const searchControl = React.useRef<SearchControlHandler>(null);
 
+  useTitle(getQueryNiceName(p.match.params.queryName)
+    + (searchControl.current?.searchControlLoaded?.pageSubTitle ? " - " : "")
+    + searchControl.current?.searchControlLoaded?.pageSubTitle);
+
   function changeUrl() {
     const scl = searchControl.current!.searchControlLoaded!;
     const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, true);
-    const newPath = Finder.findOptionsPath(findOptions, scl.extraParams());
+    const newPath = Finder.findOptionsPath(findOptions, scl.extraUrlParams);
     const currentLocation = AppContext.history.location;
 
     if (currentLocation.pathname + currentLocation.search != newPath)
@@ -61,11 +66,17 @@ function SearchPage(p: SearchPageProps) {
       </div>
     );
 
+
+
   var qs = Finder.getSettings(fo.queryName);
   return (
     <div id="divSearchPage" className="sf-search-page">
       <h3 className="display-6 sf-query-title">
         <span>{getQueryNiceName(fo.queryName)}</span>
+        {searchControl.current?.searchControlLoaded?.pageSubTitle && <>
+          <small className="sf-type-nice-name text-muted"> - {searchControl.current?.searchControlLoaded?.pageSubTitle}</small>
+        </>
+        }
       </h3>
       {qd && <SearchControl ref={searchControl}
         defaultIncludeDefaultFilters={true}
@@ -78,6 +89,7 @@ function SearchPage(p: SearchPageProps) {
         largeToolbarButtons={true}
         showFilters={SearchPage.showFilters(fo, qd, qs)}
         showGroupButton={true}
+        showSystemTimeButton={true}
         avoidChangeUrl={false}
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         maxResultsHeight={"none"}
@@ -85,6 +97,7 @@ function SearchPage(p: SearchPageProps) {
         onHeighChanged={onResize}
         onSearch={result => changeUrl()}
         extraButtons={qs?.extraButtons}
+        onPageSubTitleChanged={forceUpdate}
       />
       }
     </div>

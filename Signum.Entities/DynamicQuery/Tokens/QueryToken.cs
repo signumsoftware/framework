@@ -113,12 +113,12 @@ public abstract class QueryToken : IEquatable<QueryToken>
     {
     }
 
-    static ConcurrentDictionary<(QueryToken, SubTokensOptions), Dictionary<string, QueryToken>> subTokensOverrideCache =
-        new ConcurrentDictionary<(QueryToken, SubTokensOptions), Dictionary<string, QueryToken>>();
+    static ConcurrentDictionary<(QueryToken token, SubTokensOptions options), Dictionary<string, QueryToken>> subTokensOverrideCache =
+        new ConcurrentDictionary<(QueryToken token, SubTokensOptions options), Dictionary<string, QueryToken>>();
 
     public QueryToken? SubTokenInternal(string key, SubTokensOptions options)
     {
-        var result = CachedSubTokensOverride(options).TryGetC(key) ?? OnEntityExtension(this).SingleOrDefaultEx(a => a.Key == key);
+        var result = CachedSubTokensOverride(options).TryGetC(key) ?? OnDynamicEntityExtension(this).SingleOrDefaultEx(a => a.Key == key);
 
         if (result == null)
             return null;
@@ -133,7 +133,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public List<QueryToken> SubTokensInternal(SubTokensOptions options)
     {
         return CachedSubTokensOverride(options).Values
-            .Concat(OnEntityExtension(this))
+            .Concat(OnDynamicEntityExtension(this))
             .Where(t => t.IsAllowed() == null)
             .OrderByDescending(a => a.Priority)
             .ThenBy(a => a.ToString())
@@ -142,7 +142,20 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     Dictionary<string, QueryToken> CachedSubTokensOverride(SubTokensOptions options)
     {
-        return subTokensOverrideCache.GetOrAdd((this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionaryEx(a => a.Key, "subtokens for " + this.Key));
+        return subTokensOverrideCache.GetOrAdd((this, options), (tup) =>
+        {
+            var dictionary = tup.token.SubTokensOverride(tup.options).ToDictionaryEx(a => a.Key, "subtokens for " + this.Key);
+
+            foreach (var item in OnStaticEntityExtension(tup.Item1))
+            {
+                if (!dictionary.ContainsKey(item.Key)) //Prevent interface extensions overriding normal members
+                {
+                    dictionary.Add(item.Key, item);
+                }
+            }
+
+            return dictionary;
+        });
     }
 
     public static Func<QueryToken, Type, SubTokensOptions, List<QueryToken>> ImplementedByAllSubTokens = (quetyToken, type, options) => throw new NotImplementedException("QueryToken.ImplementedByAllSubTokens not set");
@@ -212,15 +225,25 @@ public abstract class QueryToken : IEquatable<QueryToken>
         };
     }
 
-    public static IEnumerable<QueryToken> OnEntityExtension(QueryToken parent)
+    public static Func<QueryToken, IEnumerable<QueryToken>>? StaticEntityExtensions;
+    public static IEnumerable<QueryToken> OnStaticEntityExtension(QueryToken parent)
     {
-        if (EntityExtensions == null)
-            throw new InvalidOperationException("QuertToken.EntityExtensions function not set");
+        if (StaticEntityExtensions == null)
+            throw new InvalidOperationException("QuertToken.StaticEntityExtensions function not set");
 
-        return EntityExtensions(parent);
+        return StaticEntityExtensions(parent);
     }
 
-    public static Func<QueryToken, IEnumerable<QueryToken>>? EntityExtensions;
+
+    public static Func<QueryToken, IEnumerable<QueryToken>>? DynamicEntityExtensions;
+    public static IEnumerable<QueryToken> OnDynamicEntityExtension(QueryToken parent)
+    {
+        if (DynamicEntityExtensions == null)
+            throw new InvalidOperationException("QuertToken.DynamicEntityExtensions function not set");
+
+        return DynamicEntityExtensions(parent);
+    }
+
 
 
     public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precision)

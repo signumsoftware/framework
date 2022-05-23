@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Signum.React.ApiControllers;
 using System.Text.Json;
 using Signum.Engine.Json;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Authorization;
 
@@ -18,7 +19,7 @@ public static class AuthServer
 
     public static Action<ActionContext, UserEntity> UserPreLogin;
     public static Action<ActionContext, UserEntity> UserLogged;
-    public static Action<ActionContext, UserEntity> UserLoggingOut;
+    public static Action<ActionContext, UserWithClaims> UserLoggingOut;
 
     
     public static void Start(IApplicationBuilder app, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
@@ -265,7 +266,7 @@ public static class AuthServer
 
     public static void AddUserSession(ActionContext ac, UserEntity user)
     {
-        UserEntity.Current = user;
+        UserHolder.Current = new UserWithClaims(user);
 
         AuthServer.UserLogged?.Invoke(ac, user);
     }

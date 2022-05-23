@@ -66,7 +66,8 @@ export interface SearchControlProps {
   onCreate?: (scl: SearchControlLoaded) => Promise<undefined | void | EntityPack<any> | ModifiableEntity | "no_change">;
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
   styleContext?: StyleContext;
-  customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
+  customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>;
+  onPageSubTitleChanged?: () => void;
 }
 
 export interface SearchControlState {
@@ -187,8 +188,8 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showFilters={p.showFilters != null ? p.showFilters : false}
         showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
         showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
-        showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton != null ? p.showSystemTimeButton : qs?.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true))}
-        showGroupButton={SearchControlOptions.showGroupButton(handler) && p.showGroupButton != null ? p.showGroupButton : false}
+        showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton ?? false) && (qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true))}
+        showGroupButton={SearchControlOptions.showGroupButton(handler) && (p.showGroupButton ?? false)}
         showSelectedButton={SearchControlOptions.showSelectedButton(handler)}
         showFooter={p.showFooter != null ? p.showFooter : true}
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
@@ -225,6 +226,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
 
         styleContext={p.styleContext}
         customRequest={p.customRequest}
+        onPageTitleChanged={p.onPageSubTitleChanged}
       />
     </ErrorBoundary>
   );

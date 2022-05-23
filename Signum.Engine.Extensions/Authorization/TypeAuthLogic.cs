@@ -45,7 +45,7 @@ public static partial class TypeAuthLogic
             AuthLogic.ExportToXml += exportAll => cache.ExportXml(exportAll ? TypeLogic.TypeToEntity.Keys.ToList() : null);
             AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
 
-            TypeConditionLogic.Register(UserCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
+            TypeConditionLogic.Register(UserTypeCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
         }
     }
 

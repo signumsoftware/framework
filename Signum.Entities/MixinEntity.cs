@@ -118,6 +118,11 @@ public static class MixinDeclarations
                 .Cast<MixinAttribute>()
                 .Select(t => t.MixinType));
 
+            if (EnumEntity.Extract(me) is Type et)
+            {
+                hs.AddRange(et.GetCustomAttributes(typeof(MixinAttribute), inherit: false).Cast<MixinAttribute>().Select(t => t.MixinType));
+            }
+
             foreach (var t in hs)
                 AddConstructor(t);
 
@@ -198,7 +203,7 @@ public static class MixinDeclarations
     }
 }
 
-[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum, Inherited = false, AllowMultiple = true)]
 public sealed class MixinAttribute : Attribute
 {
     readonly Type mixinType;

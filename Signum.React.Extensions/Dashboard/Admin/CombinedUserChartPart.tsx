@@ -29,10 +29,18 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
         },
       ])}
       />
-      <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
-      <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
-      <ValueLine ctx={ctx.subCtx(p => p.combinePinnedFiltersWithSameLabel)} inlineCheckbox="block" />
-      <ValueLine ctx={ctx.subCtx(p => p.useSameScale)} inlineCheckbox="block" />
+
+      <div className="row">
+        <div className="col-sm-6">
+          <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
+          <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
+          <ValueLine ctx={ctx.subCtx(p => p.combinePinnedFiltersWithSameLabel)} inlineCheckbox="block" />
+          <ValueLine ctx={ctx.subCtx(p => p.useSameScale)} inlineCheckbox="block" />
+        </div>
+        <div className="col-sm-6">
+            <ValueLine ctx={ctx.subCtx(p => p.minHeight)} formGroupStyle="Basic" />
+        </div>
+      </div>
     </div>
   );
 }

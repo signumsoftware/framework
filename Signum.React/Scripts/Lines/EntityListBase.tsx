@@ -1,12 +1,15 @@
 import * as React from 'react'
-import { classes, KeyGenerator } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite } from '../Signum.Entities'
+import { classes, Dic, KeyGenerator } from '../Globals'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList, is } from '../Signum.Entities'
 import * as Finder from '../Finder'
-import { FindOptions } from '../FindOptions'
+import * as Navigator from '../Navigator'
+import { FilterOption, FindOptions } from '../FindOptions'
 import { TypeContext, mlistItemContext } from '../TypeContext'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
+import { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutoCompleteConfig'
+import { tryGetTypeInfos } from '../Reflection'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -37,10 +40,16 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
   keyGenerator = new KeyGenerator();
   getDefaultProps(state: T) {
 
-    if (state.onFind)
-      throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
-
     super.getDefaultProps(state);
+  }
+
+  overrideProps(p: T, overridenProps: T) {
+    if (overridenProps.onFind) {
+      debugger;
+      throw new Error(`'onFind' property is not applicable to ${this.constructor.name.before("Controller")} (ctx = ${p.ctx.propertyPath}). Use 'onFindMany' instead`);
+    }
+
+    super.overrideProps(p, overridenProps);
   }
 
   setValue(list: MList<Lite<Entity> | ModifiableEntity>) {
@@ -80,6 +89,52 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     return this.props.onView ?
       this.props.onView(entity, pr) :
       this.defaultView(entity, pr);
+  }
+
+  handleViewElement = (event: React.MouseEvent<any>, index: number) => {
+
+    event.preventDefault();
+
+    const p = this.props;
+    const ctx = p.ctx;
+    const list = ctx.value!;
+    const mle = list[index];
+    const entity = mle.element;
+
+    const openWindow = (event.button == 1 || event.ctrlKey) && !p.type!.isEmbedded;
+    if (openWindow) {
+      event.preventDefault();
+      const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
+      window.open(route);
+    }
+    else {
+      const pr = ctx.propertyRoute!.addLambda(a => a[0]);
+
+      const promise = p.onView ?
+        p.onView(entity, pr) :
+        this.defaultView(entity, pr);
+
+      if (promise == null)
+        return;
+
+      promise.then(e => {
+        if (e == undefined)
+          return;
+
+        this.convert(e).then(m => {
+          if (is(list[index].element as Entity, e as Entity)) {
+            list[index].element = m;
+            if (e.modified)
+              this.setValue(list);
+            this.forceUpdate();
+          } else {
+            list[index] = { rowId: null, element: m };
+            this.setValue(list);
+          }
+
+        }).done();
+      }).done();
+    }
   }
 
   moveDown(index: number) {
@@ -159,6 +214,39 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     this.setValue(list);
   }
 
+  paste(text: string) {
+    var lites = parseLiteList(text);
+    if (lites.length == 0)
+      return;
+
+    const tis = tryGetTypeInfos(this.props.type!);
+    lites = lites.filter(lite => tis.length == 0 || tis.notNull().singleOrNull(ti => ti.name == lite.EntityType) != null);
+    if (lites.length == 0)
+      return;
+
+    const dic = lites.groupBy(lite => lite.EntityType);
+    return dic.map(kvp => {
+      const fo = this.getFindOptions(kvp.key) ?? { queryName: kvp.key };
+      const fos = (fo.filterOptions ?? []).concat([{ token: "Entity", operation: "IsIn", value: kvp.elements }]);
+      return Finder.fetchLites({ queryName: kvp.key, filterOptions: fos })
+        .then(lites => {
+          if (lites.length == 0)
+            return;
+
+          return Promise.all(lites.map(lite => this.convert(lite)))
+            .then(entities => entities.forEach(e => this.addElement(e)))
+        });
+    }).first();
+  }
+
+  handlePasteClick = (event: React.SyntheticEvent<any>) => {
+
+    event.preventDefault();
+
+    navigator.clipboard.readText()
+      .then(text => this.paste(text))
+      .done();
+  }
 
   handleFindClick = (event: React.SyntheticEvent<any>) => {
 

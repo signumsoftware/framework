@@ -476,7 +476,7 @@ internal static class TranslatorBuilder
 
             Type type = schema.GetType(typeId.Value);
 
-            return Lite.Create(type, id.Value, toString);
+            return Lite.Create(type, id!.Value, toString);
         }
 
         static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, null));
@@ -517,25 +517,13 @@ internal static class TranslatorBuilder
 
         static readonly MethodInfo miWrap = ReflectionTools.GetMethodInfo(() => PrimaryKey.Wrap(1));
 
-        protected internal override Expression VisitPrimaryKeyString(PrimaryKeyStringExpression pk)
-        {
-            var id = this.Visit(pk.Id);
-            var type = this.Visit(pk.TypeId);
 
-            return Expression.Call(miTryParse, type, id);
-        }
 
-        static readonly MethodInfo miTryParse = ReflectionTools.GetMethodInfo(() => TryParse(null!, null!));
+        //static readonly MethodInfo miTryParse = ReflectionTools.GetMethodInfo(() => TryParse(null!, null!));
 
         
 
-        static PrimaryKey? TryParse(Type type, string id)
-        {
-            if (type == null)
-                return null;
 
-            return PrimaryKey.Parse(id, type);
-        }
 
         protected internal override Expression VisitToDayOfWeek(ToDayOfWeekExpression toDayOfWeek)
         {

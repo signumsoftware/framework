@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace Signum.Engine.DynamicQuery;
 
-static class Untyped
+public static class Untyped
 {
     static MethodInfo miSelectQ =
         ReflectionTools.GetMethodInfo(() => ((IQueryable<string>)null!).Select((Expression<Func<string, int>>)null!)).GetGenericMethodDefinition();

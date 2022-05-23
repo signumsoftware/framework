@@ -14,9 +14,10 @@ export interface ReactChartCombinedInfo {
   parameters: { [parameter: string]: string };
   memo: MemoRepository;
   onDrillDown: (row: ChartClient.ChartRow, e: React.MouseEvent | MouseEvent) => void;
+
 }
 
-export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSameScale: boolean }) {
+export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSameScale: boolean, minHeigh: number | null }) {
 
   const isSimple = p.infos.every(a => a.data == null || a.data.rows.length < ReactChart.maxRowsForAnimation);
   const allData = p.infos.every(a => a.data != null);
@@ -26,7 +27,9 @@ export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSame
   const { size, setContainer } = useSize();
 
   return (
-    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} ref={setContainer} >
+    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")}
+      style={{ minHeight: (p.minHeigh ?? 400) + "px" }}
+      ref={setContainer} >
       {size &&
         renderCombinedLinesAndColumns({
           infos: p.infos,

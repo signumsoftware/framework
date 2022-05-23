@@ -274,6 +274,9 @@ public class UserChartPartEntity : Entity, IPartEntity
 
     public bool AutoRefresh { get; set; } = false;
 
+    [Unit("px")]
+    public int? MinHeight { get; set; }
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => UserChart + "");
 
@@ -290,6 +293,7 @@ public class UserChartPartEntity : Entity, IPartEntity
         AllowChangeShowData = this.AllowChangeShowData,
         CreateNew = this.CreateNew,
         AutoRefresh = this.AutoRefresh,
+        MinHeight = this.MinHeight,
     };
 
     public XElement ToXml(IToXmlContext ctx)
@@ -300,17 +304,20 @@ public class UserChartPartEntity : Entity, IPartEntity
             AllowChangeShowData ? new XAttribute(nameof(AllowChangeShowData), AllowChangeShowData) : null,
             IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null,
             CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null!,
-            AutoRefresh ? new XAttribute(nameof(AutoRefresh), AutoRefresh) : null!
+            AutoRefresh ? new XAttribute(nameof(AutoRefresh), AutoRefresh) : null!,
+            MinHeight.HasValue ? new XAttribute(nameof(MinHeight), MinHeight.Value) : null!
             );
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
-        AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
-        CreateNew = element.Attribute("CreateNew")?.Value.ToBool() ?? false;
-        AutoRefresh = element.Attribute("AutoRefresh")?.Value.ToBool() ?? false;
         UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart")!.Value));
+        ShowData = element.Attribute(nameof(ShowData))?.Value.ToBool() ?? false;
+        AllowChangeShowData = element.Attribute(nameof(AllowChangeShowData))?.Value.ToBool() ?? false;
+        IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
+        CreateNew = element.Attribute(nameof(CreateNew))?.Value.ToBool() ?? false;
+        AutoRefresh = element.Attribute(nameof(AutoRefresh))?.Value.ToBool() ?? false;
+        MinHeight = element.Attribute(nameof(MinHeight))?.Value.ToInt();
     }
 }
 
@@ -327,6 +334,9 @@ public class CombinedUserChartPartEntity : Entity, IPartEntity
     public bool CombinePinnedFiltersWithSameLabel { get; set; } = true;
 
     public bool UseSameScale { get; set; }
+
+    [Unit("px")]
+    public int? MinHeight { get; set; }
 
     public override string ToString()
     {
@@ -354,6 +364,7 @@ public class CombinedUserChartPartEntity : Entity, IPartEntity
             AllowChangeShowData ? new XAttribute(nameof(AllowChangeShowData), AllowChangeShowData) : null,
             CombinePinnedFiltersWithSameLabel ? new XAttribute(nameof(CombinePinnedFiltersWithSameLabel), CombinePinnedFiltersWithSameLabel) : null,
             UseSameScale ? new XAttribute(nameof(UseSameScale), UseSameScale) : null,
+            MinHeight.HasValue ? new XAttribute(nameof(MinHeight), MinHeight) : null,
             UserCharts.Select(uc => new XElement("UserChart",
                 new XAttribute("Guid", ctx.Include(uc.UserChart)),
                 uc.IsQueryCached ? new XAttribute(nameof(uc.IsQueryCached), uc.IsQueryCached) : null))
@@ -366,6 +377,7 @@ public class CombinedUserChartPartEntity : Entity, IPartEntity
         AllowChangeShowData = element.Attribute(nameof(AllowChangeShowData))?.Value.ToBool() ?? false;
         CombinePinnedFiltersWithSameLabel = element.Attribute(nameof(CombinePinnedFiltersWithSameLabel))?.Value.ToBool() ?? false;
         UseSameScale = element.Attribute(nameof(UseSameScale))?.Value.ToBool() ?? false;
+        MinHeight = element.Attribute(nameof(MinHeight))?.Value.ToInt();
         UserCharts.Synchronize(element.Elements("UserChart").ToList(), (cuce, elem) =>
         {
             cuce.UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(elem.Attribute("Guid")!.Value));

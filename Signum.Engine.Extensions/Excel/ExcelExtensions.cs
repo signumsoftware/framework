@@ -90,21 +90,38 @@ public static class ExcelExtensions
         return sheetData.Descendants<Cell>().FirstEx(c => c.CellReference == addressName);
     }
 
-    public static string GetCellValue(this SpreadsheetDocument document, Worksheet worksheet, string addressName)
+    public static string? GetCellValue(this SpreadsheetDocument document, Worksheet worksheet, string addressName)
     {
         Cell? theCell = worksheet.Descendants<Cell>().
           Where(c => c.CellReference == addressName).FirstOrDefault();
 
         // If the cell doesn't exist, return an empty string:
         if (theCell == null)
-            return "";
+            return null;
 
         return GetCellValue(document, theCell);
     }
 
-    public static string GetCellValue(this SpreadsheetDocument document, Cell theCell)
+    public static string? GetCellValue(this SpreadsheetDocument document, Row row, string addressName)
     {
-        string value = theCell.InnerText;
+        Cell? theCell = row.Descendants<Cell>().
+          Where(c => c.CellReference == addressName).FirstOrDefault();
+
+        // If the cell doesn't exist, return an empty string:
+        if (theCell == null)
+            return null;
+
+        return GetCellValue(document, theCell);
+    }
+
+    public static string? GetCellValue(this SpreadsheetDocument document, Cell theCell)
+    {
+        var cellValue = theCell.GetFirstChild<CellValue>();
+
+        if (cellValue == null)
+            return null;
+
+        string value = cellValue.InnerText;
 
         // If the cell represents an integer number, you're done. 
         // For dates, this code returns the serialized value that 

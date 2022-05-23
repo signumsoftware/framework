@@ -1,6 +1,7 @@
 using Signum.Entities.Mailing;
 using Signum.Entities.Basics;
 using System.ComponentModel;
+using System.Globalization;
 
 namespace Signum.Entities.Authorization;
 
@@ -54,10 +55,15 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
 
     public int LoginFailedCounter { get; set; }
 
-    public static UserEntity Current
+    public static Lite<UserEntity> Current => (Lite<UserEntity>)UserHolder.Current?.User!;
+
+    public static CultureInfo? CurrentUserCulture
     {
-        get { return (UserEntity)UserHolder.Current; }
-        set { UserHolder.Current = value; }
+        get
+        {
+            var culture = UserHolder.Current?.GetClaim("Culture") as string;
+            return culture == null ? null : System.Globalization.CultureInfo.GetCultureInfo(culture);
+        }
     }
 
     [AutoExpressionField]
@@ -72,6 +78,7 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => UserName);
 }
+
 
 public enum UserState
 {
@@ -151,6 +158,26 @@ public class UserADMixin : MixinEntity
 
         return base.PropertyValidation(pi);
     }
+
+    public static Guid? CurrentOID
+    {
+        get
+        {
+            var oid = UserHolder.Current.GetClaim("OID");
+            return oid is string s ? Guid.Parse(s) : oid is Guid g ? g : null;
+
+        }
+    }
+
+    public static string? CurrentSID
+    {
+        get
+        {
+            var oid = UserHolder.Current.GetClaim("SID");
+            return oid as string;
+
+        }
+    }
 }
 
 public enum UserOIDMessage
@@ -160,7 +187,7 @@ public enum UserOIDMessage
 }
 
 [AutoInit]
-public static class UserCondition
+public static class UserTypeCondition
 {
     public static readonly TypeConditionSymbol DeactivatedUsers;
 }

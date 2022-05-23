@@ -101,7 +101,8 @@ export function start(options: {
   if (options.queryButton)
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
-      if (!ctx.searchControl.props.showBarExtension)
+      if (!ctx.searchControl.props.showBarExtension ||
+        !(ctx.searchControl.props.showBarExtensionOption?.showChartButton ?? ctx.searchControl.props.largeToolbarButtons))
         return undefined;
 
       return { button: <MailingMenu searchControl={ctx.searchControl} /> };
@@ -145,6 +146,9 @@ export function register<T extends ModifiableEntity>(type: Type<T>, setting: Ema
 export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
 
   if (ctx.lites.length == 0)
+    return undefined;
+
+  if (EmailTemplateEntity.tryTypeInfo() == null)
     return undefined;
 
   return API.getEmailTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single", { lite: (ctx.lites.length == 1 ? ctx.lites[0] : null) })

@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
-import { ModifiableEntity, Entity, JavascriptMessage, NormalWindowMessage, SaveChangesMessage } from '@framework/Signum.Entities'
+import { ModifiableEntity, Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding } from '@framework/Reflection'
 import MessageModal from '@framework/Modals/MessageModal'
 import { DynamicViewTabs } from './DynamicViewTabs'
@@ -86,7 +86,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
   getZeroNode() {
 
-    var { ctx, children, ...extraProps } = this.props;
+    var { ctx, ...extraProps } = this.props;
 
     const context: DesignerContext = {
       refreshView: () => {

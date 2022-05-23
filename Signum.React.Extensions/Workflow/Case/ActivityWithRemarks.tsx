@@ -22,7 +22,7 @@ export interface ActivityWithRemarks {
   tags: Array<CaseTagTypeEntity>;
 }
 
-export interface ActivityWithRemarksProps extends React.Props<ActivityWithRemarks> {
+export interface ActivityWithRemarksProps {
   data: ActivityWithRemarks;
 }
 

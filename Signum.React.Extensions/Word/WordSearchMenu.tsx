@@ -33,8 +33,7 @@ export default function WordSearchMenu(p : WordSearchMenuProps){
 
   var wordReports = p.searchControl.props.queryDescription.wordTemplates;
 
-  if (!wordReports || !wordReports.length ||
-    (p.searchControl.props.showBarExtensionOption && p.searchControl.props.showBarExtensionOption.showWordReport == false))
+  if (!wordReports || !wordReports.length)
     return null;
 
   const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;

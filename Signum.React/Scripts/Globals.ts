@@ -12,6 +12,7 @@ declare global {
     __allowNavigatorWithoutUser?: boolean;
     __baseUrl: string;
     dataForChildWindow?: any;
+    dataForCurrentWindow?: any;
     exploreGraphDebugMode: boolean;
   }
 

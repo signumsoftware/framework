@@ -102,13 +102,27 @@ export default function FramePage(p: FramePageProps) {
 
     const queryString = QueryString.parse(p.location.search);
 
-    if (queryString.waitData) {
+    if (queryString.waitOpenerData) {
       if (window.opener!.dataForChildWindow == undefined) {
         throw new Error("No dataForChildWindow in parent found!")
       }
 
       var pack = window.opener!.dataForChildWindow as EntityPack<Entity>;
       window.opener!.dataForChildWindow = undefined;
+      var txt = JSON.stringify(pack);
+      return Promise.resolve({
+        pack,
+        createNew: () => Promise.resolve(JSON.parse(txt))
+      });
+    }
+
+    if (queryString.waitCurrentData) {
+      if (window.dataForCurrentWindow == undefined) {
+        throw new Error("No dataForChildWindow in parent found!")
+      }
+
+      var pack = window.dataForCurrentWindow as EntityPack<Entity>;
+      window.dataForCurrentWindow = undefined;
       var txt = JSON.stringify(pack);
       return Promise.resolve({
         pack,
@@ -208,7 +222,9 @@ export default function FramePage(p: FramePageProps) {
 
       var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
 
-      var newRoute = is(packEntity.entity, entity) ? undefined :
+      const replaceRoute = !packEntity.entity.isNew && entity.isNew;
+
+      var newRoute = is(packEntity.entity, entity) ? null :
         packEntity.entity.isNew ? Navigator.createRoute(packEntity.entity.Type) :
         Navigator.navigateRoute(packEntity.entity);
 
@@ -217,15 +233,18 @@ export default function FramePage(p: FramePageProps) {
           .then(() => loadComponent(packEntity))
           .then(gc => {
             if (mounted.current) {
-             
               setState({
                 pack: packEntity,
                 getComponent: gc,
                 refreshCount: state.refreshCount + 1,
 
               }).then(() => {
-                if (newRoute)
-                   AppContext.history.push(newRoute);
+                if (newRoute) {
+                  if (replaceRoute)
+                    AppContext.history.replace(newRoute);
+                  else
+                    AppContext.history.push(newRoute);
+                }
 
                 callback && callback();
               }).done();
@@ -239,8 +258,12 @@ export default function FramePage(p: FramePageProps) {
           getComponent: state.getComponent,
           refreshCount: state.refreshCount + 1,
         }).then(() => {
-          if (newRoute)
-            AppContext.history.push(newRoute);
+          if (newRoute) {
+            if (replaceRoute)
+              AppContext.history.replace(newRoute);
+            else
+              AppContext.history.push(newRoute);
+          }
 
           callback && callback();
         }).done();

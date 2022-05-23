@@ -140,7 +140,7 @@ public class OperationController : Controller
             CustomOperationArgsConverters[operationSymbol] = a + converter;
         }
 
-        private static object? ConvertObject(JsonElement token, OperationSymbol operationSymbol)
+        public static object? ConvertObject(JsonElement token, OperationSymbol? operationSymbol)
         {
             switch (token.ValueKind)
             {
@@ -165,12 +165,9 @@ public class OperationController : Controller
                         if (token.TryGetProperty("Type", out var type))
                             return token.ToObject<ModifiableEntity>(SignumServer.JsonSerializerOptions);
 
-                        var conv = CustomOperationArgsConverters.TryGetC(operationSymbol);
+                        var conv = operationSymbol == null ? null : CustomOperationArgsConverters.TryGetC(operationSymbol);
 
-                        if (conv == null)
-                            throw new InvalidOperationException("Impossible to deserialize request before executing {0}.\r\nConsider registering your own converter in 'CustomOperationArgsConverters'.\r\nReceived JSON:\r\n\r\n{1}".FormatWith(operationSymbol, token));
-
-                        return conv.GetInvocationListTyped().Select(f => conv(token)).NotNull().FirstOrDefault();
+                        return conv.GetInvocationListTyped().Select(f => f(token)).NotNull().FirstOrDefault();
                     }
                 case JsonValueKind.Array:
                     var result = token.EnumerateArray().Select(t => ConvertObject(t, operationSymbol)).ToList();

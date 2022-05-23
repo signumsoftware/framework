@@ -88,7 +88,7 @@ public static class SqlPreCommandExtensions
 
         Console.WriteLine("Script saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
         Console.WriteLine("Check the synchronization script before running it!");
-        var answer = SafeConsole.AskRetry("Open or run?", "open", "run", "exit");
+        var answer = SafeConsole.AskRetry("Open or run?", "run", "open", "exit");
 
         if (answer == "open")
         {

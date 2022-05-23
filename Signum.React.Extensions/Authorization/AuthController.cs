@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 using Signum.React.Filters;
 using Signum.Services;
 
@@ -68,9 +69,11 @@ public class AuthController : ControllerBase
     [HttpGet("api/auth/loginFromApiKey")]
     public LoginResponse LoginFromApiKey(string apiKey)
     {
-        var token = AuthTokenServer.CreateToken(UserEntity.Current);
+        var user = UserEntity.Current.Retrieve();
 
-        return new LoginResponse { userEntity = UserEntity.Current, token = token, authenticationType = "api-key" };
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "api-key" };
     }
 
     [HttpPost("api/auth/loginFromCookie"), SignumAllowAnonymous]
@@ -79,9 +82,10 @@ public class AuthController : ControllerBase
         if (!UserTicketServer.LoginFromCookie(ControllerContext))
             return null;
 
-        var token = AuthTokenServer.CreateToken(UserEntity.Current);
+        var user = UserEntity.Current.Retrieve();
 
-        return new LoginResponse { userEntity = UserEntity.Current, token = token, authenticationType = "cookie" };
+        var token = AuthTokenServer.CreateToken(user);
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "cookie" };
     }
 
     [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
@@ -96,9 +100,11 @@ public class AuthController : ControllerBase
             return null;
         }
 
-        var token = AuthTokenServer.CreateToken(UserEntity.Current);
+        var user = UserEntity.Current.Retrieve();
 
-        return new LoginResponse { userEntity = UserEntity.Current, token = token, authenticationType = "windows" };
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "windows" };
     }
 
     [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
@@ -107,22 +113,24 @@ public class AuthController : ControllerBase
         if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt, throwErrors))
             return null;
 
-        var token = AuthTokenServer.CreateToken(UserEntity.Current);
+        var user = UserEntity.Current.Retrieve();
 
-        return new LoginResponse { userEntity = UserEntity.Current, token = token, authenticationType = "azureAD" };
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "azureAD" };
     }
 
     [HttpGet("api/auth/currentUser")]
     public UserEntity? GetCurrentUser()
     {
         var result = UserEntity.Current;
-        return result.Is(AuthLogic.AnonymousUser) ? null : result;
+        return result.Is(AuthLogic.AnonymousUser) ? null : result.Retrieve();
     }
 
     [HttpPost("api/auth/logout")]
     public void Logout()
     {
-        AuthServer.UserLoggingOut?.Invoke(ControllerContext, UserEntity.Current);
+        AuthServer.UserLoggingOut?.Invoke(ControllerContext, UserHolder.Current);
 
         UserTicketServer.RemoveCookie(ControllerContext);
     }
@@ -137,7 +145,7 @@ public class AuthController : ControllerBase
         if (error.HasText())
             return ModelError("newPassword", error);
 
-        var user = UserEntity.Current;
+        var user = UserEntity.Current.Retrieve();
         if(string.IsNullOrEmpty(request.oldPassword))
         {
             if(user.PasswordHash != null)
@@ -156,7 +164,7 @@ public class AuthController : ControllerBase
             user.Save();
         }
 
-        return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(UserEntity.Current), authenticationType = "changePassword" };
+        return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(user), authenticationType = "changePassword" };
     }
 
 

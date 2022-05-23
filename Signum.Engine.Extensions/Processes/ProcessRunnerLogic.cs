@@ -459,7 +459,7 @@ public sealed class ExecutingProcess
             using (ProcessLogic.OnApplySession(CurrentProcess))
             {
                 if (UserEntity.Current == null)
-                    UserEntity.Current = AuthLogic.SystemUser!;
+                    UserHolder.Current = new UserWithClaims(AuthLogic.SystemUser!);
                 try
                 {
                     Algorithm.Execute(this);

@@ -88,7 +88,7 @@ public static class ViewLogLogic
         var viewLog = new ViewLogEntity
         {
             Target = QueryLogic.GetQueryEntity(queryName).ToLite(),
-            User = UserHolder.Current!.ToLite(),
+            User = UserHolder.Current!.User,
             ViewAction = type.ToString(),
         };
 
@@ -138,7 +138,7 @@ public static class ViewLogLogic
         var viewLog = new ViewLogEntity
         {
             Target = (Lite<Entity>)entity.Clone(),
-            User = UserHolder.Current.ToLite(),
+            User = UserHolder.Current.User,
             ViewAction = viewAction,
             Data = new BigStringEmbedded(),
         };

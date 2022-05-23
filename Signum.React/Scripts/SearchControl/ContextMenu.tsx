@@ -11,10 +11,12 @@ export interface ContextMenuPosition {
   children: React.ReactElement<any>[]
 }
 
-export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAttributes<HTMLUListElement> {
+export interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
   position: ContextMenuPosition;
   onHide: (e: MouseEvent | TouchEvent) => void;
   alignRight?: boolean;
+  children: React.ReactNode;
+  ref?: React.Ref<ContextMenu>;
 }
 
 export default class ContextMenu extends React.Component<ContextMenuProps> {

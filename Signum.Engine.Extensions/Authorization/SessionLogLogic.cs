@@ -46,14 +46,13 @@ public static class SessionLogLogic
 
     public static void SessionStart(string userHostAddress, string? userAgent)
     {
-        var user = UserEntity.Current;
-        if (SessionLogLogic.RoleTracked(user.Role))
+        if (SessionLogLogic.RoleTracked(RoleEntity.Current))
         {
             using (AuthLogic.Disable())
             {
                 new SessionLogEntity
                 {
-                    User = user.ToLite(),
+                    User = UserEntity.Current,
                     SessionStart = Clock.Now.TrimToSeconds(),
                     UserHostAddress = userHostAddress,
                     UserAgent = userAgent

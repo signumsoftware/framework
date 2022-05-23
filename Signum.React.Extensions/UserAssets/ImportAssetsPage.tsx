@@ -2,14 +2,17 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import * as Navigator from '@framework/Navigator'
-import { TypeContext } from '@framework/TypeContext'
+import { mlistItemContext, TypeContext } from '@framework/TypeContext'
 import { getTypeInfo } from '@framework/Reflection'
 import { API } from './UserAssetClient'
-import { UserAssetMessage, UserAssetPreviewModel, EntityAction } from './Signum.Entities.UserAssets'
+import { UserAssetMessage, UserAssetPreviewModel, EntityAction, LiteConflictEmbedded } from './Signum.Entities.UserAssets'
 import { useForceUpdate } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
-import { EntityLine } from '@framework/Lines'
+import { ChangeEvent, EntityLine, EntityTable, PropertyRoute, ValueLine } from '@framework/Lines'
 import { EntityLink } from '@framework/Search'
+import { is, liteKey, liteKeyLong, MList } from '@framework/Signum.Entities'
+import SelectorModal from '../../Signum.React/Scripts/SelectorModal'
+import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal'
 
 interface ImportAssetsPageProps extends RouteComponentProps<{}> {
 
@@ -77,48 +80,97 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
         .done();
     }
 
-    const tc = TypeContext.root(model!, undefined);
+    function handleChangeConflict(conflict: LiteConflictEmbedded) {
+
+      if (conflict.to != undefined) {
+        var listChange = model!.lines.flatMap(l => l.element.liteConflicts).filter(c => is(c.element.from, conflict.from));
+        if (listChange.length > 1) {
+          return MessageModal.show({
+            title: "",
+            message: UserAssetMessage.SameSelectionForAllConflictsOf0.niceToString(conflict.from.toStr),
+            buttons: "yes_no",
+          }).then(result => {
+            if (result == "yes") {
+              listChange.forEach(element =>
+                element.element.to = conflict.to
+              );
+
+              forceUpdate();
+            }
+          });
+        }
+      }
+    }
+
+    const tc = TypeContext.root(model!, { formSize: "ExtraSmall" });
 
     return (
       <div>
         <table className="table">
           <thead>
             <tr>
-              <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.action)} </th>
-              <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.overrideEntity)} </th>
               <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.type)} </th>
               <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.text)} </th>
+              <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.action)} </th>
+              <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.overrideEntity)} </th>
               <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.customResolution)} </th>
             </tr>
           </thead>
 
           <tbody>
             {
-              tc.value.lines!.map(mle =>
-                <tr key={mle.element.type!.cleanName}>
-                  <td> {EntityAction.niceToString(mle.element.action!)} </td>
-                  <td>
-                    {mle.element.action == "Different" &&
-                      <input type="checkbox" className="form-check-input" checked={mle.element.overrideEntity} onChange={e => {
-                        mle.element.overrideEntity = (e.currentTarget as HTMLInputElement).checked;
-                        mle.element.modified = true;
-                        forceUpdate();
-                      }}></input>
-                    }
-                  </td>
-                  <td> {getTypeInfo(mle.element.type!.cleanName).niceName} </td>
-                  <td> {mle.element.text}</td>
-                  <td> {mle.element.customResolution && <a href="#" onClick={e => {
-                    e.preventDefault();
-                    Navigator.view(mle.element.customResolution!)
-                      .then(cr => {
-                        if (cr != null) {
-                          mle.element.customResolution = cr;
-                          mle.element.modified = true;
+              mlistItemContext(tc.subCtx(a => a.lines))!.map(mlec => {
+
+                var ea = mlec.value;
+
+                return (
+                  <>
+                    <tr key={ea.type!.cleanName}>
+                      <td> {getTypeInfo(ea.type!.cleanName).niceName} </td>
+                      <td> {ea.text}</td>
+                      <td> {EntityAction.niceToString(ea.action!)} </td>
+                      <td>
+                        {ea.action == "Different" &&
+                          <input type="checkbox" className="form-check-input" checked={ea.overrideEntity} onChange={e => {
+                            ea.overrideEntity = (e.currentTarget as HTMLInputElement).checked;
+                            ea.modified = true;
+                            forceUpdate();
+                          }}></input>
                         }
-                      }).done();
-                  }}>{mle.element.customResolution.toStr}</a>}</td>
-                </tr>
+                      </td>
+                      <td> {ea.customResolution && <a href="#" onClick={e => {
+                        e.preventDefault();
+                        Navigator.view(ea.customResolution!)
+                          .then(cr => {
+                            if (cr != null) {
+                              ea.customResolution = cr;
+                              ea.modified = true;
+                            }
+                          }).done();
+                      }}>{ea.customResolution.toStr}</a>}</td>
+                    </tr>
+                    {ea.liteConflicts.length > 0 && <tr>
+                      <td colSpan={1}></td>
+                      <td colSpan={4}>
+                        {UserAssetMessage.LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase.niceToString().formatHtml(<strong>{ea.text}</strong>)}
+                        <EntityTable avoidFieldSet ctx={mlec.subCtx(a => a.liteConflicts)} create={false} remove={false} move={false}
+                          columns={EntityTable.typedColumns<LiteConflictEmbedded>([
+                            { property: a => a.propertyRoute, template: ctx => <code>{ctx.value.propertyRoute}</code> },
+                            { property: a => a.from, template: ctx => <code>{liteKeyLong(ctx.value.from)}</code> },
+                            {
+                              property: a => a.to, template: ctx =>
+                                <EntityLine ctx={ctx.subCtx(a => a.to)} type={PropertyRoute.parseFull(ctx.value.propertyRoute).typeReference()}
+                                onChange={e =>  handleChangeConflict(ctx.value)}
+                                />
+                            }
+                          ])}
+                        />
+                      </td>
+                    </tr>}
+                  </>
+                );
+
+              }
               )
             }
           </tbody>

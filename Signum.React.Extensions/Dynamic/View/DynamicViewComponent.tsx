@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityTable } from '@framework/Lines'
-import { ModifiableEntity, JavascriptMessage, NormalWindowMessage, SaveChangesMessage } from '@framework/Signum.Entities'
+import { ModifiableEntity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { classes } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'

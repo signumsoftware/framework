@@ -170,6 +170,7 @@
     <Member Name="CanNotBeModified" Description="Kann nicht geändert werden" />
     <Member Name="CanNotBeModifiedBecauseIsA0" Description="Kann nicht geändert werden, da es ein {0} ist." />
     <Member Name="CanNotBeModifiedBecauseIsNotA0" Description="Kann nicht geändert werden, da es kein {0} ist." />
+    <Member Name="ConflictMergingTypeConditions" Description="Konflikt durch Verschmelzung von Typbedingungen" />
     <Member Name="Deny" Description="Verweigern" />
     <Member Name="Everything" Description="Alles" />
     <Member Name="Filter" Description="Filter" />
@@ -518,10 +519,35 @@
   <Type Name="CombinedUserChartPartEntity" Description="Kombinierter Benutzerdiagrammteil" Gender="m">
     <Member Name="AllowChangeShowData" Description="Daten anzeigen ändern lassen" />
     <Member Name="CombinePinnedFiltersWithSameLabel" Description="Kombinieren Vorgewahlter Filter Bezeichnung" />
+    <Member Name="MinHeight" Description="Min height" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserCharts" Description="Benutzerdiagramme" />
     <Member Name="UseSameScale" Description="Verwenden der gleichen Skala" />
+  </Type>
+  <Type Name="ConcurrentUserEntity" Description="gleichzeitige Benutzer" PluralDescription="Gleichzeitige Benutzer" Gender="m">
+    <Member Name="IsModified" Description="Ist modifiziert" />
+    <Member Name="SignalRConnectionID" Description="SignalR Connection-ID" />
+    <Member Name="StartTime" Description="Startzeit" />
+    <Member Name="TargetEntity" Description="Zielentität" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="ConcurrentUserMessage">
+    <Member Name="ConcurrentUsers" Description="Gleichzeitige Benutzer" />
+    <Member Name="ConsiderOpening0InANewTabAndApplyYourChangesManually" Description="Erwägen Sie, {0} in einer neuen Registerkarte zu öffnen und Ihre Änderungen manuell anzuwenden" />
+    <Member Name="CurrentlyEditing" Description="Derzeitige Bearbeitung" />
+    <Member Name="DatabaseChangesDetected" Description="Datenbankänderungen entdeckt!" />
+    <Member Name="DoYouWantToReloadIt" Description="Möchten Sie es neu laden?" />
+    <Member Name="LooksLikeSomeoneJustSaved0ToTheDatabase" Description="Sieht so aus, als hätte jemand gerade {0} in der Datenbank gespeichert." />
+    <Member Name="LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges" Description="Es sieht so aus, als ob Sie nicht der einzige sind, der derzeit {0} ändert... nur der erste kann die Änderungen speichern!" />
+    <Member Name="ReloadIt" Description="Laden Sie es nach!" />
+    <Member Name="ThisIsNotTheLatestVersionOf0" Description="Dies ist nicht die neueste Version von {0}" />
+    <Member Name="WarningYouWillLostYourCurrentChanges" Description="WARNUNG: Sie werden Ihre aktuellen Änderungen verlieren." />
+    <Member Name="YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges" Description="Sie haben lokale Änderungen, aber {0} wurde bereits in der Datenbank gespeichert... Sie können die Änderungen nicht mehr speichern :(" />
+    <Member Name="YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications" Description="Sie haben lokale Änderungen in {0}, die derzeit von anderen Benutzern geöffnet werden. Bisher hat niemand sonst Änderungen vorgenommen. " />
+  </Type>
+  <Type Name="ConcurrentUserOperation">
+    <Member Name="Delete" Description="Löschen" />
   </Type>
   <Type Name="ConnectionType" />
   <Type Name="CSharpMigrationEntity" Description="C-sharp-Migration">
@@ -530,6 +556,7 @@
   </Type>
   <Type Name="CultureInfoEntity" Description="Kulturinfo" PluralDescription="Kulturinfos" Gender="f">
     <Member Name="EnglishName" Description="Englischer Name" />
+    <Member Name="IsNeutral" Description="Ist neutral" />
     <Member Name="Name" Description="Name" />
     <Member Name="NativeName" Description="Nativer Name" />
   </Type>
@@ -1439,78 +1466,19 @@
     <Member Name="BpmnElementId" Description="BPMN Element-id" />
     <Member Name="Xml" Description="XML" />
   </Type>
-  <Type Name="JoyrideEntity" Description="Spritztour">
-    <Member Name="Culture" Description="Kultur" />
-    <Member Name="Debug" Description="Debug" />
-    <Member Name="Guid" Description="Guid" />
-    <Member Name="KeyboardNavigation" Description="Tastaturnavigation zulassen" />
-    <Member Name="Name" Description="Name" />
-    <Member Name="ShowSkipButton" Description="Schaltfläche &quot;Abbrechen&quot; anzeigen" />
-    <Member Name="ShowStepsProgress" Description="Fortschritt anzeigen" />
-    <Member Name="Steps" Description="Schritte" />
-    <Member Name="Type" Description="Typ" />
-  </Type>
-  <Type Name="JoyrideMessage">
-    <Member Name="Back" Description="Zurück" />
-    <Member Name="Close" Description="Schließen" />
-    <Member Name="Last" Description="Beenden" />
-    <Member Name="Next" Description="Weiter" />
-    <Member Name="Skip" Description="Abbrechen" />
-  </Type>
-  <Type Name="JoyrideOperation">
-    <Member Name="Save" Description="Speichern" />
-  </Type>
-  <Type Name="JoyrideStepEntity" Description="Spritztour Schritt" PluralDescription="Spritztour Schritte" Gender="m">
-    <Member Name="AllowClicksThruHole" Description="Klicken in den Bereich zulassen" />
-    <Member Name="Culture" Description="Kultur" />
-    <Member Name="Guid" Description="Guid" />
-    <Member Name="IsFixed" Description="Ist fixiert" />
-    <Member Name="Position" Description="Position" />
-    <Member Name="Selector" Description="Selektor" />
-    <Member Name="Style" Description="Stil" />
-    <Member Name="Text" Description="Text" />
-    <Member Name="Title" Description="Titel" />
-    <Member Name="Type" Description="Typ" />
-  </Type>
-  <Type Name="JoyrideStepOperation">
-    <Member Name="Save" Description="Speichern" />
-  </Type>
-  <Type Name="JoyrideStepPosition" Description="Position">
-    <Member Name="Bottom" Description="Unten" />
-    <Member Name="BottomLeft" Description="Unten links" />
-    <Member Name="BottomRight" Description="Unten rechts" />
-    <Member Name="Top" Description="Oben" />
-    <Member Name="TopLeft" Description="Oben links" />
-    <Member Name="TopRight" Description="Oben rechts" />
-  </Type>
-  <Type Name="JoyrideStepStyleEntity" Description="Spritztour Stil" PluralDescription="Spritztour Stile" Gender="m">
-    <Member Name="BackgroundColor" Description="Hintergrundfarbe" />
-    <Member Name="BorderRadius" Description="Randradius" />
-    <Member Name="Color" Description="Farbe" />
-    <Member Name="Guid" Description="Guid" />
-    <Member Name="MainColor" Description="Hauptfarbe" />
-    <Member Name="Name" Description="Name" />
-    <Member Name="TextAlign" Description="Textausrichtung" />
-    <Member Name="Width" Description="Breite" />
-  </Type>
-  <Type Name="JoyrideStepStyleOperation">
-    <Member Name="Save" Description="Speichern" />
-  </Type>
-  <Type Name="JoyrideStepType" Description="Typ">
-    <Member Name="Click" Description="Klicken" />
-    <Member Name="Hover" Description="Hover" />
-  </Type>
-  <Type Name="JoyrideType" Description="Spritztour-Typ">
-    <Member Name="Continuous" Description="Kontinuierlich" />
-    <Member Name="Single" Description="Einzeln" />
-  </Type>
   <Type Name="LinkElementEmbedded" Description="Linkelement">
     <Member Name="Label" Description="Etikett" />
     <Member Name="Link" Description="Link" />
+    <Member Name="OpensInNewTab" Description="Öffnet in neuem Tab" />
   </Type>
   <Type Name="LinkListPartEntity" Description="Linklisten Teil" PluralDescription="Linklisten Teilen" Gender="n">
     <Member Name="Links" Description="Links" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
+  <Type Name="LiteConflictEmbedded" Description="Lite-Konflikt">
+    <Member Name="From" Description="Von" />
+    <Member Name="PropertyRoute" Description="Route der Immobilie" />
+    <Member Name="To" Description="An" />
   </Type>
   <Type Name="LoadMethodLogEntity" Description="Log für Load-Methode" PluralDescription="Logs für Load-Methoden" Gender="n">
     <Member Name="ClassName" Description="Klassen Name" />
@@ -2602,6 +2570,8 @@
     <Member Name="ExportToXml" Description="In xml exportieren" />
     <Member Name="ImportPreview" Description="Importvorschau" />
     <Member Name="ImportUserAssets" Description="Benutzer-Assets importieren" />
+    <Member Name="LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase" Description="Sieht so aus, als ob einige Entitäten in {0} in dieser Datenbank nicht existieren oder eine andere Bedeutung haben ..." />
+    <Member Name="SameSelectionForAllConflictsOf0" Description="Gleiche Auswahl für alle Konflikte der {0}" />
     <Member Name="SelectTheEntitiesToOverride" Description="Wählen Sie die Elemente zum Überschreiben aus" />
     <Member Name="SelectTheXmlFileWithTheUserAssetsThatYouWantToImport" Description="Wählen Sie die XML-Datei mit den Benutzer-Assets, die Sie importieren möchten" />
     <Member Name="SucessfullyImported" Description="Erfolgreich importiert" />
@@ -2615,6 +2585,7 @@
     <Member Name="Action" Description="Aktion" />
     <Member Name="CustomResolution" Description="Benutzerdefinierte Auflösung" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="LiteConflicts" Description="Leichte Konflikte" />
     <Member Name="OverrideEntity" Description="Entität überschreiben" />
     <Member Name="Text" Description="Text" />
     <Member Name="Type" Description="Typ" />
@@ -2645,12 +2616,10 @@
     <Member Name="AutoRefresh" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
     <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
+    <Member Name="MinHeight" Description="Min height" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
-  </Type>
-  <Type Name="UserCondition">
-    <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
   </Type>
   <Type Name="UserEntity" Description="Benutzer" Gender="m">
     <Member Name="CultureInfo" Description="Sprache" />
@@ -2740,6 +2709,9 @@
   <Type Name="UserTreePartEntity" Description="Benutzerbaumteil" PluralDescription="Benutzerbaumteile" Gender="m">
     <Member Name="RequiresTitle" Description="Titel erforderlich" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
+  <Type Name="UserTypeCondition">
+    <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
   </Type>
   <Type Name="ValueUserQueryElementEmbedded" Description="Wert der Benutzerabfrage">
     <Member Name="Href" Description="Href" />

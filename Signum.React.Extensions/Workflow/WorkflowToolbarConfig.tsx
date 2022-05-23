@@ -22,7 +22,7 @@ export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity>
     return Promise.resolve(WorkflowClient.workflowStartUrl(element.content!));
   }
 
-  isCompatibleWithUrl(res: ToolbarResponse<WorkflowEntity>, location: Location, query: any): boolean {
-    return location.pathname == AppContext.toAbsoluteUrl(WorkflowClient.workflowStartUrl(res.content!));
+  isCompatibleWithUrlPrio(res: ToolbarResponse<WorkflowEntity>, location: Location, query: any): number {
+    return location.pathname == AppContext.toAbsoluteUrl(WorkflowClient.workflowStartUrl(res.content!)) ? 2 : 0;
   }
 }

@@ -12,12 +12,13 @@ public static class TemplateUtils
 
     public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?)(?<operation>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]]+)");
 
-    public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>((?<type>[\w]):)?(\\\]|\\\:|[^\:])+)(\:(?<format>.*))?");
+    public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>((?<type>[\w]):)?(\\\]|\\\:|[^\:\]])+)(\:(?<format>.*))?");
     
     public struct SplittedToken
     {
         public string Token;
-        public string? Format; 
+        public string? Format;
+
     }
 
     public static SplittedToken? SplitToken(string formattedToken)
@@ -29,8 +30,8 @@ public static class TemplateUtils
 
         return new SplittedToken
         {
-            Token = tok.Groups["token"].Value.Replace(@"\:", ":"),
-            Format = tok.Groups["format"].Value.DefaultText("").Replace(@"\:", ":").DefaultToNull()
+            Token = tok.Groups["token"].Value.Replace(@"\:", ":").Replace(@"\]", "]"),
+            Format = tok.Groups["format"].Value.DefaultText("").Replace(@"\:", ":").Replace(@"\]", "]").DefaultToNull()
         };
     }
 
@@ -188,30 +189,112 @@ public struct TemplateError
     }
 }
 
+public class MemberWithArguments
+{
+    public MemberWithArguments(MemberInfo member, ValueProviderBase[]? arguments = null)
+    {
+        Member = member;
+        Arguments = arguments;
+    }
+
+    public MemberInfo Member { get; }
+    public ValueProviderBase[]? Arguments { get; }
+
+    public override string ToString() => ToString(new ScopedDictionary<string, ValueProviderBase>(null));
+
+    public string ToString(ScopedDictionary<string, ValueProviderBase> variables)
+    {
+        return Member.Name + (Arguments == null ? null : "(" + Arguments.ToString(a => a.ToStringWithoutBrackets(variables), ", ") + ")");
+    }
+}
 
 public static class ParsedModel
 {
     public const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
-    public static List<MemberInfo>? GetMembers(Type modelType, string? fieldOrPropertyChain, Action<bool, string> addError)
-    {
-        var members = new List<MemberInfo>();
-        var type = modelType;
-        foreach (var field in (fieldOrPropertyChain ?? "").Trim().SplitNoEmpty('.'))
-        {
-            var info = (MemberInfo?)type.GetField(field, Flags) ??
-                       (MemberInfo?)type.GetProperty(field, Flags) ??
-                       (MemberInfo?)type.GetMethod(field, Flags, null, new[] { typeof(TemplateParameters) }, null);
+    static readonly Regex Parenthesis = new Regex(@"(\([^)]*\))");
 
-            if (info == null)
+    public static List<MemberWithArguments>? GetMembers(Type modelType, string? fieldOrPropertyChain, ITemplateParser tp)
+    {
+        var members = new List<MemberWithArguments>();
+        var parensDic = new List<string>();
+        var replacedFieldOrPropertyChain = Parenthesis.Replace((fieldOrPropertyChain ?? "").Trim(), a =>
+        {
+            parensDic.Add(a.Value);
+            return "($$" + (parensDic.Count - 1) + "$$)";
+        });
+
+        var type = modelType;
+        foreach (var part in replacedFieldOrPropertyChain.SplitNoEmpty('.'))
+        {
+            if (part.EndsWith("$$)"))
             {
-                addError(false, "Type {0} does not have a property/field with name {1}, or a method that takes a TemplateParameters as an argument".FormatWith(type.Name, field));
-                return null;
+                var argumentsIndex = int.Parse(part.Between("($$", "$$)"));
+
+                var parameterString = parensDic[argumentsIndex];
+
+                var arguments = parameterString.TrimStart('(').TrimEnd(')').SplitNoEmpty(",").Select(arg => ValueProviderBase.TryParse(arg, null, tp)).ToList();
+
+                var methodName = part.Before("($$");
+
+                var method = type.GetMethod(methodName, Flags);
+
+                if (method == null)
+                {
+                    tp.AddError(false, $"Type {type.Name} does not have a method with name {methodName}");
+                    return null;
+                }
+                var miParameters = method.GetParameters();
+
+                if(miParameters.Length == 0 || !typeof(TemplateParameters).IsAssignableFrom(miParameters.Last().ParameterType))
+                {
+                    tp.AddError(false, $"The method {methodName} in {type.Name} should have a {nameof(TemplateParameters)} as last argument".FormatWith(type.Name, part));
+                    return null;
+                }
+
+                var errors = miParameters.Take(miParameters.Length - 1).Zip(arguments, (p, a) => (p, a))
+                    .Select(tuple => tuple.a?.Type == null ? null : !tuple.p.ParameterType.IsAssignableFrom(tuple.a.Type) ? $"Unable to assign the expression {tuple.a} ({tuple.a.Type!.TypeName()}) to the parameter {tuple.p.Name} ({tuple.p.ParameterType.TypeName()}) of {methodName}": null)
+                    .NotNull().ToString("\n");
+
+                if (errors.HasText())
+                {
+                    tp.AddError(false, errors);
+                    return null;
+                }
+
+                members.Add(new MemberWithArguments(method, arguments.NotNull().ToArray()));
+
+                type = method.ReturningType();
+            }
+            else
+            {
+                var info =
+                    (type.GetField(part, Flags) is { } fi ? new MemberWithArguments(fi) : null) ??
+                    (type.GetProperty(part, Flags) is { } pi ? new MemberWithArguments(pi) : null) ??
+                    (type.GetMethod(part, Flags) is { } mi ? new MemberWithArguments(mi) : null);
+
+                if (info == null)
+                {
+                    tp.AddError(false, "Type {0} does not have a property/field with name {1}, or a method that takes a TemplateParameters as an argument".FormatWith(type.Name, part));
+                    return null;
+                }
+                
+                if(info.Member is MethodInfo method)
+                {
+                    var miParameters = method.GetParameters();
+
+                    if (miParameters.Length == 0 || !typeof(TemplateParameters).IsAssignableFrom(miParameters.Last().ParameterType))
+                    {
+                        tp.AddError(false, $"The method {method.Name} in {type.Name} should have a {nameof(TemplateParameters)} as last argument".FormatWith(type.Name, part));
+                        return null;
+                    }
+                }
+
+                members.Add(info);
+
+                type = info.Member.ReturningType();
             }
 
-            members.Add(info);
-
-            type = info.ReturningType();
         }
 
         return members;
@@ -305,14 +388,16 @@ public class TemplateSynchronizationContext
     }
 
 
-    internal List<MemberInfo>? GetMembers(string fieldOrPropertyChain, Type initialType)
+    internal List<MemberWithArguments>? GetMembers(string fieldOrPropertyChain, Type initialType)
     {
-        List<MemberInfo> fields = new List<MemberInfo>();
+        List<MemberWithArguments> fields = new List<MemberWithArguments>();
 
         Type type = initialType;
         foreach (var field in fieldOrPropertyChain.Split('.'))
         {
-            var allMembers = type.GetFields(ParsedModel.Flags).Cast<MemberInfo>().Concat(type.GetProperties(ParsedModel.Flags)).ToDictionary(a => a.Name);
+            var allMembers = type.GetFields(ParsedModel.Flags).Cast<MemberInfo>()
+                .Concat(type.GetProperties(ParsedModel.Flags))
+                .ToDictionary(a => a.Name);
 
             string? s = this.Replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), this.StringDistance);
 
@@ -321,7 +406,7 @@ public class TemplateSynchronizationContext
 
             var member = allMembers.GetOrThrow(s);
 
-            fields.Add(member);
+            fields.Add(new MemberWithArguments(member));
 
             type = member.ReturningType();
         }

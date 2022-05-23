@@ -55,11 +55,11 @@ public static class UserTicketLogic
         using (AuthLogic.Disable())
         using (var tr = new Transaction())
         {
-            CleanExpiredTickets(UserEntity.Current);
+            CleanExpiredTickets(UserEntity.Current.Retrieve());
 
             UserTicketEntity result = new UserTicketEntity
             {
-                User = UserEntity.Current.ToLite(),
+                User = UserEntity.Current,
                 Device = device,
                 ConnectionDate = Clock.Now,
                 Ticket = Guid.NewGuid().ToString(),

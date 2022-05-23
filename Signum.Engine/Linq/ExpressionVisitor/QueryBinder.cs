@@ -1926,10 +1926,9 @@ internal class QueryBinder : ExpressionVisitor
                                     ImplementedByAllExpression iba = (ImplementedByAllExpression)source;
                                     FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(iba.Type, (PropertyInfo)m.Member);
                                     if (fi != null && fi.FieldEquals((Entity ie) => ie.id))
-                                        return new PrimaryKeyStringExpression(
-                                            iba.Ids.Values.Select(a => (Expression)Expression.Call(a, miToString)).Reverse().Aggregate((a, b) => Expression.Coalesce(a, b)),
-                                            iba.TypeId
-                                            ).UnNullify();
+                                        return new PrimaryKeyExpression(
+                                            Coalesce(typeof(IConvertible), iba.Ids.Values.Select(a => (Expression)Expression.Convert(a, typeof(IConvertible))))
+                                        ).UnNullify();
 
                                     throw new InvalidOperationException("The member {0} of ImplementedByAll is not accesible on queries".FormatWith(m.Member));
                                 }
@@ -2178,20 +2177,11 @@ internal class QueryBinder : ExpressionVisitor
             return new PrimaryKeyExpression(value);
         }
 
-        if (expressions.All(i => i.Value is PrimaryKeyStringExpression))
-        {
-            var type = expressions.Select(i => i.Value.Type).Distinct().SingleEx();
 
-            var dicType = expressions.SelectDictionary(exp => (Expression)((PrimaryKeyStringExpression)exp).TypeId);
 
-            var valueType = (TypeImplementedByAllExpression)CombineImplementations(strategy, dicType, typeof(Type));
 
-            var dicId = expressions.SelectDictionary(exp => ((PrimaryKeyStringExpression)exp).Id);
 
-            var valueId = CombineImplementations(strategy, dicId, typeof(string));
 
-            return new PrimaryKeyStringExpression(valueId, valueType);
-        }
 
         if (!schema.Settings.IsDbType(returnType.UnNullify()))
             throw new InvalidOperationException("Impossible to CombineImplementations of {0}".FormatWith(returnType.TypeName()));
@@ -2938,9 +2928,17 @@ internal class QueryBinder : ExpressionVisitor
 
         if (expression is ImplementedByExpression ib)
         {
-            var type = ib.Implementations.Select(imp => imp.Value.ExternalId.ValueType.Nullify()).Distinct().SingleOrDefaultEx() ?? typeof(IComparable);
-            var aggregate = new PrimaryKeyExpression(Coalesce(type, ib.Implementations.Select(imp => imp.Value.ExternalId.Value)));
-            return aggregate;
+            var type = ib.Implementations.Select(imp => imp.Value.ExternalId.ValueType.Nullify()).Distinct().Only();
+            if(type != null)
+            {
+                var aggregate = new PrimaryKeyExpression(Coalesce(type, ib.Implementations.Select(imp => imp.Value.ExternalId.Value)));
+                return aggregate;
+            }
+            else
+            {
+                var aggregate = new PrimaryKeyExpression(Coalesce(typeof(IComparable), ib.Implementations.Select(imp => Expression.Convert(imp.Value.ExternalId.Value, typeof(IComparable)))));
+                return aggregate;
+            }
         }
 
         if (expression is ImplementedByAllExpression iba)

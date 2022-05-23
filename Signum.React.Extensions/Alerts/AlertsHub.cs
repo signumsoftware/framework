@@ -18,7 +18,7 @@ public class AlertsHub : Hub<IAlertsClient>
     {
         var token = AuthTokenServer.DeserializeToken(tokenString);
 
-        AlertsServer.Connections.Add(token.User.ToLite(), Context.ConnectionId);
+        AlertsServer.Connections.Add(token.User, Context.ConnectionId);
 
         return Task.CompletedTask;
     }

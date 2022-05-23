@@ -4,7 +4,7 @@ import { classes } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite, is } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite, is, parseLiteList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
@@ -95,8 +95,11 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 
     super.setValue(val);
 
-    if (val == null)
-      this.writeInTypeahead("");
+    if (val == null) {
+      setTimeout(() => {
+        this.writeInTypeahead("");
+      }, 100);
+    }
   }
 
   writeInTypeahead(query: string) {
@@ -137,6 +140,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
       {!hasValue && c.renderFindButton(true)}
       {hasValue && !p.avoidViewButton && c.renderViewButton(true, p.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, p.ctx.value!)}
+      {c.renderPasteButton(true)}
       {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
     </>
   );
@@ -164,6 +168,16 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     </FormGroup>
   );
 
+  function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const text = e.clipboardData.getData("text");
+    const lites = parseLiteList(text);
+    if (lites.length == 0)
+      return;
+    
+    e.preventDefault();
+    c.paste(text)?.done();
+  }
+
   function renderAutoComplete(renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {
 
     const ctx = p.ctx;
@@ -177,10 +191,15 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     return (
       <Typeahead ref={c.typeahead}
-        inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined, ...p.inputAttributes }}
+        inputAttrs={{
+          className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
+          placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined,
+          onPaste: p.paste == false ? undefined : handleOnPaste,
+          ...p.inputAttributes
+        }}
         getItems={query => ac!.getItems(query)}
-        getItemsDelay={ac.getItemsDelay}
-        minLength={ac.minLength}
+        itemsDelay={ac.getItemsDelay()}
+        minLength={ac.getMinLength()}
         renderItem={(item, query) => ac!.renderItem(item, query)}
         renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
