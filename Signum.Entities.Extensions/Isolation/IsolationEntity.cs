@@ -32,7 +32,7 @@ public class IsolationEntity : Entity
 
     //null: no override
     //Tuple<T>(null): override to null
-    public static readonly ThreadVariable<Tuple<Lite<IsolationEntity>?>> CurrentThreadVariable = Statics.ThreadVariable<Tuple<Lite<IsolationEntity>?>>("CurrentIsolation");
+    public static readonly AsyncThreadVariable<Tuple<Lite<IsolationEntity>?>> CurrentThreadVariable = Statics.ThreadVariable<Tuple<Lite<IsolationEntity>?>>("CurrentIsolation");
     public static IDisposable Disable()
     {
         return UnsafeOverride(null);

@@ -29,7 +29,7 @@ public static class EntityJsonContext
         };
     }
 
-    static readonly ThreadVariable<ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)>?> currentPropertyRoute = Statics.ThreadVariable<ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey ? rowId) >?>("jsonPropertyRoute");
+    static readonly AsyncThreadVariable<ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)>?> currentPropertyRoute = Statics.ThreadVariable<ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey ? rowId) >?>("jsonPropertyRoute");
 
     public static (PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)? CurrentPropertyRouteAndEntity
     {
@@ -55,7 +55,7 @@ public static class EntityJsonContext
         return new Disposable(() => { currentPropertyRoute.Value = old; });
     }
 
-    static readonly ThreadVariable<bool> allowDirectMListChangesVariable = Statics.ThreadVariable<bool>("allowDirectMListChanges");
+    static readonly AsyncThreadVariable<bool> allowDirectMListChangesVariable = Statics.ThreadVariable<bool>("allowDirectMListChanges");
 
     public static bool AllowDirectMListChanges
     {

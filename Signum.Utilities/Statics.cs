@@ -7,9 +7,9 @@ public static class Statics
 {
     static readonly Dictionary<string, IThreadVariable> threadVariables = new Dictionary<string, IThreadVariable>();
 
-    public static ThreadVariable<T> ThreadVariable<T>(string name, bool avoidExportImport = false)
+    public static AsyncThreadVariable<T> ThreadVariable<T>(string name, bool avoidExportImport = false)
     {
-        var variable = new ThreadVariable<T>(name) { AvoidExportImport = avoidExportImport };
+        var variable = new AsyncThreadVariable<T>(name) { AvoidExportImport = avoidExportImport };
         threadVariables.AddOrThrow(name, variable, "Thread variable {0} already defined");
         return variable;
     }
@@ -133,10 +133,10 @@ public interface IThreadVariable: IUntypedVariable
     bool AvoidExportImport { get; }
 }
 
-public class ThreadVariable<T> : Variable<T>, IThreadVariable
+public class AsyncThreadVariable<T> : Variable<T>, IThreadVariable
 {
     readonly AsyncLocal<T> store = new AsyncLocal<T>();
-    internal ThreadVariable(string name) : base(name) { }
+    internal AsyncThreadVariable(string name) : base(name) { }
 
     public override T Value
     {
@@ -252,7 +252,7 @@ public class ScopeSessionFactory : ISessionFactory
 {
     public ISessionFactory Factory;
 
-    static readonly ThreadVariable<Dictionary<string, object?>> overridenSession = Statics.ThreadVariable<Dictionary<string, object?>>("overridenSession");
+    static readonly AsyncThreadVariable<Dictionary<string, object?>> overridenSession = Statics.ThreadVariable<Dictionary<string, object?>>("overridenSession");
 
     public static bool IsOverriden
     {

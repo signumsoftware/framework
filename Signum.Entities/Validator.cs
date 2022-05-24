@@ -4,7 +4,7 @@ namespace Signum.Entities;
 
 public static class Validator
 {
-    static readonly ThreadVariable<bool> inModelBinderVariable = Statics.ThreadVariable<bool>("inModelBinder");
+    static readonly AsyncThreadVariable<bool> inModelBinderVariable = Statics.ThreadVariable<bool>("inModelBinder");
     public static bool InModelBinder
     {
         get { return inModelBinderVariable.Value; }

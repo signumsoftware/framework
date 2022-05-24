@@ -5,7 +5,7 @@ public class CurrentEntityConverter : IFilterValueConverter
 {
     public static string CurrentEntityKey = "[CurrentEntity]";
 
-    static readonly ThreadVariable<Entity?> currentEntityVariable = Statics.ThreadVariable<Entity?>("currentFilterValueEntity");
+    static readonly AsyncThreadVariable<Entity?> currentEntityVariable = Statics.ThreadVariable<Entity?>("currentFilterValueEntity");
 
     public static IDisposable SetCurrentEntity(Entity? currentEntity)
     {
