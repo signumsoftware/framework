@@ -1,9 +1,11 @@
-﻿
+
 namespace Signum.Entities.UserAssets;
 
 public class LiteFilterValueConverter : IFilterValueConverter
 {
-    public Result<string?>? TryToStringValue(object? value, Type type)
+
+
+    public Result<string?>? TryGetExpression(object? value, Type targetType)
     {
         if (!(value is Lite<Entity> lite))
         {
@@ -13,16 +15,28 @@ public class LiteFilterValueConverter : IFilterValueConverter
         return new Result<string?>.Success(lite.Key());
     }
 
-    public Result<object?>? TryParseValue(string? value, Type type)
+    public Result<object?>? TryParseExpression(string? expression, Type targetType)
     {
-        if (!value.HasText())
+        if (!expression.HasText())
             return null;
 
-        string? error = Lite.TryParseLite(value, out Lite<Entity>? lite);
+        string? error = Lite.TryParseLite(expression, out Lite<Entity>? lite);
         if (error == null)
             return new Result<object?>.Success(lite);
         else
             return new Result<object?>.Error(error);
+    }
+
+    public Result<Type>? IsValidExpression(string? expression, Type targetType, Type? currentEntityType)
+    {
+        if (!expression.HasText())
+            return null;
+
+        string? error = Lite.TryParseLite(expression, out Lite<Entity>? lite);
+        if (error == null)
+            return new Result<Type>.Success(lite!.EntityType);
+        else
+            return new Result<Type>.Error(error);
     }
 }
 

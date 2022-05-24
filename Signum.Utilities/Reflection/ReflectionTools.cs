@@ -855,6 +855,65 @@ public static class ReflectionTools
         }
     }
 
+    public static bool CanChangeType(Type fromType, Type targetType)
+    {
+        if (fromType == typeof(object))
+            return true;
+
+        if (targetType.IsAssignableFrom(fromType))
+            return true;
+        else
+        {
+            Type utype = targetType.UnNullify();
+
+            if (utype.IsEnum)
+            {
+                if (fromType == typeof(string))
+                    return true;
+
+                if (ReflectionTools.IsIntegerNumber(utype))
+                    return true;
+
+                return false;
+            }
+
+            if (utype == typeof(Guid) && fromType == typeof(string))
+                return true;
+
+            if (utype == typeof(DateOnly))
+            {
+                if (fromType == typeof(string))
+                    return true;
+
+                if (fromType == typeof(DateTime))
+                    return true;
+
+                if (fromType == typeof(DateTimeOffset))
+                    return true;
+            }
+
+            var conv = TypeDescriptor.GetConverter(targetType);
+            if (conv != null && conv.CanConvertFrom(fromType))
+                return true;
+
+            conv = TypeDescriptor.GetConverter(fromType);
+            if (conv != null && conv.CanConvertTo(targetType))
+                return true;
+
+            if (targetType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(fromType) && typeof(IEnumerable).IsAssignableFrom(targetType))
+            {
+                return CanChangeType(fromType.ElementType()!, targetType.ElementType()!);
+            }
+
+            if (typeof(IConvertible).IsAssignableFrom(fromType))
+                return true;
+
+            throw new InvalidOperationException($"Unable to convert '{fromType}' to type '{targetType}'");
+
+        }
+    }
+    
+
     public static bool IsStatic(this PropertyInfo pi)
     {
         return (pi.CanRead && pi.GetGetMethod()!.IsStatic) ||

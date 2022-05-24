@@ -371,10 +371,10 @@ public class TemplateSynchronizationContext
         }
     }
 
-    public void SynchronizeValue(Type type, ref string? value, bool isList)
+    public void SynchronizeValue(Type targetType, ref string? value, bool isList, Type? currentEntityType)
     {
         string? val = value;
-        FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, type, ref val, allowRemoveToken: false, isList: isList);
+        FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, targetType, ref val, allowRemoveToken: false, isList: isList, currentEntityType);
         switch (result)
         {
             case FixTokenResult.Fix:

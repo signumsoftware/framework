@@ -39,8 +39,9 @@ public class TypeEntity : Entity
         return ClassName == type.Name && Namespace == type.Namespace;
     }
 
-    public static Func<Type, TypeEntity> ToTypeEntityFunc = t => { throw new InvalidOperationException("TypeEntity.ToTypeEntityFunc is not set"); };
-    public static Func<TypeEntity, Type> ToTypeFunc = t => { throw new InvalidOperationException("TypeEntity.ToTypeFunc is not set"); };
+    public static Func<Type, TypeEntity> TypeToEntityFunc = t => { throw new InvalidOperationException("TypeEntity.ToTypeEntityFunc is not set"); };
+    public static Func<TypeEntity, Type> EntityToTypeFunc = t => { throw new InvalidOperationException("TypeEntity.ToTypeFunc is not set"); };
+    public static Func<Lite<TypeEntity>, Type> LiteToTypeFunc = t => { throw new InvalidOperationException("TypeEntity.ToTypeLiteFunc is not set"); };
     public static Func<string, Type?> TryGetType = s => { throw new InvalidOperationException("TypeEntity.TryGetType is not set"); };
     public static Func<Type, string> GetCleanName = s => { throw new InvalidOperationException("TypeEntity.GetCleanName is not set"); };
 
@@ -53,10 +54,11 @@ public class TypeEntity : Entity
         AlreadySet = true;
     }
 
-    public static void SetTypeEntityCallbacks(Func<Type, TypeEntity> toTypeEntity, Func<TypeEntity, Type> toType)
+    public static void SetTypeEntityCallbacks(Func<Type, TypeEntity> typeToEntity, Func<TypeEntity, Type> entityToType, Func<Lite<TypeEntity>, Type> liteToType)
     {
-        TypeEntity.ToTypeEntityFunc = toTypeEntity;
-        TypeEntity.ToTypeFunc = toType;
+        TypeEntity.TypeToEntityFunc = typeToEntity;
+        TypeEntity.EntityToTypeFunc = entityToType;
+        TypeEntity.LiteToTypeFunc = liteToType;
     }
 }
 
@@ -64,11 +66,16 @@ public static class TypeEntityExtensions
 {
     public static Type ToType(this TypeEntity type)
     {
-        return TypeEntity.ToTypeFunc(type);
+        return TypeEntity.EntityToTypeFunc(type);
+    }
+
+    public static Type ToType(this Lite<TypeEntity> type)
+    {
+        return TypeEntity.LiteToTypeFunc(type);
     }
 
     public static TypeEntity ToTypeEntity(this Type type)
     {
-        return TypeEntity.ToTypeEntityFunc(type);
+        return TypeEntity.TypeToEntityFunc(type);
     }
 }

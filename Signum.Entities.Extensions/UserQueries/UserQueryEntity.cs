@@ -1,5 +1,6 @@
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
+using Signum.Entities.Chart;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
 using System.ComponentModel;
@@ -8,7 +9,7 @@ using System.Xml.Linq;
 namespace Signum.Entities.UserQueries;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class UserQueryEntity : Entity, IUserAssetEntity
+public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 {
     public UserQueryEntity() { }
     public UserQueryEntity(object queryName)
@@ -346,8 +347,10 @@ public class QueryFilterEmbedded : EmbeddedEntity
 
                 if (pi.Name == nameof(ValueString))
                 {
-                    var result = FilterValueConverter.TryParse(ValueString, Token!.Token.Type, Operation!.Value.IsList());
-                    return result is Result<object>.Error e ? e.ErrorText : null;
+                    var parent = this.TryGetParentEntity<ModifiableEntity>() as IHasEntityType;
+
+                    var result = FilterValueConverter.IsValidExpression(ValueString, Token!.Token.Type, Operation!.Value.IsList(), parent?.EntityType?.ToType());
+                    return result is Result<Type>.Error e ? e.ErrorText : null;
                 }
             }
         }

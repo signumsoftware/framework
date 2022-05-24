@@ -6,13 +6,8 @@ using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Chart;
 
-public interface IHasEntitytype
-{
-    Lite<TypeEntity>? EntityType { get; }
-}
-
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEntity
+public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEntity
 {
     public UserChartEntity() { }
     public UserChartEntity(object queryName)
@@ -70,7 +65,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEnt
     [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
     public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
-    [PreserveOrder]
+    [NotifyChildProperty, NotifyCollectionChanged, PreserveOrder]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
     
     [UniqueIndex]

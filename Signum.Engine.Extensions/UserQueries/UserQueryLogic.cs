@@ -232,6 +232,7 @@ public static class UserQueryLogic
 
     static SqlPreCommand? ProcessUserQuery(Replacements replacements, Table table, UserQueryEntity uq)
     {
+
         Console.Write(".");
         try
         {
@@ -310,13 +311,16 @@ public static class UserQueryLogic
                             }
                         }
                     }
+
                 }
+
+                var entityType = uq.EntityType == null ? null : TypeLogic.LiteToType.GetOrThrow(uq.EntityType);
 
                 foreach (var item in uq.Filters.Where(f => !f.IsGroup).ToList())
                 {
                     retry:
                     string? val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList()))
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
