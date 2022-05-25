@@ -49,7 +49,7 @@ public static class MusicLoader
 
         smashingPumpkins.Execute(BandOperation.Save);
 
-        new NoteWithDateEntity { CreationTime = DateTime.Now.AddHours(+8), CreationDate = DateTime.Now.AddHours(+8).ToDateOnly(), Text = "American alternative rock band", Target = smashingPumpkins }
+        new NoteWithDateEntity { ReleaseDate = DateTime.Now.AddHours(+8).ToDateOnly(), CreationTime = DateTime.Now.AddHours(+8), CreationDate = DateTime.Now.AddHours(+8).ToDateOnly(), Text = "American alternative rock band", Target = smashingPumpkins }
             .Execute(NoteWithDateOperation.Save);
 
         LabelEntity virgin = new LabelEntity { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }
@@ -79,7 +79,7 @@ public static class MusicLoader
             Label = virgin
         }.Execute(AlbumOperation.Save);
 
-        new NoteWithDateEntity { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), CreationDate = DateTime.Now.AddDays(-100).AddHours(-8).ToDateOnly(), Text = "The blue one with the angel", Target = mellon }
+        new NoteWithDateEntity { ReleaseDate = DateTime.Now.AddDays(-100).ToDateOnly(), CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), CreationDate = DateTime.Now.AddDays(-100).AddHours(-8).ToDateOnly(), Text = "The blue one with the angel", Target = mellon }
             .Execute(NoteWithDateOperation.Save);
 
         LabelEntity wea = new LabelEntity { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }
@@ -91,7 +91,7 @@ public static class MusicLoader
             Year = 2007,
             Author = smashingPumpkins,
             Songs = { new SongEmbedded { Name = "Tarantula" } },
-            BonusTrack = new SongEmbedded { Name = "1976" },
+            BonusTrack = new SongEmbedded { Name = "1976" ,ReleaseDate = DateTime.Now.ToDateOnly()},
             Label = wea,
         }.Execute(AlbumOperation.Save);
 
@@ -100,7 +100,7 @@ public static class MusicLoader
             Name = "American Gothic",
             Year = 2008,
             Author = smashingPumpkins,
-            Songs = { new SongEmbedded { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276) } },
+            Songs = { new SongEmbedded { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276), ReleaseDate = DateTime.Now.ToDateOnly() } },
             Label = wea,
         }.Execute(AlbumOperation.Save);
 
