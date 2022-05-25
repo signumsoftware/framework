@@ -178,7 +178,7 @@ public class SqlFunctionsTest
     [Fact]
     public void DayOfWeekContains()
     {
-        var dows  = new[] { DayOfWeek.Monday, DayOfWeek.Sunday };
+        var dows = new[] { DayOfWeek.Monday, DayOfWeek.Sunday };
 
         var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => dows.Contains(a.CreationTime.DayOfWeek)).Count();
         var dbCount = Database.Query<NoteWithDateEntity>().Where(a => dows.Contains(a.CreationTime.DayOfWeek)).Count();
@@ -192,11 +192,74 @@ public class SqlFunctionsTest
     [Fact]
     public void DayOfWeekGroupBy()
     {
+
+        var listx0 = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek)
+            .OrderBy(a => a.Key)
+            .Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+
+
+        var listx1 = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek)
+            .Select(gr => new { gr.Key, Count = gr.Count() }).OrderBy(a => a.Key).ThenByDescending(a => a.Count).ToList();
+
+
+        var listx2 = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek)
+            .OrderBy(a => a.Key).ThenByDescending(a => a.Sum(c=>c.Text.Length))
+          .Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+
+
+
+        var listx3 = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek)
+         .OrderBy(a => a.Sum(c => c.Text.Length)).ThenByDescending(a => a.Key)
+       .Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+
+
+
+        var listy0 = Database.Query<NoteWithDateEntity>().Where(a => a.ReleaseDate.HasValue)
+            .GroupBy(a => a.ReleaseDate!.Value.DayOfWeek)
+            .OrderBy(a => a.Key)
+            .Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+
+
+        var listy3 = Database.Query<NoteWithDateEntity>()
+            .Where(a => a.ReleaseDate.HasValue)
+            .GroupBy(a => a.ReleaseDate!.Value.DayOfWeek)
+             .OrderBy(a => a.Sum(c => c.Text.Length)).ThenByDescending(a => a.Key)
+            .Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+
+
+
+        var listy4 = Database.Query<NoteWithDateEntity>()
+    .Where(a => a.ReleaseDate.HasValue)
+    .GroupBy(a => a.ReleaseDate!.Value.DayOfWeek)
+     
+    .Select(gr => new { gr.Key, Count = gr.Count() })
+    .OrderBy(a => a.Count).ThenByDescending(a => a.Key)
+    .ToList();
+
+
+       var listy5 = Database.Query<AlbumEntity>()
+    .Where(a => a.BonusTrack!.ReleaseDate.HasValue)
+    .GroupBy(a => a.BonusTrack!.ReleaseDate!.Value.DayOfWeek)
+     
+    .Select(gr => new { gr.Key, Count = gr.Count() })
+    .OrderBy(a => a.Count).ThenByDescending(a => a.Key)
+    .ToList();
+
+        var listy6 = Database.Query<AlbumEntity>()
+//.Where(a => a.BonusTrack!.ReleaseDate.HasValue)
+.GroupBy(a => a.BonusTrack!.ReleaseDate!.Value.DayOfWeek)
+
+.Select(gr => new { gr.Key, Count = gr.Count() })
+.OrderBy(a => a.Count).ThenByDescending(a => a.Key)
+.ToList();
+
+
+
         var listA = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
         var listB = Database.Query<NoteWithDateEntity>().ToList().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() });
-        
+
         Assert.Equal(
-            listA.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","), 
+            listA.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","),
             listB.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","));
 
         var listA2 = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
@@ -283,7 +346,7 @@ public class SqlFunctionsTest
             return;
 
         var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
-        
+
         Assert.Equal(
             nodes.ToList().Select(a => a.ToString()).ToString(", "),
             nodes.Select(a => a.ToString().InSql()).ToList().ToString(", ")
