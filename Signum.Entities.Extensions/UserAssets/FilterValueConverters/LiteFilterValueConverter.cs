@@ -34,7 +34,7 @@ public class LiteFilterValueConverter : IFilterValueConverter
 
         string? error = Lite.TryParseLite(expression, out Lite<Entity>? lite);
         if (error == null)
-            return new Result<Type>.Success(lite!.EntityType);
+            return new Result<Type>.Success(Lite.Generate(lite!.EntityType));
         else
             return new Result<Type>.Error(error);
     }

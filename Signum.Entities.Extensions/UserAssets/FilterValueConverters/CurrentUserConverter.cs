@@ -126,6 +126,9 @@ static class SimpleMemberEvaluator
             }
         }
 
+        if (currentType.IsEntity())
+            currentType = Lite.Generate(currentType);
+
         return new Result<Type>.Success(currentType);
     }
 }
