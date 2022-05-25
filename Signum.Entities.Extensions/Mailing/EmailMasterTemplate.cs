@@ -55,7 +55,6 @@ public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         Name = element.Attribute("Name")!.Value;
-        Messages = new MList<EmailMasterTemplateMessageEmbedded>();
         Messages = element.Element("Messages")!.Elements("Message").Select(elem => new EmailMasterTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo")!.Value))
         {
             Text = elem.Value
