@@ -104,11 +104,15 @@ public static class FilePathLogic
 
             Transaction.PreRealCommit += data =>
             {
+                //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
                 var a = fp; //For ebuggin
-                task.Wait();
+                if (!AvoidWaitingForFileSave)
+                    task.Wait();
             };
         }
     }
+
+    public static bool AvoidWaitingForFileSave = false; //Alejandro xUnit deadlock
 
     public static byte[] GetByteArray(this FilePathEntity fp)
     {

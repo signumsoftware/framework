@@ -28,8 +28,11 @@ public static class FilePathEmbeddedLogic
                     var task = efp.SaveFileAsync();
                     Transaction.PreRealCommit += data =>
                     {
+                        //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
                         var a = efp; //For debugging
-                        Task.Run(async () => await task).Wait();
+
+                        if (!AvoidWaitingForFileSave)
+                            task.Wait();
                     };
                 }
             };
@@ -39,6 +42,9 @@ public static class FilePathEmbeddedLogic
             sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
         }
     }
+
+
+    public static bool AvoidWaitingForFileSave = false; //Alejandro xUnit deadlock
 
     public static FilePathEmbedded ToFilePathEmbedded(this FileContent fileContent, FileTypeSymbol fileType)
     {

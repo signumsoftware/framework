@@ -300,8 +300,6 @@ public class SongEmbedded : EmbeddedEntity
     public int Index { get; set; }
 
 
-    public DateOnly? ReleaseDate { get; set; }
-
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
 }
