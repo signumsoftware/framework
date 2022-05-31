@@ -28,6 +28,12 @@ public static class TypeLogic
         get { return Schema.Current.typeCachesLazy.Value.EntityToType; }
     }
 
+    public static Dictionary<Lite<TypeEntity>, Type> LiteToType
+    {
+        get { return Schema.Current.typeCachesLazy.Value.LiteToType; }
+    }
+
+
     public static void AssertStarted(SchemaBuilder sb)
     {
         sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!)));
@@ -69,7 +75,9 @@ public static class TypeLogic
 
             TypeEntity.SetTypeEntityCallbacks(
                 t => TypeToEntity.GetOrThrow(t),
-                t => EntityToType.GetOrThrow(t));
+                t => EntityToType.GetOrThrow(t),
+                t => LiteToType.GetOrThrow(t)
+                );
         }
     }
 
@@ -222,6 +230,7 @@ internal class TypeCaches
 {
     public readonly Dictionary<Type, TypeEntity> TypeToEntity;
     public readonly Dictionary<TypeEntity, Type> EntityToType;
+    public readonly Dictionary<Lite<TypeEntity>, Type> LiteToType;
     public readonly Dictionary<PrimaryKey, Type> IdToType;
     public readonly Dictionary<Type, PrimaryKey> TypeToId;
 
@@ -237,6 +246,7 @@ internal class TypeCaches
                 ).ToDictionary(a => a.type, a => a.typeEntity);
 
         EntityToType = TypeToEntity.Inverse();
+        LiteToType = TypeToEntity.ToDictionaryEx(kvp => kvp.Value.ToLite(), kvp => kvp.Key);
 
         TypeToId = TypeToEntity.SelectDictionary(k => k, v => v.Id);
         IdToType = TypeToId.Inverse();

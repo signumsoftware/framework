@@ -62,8 +62,18 @@ public class AggregateToken : QueryToken
 
     public override string NiceName()
     {
-        if (AggregateFunction == AggregateFunction.Count && Parent == null)
-            return AggregateFunction.NiceToString();
+        if (AggregateFunction == AggregateFunction.Count)
+        {
+            if (Parent == null)
+                return AggregateFunction.NiceToString();
+
+            return " ".Combine(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue(), Parent);
+        }
+
+        if (AggregateFunction == AggregateFunction.Sum)
+        {
+            return "Σ " + Parent;
+        }
 
         return " ".Combine(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue(), "of", Parent);
     }

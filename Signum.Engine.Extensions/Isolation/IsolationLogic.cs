@@ -92,7 +92,7 @@ public static class IsolationLogic
     {
         var result = EnumerableExtensions.JoinStrict(
             strategies.Keys,
-            Schema.Current.Tables.Keys.Where(a => !a.IsEnumEntityOrSymbol() && !typeof(SemiSymbol).IsAssignableFrom(a)),
+            Schema.Current.Tables.Keys.Where(a => !a.IsEnumEntityOrSymbol() && !typeof(SemiSymbol).IsAssignableFrom(a) && a != typeof(IsolationEntity)),
             a => a,
             a => a,
             (a, b) => 0);
@@ -107,9 +107,9 @@ public static class IsolationLogic
                     (extra.HasText() ? ("Remove something like:\r\n" + extra + "\r\n\r\n") : null) +
                     (lacking.HasText() ? ("Add something like:\r\n" + lacking + "\r\n\r\n") : null));
 
-        foreach (var item in strategies.Where(kvp => kvp.Value == IsolationStrategy.Isolated || kvp.Value == IsolationStrategy.Optional).Select(a => a.Key))
+        foreach (var item in strategies.Where(kvp => kvp.Value == IsolationStrategy.Isolated || kvp.Value == IsolationStrategy.Optional))
         {
-            giRegisterFilterQuery.GetInvoker(item)();
+            giRegisterFilterQuery.GetInvoker(item.Key)(item.Value);
         }
 
         Schema.Current.EntityEvents<IsolationEntity>().FilterQuery += () =>
@@ -128,18 +128,27 @@ public static class IsolationLogic
         return strategies[type];
     }
 
-    static readonly GenericInvoker<Action> giRegisterFilterQuery = new(() => Register_FilterQuery<Entity>());
-    static void Register_FilterQuery<T>() where T : Entity
+    static readonly GenericInvoker<Action<IsolationStrategy>> giRegisterFilterQuery = new(strategy => Register_FilterQuery<Entity>(strategy));
+    static void Register_FilterQuery<T>(IsolationStrategy stragegy) where T : Entity
     {
         Schema.Current.EntityEvents<T>().FilterQuery += () =>
         {
             if (ExecutionMode.InGlobal || IsolationEntity.Current == null)
                 return null;
 
-            return new FilterQueryResult<T>(
-                a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current),
-                a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current));
+            if (stragegy == IsolationStrategy.Isolated)
+                return new FilterQueryResult<T>(
+                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current),
+                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current));
+            
+            if(stragegy == IsolationStrategy.Optional)
+                return new FilterQueryResult<T>(
+                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current) || a.Mixin<IsolationMixin>().Isolation == null,
+                    a => a.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current) || a.Mixin<IsolationMixin>().Isolation == null);
+
+            throw new UnexpectedValueException(stragegy);
         };
+
 
         Schema.Current.EntityEvents<T>().PreUnsafeInsert += (IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery) =>
         {

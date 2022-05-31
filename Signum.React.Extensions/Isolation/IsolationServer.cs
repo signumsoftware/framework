@@ -16,7 +16,8 @@ public static class IsolationServer
 
         SchemaMap.GetColorProviders += GetMapColors;
 
-        SignumExceptionFilterAttribute.ApplyMixins += (ctx, e) => {
+        SignumExceptionFilterAttribute.ApplyMixins += (ctx, e) => 
+        {
             e.Mixin<IsolationMixin>().Isolation = IsolationEntity.Current ?? (Lite<IsolationEntity>?)ctx.HttpContext.Items[IsolationFilter.Signum_Isolation_Key];
         };
     }

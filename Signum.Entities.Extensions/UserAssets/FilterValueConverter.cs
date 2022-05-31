@@ -42,7 +42,7 @@ public static class FilterValueConverter
         {
             foreach (var fvc in converters)
             {
-                var r = fvc.TryToStringValue(value, type);
+                var r = fvc.TryGetExpression(value, type);
                 if (r != null)
                     return r;
             }
@@ -65,12 +65,12 @@ public static class FilterValueConverter
         return ((Result<object?>.Success)result).Value;
     }
 
-    public static Result<object?> TryParse(string? stringValue, Type type, bool isList)
+    public static Result<object?> TryParse(string? expression, Type type, bool isList)
     {
-        if (isList && stringValue != null && stringValue.Contains('|'))
+        if (isList && expression != null && expression.Contains('|'))
         {
             IList list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(type))!;
-            foreach (var item in stringValue.Split('|'))
+            foreach (var item in expression.Split('|'))
             {
                 var result = TryParseInternal(item.Trim(), type);
                 if (result is Result<object?>.Error e)
@@ -82,13 +82,13 @@ public static class FilterValueConverter
         }
         else
         {
-            return TryParseInternal(stringValue, type);
+            return TryParseInternal(expression, type);
         }
     }
 
-    private static Result<object?> TryParseInternal(string? stringValue, Type type)
+    private static Result<object?> TryParseInternal(string? expression, Type targetType)
     {
-        FilterType filterType = QueryUtils.GetFilterType(type);
+        FilterType filterType = QueryUtils.GetFilterType(targetType);
 
         List<IFilterValueConverter>? converters = SpecificConverters.TryGetC(filterType);
 
@@ -96,14 +96,14 @@ public static class FilterValueConverter
         {
             foreach (var fvc in converters)
             {
-                var res = fvc.TryParseValue(stringValue, type);
+                var res = fvc.TryParseExpression(expression, targetType);
                 if (res != null)
                 {
                     if (res is Result<object?>.Success s)
                     {
                         try
                         {
-                            var v = ReflectionTools.ChangeType(s.Value, type);
+                            var v = ReflectionTools.ChangeType(s.Value, targetType);
                             return new Result<object?>.Success(v);
                         }
                         catch (Exception e)
@@ -119,10 +119,66 @@ public static class FilterValueConverter
             }
         }
 
-        if (ReflectionTools.TryParse(stringValue, type, CultureInfo.InvariantCulture, out var result))
+        if (ReflectionTools.TryParse(expression, targetType, CultureInfo.InvariantCulture, out var result))
             return new Result<object?>.Success(result);
         else
             return new Result<object?>.Error("Invalid format");
+    }
+
+    public static Result<Type> IsValidExpression(string? expression, Type targetType, bool isList, Type? currentEntityType)
+    {
+        if (isList && expression != null && expression.Contains('|'))
+        {
+            List<Type> list = new List<Type>();
+            foreach (var item in expression.Split('|'))
+            {
+                var result = IsValidExpression(item.Trim(), targetType, currentEntityType);
+                if (result is Result<Type>.Error e)
+                    return new Result<Type>.Error(e.ErrorText);
+
+                list.Add(((Result<Type>.Success)result).Value);
+            }
+            return new Result<Type>.Success(list.Distinct().SingleEx());
+        }
+        else
+        {
+            return IsValidExpression(expression, targetType, currentEntityType);
+        }
+    }
+
+    private static Result<Type> IsValidExpression(string? expression, Type targetType, Type? currentEntityType)
+    {
+        FilterType filterType = QueryUtils.GetFilterType(targetType);
+
+        List<IFilterValueConverter>? converters = SpecificConverters.TryGetC(filterType);
+
+        if (converters != null)
+        {
+            foreach (var fvc in converters)
+            {
+                var res = fvc.IsValidExpression(expression, targetType, currentEntityType);
+                if (res != null)
+                {
+                    if (res is Result<Type>.Success s)
+                    {
+                        var v = ReflectionTools.CanChangeType(s.Value, targetType);
+                        if (v)
+                            return new Result<Type>.Success(s.Value);
+                        else
+                            return new Result<Type>.Error($"Impossible to convert from ${s.Value} to ${targetType}");
+
+                    }
+                    else
+                        return res;
+
+                }
+            }
+        }
+
+        if (ReflectionTools.TryParse(expression, targetType, CultureInfo.InvariantCulture, out var result))
+            return new Result<Type>.Success(result?.GetType() ?? targetType);
+        else
+            return new Result<Type>.Error("Invalid format");
     }
 
     public static FilterOperation ParseOperation(string operationString)
@@ -178,8 +234,9 @@ public static class FilterValueConverter
 
 public interface IFilterValueConverter
 {
-    Result<string?>? TryToStringValue(object? value, Type type);
-    Result<object?>? TryParseValue(string? value, Type type);
+    Result<string?>? TryGetExpression(object? value, Type targetType);
+    Result<object?>? TryParseExpression(string? expression, Type targetType);
+    Result<Type>? IsValidExpression(string? expression, Type targetType, Type? currentEntityType);
 }
 
 public abstract class Result<T>

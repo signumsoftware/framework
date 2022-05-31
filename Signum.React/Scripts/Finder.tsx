@@ -1106,8 +1106,7 @@ export class TokenCompleter {
 
   constructor(public queryDescription: QueryDescription)
   {
-    this.queryCache = TokenCompleter.globalCache[queryDescription.queryKey] ??
-      (TokenCompleter.globalCache[queryDescription.queryKey] = {});
+    this.queryCache = (TokenCompleter.globalCache[queryDescription.queryKey] ??= {});
   }
 
   requestFilter(fo: FilterOption, options: SubTokensOptions) {

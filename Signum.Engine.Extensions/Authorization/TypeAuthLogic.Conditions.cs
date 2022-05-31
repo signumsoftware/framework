@@ -149,7 +149,9 @@ public static partial class TypeAuthLogic
                 List<DebugData> debugInfo = Database.Query<T>().Where(a => notFound.Contains(a.Id))
                     .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionMode.InUserInterface)).ToList();
 
-                string details = debugInfo.ToString(a => "  '{0}'  because {1}".FormatWith(a.Lite, a.Error), "\r\n");
+                string details = 
+                    debugInfo.Count == 1 ? debugInfo.SingleEx().CanBeModified! : 
+                    debugInfo.ToString(a => "  {0}: {1}".FormatWith(a.Lite, a.CanBeModified), "\r\n");
 
                 throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(
                     typeAllowed.NiceToString(),
@@ -553,22 +555,6 @@ public static partial class TypeAuthLogic
             }
         }
 
-        public string? Error
-        {
-            get
-            {
-                foreach (var cond in Conditions.AsEnumerable().Reverse())
-                {
-                    if (cond.InGroup)
-                        return Requested <= cond.Allowed.Get(UserInterface) ? null :
-                            "is a {0} that belongs to condition {1} that is {2} (less than {3})".FormatWith(Lite.EntityType.TypeName(), cond.TypeCondition, cond.Allowed.Get(UserInterface), Requested);
-                }
-
-                return Requested <= Fallback.Get(UserInterface) ? null :
-                    "is a {0} but does not belong to any condition and the base value is {1} (less than {2})".FormatWith(Lite.EntityType.TypeName(), Fallback.Get(UserInterface), Requested);
-            }
-        }
-
         public string? CanBeModified
         {
             get
@@ -577,11 +563,17 @@ public static partial class TypeAuthLogic
                 {
                     if (cond.InGroup)
                         return Requested <= cond.Allowed.Get(UserInterface) ? null :
-                            AuthAdminMessage.CanNotBeModifiedBecauseIsA0.NiceToString(cond.TypeCondition.NiceToString());
+                            (Requested == TypeAllowedBasic.Read ?
+                            AuthAdminMessage.CanNotBeReadBecauseIsInCondition0:
+                            AuthAdminMessage.CanNotBeModifiedBecauseIsInCondition0)
+                            .NiceToString( "'" + cond.TypeCondition.NiceToString() + "'");
                 }
 
                 return Requested <= Fallback.Get(UserInterface) ? null :
-                    AuthAdminMessage.CanNotBeModifiedBecauseIsNotA0.NiceToString(Conditions.AsEnumerable().Reverse());
+                    (Requested == TypeAllowedBasic.Read ? 
+                    AuthAdminMessage.CanNotBeReadBecauseIsNotInCondition0 :
+                    AuthAdminMessage.CanNotBeModifiedBecauseIsNotInCondition0)
+                    .NiceToString(Conditions.Where(cond => Requested <= cond.Allowed.Get(UserInterface)).AsEnumerable().Reverse().CommaOr(a => "'" + a.TypeCondition.NiceToString() + "'"));
             }
         }
     }

@@ -2,8 +2,9 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities;
 
-[EntityKind(EntityKind.SystemString, EntityData.Master), InTypeScript(false), PrimaryKey(typeof(int), Identity = false, IdentityBehaviour = false)]
-[TicksColumn(false)]
+[EntityKind(EntityKind.SystemString, EntityData.Master), InTypeScript(false)]
+[PrimaryKey(typeof(int), Identity = false, IdentityBehaviour = false)]
+[TicksColumn(false), ToStringColumn(Name = "Name", Nullable = false)]
 public class EnumEntity<T> : Entity, IEquatable<EnumEntity<T>>
     where T : struct, Enum
 {

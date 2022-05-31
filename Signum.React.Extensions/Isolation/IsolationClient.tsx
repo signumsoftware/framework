@@ -13,7 +13,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   addContextHeaders.push(options => {
 
-    const overridenIsolation = getOverridenIsolation().current;
+    const overridenIsolation = getOverridenIsolation();
     if (overridenIsolation) {
       options.headers = {
         ...options.headers,
@@ -33,19 +33,19 @@ export function changeOverridenIsolation(isolation: Lite<IsolationEntity> | unde
   AppContext.resetUI();
 }
 
-export function getOverridenIsolation(): { current: Lite<IsolationEntity> | undefined, title: string } {
+export function getOverridenIsolation(): Lite<IsolationEntity> | undefined {
 
   const value = sessionStorage.getItem('Curr_Isolation');
   if (value == null)
-    return { current: undefined, title:  IsolationMessage.GlobalMode.niceToString() };
+    return undefined;
 
   const isolation = JSON.parse(value) as Lite<IsolationEntity>;
-  return { current: isolation, title: isolation.toStr! };
+  return isolation;
 }
 
-export function getIsolationWidget(ctx: WidgetContext<ModifiableEntity>): React.ReactElement<any> {
+export function getIsolationWidget(ctx: WidgetContext<ModifiableEntity>): React.ReactElement<any> | undefined {
 
-  return <IsolationWidget wc={ctx} />;
+  return IsolationEntity.tryTypeInfo() ? < IsolationWidget wc={ctx} /> : undefined;
 }
 
 

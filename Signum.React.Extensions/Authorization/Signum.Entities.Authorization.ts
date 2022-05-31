@@ -102,8 +102,10 @@ export module AuthAdminMessage {
   export const _0InUI = new MessageKey("AuthAdminMessage", "_0InUI");
   export const _0InDB = new MessageKey("AuthAdminMessage", "_0InDB");
   export const CanNotBeModified = new MessageKey("AuthAdminMessage", "CanNotBeModified");
-  export const CanNotBeModifiedBecauseIsA0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsA0");
-  export const CanNotBeModifiedBecauseIsNotA0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsNotA0");
+  export const CanNotBeModifiedBecauseIsInCondition0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsInCondition0");
+  export const CanNotBeModifiedBecauseIsNotInCondition0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsNotInCondition0");
+  export const CanNotBeReadBecauseIsInCondition0 = new MessageKey("AuthAdminMessage", "CanNotBeReadBecauseIsInCondition0");
+  export const CanNotBeReadBecauseIsNotInCondition0 = new MessageKey("AuthAdminMessage", "CanNotBeReadBecauseIsNotInCondition0");
   export const _0RulesFor1 = new MessageKey("AuthAdminMessage", "_0RulesFor1");
   export const TheUserStateMustBeDisabled = new MessageKey("AuthAdminMessage", "TheUserStateMustBeDisabled");
   export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships = new MessageKey("AuthAdminMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");

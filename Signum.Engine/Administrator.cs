@@ -184,7 +184,7 @@ public static class Administrator
         Connector.Current.SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
     }
 
-    internal static readonly ThreadVariable<Func<ObjectName, ObjectName>?> registeredViewNameReplacer = Statics.ThreadVariable<Func<ObjectName, ObjectName>?>("overrideDatabase");
+    internal static readonly AsyncThreadVariable<Func<ObjectName, ObjectName>?> registeredViewNameReplacer = Statics.ThreadVariable<Func<ObjectName, ObjectName>?>("overrideDatabase");
     public static IDisposable OverrideViewNameReplacer(Func<ObjectName, ObjectName> replacer)
     {
         registeredViewNameReplacer.Value += replacer;
@@ -304,7 +304,7 @@ public static class Administrator
         return identityBehaviourDisabled.Value?.Contains(table) == true;
     }
 
-    static ThreadVariable<ImmutableStack<ITable>?> identityBehaviourDisabled = Statics.ThreadVariable<ImmutableStack<ITable>?>("identityBehaviourOverride");
+    static AsyncThreadVariable<ImmutableStack<ITable>?> identityBehaviourDisabled = Statics.ThreadVariable<ImmutableStack<ITable>?>("identityBehaviourOverride");
     public static IDisposable DisableIdentity(ITable table, bool behaviourOnly = false)
     {
         if (!table.IdentityBehaviour)

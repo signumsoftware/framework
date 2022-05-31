@@ -17,10 +17,10 @@ export default function IsolationDropdown(props: {}) {
   if (!isolations)
     return null;
 
-  const { current, title } = IsolationClient.getOverridenIsolation();
+  const current = IsolationClient.getOverridenIsolation();
 
   return (
-    <NavDropdown id="isolationDropdown" data-current-isolation={current?.id} title={title} className="sf-isolation-dropdown" >
+    <NavDropdown id="isolationDropdown" data-current-isolation={current?.id} title={current?.toStr ?? IsolationMessage.GlobalMode.niceToString()} className="sf-isolation-dropdown" >
       <NavDropdown.Item data-isolation={name} disabled={is(undefined, current)} onClick={() => handleSelect(undefined)}>
         {IsolationMessage.GlobalMode.niceToString()}
       </NavDropdown.Item>

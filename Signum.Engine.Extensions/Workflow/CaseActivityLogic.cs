@@ -490,7 +490,7 @@ public static class CaseActivityLogic
         return new Disposable(() => AvoidNotifyInProgressVariable.Value = old);
     }
 
-    static ThreadVariable<bool> AvoidNotifyInProgressVariable = Statics.ThreadVariable<bool>("avoidNotifyInProgress");
+    static AsyncThreadVariable<bool> AvoidNotifyInProgressVariable = Statics.ThreadVariable<bool>("avoidNotifyInProgress");
 
     public static int NotifyInProgress(this ICaseMainEntity mainEntity)
     {

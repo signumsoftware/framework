@@ -6,7 +6,9 @@ public class CurrentUserConverter : IFilterValueConverter
 {
     static string CurrentUserKey = "[CurrentUser]";
 
-    public Result<string?>? TryToStringValue(object? value, Type type)
+    public static Func<UserEntity> GetCurrentUserEntity = ()=> throw new NotImplementedException("CurrentUserConverter.GetCurrentUserEntity")!;
+
+    public Result<string?>? TryGetExpression(object? value, Type targetType)
     {
         if (value is Lite<UserEntity> lu && lu.Is(UserEntity.Current))
         {
@@ -16,21 +18,39 @@ public class CurrentUserConverter : IFilterValueConverter
         return null;
     }
 
-    public Result<object?>? TryParseValue(string? value, Type type)
+    public Result<object?>? TryParseExpression(string? expression, Type targetType)
     {
-        if (value.HasText() && value.StartsWith(CurrentUserKey))
+        if (expression.HasText() && expression.StartsWith(CurrentUserKey))
         {
-            string after = value.Substring(CurrentUserKey.Length).Trim();
+            string after = expression.Substring(CurrentUserKey.Length).Trim();
 
             string[] parts = after.SplitNoEmpty('.');
 
-            return SimpleMemberEvaluator.EvaluateExpression(UserEntity.Current, parts);
+            if (parts.Length == 0)
+                return new Result<object?>.Success(UserEntity.Current);
+
+            return SimpleMemberEvaluator.EvaluateExpression(GetCurrentUserEntity(), parts);
         }
 
         return null;
     }
 
-  
+    public Result<Type>? IsValidExpression(string? expression, Type targetType, Type? currentEntityType)
+    {
+        if (expression.HasText() && expression.StartsWith(CurrentUserKey))
+        {
+            string after = expression.Substring(CurrentUserKey.Length).Trim();
+
+            string[] parts = after.SplitNoEmpty('.');
+
+            if (parts.Length == 0)
+                return new Result<Type>.Success(typeof(Lite<UserEntity>));
+
+            return SimpleMemberEvaluator.CheckExpression(typeof(UserEntity), parts);
+        }
+
+        return null;
+    }
 }
 
 static class SimpleMemberEvaluator
@@ -76,6 +96,40 @@ static class SimpleMemberEvaluator
             result = e.ToLite();
 
         return new Result<object?>.Success(result);
+    }
+
+    internal static Result<Type> CheckExpression(Type type, string[] parts)
+    {
+        var currentType = type;
+
+        foreach (var part in parts)
+        {
+            if (part.StartsWith("[") && part.EndsWith("]"))
+            {
+                var mixinName = part.Between("[", "]");
+
+                var mixin = MixinDeclarations.GetMixinDeclarations(currentType).SingleOrDefault(a => a.Name == mixinName);
+
+                if (mixin == null)
+                    return new Result<Type>.Error("Mixin {0} not found on {1}".FormatWith(mixinName, currentType));
+
+                currentType = mixin;
+            }
+            else
+            {
+                if (currentType.GetProperty(part, BindingFlags.Instance | BindingFlags.Public) is { } prop)
+                    currentType = prop.PropertyType;
+                else if (currentType.GetMethod(part, BindingFlags.Instance | BindingFlags.Public) is { } method)
+                    currentType = method.ReturnType;
+                else
+                    return new Result<Type>.Error("Property or Method {0} not found on {1}".FormatWith(part, type.FullName));
+            }
+        }
+
+        if (currentType.IsEntity())
+            currentType = Lite.Generate(currentType);
+
+        return new Result<Type>.Success(currentType);
     }
 }
 

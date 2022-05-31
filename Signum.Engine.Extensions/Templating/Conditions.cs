@@ -222,7 +222,7 @@ public class ConditionCompare : ConditionBase
         this.ValueProvider!.Synchronize(sc, remainingText);
 
         if (Operation != null)
-            sc.SynchronizeValue(this.ValueProvider!.Type!, ref Value, Operation.Value.IsList());
+            sc.SynchronizeValue(this.ValueProvider!.Type!, ref Value, Operation.Value.IsList(), null);
     }
 
     public override void Declare(ScopedDictionary<string, ValueProviderBase> variables)

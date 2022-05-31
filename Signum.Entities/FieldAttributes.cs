@@ -394,6 +394,20 @@ public sealed class TicksColumnAttribute : DbTypeAttribute
     }
 }
 
+[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
+public sealed class ToStringColumnAttribute : DbTypeAttribute
+{
+    public string? Name { get; set; }
+
+    public Type? Type { get; set; }
+
+    public bool Nullable { get; set; }
+
+    public ToStringColumnAttribute()
+    {
+    }
+}
+
 /// <summary>
 /// Activates SQL Server 2016 Temporal Tables
 /// </summary>

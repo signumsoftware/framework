@@ -152,11 +152,17 @@ public enum AuthAdminMessage
     [Description("Can not be modified")]
     CanNotBeModified,
 
-    [Description("Can not be modified because is a {0}")]
-    CanNotBeModifiedBecauseIsA0,
+    [Description("Can not be modified because is in condition {0}")]
+    CanNotBeModifiedBecauseIsInCondition0,
 
-    [Description("Can not be modified because is not a {0}")]
-    CanNotBeModifiedBecauseIsNotA0,
+    [Description("Can not be modified because is not in condition {0}")]
+    CanNotBeModifiedBecauseIsNotInCondition0,
+
+    [Description("Can not be read because is in condition {0}")]
+    CanNotBeReadBecauseIsInCondition0,
+
+    [Description("Can not be read because is not in condition {0}")]
+    CanNotBeReadBecauseIsNotInCondition0,
 
     [Description("{0} rules for {1}")]
     _0RulesFor1,

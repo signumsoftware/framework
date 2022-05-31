@@ -142,6 +142,11 @@ public interface IUserAssetEntity : IEntity
     void FromXml(XElement element, IFromXmlContext ctx);
 }
 
+public interface IHasEntityType
+{
+    Lite<TypeEntity>? EntityType { get; }
+}
+
 public static class FromXmlExtensions
 {
     public static void Synchronize<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement> syncAction)
