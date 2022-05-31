@@ -320,7 +320,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     const margin = Math.min(50, rect.width / 2);
 
     const width = rect.width;
-    const offsetX = dragEvent.pageX - rect.left;
+    const offsetX = dragEvent.x - rect.left;
 
     if (offsetX < margin)
       return 0;
@@ -336,7 +336,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     var margin = Math.min(50, rect.height / 2);
 
     const height = rect.height;
-    const offsetY = dragEvent.pageY - rect.top;
+    const offsetY = dragEvent.y - rect.top;
 
     if (offsetY < margin)
       return 0;
