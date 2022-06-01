@@ -118,10 +118,7 @@ public static class ExcelExtensions
     {
         var cellValue = theCell.GetFirstChild<CellValue>();
 
-        if (cellValue == null)
-            return null;
-
-        string value = cellValue.InnerText;
+        string value = cellValue?.InnerText ?? theCell.InnerText;
 
         // If the cell represents an integer number, you're done. 
         // For dates, this code returns the serialized value that 
