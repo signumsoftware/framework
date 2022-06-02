@@ -60,7 +60,7 @@ export function signIn(ctx: LoginContext) {
     .catch(e => {
       ctx.setLoading(undefined);
 
-      if (e && e.name == "ClientAuthError" && e.errorCode == "user_cancelled")
+      if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
         return;
 
       if (e instanceof msal.AuthError)
@@ -86,13 +86,14 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
     account: ai,
   };
 
-  return adquireTokenSilentOrPopup(userRequest)
+  return msalClient.acquireTokenSilent(userRequest)
     .then(res => {
       const rawIdToken = res.idToken;
 
       return AuthClient.API.loginWithAzureAD(rawIdToken, false);
     }, e => {
-      if (e instanceof msal.InteractionRequiredAuthError || e instanceof msal.BrowserAuthError && e.errorCode == "user_login_error")
+      if (e instanceof msal.InteractionRequiredAuthError ||
+        e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode =="user_cancelled"))
         return Promise.resolve(undefined);
 
       console.log(e);
