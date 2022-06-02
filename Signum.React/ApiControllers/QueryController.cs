@@ -103,7 +103,7 @@ public class QueryController : ControllerBase
     [HttpPost("api/query/executeQuery"), ProfilerActionSplitter]
     public async Task<ResultTable> ExecuteQuery([Required, FromBody]QueryRequestTS request, CancellationToken token)
     {
-        var result = await QueryLogic.Queries.ExecuteQueryAsync(request.ToQueryRequest(SignumServer.JsonSerializerOptions), token);
+        var result = await QueryLogic.Queries.ExecuteQueryAsync(request.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer), token);
         return result;
     }
 
