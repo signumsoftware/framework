@@ -20,15 +20,41 @@ public class SqlMigrationRunner
         {
             List<MigrationInfo> list = ReadMigrationsDirectory();
 
-            SetExecuted(list);
+            if (!autoRun && !Connector.Current.HasTables() && list.Count == 0)
+            {
+                if (!SafeConsole.Ask("Create initial migration?"))
+                    return;
 
-            if (!Prompt(list, autoRun) || autoRun)
-                return;
+                CreateInitialMigration();
+            }
+            else
+            {
+                SetExecuted(list);
+
+                if (!Prompt(list, autoRun) || autoRun)
+                    return;
+            }
         }
+    }
+
+    public static void CreateInitialMigration()
+    {
+        var script = Schema.Current.GenerationScipt(databaseNameReplacement: DatabaseNameReplacement)!;
+
+        string version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
+
+        string comment = "Initial Migration";
+
+        string fileName = version + "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment) + ".sql";
+
+        File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString(), Encoding.UTF8);
     }
 
     private static void SetExecuted(List<MigrationInfo> migrations)
     {
+        if (!Connector.Current.HasTables())
+            return;
+
         MigrationLogic.EnsureMigrationTable<SqlMigrationEntity>();
 
         var first = migrations.FirstOrDefault();
@@ -60,15 +86,30 @@ public class SqlMigrationRunner
         migrations.Sort(a => a.Version);
     }
 
-    public static List<MigrationInfo> ReadMigrationsDirectory()
+    public static bool MigrationDirectoryIsEmpty()
     {
-        Console.WriteLine();
-        SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Reading migrations from: " + MigrationsDirectory);
+        return !Directory.Exists(MigrationsDirectory) || Directory.EnumerateFiles(MigrationsDirectory).IsEmpty();
+    }
 
-        if (!Directory.Exists(MigrationsDirectory))
+    public static List<MigrationInfo> ReadMigrationsDirectory(bool silent = false)
+    {
+        if (silent)
         {
-            Directory.CreateDirectory(MigrationsDirectory);
-            SafeConsole.WriteLineColor(ConsoleColor.White, "Directory " + MigrationsDirectory + " auto-generated...");
+            if (!Directory.Exists(MigrationsDirectory))
+                return new List<MigrationInfo>();
+        }
+        else
+        {
+            if (!Directory.Exists(MigrationsDirectory))
+            {
+                Directory.CreateDirectory(MigrationsDirectory);
+                SafeConsole.WriteLineColor(ConsoleColor.White, "Directory " + MigrationsDirectory + " auto-generated...");
+            }
+            else
+            {
+                Console.WriteLine();
+                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Reading migrations from: " + MigrationsDirectory);
+            }
         }
 
         Regex regex = new Regex(@"(?<version>\d{4}\.\d{2}\.\d{2}\-\d{2}\.\d{2}\.\d{2})(_(?<comment>.+))?\.sql");
@@ -210,6 +251,8 @@ public class SqlMigrationRunner
             var script = text.Replace(DatabaseNameReplacement, databaseName);
 
             SqlPreCommandExtensions.ExecuteScript(title, text);
+
+            MigrationLogic.EnsureMigrationTable<SqlMigrationEntity>();
 
             new SqlMigrationEntity
             {

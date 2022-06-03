@@ -1129,6 +1129,11 @@ internal class DbExpressionNominator : DbExpressionVisitor
             return base.Visit(u.Operand); //Could make sense to simulate a similar convert (nullify / unnullify)
         }
 
+        if(this.isFullNominate && u.Operand is ToDayOfWeekExpression && (u.Type.UnNullify() == typeof(int) || u.Type.UnNullify() == typeof(DayOfWeek)))
+        {
+            return base.Visit(u.Operand); //Could make sense to simulate a similar convert (nullify / unnullify)
+        }
+
         if (u.NodeType == ExpressionType.Convert && u.Type.IsNullable() && u.Type.UnNullify() == u.Operand.Type && u.Operand.NodeType == ExpressionType.Conditional)
         {
             ConditionalExpression ce = (ConditionalExpression)u.Operand;

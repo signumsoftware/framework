@@ -107,11 +107,11 @@ public class ToolbarElementEmbedded : EmbeddedEntity
             string.IsNullOrEmpty(IconColor) ? null! :  new XAttribute("IconColor", IconColor),
             OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null!,
             AutoRefreshPeriod == null ? null! : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
-            this.Content == null ? null! : new XAttribute("Content",
-            this.Content is Lite<QueryEntity> ?  ctx.QueryToName((Lite<QueryEntity>)this.Content) :
-            this.Content is Lite<PermissionSymbol> ?  ctx.PermissionToName((Lite<PermissionSymbol>)this.Content) :
-            (object)ctx.Include((Lite<IUserAssetEntity>)this.Content)),
-            string.IsNullOrEmpty(this.Url) ? null! : new XAttribute("Url", this.Url));
+            Content == null ? null! : new XAttribute("Content",
+            Content is Lite<QueryEntity> query ?  ctx.QueryToName(query) :
+            Content is Lite<PermissionSymbol> perm ?  ctx.PermissionToName(perm) :
+            (object)ctx.Include((Lite<IUserAssetEntity>)Content)),
+            string.IsNullOrEmpty(Url) ? null! : new XAttribute("Url", Url));
     }
 
     internal void FromXml(XElement x, IFromXmlContext ctx)
@@ -144,17 +144,17 @@ public class ToolbarElementEmbedded : EmbeddedEntity
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if(this.Type == ToolbarElementType.Item || this.Type == ToolbarElementType.Header)
+        if(Type == ToolbarElementType.Item || Type == ToolbarElementType.Header)
         {
-            if (pi.Name == nameof(this.Label))
+            if (pi.Name == nameof(Label))
             {
-                if (string.IsNullOrEmpty(this.Label) && this.Content == null)
+                if (string.IsNullOrEmpty(Label) && Content == null)
                     return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());
             }
 
-            if(pi.Name == nameof(this.Url))
+            if(pi.Name == nameof(Url))
             { 
-                if (string.IsNullOrEmpty(this.Url) && this.Content == null && this.Type == ToolbarElementType.Item)
+                if (string.IsNullOrEmpty(Url) && Content == null && Type == ToolbarElementType.Item)
                     return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());
             }
         }

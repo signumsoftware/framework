@@ -931,9 +931,9 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
 
         var cmd = replacements.WithReplacedDatabaseName().Using(_ => results.Select((a, i) =>
             SqlPreCommand.Combine(Spacing.Simple,
-            !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? DisconnectUsers(a.name!/*CSBUG*/, "SPID" + i) : null,
-            !a.snapshot_isolation_state ? sqlBuilder.SetSnapshotIsolation(a.name!/*CSBUG*/, true) : null,
-            !a.is_read_committed_snapshot_on ? sqlBuilder.MakeSnapshotIsolationDefault(a.name!/*CSBUG*/, true) : null)).Combine(Spacing.Double));
+            !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? DisconnectUsers(a.name, "SPID" + i) : null,
+            !a.snapshot_isolation_state ? sqlBuilder.SetSnapshotIsolation(a.name, true) : null,
+            !a.is_read_committed_snapshot_on ? sqlBuilder.MakeSnapshotIsolationDefault(a.name, true) : null)).Combine(Spacing.Double));
 
         if (cmd == null)
             return null;

@@ -26,11 +26,18 @@ public static class SchemaGenerator
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
         Schema s = Schema.Current;
+
         List<ITable> tables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToList();
 
         SqlPreCommand? createTables = tables.Select(t => sqlBuilder.CreateTableSql(t)).Combine(Spacing.Double)?.PlainSqlCommand();
 
+        if (createTables != null)
+            createTables.GoAfter = true;
+
         SqlPreCommand? foreignKeys = tables.Select(sqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double)?.PlainSqlCommand();
+
+        if (foreignKeys != null)
+            foreignKeys.GoAfter = true;
 
         SqlPreCommand? indices = tables.Select(t =>
         {
@@ -45,17 +52,24 @@ public static class SchemaGenerator
 
         }).NotNull().Combine(Spacing.Double)?.PlainSqlCommand();
 
+        if (indices != null)
+            indices.GoAfter = true;
 
         return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
     }
 
     public static SqlPreCommand? InsertEnumValuesScript()
     {
-        return (from t in Schema.Current.Tables.Values
-                let enumType = EnumEntity.Extract(t.Type)
-                where enumType != null
-                select EnumEntity.GetEntities(enumType).Select((e, i) => t.InsertSqlSync(e, suffix: t.Name.Name + i)).Combine(Spacing.Simple)
+        var result = (from t in Schema.Current.Tables.Values
+                      let enumType = EnumEntity.Extract(t.Type)
+                      where enumType != null
+                      select EnumEntity.GetEntities(enumType).Select((e, i) => t.InsertSqlSync(e, suffix: t.Name.Name + i)).Combine(Spacing.Simple)
                 ).Combine(Spacing.Double)?.PlainSqlCommand();
+
+        if (result != null)
+            result.GoAfter = true;
+
+        return result;
     }
 
     public static SqlPreCommand? PostgresExtensions()
@@ -90,7 +104,6 @@ public static class SchemaGenerator
         if (!connector.AllowsSetSnapshotIsolation)
             return null;
 
-
         var list = connector.Schema.DatabaseNames().Select(a => a?.Name).ToList();
 
         if (list.Contains(null))
@@ -112,6 +125,7 @@ public static class SchemaGenerator
             ).Combine(Spacing.Double);
 
         return cmd;
+
     }
 
     private static bool SnapshotIsolationEnabled(DatabaseName dbName)

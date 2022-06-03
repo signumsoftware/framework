@@ -9,8 +9,12 @@ namespace Signum.Entities.Chart;
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEntity
 {
-    public UserChartEntity() { }
-    public UserChartEntity(object queryName)
+    public UserChartEntity()
+    {
+        this.RebindEvents();
+    }
+
+    public UserChartEntity(object queryName) : this()
     {
         this.queryName = queryName;
     }
@@ -25,7 +29,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     [Ignore]
     internal object queryName;
 
-    
+
     public QueryEntity Query { get; set; }
 
     public Lite<TypeEntity>? EntityType { get; set; }
@@ -67,7 +71,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
 
     [NotifyChildProperty, NotifyCollectionChanged, PreserveOrder]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
-    
+
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
@@ -94,6 +98,8 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
 
     protected override void PostRetrieving(PostRetrievingContext ctx)
     {
+        base.PostRetrieving(ctx);
+
         try
         {
             this.GetChartScript().SynchronizeColumns(this, ctx);
@@ -152,7 +158,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     {
         Columns.ForEach(c =>
         {
-            if(c.Token == null)
+            if (c.Token == null)
             {
                 c.OrderByIndex = null;
                 c.OrderByType = null;

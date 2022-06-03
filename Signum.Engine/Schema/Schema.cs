@@ -459,14 +459,17 @@ public class Schema : IImplementationsFinder
         return ViewBuilder.NewView(viewType);
     }
 
+   
+
     public event Func<SqlPreCommand?> Generating;
-    internal SqlPreCommand? GenerationScipt()
+    public SqlPreCommand? GenerationScipt(string? databaseNameReplacement = null)
     {
         OnBeforeDatabaseAccess();
 
         if (Generating == null)
             return null;
 
+        using (databaseNameReplacement == null ? null : ObjectName.OverrideOptions(new ObjectNameOptions { DatabaseNameReplacement = databaseNameReplacement }))
         using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
         using (ExecutionMode.Global())
         {

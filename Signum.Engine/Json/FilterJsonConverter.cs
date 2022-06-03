@@ -278,7 +278,6 @@ public class QueryValueRequestTS
 
 public class QueryRequestTS
 {
-    public string? queryUrl;
     public string queryKey;
     public bool groupResults;
     public List<FilterTS> filters;
@@ -292,7 +291,6 @@ public class QueryRequestTS
         return new QueryRequestTS
         {
             queryKey = QueryUtils.GetKey(qr.QueryName),
-            queryUrl = qr.QueryUrl,
             groupResults = qr.GroupResults,
             columns = qr.Columns.Select(c => new ColumnTS { token = c.Token.FullKey(), displayName = c.DisplayName }).ToList(),
             filters = qr.Filters.Select(f => FilterTS.FromFilter(f)).ToList(),
@@ -302,14 +300,14 @@ public class QueryRequestTS
         };
     }
 
-    public QueryRequest ToQueryRequest(JsonSerializerOptions jsonSerializerOptions)
+    public QueryRequest ToQueryRequest(JsonSerializerOptions jsonSerializerOptions, string referrerUrl)
     {
         var qn = QueryLogic.ToQueryName(this.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
 
         return new QueryRequest
         {
-            QueryUrl = queryUrl,
+            QueryUrl = referrerUrl,
             QueryName = qn,
             GroupResults = groupResults,
             Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults, jsonSerializerOptions)).ToList(),

@@ -24,7 +24,7 @@ internal static class TranslatorBuilder
 
         Scope scope = new Scope(
             alias :proj.Select.Alias,
-            positions: proj.Select.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name!, p => p.i) /*CSBUG*/
+            positions: proj.Select.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i)
         );
 
         Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope);
@@ -55,7 +55,7 @@ internal static class TranslatorBuilder
 
         Scope scope = new Scope(
             alias: proj.Select.Alias,
-            positions: proj.Select.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name!, p => p.i) /*CSBUG*/
+            positions: proj.Select.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i)
         );
 
 
