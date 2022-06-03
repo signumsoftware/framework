@@ -857,7 +857,7 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
         }
         catch (Exception e)
         {
-            return new SqlPreCommandSimple("-- Exception synchronizing enums: " + e.Message);
+            return new SqlPreCommandSimple("-- Exception synchronizing enums\r\n{0}".FormatWith(e.Message.Indent(2, '-')));
         }
     }
 
