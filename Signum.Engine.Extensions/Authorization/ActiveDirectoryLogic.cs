@@ -95,14 +95,17 @@ public static class ActiveDirectoryLogic
 
                 if (user != null)
                 {
-                    ada.UpdateUser(user, acuCtx);
+                    if (config.AutoUpdateUsers)
+                        ada.UpdateUser(user, acuCtx);
 
                     return tr.Commit(user);
                 }
+                else
+                {
+                    var result = ada.OnCreateUser(acuCtx);
 
-                var result = ada.OnCreateUser(acuCtx);
-
-                return tr.Commit(result);
+                    return tr.Commit(result);
+                }
             }
         }
     }

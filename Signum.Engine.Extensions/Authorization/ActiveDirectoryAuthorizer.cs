@@ -265,18 +265,21 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
 
     public virtual void UpdateUser(UserEntity user, IAutoCreateUserContext ctx)
     {
-        if (this.GetConfig().AutoUpdateUsers == false)
-            return;
-
-        UpdateUserInternal(user, ctx);
-
-        if (GraphExplorer.IsGraphModified(user))
+        using (var tr = new Transaction())
         {
-            using (AuthLogic.Disable())
-            using (OperationLogic.AllowSave<UserEntity>())
+            UpdateUserInternal(user, ctx);
+
+            if (GraphExplorer.IsGraphModified(user))
             {
-                user.Save();
+                using (AuthLogic.Disable())
+                using (OperationLogic.AllowSave<UserEntity>())
+                {
+                    user.Save();
+                }
             }
+
+            tr.Commit();
         }
+
     }
 }
