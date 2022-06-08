@@ -1049,7 +1049,12 @@ public static class CaseActivityLogic
                 if (@case.CaseActivities().Any(a => a.State == CaseActivityState.Pending))
                     return;
 
-                @case.FinishDate = ca!.DoneDate!.Value;
+                using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = null }))
+                {
+                    SaveEntity(ca!.Case.MainEntity);
+                }
+
+                @case.FinishDate = ca.DoneDate!.Value;
                 @case.Save();
 
                 if (@case.ParentCase != null)

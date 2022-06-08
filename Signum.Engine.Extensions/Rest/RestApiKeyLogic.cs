@@ -17,6 +17,7 @@ public class RestApiKeyLogic
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             sb.Include<RestApiKeyEntity>()
+                .WithSave(RestApiKeyOperation.Save)
                 .WithDelete(RestApiKeyOperation.Delete)
                 .WithQuery(() => e => new
                 {
@@ -25,13 +26,6 @@ public class RestApiKeyLogic
                     e.User,
                     e.ApiKey
                 });
-
-            new Graph<RestApiKeyEntity>.Execute(RestApiKeyOperation.Save)
-            {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (e, _) => { },
-            }.Register();
 
             RestApiKeyCache = sb.GlobalLazy(() =>
             {

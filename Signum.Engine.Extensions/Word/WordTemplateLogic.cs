@@ -507,7 +507,7 @@ public static class WordTemplateLogic
         }
         catch (Exception e)
         {
-            return new SqlPreCommandSimple("-- Exception in {0}: \r\n{1}".FormatWith(template.BaseToString(), e.Message.Indent(2, '-')));
+            return new SqlPreCommandSimple("-- Exception on {0}\r\n{1}".FormatWith(template.BaseToString(), e.Message.Indent(2, '-')));
         }
     }
 
