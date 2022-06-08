@@ -7,7 +7,7 @@ import { is } from '@framework/Signum.Entities'
 import * as React from 'react'
 import { Nav } from 'react-bootstrap'
 import { PermissionSymbol } from '../Authorization/Signum.Entities.Authorization'
-import { ToolbarNavItem } from '../Toolbar/Templates/ToolbarRenderer'
+import { ToolbarNavItem } from '../Toolbar/Renderers/ToolbarRenderer'
 import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import { CaseActivityQuery, WorkflowEntity, WorkflowMainEntityStrategy, WorkflowPermission } from '../Workflow/Signum.Entities.Workflow'
 import * as WorkflowClient from '../Workflow/WorkflowClient'
@@ -60,37 +60,37 @@ function WorkflowDropdownImp() {
         <ToolbarNavItem title={CaseActivityQuery.Inbox.niceName()}
           active={location.href.contains("/find/Inbox")}
           onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(Options.getInboxUrl()!, e); }}
-        icon={ToolbarConfig.coloredIcon("inbox", "steelblue")} />
+          icon={ToolbarConfig.coloredIcon("inbox", "steelblue")} />
       }
 
       {starts.length > 0 &&
         <>
-        <ToolbarNavItem 
-          title={WorkflowEntity.nicePluralName()}
-          onClick={() => setShow(!show)}
-          icon={
-            <div style={{ display: 'inline-block', position: 'relative' }}>
-              <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
-              <div className="nav-icon-with-arrow">
-                {ToolbarConfig.coloredIcon("random", "mediumvioletred")}
+          <ToolbarNavItem
+            title={WorkflowEntity.nicePluralName()}
+            onClick={() => setShow(!show)}
+            icon={
+              <div style={{ display: 'inline-block', position: 'relative' }}>
+                <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
+                <div className="nav-icon-with-arrow">
+                  {ToolbarConfig.coloredIcon("random", "mediumvioletred")}
+                </div>
               </div>
-            </div>
-          }  />
+            } />
 
-        <div style={{ display: show ? "block" : "none" }}>
+          <div style={{ display: show ? "block" : "none" }}>
 
-          <ToolbarNavItem title={CaseActivityQuery.Inbox.niceName()}
-            active={location.href.contains("/find/Inbox")}
-            onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(Options.getInboxUrl()!, e); }}
-            icon={ToolbarConfig.coloredIcon("inbox", "steelblue")}/>
+            <ToolbarNavItem title={CaseActivityQuery.Inbox.niceName()}
+              active={location.href.contains("/find/Inbox")}
+              onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(Options.getInboxUrl()!, e); }}
+              icon={ToolbarConfig.coloredIcon("inbox", "steelblue")} />
 
-          {getStarts(starts).flatMap((kvp, i) => kvp.elements.map((val, j) =>
-            <ToolbarNavItem key={ i + "-" + j} title={val.workflow.toStr + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
-              onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`, e); }}
-              active={false}
-              icon={ToolbarConfig.coloredIcon("plus-square", "seagreen")}
-            />)
-          )}
+            {getStarts(starts).flatMap((kvp, i) => kvp.elements.map((val, j) =>
+              <ToolbarNavItem key={i + "-" + j} title={val.workflow.toStr + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
+                onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`, e); }}
+                active={false}
+                icon={ToolbarConfig.coloredIcon("plus-square", "seagreen")}
+              />)
+            )}
           </div>
         </>
       }
