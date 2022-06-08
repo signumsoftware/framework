@@ -6,7 +6,7 @@ class Upgrade_20220601_Dockerfile : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ForeachCodeFile(@"Souwhtind.React\Dockerfile", file =>
+        uctx.ChangeCodeFile(@"Southwind.React\Dockerfile", file =>
         {
             file.Replace("https://deb.nodesource.com/setup_15.x", "https://deb.nodesource.com/setup_16.x");
         });
