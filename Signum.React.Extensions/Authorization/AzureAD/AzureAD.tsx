@@ -4,6 +4,7 @@ import * as AppContext from "@framework/AppContext";
 import * as AuthClient from "../AuthClient";
 import { LoginContext } from "../Login/LoginPage";
 import { ExternalServiceError } from "../../../Signum.React/Scripts/Services";
+import { LoginAuthMessage } from "../Signum.Entities.Authorization";
 
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
@@ -59,9 +60,11 @@ export function signIn(ctx: LoginContext) {
     })
     .catch(e => {
       ctx.setLoading(undefined);
-
       if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
         return;
+
+      if (e instanceof msal.BrowserAuthError && (e.errorCode == "interaction_in_progress"))
+        throw new Error(LoginAuthMessage.LoginPopupAlreadyOpenedInAnotherWindow.niceToString())
 
       if (e instanceof msal.AuthError)
         throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);

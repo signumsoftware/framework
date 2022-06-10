@@ -93,6 +93,9 @@ public enum LoginAuthMessage
 
     [Description("Login with {0}")]
     LoginWith0,
+
+    [Description("Login popup already opened in another window")]
+    LoginPopupAlreadyOpenedInAnotherWindow
 }
 
 public enum AuthMessage
