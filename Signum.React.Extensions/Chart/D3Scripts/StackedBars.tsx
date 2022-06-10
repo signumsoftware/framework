@@ -59,17 +59,21 @@ export default function renderStackedBars({ data, width, height, parameters, loa
   var keyColumn = c.c0 as ChartColumn<unknown>;
   var valueColumn0 = c.c2 as ChartColumn<number>;
 
+  var pValueAsPercent = parameters.ValueAsPercent;
+  //pValueAsPercent = 'YES';
+  //console.log(pValueAsPercent);
+
   var pivot = c.c1 == null ?
     toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
 
   var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
-
+  
   var y = d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
     .range([0, yRule.size('content')]);
-
+  
   var pStack = parameters["Stack"];
 
   var stack = d3.stack<PivotRow>()
@@ -79,7 +83,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
     .value((r, k) => r.values[k]?.value ?? 0);
 
   var stackedSeries = stack(pivot.rows);
-
+  
   var rowsByKey = pivot.rows.toObject(r => keyColumn.getKey(r.rowValue));
 
   var max = d3.max(stackedSeries, s => d3.max(s, v => v[1]))!;
@@ -123,9 +127,20 @@ export default function renderStackedBars({ data, width, height, parameters, loa
               return undefined;
 
             var key = keyColumn.getKey(r.data.rowValue);
+            var rowByKey = rowsByKey[key];
+
+            let totalCount = 0;
+            let sKeys = [] as string[];
+            stackedSeries.map(s => { sKeys.push(s.key) });
+            for (var i = 0; i < sKeys.length; i++) {
+              let v = rowByKey.values[sKeys[i]];
+              if (v && v.value) {
+                totalCount = totalCount + v.value;
+              }
+            }
 
             var active = detector?.(row.rowClick);
-
+            
             return (
               <g className="hover-group" key={key}>
                 <rect className="shape sf-transition hover-target"
@@ -153,13 +168,16 @@ export default function renderStackedBars({ data, width, height, parameters, loa
                     opacity={parameters["NumberOpacity"]}
                     textAnchor="middle"
                     fontWeight="bold">
-                    {r.data.values[s.key].valueNiceName}
+                    {pValueAsPercent == "Yes"
+                      ? totalCount > 0 ? (row.value / totalCount).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 }) : '0%'
+                      : r.data.values[s.key].valueNiceName}
                     <title>
-                      {r.data.values[s.key].valueTitle}
+                      {pValueAsPercent == "Yes"
+                        ? totalCount > 0 ? (row.value / totalCount).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 }) : '0%'
+                        : r.data.values[s.key].valueTitle}
                     </title>
                   </TextIfFits>
                 }
-
               </g>
             );
           }).notNull()}
@@ -219,4 +237,17 @@ export default function renderStackedBars({ data, width, height, parameters, loa
       <YAxis xRule={xRule} yRule={yRule} />
     </svg>
   );
+}
+
+export interface RowData {
+  key: number;
+  value: number;
+};
+
+function getTotalAmount(key: string, rowByKey: PivotRow) {
+  //console.log(key);
+
+  var v = rowByKey.values;
+  //console.log(v);
+  
 }
