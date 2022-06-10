@@ -100,19 +100,24 @@ public static class FilePathLogic
         {
             var alg = fp.FileType.GetAlgorithm();
             alg.ValidateFile(fp);
-            var task = alg.SaveFileAsync(fp);
 
-            Transaction.PreRealCommit += data =>
+            if (SyncFileSave)
+                alg.SaveFile(fp);
+            else
             {
-                //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                var a = fp; //For ebuggin
-                if (!AvoidWaitingForFileSave)
+                var task = alg.SaveFileAsync(fp);
+
+                Transaction.PreRealCommit += data =>
+                {
+                    //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
+                    var a = fp; //For ebuggin
                     task.Wait();
-            };
+                };
+            }
         }
     }
 
-    public static bool AvoidWaitingForFileSave = false; //Alejandro xUnit deadlock
+    public static bool SyncFileSave = false;
 
     public static byte[] GetByteArray(this FilePathEntity fp)
     {
