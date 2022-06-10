@@ -60,8 +60,6 @@ export default function renderStackedBars({ data, width, height, parameters, loa
   var valueColumn0 = c.c2 as ChartColumn<number>;
 
   var pValueAsPercent = parameters.ValueAsPercent;
-  //pValueAsPercent = 'YES';
-  //console.log(pValueAsPercent);
 
   var pivot = c.c1 == null ?
     toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
@@ -237,17 +235,4 @@ export default function renderStackedBars({ data, width, height, parameters, loa
       <YAxis xRule={xRule} yRule={yRule} />
     </svg>
   );
-}
-
-export interface RowData {
-  key: number;
-  value: number;
-};
-
-function getTotalAmount(key: string, rowByKey: PivotRow) {
-  //console.log(key);
-
-  var v = rowByKey.values;
-  //console.log(v);
-  
 }
