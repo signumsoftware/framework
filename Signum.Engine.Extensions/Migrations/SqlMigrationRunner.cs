@@ -250,7 +250,7 @@ public class SqlMigrationRunner
 
             var script = text.Replace(DatabaseNameReplacement, databaseName);
 
-            SqlPreCommandExtensions.ExecuteScript(title, text);
+            SqlPreCommandExtensions.ExecuteScript(title, script);
 
             MigrationLogic.EnsureMigrationTable<SqlMigrationEntity>();
 
