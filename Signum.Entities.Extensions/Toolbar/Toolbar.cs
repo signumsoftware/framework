@@ -63,6 +63,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
 public enum ToolbarLocation
 {
     Side,
+    Top,
     Main,
 }
 

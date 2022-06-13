@@ -20,22 +20,30 @@ public static class Administrator
         ExecuteGenerationScript();
     }
 
+    const int TimeoutCreateDatabase = 5 * 60; 
+
     public static void ExecuteGenerationScript()
     {
-        SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
-        foreach (SqlPreCommand command in totalScript.Commands)
+        using (Connector.CommandTimeoutScope(TimeoutCreateDatabase))
         {
-            command.ExecuteLeaves();
-            SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+            SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
+            foreach (SqlPreCommand command in totalScript.Commands)
+            {
+                command.ExecuteLeaves();
+                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+            }
         }
     }
 
     private static void CleanAllDatabases()
     {
-        foreach (var db in Schema.Current.DatabaseNames())
+        using (Connector.CommandTimeoutScope(TimeoutCreateDatabase))
         {
-            Connector.Current.CleanDatabase(db);
-            SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+            foreach (var db in Schema.Current.DatabaseNames())
+            {
+                Connector.Current.CleanDatabase(db);
+                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+            }
         }
     }
 

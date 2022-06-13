@@ -25,15 +25,19 @@ public static class FilePathEmbeddedLogic
             {
                 if (efp.BinaryFile != null) //First time
                 {
-                    var task = efp.SaveFileAsync();
-                    Transaction.PreRealCommit += data =>
+                    if (SyncFileSave)
+                        efp.SaveFile();
+                    else
                     {
-                        //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                        var a = efp; //For debugging
+                        var task = efp.SaveFileAsync();
+                        Transaction.PreRealCommit += data =>
+                        {
+                            //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
+                            var a = efp; //For debugging
 
-                        if (!AvoidWaitingForFileSave)
                             task.Wait();
-                    };
+                        };
+                    }
                 }
             };
 
@@ -44,7 +48,7 @@ public static class FilePathEmbeddedLogic
     }
 
 
-    public static bool AvoidWaitingForFileSave = false; //Alejandro xUnit deadlock
+    public static bool SyncFileSave = false;
 
     public static FilePathEmbedded ToFilePathEmbedded(this FileContent fileContent, FileTypeSymbol fileType)
     {
