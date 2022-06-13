@@ -13,10 +13,10 @@ Our cutting-edge ORM, Signum.Engine, has a full LINQ Providers that avoids N + 1
 
 Signum.React let you write a Single Page Application using React, Bootstrap and TypeScript.
  
- ## [Demo Application](https://github.com/signumsoftware/southwind#online-version-in-azure)
+## [Demo Application](https://github.com/signumsoftware/southwind#online-version-in-azure)
 Check some of the features of Signum Framework in Southwind, a Northwind port running in Azure. 
  
-# Signum Extensions
+## Signum Extensions
 Set of modules that complements [Signum Framework](https://www.signumsoftware.com/es/Framework) like Authorization, Charting, Dashboards, Mailing, Processes, Scheduled Tasks, Disconnected, User Queries...
 
 Check the different modules in https://www.signumsoftware.com/es/Extensions
