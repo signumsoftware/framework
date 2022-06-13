@@ -3,7 +3,7 @@
 
 [![Join the chat at https://gitter.im/signumsoftware/framework](https://badges.gitter.im/signumsoftware/framework.svg)](https://gitter.im/signumsoftware/framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Signum Framework is an Open Source framework from Signum Software for writing data-centric applications over the latest technologies from Microsoft (.Net Core 3.1, C# 8.0, ASP.Net Web.API and Typescript 3.7) and web standard libraries (React, Bootstrap and D3). It uses either  Microsoft SQL Server or PostgreSQL to store data.   
+Signum Framework is an Open Source framework from Signum Software for writing data-centric applications over the latest technologies from Microsoft (.Net Core, C#, ASP.Net Web.API and Typescript in their latest versions) and web standard libraries (React, Bootstrap and D3). It uses either Microsoft SQL Server or PostgreSQL to store data.   
 
 The main focus of the framework is being able to write vertical modules (database tables, entities, logic and React UI components) that can be shared between projects.
 
@@ -13,7 +13,10 @@ Our cutting-edge ORM, Signum.Engine, has a full LINQ Providers that avoids N + 1
 
 Signum.React let you write a Single Page Application using React, Bootstrap and TypeScript.
  
-# Signum Extensions
+## [Demo Application](https://github.com/signumsoftware/southwind#online-version-in-azure)
+Check some of the features of Signum Framework in Southwind, a Northwind port running in Azure. 
+ 
+## Signum Extensions
 Set of modules that complements [Signum Framework](https://www.signumsoftware.com/es/Framework) like Authorization, Charting, Dashboards, Mailing, Processes, Scheduled Tasks, Disconnected, User Queries...
 
 Check the different modules in https://www.signumsoftware.com/es/Extensions
