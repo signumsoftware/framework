@@ -23,14 +23,22 @@ export function start(options: { routes: JSX.Element[] }) {
   });
 }
 
-export function changeOverridenIsolation(isolation: Lite<IsolationEntity> | undefined) {
+export namespace Options {
+  export let onIsolationChange: ((e: React.MouseEvent, isolation: Lite<IsolationEntity> | undefined) => boolean) | null = null;
+}
 
-  if (isolation)
-    sessionStorage.setItem('Curr_Isolation', JSON.stringify(isolation));
-  else 
-    sessionStorage.removeItem('Curr_Isolation');
+export function changeOverridenIsolation(e: React.MouseEvent, isolation: Lite<IsolationEntity> | undefined) {
 
-  AppContext.resetUI();
+
+  if (Options.onIsolationChange && Options.onIsolationChange(e, isolation))
+      return;
+
+    if (isolation)
+      sessionStorage.setItem('Curr_Isolation', JSON.stringify(isolation));
+    else
+      sessionStorage.removeItem('Curr_Isolation');
+
+    AppContext.resetUI();  
 }
 
 export function getOverridenIsolation(): { current: Lite<IsolationEntity> | undefined, title: string } {

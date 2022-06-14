@@ -6,14 +6,22 @@ import { LoginContext } from "../Login/LoginPage";
 import { ExternalServiceError } from "../../../Signum.React/Scripts/Services";
 
 /*     Add this to Index.cshtml
-       var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
-       var __azureTenantId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_DirectoryID);
+       var __azureApplicationId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_ApplicationID);
+       var __azureTenantId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_DirectoryID);
+       var __tenantLogo = @Json.Serialize(TenantLogic.GetCurrentTenant()!.Logo.BinaryFile);
  * */
+
+interface TenantConfigurationEntityPart {
+  name: string | undefined;
+  navbarCSS: string | undefined;
+  lightNavbarCSS: string | undefined;
+}
 
 declare global {
   interface Window {
     __azureApplicationId: string | null;
     __azureTenantId: string | null;
+    __tenant: TenantConfigurationEntityPart;
   }
 }
 
@@ -85,8 +93,8 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
     scopes: Config.scopes, // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
     account: ai,
   };
-
-  return adquireTokenSilentOrPopup(userRequest)
+  
+  return msalClient.acquireTokenSilent(userRequest)
     .then(res => {
       const rawIdToken = res.idToken;
 
