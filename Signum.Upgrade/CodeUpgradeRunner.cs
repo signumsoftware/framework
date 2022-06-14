@@ -92,7 +92,7 @@ public class CodeUpgradeRunner: IEnumerable<CodeUpgradeBase>
 
     }
 
-    static bool IsDirtyExceptSubmodules(string folder)
+    internal static bool IsDirtyExceptSubmodules(string folder)
     {
         using (Repository rep = new Repository(folder))
         {
