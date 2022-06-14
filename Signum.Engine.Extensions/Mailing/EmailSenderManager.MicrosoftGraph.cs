@@ -25,15 +25,17 @@ public partial class EmailSenderManager : IEmailSenderManager
             var bigAttachments = email.Attachments.Where(a => a.File.FileLength > SmallFileSize).ToList();
 
             var message = ToGraphMessageWithSmallAttachments(email);
-            message.IsDraft = bigAttachments.Any();
-
             var user = graphClient.Users[email.From.AzureUserId.ToString()];
 
-            var request = user.SendMail(message, false).Request().PostResponseAsync().Result;
-
-            var newMessage = user.Messages.Request().AddAsync(message).Result;
-            if (bigAttachments.Any())
+            if (bigAttachments.IsEmpty())
             {
+                user.SendMail(message, false).Request().PostAsync().Wait();
+            }
+            else if (bigAttachments.Any())
+            {
+                message.IsDraft = true;
+
+                var newMessage = user.Messages.Request().AddAsync(message).Result;
                 foreach (var a in bigAttachments)
                 {
                     AttachmentItem attachmentItem = new AttachmentItem

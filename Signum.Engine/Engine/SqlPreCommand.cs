@@ -130,7 +130,7 @@ public static class SqlPreCommandExtensions
     {
         using (Connector.CommandTimeoutScope(Timeout))
         {
-            var regex = new Regex(@" *(GO|USE \w+|USE \[[^\]]+\]) *(\r?\n|$)", RegexOptions.IgnoreCase);
+            var regex = new Regex(@"^ *(GO|USE \w+|USE \[[^\]]+\]) *(\r?\n|$)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
             var parts = regex.Split(script);
 

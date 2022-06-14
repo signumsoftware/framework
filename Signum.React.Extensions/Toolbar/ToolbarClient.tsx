@@ -16,7 +16,7 @@ import { parseIcon } from '../Basics/Templates/IconTypeahead';
 import { Nav } from 'react-bootstrap';
 import { SidebarMode } from './SidebarContainer';
 import { Dic } from '../../Signum.React/Scripts/Globals';
-import { ToolbarNavItem } from './Templates/ToolbarRenderer';
+import { ToolbarNavItem } from './Renderers/ToolbarRenderer';
 
 export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarConfig<any>[]) {
   Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));

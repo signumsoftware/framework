@@ -93,13 +93,16 @@ public enum LoginAuthMessage
 
     [Description("Login with {0}")]
     LoginWith0,
+
+    [Description("Login popup already opened in another window")]
+    LoginPopupAlreadyOpenedInAnotherWindow
 }
 
 public enum AuthMessage
 {
     [Description("Not authorized to {0} the {1} with Id {2}")]
     NotAuthorizedTo0The1WithId2,
-    [Description("Not authorized to Retrieve '{0}'")]
+    [Description("Not authorized to retrieve '{0}'")]
     NotAuthorizedToRetrieve0
 }
 
@@ -144,6 +147,8 @@ public enum AuthAdminMessage
     ResetChanges,
     SwitchTo,
 
+    OnlyActive,
+
     [Description("{0} (in UI)")]
     _0InUI,
     [Description("{0} (in DB only)")]
@@ -152,11 +157,17 @@ public enum AuthAdminMessage
     [Description("Can not be modified")]
     CanNotBeModified,
 
-    [Description("Can not be modified because is a {0}")]
-    CanNotBeModifiedBecauseIsA0,
+    [Description("Can not be modified because is in condition {0}")]
+    CanNotBeModifiedBecauseIsInCondition0,
 
-    [Description("Can not be modified because is not a {0}")]
-    CanNotBeModifiedBecauseIsNotA0,
+    [Description("Can not be modified because is not in condition {0}")]
+    CanNotBeModifiedBecauseIsNotInCondition0,
+
+    [Description("Can not be read because is in condition {0}")]
+    CanNotBeReadBecauseIsInCondition0,
+
+    [Description("Can not be read because is not in condition {0}")]
+    CanNotBeReadBecauseIsNotInCondition0,
 
     [Description("{0} rules for {1}")]
     _0RulesFor1,

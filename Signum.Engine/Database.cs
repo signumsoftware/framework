@@ -1645,11 +1645,11 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         {
             var updater = (from c in current
                            join s in should on getKey.Evaluate(c) equals getKey.Evaluate(s)
-                           select new { c, s }).UnsafeUpdatePart(a => a.c!); /*CSBUG*/
+                           select new { c, s }).UnsafeUpdatePart(a => a.c);
 
             foreach (var prop in toUpdate)
             {
-                updater = updater.Set(prop, a => prop.Evaluate(a.s!));/*CSBUG*/
+                updater = updater.Set(prop, a => prop.Evaluate(a.s));
             }
 
             updater.Execute(title != null ? "auto" : null);

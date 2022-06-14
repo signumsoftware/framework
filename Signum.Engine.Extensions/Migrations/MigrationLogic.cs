@@ -64,6 +64,35 @@ public static class MigrationLogic
 
                 return false;
             };
+
+            Administrator.AvoidSimpleGenerate = () =>
+            {
+                if(SqlMigrationRunner.MigrationDirectoryIsEmpty())
+                {
+                    Console.WriteLine("Your SQL Migrations Directory is empty.");
+
+                    if (SafeConsole.Ask("Do you want to create the INITIAL SQL Migration instead?"))
+                    {
+                        SqlMigrationRunner.CreateInitialMigration();
+                        SqlMigrationRunner.SqlMigrations();
+                        return true;
+                    }
+                }
+                else
+                {
+                    var hasInitial = SqlMigrationRunner.ReadMigrationsDirectory(silent: true).MinBy(a => a.Version)?.Comment.Contains("Initial Migration");
+
+                    Console.WriteLine("You have an Initial SQL Migration.");
+
+                    if (SafeConsole.Ask("Do you want to run the SQL Migrations instead?"))
+                    {
+                        SqlMigrationRunner.SqlMigrations();
+                        return true;
+                    }
+                }
+
+                return false;
+            };
         }
     }
 
@@ -90,23 +119,23 @@ public static class MigrationLogic
     {
         using (var tr = new Transaction())
         {
-            if (Administrator.ExistsTable<T>())
-                return;
-
-            var table = Schema.Current.Table<T>();
-            var sqlBuilder = Connector.Current.SqlBuilder;
-
-            if (!table.Name.Schema.IsDefault() && !Database.View<SysSchemas>().Any(s => s.name == table.Name.Schema.Name))
-                sqlBuilder.CreateSchema(table.Name.Schema).ExecuteLeaves();
-
-            sqlBuilder.CreateTableSql(table).ExecuteLeaves();
-
-            foreach (var i in table.GeneratAllIndexes().Where(i => !(i is PrimaryKeyIndex)))
+            if (!Administrator.ExistsTable<T>())
             {
-                sqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
-            }
+                var table = Schema.Current.Table<T>();
+                var sqlBuilder = Connector.Current.SqlBuilder;
 
-            SafeConsole.WriteLineColor(ConsoleColor.White, "Table " + table.Name + " auto-generated...");
+                if (!table.Name.Schema.IsDefault() && !Administrator.ExistSchema(table.Name.Schema))
+                    sqlBuilder.CreateSchema(table.Name.Schema).ExecuteLeaves();
+
+                sqlBuilder.CreateTableSql(table).ExecuteLeaves();
+
+                foreach (var i in table.GeneratAllIndexes().Where(i => !(i is PrimaryKeyIndex)))
+                {
+                    sqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
+                }
+
+                SafeConsole.WriteLineColor(ConsoleColor.White, "Table " + table.Name + " auto-generated...");
+            }
 
             tr.Commit();
         }

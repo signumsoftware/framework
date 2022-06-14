@@ -15,7 +15,7 @@ public class ReactSpecialOmniboxGenerator : OmniboxResultGenerator<SpecialOmnibo
 {
     //Depends on client-side information
 
-    public static Signum.Utilities.ThreadVariable<SpecialOmniboxGenerator<ReactSpecialOmniboxAction>> ClientGeneratorVariable = Statics.ThreadVariable<SpecialOmniboxGenerator<ReactSpecialOmniboxAction>>("clientGeneratorVariable");
+    public static Signum.Utilities.AsyncThreadVariable<SpecialOmniboxGenerator<ReactSpecialOmniboxAction>> ClientGeneratorVariable = Statics.ThreadVariable<SpecialOmniboxGenerator<ReactSpecialOmniboxAction>>("clientGeneratorVariable");
 
     public static IDisposable OverrideClientGenerator(SpecialOmniboxGenerator<ReactSpecialOmniboxAction> generator)
     {

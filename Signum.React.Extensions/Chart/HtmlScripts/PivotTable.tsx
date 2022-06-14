@@ -533,7 +533,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
         <tr>
           {placeholderCell}
           <Cell gor={grv} indent={indent} colSpan={verColSpan(level)} />
-          {cells(grv?.rows!, grv?.getFilters(true) ?? [])}
+          {cells(grv?.rows ?? [], grv?.getFilters(true) ?? [])}
         </tr>
       );
     else

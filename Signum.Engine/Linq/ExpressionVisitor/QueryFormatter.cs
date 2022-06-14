@@ -12,7 +12,7 @@ namespace Signum.Engine.Linq;
 /// </summary>
 internal class QueryFormatter : DbExpressionVisitor
 {
-    public static readonly ThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>?> PostFormatter = Statics.ThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>?>("QueryFormatterPostFormatter");
+    public static readonly AsyncThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>?> PostFormatter = Statics.ThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>?>("QueryFormatterPostFormatter");
 
     Schema schema = Schema.Current;
     bool isPostgres = Schema.Current.Settings.IsPostgres;

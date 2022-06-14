@@ -1106,8 +1106,7 @@ export class TokenCompleter {
 
   constructor(public queryDescription: QueryDescription)
   {
-    this.queryCache = TokenCompleter.globalCache[queryDescription.queryKey] ??
-      (TokenCompleter.globalCache[queryDescription.queryKey] = {});
+    this.queryCache = (TokenCompleter.globalCache[queryDescription.queryKey] ??= {});
   }
 
   requestFilter(fo: FilterOption, options: SubTokensOptions) {
@@ -1498,15 +1497,10 @@ export module API {
     return ajaxGet({ url: "~/api/query/queryEntity/" + queryKey });
   }
 
-  interface QueryRequestUrl extends QueryRequest {
-    queryUrl: string;
-  }
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
   
-    const queryUrl = AppContext.history.location.pathname + AppContext.history.location.search;
-    const qr: QueryRequestUrl = { ...request, queryUrl: queryUrl };
-    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, qr)
+    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, request)
       .then(rt => decompress(rt));
   }
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ModifiableEntity, EntityPack, is, OperationSymbol } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -14,7 +14,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
 import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage, ActiveDirectoryConfigurationEmbedded } from './Signum.Entities.Authorization'
+import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage, ActiveDirectoryConfigurationEmbedded, UserState } from './Signum.Entities.Authorization'
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -39,6 +39,27 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
   Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
   Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./AzureAD/ActiveDirectoryConfiguration')));
   Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
+
+
+  Finder.addSettings({
+    queryName: UserEntity,
+    defaultFilters: [
+      {
+        groupOperation: "Or",
+        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        filters: [
+          { token: "Entity.ToString", operation: "Contains" },
+          { token: "Entity.Id", operation: "EqualTo" },
+          { token: UserEntity.token(a => a.userName), operation: "Contains" },
+        ]
+      },
+      {
+        token: UserEntity.token(a => a.state),
+        value: UserState.value("Active"),
+        pinned: { label: AuthAdminMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_StartChecked" },
+      },
+    ]
+  });
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => ctx.findOptions.queryKey == RoleEntity.typeName && isPermissionAuthorized(BasicPermission.AdminRules) ? {
     order: 6,

@@ -305,7 +305,7 @@ public class ObjectName : IEquatable<ObjectName>
         return new ObjectName(schemaName, Name, IsPostgres);
     }
 
-    static readonly ThreadVariable<ObjectNameOptions> optionsVariable = Statics.ThreadVariable<ObjectNameOptions>("objectNameOptions");
+    static readonly AsyncThreadVariable<ObjectNameOptions> optionsVariable = Statics.ThreadVariable<ObjectNameOptions>("objectNameOptions");
     public static IDisposable OverrideOptions(ObjectNameOptions options)
     {
         var old = optionsVariable.Value;

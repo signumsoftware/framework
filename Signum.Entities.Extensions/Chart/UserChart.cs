@@ -6,16 +6,15 @@ using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Chart;
 
-public interface IHasEntitytype
-{
-    Lite<TypeEntity>? EntityType { get; }
-}
-
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEntity
+public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEntity
 {
-    public UserChartEntity() { }
-    public UserChartEntity(object queryName)
+    public UserChartEntity()
+    {
+        this.RebindEvents();
+    }
+
+    public UserChartEntity(object queryName) : this()
     {
         this.queryName = queryName;
     }
@@ -30,7 +29,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEnt
     [Ignore]
     internal object queryName;
 
-    
+
     public QueryEntity Query { get; set; }
 
     public Lite<TypeEntity>? EntityType { get; set; }
@@ -70,9 +69,9 @@ public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEnt
     [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
     public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
-    [PreserveOrder]
+    [NotifyChildProperty, NotifyCollectionChanged, PreserveOrder]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
-    
+
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
@@ -99,6 +98,8 @@ public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEnt
 
     protected override void PostRetrieving(PostRetrievingContext ctx)
     {
+        base.PostRetrieving(ctx);
+
         try
         {
             this.GetChartScript().SynchronizeColumns(this, ctx);
@@ -157,7 +158,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEnt
     {
         Columns.ForEach(c =>
         {
-            if(c.Token == null)
+            if (c.Token == null)
             {
                 c.OrderByIndex = null;
                 c.OrderByType = null;

@@ -5,7 +5,7 @@ public class CurrentEntityConverter : IFilterValueConverter
 {
     public static string CurrentEntityKey = "[CurrentEntity]";
 
-    static readonly ThreadVariable<Entity?> currentEntityVariable = Statics.ThreadVariable<Entity?>("currentFilterValueEntity");
+    static readonly AsyncThreadVariable<Entity?> currentEntityVariable = Statics.ThreadVariable<Entity?>("currentFilterValueEntity");
 
     public static IDisposable SetCurrentEntity(Entity? currentEntity)
     {
@@ -19,7 +19,7 @@ public class CurrentEntityConverter : IFilterValueConverter
         return new Disposable(() => currentEntityVariable.Value = old);
     }
 
-    public Result<string?>? TryToStringValue(object? value, Type type)
+    public Result<string?>? TryGetExpression(object? value, Type targetType)
     {
         if (value is Lite<Entity> lite && lite.Is(currentEntityVariable.Value))
         {
@@ -29,15 +29,32 @@ public class CurrentEntityConverter : IFilterValueConverter
         return null;
     }
 
-    public Result<object?>? TryParseValue(string? value, Type type)
+    public Result<object?>? TryParseExpression(string? expression, Type targetType)
     {
-        if (value.HasText() && value.StartsWith(CurrentEntityKey))
+        if (expression.HasText() && expression.StartsWith(CurrentEntityKey))
         {
-            string after = value.Substring(CurrentEntityKey.Length).Trim();
+            string after = expression.Substring(CurrentEntityKey.Length).Trim();
 
             string[] parts = after.SplitNoEmpty('.' );
 
             return SimpleMemberEvaluator.EvaluateExpression(currentEntityVariable.Value, parts);
+        }
+
+        return null;
+    }
+
+    public Result<Type>? IsValidExpression(string? expression, Type targetType, Type? currentEntityType)
+    {
+        if (expression.HasText() && expression.StartsWith(CurrentEntityKey))
+        {
+            if (currentEntityType == null)
+                return new Result<Type>.Error("Parameter 'currentEntityType' is null");
+
+            string after = expression.Substring(CurrentEntityKey.Length).Trim();
+
+            string[] parts = after.SplitNoEmpty('.');
+
+            return SimpleMemberEvaluator.CheckExpression(currentEntityType, parts);
         }
 
         return null;

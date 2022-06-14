@@ -4,7 +4,7 @@ using Signum.Entities.Isolation;
 using Signum.Engine.Isolation;
 using Signum.Entities.Authorization;
 
-namespace Signum.React.Workflow;
+namespace Signum.React.Isolation;
 
 [ValidateModelFilter]
 public class IsolationController : Controller

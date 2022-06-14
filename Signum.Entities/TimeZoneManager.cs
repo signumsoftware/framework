@@ -13,7 +13,7 @@ public static class Clock
         set { OverrideTimeZoneVariable.Value = value; }
     }
 
-    public static readonly ThreadVariable<DateTime?> OverrideNowVariable = Statics.ThreadVariable<DateTime?>("now");
+    public static readonly AsyncThreadVariable<DateTime?> OverrideNowVariable = Statics.ThreadVariable<DateTime?>("now");
     public static IDisposable OverrideNow(DateTime newNow)
     {
         var old = OverrideNowVariable.Value;

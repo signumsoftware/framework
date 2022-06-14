@@ -25,12 +25,19 @@ public static class FilePathEmbeddedLogic
             {
                 if (efp.BinaryFile != null) //First time
                 {
-                    var task = efp.SaveFileAsync();
-                    Transaction.PreRealCommit += data =>
+                    if (SyncFileSave)
+                        efp.SaveFile();
+                    else
                     {
-                        var a = efp; //For debugging
-                        task.Wait();
-                    };
+                        var task = efp.SaveFileAsync();
+                        Transaction.PreRealCommit += data =>
+                        {
+                            //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
+                            var a = efp; //For debugging
+
+                            task.Wait();
+                        };
+                    }
                 }
             };
 
@@ -39,6 +46,9 @@ public static class FilePathEmbeddedLogic
             sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
         }
     }
+
+
+    public static bool SyncFileSave = false;
 
     public static FilePathEmbedded ToFilePathEmbedded(this FileContent fileContent, FileTypeSymbol fileType)
     {

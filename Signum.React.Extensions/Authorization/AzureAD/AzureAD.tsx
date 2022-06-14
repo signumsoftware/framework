@@ -4,6 +4,7 @@ import * as AppContext from "@framework/AppContext";
 import * as AuthClient from "../AuthClient";
 import { LoginContext } from "../Login/LoginPage";
 import { ExternalServiceError } from "../../../Signum.React/Scripts/Services";
+import { LoginAuthMessage } from "../Signum.Entities.Authorization";
 
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_ApplicationID);
@@ -67,9 +68,11 @@ export function signIn(ctx: LoginContext) {
     })
     .catch(e => {
       ctx.setLoading(undefined);
-
-      if (e && e.name == "ClientAuthError" && e.errorCode == "user_cancelled")
+      if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
         return;
+
+      if (e instanceof msal.BrowserAuthError && (e.errorCode == "interaction_in_progress"))
+        throw new Error(LoginAuthMessage.LoginPopupAlreadyOpenedInAnotherWindow.niceToString())
 
       if (e instanceof msal.AuthError)
         throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
@@ -93,14 +96,15 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
     scopes: Config.scopes, // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
     account: ai,
   };
-  
+
   return msalClient.acquireTokenSilent(userRequest)
     .then(res => {
       const rawIdToken = res.idToken;
 
       return AuthClient.API.loginWithAzureAD(rawIdToken, false);
     }, e => {
-      if (e instanceof msal.InteractionRequiredAuthError || e instanceof msal.BrowserAuthError && e.errorCode == "user_login_error")
+      if (e instanceof msal.InteractionRequiredAuthError ||
+        e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode =="user_cancelled"))
         return Promise.resolve(undefined);
 
       console.log(e);

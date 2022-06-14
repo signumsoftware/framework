@@ -1,0 +1,15 @@
+
+.toolbar-card {
+    width: 100%;
+    text-align: center;
+    height: 180px;
+}
+
+.toolbar-card-container {
+    width: 260px;
+    padding: 1rem;
+}
+
+.nav.navbar-nav .nav-link .nav-item-float {
+    display: none;
+}

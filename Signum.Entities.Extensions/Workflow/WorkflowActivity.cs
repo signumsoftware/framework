@@ -219,7 +219,7 @@ public class WorkflowActivityInfo
 {
     static readonly WorkflowActivityInfo Empty = new WorkflowActivityInfo();
 
-    public static readonly ThreadVariable<WorkflowActivityInfo> CurrentVariable = Statics.ThreadVariable<WorkflowActivityInfo>("CurrentWorkflowActivity");
+    public static readonly AsyncThreadVariable<WorkflowActivityInfo> CurrentVariable = Statics.ThreadVariable<WorkflowActivityInfo>("CurrentWorkflowActivity");
     public static WorkflowActivityInfo Current => CurrentVariable.Value ?? Empty;
 
     public static IDisposable Scope(WorkflowActivityInfo wa)

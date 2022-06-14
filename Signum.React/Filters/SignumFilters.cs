@@ -114,7 +114,7 @@ public class SignumHeavyProfilerFilter : SignumDisposableResourceFilter
 
 public class SignumCurrentContextFilter : SignumDisposableResourceFilter
 {
-    static ThreadVariable<FilterContext?> CurrentContextVariable = Statics.ThreadVariable<FilterContext?>("currentContext");
+    static AsyncThreadVariable<FilterContext?> CurrentContextVariable = Statics.ThreadVariable<FilterContext?>("currentContext");
 
     public static FilterContext? CurrentContext => CurrentContextVariable.Value;
 

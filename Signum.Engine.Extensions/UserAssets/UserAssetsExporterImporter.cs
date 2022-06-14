@@ -38,7 +38,7 @@ public static class UserAssetsExporter
 
         public string TypeToName(Lite<TypeEntity> type)
         {
-            return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type.RetrieveAndRemember()));
+            return TypeLogic.GetCleanName(TypeLogic.LiteToType.GetOrThrow(type));
         }
         
         public string TypeToName(TypeEntity type)

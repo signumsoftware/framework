@@ -85,7 +85,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
             {
                 var idents = GraphExplorer.FromRoot((Entity)part.Content).OfType<Entity>();
 
-                string errorsUserQuery = idents.OfType<IHasEntitytype>()
+                string errorsUserQuery = idents.OfType<IHasEntityType>()
                     .Where(uc => uc.EntityType != null && !uc.EntityType.Is(EntityType))
                     .ToString(uc => DashboardMessage._0Is1InstedOf2In3.NiceToString(NicePropertyName(() => EntityType), uc.EntityType, entityType, uc),
                     "\r\n");

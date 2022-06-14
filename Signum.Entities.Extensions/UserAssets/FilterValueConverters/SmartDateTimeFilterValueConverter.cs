@@ -244,13 +244,13 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
 
     }
 
-    public Result<string?>? TryToStringValue(object? value, Type type)
+    public Result<string?>? TryGetExpression(object? value, Type targetType)
     {
         if (value == null)
             return null;
 
         DateTime dateTime = 
-            value is string s ? DateTime.ParseExact(s, type == typeof(DateTime) ? "o" : "yyyy-MM-dd", CultureInfo.InvariantCulture) :
+            value is string s ? DateTime.ParseExact(s, targetType == typeof(DateTime) ? "o" : "yyyy-MM-dd", CultureInfo.InvariantCulture) :
             value is DateOnly d ? d.ToDateTime(): 
             value is DateTime dt ? dt : throw new UnexpectedValueException(value);
 
@@ -259,9 +259,9 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
         return new Result<string?>.Success(ss.ToString());
     }
 
-    public Result<object?>? TryParseValue(string? value, Type type)
+    public Result<object?>? TryParseExpression(string? expression, Type targetType)
     {
-        var res = SmartDateTimeSpan.TryParse(value);
+        var res = SmartDateTimeSpan.TryParse(expression);
         if (res == null)
             return null;
 
@@ -269,7 +269,25 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
             return new Result<object?>.Error(e.ErrorText);
 
         if (res is Result<SmartDateTimeSpan>.Success s)
-            return new Result<object?>.Success(type.UnNullify() == typeof(DateOnly) ? (object)s.Value.ToDateTime().ToDateOnly() : (object)s.Value.ToDateTime());
+            return new Result<object?>.Success(targetType.UnNullify() == typeof(DateOnly) ? (object)s.Value.ToDateTime().ToDateOnly() : (object)s.Value.ToDateTime());
+
+        throw new UnexpectedValueException(res);
+    }
+
+    public Result<Type>? IsValidExpression(string? expression, Type targetType, Type? currentEntityType)
+    {
+        var res = SmartDateTimeSpan.TryParse(expression);
+        if (res == null)
+            return null;
+
+        if (res is Result<SmartDateTimeSpan>.Error e)
+            return new Result<Type>.Error(e.ErrorText);
+
+        if (res is Result<SmartDateTimeSpan>.Success)
+            return new Result<Type>.Success(
+                targetType.UnNullify() == typeof(DateOnly) ? typeof(DateOnly) :
+                targetType.UnNullify() == typeof(DateTime) ? typeof(DateTime) :
+                throw new UnexpectedValueException(targetType.UnNullify()));
 
         throw new UnexpectedValueException(res);
     }

@@ -13,10 +13,11 @@ class Upgrade_20220513_UserHolder : CodeUpgradeBase
             file.Replace("UserEntity.Current.Mixin<UserADMixin>().OID", "UserADMixin.CurrentOID");
         });
 
-        uctx.ChangeCodeFile("SouthwindReact/Startup.cs", file =>
+        uctx.ChangeCodeFile("Southwind.React/Startup.cs", file =>
         {
             file.Replace("if (UserEntity.Current?.CultureInfo != null)", "if (UserEntity.CurrentUserCulture is { } ci)");
             file.Replace("return UserEntity.Current.CultureInfo.ToCultureInfo();", "return ci;");
+            file.Replace("return UserEntity.Current.CultureInfo!.ToCultureInfo();", "return ci;");
         });
     }
 }

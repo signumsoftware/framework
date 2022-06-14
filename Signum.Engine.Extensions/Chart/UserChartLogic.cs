@@ -255,11 +255,13 @@ public static class UserChartLogic
                     }
                 }
 
+                var entityType = uc.EntityType == null ? null : TypeLogic.LiteToType.GetOrThrow(uc.EntityType);
+
                 foreach (var item in uc.Filters.Where(f => !f.IsGroup).ToList())
                 {
                     retry:
                     string? val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList()))
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
@@ -320,7 +322,7 @@ public static class UserChartLogic
             }
             catch (Exception e)
             {
-                return new SqlPreCommandSimple("-- Exception in {0}: {1}".FormatWith(uc.BaseToString(), e.Message));
+                return new SqlPreCommandSimple("-- Exception on {0}\r\n{1}".FormatWith(uc.BaseToString(), e.Message.Indent(2, '-')));
             }
         }
     }

@@ -22,7 +22,7 @@ public class ExcelController : ControllerBase
     {
         ExcelPermission.PlainExcel.AssertAuthorized();
 
-        var queryRequest = request.ToQueryRequest(SignumServer.JsonSerializerOptions);
+        var queryRequest = request.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
 
         ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);
         byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName));
@@ -41,7 +41,7 @@ public class ExcelController : ControllerBase
     [HttpPost("api/excel/excelReport")]
     public FileStreamResult GenerateExcelReport([Required, FromBody]ExcelReportRequest request)
     {
-        byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions));
+        byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
 
         var fileName = request.excelReport.ToString() + "-" + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 

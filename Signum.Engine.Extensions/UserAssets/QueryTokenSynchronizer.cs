@@ -166,11 +166,11 @@ public static class QueryTokenSynchronizer
         return "tokens-Type-" + type.CleanType().FullName;
     }
 
-    public static FixTokenResult FixValue(Replacements replacements, Type type, ref string? valueString, bool allowRemoveToken, bool isList)
+    public static FixTokenResult FixValue(Replacements replacements, Type targetType, ref string? valueString, bool allowRemoveToken, bool isList, Type? currentEntityType)
     {
-        var res = FilterValueConverter.TryParse(valueString, type, isList);
+        var res = FilterValueConverter.IsValidExpression(valueString, targetType, isList, currentEntityType);
 
-        if (res is Result<object>.Success)
+        if (res is Result<Type>.Success)
             return FixTokenResult.Nothing;
 
         DelayedConsole.Flush();
@@ -181,7 +181,7 @@ public static class QueryTokenSynchronizer
             foreach (var str in valueString.Split('|'))
             {
                 string? s = str;
-                var result = FixValue(replacements, type, ref s, allowRemoveToken, false);
+                var result = FixValue(replacements, targetType, ref s, allowRemoveToken, false, currentEntityType);
 
                 if (result == FixTokenResult.DeleteEntity || result == FixTokenResult.SkipEntity || result == FixTokenResult.RemoveToken)
                     return result;
@@ -193,7 +193,7 @@ public static class QueryTokenSynchronizer
             return FixTokenResult.Fix;
         }
 
-        if (type.IsLite())
+        if (targetType.IsLite())
         {
             var m = Lite.ParseRegex.Match(valueString!);
             if (m.Success)
@@ -224,7 +224,7 @@ public static class QueryTokenSynchronizer
             }
         }
 
-        SafeConsole.WriteLineColor(ConsoleColor.White, "Value '{0}' not convertible to {1}.".FormatWith(valueString, type.TypeName()));
+        SafeConsole.WriteLineColor(ConsoleColor.White, "Value '{0}' not convertible to {1}.".FormatWith(valueString, targetType.TypeName()));
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
         if (allowRemoveToken)
             SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "- r: Remove token");

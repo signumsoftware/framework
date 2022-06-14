@@ -11,19 +11,39 @@ namespace Signum.Engine;
 
 public static class Administrator
 {
+    public static Func<bool>? OnTotalGeneration;
+
     public static void TotalGeneration()
     {
-        foreach (var db in Schema.Current.DatabaseNames())
-        {
-            Connector.Current.CleanDatabase(db);
-            SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
-        }
+        CleanAllDatabases();
 
-        SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
-        foreach (SqlPreCommand command in totalScript.Commands)
+        ExecuteGenerationScript();
+    }
+
+    const int TimeoutCreateDatabase = 5 * 60; 
+
+    public static void ExecuteGenerationScript()
+    {
+        using (Connector.CommandTimeoutScope(TimeoutCreateDatabase))
         {
-            command.ExecuteLeaves();
-            SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+            SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt()!;
+            foreach (SqlPreCommand command in totalScript.Commands)
+            {
+                command.ExecuteLeaves();
+                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+            }
+        }
+    }
+
+    private static void CleanAllDatabases()
+    {
+        using (Connector.CommandTimeoutScope(TimeoutCreateDatabase))
+        {
+            foreach (var db in Schema.Current.DatabaseNames())
+            {
+                Connector.Current.CleanDatabase(db);
+                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+            }
         }
     }
 
@@ -77,12 +97,13 @@ public static class Administrator
         return Schema.Current.GenerationScipt();
     }
 
-   
+
+    public static Func<bool>? AvoidSimpleGenerate;
 
     public static void NewDatabase()
     {
         var databaseName = Connector.Current.DatabaseName();
-        if (Database.View<SysTables>().Any())
+        if (Connector.Current.HasTables())
         {
             SafeConsole.WriteLineColor(ConsoleColor.Red, $"Are you sure you want to delete all the data in the database '{databaseName}'?");
             Console.Write($"Confirm by writing the name of the database:");
@@ -95,8 +116,16 @@ public static class Administrator
             }
         }
 
-        Console.Write("Creating new database...");
-        Administrator.TotalGeneration();
+        Console.Write("Cleaning database...");
+        using(Connector.CommandTimeoutScope(5 * 60))
+        CleanAllDatabases();
+        Console.WriteLine("Done.");
+
+        if (AvoidSimpleGenerate?.Invoke() == true)
+            return;
+
+        Console.Write("Generating new database database...");
+        ExecuteGenerationScript();
         Console.WriteLine("Done.");
     }
 
@@ -184,7 +213,7 @@ public static class Administrator
         Connector.Current.SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
     }
 
-    internal static readonly ThreadVariable<Func<ObjectName, ObjectName>?> registeredViewNameReplacer = Statics.ThreadVariable<Func<ObjectName, ObjectName>?>("overrideDatabase");
+    internal static readonly AsyncThreadVariable<Func<ObjectName, ObjectName>?> registeredViewNameReplacer = Statics.ThreadVariable<Func<ObjectName, ObjectName>?>("overrideDatabase");
     public static IDisposable OverrideViewNameReplacer(Func<ObjectName, ObjectName> replacer)
     {
         registeredViewNameReplacer.Value += replacer;
@@ -262,7 +291,13 @@ public static class Administrator
         }
     }
 
+    public static bool ExistSchema(SchemaName name)
+    {
+        if (Schema.Current.Settings.IsPostgres)
+            return Database.View<PgNamespace>().Any(ns => ns.nspname == name.Name);
 
+        return Database.View<SysSchemas>().Any(s => s.name == name.Name);
+    }
 
     public static List<T> TryRetrieveAll<T>(Replacements replacements)
         where T : Entity
@@ -304,7 +339,7 @@ public static class Administrator
         return identityBehaviourDisabled.Value?.Contains(table) == true;
     }
 
-    static ThreadVariable<ImmutableStack<ITable>?> identityBehaviourDisabled = Statics.ThreadVariable<ImmutableStack<ITable>?>("identityBehaviourOverride");
+    static AsyncThreadVariable<ImmutableStack<ITable>?> identityBehaviourDisabled = Statics.ThreadVariable<ImmutableStack<ITable>?>("identityBehaviourOverride");
     public static IDisposable DisableIdentity(ITable table, bool behaviourOnly = false)
     {
         if (!table.IdentityBehaviour)
@@ -582,7 +617,7 @@ public static class Administrator
              ParentColumn = parentTable.Columns().SingleEx(c => c.column_id == ifk.ForeignKeyColumns().SingleEx().parent_column_id).name,
          }).ToList());
 
-        foreignKeys.ForEach(fk => sqlBuilder.AlterTableDropConstraint(fk.ParentTable!, fk.Name! /*CSBUG*/).ExecuteLeaves());
+        foreignKeys.ForEach(fk => sqlBuilder.AlterTableDropConstraint(fk.ParentTable!, fk.Name).ExecuteLeaves());
 
         return new Disposable(() =>
         {

@@ -20,7 +20,9 @@ public class AzureADAuthenticationServer
             {
                 var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer!;
 
-                if (!ada.GetConfig().LoginWithAzureAD)
+                var config = ada.GetConfig();
+
+                if (!config.LoginWithAzureAD)
                     return false;
 
                 var principal = ValidateToken(jwt, out var jwtSecurityToken);
@@ -31,19 +33,20 @@ public class AzureADAuthenticationServer
                 if(user == null)
                 {
                     user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == ctx.UserName) ??
-                    (ctx.UserName.Contains("@") && ada.GetConfig().AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == ctx.UserName || a.UserName == ctx.UserName.Before("@")) : null);
+                    (ctx.UserName.Contains("@") && config.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == ctx.UserName || a.UserName == ctx.UserName.Before("@")) : null);
                 }
 
                 if (user == null)
                 {
-                    if (!ada.GetConfig().AutoCreateUsers)
+                    if (!config.AutoCreateUsers)
                         return false;
 
                     user = ada.OnCreateUser(ctx);
                 }
                 else
                 {
-                    ada.UpdateUser(user, ctx);
+                    if (config.AutoUpdateUsers)
+                        ada.UpdateUser(user, ctx);
                 }
 
                 AuthServer.OnUserPreLogin(ac, user);
