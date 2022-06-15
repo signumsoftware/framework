@@ -81,9 +81,9 @@ export default function renderStackedBars({ data, width, height, parameters, loa
     .value((r, k) => r.values[k]?.value ?? 0);
 
   var stackedSeries = stack(pivot.rows);
-  
-  var rowsByKey = pivot.rows.toObject(r => keyColumn.getKey(r.rowValue));
 
+  var rowsByKey = pivot.rows.toObject(r => keyColumn.getKey(r.rowValue));
+  
   var max = d3.max(stackedSeries, s => d3.max(s, v => v[1]))!;
   var min = d3.min(stackedSeries, s => d3.min(s, v => v[0]))!;
 
@@ -127,15 +127,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
             var key = keyColumn.getKey(r.data.rowValue);
             var rowByKey = rowsByKey[key];
 
-            let totalCount = 0;
-            let sKeys = [] as string[];
-            stackedSeries.map(s => { sKeys.push(s.key) });
-            for (var i = 0; i < sKeys.length; i++) {
-              let v = rowByKey.values[sKeys[i]];
-              if (v && v.value) {
-                totalCount = totalCount + v.value;
-              }
-            }
+            const totalCount = stackedSeries.sum(s => rowByKey.values[s.key]?.value ?? 0);
 
             var active = detector?.(row.rowClick);
             

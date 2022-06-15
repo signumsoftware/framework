@@ -121,15 +121,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
           var key = keyColumn.getKey(r.data.rowValue);
           var rowByKey = rowsByKey[key];
 
-          let totalCount = 0;
-          let sKeys = [] as string[];
-          stackedSeries.map(s => { sKeys.push(s.key) });
-          for (var i = 0; i < sKeys.length; i++) {
-            let v = rowByKey.values[sKeys[i]];
-            if (v && v.value) {
-              totalCount = totalCount + v.value;
-            }
-          }
+          const totalCount = stackedSeries.sum(s => rowByKey.values[s.key]?.value ?? 0);
 
           var active = detector?.(row.rowClick);
 

@@ -133,15 +133,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
             var rowByKey = rowsByKey[dataKey];
 
-            let totalCount = 0;
-            let sKeys = [] as string[];
-            stackedSeries.map(s => { sKeys.push(s.key) });
-            for (var i = 0; i < sKeys.length; i++) {
-              let v = rowByKey.values[sKeys[i]];
-              if (v && v.value) {
-                totalCount = totalCount + v.value;
-              }
-            }
+            const totalCount = stackedSeries.sum(s => rowByKey.values[s.key]?.value ?? 0);
 
             if ((y(v[1])! - y(v[0])!)! <= 10)
               return null;
