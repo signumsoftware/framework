@@ -54,6 +54,8 @@ export default function renderStackedLines({ data, width, height, parameters, lo
   var keyColumn = c.c0 as ChartColumn<unknown>;
   var valueColumn0 = c.c2 as ChartColumn<number>;
 
+  var pValueAsPercent = parameters.ValueAsPercent;
+
   var pivot = c.c1 == null ?
     toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
@@ -129,6 +131,10 @@ export default function renderStackedLines({ data, width, height, parameters, lo
             if (row == undefined)
               return null;
 
+            var rowByKey = rowsByKey[dataKey];
+
+            const totalCount = stackedSeries.sum(s => rowByKey.values[s.key]?.value ?? 0);
+
             if ((y(v[1])! - y(v[0])!)! <= 10)
               return null;
 
@@ -140,7 +146,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
                   transform={translate(x(dataKey)! - rectRadious, -y(v[1])!)}
                   width={2 * rectRadious}
                   fillOpacity={active == true ? undefined : .2}
-                  fill={active == true ? "black" : colorByKey[s.key]?? color(s.key)}
+                  fill={active == true ? "black" : colorByKey[s.key] ?? color(s.key)}
                   height={y(v[1])! - y(v[0])!}
                   onClick={e => onDrillDown(row.rowClick, e)}
                   cursor="pointer">
@@ -164,9 +170,13 @@ export default function renderStackedLines({ data, width, height, parameters, lo
                     onClick={e => onDrillDown(row.rowClick, e)}
                     textAnchor="middle"
                     fontWeight="bold">
-                    {row.valueNiceName}
+                    {pValueAsPercent == "Yes"
+                      ? totalCount > 0 ? (row.value / totalCount).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 }) : '0%'
+                      : row.valueNiceName}
                     <title>
-                      {row.valueTitle}
+                      {pValueAsPercent == "Yes"
+                        ? totalCount > 0 ? (row.value / totalCount).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 }) : '0%'
+                        : row.valueTitle}
                     </title>
                   </TextRectangle>
                 }
@@ -177,7 +187,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
       </g>
       )}
-      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} isActive={c.c1 && detector && (row => detector!({c1: row.value }))} onDrillDown={c.c1 && ((s, e) => onDrillDown({ c1: s.value }, e))} />
+      <Legend pivot={pivot} xRule={xRule} yRule={yRule} color={color} isActive={c.c1 && detector && (row => detector!({ c1: row.value }))} onDrillDown={c.c1 && ((s, e) => onDrillDown({ c1: s.value }, e))} />
 
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XAxis xRule={xRule} yRule={yRule} />
