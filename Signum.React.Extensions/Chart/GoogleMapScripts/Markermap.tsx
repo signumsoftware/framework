@@ -27,7 +27,7 @@ export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient
   })
 
   return (
-    <div className="sf-chart-container" ref={divElement}>
+    <div style={{ width: "100%", height: "100%" }} ref={divElement}>
     </div>
   );
 
