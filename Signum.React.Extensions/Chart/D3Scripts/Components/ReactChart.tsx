@@ -23,7 +23,7 @@ export interface ReactChartProps {
   onBackgroundClick?: (e: React.MouseEvent) => void;
   onRenderChart: (data: ChartClient.ChartScriptProps) => React.ReactNode;
   dashboardFilter?: DashboardFilter;
-  minHeigh: number | null;
+  minHeight: number | null;
 }
 
 
@@ -38,7 +38,7 @@ export default function ReactChart(p: ReactChartProps) {
   const { size, setContainer } = useSize();
 
   return (
-    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} style={{ minHeight: (p.minHeigh ?? 400) + "px" }} ref={setContainer} onClick={p.onBackgroundClick}>
+    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} style={{ minHeight: (p.minHeight ?? 400) + "px" }} ref={setContainer} onClick={p.onBackgroundClick}>
       {size &&
         p.onRenderChart({
           chartRequest: p.chartRequest,
