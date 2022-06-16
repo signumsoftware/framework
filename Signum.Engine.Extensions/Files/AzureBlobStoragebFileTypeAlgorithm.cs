@@ -27,7 +27,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 {
     public Func<IFilePath, BlobContainerClient> GetClient { get; private set; }
 
-    public Func<bool> WebDownload { get; private set; } = () => false;
+    public Func<bool> WebDownload { get; set; } = () => false;
 
     public Func<IFilePath, string> CalculateSuffix { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
     public bool WeakFileReference { get; set; }
@@ -50,9 +50,9 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
         if (!this.WebDownload())
             return PrefixPair.None();
-
-        //return PrefixPair.WebOnly($"https://{client.Uri}/{efp.Suffix}");
-        return PrefixPair.WebOnly($"{client.Uri}");
+        
+        return PrefixPair.WebOnly($"{client.Uri}/{efp.Suffix}");
+        //return PrefixPair.WebOnly($"{client.Uri}");
     }
 
 
