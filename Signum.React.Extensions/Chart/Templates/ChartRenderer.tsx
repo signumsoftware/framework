@@ -29,7 +29,7 @@ export interface ChartRendererProps {
   dashboardFilter?: DashboardFilter;
   onDrillDown?: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onBackgroundClick?: (e: React.MouseEvent) => void;
-  minHeigh: number | null;
+  minHeight: number | null;
 }
 
 export default function ChartRenderer(p: ChartRendererProps) {
@@ -59,7 +59,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
           parameters={parameters}
           onReload={p.onReload}
           onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)}
-          minHeigh={p.minHeigh}
+          minHeight={p.minHeight}
         />
         }
       </ErrorBoundary>
