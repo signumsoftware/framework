@@ -51,8 +51,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         if (!this.WebDownload())
             return PrefixPair.None();
         
-        return PrefixPair.WebOnly($"{client.Uri}/{efp.Suffix}");
-        //return PrefixPair.WebOnly($"{client.Uri}");
+        return PrefixPair.WebOnly($"{client.Uri}");
     }
 
 
