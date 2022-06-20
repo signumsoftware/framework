@@ -33,59 +33,58 @@ internal class EntityCompleter : DbExpressionVisitor
         var id = binder.GetId(lite.Reference);
 
         var typeId = binder.GetEntityType(lite.Reference);
-        var toStr = LiteToString(lite, typeId);
-        //var toStr2 = Visit(toStr); //AdditionalBinding in embedded requires it, but makes problems in many other lites in Nominator
 
-        return new LiteValueExpression(lite.Type, typeId, id, toStr);
+        if (lite.CustomModelExpression != null)
+            return new LiteValueExpression(lite.Type, typeId, id, lite.CustomModelExpression, null);
+
+        var models = GetModels(lite, typeId);
+
+        //var model2 = Visit(model); //AdditionalBinding in embedded requires it, but makes problems in many other lites in Nominator
+
+        return new LiteValueExpression(lite.Type, typeId, id, null, models.ToReadOnly());
     }
 
-    private Expression? LiteToString(LiteReferenceExpression lite, Expression typeId)
+    private Dictionary<Type, ExpressionOrType> GetModels(LiteReferenceExpression lite, Expression typeId)
     {
-        if (lite.CustomModel != null)
-            return Visit(lite.CustomModel);
+        if (lite.Reference is ImplementedByAllExpression iba)
+        {
+            if (lite.CustomModelTypes != null)
+                return lite.CustomModelTypes.ToDictionary(a => a.Key, a => new ExpressionOrType(a.Value));
 
-        if (lite.Reference is ImplementedByAllExpression)
-            return null;
-
-        if (lite.LazyModel)
-            return null;
-
-        if (IsCacheable(typeId))
-            return null;
+            return new Dictionary<Type, ExpressionOrType>();
+        }
 
         if (lite.Reference is EntityExpression entityExp)
         {
-            if (entityExp.AvoidExpandOnRetrieving)
-                return null;
+            var modelType = lite.CustomModelTypes?.TryGetC(entityExp.Type) ?? Lite.DefaultModelType(entityExp.Type);
 
-            return binder.BindMethodCall(Expression.Call(entityExp, EntityExpression.ToStringMethod));
+            return new Dictionary<Type, ExpressionOrType>
+            {
+                { entityExp.Type, lite.LazyModel  || entityExp.AvoidExpandOnRetrieving ? new ExpressionOrType(modelType) : new ExpressionOrType(GetModel(entityExp, modelType)) }
+            };
         }
 
         if (lite.Reference is ImplementedByExpression ibe)
         {
-            if (ibe.Implementations.Any(imp => imp.Value.AvoidExpandOnRetrieving))
-                return null;
-
-            return ibe.Implementations.Values.Select(ee =>
-                new When(SmartEqualizer.NotEqualNullable(ee.ExternalId, QueryBinder.NullId(ee.ExternalId.ValueType)),
-                 binder.BindMethodCall(Expression.Call(ee, EntityExpression.ToStringMethod)))
-                 ).ToCondition(typeof(string));
+            return ibe.Implementations.Values.ToDictionary(imp => imp.Type,
+                imp =>
+                {
+                    var modelType = lite.CustomModelTypes?.TryGetC(imp.Type) ?? Lite.DefaultModelType(imp.Type);
+                    return lite.LazyModel || imp.AvoidExpandOnRetrieving ? new ExpressionOrType(modelType) : new ExpressionOrType(GetModel(imp, modelType));
+                });
         }
 
-        return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+        throw new UnexpectedValueException(lite.Reference);
     }
 
-    private static bool IsCacheable(Expression newTypeId)
+    private Expression GetModel(EntityExpression entityExp, Type modelType)
     {
+        if (modelType == typeof(string))
+            return binder.Visit(Expression.Call(entityExp, EntityExpression.ToStringMethod));
 
-        if (newTypeId is TypeEntityExpression tfie)
-            return IsCached(tfie.TypeValue);
+        var mce = Lite.GetModelConstructorExpression(entityExp.Type, modelType);
 
-
-        if (newTypeId is TypeImplementedByExpression tibe)
-            return tibe.TypeImplementations.All(t => IsCached(t.Key));
-
-        return false;
+        return binder.Visit(Expression.Invoke(mce, entityExp));
     }
 
     protected internal override Expression VisitEntity(EntityExpression ee)

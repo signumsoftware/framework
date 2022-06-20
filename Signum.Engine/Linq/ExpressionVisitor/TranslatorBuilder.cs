@@ -411,9 +411,9 @@ internal static class TranslatorBuilder
         {
             var reference = Visit(lite.Reference);
 
-            var toStr = Visit(lite.CustomModel);
+            var model = Visit(lite.CustomModelExpression);
 
-            return Lite.ToLiteFatInternalExpression(reference, toStr ?? Expression.Constant(null, typeof(string)));
+            return Lite.ToLiteFatInternalExpression(reference, model ?? Expression.Constant(null, typeof(string)));
         }
 
         protected internal override Expression VisitLiteValue(LiteValueExpression lite)
@@ -423,10 +423,10 @@ internal static class TranslatorBuilder
             if (id == null)
                 return Expression.Constant(null, lite.Type);
 
-            var toStr = Visit(lite.ToStr);
+            var customModel = Visit(lite.CustomModelExpression);
             var typeId = lite.TypeId;
 
-            var toStringOrNull = toStr ?? Expression.Constant(null, typeof(string));
+            var modelOrNull = customModel ?? Expression.Constant(null, typeof(string));
 
 
             Expression nothing = Expression.Constant(null, lite.Type);
@@ -435,36 +435,49 @@ internal static class TranslatorBuilder
             {
                 Type type = tee.TypeValue;
 
+                var model = lite.CustomModelExpression != null ? Visit(lite.CustomModelExpression) :
+                  ;
+
                 liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                    Expression.Convert(Lite.NewExpression(type, id, toStringOrNull), lite.Type),
+                    Expression.Convert(Lite.NewExpression(type, id, model), lite.Type),
                     nothing);
             }
             else if (typeId is TypeImplementedByExpression tib)
             {
                 liteConstructor = tib.TypeImplementations.Aggregate(nothing,
                     (acum, ti) =>
-                        {
-                            var visitId = Visit(NullifyColumn(ti.Value));
-                            return Expression.Condition(Expression.NotEqual(visitId, NullId),
-                                Expression.Convert(Lite.NewExpression(ti.Key, visitId, toStringOrNull), lite.Type), acum);
-                        });
+                    {
+                        var visitId = Visit(NullifyColumn(ti.Value));
+                        return Expression.Condition(Expression.NotEqual(visitId, NullId),
+                            Expression.Convert(Lite.NewExpression(ti.Key, visitId, modelOrNull), lite.Type), acum);
+                    });
             }
             else if (typeId is TypeImplementedByAllExpression tiba)
             {
                 var tid = Visit(NullifyColumn(tiba.TypeColumn));
-                liteConstructor = Expression.Convert(Expression.Call(miTryLiteCreate, Expression.Constant(Schema.Current), tid, id.Nullify(), toStringOrNull), lite.Type);
+                liteConstructor = Expression.Convert(Expression.Call(miTryLiteCreate, Expression.Constant(Schema.Current), tid, id.Nullify(), modelOrNull), lite.Type);
             }
             else
             {
                 liteConstructor = Expression.Condition(Expression.NotEqual(id.Nullify(), NullId),
-                                   Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), toStringOrNull), lite.Type),
+                                   Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), modelOrNull), lite.Type),
                                     nothing);
             }
 
-            if (toStr != null)
-                return Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(typeof(LiteImp)), liteConstructor.TryConvert(typeof(LiteImp))).TryConvert(liteConstructor.Type);
+            if (customModel != null)
+                return PostRetrieving(liteConstructor);
             else
-                return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(lite.Type)!), liteConstructor);
+                return RequestLite(liteConstructor);
+        }
+
+        private static MethodCallExpression RequestLite(Expression liteConstructor)
+        {
+            return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(liteConstructor.Type)!), liteConstructor);
+        }
+
+        private static Expression PostRetrieving(Expression liteConstructor)
+        {
+            return Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(typeof(LiteImp)), liteConstructor.TryConvert(typeof(LiteImp))).TryConvert(liteConstructor.Type);
         }
 
         static readonly MethodInfo miTryLiteCreate = ReflectionTools.GetMethodInfo(() => TryLiteCreate(null!, null, null!, null!));

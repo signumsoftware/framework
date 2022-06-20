@@ -549,7 +549,7 @@ public static class Lite
     static ConcurrentDictionary<(Type type, Type modelType), ConstructorInfo> liteConstructorCache = new();
     public static ConstructorInfo GetLiteConstructorFromCache(Type type, Type modelType)
     {
-        return liteConstructorCache.GetOrAdd((type, modelType), t =>  CreateLiteConstructor(t.type, t.modelType));
+        return liteConstructorCache.GetOrAdd((type, modelType), t => CreateLiteConstructor(t.type, t.modelType));
     }
 
     static ConstructorInfo CreateLiteConstructor(Type t, Type model)
@@ -564,19 +564,19 @@ public static class Lite
     }
 
 
-    static Lite<T>? ToLiteFatInternal<T>(this T? entity, string? toStr)
+    static Lite<T>? ToLiteFatInternal<T>(this T? entity, object? model)
         where T : class, IEntity
     {
         if (entity == null)
             return null;
 
-        return entity.ToLiteFat(toStr);
+        return entity.ToLiteFat(model);
     }
 
     static MethodInfo miToLiteFatInternal = ReflectionTools.GetMethodInfo(() => ToLiteFatInternal<Entity>(null, null)).GetGenericMethodDefinition();
-    public static Expression ToLiteFatInternalExpression(Expression reference, Expression toString)
+    public static Expression ToLiteFatInternalExpression(Expression reference, Expression model)
     {
-        return Expression.Call(miToLiteFatInternal.MakeGenericMethod(reference.Type), reference, toString);
+        return Expression.Call(miToLiteFatInternal.MakeGenericMethod(reference.Type), reference, model);
     }
 
     public static Lite<T> ParsePrimaryKey<T>(string id)

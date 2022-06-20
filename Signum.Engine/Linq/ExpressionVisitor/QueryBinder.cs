@@ -172,13 +172,18 @@ internal class QueryBinder : ExpressionVisitor
 
             return new ImplementedByExpression(ib.Type, strategy, ib.Implementations);
         }
-        else if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
+        else if (m.Method.DeclaringType == typeof(Lite) && (m.Method.Name == "ToLite" || m.Method.Name == "ToLiteFat"))
         {
-            Expression? toStr = Visit(m.TryGetArgument("toStr")); //could be null
-
             var entity = Visit(m.GetArgument("entity"));
             var converted = EntityCasting(entity, Lite.Extract(m.Type)!)!;
-            return MakeLite(converted, toStr);
+            
+            
+            Expression? model = Visit(m.TryGetArgument("model")); //could be null
+            Expression? modelType = Visit(m.TryGetArgument("modelType")); //could be null
+
+            return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, model, 
+                modelType == null ? null : ToTypeDictionary(modelType, entity.Type),
+                false, eagerEntity: m.Method.Name == "ToLiteFat");
         }
         else if (m.Method.DeclaringType!.IsInstantiationOf(typeof(EnumEntity<>)) && m.Method.Name == "ToEnum")
         {
@@ -231,7 +236,24 @@ internal class QueryBinder : ExpressionVisitor
         return BindMethodCall(result);
     }
 
+    private Dictionary<Type, Type>? ToTypeDictionary(Expression? modelType, Type entityType)
+    {
+        if (modelType == null)
+            return null;
 
+        if (modelType is ConstantExpression ce)
+        {
+            if (ce.IsNull())
+                return null;
+               
+            if(ce.Value is Type t)
+            {
+                return new Dictionary<Type, Type> { { entityType, t } };
+            }
+        }
+
+        throw new NotImplementedException("Not implemented " + modelType.ToString());
+    }
 
     private Expression BindExpandEntity(Expression source, LambdaExpression entitySelector, ExpandEntity expandEntity)
     {
@@ -2393,7 +2415,7 @@ internal class QueryBinder : ExpressionVisitor
 
             Expression entity = EntityCasting(lite.Reference, Lite.Extract(uType)!)!;
 
-            return MakeLite(entity, lite.CustomModel);
+            return new LiteReferenceExpression(entity.Type, entity, lite.CustomModelExpression, lite.CustomModelTypes, false, false);
         }
 
         return null;
@@ -3576,7 +3598,7 @@ class AssignAdapterExpander : DbExpressionVisitor
         {
             var type = node.Method.GetGenericArguments()[0];
             var id = ToPrimaryKey(node.Arguments[0]);
-            return new LiteReferenceExpression(Lite.Generate(type), new EntityExpression(type, id, null, null, null, null, null, false), null, false, false);
+            return new LiteReferenceExpression(Lite.Generate(type), new EntityExpression(type, id, null, null, null, null, null, false), null, null, false, false);
         }
 
         if (node.Method.IsInstantiationOf(miSetId))
@@ -3612,7 +3634,7 @@ class AssignAdapterExpander : DbExpressionVisitor
                 using (this.OverrideColExpression(col.Reference))
                 {
                     var entity = CombineConditional(test, l.Reference, r.Reference)!;
-                    return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, null, false, false);
+                    return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, null, null, false, false);
                 }
             });
         }
@@ -3700,7 +3722,7 @@ class AssignAdapterExpander : DbExpressionVisitor
                     using (this.OverrideColExpression(col.Reference))
                     {
                         var entity = CombineCoalesce(l.Reference, r.Reference)!;
-                        return new LiteReferenceExpression(Lite.Generate(entity!.Type), entity, null, false, false);
+                        return new LiteReferenceExpression(Lite.Generate(entity!.Type), entity, null, null, false, false);
                     }
                 });
             }
@@ -3849,7 +3871,7 @@ class AssignAdapterExpander : DbExpressionVisitor
 
         var newRef = this.OverrideColExpression(reference).Using(_ => Visit(lite.Reference));
         if (newRef != lite.Reference)
-            return new LiteReferenceExpression(Lite.Generate(newRef.Type), newRef, null, false, false);
+            return new LiteReferenceExpression(Lite.Generate(newRef.Type), newRef, null, null, false, false);
 
         return lite;
     }
@@ -3941,7 +3963,7 @@ class AssignAdapterExpander : DbExpressionVisitor
                     lite == null ? Expression.Constant(null, type) : Expression.Constant(lite.Id.Object, type),
                     lite?.EntityType);
 
-                return new LiteReferenceExpression(colLite.Type, entity, null, false, false);
+                return new LiteReferenceExpression(colLite.Type, entity, null, null, false, false);
             }
         }
 

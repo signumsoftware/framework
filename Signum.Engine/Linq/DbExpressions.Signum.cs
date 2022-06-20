@@ -352,24 +352,48 @@ internal class LiteReferenceExpression : DbExpression
     }
 }
 
+public struct ExpressionOrType
+{
+    public readonly Expression? EagerExpression;
+    public readonly Type? LazyModelType;
+
+    public ExpressionOrType(Type lazyModelType)
+    {
+        LazyModelType = lazyModelType;
+        EagerExpression = null;
+    }
+
+    public ExpressionOrType(Expression eagerExpression)
+    {
+        LazyModelType = null;
+        EagerExpression = eagerExpression;
+    }
+}
+
 internal class LiteValueExpression : DbExpression
 {
     public readonly Expression TypeId;
     public readonly PrimaryKeyExpression Id;
-    public readonly Expression? ToStr;
+    public readonly Expression? CustomModelExpression; 
+    public readonly ReadOnlyDictionary<Type, ExpressionOrType>? Models;
 
 
-    public LiteValueExpression(Type type, Expression typeId, PrimaryKeyExpression id, Expression? toStr) :
+    public LiteValueExpression(Type type, Expression typeId, PrimaryKeyExpression id, Expression? customModelExpression, ReadOnlyDictionary<Type, ExpressionOrType>? models) :
         base(DbExpressionType.LiteValue, type)
     {
         this.TypeId = typeId ?? throw new ArgumentNullException(nameof(typeId));
         this.Id = id ?? throw new ArgumentNullException(nameof(id));
-        this.ToStr = toStr;
+
+        if (customModelExpression != null && models != null)
+            throw new InvalidOperationException($"{nameof(customModelExpression)} and {models} are incomatible");
+
+        this.CustomModelExpression = customModelExpression;
+        this.Models = models;
     }
 
     public override string ToString()
     {
-        return $"new Lite<{Type.CleanType().TypeName()}>({TypeId},{Id},{ToStr})";
+        return $"new Lite<{Type.CleanType().TypeName()}>({TypeId},{Id},{CustomModelExpression?.ToString() ?? Models?.ToString(";")})";
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)

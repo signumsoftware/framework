@@ -97,6 +97,8 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
         get { return id; }
     }
 
+    public object? Model => this.model;
+
     public void SetEntity(Entity ei)
     {
         if (id == null)
