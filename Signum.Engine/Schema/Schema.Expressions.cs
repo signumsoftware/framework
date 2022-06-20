@@ -226,8 +226,16 @@ public partial class FieldReference
 
         var result = new EntityExpression(cleanType, new PrimaryKeyExpression(new ColumnExpression(this.Type.Nullify(), tableAlias, Name)), period, null, null, null, null, AvoidExpandOnRetrieving);
 
-        if(this.IsLite)
-            return QueryBinder.MakeLite(result, null);
+        if (this.IsLite) {
+
+            var customModel = this.CustomLiteModelType == null ? null :
+                new Dictionary<Type, Expression>
+                {
+                    { cleanType, Expression.Invoke(Lite.GetModelConstructorExpression(cleanType, this.CustomLiteModelType), result) }
+                };
+
+            return QueryBinder.MakeLite(result, customModel);
+        }
         else
             return result;
     }
@@ -293,7 +301,12 @@ public partial class FieldImplementedBy
         var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType)! : FieldType, SplitStrategy, implementations);
 
         if (this.IsLite)
-            return QueryBinder.MakeLite(result, null);
+        {
+            var customModelTypes = ImplementationColumns.Any(ic => ic.Value.CustomLiteModelType != null) ?
+                ImplementationColumns.Where(a => a.Value.CustomLiteModelType != null).ToDictionaryEx(a => a.Key, a => a.Value.CustomLiteModelType!) : null;
+
+            return QueryBinder.MakeLite(result, customModelTypes);
+        }
         else
             return result;
     }
@@ -310,7 +323,7 @@ public partial class FieldImplementedByAll
             period);
 
         if (this.IsLite)
-            return QueryBinder.MakeLite(result, null);
+            return QueryBinder.MakeLite(result, CustomLiteModelTypes);
         else
             return result;
     }

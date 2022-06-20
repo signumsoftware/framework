@@ -1584,7 +1584,7 @@ internal class QueryBinder : ExpressionVisitor
             }
             else if (source is LiteReferenceExpression lite)
             {
-                var toStr = lite.CustomToStr ?? BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+                var toStr = BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
 
                 return toStr;
             }
@@ -2393,7 +2393,7 @@ internal class QueryBinder : ExpressionVisitor
 
             Expression entity = EntityCasting(lite.Reference, Lite.Extract(uType)!)!;
 
-            return MakeLite(entity, lite.CustomToStr);
+            return MakeLite(entity, lite.CustomModel);
         }
 
         return null;
@@ -2916,9 +2916,9 @@ internal class QueryBinder : ExpressionVisitor
         return new PrimaryKeyExpression(new SqlConstantExpression(null, type.Nullify()));
     }
 
-    public static Expression MakeLite(Expression entity, Expression? customToStr)
+    public static Expression MakeLite(Expression entity, Dictionary<Type, Type>? customModelTypes = null)
     {
-        return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, customToStr, false, false);
+        return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, null, customModelTypes, false, false);
     }
 
     public PrimaryKeyExpression GetId(Expression expression)

@@ -41,13 +41,13 @@ public class EntitiesController : ControllerBase
         return SignumServer.GetEntityPack(entity);
     }
 
-    [HttpPost("api/entityToStrings")]
-    public string[] EntityToStrings([Required, FromBody]Lite<Entity>[] lites)
+    [HttpPost("api/liteModels")]
+    public object[] LiteModels([Required, FromBody]Lite<Entity>[] lites)
     {
         if (lites == null || lites.Length == 0)
             throw new ArgumentNullException(nameof(lites));
 
-        return lites.Select(a => Database.GetToStr(a.EntityType, a.Id)).ToArray();
+        return lites.Select(a => Database.GetLiteModel(a.EntityType, a.Id, a.ModelType)).ToArray();
     }
 
     [HttpGet("api/fetchAll/{typeName}"), ProfilerActionSplitter("typeName")]

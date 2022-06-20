@@ -452,7 +452,7 @@ internal class DbExpressionComparer : ExpressionComparer
 
     protected virtual bool CompareLiteReference(LiteReferenceExpression a, LiteReferenceExpression b)
     {
-        return Compare(a.Reference, b.Reference) && Compare(a.CustomToStr, b.CustomToStr);
+        return Compare(a.Reference, b.Reference) && Compare(a.CustomModel, b.CustomModel);
     }
 
     protected virtual bool CompareLiteValue(LiteValueExpression a, LiteValueExpression b)

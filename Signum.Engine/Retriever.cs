@@ -40,7 +40,7 @@ class RealRetriever : IRetriever
     EntityCache.RealEntityCache entityCache;
     Dictionary<(Type type, PrimaryKey id), Entity> retrieved = new Dictionary<(Type type, PrimaryKey id), Entity>();
     Dictionary<Type, Dictionary<PrimaryKey, Entity>>? requests;
-    Dictionary<(Type type, PrimaryKey id), List<Lite<IEntity>>>? liteRequests;
+    Dictionary<(Type type, Type modelType, PrimaryKey id), List<Lite<IEntity>>>? liteRequests;
     List<Modifiable> modifiablePostRetrieving = new List<Modifiable>();
 
     bool TryGetRequest((Type type, PrimaryKey id) key, [NotNullWhen(true)]out Entity? value)
@@ -139,13 +139,13 @@ class RealRetriever : IRetriever
         ICacheController? cc = Schema.Current.CacheController(lite.EntityType);
         if (cc != null && cc.Enabled)
         {
-            lite.SetToString(cc.TryGetToString(lite.Id) ?? ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(lite.EntityType.NiceName(), lite.Id) + "]"));
+            lite.SetModel(cc.TryGetLiteModel(lite.Id, lite.ModelType) ?? Lite.GetNotFoundModel(lite));
             return lite;
         }
 
-        var tuple = (type: lite.EntityType, id: lite.Id);
+        var tuple = (type: lite.EntityType, modelType: lite.ModelType, id: lite.Id);
         if (liteRequests == null)
-            liteRequests = new Dictionary<(Type type, PrimaryKey id), List<Lite<IEntity>>>();
+            liteRequests = new Dictionary<(Type type, Type modelType, PrimaryKey id), List<Lite<IEntity>>>();
         liteRequests.GetOrCreate(tuple).Add(lite);
         return lite;
     }
@@ -214,21 +214,20 @@ class RealRetriever : IRetriever
 
         if (liteRequests != null)
         {
-
             {
-                List<(Type type, PrimaryKey id)>? toRemove = null;
+                List<(Type type, Type modelType, PrimaryKey id)>? toRemove = null;
                 foreach (var item in liteRequests)
                 {
-                    var entity = retrieved.TryGetC(item.Key);
+                    var entity = retrieved.TryGetC((item.Key.type, item.Key.id));
                     if (entity != null)
                     {
-                        var toStr = entity.ToString();
+                        var toStr = Lite.GetModel(entity, item.Key.modelType);
 
                         foreach (var lite in item.Value)
-                            lite.SetToString(toStr);
+                            lite.SetModel(toStr);
 
                         if (toRemove == null)
-                            toRemove = new List<(Type type, PrimaryKey id)>();
+                            toRemove = new();
 
                         toRemove.Add(item.Key);
                     }
@@ -242,14 +241,14 @@ class RealRetriever : IRetriever
             {
                 var group = liteRequests.GroupBy(a => a.Key.type).FirstEx();
 
-                var dic = await giGetStrings.GetInvoker(group.Key)(group.Select(a => a.Key.id).ToList(), token);
+                var dic = await giLiteModels.GetInvoker(group.Key)(group.Select(a => a.Key.id).ToList(), token);
 
                 foreach (var item in group)
                 {
-                    var toStr = dic.TryGetC(item.Key.id) ?? ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(item.Key.type.NiceName(), item.Key.id) + "]");
+                    var model = dic.TryGetCN(item.Key.id) ?? Lite.GetNotFoundModel(item.Value.FirstEx());
                     foreach (var lite in item.Value)
                     {
-                        lite.SetToString(toStr);
+                        lite.SetModel(model);
                     }
                 }
 
@@ -293,20 +292,22 @@ class RealRetriever : IRetriever
 
     }
 
-    static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>> giGetStrings =
-        new((ids, token) => GetStrings<Entity>(ids, token));
-    static async Task<Dictionary<PrimaryKey, string>> GetStrings<T>(List<PrimaryKey> ids, CancellationToken? token) where T : Entity
+    static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, object?>>>> giLiteModels =
+        new((ids, token) => GetLiteModels<Entity, string>(ids, token));
+    static async Task<Dictionary<PrimaryKey, object?>> GetLiteModels<T, M>(List<PrimaryKey> ids, CancellationToken? token) where T : Entity
     {
         ICacheController? cc = Schema.Current.CacheController(typeof(T));
         if (cc != null && cc.Enabled)
         {
             cc.Load();
-            return ids.ToDictionary(a => a, a => cc.TryGetToString(a)!);
+            return ids.ToDictionary(a => a, a => cc.TryGetLiteModel(a, typeof(M)!));
         }
-        else if (token != null)
+
+        var modelExpression = Lite.GetModelConstructorExpression<T, M>();
+        if (token != null)
         {
             var tasks = ids.Chunk(Schema.Current.Settings.MaxNumberOfParameters)
-               .Select(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KeyValuePair.Create(a.Id, a.ToString())).ToListAsync(token!.Value))
+               .Select(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KeyValuePair.Create(a.Id, (object?)modelExpression.Evaluate(a))).ToListAsync(token!.Value))
                .ToList();
 
             var list = await Task.WhenAll(tasks);
@@ -317,7 +318,7 @@ class RealRetriever : IRetriever
         else
         {
             var dic = ids.Chunk(Schema.Current.Settings.MaxNumberOfParameters)
-                .SelectMany(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KeyValuePair.Create(a.Id, a.ToString())))
+                .SelectMany(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KeyValuePair.Create(a.Id, (object?)modelExpression.Evaluate(a))))
                 .ToDictionaryEx();
 
             return dic;

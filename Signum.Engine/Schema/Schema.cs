@@ -852,8 +852,8 @@ public interface ICacheController
 
     void Complete(Entity entity, IRetriever retriver);
 
-    string GetToString(PrimaryKey id);
-    string? TryGetToString(PrimaryKey? id);
+    object GetLiteModel(PrimaryKey id, Type modelType);
+    object? TryGetLiteModel(PrimaryKey? id, Type modelType);
 }
 
 public class InvalidateEventArgs : EventArgs { }
@@ -876,9 +876,9 @@ public abstract class CacheControllerBase<T> : ICacheController
 
     public abstract bool Exists(PrimaryKey id);
 
-    public abstract string GetToString(PrimaryKey id);
+    public abstract object GetLiteModel(PrimaryKey id, Type modelType);
 
-    public abstract string? TryGetToString(PrimaryKey? id);
+    public abstract object? TryGetLiteModel(PrimaryKey? id, Type modelType);
 
     public abstract List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
         where R : Entity;

@@ -49,7 +49,7 @@ public class ReactOmniboxManager : OmniboxManager
         if (!Database.Exists(type, id))
             return null;
 
-        return Database.FillToString(Lite.Create(type, id));
+        return Database.FillLiteModel(Lite.Create(type, id));
     }
 
     public override QueryDescription GetDescription(object queryName)

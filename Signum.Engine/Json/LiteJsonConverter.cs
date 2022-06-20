@@ -28,10 +28,26 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
         writer.WriteString("EntityType", TypeLogic.GetCleanName(lite.EntityType));
 
+        if(lite.ModelType != Lite.DefaultModelType(lite.EntityType))
+            writer.WriteString("ModelType", TypeLogic.GetCleanName(lite.ModelType));
+
         writer.WritePropertyName("id");
         JsonSerializer.Serialize(writer, lite.IdOrNull?.Object, lite.IdOrNull?.Object.GetType() ?? typeof(object), options);
 
-        writer.WriteString("toStr", lite.ToString());
+        if(lite.Model != null)
+        {
+            if(lite.Model is string str)
+                writer.WriteString("model", str);
+            else
+            {
+                writer.WritePropertyName("model");
+
+                var pr = PropertyRoute.Root(lite.Model.GetType());
+                var model = (ModelEntity)lite.Model;
+                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, model, null)))
+                    JsonSerializer.Serialize(writer, model, options);
+            }
+        }
 
         if (lite.EntityOrNull != null)
         {
@@ -53,7 +69,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
         reader.Assert(JsonTokenType.StartObject);
 
-        string? toString = null;
+        object? model = null;
         string? idObj = null;
         string? typeStr = null;
         Entity? entity = null;
@@ -64,7 +80,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
             var propName = reader.GetString();
             switch (propName)
             {
-                case "toStr": reader.Read(); toString = reader.GetString(); break;
+                case "EntityType": reader.Read(); typeStr = reader.GetString(); break;
                 case "id":
                     {
                         reader.Read();
@@ -78,11 +94,23 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
                         break;
                     }
-                case "EntityType": reader.Read(); typeStr = reader.GetString(); break;
+                case "model":
+                    reader.Read();
+                    if (reader.TokenType == JsonTokenType.String)
+                        model = reader.GetString();
+                    else
+                    {
+                        using (EntityJsonConverterFactory.SetPath(".model"))
+                        {
+                            var converter = (JsonConverterWithExisting<ModelEntity>)options.GetConverter(typeof(ModelEntity));
+                            model = converter.Read(ref reader, typeof(ModelEntity), options, (ModelEntity?)existingValue?.Model);
+                        }
+                    }
+                    reader.Read(); model = reader.GetString(); break;
                 case "entity":
+                    reader.Read();
                     using (EntityJsonConverterFactory.SetPath(".entity"))
                     {
-                        reader.Read();
                         var converter = (JsonConverterWithExisting<Entity>)options.GetConverter(typeof(Entity));
                         entity = converter.Read(ref reader, typeof(Entity), options, (Entity?)(IEntity?)existingValue?.EntityOrNull);
                     }
@@ -100,9 +128,9 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
         PrimaryKey? idOrNull = idObj == null ? (PrimaryKey?)null : PrimaryKey.Parse(idObj, type);
 
         if (entity == null)
-            return (Lite<T>)Lite.Create(type, idOrNull!.Value, toString!);
+            return (Lite<T>)Lite.Create(type, idOrNull!.Value, model);
 
-        var result = (Lite<T>)entity.ToLiteFat(toString);
+        var result = (Lite<T>)entity.ToLiteFat(model);
 
         if (result.EntityType != type)
             throw new InvalidOperationException("Types don't match");

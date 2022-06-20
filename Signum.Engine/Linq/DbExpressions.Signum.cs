@@ -295,12 +295,13 @@ internal class ImplementedByAllExpression : DbExpression
 
 internal class LiteReferenceExpression : DbExpression
 {
-    public bool LazyToStr;
+    public bool LazyModel;
     public bool EagerEntity;
     public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
-    public readonly Expression? CustomToStr; //Not readonly
+    public readonly Expression? CustomModelExpression;
+    public readonly Dictionary<Type, Type>? CustomModelTypes; 
 
-    public LiteReferenceExpression(Type type, Expression reference, Expression? customToStr, bool lazyToStr, bool eagerEntity) :
+    public LiteReferenceExpression(Type type, Expression reference, Expression? customModelExpression, Dictionary<Type, Type>? customModelTypes, bool lazyModel, bool eagerEntity) :
         base(DbExpressionType.LiteReference, type)
     {
         Type? cleanType = Lite.Extract(type);
@@ -308,17 +309,24 @@ internal class LiteReferenceExpression : DbExpression
         if (cleanType != reference.Type)
             throw new ArgumentException("The type {0} is not the Lite version of {1}".FormatWith(type.TypeName(), reference.Type.TypeName()));
 
+        if (customModelExpression != null && customModelTypes != null)
+            throw new InvalidOperationException($"{nameof(customModelExpression)} and {nameof(customModelTypes)} are incompatible");
+
         this.Reference = reference;
 
-        this.CustomToStr = customToStr;
+        this.CustomModelExpression = customModelExpression;
+        this.CustomModelTypes = customModelTypes;
 
-        this.LazyToStr = lazyToStr;
+        this.LazyModel = lazyModel;
         this.EagerEntity = eagerEntity;
     }
 
     public override string ToString()
     {
-        return "({0}).ToLite({1})".FormatWith(Reference.ToString(), CustomToStr == null ? null : ("customToStr: " + CustomToStr.ToString()));
+        return "({0}).ToLite({1})".FormatWith(Reference.ToString(),
+            CustomModelExpression != null ? ("custmoModelExpression: " + CustomModelExpression.ToString()) :
+            CustomModelTypes != null ? ("custmoModelTypes: {" + CustomModelTypes.ToString(kvp => kvp.Key.TypeName() + ":" + kvp.Value.TypeName(), ", ") + "}") :
+            null);
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -331,13 +339,13 @@ internal class LiteReferenceExpression : DbExpression
         switch (expandLite)
         {
             case ExpandLite.EntityEager:
-                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomToStr, lazyToStr: false, eagerEntity: true);
-            case ExpandLite.ToStringEager:
-                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomToStr, lazyToStr: false, eagerEntity: false);
-            case ExpandLite.ToStringLazy:
-                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomToStr, lazyToStr: true, eagerEntity: false);
-            case ExpandLite.ToStringNull:
-                return new LiteReferenceExpression(this.Type, this.Reference, Expression.Constant(null, typeof(string)), lazyToStr: true, eagerEntity: false);
+                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomModelExpression, this.CustomModelTypes, lazyModel: false, eagerEntity: true);
+            case ExpandLite.ModelEager:
+                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomModelExpression, this.CustomModelTypes, lazyModel: false, eagerEntity: false);
+            case ExpandLite.ModelLazy:
+                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomModelExpression, this.CustomModelTypes, lazyModel: true, eagerEntity: false);
+            case ExpandLite.ModelNull:
+                return new LiteReferenceExpression(this.Type, this.Reference, Expression.Constant(null, typeof(string)), null, lazyModel: true, eagerEntity: false);
             default:
                 throw new NotImplementedException();
         }

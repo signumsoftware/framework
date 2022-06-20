@@ -60,9 +60,9 @@ internal class DbExpressionVisitor : ExpressionVisitor
     protected internal virtual Expression VisitLiteReference(LiteReferenceExpression lite)
     {
         var newRef = Visit(lite.Reference);
-        var newToStr = Visit(lite.CustomToStr);
-        if (newRef != lite.Reference || newToStr != lite.CustomToStr)
-            return new LiteReferenceExpression(lite.Type,  newRef, newToStr, lite.LazyToStr, lite.EagerEntity);
+        var newModel = Visit(lite.CustomModel);
+        if (newRef != lite.Reference || newModel != lite.CustomModel)
+            return new LiteReferenceExpression(lite.Type,  newRef, newModel, lite.LazyModel, lite.EagerEntity);
         return lite;
     }
 

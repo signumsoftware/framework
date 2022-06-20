@@ -411,7 +411,7 @@ internal static class TranslatorBuilder
         {
             var reference = Visit(lite.Reference);
 
-            var toStr = Visit(lite.CustomToStr);
+            var toStr = Visit(lite.CustomModel);
 
             return Lite.ToLiteFatInternalExpression(reference, toStr ?? Expression.Constant(null, typeof(string)));
         }

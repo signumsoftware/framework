@@ -229,9 +229,9 @@ public class EntityInfoProxy
     }
 
 
-    public Lite<Entity> ToLite(string? toString = null)
+    public Lite<Entity> ToLite(object? liteModel = null)
     {
-        return Lite.Create(this.EntityType, this.IdOrNull!.Value, toString);
+        return Lite.Create(this.EntityType, this.IdOrNull!.Value, liteModel);
     }
 
     public static EntityInfoProxy? Parse(string dataEntity)

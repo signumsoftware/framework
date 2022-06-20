@@ -41,13 +41,13 @@ internal class EntityCompleter : DbExpressionVisitor
 
     private Expression? LiteToString(LiteReferenceExpression lite, Expression typeId)
     {
-        if (lite.CustomToStr != null)
-            return Visit(lite.CustomToStr);
+        if (lite.CustomModel != null)
+            return Visit(lite.CustomModel);
 
         if (lite.Reference is ImplementedByAllExpression)
             return null;
 
-        if (lite.LazyToStr)
+        if (lite.LazyModel)
             return null;
 
         if (IsCacheable(typeId))
