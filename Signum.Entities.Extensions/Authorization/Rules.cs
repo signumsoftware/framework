@@ -4,6 +4,7 @@ namespace Signum.Entities.Authorization;
 
 [EntityKind(EntityKind.System, EntityData.Master)]
 public abstract class RuleEntity<R, A> : Entity
+    where R : class
 {   
     public Lite<RoleEntity> Role { get; set; }
 

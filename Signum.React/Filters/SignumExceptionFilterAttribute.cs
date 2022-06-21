@@ -149,12 +149,12 @@ public class HttpError
         }
     }
 
-    public string ExceptionType;
-    public string ExceptionMessage;
-    public string? ExceptionId;
-    public string? StackTrace;
-    public ModelEntity? Model; 
-    public HttpError? InnerException;
+    public string ExceptionType { get; set; }
+    public string ExceptionMessage { get; set; }
+    public string? ExceptionId { get; set; }
+    public string? StackTrace { get; set; }
+    public ModelEntity? Model; /*{ get; set; }*/
+    public HttpError? InnerException; /*{ get; set; }*/
 }
 
 public class SignumInitializeFilterAttribute : IAsyncResourceFilter

@@ -9,64 +9,34 @@ namespace Signum.Utilities.Reflection;
 
 public static class ReflectionTools
 {
-    public static bool? IsNullable(this FieldInfo fi, int position = 0)
+    public static bool? IsNullable(this FieldInfo fi)
     {
-        var result = fi.GetCustomAttribute<NullableAttribute>(); 
+        if (fi.Name.Contains("Resource"))
+        {
 
-        if (result != null)
-            return result.GetNullable(position);
+        }
 
-        if (fi.FieldType.IsValueType)
+        var info = new NullabilityInfoContext().Create(fi);
+
+        if (info.ReadState == NullabilityState.Unknown)
             return null;
 
-        return fi.DeclaringType!.IsNullableFromContext(position);
+        return info.ReadState == NullabilityState.Nullable;
     }
 
-    public static bool? IsNullable(this PropertyInfo pi, int position = 0)
+    public static bool? IsNullable(this PropertyInfo pi)
     {
-        var result = pi.GetCustomAttribute<NullableAttribute>();
+        if (pi.Name.Contains("Resource"))
+        {
 
-        if (result != null)
-            return result.GetNullable(position);
+        }
 
-        if (pi.PropertyType.IsValueType)
+        var info = new NullabilityInfoContext().Create(pi);
+
+        if (info.ReadState == NullabilityState.Unknown)
             return null;
-
-        return pi.DeclaringType!.IsNullableFromContext();
-    }
-
-    public static bool? IsNullableFromContext(this Type ti, int position = 0)
-    {
-        var result = ti.GetCustomAttribute<NullableContextAttribute>();
-        if (result != null)
-            return result.GetNullable(position);
-
-        return ti.DeclaringType?.IsNullableFromContext(position);
-    }
-
-    public static bool? GetNullable(this NullableContextAttribute attr, int position = 0)
-    {
-        if (position > 0 && attr.NullableFlags.Length == 1)
-            position = 0;
-
-        var first = attr.NullableFlags[position];
-
-        return first == 1 ? (bool?)false :
-              first == 2 ? (bool?)true :
-              null;
-    }
-
- 
-    public static bool? GetNullable(this NullableAttribute attr, int position = 0)
-    {
-        if (position > 0 && attr.NullableFlags.Length == 1)
-            position = 0;
-
-        var first = attr.NullableFlags[position];
-
-        return first == 1 ? (bool?)false :
-              first == 2 ? (bool?)true :
-              null;
+        
+            return info.ReadState == NullabilityState.Nullable;
     }
 
     public static bool FieldEquals(FieldInfo? f1, FieldInfo? f2)
