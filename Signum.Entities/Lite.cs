@@ -142,8 +142,6 @@ public class LiteModelConstructor<T, M> : ILiteModelConstructor
 
 public static class Lite
 {
-
-
     public static Type BaseImplementationType = typeof(LiteImp);
 
     static GenericInvoker<Func<PrimaryKey, object?, Lite<Entity>>> giNewLite =
@@ -177,6 +175,7 @@ public static class Lite
             throw new FormatException(error);
     }
 
+
     public static Lite<T> Parse<T>(string liteKey) where T : class, IEntity
     {
         return (Lite<T>)Lite.Parse(liteKey);
@@ -201,7 +200,7 @@ public static class Lite
 
         string? toStr = match.Groups["toStr"].Value.DefaultText(null!); //maybe null
 
-        result = giNewLite.GetInvoker(type)(id, toStr);
+        result = giNewLite.GetInvoker(type, typeof(string))(id, toStr);
         return null;
     }
 
@@ -214,12 +213,17 @@ public static class Lite
 
     public static Lite<Entity> Create(Type type, PrimaryKey id)
     {
-        return giNewLite.GetInvoker(type)(id, null);
+        return giNewLite.GetInvoker(type, typeof(string))(id, null);
     }
 
-    public static Lite<Entity> Create(Type type, PrimaryKey id, object? model)
+    public static Lite<Entity> Create(Type type, PrimaryKey id, object model)
     {
-        return giNewLite.GetInvoker(type)(id, model);
+        return giNewLite.GetInvoker(type, model.GetType())(id, model);
+    }
+
+    public static Lite<Entity> Create(Type type, PrimaryKey id, Type modelType)
+    {
+        return giNewLite.GetInvoker(type, modelType)(id, null);
     }
 
     [DebuggerStepThrough]
@@ -229,9 +233,11 @@ public static class Lite
         if (entity.IdOrNull == null)
             throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-        var model = Lite.GetModel(entity, Lite.DefaultModelType(entity.GetType()));
+        var modelType = Lite.DefaultModelType(entity.GetType());
 
-        return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, model);
+        var model = Lite.GetModel(entity, modelType);
+
+        return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), modelType)(entity.Id, model);
     }
 
     [DebuggerStepThrough]
@@ -243,26 +249,37 @@ public static class Lite
 
         var model = Lite.GetModel(entity, modelType);
 
-        return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, model);
+        return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), modelType)(entity.Id, model);
+    }
+
+    public static IEnumerable<Type> GetLiteModelTypes(Type entityType)
+    {
+        var dic = Lite.LiteModelConstructors.TryGetC(entityType);
+        if (dic == null)
+            return new[] { typeof(string) };
+
+        return dic.Keys.PreAnd(typeof(string));
     }
 
     [DebuggerStepThrough]
-    public static Lite<T> ToLite<T>(this T entity, object? model)
+    public static Lite<T> ToLite<T>(this T entity, object model)
         where T : class, IEntity
     {
         if (entity.IsNew)
             throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-        return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, model);
+        return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), model.GetType())(entity.Id, model);
     }
 
     [DebuggerStepThrough]
     public static Lite<T> ToLiteFat<T>(this T entity)
      where T : class, IEntity
     {
-        var model = Lite.GetModel(entity, Lite.DefaultModelType(entity.GetType()));
+        var modelType = Lite.DefaultModelType(entity.GetType());
 
-        return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, model);
+        var model = Lite.GetModel(entity, modelType);
+
+        return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType(), modelType)((Entity)(IEntity)entity, model);
     }
 
     [DebuggerStepThrough]
@@ -271,14 +288,14 @@ public static class Lite
     {
         var model = Lite.GetModel(entity, modelType);
 
-        return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, model);
+        return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType(), modelType)((Entity)(IEntity)entity, model);
     }
 
     [DebuggerStepThrough]
-    public static Lite<T> ToLiteFat<T>(this T entity, object? model)
+    public static Lite<T> ToLiteFat<T>(this T entity, object model)
       where T : class, IEntity
     {
-        return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, model);
+        return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType(), model.GetType())((Entity)(IEntity)entity, model);
     }
 
     [DebuggerStepThrough]
@@ -354,6 +371,22 @@ public static class Lite
     public static object GetModel(IEntity e, Type modelType)
     {
         return giGetModel.GetInvoker(e.GetType(), modelType)((Entity)e);
+    }
+
+    public static Type ParseModelType(Type type, string modelTypeStr)
+    {
+        if (modelTypeStr == "string" || 
+            modelTypeStr == "String")
+            return typeof(string);
+
+        var dic = LiteModelConstructors.TryGetC(type);
+
+        var single = dic?.Keys.SingleOrDefaultEx(a => Reflector.CleanTypeName(a) == modelTypeStr);
+
+        if (single == null)
+            throw new InvalidOperationException($"No Lite Model with name '{modelTypeStr}' is registered for '{type.TypeName()}'");
+
+        return single;
     }
 
     static GenericInvoker<Func<Entity, object>> giGetModel = new GenericInvoker<Func<Entity, object>>((e) => GetModel<Entity, string>(e));
@@ -552,31 +585,15 @@ public static class Lite
         return liteConstructorCache.GetOrAdd((type, modelType), t => CreateLiteConstructor(t.type, t.modelType));
     }
 
-    static ConstructorInfo CreateLiteConstructor(Type t, Type model)
+    static ConstructorInfo CreateLiteConstructor(Type t, Type modelType)
     {
-        return typeof(LiteImp<,>).MakeGenericType(t, model).GetConstructor(new[] { typeof(PrimaryKey), typeof(string) })!;
+        return typeof(LiteImp<,>).MakeGenericType(t, modelType).GetConstructor(new[] { typeof(PrimaryKey), modelType })!;
     }
 
 
     public static NewExpression NewExpression(Type type, Expression id, Expression model)
     {
         return Expression.New(Lite.GetLiteConstructorFromCache(type, model.Type), id.UnNullify(), model);
-    }
-
-
-    static Lite<T>? ToLiteFatInternal<T>(this T? entity, object? model)
-        where T : class, IEntity
-    {
-        if (entity == null)
-            return null;
-
-        return entity.ToLiteFat(model);
-    }
-
-    static MethodInfo miToLiteFatInternal = ReflectionTools.GetMethodInfo(() => ToLiteFatInternal<Entity>(null, null)).GetGenericMethodDefinition();
-    public static Expression ToLiteFatInternalExpression(Expression reference, Expression model)
-    {
-        return Expression.Call(miToLiteFatInternal.MakeGenericMethod(reference.Type), reference, model);
     }
 
     public static Lite<T> ParsePrimaryKey<T>(string id)

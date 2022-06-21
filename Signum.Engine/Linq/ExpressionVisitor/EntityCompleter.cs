@@ -74,13 +74,13 @@ internal class EntityCompleter : DbExpressionVisitor
                 });
         }
 
-        throw new UnexpectedValueException(lite.Reference);
+        return new Dictionary<Type, ExpressionOrType>(); //Could be more accurate to preserve model in liteA ?? liteB  or condition ? liteA : liteB 
     }
 
     private Expression GetModel(EntityExpression entityExp, Type modelType)
     {
-        if (modelType == typeof(string))
-            return binder.Visit(Expression.Call(entityExp, EntityExpression.ToStringMethod));
+        //if (modelType == typeof(string))
+        //    return binder.BindMethodCall(Expression.Call(entityExp, EntityExpression.ToStringMethod));
 
         var mce = Lite.GetModelConstructorExpression(entityExp.Type, modelType);
 

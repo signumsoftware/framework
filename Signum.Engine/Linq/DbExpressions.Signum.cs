@@ -299,9 +299,9 @@ internal class LiteReferenceExpression : DbExpression
     public bool EagerEntity;
     public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
     public readonly Expression? CustomModelExpression;
-    public readonly Dictionary<Type, Type>? CustomModelTypes; 
+    public readonly ReadOnlyDictionary<Type, Type>? CustomModelTypes; 
 
-    public LiteReferenceExpression(Type type, Expression reference, Expression? customModelExpression, Dictionary<Type, Type>? customModelTypes, bool lazyModel, bool eagerEntity) :
+    public LiteReferenceExpression(Type type, Expression reference, Expression? customModelExpression, ReadOnlyDictionary<Type, Type>? customModelTypes, bool lazyModel, bool eagerEntity) :
         base(DbExpressionType.LiteReference, type)
     {
         Type? cleanType = Lite.Extract(type);
@@ -325,7 +325,7 @@ internal class LiteReferenceExpression : DbExpression
     {
         return "({0}).ToLite({1})".FormatWith(Reference.ToString(),
             CustomModelExpression != null ? ("custmoModelExpression: " + CustomModelExpression.ToString()) :
-            CustomModelTypes != null ? ("custmoModelTypes: {" + CustomModelTypes.ToString(kvp => kvp.Key.TypeName() + ":" + kvp.Value.TypeName(), ", ") + "}") :
+            CustomModelTypes != null ? ("custmoModelTypes: {\n" + CustomModelTypes.ToString(kvp => kvp.Key.TypeName() + ": " + kvp.Value.TypeName(), "\n, ").Indent(4) + "\n}") :
             null);
     }
 
@@ -368,6 +368,11 @@ public struct ExpressionOrType
         LazyModelType = null;
         EagerExpression = eagerExpression;
     }
+
+    public override string ToString()
+    {
+        return LazyModelType?.TypeName() ?? EagerExpression!.ToString();
+    }
 }
 
 internal class LiteValueExpression : DbExpression
@@ -393,7 +398,12 @@ internal class LiteValueExpression : DbExpression
 
     public override string ToString()
     {
-        return $"new Lite<{Type.CleanType().TypeName()}>({TypeId},{Id},{CustomModelExpression?.ToString() ?? Models?.ToString(";")})";
+
+        var lastPart = CustomModelExpression != null ? ("custmoModelExpression: " + CustomModelExpression.ToString()) :
+            Models != null ? ("models: {\n" + Models.ToString(kvp => kvp.Key.TypeName() + ": " + kvp.Value.ToString(), "\n, ").Indent(4) + "\n}") :
+            null;
+
+        return $"new Lite<{Type.CleanType().TypeName()}>({TypeId},{Id}, {lastPart})";
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)

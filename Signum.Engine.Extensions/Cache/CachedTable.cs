@@ -128,8 +128,28 @@ public abstract class CachedTableBase
     internal abstract bool Contains(PrimaryKey primaryKey);
 }
 
+public interface ICachedLiteModelConstructor
+{
+    object GetModel(PrimaryKey pk);
+}
 
+public class CachedLiteModelConstructor<M> : ICachedLiteModelConstructor
+    where M : notnull
+{
+    Expression<Func<PrimaryKey, M>> Expression; //For Debugging
+    Func<PrimaryKey, M> Function;
 
+    public CachedLiteModelConstructor(Expression<Func<PrimaryKey, M>> expression)
+    {
+        this.Expression = expression;
+        this.Function = expression.Compile();
+    }
+
+    public object GetModel(PrimaryKey pk)
+    {
+        return Function(pk);
+    }
+}
 
 class CachedTable<T> : CachedTableBase where T : Entity
 {
@@ -146,8 +166,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     Action<object, IRetriever, T> completer;
     Expression<Action<object, IRetriever, T>> completerExpression;
     Func<object, PrimaryKey> idGetter;
-    Expression<Func<PrimaryKey, string>> toStrGetterExpression = null!;
-    Func<PrimaryKey, string> toStrGetter = null!;
+    Dictionary<Type, ICachedLiteModelConstructor> liteModelConstructors = null!; 
 
     public override IColumn? ParentColumn { get; set; }
 
@@ -231,13 +250,21 @@ class CachedTable<T> : CachedTableBase where T : Entity
 
     public override void SchemaCompleted()
     {
-        toStrGetterExpression = ToStringExpressionVisitor.GetToString<T>(this.Constructor, s => s.ToString());
-        toStrGetter = toStrGetterExpression.Compile();
+        this.liteModelConstructors = Lite.GetLiteModelTypes(typeof(T))
+            .ToDictionary(modelType => modelType, modelType => 
+            {
+                var modelConstructor = Lite.GetModelConstructorExpression(typeof(T), modelType);
+                var cachedModelConstructor = LiteModelExpressionVisitor.giGetCachedLiteModelConstructor.GetInvoker(typeof(T), modelType)(this.Constructor, modelConstructor);
+                return cachedModelConstructor;
+            });
+
+
         if (this.subTables != null)
             foreach (var item in this.subTables)
                 item.SchemaCompleted();
 
     }
+
 
     protected override void Reset()
     {
@@ -259,9 +286,9 @@ class CachedTable<T> : CachedTableBase where T : Entity
         rows.Load();
     }
 
-    public string GetToString(PrimaryKey id)
+    public object GetLiteModel(PrimaryKey id, Type modelType)
     {
-        return toStrGetter(id);
+        return this.liteModelConstructors.GetOrThrow(modelType).GetModel(id);
     }
 
     public object GetRow(PrimaryKey id)
@@ -274,14 +301,14 @@ class CachedTable<T> : CachedTableBase where T : Entity
         return origin;
     }
 
-    public string? TryGetToString(PrimaryKey id)
+    public object? TryGetLiteModel(PrimaryKey id, Type modelType)
     {
         Interlocked.Increment(ref hits);
         var origin = this.GetRows().TryGetC(id);
         if (origin == null)
             return null;
 
-        return toStrGetter(id);
+        return this.liteModelConstructors.GetOrThrow(modelType).GetModel(id);
     }
 
     public bool Exists(PrimaryKey id)
@@ -685,9 +712,9 @@ class CachedLiteTable<T> : CachedTableBase where T : Entity
     {
         Interlocked.Increment(ref hits);
 
-        var lite = (LiteImp<T>)Lite.Create<T>(id, toStrings.Value[id]);
-
-        return retriever.ModifiablePostRetrieving(lite)!;
+        var lite = Lite.Create<T>(id, toStrings.Value[id]);
+        retriever.ModifiablePostRetrieving((LiteImp)lite);
+        return lite;
     }
 
     public override int? Count

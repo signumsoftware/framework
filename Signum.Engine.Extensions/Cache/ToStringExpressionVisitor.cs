@@ -4,19 +4,23 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Cache;
 
-class ToStringExpressionVisitor : ExpressionVisitor
+class LiteModelExpressionVisitor : ExpressionVisitor
 {
     Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
 
     CachedEntityExpression root;
 
-    public ToStringExpressionVisitor(ParameterExpression param, CachedEntityExpression root)
+    public LiteModelExpressionVisitor(ParameterExpression param, CachedEntityExpression root)
     {
         this.root = root;
         this.replacements = new Dictionary<ParameterExpression, Expression> { { param, root } };
     }
 
-    public static Expression<Func<PrimaryKey, string>> GetToString<T>(CachedTableConstructor constructor, Expression<Func<T, string>> lambda)
+    public static GenericInvoker<Func<CachedTableConstructor, LambdaExpression, ICachedLiteModelConstructor>> giGetCachedLiteModelConstructor =
+        new((ctc, la) => GetCachedLiteModelConstructor<Entity, ModelEntity>(ctc, (Expression<Func<Entity, ModelEntity>>)la));
+    public static CachedLiteModelConstructor<M> GetCachedLiteModelConstructor<T, M>(CachedTableConstructor constructor, Expression<Func<T, M>> lambda)
+        where T : Entity
+        where M : notnull
     {
         Table table = (Table)constructor.table;
 
@@ -29,11 +33,13 @@ class ToStringExpressionVisitor : ExpressionVisitor
 
         var root = new CachedEntityExpression(pk, typeof(T), constructor, null, null);
 
-        var visitor = new ToStringExpressionVisitor(param, root);
+        var visitor = new LiteModelExpressionVisitor(param, root);
 
         var result = visitor.Visit(lambda.Body);
 
-        return Expression.Lambda<Func<PrimaryKey, string>>(result, pk);
+        var lambdaExpression =  Expression.Lambda<Func<PrimaryKey, M>>(result, pk);
+
+        return new CachedLiteModelConstructor<M>(lambdaExpression);
     }
 
     protected override Expression VisitMember(MemberExpression node)
@@ -230,7 +236,7 @@ class ToStringExpressionVisitor : ExpressionVisitor
 
                 ConstantExpression tab = Expression.Constant(ce.Constructor.cachedTable, cachedTableType);
 
-                var mi = cachedTableType.GetMethod(nameof(CachedTable<Entity>.GetToString))!;
+                var mi = cachedTableType.GetMethod(nameof(CachedTable<Entity>.GetLiteModel))!;
 
                 return Expression.Call(tab, mi, ce.PrimaryKey.UnNullify());
             }

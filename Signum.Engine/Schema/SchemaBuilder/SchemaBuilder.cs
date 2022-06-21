@@ -692,7 +692,7 @@ public class SchemaBuilder
             string impName = name.Add(TypeLogic.GetCleanName(t)).ToString();
             return new ImplementationColumn(impName, referenceTable: rt)
             {
-                CustomLiteModelType = !isLite ? null : Settings.FieldAttributes(route)?.OfType<LiteModelAttribute>().SingleOrDefaultEx(a => a.EntityType == t)?.LiteModelType,
+                CustomLiteModelType = !isLite ? null : Settings.FieldAttributes(route)?.OfType<LiteModelAttribute>().SingleOrDefaultEx(a => a.ForEntityType == t)?.LiteModelType,
                 Nullable = nullable,
                 AvoidForeignKey = avoidForeignKey,
             };
@@ -700,6 +700,7 @@ public class SchemaBuilder
 
         return new FieldImplementedBy(route, implementations)
         {
+            IsLite = isLite,
             SplitStrategy = strategy,
             AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null
         }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));

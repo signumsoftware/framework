@@ -70,9 +70,22 @@ internal class DbExpressionVisitor : ExpressionVisitor
     {
         var newTypeId = Visit(lite.TypeId);
         var newId = (PrimaryKeyExpression)Visit(lite.Id);
-        var newModel = Visit(lite.CustomModelExpression);
-        if (newTypeId != lite.TypeId || newId != lite.Id || newModel != lite.CustomModelExpression)
-            return new LiteValueExpression(lite.Type, newTypeId, newId, newModel, lite.Models);
+        var customModelExpression = Visit(lite.CustomModelExpression);
+        var models = lite.Models == null ? null : Visit(lite.Models, eos =>
+        {
+            if (eos.LazyModelType != null)
+                return eos;
+
+            var newExpr = Visit(eos.EagerExpression);
+
+            if (newExpr != eos.EagerExpression)
+                return new ExpressionOrType(newExpr!);
+
+            return eos;
+        });
+
+        if (newTypeId != lite.TypeId || newId != lite.Id || customModelExpression != lite.CustomModelExpression || models != lite.Models)
+            return new LiteValueExpression(lite.Type, newTypeId, newId, customModelExpression, models);
         return lite;
     }
 
@@ -89,14 +102,13 @@ internal class DbExpressionVisitor : ExpressionVisitor
     [DebuggerStepThrough]
     protected static ReadOnlyDictionary<K, V> Visit<K, V>(ReadOnlyDictionary<K, V> dictionary, Func<V, V> newValue)
         where K : notnull
-        where V : class
     {
         Dictionary<K, V>? alternate = null;
         foreach (var k in dictionary.Keys)
         {
             V item = dictionary[k];
             V newItem = newValue(item);
-            if (alternate == null && item != newItem)
+            if (alternate == null && !Equals(item, newItem))
             {
                 alternate = new Dictionary<K, V>();
                 foreach (var k2 in dictionary.Keys.TakeWhile(k2 => !k2.Equals(k)))

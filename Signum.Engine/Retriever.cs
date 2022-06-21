@@ -239,9 +239,9 @@ class RealRetriever : IRetriever
 
             while (liteRequests.Count > 0)
             {
-                var group = liteRequests.GroupBy(a => a.Key.type).FirstEx();
+                var group = liteRequests.GroupBy(a => (a.Key.type, a.Key.modelType)).FirstEx();
 
-                var dic = await giLiteModels.GetInvoker(group.Key)(group.Select(a => a.Key.id).ToList(), token);
+                var dic = await giLiteModels.GetInvoker(group.Key.type, group.Key.modelType)(group.Select(a => a.Key.id).ToList(), token);
 
                 foreach (var item in group)
                 {

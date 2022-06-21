@@ -236,7 +236,7 @@ internal class QueryBinder : ExpressionVisitor
         return BindMethodCall(result);
     }
 
-    private Dictionary<Type, Type>? ToTypeDictionary(Expression? modelType, Type entityType)
+    private ReadOnlyDictionary<Type, Type>? ToTypeDictionary(Expression? modelType, Type entityType)
     {
         if (modelType == null)
             return null;
@@ -248,7 +248,7 @@ internal class QueryBinder : ExpressionVisitor
                
             if(ce.Value is Type t)
             {
-                return new Dictionary<Type, Type> { { entityType, t } };
+                return new Dictionary<Type, Type> { { entityType, t } }.ToReadOnly();
             }
         }
 
@@ -1319,7 +1319,8 @@ internal class QueryBinder : ExpressionVisitor
 
             Expression[] results = expr switch
             {
-                LiteReferenceExpression lite => lite.Reference is ImplementedByAllExpression iba ? iba.Ids.Values.PreAnd(iba.TypeId).ToArray() :
+                LiteReferenceExpression lite => 
+                    lite.Reference is ImplementedByAllExpression iba ? iba.Ids.Values.PreAnd(iba.TypeId).ToArray() :
                     lite.Reference is EntityExpression e ? new[] { GetExpressionOrder(e), e.ExternalId } :
                     lite.Reference is ImplementedByExpression ib ? ib.Implementations.Values.SelectMany(e => new[] { GetExpressionOrder(e), e.ExternalId }).ToArray() :
                     throw new NotImplementedException(""),
@@ -2415,7 +2416,7 @@ internal class QueryBinder : ExpressionVisitor
 
             Expression entity = EntityCasting(lite.Reference, Lite.Extract(uType)!)!;
 
-            return new LiteReferenceExpression(entity.Type, entity, lite.CustomModelExpression, lite.CustomModelTypes, false, false);
+            return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, lite.CustomModelExpression, lite.CustomModelTypes, false, false);
         }
 
         return null;
@@ -2940,7 +2941,7 @@ internal class QueryBinder : ExpressionVisitor
 
     public static Expression MakeLite(Expression entity, Dictionary<Type, Type>? customModelTypes = null)
     {
-        return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, null, customModelTypes, false, false);
+        return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, null, customModelTypes?.ToReadOnly(), false, false);
     }
 
     public PrimaryKeyExpression GetId(Expression expression)

@@ -72,6 +72,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
         object? model = null;
         string? idObj = null;
         string? typeStr = null;
+        string? modelTypeStr = null;
         Entity? entity = null;
 
         reader.Read();
@@ -94,6 +95,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
                         break;
                     }
+                case "ModelType": reader.Read(); modelTypeStr = reader.GetString(); break;
                 case "model":
                     reader.Read();
                     if (reader.TokenType == JsonTokenType.String)
@@ -127,10 +129,19 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
         PrimaryKey? idOrNull = idObj == null ? (PrimaryKey?)null : PrimaryKey.Parse(idObj, type);
 
-        if (entity == null)
-            return (Lite<T>)Lite.Create(type, idOrNull!.Value, model);
 
-        var result = (Lite<T>)entity.ToLiteFat(model);
+        Type modelType = modelTypeStr == null ? Lite.DefaultModelType(type) : Lite.ParseModelType(type, modelTypeStr);
+
+        if (entity == null)
+        {
+            return model != null ?
+                (Lite<T>)Lite.Create(type, idOrNull!.Value, model) :
+                (Lite<T>)Lite.Create(type, idOrNull!.Value, modelType);
+        }
+
+        var result = model != null ? 
+            (Lite<T>)entity.ToLiteFat(model) : 
+            (Lite<T>)entity.ToLiteFat(modelType); ;
 
         if (result.EntityType != type)
             throw new InvalidOperationException("Types don't match");

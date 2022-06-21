@@ -3,6 +3,8 @@ using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Entities.Internal;
 using Signum.Utilities.DataStructures;
+using Signum.Engine.Basics;
+using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq;
 
@@ -407,14 +409,36 @@ internal static class TranslatorBuilder
             return Expression.Call(Expression.Constant(Schema.Current), miGetType, Visit(typeIba.TypeColumn).UnNullify());
         }
 
+        //EagerEntity
         protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
             var reference = Visit(lite.Reference);
 
             var model = Visit(lite.CustomModelExpression);
 
-            return Lite.ToLiteFatInternalExpression(reference, model ?? Expression.Constant(null, typeof(string)));
+            return Expression.Call(miToLiteFatInternal.MakeGenericMethod(reference.Type),
+                reference,
+                model ?? Expression.Constant(null, typeof(object)),
+                Expression.Constant(lite.CustomModelTypes, typeof(ReadOnlyDictionary<Type, Type>)));
         }
+
+        static MethodInfo miToLiteFatInternal = ReflectionTools.GetMethodInfo(() => ToLiteFatInternal<Entity>(null, null, null!)).GetGenericMethodDefinition();
+        static Lite<T>? ToLiteFatInternal<T>(T? entity, object? model, IReadOnlyDictionary<Type, Type>? modelTypeDictionary)
+            where T : class, IEntity
+        {
+            if (entity == null)
+                return null;
+
+
+            if (model != null)
+                return entity.ToLiteFat(model);
+
+
+            var modelType = modelTypeDictionary?.TryGetC(entity.GetType()) ?? Lite.DefaultModelType(entity.GetType());
+
+            return entity.ToLiteFat(modelType);
+        }
+
 
         protected internal override Expression VisitLiteValue(LiteValueExpression lite)
         {
@@ -426,49 +450,101 @@ internal static class TranslatorBuilder
             var customModel = Visit(lite.CustomModelExpression);
             var typeId = lite.TypeId;
 
-            var modelOrNull = customModel ?? Expression.Constant(null, typeof(string));
+            Expression GetEagerModel(Type entityType, out bool requiresRequest)
+            {
+                requiresRequest = false;
+                if (customModel != null)
+                    return customModel;
 
+                var eot = lite.Models!.GetOrThrow(entityType);
+
+                if (eot.EagerExpression != null)
+                    return Visit(eot.EagerExpression);
+
+                requiresRequest = true;
+
+                return Expression.Constant(null, eot.LazyModelType!);
+            }
 
             Expression nothing = Expression.Constant(null, lite.Type);
-            Expression liteConstructor;
             if (typeId is TypeEntityExpression tee)
             {
                 Type type = tee.TypeValue;
 
-                var model = lite.CustomModelExpression != null ? Visit(lite.CustomModelExpression) :
-                  ;
+                var model = GetEagerModel(type, out var requiresRequest);
 
-                liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                    Expression.Convert(Lite.NewExpression(type, id, model), lite.Type),
+                var liteConstructor = Expression.Convert(Lite.NewExpression(type, id, model), lite.Type);
+
+                return Expression.Condition(Expression.NotEqual(id, NullId),
+                    requiresRequest ? RequestLite(liteConstructor) : PostRetrieving(liteConstructor),
                     nothing);
             }
             else if (typeId is TypeImplementedByExpression tib)
             {
-                liteConstructor = tib.TypeImplementations.Aggregate(nothing,
+                var result = tib.TypeImplementations.Aggregate(nothing,
                     (acum, ti) =>
                     {
                         var visitId = Visit(NullifyColumn(ti.Value));
+                        var model = GetEagerModel(ti.Key, out var requiresRequest);
+
+                        var liteConstructor = Lite.NewExpression(ti.Key, visitId, model);
+
                         return Expression.Condition(Expression.NotEqual(visitId, NullId),
-                            Expression.Convert(Lite.NewExpression(ti.Key, visitId, modelOrNull), lite.Type), acum);
+                            Expression.Convert(requiresRequest ? RequestLite(liteConstructor) : PostRetrieving(liteConstructor), lite.Type),
+                            acum);
                     });
+
+                return result;
             }
             else if (typeId is TypeImplementedByAllExpression tiba)
             {
+                var uid = id.UnNullify();
+
                 var tid = Visit(NullifyColumn(tiba.TypeColumn));
-                liteConstructor = Expression.Convert(Expression.Call(miTryLiteCreate, Expression.Constant(Schema.Current), tid, id.Nullify(), modelOrNull), lite.Type);
+                var typeFromId = Expression.Call(Expression.Constant(Schema.Current), miGetTypeFromId, tid.UnNullify());
+                if (customModel != null)
+                    return Expression.Condition(Expression.Equal(tid, NullId), nothing,
+                        PostRetrieving(Expression.Convert(
+                            Expression.Call(miLiteCreateModel, typeFromId, uid, customModel), 
+                            lite.Type)));
+
+                var baseCase = Expression.Condition(Expression.Equal(tid, NullId), nothing,
+                    RequestLite(
+                        Expression.Convert(
+                            Expression.Call(miLiteCreateModelType, typeFromId, uid, Expression.Call(miGetDefaultModelType, typeFromId)), 
+                            lite.Type)));
+
+                var result = lite.Models!.Aggregate((Expression)baseCase,
+                    (acum, kvp) =>
+                    {
+                        var model = GetEagerModel(kvp.Key, out var requiresRequest);
+
+                        var liteExpression = requiresRequest ?
+                                RequestLite(Expression.Call(miLiteCreateModelType, typeFromId, uid, Expression.Constant(model.Type))) :
+                                PostRetrieving(Expression.Call(miLiteCreateModel, typeFromId, uid, model));
+
+                        return Expression.Condition(Expression.Equal(tid, Expression.Constant(TypeLogic.TypeToId.GetOrThrow(kvp.Key))),
+                            Expression.Convert(liteExpression, lite.Type),
+                            acum);
+                    });
+
+                return result;
             }
             else
             {
-                liteConstructor = Expression.Condition(Expression.NotEqual(id.Nullify(), NullId),
-                                   Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), modelOrNull), lite.Type),
-                                    nothing);
-            }
+                var type = Visit(typeId);
 
-            if (customModel != null)
-                return PostRetrieving(liteConstructor);
-            else
-                return RequestLite(liteConstructor);
+                var constructor = customModel != null ?
+                    PostRetrieving(Expression.Call(miLiteCreateModel, type, id.UnNullify(), customModel)) :
+                    RequestLite(Expression.Call(miLiteCreateModelType, type, id.UnNullify(), Expression.Call(miGetDefaultModelType, type))); //Maybe could be optimized
+
+                return Expression.Condition(Expression.NotEqual(id.Nullify(), NullId),
+                        Expression.Convert(constructor, lite.Type),
+                        nothing);
+            }
         }
+
+        static MethodInfo miGetDefaultModelType = ReflectionTools.GetMethodInfo(() => Lite.DefaultModelType(null!));
 
         private static MethodCallExpression RequestLite(Expression liteConstructor)
         {
@@ -480,19 +556,9 @@ internal static class TranslatorBuilder
             return Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(typeof(LiteImp)), liteConstructor.TryConvert(typeof(LiteImp))).TryConvert(liteConstructor.Type);
         }
 
-        static readonly MethodInfo miTryLiteCreate = ReflectionTools.GetMethodInfo(() => TryLiteCreate(null!, null, null!, null!));
-
-        static Lite<Entity>? TryLiteCreate(Schema schema, PrimaryKey? typeId, PrimaryKey? id, string toString)
-        {
-            if (typeId == null)
-                return null;
-
-            Type type = schema.GetType(typeId.Value);
-
-            return Lite.Create(type, id!.Value, toString);
-        }
-
-        static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, null));
+        static readonly MethodInfo miGetTypeFromId = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
+        static MethodInfo miLiteCreateModel = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, (object)null!));
+        static MethodInfo miLiteCreateModelType = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, (Type)null!));
 
         protected internal override Expression VisitMListElement(MListElementExpression mle)
         {

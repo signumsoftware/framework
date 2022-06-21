@@ -228,9 +228,9 @@ public partial class FieldReference
 
         if (this.IsLite) {
 
-            var customModel = this.CustomLiteModelType == null ? null : new Dictionary<Type, Type> { { cleanType, this.CustomLiteModelType } };
+            var customModelTypes = this.CustomLiteModelType == null ? null : new Dictionary<Type, Type> { { cleanType, this.CustomLiteModelType } };
 
-            return QueryBinder.MakeLite(result, customModel);
+            return QueryBinder.MakeLite(result, customModelTypes);
         }
         else
             return result;
