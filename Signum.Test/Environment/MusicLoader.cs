@@ -91,7 +91,7 @@ public static class MusicLoader
             Year = 2007,
             Author = smashingPumpkins,
             Songs = { new SongEmbedded { Name = "Tarantula" } },
-            BonusTrack = new SongEmbedded { Name = "1976" ,ReleaseDate = DateTime.Now.ToDateOnly()},
+            BonusTrack = new SongEmbedded { Name = "1976" },
             Label = wea,
         }.Execute(AlbumOperation.Save);
 
@@ -100,7 +100,7 @@ public static class MusicLoader
             Name = "American Gothic",
             Year = 2008,
             Author = smashingPumpkins,
-            Songs = { new SongEmbedded { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276), ReleaseDate = DateTime.Now.ToDateOnly() } },
+            Songs = { new SongEmbedded { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276) } },
             Label = wea,
         }.Execute(AlbumOperation.Save);
 
