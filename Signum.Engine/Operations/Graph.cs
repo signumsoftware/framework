@@ -194,6 +194,13 @@ public class Graph<T>
             return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);
         }
 
+        LambdaExpression? IEntityOperation.CanExecuteExpression()
+        {
+            return CanExecuteExpression;
+        }
+
+        public Expression<Func<T, string?>>? CanExecuteExpression { get; set; }
+
         string? IEntityOperation.CanExecute(IEntity entity)
         {
             return OnCanConstruct(entity);
@@ -484,6 +491,13 @@ public class Graph<T>
             this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
         }
 
+        LambdaExpression? IEntityOperation.CanExecuteExpression()
+        {
+            return CanExecuteExpression;
+        }
+
+        public Expression<Func<T, string?>>? CanExecuteExpression { get; set; } 
+
         string? IEntityOperation.CanExecute(IEntity entity)
         {
             return OnCanExecute((T)entity);
@@ -622,6 +636,13 @@ public class Graph<T>
         {
             this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
         }
+
+        LambdaExpression? IEntityOperation.CanExecuteExpression()
+        {
+            return CanExecuteExpression;
+        }
+
+        public Expression<Func<T, string?>>? CanExecuteExpression { get; set; }
 
         string? IEntityOperation.CanExecute(IEntity entity)
         {

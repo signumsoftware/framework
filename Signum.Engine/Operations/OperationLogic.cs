@@ -773,7 +773,8 @@ public interface IEntityOperation : IOperation
 {
     bool CanBeModified { get; }
     bool CanBeNew { get; }
-    string? CanExecute(IEntity entity);
+    string? CanExecute(IEntity entity);   
+    LambdaExpression? CanExecuteExpression();
     bool HasCanExecute { get; }
     Type BaseType { get; }
 }
