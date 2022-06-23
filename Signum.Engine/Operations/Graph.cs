@@ -160,6 +160,8 @@ public class Graph<T>
 
         public Func<F, string?>? CanConstruct { get; set; }
 
+        public Expression<Func<F, string?>>? CanConstructExpression { get; set; }
+
         public ConstructFrom<F> OverrideCanConstruct(Overrider<Func<F, string?>> overrider)
         {
             this.CanConstruct = overrider(this.CanConstruct ?? (f => null));
@@ -196,10 +198,8 @@ public class Graph<T>
 
         LambdaExpression? IEntityOperation.CanExecuteExpression()
         {
-            return CanExecuteExpression;
+            return CanConstructExpression;
         }
-
-        public Expression<Func<T, string?>>? CanExecuteExpression { get; set; }
 
         string? IEntityOperation.CanExecute(IEntity entity)
         {
@@ -475,6 +475,8 @@ public class Graph<T>
         //public Action<T, object[]?> Execute { get; set; } (inherited)
         public Func<T, string?>? CanExecute { get; set; }
 
+        public Expression<Func<T, string?>>? CanExecuteExpression { get; set; }
+
         public Execute OverrideCanExecute(Overrider<Func<T, string?>> overrider)
         {
             this.CanExecute = overrider(this.CanExecute ?? (t => null));
@@ -495,8 +497,6 @@ public class Graph<T>
         {
             return CanExecuteExpression;
         }
-
-        public Expression<Func<T, string?>>? CanExecuteExpression { get; set; } 
 
         string? IEntityOperation.CanExecute(IEntity entity)
         {
@@ -598,6 +598,7 @@ public class Graph<T>
         {
             return "{0} Execute on {1}".FormatWith(Symbol, typeof(T));
         }
+
     }
 
     public class Delete : _Delete<T>, IDeleteOperation
@@ -621,6 +622,8 @@ public class Graph<T>
         //public Action<T, object[]?> Delete { get; set; } (inherited)
         public Func<T, string?>? CanDelete { get; set; }
 
+        public Expression<Func<T, string?>>? CanDeleteExpression { get; set; }
+
         public Delete OverrideCanDelete(Overrider<Func<T, string?>> overrider)
         {
             this.CanDelete = overrider(this.CanDelete ?? (t => null));
@@ -639,10 +642,8 @@ public class Graph<T>
 
         LambdaExpression? IEntityOperation.CanExecuteExpression()
         {
-            return CanExecuteExpression;
+            return CanDeleteExpression;
         }
-
-        public Expression<Func<T, string?>>? CanExecuteExpression { get; set; }
 
         string? IEntityOperation.CanExecute(IEntity entity)
         {
