@@ -42,9 +42,21 @@ public class OperationsToken : QueryToken
     string key;
     public override string Key { get { return key; } }
 
+    public static Func<Type, IEnumerable<OperationSymbol>>? GetTypeOperations;
+    protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
+    {
+        if (GetTypeOperations == null)
+            throw new InvalidOperationException("OperationsToken.GetTypeOperations not set");
+
+
+        return GetTypeOperations(parent.Type.CleanType())
+            .Select(o => (QueryToken)new OperationToken(this, o.Key.Replace(".", "#"), parent.Type, o))
+            .ToList();
+    }
+
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
-        throw new InvalidOperationException("OperationsToken (\"[Operations]\") is just a container for Operation tokens");
+        return parent.BuildExpression(context);
     }
 
     public override string? IsAllowed()
@@ -76,19 +88,5 @@ public class OperationsToken : QueryToken
     {
         return null;
     }
-
-    public static Func<Type, IEnumerable<OperationSymbol>>? GetTypeOperations;
-
-    protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
-    {
-        if (GetTypeOperations == null)
-            throw new InvalidOperationException("OperationsToken.GetTypeOperations not set");
-
-
-        return GetTypeOperations(parent.Type.CleanType())
-            .Select(o => (QueryToken)new OperationToken(this, o.Key.Replace(".", "#"), parent.Type, o))
-            .ToList();
-    }
-
 
 }
