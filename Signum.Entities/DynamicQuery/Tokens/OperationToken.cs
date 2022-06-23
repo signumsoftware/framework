@@ -7,6 +7,7 @@ public class OperationToken : QueryToken
 {
     QueryToken parent;
     Type entityType;
+    OperationSymbol operation;
 
     public override QueryToken? Parent => parent;
 
@@ -22,11 +23,9 @@ public class OperationToken : QueryToken
 
     }
 
-    OperationSymbol operation;
-
     public override string ToString()
     {
-        return $"{entityType.CleanType().Name}.{key}";
+        return operation.Key;
     }
 
     public override string NiceName()

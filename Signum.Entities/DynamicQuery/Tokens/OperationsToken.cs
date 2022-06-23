@@ -61,7 +61,7 @@ public class OperationsToken : QueryToken
 
     public override string? IsAllowed()
     {
-        return null;
+        return parent.IsAllowed();
     }
 
     public override QueryToken Clone()
