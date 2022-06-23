@@ -5,6 +5,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.Basics;
 using Signum.Engine.Operations.Internal;
 using System.Collections.Immutable;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Operations;
 
@@ -105,8 +106,31 @@ public static class OperationLogic
             sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+            OperationsToken.GetTypeOperations = (type) => TypeOperations(type).Select(o => o.OperationSymbol);
             OperationToken.OperationAllowedInUI = (operationSymbol, entityType) => OperationAllowedMessage(operationSymbol, entityType, inUserInterface: true);
+            OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
         }
+    }
+
+    private static Expression OperationToken_BuildExpression(Type entityType, OperationSymbol operationSymbol, Expression parentExpression)
+    {
+        var operation = (IEntityOperation)FindOperation(entityType, operationSymbol);
+
+        LambdaExpression? cee = operation.CanExecuteExpression();
+
+        if (cee == null)
+            return parentExpression;
+
+        var entityExpr = parentExpression.ExtractEntity(false);
+        var operationKeyExpr = Expression.Constant(operationSymbol.Key);
+        var canExecuteExpr = ExpressionReplacer.Replace(cee.Body, new Dictionary<ParameterExpression, Expression> { { cee.Parameters.Single(), entityExpr } });
+
+        var dtoConstructor = typeof(OperationColumnDTO).GetConstructor(new[] { typeof(Lite<IEntity>), typeof(string),  typeof(string) });
+
+        NewExpression newExpr = Expression.New(dtoConstructor!, entityExpr.BuildLite(), operationKeyExpr, canExecuteExpr);
+
+        return newExpr;
     }
 
     private static void RegisterCurrentLogs(Schema schema)
