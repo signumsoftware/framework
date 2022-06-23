@@ -1,6 +1,6 @@
 import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
-import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
+import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, OperationSymbol } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
@@ -1435,6 +1435,27 @@ export class QueryTokenString<T> {
 
   hasValue(): QueryTokenString<boolean> {
     return new QueryTokenString<boolean>(this.token + ".HasValue");
+  }
+
+  operations(): OperationsTokenString {
+    return new OperationsTokenString(this.token);
+  }
+}
+
+export class OperationsTokenString {
+
+  token: string
+
+  constructor(token: string) {
+    this.token = token + ".[Operations]";
+  }
+
+  toString() {
+    return this.token;
+  }
+
+  operation(os: OperationSymbol): string {
+    return this.token + "." + os.key.replace(".", "#");
   }
 }
 
