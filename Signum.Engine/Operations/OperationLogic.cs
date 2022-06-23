@@ -105,6 +105,7 @@ public static class OperationLogic
             sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+            OperationToken.OperationAllowedInUI = (operationSymbol, entityType) => OperationAllowedMessage(operationSymbol, entityType, inUserInterface: true);
         }
     }
 
@@ -227,11 +228,21 @@ Consider the following options:
             return true;
     }
 
-    public static void AssertOperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
+    public static string? OperationAllowedMessage(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
     {
         if (!OperationAllowed(operationSymbol, entityType, inUserInterface))
-            throw new UnauthorizedAccessException(OperationMessage.Operation01IsNotAuthorized.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key) +
-                (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : ""));
+            return OperationMessage.Operation01IsNotAuthorized.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key) +
+                (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : "");
+        
+        return null;
+    }
+
+    public static void AssertOperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
+    {
+        var allowed = OperationAllowedMessage(operationSymbol, entityType, inUserInterface);
+
+        if (allowed != null)
+            throw new UnauthorizedAccessException(allowed);
     }
     #endregion
 
