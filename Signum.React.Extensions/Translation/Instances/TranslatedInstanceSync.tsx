@@ -217,7 +217,9 @@ export function TranslationProperty({ property }: { property: PropertyChange }) 
   }
 
   var translations = Object.entries(property.support)
-    .flatMap(([c, rc]) => rc.automaticTranslations.map(at => ({ culture: c, text: at.text, translatorName: at.translatorName })));
+    .flatMap(([c, rc]) => rc.automaticTranslations.map(at => ({ culture: c, text: at.text, translatorName: at.translatorName }))
+      .concat(rc.oldTranslation ? [{ culture: c, text: rc.oldTranslation, translatorName: "Previous translation" }] : [])
+  );
 
   if (translations.length == 0 || avoidCombo)
     return (
