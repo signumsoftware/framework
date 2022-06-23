@@ -238,7 +238,7 @@ class LiteModelExpressionVisitor : ExpressionVisitor
 
                 var mi = cachedTableType.GetMethod(nameof(CachedTable<Entity>.GetLiteModel))!;
 
-                return Expression.Call(tab, mi, ce.PrimaryKey.UnNullify());
+                return Expression.Convert(Expression.Call(tab, mi, ce.PrimaryKey.UnNullify(), Expression.Constant(typeof(string))), typeof(string));
             }
         }
 

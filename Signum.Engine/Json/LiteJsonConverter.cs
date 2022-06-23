@@ -108,7 +108,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
                             model = converter.Read(ref reader, typeof(ModelEntity), options, (ModelEntity?)existingValue?.Model);
                         }
                     }
-                    reader.Read(); model = reader.GetString(); break;
+                    break;
                 case "entity":
                     reader.Read();
                     using (EntityJsonConverterFactory.SetPath(".entity"))

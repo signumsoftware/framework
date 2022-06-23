@@ -101,6 +101,8 @@ public interface ILiteModelConstructor
 
     ILiteModelConstructor Clone(bool isDefault);
 
+    LambdaExpression GetConstructorExpression();
+
     object? NotFoundModel(Lite<Entity> lite);
 }
 
@@ -138,6 +140,8 @@ public class LiteModelConstructor<T, M> : ILiteModelConstructor
 
         return NotFoundModel.Invoke((Lite<T>)lite);
     }
+
+    public LambdaExpression GetConstructorExpression() => this.ConstructorExpression;
 }
 
 public static class Lite
@@ -252,7 +256,7 @@ public static class Lite
         return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), modelType)(entity.Id, model);
     }
 
-    public static IEnumerable<Type> GetLiteModelTypes(Type entityType)
+    public static IEnumerable<Type> GetAllLiteModelTypes(Type entityType)
     {
         var dic = Lite.LiteModelConstructors.TryGetC(entityType);
         if (dic == null)

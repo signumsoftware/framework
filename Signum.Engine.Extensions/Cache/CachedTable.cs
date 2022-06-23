@@ -250,7 +250,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
 
     public override void SchemaCompleted()
     {
-        this.liteModelConstructors = Lite.GetLiteModelTypes(typeof(T))
+        this.liteModelConstructors = Lite.GetAllLiteModelTypes(typeof(T))
             .ToDictionary(modelType => modelType, modelType => 
             {
                 var modelConstructor = Lite.GetModelConstructorExpression(typeof(T), modelType);

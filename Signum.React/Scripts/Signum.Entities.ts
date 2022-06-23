@@ -16,7 +16,7 @@ export interface ModifiableEntity {
 }
 
 export function liteKeyLong(lite: Lite<Entity>) {
-  return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id) + ";" + lite.toStr;
+  return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id) + ";" + getToString(lite);
 }
 
 export interface Entity extends ModifiableEntity {
@@ -67,7 +67,7 @@ export interface Lite<T extends Entity> {
   entity?: T;
   EntityType: string;
   id?: number | string;
-  toStr?: string;
+  model?: unknown;
 }
 
 export interface ModelState {
@@ -93,10 +93,60 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
   toStringDictionary[type.typeName] = toStringFunc as ((e: ModifiableEntity) => string) | null;
 }
 
+
+export function registerCustomModelConsturctor<T extends Entity, M extends ModelEntity>(type: Type<T>, modelType: Type<T>, constructLiteModel: ((e: T) => M)) {
+  var ti = Reflection.tryGetTypeInfo(type.typeName);
+
+  if (ti) {
+    var clm = ti.customLiteModels?.[modelType.typeName];
+
+    if (clm == null)
+      throw new Error(`Type ${type.typeName} has no registered Lite Model '${modelType}'`); 
+
+    clm.constructorFunction = constructLiteModel as any as (e: Entity) => ModelEntity;
+  }
+}
+
 import * as Reflection from './Reflection'
+import { object } from 'prop-types';
 
 export function newNiceName(ti: Reflection.TypeInfo) {
   return FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName);
+}
+
+function createLiteModel(e: Entity, modelType?: string): ModelEntity | string {
+
+  var ti = Reflection.tryGetTypeInfo(e.Type);
+
+  if (ti == null)
+    return getToString(e);
+
+  modelType ??= getDefaultLiteModelType(ti);
+
+  if (modelType == "string")
+    return getToString(e);
+
+  var clm = ti.customLiteModels?.[modelType];
+
+  if (clm == null)
+    throw new Error(`Type ${e.Type} has no registered Lite Model '${modelType}'`); 
+  
+  if (clm.constructorFunction)
+    return clm.constructorFunction(e);
+
+  if (clm.constructorFunctionString == null)
+    throw new Error(`No constructor function for '${modelType}' provided`);
+
+  clm.constructorFunction = compileFunction(clm.constructorFunctionString);
+
+  return clm.constructorFunction!(e);
+}
+
+function getDefaultLiteModelType(ti: Reflection.TypeInfo) {
+  if (!ti.customLiteModels)
+    return "string";
+
+  return Object.keys(ti.customLiteModels).singleOrNull(modelType => ti.customLiteModels![modelType].isDefault) ?? "string"
 }
 
 function getOrCreateToStringFunction(type: string) {
@@ -106,10 +156,18 @@ function getOrCreateToStringFunction(type: string) {
 
   const ti = Reflection.tryGetTypeInfo(type);
 
+  toStringDictionary[type] = ti?.toStringFunction ? compileFunction(ti.toStringFunction) : null;
+
+  return f;
+}
+
+function compileFunction(functionString: string): (e: any) => any {
+ 
+
   const getToString2 = getToString;
   const newNiceName2 = newNiceName;
 
-  try {
+  {
     const getToString = getToString2;
     const valToString = Reflection.valToString;
     const numberToString = Reflection.numberToString;
@@ -118,15 +176,10 @@ function getOrCreateToStringFunction(type: string) {
     const getTypeInfo = Reflection.getTypeInfo;
     const newNiceName = newNiceName2;
 
-    f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
-  } catch (e) {
-    f = null;
+    return eval("(" + functionString + ")");
   }
-
-  toStringDictionary[type] = f;
-
-  return f;
 }
+
 
 export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined | null, toStringLite?: (e : Entity) => string): string {
   if (entityOrLite == null)
@@ -140,7 +193,13 @@ export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | unde
     if (Reflection.isLowPopulationSymbol(lite.EntityType))
       return Reflection.symbolNiceName(lite as Lite<Entity & Reflection.ISymbol>);
 
-    return lite.toStr || lite.EntityType;
+    if (typeof lite.model == "string")
+      return lite.model;
+
+    if (isModifiableEntity(lite.model))
+      return getToString(lite.model);
+
+    return lite.EntityType;
   }
 
   const entity = entityOrLite as ModifiableEntity;
@@ -154,14 +213,14 @@ export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | unde
   return entity.toStr || entity.Type;
 }
 
-export function toLite<T extends Entity>(entity: T, fat?: boolean, toStr?: string): Lite<T>;
-export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boolean, toStr?: string): Lite<T> | null;
-export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boolean, toStr?: string): Lite<T> | null {
+export function toLite<T extends Entity>(entity: T, fat?: boolean, model?: unknown): Lite<T>;
+export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boolean, model?: unknown): Lite<T> | null;
+export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boolean, model?: unknown): Lite<T> | null {
 
   if (!entity)
     return null;
   if (fat)
-    return toLiteFat(entity, toStr);
+    return toLiteFat(entity, model);
 
   if (entity.id == undefined)
     throw new Error(`The ${entity.Type} has no Id`);
@@ -169,17 +228,17 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
   return {
     EntityType: entity.Type,
     id: entity.id,
-    toStr: toStr || getToString(entity),
+    model: model || getToString(entity),
   }
 }
 
-export function toLiteFat<T extends Entity>(entity: T, toStr?: string): Lite<T> {
+export function toLiteFat<T extends Entity>(entity: T, model?: unknown): Lite<T> {
 
   return {
     entity: entity,
     EntityType: entity.Type,
     id: entity.id,
-    toStr: toStr || getToString(entity),
+    model: model || createLiteModel(entity),
   }
 }
 

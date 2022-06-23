@@ -1,6 +1,6 @@
 import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
-import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
+import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, ModelEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
@@ -26,6 +26,7 @@ export interface TypeInfo {
   entityKind?: EntityKind;
   entityData?: EntityData;
   toStringFunction?: string;
+  customLiteModels?: { [modelType: string]: CustomLiteModel };
   isLowPopulation?: boolean;
   isSystemVersioned?: boolean;
   requiresSaveOperation?: boolean;
@@ -36,6 +37,12 @@ export interface TypeInfo {
   hasConstructorOperation?: boolean;
   operations?: { [name: string]: OperationInfo };
 }
+
+export interface CustomLiteModel {
+  isDefault: boolean;
+  constructorFunctionString?: string;
+  constructorFunction?: (e: Entity) => ModelEntity;
+} 
 
 export interface MemberInfo {
   name: string,
