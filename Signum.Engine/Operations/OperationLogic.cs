@@ -127,7 +127,7 @@ public static class OperationLogic
         var operationKey = Expression.Constant(operationSymbol.Key);
         var canExecute = ExpressionReplacer.Replace(cee.Body, new Dictionary<ParameterExpression, Expression> { { cee.Parameters.Single(), entity } });
 
-        var dtoConstructor = typeof(OperationColumnDTO).GetConstructor(new[] { typeof(Lite<IEntity>), typeof(string),  typeof(string) });
+        var dtoConstructor = typeof(CellOperationDTO).GetConstructor(new[] { typeof(Lite<IEntity>), typeof(string),  typeof(string) });
 
         NewExpression newExpr = Expression.New(dtoConstructor!, entity.BuildLite(), operationKey, canExecute);
 
