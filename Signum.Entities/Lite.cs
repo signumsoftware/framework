@@ -335,6 +335,9 @@ public static class Lite
 
     public static void RegisterLiteModelConstructor<T, M>(LiteModelConstructor<T, M> liteModelConstructor, bool isOverride = false) where T : Entity
     {
+        if (typeof(M).IsModelEntity() && typeof(M).GetMethod("ToString", BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)?.GetCustomAttribute<ExpressionFieldAttribute>(false) == null)
+            throw new InvalidOperationException($"{typeof(M).TypeName()} needs to implement ToString using [AutoExpressionField] to allow ToString on Lite<{typeof(T).TypeName()}>");
+
         var dic = LiteModelConstructors.GetOrCreate(typeof(T));
 
         if (dic.ContainsKey(typeof(M)) && !isOverride)
@@ -352,7 +355,7 @@ public static class Lite
         dic[typeof(M)] = liteModelConstructor;
     }
 
-    internal static Type DefaultModelType(Type type)
+    public static Type DefaultModelType(Type type)
     {
         return LiteModelConstructors.TryGetC(type)?.Values.SingleOrDefaultEx(a => a.IsDefault)?.ModelType ?? typeof(string);
     }
@@ -377,18 +380,26 @@ public static class Lite
         return giGetModel.GetInvoker(e.GetType(), modelType)((Entity)e);
     }
 
-    public static Type ParseModelType(Type type, string modelTypeStr)
+    public static string ModelTypeToString(Type modelType)
+    {
+        if (modelType == typeof(string))
+            return "string";
+
+        return Reflector.CleanTypeName(modelType);
+    }
+
+    public static Type ParseModelType(Type entityType, string modelTypeStr)
     {
         if (modelTypeStr == "string" || 
             modelTypeStr == "String")
             return typeof(string);
 
-        var dic = LiteModelConstructors.TryGetC(type);
+        var dic = LiteModelConstructors.TryGetC(entityType);
 
         var single = dic?.Keys.SingleOrDefaultEx(a => Reflector.CleanTypeName(a) == modelTypeStr);
 
         if (single == null)
-            throw new InvalidOperationException($"No Lite Model with name '{modelTypeStr}' is registered for '{type.TypeName()}'");
+            throw new InvalidOperationException($"No Lite Model with name '{modelTypeStr}' is registered for '{entityType.TypeName()}'");
 
         return single;
     }

@@ -84,7 +84,9 @@ internal class EntityCompleter : DbExpressionVisitor
 
         var mce = Lite.GetModelConstructorExpression(entityExp.Type, modelType);
 
-        return binder.Visit(Expression.Invoke(mce, entityExp));
+        var bound = binder.Visit(Expression.Invoke(mce, entityExp));
+
+        return Visit(bound);
     }
 
     protected internal override Expression VisitEntity(EntityExpression ee)

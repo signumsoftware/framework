@@ -285,8 +285,15 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     if (!cc.Exists(id))
                         return null;
 
-                    var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)));
-                    return Lite.Create<T>(id, model);
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        rr.CompleteAll();
+
+                        return Lite.Create<T>(id, model);
+                    }
                 }
 
                 var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
@@ -317,8 +324,15 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
                 {
-                    var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)));
-                    return Lite.Create<T>(id, model);
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        rr.CompleteAll();
+
+                        return Lite.Create<T>(id, model);
+                    } 
                 }
 
                 var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
@@ -349,7 +363,15 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
                 {
-                    return Lite.Create<T>(id, cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T))));
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        await rr.CompleteAllAsync(token);
+
+                        return Lite.Create<T>(id, model);
+                    }
                 }
 
                 var result = await Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultAsync(a => a.Id == id, token);
@@ -394,7 +416,17 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             {
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
-                    return cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)));
+                {
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        rr.CompleteAll();
+
+                        return model;
+                    }
+                }
 
                 return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
             }
@@ -421,7 +453,17 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             {
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
-                    return cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)));
+                {
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        await rr.CompleteAllAsync(token);
+
+                        return model;
+                    }
+                }
 
                 return await Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstAsync(token);
             }
@@ -621,7 +663,16 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (cc != null && GetFilterQuery<T>() == null)
                 {
                     var mt = modelType ?? Lite.DefaultModelType(typeof(T));
-                    return cc.GetAllIds().Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt))).ToList();
+
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetAllIds().Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt, rr))).ToList();
+
+                        rr.CompleteAll();
+
+                        return model;
+                    }
                 }
 
                 return Database.Query<T>().Select(e => e.ToLite()).ToList();
@@ -649,7 +700,15 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 {
                     var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
-                    return cc.GetAllIds().Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt))).ToList();
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetAllIds().Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt, rr))).ToList();
+
+                        await rr.CompleteAllAsync(token);
+
+                        return model;
+                    }
                 }
 
                 return await Database.Query<T>().Select(e => e.ToLite()).ToListAsync(token);
@@ -890,7 +949,15 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             {
                 var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
-                return ids.Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt))).ToList();
+                using (new EntityCache())
+                using (var rr = EntityCache.NewRetriever())
+                {
+                    var model = ids.Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt, rr))).ToList();
+
+                    rr.CompleteAll();
+
+                    return model;
+                }
             }
 
             var retrieved = ids.Chunk(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)).Select(a => a.ToLite())).ToDictionary(a => a.Id);
@@ -920,7 +987,15 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             {
                 var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
-                return ids.Select(id => (Lite<T>)Lite.Create<T>(id, cc.GetLiteModel(id, mt))).ToList();
+                using (new EntityCache())
+                using (var rr = EntityCache.NewRetriever())
+                {
+                    var model = ids.Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt, rr))).ToList();
+
+                    await rr.CompleteAllAsync(token);
+
+                    return model;
+                }
             }
 
             var tasks = ids.Chunk(Schema.Current.Settings.MaxNumberOfParameters)

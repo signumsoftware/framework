@@ -28,8 +28,8 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
         writer.WriteString("EntityType", TypeLogic.GetCleanName(lite.EntityType));
 
-        if(lite.ModelType != Lite.DefaultModelType(lite.EntityType))
-            writer.WriteString("ModelType", TypeLogic.GetCleanName(lite.ModelType));
+        if (lite.ModelType != Lite.DefaultModelType(lite.EntityType))
+            writer.WriteString("ModelType", Lite.ModelTypeToString(lite.ModelType));
 
         writer.WritePropertyName("id");
         JsonSerializer.Serialize(writer, lite.IdOrNull?.Object, lite.IdOrNull?.Object.GetType() ?? typeof(object), options);

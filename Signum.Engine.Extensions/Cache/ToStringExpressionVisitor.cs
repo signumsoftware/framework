@@ -1,6 +1,7 @@
 using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Engine.Cache;
 
@@ -31,13 +32,23 @@ class LiteModelExpressionVisitor : ExpressionVisitor
 
         var pk = Expression.Parameter(typeof(PrimaryKey), "pk");
 
-        var root = new CachedEntityExpression(pk, typeof(T), constructor, null, null);
+        var root = new CachedEntityExpression(pk, typeof(T), false, constructor, column: null, previousConstructor: null);
 
-        var visitor = new LiteModelExpressionVisitor(param, root);
+        var tab = Expression.Constant(constructor.cachedTable);
+        var origin = Expression.Convert(Expression.Property(Expression.Call(tab, "GetRows", null), "Item", pk), constructor.tupleType);
 
-        var result = visitor.Visit(lambda.Body);
+        var result = new LiteModelExpressionVisitor(param, root).Visit(lambda.Body);
+        var result2 = new CachedEntityRemoverVisitor().Visit(result);
 
-        var lambdaExpression =  Expression.Lambda<Func<PrimaryKey, M>>(result, pk);
+        var block = Expression.Block(
+            variables: new[] { constructor.origin },
+            expressions: new[] {
+                Expression.Assign(constructor.origin, origin),
+                result2
+            }
+        );
+
+        var lambdaExpression =  Expression.Lambda<Func<PrimaryKey, IRetriever, M>>(block, pk, CachedTableConstructor.retriever);
 
         return new CachedLiteModelConstructor<M>(lambdaExpression);
     }
@@ -86,19 +97,13 @@ class LiteModelExpressionVisitor : ExpressionVisitor
     {
         Expression body = GetField(field, n.Constructor, prevPrimaryKey);
 
-        ConstantExpression tab = Expression.Constant(n.Constructor.cachedTable, typeof(CachedTable<>).MakeGenericType(((Table)n.Constructor.table).Type));
-
-        Expression origin = Expression.Convert(Expression.Property(Expression.Call(tab, "GetRows", null), "Item", n.PrimaryKey.UnNullify()), n.Constructor.tupleType);
-
-        var result = ExpressionReplacer.Replace(body, new Dictionary<ParameterExpression, Expression> { { n.Constructor.origin, origin } });
-
         if (!n.PrimaryKey.Type.IsNullable())
-            return result;
+            return body;
 
         return Expression.Condition(
             Expression.Equal(n.PrimaryKey, Expression.Constant(null, n.PrimaryKey.Type)),
-            Expression.Constant(null, result.Type.Nullify()),
-            result.Nullify());
+            Expression.Constant(null, body.Type.Nullify()),
+            body.Nullify());
     }
 
     private Expression GetField(Field field, CachedTableConstructor constructor, Expression? previousPrimaryKey)
@@ -151,12 +156,12 @@ class LiteModelExpressionVisitor : ExpressionVisitor
 
         if (field is FieldEmbedded fe)
         {
-            return new CachedEntityExpression(previousPrimaryKey!, fe.FieldType, constructor, fe, null);
+            return new CachedEntityExpression(previousPrimaryKey!,constructor, fe);
         }
 
         if (field is FieldMixin fm)
         {
-            return new CachedEntityExpression(previousPrimaryKey!, fm.FieldType, constructor, null, fm);
+            return new CachedEntityExpression(previousPrimaryKey!, constructor, fm);
         }
 
         if (field is FieldMList)
@@ -177,7 +182,7 @@ class LiteModelExpressionVisitor : ExpressionVisitor
             CacheLogic.GetCachedTable(entityType).Constructor :
             constructor.cachedTable.SubTables!.SingleEx(a => a.ParentColumn == column).Constructor;
 
-        return new CachedEntityExpression(pk, entityType, typeConstructor, null, null);
+        return new CachedEntityExpression(pk, entityType, isLite, typeConstructor, column, constructor);
     }
 
     protected override Expression VisitUnary(UnaryExpression node)
@@ -214,8 +219,6 @@ class LiteModelExpressionVisitor : ExpressionVisitor
 
                 return node.Update(null!, new Sequence<Expression> { formatStr, remainging });
             }
-
-          
         }
 
         var obj = base.Visit(node.Object);
@@ -238,7 +241,7 @@ class LiteModelExpressionVisitor : ExpressionVisitor
 
                 var mi = cachedTableType.GetMethod(nameof(CachedTable<Entity>.GetLiteModel))!;
 
-                return Expression.Convert(Expression.Call(tab, mi, ce.PrimaryKey.UnNullify(), Expression.Constant(typeof(string))), typeof(string));
+                return Expression.Convert(Expression.Call(tab, mi, ce.PrimaryKey.UnNullify(), Expression.Constant(typeof(string)), CachedTableConstructor.retriever), typeof(string));
             }
         }
 
@@ -360,39 +363,53 @@ internal class CachedEntityExpression : Expression
     {
         get { return ExpressionType.Extension; }
     }
-
     public readonly CachedTableConstructor Constructor;
     public readonly Expression PrimaryKey;
     public readonly FieldEmbedded? FieldEmbedded;
     public readonly FieldMixin? FieldMixin;
+    public readonly IColumn? Column;
+    public readonly CachedTableConstructor? PreviousConstructor;
 
+    public readonly bool isLite;
     public readonly Type type;
-    public override Type Type { get { return type; } }
+    public override Type Type { get { return isLite ? Lite.Generate(type) : type; } }
 
-    public CachedEntityExpression(Expression primaryKey, Type type, CachedTableConstructor constructor, FieldEmbedded? embedded, FieldMixin? mixin)
+
+    public CachedEntityExpression(Expression previousPrimaryKey,  CachedTableConstructor constructor, FieldEmbedded embedded)
+        : this(previousPrimaryKey, constructor, embedded.FieldType)
     {
-        if (primaryKey == null)
-            throw new ArgumentNullException(nameof(primaryKey));
+        this.FieldEmbedded = embedded;
+    }
 
+
+    public CachedEntityExpression(Expression previousPrimaryKey, CachedTableConstructor constructor, FieldMixin mixin)
+            : this(previousPrimaryKey, constructor, mixin.FieldType)
+    {
+        this.FieldMixin = mixin;
+    }
+
+    public CachedEntityExpression(Expression primaryKey, Type type, bool isLite, CachedTableConstructor constructor, IColumn? column, CachedTableConstructor? previousConstructor)
+        : this(primaryKey, constructor, type)
+    {
+        this.isLite = isLite;
+
+        if (column != null)
+        {
+            if (previousConstructor!.table.Columns[column.Name] != column)
+                throw new InvalidOperationException("Wrong Previous Constructor");
+
+            this.Column = column;
+            this.PreviousConstructor = previousConstructor;
+        }
+    }
+
+    CachedEntityExpression(Expression primaryKey, CachedTableConstructor constructor, Type type)
+    {
         if (primaryKey.Type.UnNullify() != typeof(PrimaryKey))
             throw new InvalidOperationException("primaryKey should be a PrimaryKey");
 
-        if (type.IsEmbeddedEntity())
-        {
-            this.FieldEmbedded = embedded ?? throw new ArgumentNullException(nameof(embedded));
-        }
-        else if (type.IsMixinEntity())
-        {
-            this.FieldMixin = mixin ?? throw new ArgumentNullException(nameof(mixin));
-        }
-        else
-        {
-            if (((Table)constructor.table).Type != type.CleanType())
-                throw new InvalidOperationException("Wrong type");
-        }
 
         this.PrimaryKey = primaryKey;
-
         this.type = type;
         this.Constructor = constructor;
     }
@@ -407,11 +424,50 @@ internal class CachedEntityExpression : Expression
         if (pk == this.PrimaryKey)
             return this;
 
-        return new CachedEntityExpression(pk, type, Constructor, FieldEmbedded, FieldMixin);
+        if(this.FieldEmbedded != null)
+            return new CachedEntityExpression(pk, Constructor, FieldEmbedded);
+        if (this.FieldMixin != null)
+            return new CachedEntityExpression(pk, Constructor, FieldMixin);
+        else
+            return new CachedEntityExpression(pk, type, isLite, Constructor, Column, PreviousConstructor);
     }
 
     public override string ToString()
     {
         return $"CachedEntityExpression({Type.TypeName()}, {PrimaryKey})";
+    }
+}
+
+
+public class CachedEntityRemoverVisitor : ExpressionVisitor
+{
+
+    [return: NotNullIfNotNull("node")]
+    public override Expression? Visit(Expression? node)
+    {
+        if (node is CachedEntityExpression ce)
+        {
+            if (ce.FieldEmbedded != null)
+                return ce.Constructor.MaterializeEmbedded(ce.FieldEmbedded);
+
+            if (ce.FieldMixin != null)
+                throw new NotImplementedException("Unable to get isolated Mixins from Cache for the Lite Model ");
+
+            if (ce.Column != null)
+            {
+                var customModelType = ce.Column switch
+                {
+                    FieldReference fr => fr.CustomLiteModelType,
+                    ImplementationColumn ic => ic.CustomLiteModelType,
+                    _ => throw new UnexpectedValueException(ce.Column)
+                };
+
+                 return ce.PreviousConstructor!.GetEntity(ce.isLite, ce.Column, ce.type, customModelType);
+            }
+            else
+                throw new NotImplementedException("Unable to get the full Entity from cache for LiteModel ");
+        }
+
+        return base.Visit(node);
     }
 }

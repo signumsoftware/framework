@@ -139,7 +139,7 @@ class RealRetriever : IRetriever
         ICacheController? cc = Schema.Current.CacheController(lite.EntityType);
         if (cc != null && cc.Enabled)
         {
-            lite.SetModel(cc.TryGetLiteModel(lite.Id, lite.ModelType) ?? Lite.GetNotFoundModel(lite));
+            lite.SetModel(cc.TryGetLiteModel(lite.Id, lite.ModelType, this) ?? Lite.GetNotFoundModel(lite));
             return lite;
         }
 
@@ -241,7 +241,7 @@ class RealRetriever : IRetriever
             {
                 var group = liteRequests.GroupBy(a => (a.Key.type, a.Key.modelType)).FirstEx();
 
-                var dic = await giLiteModels.GetInvoker(group.Key.type, group.Key.modelType)(group.Select(a => a.Key.id).ToList(), token);
+                var dic = await giLiteModels.GetInvoker(group.Key.type, group.Key.modelType)(group.Select(a => a.Key.id).ToList(), this, token);
 
                 foreach (var item in group)
                 {
@@ -292,15 +292,15 @@ class RealRetriever : IRetriever
 
     }
 
-    static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, object?>>>> giLiteModels =
-        new((ids, token) => GetLiteModels<Entity, string>(ids, token));
-    static async Task<Dictionary<PrimaryKey, object?>> GetLiteModels<T, M>(List<PrimaryKey> ids, CancellationToken? token) where T : Entity
+    static readonly GenericInvoker<Func<List<PrimaryKey>, IRetriever, CancellationToken?, Task<Dictionary<PrimaryKey, object?>>>> giLiteModels =
+        new((ids, retriever, token) => GetLiteModels<Entity, string>(ids, retriever, token));
+    static async Task<Dictionary<PrimaryKey, object?>> GetLiteModels<T, M>(List<PrimaryKey> ids, IRetriever retriever, CancellationToken? token) where T : Entity
     {
         ICacheController? cc = Schema.Current.CacheController(typeof(T));
         if (cc != null && cc.Enabled)
         {
             cc.Load();
-            return ids.ToDictionary(a => a, a => cc.TryGetLiteModel(a, typeof(M)!));
+            return ids.ToDictionary(a => a, a => cc.TryGetLiteModel(a, typeof(M), retriever));
         }
 
         var modelExpression = Lite.GetModelConstructorExpression<T, M>();
