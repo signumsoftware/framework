@@ -430,6 +430,7 @@ export module OperationMessage {
   export const Setters = new MessageKey("OperationMessage", "Setters");
   export const AddSetter = new MessageKey("OperationMessage", "AddSetter");
   export const MultiSetter = new MessageKey("OperationMessage", "MultiSetter");
+  export const Operation01DoesNotHaveCanExecuteExpression = new MessageKey("OperationMessage", "Operation01DoesNotHaveCanExecuteExpression");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");

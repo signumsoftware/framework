@@ -108,7 +108,7 @@ public static class OperationLogic
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
             OperationsToken.GetTypeOperations = (type) => TypeOperations(type).Select(o => o.OperationSymbol);
-            OperationToken.OperationAllowedInUI = (operationSymbol, entityType) => OperationAllowedMessage(operationSymbol, entityType, inUserInterface: true);
+            OperationToken.OperationAllowedInUI = (operationSymbol, entityType) => OperationTokenAllowed(operationSymbol, entityType);
             OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
         }
     }
@@ -120,17 +120,27 @@ public static class OperationLogic
         LambdaExpression? cee = operation.CanExecuteExpression();
 
         if (cee == null)
-            return parentExpression;
+            throw new InvalidOperationException(OperationMessage.Operation01DoesNotHaveCanExecuteExpression
+                                                                .NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key));
 
-        var entityExpr = parentExpression.ExtractEntity(false);
-        var operationKeyExpr = Expression.Constant(operationSymbol.Key);
-        var canExecuteExpr = ExpressionReplacer.Replace(cee.Body, new Dictionary<ParameterExpression, Expression> { { cee.Parameters.Single(), entityExpr } });
+        var entity = parentExpression.ExtractEntity(false);
+        var operationKey = Expression.Constant(operationSymbol.Key);
+        var canExecute = ExpressionReplacer.Replace(cee.Body, new Dictionary<ParameterExpression, Expression> { { cee.Parameters.Single(), entity } });
 
         var dtoConstructor = typeof(OperationColumnDTO).GetConstructor(new[] { typeof(Lite<IEntity>), typeof(string),  typeof(string) });
 
-        NewExpression newExpr = Expression.New(dtoConstructor!, entityExpr.BuildLite(), operationKeyExpr, canExecuteExpr);
+        NewExpression newExpr = Expression.New(dtoConstructor!, entity.BuildLite(), operationKey, canExecute);
 
         return newExpr;
+    }
+
+    private static string? OperationTokenAllowed(OperationSymbol operationSymbol, Type entityType)
+    {
+        var operation = (IEntityOperation)FindOperation(entityType, operationSymbol);
+        if (operation.CanExecuteExpression() == null)
+            return OperationMessage.Operation01DoesNotHaveCanExecuteExpression.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key);
+
+        return OperationAllowedMessage(operationSymbol, entityType, true);
     }
 
     private static void RegisterCurrentLogs(Schema schema)
