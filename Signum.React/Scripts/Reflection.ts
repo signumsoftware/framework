@@ -1437,25 +1437,8 @@ export class QueryTokenString<T> {
     return new QueryTokenString<boolean>(this.token + ".HasValue");
   }
 
-  operations(): OperationsTokenString {
-    return new OperationsTokenString(this.token);
-  }
-}
-
-export class OperationsTokenString {
-
-  token: string
-
-  constructor(token: string) {
-    this.token = token + ".[Operations]";
-  }
-
-  toString() {
-    return this.token;
-  }
-
-  operation(os: OperationSymbol): string {
-    return this.token + "." + os.key.replace(".", "#");
+  operation(os: OperationSymbol): string { //operation tokens are leaf
+    return this.token + ".[Operations]." + os.key.replace(".", "#");
   }
 }
 
