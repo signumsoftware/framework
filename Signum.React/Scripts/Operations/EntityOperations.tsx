@@ -110,7 +110,7 @@ export function andNew<T extends Entity>(eoc: EntityOperationContext<T>, inDropd
   });
 }
 
-type OutlineBsColor =
+export type OutlineBsColor =
   | 'outline-primary'
   | 'outline-secondary'
   | 'outline-success'
@@ -278,7 +278,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   }
 }
 
-function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end") {
+export function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end") {
   if (icon) {
     switch (iconAlign) {
       case "end": return (<span>{text} <FontAwesomeIcon icon={icon} color={iconColor} fixedWidth /></span>);
