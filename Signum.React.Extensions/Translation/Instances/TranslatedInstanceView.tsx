@@ -15,6 +15,7 @@ import TextArea from '@framework/Components/TextArea'
 import { KeyCodes } from '@framework/Components'
 import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
+import { getToString } from '@framework/Signum.Entities'
 
 export default function TranslationInstanceView(p: RouteComponentProps<{ type: string; culture?: string; }>) {
 
@@ -70,7 +71,7 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
 
   const message = TranslationMessage.View0In1.niceToString(type,
     culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
-      cultures ? cultures[culture].toStr :
+      cultures ? getToString(cultures[culture]) :
         culture);
 
   useTitle(message);

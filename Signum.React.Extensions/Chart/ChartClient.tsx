@@ -4,7 +4,7 @@ import { ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
@@ -648,7 +648,7 @@ export module API {
     if (token.type.isLite)
       return v => {
         var lite = v as Lite<Entity> | null;
-        return String(lite?.toStr ?? "");
+        return String(getToString(lite) ?? "");
       };
 
     if (token.filterType == "Enum")
@@ -746,7 +746,7 @@ export module API {
     if (!hasAggregates(request)) {
       const value = (r: ChartRow) => r.entity;
       const color = (v: Lite<Entity> | undefined) => !v ? "#555" : null;
-      const niceName = (v: Lite<Entity> | undefined) => v?.toStr;
+      const niceName = (v: Lite<Entity> | undefined) => getToString(v);
       const key = (v: Lite<Entity> | undefined) => v ? liteKey(v) : String(v);
       cols.insertAt(0, ({
         name: "entity",

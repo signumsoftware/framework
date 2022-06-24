@@ -3,7 +3,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
 import * as Navigator from '@framework/Navigator';
-import { JavascriptMessage, toLite } from '@framework/Signum.Entities'
+import { getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { WorkflowActivityStats } from "../WorkflowClient";
 import { FormGroup, StyleContext, FormControlReadonly } from "@framework/Lines";
 import { WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from "../Signum.Entities.Workflow";
@@ -82,7 +82,7 @@ const [show, setShow] = React.useState<boolean>(true);
   var stats = p.stats;
   return <Modal size="lg" onHide={handleCloseClicked} show={show} onExited={handleOnExited}>
     <ModalHeaderButtons onClose={handleCloseClicked}>
-      {stats.workflowActivity.toStr}
+      {getToString(stats.workflowActivity)}
     </ModalHeaderButtons>
     <div className="modal-body">
       {

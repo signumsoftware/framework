@@ -57,10 +57,12 @@ export function toMList<T>(array: T[]): MList<T> {
 }
 
 export interface Lite<T extends Entity> {
-  entity?: T;
   EntityType: string;
   id?: number | string;
   model?: unknown;
+
+  ModelType?: string;
+  entity?: T;
 }
 
 export interface ModelState {
@@ -155,22 +157,21 @@ function getOrCreateToStringFunction(type: string) {
 }
 
 function compileFunction(functionString: string): (e: any) => any {
- 
 
-  const getToString2 = getToString;
-  const newNiceName2 = newNiceName;
+  var func = new Function("e", "fd", functionString);
 
-  {
-    const getToString = getToString2;
-    const valToString = Reflection.valToString;
-    const numberToString = Reflection.numberToString;
-    const dateToString = Reflection.dateToString;
-    const timeToString = Reflection.timeToString;
-    const getTypeInfo = Reflection.getTypeInfo;
-    const newNiceName = newNiceName2;
+  var funcDeps = {
+    getToString: getToString,
+    valToString: Reflection.valToString,
+    numberToString: Reflection.numberToString,
+    dateToString: Reflection.dateToString,
+    timeToString: Reflection.timeToString,
+    getTypeInfo: Reflection.getTypeInfo,
+    newNiceName: newNiceName,
+    New : Reflection.New,
+  };
 
-    return eval("(" + functionString + ")");
-  }
+  return e => func(e, funcDeps);
 }
 
 
@@ -221,7 +222,7 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
   return {
     EntityType: entity.Type,
     id: entity.id,
-    model: model || getToString(entity),
+    model: model || createLiteModel(entity),
   }
 }
 

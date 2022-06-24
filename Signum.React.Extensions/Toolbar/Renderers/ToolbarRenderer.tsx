@@ -9,11 +9,10 @@ import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
+import { getToString } from '@framework/Signum.Entities'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
-import { SidebarMode  } from '../SidebarContainer'
-import { isActive } from '@framework/FindOptions';
-import { classes, Dic } from '@framework/Globals';
 import { urlVariables } from '../../Dashboard/UrlVariables';
+import { Dic } from '@framework/Globals';
 
 
 
@@ -100,7 +99,7 @@ export function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, active: T
     case "Header":
     case "Item":
       if (res.elements && res.elements.length) {
-        var title = res.label || res.content!.toStr;
+        var title = res.label || getToString(res.content);
         var icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
 
         return (

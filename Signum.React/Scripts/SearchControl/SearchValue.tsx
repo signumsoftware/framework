@@ -303,7 +303,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
           return Duration.fromISOTime(value).toFormat(luxonFormat ?? "hh:mm:ss");
         }
       case "String": return value;
-      case "Lite": return (value as Lite<Entity>).toStr ?? null;
+      case "Lite": return value && Navigator.renderLite(value as Lite<Entity>);
       case "Embedded": return getToString(value as EmbeddedEntity);
       case "Boolean": return <input type="checkbox" className="form-check-input" disabled={true} checked={value} />
       case "Enum": return getEnumInfo(token!.type.name, value).niceName;

@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { getTypeInfo } from '@framework/Reflection'
-import { JavascriptMessage } from '@framework/Signum.Entities'
+import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { WorkflowEntity, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import { NavDropdown, Dropdown } from 'react-bootstrap'
@@ -42,7 +42,7 @@ function WorkflowDropdownImp(props: {}) {
           (kvp.elements.length > 1 && <Dropdown.Item key={i} disabled>{kvp.elements[0].typeInfo.niceName}</Dropdown.Item>),
           ...kvp.elements.map((val, j) =>
             <LinkContainer key={i + "-" + j} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
-              <Dropdown.Item>{val.workflow.toStr}{val.mainEntityStrategy == "CreateNew" ? "" : `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`}</Dropdown.Item>
+              <Dropdown.Item>{getToString(val.workflow)}{val.mainEntityStrategy == "CreateNew" ? "" : `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`}</Dropdown.Item>
             </LinkContainer>)
         ])}
     </NavDropdown>

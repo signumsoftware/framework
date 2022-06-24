@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import * as Navigator from '@framework/Navigator'
-import { JavascriptMessage, is } from '@framework/Signum.Entities'
+import { JavascriptMessage, is, getToString } from '@framework/Signum.Entities'
 import { CaseActivityEntity, CaseActivityMessage } from '../Signum.Entities.Workflow'
 import { useFetchInState } from '@framework/Navigator'
 
@@ -26,7 +26,7 @@ export default function CaseFromSenderInfo(p: CaseFromSenderInfoProps) {
           <div className="alert alert-info case-alert">
             {prev == null ? JavascriptMessage.loading.niceToString() :
               CaseActivityMessage.From0On1.niceToString().formatHtml(
-                <strong>{prev.doneBy!.toStr}</strong>,
+                <strong>{getToString(prev.doneBy)}</strong>,
                 <strong>{DateTime.fromISO(prev.doneDate!).toFormat("FFF")} ({DateTime.fromISO(prev.doneDate!).toRelative()})</strong>)
             }
           </div>

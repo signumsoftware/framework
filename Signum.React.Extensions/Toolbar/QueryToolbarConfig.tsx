@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Location } from 'history'
 import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
+import { getToString } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'
@@ -20,7 +21,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   getIcon(element: ToolbarResponse<QueryEntity>) {
 
     if (element.iconName == "count")
-      return <CountIcon findOptions={{ queryName: element.content!.toStr! }} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
+      return <CountIcon findOptions={{ queryName: getToString(element.content)! }} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
     return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName) , ["far", "list-alt"]), element.iconColor || "dodgerblue");
   }
@@ -29,16 +30,16 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     if (!res.openInPopup)
       super.handleNavigateClick(e, res);
     else {
-      Finder.explore({ queryName: res.content!.toStr! }).done()
+      Finder.explore({ queryName: getToString(res.content)! }).done()
     }
   }
 
   navigateTo(res: ToolbarResponse<QueryEntity>): Promise<string> {
-    return Promise.resolve(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
+    return Promise.resolve(Finder.findOptionsPath({ queryName: getToString(res.content)! }));
   }
 
   isCompatibleWithUrlPrio(res: ToolbarResponse<QueryEntity>, location: Location, query: any): number {
-    return location.pathname == AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: res.content!.toStr! })) ? 1 : 0;
+    return location.pathname == AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: getToString(res.content)! })) ? 1 : 0;
   }
 }
 

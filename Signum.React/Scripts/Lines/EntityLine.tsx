@@ -51,6 +51,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
           if (this.currentItem)
             this.setCurrentItem(undefined);
         } else {
+          debugger;
           if (!this.currentItem || !is(this.currentItem.entity as Entity | Lite<Entity>, entity as Entity | Lite<Entity>) || getToString(this.currentItem.entity) != getToString(entity)) {
             var ci = { entity: entity!, item: undefined as unknown }
             this.setCurrentItem(ci);
@@ -185,7 +186,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     var ac = p.autocomplete;
 
     if (ac == null || ctx.readOnly) {
-      var fcr = <FormControlReadonly ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass) }>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
+      var fcr = <FormControlReadonly ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
       return renderInput ? renderInput(fcr) : fcr;
     }
 

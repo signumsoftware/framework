@@ -111,17 +111,19 @@ export function registerConfiguration<T extends IFile & ModifiableEntity>(type: 
 
 export interface FileDownloaderConfiguration<T extends IFile> {
   fileUrl?: (file: T) => string;
+  fileLiteUrl?: (file: Lite<T & Entity>) => string;
   downloadClick?: (event: React.MouseEvent<any>, file: T) => void;
   viewClick?: (event: React.MouseEvent<any>, file: T) => void;
 }
 
 registerConfiguration(FileEntity, {
   fileUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
-  viewClick: (event, file) => viewUrl(event, AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id))
+  fileLiteUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
 });
 
 registerConfiguration(FilePathEntity, {
   fileUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
+  fileLiteUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
 });
 
 registerConfiguration(FileEmbedded, {

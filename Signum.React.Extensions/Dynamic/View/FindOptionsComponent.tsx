@@ -9,7 +9,7 @@ import * as Navigator from '@framework/Navigator'
 import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { Typeahead } from '@framework/Components'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
-import { ModifiableEntity, JavascriptMessage, EntityControlMessage } from '@framework/Signum.Entities'
+import { ModifiableEntity, JavascriptMessage, EntityControlMessage, getToString } from '@framework/Signum.Entities'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'
 import { FilterOperation, PaginationMode } from '@framework/Signum.Entities.DynamicQuery'
 import { ExpressionOrValueComponent, FieldComponent, DesignerModal } from './Designer'
@@ -273,7 +273,7 @@ export function FindOptionsComponent(p : FindOptionsComponentProps){
 export function QueryKeyLine(p : { queryKey: string | undefined, label: string; onChange: (queryKey: string | undefined) => void }){
   function handleGetItems(query: string) {
     return Finder.API.findLiteLike({ types: QueryEntity.typeName, subString: query, count: 5 })
-      .then(lites => lites.map(a => a.toStr));
+      .then(lites => lites.map(a => getToString(a)));
   }
 
 
