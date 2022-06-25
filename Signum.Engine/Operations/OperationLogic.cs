@@ -130,13 +130,14 @@ public static class OperationLogic
 
         LambdaExpression? cee = operation.CanExecuteExpression();
 
-        if (cee == null)
-            throw new InvalidOperationException(OperationMessage.Operation01DoesNotHaveCanExecuteExpression
-                                                                .NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key));
-
+        if (cee == null && operation.HasCanExecute)
+                throw new InvalidOperationException(OperationMessage.Operation01DoesNotHaveCanExecuteExpression
+                                                                    .NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key));
+              
         var entity = parentExpression.ExtractEntity(false);
         var operationKey = Expression.Constant(operationSymbol.Key);
-        var canExecute = ExpressionReplacer.Replace(cee.Body, new Dictionary<ParameterExpression, Expression> { { cee.Parameters.Single(), entity } });
+        var canExecute = cee == null ? Expression.Constant(null, typeof(string)) : 
+                ExpressionReplacer.Replace(cee.Body, new Dictionary<ParameterExpression, Expression> { { cee.Parameters.Single(), entity } });
 
         var dtoConstructor = typeof(CellOperationDTO).GetConstructor(new[] { typeof(Lite<IEntity>), typeof(string),  typeof(string) });
 
@@ -148,7 +149,7 @@ public static class OperationLogic
     private static string? OperationToken_IsAllowedExtension(OperationSymbol operationSymbol, Type entityType)
     {
         var operation = (IEntityOperation)FindOperation(entityType, operationSymbol);
-        if (operation.CanExecuteExpression() == null)
+        if (operation.CanExecuteExpression() == null && operation.HasCanExecute)
             return OperationMessage.Operation01DoesNotHaveCanExecuteExpression.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key);
 
         return OperationAllowedMessage(operationSymbol, entityType, true);
