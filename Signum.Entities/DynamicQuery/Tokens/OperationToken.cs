@@ -58,7 +58,7 @@ public class OperationToken : QueryToken
     public override string? IsAllowed()
     {
         if (IsAllowedExtension == null)
-            throw new InvalidOperationException("OperationToken.OperationAllowedInUI not set");
+            throw new InvalidOperationException("OperationToken.IsAllowedExtension not set");
 
         return IsAllowedExtension(operation, entityType);
     }

@@ -76,7 +76,7 @@ export function CellOperationButton({ icoc: icocOrNull, onOperationClick, canExe
   var button = <Button variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
     {...props}
     key="button"
-    title={icoc.operationInfo.niceName}
+    //title={icoc.operationInfo.niceName}
     className={classes(disabled ? "disabled" : undefined, props?.className, icoc.settings && icoc.settings.classes)}
     onClick={disabled ? undefined : handleOnClick}
     data-operation={icoc.operationInfo.key}>
