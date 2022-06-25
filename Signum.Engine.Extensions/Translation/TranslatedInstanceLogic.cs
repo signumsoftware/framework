@@ -268,11 +268,22 @@ public static class TranslatedInstanceLogic
                 select ti).UnsafeDelete();
     }
 
-    public static string? TranslatedField<T>(this T entity, Expression<Func<T, string?>> property) where T : Entity
+    public static string TranslatedField<T>(this T entity, Expression<Func<T, string>> property) where T : Entity
     {
         string? fallbackString = TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
 
-        return entity.ToLite().TranslatedField(property, fallbackString);
+        var pr = PropertyRoute.Construct(property);
+
+        return entity.ToLite().TranslatedField(pr, fallbackString);
+    }
+
+    public static string? TranslatedFieldNullable<T>(this T entity, Expression<Func<T, string?>> property) where T : Entity
+    {
+        string? fallbackString = TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
+
+        var pr = PropertyRoute.Construct(property);
+
+        return entity.ToLite().TranslatedField(pr, fallbackString);
     }
 
     public static IEnumerable<TranslatableElement<T>> TranslatedMList<E, T>(this E entity, Expression<Func<E, MList<T>>> mlistProperty) where E : Entity
@@ -289,7 +300,16 @@ public static class TranslatedInstanceLogic
         }
     }
 
-    public static string? TranslatedElement<T>(this TranslatableElement<T> element, Expression<Func<T, string?>> property)
+    public static string TranslatedElement<T>(this TranslatableElement<T> element, Expression<Func<T, string>> property)
+    {
+        string fallback = GetPropertyRouteAccesor(property)(element.Value);
+
+        PropertyRoute route = element.ElementRoute.Continue(property);
+
+        return TranslatedField(element.Lite, route, element.RowId, fallback);
+    }
+
+    public static string? TranslatedElementNullable<T>(this TranslatableElement<T> element, Expression<Func<T, string?>> property)
     {
         string? fallback = GetPropertyRouteAccesor(property)(element.Value);
         
