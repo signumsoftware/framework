@@ -13,12 +13,14 @@ public class OperationToken : QueryToken
 
     public OperationToken(QueryToken parent, string key, Type entityType, OperationSymbol operationSymbol)
     {
-        if (!entityType.CleanType().IsIEntity())
+        var cleanType = entityType.CleanType();
+
+        if (!cleanType.IsIEntity())
             throw new InvalidOperationException("OperationToken, invalid entityType (should be entity or lite)");
 
         this.parent = parent;
         this.key = key;
-        this.entityType = entityType;
+        this.entityType = cleanType;
         this.operation = operationSymbol;
 
     }
