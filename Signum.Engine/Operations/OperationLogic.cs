@@ -108,7 +108,7 @@ public static class OperationLogic
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
             OperationsToken.GetTypeOperations = (type) => TypeOperations(type).Select(o => o.OperationSymbol);
-            OperationToken.OperationAllowedInUI = (operationSymbol, entityType) => OperationTokenAllowed(operationSymbol, entityType);
+            OperationToken.IsAllowedExtension = (operationSymbol, entityType) => OperationToken_IsAllowedExtension(operationSymbol, entityType);
             OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
         }
     }
@@ -134,7 +134,7 @@ public static class OperationLogic
         return newExpr;
     }
 
-    private static string? OperationTokenAllowed(OperationSymbol operationSymbol, Type entityType)
+    private static string? OperationToken_IsAllowedExtension(OperationSymbol operationSymbol, Type entityType)
     {
         var operation = (IEntityOperation)FindOperation(entityType, operationSymbol);
         if (operation.CanExecuteExpression() == null)

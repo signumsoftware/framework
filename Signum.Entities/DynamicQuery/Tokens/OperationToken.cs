@@ -52,13 +52,13 @@ public class OperationToken : QueryToken
         return result;
     }
 
-    public static Func<OperationSymbol, Type, string?>? OperationAllowedInUI;
+    public static Func<OperationSymbol, Type, string?>? IsAllowedExtension;
     public override string? IsAllowed()
     {
-        if (OperationAllowedInUI == null)
+        if (IsAllowedExtension == null)
             throw new InvalidOperationException("OperationToken.OperationAllowedInUI not set");
 
-        return OperationAllowedInUI(operation, entityType);
+        return IsAllowedExtension(operation, entityType);
     }
 
     public override QueryToken Clone()
