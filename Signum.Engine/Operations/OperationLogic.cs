@@ -107,10 +107,21 @@ public static class OperationLogic
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
-            OperationsToken.GetTypeOperations = (type) => TypeOperations(type).Select(o => o.OperationSymbol);
+            OperationsToken.GetTypeEligibleOperations = (entityType) => OperationsToken_GetTypeEligibleOperations(entityType);
             OperationToken.IsAllowedExtension = (operationSymbol, entityType) => OperationToken_IsAllowedExtension(operationSymbol, entityType);
             OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
         }
+    }
+
+    private static IEnumerable<OperationSymbol> OperationsToken_GetTypeEligibleOperations(Type entityType)
+    {
+        return TypeOperations(entityType)
+            .Where((o) =>
+                {
+                    var op = TryFindOperation(entityType, o.OperationSymbol) as IEntityOperation;
+                    return op?.CanExecuteExpression() != null || op?.HasCanExecute == false;
+                })
+            .Select(o => o.OperationSymbol);
     }
 
     private static Expression OperationToken_BuildExpression(Type entityType, OperationSymbol operationSymbol, Expression parentExpression)
