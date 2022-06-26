@@ -24,11 +24,19 @@ import { FilterOperation } from "./Signum.Entities.DynamicQuery";
 import { FunctionalAdapter } from "./Modals";
 import { SearchControlLoaded } from "./Search";
 import { isActive, isFilterGroupOption, isFilterGroupOptionParsed } from "./FindOptions";
+import { CellFormatter, CellFormatterContext } from "./Finder";
+import { CellOperationButton } from "./Operations/CellOperation";
 
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
     return false;
   }
+}
+
+interface CellOperationDto {
+  lite: Lite<Entity>;
+  operationKey: string;
+  canExecute?: string
 }
 
 export function start() {
@@ -47,6 +55,17 @@ export function start() {
       icon: "history",
       iconColor: "green",
     }));
+
+  Finder.formatRules.push({
+    name: "CellOperation",
+    isApplicable: c => {
+      return c.type.name == "CellOperationDTO";
+    },
+    formatter: c => new CellFormatter((dto: CellOperationDto, ctx) => dto ? <CellOperationButton icoc={CellOperationContext.fromCellContext(ctx, dto)} />
+    : undefined)
+
+  });
+
 }
 
 export const operationSettings: { [operationKey: string]: OperationSettings } = {};
@@ -282,6 +301,90 @@ export class ContextualOperationContext<T extends Entity> {
     return this.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
   }
 }
+
+/**
+ * Cell Operation Settings, rendered in search control cells
+ */
+export class CellOperationSettings extends OperationSettings {
+  text?: (coc: CellOperationContext) => string;
+  //isVisible?: (coc: CellOperationContext) => boolean;
+  confirmMessage?: (coc: CellOperationContext) => string | undefined | null;
+  onClick?: (coc: CellOperationContext) => Promise<void>;
+  hideOnCanExecute?: boolean;
+  //showOnReadOnly?: boolean;
+  //order?: number;
+  color?: BsColor;
+  icon?: IconProp;
+  iconColor?: string;
+  iconAlign?: "start" | "end";
+  outline?: boolean;
+  classes?: string;
+  overrideCanExecute?: (ctx: CellOperationContext) => string | undefined | null;
+  createButton?: (eoc: CellOperationContext, group?: EntityOperationGroup) => ButtonBarElement[];
+
+  constructor(operationSymbol: OperationSymbol | string, options: CellOperationOptions) {
+    super(operationSymbol);
+
+    Dic.assign(this, options);
+  }
+}
+
+export interface CellOperationOptions {
+  text?: (coc: CellOperationContext) => string;
+  //isVisible?: (coc: CellOperationContext) => boolean;
+  confirmMessage?: (coc: CellOperationContext) => string | undefined | null;
+  onClick?: (coc: CellOperationContext) => Promise<void>;
+  hideOnCanExecute?: boolean;
+  //showOnReadOnly?: boolean;
+  //order?: number;
+  color?: BsColor;
+  icon?: IconProp;
+  iconColor?: string;
+  iconAlign?: "start" | "end";
+  outline?: boolean;
+  classes?: string;
+  overrideCanExecute?: (ctx: CellOperationContext) => string | undefined | null;
+  createButton?: (eoc: CellOperationContext, group?: EntityOperationGroup) => ButtonBarElement[];
+}
+
+export class CellOperationContext {
+
+  tag?: string;
+  lite: Lite<Entity>;
+  operationInfo: OperationInfo;
+  settings?: CellOperationSettings;
+//  entityOperationSettings?: EntityOperationSettings<T>;
+  canExecute?: string;
+  event?: React.MouseEvent<any>;
+
+  color?: BsColor;
+  icon?: IconProp;
+  iconColor?: string;
+  iconAlign?: "start" | "end";
+  outline?: boolean;
+
+  onExecuteSuccess?: (pack: EntityPack<Entity> | undefined) => void;
+  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
+  onDeleteSuccess?: () => void;
+
+  static fromCellContext(ctx: CellFormatterContext, dto: CellOperationDto) {
+    const result = new CellOperationContext(dto);
+    result.settings = getSettings(dto.operationKey) as CellOperationSettings;
+    result.onExecuteSuccess = (p) => ctx.refresh?.()
+    return result;
+  }
+
+  constructor(co: CellOperationDto) {
+    this.lite = co.lite;
+    this.operationInfo = getOperationInfo(co.operationKey, co.lite.EntityType);
+    this.canExecute = co.canExecute;
+  }
+
+  raiseEntityChanged() {
+    return Navigator.raiseEntityChanged(this.lite.EntityType);
+  }
+}
+
 
 export class EntityOperationContext<T extends Entity> {
   

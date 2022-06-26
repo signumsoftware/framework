@@ -160,6 +160,8 @@ public class Graph<T>
 
         public Func<F, string?>? CanConstruct { get; set; }
 
+        public Expression<Func<F, string?>>? CanConstructExpression { get; set; }
+
         public ConstructFrom<F> OverrideCanConstruct(Overrider<Func<F, string?>> overrider)
         {
             this.CanConstruct = overrider(this.CanConstruct ?? (f => null));
@@ -192,6 +194,11 @@ public class Graph<T>
             where B : class, IEntity
         {
             return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);
+        }
+
+        LambdaExpression? IEntityOperation.CanExecuteExpression()
+        {
+            return CanConstructExpression;
         }
 
         string? IEntityOperation.CanExecute(IEntity entity)
@@ -468,6 +475,8 @@ public class Graph<T>
         //public Action<T, object[]?> Execute { get; set; } (inherited)
         public Func<T, string?>? CanExecute { get; set; }
 
+        public Expression<Func<T, string?>>? CanExecuteExpression { get; set; }
+
         public Execute OverrideCanExecute(Overrider<Func<T, string?>> overrider)
         {
             this.CanExecute = overrider(this.CanExecute ?? (t => null));
@@ -482,6 +491,11 @@ public class Graph<T>
         public Execute(ExecuteSymbol<T> symbol)
         {
             this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
+        }
+
+        LambdaExpression? IEntityOperation.CanExecuteExpression()
+        {
+            return CanExecuteExpression;
         }
 
         string? IEntityOperation.CanExecute(IEntity entity)
@@ -584,6 +598,7 @@ public class Graph<T>
         {
             return "{0} Execute on {1}".FormatWith(Symbol, typeof(T));
         }
+
     }
 
     public class Delete : _Delete<T>, IDeleteOperation
@@ -607,6 +622,8 @@ public class Graph<T>
         //public Action<T, object[]?> Delete { get; set; } (inherited)
         public Func<T, string?>? CanDelete { get; set; }
 
+        public Expression<Func<T, string?>>? CanDeleteExpression { get; set; }
+
         public Delete OverrideCanDelete(Overrider<Func<T, string?>> overrider)
         {
             this.CanDelete = overrider(this.CanDelete ?? (t => null));
@@ -621,6 +638,11 @@ public class Graph<T>
         public Delete(DeleteSymbol<T> symbol)
         {
             this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
+        }
+
+        LambdaExpression? IEntityOperation.CanExecuteExpression()
+        {
+            return CanDeleteExpression;
         }
 
         string? IEntityOperation.CanExecute(IEntity entity)
