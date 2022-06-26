@@ -452,14 +452,17 @@ internal class DbExpressionComparer : ExpressionComparer
 
     protected virtual bool CompareLiteReference(LiteReferenceExpression a, LiteReferenceExpression b)
     {
-        return Compare(a.Reference, b.Reference) && Compare(a.CustomToStr, b.CustomToStr);
+        return Compare(a.Reference, b.Reference)
+            && Compare(a.CustomModelExpression, b.CustomModelExpression)
+            && CompareDictionaries(a.CustomModelTypes, b.CustomModelTypes, (at, bt) => at == bt);
     }
 
     protected virtual bool CompareLiteValue(LiteValueExpression a, LiteValueExpression b)
     {
         return Compare(a.Id, b.Id)
-           && Compare(a.ToStr, b.ToStr)
-           && Compare(a.TypeId, b.TypeId);
+           && Compare(a.TypeId, b.TypeId)
+           && Compare(a.CustomModelExpression, b.CustomModelExpression)
+           && CompareDictionaries(a.Models, b.Models, (a1, b1) => a1.LazyModelType == b1.LazyModelType && Compare(a1.EagerExpression, b1.EagerExpression));
     }
 
     protected virtual bool CompareTypeFieldInit(TypeEntityExpression a, TypeEntityExpression b)

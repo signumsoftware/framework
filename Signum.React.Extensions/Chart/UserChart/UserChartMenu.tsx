@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Dropdown } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import { Lite, toLite, newMListElement, SearchMessage, MList } from '@framework/Signum.Entities'
+import { Lite, toLite, newMListElement, SearchMessage, MList, getToString } from '@framework/Signum.Entities'
 import { is } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
@@ -41,13 +41,13 @@ export default function UserChartMenu(p: UserChartMenuProps) {
         setUserCharts(list);
         const userChart = p.chartRequestView.userChart;
 
-        if (userChart && userChart.toStr == null) {
+        if (userChart && userChart.model == null) {
           const similar = list.singleOrNull(a => is(a, userChart));
           if (similar) {
-            userChart.toStr = similar.toStr;
+            userChart.model = similar.model;
             forceUpdate();
           } else {
-            Navigator.API.fillToStrings(userChart)
+            Navigator.API.fillLiteModels(userChart)
               .then(() => forceUpdate())
               .done();
           }
@@ -162,7 +162,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
   }
 
   const crView = p.chartRequestView;
-  const labelText = !crView.userChart ? UserChartEntity.nicePluralName() : crView.userChart.toStr
+  const labelText = !crView.userChart ? UserChartEntity.nicePluralName() : getToString(crView.userChart)
 
   var canSave = tryGetOperationInfo(UserChartOperation.Save, UserChartEntity) != null;
 
@@ -187,12 +187,12 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           </div>}
         <div id="userchart-items-container" style={{ maxHeight: "300px", overflowX: "auto" }}>
           {userCharts?.map((uc, i) => {
-            if (filter == undefined || uc.toStr?.search(new RegExp(RegExp.escape(filter), "i")) != -1)
+            if (filter == undefined || getToString(uc)?.search(new RegExp(RegExp.escape(filter), "i")) != -1)
               return (
                 <Dropdown.Item key={i}
                   className={classes("sf-userquery", is(uc, crView.userChart) && "active")}
                   onClick={() => handleSelect(uc)}>
-                  {uc.toStr}
+                  {getToString(uc)}
                 </Dropdown.Item>)
           })}
         </div>

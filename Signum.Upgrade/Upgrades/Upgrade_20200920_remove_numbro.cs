@@ -46,15 +46,3 @@ class Upgrade_20200920_remove_numbro : CodeUpgradeBase
 
     
 }
-
-public static class RegexExpressions
-{
-    public static Regex WithMacros(this Regex regex)
-    {
-        var pattern = regex.ToString();
-
-        var newPattern = pattern.Replace("::EXPR::", new Regex(@"(?:[^()]|(?<Open>[(])|(?<-Open>[)]))+").ToString()); /*Just for validation and coloring*/
-
-        return new Regex(newPattern, regex.Options);
-    }
-}

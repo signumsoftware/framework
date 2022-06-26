@@ -117,17 +117,17 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined)}>
-      <Multiselect
-        readOnly={p.ctx.readOnly}
-        dataKey={item => isMListElement(item) ? liteKey(getLite(item.element)) : liteKey((item as ResultRow).entity!)}
-        textField="name"
-        value={p.ctx.value}
-        data={optionsRows}
-        onChange={(value => c.handleOnSelect(value.map(e => e.entity!)))}
-        renderListItem={({ item }) => p.onRenderItem ? p.onRenderItem(item) : item.entity!.toStr}
-        renderTagValue={({ item }) => isMListElement(item) ? getLite(item.element).toStr  :
-          p.onRenderItem ? p.onRenderItem(item) : item.entity?.toStr
-        }
+        <Multiselect
+          readOnly={p.ctx.readOnly}
+          dataKey={item => isMListElement(item) ? liteKey(getLite(item.element)) : liteKey((item as ResultRow).entity!)}
+          textField="name"
+          value={p.ctx.value}
+          data={optionsRows}
+          onChange={(value => c.handleOnSelect(value.map(e => e.entity!)))}
+          renderListItem={({ item }) => p.onRenderItem ? p.onRenderItem(item) : Navigator.renderLite(item.entity!)}
+          renderTagValue={({ item }) => isMListElement(item) ? Navigator.renderLite(getLite(item.element)) :
+            p.onRenderItem ? p.onRenderItem(item) : Navigator.renderLite(item.entity!)
+          }
         />
       </div>
     </FormGroup>

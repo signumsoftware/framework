@@ -1,6 +1,7 @@
 
 namespace Signum.Entities.Files;
 
+[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class FileTypeSymbol : Symbol
 {
     private FileTypeSymbol() { }

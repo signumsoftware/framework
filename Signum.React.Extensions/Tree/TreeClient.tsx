@@ -7,7 +7,7 @@ import * as Finder from '@framework/Finder'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { Type, tryGetTypeInfo } from '@framework/Reflection'
-import { Lite } from '@framework/Signum.Entities'
+import { getToString, Lite } from '@framework/Signum.Entities'
 import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
 import { FilterRequest, FilterOption } from "@framework/FindOptions";
@@ -72,7 +72,7 @@ function moveModal(lite: Lite<TreeEntity>) {
     return s.createMoveModel(lite, {});
   else
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
-      title: TreeMessage.Move0.niceToString(lite.toStr),
+      title: TreeMessage.Move0.niceToString(getToString(lite)),
       modalSize: "md",
       extraProps: { lite },
     })
@@ -84,7 +84,7 @@ function copyModal(lite: Lite<TreeEntity>) {
     return s.createCopyModel(lite, {});
   else
     return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
-      title: TreeMessage.Copy0.niceToString(lite.toStr),
+      title: TreeMessage.Copy0.niceToString(getToString(lite)),
       modalSize: "md",
       extraProps: { lite },
     });

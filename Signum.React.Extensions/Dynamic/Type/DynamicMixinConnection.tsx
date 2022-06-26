@@ -5,7 +5,7 @@ import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { DynamicTypeEntity, DynamicTypeMessage, DynamicMixinConnectionEntity } from '../Signum.Entities.Dynamic'
 import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
-import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '@framework/Signum.Entities'
+import { ModifiableEntity, Entity, Lite, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, getQueryNiceName } from '@framework/Reflection'
 import * as DynamicTypeClient from '../DynamicTypeClient'
 import { Typeahead } from '@framework/Components';
@@ -49,7 +49,7 @@ export function MixinCombo(p : MixinComboProps){
       ],
       orderOptions: [],
       count: 5
-    }).then(lites => lites?.map(a => a.toStr));
+    }).then(lites => lites?.map(a => getToString(a)));
   }
 
   function handleOnChange(newValue: string) {

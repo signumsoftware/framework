@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations'
-import { Lite } from '@framework/Signum.Entities'
+import { getToString, Lite } from '@framework/Signum.Entities'
 import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult } from '../TranslationClient'
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
@@ -23,7 +23,7 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
   const [result, reloadResult] = useAPIWithReload(() => API.sync(assembly, culture, namespace), [assembly, culture, namespace]);  
 
   var message = result?.totalTypes == 0 ? TranslationMessage._0AlreadySynchronized.niceToString(namespace ?? assembly) :
-    TranslationMessage.Synchronize0In1.niceToString(namespace ?? assembly, cultures ? cultures[culture].toStr : culture) +
+    TranslationMessage.Synchronize0In1.niceToString(namespace ?? assembly, cultures ? getToString(cultures[culture]) : culture) +
     (result ? ` [${Dic.getKeys(result.types).length}/${result.totalTypes}]` : " …");
 
   useTitle(message);

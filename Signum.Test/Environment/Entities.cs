@@ -176,6 +176,22 @@ public enum AwardResult
     Nominated
 }
 
+public class AwardLiteModel : ModelEntity
+{
+    [StringLengthValidator(Max = 100)]
+    public string Type { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string Category { get; set; }
+
+    public int Year { get; set; }
+
+    public override string ToString()
+    {
+        return $"{Category} {Year}";
+    }
+}
+
 public class GrammyAwardEntity : AwardEntity
 {
 }
@@ -312,7 +328,9 @@ public class AwardNominationEntity : Entity, ICanBeOrdered
     public Lite<IAuthorEntity> Author { get; set; }
 
     [ForceNullable]
-    [ImplementedBy(typeof(GrammyAwardEntity), typeof(PersonalAwardEntity), typeof(AmericanMusicAwardEntity)), NotNullValidator(Disabled = true)]
+    [LiteModel(typeof(AwardLiteModel), ForEntityType = typeof(GrammyAwardEntity))]
+    [ImplementedBy(typeof(GrammyAwardEntity), typeof(PersonalAwardEntity), typeof(AmericanMusicAwardEntity))]
+    [NotNullValidator(Disabled = true)]
     public Lite<AwardEntity> Award { get; set; }
 
     public int Year { get; set; }

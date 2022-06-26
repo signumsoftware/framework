@@ -6,7 +6,7 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTypeInfo, getTypeInfos, Type } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite, parseLiteList } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite, parseLiteList, getToString } from '../Signum.Entities'
 import { LineBaseController, LineBaseProps } from './LineBase'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
@@ -208,7 +208,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       return Promise.resolve(t.name);
 
     if (t.name == IsByAll)
-      return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => t?.toStr /*CleanName*/);
+      return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => getToString(t) /*CleanName*/);
 
     const tis = tryGetTypeInfos(t).notNull().filter(ti => predicate(ti));
 
@@ -284,7 +284,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
           return;
 
         lites = lites.filter(lite => lite.EntityType == ti.name);
-        return Navigator.API.fillToStrings(...lites)
+        return Navigator.API.fillLiteModels(...lites)
           .then(() => SelectorModal.chooseLite(ti.name, lites));
       })
       .then(lite => {

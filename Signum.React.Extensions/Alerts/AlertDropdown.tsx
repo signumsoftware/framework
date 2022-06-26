@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Operations from '@framework/Operations'
 import * as Finder from '@framework/Finder'
-import { is, JavascriptMessage, toLite } from '@framework/Signum.Entities'
+import { getToString, is, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { Toast, Button, ButtonGroup } from 'react-bootstrap'
 import { DateTime } from 'luxon'
 import { useAPIWithReload, useForceUpdate, useUpdatedRef } from '@framework/Hooks';
@@ -224,7 +224,7 @@ export function AlertToast(p: { alert: AlertEntity, onClose: (e: AlertEntity[]) 
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
         {AlertsClient.formatText(p.alert.textField || p.alert.textFromAlertType || "", p.alert, p.refresh)}
-        {p.alert.createdBy && <small className="sf-alert-signature">{p.alert.createdBy?.toStr}</small>}
+        {p.alert.createdBy && <small className="sf-alert-signature">{getToString(p.alert.createdBy)}</small>}
       </Toast.Body>
     </Toast>
   );

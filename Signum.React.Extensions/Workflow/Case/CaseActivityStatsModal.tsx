@@ -5,7 +5,7 @@ import { openModal, IModalProps } from '@framework/Modals';
 import { timeToString, toNumberFormat } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Navigator from '@framework/Navigator';
-import { JavascriptMessage } from '@framework/Signum.Entities'
+import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { CaseActivityStats, formatDuration } from "../WorkflowClient";
 import { FormGroup, StyleContext } from "@framework/Lines";
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity } from "../Signum.Entities.Workflow";
@@ -34,7 +34,7 @@ export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
   return (
     <Modal size="lg" onHide={handleCloseClicked} show={show} onExited={handleOnExited}>
       <div className="modal-header">
-        <h5 className="modal-title">{caseActivityStats.first().workflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})</h5>
+        <h5 className="modal-title">{getToString(caseActivityStats.first().workflowActivity)} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})</h5>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
       </div>
       <div className="modal-body">
@@ -45,7 +45,7 @@ export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
                 {
                   caseActivityStats.map(a =>
                     <Tab key={a.caseActivity.id!.toString()} eventKey={a.caseActivity.id!.toString()}
-                      title={a.doneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{a.doneBy.toStr} {DoneType.niceToString(a.doneType!)} <mark>({DateTime.fromISO(a.doneDate).toRelative()})</mark></span> as any}>
+                      title={a.doneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{getToString(a.doneBy)} {DoneType.niceToString(a.doneType!)} <mark>({DateTime.fromISO(a.doneDate).toRelative()})</mark></span> as any}>
                       <CaseActivityStatsComponent stats={a} caseEntity={p.case} />
                     </Tab>)
                 }
@@ -121,7 +121,7 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
 
   return (
     <div>
-      <FormGroup ctx={ctx} labelText={CaseActivityEntity.niceName()}>{stats.caseActivity.toStr}</FormGroup>
+      <FormGroup ctx={ctx} labelText={CaseActivityEntity.niceName()}>{getToString(stats.caseActivity)}</FormGroup>
       <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneBy)}>{stats.doneBy && <EntityLink lite={stats.doneBy} />}</FormGroup>
       <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.startDate)}>{formatDate(stats.startDate)}</FormGroup>
       <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneDate)}>{formatDate(stats.doneDate)}</FormGroup>

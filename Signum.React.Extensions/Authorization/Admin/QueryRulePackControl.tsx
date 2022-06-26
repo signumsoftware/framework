@@ -9,6 +9,7 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { Button } from 'react-bootstrap'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks';
+import { getToString } from '@framework/Signum.Entities';
 
 export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: TypeContext<QueryRulePack> }, ref: React.Ref<IRenderButtons>) {
 
@@ -77,7 +78,7 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
           {ctx.mlistItemCtxs(a => a.rules).orderBy(a => a.value.resource.key).map((c, i) =>
             <tr key={i}>
               <td>
-                {c.value.resource.toStr}
+                {getToString(c.value.resource)}
               </td>
               <td style={{ textAlign: "center" }}>
                 {renderRadio(c.value, "Allow", "green")}

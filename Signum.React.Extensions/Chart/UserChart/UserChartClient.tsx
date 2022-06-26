@@ -4,7 +4,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { UserChartEntity, ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
@@ -39,7 +39,7 @@ export function start(options: { routes: JSX.Element[] }) {
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(uqs =>
-      uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), () => uc.toStr ?? "", e => {
+      uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), () => getToString(uc) ?? "", e => {
         window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
       }, { icon: "chart-bar", iconColor: "darkviolet" })));
   });

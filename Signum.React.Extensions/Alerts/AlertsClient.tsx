@@ -13,7 +13,7 @@ import { andClose } from '@framework/Operations/EntityOperations';
 import * as AuthClient from '../Authorization/AuthClient'
 import { ajaxGet } from '@framework/Services'
 import * as Finder from '@framework/Finder'
-import { Entity, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'
 import { EntityLink } from '@framework/Search'
 import Alert from './Templates/Alert'
 import { ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
@@ -145,7 +145,7 @@ export function formatText(text: string, alert: Partial<AlertEntity>, onNavigate
       isLite(prop) ? prop : null;
 
     if (groups.url)
-      nodes.push(<Link to={replacePlaceHolders(groups.url, alert)!}>{replacePlaceHolders(groups.text, alert) ?? lite?.toStr}</Link>);
+      nodes.push(<Link to={replacePlaceHolders(groups.url, alert)!}>{replacePlaceHolders(groups.text, alert) ?? getToString(lite)}</Link>);
     else if (lite != null) {
       if (groups.text)
         nodes.push(<EntityLink lite={lite} onNavigated={onNavigated}>{replacePlaceHolders(groups.text, alert)}</EntityLink>);

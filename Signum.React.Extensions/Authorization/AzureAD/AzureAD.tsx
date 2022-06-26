@@ -7,14 +7,22 @@ import { ExternalServiceError } from "../../../Signum.React/Scripts/Services";
 import { LoginAuthMessage } from "../Signum.Entities.Authorization";
 
 /*     Add this to Index.cshtml
-       var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
-       var __azureTenantId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_DirectoryID);
+       var __azureApplicationId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_ApplicationID);
+       var __azureTenantId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_DirectoryID);
+       var __tenantLogo = @Json.Serialize(TenantLogic.GetCurrentTenant()!.Logo.BinaryFile);
  * */
+
+interface TenantConfigurationEntityPart {
+  name: string | undefined;
+  navbarCSS: string | undefined;
+  lightNavbarCSS: string | undefined;
+}
 
 declare global {
   interface Window {
     __azureApplicationId: string | null;
     __azureTenantId: string | null;
+    __tenant: TenantConfigurationEntityPart;
   }
 }
 

@@ -1,6 +1,6 @@
 import * as Finder from '@framework/Finder'
 import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, FindOptionsParsed, isFilterGroupOptionParsed, isFilterGroupRequest, OrderRequest, Pagination, QueryRequest, QueryToken, QueryValueRequest, ResultRow, ResultTable } from '@framework/FindOptions'
-import { Entity, is, Lite } from '@framework/Signum.Entities';
+import { Entity, getToString, is, Lite } from '@framework/Signum.Entities';
 import { useFetchAll } from '../../Signum.React/Scripts/Navigator';
 import { ignoreErrors } from '../../Signum.React/Scripts/QuickLinks';
 import * as ChartClient from '../Chart/ChartClient'
@@ -339,12 +339,12 @@ function orderRows(rt: ResultTable, orders: OrderRequest[], parseTokens: { [toke
 
     if (o.orderType == "Ascending") {
       if (pt.filterType == "Lite")
-        newRows.sort((ra, rb) => { const a = ra.columns[index]; const b = rb.columns[index]; return a == b ? 0 : a == null ? -1 : b == null ? 1 : a.toStr > b.toStr ? 1 : -1 });
+        newRows.sort((ra, rb) => { const a = ra.columns[index]; const b = rb.columns[index]; return a == b ? 0 : a == null ? -1 : b == null ? 1 : getToString(a) > getToString(b) ? 1 : -1 });
       else
         newRows.sort((ra, rb) => { const a = ra.columns[index]; const b = rb.columns[index]; return a == b ? 0 : a == null ? -1 : b == null ? 1 : a > b ? 1 : -1 });
     } else {
       if (pt.filterType == "Lite")
-        newRows.sort((ra, rb) => { const a = ra.columns[index]; const b = rb.columns[index]; return a == b ? 0 : a == null ? 1 : b == null ? -1 : a.toStr > b.toStr ? -1 : 1 });
+        newRows.sort((ra, rb) => { const a = ra.columns[index]; const b = rb.columns[index]; return a == b ? 0 : a == null ? 1 : b == null ? -1 : getToString(a) > getToString(b) ? -1 : 1 });
       else
         newRows.sort((ra, rb) => { const a = ra.columns[index]; const b = rb.columns[index]; return a == b ? 0 : a == null ? 1 : b == null ? -1 : a > b ? -1 : 1 });
     }

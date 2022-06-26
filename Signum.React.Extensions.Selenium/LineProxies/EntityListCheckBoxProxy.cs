@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using OpenQA.Selenium;
 using Signum.Entities;
@@ -23,7 +23,7 @@ public class EntityListCheckBoxProxy : EntityBaseProxy
         return this.Element.WithLocator(By.CssSelector("label.sf-checkbox-element")).FindElements().Select(e =>
         {
             var lite = Lite.Parse(e.FindElement(By.CssSelector("input[type=checkbox]")).GetAttribute("name"));
-            lite.SetToString(e.FindElement(By.CssSelector("span.sf-entitStrip-link")).Text);
+            lite.SetModel(e.FindElement(By.CssSelector("span.sf-entitStrip-link")).Text);
             return lite;
         }).ToList();
     }

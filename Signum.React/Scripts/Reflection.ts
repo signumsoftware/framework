@@ -1,6 +1,6 @@
 import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
-import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
+import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, ModelEntity, getToString } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
@@ -26,6 +26,7 @@ export interface TypeInfo {
   entityKind?: EntityKind;
   entityData?: EntityData;
   toStringFunction?: string;
+  customLiteModels?: { [modelType: string]: CustomLiteModel };
   isLowPopulation?: boolean;
   isSystemVersioned?: boolean;
   requiresSaveOperation?: boolean;
@@ -36,6 +37,12 @@ export interface TypeInfo {
   hasConstructorOperation?: boolean;
   operations?: { [name: string]: OperationInfo };
 }
+
+export interface CustomLiteModel {
+  isDefault: boolean;
+  constructorFunctionString?: string;
+  constructorFunction?: (e: Entity) => ModelEntity;
+} 
 
 export interface MemberInfo {
   name: string,
@@ -916,6 +923,7 @@ const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
 const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const getMixinRegexOld = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]\)$/;
 const getMixinRegex = /^\(0,[^.]+\.getMixin\)\((.+),[^.]+\.([$a-zA-Z_][0-9a-zA-Z_$]*)\)$/;
+const getToStringRegex = /^\(0,[^.]+\.getToString\)\((.+)\)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const fixNullPropagator = /^\(([_\w]+)\s*=\s(.*?)\s*\)\s*===\s*null\s*\|\|\s*\1\s*===\s*void 0\s*\?\s*void 0\s*:\s*\1$/;
 const fixNullPropagatorProd = /^\s*null\s*===\(([_\w]+)\s*=\s*(.*?)\s*\)\s*\|\|\s*void 0\s*===\s*\1\s*\?\s*void 0\s*:\s*\1$/;
@@ -941,6 +949,10 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
     }
     else if (m = getMixinRegex.exec(body) ?? getMixinRegexOld.exec(body)) {
       result.push({ name: m[2], type: "Mixin" });
+      body = m[1];
+    }
+    else if (m = getToStringRegex.exec(body)) {
+      result.push({ name: "toStr", type: "Member" });
       body = m[1];
     }
     else if (m = memberRegex.exec(body) ?? memberIndexerRegex.exec(body)) {
@@ -1165,13 +1177,13 @@ export function isType(obj: any): obj is IType {
   return (obj as IType).typeName != undefined;
 }
 
-export function newLite<T extends Entity>(type: Type<T>, id: number | string, toStr?: string): Lite<T>;
-export function newLite(typeName: PseudoType, id: number | string, toStr?: string): Lite<Entity>;
-export function newLite(type: PseudoType, id: number | string, toStr?: string): Lite<Entity> {
+export function newLite<T extends Entity>(type: Type<T>, id: number | string, model?: unknown): Lite<T>;
+export function newLite(typeName: PseudoType, id: number | string, model?: unknown): Lite<Entity>;
+export function newLite(type: PseudoType, id: number | string, model?: unknown): Lite<Entity> {
   return {
     EntityType: getTypeName(type),
     id: id,
-    toStr: toStr
+    model: model
   };
 }
 
@@ -1543,11 +1555,14 @@ export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>
   if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
   {
     var m = getMember((symbol as Entity & ISymbol).key);
-    return m && m.niceName || symbol.toStr!;
+    return m && m.niceName || (symbol as Entity).toStr!;
   }
   else {
-    var m = getMember(symbol.toStr!);
-    return m && m.niceName || symbol.toStr!;
+    var model = (symbol as Lite<Entity>).model;
+    var toStr = typeof model == "string" ? model : (model as ModelEntity).toStr;
+
+    var m = getMember(toStr);
+    return m && m.niceName || toStr;
   }
 }
 
