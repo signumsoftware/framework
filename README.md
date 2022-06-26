@@ -54,6 +54,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2022.06.13 Initial Migration](https://github.com/signumsoftware/framework/commit/c57b3d6563ec5859bf131cfd7800d32d1a07336f#commitcomment-75943113)
 * [2022.04.05 ImplementedByAll with multiple ID columns](https://github.com/signumsoftware/framework/commit/51321d1a236925fbf874c39ea0c9445f96a46089#commitcomment-70655266)
 * [2022.03.29 ValueSearchControl(Line) renamed to SearchValue(Line)](https://github.com/signumsoftware/framework/commit/8057968f8f7b5aed429487364cb83c1f5be21937#comments)
 * [2022.03.18 Improvements in Charting](https://github.com/signumsoftware/framework/commit/740b67b0d509410e2a87b202954a9ee58bf84d6e#comments)
