@@ -42,14 +42,14 @@ public class OperationsToken : QueryToken
     string key;
     public override string Key { get { return key; } }
 
-    public static Func<Type, IEnumerable<OperationSymbol>>? GetTypeEligibleOperations;
+    public static Func<Type, IEnumerable<OperationSymbol>>? GetEligibleTypeOperations;
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
     {
-        if (GetTypeEligibleOperations == null)
+        if (GetEligibleTypeOperations == null)
             throw new InvalidOperationException("OperationsToken.GetTypeOperations not set");
 
 
-        return GetTypeEligibleOperations(parent.Type.CleanType())
+        return GetEligibleTypeOperations(parent.Type.CleanType())
             .Select(o => (QueryToken)new OperationToken(this, o.Key.Replace(".", "#"), parent.Type, o))
             .ToList();
     }

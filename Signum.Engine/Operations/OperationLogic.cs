@@ -107,13 +107,13 @@ public static class OperationLogic
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
-            OperationsToken.GetTypeEligibleOperations = (entityType) => OperationsToken_GetTypeEligibleOperations(entityType);
+            OperationsToken.GetEligibleTypeOperations = (entityType) => OperationsToken_GetEligibleTypeOperations(entityType);
             OperationToken.IsAllowedExtension = (operationSymbol, entityType) => OperationToken_IsAllowedExtension(operationSymbol, entityType);
             OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
         }
     }
 
-    private static IEnumerable<OperationSymbol> OperationsToken_GetTypeEligibleOperations(Type entityType)
+    private static IEnumerable<OperationSymbol> OperationsToken_GetEligibleTypeOperations(Type entityType)
     {
         return TypeOperations(entityType)
             .Where((o) =>
@@ -148,10 +148,6 @@ public static class OperationLogic
 
     private static string? OperationToken_IsAllowedExtension(OperationSymbol operationSymbol, Type entityType)
     {
-        var operation = (IEntityOperation)FindOperation(entityType, operationSymbol);
-        if (operation.CanExecuteExpression() == null && operation.HasCanExecute)
-            return OperationMessage.Operation01DoesNotHaveCanExecuteExpression.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key);
-
         return OperationAllowedMessage(operationSymbol, entityType, true);
     }
 
