@@ -197,6 +197,14 @@ class CachedLiteTable<T> : CachedTableBase where T : Entity
 
         protected override Expression VisitMember(MemberExpression node)
         {
+            LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(node.Expression!.Type, node.Member);
+
+            if (lambda != null)
+            {
+                var replace = ExpressionReplacer.Replace(Expression.Invoke(lambda, node.Expression!));
+                return this.Visit(replace);
+            }
+
             if (node.Expression == param)
             {
                 var field = table.GetField(node.Member);
