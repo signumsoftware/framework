@@ -38,6 +38,9 @@ export function CellOperationButton({ icoc: icocOrNull, onOperationClick, canExe
 
   const icoc = icocOrNull;
 
+  if (!icoc.settings?.isVisible?.(icoc) == false)
+    return null;
+
   if (canExecute === undefined)
     canExecute = icoc.settings?.overrideCanExecute ? icoc.settings.overrideCanExecute(icoc) : icoc.canExecute;
 

@@ -307,7 +307,7 @@ export class ContextualOperationContext<T extends Entity> {
  */
 export class CellOperationSettings extends OperationSettings {
   text?: (coc: CellOperationContext) => string;
-  //isVisible?: (coc: CellOperationContext) => boolean;
+  isVisible?: (coc: CellOperationContext) => boolean;
   confirmMessage?: (coc: CellOperationContext) => string | undefined | null;
   onClick?: (coc: CellOperationContext) => Promise<void>;
   hideOnCanExecute?: boolean;
@@ -331,7 +331,7 @@ export class CellOperationSettings extends OperationSettings {
 
 export interface CellOperationOptions {
   text?: (coc: CellOperationContext) => string;
-  //isVisible?: (coc: CellOperationContext) => boolean;
+  isVisible?: (coc: CellOperationContext) => boolean;
   confirmMessage?: (coc: CellOperationContext) => string | undefined | null;
   onClick?: (coc: CellOperationContext) => Promise<void>;
   hideOnCanExecute?: boolean;
@@ -370,7 +370,7 @@ export class CellOperationContext {
   static fromCellContext(ctx: CellFormatterContext, dto: CellOperationDto) {
     const result = new CellOperationContext(dto);
     result.settings = getSettings(dto.operationKey) as CellOperationSettings;
-    result.onExecuteSuccess = (p) => ctx.refresh?.()
+    result.onExecuteSuccess = (p) => ctx.refresh?.();
     return result;
   }
 
