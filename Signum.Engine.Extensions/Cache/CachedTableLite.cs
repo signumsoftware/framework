@@ -6,7 +6,7 @@ using Signum.Engine.Connection;
 
 namespace Signum.Engine.Cache;
 
-class CachedLiteTable<T> : CachedTableBase where T : Entity
+class CachedTableLite<T> : CachedTableBase where T : Entity
 {
     public override IColumn? ParentColumn { get; set; }
 
@@ -28,7 +28,7 @@ class CachedLiteTable<T> : CachedTableBase where T : Entity
         return rows.Value;
     }
 
-    public CachedLiteTable(ICacheLogicController controller, AliasGenerator aliasGenerator, string lastPartialJoin, string? remainingJoins)
+    public CachedTableLite(ICacheLogicController controller, AliasGenerator aliasGenerator, string lastPartialJoin, string? remainingJoins)
         : base(controller)
     {
         this.table = Schema.Current.Table(typeof(T));
@@ -191,13 +191,11 @@ class CachedLiteTable<T> : CachedTableBase where T : Entity
             return result;
         }
 
-
-
         static MethodInfo miMixin = ReflectionTools.GetMethodInfo((Entity e) => e.Mixin<MixinEntity>()).GetGenericMethodDefinition();
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(node.Expression!.Type, node.Member);
+            LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(node.Expression?.Type, node.Member);
 
             if (lambda != null)
             {

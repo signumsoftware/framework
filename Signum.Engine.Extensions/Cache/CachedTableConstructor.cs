@@ -90,7 +90,7 @@ internal class CachedTableConstructor
 
     static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string?, CachedTableBase>> ciCachedSemiTable =
       new((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
-          new CachedLiteTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
+          new CachedTableLite<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
     static GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string?, CachedTableBase>> ciCachedTableMList =
       new((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
@@ -266,7 +266,7 @@ internal class CachedTableConstructor
 
                         var modelType = customLiteModelType ?? Lite.DefaultModelType(type);
 
-                        lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod(nameof(CachedLiteTable<Entity>.GetLite))!,
+                        lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod(nameof(CachedTableLite<Entity>.GetLite))!,
                             NewPrimaryKey(id.UnNullify()),
                             retriever,
                             Expression.Constant(modelType));

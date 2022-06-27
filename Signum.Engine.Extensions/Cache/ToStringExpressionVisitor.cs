@@ -55,7 +55,7 @@ class LiteModelExpressionVisitor : ExpressionVisitor
 
     protected override Expression VisitMember(MemberExpression node)
     {
-        LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(node.Expression!.Type, node.Member);
+        LambdaExpression? lambda = ExpressionCleaner.GetFieldExpansion(node.Expression?.Type, node.Member);
 
         if (lambda != null)
         {
