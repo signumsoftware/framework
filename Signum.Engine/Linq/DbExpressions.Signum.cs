@@ -434,7 +434,7 @@ internal class TypeEntityExpression : TypeDbExpression
 
     public override string ToString()
     {
-        return "TypeFie({0};{1})".FormatWith(TypeValue.TypeName(), ExternalId.ToString());
+        return "TypeEntity({0};{1})".FormatWith(TypeValue.TypeName(), ExternalId.ToString());
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)

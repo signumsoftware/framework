@@ -97,7 +97,7 @@ public class SelectTest
     }
 
     [Fact]
-    public void SelectLiteToStr()
+    public void SelectLiteCustomModel()
     {
         var list = Database.Query<AlbumEntity>().Select(a => a.ToLite(a.Label.Name)).ToList();
     }
