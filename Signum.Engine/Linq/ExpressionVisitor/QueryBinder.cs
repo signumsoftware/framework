@@ -2441,17 +2441,21 @@ internal class QueryBinder : ExpressionVisitor
         {
             if (b.NodeType == ExpressionType.Coalesce)
                 return Expression.Coalesce(left, right, b.Conversion);
-            else
-            {
-                //if (left is ProjectionExpression && !((ProjectionExpression)left).IsOneCell  ||
-                //    right is ProjectionExpression && !((ProjectionExpression)right).IsOneCell)
-                //    throw new InvalidOperationException("Comparing {0} and {1} is not valid in SQL".FormatWith(b.Left.ToString(), b.Right.ToString()));
 
-                if (left.Type.IsNullable() == right.Type.IsNullable())
-                    return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-                else
-                    return Expression.MakeBinary(b.NodeType, left.Nullify(), right.Nullify());
-            }
+            if (b.NodeType == ExpressionType.Equal)
+                return SmartEqualizer.PolymorphicEqual(left, right);
+
+            if (b.NodeType == ExpressionType.NotEqual)
+                return Expression.Not(SmartEqualizer.PolymorphicEqual(left, right));
+
+            //if (left is ProjectionExpression && !((ProjectionExpression)left).IsOneCell  ||
+            //    right is ProjectionExpression && !((ProjectionExpression)right).IsOneCell)
+            //    throw new InvalidOperationException("Comparing {0} and {1} is not valid in SQL".FormatWith(b.Left.ToString(), b.Right.ToString()));
+
+            if (left.Type.IsNullable() == right.Type.IsNullable())
+                return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
+            else
+                return Expression.MakeBinary(b.NodeType, left.Nullify(), right.Nullify());
         }
         return b;
     }

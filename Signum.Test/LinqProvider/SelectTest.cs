@@ -102,7 +102,11 @@ public class SelectTest
         var list = Database.Query<AlbumEntity>().Select(a => a.ToLite(a.Label.Name)).ToList();
     }
 
-
+    [Fact]
+    public void SelectLiteWithComplicateModel()
+    {
+        var list = Database.Query<AlbumReEditionEntity>().Select(a => a.ToLite()).ToList();
+    }
 
     [Fact]
     public void SelectBool()

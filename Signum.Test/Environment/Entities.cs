@@ -186,10 +186,9 @@ public class AwardLiteModel : ModelEntity
 
     public int Year { get; set; }
 
-    public override string ToString()
-    {
-        return $"{Category} {Year}";
-    }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Category} {Year}");
 }
 
 public class GrammyAwardEntity : AwardEntity
@@ -268,7 +267,7 @@ public class AlbumEntity : Entity, ISecretContainer
     string? ISecretContainer.Secret { get; set; }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => Name);
+    public override string ToString() => As.Expression(() => $"{Name} ({Author})");
 }
 
 public interface ISecretContainer
@@ -443,4 +442,23 @@ public class FolderEntity : Entity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
+}
+
+[EntityKind(EntityKind.Main, EntityData.Transactional)]
+public class AlbumReEditionEntity : Entity
+{
+    public Lite<AlbumEntity> Album { get; set; }
+
+    public DateTime Date { get; set; }
+
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Album} {Date}");
+}
+
+[AutoInit]
+public static class AlbumReEditionOperation
+{
+    public static readonly ExecuteSymbol<AlbumReEditionEntity> Save;
+    public static readonly DeleteSymbol<AlbumReEditionEntity> Delete;
 }
