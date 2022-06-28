@@ -185,7 +185,7 @@ public class OperationController : Controller
     [HttpPost("api/operation/constructFromMany"), ProfilerActionSplitter]
     public EntityPackTS? ConstructFromMany([Required, FromBody]MultiOperationRequest request)
     {
-        var type = request.Lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.Type);
+        var type = request.Lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.Type!);
 
         var op = request.GetOperationSymbol(type);
         var entity = OperationLogic.ServiceConstructFromMany(request.Lites, type, op, request.ParseArgs(op));
@@ -308,7 +308,7 @@ public class OperationController : Controller
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class MultiOperationRequest : BaseOperationRequest
     {
-        public string Type { get; set; }
+        public string? Type { get; set; }
         public Lite<Entity>[] Lites { get; set; }
 
         public List<PropertySetter>? Setters { get; set; }
