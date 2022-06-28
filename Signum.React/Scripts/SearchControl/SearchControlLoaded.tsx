@@ -482,7 +482,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           columnOption={this.state.editingColumn}
           onChange={this.handleColumnChanged}
           queryDescription={qd}
-          subTokensOptions={SubTokensOptions.CanElement | canAggregate}
+          subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanOperation | canAggregate}
           close={this.handleColumnClose} />}
         <div ref={d => this.containerDiv = d}
           className="sf-scroll-table-container table-responsive"

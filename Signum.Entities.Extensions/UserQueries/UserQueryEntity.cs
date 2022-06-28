@@ -89,10 +89,10 @@ public class UserQueryEntity : Entity, IUserAssetEntity
             f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
 
         foreach (var c in Columns)
-            c.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
+            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanOperation | canAggregate);
 
         foreach (var o in Orders)
-            o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
+            o.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanOperation | canAggregate);
     }
 
     public XElement ToXml(IToXmlContext ctx)

@@ -184,7 +184,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
                     new EntityToStringToken(this),
                     IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidFrom): null,
                     IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidTo): null,
-                    new OperationsToken(this),
+                    ((options & SubTokensOptions.CanOperation) != 0) ? new OperationsToken(this) : null,
                 }
                 .NotNull()
                 .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this);
