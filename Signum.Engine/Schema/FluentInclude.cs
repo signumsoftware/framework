@@ -47,5 +47,11 @@ public class FluentInclude<T> where T : Entity
         return this;
     }
 
+    public FluentInclude<T> WithLiteModel<M>(Expression<Func<T, M>> constructorExpression, bool isDefault = true)
+    {
+        Lite.RegisterLiteModelConstructor(constructorExpression, isDefault);
+        return this;
+    }
+
 }
 
