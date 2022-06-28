@@ -10,7 +10,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
@@ -1129,6 +1129,10 @@ export class TokenCompleter {
 
       if (hasElement(token) && (options & SubTokensOptions.CanElement) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Element not allowed)`);
+
+      if (hasOperation(token) && (options & SubTokensOptions.CanOperation) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Operation not allowed)`);
+
       return;
     }
 
