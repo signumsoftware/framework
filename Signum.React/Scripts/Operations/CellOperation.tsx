@@ -15,6 +15,7 @@ import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiP
 import { BsColor } from "../Components";
 import Exception from "../Exceptions/Exception";
 import { OutlineBsColor, withIcon } from "./EntityOperations";
+import { CellFormatter } from "../Finder";
 
 
 export interface CellOperationProps extends ButtonProps {
@@ -154,7 +155,7 @@ function getConfirmMessage(coc: CellOperationContext) {
 }
 
 
-export function defaultCellOperationClick(icoc: CellOperationContext, ...args: any[]) : Promise<void> {
+export function defaultCellOperationClick(icoc: CellOperationContext, ...args: any[]): Promise<void> {
 
   icoc.event!.persist();
 
@@ -164,7 +165,7 @@ export function defaultCellOperationClick(icoc: CellOperationContext, ...args: a
 
     switch (icoc.operationInfo.operationType) {
       case "ConstructorFromMany":
-          throw new Error("ConstructorFromMany operation can not be in column");
+        throw new Error("ConstructorFromMany operation can not be in column");
 
       case "ConstructorFrom":
         if (icoc.lite) {
@@ -179,16 +180,17 @@ export function defaultCellOperationClick(icoc: CellOperationContext, ...args: a
         };
       case "Execute":
         return API.executeLite(icoc.lite, icoc.operationInfo.key, ...args)
-            .then(icoc.onExecuteSuccess ?? (pack => {
-              icoc.raiseEntityChanged();
-              notifySuccess();              
-            }));
+          .then(icoc.onExecuteSuccess ?? (pack => {
+            icoc.cellContext.refresh?.();
+            icoc.raiseEntityChanged();
+            notifySuccess();
+          }));
       case "Delete":
         return API.deleteLite(icoc.lite, icoc.operationInfo.key, ...args)
-            .then(icoc.onDeleteSuccess ?? (() => {
-              icoc.raiseEntityChanged();
-              notifySuccess();
-            }));
+          .then(icoc.onDeleteSuccess ?? (() => {
+            icoc.raiseEntityChanged();
+            notifySuccess();
+          }));
     }
   });
 

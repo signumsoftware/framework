@@ -25,7 +25,7 @@ import { FunctionalAdapter } from "./Modals";
 import { SearchControlLoaded } from "./Search";
 import { isActive, isFilterGroupOption, isFilterGroupOptionParsed } from "./FindOptions";
 import { CellFormatter, CellFormatterContext } from "./Finder";
-import { CellOperationButton } from "./Operations/CellOperation";
+import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperation";
 
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
@@ -61,7 +61,7 @@ export function start() {
     isApplicable: c => {
       return c.type.name == "CellOperationDTO";
     },
-    formatter: c => new CellFormatter((dto: CellOperationDto, ctx) => dto ? <CellOperationButton icoc={CellOperationContext.fromCellContext(ctx, dto)} />
+    formatter: c => new CellFormatter((dto: CellOperationDto, ctx) => dto ? <CellOperationButton icoc={new CellOperationContext(ctx, dto)} />
     : undefined)
 
   });
@@ -312,7 +312,6 @@ export class CellOperationSettings extends OperationSettings {
   onClick?: (coc: CellOperationContext) => Promise<void>;
   hideOnCanExecute?: boolean;
   //showOnReadOnly?: boolean;
-  //order?: number;
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
@@ -336,7 +335,6 @@ export interface CellOperationOptions {
   onClick?: (coc: CellOperationContext) => Promise<void>;
   hideOnCanExecute?: boolean;
   //showOnReadOnly?: boolean;
-  //order?: number;
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
@@ -350,11 +348,11 @@ export interface CellOperationOptions {
 export class CellOperationContext {
 
   tag?: string;
-  lite: Lite<Entity>;
-  operationInfo: OperationInfo;
-  settings?: CellOperationSettings;
-//  entityOperationSettings?: EntityOperationSettings<T>;
-  canExecute?: string;
+  readonly lite: Lite<Entity>;
+  readonly operationInfo: OperationInfo;
+  readonly cellContext: CellFormatterContext;
+  readonly canExecute?: string;
+  readonly settings?: CellOperationSettings;
   event?: React.MouseEvent<any>;
 
   color?: BsColor;
@@ -367,22 +365,22 @@ export class CellOperationContext {
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
   onDeleteSuccess?: () => void;
 
-  static fromCellContext(ctx: CellFormatterContext, dto: CellOperationDto) {
-    const result = new CellOperationContext(dto);
-    result.settings = getSettings(dto.operationKey) as CellOperationSettings;
-    result.onExecuteSuccess = (p) => ctx.refresh?.();
-    return result;
-  }
-
-  constructor(co: CellOperationDto) {
+  constructor(ctx: CellFormatterContext, co: CellOperationDto) {
     this.lite = co.lite;
     this.operationInfo = getOperationInfo(co.operationKey, co.lite.EntityType);
+    this.cellContext = ctx;
     this.canExecute = co.canExecute;
+    this.settings = getSettings(co.operationKey) as CellOperationSettings;
   }
 
   raiseEntityChanged() {
     return Navigator.raiseEntityChanged(this.lite.EntityType);
   }
+
+  defaultClick(...args: any[]) {
+    return defaultCellOperationClick(this, ...args);
+  }
+
 }
 
 
