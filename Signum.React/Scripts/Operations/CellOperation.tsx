@@ -22,7 +22,6 @@ export interface CellOperationProps extends ButtonProps {
   coc: CellOperationContext;
   onOperationClick?: (coc: CellOperationContext) => Promise<void>;
   variant?: BsColor;
-  canExecute?: string | null;
   className?: string;
   children?: React.ReactNode;
   color?: BsColor;
@@ -32,36 +31,29 @@ export interface CellOperationProps extends ButtonProps {
   outline?: boolean;
 }
 
-export function CellOperationButton({ coc: cocOrNull, onOperationClick, canExecute, outline, color, icon, iconColor, iconAlign, ...props }: CellOperationProps) {
+export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline, color, icon, iconColor, iconAlign, ...props }: CellOperationProps) {
 
   if (cocOrNull == null)
     return null;
 
   const coc = cocOrNull;
 
-  if (!coc.settings?.isVisible?.(coc) == false)
+  if (!coc.isVisibleInCell())
     return null;
 
-  if (canExecute === undefined)
-    canExecute = coc.settings?.overrideCanExecute ? coc.settings.overrideCanExecute(coc) : coc.canExecute;
-
+  const canExecute = coc.settings?.overrideCanExecute ? coc.settings.overrideCanExecute(coc) : coc.canExecute;
   const disabled = !!canExecute;
 
-  const entityOperationSettings = getSettings(coc.operationInfo.key) as EntityOperationSettings<Entity> | undefined;
-
-  const hideOnCanExecute = coc.settings?.hideOnCanExecute ? entityOperationSettings?.hideOnCanExecute : false;
-
-  if (hideOnCanExecute && disabled)
-    return null;
+  const eos = coc.entityOperationSettings;
 
   if (color == null)
-    color = coc.settings?.color ?? entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
+    color = coc.settings?.color ?? eos?.color ?? Defaults.getColor(coc.operationInfo);
 
   if (icon == null)
-    icon = coalesceIcon(coc.settings?.icon, entityOperationSettings?.icon);
+    icon = coalesceIcon(coc.settings?.icon, eos?.icon);
 
   if (iconColor == null)
-    iconColor = coc.settings?.iconColor || entityOperationSettings?.iconColor;
+    iconColor = coc.settings?.iconColor || eos?.iconColor;
 
   if (outline == null)
     outline = coc.outline ?? coc.settings?.outline;

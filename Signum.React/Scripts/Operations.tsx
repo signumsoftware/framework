@@ -61,7 +61,7 @@ export function start() {
     isApplicable: c => {
       return c.type.name == "CellOperationDTO";
     },
-    formatter: c => new CellFormatter((dto: CellOperationDto, ctx) => dto ? <CellOperationButton icoc={new CellOperationContext(ctx, dto)} />
+    formatter: c => new CellFormatter((dto: CellOperationDto, ctx) => dto ? <CellOperationButton coc={new CellOperationContext(ctx, dto)} />
     : undefined)
 
   });
@@ -282,7 +282,7 @@ export class ContextualOperationContext<T extends Entity> {
       if (eos.isVisible != null) //If you override isVisible in EntityOperationsettings you have to override in ContextualOperationSettings too
         return false;
 
-      if (eos.onClick != null && cos?.onClick == null) //also for isClick, if you override in EntityOperationsettings you have to override in ContextualOperationSettings
+      if (eos.onClick != null && cos?.onClick == null) //also for onClick, if you override in EntityOperationsettings you have to override in ContextualOperationSettings
         return false;
     }
 
@@ -353,6 +353,7 @@ export class CellOperationContext {
   readonly cellContext: CellFormatterContext;
   readonly canExecute?: string;
   readonly settings?: CellOperationSettings;
+  readonly entityOperationSettings?: EntityOperationSettings<any>;
   event?: React.MouseEvent<any>;
 
   color?: BsColor;
@@ -370,7 +371,8 @@ export class CellOperationContext {
     this.operationInfo = getOperationInfo(co.operationKey, co.lite.EntityType);
     this.cellContext = ctx;
     this.canExecute = co.canExecute;
-    this.settings = getSettings(co.operationKey) as CellOperationSettings;
+    this.entityOperationSettings = getSettings(co.operationKey) as EntityOperationSettings<Entity>;
+    this.settings = this.entityOperationSettings ? this.entityOperationSettings.cell : getSettings(co.operationKey) as CellOperationSettings;
   }
 
   raiseEntityChanged() {
@@ -379,6 +381,29 @@ export class CellOperationContext {
 
   defaultClick(...args: any[]) {
     return defaultCellOperationClick(this, ...args);
+  }
+
+  isVisibleInCell(): boolean {
+
+    const cos = this.settings;
+    const eos = this.entityOperationSettings;
+
+    const hideOnCanExecute = cos?.hideOnCanExecute ? eos?.hideOnCanExecute : false;
+    if (hideOnCanExecute && this.canExecute)
+      return false;
+
+    if (cos?.isVisible)
+      return cos.isVisible(this);
+
+    if (eos) {
+      if (eos.isVisible != null) //If you override isVisible in EntityOperationsettings you have to override in CellOperationContext too
+        return false;
+
+      if (eos.onClick != null && cos?.onClick == null) //also for onClick, if you override in EntityOperationsettings you have to override in CellOperationContext
+        return false;
+    }
+
+    return true;
   }
 
 }
@@ -560,6 +585,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
   contextual?: ContextualOperationSettings<T>;
   contextualFromMany?: ContextualOperationSettings<T>;
+  cell?: CellOperationSettings;
 
   text?: (coc: EntityOperationContext<T>) => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
@@ -588,12 +614,15 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
     this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol as any, options.contextual) : undefined;
     this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol as any, options.contextualFromMany) : undefined;
+    this.cell = options.cell ? new CellOperationSettings(operationSymbol as any, options.cell) : undefined;
   }
 }
 
 export interface EntityOperationOptions<T extends Entity> {
   contextual?: ContextualOperationOptions<T>;
   contextualFromMany?: ContextualOperationOptions<T>;
+  cell?: CellOperationOptions;
+
   text?: (coc: EntityOperationContext<T>) => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
