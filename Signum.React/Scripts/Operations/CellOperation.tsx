@@ -181,6 +181,7 @@ export function defaultCellOperationClick(coc: CellOperationContext, ...args: an
       case "Delete":
         return API.deleteLite(coc.lite, coc.operationInfo.key, ...args)
           .then(coc.onDeleteSuccess ?? (() => {
+            coc.cellContext.refresh?.();
             coc.raiseEntityChanged();
             notifySuccess();
           }));
