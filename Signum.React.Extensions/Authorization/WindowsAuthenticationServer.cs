@@ -16,6 +16,9 @@ public class WindowsAuthenticationServer
         if (config.DirectoryRegistry_Username.HasText())
             return new PrincipalContext(ContextType.Domain, domainName, config.DirectoryRegistry_Username + "@" + config.DomainServer, config.DirectoryRegistry_Password);
 
+        if (config.DomainServer.HasText())
+            return new PrincipalContext(ContextType.Domain, config.DomainServer);
+        
         return new PrincipalContext(ContextType.Domain, domainName); //Uses current user
     }
 
