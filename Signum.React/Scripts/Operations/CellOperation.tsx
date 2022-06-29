@@ -19,7 +19,7 @@ import { CellFormatter } from "../Finder";
 
 
 export interface CellOperationProps extends ButtonProps {
-  icoc: CellOperationContext;
+  coc: CellOperationContext;
   onOperationClick?: (coc: CellOperationContext) => Promise<void>;
   variant?: BsColor;
   canExecute?: string | null;
@@ -32,48 +32,49 @@ export interface CellOperationProps extends ButtonProps {
   outline?: boolean;
 }
 
-export function CellOperationButton({ icoc: icocOrNull, onOperationClick, canExecute, outline, color, icon, iconColor, iconAlign, ...props }: CellOperationProps) {
+export function CellOperationButton({ coc: cocOrNull, onOperationClick, canExecute, outline, color, icon, iconColor, iconAlign, ...props }: CellOperationProps) {
 
-  if (icocOrNull == null)
+  if (cocOrNull == null)
     return null;
 
-  const icoc = icocOrNull;
+  const coc = cocOrNull;
 
-  if (!icoc.settings?.isVisible?.(icoc) == false)
+  if (!coc.settings?.isVisible?.(coc) == false)
     return null;
 
   if (canExecute === undefined)
-    canExecute = icoc.settings?.overrideCanExecute ? icoc.settings.overrideCanExecute(icoc) : icoc.canExecute;
+    canExecute = coc.settings?.overrideCanExecute ? coc.settings.overrideCanExecute(coc) : coc.canExecute;
 
   const disabled = !!canExecute;
 
-  const entityOperationSettings = getSettings(icoc.operationInfo.key) as EntityOperationSettings<Entity> | undefined;
+  const entityOperationSettings = getSettings(coc.operationInfo.key) as EntityOperationSettings<Entity> | undefined;
 
-  const hideOnCanExecute = icoc.settings?.hideOnCanExecute ? entityOperationSettings?.hideOnCanExecute : false;
+  const hideOnCanExecute = coc.settings?.hideOnCanExecute ? entityOperationSettings?.hideOnCanExecute : false;
 
   if (hideOnCanExecute && disabled)
     return null;
 
   if (color == null)
-    color = icoc.settings?.color ?? entityOperationSettings?.color ?? Defaults.getColor(icoc.operationInfo);
+    color = coc.settings?.color ?? entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
 
   if (icon == null)
-    icon = coalesceIcon(icoc.settings?.icon, entityOperationSettings?.icon);
+    icon = coalesceIcon(coc.settings?.icon, entityOperationSettings?.icon);
 
   if (iconColor == null)
-    iconColor = icoc.settings?.iconColor || entityOperationSettings?.iconColor;
+    iconColor = coc.settings?.iconColor || entityOperationSettings?.iconColor;
 
   if (outline == null)
-    outline = icoc.outline ?? icoc.settings?.outline;
+    outline = coc.outline ?? coc.settings?.outline;
 
   if (iconAlign == null)
-    iconAlign = icoc.iconAlign ?? icoc.settings?.iconAlign;
+    iconAlign = coc.iconAlign ?? coc.settings?.iconAlign;
 
-  const operationClickOrDefault = onOperationClick ?? icoc.settings?.onClick ?? defaultCellOperationClick
+  const operationClickOrDefault = onOperationClick ?? coc.settings?.onClick ?? defaultCellOperationClick
 
-  const handleOnClick = (me: React.MouseEvent<any>) => {
-    icoc.event = me;
-    operationClickOrDefault(icoc)
+  const handleOnClick = (event: React.MouseEvent<any>) => {
+    coc.event = event;
+    event.persist();
+    operationClickOrDefault(coc)
       .done();
   }
 
@@ -81,15 +82,15 @@ export function CellOperationButton({ icoc: icocOrNull, onOperationClick, canExe
     {...props}
     key="button"
     //title={icoc.operationInfo.niceName}
-    className={classes(disabled ? "disabled" : undefined, props?.className, icoc.settings && icoc.settings.classes)}
+    className={classes(disabled ? "disabled" : undefined, props?.className, coc.settings && coc.settings.classes)}
     onClick={disabled ? undefined : handleOnClick}
-    data-operation={icoc.operationInfo.key}>
+    data-operation={coc.operationInfo.key}>
     {renderChildren()}
   </Button>;
 
   if (canExecute) {
     return (
-      <OverlayTrigger overlay={<Tooltip id={icoc.operationInfo.key + "_tooltip"} placement={"bottom"}>{canExecute}</Tooltip>}>
+      <OverlayTrigger overlay={<Tooltip id={coc.operationInfo.key + "_tooltip"} placement={"bottom"}>{canExecute}</Tooltip>}>
         {button}
       </OverlayTrigger>
     );
@@ -101,7 +102,7 @@ export function CellOperationButton({ icoc: icocOrNull, onOperationClick, canExe
     if (props.children)
       return props.children;
 
-    let text: string = icoc.settings?.text ? icoc.settings.text(icoc) : icoc.operationInfo.niceName;
+    let text: string = coc.settings?.text ? coc.settings.text(coc) : coc.operationInfo.niceName;
 
     return withIcon(text, icon, iconColor, iconAlign);
   }
@@ -155,40 +156,40 @@ function getConfirmMessage(coc: CellOperationContext) {
 }
 
 
-export function defaultCellOperationClick(icoc: CellOperationContext, ...args: any[]): Promise<void> {
+export function defaultCellOperationClick(coc: CellOperationContext, ...args: any[]): Promise<void> {
 
-  icoc.event!.persist();
+  coc.event!.persist();
 
-  return confirmInNecessary(icoc).then(conf => {
+  return confirmInNecessary(coc).then(conf => {
     if (!conf)
       return;
 
-    switch (icoc.operationInfo.operationType) {
+    switch (coc.operationInfo.operationType) {
       case "ConstructorFromMany":
         throw new Error("ConstructorFromMany operation can not be in column");
 
       case "ConstructorFrom":
-        if (icoc.lite) {
-          return API.constructFromLite(icoc.lite, icoc.operationInfo.key, ...args)
-            .then(icoc.onConstructFromSuccess ?? (pack => {
+        if (coc.lite) {
+          return API.constructFromLite(coc.lite, coc.operationInfo.key, ...args)
+            .then(coc.onConstructFromSuccess ?? (pack => {
               if (pack?.entity.id != null)
                 Navigator.raiseEntityChanged(pack.entity);
               notifySuccess();
-              return Navigator.createNavigateOrTab(pack, icoc.event!)
+              return Navigator.createNavigateOrTab(pack, coc.event!)
                 .then(() => { })
             }));
         };
       case "Execute":
-        return API.executeLite(icoc.lite, icoc.operationInfo.key, ...args)
-          .then(icoc.onExecuteSuccess ?? (pack => {
-            icoc.cellContext.refresh?.();
-            icoc.raiseEntityChanged();
+        return API.executeLite(coc.lite, coc.operationInfo.key, ...args)
+          .then(coc.onExecuteSuccess ?? (pack => {
+            coc.cellContext.refresh?.();
+            coc.raiseEntityChanged();
             notifySuccess();
           }));
       case "Delete":
-        return API.deleteLite(icoc.lite, icoc.operationInfo.key, ...args)
-          .then(icoc.onDeleteSuccess ?? (() => {
-            icoc.raiseEntityChanged();
+        return API.deleteLite(coc.lite, coc.operationInfo.key, ...args)
+          .then(coc.onDeleteSuccess ?? (() => {
+            coc.raiseEntityChanged();
             notifySuccess();
           }));
     }
