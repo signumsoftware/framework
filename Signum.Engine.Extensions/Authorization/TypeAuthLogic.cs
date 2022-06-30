@@ -266,16 +266,14 @@ class TypeAllowedMerger : IMerger<Type, TypeAllowedAndConditions>
         if (first == null)
             return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback!.Value)));
 
-        var conditions = first.Conditions.Select(c => c.TypeCondition).ToList();
+        var conditions = first.Conditions.SelectMany(c => c.TypeConditions).ToList();
 
-        if (baseRules.Where(c => !c.Conditions.IsNullOrEmpty() && c != first).Any(br => !br.Conditions.Select(c => c.TypeCondition).SequenceEqual(conditions)))
+        if (baseRules.Where(c => !c.Conditions.IsNullOrEmpty() && c != first).Any(br => !br.Conditions.SelectMany(c => c.TypeConditions).SequenceEqual(conditions)))
             return new TypeAllowedAndConditions(null);
 
         return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback!.Value)),
-            conditions.Select((c, i) => new TypeConditionRuleEmbedded(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
+            conditions.Select((c, i) => new TypeConditionRuleModel(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
     }
-
-
 }
 
 public static class AuthThumbnailExtensions

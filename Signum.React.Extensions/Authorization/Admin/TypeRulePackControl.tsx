@@ -16,7 +16,7 @@ import { OperationSymbol, ModelEntity, newMListElement, NormalControlMessage, ge
 import { API, properties, queries, operations } from '../AuthAdminClient'
 import {
   TypeRulePack, AuthAdminMessage, PermissionSymbol, TypeAllowed, TypeAllowedRule,
-  TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleEmbedded, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack, RoleEntity
+  TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleModel, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack, RoleEntity
 } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
@@ -193,8 +193,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
         if (!tc)
           return;
 
-        taac.conditions.push(newMListElement(TypeConditionRuleEmbedded.New({
-          typeCondition: tc!,
+        taac.conditions.push(newMListElement(TypeConditionRuleModel.New({
+          typeConditions: tc!,
           allowed: "None"
         })));
 

@@ -162,13 +162,13 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
     {
     }
 
-    public TypeAllowedAndConditions(TypeAllowed? fallback, IEnumerable<TypeConditionRuleEmbedded> conditions)
+    public TypeAllowedAndConditions(TypeAllowed? fallback, IEnumerable<TypeConditionRuleModel> conditions)
     {
         this.fallback = fallback;
         this.Conditions.AddRange(conditions);
     }
 
-    public TypeAllowedAndConditions(TypeAllowed? fallback, params TypeConditionRuleEmbedded[] conditions)
+    public TypeAllowedAndConditions(TypeAllowed? fallback, params TypeConditionRuleModel[] conditions)
     {
         this.fallback = fallback;
         this.Conditions.AddRange(conditions);
@@ -187,7 +187,7 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
         get { return this.fallback ?? TypeAllowed.None; }
     }
 
-    public MList<TypeConditionRuleEmbedded> Conditions { get; set; } = new MList<TypeConditionRuleEmbedded>();
+    public MList<TypeConditionRuleModel> Conditions { get; set; } = new MList<TypeConditionRuleModel>();
 
     public override bool Equals(object? obj) => obj is TypeAllowedAndConditions tac && Equals(tac);
     public bool Equals(TypeAllowedAndConditions? other)
@@ -261,7 +261,7 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
         if (Conditions.IsEmpty())
             return Fallback.ToString()!;
 
-        return "{0} | {1}".FormatWith(Fallback, Conditions.ToString(c => "{0} {1}".FormatWith(c.TypeCondition, c.Allowed), " | "));
+        return "{0} | {1}".FormatWith(Fallback, Conditions.ToString(c => $"{c}", " | "));
     }
 
     internal bool Exactly(TypeAllowed current)
@@ -271,32 +271,43 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
 
     public TypeAllowedAndConditions WithoutCondition(TypeConditionSymbol typeCondition)
     {
-        return new TypeAllowedAndConditions(this.Fallback, this.Conditions.Where(a => !a.TypeCondition.Is(typeCondition)));
+        return new TypeAllowedAndConditions(this.Fallback, this.Conditions.Where(a => !a.TypeConditions.Contains(typeCondition)));
     }
 }
 
-public class TypeConditionRuleEmbedded : EmbeddedEntity, IEquatable<TypeConditionRuleEmbedded>
+public class TypeConditionRuleModel : ModelEntity, IEquatable<TypeConditionRuleModel>
 {
-    private TypeConditionRuleEmbedded() { }
+    private TypeConditionRuleModel() { }
 
-    public TypeConditionRuleEmbedded(TypeConditionSymbol typeCondition, TypeAllowed allowed)
+    public TypeConditionRuleModel(MList<TypeConditionSymbol> typeConditions, TypeAllowed allowed)
     {
-        this.TypeCondition = typeCondition;
+        this.TypeConditions = typeConditions.ToMList();
         this.Allowed = allowed;
     }
 
-    public TypeConditionSymbol TypeCondition { get; set; }
+    public TypeConditionRuleModel(TypeConditionSymbol typeCondition, TypeAllowed allowed)
+    {
+        this.TypeConditions.Add(typeCondition);
+        this.Allowed = allowed;
+    }
+
+    [PreserveOrder, NoRepeatValidator]
+    public MList<TypeConditionSymbol> TypeConditions { get; set; } = new MList<TypeConditionSymbol>();
 
     public TypeAllowed Allowed { get; set; }
 
-    public bool Equals(TypeConditionRuleEmbedded? other)
+    public bool Equals(TypeConditionRuleModel? other)
     {
         if (other == null)
             return false;
 
-        return TypeCondition.Equals(other.TypeCondition) &&
+        return TypeConditions.ToHashSet().SetEquals(other.TypeConditions) &&
             Allowed.Equals(other.Allowed);
     }
+
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => TypeConditions.ToString(" & ") + " => " + Allowed);
 }
 
 public enum AuthThumbnail

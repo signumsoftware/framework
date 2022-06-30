@@ -228,17 +228,20 @@ public static partial class TypeAuthLogic
 
     private static Func<T, bool>? IsAllowedInMemory<T>(TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : Entity
     {
-        if (tac.Conditions.Any(c => TypeConditionLogic.GetInMemoryCondition<T>(c.TypeCondition) == null))
+        if (tac.Conditions.SelectMany(c => c.TypeConditions).Any(tc => TypeConditionLogic.GetInMemoryCondition<T>(tc) == null))
             return null;
 
         return entity =>
         {
             foreach (var cond in tac.Conditions.Reverse())
             {
-                var func = TypeConditionLogic.GetInMemoryCondition<T>(cond.TypeCondition)!;
+                foreach (var c in cond.TypeConditions)
+                {
+                    var func = TypeConditionLogic.GetInMemoryCondition<T>(c)!;
 
-                if (func(entity))
-                    return cond.Allowed.Get(inUserInterface) >= allowed;
+                    if (func(entity))
+                        return cond.Allowed.Get(inUserInterface) >= allowed;
+                }
             }
 
             return tac.FallbackOrNone.Get(inUserInterface) >= allowed;
@@ -477,14 +480,17 @@ public static partial class TypeAuthLogic
 
         var expression = tac.Conditions.Aggregate(baseValue, (acum, tacRule) =>
         {
-            var lambda = TypeConditionLogic.GetCondition(type, tacRule.TypeCondition);
-
-            var exp = (Expression)Expression.Invoke(lambda, entity);
+           var iExp = tacRule.TypeConditions.Aggregate(baseValue, (iacum, s) =>
+           {
+               var lambda = TypeConditionLogic.GetCondition(type, s);
+               var exp = (Expression)Expression.Invoke(lambda, entity);
+               return Expression.Or(exp, iacum);
+           });
 
             if (tacRule.Allowed.Get(inUserInterface) >= requested)
-                return Expression.Or(exp, acum);
+                return Expression.Or(iExp, acum);
             else
-                return Expression.And(Expression.Not(exp), acum);
+                return Expression.And(Expression.Not(iExp), acum);
         });
 
         var cleaned = DbQueryProvider.Clean(expression, false, null)!;
@@ -508,8 +514,9 @@ public static partial class TypeAuthLogic
         Expression baseValue = Expression.Constant(tac.FallbackOrNone.Get(inUserInterface) >= requested);
 
         var list = (from line in tac.Conditions
-                    select Expression.New(ciGroupDebugData, Expression.Constant(line.TypeCondition, typeof(TypeConditionSymbol)),
-                    Expression.Invoke(TypeConditionLogic.GetCondition(type, line.TypeCondition), entity),
+                    from s in line.TypeConditions
+                    select Expression.New(ciGroupDebugData, Expression.Constant(s, typeof(TypeConditionSymbol)),
+                    Expression.Invoke(TypeConditionLogic.GetCondition(type, s), entity),
                     Expression.Constant(line.Allowed))).ToArray();
 
         Expression newList = Expression.ListInit(Expression.New(typeof(List<ConditionDebugData>)), list);
@@ -645,10 +652,10 @@ public static partial class TypeAuthLogic
             Role = role,
             Resource = resource,
             Allowed = allowed.Fallback!.Value,
-            Conditions = allowed.Conditions.Select(a => new RuleTypeConditionEmbedded
+            Conditions = allowed.Conditions.Select(a => new RuleTypeConditionEntity
             {
                 Allowed = a.Allowed,
-                Condition = a.TypeCondition
+                Conditions = a.TypeConditions.ToMList()
             }).ToMList()
         };
     }
@@ -656,28 +663,29 @@ public static partial class TypeAuthLogic
     public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeEntity rule)
     {
         return new TypeAllowedAndConditions(rule.Allowed,
-            rule.Conditions.Select(c => new TypeConditionRuleEmbedded(c.Condition, c.Allowed)));
+            rule.Conditions.Select(c => new TypeConditionRuleModel(c.Conditions, c.Allowed)));
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements rep)
     {
         var conds = (from rt in Database.Query<RuleTypeEntity>()
                      from c in rt.Conditions
-                     select new { rt.Resource, c.Condition, rt.Role }).ToList();
+                     from s in c.Conditions
+                     select new { rt.Resource, s, rt.Role }).ToList();
 
-        var errors = conds.GroupBy(a => new { a.Resource, a.Condition }, a => a.Role)
+        var errors = conds.GroupBy(a => new { a.Resource, a.s}, a => a.Role)
             .Where(gr =>
             {
-                if (gr.Key.Condition!.FieldInfo == null) /*CSBUG*/
+                if (gr.Key.s.FieldInfo == null) /*CSBUG*/
                 {
-                    var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.Condition.Key);
+                    var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.s.Key);
                     if (replacedName == null)
                         return false; // Other Syncronizer will do it
 
                     return !TypeConditionLogic.ConditionsFor(gr.Key.Resource!.ToType()).Any(a => a.Key == replacedName);
                 }
 
-                return !TypeConditionLogic.IsDefined(gr.Key.Resource!.ToType(), gr.Key.Condition);
+                return !TypeConditionLogic.IsDefined(gr.Key.Resource!.ToType(), gr.Key.s);
             })
             .ToList();
 
@@ -685,8 +693,8 @@ public static partial class TypeAuthLogic
             return errors.Select(a =>
             {
                 return Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt) => rt.Conditions, Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
-                    .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))!
-                    .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.Condition, a.Key.Resource, a.ToString(", ")));
+                    .Where(mle => mle.Element.Conditions.Contains(a.Key.s) && mle.Parent.Resource.Is(a.Key.Resource)))!
+                    .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.s, a.Key.Resource, a.ToString(", ")));
             }).Combine(Spacing.Double);
     }
 }
