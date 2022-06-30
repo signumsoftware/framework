@@ -212,23 +212,25 @@ export interface OperationMenuItemProps {
 export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps) {
   const text = children ?? OperationMenuItem.getText(coc);
 
+  const eos = coc.entityOperationSettings;
+
   if (color == null)
-    color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
+    color = coc.settings?.color ?? eos?.color ?? Defaults.getColor(coc.operationInfo);
 
   if (icon == null)
-    icon = coalesceIcon(coc.settings?.icon, coc.entityOperationSettings?.icon);
+    icon = coalesceIcon(coc.settings?.icon, eos?.icon);
 
   if (iconColor == null)
-    iconColor = coc.settings?.iconColor || coc.entityOperationSettings?.iconColor;
+    iconColor = coc.settings?.iconColor || eos?.iconColor;
 
   const disabled = !!coc.canExecute;
 
-  const operationClickOrDefault = onOperationClick ?? coc.settings?.onClick ?? defaultContextualClick
+  const customOrSettingsOrDefaultClick = onOperationClick ?? coc.settings?.onClick ?? eos?.commonOnClick ?? defaultContextualOperationClick
 
   const handleOnClick = (me: React.MouseEvent<any>) => {
     coc.event = me;
     onClick?.(me);
-    operationClickOrDefault(coc)
+    customOrSettingsOrDefaultClick(coc)
       .done();
   }
 
@@ -273,7 +275,7 @@ OperationMenuItem.simplifyName = (niceName: string) => {
 }
 
 
-export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) : Promise<void> {
+export function defaultContextualOperationClick(coc: ContextualOperationContext<any>, ...args: any[]) : Promise<void> {
 
   coc.event!.persist();
 

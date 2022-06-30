@@ -15,7 +15,7 @@ import * as Navigator from './Navigator';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import { ButtonBarManager } from './Frames/ButtonBar';
 import { getEntityOperationButtons, defaultOnClick, andClose, andNew, OperationButton } from './Operations/EntityOperations';
-import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick, OperationMenuItem } from './Operations/ContextualOperations';
+import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualOperationClick, OperationMenuItem } from './Operations/ContextualOperations';
 import { ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems';
 import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -239,7 +239,11 @@ export class ContextualOperationContext<T extends Entity> {
 
 
   defaultContextualClick(...args: any[]): Promise<void> {
-    return defaultContextualClick(this, ...args);
+    return defaultContextualOperationClick(this, ...args);
+  }
+
+  defaultClick(...args: any[]): Promise<void> {
+    return defaultContextualOperationClick(this, ...args);
   }
 
   constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>) {
@@ -282,7 +286,8 @@ export class ContextualOperationContext<T extends Entity> {
       if (eos.isVisible != null) //If you override isVisible in EntityOperationsettings you have to override in ContextualOperationSettings too
         return false;
 
-      if (eos.onClick != null && cos?.onClick == null) //also for onClick, if you override in EntityOperationsettings you have to override in ContextualOperationSettings
+      //for onClick, if you have onClick in EntityOperationsettings you have to add there also commonOnClick or add specific onClick in ContextualOperationSettings
+      if (eos.onClick != null && eos.commonOnClick == null && cos?.onClick == null) 
         return false;
     }
 
@@ -396,10 +401,11 @@ export class CellOperationContext {
       return cos.isVisible(this);
 
     if (eos) {
-      if (eos.isVisible != null) //If you override isVisible in EntityOperationsettings you have to override in CellOperationContext too
+      if (eos.isVisible != null) //If you override isVisible in EntityOperationsettings you have to override in CellOperationSettings too
         return false;
 
-      if (eos.onClick != null && cos?.onClick == null) //also for onClick, if you override in EntityOperationsettings you have to override in CellOperationContext
+      //for onClick, if you have onClick in EntityOperationsettings you have to add there also commonOnClick or add specific onClick in CellOperationSettings
+      if (eos.onClick != null && eos.commonOnClick == null && cos?.onClick == null) 
         return false;
     }
 
@@ -530,8 +536,10 @@ export class EntityOperationContext<T extends Entity> {
 
   click() {
     this.frame.execute(() => {
-      if (this.settings && this.settings.onClick)
+      if (this.settings?.onClick)
         return this.settings.onClick(this);
+      else if (this.settings?.commonOnClick)
+        return this.settings.commonOnClick(this);
       else
         return defaultOnClick(this);
     }).done();
@@ -592,6 +600,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
+  commonOnClick?: (oc: EntityOperationContext<T> | ContextualOperationContext<T> | CellOperationContext) => Promise<void>;
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
@@ -628,6 +637,7 @@ export interface EntityOperationOptions<T extends Entity> {
   overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
+  commonOnClick?: (oc: EntityOperationContext<T> | ContextualOperationContext<T> | CellOperationContext) => Promise<void>;
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
