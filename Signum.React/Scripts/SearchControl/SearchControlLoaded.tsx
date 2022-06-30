@@ -450,6 +450,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });
 
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
+    const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
 
     return (
       <div className="sf-search-control sf-control-container"
@@ -482,7 +483,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           columnOption={this.state.editingColumn}
           onChange={this.handleColumnChanged}
           queryDescription={qd}
-          subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanOperation | canAggregate}
+          subTokensOptions={SubTokensOptions.CanElement | canAggregateXorOperation}
           close={this.handleColumnClose} />}
         <div ref={d => this.containerDiv = d}
           className="sf-scroll-table-container table-responsive"

@@ -84,15 +84,16 @@ public class UserQueryEntity : Entity, IUserAssetEntity
     internal void ParseData(QueryDescription description)
     {
         var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
+        var canAggregateXorOperation = canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation;
 
         foreach (var f in Filters)
             f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
 
         foreach (var c in Columns)
-            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanOperation | canAggregate);
+            c.ParseData(this, description, SubTokensOptions.CanElement | canAggregateXorOperation);
 
         foreach (var o in Orders)
-            o.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanOperation | canAggregate);
+            o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
     }
 
     public XElement ToXml(IToXmlContext ctx)
