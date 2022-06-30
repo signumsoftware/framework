@@ -178,7 +178,7 @@ public class SqlFunctionsTest
     [Fact]
     public void DayOfWeekContains()
     {
-        var dows  = new[] { DayOfWeek.Monday, DayOfWeek.Sunday };
+        var dows = new[] { DayOfWeek.Monday, DayOfWeek.Sunday };
 
         var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => dows.Contains(a.CreationTime.DayOfWeek)).Count();
         var dbCount = Database.Query<NoteWithDateEntity>().Where(a => dows.Contains(a.CreationTime.DayOfWeek)).Count();
@@ -190,13 +190,26 @@ public class SqlFunctionsTest
     }
 
     [Fact]
+    public void DayOfWeekGroupByNullable()
+    {
+        var listy0 = Database.Query<NoteWithDateEntity>()
+          .Where(a => a.ReleaseDate.HasValue)
+          .GroupBy(a => (DayOfWeek?)a.ReleaseDate!.Value.DayOfWeek)
+          .OrderBy(a => a.Key)
+          .Select(gr => new { gr.Key, Count = gr.Count() })
+          .ToList();
+
+    }
+
+    [Fact]
     public void DayOfWeekGroupBy()
     {
+
         var listA = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
         var listB = Database.Query<NoteWithDateEntity>().ToList().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() });
-        
+
         Assert.Equal(
-            listA.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","), 
+            listA.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","),
             listB.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","));
 
         var listA2 = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
@@ -283,7 +296,7 @@ public class SqlFunctionsTest
             return;
 
         var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
-        
+
         Assert.Equal(
             nodes.ToList().Select(a => a.ToString()).ToString(", "),
             nodes.Select(a => a.ToString().InSql()).ToList().ToString(", ")

@@ -20,8 +20,9 @@ public class NoteWithDateEntity : Entity
     public Lite<IEntity>? OtherTarget { get; set; }
 
     public DateTime CreationTime { get; set; }
-    
+
     public DateOnly CreationDate { get; set; }
+    public DateOnly? ReleaseDate { get; set; }
 
     public override string ToString()
     {
@@ -297,6 +298,7 @@ public class SongEmbedded : EmbeddedEntity
     public int? Seconds { get; set; }
 
     public int Index { get; set; }
+
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
