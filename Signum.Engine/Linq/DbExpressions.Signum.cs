@@ -295,12 +295,13 @@ internal class ImplementedByAllExpression : DbExpression
 
 internal class LiteReferenceExpression : DbExpression
 {
-    public bool LazyToStr;
+    public bool LazyModel;
     public bool EagerEntity;
     public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
-    public readonly Expression? CustomToStr; //Not readonly
+    public readonly Expression? CustomModelExpression;
+    public readonly ReadOnlyDictionary<Type, Type>? CustomModelTypes; 
 
-    public LiteReferenceExpression(Type type, Expression reference, Expression? customToStr, bool lazyToStr, bool eagerEntity) :
+    public LiteReferenceExpression(Type type, Expression reference, Expression? customModelExpression, ReadOnlyDictionary<Type, Type>? customModelTypes, bool lazyModel, bool eagerEntity) :
         base(DbExpressionType.LiteReference, type)
     {
         Type? cleanType = Lite.Extract(type);
@@ -308,17 +309,24 @@ internal class LiteReferenceExpression : DbExpression
         if (cleanType != reference.Type)
             throw new ArgumentException("The type {0} is not the Lite version of {1}".FormatWith(type.TypeName(), reference.Type.TypeName()));
 
+        if (customModelExpression != null && customModelTypes != null)
+            throw new InvalidOperationException($"{nameof(customModelExpression)} and {nameof(customModelTypes)} are incompatible");
+
         this.Reference = reference;
 
-        this.CustomToStr = customToStr;
+        this.CustomModelExpression = customModelExpression;
+        this.CustomModelTypes = customModelTypes;
 
-        this.LazyToStr = lazyToStr;
+        this.LazyModel = lazyModel;
         this.EagerEntity = eagerEntity;
     }
 
     public override string ToString()
     {
-        return "({0}).ToLite({1})".FormatWith(Reference.ToString(), CustomToStr == null ? null : ("customToStr: " + CustomToStr.ToString()));
+        return "({0}).ToLite({1})".FormatWith(Reference.ToString(),
+            CustomModelExpression != null ? ("custmoModelExpression: " + CustomModelExpression.ToString()) :
+            CustomModelTypes != null ? ("custmoModelTypes: {\n" + CustomModelTypes.ToString(kvp => kvp.Key.TypeName() + ": " + kvp.Value.TypeName(), "\n, ").Indent(4) + "\n}") :
+            null);
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -331,16 +339,39 @@ internal class LiteReferenceExpression : DbExpression
         switch (expandLite)
         {
             case ExpandLite.EntityEager:
-                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomToStr, lazyToStr: false, eagerEntity: true);
-            case ExpandLite.ToStringEager:
-                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomToStr, lazyToStr: false, eagerEntity: false);
-            case ExpandLite.ToStringLazy:
-                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomToStr, lazyToStr: true, eagerEntity: false);
-            case ExpandLite.ToStringNull:
-                return new LiteReferenceExpression(this.Type, this.Reference, Expression.Constant(null, typeof(string)), lazyToStr: true, eagerEntity: false);
+                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomModelExpression, this.CustomModelTypes, lazyModel: false, eagerEntity: true);
+            case ExpandLite.ModelEager:
+                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomModelExpression, this.CustomModelTypes, lazyModel: false, eagerEntity: false);
+            case ExpandLite.ModelLazy:
+                return new LiteReferenceExpression(this.Type, this.Reference, this.CustomModelExpression, this.CustomModelTypes, lazyModel: true, eagerEntity: false);
+            case ExpandLite.ModelNull:
+                return new LiteReferenceExpression(this.Type, this.Reference, Expression.Constant(null, typeof(string)), null, lazyModel: true, eagerEntity: false);
             default:
                 throw new NotImplementedException();
         }
+    }
+}
+
+public struct ExpressionOrType
+{
+    public readonly Expression? EagerExpression;
+    public readonly Type? LazyModelType;
+
+    public ExpressionOrType(Type lazyModelType)
+    {
+        LazyModelType = lazyModelType;
+        EagerExpression = null;
+    }
+
+    public ExpressionOrType(Expression eagerExpression)
+    {
+        LazyModelType = null;
+        EagerExpression = eagerExpression;
+    }
+
+    public override string ToString()
+    {
+        return LazyModelType?.TypeName() ?? EagerExpression!.ToString();
     }
 }
 
@@ -348,20 +379,31 @@ internal class LiteValueExpression : DbExpression
 {
     public readonly Expression TypeId;
     public readonly PrimaryKeyExpression Id;
-    public readonly Expression? ToStr;
+    public readonly Expression? CustomModelExpression; 
+    public readonly ReadOnlyDictionary<Type, ExpressionOrType>? Models;
 
 
-    public LiteValueExpression(Type type, Expression typeId, PrimaryKeyExpression id, Expression? toStr) :
+    public LiteValueExpression(Type type, Expression typeId, PrimaryKeyExpression id, Expression? customModelExpression, ReadOnlyDictionary<Type, ExpressionOrType>? models) :
         base(DbExpressionType.LiteValue, type)
     {
         this.TypeId = typeId ?? throw new ArgumentNullException(nameof(typeId));
         this.Id = id ?? throw new ArgumentNullException(nameof(id));
-        this.ToStr = toStr;
+
+        if (customModelExpression != null && models != null)
+            throw new InvalidOperationException($"{nameof(customModelExpression)} and {models} are incomatible");
+
+        this.CustomModelExpression = customModelExpression;
+        this.Models = models;
     }
 
     public override string ToString()
     {
-        return $"new Lite<{Type.CleanType().TypeName()}>({TypeId},{Id},{ToStr})";
+
+        var lastPart = CustomModelExpression != null ? ("custmoModelExpression: " + CustomModelExpression.ToString()) :
+            Models != null ? ("models: {\n" + Models.ToString(kvp => kvp.Key.TypeName() + ": " + kvp.Value.ToString(), "\n, ").Indent(4) + "\n}") :
+            null;
+
+        return $"new Lite<{Type.CleanType().TypeName()}>({TypeId},{Id}, {lastPart})";
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
@@ -392,7 +434,7 @@ internal class TypeEntityExpression : TypeDbExpression
 
     public override string ToString()
     {
-        return "TypeFie({0};{1})".FormatWith(TypeValue.TypeName(), ExternalId.ToString());
+        return "TypeEntity({0};{1})".FormatWith(TypeValue.TypeName(), ExternalId.ToString());
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)

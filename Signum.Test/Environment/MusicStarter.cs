@@ -60,6 +60,9 @@ public static class MusicStarter
         sb.Schema.Settings.FieldAttributes((OperationLogEntity ol) => ol.User).Add(new ImplementedByAttribute());
         sb.Schema.Settings.FieldAttributes((ExceptionEntity e) => e.User).Add(new ImplementedByAttribute());
 
+        Lite.RegisterLiteModelConstructor((AmericanMusicAwardEntity a) => new AwardLiteModel { Category = a.Category, Year = a.Year, Type = "AMA" });
+        Lite.RegisterLiteModelConstructor((GrammyAwardEntity a) => new AwardLiteModel { Category = a.Category, Year = a.Year, Type = "Grammy" }, isDefault: false);
+
         if (Connector.Current.SupportsTemporalTables)
         {
             sb.Schema.Settings.TypeAttributes<FolderEntity>().Add(new SystemVersionedAttribute());

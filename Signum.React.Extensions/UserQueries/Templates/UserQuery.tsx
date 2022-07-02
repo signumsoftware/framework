@@ -9,7 +9,7 @@ import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbe
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
-import { SearchMessage } from '@framework/Signum.Entities'
+import { SearchMessage, getToString } from '@framework/Signum.Entities'
 
 const CurrentEntityKey = "[CurrentEntity]";
 
@@ -40,7 +40,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
       {query &&
         (<div>
           <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters} onChange={() => forceUpdate()}
-            helpText={UserQueryMessage.MakesTheUserQueryAvailableAsAQuickLinkOf0.niceToString(ctx.value.entityType?.toStr ?? UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))} />
+            helpText={UserQueryMessage.MakesTheUserQueryAvailableAsAQuickLinkOf0.niceToString(getToString(ctx.value.entityType) ?? UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))} />
           {
             p.ctx.value.entityType &&
             <div className="row">

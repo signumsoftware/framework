@@ -5,7 +5,7 @@ import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import {
-  EntityPack, Lite, toLite, newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity, liteKey
+  EntityPack, Lite, toLite, newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity, liteKey, getToString
 } from '@framework/Signum.Entities'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
@@ -167,10 +167,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     },
     formatters: {
       "Activity": new Finder.CellFormatter(cell => <ActivityWithRemarks data={cell} />),
-      "MainEntity": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
-      "Actor": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
-      "Sender": new Finder.CellFormatter(cell => cell && <span>{cell.toStr}</span>),
-      "Workflow": new Finder.CellFormatter(cell => <span>{cell.toStr}</span>),
+      "MainEntity": new Finder.CellFormatter(cell => <span>{getToString(cell)}</span>),
+      "Actor": new Finder.CellFormatter(cell => <span>{getToString(cell)}</span>),
+      "Sender": new Finder.CellFormatter(cell => cell && <span>{getToString(cell)}</span>),
+      "Workflow": new Finder.CellFormatter(cell => <span>{getToString(cell)}</span>),
     },
     defaultOrders: [{
       token: "StartDate",
@@ -223,7 +223,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   function askDeleteMainEntity(mainEntity?: ICaseMainEntity): Promise<boolean | undefined> {
     return MessageModal.show({
       title: CaseMessage.DeleteMainEntity.niceToString(),
-      message: mainEntity == null ? CaseMessage.DoYouWAntToAlsoDeleteTheMainEntities.niceToString() : CaseMessage.DoYouWAntToAlsoDeleteTheMainEntity0.niceToString(mainEntity.toStr),
+      message: mainEntity == null ? CaseMessage.DoYouWAntToAlsoDeleteTheMainEntities.niceToString() : CaseMessage.DoYouWAntToAlsoDeleteTheMainEntity0.niceToString(getToString(mainEntity)),
       buttons: "yes_no_cancel",
       style: "warning"
     }).then(u => u == "cancel" ? undefined : u == "yes")
@@ -452,7 +452,7 @@ function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promis
     message:
       <div>
         <strong>{WorkflowMessage.PleaseChooseExpirationDate.niceToString()}</strong>
-        <ul>{workflows.map((w, i) => <li key={i}>{w.toStr}</li>)}</ul>
+        <ul>{workflows.map((w, i) => <li key={i}>{getToString(w)}</li>)}</ul>
       </div>
   });
 }
@@ -631,7 +631,7 @@ function getWorkflowJumpSelector(activity: Lite<WorkflowActivityEntity>): Promis
     .then(jumps => SelectorModal.chooseElement(jumps,
       {
         title: WorkflowActivityMessage.ChooseADestinationForWorkflowJumping.niceToString(),
-        buttonDisplay: a => a.toStr ?? "",
+        buttonDisplay: a => getToString(a) ?? "",
         forceShow: true
       }));
 }

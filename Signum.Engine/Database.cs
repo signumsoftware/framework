@@ -256,23 +256,23 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return giRetrieveAsync.GetInvoker(type)(id, token);
     }
 
-    public static Lite<Entity>? TryRetrieveLite(Type type, PrimaryKey id)
+    public static Lite<Entity>? TryRetrieveLite(Type type, PrimaryKey id, Type? modelType = null)
     {
-        return giTryRetrieveLite.GetInvoker(type)(id);
+        return giTryRetrieveLite.GetInvoker(type)(id, modelType);
     }
 
-    public static Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
+    public static Lite<Entity> RetrieveLite(Type type, PrimaryKey id, Type? modelType = null)
     {
-        return giRetrieveLite.GetInvoker(type)(id);
+        return giRetrieveLite.GetInvoker(type)(id, modelType);
     }
 
-    public static Task<Lite<Entity>> RetrieveLiteAsync(Type type, PrimaryKey id, CancellationToken token)
+    public static Task<Lite<Entity>> RetrieveLiteAsync(Type type, PrimaryKey id, CancellationToken token, Type? modelType = null)
     {
-        return giRetrieveLiteAsync.GetInvoker(type)(id, token);
+        return giRetrieveLiteAsync.GetInvoker(type)(id, token, modelType);
     }
 
-    static readonly GenericInvoker<Func<PrimaryKey, Lite<Entity>?>> giTryRetrieveLite = new(id => TryRetrieveLite<Entity>(id));
-    public static Lite<T>? TryRetrieveLite<T>(PrimaryKey id)
+    static readonly GenericInvoker<Func<PrimaryKey, Type?, Lite<Entity>?>> giTryRetrieveLite = new((id, modelType) => TryRetrieveLite<Entity>(id, modelType));
+    public static Lite<T>? TryRetrieveLite<T>(PrimaryKey id, Type? modelType = null)
         where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => "TryRetrieveLite<{0}>".FormatWith(typeof(T).TypeName())))
@@ -283,8 +283,17 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 if (cc != null && GetFilterQuery<T>() == null)
                 {
                     if (!cc.Exists(id))
-                        return null; 
-                    return new LiteImp<T>(id, cc.GetToString(id));
+                        return null;
+
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        rr.CompleteAll();
+
+                        return Lite.Create<T>(id, model);
+                    }
                 }
 
                 var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
@@ -304,8 +313,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     }
 
 
-    static readonly GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giRetrieveLite = new(id => RetrieveLite<Entity>(id));
-    public static Lite<T> RetrieveLite<T>(PrimaryKey id)
+    static readonly GenericInvoker<Func<PrimaryKey, Type?, Lite<Entity>>> giRetrieveLite = new((id, modelType) => RetrieveLite<Entity>(id, modelType));
+    public static Lite<T> RetrieveLite<T>(PrimaryKey id, Type? modelType = null)
         where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => "RetrieveLite<{0}>".FormatWith(typeof(T).TypeName())))
@@ -315,7 +324,15 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
                 {
-                    return new LiteImp<T>(id, cc.GetToString(id));
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        rr.CompleteAll();
+
+                        return Lite.Create<T>(id, model);
+                    } 
                 }
 
                 var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
@@ -334,9 +351,9 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
     }
 
-    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giRetrieveLiteAsync =
-        new((id, token) => RetrieveLiteAsync<Entity>(id, token));
-    public static async Task<Lite<T>> RetrieveLiteAsync<T>(PrimaryKey id, CancellationToken token)
+    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Type?, Task<Lite<Entity>>>> giRetrieveLiteAsync =
+        new((id, token, modelType) => RetrieveLiteAsync<Entity>(id, token, modelType));
+    public static async Task<Lite<T>> RetrieveLiteAsync<T>(PrimaryKey id, CancellationToken token, Type? modelType = null)
         where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => "RetrieveLiteAsync<{0}>".FormatWith(typeof(T).TypeName())))
@@ -346,7 +363,15 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
                 {
-                    return new LiteImp<T>(id, cc.GetToString(id));
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        await rr.CompleteAllAsync(token);
+
+                        return Lite.Create<T>(id, model);
+                    }
                 }
 
                 var result = await Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultAsync(a => a.Id == id, token);
@@ -365,24 +390,24 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
     }
 
-    public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IEntity
+    public static Lite<T> FillLiteModel<T>(this Lite<T> lite) where T : class, IEntity
     {
-        lite.SetToString(GetToStr(lite.EntityType, lite.Id));
+        lite.SetModel(GetLiteModel(lite.EntityType, lite.Id, lite.ModelType));
 
         return lite;
     }
 
-    public static async Task<Lite<T>> FillToStringAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
+    public static async Task<Lite<T>> FillLiteModelAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
     {
-        lite.SetToString(await GetToStrAsync(lite.EntityType, lite.Id, token));
+        lite.SetModel(await GetLiteModelAsync(lite.EntityType, lite.Id, token, lite.ModelType));
 
         return lite;
     }
 
 
-    public static string GetToStr(Type type, PrimaryKey id) => giGetToStr.GetInvoker(type)(id);
-    static readonly GenericInvoker<Func<PrimaryKey, string>> giGetToStr = new(id => GetToStr<Entity>(id));
-    public static string GetToStr<T>(PrimaryKey id)
+    public static object GetLiteModel(Type type, PrimaryKey id, Type? modelType = null) => giGetLiteModel.GetInvoker(type)(id, modelType);
+    static readonly GenericInvoker<Func<PrimaryKey, Type?, object>> giGetLiteModel = new((id, modelType) => GetLiteModel<Entity>(id, modelType));
+    public static object GetLiteModel<T>(PrimaryKey id, Type? modelType)
         where T : Entity
     {
         try
@@ -391,7 +416,17 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             {
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
-                    return cc.GetToString(id);
+                {
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        rr.CompleteAll();
+
+                        return model;
+                    }
+                }
 
                 return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
             }
@@ -406,10 +441,10 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
 
 
-    public static Task<string> GetToStrAsync(Type type, PrimaryKey id, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, token);
-    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>> giGetToStrAsync =
-        new((id, token) => GetToStrAsync<Entity>(id, token));
-    public static async Task<string> GetToStrAsync<T>(PrimaryKey id, CancellationToken token)
+    public static Task<object> GetLiteModelAsync(Type type, PrimaryKey id, CancellationToken token, Type? modelType) => giGetToStrAsync.GetInvoker(type)(id, token, modelType);
+    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Type?, Task<object>>> giGetToStrAsync =
+        new((id, token, modelType) => GetLiteModelAsync<Entity>(id, token, modelType));
+    public static async Task<object> GetLiteModelAsync<T>(PrimaryKey id, CancellationToken token, Type? modelType = null)
         where T : Entity
     {
         try
@@ -418,7 +453,17 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             {
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
-                    return cc.GetToString(id);
+                {
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetLiteModel(id, modelType ?? Lite.DefaultModelType(typeof(T)), rr);
+
+                        await rr.CompleteAllAsync(token);
+
+                        return model;
+                    }
+                }
 
                 return await Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstAsync(token);
             }
@@ -606,8 +651,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     }
 
 
-    static readonly GenericInvoker<Func<IList>> giRetrieveAllLite = new(() => Database.RetrieveAllLite<TypeEntity>());
-    public static List<Lite<T>> RetrieveAllLite<T>()
+    static readonly GenericInvoker<Func<Type?, IList>> giRetrieveAllLite = new(modelType => Database.RetrieveAllLite<TypeEntity>(modelType));
+    public static List<Lite<T>> RetrieveAllLite<T>(Type? modelType = null)
         where T : Entity
     {
         try
@@ -617,7 +662,17 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
                 {
-                    return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                    var mt = modelType ?? Lite.DefaultModelType(typeof(T));
+
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetAllIds().Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt, rr))).ToList();
+
+                        rr.CompleteAll();
+
+                        return model;
+                    }
                 }
 
                 return Database.Query<T>().Select(e => e.ToLite()).ToList();
@@ -633,7 +688,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllLiteAsync =
         new(token => Database.RetrieveAllLiteAsyncIList<TypeEntity>(token));
     static Task<IList> RetrieveAllLiteAsyncIList<T>(CancellationToken token) where T : Entity => RetrieveAllLiteAsync<T>(token).ContinueWith(r => (IList)r.Result);
-    public static async Task<List<Lite<T>>> RetrieveAllLiteAsync<T>(CancellationToken token)
+    public static async Task<List<Lite<T>>> RetrieveAllLiteAsync<T>(CancellationToken token, Type? modelType = null)
         where T : Entity
     {
         try
@@ -643,7 +698,17 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null && GetFilterQuery<T>() == null)
                 {
-                    return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                    var mt = modelType ?? Lite.DefaultModelType(typeof(T));
+
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        var model = cc.GetAllIds().Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt, rr))).ToList();
+
+                        await rr.CompleteAllAsync(token);
+
+                        return model;
+                    }
                 }
 
                 return await Database.Query<T>().Select(e => e.ToLite()).ToListAsync(token);
@@ -656,12 +721,12 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
     }
 
-    public static List<Lite<Entity>> RetrieveAllLite(Type type)
+    public static List<Lite<Entity>> RetrieveAllLite(Type type, Type? modelType = null)
     {
         if (type == null)
             throw new ArgumentNullException(nameof(type));
 
-        IList list = giRetrieveAllLite.GetInvoker(type)();
+        IList list = giRetrieveAllLite.GetInvoker(type)(modelType);
         return list.Cast<Lite<Entity>>().ToList();
     }
 
@@ -869,9 +934,9 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return list.Cast<Entity>().ToList();
     }
 
-    static readonly GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite =
-        new(ids => RetrieveListLite<Entity>(ids));
-    public static List<Lite<T>> RetrieveListLite<T>(List<PrimaryKey> ids)
+    static readonly GenericInvoker<Func<List<PrimaryKey>, Type?, IList>> giRetrieveListLite =
+        new((ids, modelType) => RetrieveListLite<Entity>(ids, modelType));
+    public static List<Lite<T>> RetrieveListLite<T>(List<PrimaryKey> ids, Type? modelType = null)
         where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".FormatWith(typeof(T).TypeName())))
@@ -882,7 +947,17 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             var cc = GetCacheController<T>();
             if (cc != null && GetFilterQuery<T>() == null)
             {
-                return ids.Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                var mt = modelType ?? Lite.DefaultModelType(typeof(T));
+
+                using (new EntityCache())
+                using (var rr = EntityCache.NewRetriever())
+                {
+                    var model = ids.Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt, rr))).ToList();
+
+                    rr.CompleteAll();
+
+                    return model;
+                }
             }
 
             var retrieved = ids.Chunk(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)).Select(a => a.ToLite())).ToDictionary(a => a.Id);
@@ -899,7 +974,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListLiteAsync =
         new((ids, token) => RetrieveListLiteAsyncIList<Entity>(ids, token));
     static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
-    public static async Task<List<Lite<T>>> RetrieveListLiteAsync<T>(List<PrimaryKey> ids, CancellationToken token)
+    public static async Task<List<Lite<T>>> RetrieveListLiteAsync<T>(List<PrimaryKey> ids, CancellationToken token, Type? modelType = null)
         where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".FormatWith(typeof(T).TypeName())))
@@ -910,7 +985,17 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             var cc = GetCacheController<T>();
             if (cc != null && GetFilterQuery<T>() == null)
             {
-                return ids.Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                var mt = modelType ?? Lite.DefaultModelType(typeof(T));
+
+                using (new EntityCache())
+                using (var rr = EntityCache.NewRetriever())
+                {
+                    var model = ids.Select(id => Lite.Create<T>(id, cc.GetLiteModel(id, mt, rr))).ToList();
+
+                    await rr.CompleteAllAsync(token);
+
+                    return model;
+                }
             }
 
             var tasks = ids.Chunk(Schema.Current.Settings.MaxNumberOfParameters)
@@ -930,12 +1015,12 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
     }
 
-    public static List<Lite<Entity>> RetrieveListLite(Type type, List<PrimaryKey> ids)
+    public static List<Lite<Entity>> RetrieveListLite(Type type, List<PrimaryKey> ids, Type? modelType = null)
     {
         if (type == null)
             throw new ArgumentNullException(nameof(type));
 
-        IList list = giRetrieveListLite.GetInvoker(type).Invoke(ids);
+        IList list = giRetrieveListLite.GetInvoker(type).Invoke(ids, modelType);
         return list.Cast<Lite<Entity>>().ToList();
     }
 

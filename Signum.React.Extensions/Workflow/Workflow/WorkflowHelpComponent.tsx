@@ -3,6 +3,7 @@ import { WorkflowEntity, WorkflowActivityEntity, WorkflowActivityMessage } from 
 import * as Finder from '@framework/Finder'
 import { TypeHelpMode } from '../../TypeHelp/TypeHelpClient'
 import ValueLineModal from '@framework/ValueLineModal';
+import { getToString } from '@framework/Signum.Entities';
 
 interface WorkflowHelpComponentProps {
   typeName: string;
@@ -28,8 +29,8 @@ export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps){
           return;
 
         var text = acts.map(a => p.mode == "CSharp" ?
-          `WorkflowActivityInfo.Current.Is("${w.toStr}", "${a.toStr}")` :
-          `modules.WorkflowClient.inWorkflow(ctx, "${w.toStr}", "${a.toStr}")`
+          `WorkflowActivityInfo.Current.Is("${getToString(w)}", "${getToString(a)}")` :
+          `modules.WorkflowClient.inWorkflow(ctx, "${getToString(w)}", "${getToString(a)}")`
         ).join(" ||\r\n");
 
         ValueLineModal.show({

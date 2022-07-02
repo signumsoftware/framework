@@ -15,7 +15,7 @@ import {
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
 import { TypeEntity, QueryEntity, ExceptionEntity } from './Signum.Entities.Basics';
 
 import {
@@ -1219,7 +1219,7 @@ export class TokenCompleter {
 
 export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<void> {
 
-  const needToStr: Lite<any>[] = [];
+  const needsModel: Lite<any>[] = [];
 
   function parseFilterValue(fo: FilterOptionParsed) {
     if (isFilterGroupOptionParsed(fo))
@@ -1229,27 +1229,27 @@ export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<
         if (!Array.isArray(fo.value))
           fo.value = [fo.value];
 
-        fo.value = (fo.value as any[]).map(v => parseValue(fo.token!, v, needToStr));
+        fo.value = (fo.value as any[]).map(v => parseValue(fo.token!, v, needsModel));
       }
       else {
         if (Array.isArray(fo.value))
           throw new Error("Unespected array for operation " + fo.operation);
 
-        fo.value = parseValue(fo.token!, fo.value, needToStr);
+        fo.value = parseValue(fo.token!, fo.value, needsModel);
       }
     }
   }
 
   filterOptions.forEach(fo => parseFilterValue(fo));
 
-  if (needToStr.length == 0)
+  if (needsModel.length == 0)
     return Promise.resolve(undefined);
 
-  return Navigator.API.fillToStringsArray(needToStr)
+  return Navigator.API.fillLiteModelsArray(needsModel)
 }
 
 
-function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
+function parseValue(token: QueryToken, val: any, needModel: Array<any>): any {
   switch (token.filterType) {
     case "Boolean": return parseBoolean(val);
     case "Integer": return nanToNull(parseInt(val));
@@ -1291,8 +1291,8 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
       {
         const lite = convertToLite(val);
 
-        if (lite && !lite.toStr)
-          needToStr.push(lite);
+        if (lite && !lite.model)
+          needModel.push(lite);
 
         return lite;
       }
@@ -1876,7 +1876,12 @@ function initFormatRules(): FormatRule[] {
     {
       name: "Object",
       isApplicable: qt => true,
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell.toStr ?? cell.toString()}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell?.toString()}</span> : undefined)
+    },
+    {
+      name: "Object",
+      isApplicable: qt => qt.filterType == "Embedded" || qt.filterType == "Lite",
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{getToString(cell)}</span> : undefined)
     },
     {
       name: "MultiLine",
@@ -1889,7 +1894,7 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{cell.toStr ?? cell.toString()}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined)
     },
     {
       name: "Password",

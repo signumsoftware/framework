@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic } from '@framework/Globals';
-import { Lite, is } from '@framework/Signum.Entities'
+import { Lite, is, getToString } from '@framework/Signum.Entities'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import * as CultureClient from './CultureClient'
 import { NavDropdown } from 'react-bootstrap';
@@ -24,7 +24,7 @@ export default function CultureDropdown(p: { fullName?: boolean }) {
     <NavDropdown data-culture={current.name} title={p.fullName ? current.nativeName : simplifyName(current.nativeName)} className="sf-culture-dropdown">
       {Dic.map(cultures, (name, c, i) =>
         <NavDropdown.Item key={i} data-culture={name} disabled={is(c, current)} onClick={() => handleSelect(c)}>
-          {p.fullName ? c.toStr : simplifyName(c.toStr!)}
+          {p.fullName ? getToString(c) : simplifyName(getToString(c)!)}
         </NavDropdown.Item>
       )}
     </NavDropdown >
@@ -59,7 +59,7 @@ export function CultureDropdownMenuItem(props: { fullName?: boolean }) {
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>
           <NavDropdown.Item key={i} data-culture={name} disabled={is(c, current)} onClick={() => handleSelect(c)}>
-            {props.fullName ? c.toStr : simplifyName(c.toStr!)}
+            {props.fullName ? getToString(c) : simplifyName(getToString(c)!)}
           </NavDropdown.Item>
         )}
       </div>

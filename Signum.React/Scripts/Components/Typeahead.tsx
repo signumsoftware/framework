@@ -301,7 +301,7 @@ Typeahead.defaultProps = {
 
 
 export namespace TypeaheadOptions {
-  export function highlightedText(val: string, query?: string): React.ReactNode {
+  export function highlightedText(val: string, query?: string): React.ReactChild {
 
     if (query == undefined)
       return val;
@@ -319,13 +319,13 @@ export namespace TypeaheadOptions {
     );
   }
 
-  export function highlightedTextAll(val: string, query: string | undefined): React.ReactNode {
+  export function highlightedTextAll(val: string, query: string | undefined): React.ReactChild {
     if (query == undefined)
       return val;
 
     const parts = query.toLocaleLowerCase().split(" ").filter(a => a.length > 0).orderByDescending(a => a.length);
 
-    function splitText(str: string, partIndex: number): React.ReactNode {
+    function splitText(str: string, partIndex: number): React.ReactChild {
 
       if (str.length == 0)
         return str;

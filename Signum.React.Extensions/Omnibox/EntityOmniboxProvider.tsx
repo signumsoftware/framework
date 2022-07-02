@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Lite, Entity } from '@framework/Signum.Entities'
+import { Lite, Entity, getToString } from '@framework/Signum.Entities'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from './OmniboxClient'
 import * as Navigator from '@framework/Navigator'
@@ -34,7 +34,7 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
         if (result.lite == undefined) {
           array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
         } else {
-          array.push(result.lite.toStr!);
+          array.push(getToString(result.lite)!);
         }
       } else {
         if (result.lite == undefined) {

@@ -1,6 +1,6 @@
-﻿/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.d.ts" />
 import { WorkflowConditionEntity, WorkflowActionEntity } from '../Signum.Entities.Workflow'
-import { Lite, liteKey } from '@framework/Signum.Entities'
+import { getToString, Lite, liteKey } from '@framework/Signum.Entities'
 
 export function getOrientation(rect: BPMN.DiElement, reference: BPMN.DiElement, padding: number) {
   padding = padding || 0;
@@ -124,7 +124,7 @@ export class ConnectionIcons {
 
     this._overlays.add(shape, 'transaction-boundaries', {
       position: position,
-      html: `<div class="connection-icon" data-key="${liteKey(lite)}" title="${htmlEscape(lite.EntityType + ": " + lite.toStr || "")}" style="width: ${width}px; height: ${height}px; background: ${color}; cursor:pointer;"> </div>`
+      html: `<div class="connection-icon" data-key="${liteKey(lite)}" title="${htmlEscape(lite.EntityType + ": " + getToString(lite) || "")}" style="width: ${width}px; height: ${height}px; background: ${color}; cursor:pointer;"> </div>`
     });
   };
 

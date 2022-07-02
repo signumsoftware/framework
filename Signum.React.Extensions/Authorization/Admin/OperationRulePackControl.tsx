@@ -3,7 +3,7 @@ import { Button } from 'react-bootstrap'
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
-import { OperationSymbol } from '@framework/Signum.Entities'
+import { getToString, OperationSymbol } from '@framework/Signum.Entities'
 import { API } from '../AuthAdminClient'
 import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthEmailMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
@@ -77,7 +77,7 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
           {ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
             <tr key={i}>
               <td>
-                {c.value.resource!.operation!.toStr}
+                {getToString(c.value.resource!.operation)}
               </td>
               <td style={{ textAlign: "center" }}>
                 {renderRadio(c.value, "Allow", "green")}

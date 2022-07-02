@@ -30,7 +30,7 @@ export default function UserQueryPage(p: UserQueryPageProps) {
       .then(uq => {
         setCurrentUserQuery(uq);
         const lite = entity == undefined ? undefined : parseLite(entity);
-        return Navigator.API.fillToStrings(lite)
+        return Navigator.API.fillLiteModels(lite)
           .then(() => UserQueryClient.Converter.toFindOptions(uq, lite))
       })
   }, [userQueryId, entity]);

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Lite, toLite, Entity, EntityPack } from '@framework/Signum.Entities'
+import { Lite, toLite, Entity, EntityPack, getToString } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
 import * as WordClient from './WordClient'
@@ -42,7 +42,7 @@ export default function WordEntityMenu(p : WordEntityMenuProps){
           p.entityPack.wordTemplates!.map((wt, i) =>
             <Dropdown.Item key={i}
               onClick={() => handleOnClick(wt)}>
-              {wt.toStr}
+              {getToString(wt)}
             </Dropdown.Item>)
         }
     </DropdownButton>

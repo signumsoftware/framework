@@ -3,9 +3,10 @@ import { ModifiableEntity, Lite, Entity, toLite, is, liteKey, getToString, isEnt
 import * as Finder from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
-import { TypeReference } from '../Reflection'
+import { getTypeInfos, tryGetTypeInfos, TypeReference } from '../Reflection'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FormGroup } from './FormGroup'
+import * as Navigator from '../Navigator'
 import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
 import { useController } from './LineBase'
@@ -37,6 +38,12 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
     p.find = false;
   }
 
+  overrideProps(p: EntityComboProps, overridenProps: EntityComboProps) {
+    super.overrideProps(p, overridenProps);
+    if (p.onRenderItem === undefined && p.type && tryGetTypeInfos(p.type).some(a => a && Navigator.getSettings(a)?.renderLite)) {
+      p.onRenderItem = row => (row?.entity && Navigator.renderLite(row.entity)) ?? "";
+    }
+  }
 
   doView(entity: ModifiableEntity | Lite<Entity>) {
     var promise = super.doView(entity) ?? Promise.resolve(undefined);
@@ -221,8 +228,15 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
 
   if (p.onRenderItem) {
     return (
-      <DropdownList className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionRows()} onChange={row => p.onChange(row?.entity ?? null)} value={getResultRow(lite)}
-        title={lite?.toStr}
+      <DropdownList
+        className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionRows()}
+        onChange={row => p.onChange(row?.entity ?? null)}
+        value={getResultRow(lite)}
+        title={getToString(lite)}
+        filter={(e, query) => {
+          var toStr = getToString((e as ResultRow).entity).toLowerCase();
+          return query.toLowerCase().split(' ').every(part => toStr.contains(part));
+        }}
         renderValue={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "Value")}
         renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "ListItem")}
       />
@@ -230,7 +244,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
   } else {
     return (
       <select className={classes(ctx.formSelectClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
-        title={lite?.toStr}
+        title={getToString(lite)}
         onClick={() => setLoadData(true)}
         disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
         {getOptionRows().map((r, i) => <option key={i} value={r?.entity ? liteKey(r.entity!) : ""}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
@@ -279,7 +293,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     return v as Lite<Entity>;
   }
 
-  function getOptionRows() {
+  function getOptionRows(): ResultRow[] {
 
     const lite = getLite();
 

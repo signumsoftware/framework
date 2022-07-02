@@ -288,7 +288,7 @@ public class ExpressionComparer
         return true;
     }
 
-    protected static bool CompareDictionaries<K, V>(ReadOnlyDictionary<K, V> a, ReadOnlyDictionary<K, V> b, Func<V, V, bool> comparer)
+    protected static bool CompareDictionaries<K, V>(ReadOnlyDictionary<K, V>? a, ReadOnlyDictionary<K, V>? b, Func<V, V, bool> comparer)
         where K : notnull
     {
         if (a == b)

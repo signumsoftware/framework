@@ -8,7 +8,7 @@ import * as Finder from '@framework/Finder'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import * as Operations from '@framework/Operations'
-import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey } from '@framework/Signum.Entities'
+import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
 import { FilterOptionParsed, QueryDescription, SubTokensOptions, FilterOption } from "@framework/FindOptions";
@@ -427,7 +427,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           <Dropdown.Toggle id="selectedButton"
             className="sf-query-button sf-tm-selected" disabled={selected == undefined}
             variant="light">
-            {`${JavascriptMessage.Selected.niceToString()} (${selected ? selected.lite.toStr : TreeViewerMessage.None.niceToString()})`}
+            {`${JavascriptMessage.Selected.niceToString()} (${selected ? getToString(selected.lite) : TreeViewerMessage.None.niceToString()})`}
           </Dropdown.Toggle>
           <Dropdown.Menu>
             {menuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :

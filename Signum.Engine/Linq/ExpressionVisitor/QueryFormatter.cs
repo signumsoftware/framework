@@ -1023,7 +1023,7 @@ internal class QueryFormatter : DbExpressionVisitor
 
     protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
     {
-        return base.VisitLiteReference(lite);
+        throw InvalidSqlExpression(lite);
     }
 
     protected override Expression VisitInvocation(InvocationExpression iv)

@@ -444,6 +444,18 @@ public class CombineStrategyAttribute : Attribute
     }
 }
 
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
+public sealed class LiteModelAttribute : Attribute
+{
+    public Type LiteModelType { get; private set; }
+    public Type? ForEntityType { get; set; }
+
+    public LiteModelAttribute(Type liteModel)
+    {
+        this.LiteModelType = liteModel;
+    }
+}
+
 public enum CombineStrategy
 {
     Union,

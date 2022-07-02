@@ -10,7 +10,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { ChangeEvent, EntityLine, EntityTable, PropertyRoute, ValueLine } from '@framework/Lines'
 import { EntityLink } from '@framework/Search'
-import { is, liteKey, liteKeyLong, MList } from '@framework/Signum.Entities'
+import { getToString, is, liteKey, liteKeyLong, MList } from '@framework/Signum.Entities'
 import SelectorModal from '../../Signum.React/Scripts/SelectorModal'
 import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal'
 
@@ -87,7 +87,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
         if (listChange.length > 1) {
           return MessageModal.show({
             title: "",
-            message: UserAssetMessage.SameSelectionForAllConflictsOf0.niceToString(conflict.from.toStr),
+            message: UserAssetMessage.SameSelectionForAllConflictsOf0.niceToString(getToString(conflict.from)),
             buttons: "yes_no",
           }).then(result => {
             if (result == "yes") {
@@ -147,7 +147,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
                               ea.modified = true;
                             }
                           }).done();
-                      }}>{ea.customResolution.toStr}</a>}</td>
+                      }}>{getToString(ea.customResolution)}</a>}</td>
                     </tr>
                     {ea.liteConflicts.length > 0 && <tr>
                       <td colSpan={1}></td>

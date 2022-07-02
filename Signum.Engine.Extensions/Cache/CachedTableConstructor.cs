@@ -8,34 +8,33 @@ internal class CachedTableConstructor
 {
     public CachedTableBase cachedTable;
     public ITable table;
+    public List<IColumn> columns;
 
     public ParameterExpression origin;
 
-    public AliasGenerator? aliasGenerator;
+    public AliasGenerator aliasGenerator;
     public Alias? currentAlias;
     public Type tupleType;
 
     public string? remainingJoins;
 
-    public CachedTableConstructor(CachedTableBase cachedTable, AliasGenerator? aliasGenerator)
+    public CachedTableConstructor(CachedTableBase cachedTable, AliasGenerator aliasGenerator, List<IColumn> columns)
     {
         this.cachedTable = cachedTable;
         this.table = cachedTable.Table;
+        this.columns = columns;
 
-        if (aliasGenerator != null)
-        {
-            this.aliasGenerator = aliasGenerator;
-            this.currentAlias = aliasGenerator.NextTableAlias(table.Name.Name);
-        }
+        this.aliasGenerator = aliasGenerator;
+        this.currentAlias = aliasGenerator.NextTableAlias(table.Name.Name);
 
-        this.tupleType = TupleReflection.TupleChainType(table.Columns.Values.Select(GetColumnType));
+        this.tupleType = TupleReflection.TupleChainType(this.columns.Select(GetColumnType));
 
         this.origin = Expression.Parameter(tupleType, "origin");
     }
 
     public Expression GetTupleProperty(IColumn column)
     {
-        return TupleReflection.TupleChainProperty(origin, table.Columns.Values.IndexOf(column));
+        return TupleReflection.TupleChainProperty(origin, columns.IndexOf(column));
     }
 
     internal string CreatePartialInnerJoin(IColumn column)
@@ -53,7 +52,7 @@ internal class CachedTableConstructor
         ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
 
         var tupleConstructor = TupleReflection.TupleChainConstructor(
-            table.Columns.Values.Select((c, i) => FieldReader.GetExpression(reader, i, GetColumnType(c)))
+            columns.Select((c, i) => FieldReader.GetExpression(reader, i, GetColumnType(c)))
             );
 
         return Expression.Lambda<Func<FieldReader, object>>(tupleConstructor, reader).Compile();
@@ -61,7 +60,7 @@ internal class CachedTableConstructor
 
     internal Func<object, PrimaryKey> GetPrimaryKeyGetter(IColumn column)
     {
-        var access = TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), table.Columns.Values.IndexOf(column));
+        var access = TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), columns.IndexOf(column));
 
         var primaryKey = NewPrimaryKey(access);
 
@@ -70,7 +69,7 @@ internal class CachedTableConstructor
 
     internal Func<object, PrimaryKey?> GetPrimaryKeyNullableGetter(IColumn column)
     {
-        var access = TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), table.Columns.Values.IndexOf(column));
+        var access = TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), columns.IndexOf(column));
 
         var primaryKey = WrapPrimaryKey(access);
 
@@ -85,15 +84,15 @@ internal class CachedTableConstructor
     }
 
 
-    static GenericInvoker<Func<ICacheLogicController, AliasGenerator?, string, string?, CachedTableBase>> ciCachedTable =
+    static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string?, CachedTableBase>> ciCachedTable =
      new((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
          new CachedTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
     static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string?, CachedTableBase>> ciCachedSemiTable =
       new((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
-          new CachedLiteTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
+          new CachedTableLite<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
 
-    static GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator?, string, string?, CachedTableBase>> ciCachedTableMList =
+    static GenericInvoker<Func<ICacheLogicController, TableMList, AliasGenerator, string, string?, CachedTableBase>> ciCachedTableMList =
       new((controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins) =>
           new CachedTableMList<Entity>(controller, relationalTable, aliasGenerator, lastPartialJoin, remainingJoins));
 
@@ -115,20 +114,20 @@ internal class CachedTableConstructor
             var nullRef = Expression.Constant(null, field.FieldType);
             bool isLite = fr.IsLite;
 
-            if (field is FieldReference)
+            if (field is FieldReference fr2)
             {
                 IColumn column = (IColumn)field;
 
-                return GetEntity(isLite, column, field.FieldType.CleanType());
+                return GetEntity(isLite, column, field.FieldType.CleanType(), fr2.CustomLiteModelType);
             }
 
             if (field is FieldImplementedBy ib)
             {
                 var call = ib.ImplementationColumns.Aggregate((Expression)nullRef, (acum, kvp) =>
                 {
-                    IColumn column = (IColumn)kvp.Value;
+                    var column = kvp.Value;
 
-                    Expression entity = GetEntity(isLite, column, kvp.Key);
+                    Expression entity = GetEntity(isLite, column, kvp.Key, column.CustomLiteModelType);
 
                     return Expression.Condition(Expression.NotEqual(WrapPrimaryKey(GetTupleProperty(column)), NullId),
                         Expression.Convert(entity, field.FieldType),
@@ -165,64 +164,74 @@ internal class CachedTableConstructor
 
         if (field is FieldEmbedded fe)
         {
-            var bindings = new List<Expression>();
-            var embParam = Expression.Parameter(fe.FieldType);
-            bindings.Add(Expression.Assign(embParam, Expression.New(fe.FieldType)));
-            bindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(embParam.Type), embParam));
-
-            foreach (var f in fe.EmbeddedFields.Values)
-            {
-                Expression value = MaterializeField(f.Field);
-                var assigment = Expression.Assign(Expression.Field(embParam, f.FieldInfo), value);
-                bindings.Add(assigment);
-            }
-
-            if (fe.Mixins != null)
-            {
-                foreach (var mixin in fe.Mixins.Values)
-                {
-                    ParameterExpression mixParam = Expression.Parameter(mixin.FieldType);
-                    var mixBlock = MaterializeMixin(embParam, mixin, mixParam);
-                    bindings.Add(mixBlock);
-                }
-            }
-
-            bindings.Add(embParam);
-
-            Expression block = Expression.Block(new[] { embParam }, bindings);
-
-            if (fe.HasValue == null)
-                return block;
-
-            return Expression.Condition(
-                Expression.Equal(GetTupleProperty(fe.HasValue), Expression.Constant(true)),
-                block,
-                Expression.Constant(null, field.FieldType));
+            return MaterializeEmbedded(fe);
         }
 
 
         if (field is FieldMList mListField)
         {
-            var idColumn = table.Columns.Values.OfType<FieldPrimaryKey>().First();
-
-            string lastPartialJoin = CreatePartialInnerJoin(idColumn);
-
-            Type elementType = field.FieldType.ElementType()!;
-
-            CachedTableBase ctb = ciCachedTableMList.GetInvoker(elementType)(cachedTable.controller, mListField.TableMList, aliasGenerator, lastPartialJoin, remainingJoins);
-
-            if (cachedTable.subTables == null)
-                cachedTable.subTables = new List<CachedTableBase>();
-
-            cachedTable.subTables.Add(ctb);
-
-            return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod(nameof(CachedTableMList<int>.GetMList))!, NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
+            return MaterializeMList(mListField);
         }
 
         throw new InvalidOperationException("Unexpected {0}".FormatWith(field.GetType().Name));
     }
 
-    private Expression GetEntity(bool isLite, IColumn column, Type type)
+    private Expression MaterializeMList(FieldMList mListField)
+    {
+        var idColumn = columns.OfType<FieldPrimaryKey>().First();
+
+        string lastPartialJoin = CreatePartialInnerJoin(idColumn);
+
+        Type elementType = mListField.FieldType.ElementType()!;
+
+        CachedTableBase ctb = ciCachedTableMList.GetInvoker(elementType)(cachedTable.controller, mListField.TableMList, aliasGenerator, lastPartialJoin, remainingJoins);
+
+        if (cachedTable.subTables == null)
+            cachedTable.subTables = new List<CachedTableBase>();
+
+        cachedTable.subTables.Add(ctb);
+
+        return Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod(nameof(CachedTableMList<int>.GetMList))!, NewPrimaryKey(GetTupleProperty(idColumn)), retriever);
+    }
+
+    internal Expression MaterializeEmbedded(FieldEmbedded fe)
+    {
+        var bindings = new List<Expression>();
+        var embParam = Expression.Parameter(fe.FieldType);
+        bindings.Add(Expression.Assign(embParam, Expression.New(fe.FieldType)));
+        bindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(embParam.Type), embParam));
+
+        foreach (var f in fe.EmbeddedFields.Values)
+        {
+            Expression value = MaterializeField(f.Field);
+            var assigment = Expression.Assign(Expression.Field(embParam, f.FieldInfo), value);
+            bindings.Add(assigment);
+        }
+
+        if (fe.Mixins != null)
+        {
+            foreach (var mixin in fe.Mixins.Values)
+            {
+                ParameterExpression mixParam = Expression.Parameter(mixin.FieldType);
+                var mixBlock = MaterializeMixin(embParam, mixin, mixParam);
+                bindings.Add(mixBlock);
+            }
+        }
+
+        bindings.Add(embParam);
+
+        Expression block = Expression.Block(new[] { embParam }, bindings);
+
+        if (fe.HasValue == null)
+            return block;
+
+        return Expression.Condition(
+            Expression.Equal(GetTupleProperty(fe.HasValue), Expression.Constant(true)),
+            block,
+            Expression.Constant(null, fe.FieldType));
+    }
+
+    internal Expression GetEntity(bool isLite, IColumn column, Type type, Type? customLiteModelType)
     {
         Expression id = GetTupleProperty(column);
 
@@ -233,8 +242,10 @@ internal class CachedTableConstructor
             {
                 case CacheType.Cached:
                     {
+                        var modelType = customLiteModelType ?? Lite.DefaultModelType(type);
+
                         lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type),
-                            Lite.NewExpression(type, NewPrimaryKey(id.UnNullify()), Expression.Constant(null, typeof(string))));
+                            Expression.New(Lite.GetLiteConstructorFromCache(type, modelType), NewPrimaryKey(id.UnNullify()), Expression.Constant(null, modelType)));
 
                         lite = Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(typeof(LiteImp)), lite.TryConvert(typeof(LiteImp))).TryConvert(lite.Type);
 
@@ -253,7 +264,12 @@ internal class CachedTableConstructor
 
                         ctb.ParentColumn = column;
 
-                        lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite")!, NewPrimaryKey(id.UnNullify()), retriever);
+                        var modelType = customLiteModelType ?? Lite.DefaultModelType(type);
+
+                        lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod(nameof(CachedTableLite<Entity>.GetLite))!,
+                            NewPrimaryKey(id.UnNullify()),
+                            retriever,
+                            Expression.Constant(modelType));
 
                         break;
                     }
@@ -322,9 +338,6 @@ internal class CachedTableConstructor
 
     public static MemberExpression peModified = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever me) => me.ModifiedState));
 
-    public static ConstructorInfo ciKVPIntString = ReflectionTools.GetConstuctorInfo(() => new KeyValuePair<PrimaryKey, string>(1, ""));
-
-
     public static Action<IRetriever, Modifiable> resetModifiedAction;
 
     static CachedTableConstructor()
@@ -348,6 +361,11 @@ internal class CachedTableConstructor
 
     internal BlockExpression MaterializeEntity(ParameterExpression me, Table table)
     {
+        if(table.Name.Name == "Employee")
+        {
+
+        }
+
         List<Expression> instructions = new List<Expression>();
         instructions.Add(Expression.Assign(origin, Expression.Convert(CachedTableConstructor.originObject, tupleType)));
 
