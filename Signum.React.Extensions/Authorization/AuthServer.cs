@@ -293,7 +293,7 @@ public static class AuthServer
                 t.extra["role-" + r.Key() + "-ui"] = GetName(ToStringList(tac, userInterface: true));
                 t.extra["role-" + r.Key() + "-db"] = GetName(ToStringList(tac, userInterface: false));
                 t.extra["role-" + r.Key() + "-tooltip"] = ToString(tac.Fallback) + "\n" + (tac.Conditions.IsNullOrEmpty() ? null :
-                    tac.Conditions.ToString(a => a.TypeCondition.NiceToString() + ": " + ToString(a.Allowed), "\n") + "\n");
+                    tac.Conditions.ToString(a => a.ToString() + ": " + ToString(a.Allowed), "\n") + "\n");
             },
             Order = 10,
         }).ToArray();

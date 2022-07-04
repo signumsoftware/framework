@@ -12,7 +12,7 @@ import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 
 import { getTypeInfo, Binding, GraphExplorer } from '@framework/Reflection'
-import { OperationSymbol, ModelEntity, newMListElement, NormalControlMessage, getToString } from '@framework/Signum.Entities'
+import { OperationSymbol, ModelEntity, newMListElement, NormalControlMessage, getToString, toMList } from '@framework/Signum.Entities'
 import { API, properties, queries, operations } from '../AuthAdminClient'
 import {
   TypeRulePack, AuthAdminMessage, PermissionSymbol, TypeAllowed, TypeAllowedRule,
@@ -186,15 +186,15 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     </div>
   );
 
+  function handleAddConditionClick(conditions: TypeConditionSymbol[], taac: TypeAllowedAndConditions) {
 
-  function handleAddConditionClick(remainig: TypeConditionSymbol[], taac: TypeAllowedAndConditions) {
-    SelectorModal.chooseElement(remainig, { buttonDisplay: a => getToString(a) })
+    SelectorModal.chooseManyElement(conditions, { buttonDisplay: a => getToString(a) })
       .then(tc => {
         if (!tc)
           return;
 
         taac.conditions.push(newMListElement(TypeConditionRuleModel.New({
-          typeConditions: tc!,
+          typeConditions: tc.map(t => newMListElement <TypeConditionSymbol>(t)),
           allowed: "None"
         })));
 
@@ -203,7 +203,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       .done();
   }
 
-  function handleRemoveConditionClick(taac: TypeAllowedAndConditions, con: TypeConditionRuleEmbedded) {
+  function handleRemoveConditionClick(taac: TypeAllowedAndConditions, con: TypeConditionRuleModel) {
     taac.conditions!.remove(taac.conditions.filter(mle => mle.element == con).single());
     taac.modified = true;
     updateFrame();
@@ -213,11 +213,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
 
     let roleId = ctx.value.role.id!;
 
-    let used = tctx.value.allowed.conditions.map(mle => mle.element.typeCondition.id!);
-
-    let remaining = tctx.value.availableConditions.filter(tcs => !used.contains(tcs.id!));
-
     var typeInfo = getTypeInfo(tctx.value.resource.cleanName);
+    var conditions = tctx.value.availableConditions;
 
     var masterClass = typeInfo.entityData == "Master" ? "sf-master" : undefined;
 
@@ -225,8 +222,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     return [
       <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions")}>
         <td className={tctx.value.allowed.fallback == null ? "text-danger fw-bold" : undefined} title={AuthAdminMessage.ConflictMergingTypeConditions.niceToString()}>
-          {remaining.length > 0 ?
-            <span className="sf-condition-icon" onClick={() => handleAddConditionClick(remaining, tctx.value.allowed)}>
+          {conditions.length > 0 ?
+            <span className="sf-condition-icon" onClick={() => handleAddConditionClick(conditions, tctx.value.allowed)}>
               <FontAwesomeIcon icon="plus-circle" />
             </span> :
             <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>}
@@ -273,12 +270,12 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     ].concat(tctx.value.allowed!.conditions!.map(mle => mle.element).map((c, i) => {
       let b = Binding.create(c, ca => ca.allowed);
       return (
-        <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className + "_" + c.typeCondition.id} className="sf-auth-condition" >
+        <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className + "_" + c.typeConditions.map(c => c.element.id).join("_")} className="sf-auth-condition" >
           <td>
             {"\u00A0 \u00A0".repeat(i + 1)}
             <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, c)}><FontAwesomeIcon icon="minus-circle" /></span>
             &nbsp;
-            <small>{getToString(c.typeCondition)}</small>
+            <small>{getToString(c)}</small>
           </td>
           <td style={{ textAlign: "center" }} className={masterClass}>
             {colorRadio(b, "Write", "green")}
@@ -369,7 +366,9 @@ function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeA
     && allowed.conditions!.map(mle => mle.element)
       .every((c, i) => {
         let b = allowedBase.conditions![i].element;
-        return c.allowed == b.allowed && is(c.typeCondition, b.typeCondition);
+        if (c.typeConditions.length != b.typeConditions.length)
+          return false;
+        return c.allowed == b.allowed && c.typeConditions.every(ct => b.typeConditions.contains(ct))
       });
 }
 

@@ -51,8 +51,10 @@ public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
     public MList<RuleTypeConditionEntity> Conditions { get; set; } = new MList<RuleTypeConditionEntity>();
 }
 
+[EntityKind(EntityKind.System, EntityData.Master)]
 public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntity>, ICanBeOrdered
 {
+    [NotNullValidator(Disabled = true)]
     public Lite<RuleTypeEntity> RuleType { get; set; }
 
     [PreserveOrder, NoRepeatValidator]

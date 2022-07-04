@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
-import { SelectorMessage, Lite, getToString, liteKey, Entity } from './Signum.Entities'
+import { SelectorMessage, Lite, getToString, liteKey, Entity, JavascriptMessage } from './Signum.Entities'
 import { TypeInfo, EnumType, Type, getTypeInfo } from './Reflection'
 import * as Finder from './Finder'
 import { BsSize } from './Components';
@@ -12,15 +12,22 @@ interface SelectorModalProps extends IModalProps<any> {
   message: React.ReactNode;
   size?: BsSize;
   dialogClassName?: string;
+  multiSelect?: boolean;
 }
 
 export default function SelectorModal(p: SelectorModalProps) {
 
   const [show, setShow] = React.useState(true);
+  const [selectedItems, setSelectedItems] = React.useState < string[] >([]);
   const selectedValue = React.useRef<any>(undefined);
 
   function handleButtonClicked(val: any) {
     selectedValue.current = val;
+    setShow(false);
+  }
+
+  function handleOkClicked() {
+    selectedValue.current = selectedItems;    
     setShow(false);
   }
 
@@ -31,6 +38,16 @@ export default function SelectorModal(p: SelectorModalProps) {
   function handleOnExited() {
     p.onExited!(selectedValue.current);
   }
+
+  function handleCheckboxOnChange(e: React.SyntheticEvent<any>) {
+    const input = e.currentTarget as HTMLInputElement;
+    if (input.checked) {
+      setSelectedItems([...selectedItems, input.name]);
+    }
+    else {
+      setSelectedItems(selectedItems.filter(i => i != input.name));
+    }
+  };
 
   return (
     <Modal size={p.size || "sm" as any} show={show} onExited={handleOnExited}
@@ -48,11 +65,19 @@ export default function SelectorModal(p: SelectorModalProps) {
         <div>
           {p.message && (typeof p.message == "string" ? <p>{p.message}</p> : p.message)}
           {p.options.map((o, i) =>
+            p.multiSelect ? <label style={{ display: "block" }} key={i}>
+              <input type="checkbox" onChange={handleCheckboxOnChange} className={"form-check-input"} name={o.name} checked={selectedItems.contains(o.name)} /> 
+              {" "}{o.displayName} 
+              </label> :
             <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.name}
               className="sf-chooser-button sf-close-button btn btn-light" {...o.htmlAttributes}>
               {o.displayName}
             </button>)}
         </div>
+        {p.multiSelect && <button type="button" onClick={() => handleOkClicked()} 
+          className="btn btn-primary">
+          {JavascriptMessage.ok.niceToString()}
+        </button>}
       </div>
     </Modal>
   );
@@ -70,6 +95,30 @@ SelectorModal.chooseElement = <T extends Object>(options: T[], config?: Selector
   }
 
   return openModal<T>(<SelectorModal
+    options={options.map(a => ({
+      value: a,
+      displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
+      name: buttonName ? buttonName(a) : a.toString(),
+      htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a)
+    }))}
+    title={title || SelectorMessage.ChooseAValue.niceToString()}
+    message={message ?? SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
+    size={size}
+    dialogClassName={dialogClassName} />);
+};
+
+SelectorModal.chooseManyElement = <T extends Object>(options: T[], config?: SelectorConfig<T>): Promise<T[] | undefined> => {
+  const { buttonDisplay, buttonName, title, message, size, dialogClassName } = config || {} as SelectorConfig<T>;
+
+  if (!config || !config.forceShow) {
+    if (options.length == 1)
+      return Promise.resolve(options);
+
+    if (options.length == 0)
+      return Promise.resolve(undefined);
+  }
+
+  return openModal<T[]>(<SelectorModal
     options={options.map(a => ({
       value: a,
       displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
