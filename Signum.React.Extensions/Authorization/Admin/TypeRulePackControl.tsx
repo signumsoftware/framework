@@ -188,7 +188,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
 
   function handleAddConditionClick(conditions: TypeConditionSymbol[], taac: TypeAllowedAndConditions) {
 
-    SelectorModal.chooseManyElement(conditions, { buttonDisplay: a => getToString(a) })
+    SelectorModal.chooseManyElement(conditions, { buttonDisplay: a => getToString(a), size: "md" })
       .then(tc => {
         if (!tc)
           return;

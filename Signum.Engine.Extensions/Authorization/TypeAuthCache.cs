@@ -378,28 +378,13 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                                Condition = Conditions(xr, replacements)
                            })).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
-                SqlPreCommand? restSql = dic.Select(kvp =>
+                SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(new RuleTypeEntity
                 {
-                    var ruleTypeSql = table.InsertSqlSync(new RuleTypeEntity
-                    {
-                        Resource = kvp.Key,
-                        Role = role,
-                        Allowed = kvp.Value.Allowed,
-                        Conditions = kvp.Value.Condition! /*CSBUG*/
-                    },
-                    comment: Comment(role, kvp.Key, kvp.Value.Allowed));
-
-                    var ruleTypeConditionSql = kvp.Value.Condition.Select(tc => conditionTable.InsertSqlSync(new RuleTypeConditionEntity
-                    {
-                        RuleType
-                        Resource = kvp.Key,
-                        Role = role,
-                        Allowed = kvp.Value.Allowed,
-                        Conditions = kvp.Value.Condition! /*CSBUG*/
-                    },
-                    comment: Comment(role, kvp.Key, kvp.Value.Allowed));
-                    return ruleTypeSql.Combine(Spacing.Simple, ruleTypeConditionSql);
-                }).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
+                    Resource = kvp.Key,
+                    Role = role,
+                    Allowed = kvp.Value.Allowed,
+                    Conditions = kvp.Value.Condition!.ToMList() /*CSBUG*/
+                }, comment: Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
 
                 return restSql;
             },

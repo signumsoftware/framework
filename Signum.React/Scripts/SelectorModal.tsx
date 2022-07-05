@@ -75,7 +75,7 @@ export default function SelectorModal(p: SelectorModalProps) {
             </button>)}
         </div>
         {p.multiSelect && <button type="button" onClick={() => handleOkClicked()} 
-          className="btn btn-primary">
+          className="btn btn-primary mt-2">
           {JavascriptMessage.ok.niceToString()}
         </button>}
       </div>
@@ -123,12 +123,14 @@ SelectorModal.chooseManyElement = <T extends Object>(options: T[], config?: Sele
       value: a,
       displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
       name: buttonName ? buttonName(a) : a.toString(),
-      htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a)
+      htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a),
     }))}
-    title={title || SelectorMessage.ChooseAValue.niceToString()}
-    message={message ?? SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
+    title={title || SelectorMessage.ChooseValues.niceToString()}
+    message={message ?? SelectorMessage.PleaseSelectAtLeastOneValueToContinue.niceToString()}
     size={size}
-    dialogClassName={dialogClassName} />);
+    dialogClassName={dialogClassName}
+    multiSelect={true}
+  />);
 };
 
 SelectorModal.chooseType = (options: TypeInfo[], config?: SelectorConfig<TypeInfo>): Promise<TypeInfo | undefined> => {

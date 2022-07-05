@@ -248,7 +248,12 @@ public enum SelectorMessage
     PleaseChooseA0ToContinue,
 
     [Description("Creation of {0} cancelled")]
-    CreationOf0Cancelled
+    CreationOf0Cancelled,
+
+    ChooseValues,
+
+    [Description("Please select at least one value to continue:")]
+    PleaseSelectAtLeastOneValueToContinue
 }
 
 [AllowUnathenticated]
