@@ -1,4 +1,5 @@
 using Signum.Utilities.DataStructures;
+using System.Collections;
 using System.Xml.Linq;
 
 namespace Signum.Engine.Operations;
@@ -28,8 +29,9 @@ public class Graph<T, S>
     public class Construct : Graph<T>.Construct, IGraphToStateOperation
     {
         public List<S> ToStates { get; private set; } = new List<S>();
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        IList? IOperation.UntypedToStates => ToStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
 
         public Construct(ConstructSymbol<T>.Simple symbol)
             : base(symbol)
@@ -83,8 +85,9 @@ public class Graph<T, S>
         where F : class, IEntity
     {
         public List<S> ToStates { get; private set; } = new List<S>();
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        IList? IOperation.UntypedToStates => ToStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
 
         public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
             : base(symbol)
@@ -127,8 +130,10 @@ public class Graph<T, S>
         where F : class, IEntity
     {
         public List<S> ToStates { get; private set; } = new List<S>();
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        IList? IOperation.UntypedToStates => ToStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
+
 
         public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
             : base(symbol)
@@ -173,14 +178,13 @@ public class Graph<T, S>
     {
         public List<S> FromStates { get; private set; }
         public List<S> ToStates { get; private set; }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        IList? IOperation.UntypedToStates => ToStates;
+        IList? IOperation.UntypedFromStates => FromStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
 
-        bool IGraphHasStatesOperation.HasFromStates
-        {
-            get { return !FromStates.IsNullOrEmpty(); }
-        }
+
+        bool IGraphHasStatesOperation.HasFromStates => !FromStates.IsNullOrEmpty();
 
         public Execute(ExecuteSymbol<T> symbol)
             : base(symbol)
@@ -188,8 +192,6 @@ public class Graph<T, S>
             FromStates = new List<S>();
             ToStates = new List<S>();
         }
-
-        bool IEntityOperation.HasCanExecute { get { return true; } }
 
         protected override string? OnCanExecute(T entity)
         {
@@ -224,8 +226,9 @@ public class Graph<T, S>
     public class Delete : Graph<T>.Delete, IGraphOperation, IGraphFromStatesOperation
     {
         public List<S> FromStates { get; private set; }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        IList? IOperation.UntypedFromStates => FromStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
 
         bool IGraphHasStatesOperation.HasFromStates
         {

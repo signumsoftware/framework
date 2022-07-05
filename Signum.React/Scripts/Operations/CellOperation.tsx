@@ -1,6 +1,6 @@
 import * as React from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, External } from '../Signum.Entities';
+import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, External, getToString } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
 import { classes } from '../Globals';
 import * as Navigator from '../Navigator';
@@ -14,7 +14,7 @@ import { Button, ButtonProps, Dropdown, OverlayTrigger, Tooltip } from "react-bo
 import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiPropertySetter";
 import { BsColor } from "../Components";
 import Exception from "../Exceptions/Exception";
-import { OutlineBsColor, withIcon } from "./EntityOperations";
+import { withIcon } from "./EntityOperations";
 import { CellFormatter } from "../Finder";
 
 
@@ -70,10 +70,11 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
       .done();
   }
 
-  var button = <Button variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
+  var button = <Button variant={(outline ? ("outline-" + color) : color)}
     {...props}
     key="button"
-    //title={icoc.operationInfo.niceName}
+    size="sm"
+    title={coc.operationInfo.niceName}
     className={classes(disabled ? "disabled" : undefined, props?.className, coc.settings && coc.settings.classes)}
     onClick={disabled ? undefined : handleOnClick}
     data-operation={coc.operationInfo.key}>
@@ -140,7 +141,7 @@ function getConfirmMessage(coc: CellOperationContext) {
   if (coc.operationInfo.operationType == "Delete") {
     const lite = coc.lite;
     if (lite) {
-      return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{lite.toStr} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);;
+      return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{getToString(lite)} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);;
     }
   }
 

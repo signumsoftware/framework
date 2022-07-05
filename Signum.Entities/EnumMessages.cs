@@ -46,8 +46,6 @@ public enum OperationMessage
     AddSetter,
     [Description("multi setter")]
     MultiSetter,
-    [Description("Operation {0} ({1}) doesn't have CanExecuteExpression. It can not be used as query token")]
-    Operation01DoesNotHaveCanExecuteExpression,
 }
 
 public enum SynchronizerMessage

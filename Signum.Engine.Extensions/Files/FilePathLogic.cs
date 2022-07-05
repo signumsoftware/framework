@@ -63,7 +63,7 @@ public static class FilePathLogic
     static PrefixPair CalculatePrefixPair(FilePathEntity fp)
     {
         using (new EntityCache(EntityCacheType.ForceNew))
-           return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
+            return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
     }
 
     public static IDisposable? FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
@@ -105,17 +105,16 @@ public static class FilePathLogic
                 alg.SaveFile(fp);
             else
             {
-            var task = alg.SaveFileAsync(fp);
+                var task = alg.SaveFileAsync(fp);
 
-            Transaction.PreRealCommit += data =>
-            {
+                Transaction.PreRealCommit += data =>
+                {
                     //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                var a = fp; //For ebuggin
-                if (!AvoidWaitingForFileSave)
-                task.Wait();
-            };
+                    var a = fp; //For ebuggin
+                    task.Wait();
+                };
+            }
         }
-    }
     }
 
     public static bool SyncFileSave = false;

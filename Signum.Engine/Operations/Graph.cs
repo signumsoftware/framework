@@ -1,6 +1,7 @@
 using Signum.Engine.Basics;
 using Signum.Engine.Operations.Internal;
 using Signum.Entities.Basics;
+using System.Collections;
 
 namespace Signum.Engine.Operations;
 
@@ -12,14 +13,15 @@ public class Graph<T>
     public class Construct : _Construct<T>, IConstructOperation
     {
         protected readonly OperationSymbol operationSymbol;
-        OperationSymbol IOperation.OperationSymbol { get { return operationSymbol; } }
-        Type IOperation.OverridenType { get { return typeof(T); } }
-        OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
-        bool IOperation.Returns { get { return true; } }
-        Type? IOperation.ReturnType { get { return typeof(T); } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return null; } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-        Type? IOperation.StateType { get { return null; } }
+        OperationSymbol IOperation.OperationSymbol => operationSymbol;
+        Type IOperation.OverridenType => typeof(T);
+        OperationType IOperation.OperationType => OperationType.Constructor;
+        bool IOperation.Returns => true;
+        Type? IOperation.ReturnType => typeof(T);
+        IList? IOperation.UntypedFromStates => null;
+        IList? IOperation.UntypedToStates => new List<Enum>();
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
 
         public bool LogAlsoIfNotSaved { get; set; }
 
@@ -139,12 +141,13 @@ public class Graph<T>
         where F : class, IEntity
     {
         protected readonly OperationSymbol operationSymbol;
-        OperationSymbol IOperation.OperationSymbol { get { return operationSymbol; } }
-        Type IOperation.OverridenType { get { return typeof(F); } }
-        OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return null; } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-        Type? IOperation.StateType { get { return null; } }
+        OperationSymbol IOperation.OperationSymbol => operationSymbol;
+        Type IOperation.OverridenType => typeof(F);
+        OperationType IOperation.OperationType => OperationType.ConstructorFrom;
+        IList? IOperation.UntypedFromStates => null;
+        IList? IOperation.UntypedToStates => new List<Enum>();
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
 
         public bool CanBeModified { get; set; }
         public bool LogAlsoIfNotSaved { get; set; }
@@ -314,17 +317,18 @@ public class Graph<T>
         where F : class, IEntity
     {
         protected readonly OperationSymbol operationSymbol;
-        OperationSymbol IOperation.OperationSymbol { get { return operationSymbol; } }
-        Type IOperation.OverridenType { get { return typeof(F); } }
-        OperationType IOperation.OperationType { get { return OperationType.ConstructorFromMany; } }
-        bool IOperation.Returns { get { return true; } }
-        Type? IOperation.ReturnType { get { return typeof(T); } }
+        OperationSymbol IOperation.OperationSymbol => operationSymbol;
+        Type IOperation.OverridenType => typeof(F);
+        OperationType IOperation.OperationType => OperationType.ConstructorFromMany;
+        bool IOperation.Returns => true;
+        Type? IOperation.ReturnType => typeof(T);
 
         protected readonly Type baseType;
-        Type IConstructorFromManyOperation.BaseType { get { return baseType; } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return null; } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-        Type? IOperation.StateType { get { return null; } }
+        Type IConstructorFromManyOperation.BaseType => baseType;
+        IList? IOperation.UntypedFromStates => null;
+        IList? IOperation.UntypedToStates => new List<Enum>();
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
 
         public bool LogAlsoIfNotSaved { get; set; }
 
@@ -456,19 +460,20 @@ public class Graph<T>
     public class Execute : _Execute<T>, IExecuteOperation
     {
         protected readonly ExecuteSymbol<T> Symbol;
-        OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
-        Type IOperation.OverridenType { get { return typeof(T); } }
-        OperationType IOperation.OperationType { get { return OperationType.Execute; } }
+        OperationSymbol IOperation.OperationSymbol => Symbol.Symbol;
+        Type IOperation.OverridenType => typeof(T);
+        OperationType IOperation.OperationType => OperationType.Execute;
         public bool CanBeModified { get; set; }
-        bool IOperation.Returns { get { return true; } }
-        Type? IOperation.ReturnType { get { return null; } }
-        Type? IOperation.StateType { get { return null; } }
+        bool IOperation.Returns => true;
+        Type? IOperation.ReturnType => null;
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
         public bool AvoidImplicitSave { get; set; }
 
-        Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
-        bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+        Type IEntityOperation.BaseType => Symbol.BaseType;
+        bool IEntityOperation.HasCanExecute => CanExecute != null;
+        IList? IOperation.UntypedFromStates => new List<Enum>();
+        IList? IOperation.UntypedToStates => new List<Enum>();
 
         public bool CanBeNew { get; set; }
 
@@ -604,15 +609,16 @@ public class Graph<T>
     public class Delete : _Delete<T>, IDeleteOperation
     {
         protected readonly DeleteSymbol<T> Symbol;
-        OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
-        Type IOperation.OverridenType { get { return typeof(T); } }
-        OperationType IOperation.OperationType { get { return OperationType.Delete; } }
+        OperationSymbol IOperation.OperationSymbol => Symbol.Symbol;
+        Type IOperation.OverridenType => typeof(T);
+        OperationType IOperation.OperationType => OperationType.Delete;
         public bool CanBeModified { get; set; }
-        bool IOperation.Returns { get { return false; } }
-        Type? IOperation.ReturnType { get { return null; } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return null; } }
-        Type? IOperation.StateType { get { return null; } }
+        bool IOperation.Returns => false;
+        Type? IOperation.ReturnType => null;
+        IList? IOperation.UntypedFromStates => new List<Enum>();
+        IList? IOperation.UntypedToStates => null;
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
 
         public bool CanBeNew { get { return false; } }
 

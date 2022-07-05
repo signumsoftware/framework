@@ -2,6 +2,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Map;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using System.Collections;
 
 namespace Signum.React.Map;
 
@@ -58,15 +59,15 @@ public static class OperationMap
         };
     }
 
-    static IEnumerable<Enum> WithDefaultStateArray(IEnumerable<Enum>? enumerable, DefaultState forNull)
+    static IEnumerable<Enum> WithDefaultStateArray(IList? enumerable, DefaultState forNull)
     {
         if (enumerable == null)
             return new Enum[] { forNull };
 
-        if (enumerable.IsEmpty())
+        if (enumerable.Cast<Enum>().IsEmpty())
             return new Enum[] { DefaultState.All };
 
-        return enumerable;
+        return enumerable.Cast<Enum>();
     }
 
     static readonly GenericInvoker<Func<LambdaExpression, Dictionary<Enum, int>>> giCountGroupBy =
