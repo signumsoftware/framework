@@ -29,15 +29,15 @@ public static class FilePathEmbeddedLogic
                         efp.SaveFile();
                     else
                     {
-                        var task = efp.SaveFileAsync();
-                        Transaction.PreRealCommit += data =>
-                        {
+                    var task = efp.SaveFileAsync();
+                    Transaction.PreRealCommit += data =>
+                    {
                             //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                            var a = efp; //For debugging
+                        var a = efp; //For debugging
 
                             task.Wait();
-                        };
-                    }
+                    };
+                }
                 }
             };
 

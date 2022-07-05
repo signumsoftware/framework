@@ -589,4 +589,5 @@ public enum SubTokensOptions
     CanAggregate = 1,
     CanAnyAll = 2,
     CanElement = 4,
+    CanOperation = 8,
 }

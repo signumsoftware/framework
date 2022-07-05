@@ -128,6 +128,8 @@ export module QueryTokenMessage {
   export const _0Of1 = new MessageKey("QueryTokenMessage", "_0Of1");
   export const RowOrder = new MessageKey("QueryTokenMessage", "RowOrder");
   export const RowId = new MessageKey("QueryTokenMessage", "RowId");
+  export const AddsAsACellOperation = new MessageKey("QueryTokenMessage", "AddsAsACellOperation");
+  export const ContainsAListOfOperationsEligibleForShowingInCell = new MessageKey("QueryTokenMessage", "ContainsAListOfOperationsEligibleForShowingInCell");
 }
 
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");

@@ -105,16 +105,17 @@ public static class FilePathLogic
                 alg.SaveFile(fp);
             else
             {
-                var task = alg.SaveFileAsync(fp);
+            var task = alg.SaveFileAsync(fp);
 
-                Transaction.PreRealCommit += data =>
-                {
+            Transaction.PreRealCommit += data =>
+            {
                     //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                    var a = fp; //For ebuggin
-                    task.Wait();
-                };
-            }
+                var a = fp; //For ebuggin
+                if (!AvoidWaitingForFileSave)
+                task.Wait();
+            };
         }
+    }
     }
 
     public static bool SyncFileSave = false;

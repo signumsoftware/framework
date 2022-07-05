@@ -40,7 +40,13 @@ public class MarkermapChartScript : ChartScript
                 new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 6,  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
                 new ChartScriptParameter("ColorSet", ChartParameterType.Enum) {  ColumnIndex = 6, ValueDefinition = EnumValueList.Parse("YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn") },
                 new ChartScriptParameter("ColorCategory", ChartParameterType.Enum) {  ColumnIndex = 7, ValueDefinition = EnumValueList.Parse("category10|category20|category20b|category20c|accent|paired|pastel1|pastel2|set1|set2|set3") }
-            }
+            },
+            new ChartScriptParameterGroup("Zoom")
+            {
+                new ChartScriptParameter("Zoom", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2m } },
+                new ChartScriptParameter("MinZoom", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = null } },
+                new ChartScriptParameter("MaxZoom", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = null } },
+            },
         };
     }      
 }                

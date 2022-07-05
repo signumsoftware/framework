@@ -5,6 +5,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.Basics;
 using Signum.Engine.Operations.Internal;
 using System.Collections.Immutable;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Operations;
 
@@ -105,7 +106,49 @@ public static class OperationLogic
             sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+            OperationsToken.GetEligibleTypeOperations = (entityType) => OperationsToken_GetEligibleTypeOperations(entityType);
+            OperationToken.IsAllowedExtension = (operationSymbol, entityType) => OperationToken_IsAllowedExtension(operationSymbol, entityType);
+            OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
         }
+    }
+
+    private static IEnumerable<OperationSymbol> OperationsToken_GetEligibleTypeOperations(Type entityType)
+    {
+        return TypeOperations(entityType)
+            .Where((o) =>
+                {
+                    var op = TryFindOperation(entityType, o.OperationSymbol) as IEntityOperation;
+                    return op?.CanExecuteExpression() != null || op?.HasCanExecute == false;
+                })
+            .Select(o => o.OperationSymbol);
+    }
+
+    private static Expression OperationToken_BuildExpression(Type entityType, OperationSymbol operationSymbol, Expression parentExpression)
+    {
+        var operation = (IEntityOperation)FindOperation(entityType, operationSymbol);
+
+        LambdaExpression? cee = operation.CanExecuteExpression();
+
+        if (cee == null && operation.HasCanExecute)
+                throw new InvalidOperationException(OperationMessage.Operation01DoesNotHaveCanExecuteExpression
+                                                                    .NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key));
+              
+        var entity = parentExpression.ExtractEntity(false);
+        var operationKey = Expression.Constant(operationSymbol.Key);
+        var canExecute = cee == null ? Expression.Constant(null, typeof(string)) : 
+                ExpressionReplacer.Replace(cee.Body, new Dictionary<ParameterExpression, Expression> { { cee.Parameters.Single(), entity } });
+
+        var dtoConstructor = typeof(CellOperationDTO).GetConstructor(new[] { typeof(Lite<IEntity>), typeof(string),  typeof(string) });
+
+        NewExpression newExpr = Expression.New(dtoConstructor!, entity.BuildLite(), operationKey, canExecute);
+
+        return newExpr;
+    }
+
+    private static string? OperationToken_IsAllowedExtension(OperationSymbol operationSymbol, Type entityType)
+    {
+        return OperationAllowedMessage(operationSymbol, entityType, true);
     }
 
     private static void RegisterCurrentLogs(Schema schema)
@@ -227,11 +270,21 @@ Consider the following options:
             return true;
     }
 
-    public static void AssertOperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
+    public static string? OperationAllowedMessage(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
     {
         if (!OperationAllowed(operationSymbol, entityType, inUserInterface))
-            throw new UnauthorizedAccessException(OperationMessage.Operation01IsNotAuthorized.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key) +
-                (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : ""));
+            return OperationMessage.Operation01IsNotAuthorized.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key) +
+                (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : "");
+        
+        return null;
+    }
+
+    public static void AssertOperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
+    {
+        var allowed = OperationAllowedMessage(operationSymbol, entityType, inUserInterface);
+
+        if (allowed != null)
+            throw new UnauthorizedAccessException(allowed);
     }
     #endregion
 
@@ -773,7 +826,8 @@ public interface IEntityOperation : IOperation
 {
     bool CanBeModified { get; }
     bool CanBeNew { get; }
-    string? CanExecute(IEntity entity);
+    string? CanExecute(IEntity entity);   
+    LambdaExpression? CanExecuteExpression();
     bool HasCanExecute { get; }
     Type BaseType { get; }
 }
