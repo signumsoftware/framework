@@ -302,6 +302,9 @@ public class Graph<T>
 
         public virtual void AssertIsValid()
         {
+            if (CanConstruct == null && CanConstructExpression != null)
+                CanConstruct = CanConstructExpression.Compile();
+
             if (Construct == null)
                 throw new InvalidOperationException("Operation {0} does not hace Construct initialized".FormatWith(operationSymbol));
         }
@@ -595,6 +598,9 @@ public class Graph<T>
 
         public virtual void AssertIsValid()
         {
+            if (CanExecute == null && CanExecuteExpression != null)
+                CanExecute = CanExecuteExpression.Compile();
+
             if (Execute == null)
                 throw new InvalidOperationException("Operation {0} does not have Execute initialized".FormatWith(Symbol));
         }
@@ -733,6 +739,9 @@ public class Graph<T>
 
         public virtual void AssertIsValid()
         {
+            if (CanDelete == null && CanDeleteExpression != null)
+                CanDelete = CanDeleteExpression.Compile();
+
             if (Delete == null)
                 throw new InvalidOperationException("Operation {0} does not have Delete initialized".FormatWith(Symbol.Symbol));
         }
