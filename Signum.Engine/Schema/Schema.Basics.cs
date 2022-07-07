@@ -306,7 +306,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
                     if (ui == null || ui.AvoidAttachToUniqueIndexes)
                         return ix;
 
-                    return new UniqueTableIndex(ui.Table, ui.Columns.Concat(attachedFields).ToArray())
+                    return new UniqueTableIndex(ui.Table, ui.Columns.Union(attachedFields).ToArray())
                     {
                         Where = ui.Where
                     };
