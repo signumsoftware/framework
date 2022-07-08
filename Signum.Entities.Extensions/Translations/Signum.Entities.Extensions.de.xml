@@ -168,14 +168,17 @@
     <Member Name="_0RulesFor1" Description="{0} Regeln für {1}" />
     <Member Name="Allow" Description="Erlauben" />
     <Member Name="CanNotBeModified" Description="Kann nicht geändert werden" />
-    <Member Name="CanNotBeModifiedBecauseIsA0" Description="Kann nicht geändert werden, da es ein {0} ist." />
-    <Member Name="CanNotBeModifiedBecauseIsNotA0" Description="Kann nicht geändert werden, da es kein {0} ist." />
+    <Member Name="CanNotBeModifiedBecauseIsInCondition0" Description="Kann nicht geändert werden, da er sich im Zustand {0} befindet." />
+    <Member Name="CanNotBeModifiedBecauseIsNotInCondition0" Description="Kann nicht geändert werden, da nicht im Zustand {0}" />
+    <Member Name="CanNotBeReadBecauseIsInCondition0" Description="Kann nicht gelesen werden, da im Zustand {0}" />
+    <Member Name="CanNotBeReadBecauseIsNotInCondition0" Description="Kann nicht gelesen werden, da nicht im Zustand {0}" />
     <Member Name="ConflictMergingTypeConditions" Description="Konflikt durch Verschmelzung von Typbedingungen" />
     <Member Name="Deny" Description="Verweigern" />
     <Member Name="Everything" Description="Alles" />
     <Member Name="Filter" Description="Filter" />
     <Member Name="NoRoles" Description="Keine Rollen" />
     <Member Name="Nothing" Description="Nichts" />
+    <Member Name="OnlyActive" Description="Nur aktive" />
     <Member Name="Overriden" Description="Überschrieben" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
     <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
@@ -765,6 +768,11 @@
     <Member Name="DisconnectedMachine" Description="Getrennter Computer" />
     <Member Name="LastOnlineTicks" Description="Letzte Onlineticks" />
   </Type>
+  <Type Name="DiscoveryEntity" />
+  <Type Name="DiscoveryLogEntity" />
+  <Type Name="DiscoveryMessageEmbedded" />
+  <Type Name="DiscoveryOperation" />
+  <Type Name="DiscoveryType" />
   <Type Name="DoneType" Description="Fertigstellungstypen">
     <Member Name="Jump" Description="Springen" />
     <Member Name="Next" Description="Nächstes" />
@@ -1509,6 +1517,7 @@
     <Member Name="InvalidUsername" Description="Ungültiger Benutzername" />
     <Member Name="InvalidUsernameOrPassword" Description="Ungültiger Benutzername oder Kennwort" />
     <Member Name="Login" Description="Login" />
+    <Member Name="LoginPopupAlreadyOpenedInAnotherWindow" Description="Login-Popup bereits in einem anderen Fenster geöffnet" />
     <Member Name="LoginWith0" Description="Login mit {0}" />
     <Member Name="LoginWithWindowsUser" Description="Anmelden mit Windows-Benutzer" />
     <Member Name="Logout" Description="Logout" />
@@ -2375,6 +2384,7 @@
   <Type Name="ToolbarLocation" Description="Toolbar-Position">
     <Member Name="Main" Description="Haupt" />
     <Member Name="Side" Description="Seite" />
+    <Member Name="Top" Description="Nach oben" />
   </Type>
   <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü" PluralDescription="Toolbar-Menüs" Gender="f">
     <Member Name="Elements" Description="Elemente" />
