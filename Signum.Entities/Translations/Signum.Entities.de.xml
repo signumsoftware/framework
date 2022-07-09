@@ -297,8 +297,10 @@
     <Member Name="And" Description=" und " />
     <Member Name="AnyEntity" Description="Jede Einheit" />
     <Member Name="As0" Description="Als {0}" />
+    <Member Name="CellOperation" Description="Zelloperation" />
     <Member Name="Check" Description="Ja/Nein-Wert" />
     <Member Name="Column0NotFound" Description="Die Spalte {0} wurde nicht gefunden" />
+    <Member Name="ContainerOfCellOperations" Description="Container für Zellenoperationen" />
     <Member Name="Count" Description="Num" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />

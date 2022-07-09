@@ -470,9 +470,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
     static string GetNiceTypeName(Type type, Implementations? implementations)
     {
         if (type == typeof(CellOperationDTO))
-            return QueryTokenMessage.AddsAsACellOperation.NiceToString();
+            return QueryTokenMessage.CellOperation.NiceToString();
         if (type == typeof(OperationsToken))
-            return QueryTokenMessage.ContainsAListOfOperationsEligibleForShowingInCell.NiceToString();
+            return QueryTokenMessage.ContainerOfCellOperations.NiceToString();
         switch (QueryUtils.TryGetFilterType(type))
         {
             case FilterType.Integer: return QueryTokenMessage.Number.NiceToString();
@@ -675,6 +675,6 @@ public enum QueryTokenMessage
     [Description("RowID")]
     RowId,
 
-    AddsAsACellOperation,
-    ContainsAListOfOperationsEligibleForShowingInCell
+    CellOperation,
+    ContainerOfCellOperations
 }
