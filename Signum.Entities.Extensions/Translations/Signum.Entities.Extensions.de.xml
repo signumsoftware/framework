@@ -2385,6 +2385,7 @@
     <Member Name="Main" Description="Haupt" />
     <Member Name="Side" Description="Seite" />
     <Member Name="Top" Description="Top" />
+    <Member Name="Top" Description="Nach oben" />
   </Type>
   <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü" PluralDescription="Toolbar-Menüs" Gender="f">
     <Member Name="Elements" Description="Elemente" />
