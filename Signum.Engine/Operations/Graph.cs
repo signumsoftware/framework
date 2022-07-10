@@ -104,13 +104,16 @@ public class Graph<T>
 
                         var exLog = ex.LogException();
 
-                        using (var tr2 = Transaction.ForceNew())
+                        if (log != null)
                         {
-                            log!.Exception = exLog.ToLite();
+                            using (var tr2 = Transaction.ForceNew())
+                            {
+                                log.Exception = exLog.ToLite();
 
-                            log.SaveLog();
+                                log.SaveLog();
 
-                            tr2.Commit();
+                                tr2.Commit();
+                            }
                         }
                     }
 
@@ -280,13 +283,16 @@ public class Graph<T>
 
                         var exLog = ex.LogException();
 
-                        using (var tr2 = Transaction.ForceNew())
+                        if (log != null)
                         {
-                            log!.Exception = exLog.ToLite();
+                            using (var tr2 = Transaction.ForceNew())
+                            {
+                                log.Exception = exLog.ToLite();
 
-                            log.SaveLog();
+                                log.SaveLog();
 
-                            tr2.Commit();
+                                tr2.Commit();
+                            }
                         }
                     }
 
@@ -423,14 +429,16 @@ public class Graph<T>
                             throw;
 
                         var exLog = ex.LogException();
-
-                        using (var tr2 = Transaction.ForceNew())
+                        if (log != null)
                         {
-                            log!.Exception = exLog.ToLite();
+                            using (var tr2 = Transaction.ForceNew())
+                            {
+                                log.Exception = exLog.ToLite();
 
-                            log.SaveLog();
+                                log.SaveLog();
 
-                            tr2.Commit();
+                                tr2.Commit();
+                            }
                         }
                     }
 
