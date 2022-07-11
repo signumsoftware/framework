@@ -15,7 +15,7 @@ public class WordController : ControllerBase
     public FileStreamResult CreateReport([Required, FromBody]CreateWordReportRequest request)
     {
         var template = request.Template.RetrieveAndRemember();
-        var modifiableEntity = request.Entity ?? request.Lite.RetrieveAndRemember();
+        var modifiableEntity = request.Entity ?? request.Lite!.RetrieveAndRemember();
 
         var file = template.CreateReportFileContent(modifiableEntity);
 
@@ -25,8 +25,8 @@ public class WordController : ControllerBase
     public class CreateWordReportRequest
     {
         public Lite<WordTemplateEntity> Template { get; set; }
-        public Lite<Entity> Lite { get; set; }
-        public ModifiableEntity Entity { get; set; }
+        public Lite<Entity>? Lite { get; set; }
+        public ModifiableEntity? Entity { get; set; }
     }
 
     [HttpPost("api/word/constructorType")]
