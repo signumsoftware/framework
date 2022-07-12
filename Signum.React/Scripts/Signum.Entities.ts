@@ -176,6 +176,7 @@ function compileFunction(functionString: string): (e: any) => any {
     getTypeInfo: Reflection.getTypeInfo,
     newNiceName: newNiceName,
     New : Reflection.New,
+    toLite: toLite,
   };
 
   return e => func(e, funcDeps);

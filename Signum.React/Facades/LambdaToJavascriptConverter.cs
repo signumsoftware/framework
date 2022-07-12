@@ -130,6 +130,13 @@ internal class LambdaToJavascriptConverter
                     return "fd.getTypeInfo(" + obj + ")";
             }
 
+            if (mc.Method.Name == "ToLite" && mc.Arguments[0].Type.IsIEntity())
+            {
+                var obj = ToJavascript(param, mc.Arguments[0]);
+                if (obj != null)
+                    return "fd.toLite(" + obj + ")";
+            }
+
             if (mc.Method.Name == nameof(string.Format) && mc.Method.DeclaringType == typeof(string) ||
                 mc.Method.Name == nameof(StringExtensions.FormatWith) && mc.Method.DeclaringType == typeof(StringExtensions))
             {
