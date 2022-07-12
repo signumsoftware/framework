@@ -85,7 +85,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     return undefined;
 
   let contextPromise: Promise<ContextualOperationContext<Entity>[]>;
-  if (contexts.some(coc => coc.operationInfo.hasCanExecute) || Operations.Options.maybeReadonly(ti)) {
+  if (contexts.some(coc => coc.operationInfo.hasCanExecute || coc.operationInfo.hasStates) || Operations.Options.maybeReadonly(ti)) {
     if (ctx.lites.length == 1) {
       contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
         contexts.forEach(coc => {
