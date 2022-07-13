@@ -91,7 +91,14 @@ export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterG
 }
 
 export function isActive(fo: FilterOptionParsed) {
-  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "NotCheckbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+}
+
+export function isCheckBox(active: PinnedFilterActive | undefined) {
+  return active == "Checkbox_StartChecked" ||
+    active == "Checkbox_StartUnchecked" ||
+    active == "NotCheckbox_StartChecked" ||
+    active == "NotCheckbox_StartUnchecked";
 }
 
 export interface FilterConditionOptionParsed {

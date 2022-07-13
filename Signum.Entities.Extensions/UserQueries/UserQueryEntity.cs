@@ -481,6 +481,9 @@ public static class UserQueryUtils
                 if (filter.Pinned.Active == PinnedFilterActive.Checkbox_StartUnchecked)
                     return null;
 
+                if (filter.Pinned.Active == PinnedFilterActive.NotCheckbox_StartChecked)
+                    return null;
+
                 if (filter.Pinned.SplitText && !filter.ValueString.HasText())
                     return null;
             }
