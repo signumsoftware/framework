@@ -161,6 +161,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           ref={handleSearchValueLoaded}
           findOptions={fo}
           initialValue={p.initialValue}
+          onInitialValueLoaded={() => forceUpdate()}
           multipleValues={p.multipleValues}
           isBadge={isBadge}
           customClass={p.customClass ?? (p.multipleValues ? p.ctx.labelClass : undefined)}
