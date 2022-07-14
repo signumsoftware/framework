@@ -271,7 +271,7 @@ OperationMenuItem.getText = (coc: ContextualOperationContext<any>): React.ReactN
 
 OperationMenuItem.simplifyName = (niceName: string) => {
   const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
-  return array ? (niceName.tryBefore(array[1]) ?? "") + array[1].firstUpper() : niceName;
+  return array ? OperationMessage.Create0.niceToString(array[1].firstUpper()) : niceName;
 }
 
 

@@ -465,6 +465,7 @@ export module NormalControlMessage {
 export module OperationMessage {
   export const Create = new MessageKey("OperationMessage", "Create");
   export const CreateFromRegex = new MessageKey("OperationMessage", "CreateFromRegex");
+  export const Create0 = new MessageKey("OperationMessage", "Create0");
   export const StateShouldBe0InsteadOf1 = new MessageKey("OperationMessage", "StateShouldBe0InsteadOf1");
   export const TheStateOf0ShouldBe1InsteadOf2 = new MessageKey("OperationMessage", "TheStateOf0ShouldBe1InsteadOf2");
   export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
