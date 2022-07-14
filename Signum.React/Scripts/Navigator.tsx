@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
-import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo } from './Reflection';
 import { TypeContext } from './TypeContext';
@@ -800,9 +800,13 @@ export module API {
     return fillLiteModelsArray(lites.filter(l => l != null) as Lite<Entity>[]);
   }
 
-  export function fillLiteModelsArray(lites: Lite<Entity>[]): Promise<void> {
+  export function fillLiteModelsArray(lites: Lite<Entity>[], force?: boolean): Promise<void> {
 
-    const realLites = lites.filter(a => a.model == undefined && a.entity == undefined);
+    if (force) {
+      lites.forEach(a => a.ModelType = a.ModelType ?? (isModifiableEntity(a.model) ? a.model.Type : "string"));
+    }
+
+    const realLites = force ? lites : lites.filter(a => a.model == undefined && a.entity == undefined);
 
     if (!realLites.length)
       return Promise.resolve();

@@ -428,7 +428,10 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     }
                 }
 
-                return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
+                if (modelType == null)
+                    return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToLite()).FirstEx().Model!;
+
+                return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToLite(modelType)).FirstEx().Model!;
             }
         }
         catch (Exception e)

@@ -396,7 +396,7 @@ public static class Lite
 
         var dic = LiteModelConstructors.TryGetC(entityType);
 
-        var single = dic?.Keys.SingleOrDefaultEx(a => Reflector.CleanTypeName(a) == modelTypeStr);
+        var single = dic?.Keys.SingleOrDefaultEx(a => a.Name == modelTypeStr || Reflector.CleanTypeName(a) == modelTypeStr);
 
         if (single == null)
             throw new InvalidOperationException($"No Lite Model with name '{modelTypeStr}' is registered for '{entityType.TypeName()}'");
