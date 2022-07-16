@@ -17,6 +17,12 @@ export interface MapOperation extends ForceNode {
   count: number;
   fromStates: string[];
   toStates: string[];
+  fromToStates: FromToStates[];
+}
+
+export interface FromToStates {
+  from: string;
+  to: string;
 }
 
 export interface MapState extends ForceNode {
