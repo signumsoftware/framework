@@ -90,6 +90,14 @@ public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
     /// Usefull to be defenisive about someone else loading the entity and producing serialization problems. 
     /// </summary>
     Lite<T> Clone();
+
+
+    /// <summary>
+    /// Get the Model Property and cast it to M
+    /// </summary>
+    /// <typeparam name="M"></typeparam>
+    /// <returns></returns>
+    M GetModel<M>() where M : ModelEntity; //LiteModel<T>
 }
 
 
@@ -239,7 +247,7 @@ public static class Lite
 
         var modelType = Lite.DefaultModelType(entity.GetType());
 
-        var model = Lite.GetModel(entity, modelType);
+        var model = Lite.ConstructModel(entity, modelType);
 
         return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), modelType)(entity.Id, model);
     }
@@ -251,7 +259,7 @@ public static class Lite
         if (entity.IdOrNull == null)
             throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-        var model = Lite.GetModel(entity, modelType);
+        var model = Lite.ConstructModel(entity, modelType);
 
         return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), modelType)(entity.Id, model);
     }
@@ -281,7 +289,7 @@ public static class Lite
     {
         var modelType = Lite.DefaultModelType(entity.GetType());
 
-        var model = Lite.GetModel(entity, modelType);
+        var model = Lite.ConstructModel(entity, modelType);
 
         return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType(), modelType)((Entity)(IEntity)entity, model);
     }
@@ -290,7 +298,7 @@ public static class Lite
     public static Lite<T> ToLiteFat<T>(this T entity, Type modelType)
         where T : class, IEntity
     {
-        var model = Lite.GetModel(entity, modelType);
+        var model = Lite.ConstructModel(entity, modelType);
 
         return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType(), modelType)((Entity)(IEntity)entity, model);
     }
@@ -330,14 +338,15 @@ public static class Lite
 
     public static Dictionary<Type/*Entity*/, Dictionary<Type/*Model*/, ILiteModelConstructor>> LiteModelConstructors = new();
 
-    public static void RegisterLiteModelConstructor<T, M>(Expression<Func<T, M>> constructorExpression, bool isDefault = true, bool isOverride = false) where T : Entity
+    public static void RegisterLiteModelConstructor<T, M>(Expression<Func<T, M>> constructorExpression, bool isDefault = true, bool isOverride = false) 
+        where T : Entity
+        where M : LiteModel<T>
         => RegisterLiteModelConstructor(new LiteModelConstructor<T, M>(isDefault, constructorExpression), isOverride);
 
-    public static void RegisterLiteModelConstructor<T, M>(LiteModelConstructor<T, M> liteModelConstructor, bool isOverride = false) where T : Entity
+    public static void RegisterLiteModelConstructor<T, M>(LiteModelConstructor<T, M> liteModelConstructor, bool isOverride = false) 
+        where T : Entity
+        where M : LiteModel<T>
     {
-        if (typeof(M).IsModelEntity() && typeof(M).GetMethod("ToString", BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)?.GetCustomAttribute<ExpressionFieldAttribute>(false) == null)
-            throw new InvalidOperationException($"{typeof(M).TypeName()} needs to implement ToString using [AutoExpressionField] to allow ToString on Lite<{typeof(T).TypeName()}>");
-
         var dic = LiteModelConstructors.GetOrCreate(typeof(T));
 
         if (dic.ContainsKey(typeof(M)) && !isOverride)
@@ -375,7 +384,7 @@ public static class Lite
         return lmc.NotFoundModel((Lite<Entity>)lite);
     }
 
-    public static object GetModel(IEntity e, Type modelType)
+    public static object ConstructModel(IEntity e, Type modelType)
     {
         return giGetModel.GetInvoker(e.GetType(), modelType)((Entity)e);
     }
@@ -404,8 +413,8 @@ public static class Lite
         return single;
     }
 
-    static GenericInvoker<Func<Entity, object>> giGetModel = new GenericInvoker<Func<Entity, object>>((e) => GetModel<Entity, string>(e));
-    public static M GetModel<T, M>(T e)
+    static GenericInvoker<Func<Entity, object>> giGetModel = new GenericInvoker<Func<Entity, object>>((e) => ConstructModel<Entity, string>(e));
+    public static M ConstructModel<T, M>(T e)
         where T : Entity
     {
         var lmc = LiteModelConstructors.TryGetC(typeof(T))?.TryGetC(typeof(M));

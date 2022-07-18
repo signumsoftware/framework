@@ -221,7 +221,7 @@ class RealRetriever : IRetriever
                     var entity = retrieved.TryGetC((item.Key.type, item.Key.id));
                     if (entity != null)
                     {
-                        var toStr = Lite.GetModel(entity, item.Key.modelType);
+                        var toStr = Lite.ConstructModel(entity, item.Key.modelType);
 
                         foreach (var lite in item.Value)
                             lite.SetModel(toStr);
