@@ -165,7 +165,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         RoleAllowedCache cache = runtimeRules.Value.GetOrThrow(rules.Role);
 
         rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
-        rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
+        rules.InheritFrom = AuthLogic.RelatedTo(rules.Role).ToMList();
         rules.Rules = (from r in resources
                        let k = ToKey(r)
                        select new AR()

@@ -1,30 +1,30 @@
 import * as React from 'react'
-import { RoleEntity, AuthAdminMessage, UserEntity } from '../Signum.Entities.Authorization'
+import { RoleEntity, AuthAdminMessage, UserEntity, MergeStrategy } from '../Signum.Entities.Authorization'
 import { ValueLine, EntityStrip, TypeContext } from '@framework/Lines'
 import { useForceUpdate } from '@framework/Hooks'
 import { SearchValue, SearchValueLine } from '@framework/Search';
+import { External } from '@framework/Signum.Entities';
 
 export default function Role(p: { ctx: TypeContext<RoleEntity> }) {
   const forceUpdate = useForceUpdate();
 
-  function rolesMessage() {
-    return AuthAdminMessage.NoRoles.niceToString() + " ⇒ " +
-      (p.ctx.value.mergeStrategy == "Union" ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).niceToString();
+  function rolesMessage(r: RoleEntity) {
+    return AuthAdminMessage.DefaultAuthorization.niceToString() +
+      (r.inheritsFrom.length == 0 ? (r.mergeStrategy == "Union" ? AuthAdminMessage.Everithing : AuthAdminMessage.Nothing).niceToString() :
+        r.inheritsFrom.length == 1 ? AuthAdminMessage.SameAs0.niceToString(r.inheritsFrom.single().element.toStr) :
+          (r.mergeStrategy == "Union" ? AuthAdminMessage.MaximumOfThe0 : AuthAdminMessage.MinumumOfThe0).niceToString(RoleEntity.niceCount(r.inheritsFrom.length)));
   }
   const ctx = p.ctx;
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(e => e.name)} />
-      <ValueLine ctx={ctx.subCtx(e => e.mergeStrategy)} unitText={rolesMessage()} onChange={() => forceUpdate()} />
-      <EntityStrip ctx={ctx.subCtx(e => e.roles)}
+      <ValueLine ctx={ctx.subCtx(e => e.description)} />
+      <br/>
+      <EntityStrip ctx={ctx.subCtx(e => e.inheritsFrom)}
         iconStart={true}
         vertical={true}
-        findOptions={{
-          queryName: RoleEntity,
-          filterOptions: [{ token: RoleEntity.token(a => a.entity), operation: "IsNotIn", value: ctx.value.roles.map(a => a.element) }]
-        }}
         onChange={() => forceUpdate()} />
-
+      <ValueLine ctx={ctx.subCtx(e => e.mergeStrategy)} helpText={rolesMessage(ctx.value)} onChange={() => forceUpdate()} />
 
       <div className="row mt-4">
         <div className="offset-sm-2">
@@ -40,7 +40,7 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }) {
       }
       {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={{
         queryName: RoleEntity,
-        filterOptions: [{ token: RoleEntity.token(a => a.entity).append(u => u.roles).any(), value: ctx.value }]
+        filterOptions: [{ token: RoleEntity.token(a => a.entity).append(u => u.inheritsFrom).any(), value: ctx.value }]
       }} />
       }
 

@@ -74,16 +74,16 @@ public abstract class BaseRulePack<T> : ModelEntity
     public MergeStrategy MergeStrategy { get; set; }
 
     [HiddenProperty]
-    public MList<Lite<RoleEntity>> SubRoles { get; set; } = new MList<Lite<RoleEntity>>();
+    public MList<Lite<RoleEntity>> InheritFrom { get; set; } = new MList<Lite<RoleEntity>>();
 
     public string Strategy
     {
         get
         {
-            return AuthAdminMessage._0of1.NiceToString().FormatWith(
-                MergeStrategy.NiceToString(),
-                SubRoles.IsNullOrEmpty() ? "∅  -> " + (MergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString() :
-                SubRoles.CommaAnd());
+            return AuthAdminMessage.DefaultAuthorization.NiceToString() +
+                (InheritFrom.Count == 0 ? (MergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Everithing : AuthAdminMessage.Nothing).NiceToString() :
+                InheritFrom.Count == 1 ? AuthAdminMessage.SameAs0.NiceToString(InheritFrom.Only()) :
+                (MergeStrategy == MergeStrategy.Union ? AuthAdminMessage.MaximumOfThe0 : AuthAdminMessage.MinumumOfThe0).NiceToString(typeof(RoleEntity).NiceCount(InheritFrom.Count)));
         }
     }
     

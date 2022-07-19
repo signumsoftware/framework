@@ -107,6 +107,7 @@ public static class AuthLogic
                     Entity = r,
                     r.Id,
                     r.Name,
+                    r.Description,
                 });
 
             roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
@@ -155,14 +156,14 @@ public static class AuthLogic
 
     static void Schema_Saving(RoleEntity role)
     {
-        if (!role.IsNew && role.Roles.IsGraphModified)
+        if (!role.IsNew && role.InheritsFrom.IsGraphModified)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
             {
                 EntityCache.AddFullGraph(role);
                 var allRoles = Database.RetrieveAll<RoleEntity>();
 
-                var roleGraph = DirectedGraph<RoleEntity>.Generate(allRoles, r => r.Roles.Select(sr => sr.RetrieveAndRemember()));
+                var roleGraph = DirectedGraph<RoleEntity>.Generate(allRoles, r => r.InheritsFrom.Select(sr => sr.RetrieveAndRemember()));
 
                 var problems = roleGraph.FeedbackEdgeSet().Edges.ToList();
 
@@ -183,7 +184,7 @@ public static class AuthLogic
             using (new EntityCache(EntityCacheType.ForceNewSealed))
                 foreach (var role in Database.RetrieveAll<RoleEntity>())
                 {
-                    newRoles.Expand(role.ToLite(), r => r.RetrieveAndRemember().Roles);
+                    newRoles.Expand(role.ToLite(), r => r.RetrieveAndRemember().InheritsFrom);
                 }
 
             var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
@@ -413,6 +414,8 @@ public static class AuthLogic
     {
         SystemEventLogLogic.Log("Export AuthRules");
 
+        var rolesDic = Database.Query<RoleEntity>().ToDictionary(a => a.ToLite());
+
         return new XDocument(
             new XDeclaration("1.0", "utf-8", "yes"),
             new XElement("Auth",
@@ -420,7 +423,9 @@ public static class AuthLogic
                     RolesInOrder().Select(r => new XElement("Role",
                         new XAttribute("Name", r.ToString()!),
                         GetMergeStrategy(r) == MergeStrategy.Intersection ? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null!,
-                        new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
+                        new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(",")),
+                        rolesDic.TryGetC(r)?.Description?.Let(d => new XAttribute("Description", d))
+                        ))),
                  ExportToXml?.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())!));
     }
 
@@ -495,14 +500,15 @@ public static class AuthLogic
         {
             Name = x.Attribute("Name")!.Value,
             MergeStrategy = x.Attribute("MergeStrategy")?.Let(ms => ms.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union,
-            SubRoles = x.Attribute("Contains")!.Value.SplitNoEmpty(',')
+            SubRoles = x.Attribute("Contains")!.Value.SplitNoEmpty(','),
+            Description = x.Attribute("Description")?.Value,
         }).ToList();
 
-        var roles = roleInfos.ToDictionary(a => a.Name!, a => new RoleEntity { Name = a.Name!, MergeStrategy = a.MergeStrategy }); /*CSBUG*/
+        var roles = roleInfos.ToDictionary(a => a.Name!, a => new RoleEntity { Name = a.Name!, MergeStrategy = a.MergeStrategy, Description = a.Description, });
 
         foreach (var ri in roleInfos)
         {
-            roles[ri.Name].Roles = ri.SubRoles.Select(r => roles.GetOrThrow(r).ToLiteFat()).ToMList();
+            roles[ri.Name].InheritsFrom = ri.SubRoles.Select(r => roles.GetOrThrow(r).ToLiteFat()).ToMList();
         }
 
         using (OperationLogic.AllowSave<RoleEntity>())
@@ -528,7 +534,8 @@ public static class AuthLogic
                 createNew: (name, xElement) => table.InsertSqlSync(new RoleEntity
                 {
                     Name = name,
-                    MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union
+                    MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union,
+                    Description = xElement.Attribute("Description")?.Let(t => t.Value)
                 }, includeCollections: false),
 
                 removeOld: (name, role) => table.DeleteSqlSync(role, r => r.Name == role.Name),
@@ -537,6 +544,7 @@ public static class AuthLogic
                     var oldName = role.Name;
                     role.Name = name;
                     role.MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
+                    role.Description = xElement.Attribute("Description")?.Let(t => t.Value);
                     return table.UpdateSqlSync(role, r => r.Name == oldName, includeCollections: false, comment: oldName);
                 });
 
@@ -567,12 +575,12 @@ public static class AuthLogic
              mergeBoth: (name, xElement, role) =>
              {
                  var should = xElement.Attribute("Contains")!.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                 var current = role.Roles.Select(a => a.ToString()!);
+                 var current = role.InheritsFrom.Select(a => a.ToString()!);
 
                  if (should.OrderBy().SequenceEqual(current.OrderBy()))
                      return null;
 
-                 role.Roles = should.Select(rs => rolesDic.GetOrThrow(rs).ToLite()).ToMList();
+                 role.InheritsFrom = should.Select(rs => rolesDic.GetOrThrow(rs).ToLite()).ToMList();
 
                  return table.UpdateSqlSync(role, r => r.Name == role.Name);
              });
