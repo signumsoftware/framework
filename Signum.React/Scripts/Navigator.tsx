@@ -573,7 +573,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   }
 
   return new MultiAutoCompleteConfig(types.toObject(t => t!.name,
-    t => getAutoCompleteBasic(t!, (findOptionsDictionary && findOptionsDictionary[type?.name]), ctx, create, showType!)
+    t => getAutoCompleteBasic(t!, (findOptionsDictionary && findOptionsDictionary[t!.name]), ctx, create, showType!)
   ));
 }
 
