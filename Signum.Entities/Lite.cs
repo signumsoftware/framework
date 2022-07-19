@@ -340,13 +340,14 @@ public static class Lite
 
     public static void RegisterLiteModelConstructor<T, M>(Expression<Func<T, M>> constructorExpression, bool isDefault = true, bool isOverride = false) 
         where T : Entity
-        where M : LiteModel<T>
         => RegisterLiteModelConstructor(new LiteModelConstructor<T, M>(isDefault, constructorExpression), isOverride);
 
     public static void RegisterLiteModelConstructor<T, M>(LiteModelConstructor<T, M> liteModelConstructor, bool isOverride = false) 
         where T : Entity
-        where M : LiteModel<T>
     {
+        if (typeof(M).IsModelEntity() && typeof(M).GetMethod("ToString", BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)?.GetCustomAttribute<ExpressionFieldAttribute>(false) == null)
+            throw new InvalidOperationException($"{typeof(M).TypeName()} needs to implement ToString using [AutoExpressionField] to allow ToString on Lite<{typeof(T).TypeName()}>");
+
         var dic = LiteModelConstructors.GetOrCreate(typeof(T));
 
         if (dic.ContainsKey(typeof(M)) && !isOverride)
