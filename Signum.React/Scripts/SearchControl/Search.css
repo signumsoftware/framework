@@ -80,6 +80,7 @@ table.sf-search-results > tbody > tr > td {
     cursor: pointer;
     background-color: #f8f8f8;
     position: sticky;
+    z-index: 5; /*prevnting overrided cell to render inside header*/
     top: 0; /* Don't forget this, required for the stickiness */
 }
 
