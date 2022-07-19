@@ -369,7 +369,7 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
     public static Action<string , string , string? >? ResponseRecorder;//  replacementsKey,oldValue,newValue
 
     //public static Dictionary<String, Replacements.Selection>? cases ;
-    private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
+    public static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
     {
         if (AutoReplacement != null)
         {
