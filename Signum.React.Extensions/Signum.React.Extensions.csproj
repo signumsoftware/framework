@@ -35,7 +35,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.19.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.19.0" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.7.3">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.7.4">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>

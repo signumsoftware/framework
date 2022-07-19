@@ -27,7 +27,7 @@ export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient
   })
 
   return (
-    <div className="sf-chart-container" ref={divElement}>
+    <div style={{ width: "100%", height: "100%" }} ref={divElement}>
     </div>
   );
 
@@ -37,6 +37,9 @@ export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient
   function drawChart() {
 
     var mapType = parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
+    var zoom = parameters["Zoom"];
+    var minZoom = parameters["MinZoom"];
+    var maxZoom = parameters["MaxZoom"];
 
     var latitudeColumn = data?.columns.c0! as ChartClient.ChartColumn<number> | undefined;
     var longitudeColumn = data?.columns.c1! as ChartClient.ChartColumn<number> | undefined;
@@ -47,7 +50,9 @@ export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient
 
     var mapOptions = {
       center: centerMap,
-      zoom: 2,
+      zoom: zoom && parseInt(zoom),
+      minZoom: minZoom && parseInt(minZoom),
+      maxZoom: maxZoom && parseInt(maxZoom),
       mapTypeControlOptions: {
         mapTypeIds: ["roadmap", "satellite", "hybrid", "terrain",
           "styled_map"]

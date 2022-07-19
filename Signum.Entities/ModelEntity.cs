@@ -36,3 +36,8 @@ public abstract class ModelEntity : ModifiableEntity, IRootEntity
             fieldRoute.FieldInfo!.GetCustomAttribute<ImplementedByAllAttribute>());
     }
 }
+
+public abstract class LiteModel<E> : ModelEntity where E: Entity
+{
+    public abstract override string ToString();
+}

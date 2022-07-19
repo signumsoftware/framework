@@ -45,7 +45,6 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
 
   overrideProps(p: T, overridenProps: T) {
     if (overridenProps.onFind) {
-      debugger;
       throw new Error(`'onFind' property is not applicable to ${this.constructor.name.before("Controller")} (ctx = ${p.ctx.propertyPath}). Use 'onFindMany' instead`);
     }
 

@@ -361,14 +361,14 @@ public static class Administrator
         });
     }
 
-    public static void SaveDisableIdentity<T>(T entities)
+    public static T SaveDisableIdentity<T>(T entity)
         where T : Entity
     {
         using (var tr = new Transaction())
         using (Administrator.SaveDisableIdentity<T>())
         {
-            Database.Save(entities);
-            tr.Commit();
+            Database.Save(entity);
+            return tr.Commit(entity);
         }
     }
 

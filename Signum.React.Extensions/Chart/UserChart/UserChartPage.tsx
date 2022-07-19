@@ -20,7 +20,7 @@ export default function UserChartPage(p : UserChartPageProps){
 
     const lite = entity == undefined ? undefined : parseLite(entity);
 
-    Navigator.API.fillToStrings(lite)
+    Navigator.API.fillLiteModels(lite)
       .then(() => Navigator.API.fetchEntity(UserChartEntity, userChartId))
       .then(uc => UserChartClient.Converter.toChartRequest(uc, lite)
         .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc))))

@@ -15,19 +15,19 @@ public class ExpandTest
     [Fact]
     public void ExpandToStringNull()
     {
-        Database.Query<CountryEntity>().Select(a => a.ToLite()).ExpandLite(a => a, ExpandLite.ToStringNull).ToList();
+        Database.Query<CountryEntity>().Select(a => a.ToLite()).ExpandLite(a => a, ExpandLite.ModelNull).ToList();
     }
 
     [Fact]
     public void ExpandToStringLazy()
     {
-        Database.Query<CountryEntity>().Select(a => a.ToLite()).ExpandLite(a => a, ExpandLite.ToStringLazy).ToList();
+        Database.Query<CountryEntity>().Select(a => a.ToLite()).ExpandLite(a => a, ExpandLite.ModelLazy).ToList();
     }
 
     [Fact]
     public void ExpandToStringEager()
     {
-        Database.Query<CountryEntity>().Select(a => a.ToLite()).ExpandLite(a => a, ExpandLite.ToStringEager).ToList();
+        Database.Query<CountryEntity>().Select(a => a.ToLite()).ExpandLite(a => a, ExpandLite.ModelEager).ToList();
     }
 
     [Fact]

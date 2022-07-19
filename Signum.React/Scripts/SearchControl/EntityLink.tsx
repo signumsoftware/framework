@@ -35,7 +35,7 @@ export default function EntityLink(p: EntityLinkProps) {
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}
       onClick={handleClick}
     >
-      {children ?? lite.toStr}
+      {children ?? Navigator.renderLite(lite)}
     </Link>
   );
 

@@ -75,9 +75,9 @@ public static class TranslatedInstanceLogic
         }
     }
 
-    public static void AddRoute<T, S>(Expression<Func<T, S>> propertyRoute) where T : Entity
+    public static void AddRoute<T, S>(Expression<Func<T, S>> propertyRoute, TranslateableRouteType type = TranslateableRouteType.Text) where T : Entity
     {
-        AddRoute(PropertyRoute.Construct<T, S>(propertyRoute));
+        AddRoute(PropertyRoute.Construct<T, S>(propertyRoute), type);
     }
 
     public static void AddRoute(PropertyRoute route, TranslateableRouteType type = TranslateableRouteType.Text)
@@ -270,9 +270,20 @@ public static class TranslatedInstanceLogic
 
     public static string TranslatedField<T>(this T entity, Expression<Func<T, string>> property) where T : Entity
     {
-        string fallbackString = TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
+        string? fallbackString = TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
 
-        return entity.ToLite().TranslatedField(property, fallbackString);
+        var pr = PropertyRoute.Construct(property);
+
+        return entity.ToLite().TranslatedField(pr, fallbackString);
+    }
+
+    public static string? TranslatedFieldNullable<T>(this T entity, Expression<Func<T, string?>> property) where T : Entity
+    {
+        string? fallbackString = TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
+
+        var pr = PropertyRoute.Construct(property);
+
+        return entity.ToLite().TranslatedField(pr, fallbackString);
     }
 
     public static IEnumerable<TranslatableElement<T>> TranslatedMList<E, T>(this E entity, Expression<Func<E, MList<T>>> mlistProperty) where E : Entity
@@ -292,6 +303,15 @@ public static class TranslatedInstanceLogic
     public static string TranslatedElement<T>(this TranslatableElement<T> element, Expression<Func<T, string>> property)
     {
         string fallback = GetPropertyRouteAccesor(property)(element.Value);
+
+        PropertyRoute route = element.ElementRoute.Continue(property);
+
+        return TranslatedField(element.Lite, route, element.RowId, fallback);
+    }
+
+    public static string? TranslatedElementNullable<T>(this TranslatableElement<T> element, Expression<Func<T, string?>> property)
+    {
+        string? fallback = GetPropertyRouteAccesor(property)(element.Value);
         
         PropertyRoute route = element.ElementRoute.Continue(property); 
 
@@ -299,7 +319,7 @@ public static class TranslatedInstanceLogic
     }
 
     [return: NotNullIfNotNull("fallbackString")]
-    public static string? TranslatedField<T>(this Lite<T> lite, Expression<Func<T, string>> property, string? fallbackString) where T : Entity
+    public static string? TranslatedField<T>(this Lite<T> lite, Expression<Func<T, string?>> property, string? fallbackString) where T : Entity
     {
         PropertyRoute route = PropertyRoute.Construct(property);
 
@@ -308,7 +328,7 @@ public static class TranslatedInstanceLogic
 
 
     [return: NotNullIfNotNull("fallbackString")]
-    public static string? TranslatedField(Lite<Entity> lite, PropertyRoute route, string? fallbackString)
+    public static string? TranslatedField(this Lite<Entity> lite, PropertyRoute route, string? fallbackString)
     {
         return TranslatedField(lite, route, null, fallbackString);
     }
@@ -357,7 +377,7 @@ public static class TranslatedInstanceLogic
     }
 
 
-    public static T SaveTranslation<T>(this T entity, CultureInfoEntity ci, Expression<Func<T, string>> propertyRoute, string translatedText)
+    public static T SaveTranslation<T>(this T entity, CultureInfoEntity ci, Expression<Func<T, string?>> propertyRoute, string? translatedText)
         where T : Entity
     {
         entity.Save();
@@ -368,7 +388,7 @@ public static class TranslatedInstanceLogic
                 PropertyRoute = PropertyRoute.Construct(propertyRoute).ToPropertyRouteEntity(),
                 Culture = ci,
                 TranslatedText = translatedText,
-                OriginalText = GetPropertyRouteAccesor(propertyRoute)(entity),
+                OriginalText = GetPropertyRouteAccesor(propertyRoute)(entity)!,
                 Instance = entity.ToLite(),
             }.Save();
 
@@ -381,6 +401,14 @@ public static class TranslatedInstanceLogic
     public static Func<T, R> GetPropertyRouteAccesor<T, R>(Expression<Func<T, R>> propertyRoute)
     {
         return (Func<T, R>)compiledExpressions.GetOrAdd(propertyRoute, ld => ld.Compile());
+    }
+
+    public static string ExportExcelFile(Type type, CultureInfo culture, string folder)
+    {
+        var fc = ExportExcelFile(type, culture);
+        var fileName = Path.Combine(folder, fc.FileName);
+        File.WriteAllBytes(fileName, fc.Bytes);
+        return fileName;
     }
 
     public static FileContent ExportExcelFile(Type type, CultureInfo culture)
@@ -517,10 +545,14 @@ public static class TranslatedInstanceLogic
         {
             Dictionary<PropertyRoute, PropertyRouteEntity> routes = should.Keys.Select(a => a.instanceKey.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteEntity());
 
+            routes.Values.Where(a => a.IsNew).SaveList();
+
+            List<TranslatedInstanceEntity> toInsert = new List<TranslatedInstanceEntity>(); 
+
             Synchronizer.Synchronize(
                 should,
                 current,
-                (k, n) => new TranslatedInstanceEntity
+                (k, n) => toInsert.Add(new TranslatedInstanceEntity
                 {
                     Culture = n.Culture.ToCultureInfoEntity(),
                     PropertyRoute = routes.GetOrThrow(n.Key.Route),
@@ -528,7 +560,7 @@ public static class TranslatedInstanceLogic
                     RowId  = n.Key.RowId?.ToString(),
                     OriginalText = n.OriginalText,
                     TranslatedText = n.TranslatedText,
-                }.Save(),
+                }),
                 (k, o) => { },
                 (k, n, o) =>
                 {
@@ -544,6 +576,8 @@ public static class TranslatedInstanceLogic
                         r.Save();
                     }
                 });
+
+            toInsert.BulkInsert(message: "auto");
 
             tr.Commit();
         }

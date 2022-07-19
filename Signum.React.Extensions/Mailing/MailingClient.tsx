@@ -5,7 +5,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
-import { Lite, Entity, registerToString, JavascriptMessage } from '@framework/Signum.Entities'
+import { Lite, Entity, registerToString, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName, isTypeEntity } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
@@ -158,10 +158,10 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
 
       return {
         header: EmailTemplateEntity.nicePluralName(),
-        menuItems: wts.map(wt =>
-          <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
+        menuItems: wts.map(et =>
+          <Dropdown.Item data-operation={et.EntityType} onClick={() => handleMenuClick(et, ctx)}>
             <FontAwesomeIcon icon={["far", "envelope"]} className="icon" />
-            {wt.toStr}
+            {getToString(et)}
           </Dropdown.Item>
         )
       } as MenuItemBlock;

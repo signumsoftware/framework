@@ -184,7 +184,7 @@ public static class MusicLoader
             Label = mjj
         }.Execute(AlbumOperation.Save);
 
-        new AlbumEntity
+        var bdf = new AlbumEntity
         {
             Name = "Blood on the Dance Floor",
             Year = 1995,
@@ -193,6 +193,12 @@ public static class MusicLoader
             .Split(',').Select(s => new SongEmbedded { Name = s.Trim() }).ToMList(),
             Label = mjj
         }.Execute(AlbumOperation.Save); ;
+
+        new AlbumReEditionEntity
+        {
+            Album = bdf.ToLite(),
+            Date = new DateTime(2020, 5, 5)
+        }.Execute(AlbumReEditionOperation.Save);
 
         var ga = (GrammyAwardEntity)new GrammyAwardEntity { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
             .Execute(AwardOperation.Save);
@@ -231,6 +237,8 @@ public static class MusicLoader
             BonusTrack = new SongEmbedded { Name = "Svo hljótt" },
             Label = emi
         }.Execute(AlbumOperation.Save);
+
+
 
         new AwardNominationEntity { Author = sigurRos.ToLite(), Award = ga.ToLite() }.Save();
         new AwardNominationEntity { Author = michael.ToLite(), Award = ga.ToLite() }.Save();

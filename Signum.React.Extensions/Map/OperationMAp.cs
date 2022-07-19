@@ -2,6 +2,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Map;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using System.Collections;
 
 namespace Signum.React.Map;
 
@@ -54,19 +55,24 @@ public static class OperationMap
                               count = operationCounts.TryGet(o.OperationSymbol, 0),
                               fromStates = WithDefaultStateArray(o.UntypedFromStates, DefaultState.Start).Select(a => a.ToString()).ToArray(),
                               toStates = WithDefaultStateArray(o.UntypedToStates, DefaultState.End).Select(a => a.ToString()).ToArray(),
+                              fromToStates = o is IGraphFromToStatesOperations gfts ? gfts.GetUntypedFromTo()?.Select(t => new FromToState
+                              {
+                                  From = t.@from?.ToString() ?? "null",
+                                  To = t.to?.ToString() ?? "null"
+                              }).ToArray() : null
                           }).ToList()
         };
     }
 
-    static IEnumerable<Enum> WithDefaultStateArray(IEnumerable<Enum>? enumerable, DefaultState forNull)
+    static IEnumerable<string> WithDefaultStateArray(IList? enumerable, DefaultState forNull)
     {
         if (enumerable == null)
-            return new Enum[] { forNull };
+            return new string[] { forNull.ToString() };
 
-        if (enumerable.IsEmpty())
-            return new Enum[] { DefaultState.All };
+        if (enumerable.Count == 0)
+            return new string[] { DefaultState.All.ToString() };
 
-        return enumerable;
+        return enumerable.Cast<object?>().Select(a => a?.ToString() ?? "null");
     }
 
     static readonly GenericInvoker<Func<LambdaExpression, Dictionary<Enum, int>>> giCountGroupBy =
@@ -117,6 +123,13 @@ public class MapOperation
     public int count;
     public string[] fromStates;
     public string[] toStates;
+    public FromToState[]? fromToStates;
+}
+
+public class FromToState
+{
+    public string From;
+    public string To; 
 }
 
 public class MapState

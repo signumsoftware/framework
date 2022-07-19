@@ -306,7 +306,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
                     if (ui == null || ui.AvoidAttachToUniqueIndexes)
                         return ix;
 
-                    return new UniqueTableIndex(ui.Table, ui.Columns.Concat(attachedFields).ToArray())
+                    return new UniqueTableIndex(ui.Table, ui.Columns.Union(attachedFields).ToArray())
                     {
                         Where = ui.Where
                     };
@@ -917,6 +917,8 @@ public partial class FieldReference : Field, IColumn, IFieldReference
     public bool AvoidForeignKey { get; set; }
 
     public bool IsLite { get; internal set; }
+    public Type? CustomLiteModelType { get; internal set; }
+
     public bool AvoidExpandOnRetrieving { get; set; }
     public string? Default { get; set; }
 
@@ -973,6 +975,7 @@ public partial class FieldReference : Field, IColumn, IFieldReference
             this.clearEntityOnSaving = value;
         }
     }
+
 
     internal override IEnumerable<TableMList> TablesMList()
     {
@@ -1093,8 +1096,11 @@ public partial class FieldImplementedByAll : Field, IFieldReference
 
     public bool AvoidExpandOnRetrieving { get; internal set; }
 
-    public Dictionary<Type, ImplementedByAllIdColumn> IdColumns { get; set; }
+    public Dictionary<Type/*PrimaryKeyType*/, ImplementedByAllIdColumn> IdColumns { get; set; }
+
     public ImplementationColumn TypeColumn { get; set; }
+
+    public Dictionary<Type, Type>? CustomLiteModelTypes;
 
     public FieldImplementedByAll(PropertyRoute route, IEnumerable<ImplementedByAllIdColumn> columnIds, ImplementationColumn columnType) : base(route)
     {
@@ -1170,6 +1176,7 @@ public partial class ImplementationColumn : IColumn
     public Type Type => this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type;
     public bool AvoidForeignKey { get; set; }
     public string? Default { get; set; }
+    public Type? CustomLiteModelType { get; internal set; }
 
     public ImplementationColumn(string name, Table referenceTable)
     {

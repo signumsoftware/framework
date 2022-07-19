@@ -2,6 +2,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Chart;
 
+[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class ChartScriptSymbol : Symbol
 {
     private ChartScriptSymbol() { }

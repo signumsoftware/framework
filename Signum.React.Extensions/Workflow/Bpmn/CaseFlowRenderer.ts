@@ -7,6 +7,7 @@ import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseActivityStats, formatDuration } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils"
+import { getToString } from "@framework/Signum.Entities"
 
 export class CaseFlowRenderer extends CustomRenderer {
   static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
@@ -30,7 +31,7 @@ export class CaseFlowRenderer extends CustomRenderer {
     else {
       const pathGroup = (path.parentNode as SVGGElement).parentNode as SVGGElement;
       const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() || pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
-      title.textContent = stats.filter(con => con.doneDate != null).map(con => `${DoneType.niceToString(con.doneType)} (${con.doneBy.toStr} ${DateTime.fromISO(con.doneDate).toRelative()})`).join("\n");
+      title.textContent = stats.filter(con => con.doneDate != null).map(con => `${DoneType.niceToString(con.doneType)} (${getToString(con.doneBy)} ${DateTime.fromISO(con.doneDate).toRelative()})`).join("\n");
     }
 
     return path;
@@ -148,7 +149,7 @@ export class CaseFlowRenderer extends CustomRenderer {
             const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() ||
               pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
 
-            title.textContent = `${DoneType.niceToString(jump.doneType)} (${jump.doneBy.toStr} ${DateTime.fromISO(jump.doneDate).toRelative()})`;
+            title.textContent = `${DoneType.niceToString(jump.doneType)} (${getToString(jump.doneBy)} ${DateTime.fromISO(jump.doneDate).toRelative()})`;
           });
         }
       }
@@ -170,13 +171,13 @@ function getDoneColor(doneType: DoneType) {
 }
 
 function getTitle(stats: CaseActivityStats) {
-  let result = `${stats.workflowActivity.toStr} (${CaseNotificationEntity.nicePluralName()} ${stats.notifications})
+  let result = `${getToString(stats.workflowActivity)} (${CaseNotificationEntity.nicePluralName()} ${stats.notifications})
 ${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${DateTime.fromISO(stats.startDate).toFormat("FFF")} (${DateTime.fromISO(stats.startDate).toRelative()})`;
 
   if (stats.doneDate != null)
     result += `
 ${CaseActivityEntity.nicePropertyName(a => a.doneDate)}: ${DateTime.fromISO(stats.doneDate).toFormat("FFF")} (${DateTime.fromISO(stats.doneDate).toRelative()})
-${CaseActivityEntity.nicePropertyName(a => a.doneBy)}: ${stats.doneBy && stats.doneBy.toStr} (${DoneType.niceToString(stats.doneType!)})
+${CaseActivityEntity.nicePropertyName(a => a.doneBy)}: ${stats.doneBy && getToString(stats.doneBy)} (${DoneType.niceToString(stats.doneType!)})
 ${CaseActivityEntity.nicePropertyName(a => a.duration)}: ${formatMinutes(stats.duration)}`;
 
   result += `

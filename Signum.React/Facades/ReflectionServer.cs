@@ -179,7 +179,7 @@ public static class ReflectionServer
         var settings = Schema.Current.Settings;
 
         var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
-                      where !type.IsEnumEntity() && !type.IsGenericType &&!ReflectionServer.ExcludeTypes.Contains(type)
+                      where !type.IsEnumEntity() && !type.IsGenericType && !ReflectionServer.ExcludeTypes.Contains(type)
                       let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                       let allOperations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
                       select KeyValuePair.Create(GetTypeName(type), OnTypeExtension(new TypeInfoTS
@@ -220,6 +220,13 @@ public static class ReflectionServer
                             })
                             .Where(kvp => kvp.Value != null)
                             .ToDictionaryEx("properties"),
+
+                          CustomLiteModels = !type.IsEntity() ? null : Lite.LiteModelConstructors.TryGetC(type)?.Values
+                            .ToDictionary(lmc => lmc.ModelType.TypeName(), lmc => new CustomLiteModelTS
+                            {
+                                IsDefault = lmc.IsDefault,
+                                ConstructorFunctionString = LambdaToJavascriptConverter.ToJavascript(lmc.GetConstructorExpression())!
+                            }),
 
                           HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
                           Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
@@ -357,7 +364,9 @@ public class TypeInfoTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsSystemVersioned { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? ToStringFunction { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool QueryDefined { get; set; }
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, MemberInfoTS> Members { get; set; } = null!;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, CustomLiteModelTS>? CustomLiteModels { get; set; } = null!;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool HasConstructorOperation { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, OperationInfoTS>? Operations { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool RequiresEntityPack { get; set; }
@@ -367,6 +376,12 @@ public class TypeInfoTS
 
 
     public override string ToString() => $"{Kind} {NiceName} {EntityKind} {EntityData}";
+}
+
+public class CustomLiteModelTS
+{
+    public string? ConstructorFunctionString = null!;
+    public bool IsDefault; 
 }
 
 public class MemberInfoTS

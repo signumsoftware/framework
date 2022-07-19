@@ -157,7 +157,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           chartRequest={chartRequest}
           lastChartRequest={chartRequest}
           data={result?.chartTable}
-          minHeigh={p.content.minHeight}
+          minHeight={p.content.minHeight}
           loading={result === null}
           onBackgroundClick={e => {
             if (!e.ctrlKey) {

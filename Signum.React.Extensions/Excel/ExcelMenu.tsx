@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder'
-import { Lite, PaginationMessage, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
+import { getToString, Lite, PaginationMessage, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage, ExcelReportOperation } from './Signum.Entities.Excel'
@@ -104,7 +104,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
           excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}
               onClick={() => handleClick(uq)}>
-              {uq.toStr}
+              {getToString(uq)}
             </Dropdown.Item>)
         }
         {(p.plainExcel || excelReports && excelReports.length > 0) && <Dropdown.Divider />}

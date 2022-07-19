@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder'
-import { JavascriptMessage, Lite } from '@framework/Signum.Entities'
+import { getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { WorkflowEntity, WorkflowModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from '../Signum.Entities.Workflow'
 import * as Navigator from '@framework/Navigator'
 import { API, WorkflowActivityMonitor, WorkflowActivityMonitorRequest } from '../WorkflowClient'
@@ -29,7 +29,7 @@ export default function WorkflowActivityMonitorPage(p: RouteComponentProps<{ wor
 
   var workflow = useAPI(() => {
     const lite = newLite(WorkflowEntity, p.match.params.workflowId);
-    return Navigator.API.fillToStrings(lite).then(() => lite);
+    return Navigator.API.fillLiteModels(lite).then(() => lite);
   }, [p.match.params.workflowId]);
 
   const config = React.useMemo(() => workflow == null ? undefined : ({
@@ -55,7 +55,7 @@ export default function WorkflowActivityMonitorPage(p: RouteComponentProps<{ wor
   return (
     <div>
       <h3 className="modal-title">
-        {!config ? JavascriptMessage.loading.niceToString() : config.workflow.toStr}
+        {!config ? JavascriptMessage.loading.niceToString() : getToString(config.workflow)}
         {config && Navigator.isViewable(WorkflowEntity) &&
           <small>&nbsp;<a href={Navigator.navigateRoute(config.workflow)} target="blank"><FontAwesomeIcon icon="pencil" /></a></small>}
         <br />

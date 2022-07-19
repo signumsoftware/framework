@@ -91,7 +91,14 @@ export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterG
 }
 
 export function isActive(fo: FilterOptionParsed) {
-  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "NotCheckbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+}
+
+export function isCheckBox(active: PinnedFilterActive | undefined) {
+  return active == "Checkbox_StartChecked" ||
+    active == "Checkbox_StartUnchecked" ||
+    active == "NotCheckbox_StartChecked" ||
+    active == "NotCheckbox_StartUnchecked";
 }
 
 export interface FilterConditionOptionParsed {
@@ -169,6 +176,7 @@ export enum SubTokensOptions {
   CanAggregate = 1,
   CanAnyAll = 2,
   CanElement = 4,
+  CanOperation = 8,
 }
 
 export interface QueryToken {
@@ -208,7 +216,7 @@ export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | stri
   return token == tokenStart || token.startsWith(tokenStart + ".");
 }
 
-export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll";
+export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "Operation";
 
 export function hasAnyOrAll(token: QueryToken | undefined): boolean {
   if (token == undefined)
@@ -242,6 +250,16 @@ export function hasElement(token: QueryToken | undefined): boolean {
     return true;
 
   return hasElement(token.parent);
+}
+
+export function hasOperation(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "Operation")
+    return true;
+
+  return hasOperation(token.parent);
 }
 
 export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | undefined {

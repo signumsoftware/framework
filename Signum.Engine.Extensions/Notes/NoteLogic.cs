@@ -78,7 +78,7 @@ public static class NoteLogic
             CreatedBy = user ?? UserEntity.Current,
             Text = text,
             Title = title,
-            Target = (Lite<Entity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
+            Target = (Lite<Entity>)entity,
             NoteType = noteType
         }.Execute(NoteOperation.Save);
     }

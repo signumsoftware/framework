@@ -49,6 +49,6 @@ public class WordController : ControllerBase
 
     public class GetWordTemplatesRequest
     {
-        public Lite<Entity> Lite { get; set; }
+        public Lite<Entity>? Lite { get; set; }
     }
 }

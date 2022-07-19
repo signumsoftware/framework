@@ -43,6 +43,10 @@ public class StackedBarsChartScript : ChartScript
                 new ChartScriptParameter("Stack", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("zero|expand|wiggle|silhouette") },
                 new ChartScriptParameter("Order", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("none|ascending|descending|insideOut|reverse") },
             },
+            new ChartScriptParameterGroup("ShowPercent")
+            {
+                new ChartScriptParameter("ValueAsPercent", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Yes") },
+            },
         };
     }      
 }                

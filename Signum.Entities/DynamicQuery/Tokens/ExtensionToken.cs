@@ -9,7 +9,7 @@ public class ExtensionToken : QueryToken
 
     public ExtensionToken(QueryToken parent, string key, Type type, bool isProjection,
         string? unit, string? format, Implementations? implementations,
-        string? isAllowed, PropertyRoute? propertyRoute, string displayName)
+        Func<string?> isAllowed, PropertyRoute? propertyRoute, Func<string> displayName)
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
@@ -25,12 +25,13 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
         this.unit = unit;
         this.format = format;
         this.implementations = implementations;
-        this.isAllowed = isAllowed;
+        this.isAllowedFunc = isAllowed;
         this.propertyRoute = propertyRoute;
-        this.DisplayName = displayName;
+        this.DisplayNameFunc = displayName;
     }
 
-    public string DisplayName { get; set; }
+    Func<string> DisplayNameFunc;
+    public string DisplayName => DisplayNameFunc();
 
     public override string ToString()
     {
@@ -100,10 +101,12 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
         return isProjection ? implementations : null;
     }
 
-    string? isAllowed;
+    Func<string?> isAllowedFunc;
     public override string? IsAllowed()
     {
         string? parentAllowed = this.parent.IsAllowed();
+
+        var isAllowed = isAllowedFunc();
 
         if (isAllowed.HasText() && parentAllowed.HasText())
             return QueryTokenMessage.And.NiceToString().Combine(isAllowed!, parentAllowed!);
@@ -113,6 +116,6 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
 
     public override QueryToken Clone()
     {
-        return new ExtensionToken(this.parent.Clone(), key, type, isProjection, unit, format, implementations, isAllowed, propertyRoute, DisplayName);
+        return new ExtensionToken(this.parent.Clone(), key, type, isProjection, unit, format, implementations, isAllowedFunc, propertyRoute, DisplayNameFunc);
     }
 }

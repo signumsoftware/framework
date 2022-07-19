@@ -4,7 +4,7 @@ import { DateTime } from 'luxon'
 import { TypeContext, EntityFrame } from '@framework/TypeContext'
 import { PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
 import { ValueLine } from '@framework/Lines'
-import { EntityPack } from '@framework/Signum.Entities'
+import { EntityPack, getToString } from '@framework/Signum.Entities'
 import { ButtonBar } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, CaseActivityMessage, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import { DynamicViewMessage } from '../../Dynamic/Signum.Entities.Dynamic'
@@ -21,7 +21,7 @@ export default function CaseButtonBar(p : CaseButtonBarProps){
     return (
       <div className="workflow-buttons">
         {CaseActivityMessage.DoneBy0On1.niceToString().formatHtml(
-          <strong>{ca.doneBy && ca.doneBy.toStr}</strong>,
+          <strong>{ca.doneBy && getToString(ca.doneBy)}</strong>,
           ca.doneDate && <strong>{DateTime.fromISO(ca.doneDate).toFormat("FFF")} ({DateTime.fromISO(ca.doneDate).toRelative()})</strong>)
         }
       </div>

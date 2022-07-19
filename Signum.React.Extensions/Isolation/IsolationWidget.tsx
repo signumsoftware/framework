@@ -1,6 +1,6 @@
 
 import * as React from 'react'
-import { ModifiableEntity, tryGetMixin } from '@framework/Signum.Entities'
+import { getToString, ModifiableEntity, tryGetMixin } from '@framework/Signum.Entities'
 import { IsolationMessage, IsolationMixin } from './Signum.Entities.Isolation';
 import * as IsolationClient from './IsolationClient';
 import { WidgetContext } from '@framework/Frames/Widgets';
@@ -18,10 +18,9 @@ export function IsolationWidget(p: IsolationWidgetProps) {
   if (mixin == null)
     return null;
 
-  const isolation = entity.isNew ? IsolationClient.getOverridenIsolation()?.toStr ?? IsolationMessage.GlobalEntity.niceToString() :
-    mixin.isolation?.toStr ?? IsolationMessage.GlobalEntity.niceToString();
+  const isolation = entity.isNew ? IsolationClient.getOverridenIsolation() : mixin.isolation;
 
   return (
-    <strong className="badge btn-secondary" style={{ display: "flex" }}>{isolation}</strong>
+    <strong className="badge btn-secondary" style={{ display: "flex" }}>{isolation == null ? IsolationMessage.GlobalEntity.niceToString() : getToString(isolation)}</strong>
   );
 }

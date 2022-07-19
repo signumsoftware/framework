@@ -17,7 +17,7 @@ import { getTypeInfo } from '@framework/Reflection'
 import { useTitle } from '@framework/AppContext'
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
 import { TranslationMember, initialElementIf } from '../Code/TranslationTypeTable'
-import { Lite } from '@framework/Signum.Entities'
+import { getToString, Lite } from '@framework/Signum.Entities'
 
 
 
@@ -71,7 +71,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
   }
 
   const message = result && result.totalInstances == 0 ? TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName) :
-    TranslationMessage.Synchronize0In1.niceToString(getTypeInfo(type).niceName, cultures ? cultures[culture].toStr : culture) +
+    TranslationMessage.Synchronize0In1.niceToString(getTypeInfo(type).niceName, cultures ? getToString(cultures[culture]) : culture) +
     (result && result.instances.length < result.totalInstances ? " [{0}/{1}]".formatWith(result.instances.length, result.totalInstances) : "");
 
   useTitle(message);
@@ -217,7 +217,9 @@ export function TranslationProperty({ property }: { property: PropertyChange }) 
   }
 
   var translations = Object.entries(property.support)
-    .flatMap(([c, rc]) => rc.automaticTranslations.map(at => ({ culture: c, text: at.text, translatorName: at.translatorName })));
+    .flatMap(([c, rc]) => rc.automaticTranslations.map(at => ({ culture: c, text: at.text, translatorName: at.translatorName }))
+      .concat(rc.oldTranslation ? [{ culture: c, text: rc.oldTranslation, translatorName: "Previous translation" }] : [])
+  );
 
   if (translations.length == 0 || avoidCombo)
     return (
