@@ -921,9 +921,6 @@ const lambdaRegex = /^\s*\(?\s*(?<param>[$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*(
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/;
 const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
-const getMixinRegexOld = /^Object\([^[]+\["getMixin"\]\)\((.+),[^[]+\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]\)$/;
-const getMixinRegex = /^\(0,[^.]+\.getMixin\)\((.+),[^.]+\.([$a-zA-Z_][0-9a-zA-Z_$]*)\)$/;
-const getToStringRegex = /^\(0,[^.]+\.getToString\)\((.+)\)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const fixNullPropagator = /^\(([_\w]+)\s*=\s(.*?)\s*\)\s*===\s*null\s*\|\|\s*\1\s*===\s*void 0\s*\?\s*void 0\s*:\s*\1$/;
 const fixNullPropagatorProd = /^\s*null\s*===\(([_\w]+)\s*=\s*(.*?)\s*\)\s*\|\|\s*void 0\s*===\s*\1\s*\?\s*void 0\s*:\s*\1$/;
@@ -945,14 +942,6 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
     let m: RegExpExecArray | null;
     if (m = mixinMemberRegex.exec(body)) {
       result.push({ name: m[2], type: "Mixin" });
-      body = m[1];
-    }
-    else if (m = getMixinRegex.exec(body) ?? getMixinRegexOld.exec(body)) {
-      result.push({ name: m[2], type: "Mixin" });
-      body = m[1];
-    }
-    else if (m = getToStringRegex.exec(body)) {
-      result.push({ name: "toStr", type: "Member" });
       body = m[1];
     }
     else if (m = memberRegex.exec(body) ?? memberIndexerRegex.exec(body)) {
@@ -1379,6 +1368,10 @@ export class QueryTokenString<T> {
 
   systemValidTo() {
     return new QueryTokenString(this.token + ".SystemValidTo");
+  }
+
+  getToString() {
+    return new QueryTokenString(this.token + ".ToString");
   }
 
   cast<R extends Entity>(t: Type<R>): QueryTokenString<R> {
