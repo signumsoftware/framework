@@ -42,9 +42,9 @@ function SearchPage(p: SearchPageProps) {
 
   const searchControl = React.useRef<SearchControlHandler>(null);
 
-  useTitle(getQueryNiceName(p.match.params.queryName)
-    + (searchControl.current?.searchControlLoaded?.pageSubTitle ? " - " : "")
-    + searchControl.current?.searchControlLoaded?.pageSubTitle);
+  var subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
+
+  useTitle(getQueryNiceName(p.match.params.queryName) + (subTitle ? (" - " + subTitle) : ""));
 
   function changeUrl() {
     const scl = searchControl.current!.searchControlLoaded!;
