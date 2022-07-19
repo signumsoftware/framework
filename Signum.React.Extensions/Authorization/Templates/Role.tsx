@@ -3,7 +3,7 @@ import { RoleEntity, AuthAdminMessage, UserEntity, MergeStrategy } from '../Sign
 import { ValueLine, EntityStrip, TypeContext } from '@framework/Lines'
 import { useForceUpdate } from '@framework/Hooks'
 import { SearchValue, SearchValueLine } from '@framework/Search';
-import { External } from '@framework/Signum.Entities';
+import { External, getToString } from '@framework/Signum.Entities';
 
 export default function Role(p: { ctx: TypeContext<RoleEntity> }) {
   const forceUpdate = useForceUpdate();
@@ -11,7 +11,7 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }) {
   function rolesMessage(r: RoleEntity) {
     return AuthAdminMessage.DefaultAuthorization.niceToString() +
       (r.inheritsFrom.length == 0 ? (r.mergeStrategy == "Union" ? AuthAdminMessage.Everithing : AuthAdminMessage.Nothing).niceToString() :
-        r.inheritsFrom.length == 1 ? AuthAdminMessage.SameAs0.niceToString(r.inheritsFrom.single().element.toStr) :
+        r.inheritsFrom.length == 1 ? AuthAdminMessage.SameAs0.niceToString(getToString(r.inheritsFrom.single().element)) :
           (r.mergeStrategy == "Union" ? AuthAdminMessage.MaximumOfThe0 : AuthAdminMessage.MinumumOfThe0).niceToString(RoleEntity.niceCount(r.inheritsFrom.length)));
   }
   const ctx = p.ctx;
