@@ -109,7 +109,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
 
         this.entityOrNull = (T)ei;
         if (ei != null && this.model == null)
-            this.model = Lite.GetModel<T, M>(this.entityOrNull);
+            this.model = Lite.ConstructModel<T, M>(this.entityOrNull);
     }
 
     public void ClearEntity()
@@ -120,7 +120,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
         if (id == null)
             throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
-        this.model = Lite.GetModel<T, M>(this.entityOrNull!);
+        this.model = Lite.ConstructModel<T, M>(this.entityOrNull!);
         this.entityOrNull = null;
     }
 
@@ -203,5 +203,10 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
     public Lite<T> Clone()
     {
         return new LiteImp<T, M>(Id, model);
+    }
+
+    public M1 GetModel<M1>() where M1 : ModelEntity
+    {
+        return (M1)(object)this.model!;
     }
 }

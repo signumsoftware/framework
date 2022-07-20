@@ -79,6 +79,6 @@ public class MailingController : ControllerBase
 
     public class GetEmailTemplatesRequest
     {
-        public Lite<Entity> lite { get; set; }
+        public Lite<Entity>? lite { get; set; }
     }
 }

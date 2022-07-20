@@ -130,7 +130,7 @@ public class ColumnTS
 
     public Column ToColumn(QueryDescription qd, bool canAggregate)
     {
-        var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
+        var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation));
 
         return new Column(queryToken, displayName ?? queryToken.NiceName());
     }

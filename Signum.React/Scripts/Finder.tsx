@@ -10,7 +10,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
@@ -435,7 +435,7 @@ export function parseOrderOptions(orderOptions: (OrderOption | null | undefined)
 export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: boolean, qd: QueryDescription): Promise<ColumnOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
-  var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
+  var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation);
   columnOptions.forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
@@ -739,7 +739,9 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
       fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
   }
 
-  var canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
+  const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
+  const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
+
   const completer = new TokenCompleter(qd);
 
 
@@ -750,7 +752,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
   if (fo.columnOptions) {
-    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregate));
+    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregateXorOperation));
     fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
   }
 
@@ -882,7 +884,7 @@ interface OverridenValue {
 
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
 
-  if (fop.pinned && fop.pinned.active == "Checkbox_StartUnchecked")
+  if (fop.pinned && (fop.pinned.active == "Checkbox_StartUnchecked" || fop.pinned.active == "NotCheckbox_StartChecked"))
     return undefined;
 
   if (fop.dashboardBehaviour == "UseAsInitialSelection")
@@ -1136,6 +1138,10 @@ export class TokenCompleter {
 
       if (hasElement(token) && (options & SubTokensOptions.CanElement) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Element not allowed)`);
+
+      if (hasOperation(token) && (options & SubTokensOptions.CanOperation) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Operation not allowed)`);
+
       return;
     }
 

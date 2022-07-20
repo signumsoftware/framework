@@ -93,9 +93,6 @@ public enum LoginAuthMessage
 
     [Description("Login with {0}")]
     LoginWith0,
-
-    [Description("Login popup already opened in another window")]
-    LoginPopupAlreadyOpenedInAnotherWindow
 }
 
 public enum AuthMessage
@@ -132,8 +129,6 @@ public enum AuthAdminMessage
 {
     [Description("{0} of {1}")]
     _0of1,
-    Nothing,
-    Everything,
     TypeRules,
     PermissionRules,
 
@@ -141,7 +136,6 @@ public enum AuthAdminMessage
     Deny,
 
     Overriden,
-    NoRoles,
     Filter,
     PleaseSaveChangesFirst,
     ResetChanges,
@@ -180,4 +174,17 @@ public enum AuthAdminMessage
     ConflictMergingTypeConditions,
 
     Save,
+
+    [Description("Default Authorization: ")]
+    DefaultAuthorization,
+
+    [Description("Maximum of the {0}")]
+    MaximumOfThe0,
+    [Description("Maximum of the {0}")]
+    MinumumOfThe0,
+    [Description("Same as {0}")]
+    SameAs0,
+    Nothing,
+    Everithing,
+
 }

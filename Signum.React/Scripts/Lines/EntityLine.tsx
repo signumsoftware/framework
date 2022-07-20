@@ -51,7 +51,6 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
           if (this.currentItem)
             this.setCurrentItem(undefined);
         } else {
-          debugger;
           if (!this.currentItem || !is(this.currentItem.entity as Entity | Lite<Entity>, entity as Entity | Lite<Entity>) || getToString(this.currentItem.entity) != getToString(entity)) {
             var ci = { entity: entity!, item: undefined as unknown }
             this.setCurrentItem(ci);

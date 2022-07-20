@@ -1,6 +1,7 @@
 using Signum.Engine.Basics;
 using Signum.Engine.Operations.Internal;
 using Signum.Entities.Basics;
+using System.Collections;
 
 namespace Signum.Engine.Operations;
 
@@ -12,14 +13,15 @@ public class Graph<T>
     public class Construct : _Construct<T>, IConstructOperation
     {
         protected readonly OperationSymbol operationSymbol;
-        OperationSymbol IOperation.OperationSymbol { get { return operationSymbol; } }
-        Type IOperation.OverridenType { get { return typeof(T); } }
-        OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
-        bool IOperation.Returns { get { return true; } }
-        Type? IOperation.ReturnType { get { return typeof(T); } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return null; } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-        Type? IOperation.StateType { get { return null; } }
+        OperationSymbol IOperation.OperationSymbol => operationSymbol;
+        Type IOperation.OverridenType => typeof(T);
+        OperationType IOperation.OperationType => OperationType.Constructor;
+        bool IOperation.Returns => true;
+        Type? IOperation.ReturnType => typeof(T);
+        IList? IOperation.UntypedFromStates => null;
+        IList? IOperation.UntypedToStates => new List<Enum>();
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
 
         public bool LogAlsoIfNotSaved { get; set; }
 
@@ -102,13 +104,16 @@ public class Graph<T>
 
                         var exLog = ex.LogException();
 
-                        using (var tr2 = Transaction.ForceNew())
+                        if (log != null)
                         {
-                            log!.Exception = exLog.ToLite();
+                            using (var tr2 = Transaction.ForceNew())
+                            {
+                                log.Exception = exLog.ToLite();
 
-                            log.SaveLog();
+                                log.SaveLog();
 
-                            tr2.Commit();
+                                tr2.Commit();
+                            }
                         }
                     }
 
@@ -139,12 +144,13 @@ public class Graph<T>
         where F : class, IEntity
     {
         protected readonly OperationSymbol operationSymbol;
-        OperationSymbol IOperation.OperationSymbol { get { return operationSymbol; } }
-        Type IOperation.OverridenType { get { return typeof(F); } }
-        OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return null; } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-        Type? IOperation.StateType { get { return null; } }
+        OperationSymbol IOperation.OperationSymbol => operationSymbol;
+        Type IOperation.OverridenType => typeof(F);
+        OperationType IOperation.OperationType => OperationType.ConstructorFrom;
+        IList? IOperation.UntypedFromStates => null;
+        IList? IOperation.UntypedToStates => new List<Enum>();
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
 
         public bool CanBeModified { get; set; }
         public bool LogAlsoIfNotSaved { get; set; }
@@ -159,6 +165,8 @@ public class Graph<T>
         public bool CanBeNew { get; set; }
 
         public Func<F, string?>? CanConstruct { get; set; }
+
+        public Expression<Func<F, string?>>? CanConstructExpression { get; set; }
 
         public ConstructFrom<F> OverrideCanConstruct(Overrider<Func<F, string?>> overrider)
         {
@@ -192,6 +200,11 @@ public class Graph<T>
             where B : class, IEntity
         {
             return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);
+        }
+
+        LambdaExpression? IEntityOperation.CanExecuteExpression()
+        {
+            return CanConstructExpression;
         }
 
         string? IEntityOperation.CanExecute(IEntity entity)
@@ -270,13 +283,16 @@ public class Graph<T>
 
                         var exLog = ex.LogException();
 
-                        using (var tr2 = Transaction.ForceNew())
+                        if (log != null)
                         {
-                            log!.Exception = exLog.ToLite();
+                            using (var tr2 = Transaction.ForceNew())
+                            {
+                                log.Exception = exLog.ToLite();
 
-                            log.SaveLog();
+                                log.SaveLog();
 
-                            tr2.Commit();
+                                tr2.Commit();
+                            }
                         }
                     }
 
@@ -292,6 +308,9 @@ public class Graph<T>
 
         public virtual void AssertIsValid()
         {
+            if (CanConstruct == null && CanConstructExpression != null)
+                CanConstruct = CanConstructExpression.Compile();
+
             if (Construct == null)
                 throw new InvalidOperationException("Operation {0} does not hace Construct initialized".FormatWith(operationSymbol));
         }
@@ -307,17 +326,18 @@ public class Graph<T>
         where F : class, IEntity
     {
         protected readonly OperationSymbol operationSymbol;
-        OperationSymbol IOperation.OperationSymbol { get { return operationSymbol; } }
-        Type IOperation.OverridenType { get { return typeof(F); } }
-        OperationType IOperation.OperationType { get { return OperationType.ConstructorFromMany; } }
-        bool IOperation.Returns { get { return true; } }
-        Type? IOperation.ReturnType { get { return typeof(T); } }
+        OperationSymbol IOperation.OperationSymbol => operationSymbol;
+        Type IOperation.OverridenType => typeof(F);
+        OperationType IOperation.OperationType => OperationType.ConstructorFromMany;
+        bool IOperation.Returns => true;
+        Type? IOperation.ReturnType => typeof(T);
 
         protected readonly Type baseType;
-        Type IConstructorFromManyOperation.BaseType { get { return baseType; } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return null; } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-        Type? IOperation.StateType { get { return null; } }
+        Type IConstructorFromManyOperation.BaseType => baseType;
+        IList? IOperation.UntypedFromStates => null;
+        IList? IOperation.UntypedToStates => new List<Enum>();
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
 
         public bool LogAlsoIfNotSaved { get; set; }
 
@@ -409,14 +429,16 @@ public class Graph<T>
                             throw;
 
                         var exLog = ex.LogException();
-
-                        using (var tr2 = Transaction.ForceNew())
+                        if (log != null)
                         {
-                            log!.Exception = exLog.ToLite();
+                            using (var tr2 = Transaction.ForceNew())
+                            {
+                                log.Exception = exLog.ToLite();
 
-                            log.SaveLog();
+                                log.SaveLog();
 
-                            tr2.Commit();
+                                tr2.Commit();
+                            }
                         }
                     }
 
@@ -449,24 +471,27 @@ public class Graph<T>
     public class Execute : _Execute<T>, IExecuteOperation
     {
         protected readonly ExecuteSymbol<T> Symbol;
-        OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
-        Type IOperation.OverridenType { get { return typeof(T); } }
-        OperationType IOperation.OperationType { get { return OperationType.Execute; } }
+        OperationSymbol IOperation.OperationSymbol => Symbol.Symbol;
+        Type IOperation.OverridenType => typeof(T);
+        OperationType IOperation.OperationType => OperationType.Execute;
         public bool CanBeModified { get; set; }
-        bool IOperation.Returns { get { return true; } }
-        Type? IOperation.ReturnType { get { return null; } }
-        Type? IOperation.StateType { get { return null; } }
+        bool IOperation.Returns => true;
+        Type? IOperation.ReturnType => null;
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
         public bool AvoidImplicitSave { get; set; }
 
-        Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
-        bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+        Type IEntityOperation.BaseType => Symbol.BaseType;
+        bool IEntityOperation.HasCanExecute => CanExecute != null;
+        IList? IOperation.UntypedFromStates => new List<Enum>();
+        IList? IOperation.UntypedToStates => new List<Enum>();
 
         public bool CanBeNew { get; set; }
 
         //public Action<T, object[]?> Execute { get; set; } (inherited)
         public Func<T, string?>? CanExecute { get; set; }
+
+        public Expression<Func<T, string?>>? CanExecuteExpression { get; set; }
 
         public Execute OverrideCanExecute(Overrider<Func<T, string?>> overrider)
         {
@@ -482,6 +507,11 @@ public class Graph<T>
         public Execute(ExecuteSymbol<T> symbol)
         {
             this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
+        }
+
+        LambdaExpression? IEntityOperation.CanExecuteExpression()
+        {
+            return CanExecuteExpression;
         }
 
         string? IEntityOperation.CanExecute(IEntity entity)
@@ -522,11 +552,11 @@ public class Graph<T>
                     using (var tr = new Transaction())
                     {
                         using (OperationLogic.AllowSave(entity.GetType()))
+                        using (AssertEntity((T)entity))
+                        {
                             OperationLogic.OnSuroundOperation(this, log, entity, args).EndUsing(_ =>
                             {
                                 Execute((T)entity, args);
-
-                                AssertEntity((T)entity);
 
                                 if (!AvoidImplicitSave)
                                     entity.Save(); //Nothing happens if already saved
@@ -534,6 +564,7 @@ public class Graph<T>
                                 log.SetTarget(entity);
                                 log.End = Clock.Now;
                             });
+                        }
 
                         log.SaveLog();
 
@@ -570,12 +601,16 @@ public class Graph<T>
             }
         }
 
-        protected virtual void AssertEntity(T entity)
+        protected virtual IDisposable? AssertEntity(T entity)
         {
+            return null;
         }
 
         public virtual void AssertIsValid()
         {
+            if (CanExecute == null && CanExecuteExpression != null)
+                CanExecute = CanExecuteExpression.Compile();
+
             if (Execute == null)
                 throw new InvalidOperationException("Operation {0} does not have Execute initialized".FormatWith(Symbol));
         }
@@ -584,20 +619,22 @@ public class Graph<T>
         {
             return "{0} Execute on {1}".FormatWith(Symbol, typeof(T));
         }
+
     }
 
     public class Delete : _Delete<T>, IDeleteOperation
     {
         protected readonly DeleteSymbol<T> Symbol;
-        OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
-        Type IOperation.OverridenType { get { return typeof(T); } }
-        OperationType IOperation.OperationType { get { return OperationType.Delete; } }
+        OperationSymbol IOperation.OperationSymbol => Symbol.Symbol;
+        Type IOperation.OverridenType => typeof(T);
+        OperationType IOperation.OperationType => OperationType.Delete;
         public bool CanBeModified { get; set; }
-        bool IOperation.Returns { get { return false; } }
-        Type? IOperation.ReturnType { get { return null; } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return null; } }
-        Type? IOperation.StateType { get { return null; } }
+        bool IOperation.Returns => false;
+        Type? IOperation.ReturnType => null;
+        IList? IOperation.UntypedFromStates => new List<Enum>();
+        IList? IOperation.UntypedToStates => null;
+        Type? IOperation.StateType => null;
+        LambdaExpression? IOperation.GetStateExpression() => null;
 
         public bool CanBeNew { get { return false; } }
 
@@ -606,6 +643,8 @@ public class Graph<T>
 
         //public Action<T, object[]?> Delete { get; set; } (inherited)
         public Func<T, string?>? CanDelete { get; set; }
+
+        public Expression<Func<T, string?>>? CanDeleteExpression { get; set; }
 
         public Delete OverrideCanDelete(Overrider<Func<T, string?>> overrider)
         {
@@ -621,6 +660,11 @@ public class Graph<T>
         public Delete(DeleteSymbol<T> symbol)
         {
             this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
+        }
+
+        LambdaExpression? IEntityOperation.CanExecuteExpression()
+        {
+            return CanDeleteExpression;
         }
 
         string? IEntityOperation.CanExecute(IEntity entity)
@@ -705,6 +749,9 @@ public class Graph<T>
 
         public virtual void AssertIsValid()
         {
+            if (CanDelete == null && CanDeleteExpression != null)
+                CanDelete = CanDeleteExpression.Compile();
+
             if (Delete == null)
                 throw new InvalidOperationException("Operation {0} does not have Delete initialized".FormatWith(Symbol.Symbol));
         }

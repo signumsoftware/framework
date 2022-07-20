@@ -27,6 +27,7 @@ export interface SearchValueProps {
   onExplored?: () => void;
   onTokenLoaded?: () => void;
   initialValue?: any;
+  onInitialValueLoaded?: () => void;
   customClass?: string | ((value: any | undefined) => (string | undefined));
   customStyle?: React.CSSProperties;
   format?: string;
@@ -111,8 +112,10 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       return Promise.resolve(undefined);
 
     if (p.initialValue != undefined) {
-      if (Hooks.areEqual(deps ?? [], initialDeps.current ?? []))
+      if (Hooks.areEqual(deps ?? [], initialDeps.current ?? [])) {
+        p.onInitialValueLoaded?.();
         return Promise.resolve(p.initialValue);
+      }
       else
         return makeRequest();
     } else {

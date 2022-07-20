@@ -85,7 +85,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     return undefined;
 
   let contextPromise: Promise<ContextualOperationContext<Entity>[]>;
-  if (contexts.some(coc => coc.operationInfo.hasCanExecute) || Operations.Options.maybeReadonly(ti)) {
+  if (contexts.some(coc => coc.operationInfo.hasCanExecute || coc.operationInfo.hasStates) || Operations.Options.maybeReadonly(ti)) {
     if (ctx.lites.length == 1) {
       contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
         contexts.forEach(coc => {
@@ -212,23 +212,25 @@ export interface OperationMenuItemProps {
 export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps) {
   const text = children ?? OperationMenuItem.getText(coc);
 
+  const eos = coc.entityOperationSettings;
+
   if (color == null)
-    color = coc.settings?.color ?? coc.entityOperationSettings?.color ?? Defaults.getColor(coc.operationInfo);
+    color = coc.settings?.color ?? eos?.color ?? Defaults.getColor(coc.operationInfo);
 
   if (icon == null)
-    icon = coalesceIcon(coc.settings?.icon, coc.entityOperationSettings?.icon);
+    icon = coalesceIcon(coc.settings?.icon, eos?.icon);
 
   if (iconColor == null)
-    iconColor = coc.settings?.iconColor || coc.entityOperationSettings?.iconColor;
+    iconColor = coc.settings?.iconColor || eos?.iconColor;
 
   const disabled = !!coc.canExecute;
 
-  const operationClickOrDefault = onOperationClick ?? coc.settings?.onClick ?? defaultContextualClick
+  const customOrSettingsOrDefaultClick = onOperationClick ?? coc.settings?.onClick ?? eos?.commonOnClick ?? defaultContextualOperationClick
 
   const handleOnClick = (me: React.MouseEvent<any>) => {
     coc.event = me;
     onClick?.(me);
-    operationClickOrDefault(coc)
+    customOrSettingsOrDefaultClick(coc)
       .done();
   }
 
@@ -269,11 +271,11 @@ OperationMenuItem.getText = (coc: ContextualOperationContext<any>): React.ReactN
 
 OperationMenuItem.simplifyName = (niceName: string) => {
   const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
-  return array ? (niceName.tryBefore(array[1]) ?? "") + array[1].firstUpper() : niceName;
+  return array ? OperationMessage.Create0.niceToString(array[1].firstUpper()) : niceName;
 }
 
 
-export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) : Promise<void> {
+export function defaultContextualOperationClick(coc: ContextualOperationContext<any>, ...args: any[]) : Promise<void> {
 
   coc.event!.persist();
 

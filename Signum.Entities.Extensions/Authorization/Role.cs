@@ -11,36 +11,13 @@ public class RoleEntity : Entity
     [StringLengthValidator(Min = 2, Max = 100)]
     public string Name { get; set; }
 
-    MergeStrategy mergeStrategy;
-    public MergeStrategy MergeStrategy
-    {
-        get { return mergeStrategy; }
-        set
-        {
-            if (Set(ref mergeStrategy, value))
-                Notify(() => StrategyHint);
-        }
-    }
+    public MergeStrategy MergeStrategy { get; set; }
 
-    [NotifyCollectionChanged]
-    public MList<Lite<RoleEntity>> Roles { get; set; } = new MList<Lite<RoleEntity>>();
+    [NotifyCollectionChanged, NoRepeatValidator]
+    public MList<Lite<RoleEntity>> InheritsFrom { get; set; } = new MList<Lite<RoleEntity>>();
 
-    protected override void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
-    {
-        Notify(() => StrategyHint);
-    }
-
-    [HiddenProperty]
-    public string? StrategyHint
-    {
-        get
-        {
-            if (Roles.Any())
-                return null;
-
-            return AuthAdminMessage.NoRoles.NiceToString()  + "-> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString();
-        }
-    }
+    [StringLengthValidator(MultiLine = true)]
+    public string? Description { get; set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);

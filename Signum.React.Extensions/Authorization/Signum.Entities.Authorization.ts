@@ -87,14 +87,11 @@ export interface AllowedRuleCoerced<R, A> extends AllowedRule<R, A> {
 
 export module AuthAdminMessage {
   export const _0of1 = new MessageKey("AuthAdminMessage", "_0of1");
-  export const Nothing = new MessageKey("AuthAdminMessage", "Nothing");
-  export const Everything = new MessageKey("AuthAdminMessage", "Everything");
   export const TypeRules = new MessageKey("AuthAdminMessage", "TypeRules");
   export const PermissionRules = new MessageKey("AuthAdminMessage", "PermissionRules");
   export const Allow = new MessageKey("AuthAdminMessage", "Allow");
   export const Deny = new MessageKey("AuthAdminMessage", "Deny");
   export const Overriden = new MessageKey("AuthAdminMessage", "Overriden");
-  export const NoRoles = new MessageKey("AuthAdminMessage", "NoRoles");
   export const Filter = new MessageKey("AuthAdminMessage", "Filter");
   export const PleaseSaveChangesFirst = new MessageKey("AuthAdminMessage", "PleaseSaveChangesFirst");
   export const ResetChanges = new MessageKey("AuthAdminMessage", "ResetChanges");
@@ -112,6 +109,12 @@ export module AuthAdminMessage {
   export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships = new MessageKey("AuthAdminMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");
   export const ConflictMergingTypeConditions = new MessageKey("AuthAdminMessage", "ConflictMergingTypeConditions");
   export const Save = new MessageKey("AuthAdminMessage", "Save");
+  export const DefaultAuthorization = new MessageKey("AuthAdminMessage", "DefaultAuthorization");
+  export const MaximumOfThe0 = new MessageKey("AuthAdminMessage", "MaximumOfThe0");
+  export const MinumumOfThe0 = new MessageKey("AuthAdminMessage", "MinumumOfThe0");
+  export const SameAs0 = new MessageKey("AuthAdminMessage", "SameAs0");
+  export const Nothing = new MessageKey("AuthAdminMessage", "Nothing");
+  export const Everithing = new MessageKey("AuthAdminMessage", "Everithing");
 }
 
 export module AuthEmailMessage {
@@ -205,7 +208,6 @@ export module LoginAuthMessage {
   export const _0HasBeenSucessfullyAssociatedWithUser1InThisDevice = new MessageKey("LoginAuthMessage", "_0HasBeenSucessfullyAssociatedWithUser1InThisDevice");
   export const TryToLogInWithIt = new MessageKey("LoginAuthMessage", "TryToLogInWithIt");
   export const LoginWith0 = new MessageKey("LoginAuthMessage", "LoginWith0");
-  export const LoginPopupAlreadyOpenedInAnotherWindow = new MessageKey("LoginAuthMessage", "LoginPopupAlreadyOpenedInAnotherWindow");
 }
 
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");
@@ -336,7 +338,8 @@ export interface RoleEntity extends Entities.Entity {
   Type: "Role";
   name: string;
   mergeStrategy: MergeStrategy;
-  roles: Entities.MList<Entities.Lite<RoleEntity>>;
+  inheritsFrom: Entities.MList<Entities.Lite<RoleEntity>>;
+  description: string | null;
 }
 
 export const RoleMappingEmbedded = new Type<RoleMappingEmbedded>("RoleMappingEmbedded");

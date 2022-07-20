@@ -184,7 +184,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
         RoleAllowedCache cache = runtimeRules.Value.GetOrThrow(rules.Role);
 
         rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
-        rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
+        rules.InheritFrom = AuthLogic.RelatedTo(rules.Role).ToMList();
         rules.Rules = (from r in resources
                        let type = TypeLogic.EntityToType.GetOrThrow(r)
                        select new TypeAllowedRule()

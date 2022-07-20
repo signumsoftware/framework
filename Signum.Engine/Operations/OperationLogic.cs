@@ -5,6 +5,8 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.Basics;
 using Signum.Engine.Operations.Internal;
 using System.Collections.Immutable;
+using Signum.Entities.DynamicQuery;
+using System.Collections;
 
 namespace Signum.Engine.Operations;
 
@@ -105,7 +107,78 @@ public static class OperationLogic
             sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+            OperationsToken.GetEligibleTypeOperations = (entityType) => OperationsToken_GetEligibleTypeOperations(entityType);
+            OperationToken.IsAllowedExtension = (operationSymbol, entityType) => OperationToken_IsAllowedExtension(operationSymbol, entityType);
+            OperationToken.BuildExtension = (entityType, operationSymbol, parentExpression) => OperationToken_BuildExpression(entityType, operationSymbol, parentExpression);
         }
+    }
+
+    private static IEnumerable<OperationSymbol> OperationsToken_GetEligibleTypeOperations(Type entityType)
+    {
+        return TypeOperations(entityType)
+            .Where((o) =>
+                {
+                    var op = TryFindOperation(entityType, o.OperationSymbol) as IEntityOperation;
+
+                    if (op == null)
+                        return false;
+
+                    return !op.HasCanExecute || op.CanExecuteExpression() != null;
+                })
+            .Select(o => o.OperationSymbol);
+    }
+
+
+    static MethodInfo miContainsEnumerable = ReflectionTools.GetMethodInfo((IEnumerable<int> s) => s.Contains(2)).GetGenericMethodDefinition();
+    static MethodInfo miFormatWith = ReflectionTools.GetMethodInfo((string format) => format.FormatWith("hi"));
+    static MethodInfo miNiceToString = ReflectionTools.GetMethodInfo((Enum a) => a.NiceToString());
+
+    private static Expression OperationToken_BuildExpression(Type entityType, OperationSymbol operationSymbol, Expression parentExpression)
+    {
+        var operation = (IEntityOperation)FindOperation(entityType, operationSymbol);
+
+        LambdaExpression? cee = operation.CanExecuteExpression();
+
+        if (operation.HasCanExecute && cee == null)
+            throw new InvalidOperationException($"Operation {operationSymbol} requires CanExecuteExpression to be used as query token");
+
+        var entity = parentExpression.ExtractEntity(false);
+        var operationKey = Expression.Constant(operationSymbol.Key);
+        var canExecute = cee == null ? Expression.Constant(null, typeof(string)) : (Expression)Expression.Invoke(cee, entity);
+        
+        if (operation.StateType != null && operation.UntypedFromStates != null)
+        {
+            var miContains = miContainsEnumerable.MakeGenericMethod(operation.StateType!);
+
+            var state = Expression.Invoke(operation.GetStateExpression()!, entity);
+
+            var message = OperationMessage.StateShouldBe0InsteadOf1.NiceToString(operation.UntypedFromStates.Cast<Enum>().CommaOr(a => a.NiceToString()), "{0}");
+
+            var stateNiceName = (Expression)Expression.Call(miNiceToString, Expression.Convert(state, typeof(Enum)));
+
+            if (operation.StateType!.IsNullable())
+                stateNiceName = Expression.Condition(
+                    Expression.Equal(state, Expression.Constant(null, operation.StateType!)),
+                    Expression.Constant("null"),
+                    stateNiceName);
+
+            canExecute = Expression.Condition(
+                Expression.Not(Expression.Call(miContains, Expression.Constant(operation.UntypedFromStates!), state)),
+                Expression.Call(miFormatWith, Expression.Constant(message), stateNiceName),
+                canExecute);
+        }
+
+        var dtoConstructor = typeof(CellOperationDTO).GetConstructor(new[] { typeof(Lite<IEntity>), typeof(string), typeof(string) });
+
+        NewExpression newExpr = Expression.New(dtoConstructor!, entity.BuildLite(), operationKey, canExecute);
+
+        return newExpr;
+    }
+
+    private static string? OperationToken_IsAllowedExtension(OperationSymbol operationSymbol, Type entityType)
+    {
+        return OperationAllowedMessage(operationSymbol, entityType, true);
     }
 
     private static void RegisterCurrentLogs(Schema schema)
@@ -227,11 +300,21 @@ Consider the following options:
             return true;
     }
 
-    public static void AssertOperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
+    public static string? OperationAllowedMessage(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
     {
         if (!OperationAllowed(operationSymbol, entityType, inUserInterface))
-            throw new UnauthorizedAccessException(OperationMessage.Operation01IsNotAuthorized.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key) +
-                (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : ""));
+            return OperationMessage.Operation01IsNotAuthorized.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key) +
+                (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : "");
+        
+        return null;
+    }
+
+    public static void AssertOperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
+    {
+        var allowed = OperationAllowedMessage(operationSymbol, entityType, inUserInterface);
+
+        if (allowed != null)
+            throw new UnauthorizedAccessException(allowed);
     }
     #endregion
 
@@ -764,16 +847,21 @@ public interface IOperation
     Type? ReturnType { get; }
     void AssertIsValid();
 
-    IEnumerable<Enum>? UntypedFromStates { get; }
-    IEnumerable<Enum>? UntypedToStates { get; }
+    IList? UntypedFromStates { get; }
+    IList? UntypedToStates { get; }
+
     Type? StateType { get; }
+    LambdaExpression? GetStateExpression();
 }
 
 public interface IEntityOperation : IOperation
 {
     bool CanBeModified { get; }
     bool CanBeNew { get; }
-    string? CanExecute(IEntity entity);
+    string? CanExecute(IEntity entity);   
+    LambdaExpression? CanExecuteExpression();
+
+
     bool HasCanExecute { get; }
     Type BaseType { get; }
 }
