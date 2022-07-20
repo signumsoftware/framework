@@ -251,9 +251,6 @@ class TypeAllowedMerger : IMerger<Type, TypeAllowedAndConditions>
         if (only != null)
             return only;
 
-        if (baseRules.Any(a => a.Fallback == null))
-            return new TypeAllowedAndConditions(null);
-
         if (baseRules.Any(a => a.Exactly(max)))
             return new TypeAllowedAndConditions(max);
 
@@ -261,18 +258,20 @@ class TypeAllowedMerger : IMerger<Type, TypeAllowedAndConditions>
         if (onlyNotOposite != null)
             return onlyNotOposite;
 
-        var first = baseRules.FirstOrDefault(c => !c.Conditions.IsNullOrEmpty());
+        throw new NotImplementedException();
 
-        if (first == null)
-            return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback!.Value)));
+        //var first = baseRules.FirstOrDefault(c => !c.ConditionRules.IsNullOrEmpty());
 
-        var conditions = first.Conditions.SelectMany(c => c.TypeConditions).ToList();
+        //if (first == null)
+        //    return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback!.Value)));
 
-        if (baseRules.Where(c => !c.Conditions.IsNullOrEmpty() && c != first).Any(br => !br.Conditions.SelectMany(c => c.TypeConditions).SequenceEqual(conditions)))
-            return new TypeAllowedAndConditions(null);
+        //var conditions = first.ConditionRules.SelectMany(c => c.TypeConditions).ToList();
 
-        return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback!.Value)),
-            conditions.Select((c, i) => new TypeConditionRuleModel(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
+        //if (baseRules.Where(c => !c.ConditionRules.IsNullOrEmpty() && c != first).Any(br => !br.ConditionRules.SelectMany(c => c.TypeConditions).SequenceEqual(conditions)))
+        //    return new TypeAllowedAndConditions(null);
+
+        //return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback!.Value)),
+        //    conditions.Select((c, i) => new TypeConditionRuleModel(c, maxMerge(baseRules.Where(br => !br.ConditionRules.IsNullOrEmpty()).Select(br => br.ConditionRules[i].Allowed)))).ToArray());
     }
 }
 

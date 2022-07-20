@@ -57,7 +57,7 @@ public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntit
     [NotNullValidator(Disabled = true)]
     public Lite<RuleTypeEntity> RuleType { get; set; }
 
-    [PreserveOrder, NoRepeatValidator]
+    [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
     public MList<TypeConditionSymbol> Conditions { get; set; } = new MList<TypeConditionSymbol>();
 
     public TypeAllowed Allowed { get; set; }
@@ -73,10 +73,9 @@ public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntit
             && this.Allowed == other.Allowed;
     }
 
-    public override string ToString()
-    {
-        return "{0} ({1})".FormatWith(Conditions.ToString(c => c.ToString(), " & "), Allowed);
-    }
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Allowed.ToString());
+  
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

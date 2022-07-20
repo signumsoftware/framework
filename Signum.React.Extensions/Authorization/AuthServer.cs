@@ -52,7 +52,7 @@ public static class AuthServer
 
                     ti.Extension.Add("maxTypeAllowed", ta.MaxUI());
                     ti.Extension.Add("minTypeAllowed", ta.MinUI());
-                    ti.RequiresEntityPack |= ta.Conditions.Any();
+                    ti.RequiresEntityPack |= ta.ConditionRules.Any();
 
                     return ti;
                 }
@@ -292,8 +292,8 @@ public static class AuthServer
 
                 t.extra["role-" + r.Key() + "-ui"] = GetName(ToStringList(tac, userInterface: true));
                 t.extra["role-" + r.Key() + "-db"] = GetName(ToStringList(tac, userInterface: false));
-                t.extra["role-" + r.Key() + "-tooltip"] = ToString(tac.Fallback) + "\n" + (tac.Conditions.IsNullOrEmpty() ? null :
-                    tac.Conditions.ToString(a => a.ToString() + ": " + ToString(a.Allowed), "\n") + "\n");
+                t.extra["role-" + r.Key() + "-tooltip"] = ToString(tac.Fallback) + "\n" + (tac.ConditionRules.IsNullOrEmpty() ? null :
+                    tac.ConditionRules.ToString(a => a.ToString() + ": " + ToString(a.Allowed), "\n") + "\n");
             },
             Order = 10,
         }).ToArray();
@@ -309,7 +309,7 @@ public static class AuthServer
         List<TypeAllowedBasic?> result = new List<TypeAllowedBasic?>();
         result.Add(tac.Fallback == null ? (TypeAllowedBasic?)null : tac.Fallback.Value.Get(userInterface));
 
-        foreach (var c in tac.Conditions)
+        foreach (var c in tac.ConditionRules)
             result.Add(c.Allowed.Get(userInterface));
 
         return result;

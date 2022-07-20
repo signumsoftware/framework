@@ -208,9 +208,9 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                 (type, pr) => pr.Delete(),
                 (type, ar, pr) =>
                 {
-                    pr.Allowed = ar.Allowed.Fallback!.Value;
+                    pr.Allowed = ar.Allowed.Fallback;
 
-                    var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionEntity
+                    var shouldConditions = ar.Allowed.ConditionRules.Select(a => new RuleTypeConditionEntity
                     {
                         Allowed = a.Allowed,
                         Conditions = a.TypeConditions.ToMList(),
@@ -325,7 +325,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                      select new XElement("Type",
                         new XAttribute("Resource", resource),
                         new XAttribute("Allowed", allowed.Fallback.ToString()!),
-                        from c in allowed.Conditions
+                        from c in allowed.ConditionRules
                         select new XElement("Condition",
                             new XAttribute("Name", c.ToString()),
                             new XAttribute("Allowed", c.Allowed.ToString()))

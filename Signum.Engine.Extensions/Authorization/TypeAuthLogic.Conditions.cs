@@ -150,8 +150,8 @@ public static partial class TypeAuthLogic
                     .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionMode.InUserInterface)).ToList();
 
                 string details = 
-                    debugInfo.Count == 1 ? debugInfo.SingleEx().CanBeModified! : 
-                    debugInfo.ToString(a => "  {0}: {1}".FormatWith(a.Lite, a.CanBeModified), "\r\n");
+                    debugInfo.Count == 1 ? debugInfo.SingleEx().ErrorMessage! : 
+                    debugInfo.ToString(a => "  {0}: {1}".FormatWith(a.Lite, a.ErrorMessage), "\r\n");
 
                 throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(
                     typeAllowed.NiceToString(),
@@ -228,23 +228,24 @@ public static partial class TypeAuthLogic
 
     private static Func<T, bool>? IsAllowedInMemory<T>(TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : Entity
     {
-        if (tac.Conditions.SelectMany(c => c.TypeConditions).Any(tc => TypeConditionLogic.GetInMemoryCondition<T>(tc) == null))
+        if (tac.ConditionRules.SelectMany(c => c.TypeConditions).Any(tc => TypeConditionLogic.GetInMemoryCondition<T>(tc) == null))
             return null;
 
         return entity =>
         {
-            foreach (var cond in tac.Conditions.Reverse())
+            foreach (var cond in tac.ConditionRules.Reverse())
             {
-                foreach (var c in cond.TypeConditions)
+                if (cond.TypeConditions.All(tc =>
                 {
-                    var func = TypeConditionLogic.GetInMemoryCondition<T>(c)!;
-
-                    if (func(entity))
-                        return cond.Allowed.Get(inUserInterface) >= allowed;
+                    var func = TypeConditionLogic.GetInMemoryCondition<T>(tc)!;
+                    return func(entity);
+                }))
+                {
+                    return cond.Allowed.Get(inUserInterface) >= allowed;
                 }
             }
 
-            return tac.FallbackOrNone.Get(inUserInterface) >= allowed;
+            return tac.Fallback.Get(inUserInterface) >= allowed;
         };
     }
 
@@ -298,13 +299,13 @@ public static partial class TypeAuthLogic
     {
         var taac = TypeAuthLogic.GetAllowed(ident.GetType());
 
-        if (taac.Conditions.IsEmpty())
-            return taac.FallbackOrNone.GetDB() >= TypeAllowedBasic.Write ? null : AuthAdminMessage.CanNotBeModified.NiceToString();
+        if (taac.ConditionRules.IsEmpty())
+            return taac.Fallback.GetDB() >= TypeAllowedBasic.Write ? null : AuthAdminMessage.CanNotBeModified.NiceToString();
 
         if (ident.IsNew)
             return null;
 
-        return IsAllowedForDebug(ident, TypeAllowedBasic.Write, false)?.CanBeModified;
+        return IsAllowedForDebug(ident, TypeAllowedBasic.Write, false)?.ErrorMessage;
     }
 
     static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, DebugData>> miIsAllowedForDebugEntity =
@@ -408,7 +409,7 @@ public static partial class TypeAuthLogic
         if (max < TypeAllowedBasic.Read)
             throw new UnauthorizedAccessException("Type {0} is not authorized{1}{2}".FormatWith(typeof(T).Name,
                 ui ? " in user interface" : null,
-                allowed.Conditions.Any() ? " for any condition" : null));
+                allowed.ConditionRules.Any() ? " for any condition" : null));
     }
 
 
@@ -476,33 +477,19 @@ public static partial class TypeAuthLogic
 
         TypeAllowedAndConditions tac = GetAllowed(type);
 
-        Expression baseValue = Expression.Constant(tac.FallbackOrNone.Get(inUserInterface) >= requested);
+        var node = tac.ToTypeConditionNode(requested, inUserInterface);
 
-        var expression = tac.Conditions.Aggregate(baseValue, (acum, tacRule) =>
-        {
-           var iExp = tacRule.TypeConditions.Aggregate(baseValue, (iacum, s) =>
-           {
-               var lambda = TypeConditionLogic.GetCondition(type, s);
-               var exp = (Expression)Expression.Invoke(lambda, entity);
-               return Expression.Or(exp, iacum);
-           });
+        var simpleNode = node.Simplify();
 
-            if (tacRule.Allowed.Get(inUserInterface) >= requested)
-                return Expression.Or(iExp, acum);
-            else
-                return Expression.And(Expression.Not(iExp), acum);
-        });
+        var expression = simpleNode.ToExpression(entity);
 
-        var cleaned = DbQueryProvider.Clean(expression, false, null)!;
-
-        var orsSimplified = AndOrSimplifierVisitor.SimplifyOrs(cleaned);
-
-        return orsSimplified;
+        return expression;
     }
 
 
     static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null!, TypeAllowedBasic.Write, true, TypeAllowed.Write, null!));
-    static ConstructorInfo ciGroupDebugData = ReflectionTools.GetConstuctorInfo(() => new ConditionDebugData(null!, true, TypeAllowed.Write));
+    static ConstructorInfo ciConditionRuleDebugData = ReflectionTools.GetConstuctorInfo(() => new ConditionRuleDebugData(null!, TypeAllowed.Write));
+    static ConstructorInfo ciConditionDebugData = ReflectionTools.GetConstuctorInfo(() => new ConditionDebugData(null!, true));
     static MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity a) => a.ToLite()).GetGenericMethodDefinition();
 
     internal static Expression IsAllowedExpressionDebug(Expression entity, TypeAllowedBasic requested, bool inUserInterface)
@@ -511,15 +498,20 @@ public static partial class TypeAuthLogic
 
         TypeAllowedAndConditions tac = GetAllowed(type);
 
-        Expression baseValue = Expression.Constant(tac.FallbackOrNone.Get(inUserInterface) >= requested);
+        Expression baseValue = Expression.Constant(tac.Fallback.Get(inUserInterface) >= requested);
 
-        var list = (from line in tac.Conditions
-                    from s in line.TypeConditions
-                    select Expression.New(ciGroupDebugData, Expression.Constant(s, typeof(TypeConditionSymbol)),
-                    Expression.Invoke(TypeConditionLogic.GetCondition(type, s), entity),
-                    Expression.Constant(line.Allowed))).ToArray();
+        var list = (from line in tac.ConditionRules
+                    select Expression.New(ciConditionRuleDebugData,
 
-        Expression newList = Expression.ListInit(Expression.New(typeof(List<ConditionDebugData>)), list);
+                    Expression.ListInit(Expression.New(typeof(List<ConditionDebugData>)),
+                            line.TypeConditions.Select(tc => Expression.New(ciConditionDebugData,
+                                Expression.Constant(tc, typeof(TypeConditionSymbol)),
+                                Expression.Invoke(TypeConditionLogic.GetCondition(type, tc), entity))).ToArray()),
+
+                    Expression.Constant(line.Allowed)))
+                .ToArray();
+
+        Expression newList = Expression.ListInit(Expression.New(typeof(List<ConditionRuleDebugData>)), list);
 
         Expression liteEntity = Expression.Call(null, miToLite.MakeGenericMethod(entity.Type), entity);
 
@@ -532,13 +524,13 @@ public static partial class TypeAuthLogic
 
     public class DebugData
     {
-        public DebugData(Lite<IEntity> lite, TypeAllowedBasic requested, bool userInterface, TypeAllowed fallback, List<ConditionDebugData> groups)
+        public DebugData(Lite<IEntity> lite, TypeAllowedBasic requested, bool userInterface, TypeAllowed fallback, List<ConditionRuleDebugData> rules)
         {
             this.Lite = lite;
             this.Requested = requested;
             this.Fallback = fallback;
             this.UserInterface = userInterface;
-            this.Conditions = groups;
+            this.Rules = rules;
         }
 
         public Lite<IEntity> Lite { get; private set; }
@@ -546,55 +538,66 @@ public static partial class TypeAuthLogic
         public TypeAllowed Fallback { get; private set; }
         public bool UserInterface { get; private set; }
 
-        public List<ConditionDebugData> Conditions { get; private set; }
+        public List<ConditionRuleDebugData> Rules { get; private set; }
 
         public bool IsAllowed
         {
             get
             {
-                foreach (var item in Conditions.AsEnumerable().Reverse())
+                foreach (var rule in Rules.AsEnumerable().Reverse())
                 {
-                    if (item.InGroup)
-                        return Requested <= item.Allowed.Get(UserInterface);
+                    if (rule.Conditions.All(c => c.InGroup))
+                        return Requested <= rule.Allowed.Get(UserInterface);
                 }
 
                 return Requested <= Fallback.Get(UserInterface);
             }
         }
 
-        public string? CanBeModified
+        public string? ErrorMessage
         {
             get
             {
-                foreach (var cond in Conditions.AsEnumerable().Reverse())
+                foreach (var rule in Rules.AsEnumerable().Reverse())
                 {
-                    if (cond.InGroup)
-                        return Requested <= cond.Allowed.Get(UserInterface) ? null :
+                    if (rule.Conditions.All(c => c.InGroup))
+                        return Requested <= rule.Allowed.Get(UserInterface) ? null :
                             (Requested == TypeAllowedBasic.Read ?
-                            AuthAdminMessage.CanNotBeReadBecauseIsInCondition0:
+                            AuthAdminMessage.CanNotBeReadBecauseIsInCondition0 :
                             AuthAdminMessage.CanNotBeModifiedBecauseIsInCondition0)
-                            .NiceToString( "'" + cond.TypeCondition.NiceToString() + "'");
+                            .NiceToString(rule.Conditions.CommaAnd(c => "'" + c.TypeCondition.NiceToString() + "'"));
                 }
 
                 return Requested <= Fallback.Get(UserInterface) ? null :
-                    (Requested == TypeAllowedBasic.Read ? 
+                    (Requested == TypeAllowedBasic.Read ?
                     AuthAdminMessage.CanNotBeReadBecauseIsNotInCondition0 :
                     AuthAdminMessage.CanNotBeModifiedBecauseIsNotInCondition0)
-                    .NiceToString(Conditions.Where(cond => Requested <= cond.Allowed.Get(UserInterface)).AsEnumerable().Reverse().CommaOr(a => "'" + a.TypeCondition.NiceToString() + "'"));
+                    .NiceToString(Rules.Where(cond => Requested <= cond.Allowed.Get(UserInterface)).AsEnumerable().Reverse()
+                    .CommaOr(rule => rule.Conditions.Where(a => !a.InGroup).CommaAnd(c => "'" + c.TypeCondition.NiceToString() + "'")));
             }
         }
     }
 
     public class ConditionDebugData
     {
+        internal ConditionDebugData(TypeConditionSymbol typeCondition, bool inGroup)
+        {
+            TypeCondition = typeCondition;
+            InGroup = inGroup;
+        }
+
         public TypeConditionSymbol TypeCondition { get; private set; }
         public bool InGroup { get; private set; }
+    }
+
+    public class ConditionRuleDebugData
+    {
+        public List<ConditionDebugData> Conditions { get; private set; }
         public TypeAllowed Allowed { get; private set; }
 
-        internal ConditionDebugData(TypeConditionSymbol typeCondition, bool inGroup, TypeAllowed allowed)
+        internal ConditionRuleDebugData(List<ConditionDebugData> conditions, TypeAllowed allowed)
         {
-            this.TypeCondition = typeCondition;
-            this.InGroup = inGroup;
+            this.Conditions = conditions;
             this.Allowed = allowed;
         }
     }
@@ -651,8 +654,8 @@ public static partial class TypeAuthLogic
         {
             Role = role,
             Resource = resource,
-            Allowed = allowed.Fallback!.Value,
-            Conditions = allowed.Conditions.Select(a => new RuleTypeConditionEntity
+            Allowed = allowed.Fallback,
+            Conditions = allowed.ConditionRules.Select(a => new RuleTypeConditionEntity
             {
                 Allowed = a.Allowed,
                 Conditions = a.TypeConditions.ToMList()
@@ -699,64 +702,61 @@ public static partial class TypeAuthLogic
     }
 }
 
-public static class AndOrSimplifierVisitor
-{
-    class HashSetComparer<T> : IEqualityComparer<HashSet<T>>
-    {
-        public bool Equals(HashSet<T>? x, HashSet<T>? y)
-        {
-            return x != null && y != null && x.SetEquals(y);
-        }
+//public static class AndOrSimplifierVisitor
+//{
+//    class HashSetComparer<T> : IEqualityComparer<HashSet<T>>
+//    {
+//        public bool Equals(HashSet<T>? x, HashSet<T>? y)
+//        {
+//            return x != null && y != null && x.SetEquals(y);
+//        }
 
-        public int GetHashCode([DisallowNull] HashSet<T> obj)
-        {
-            return obj.Count;
-        }
-    }
+//        public int GetHashCode([DisallowNull] HashSet<T> obj)
+//        {
+//            return obj.Count;
+//        }
+//    }
 
+//    static IEqualityComparer<Expression> Comparer = ExpressionComparer.GetComparer<Expression>(false);
+//    static IEqualityComparer<HashSet<Expression>> HSetComparer = new HashSetComparer<Expression>();
 
+//    public static Expression SimplifyOrs(Expression expr)
+//    {
+//        if (expr is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
+//        {
+//            var orGroups = OrAndList(b);
 
+//            var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og))).ToList();
 
-    static IEqualityComparer<Expression> Comparer = ExpressionComparer.GetComparer<Expression>(false);
-    static IEqualityComparer<HashSet<Expression>> HSetComparer = new HashSetComparer<Expression>();
+//            return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
+//        }
 
-    public static Expression SimplifyOrs(Expression expr)
-    {
-        if (expr is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
-        {
-            var orGroups = OrAndList(b);
+//        return expr;
+//    }
 
-            var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og))).ToList();
+//    static HashSet<HashSet<Expression>> OrAndList(Expression expression)
+//    {
+//        if (expression is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
+//        {
+//            return OrAndList(b.Left).Concat(OrAndList(b.Right)).ToHashSet(HSetComparer);
+//        }
+//        else
+//        {
+//            var ands = AndList(expression);
+//            return new HashSet<HashSet<Expression>>(HSetComparer) { ands };
+//        }
+//    }
 
-            return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
-        }
+//    static HashSet<Expression> AndList(Expression expression)
+//    {
+//        if (expression is BinaryExpression b && (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso))
+//            return AndList(b.Left).Concat(AndList(b.Right)).ToHashSet(Comparer);
+//        else
+//            return new HashSet<Expression>(Comparer) { expression };
+//    }
 
-        return expr;
-    }
-
-    static HashSet<HashSet<Expression>> OrAndList(Expression expression)
-    {
-        if (expression is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
-        {
-            return OrAndList(b.Left).Concat(OrAndList(b.Right)).ToHashSet(HSetComparer);
-        }
-        else
-        {
-            var ands = AndList(expression);
-            return new HashSet<HashSet<Expression>>(HSetComparer) { ands };
-        }
-    }
-
-    static HashSet<Expression> AndList(Expression expression)
-    {
-        if (expression is BinaryExpression b && (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso))
-            return AndList(b.Left).Concat(AndList(b.Right)).ToHashSet(Comparer);
-        else
-            return new HashSet<Expression>(Comparer) { expression };
-    }
-
-    static bool IsMoreSimpleAndGeneralThan(this HashSet<Expression> simple, HashSet<Expression> complex)
-    {
-        return simple.All(a => complex.Contains(a));
-    }
-}
+//    static bool IsMoreSimpleAndGeneralThan(this HashSet<Expression> simple, HashSet<Expression> complex)
+//    {
+//        return simple.All(a => complex.Contains(a));
+//    }
+//}
