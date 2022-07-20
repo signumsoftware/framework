@@ -531,9 +531,10 @@ public static class TranslatedInstanceLogic
 
 
 
-    public static void SaveRecords(List<TranslationRecord> records, Type t, CultureInfo? c)
+    public static void SaveRecords(List<TranslationRecord> records, Type t, bool isSync, CultureInfo? c)
     {
-        Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslationRecord> should = records.Where(a => a.TranslatedText.HasText())
+        Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslationRecord> should = records
+            .Where(a => !isSync || a.TranslatedText.HasText())
             .ToDictionary(a => (a.Culture, a.Key));
 
         Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslatedInstanceEntity> current =

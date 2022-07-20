@@ -69,7 +69,7 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
       }));
     }));
 
-    lock(() => API.saveTranslatedInstanceData(records, type, culture)
+    lock(() => API.saveTranslatedInstanceData(records, type, false, culture)
       .then(() => { reloadResult(); notifySuccess(); }))
       .done();
   }
