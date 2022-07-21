@@ -258,20 +258,163 @@ class TypeAllowedMerger : IMerger<Type, TypeAllowedAndConditions>
         if (onlyNotOposite != null)
             return onlyNotOposite;
 
-        throw new NotImplementedException();
+        if (baseRules.All(a => a.ConditionRules.Count == 0))
+            return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)));
 
-        //var first = baseRules.FirstOrDefault(c => !c.ConditionRules.IsNullOrEmpty());
+        var conditions = baseRules.SelectMany(a => a.ConditionRules).SelectMany(a => a.TypeConditions).Distinct().OrderBy(a => a.ToString()).ToList();
 
-        //if (first == null)
-        //    return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback!.Value)));
+        if (conditions.Count > 31)
+            throw new InvalidOperationException("You can not merge more than 31 type conditions");
 
-        //var conditions = first.ConditionRules.SelectMany(c => c.TypeConditions).ToList();
+        var conditionDictionary = conditions.Select((tc, i) => KeyValuePair.Create(tc, 1 << i)).ToDictionaryEx();
 
-        //if (baseRules.Where(c => !c.ConditionRules.IsNullOrEmpty() && c != first).Any(br => !br.ConditionRules.SelectMany(c => c.TypeConditions).SequenceEqual(conditions)))
-        //    return new TypeAllowedAndConditions(null);
+        int numCells = 1 << conditionDictionary.Count;
 
-        //return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback!.Value)),
-        //    conditions.Select((c, i) => new TypeConditionRuleModel(c, maxMerge(baseRules.Where(br => !br.ConditionRules.IsNullOrEmpty()).Select(br => br.ConditionRules[i].Allowed)))).ToArray());
+        var matrixes = baseRules.Select(tac => GetMatrix(tac, numCells, conditionDictionary)).ToList();
+
+        var maxMatrix = 0.To(numCells).Select(i => maxMerge(matrixes.Select(m => m[i]))).ToArray();
+
+        return GetRules(maxMatrix, numCells, conditionDictionary);
+    }
+
+    static TypeAllowed[] GetMatrix(TypeAllowedAndConditions tac, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+    {
+        var matrix = 0.To(numCells).Select(a => tac.Fallback).ToArray();
+
+        foreach (var rule in tac.ConditionRules)
+        {
+            var mask = rule.TypeConditions.Select(tc => conditionDictionary.GetOrThrow(tc)).Aggregate((a, b) => a | b);
+
+            for (int i = 0; i < numCells; i++)
+            {
+                if ((i & mask) == mask)
+                {
+                    matrix[i] = rule.Allowed;
+                }
+            }
+        }
+
+        return matrix;
+    }
+
+    static TypeAllowedAndConditions GetRules(TypeAllowed[] matrix, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+    {
+        var array = matrix.Select(ta => (TypeAllowed?)ta).ToArray();
+
+        var conditionRules = new List<TypeConditionRuleModel>();
+
+        var availableTypeConditions = conditionDictionary.Keys.ToList();
+
+        while (true)
+        {
+            { //0 Conditions
+                var ta = OnlyOneValue(0);
+
+                if (ta != null)
+                    return new TypeAllowedAndConditions(ta.Value, conditionRules.AsEnumerable().Reverse().ToArray());
+            }
+
+            { //1 Condition
+                foreach (var tc in availableTypeConditions)
+                {
+                    var mask = conditionDictionary[tc];
+
+                    var ta = OnlyOneValue(mask);
+
+                    if (ta.HasValue)
+                    {
+                        conditionRules.Add(new TypeConditionRuleModel(new[] { tc }, ta.Value));
+                        availableTypeConditions.Remove(tc);
+
+                        ClearArray(mask);
+
+                        goto next;
+                    }
+                }
+
+            }
+
+            //>= 2 Conditions
+            for (int numConditions = 2; numConditions < availableTypeConditions.Count; numConditions++)
+            {
+                foreach (var mask in GetMasksOf(numConditions, availableTypeConditions))
+                {
+                    var ta = OnlyOneValue(mask);
+
+                    if (ta.HasValue)
+                    {
+                        conditionRules.Add(new TypeConditionRuleModel(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == mask).ToArray(), ta.Value));
+
+                        ClearArray(mask);
+
+                        goto next;
+                    }
+                }
+            }
+
+        next: continue;
+        }
+
+
+        TypeAllowed? OnlyOneValue(int mask)
+        {
+            TypeAllowed? currentValue = null;
+
+            for (int i = 0; i < numCells; i++)
+            {
+                if ((i & mask) == mask)
+                {
+                    var v = array![i];
+                    if (v != null)
+                    {
+                        if (currentValue == null)
+                            currentValue = v;
+                        else if (currentValue != v)
+                            return null;
+                    }
+                }
+            }
+
+            if (currentValue == null)
+                throw new InvalidOperationException("Array is empty!");
+
+            return currentValue;
+        }
+
+        void ClearArray(int mask)
+        {
+            for (int i = 0; i < numCells; i++)
+            {
+                if ((i & mask) == mask)
+                {
+                    array![i] = null;
+                }
+            }
+        }
+
+
+        IEnumerable<int> GetMasksOf(int numConditions, List<TypeConditionSymbol> availableTypeConditions, int skip = 0)
+        {
+            if (numConditions == 1)
+            {
+                for (int i = skip; i < availableTypeConditions.Count; i++)
+                {
+                    yield return conditionDictionary[availableTypeConditions[i]];
+                }
+            }
+            else
+            {
+                for (int i = skip; i < availableTypeConditions.Count; i++)
+                {
+                    var val = conditionDictionary[availableTypeConditions[i]];
+
+                    foreach (var item in GetMasksOf(numConditions -1, availableTypeConditions, skip + 1))
+                    {
+                        yield return item | val;
+                    }
+                }
+            }
+        }
     }
 }
 

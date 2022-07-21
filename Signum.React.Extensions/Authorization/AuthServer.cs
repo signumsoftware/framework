@@ -299,15 +299,15 @@ public static class AuthServer
         }).ToArray();
     }
 
-    static string GetName(List<TypeAllowedBasic?> list)
+    static string GetName(List<TypeAllowedBasic> list)
     {
-        return "auth-" + list.ToString(a => a == null ? "Error" : a.ToString(), "-");
+        return "auth-" + list.ToString("-");
     }
 
-    static List<TypeAllowedBasic?> ToStringList(TypeAllowedAndConditions tac, bool userInterface)
+    static List<TypeAllowedBasic> ToStringList(TypeAllowedAndConditions tac, bool userInterface)
     {
-        List<TypeAllowedBasic?> result = new List<TypeAllowedBasic?>();
-        result.Add(tac.Fallback == null ? (TypeAllowedBasic?)null : tac.Fallback.Value.Get(userInterface));
+        List<TypeAllowedBasic> result = new List<TypeAllowedBasic>();
+        result.Add(tac.Fallback.Get(userInterface));
 
         foreach (var c in tac.ConditionRules)
             result.Add(c.Allowed.Get(userInterface));

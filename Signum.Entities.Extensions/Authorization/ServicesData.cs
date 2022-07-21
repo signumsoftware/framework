@@ -273,15 +273,9 @@ public class TypeConditionRuleModel : ModelEntity, IEquatable<TypeConditionRuleM
 {
     private TypeConditionRuleModel() { }
 
-    public TypeConditionRuleModel(MList<TypeConditionSymbol> typeConditions, TypeAllowed allowed)
+    public TypeConditionRuleModel(IEnumerable<TypeConditionSymbol> typeConditions, TypeAllowed allowed)
     {
         this.TypeConditions = typeConditions.ToMList();
-        this.Allowed = allowed;
-    }
-
-    public TypeConditionRuleModel(TypeConditionSymbol typeCondition, TypeAllowed allowed)
-    {
-        this.TypeConditions.Add(typeCondition);
         this.Allowed = allowed;
     }
 

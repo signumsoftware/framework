@@ -193,8 +193,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
         if (!tc)
           return;
 
-        taac.conditions.push(newMListElement(TypeConditionRuleModel.New({
-          typeConditions: tc.map(t => newMListElement <TypeConditionSymbol>(t)),
+        taac.conditionRules.push(newMListElement(TypeConditionRuleModel.New({
+          typeConditions: tc.map(t => newMListElement(t)),
           allowed: "None"
         })));
 
@@ -204,7 +204,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
   }
 
   function handleRemoveConditionClick(taac: TypeAllowedAndConditions, con: TypeConditionRuleModel) {
-    taac.conditions!.remove(taac.conditions.filter(mle => mle.element == con).single());
+    taac.conditionRules.remove(taac.conditionRules.single(mle => mle.element == con));
     taac.modified = true;
     updateFrame();
   }
@@ -220,7 +220,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
 
     let fallback = Binding.create(tctx.value.allowed, a => a.fallback);
     return [
-      <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions")}>
+      <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td className={tctx.value.allowed.fallback == null ? "text-danger fw-bold" : undefined} title={AuthAdminMessage.ConflictMergingTypeConditions.niceToString()}>
           {conditions.length > 0 ?
             <span className="sf-condition-icon" onClick={() => handleAddConditionClick(conditions, tctx.value.allowed)}>
@@ -267,15 +267,18 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
               m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
         </td>}
       </tr>
-    ].concat(tctx.value.allowed!.conditions!.map(mle => mle.element).map((c, i) => {
-      let b = Binding.create(c, ca => ca.allowed);
+    ].concat(tctx.value.allowed.conditionRules.map(mle => mle.element).map((cr, i) => {
+      let b = Binding.create(cr, ca => ca.allowed);
       return (
-        <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className + "_" + c.typeConditions.map(c => c.element.id).join("_")} className="sf-auth-condition" >
+        <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")} className="sf-auth-condition" >
           <td>
             {"\u00A0 \u00A0".repeat(i + 1)}
-            <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, c)}><FontAwesomeIcon icon="minus-circle" /></span>
+            <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, cr)}><FontAwesomeIcon icon="minus-circle" /></span>
             &nbsp;
-            <small>{getToString(c)}</small>
+            {cr.typeConditions.flatMap((tc, j) => [
+              <small key={j}> {getToString(tc.element)}</small>,
+              j < cr.typeConditions.length - 1 ? <span key={j + "$"}>&</span> : null])
+              .notNull()}
           </td>
           <td style={{ textAlign: "center" }} className={masterClass}>
             {colorRadio(b, "Write", "green")}
@@ -362,13 +365,21 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
 
 function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeAllowedAndConditions) {
   return allowed.fallback == allowedBase.fallback
-    && allowed.conditions!.length == allowedBase.conditions!.length
-    && allowed.conditions!.map(mle => mle.element)
+    && allowed.conditionRules.length == allowedBase.conditionRules.length
+    && allowed.conditionRules.map(mle => mle.element)
       .every((c, i) => {
-        let b = allowedBase.conditions![i].element;
+        let b = allowedBase.conditionRules[i].element;
+
+        if (c.allowed != b.allowed)
+          return false;
+
         if (c.typeConditions.length != b.typeConditions.length)
           return false;
-        return c.allowed == b.allowed && c.typeConditions.every(ct => b.typeConditions.contains(ct))
+
+        var cKeys = c.typeConditions.map(a => a.element.key);
+        var bKeys = b.typeConditions.map(a => a.element.key);
+
+        return cKeys.every(k => bKeys.contains(k));
       });
 }
 
