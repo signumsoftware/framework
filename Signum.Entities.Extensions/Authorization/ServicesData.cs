@@ -265,7 +265,7 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
 
     public TypeAllowedAndConditions WithoutCondition(TypeConditionSymbol typeCondition)
     {
-        return new TypeAllowedAndConditions(this.Fallback, this.ConditionRules.Where(a => !a.TypeConditions.Contains(typeCondition)));
+        return new TypeAllowedAndConditions(this.Fallback, this.ConditionRules.Select(a => a.WithoutCondition(typeCondition)).NotNull().ToMList());
     }
 }
 
@@ -293,9 +293,19 @@ public class TypeConditionRuleModel : ModelEntity, IEquatable<TypeConditionRuleM
             Allowed.Equals(other.Allowed);
     }
 
-
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => TypeConditions.ToString(" & ") + " => " + Allowed);
+
+    internal TypeConditionRuleModel? WithoutCondition(TypeConditionSymbol typeCondition)
+    {
+        if (!TypeConditions.Contains(typeCondition))
+            return this;
+
+        if (TypeConditions.Count == 1)
+            return null;
+
+        return new TypeConditionRuleModel { TypeConditions = TypeConditions.Where(tc => !tc.Is(typeCondition)).ToMList() };
+    }
 }
 
 public enum AuthThumbnail

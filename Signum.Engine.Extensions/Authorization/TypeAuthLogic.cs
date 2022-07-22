@@ -277,6 +277,21 @@ class TypeAllowedMerger : IMerger<Type, TypeAllowedAndConditions>
         return GetRules(maxMatrix, numCells, conditionDictionary);
     }
 
+    static string Debug(int cell, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+    {
+        return conditionDictionary.ToString(kvp => ((kvp.Value & cell) == kvp.Value ? " " : "!") + kvp.Key.ToString().After("."), " & ");
+    }
+
+    static string Debug(TypeAllowed[] matrix, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+    {
+        return matrix.Select((ta, i) => Debug(i, conditionDictionary) + " => " + ta).ToString("\n");
+    }
+
+    static string Debug(TypeAllowed?[] matrix, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+    {
+        return matrix.Select((ta, i) => Debug(i, conditionDictionary) + " => " + ta).ToString("\n");
+    }
+
     static TypeAllowed[] GetMatrix(TypeAllowedAndConditions tac, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
     {
         var matrix = 0.To(numCells).Select(a => tac.Fallback).ToArray();
@@ -335,7 +350,7 @@ class TypeAllowedMerger : IMerger<Type, TypeAllowedAndConditions>
             }
 
             //>= 2 Conditions
-            for (int numConditions = 2; numConditions < availableTypeConditions.Count; numConditions++)
+            for (int numConditions = 2; numConditions <= availableTypeConditions.Count; numConditions++)
             {
                 foreach (var mask in GetMasksOf(numConditions, availableTypeConditions))
                 {
@@ -343,7 +358,7 @@ class TypeAllowedMerger : IMerger<Type, TypeAllowedAndConditions>
 
                     if (ta.HasValue)
                     {
-                        conditionRules.Add(new TypeConditionRuleModel(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == mask).ToArray(), ta.Value));
+                        conditionRules.Add(new TypeConditionRuleModel(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == conditionDictionary[tc]).ToArray(), ta.Value));
 
                         ClearArray(mask);
 

@@ -42,9 +42,20 @@ public class AndNode : TypeConditionNode
         return false;
     }
 
-    public override string ToString() => Nodes.Count == 0 ? "TRUE" : $"AND({Nodes.ToString(", ")})";
+    public override string ToString() => Nodes.Count == 0 ? "TRUE" :
+        Nodes.All(a => a is SymbolNode) ? $"AND({Nodes.ToString(", ")})" :
+        $"AND(\n{Nodes.ToString(",\n").Indent(3)}\n)";
 
-    public override int GetHashCode() => Nodes.Sum(a => a.GetHashCode()) + 5;
+    public override int GetHashCode() {
+
+        var hs = new HashCode();
+        hs.Add(100);
+        foreach (var item in Nodes)
+        {
+            hs.Add(item);
+        }
+        return hs.ToHashCode();
+    }
 
     public override bool Equals(object? obj) => obj is AndNode other && other.Nodes.ToHashSet().SetEquals(other.Nodes);
 
@@ -63,10 +74,18 @@ public class OrNode : TypeConditionNode
 
     public override bool IsMoreSimpleAndGeneralThan(TypeConditionNode og) => false;
 
-    public override string ToString() => Nodes.Count == 0 ? "FALSE" : $"OR({Nodes.ToString(a => " " + a + " ", ", ")})";
+    public override string ToString() => Nodes.Count == 0 ? "FALSE" : $"OR(\n{Nodes.ToString(",\n").Indent(2)}\n)";
 
-    public override int GetHashCode() => Nodes.Sum(a => a.GetHashCode());
-
+    public override int GetHashCode()
+    {
+        var hs = new HashCode();
+        hs.Add(10);
+        foreach (var item in Nodes)
+        {
+            hs.Add(item);
+        }
+        return hs.ToHashCode();
+    }
     public override bool Equals(object? obj) => obj is OrNode other && other.Nodes.ToHashSet().SetEquals(other.Nodes);
 }
 
@@ -99,7 +118,7 @@ public class SymbolNode : TypeConditionNode
 
     public override bool? ConstantValue => null;
 
-    public override bool IsMoreSimpleAndGeneralThan(TypeConditionNode og) => false;
+    public override bool IsMoreSimpleAndGeneralThan(TypeConditionNode og) => og is AndNode an && an.Nodes.Contains(this);
 
     public override string ToString() => Symbol.ToString();
 
@@ -187,7 +206,7 @@ public static class TypeConditionNodeExtensions
             return Expression.Negate(nn.ToExpression(entity));
 
         if (node is AndNode and)
-            return and.Nodes.Select(n => n.ToExpression(entity)).Aggregate(Expression.Add);
+            return and.Nodes.Select(n => n.ToExpression(entity)).Aggregate(Expression.And);
 
         if (node is OrNode or)
             return or.Nodes.Select(n => n.ToExpression(entity)).Aggregate(Expression.Or);

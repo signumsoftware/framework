@@ -276,8 +276,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
             <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, cr)}><FontAwesomeIcon icon="minus-circle" /></span>
             &nbsp;
             {cr.typeConditions.flatMap((tc, j) => [
-              <small key={j}> {getToString(tc.element)}</small>,
-              j < cr.typeConditions.length - 1 ? <span key={j + "$"}>&</span> : null])
+              <small className="mx-1" key={j}>{getToString(tc.element)}</small>,
+              j < cr.typeConditions.length - 1 ? <small className="and" key={j + "$"}>&</small> : null])
               .notNull()}
           </td>
           <td style={{ textAlign: "center" }} className={masterClass}>

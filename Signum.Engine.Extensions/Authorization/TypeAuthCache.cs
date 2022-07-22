@@ -76,9 +76,13 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
     {
         TypeConditionSymbol condition = (TypeConditionSymbol)arg;
 
-        var command = Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt)=>rt.Conditions,  Database.MListQuery((RuleTypeEntity rt) => rt.Conditions).Where(mle => mle.Element.Conditions.Contains(condition)));
+        if (!Database.MListQuery((RuleTypeConditionEntity rt) => rt.Conditions).Any(mle => mle.Element.Is(condition)))
+            return null;
 
-        return command;
+        var mlist = Administrator.UnsafeDeletePreCommandMList((RuleTypeConditionEntity rt)=>rt.Conditions,  Database.MListQuery((RuleTypeConditionEntity rt) => rt.Conditions).Where(mle => mle.Element.Is(condition)));
+        var emptyRules = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(rt => rt.Conditions.Count == 0), force: true, avoidMList: true);
+
+        return SqlPreCommand.Combine(Spacing.Simple, mlist, emptyRules);
     }
 
     TypeAllowedAndConditions IManualAuth<Type, TypeAllowedAndConditions>.GetAllowed(Lite<RoleEntity> role, Type key)
@@ -327,7 +331,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                         new XAttribute("Allowed", allowed.Fallback.ToString()!),
                         from c in allowed.ConditionRules
                         select new XElement("Condition",
-                            new XAttribute("Name", c.ToString()),
+                            new XAttribute("Name", c.TypeConditions.ToString(", ")),
                             new XAttribute("Allowed", c.Allowed.ToString()))
                      )
                  )
@@ -351,7 +355,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
             TypeLogic.NameToType.Where(a => !a.Value.IsEnumEntity()).Select(a => a.Key).ToHashSet(), typeReplacementKey);
 
         replacements.AskForReplacements(
-            xRoles.SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).SelectMany(x => x.Attribute("Name")!.Value.Split(" & ").ToList()).ToHashSet(),
+            xRoles.SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).SelectMany(x => x.Attribute("Name")!.Value.SplitNoEmpty(",").Select(a=>a.Trim()).ToList()).ToHashSet(),
             SymbolLogic<TypeConditionSymbol>.AllUniqueKeys(),
             typeConditionReplacementKey);
 
@@ -366,7 +370,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
         };
 
 
-        return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
+        return Synchronizer.SynchronizeScript(Spacing.Triple, should, current,
             createNew: (role, x) =>
             {
                 var dic = (from xr in x.Elements("Type")
@@ -397,7 +401,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                            select KeyValuePair.Create(t, xr)).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
                 SqlPreCommand? restSql = Synchronizer.SynchronizeScript(
-                    Spacing.Simple,
+                    Spacing.Triple,
                     dic,
                     list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
                     createNew: (r, xr) =>
@@ -432,8 +436,8 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
         var conditions = (from xc in xr.Elements("Condition")
                 select new RuleTypeConditionEntity
                 {
-                    Conditions = xc.Attribute("Name")!.Value.Split(" & ")
-                        .Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s))).NotNull().ToMList(),
+                    Conditions = xc.Attribute("Name")!.Value.SplitNoEmpty(",")
+                        .Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToMList(),
                     Allowed = xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>()
                 }).ToMList();
         return conditions;
