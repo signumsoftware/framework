@@ -7,7 +7,7 @@ import { BsSize } from './Components';
 import { Modal } from 'react-bootstrap';
 
 interface SelectorModalProps extends IModalProps<any> {
-  options: { value: any; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
+  options: { value: unknown; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
   title: React.ReactNode;
   message: React.ReactNode;
   size?: BsSize;
@@ -18,7 +18,7 @@ interface SelectorModalProps extends IModalProps<any> {
 export default function SelectorModal(p: SelectorModalProps) {
 
   const [show, setShow] = React.useState(true);
-  const [selectedItems, setSelectedItems] = React.useState < string[] >([]);
+  const [selectedItems, setSelectedItems] = React.useState<unknown[]>([]);
   const selectedValue = React.useRef<any>(undefined);
 
   function handleButtonClicked(val: any) {
@@ -39,13 +39,12 @@ export default function SelectorModal(p: SelectorModalProps) {
     p.onExited!(selectedValue.current);
   }
 
-  function handleCheckboxOnChange(e: React.SyntheticEvent<any>) {
-    const input = e.currentTarget as HTMLInputElement;
-    if (input.checked) {
-      setSelectedItems([...selectedItems, input.name]);
+  function handleCheckboxOnChange(e: React.ChangeEvent<HTMLInputElement>, value: unknown) {
+    if (e.currentTarget.checked) {
+      setSelectedItems([...selectedItems, value]);
     }
     else {
-      setSelectedItems(selectedItems.filter(i => i != input.name));
+      setSelectedItems(selectedItems.filter(v => v != value));
     }
   };
 
@@ -66,7 +65,7 @@ export default function SelectorModal(p: SelectorModalProps) {
           {p.message && (typeof p.message == "string" ? <p>{p.message}</p> : p.message)}
           {p.options.map((o, i) =>
             p.multiSelect ? <label style={{ display: "block" }} key={i}>
-              <input type="checkbox" onChange={handleCheckboxOnChange} className={"form-check-input"} name={o.name} checked={selectedItems.contains(o.name)} /> 
+              <input type="checkbox" onChange={e=> handleCheckboxOnChange(e, o.value)} className={"form-check-input"} name={o.displayName?.toString()!} checked={selectedItems.contains(o.value)} /> 
               {" "}{o.displayName} 
               </label> :
             <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.name}
@@ -111,11 +110,8 @@ SelectorModal.chooseManyElement = <T extends Object>(options: T[], config?: Sele
   const { buttonDisplay, buttonName, title, message, size, dialogClassName } = config || {} as SelectorConfig<T>;
 
   if (!config || !config.forceShow) {
-    if (options.length == 1)
-      return Promise.resolve(options);
-
     if (options.length == 0)
-      return Promise.resolve(undefined);
+      return Promise.resolve([]);
   }
 
   return openModal<T[]>(<SelectorModal
