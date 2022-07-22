@@ -26,7 +26,7 @@ internal class DbExpressionVisitor : ExpressionVisitor
         var source = VisitSource(delete.Source);
         var where = Visit(delete.Where);
         if (source != delete.Source || where != delete.Where)
-            return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where, delete.ReturnRowCount);
+            return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where, delete.ReturnRowCount, delete.Alias);
         return delete;
     }
 
