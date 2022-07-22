@@ -607,18 +607,34 @@ SELECT {id} FROM rows;";
 
     class CollectionsCache
     {
-        public Func<Entity, string, bool, SqlPreCommand> InsertCollectionsSync;
+        public List<TableMList.IMListCache> Caches;
 
-        public Action<List<EntityForbidden>> InsertCollections;
-        public Action<List<EntityForbidden>> UpdateCollections;
-
-        public CollectionsCache(Func<Entity, string, bool, SqlPreCommand> insertCollectionsSync,
-            Action<List<EntityForbidden>> insertCollections,
-            Action<List<EntityForbidden>> updateCollections)
+        public SqlPreCommand InsertCollectionsSync(Entity ident, string suffix, string parameterIdVar)
         {
-            InsertCollectionsSync = insertCollectionsSync;
-            InsertCollections = insertCollections;
-            UpdateCollections = updateCollections;
+            return Caches.Select((rc, i) => rc.RelationalInsertSync(ident, suffix + "_" + i.ToString(), parameterIdVar)).Combine(Spacing.Double)!;
+        }
+
+        public SqlPreCommand UpdateCollectionsSync(Entity ident, string suffix, bool replaceParameter)
+        {
+            return Caches.Select((rc, i) => rc.RelationalUpdateSync(ident, suffix + "_" + i.ToString(), replaceParameter)).Combine(Spacing.Double)!;
+        }
+
+        public void InsertCollections(List<EntityForbidden> entities)
+        {
+            foreach (var rc in Caches)
+                rc.RelationalInserts(entities);
+
+        }
+
+        public void UpdateCollections(List<EntityForbidden> entities)
+        {
+            foreach (var rc in Caches)
+                rc.RelationalUpdates(entities);
+        }
+
+        public CollectionsCache(List<TableMList.IMListCache> caches)
+        {
+            this.Caches = caches;
         }
 
         internal static CollectionsCache? InitializeCollections(Table table)
@@ -633,20 +649,7 @@ SELECT {id} FROM rows;";
                     return null;
                 else
                 {
-                    return new CollectionsCache(
-                        insertCollections: (entities) =>
-                        {
-                            foreach (var rc in caches)
-                                rc.RelationalInserts(entities);
-                        },
-                        updateCollections: (entities) =>
-                       {
-                           foreach (var rc in caches)
-                               rc.RelationalUpdates(entities);
-                       },
-                        insertCollectionsSync: (ident, suffix, replaceParameter) =>
-                            caches.Select((rc, i) => rc.RelationalUpdateSync(ident, suffix + "_" + i.ToString(), replaceParameter)).Combine(Spacing.Double)!
-                    );
+                    return new CollectionsCache(caches);
                 }
             }
         }
@@ -655,19 +658,9 @@ SELECT {id} FROM rows;";
     ResetLazy<CollectionsCache?> saveCollections;
 
 
-    private SqlPreCommand? GetInsertCollectionSync(Entity ident, bool includeCollections, string suffix)
-    {
-        if (!includeCollections)
-            return null;
 
-        var cc = saveCollections.Value;
-        if (cc == null)
-            return null;
 
-        return cc.InsertCollectionsSync(ident, suffix, false);
-    }
-
-    public SqlPreCommand InsertSqlSync(Entity ident, bool includeCollections = true, string? comment = null, string suffix = "")
+    public SqlPreCommand InsertSqlSync(Entity ident, bool includeCollections = true, string? comment = null, string suffix = "", string? forceParentId = null)
     {
         PrepareEntitySync(ident);
         SetToStrField(ident);
@@ -675,12 +668,16 @@ SELECT {id} FROM rows;";
         bool isGuid = this.PrimaryKey.DbType.IsGuid();
         var isPostgres = Schema.Current.Settings.IsPostgres;
 
-        SqlPreCommand? collections = GetInsertCollectionSync(ident, includeCollections, suffix);
-
         var identityBehaviour = IdentityBehaviour && !Administrator.IsIdentityBehaviourDisabled(this);
 
-        string? parentId = collections != null && identityBehaviour ? Table.Var(isPostgres, "parentId") : null;
-        string? newIds = collections != null && identityBehaviour && (!isPostgres && isGuid) ? Table.Var(isPostgres, "newIDs") : null;
+        string? parentId = includeCollections && identityBehaviour ? (forceParentId ?? Table.Var(isPostgres, "parentId")) : null;
+        string? newIds = includeCollections && identityBehaviour && (!isPostgres && isGuid) ? Table.Var(isPostgres, "newIDs") : null;
+
+        SqlPreCommand? collections = !includeCollections ? null : saveCollections.Value?.InsertCollectionsSync(ident, suffix, parentId!);
+
+        SqlPreCommand? virtualMList = !includeCollections ? null : VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type)?.Values
+            .Select(vmi => giInsertVirtualMListSync.GetInvoker(this.Type, vmi.BackReferenceRoute.RootType)(ident, vmi, parentId!))
+            .Combine(Spacing.Double);
 
         SqlPreCommandSimple insert = identityBehaviour ?
             new SqlPreCommandSimple(
@@ -690,13 +687,14 @@ SELECT {id} FROM rows;";
                 inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
                 new List<DbParameter>().Do(dbParams => inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment);
 
-        if (collections == null)
+        if (collections == null && virtualMList == null)
             return insert;
 
         if (!identityBehaviour)
         {
             return SqlPreCommand.Combine(Spacing.Simple,
                insert,
+               virtualMList,
                collections)!;
         }
 
@@ -709,7 +707,8 @@ DECLARE {parentId} {pkType};
 BEGIN
 {insert.PlainSql().Indent(4)}
 
-{collections.PlainSql().Indent(4)}
+{collections?.PlainSql().Indent(4)}
+{virtualMList?.PlainSql().Indent(4)}
 END $$;"); ;
         }
         else if (isGuid)
@@ -718,15 +717,17 @@ END $$;"); ;
                 insert,
                 new SqlPreCommandSimple($"DECLARE {parentId} {pkType};"),
                 new SqlPreCommandSimple($"SELECT {parentId} = ID FROM {newIds};"),
-                collections)!;
+                collections,
+                virtualMList)!;
         }
         else
         {
             return SqlPreCommand.Combine(Spacing.Simple,
-                new SqlPreCommandSimple($"DECLARE {parentId} {pkType};") { GoBefore = true },
+                new SqlPreCommandSimple($"DECLARE {parentId} {pkType};") { GoBefore = forceParentId == null },
                 insert,
                 new SqlPreCommandSimple($"SET {parentId} = @@Identity;"),
-                collections)!;
+                collections,
+                virtualMList)!;
         }
     }
 
@@ -754,7 +755,7 @@ END $$;"); ;
             bool isPostgres = Schema.Current.Settings.IsPostgres;
 
             var declare = DeclarePrimaryKeyVariable(entity, where);
-            var updateSql = new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter(entity.Id.VariableName);
+            var updateSql = new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter( entity.Id.VariableName);
 
             update = isPostgres ?
                 PostgresDoBlock(entity.Id.VariableName!, declare, updateSql) :
@@ -768,13 +769,84 @@ END $$;"); ;
         if (!includeCollections)
             return update;
 
+        var vmis = VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type);
+
+        SqlPreCommand? virtualMList = vmis?.Values
+            .Select(vmi => giUpdateVirtualMListSync.GetInvoker(this.Type, vmi.BackReferenceRoute.RootType)(entity, vmi))
+            .Combine(Spacing.Double);
+
         var cc = saveCollections.Value;
-        if (cc == null)
-            return update;
+        SqlPreCommand? collections = cc?.UpdateCollectionsSync((Entity)entity, suffix, where != null);
 
-        SqlPreCommand collections = cc.InsertCollectionsSync((Entity)entity, suffix, where != null);
+        return SqlPreCommand.Combine(Spacing.Double, update, collections, virtualMList);
+    }
 
-        return SqlPreCommand.Combine(Spacing.Simple, update, collections);
+    static GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>> giUpdateVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>>(
+        (e, vmi) => UpdateVirtualMListSync<Entity, Entity>(e, vmi));
+
+    static SqlPreCommand UpdateVirtualMListSync<T, E>(T entity, VirtualMListInfo vmli)
+        where T : Entity
+        where E : Entity
+    {
+        var table = Schema.Current.Table(typeof(E));
+
+        var lambda = vmli.MListRoute.GetLambdaExpression<T, MList<E>>(safeNullAccess: true).Compile();
+
+        var mlist = lambda(entity);
+
+        var backRef = vmli.BackReferenceRoute.GetLambdaExpression<E, Lite<T>>(safeNullAccess: false);
+
+        var delete = Administrator.UnsafeDeletePreCommand(Database.Query<E>().Where(e => backRef.Evaluate(e).Is(entity)));
+
+        var getContainer = vmli.BackReferenceRoute.Parent!.GetLambdaExpression<E, ModifiableEntity>(safeNullAccess: true).Compile();
+
+        var setter = ReflectionTools.CreateSetter<ModifiableEntity, Lite<T>>((MemberInfo?)vmli.BackReferenceRoute.PropertyInfo ?? vmli.BackReferenceRoute.FieldInfo!)!;
+
+        var inserts = mlist.Select(elem =>
+        {
+            setter(getContainer(elem), entity.ToLite());
+            
+            var result = table.InsertSqlSync(elem);
+            return result;
+        }).Combine(Spacing.Simple);
+
+        return SqlPreCommand.Combine(Spacing.Simple, delete, inserts)!;
+    }
+
+    static GenericInvoker<Func<Entity, VirtualMListInfo, string, SqlPreCommand>> giInsertVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, string, SqlPreCommand>>(
+        (e, vmi, parentId) => InsertVirtualMListSync<Entity, Entity>(e, vmi, parentId));
+
+    static SqlPreCommand InsertVirtualMListSync<T, E>(T entity, VirtualMListInfo vmli, string parentId)
+        where T : Entity
+        where E : Entity
+    {
+        var table = Schema.Current.Table(typeof(E));
+
+        var lambda = vmli.MListRoute.GetLambdaExpression<T, MList<E>>(safeNullAccess: true).Compile();
+
+        var mlist = lambda(entity);
+
+        var backRef = vmli.BackReferenceRoute.GetLambdaExpression<E, Lite<T>>(safeNullAccess: false);
+
+        bool isPostgres = Schema.Current.Settings.IsPostgres;
+        var field = (FieldReference)Schema.Current.Field(vmli.BackReferenceRoute)!;
+
+        var paramName = Signum.Engine.ParameterBuilder.GetParameterName(field.Name);
+
+        var inserts = mlist.Select((elem, i) =>
+        {
+            var result = table.InsertSqlSync(elem, forceParentId: parentId + "_" + i);
+
+            var simple = result as SqlPreCommandSimple ?? (SqlPreCommandSimple)((SqlPreCommandConcat)result).Commands.FirstEx(r => r is SqlPreCommandSimple s && s.Parameters != null);
+
+            var param = simple.Parameters!.SingleEx(p => p.ParameterName == paramName);
+
+            simple.ReplaceParameter(param, parentId);
+
+            return result;
+        }).Combine(Spacing.Simple);
+
+        return SqlPreCommand.Combine(Spacing.Simple, inserts)!;
     }
 
     void PrepareEntitySync(Entity entity)
@@ -839,6 +911,7 @@ public partial class TableMList
     internal interface IMListCache
     {
         SqlPreCommand? RelationalUpdateSync(Entity parent, string suffix, bool replaceParameter);
+        SqlPreCommand? RelationalInsertSync(Entity parent, string suffix, string parentIdVar);
         void RelationalInserts(List<EntityForbidden> entities);
         void RelationalUpdates(List<EntityForbidden> entities);
 
@@ -1101,9 +1174,6 @@ public partial class TableMList
 
             if (collection == null)
             {
-                if (parent.IsNew)
-                    return null;
-
                 return new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) })
                     .ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null);
             }
@@ -1111,30 +1181,36 @@ public partial class TableMList
             if (collection.Modified == ModifiedState.Clean)
                 return null;
 
-            if (parent.IsNew)
+            return SqlPreCommand.Combine(Spacing.Simple,
+                new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) }).ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null),
+                collection.Select((e, i) => new SqlPreCommandSimple(sqlInsert(new[] { suffix + "_" + i }, false), new List<DbParameter>().Do(ps => InsertParameters(parent, e, i, new Forbidden(), suffix + "_" + i, ps)))
+                    .AddComment(e?.ToString())
+                    .ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null)
+                ).Combine(Spacing.Simple));
+        }
+
+        public SqlPreCommand? RelationalInsertSync(Entity parent, string suffix, string parentIdVar)
+        {
+            MList<T> collection = Getter(parent);
+
+            if (collection == null || collection.IsEmpty())
+                return null;
+
+            if (collection.Modified == ModifiedState.Clean)
+                return null;
+
+
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+            return collection.Select((e, i) =>
             {
-                var isPostgres = Schema.Current.Settings.IsPostgres;
-                var parentIdVar = Table.Var(isPostgres, "parentId");
-                return collection.Select((e, i) =>
-                {
-                    var parameters = new List<DbParameter>();
-                    InsertParameters(parent, e, i, new Forbidden(new HashSet<Entity> { parent }), suffix + "_" + i, parameters);
-                    var parentId = parameters.First(); // wont be replaced, generating @parentId
-                        parameters.RemoveAt(0);
-                    string script = sqlInsert(new[] { suffix + "_" + i }, false);
-                    script = script.Replace(parentId.ParameterName, parentIdVar);
-                    return new SqlPreCommandSimple(script, parameters).AddComment(e?.ToString());
-                }).Combine(Spacing.Simple);
-            }
-            else
-            {
-                return SqlPreCommand.Combine(Spacing.Simple,
-                    new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) }).ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null),
-                    collection.Select((e, i) => new SqlPreCommandSimple(sqlInsert(new[] { suffix + "_" + i }, false), new List<DbParameter>().Do(ps => InsertParameters(parent, e, i, new Forbidden(), suffix + "_" + i, ps)))
-                        .AddComment(e?.ToString())
-                        .ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null)
-                    ).Combine(Spacing.Simple));
-            }
+                var parameters = new List<DbParameter>();
+                InsertParameters(parent, e, i, new Forbidden(new HashSet<Entity> { parent }), suffix + "_" + i, parameters);
+                var parentId = parameters.First(); // wont be replaced, generating @parentId
+                    parameters.RemoveAt(0);
+                string script = sqlInsert(new[] { suffix + "_" + i }, false);
+                script = script.Replace(parentId.ParameterName, parentIdVar);
+                return new SqlPreCommandSimple(script, parameters).AddComment(e?.ToString());
+            }).Combine(Spacing.Simple);
         }
     }
 
@@ -1153,12 +1229,12 @@ public partial class TableMList
             table = this,
             Getter = entity => (MList<T>)Getter(entity),
 
-            sqlDelete = suffix => "DELETE FROM {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
+            sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
             DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), ident.Id, this.BackReference.ReferenceTable.PrimaryKey),
 
             sqlDeleteExcept = num =>
             {
-                var sql = "DELETE FROM {0} WHERE {1} = {2}"
+                var sql = "DELETE {0} WHERE {1} = {2}"
                     .FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name));
 
                 sql += " AND {0} NOT IN ({1})"
