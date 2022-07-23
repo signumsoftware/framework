@@ -104,7 +104,7 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
         return scalar;
     }
 
-    internal protected virtual R Delete<R>(IQueryable query, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false)
+    internal protected virtual R Delete<R>(IQueryable query, Func<SqlPreCommandSimple, R> continuation, bool removeSelectRowCount = false, bool avoidMList = false)
     {
         AliasGenerator aliasGenerator = new AliasGenerator();
 
@@ -116,7 +116,7 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
 
             log.Switch("Bind");
             var binder = new QueryBinder(aliasGenerator);
-            CommandExpression delete = binder.BindDelete(cleaned);
+            CommandExpression delete = binder.BindDelete(cleaned, avoidMList);
             CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, binder, aliasGenerator, log);
             CommandExpression deleteSimplified = CommandSimplifier.Simplify(deleteOptimized, removeSelectRowCount, aliasGenerator);
 

@@ -406,15 +406,15 @@ public static class Administrator
         return prov.Translate(query.Expression, tr => tr.MainCommand);
     }
 
-    public static SqlPreCommandSimple? UnsafeDeletePreCommand<T>(IQueryable<T> query)
+    public static SqlPreCommandSimple? UnsafeDeletePreCommand<T>(IQueryable<T> query, bool force = false, bool avoidMList = false)
         where T : Entity
     {
-        if (!Administrator.ExistsTable<T>() || !query.Any())
+        if (!Administrator.ExistsTable<T>() || (!query.Any() && !force))
             return null;
 
         var prov = ((DbQueryProvider)query.Provider);
         using (PrimaryKeyExpression.PreferVariableName())
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
+            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true, avoidMList);
     }
 
     public static SqlPreCommandSimple? UnsafeDeletePreCommandMList<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)

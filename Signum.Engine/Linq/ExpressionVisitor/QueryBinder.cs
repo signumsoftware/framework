@@ -2460,7 +2460,7 @@ internal class QueryBinder : ExpressionVisitor
         return b;
     }
 
-    internal CommandExpression BindDelete(Expression source)
+    internal CommandExpression BindDelete(Expression source, bool avoidMList)
     {
         var isHistory = this.systemTime is SystemTime.HistoryTable;
 
@@ -2472,19 +2472,22 @@ internal class QueryBinder : ExpressionVisitor
         {
             Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.GetName(isHistory)))!;
 
-            commands.AddRange(ee.Table.TablesMList().Select(t =>
+            if (!avoidMList)
             {
-                Expression backId = t.BackColumnExpression(aliasGenerator.Table(t.GetName(isHistory)));
-                return new DeleteExpression(t, isHistory && t.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(backId, ee.ExternalId), returnRowCount: false);
-            }));
+                commands.AddRange(ee.Table.TablesMList().Select(t =>
+                {
+                    Expression backId = t.BackColumnExpression(aliasGenerator.Table(t.GetName(isHistory)));
+                    return new DeleteExpression(t, isHistory && t.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(backId, ee.ExternalId), returnRowCount: false, alias: null);
+                }));
+            }
 
-            commands.Add(new DeleteExpression(ee.Table, isHistory && ee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, ee.ExternalId), returnRowCount: true));
+            commands.Add(new DeleteExpression(ee.Table, isHistory && ee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, ee.ExternalId), returnRowCount: true, alias: null));
         }
         else if (pr.Projector is MListElementExpression mlee)
         {
             Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.GetName(isHistory)));
 
-            commands.Add(new DeleteExpression(mlee.Table, isHistory && mlee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId), returnRowCount: true));
+            commands.Add(new DeleteExpression(mlee.Table, isHistory && mlee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId), returnRowCount: true, alias: null));
         }
         else if (pr.Projector is EmbeddedEntityExpression eee)
         {
@@ -2492,7 +2495,7 @@ internal class QueryBinder : ExpressionVisitor
 
             Expression id = vn.GetIdExpression(aliasGenerator.Table(vn.Name)).ThrowIfNull(() => $"{vn.Name} has no primary name");
 
-            commands.Add(new DeleteExpression(vn, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId()), returnRowCount: true));
+            commands.Add(new DeleteExpression(vn, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId()), returnRowCount: true, alias: null));
         }
         else
             throw new InvalidOperationException("Delete not supported for {0}".FormatWith(pr.Projector.GetType().TypeName()));

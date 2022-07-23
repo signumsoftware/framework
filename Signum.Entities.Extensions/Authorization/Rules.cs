@@ -46,29 +46,36 @@ public class RulePropertyEntity : RuleEntity<PropertyRouteEntity, PropertyAllowe
 
 public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
 {
-    [PreserveOrder]
-    public MList<RuleTypeConditionEmbedded> Conditions { get; set; } = new MList<RuleTypeConditionEmbedded>();
+    [PreserveOrder, NoRepeatValidator, Ignore, QueryableProperty]
+    [NotifyChildProperty, NotifyCollectionChanged]
+    public MList<RuleTypeConditionEntity> Conditions { get; set; } = new MList<RuleTypeConditionEntity>();
 }
 
-public class RuleTypeConditionEmbedded : EmbeddedEntity, IEquatable<RuleTypeConditionEmbedded>
+[EntityKind(EntityKind.System, EntityData.Master)]
+public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntity>, ICanBeOrdered
 {
-    public TypeConditionSymbol Condition { get; set; }
+    [NotNullValidator(Disabled = true)]
+    public Lite<RuleTypeEntity> RuleType { get; set; }
+
+    [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
+    public MList<TypeConditionSymbol> Conditions { get; set; } = new MList<TypeConditionSymbol>();
 
     public TypeAllowed Allowed { get; set; }
 
-    public bool Equals(RuleTypeConditionEmbedded? other)
+    public int Order { get; set; }
+
+    public bool Equals(RuleTypeConditionEntity? other)
     {
         if (other == null)
             return false;
 
-        return this.Condition.Equals(other.Condition)
+        return this.Conditions.ToHashSet().SetEquals(other.Conditions)
             && this.Allowed == other.Allowed;
     }
 
-    public override string ToString()
-    {
-        return "{0} ({1})".FormatWith(Condition, Allowed);
-    }
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Allowed.ToString());
+  
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
