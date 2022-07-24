@@ -19,8 +19,8 @@ import { CellFormatter } from "../Finder";
 
 
 export interface CellOperationProps extends ButtonProps {
-  coc: CellOperationContext;
-  onOperationClick?: (coc: CellOperationContext) => Promise<void>;
+  coc: CellOperationContext<Entity>;
+  onOperationClick?: (coc: CellOperationContext<Entity>) => Promise<void>;
   variant?: BsColor;
   className?: string;
   children?: React.ReactNode;
@@ -101,7 +101,7 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
   }
 }
 
-CellOperationButton.getText = (icoc: CellOperationContext): React.ReactNode => {
+CellOperationButton.getText = (icoc: CellOperationContext<Entity>): React.ReactNode => {
 
   if (icoc.settings && icoc.settings.text)
     return icoc.settings.text(icoc);
@@ -115,7 +115,7 @@ CellOperationButton.simplifyName = (niceName: string) => {
   return array ? OperationMessage.Create0.niceToString(array[1].firstUpper()) : niceName;
 }
 
-function confirmInNecessary(coc: CellOperationContext): Promise<boolean> {
+function confirmInNecessary(coc: CellOperationContext<Entity>): Promise<boolean> {
 
   const confirmMessage = getConfirmMessage(coc);
 
@@ -131,7 +131,7 @@ function confirmInNecessary(coc: CellOperationContext): Promise<boolean> {
   }).then(result => { return result == "yes"; });
 }
 
-function getConfirmMessage(coc: CellOperationContext) {
+function getConfirmMessage(coc: CellOperationContext<Entity>) {
   if (coc.settings && coc.settings.confirmMessage === null)
     return undefined;
 
@@ -149,7 +149,7 @@ function getConfirmMessage(coc: CellOperationContext) {
 }
 
 
-export function defaultCellOperationClick(coc: CellOperationContext, ...args: any[]): Promise<void> {
+export function defaultCellOperationClick(coc: CellOperationContext<any>, ...args: any[]): Promise<void> {
 
   coc.event!.persist();
 
