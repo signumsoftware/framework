@@ -478,7 +478,7 @@ public static class TranslatedInstanceLogic
             TranslatedText = cellValues[4]
         });
 
-        SaveRecords(records, type, culture);
+        SaveRecords(records, type, isSync: false, culture);
 
         return new TypeCulturePair(type, culture);
     }
