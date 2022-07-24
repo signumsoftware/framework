@@ -191,10 +191,11 @@ public static class PlainExcelGenerator
                 CustomWidth = true
             }).ToArray()));
 
+            if (title.HasText())
+                worksheetPart.Worksheet.Append(new[] { CellBuilder.Cell(title, DefaultStyle.Title) }.ToRow());
+
             worksheetPart.Worksheet.Append(new Sequence<Row>()
             {
-                new[] { CellBuilder.Cell(title ?? "", DefaultStyle.Title) }.ToRow(),
-        
                 (from c in members
                 select CellBuilder.Cell(c.Name, DefaultStyle.Header)).ToRow(),
 
