@@ -175,7 +175,7 @@ function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, ch
 export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode }) {
   return (
     <Nav.Item >
-      <Nav.Link title={p.title} onClick={p.onClick} active={p.active}>
+      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active}>
         {p.icon} 
         <span className={"nav-item-text"}>{p.title}</span>
         <div className={"nav-item-float"}>{p.title}</div>
