@@ -37,6 +37,7 @@ import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
+import { Search } from "history";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -1391,6 +1392,11 @@ export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenStri
 }
 
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
+export type ExtractQueryToken<T> = T extends QueryTokenString<infer S> ? AddToLite<S> : any;
+
+export type ExtractTokensObject<T> = {
+  [P in keyof T]: ExtractQueryToken<T[P]>;
+};
 
 export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
   return useAPI(
@@ -1451,6 +1457,29 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
 
   return resultTable.rows[0]?.columns[0] ?? null;
 }
+
+
+
+export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity> | null, tokensObject: TO, additionalDeps?: any[], options?: APIHookOptions): ExtractTokensObject<TO> | null | undefined {
+  var resultTable = useQuery(entity == null || isEntity(entity) && entity.isNew ? null : {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a  })),
+    columnOptionsMode: "Replace",
+  }, additionalDeps, options);
+
+  if (entity == null)
+    return null;
+
+  if (resultTable == null)
+    return undefined;
+
+  var firstRow = resultTable.rows[0]; 
+
+  return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+}
+
 
 export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[], options?: APIHookOptions): AddToLite<R>[] | null | undefined {
   var resultTable = useQuery(entity == null || isEntity(entity) && entity.isNew ? null : {
