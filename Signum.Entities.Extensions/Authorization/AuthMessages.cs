@@ -180,7 +180,7 @@ public enum AuthAdminMessage
 
     [Description("Maximum of the {0}")]
     MaximumOfThe0,
-    [Description("Maximum of the {0}")]
+    [Description("Minimum of the {0}")]
     MinumumOfThe0,
     [Description("Same as {0}")]
     SameAs0,
