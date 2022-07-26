@@ -228,26 +228,26 @@ public class Graph<T, S>
             return base.OnCanExecute(entity);
         }
 
-        protected override IDisposable? AssertEntity(T entity)
+        protected override Action? AssertEntity(T entity)
         {
             if(this.FromToStates.Count == 0)
             {
-                return new Disposable(() =>
+                return () =>
                 {
                     AssertToState(entity, this);
-                });
+                };
             }
             else
             {
                 S initialState = GetStateFunc(entity);
                 var targetStates = this.FromToStates.Where(a => object.Equals(a.from, initialState)).Select(a => a.to).ToList();
 
-                return new Disposable(() =>
+                return () =>
                 {
                     S endState = GetStateFunc(entity);
                     if (!targetStates.Contains(endState))
                         throw new InvalidOperationException("After executing {0} from state {1} should be {2}, but is {3}".FormatWith(Symbol.Symbol, initialState, targetStates.CommaOr(), endState));
-                });
+                };
             }
         }
 
