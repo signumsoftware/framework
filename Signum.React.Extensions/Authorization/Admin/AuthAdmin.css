@@ -53,6 +53,10 @@
         color:#bbb
     }
 
+    .sf-auth-rules small.and {
+        color: #444
+    }
+
 a.sf-auth-chooser
 {
     text-decoration: none !important;

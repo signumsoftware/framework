@@ -15,7 +15,8 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
     {
         this.merger = merger;
 
-        sb.Include<RuleTypeEntity>();
+        sb.Include<RuleTypeEntity>()
+            .WithVirtualMList(rt => rt.Conditions, c => c.RuleType);
 
         sb.AddUniqueIndex<RuleTypeEntity>(rt => new { rt.Resource, rt.Role });
 
@@ -42,16 +43,15 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
 
         try
         {
-
             Type type = TypeLogic.EntityToType.GetOrThrow(rt.Resource);
             var conditions = rt.Conditions.Where(a =>
-            a.Condition.FieldInfo != null && /*Not 100% Sync*/
-            !TypeConditionLogic.IsDefined(type, a.Condition));
+                a.Conditions.Any(c => c.FieldInfo != null && /*Not 100% Sync*/
+                !TypeConditionLogic.IsDefined(type, c)));
 
             if (conditions.IsEmpty())
                 return null;
 
-            return "Type {0} has no definitions for the conditions: {1}".FormatWith(type.Name, conditions.CommaAnd(a => a.Condition.Key));
+            return "Type {0} has no definitions for the conditions: {1}".FormatWith(type.Name, conditions.CommaAnd(a => a.Conditions.CommaAnd(c => c.Key)));
         }
         catch (Exception ex) when (StartParameters.IgnoredDatabaseMismatches != null)
         {
@@ -76,9 +76,13 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
     {
         TypeConditionSymbol condition = (TypeConditionSymbol)arg;
 
-        var command = Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt)=>rt.Conditions,  Database.MListQuery((RuleTypeEntity rt) => rt.Conditions).Where(mle => mle.Element.Condition.Is(condition)));
+        if (!Database.MListQuery((RuleTypeConditionEntity rt) => rt.Conditions).Any(mle => mle.Element.Is(condition)))
+            return null;
 
-        return command;
+        var mlist = Administrator.UnsafeDeletePreCommandMList((RuleTypeConditionEntity rt)=>rt.Conditions,  Database.MListQuery((RuleTypeConditionEntity rt) => rt.Conditions).Where(mle => mle.Element.Is(condition)));
+        var emptyRules = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(rt => rt.Conditions.Count == 0), force: true, avoidMList: true);
+
+        return SqlPreCommand.Combine(Spacing.Simple, mlist, emptyRules);
     }
 
     TypeAllowedAndConditions IManualAuth<Type, TypeAllowedAndConditions>.GetAllowed(Lite<RoleEntity> role, Type key)
@@ -208,12 +212,12 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                 (type, pr) => pr.Delete(),
                 (type, ar, pr) =>
                 {
-                    pr.Allowed = ar.Allowed.Fallback!.Value;
+                    pr.Allowed = ar.Allowed.Fallback;
 
-                    var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionEmbedded
+                    var shouldConditions = ar.Allowed.ConditionRules.Select(a => new RuleTypeConditionEntity
                     {
                         Allowed = a.Allowed,
-                        Condition = a.TypeCondition,
+                        Conditions = a.TypeConditions.ToMList(),
                     }).ToMList();
 
                     if (!pr.Conditions.SequenceEqual(shouldConditions))
@@ -325,9 +329,9 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                      select new XElement("Type",
                         new XAttribute("Resource", resource),
                         new XAttribute("Allowed", allowed.Fallback.ToString()!),
-                        from c in allowed.Conditions
+                        from c in allowed.ConditionRules
                         select new XElement("Condition",
-                            new XAttribute("Name", c.TypeCondition.Key),
+                            new XAttribute("Name", c.TypeConditions.ToString(", ")),
                             new XAttribute("Allowed", c.Allowed.ToString()))
                      )
                  )
@@ -344,13 +348,14 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
         var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name")!.Value));
 
         Table table = Schema.Current.Table(typeof(RuleTypeEntity));
+        Table conditionTable = Schema.Current.Table(typeof(RuleTypeConditionEntity));
 
         replacements.AskForReplacements(
             xRoles.SelectMany(x => x.Elements("Type")).Select(x => x.Attribute("Resource")!.Value).ToHashSet(),
             TypeLogic.NameToType.Where(a => !a.Value.IsEnumEntity()).Select(a => a.Key).ToHashSet(), typeReplacementKey);
 
         replacements.AskForReplacements(
-            xRoles.SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).Select(x => x.Attribute("Name")!.Value).ToHashSet(),
+            xRoles.SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).SelectMany(x => x.Attribute("Name")!.Value.SplitNoEmpty(",").Select(a=>a.Trim()).ToList()).ToHashSet(),
             SymbolLogic<TypeConditionSymbol>.AllUniqueKeys(),
             typeConditionReplacementKey);
 
@@ -365,7 +370,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
         };
 
 
-        return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
+        return Synchronizer.SynchronizeScript(Spacing.Triple, should, current,
             createNew: (role, x) =>
             {
                 var dic = (from xr in x.Elements("Type")
@@ -382,7 +387,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                     Resource = kvp.Key,
                     Role = role,
                     Allowed = kvp.Value.Allowed,
-                    Conditions = kvp.Value.Condition! /*CSBUG*/
+                    Conditions = kvp.Value.Condition!.ToMList() /*CSBUG*/
                 }, comment: Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
 
                 return restSql;
@@ -396,7 +401,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                            select KeyValuePair.Create(t, xr)).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
                 SqlPreCommand? restSql = Synchronizer.SynchronizeScript(
-                    Spacing.Simple,
+                    Spacing.Triple,
                     dic,
                     list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
                     createNew: (r, xr) =>
@@ -404,9 +409,12 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                         var a = xr.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>();
                         var conditions = Conditions(xr, replacements);
 
-                        return table.InsertSqlSync(new RuleTypeEntity { Resource = r, Role = role, Allowed = a, Conditions = conditions }, comment: Comment(role, r, a));
+                        return table.InsertSqlSync(
+                            new RuleTypeEntity { Resource = r, Role = role, Allowed = a, Conditions = conditions.ToMList() }, 
+                            includeCollections: true, 
+                            comment: Comment(role, r, a));
                     },
-                    removeOld: (r, rt) => table.DeleteSqlSync(rt, null, Comment(role, r, rt.Allowed)),
+                    removeOld: (r, rt) => table.DeleteSqlSync(rt, null,  Comment(role, r, rt.Allowed)),
                     mergeBoth: (r, xr, pr) =>
                     {
                         var oldA = pr.Allowed;
@@ -416,23 +424,23 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                         if (!pr.Conditions.SequenceEqual(conditions))
                             pr.Conditions = conditions;
 
-                        return table.UpdateSqlSync(pr, null, comment: Comment(role, r, oldA, pr.Allowed));
+                        return table.UpdateSqlSync(pr, null, includeCollections:true, comment: Comment(role, r, oldA, pr.Allowed));
                     })?.Do(p => p.GoBefore = true);
 
                 return restSql;
             });
     }
 
-    private static MList<RuleTypeConditionEmbedded> Conditions(XElement xr, Replacements replacements)
+    private static MList<RuleTypeConditionEntity> Conditions(XElement xr, Replacements replacements)
     {
-        return (from xc in xr.Elements("Condition")
-                let cn = SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, xc.Attribute("Name")!.Value))
-                where cn != null
-                select new RuleTypeConditionEmbedded
+        var conditions = (from xc in xr.Elements("Condition")
+                select new RuleTypeConditionEntity
                 {
-                    Condition = cn,
+                    Conditions = xc.Attribute("Name")!.Value.SplitNoEmpty(",")
+                        .Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToMList(),
                     Allowed = xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>()
                 }).ToMList();
+        return conditions;
     }
 
 

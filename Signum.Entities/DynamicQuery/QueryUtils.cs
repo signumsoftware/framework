@@ -433,7 +433,7 @@ public static class QueryUtils
 
 
     static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity ident) => ident.ToLite()).GetGenericMethodDefinition();
-    internal static Expression ExtractEntity(this Expression expression, bool idAndToStr)
+    public static Expression ExtractEntity(this Expression expression, bool idAndToStr)
     {
         if (expression.Type.IsLite())
         {

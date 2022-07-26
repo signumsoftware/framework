@@ -65,7 +65,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
       });
     }).notNull());
 
-    lock(() => API.saveTranslatedInstanceData(records, type, culture)
+    lock(() => API.saveTranslatedInstanceData(records, type, true, culture)
       .then(() => { reloadResult(); notifySuccess(); }))
       .done();
   }

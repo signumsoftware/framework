@@ -380,17 +380,19 @@ export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAll
   Type: "RuleQuery";
 }
 
-export const RuleTypeConditionEmbedded = new Type<RuleTypeConditionEmbedded>("RuleTypeConditionEmbedded");
-export interface RuleTypeConditionEmbedded extends Entities.EmbeddedEntity {
-  Type: "RuleTypeConditionEmbedded";
-  condition: Signum.TypeConditionSymbol;
+export const RuleTypeConditionEntity = new Type<RuleTypeConditionEntity>("RuleTypeCondition");
+export interface RuleTypeConditionEntity extends Entities.Entity {
+  Type: "RuleTypeCondition";
+  ruleType: Entities.Lite<RuleTypeEntity>;
+  conditions: Entities.MList<Signum.TypeConditionSymbol>;
   allowed: TypeAllowed;
+  order: number;
 }
 
 export const RuleTypeEntity = new Type<RuleTypeEntity>("RuleType");
 export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
   Type: "RuleType";
-  conditions: Entities.MList<RuleTypeConditionEmbedded>;
+  conditions: Entities.MList<RuleTypeConditionEntity>;
 }
 
 export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
@@ -420,8 +422,8 @@ export type TypeAllowed =
 export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
   Type: "TypeAllowedAndConditions";
-  fallback: TypeAllowed | null;
-  conditions: Entities.MList<TypeConditionRuleEmbedded>;
+  fallback: TypeAllowed;
+  conditionRules: Entities.MList<TypeConditionRuleModel>;
 }
 
 export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic");
@@ -439,10 +441,10 @@ export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllo
   availableConditions: Array<Signum.TypeConditionSymbol>;
 }
 
-export const TypeConditionRuleEmbedded = new Type<TypeConditionRuleEmbedded>("TypeConditionRuleEmbedded");
-export interface TypeConditionRuleEmbedded extends Entities.EmbeddedEntity {
-  Type: "TypeConditionRuleEmbedded";
-  typeCondition: Signum.TypeConditionSymbol;
+export const TypeConditionRuleModel = new Type<TypeConditionRuleModel>("TypeConditionRuleModel");
+export interface TypeConditionRuleModel extends Entities.ModelEntity {
+  Type: "TypeConditionRuleModel";
+  typeConditions: Entities.MList<Signum.TypeConditionSymbol>;
   allowed: TypeAllowed;
 }
 

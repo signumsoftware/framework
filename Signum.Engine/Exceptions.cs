@@ -84,7 +84,15 @@ public class UniqueKeyException : ApplicationException
                                         return colValues.GetOrThrow(fe)?.Let(a => ReflectionTools.ChangeType(a, fe.Type));
 
                                     if (f is FieldReference fr)
-                                        return colValues.GetOrThrow(fr)?.Let(a => Database.RetrieveLite(fr.Type, PrimaryKey.Parse(a, fr.Type)));
+                                    {
+                                        var id = colValues.GetOrThrow(fr);
+                                        if (id == null)
+                                            return null;
+
+                                        var type = fr.FieldType.CleanType();
+
+                                        return Database.RetrieveLite(type, PrimaryKey.Parse(id, type));
+                                    } 
 
                                     if (f is FieldImplementedBy ib)
                                     {

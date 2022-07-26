@@ -119,8 +119,8 @@ export module API {
     return ajaxGet({ url: `~/api/translatedInstance/sync/${type}?${QueryString.stringify({ culture })}` });
   }
 
-  export function saveTranslatedInstanceData(records: TranslationRecord[], type: string, culture?: string | undefined): Promise<void> {
-    return ajaxPost({ url: `~/api/translatedInstance/save/${type}?${QueryString.stringify({ culture })}` }, records);
+  export function saveTranslatedInstanceData(records: TranslationRecord[], type: string, isSync: boolean, culture?: string | undefined): Promise<void> {
+    return ajaxPost({ url: `~/api/translatedInstance/save/${type}?${QueryString.stringify({ isSync, culture })}` }, records);
   }
 
 }

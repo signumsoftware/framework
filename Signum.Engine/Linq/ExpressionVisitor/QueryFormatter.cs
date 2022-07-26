@@ -828,7 +828,10 @@ internal class QueryFormatter : DbExpressionVisitor
         using (this.PrintSelectRowCount(delete.ReturnRowCount))
         {
             sb.Append("DELETE FROM ");
-            sb.Append(delete.Name.ToString());
+            if (delete.Alias != null)
+                sb.Append(delete.Alias.ToString());
+            else
+                sb.Append(delete.Name.ToString());
             this.AppendNewLine(Indentation.Same);
 
             if (isPostgres)

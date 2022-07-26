@@ -142,7 +142,7 @@ internal class QueryRebinder : DbExpressionVisitor
         var where = Visit(delete.Where);
 
         if (source != delete.Source || where != delete.Where)
-            return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where, delete.ReturnRowCount);
+            return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where, delete.ReturnRowCount, alias: null);
 
         return delete;
     }
