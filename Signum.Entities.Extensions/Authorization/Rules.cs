@@ -64,13 +64,15 @@ public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntit
 
     public int Order { get; set; }
 
+    public override int GetHashCode() => Conditions.Count;
+
+    public override bool Equals(object? obj) => obj is RuleTypeConditionEntity rtc && Equals(rtc);
     public bool Equals(RuleTypeConditionEntity? other)
     {
         if (other == null)
             return false;
 
-        return this.Conditions.ToHashSet().SetEquals(other.Conditions)
-            && this.Allowed == other.Allowed;
+        return this.Conditions.ToHashSet().SetEquals(other.Conditions);
     }
 
     [AutoExpressionField]

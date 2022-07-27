@@ -181,6 +181,7 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
         private set { fallback = value; }
     }
 
+    [NoRepeatValidator]
     public MList<TypeConditionRuleModel> ConditionRules { get; set; } = new MList<TypeConditionRuleModel>();
 
     public override bool Equals(object? obj) => obj is TypeAllowedAndConditions tac && Equals(tac);
@@ -284,13 +285,15 @@ public class TypeConditionRuleModel : ModelEntity, IEquatable<TypeConditionRuleM
 
     public TypeAllowed Allowed { get; set; }
 
+    public override int GetHashCode() => TypeConditions.Count;
+    public override bool Equals(object? obj) => obj is TypeConditionRuleModel rm && Equals(rm);
+
     public bool Equals(TypeConditionRuleModel? other)
     {
         if (other == null)
             return false;
 
-        return TypeConditions.ToHashSet().SetEquals(other.TypeConditions) &&
-            Allowed.Equals(other.Allowed);
+        return TypeConditions.ToHashSet().SetEquals(other.TypeConditions);
     }
 
     [AutoExpressionField]

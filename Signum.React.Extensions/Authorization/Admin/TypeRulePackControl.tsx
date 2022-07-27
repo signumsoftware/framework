@@ -20,10 +20,11 @@ import {
 } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
-import { QueryEntity, PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
+import { QueryEntity, PropertyRouteEntity, TypeEntity } from '@framework/Signum.Entities.Basics'
 
 import "./AuthAdmin.css"
 import { is } from '@framework/Signum.Entities';
+import { getNiceTypeName } from '../../../Signum.React/Scripts/Operations/MultiPropertySetter'
 
 export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
 
@@ -186,9 +187,18 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     </div>
   );
 
-  function handleAddConditionClick(conditions: TypeConditionSymbol[], taac: TypeAllowedAndConditions) {
+  function handleAddConditionClick(conditions: TypeConditionSymbol[], taac: TypeAllowedAndConditions, type: TypeEntity) {
 
-    SelectorModal.chooseManyElement(conditions, { buttonDisplay: a => getToString(a), size: "md" })
+    SelectorModal.chooseManyElement(conditions, {
+      buttonDisplay: a => getToString(a),
+      title: AuthAdminMessage.SelectTypeConditions.niceToString(),
+      message: <div>
+        <p>{AuthAdminMessage.ThereAre0TypeConditionsDefinedFor1.niceToString().formatHtml(<strong>{conditions.length}</strong>, <strong>{getTypeInfo(type.cleanName).niceName}</strong>)}</p>
+        <p>{AuthAdminMessage.SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
+        <p>{AuthAdminMessage.SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
+      </div>,
+      size: "md"
+    })
       .then(tc => {
         if (!tc)
           return;
@@ -223,7 +233,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td className={tctx.value.allowed.fallback == null ? "text-danger fw-bold" : undefined} title={AuthAdminMessage.ConflictMergingTypeConditions.niceToString()}>
           {conditions.length > 0 ?
-            <span className="sf-condition-icon" onClick={() => handleAddConditionClick(conditions, tctx.value.allowed)}>
+            <span className="sf-condition-icon" onClick={() => handleAddConditionClick(conditions, tctx.value.allowed, tctx.value.resource)}>
               <FontAwesomeIcon icon="plus-circle" />
             </span> :
             <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>}

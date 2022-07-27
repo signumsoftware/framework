@@ -187,4 +187,16 @@ public enum AuthAdminMessage
     Nothing,
     Everithing,
 
+    [Description("Select Type Condition(s)")]
+    SelectTypeConditions,
+
+    [Description("There are {0} Type Conditions defined for {1}.")]
+    ThereAre0TypeConditionsDefinedFor1,
+
+    [Description("Select one to override the access for {0} that satisfy this condition.")]
+    SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition,
+
+    [Description("Select more than one to override access for {0} that satisfy all the conditions at the same time.")]
+    SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime
+
 }
