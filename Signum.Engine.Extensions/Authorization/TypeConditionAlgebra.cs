@@ -203,7 +203,7 @@ public static class TypeConditionNodeExtensions
         }
 
         if (node is NotNode nn)
-            return Expression.Negate(nn.ToExpression(entity));
+            return Expression.Not(nn.Operand.ToExpression(entity));
 
         if (node is AndNode and)
             return and.Nodes.Select(n => n.ToExpression(entity)).Aggregate(Expression.And);
