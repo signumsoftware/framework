@@ -158,7 +158,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
         using (AuthLogic.Disable())
         using (new EntityCache(EntityCacheType.ForceNewSealed))
         {
-            List<Lite<RoleEntity>> roles = AuthLogic.RolesInOrder().ToList();
+            List<Lite<RoleEntity>> roles = AuthLogic.RolesInOrder(includeTrivialMerge: true).ToList();
 
             var rules = Database.Query<RuleTypeEntity>().ToList();
 
@@ -316,7 +316,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
         var rules = runtimeRules.Value;
 
         return new XElement("Types",
-            (from r in AuthLogic.RolesInOrder()
+            (from r in AuthLogic.RolesInOrder(includeTrivialMerge: false)
              let rac = rules.GetOrThrow(r)
              select new XElement("Role",
                  new XAttribute("Name", r.ToString()!),

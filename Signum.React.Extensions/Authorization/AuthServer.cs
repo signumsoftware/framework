@@ -276,7 +276,7 @@ public static class AuthServer
         if (!BasicPermission.AdminRules.IsAuthorized())
             return new MapColorProvider[0];
 
-        var roleRules = AuthLogic.RolesInOrder().ToDictionary(r => r,
+        var roleRules = AuthLogic.RolesInOrder(includeTrivialMerge: false).ToDictionary(r => r,
             r => TypeAuthLogic.GetTypeRules(r).Rules.ToDictionary(a => a.Resource.CleanName, a => a.Allowed));
 
         return roleRules.Keys.Select((r, i) => new MapColorProvider

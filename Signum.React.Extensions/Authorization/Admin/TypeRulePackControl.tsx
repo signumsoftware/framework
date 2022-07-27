@@ -37,8 +37,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     const hasChanges = bc.pack.entity.modified;
 
     return [
-      { button: <Button variant="primary" disabled={!hasChanges} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
-      { button: <Button variant="warning" disabled={!hasChanges} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
+      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
       { button: <Button variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
     ];
   }
@@ -251,7 +251,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
           {colorRadio(fallback, "None", "red")}
         </td>
         <td style={{ textAlign: "center" }}>
-          <GrayCheckbox checked={!typeAllowedEquals(tctx.value.allowed, tctx.value.allowedBase)} onUnchecked={() => {
+          <GrayCheckbox readOnly={ctx.readOnly} checked={!typeAllowedEquals(tctx.value.allowed, tctx.value.allowedBase)} onUnchecked={() => {
             tctx.value.allowed = JSON.parse(JSON.stringify(tctx.value.allowedBase));
             tctx.value.modified = true;
             updateFrame();
@@ -328,6 +328,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       title={title}
       color={color}
       icon={icon}
+      readOnly={ctx.readOnly}
       onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); updateFrame(); }}
     />;
   }
@@ -350,7 +351,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       }
       else {
         action()
-          .then(m => Navigator.view(m, { buttons: "close" }))
+          .then(m => Navigator.view(m, { buttons: "close", readOnly: ctx.readOnly }))
           .then(() => action())
           .then(m => {
             setNewValue(m);

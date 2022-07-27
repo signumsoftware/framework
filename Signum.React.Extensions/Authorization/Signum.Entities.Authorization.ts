@@ -119,6 +119,9 @@ export module AuthAdminMessage {
   export const ThereAre0TypeConditionsDefinedFor1 = new MessageKey("AuthAdminMessage", "ThereAre0TypeConditionsDefinedFor1");
   export const SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition = new MessageKey("AuthAdminMessage", "SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition");
   export const SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime = new MessageKey("AuthAdminMessage", "SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime");
+  export const Role0InheritsFromTrivialMergeRole1 = new MessageKey("AuthAdminMessage", "Role0InheritsFromTrivialMergeRole1");
+  export const IncludeTrivialMerges = new MessageKey("AuthAdminMessage", "IncludeTrivialMerges");
+  export const Role0IsTrivialMerge = new MessageKey("AuthAdminMessage", "Role0IsTrivialMerge");
 }
 
 export module AuthEmailMessage {
@@ -342,6 +345,7 @@ export interface RoleEntity extends Entities.Entity {
   Type: "Role";
   name: string;
   mergeStrategy: MergeStrategy;
+  isTrivialMerge: boolean;
   inheritsFrom: Entities.MList<Entities.Lite<RoleEntity>>;
   description: string | null;
 }

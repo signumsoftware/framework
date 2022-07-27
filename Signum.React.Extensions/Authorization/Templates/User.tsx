@@ -1,10 +1,12 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { UserEntity, UserState, LoginAuthMessage, UserADMixin } from '../Signum.Entities.Authorization'
+import { UserEntity, UserState, LoginAuthMessage, UserADMixin, RoleEntity } from '../Signum.Entities.Authorization'
 import { Binding } from '@framework/Reflection'
 import { ValueLine, EntityLine, EntityCombo, FormGroup, TypeContext } from '@framework/Lines'
 import { DoublePassword } from './DoublePassword'
 import { tryGetMixin } from '@framework/Signum.Entities'
+import * as Finder from '@framework/Finder'
+import * as AuthAdminClient from '../AuthAdminClient'
 
 export default function User(p: { ctx: TypeContext<UserEntity> }) {
 
@@ -19,7 +21,18 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
       <ValueLine ctx={ctx.subCtx(e => e.userName)} readOnly={User.userNameReadonly(ctx.value) ? true : undefined} />
       {!ctx.readOnly && ctx.subCtx(a => a.passwordHash).propertyRoute?.canModify() && User.changePasswordVisible(ctx.value) &&
         <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} isNew={entity.isNew} mandatory />}
-      <EntityLine ctx={ctx.subCtx(e => e.role)} />
+
+      <EntityLine ctx={ctx.subCtx(e => e.role)} onFind={() =>
+        Finder.findMany(RoleEntity).then(rs => {
+          if (rs == null)
+            return undefined;
+
+          if (rs.length == 1)
+            return rs[0];
+
+          return AuthAdminClient.API.trivialMergeRole(rs);
+        })} />
+
       <ValueLine ctx={ctx.subCtx(e => e.email)} readOnly={User.emailReadonly(ctx.value) ? true : undefined} />
       <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
     </div>

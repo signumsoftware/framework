@@ -197,6 +197,13 @@ public enum AuthAdminMessage
     SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition,
 
     [Description("Select more than one to override access for {0} that satisfy all the conditions at the same time.")]
-    SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime
+    SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime,
 
+    [Description("Role {0} inherits from trivial merge role {1}")]
+    Role0InheritsFromTrivialMergeRole1,
+
+    IncludeTrivialMerges,
+
+    [Description("Role {0} is trivial merge")]
+    Role0IsTrivialMerge,
 }
