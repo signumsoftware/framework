@@ -101,6 +101,7 @@ public enum WordTemplateMessage
     WordReport,
 }
 
+[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class WordTransformerSymbol : Symbol
 {
     private WordTransformerSymbol() { }
@@ -111,6 +112,7 @@ public class WordTransformerSymbol : Symbol
     }
 }
 
+[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class WordConverterSymbol : Symbol
 {
     private WordConverterSymbol() { }

@@ -3,7 +3,7 @@
 
 [![Join the chat at https://gitter.im/signumsoftware/framework](https://badges.gitter.im/signumsoftware/framework.svg)](https://gitter.im/signumsoftware/framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Signum Framework is an Open Source framework from Signum Software for writing data-centric applications over the latest technologies from Microsoft (.Net Core 3.1, C# 8.0, ASP.Net Web.API and Typescript 3.7) and web standard libraries (React, Bootstrap and D3). It uses either  Microsoft SQL Server or PostgreSQL to store data.   
+Signum Framework is an Open Source framework from Signum Software for writing data-centric applications over the latest technologies from Microsoft (.Net Core, C#, ASP.Net Web.API and Typescript in their latest versions) and web standard libraries (React, Bootstrap and D3). It uses either Microsoft SQL Server or PostgreSQL to store data.   
 
 The main focus of the framework is being able to write vertical modules (database tables, entities, logic and React UI components) that can be shared between projects.
 
@@ -13,7 +13,10 @@ Our cutting-edge ORM, Signum.Engine, has a full LINQ Providers that avoids N + 1
 
 Signum.React let you write a Single Page Application using React, Bootstrap and TypeScript.
  
-# Signum Extensions
+## [Demo Application](https://github.com/signumsoftware/southwind#online-version-in-azure)
+Check some of the features of Signum Framework in Southwind, a Northwind port running in Azure. 
+ 
+## Signum Extensions
 Set of modules that complements [Signum Framework](https://www.signumsoftware.com/es/Framework) like Authorization, Charting, Dashboards, Mailing, Processes, Scheduled Tasks, Disconnected, User Queries...
 
 Check the different modules in https://www.signumsoftware.com/es/Extensions
@@ -51,6 +54,9 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2022.07.22 TypeCondition intersection](https://github.com/signumsoftware/framework/commit/15024fa5f81b7e627b564ee229edb19990411e1a#commitcomment-79437098)
+* [2022.06.26 Presenting Lite Model](https://github.com/signumsoftware/framework/commit/160ddc3b3261c544b15c144c4d2e47f04b305feb#commitcomment-77033687)
+* [2022.06.13 Initial Migration](https://github.com/signumsoftware/framework/commit/c57b3d6563ec5859bf131cfd7800d32d1a07336f#commitcomment-75943113)
 * [2022.04.05 ImplementedByAll with multiple ID columns](https://github.com/signumsoftware/framework/commit/51321d1a236925fbf874c39ea0c9445f96a46089#commitcomment-70655266)
 * [2022.03.29 ValueSearchControl(Line) renamed to SearchValue(Line)](https://github.com/signumsoftware/framework/commit/8057968f8f7b5aed429487364cb83c1f5be21937#comments)
 * [2022.03.18 Improvements in Charting](https://github.com/signumsoftware/framework/commit/740b67b0d509410e2a87b202954a9ee58bf84d6e#comments)

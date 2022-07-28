@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
-import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo } from './Reflection';
 import { TypeContext } from './TypeContext';
@@ -21,8 +21,10 @@ import { toAbsoluteUrl, currentUser } from "./AppContext";
 import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
 import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessageDefault, RenderMessageDefault } from "./Modals/ErrorModal";
 import CopyLiteButton from "./Components/CopyLiteButton";
+import { Typeahead } from "./Components";
+import { TypeaheadOptions } from "./Components/Typeahead";
 
-if (!window.__allowNavigatorWithoutUser && (currentUser == null || currentUser.toStr == "Anonymous"))
+if (!window.__allowNavigatorWithoutUser && (currentUser == null || getToString(currentUser) == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -100,7 +102,6 @@ export function setRenderIdFunction(newFunction: (entity: Entity) => React.React
   renderId = newFunction;
 }
 
-
 let renderTitle = (typeInfo: TypeInfo, entity: ModifiableEntity) => {
   return "{0} {1}".formatHtml(typeInfo.niceName, renderId(entity as Entity));
   return null;
@@ -148,7 +149,43 @@ export function createRoute(type: PseudoType, viewName?: string) {
 }
 
 
+export function renderLiteOrEntity(entity: Lite<Entity> | Entity | ModifiableEntity, modelType?: string) {
+  if (isLite(entity))
+    return renderLite(entity);
 
+  if (isEntity(entity)) {
+    var es = entitySettings[entity.Type];
+   
+    if (es.renderEntity)
+      return es.renderEntity(entity);
+
+    if (es.renderLite) {
+      var lite = toLite(entity, entity.isNew);
+      return es.renderLite(lite);
+    }
+
+    return getToString(entity);
+  }
+}
+
+export function renderLite(lite: Lite<Entity>, subStr?: string): React.ReactChild {
+  var es = entitySettings[lite.EntityType];
+  if (es != null && es.renderLite != null) {
+    return es.renderLite(lite, subStr);
+  }
+
+  var toStr = getToString(lite);
+  return TypeaheadOptions.highlightedTextAll(toStr, subStr);
+}
+
+export function renderEntity(entity: ModifiableEntity): React.ReactNode {
+  var es = entitySettings[entity.Type];
+  if (es != null && es.renderEntity != null) {
+    return es.renderEntity(entity);
+  }
+
+  return getToString(entity);
+}
 
 export function clearEntitySettings() {
   Dic.clear(entitySettings);
@@ -573,7 +610,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   }
 
   return new MultiAutoCompleteConfig(types.toObject(t => t!.name,
-    t => getAutoCompleteBasic(t!, (findOptionsDictionary && findOptionsDictionary[type?.name]), ctx, create, showType!)
+    t => getAutoCompleteBasic(t!, (findOptionsDictionary && findOptionsDictionary[t!.name]), ctx, create, showType!)
   ));
 }
 
@@ -748,30 +785,34 @@ export function useLiteToString<T extends Entity>(type: Type<T>, id: number | st
 
   var lite = React.useMemo(() => newLite(type, id), [type, id]);
 
-  useAPI(() => API.fillToStrings(lite), [lite]);
+  useAPI(() => API.fillLiteModels(lite), [lite]);
 
   return lite;
 }
 
 export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false): void {
-  useAPI(() => lite == null || (lite.toStr != null && !force) ? Promise.resolve(null) : API.fillToStrings(lite), [lite]);
+  useAPI(() => lite == null || (getToString(lite) != null && !force) ? Promise.resolve(null) : API.fillLiteModels(lite), [lite]);
 }
 
 export module API {
 
-  export function fillToStrings(...lites: (Lite<Entity> | null | undefined)[]): Promise<void> {
-    return fillToStringsArray(lites.filter(l => l != null) as Lite<Entity>[]);
+  export function fillLiteModels(...lites: (Lite<Entity> | null | undefined)[]): Promise<void> {
+    return fillLiteModelsArray(lites.filter(l => l != null) as Lite<Entity>[]);
   }
 
-  export function fillToStringsArray(lites: Lite<Entity>[]): Promise<void> {
+  export function fillLiteModelsArray(lites: Lite<Entity>[], force?: boolean): Promise<void> {
 
-    const realLites = lites.filter(a => a.toStr == undefined && a.entity == undefined);
+    if (force) {
+      lites.forEach(a => a.ModelType = a.ModelType ?? (isModifiableEntity(a.model) ? a.model.Type : "string"));
+    }
+
+    const realLites = force ? lites : lites.filter(a => a.model == undefined && a.entity == undefined);
 
     if (!realLites.length)
       return Promise.resolve();
 
-    return ajaxPost<string[]>({ url: "~/api/entityToStrings" }, realLites).then(strs => {
-      realLites.forEach((l, i) => l.toStr = strs[i]);
+    return ajaxPost<unknown[]>({ url: "~/api/liteModels" }, realLites).then(models => {
+      realLites.forEach((l, i) => l.model = models[i]);
     });
   }
 
@@ -879,6 +920,9 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
 
+  renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild;
+  renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+
   namedViews?: NamedViewSettings<T>[];
 }
 
@@ -952,6 +996,9 @@ export class EntitySettings<T extends ModifiableEntity> {
 
     this.viewOverrides.push({ override, viewName });
   }
+
+  renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild; 
+  renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 

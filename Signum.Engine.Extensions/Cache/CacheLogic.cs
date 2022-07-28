@@ -541,20 +541,19 @@ public static class CacheLogic
             return cachedTable.GetAllIds();
         }
 
-        public override string GetToString(PrimaryKey id)
+        public override object GetLiteModel(PrimaryKey id, Type modelType, IRetriever retriever)
         {
             AssertEnabled();
 
-            return cachedTable.GetToString(id);
+            return cachedTable.GetLiteModel(id, modelType, retriever);
         }
 
-        public override string? TryGetToString(PrimaryKey? id)
+        public override object? TryGetLiteModel(PrimaryKey? id, Type modelType, IRetriever retriever)
         {
             AssertEnabled();
 
-            return cachedTable.TryGetToString(id!.Value)!;
+            return cachedTable.TryGetLiteModel(id!.Value, modelType, retriever)!;
         }
-
 
         public override bool Exists(PrimaryKey id)
         {
@@ -586,9 +585,14 @@ public static class CacheLogic
 
             var ids = dic.TryGetC(lite.Id).EmptyIfNull();
 
-            return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
+            return ids.Select(id => retriever.Complete<T>(id, e =>
+            {
+                retriever.ModifiablePostRetrieving(e);
+                this.Complete(e, retriever);
+            })!).ToList();
         }
 
+      
 
         public Type Type
         {

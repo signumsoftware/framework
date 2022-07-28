@@ -60,7 +60,7 @@ public static class AzureADLogic
         {
             ClientCredentialProvider authProvider = AzureADLogic.GetClientCredentialProvider();
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-            var result = graphClient.Users[oid.ToString()].MemberOf.WithODataCast("microsoft.graph.group").Request().Top(999).Select("id, displayName, ODataType").GetAsync().Result.ToList();
+            var result = graphClient.Users[oid.ToString()].TransitiveMemberOf.WithODataCast("microsoft.graph.group").Request().Top(999).Select("id, displayName, ODataType").GetAsync().Result.ToList();
 
             return result.Select(a => Guid.Parse(a.Id)).ToList();
         }
@@ -309,7 +309,7 @@ public static class AzureADLogic
 
         var client = (GraphServiceClient)groups.Client;
 
-        var url = client.Users[oid.ToString()].MemberOf.AppendSegmentToRequestUrl("microsoft.graph.group");
+        var url = client.Users[oid.ToString()].TransitiveMemberOf.AppendSegmentToRequestUrl("microsoft.graph.group");
 
         var constructor = groups.GetType().GetConstructors().SingleEx();
 

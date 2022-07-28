@@ -53,6 +53,10 @@
         color:#bbb
     }
 
+    .sf-auth-rules small.and {
+        color: #444
+    }
+
 a.sf-auth-chooser
 {
     text-decoration: none !important;
@@ -69,6 +73,10 @@ a.sf-auth-chooser
     .sf-auth-checkbox.fa-check-square-o {
         cursor: pointer;
         color: #555
+    }
+
+    .sf-not-allowed{
+        cursor: not-allowed !important;
     }
 
 span.group.inactive

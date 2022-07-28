@@ -4,7 +4,7 @@ import * as AppContext from '@framework/AppContext'
 import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from '../Alerts/useSignalR'
 import { ConcurrentUserEntity, ConcurrentUserMessage } from './Signum.Entities.ConcurrentUser'
 import { OverlayTrigger, Popover } from 'react-bootstrap';
-import { Entity, Lite, liteKey, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, toLite } from '@framework/Signum.Entities'
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization'
 import { useAPI, useForceUpdate, useUpdatedRef } from '../../Signum.React/Scripts/Hooks'
 import { GraphExplorer } from '@framework/Reflection'
@@ -84,7 +84,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
           style: "warning",
           message:
             <div>
-              <p>{ConcurrentUserMessage.LooksLikeSomeoneJustSaved0ToTheDatabase.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}</p>
+              <p>{ConcurrentUserMessage.LooksLikeSomeoneJustSaved0ToTheDatabase.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}</p>
               <p>{ConcurrentUserMessage.DoYouWantToReloadIt.niceToString()}</p>
               {isModified.current &&
                 <>
@@ -92,7 +92,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
                     {ConcurrentUserMessage.WarningYouWillLostYourCurrentChanges.niceToString()}
                   </p>
                   <p>
-                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{p.entity.toStr}</a>)}
+                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{getToString(p.entity)}</a>)}
                   </p>
                 </>
               }
@@ -122,7 +122,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
             
             {otherUsers?.map((a, i) =>
               <div key={i} style={{ whiteSpace: "nowrap" }} >
-                <UserCircle user={a.user} /> {a.user.toStr} ({DateTime.fromISO(a.startTime).toRelative()})
+                <UserCircle user={a.user} /> {getToString(a.user)} ({DateTime.fromISO(a.startTime).toRelative()})
                 {a.isModified && <FontAwesomeIcon icon="edit" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
               </div>)}
 
@@ -130,22 +130,22 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
               (ticks !== p.entity.ticks ?
                 <div className="mt-3">
                   <small>
-                  {ConcurrentUserMessage.YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}
-                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{p.entity.toStr}</a>)}
+                  {ConcurrentUserMessage.YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}
+                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{getToString(p.entity)}</a>)}
                   </small>
                 </div> :
                 otherUsers.some(u => u.isModified) && isModified.current ?
                   <div className="mt-3">
-                    <small>{ConcurrentUserMessage.LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}</small>
+                    <small>{ConcurrentUserMessage.LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}</small>
                   </div>
                 : 
                 <div className="mt-3">
-                  <small>{ConcurrentUserMessage.YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}</small>
+                  <small>{ConcurrentUserMessage.YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}</small>
                 </div>
               ) : ticks !== p.entity.ticks ? 
                 <div className="mt-3">
                   <small>
-                    {ConcurrentUserMessage.ThisIsNotTheLatestVersionOf0.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}
+                    {ConcurrentUserMessage.ThisIsNotTheLatestVersionOf0.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}
                     <button className="btn btn-primary btn-sm" onClick={p.onReload}>{ConcurrentUserMessage.ReloadIt.niceToString()}</button>
                   </small>
                 </div> : null
@@ -175,13 +175,13 @@ export namespace Options {
 }
 
 export function getUserInitials(u: Lite<UserEntity>): string {
-  return u.toStr?.split(" ").map(m => m[0]).filter((a, i) => i < 2).join("").toUpperCase() ?? "";
+  return getToString(u)?.split(" ").map(m => m[0]).filter((a, i) => i < 2).join("").toUpperCase() ?? "";
 }
 
 export function UserCircle(p: { user: Lite<UserEntity>, className?: string }) {
   var color = Options.getUserColor(p.user);
   return (
-    <span className={classes("concurrent-user-circle", p.className)} style={{ color: "white", backgroundColor: color }} title={p.user.toStr}>
+    <span className={classes("concurrent-user-circle", p.className)} style={{ color: "white", backgroundColor: color }} title={getToString(p.user)}>
       {getUserInitials(p.user)}
     </span>
   );

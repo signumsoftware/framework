@@ -26,9 +26,9 @@ public enum ExpandLite
 {
     EntityEager,
     //Default,
-    ToStringEager,
-    ToStringLazy,
-    ToStringNull,
+    ModelEager,
+    ModelLazy,
+    ModelNull,
 }
 
 public enum ExpandEntity

@@ -43,7 +43,7 @@ public class SqlMigrationRunner
 
         string version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
 
-        string comment = "Initial Migration";
+        string comment = InitialMigrationComment;
 
         string fileName = version + "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment) + ".sql";
 
@@ -134,6 +134,7 @@ public class SqlMigrationRunner
     }
 
     public const string DatabaseNameReplacement = "#DatabaseName#";
+    public const string InitialMigrationComment = "Initial Migration";
 
     private static bool Prompt(List<MigrationInfo> migrations, bool autoRun)
     {
@@ -290,6 +291,84 @@ public class SqlMigrationRunner
         }
 
         Console.WriteLine();
+    }
+
+
+    public static void SquashMigrationHistory()
+    {
+        Console.WriteLine();
+
+        Console.WriteLine("Squash Migration History will reset all the SQL Migration history into one Initial Migration");
+        Console.WriteLine();
+
+        Console.WriteLine("This operation doesn't change your database schema, but will delete your migration history.");
+        Console.WriteLine();
+
+        Console.WriteLine("First step is to check that there are no differences between the current database and the application");
+        Console.WriteLine();
+
+        Console.WriteLine("Press [ENTER] to start the synchronization");
+
+        Console.ReadLine();
+
+        while (Administrator.TotalSynchronizeScript() is SqlPreCommand cmd)
+        {
+            if(cmd != null)
+            {
+                cmd.OpenSqlFileRetry();
+            }
+        }
+
+        Console.WriteLine();
+
+        SafeConsole.WriteLineColor(ConsoleColor.Green, "Perfectly Synchronized!");
+        
+        Console.WriteLine();
+
+        var files = Directory.EnumerateFiles(MigrationsDirectory);
+        SafeConsole.WriteLineColor(files.Count() == 0 ? ConsoleColor.Green : ConsoleColor.Yellow, $"{files.Count()} files found in the migration directry ({MigrationsDirectory})");
+
+        MigrationLogic.EnsureMigrationTable<SqlMigrationEntity>();
+
+        var executedMigrations = Database.Query<SqlMigrationEntity>().Count();
+
+        SafeConsole.WriteLineColor(executedMigrations == 0 ? ConsoleColor.Green : ConsoleColor.Yellow, $"{executedMigrations} executed migrations in the database ({Schema.Current.Table(typeof(SqlMigrationEntity)).Name})");
+
+        if (files.Count() > 0 || executedMigrations > 0)
+        {
+            Console.WriteLine();
+            if (SafeConsole.Ask("Confirm that do you want to remove all the migrations by writing 'squash'", "squash") == "squash")
+            {
+                files.ToList().ForEach(f =>
+                {
+                    File.Delete(f);
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, "File deleted: " + f);
+                });
+
+                Database.Query<SqlMigrationEntity>().UnsafeDelete(message: "wait");
+            }
+        }
+
+        Console.WriteLine("Generating Initial Migration file...");
+
+        var script = Schema.Current.GenerationScipt(databaseNameReplacement: DatabaseNameReplacement)!;
+
+        string version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
+
+        string comment = InitialMigrationComment;
+
+        string fileName = version + "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment) + ".sql";
+
+
+        File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString(), Encoding.UTF8);
+
+        new SqlMigrationEntity
+        {
+            Comment = comment,
+            VersionNumber = version,
+        }.Save();
+
+        SafeConsole.WriteLineColor(ConsoleColor.Green, "Initial Migration saved and marked as executed");
     }
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.

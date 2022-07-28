@@ -239,6 +239,7 @@
     <Member Name="Condition" Description="Bedingung" />
     <Member Name="Confirm" Description="Bestätigen" />
     <Member Name="Create" Description="Erstellen..." />
+    <Member Name="Create0" Description="{0} erstellen" />
     <Member Name="CreateFromRegex" Description="^(.*) aus .* erstellen$" />
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
@@ -269,6 +270,8 @@
     <Member Name="Always" Description="Immer" />
     <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
     <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
+    <Member Name="NotCheckbox_StartChecked" Description="Nicht Checkbox (aktiviert starten)" />
+    <Member Name="NotCheckbox_StartUnchecked" Description="Nicht Checkbox (unaktiviert starten)" />
     <Member Name="WhenHasValue" Description="Wenn er einen Wert hat" />
   </Type>
   <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">
@@ -297,8 +300,10 @@
     <Member Name="And" Description=" und " />
     <Member Name="AnyEntity" Description="Jede Einheit" />
     <Member Name="As0" Description="Als {0}" />
+    <Member Name="CellOperation" Description="Zelloperation" />
     <Member Name="Check" Description="Ja/Nein-Wert" />
     <Member Name="Column0NotFound" Description="Die Spalte {0} wurde nicht gefunden" />
+    <Member Name="ContainerOfCellOperations" Description="Container für Zellenoperationen" />
     <Member Name="Count" Description="Num" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
@@ -455,12 +460,14 @@
   <Type Name="SelectorMessage">
     <Member Name="_0Selector" Description="{0}-Selektor" />
     <Member Name="ChooseAValue" Description="Wählen Sie einen Wert" />
+    <Member Name="ChooseValues" Description="Werte wählen" />
     <Member Name="ConstructorSelector" Description="Konstruktor Selektor" />
     <Member Name="CreationOf0Cancelled" Description="Erstellung von {0} abgebrochen" />
     <Member Name="PleaseChooseA0ToContinue" Description="Wählen Sie einen {0} wert, um fortzufahren:" />
     <Member Name="PleaseChooseAValueToContinue" Description="Bitte wählen Sie einen Wert, um fortzufahren:" />
     <Member Name="PleaseSelectAConstructor" Description="Bitte wählen Sie einen Konstruktor" />
     <Member Name="PleaseSelectAnElement" Description="Bitte wählen Sie ein Element" />
+    <Member Name="PleaseSelectAtLeastOneValueToContinue" Description="Bitte wählen Sie mindestens einen Wert aus, um fortzufahren:" />
     <Member Name="PleaseSelectAType" Description="Bitte wählen Sie einen der folgenden Typen: " />
     <Member Name="SelectAnElement" Description="Wählen Sie ein Element" />
     <Member Name="TypeSelector" Description="Typselektor" />

@@ -1,5 +1,6 @@
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 
 namespace Signum.Utilities;
@@ -44,5 +45,23 @@ public static class XmlExtensions
         {
             return (T)serializer.Deserialize(reader)!;
         }
+    }
+
+    public static XAttribute AttributeEx(this XElement element, XName name)
+    {
+        var att = element.Attribute(name);
+        if (att == null)
+            throw new InvalidOperationException($"Attribute '{name}' not found");
+
+        return att;
+    }
+
+    public static XElement ElementEx(this XElement element, XName name)
+    {
+        var elem = element.Element(name);
+        if (elem == null)
+            throw new InvalidOperationException($"Element '{name}' not found");
+
+        return elem;
     }
 }

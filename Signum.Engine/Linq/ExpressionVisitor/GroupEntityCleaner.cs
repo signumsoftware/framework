@@ -45,7 +45,7 @@ internal class GroupEntityCleaner : DbExpressionVisitor
         {
             if (node.Left.Type.IsLite() || node.Right.Type.IsLite())
                 return this.Visit(new LiteReferenceExpression(node.Type,
-                    Expression.Coalesce(GetLiteEntity(node.Left), GetLiteEntity(node.Right)), null, false, false));
+                    Expression.Coalesce(GetLiteEntity(node.Left), GetLiteEntity(node.Right)), null, null, false, false));
 
             if (typeof(IEntity).IsAssignableFrom(node.Left.Type) || typeof(IEntity).IsAssignableFrom(node.Right.Type))
             {
@@ -62,7 +62,7 @@ internal class GroupEntityCleaner : DbExpressionVisitor
     {
         if (node.IfTrue.Type.IsLite() || node.IfTrue.Type.IsLite())
             return this.Visit(new LiteReferenceExpression(node.Type,
-                Expression.Condition(node.Test, GetLiteEntity(node.IfTrue), GetLiteEntity(node.IfFalse)), null, false, false));
+                Expression.Condition(node.Test, GetLiteEntity(node.IfTrue), GetLiteEntity(node.IfFalse)), null, null, false, false));
 
         if (typeof(IEntity).IsAssignableFrom(node.IfTrue.Type) || typeof(IEntity).IsAssignableFrom(node.IfFalse.Type))
         {

@@ -146,22 +146,22 @@ public static class PlainExcelGenerator
         }
     }
 
-    public static byte[] WritePlainExcel<T>(IEnumerable<T> results)
+    public static byte[] WritePlainExcel<T>(IEnumerable<T> results, string? title = null)
     {
         using (MemoryStream ms = new MemoryStream())
         {
-            WritePlainExcel(results, ms);
+            WritePlainExcel(results, ms, title);
             return ms.ToArray();
         }
     }
 
-    public static void WritePlainExcel<T>(IEnumerable<T> results, string fileName)
+    public static void WritePlainExcel<T>(IEnumerable<T> results, string fileName, string? title = null)
     {
         using (FileStream fs = File.Create(fileName))
-            WritePlainExcel(results, fs);
+            WritePlainExcel(results, fs, title);
     }
 
-    public static void WritePlainExcel<T>(IEnumerable<T> results, Stream stream)
+    public static void WritePlainExcel<T>(IEnumerable<T> results, Stream stream, string? title = null)
     {
         stream.WriteAllBytes(Template);
 
@@ -190,6 +190,9 @@ public static class PlainExcelGenerator
                 BestFit = true,
                 CustomWidth = true
             }).ToArray()));
+
+            if (title.HasText())
+                worksheetPart.Worksheet.Append(new[] { CellBuilder.Cell(title, DefaultStyle.Title) }.ToRow());
 
             worksheetPart.Worksheet.Append(new Sequence<Row>()
             {

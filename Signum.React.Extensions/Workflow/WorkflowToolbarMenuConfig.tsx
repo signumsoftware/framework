@@ -3,7 +3,7 @@ import * as AppContext from '@framework/AppContext'
 import { useAPI } from '@framework/Hooks'
 import * as Navigator from '@framework/Navigator'
 import { getTypeInfo } from '@framework/Reflection'
-import { is } from '@framework/Signum.Entities'
+import { getToString, is } from '@framework/Signum.Entities'
 import * as React from 'react'
 import { Nav } from 'react-bootstrap'
 import { PermissionSymbol } from '../Authorization/Signum.Entities.Authorization'
@@ -92,7 +92,7 @@ function WorkflowDropdownImp() {
               icon={ToolbarConfig.coloredIcon("inbox", "steelblue")} />
 
             {getStarts(starts).flatMap((kvp, i) => kvp.elements.map((val, j) =>
-              <ToolbarNavItem key={i + "-" + j} title={val.workflow.toStr + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
+              <ToolbarNavItem key={i + "-" + j} title={getToString(val.workflow) + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
                 onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`, e); }}
                 active={false}
                 icon={ToolbarConfig.coloredIcon("plus-square", "seagreen")}

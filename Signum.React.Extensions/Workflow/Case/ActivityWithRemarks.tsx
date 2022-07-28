@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import { Lite } from '@framework/Signum.Entities'
+import { getToString, Lite } from '@framework/Signum.Entities'
 import { CaseActivityMessage, CaseNotificationEntity, CaseNotificationOperation, CaseActivityEntity, WorkflowActivityEntity, CaseTagTypeEntity, CaseEntity } from '../Signum.Entities.Workflow'
 import { FindOptions } from '@framework/Search'
 import * as Finder from '@framework/Finder'
@@ -86,7 +86,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
   }
   return (
     <span>
-      {p.data.workflowActivity.toStr}
+      {getToString(p.data.workflowActivity)}
       &nbsp;
       <a href="#" onClick={handleRemarksClick} className={classes(
         "case-icon",

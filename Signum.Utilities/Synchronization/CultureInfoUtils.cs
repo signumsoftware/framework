@@ -5,7 +5,7 @@ namespace Signum.Utilities;
 
 public static class CultureInfoUtils
 {
-    public static IDisposable? ChangeBothCultures(string cultureName)
+    public static IDisposable? ChangeBothCultures(string? cultureName)
     {
         if (string.IsNullOrEmpty(cultureName))
             return null;
@@ -30,7 +30,7 @@ public static class CultureInfoUtils
         });
     }
 
-    public static IDisposable? ChangeCulture(string cultureName)
+    public static IDisposable? ChangeCulture(string? cultureName)
     {
         if (string.IsNullOrEmpty(cultureName))
             return null;

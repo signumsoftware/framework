@@ -32,7 +32,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
   var allQueryNames = p.ctx.value.parts.flatMap(a => DashboardClient.getQueryNames(a.element.content))
     .distinctBy(a => a.id!.toString())
-    .orderBy(a => a.toStr)
+    .orderBy(a => getToString(a))
     .map(a => toLite(a));
 
 

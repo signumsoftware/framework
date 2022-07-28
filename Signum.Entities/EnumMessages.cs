@@ -16,6 +16,8 @@ public enum OperationMessage
     Create,
     [Description("^Create (.*) from .*$")]
     CreateFromRegex,
+    [Description("Create {0}")]
+    Create0,
     [Description("State should be {0} (instead of {1})")]
     StateShouldBe0InsteadOf1,
     [Description("The state of {0} should be {1} (instead of {2})")]
@@ -248,7 +250,12 @@ public enum SelectorMessage
     PleaseChooseA0ToContinue,
 
     [Description("Creation of {0} cancelled")]
-    CreationOf0Cancelled
+    CreationOf0Cancelled,
+
+    ChooseValues,
+
+    [Description("Please select at least one value to continue:")]
+    PleaseSelectAtLeastOneValueToContinue
 }
 
 [AllowUnathenticated]

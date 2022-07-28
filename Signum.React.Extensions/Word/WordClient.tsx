@@ -4,7 +4,7 @@ import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Lite, Entity, EntityPack, toLite, ModifiableEntity, toMList } from '@framework/Signum.Entities'
+import { Lite, Entity, EntityPack, toLite, ModifiableEntity, toMList, getToString } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
 import { Type, isTypeEntity, QueryTokenString } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
@@ -136,7 +136,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
         menuItems: wts.map(wt =>
           <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
             <FontAwesomeIcon icon={["far", "file-word"]} className="icon" />
-            {wt.toStr}
+            {getToString(wt)}
           </Dropdown.Item>
         )
       } as MenuItemBlock;

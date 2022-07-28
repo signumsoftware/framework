@@ -1,4 +1,5 @@
 using Signum.Engine.Linq;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps;
 
@@ -19,13 +20,34 @@ public partial class Table
                            select new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}; --{3}"
                                .FormatWith(tml.Name, tml.BackReference.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()))).Combine(Spacing.Simple);
 
+        var vmis = VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type);
+
+        SqlPreCommand? virtualMList = vmis?.Values
+            .Select(vmi => giDeleteVirtualMListSync.GetInvoker(this.Type, vmi.BackReferenceRoute.RootType)(entity, vmi))
+            .Combine(Spacing.Double);
+
         var main = new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}; --{3}"
                 .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()));
 
         if (isPostgres && declaration != null)
-            return PostgresDoBlock(entity.Id.VariableName!, declaration, SqlPreCommand.Combine(Spacing.Simple, pre, collections, main)!);
+            return PostgresDoBlock(entity.Id.VariableName!, declaration, SqlPreCommand.Combine(Spacing.Simple, pre, collections, virtualMList, main)!);
 
-        return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, main)!;
+        return SqlPreCommand.Combine(Spacing.Simple, declaration, pre, collections, virtualMList, main)!;
+    }
+
+    static GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand?>> giDeleteVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand?>>(
+      (e, vmi) => DeleteVirtualMListSync<Entity, Entity>(e, vmi));
+    static SqlPreCommand? DeleteVirtualMListSync<T, E>(T entity, VirtualMListInfo vmli)
+        where T : Entity
+        where E : Entity
+    {
+        var table = Schema.Current.Table(typeof(E));
+
+        var backRef = vmli.BackReferenceRoute.GetLambdaExpression<E, Lite<T>>(safeNullAccess: false);
+
+        var delete = Administrator.UnsafeDeletePreCommand(Database.Query<E>().Where(e => backRef.Evaluate(e).Is(entity)));
+
+        return delete;
     }
 
     int parameterIndex;

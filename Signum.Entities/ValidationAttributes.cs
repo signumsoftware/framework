@@ -233,9 +233,8 @@ public class EMailValidatorAttribute : RegexValidatorAttribute
 
 public class TelephoneValidatorAttribute : RegexValidatorAttribute
 {
-    public static string BasicRegex = @"((\+)\p{Nd}\p{Nd})? *(\([ \p{Nd}]+\))?([ \p{Nd}]+ */)? *[\p{Nd}][ \-\.\p{Nd}]+";
 
-    public static Regex TelephoneRegex = new Regex($@"^{BasicRegex}$");
+    public static Regex TelephoneRegex = new Regex(@"^[\p{Nd}+\-/() ]+$");
 
     public TelephoneValidatorAttribute()
         : base(TelephoneRegex)
@@ -264,7 +263,7 @@ public class AlphanumericOnlyValidatorAttribute : RegexValidatorAttribute
 
 public class MultipleTelephoneValidatorAttribute : RegexValidatorAttribute
 {
-    public static Regex MultipleTelephoneRegex = new Regex($@"^{TelephoneValidatorAttribute.BasicRegex}(,\s*{TelephoneValidatorAttribute.BasicRegex})*");
+    public static Regex MultipleTelephoneRegex = new Regex(@"^[\p{Nd}+\-/() ](,\s*[\p{Nd}+\-/() ])*");
 
     public MultipleTelephoneValidatorAttribute()
         : base(MultipleTelephoneRegex)

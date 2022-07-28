@@ -80,7 +80,7 @@ public static class MigrationLogic
                 }
                 else
                 {
-                    var hasInitial = SqlMigrationRunner.ReadMigrationsDirectory(silent: true).MinBy(a => a.Version)?.Comment.Contains("Initial Migration");
+                    var hasInitial = SqlMigrationRunner.ReadMigrationsDirectory(silent: true).MinBy(a => a.Version)?.Comment.Contains(SqlMigrationRunner.InitialMigrationComment);
 
                     Console.WriteLine("You have an Initial SQL Migration.");
 

@@ -1,6 +1,7 @@
 
 namespace Signum.Entities.Authorization;
 
+[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class PermissionSymbol : Symbol
 {
     private PermissionSymbol() { }

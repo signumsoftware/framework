@@ -26,7 +26,7 @@ internal class DbExpressionVisitor : ExpressionVisitor
         var source = VisitSource(delete.Source);
         var where = Visit(delete.Where);
         if (source != delete.Source || where != delete.Where)
-            return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where, delete.ReturnRowCount);
+            return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where, delete.ReturnRowCount, delete.Alias);
         return delete;
     }
 
@@ -60,9 +60,9 @@ internal class DbExpressionVisitor : ExpressionVisitor
     protected internal virtual Expression VisitLiteReference(LiteReferenceExpression lite)
     {
         var newRef = Visit(lite.Reference);
-        var newToStr = Visit(lite.CustomToStr);
-        if (newRef != lite.Reference || newToStr != lite.CustomToStr)
-            return new LiteReferenceExpression(lite.Type,  newRef, newToStr, lite.LazyToStr, lite.EagerEntity);
+        var newModelExpression = Visit(lite.CustomModelExpression);
+        if (newRef != lite.Reference || newModelExpression != lite.CustomModelExpression)
+            return new LiteReferenceExpression(lite.Type,  newRef, newModelExpression, lite.CustomModelTypes, lite.LazyModel, lite.EagerEntity);
         return lite;
     }
 
@@ -70,9 +70,22 @@ internal class DbExpressionVisitor : ExpressionVisitor
     {
         var newTypeId = Visit(lite.TypeId);
         var newId = (PrimaryKeyExpression)Visit(lite.Id);
-        var newToStr = Visit(lite.ToStr);
-        if (newTypeId != lite.TypeId || newId != lite.Id || newToStr != lite.ToStr)
-            return new LiteValueExpression(lite.Type, newTypeId, newId, newToStr);
+        var customModelExpression = Visit(lite.CustomModelExpression);
+        var models = lite.Models == null ? null : Visit(lite.Models, eos =>
+        {
+            if (eos.LazyModelType != null)
+                return eos;
+
+            var newExpr = Visit(eos.EagerExpression);
+
+            if (newExpr != eos.EagerExpression)
+                return new ExpressionOrType(newExpr!);
+
+            return eos;
+        });
+
+        if (newTypeId != lite.TypeId || newId != lite.Id || customModelExpression != lite.CustomModelExpression || models != lite.Models)
+            return new LiteValueExpression(lite.Type, newTypeId, newId, customModelExpression, models);
         return lite;
     }
 
@@ -89,14 +102,13 @@ internal class DbExpressionVisitor : ExpressionVisitor
     [DebuggerStepThrough]
     protected static ReadOnlyDictionary<K, V> Visit<K, V>(ReadOnlyDictionary<K, V> dictionary, Func<V, V> newValue)
         where K : notnull
-        where V : class
     {
         Dictionary<K, V>? alternate = null;
         foreach (var k in dictionary.Keys)
         {
             V item = dictionary[k];
             V newItem = newValue(item);
-            if (alternate == null && item != newItem)
+            if (alternate == null && !Equals(item, newItem))
             {
                 alternate = new Dictionary<K, V>();
                 foreach (var k2 in dictionary.Keys.TakeWhile(k2 => !k2.Equals(k)))

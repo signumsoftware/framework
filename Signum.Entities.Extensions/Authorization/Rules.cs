@@ -1,9 +1,11 @@
 using Signum.Entities.Basics;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Entities.Authorization;
 
 [EntityKind(EntityKind.System, EntityData.Master)]
 public abstract class RuleEntity<R, A> : Entity
+    where R : class
 {   
     public Lite<RoleEntity> Role { get; set; }
 
@@ -19,6 +21,14 @@ public abstract class RuleEntity<R, A> : Entity
     protected override void PreSaving(PreSavingContext ctx)
     {
         this.toStr = this.ToString();
+    }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(Role) && RoleEntity.RetrieveFromCache(Role).IsTrivialMerge)
+            return AuthAdminMessage.Role0IsTrivialMerge.NiceToString(Role);
+
+        return base.PropertyValidation(pi);
     }
 }
 
@@ -45,29 +55,51 @@ public class RulePropertyEntity : RuleEntity<PropertyRouteEntity, PropertyAllowe
 
 public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
 {
-    [PreserveOrder]
-    public MList<RuleTypeConditionEmbedded> Conditions { get; set; } = new MList<RuleTypeConditionEmbedded>();
+    [PreserveOrder, Ignore, QueryableProperty]
+    [NotifyChildProperty, NotifyCollectionChanged]
+    public MList<RuleTypeConditionEntity> ConditionRules { get; set; } = new MList<RuleTypeConditionEntity>();
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(ConditionRules))
+        {
+            var errors = NoRepeatValidatorAttribute.ByKey(ConditionRules, a => a.Conditions.OrderBy(a => a.ToString()).ToString(" & "));
+
+            if (errors != null)
+                return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(this.Resource, errors);
+        }
+
+        return base.PropertyValidation(pi);
+    }
 }
 
-public class RuleTypeConditionEmbedded : EmbeddedEntity, IEquatable<RuleTypeConditionEmbedded>
+[EntityKind(EntityKind.System, EntityData.Master)]
+public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntity>, ICanBeOrdered
 {
-    public TypeConditionSymbol Condition { get; set; }
+    [NotNullValidator(Disabled = true)]
+    public Lite<RuleTypeEntity> RuleType { get; set; }
+
+    [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
+    public MList<TypeConditionSymbol> Conditions { get; set; } = new MList<TypeConditionSymbol>();
 
     public TypeAllowed Allowed { get; set; }
 
-    public bool Equals(RuleTypeConditionEmbedded? other)
+    public int Order { get; set; }
+
+    public override int GetHashCode() => Conditions.Count ^ Allowed.GetHashCode();
+
+    public override bool Equals(object? obj) => obj is RuleTypeConditionEntity rtc && Equals(rtc);
+    public bool Equals(RuleTypeConditionEntity? other)
     {
         if (other == null)
             return false;
 
-        return this.Condition.Equals(other.Condition)
-            && this.Allowed == other.Allowed;
+        return this.Conditions.ToHashSet().SetEquals(other.Conditions) && this.Allowed == other.Allowed;
     }
 
-    public override string ToString()
-    {
-        return "{0} ({1})".FormatWith(Condition, Allowed);
-    }
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Allowed.ToString());
+
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

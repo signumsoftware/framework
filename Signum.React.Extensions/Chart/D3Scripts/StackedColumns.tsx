@@ -58,6 +58,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
   var c = data.columns;
   var keyColumn = c.c0 as ChartColumn<unknown>;
   var valueColumn0 = c.c2 as ChartColumn<number>;
+  var pValueAsPercent = parameters.ValueAsPercent;
 
   var pivot = c.c1 == null ?
     toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
@@ -117,6 +118,11 @@ export default function renderStackedColumns({ data, width, height, parameters, 
           if (row == undefined)
             return undefined;
 
+          var key = keyColumn.getKey(r.data.rowValue);
+          var rowByKey = rowsByKey[key];
+
+          const totalCount = stackedSeries.sum(s => rowByKey.values[s.key]?.value ?? 0);
+
           var active = detector?.(row.rowClick);
 
           return (
@@ -146,9 +152,13 @@ export default function renderStackedColumns({ data, width, height, parameters, 
                   opacity={parameters["NumberOpacity"]}
                   textAnchor="middle"
                   fontWeight="bold">
-                  {r.data.values[s.key].valueNiceName}
+                  {pValueAsPercent == "Yes"
+                    ? totalCount > 0 ? (row.value / totalCount).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 }) : '0%'
+                    : r.data.values[s.key].valueNiceName}
                   <title>
-                    {r.data.values[s.key].valueTitle}
+                    {pValueAsPercent == "Yes"
+                      ? totalCount > 0 ? (row.value / totalCount).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 }) : '0%'
+                      : r.data.values[s.key].valueTitle}
                   </title>
                 </TextIfFits>}
             </g>

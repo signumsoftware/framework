@@ -57,8 +57,6 @@ export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state
 
 function TranslateButton(p: { controller: ValueLineController }) {
 
-  var culture = CultureClient.currentCulture.name.tryBefore("-") ?? CultureClient.currentCulture.name;
-
   var ctx = p.controller.props.ctx.tryFindRootEntity();
 
   return (
@@ -68,8 +66,8 @@ function TranslateButton(p: { controller: ValueLineController }) {
 
         const url =
           ctx == null ? `~/translatedInstance/status/` :
-          (ctx.value as Entity).id == null ? `~/translatedInstance/view/${ctx.value.Type}/${culture}` :
-            `~/translatedInstance/view/${ctx.value.Type}/${culture}?filter=${ctx.value.Type};${(ctx.value as Entity).id}`;
+          (ctx.value as Entity).id == null ? `~/translatedInstance/view/${ctx.value.Type}/` :
+            `~/translatedInstance/view/${ctx.value.Type}/?filter=${ctx.value.Type};${(ctx.value as Entity).id}`;
 
         window.open(AppContext.toAbsoluteUrl(url));
       }}
@@ -121,8 +119,8 @@ export module API {
     return ajaxGet({ url: `~/api/translatedInstance/sync/${type}?${QueryString.stringify({ culture })}` });
   }
 
-  export function saveTranslatedInstanceData(records: TranslationRecord[], type: string, culture?: string | undefined): Promise<void> {
-    return ajaxPost({ url: `~/api/translatedInstance/save/${type}?${QueryString.stringify({ culture })}` }, records);
+  export function saveTranslatedInstanceData(records: TranslationRecord[], type: string, isSync: boolean, culture?: string | undefined): Promise<void> {
+    return ajaxPost({ url: `~/api/translatedInstance/save/${type}?${QueryString.stringify({ isSync, culture })}` }, records);
   }
 
 }
@@ -174,13 +172,15 @@ export interface TranslatedInstanceViewType {
   type: string;
   masterCulture: string;
   routes: { [propertyRoute: string]: TranslateableRouteType }
-  instances: {
-    lite: Lite<Entity>; 
-    master: { [prAndRowId: string]: string };
-    translations: {
-      [prAndRowId: string]: { [culture: string]: TranslatedPairView }
-    }
-  }[]
+  instances: TranslatedInstanceView[];
+}
+
+export interface TranslatedInstanceView {
+  lite: Lite<Entity>;
+  master: { [prAndRowId: string]: string };
+  translations: {
+    [prAndRowId: string]: { [culture: string]: TranslatedPairView }
+  }
 }
 
 export interface TranslatedPairView {

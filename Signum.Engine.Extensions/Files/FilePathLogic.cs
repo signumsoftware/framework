@@ -63,7 +63,7 @@ public static class FilePathLogic
     static PrefixPair CalculatePrefixPair(FilePathEntity fp)
     {
         using (new EntityCache(EntityCacheType.ForceNew))
-           return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
+            return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
     }
 
     public static IDisposable? FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)

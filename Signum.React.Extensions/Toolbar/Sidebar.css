@@ -148,6 +148,14 @@
         display: inline-block;
     }
 
+.sidebar-nav.wide .nav-item-sub-menu{
+    padding-left: 10px;
+}
+
+.sidebar-nav.narrow .nav-item-sub-menu {
+    padding-left: 5px;
+}
+
 .sidebar-brand-icon-mini {
     width: 33px !important;
     height: 37px !important;

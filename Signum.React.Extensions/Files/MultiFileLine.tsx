@@ -4,7 +4,7 @@ import * as Constructor from '@framework/Constructor'
 import { ButtonBarElement, TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EntityControlMessage, EmbeddedEntity, MListElement } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EntityControlMessage, EmbeddedEntity, MListElement, getToString } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import { FileUploader } from './FileUploader'
@@ -125,7 +125,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                   {p.getComponent ? p.getComponent(mlec) :
                     p.download == "None" ?
                       <span className={classes(mlec.formControlClass, "file-control")} >
-                        {p.getFileFromElement ? p.getFileFromElement(mlec.value).toStr : mlec.value.toStr}
+                        {getToString(p.getFileFromElement ? p.getFileFromElement(mlec.value) : mlec.value)}
                       </span > :
                       <FileDownloader
                         configuration={p.configuration}
