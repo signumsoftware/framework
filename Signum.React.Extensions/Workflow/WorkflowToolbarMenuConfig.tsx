@@ -8,7 +8,7 @@ import * as React from 'react'
 import { Nav } from 'react-bootstrap'
 import { PermissionSymbol } from '../Authorization/Signum.Entities.Authorization'
 import { ToolbarNavItem } from '../Toolbar/Renderers/ToolbarRenderer'
-import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import { CaseActivityQuery, WorkflowEntity, WorkflowMainEntityStrategy, WorkflowPermission } from '../Workflow/Signum.Entities.Workflow'
 import * as WorkflowClient from '../Workflow/WorkflowClient'
 
@@ -17,6 +17,13 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
   constructor() {
     var type = PermissionSymbol;
     super(type);
+  }
+
+  getDefaultIcon(): IconColor {
+    return ({
+      icon: "random",
+      iconColor: "#2471A3",
+    });
   }
 
   isApplicableTo(element: ToolbarResponse<PermissionSymbol>) {
