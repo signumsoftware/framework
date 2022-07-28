@@ -119,6 +119,8 @@ export module AuthAdminMessage {
   export const ThereAre0TypeConditionsDefinedFor1 = new MessageKey("AuthAdminMessage", "ThereAre0TypeConditionsDefinedFor1");
   export const SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition = new MessageKey("AuthAdminMessage", "SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition");
   export const SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime = new MessageKey("AuthAdminMessage", "SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime");
+  export const RepeatedTypeCondition = new MessageKey("AuthAdminMessage", "RepeatedTypeCondition");
+  export const TheFollowingTypeConditionsHaveAlreadyBeenUsed = new MessageKey("AuthAdminMessage", "TheFollowingTypeConditionsHaveAlreadyBeenUsed");
 }
 
 export module AuthEmailMessage {
@@ -396,7 +398,7 @@ export interface RuleTypeConditionEntity extends Entities.Entity {
 export const RuleTypeEntity = new Type<RuleTypeEntity>("RuleType");
 export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
   Type: "RuleType";
-  conditions: Entities.MList<RuleTypeConditionEntity>;
+  conditionRules: Entities.MList<RuleTypeConditionEntity>;
 }
 
 export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");

@@ -655,7 +655,7 @@ public static partial class TypeAuthLogic
             Role = role,
             Resource = resource,
             Allowed = allowed.Fallback,
-            Conditions = allowed.ConditionRules.Select(a => new RuleTypeConditionEntity
+            ConditionRules = allowed.ConditionRules.Select(a => new RuleTypeConditionEntity
             {
                 Allowed = a.Allowed,
                 Conditions = a.TypeConditions.ToMList()
@@ -666,13 +666,13 @@ public static partial class TypeAuthLogic
     public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeEntity rule)
     {
         return new TypeAllowedAndConditions(rule.Allowed,
-            rule.Conditions.Select(c => new TypeConditionRuleModel(c.Conditions, c.Allowed)));
+            rule.ConditionRules.Select(c => new TypeConditionRuleModel(c.Conditions, c.Allowed)));
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements rep)
     {
         var conds = (from rt in Database.Query<RuleTypeEntity>()
-                     from c in rt.Conditions
+                     from c in rt.ConditionRules
                      from s in c.Conditions
                      select new { rt.Resource, s, rt.Role }).ToList();
 
@@ -695,7 +695,7 @@ public static partial class TypeAuthLogic
         using (rep.WithReplacedDatabaseName())
             return errors.Select(a =>
             {
-                return Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt) => rt.Conditions, Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
+                return Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt) => rt.ConditionRules, Database.MListQuery((RuleTypeEntity rt) => rt.ConditionRules)
                     .Where(mle => mle.Element.Conditions.Contains(a.Key.s) && mle.Parent.Resource.Is(a.Key.Resource)))!
                     .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.s, a.Key.Resource, a.ToString(", ")));
             }).Combine(Spacing.Double);

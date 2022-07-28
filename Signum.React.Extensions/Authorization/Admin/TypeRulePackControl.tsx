@@ -203,6 +203,14 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
         if (!tc)
           return;
 
+        var combinedKey = tc.orderBy(a => a.key).map(a => a.key).join(" & ");
+
+        if (taac.conditionRules.some(cr => cr.element.typeConditions.orderBy(a => a.element.key).map(a => a.element.key).join(" & ") == combinedKey)) {
+          return MessageModal.showError(<div><p>{AuthAdminMessage.TheFollowingTypeConditionsHaveAlreadyBeenUsed.niceToString()}</p>
+            <p><strong>{combinedKey}</strong></p></div>,
+            AuthAdminMessage.RepeatedTypeCondition.niceToString());
+        }
+
         taac.conditionRules.push(newMListElement(TypeConditionRuleModel.New({
           typeConditions: tc.map(t => newMListElement(t)),
           allowed: "None"
@@ -232,7 +240,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     return [
       <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td className={tctx.value.allowed.fallback == null ? "text-danger fw-bold" : undefined} title={AuthAdminMessage.ConflictMergingTypeConditions.niceToString()}>
-          {conditions.length > 0 ?
+          {conditions.length > 1 || conditions.length == 1 && tctx.value.allowed.conditionRules.length == 0 ?
             <span className="sf-condition-icon" onClick={() => handleAddConditionClick(conditions, tctx.value.allowed, tctx.value.resource)}>
               <FontAwesomeIcon icon="plus-circle" />
             </span> :
