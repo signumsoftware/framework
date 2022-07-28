@@ -22,6 +22,14 @@ public abstract class RuleEntity<R, A> : Entity
     {
         this.toStr = this.ToString();
     }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(Role) && RoleEntity.RetrieveFromCache(Role).IsTrivialMerge)
+            return AuthAdminMessage.Role0IsTrivialMerge.NiceToString(Role);
+
+        return base.PropertyValidation(pi);
+    }
 }
 
 public class RuleQueryEntity : RuleEntity<QueryEntity, QueryAllowed> { }

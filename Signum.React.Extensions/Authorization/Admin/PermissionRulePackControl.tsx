@@ -21,8 +21,8 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
     const hasChanges = bc.pack.entity.modified;
 
     return [
-      { button: <Button variant="primary" disabled={!hasChanges} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
-      { button: <Button variant="warning" disabled={!hasChanges} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
+      { button: <Button variant="primary" disabled={!hasChanges || p.ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="warning" disabled={!hasChanges || p.ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
       { button: <Button variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
     ];
   }
@@ -135,7 +135,7 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
                 {renderRadio(c.value, false, "red")}
               </td>
               <td style={{ textAlign: "center" }}>
-                <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
+                  <GrayCheckbox readOnly={ctx.readOnly} checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
                   c.value.allowed = c.value.allowedBase;
                   ctx.value.modified = true;
                   updateFrame();
@@ -150,6 +150,6 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
   );
 
   function renderRadio(c: PermissionAllowedRule, allowed: boolean, color: string) {
-    return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; updateFrame() }} />;
+    return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; updateFrame() }} />;
   }
 });

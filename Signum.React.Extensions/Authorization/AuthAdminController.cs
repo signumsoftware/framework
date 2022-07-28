@@ -117,6 +117,14 @@ public class AuthAdminController : ControllerBase
         }
     }
 
+    [HttpPost("api/authAdmin/trivialMergeRole")]
+    public Lite<RoleEntity> TrivialMergeRole([FromBody]List<Lite<RoleEntity>> roles)
+    {
+        //BasicPermission.AdminRules.AssertAuthorized();
+
+        return AuthLogic.GetOrCreateTrivialMergeRole(roles);
+    }
+
     private static void CleanChanges(ModelEntity rules)
     {
         var graph = GraphExplorer.FromRoot(rules);

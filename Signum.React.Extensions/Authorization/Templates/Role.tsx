@@ -14,11 +14,14 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }) {
         r.inheritsFrom.length == 1 ? AuthAdminMessage.SameAs0.niceToString(getToString(r.inheritsFrom.single().element)) :
           (r.mergeStrategy == "Union" ? AuthAdminMessage.MaximumOfThe0 : AuthAdminMessage.MinumumOfThe0).niceToString(RoleEntity.niceCount(r.inheritsFrom.length)));
   }
-  const ctx = p.ctx;
+  const ctx = p.ctx.subCtx({ readOnly: p.ctx.value.isTrivialMerge });
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(e => e.name)} />
-      <ValueLine ctx={ctx.subCtx(e => e.description)} />
+      {ctx.value.isTrivialMerge ?
+        <ValueLine ctx={ctx.subCtx(e => e.isTrivialMerge)} /> :
+        <ValueLine ctx={ctx.subCtx(e => e.description)} />
+      }
       <br/>
       <EntityStrip ctx={ctx.subCtx(e => e.inheritsFrom)}
         iconStart={true}
