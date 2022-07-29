@@ -237,11 +237,6 @@ export class ContextualOperationContext<T extends Entity> {
   onContextualSuccess?: (pack: API.ErrorReport) => void;
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
 
-
-  defaultContextualClick(...args: any[]): Promise<void> {
-    return defaultContextualOperationClick(this, ...args);
-  }
-
   defaultClick(...args: any[]): Promise<void> {
     return defaultContextualOperationClick(this, ...args);
   }
@@ -287,7 +282,7 @@ export class ContextualOperationContext<T extends Entity> {
         return false;
 
       //for onClick, if you have onClick in EntityOperationsettings you have to add there also commonOnClick or add specific onClick in ContextualOperationSettings
-      if (eos.onClick != null && eos.commonOnClick == null && cos?.onClick == null) 
+      if (eos.onClick != null && cos?.onClick == null && (eos.commonOnClick == null || this.context.lites.length > 1)) 
         return false;
     }
 
