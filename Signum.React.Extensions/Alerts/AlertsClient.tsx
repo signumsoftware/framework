@@ -52,10 +52,9 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
   }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Delay, {
-    onClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.toISO())),
+    commonOnClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.toISO())),
     hideOnCanExecute: true,
-    contextual: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())) },
-    contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.toISO())) },
+    contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultClick(d.toISO())) },
   }));
 
   var cellFormatter = new Finder.CellFormatter((cell, ctx) => {
