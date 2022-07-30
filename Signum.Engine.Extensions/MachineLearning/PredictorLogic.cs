@@ -188,7 +188,7 @@ public static class PredictorLogic
 
                 new Graph<ProcessEntity>.ConstructFrom<PredictorEntity>(PredictorOperation.AutoconfigureNetwork)
                 {
-                    CanConstruct = p => p.AlgorithmSettings is NeuralNetworkSettingsEntity ? null : ValidationMessage._0ShouldBeOfType1.NiceToString(p.NicePropertyName(_ => _.AlgorithmSettings), typeof(NeuralNetworkSettingsEntity).NiceName()),
+                    CanConstruct = p => p.AlgorithmSettings is NeuralNetworkSettingsEntity ? null : ValidationMessage._0ShouldBeOfType1.NiceToString(Entity.NicePropertyName(() => p.AlgorithmSettings), typeof(NeuralNetworkSettingsEntity).NiceName()),
                     Construct = (p, _) =>
                     {
                         return ProcessLogic.Create(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkEntity
