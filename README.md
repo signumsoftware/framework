@@ -54,6 +54,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2022.07.27 RoleEntity IsTrivialMerge](https://github.com/signumsoftware/framework/commit/c468115b100f1d1df032afcbf7a8561d01dc6025#comments)
 * [2022.07.22 TypeCondition intersection](https://github.com/signumsoftware/framework/commit/15024fa5f81b7e627b564ee229edb19990411e1a#commitcomment-79437098)
 * [2022.06.26 Presenting Lite Model](https://github.com/signumsoftware/framework/commit/160ddc3b3261c544b15c144c4d2e47f04b305feb#commitcomment-77033687)
 * [2022.06.13 Initial Migration](https://github.com/signumsoftware/framework/commit/c57b3d6563ec5859bf131cfd7800d32d1a07336f#commitcomment-75943113)
