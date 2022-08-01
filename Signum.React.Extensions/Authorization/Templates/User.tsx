@@ -22,17 +22,33 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
 
   return (
     <div>
- 	   <div className="row">
+ 	  <div className="row">
         <div className="col-sm-2">
           <ProfilePhoto user={ctx.value } />
         </div>
         <div className="col-sm-8">
+          <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
+          <ValueLine ctx={ctx.subCtx(e => e.userName)} readOnly={User.userNameReadonly(ctx.value) ? true : undefined} />
+          {!ctx.readOnly && ctx.subCtx(a => a.passwordHash).propertyRoute?.canModify() && User.changePasswordVisible(ctx.value) &&
+            <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} isNew={entity.isNew} mandatory />}
+
+          <EntityLine ctx={ctx.subCtx(e => e.role)} onFind={() =>
+            Finder.findMany(RoleEntity).then(rs => {
+              if (rs == null)
+                return undefined;
+
+              if (rs.length == 1)
+                return rs[0];
+
+              return AuthAdminClient.API.trivialMergeRole(rs);
+            })} />
       	
 
-      <ValueLine ctx={ctx.subCtx(e => e.email)} readOnly={User.emailReadonly(ctx.value) ? true : undefined} />
-      <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
+            <ValueLine ctx={ctx.subCtx(e => e.email)} readOnly={User.emailReadonly(ctx.value) ? true : undefined} />
+            <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
+        </div>
+      </div>
     </div>
-</div>
   );
 }
 
