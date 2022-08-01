@@ -16,6 +16,7 @@ import { BsColor } from "../Components";
 import Exception from "../Exceptions/Exception";
 import { OutlineBsColor, withIcon } from "./EntityOperations";
 import { CellFormatter } from "../Finder";
+import { useDoubleClick } from "../Hooks";
 
 
 export interface CellOperationProps extends ButtonProps {
@@ -70,12 +71,14 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
       .done();
   }
 
+  const onlySingleClick = useDoubleClick((e) => { }, handleOnClick);
+
   var button = <Button variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
     {...props}
     key="button"
     //title={icoc.operationInfo.niceName}
     className={classes(disabled ? "disabled" : undefined, props?.className, coc.settings && coc.settings.classes)}
-    onClick={disabled ? undefined : handleOnClick}
+    onClick={disabled ? undefined : onlySingleClick}
     data-operation={coc.operationInfo.key}>
     {renderChildren()}
   </Button>;
