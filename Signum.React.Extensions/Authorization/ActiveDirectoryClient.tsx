@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ajaxPost, ajaxGet } from '@framework/Services';
+import { ajaxPost, ajaxGet, ajaxGetRaw } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery, ActiveDirectoryMessage, ADGroupEntity } from './Signum.Entities.Authorization'
@@ -215,3 +215,4 @@ export interface ADGroupRequest {
   id: string;
   displayName: string
 }
+

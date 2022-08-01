@@ -110,6 +110,8 @@ public static class AuthLogic
                     r.Description,
                 });
 
+           // Lite.RegisterLiteModelConstructor((UserEntity e) => new UserLiteModel {UserName = e.UserName });
+
             roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
             rolesInverse = sb.GlobalLazy(() => roles.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
             rolesByName = sb.GlobalLazy(() => roles.Value.ToDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));

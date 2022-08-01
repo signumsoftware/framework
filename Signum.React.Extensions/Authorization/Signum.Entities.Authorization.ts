@@ -487,6 +487,14 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
   loginFailedCounter: number;
 }
 
+export const UserLiteModel = new Type<UserLiteModel>("UserLiteModel");
+export interface UserLiteModel extends Entities.ModelEntity {
+  Type: "UserLiteModel";
+  userName: string;
+  oID: string /*Guid*/ | null;
+  sID: string | null;
+}
+
 export module UserOIDMessage {
   export const TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet = new MessageKey("UserOIDMessage", "TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet");
 }
