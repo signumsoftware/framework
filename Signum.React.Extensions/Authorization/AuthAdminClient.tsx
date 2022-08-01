@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -61,6 +61,25 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     ]
   });
 
+  Finder.addSettings({
+    queryName: RoleEntity,
+    defaultFilters: [
+      {
+        groupOperation: "Or",
+        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        filters: [
+          { token: "Entity.Id", operation: "EqualTo" },
+          { token: "Entity.ToString", operation: "Contains" },
+        ]
+      },
+      {
+        token: RoleEntity.token(a => a.entity.isTrivialMerge),
+        value: false,
+        pinned: { active: "NotCheckbox_StartUnchecked", label: AuthAdminMessage.IncludeTrivialMerges.niceToString(), column : 2 }
+      }
+    ]
+  });
+
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => ctx.findOptions.queryKey == RoleEntity.typeName && isPermissionAuthorized(BasicPermission.AdminRules) ? {
     order: 6,
     button: <button className="btn btn-info"
@@ -83,7 +102,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),
-      e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close" })).done(),
+      e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })).done(),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "red", color: "danger", group: null }));
   }
 
@@ -102,7 +121,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Admin/PermissionRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(),
-      e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close" })).done(),
+      e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })).done(),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "orange", color: "warning", group: null }));
   }
 
@@ -239,6 +258,9 @@ export module API {
       .done();
   }
 
+  export function trivialMergeRole(rule: Lite<RoleEntity>[]): Promise<Lite<RoleEntity>> {
+    return ajaxPost({ url: "~/api/authAdmin/trivialMergeRole" }, rule);
+  }
 }
 
 declare module '@framework/Reflection' {

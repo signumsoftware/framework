@@ -73,7 +73,7 @@ public class NeuralNetworkSettingsEntity : Entity, IPredictorAlgorithmSettings
             bool typeIsClassification = this.PredictionType == PredictionType.Classification || this.PredictionType == PredictionType.MultiClassification;
 
             if (lossIsClassification != typeIsClassification)
-                return PredictorMessage._0IsNotCompatibleWith12.NiceToString(function.NiceToString(), this.NicePropertyName(a => a.PredictionType), this.PredictionType.NiceToString());
+                return PredictorMessage._0IsNotCompatibleWith12.NiceToString(function.NiceToString(), Entity.NicePropertyName(() => this.PredictionType), this.PredictionType.NiceToString());
 
             return null;
         }

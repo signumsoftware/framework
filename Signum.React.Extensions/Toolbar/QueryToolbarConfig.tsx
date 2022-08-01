@@ -5,7 +5,7 @@ import { getToString } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'
-import { RefreshCounterEvent, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
+import { IconColor, RefreshCounterEvent, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { SearchValue, FindOptions } from '@framework/Search';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useDocumentEvent, useInterval } from '@framework/Hooks'
@@ -23,7 +23,14 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     if (element.iconName == "count")
       return <CountIcon findOptions={{ queryName: getToString(element.content)! }} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
-    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName) , ["far", "list-alt"]), element.iconColor || "dodgerblue");
+    return super.getIcon(element);
+  }
+
+  getDefaultIcon(): IconColor {
+    return ({
+      icon: ["far", "list-alt"],
+      iconColor: "dodgerblue",
+    });
   }
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {

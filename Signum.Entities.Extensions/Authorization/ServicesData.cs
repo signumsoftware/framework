@@ -1,4 +1,5 @@
 using Signum.Entities.Basics;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Entities.Authorization;
 
@@ -198,6 +199,19 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
         return this.fallback.GetHashCode();
     }
 
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if(pi.Name == nameof(ConditionRules))
+        {
+            var errors = NoRepeatValidatorAttribute.ByKey(ConditionRules, a => a.TypeConditions.OrderBy(a => a.ToString()).ToString(" & "));
+
+            if (errors != null)
+                return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(pi.NiceName(), errors);
+        }
+
+        return base.PropertyValidation(pi);
+    }
+
     public TypeAllowedBasic Min(bool inUserInterface)
     {
         return inUserInterface ? MinUI() : MinDB();
@@ -284,13 +298,15 @@ public class TypeConditionRuleModel : ModelEntity, IEquatable<TypeConditionRuleM
 
     public TypeAllowed Allowed { get; set; }
 
+    public override int GetHashCode() => TypeConditions.Count ^ Allowed.GetHashCode();
+    public override bool Equals(object? obj) => obj is TypeConditionRuleModel rm && Equals(rm);
+
     public bool Equals(TypeConditionRuleModel? other)
     {
         if (other == null)
             return false;
 
-        return TypeConditions.ToHashSet().SetEquals(other.TypeConditions) &&
-            Allowed.Equals(other.Allowed);
+        return TypeConditions.ToHashSet().SetEquals(other.TypeConditions) && Allowed == other.Allowed;
     }
 
     [AutoExpressionField]

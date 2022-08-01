@@ -585,7 +585,11 @@ public static class CacheLogic
 
             var ids = dic.TryGetC(lite.Id).EmptyIfNull();
 
-            return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))!).ToList();
+            return ids.Select(id => retriever.Complete<T>(id, e =>
+            {
+                retriever.ModifiablePostRetrieving(e);
+                this.Complete(e, retriever);
+            })!).ToList();
         }
 
       

@@ -17,6 +17,7 @@ import { Nav } from 'react-bootstrap';
 import { SidebarMode } from './SidebarContainer';
 import { Dic } from '../../Signum.React/Scripts/Globals';
 import { ToolbarNavItem } from './Renderers/ToolbarRenderer';
+import { coalesceIcon } from '../../Signum.React/Scripts/Operations/ContextualOperations';
 
 export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarConfig<any>[]) {
   Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
@@ -51,15 +52,24 @@ export class RefreshCounterEvent extends Event {
   }
 }
 
+export interface IconColor {
+  icon: IconProp;
+  iconColor: string;
+}
+
 export abstract class ToolbarConfig<T extends Entity> {
   type: Type<T>;
   constructor(type: Type<T>) {
     this.type = type;
   }
 
+
   getIcon(element: ToolbarResponse<T>) {
-    return ToolbarConfig.coloredIcon(parseIcon(element.iconName), element.iconColor);
+    const defaultIcon = this.getDefaultIcon();
+    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), defaultIcon.icon), element.iconColor ?? defaultIcon.iconColor);
   }
+
+  abstract getDefaultIcon(): IconColor;
 
   static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactChild | null {
     if (!icon)

@@ -75,6 +75,10 @@ a.sf-auth-chooser
         color: #555
     }
 
+    .sf-not-allowed{
+        cursor: not-allowed !important;
+    }
+
 span.group.inactive
 {
     color:#CCC

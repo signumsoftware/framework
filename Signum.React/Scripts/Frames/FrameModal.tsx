@@ -275,7 +275,6 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         }
       }
     };
-
     styleOptions = {
       readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(packComponent.pack, { isEmbedded: p.propertyRoute?.typeReference().isEmbedded }),
       frame: frame,

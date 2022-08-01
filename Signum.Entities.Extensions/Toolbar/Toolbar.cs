@@ -87,7 +87,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
     [StringLengthValidator(Min = 3, Max = 100)]
     public string? IconColor { get; set; }
 
-    [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity), typeof(PermissionSymbol), typeof(ToolbarEntity))]
+    [ImplementedBy(typeof(ToolbarMenuEntity), typeof(ToolbarEntity), typeof(QueryEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]
     public Lite<Entity>? Content { get; set; }
 
     [StringLengthValidator(Min = 1, Max = int.MaxValue), URLValidator(absolute: true, aspNetSiteRelative: true)]

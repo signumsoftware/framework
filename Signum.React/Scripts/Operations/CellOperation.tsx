@@ -61,12 +61,12 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
   if (iconAlign == null)
     iconAlign = coc.iconAlign ?? coc.settings?.iconAlign;
 
-  const customOrSettingsOrDefaultClick = onOperationClick ?? coc.settings?.onClick ?? eos?.commonOnClick ?? defaultCellOperationClick
+  const resolvedOnClick = onOperationClick ?? coc.settings?.onClick ?? eos?.commonOnClick ?? defaultCellOperationClick
 
   const handleOnClick = (event: React.MouseEvent<any>) => {
     coc.event = event;
     event.persist();
-    customOrSettingsOrDefaultClick(coc)
+    resolvedOnClick(coc)
       .done();
   }
 

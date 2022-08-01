@@ -15,6 +15,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 import './ConcurrentUser.css'
 import * as ConcurrentUserClient from './ConcurrentUserClient';
 import { exploreWindowsOpen } from '../../Signum.React/Scripts/Finder'
+import { HubConnectionState } from '@microsoft/signalr'
 
 export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }) {
   
@@ -44,7 +45,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
       function updateModified() {
         GraphExplorer.propagateAll(p.entity);
 
-        if (p.entity.modified != isModified.current) {
+        if (p.entity.modified != isModified.current && conn?.state == HubConnectionState.Connected) {
           conn?.send("EntityModified", entityKey, userKey, p.entity.modified).done();
           isModified.current = p.entity.modified;
         }

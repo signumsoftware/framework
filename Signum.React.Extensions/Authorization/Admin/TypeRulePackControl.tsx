@@ -20,10 +20,11 @@ import {
 } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
-import { QueryEntity, PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
+import { QueryEntity, PropertyRouteEntity, TypeEntity } from '@framework/Signum.Entities.Basics'
 
 import "./AuthAdmin.css"
 import { is } from '@framework/Signum.Entities';
+import { getNiceTypeName } from '../../../Signum.React/Scripts/Operations/MultiPropertySetter'
 
 export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
 
@@ -36,8 +37,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     const hasChanges = bc.pack.entity.modified;
 
     return [
-      { button: <Button variant="primary" disabled={!hasChanges} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
-      { button: <Button variant="warning" disabled={!hasChanges} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
+      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
       { button: <Button variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
     ];
   }
@@ -186,12 +187,29 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     </div>
   );
 
-  function handleAddConditionClick(conditions: TypeConditionSymbol[], taac: TypeAllowedAndConditions) {
+  function handleAddConditionClick(conditions: TypeConditionSymbol[], taac: TypeAllowedAndConditions, type: TypeEntity) {
 
-    SelectorModal.chooseManyElement(conditions, { buttonDisplay: a => getToString(a), size: "md" })
+    SelectorModal.chooseManyElement(conditions, {
+      buttonDisplay: a => getToString(a),
+      title: AuthAdminMessage.SelectTypeConditions.niceToString(),
+      message: <div>
+        <p>{AuthAdminMessage.ThereAre0TypeConditionsDefinedFor1.niceToString().formatHtml(<strong>{conditions.length}</strong>, <strong>{getTypeInfo(type.cleanName).niceName}</strong>)}</p>
+        <p>{AuthAdminMessage.SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
+        <p>{AuthAdminMessage.SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
+      </div>,
+      size: "md"
+    })
       .then(tc => {
         if (!tc)
           return;
+
+        var combinedKey = tc.orderBy(a => a.key).map(a => a.key).join(" & ");
+
+        if (taac.conditionRules.some(cr => cr.element.typeConditions.orderBy(a => a.element.key).map(a => a.element.key).join(" & ") == combinedKey)) {
+          return MessageModal.showError(<div><p>{AuthAdminMessage.TheFollowingTypeConditionsHaveAlreadyBeenUsed.niceToString()}</p>
+            <p><strong>{combinedKey}</strong></p></div>,
+            AuthAdminMessage.RepeatedTypeCondition.niceToString());
+        }
 
         taac.conditionRules.push(newMListElement(TypeConditionRuleModel.New({
           typeConditions: tc.map(t => newMListElement(t)),
@@ -222,8 +240,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     return [
       <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td className={tctx.value.allowed.fallback == null ? "text-danger fw-bold" : undefined} title={AuthAdminMessage.ConflictMergingTypeConditions.niceToString()}>
-          {conditions.length > 0 ?
-            <span className="sf-condition-icon" onClick={() => handleAddConditionClick(conditions, tctx.value.allowed)}>
+          {conditions.length > 1 || conditions.length == 1 && tctx.value.allowed.conditionRules.length == 0 ?
+            <span className="sf-condition-icon" onClick={() => handleAddConditionClick(conditions, tctx.value.allowed, tctx.value.resource)}>
               <FontAwesomeIcon icon="plus-circle" />
             </span> :
             <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>}
@@ -241,7 +259,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
           {colorRadio(fallback, "None", "red")}
         </td>
         <td style={{ textAlign: "center" }}>
-          <GrayCheckbox checked={!typeAllowedEquals(tctx.value.allowed, tctx.value.allowedBase)} onUnchecked={() => {
+          <GrayCheckbox readOnly={ctx.readOnly} checked={!typeAllowedEquals(tctx.value.allowed, tctx.value.allowedBase)} onUnchecked={() => {
             tctx.value.allowed = JSON.parse(JSON.stringify(tctx.value.allowedBase));
             tctx.value.modified = true;
             updateFrame();
@@ -318,6 +336,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       title={title}
       color={color}
       icon={icon}
+      readOnly={ctx.readOnly}
       onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); updateFrame(); }}
     />;
   }
@@ -340,7 +359,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       }
       else {
         action()
-          .then(m => Navigator.view(m, { buttons: "close" }))
+          .then(m => Navigator.view(m, { buttons: "close", readOnly: ctx.readOnly }))
           .then(() => action())
           .then(m => {
             setNewValue(m);

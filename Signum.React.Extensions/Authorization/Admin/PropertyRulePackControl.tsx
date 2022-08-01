@@ -26,7 +26,7 @@ export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx
 
   function renderButtons(bc: ButtonsContext) {
     return [
-      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" disabled={ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
     ];
   }
 
@@ -90,7 +90,7 @@ export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx
                 {renderRadio(c.value, "None", "red")}
               </td>
               <td style={{ textAlign: "center" }}>
-                <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
+                <GrayCheckbox readOnly={ctx.readOnly} checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
                   c.value.allowed = c.value.allowedBase;
                   ctx.value.modified = true;
                   forceUpdate();
@@ -111,6 +111,7 @@ export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx
       return;
 
     return <ColorRadio
+      readOnly={ctx.readOnly}
       checked={c.allowed == allowed}
       color={color}
       onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }}

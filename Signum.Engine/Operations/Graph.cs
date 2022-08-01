@@ -552,11 +552,13 @@ public class Graph<T>
                     using (var tr = new Transaction())
                     {
                         using (OperationLogic.AllowSave(entity.GetType()))
-                        using (AssertEntity((T)entity))
                         {
+                            var assertEnd = AssertEntity((T)entity);
                             OperationLogic.OnSuroundOperation(this, log, entity, args).EndUsing(_ =>
                             {
                                 Execute((T)entity, args);
+
+                                assertEnd?.Invoke();
 
                                 if (!AvoidImplicitSave)
                                     entity.Save(); //Nothing happens if already saved
@@ -601,7 +603,7 @@ public class Graph<T>
             }
         }
 
-        protected virtual IDisposable? AssertEntity(T entity)
+        protected virtual Action? AssertEntity(T entity)
         {
             return null;
         }
