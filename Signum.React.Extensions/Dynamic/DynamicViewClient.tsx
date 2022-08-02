@@ -69,12 +69,8 @@ export function start(options: { routes: JSX.Element[] }) {
   }));
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Delete, {
-    onClick: ctx => {
-      cleanCaches();
-      return ctx.defaultClick();
-    },
-    contextual: { onClick: ctx => { cleanCaches(); return ctx.defaultContextualClick(); } },
-    contextualFromMany: { onClick: ctx => { cleanCaches(); return ctx.defaultContextualClick(); } },
+    commonOnClick: oc => { cleanCaches(); return oc.defaultClick(); },
+    contextualFromMany: { onClick: ctx => { cleanCaches(); return ctx.defaultClick(); } },
   }));
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Save, {
@@ -85,12 +81,8 @@ export function start(options: { routes: JSX.Element[] }) {
   }));
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Delete, {
-    onClick: ctx => {
-      cleanCaches();
-      return ctx.defaultClick();
-    },
-    contextual: { onClick: ctx => { cleanCaches(); return ctx.defaultContextualClick(); } },
-    contextualFromMany: { onClick: ctx => { cleanCaches(); return ctx.defaultContextualClick(); } },
+    commonOnClick: ctx => { cleanCaches(); return ctx.defaultClick(); },
+    contextualFromMany: { onClick: ctx => { cleanCaches(); return ctx.defaultClick(); } },
   }));
 
   Navigator.setViewDispatcher(new DynamicViewViewDispatcher());

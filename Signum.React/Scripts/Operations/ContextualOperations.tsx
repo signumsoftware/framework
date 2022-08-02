@@ -225,13 +225,12 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
 
   const disabled = !!coc.canExecute;
 
-  const customOrSettingsOrDefaultClick = onOperationClick ?? coc.settings?.onClick ?? eos?.commonOnClick ?? defaultContextualOperationClick
+  const resolvedOnClick = onOperationClick ?? coc.settings?.onClick ?? (coc.context.lites.length > 1 ? null : eos?.commonOnClick) ?? defaultContextualOperationClick;
 
   const handleOnClick = (me: React.MouseEvent<any>) => {
     coc.event = me;
     onClick?.(me);
-    customOrSettingsOrDefaultClick(coc)
-      .done();
+    resolvedOnClick(coc).done();
   }
 
   const item = (

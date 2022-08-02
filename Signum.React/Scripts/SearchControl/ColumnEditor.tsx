@@ -48,14 +48,17 @@ export default function ColumnEditor(p: ColumnEditorProps) {
   const co = p.columnOption;
 
   const isCollection = co.token && co.token.type.isCollection;
+  const isInvalid = co.token && co.token.type.name == "OperationsToken";
 
   const summaryNotAggregate = co.summaryToken != null && co.summaryToken.queryTokenType != "Aggregate";
 
   return (
     <div className="sf-column-editor">
       <button type="button" className="btn-close float-end" aria-label="Close" onClick={p.close} />
-      <div className={classes("d-flex", isCollection ? "error" : undefined)}
-        title={StyleContext.default.titleLabels && isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
+      <div className={classes("d-flex", isCollection || isInvalid ? "error" : undefined)}
+        title={!StyleContext.default.titleLabels ? undefined : 
+          isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() :
+          isInvalid ? SearchMessage.InvalidColumnExpression.niceToString() : undefined}>
         <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>{SearchMessage.Field.niceToString()}</label>
         <div className="flex-grow-1">
           <div className="rw-widget-xs">

@@ -370,6 +370,9 @@ public static class QueryUtils
         if (token.Type != typeof(string) && token.Type.ElementType() != null)
             return "You can not filter by collections, continue the sequence";
 
+        if (token is OperationsToken or OperationToken)
+            return $"{token} is not a valid filter";
+
         return null;
     }
 
@@ -387,6 +390,9 @@ public static class QueryUtils
                 CollectionAnyAllType.Any.NiceToString(),
                 CollectionAnyAllType.NoOne.NiceToString(),
                 CollectionAnyAllType.AnyNo.NiceToString());
+
+        if (token is OperationsToken)
+            return $"{token} is not a valid column";
 
         return null;
     }
@@ -427,6 +433,9 @@ public static class QueryUtils
                 CollectionAnyAllType.Any.NiceToString(),
                 CollectionAnyAllType.NoOne.NiceToString(),
                 CollectionAnyAllType.AnyNo.NiceToString());
+
+        if (token is OperationsToken or OperationToken)
+            return $"{token} is not a valid order";
 
         return null;
     }

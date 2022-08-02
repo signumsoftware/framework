@@ -5,8 +5,9 @@ using Signum.Entities.Authorization;
 using Signum.React.Filters;
 using System.Threading.Tasks;
 using System.Threading;
-
-
+using System.Linq;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Authorization;
 
@@ -45,6 +46,7 @@ public class ActiveDirectoryController : ControllerBase
         throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
     }
 
+
     [HttpPost("api/createADGroup")]
     public Lite<ADGroupEntity> CreateADGroup([FromBody][Required] ADGroupRequest groupRequest)
     {
@@ -60,6 +62,59 @@ public class ActiveDirectoryController : ControllerBase
         }.SetId(groupRequest.Id);
 
         return group.Execute(ADGroupOperation.Save).ToLite();
+    }
+
+
+    [HttpGet("api/thumbnailphoto/{username}"), SignumAllowAnonymous]
+    [ResponseCache(Duration = 20, Location = ResponseCacheLocation.Client)]
+    public FileStreamResult? GetThumbnail(string username)
+    {
+        using (AuthLogic.Disable())
+        {
+            var byteArray = ActiveDirectoryLogic.GetProfilePicture(username);
+
+            if (byteArray != null)
+            {
+                var memStream = new MemoryStream();
+
+                memStream.Write(byteArray);
+                memStream.Position = 0;
+
+                var streamResult = new FileStreamResult(memStream, "image/jpeg");
+
+                return streamResult;
+            }
+
+            return null;
+        }
+    }
+
+    [HttpPost("api/getUserPhoto")]
+    public FileStreamResult GetUserPhoto([FromBody][Required] UserPhotoRequest request)
+    {
+        if (request.OId != null)
+        {
+            var photo = AzureADLogic.GetUserPhoto(request.OId.Value).Result;
+            if (photo != null)
+            {
+                photo.Position = 0;
+                return new FileStreamResult(photo, "image/jpeg");
+            }
+        }
+
+        if (request.SId != null)
+        {
+
+        }
+
+        throw new InvalidOperationException(ValidationMessage._0Or1ShouldBeSet.NiceToString("OId", "SId"));
+    }
+
+    public class UserPhotoRequest
+    {
+        public Guid? OId { get; set; }
+
+        public string? SId { get; set; }
     }
 
     public class ADGroupRequest

@@ -306,16 +306,16 @@ public static class WorkflowLogic
                 Execute = (e, _) =>
                 {
                     if (e.Timer == null && e.Type.IsTimer())
-                        throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(e.NicePropertyName(a => a.Timer), e.NicePropertyName(a => a.Type), e.Type.NiceToString()));
+                        throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.Timer), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
 
                     if (e.Timer != null && !e.Type.IsTimer())
-                        throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(e.NicePropertyName(a => a.Timer), e.NicePropertyName(a => a.Type), e.Type.NiceToString()));
+                        throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.Timer), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
 
                     if (e.BoundaryOf == null && e.Type.IsBoundaryTimer())
-                        throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(e.NicePropertyName(a => a.BoundaryOf), e.NicePropertyName(a => a.Type), e.Type.NiceToString()));
+                        throw new InvalidOperationException(ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.BoundaryOf), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
 
                     if (e.BoundaryOf != null && !e.Type.IsBoundaryTimer())
-                        throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(e.NicePropertyName(a => a.BoundaryOf), e.NicePropertyName(a => a.Type), e.Type.NiceToString()));
+                        throw new InvalidOperationException(ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(Entity.NicePropertyName(() => e.BoundaryOf), Entity.NicePropertyName(() => e.Type), e.Type.NiceToString()));
 
                     e.Save();
                 },

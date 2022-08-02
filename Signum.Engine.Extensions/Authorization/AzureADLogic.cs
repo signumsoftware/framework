@@ -5,6 +5,7 @@ using Signum.Engine.Scheduler;
 using Signum.Entities.Authorization;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Text.Json;
 
 namespace Signum.Engine.Authorization;
@@ -499,6 +500,24 @@ public static class AzureADLogic
         var msGraphUser = graphClient.Users[adUser.ObjectID.ToString()].Request().GetAsync().Result;
 
         return new MicrosoftGraphCreateUserContext(msGraphUser);
+    }
+
+
+    public static async Task<MemoryStream?> GetUserPhoto(Guid OId)
+    {
+        ClientCredentialProvider authProvider = GetClientCredentialProvider();
+        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+        var photo = await graphClient.Users[OId.ToString()].Photos["64x64"].Content.Request().GetAsync();
+        if (photo != null)
+        {
+            MemoryStream ms = new MemoryStream();
+            photo.CopyTo(ms);
+            return ms;
+        }
+        else
+        {
+            return null;
+        }
     }
 }
 

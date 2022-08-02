@@ -208,15 +208,11 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   }));
 
   Operations.addSettings(new EntityOperationSettings(CaseOperation.Delete, {
-    onClick: eoc => askDeleteMainEntity(eoc.entity.mainEntity)
-      .then(u => u == undefined ? undefined : eoc.defaultClick(u)),
-    contextual: {
-      onClick: coc => askDeleteMainEntity(coc.pack!.entity.mainEntity)
-        .then(u => u == undefined ? undefined : coc.defaultContextualClick(u))
-    },
+    commonOnClick: oc => oc.getEntity().then(e=> askDeleteMainEntity(e.mainEntity))
+      .then(u => u == undefined ? undefined : oc.defaultClick(u)),
     contextualFromMany: {
       onClick: coc => askDeleteMainEntity()
-        .then(u => u == undefined ? undefined : coc.defaultContextualClick(u))
+        .then(u => u == undefined ? undefined : coc.defaultClick(u))
     },
   }));
 
@@ -233,15 +229,11 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, {
     hideOnCanExecute: true,
     isVisible: ctx => false,
-    onClick: eoc => askDeleteMainEntity(eoc.entity.case.mainEntity)
-      .then(u => u == undefined ? undefined : eoc.defaultClick(u)),
-    contextual: {
-      onClick: coc => askDeleteMainEntity(coc.pack!.entity.case.mainEntity)
-        .then(u => u == undefined ? undefined : coc.defaultContextualClick(u))
-    },
+    commonOnClick: oc => oc.getEntity().then(e => askDeleteMainEntity(e.case.mainEntity))
+      .then(u => u == undefined ? undefined : oc.defaultClick(u)),
     contextualFromMany: {
       onClick: coc => askDeleteMainEntity()
-        .then(u => u == undefined ? undefined : coc.defaultContextualClick(u))
+        .then(u => u == undefined ? undefined : coc.defaultClick(u))
     },
   }));
 
@@ -267,7 +259,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       onClick: coc =>
         Navigator.API.fetch(coc.context.lites[0])
           .then(ca => getWorkflowJumpSelector(toLite(ca.workflowActivity as WorkflowActivityEntity)))
-          .then(dest => dest && coc.defaultContextualClick(dest))
+          .then(dest => dest && coc.defaultClick(dest))
 
     }
   }));
@@ -289,7 +281,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       onClick: coc =>
         Navigator.API.fetch(coc.context.lites[0])
           .then(ca => getWorkflowFreeJump(ca.case.workflow))
-          .then(dest => dest && coc.defaultContextualClick(dest))
+          .then(dest => dest && coc.defaultClick(dest))
     }
   }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timer, { isVisible: ctx => false }));
@@ -341,7 +333,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
             : <OperationMenuItem coc={coc} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name}</OperationMenuItem>];
 
         } else if (wa.type == "Decision") {
-          return wa.decisionOptions.map(mle => <OperationMenuItem coc={coc} onOperationClick={() => coc.defaultContextualClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationMenuItem>);
+          return wa.decisionOptions.map(mle => <OperationMenuItem coc={coc} onOperationClick={() => coc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationMenuItem>);
         }
         else
           return [];
@@ -379,16 +371,31 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Deactivate, {
     onClick: eoc => chooseWorkflowExpirationDate([toLite(eoc.entity)]).then(val => !val ? undefined : eoc.defaultClick(val)),
     contextual: {
-      onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => !val ? undefined : coc.defaultContextualClick(val)),
+      onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => !val ? undefined : coc.defaultClick(val)),
       icon: ["far", "heart"],
       iconColor: "gray"
     },
     contextualFromMany: {
-      onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => !val ? undefined : coc.defaultContextualClick(val)),
+      onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => !val ? undefined : coc.defaultClick(val)),
       icon: ["far", "heart"],
       iconColor: "gray"
     },
   }));
+
+  function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promise<string | undefined> {
+    return ValueLineModal.show({
+      type: { name: "string" },
+      valueLineType: "DateTime",
+      modalSize: "md",
+      title: WorkflowMessage.DeactivateWorkflow.niceToString(),
+      message:
+        <div>
+          <strong>{WorkflowMessage.PleaseChooseExpirationDate.niceToString()}</strong>
+          <ul>{workflows.map((w, i) => <li key={i}>{getToString(w)}</li>)}</ul>
+        </div>
+    });
+  }
+
   Navigator.addSettings(new EntitySettings(WorkflowEntity, w => import('./Workflow/Workflow'), { avoidPopup: true }));
 
   hide(WorkflowPoolEntity);
@@ -443,19 +450,6 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   }
 }
 
-function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promise<string | undefined> {
-  return ValueLineModal.show({
-    type: { name: "string" },
-    valueLineType: "DateTime",
-    modalSize: "md",
-    title: WorkflowMessage.DeactivateWorkflow.niceToString(),
-    message:
-      <div>
-        <strong>{WorkflowMessage.PleaseChooseExpirationDate.niceToString()}</strong>
-        <ul>{workflows.map((w, i) => <li key={i}>{getToString(w)}</li>)}</ul>
-      </div>
-  });
-}
 
 export function workflowActivityMonitorUrl
   (workflow: Lite<WorkflowEntity>) {
