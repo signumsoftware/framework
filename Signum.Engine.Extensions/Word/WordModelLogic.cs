@@ -266,8 +266,8 @@ public static class WordModelLogic
         return GetTemplate(candidates, model, ci) ??
             GetTemplate(candidates, model, CultureInfo.CurrentCulture.Parent) ??
             candidates.SingleEx(
-                () => $"No active WordTemplate for {registeredWordModels} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}",
-                () => $"More than one active WordTemplate for {registeredWordModels} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}");
+                () => $"No active WordTemplate for {model} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}",
+                () => $"More than one active WordTemplate for {model} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}");
     }
 
     private static WordTemplateEntity? GetTemplate(IEnumerable<WordTemplateEntity> candidates, WordModelEntity model, CultureInfo culture)
