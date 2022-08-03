@@ -85,6 +85,30 @@ public static class AuthLogic
                     userWithClaims.Claims["OID"] = mixin.OID;
                     userWithClaims.Claims["SID"] = mixin.SID;
                 };
+
+                var lambda = As.GetExpression((UserEntity u) => u.ToString());
+
+                if (lambda.Body is MemberExpression me && me.Member is PropertyInfo pi && pi.Name == nameof(UserEntity.UserName))
+                {
+                    Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+                    {
+                        UserName = u.UserName,
+                        ToStringValue = null,
+                        OID = u.Mixin<UserADMixin>().OID,
+                        SID = u.Mixin<UserADMixin>().SID,
+                    });
+                }
+                else
+                {
+                    Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+                    {
+                        UserName = u.UserName,
+                        ToStringValue = u.ToString(),
+                        OID = u.Mixin<UserADMixin>().OID,
+                        SID = u.Mixin<UserADMixin>().SID,
+                    });
+                }
+             
             }
 
             CultureInfoLogic.AssertStarted(sb);

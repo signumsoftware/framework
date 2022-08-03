@@ -16,6 +16,7 @@ import { BsColor } from "../Components";
 import Exception from "../Exceptions/Exception";
 import { withIcon } from "./EntityOperations";
 import { CellFormatter } from "../Finder";
+import { useDoubleClick } from "../Hooks";
 
 
 export interface CellOperationProps extends ButtonProps {
@@ -61,22 +62,24 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
   if (iconAlign == null)
     iconAlign = coc.iconAlign ?? coc.settings?.iconAlign;
 
-  const customOrSettingsOrDefaultClick = onOperationClick ?? coc.settings?.onClick ?? eos?.commonOnClick ?? defaultCellOperationClick
+  const resolvedOnClick = onOperationClick ?? coc.settings?.onClick ?? eos?.commonOnClick ?? defaultCellOperationClick
 
   const handleOnClick = (event: React.MouseEvent<any>) => {
     coc.event = event;
     event.persist();
-    customOrSettingsOrDefaultClick(coc)
+    resolvedOnClick(coc)
       .done();
   }
 
-  var button = <Button variant={(outline ? ("outline-" + color) : color)}
+  const onlySingleClick = useDoubleClick((e) => { }, handleOnClick);
+
+  var button = <Button variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
     {...props}
     key="button"
     size="sm"
     title={coc.operationInfo.niceName}
     className={classes(disabled ? "disabled" : undefined, props?.className, coc.settings && coc.settings.classes)}
-    onClick={disabled ? undefined : handleOnClick}
+    onClick={disabled ? undefined : onlySingleClick}
     data-operation={coc.operationInfo.key}>
     {renderChildren()}
   </Button>;

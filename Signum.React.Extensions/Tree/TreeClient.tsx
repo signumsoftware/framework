@@ -31,7 +31,7 @@ export function start(options: { routes: JSX.Element[] }) {
     new EntityOperationSettings(TreeOperation.CreateNextSibling, { contextual: { isVisible: ctx => ctx.context.container instanceof SearchControlLoaded } }),
     new EntityOperationSettings(TreeOperation.Move, {
       onClick: ctx => moveModal(toLite(ctx.entity)).then(m => m && ctx.defaultClick(m)),
-      contextual: { onClick: ctx => moveModal(ctx.context.lites[0]).then(m => m && ctx.defaultContextualClick(m)) }
+      contextual: { onClick: ctx => moveModal(ctx.context.lites[0]).then(m => m && ctx.defaultClick(m)) }
     }),
     new EntityOperationSettings(TreeOperation.Copy, {
       onClick: ctx => copyModal(toLite(ctx.entity)).then(m => {
@@ -44,7 +44,7 @@ export function start(options: { routes: JSX.Element[] }) {
         onClick: ctx => copyModal(ctx.context.lites[0]).then(m => {
           if (m) {
             ctx.onConstructFromSuccess = pack => Operations.notifySuccess();
-            ctx.defaultContextualClick(m);
+            ctx.defaultClick(m);
           }
         })
       }

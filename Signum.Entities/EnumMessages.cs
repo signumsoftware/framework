@@ -120,6 +120,7 @@ public enum SearchMessage
     [Description("Add column")]
     AddColumn,
     CollectionsCanNotBeAddedAsColumns,
+    InvalidColumnExpression,
     [Description("Add filter")]
     AddFilter,
     [Description("Add group")]

@@ -1,19 +1,41 @@
 import * as React from 'react'
-import { ajaxPost, ajaxGet } from '@framework/Services';
+import { ajaxPost, ajaxGet, ajaxGetRaw } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery, ActiveDirectoryMessage, ADGroupEntity } from './Signum.Entities.Authorization'
+import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery, ActiveDirectoryMessage, ADGroupEntity, UserADMixin, UserLiteModel } from './Signum.Entities.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ValueLineModal from '@framework/ValueLineModal';
 import { FindOptions, FindOptionsParsed, ResultRow } from '@framework/FindOptions';
 import MessageModal from '@framework/Modals/MessageModal';
-import { Lite, SearchMessage } from '@framework/Signum.Entities';
+import { isLite, Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
 import SelectorModal from '@framework/SelectorModal';
 import { QueryString } from '@framework/QueryString';
 import { isPermissionAuthorized } from './AuthClient';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
+import ProfilePhoto, { urlProviders } from './Templates/ProfilePhoto';
+import * as AppContext from "@framework/AppContext"
+import { TypeaheadOptions } from '../../Signum.React/Scripts/Components/Typeahead';
 
 export function start(options: { routes: JSX.Element[] }) {
+  if (window.__azureApplicationId) {
+    urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
+      var oid =
+        (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
+        tryGetMixin(u, UserADMixin)?.oID;
+
+      return oid == null ? null : AppContext.toAbsoluteUrl("~/api/azureUserPhoto/" + size + "/" + oid);
+    })
+  }
+
+  urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
+    var sid =
+      (UserEntity.isLite(u)) ? (u.model as UserLiteModel).sID :
+        tryGetMixin(u, UserADMixin)?.sID;
+    
+    return sid == null ? null : AppContext.toAbsoluteUrl("~/api/adThumbnailphoto/" +
+      UserEntity.isLite(u) ? ((u as Lite<UserEntity>).model as UserLiteModel).userName : (u as UserEntity).userName);
+  });
+
   Navigator.addSettings(new Navigator.EntitySettings(ADGroupEntity, e => import('./AzureAD/ADGroup'), { isCreable: "Never" }));
 
   Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ? ({

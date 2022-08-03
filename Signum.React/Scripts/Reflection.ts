@@ -1748,6 +1748,10 @@ export class PropertyRoute {
     return [...this.parent == null ? [] : this.parent.allParents(includeMixins), this];
   }
 
+  addMixin<T extends MixinEntity>(mixin: Type<T>, property: ((val: T) => any) | string) {
+    return this.addMember("Mixin", mixin.typeName, true).addLambda(property);
+  }
+
   addLambda(property: ((val: any) => any) | string): PropertyRoute {
     const lambdaMembers = typeof property == "function" ?
       getLambdaMembers(property) :

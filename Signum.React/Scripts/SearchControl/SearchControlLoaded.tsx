@@ -1290,7 +1290,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (t.type.isCollection)
       return false;
 
-    if (t.type.isEmbedded || isTypeModel(t.type.name))
+    if (t.type.isEmbedded || isTypeModel(t.type.name) || t.type.name == "CellOperationDTO")
       return t.hasOrderAdapter == true;
 
     return true;

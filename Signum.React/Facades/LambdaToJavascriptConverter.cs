@@ -7,7 +7,7 @@ namespace Signum.React.Facades;
 
 internal class LambdaToJavascriptConverter
 {
-    public static string? ToJavascript(LambdaExpression lambdaExpression)
+    public static string? ToJavascript(LambdaExpression lambdaExpression, bool assert)
     {
         if (lambdaExpression == null)
             return null;
@@ -17,7 +17,12 @@ internal class LambdaToJavascriptConverter
         var body = ToJavascript(newLambda.Parameters.Single(), newLambda.Body);
 
         if (body == null)
+        {
+            if (assert)
+                throw new InvalidOperationException("Unable to convert to Javascript:" + lambdaExpression.ToString());
+
             return null;
+        }
 
         return "return " + body;
     }
@@ -137,6 +142,17 @@ internal class LambdaToJavascriptConverter
                     return "fd.toLite(" + obj + ")";
             }
 
+            if (mc.Method.Name == nameof(Entity.Mixin))
+            {
+                var obj = ToJavascript(param, mc.Object!);
+                if (obj != null)
+                {
+                    var mixinType = mc.Method.GetGenericArguments().SingleEx();
+                    return $"{obj}.mixins['{ Reflector.CleanTypeName(mixinType)}']";
+
+                }
+            }
+
             if (mc.Method.Name == nameof(string.Format) && mc.Method.DeclaringType == typeof(string) ||
                 mc.Method.Name == nameof(StringExtensions.FormatWith) && mc.Method.DeclaringType == typeof(StringExtensions))
             {
@@ -148,8 +164,7 @@ internal class LambdaToJavascriptConverter
                 var strFormat = ToJavascriptToString(param, format);
                 var arguments = args.Select(a => ToJavascriptToString(param, a)).ToList();
 
-                if (strFormat != null && !arguments.Contains(null))
-                    return $"{strFormat}.formatWith(" + arguments.ToString(", ") + ")";
+                return $"{strFormat}.formatWith(" + arguments.ToString(", ") + ")";
             }
 
             if (mc.Method.IsExtensionMethod() && mc.Arguments.Only()?.Type == typeof(Type))

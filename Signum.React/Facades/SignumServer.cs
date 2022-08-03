@@ -156,10 +156,13 @@ public class WebEntityJsonConverterFactory : EntityJsonConverterFactory
         return att.PropertyRoute;
     }
 
-    public override Type ResolveType(string typeStr, Type objectType)
+    public override Type ResolveType(string typeStr, Type objectType, Func<string, Type>? parseType)
     {
         if (Reflector.CleanTypeName(objectType) == typeStr)
             return objectType;
+
+        if (parseType != null)
+            return parseType(typeStr);
 
         var type = ReflectionServer.TypesByName.Value.GetOrThrow(typeStr);
 

@@ -191,3 +191,19 @@ public static class UserTypeCondition
 {
     public static readonly TypeConditionSymbol DeactivatedUsers;
 }
+
+
+[AllowUnathenticated]
+public class UserLiteModel : ModelEntity
+{
+    public string UserName { get; set; }
+    
+    public string? ToStringValue { get; set; }
+
+    public Guid? OID { get; set; }
+
+    public string? SID { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => ToStringValue ?? UserName);
+}
