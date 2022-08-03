@@ -62,7 +62,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
         writer.WriteEndObject();
     }
 
-    public override Lite<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, Lite<T>? existingValue) 
+    public override Lite<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, Lite<T>? existingValue, Func<string, Type>? parseType) 
     {
         if (reader.TokenType == JsonTokenType.Null)
             return null;
@@ -71,7 +71,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
         object? model = null;
         string? idObj = null;
-        string? typeStr = null;
+        Type? type = null;
         string? modelTypeStr = null;
         Entity? entity = null;
 
@@ -81,7 +81,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
             var propName = reader.GetString();
             switch (propName)
             {
-                case "EntityType": reader.Read(); typeStr = reader.GetString(); break;
+                case "EntityType": reader.Read(); type = TypeLogic.GetType(reader.GetString()!); break;
                 case "id":
                     {
                         reader.Read();
@@ -105,7 +105,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
                         using (EntityJsonConverterFactory.SetPath(".model"))
                         {
                             var converter = (JsonConverterWithExisting<ModelEntity>)options.GetConverter(typeof(ModelEntity));
-                            model = converter.Read(ref reader, typeof(ModelEntity), options, (ModelEntity?)existingValue?.Model);
+                            model = converter.Read(ref reader, typeof(ModelEntity), options, (ModelEntity?)existingValue?.Model, modelTypeStr => Lite.ParseModelType(type!, modelTypeStr));
                         }
                     }
                     break;
@@ -114,7 +114,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
                     using (EntityJsonConverterFactory.SetPath(".entity"))
                     {
                         var converter = (JsonConverterWithExisting<Entity>)options.GetConverter(typeof(Entity));
-                        entity = converter.Read(ref reader, typeof(Entity), options, (Entity?)(IEntity?)existingValue?.EntityOrNull);
+                        entity = converter.Read(ref reader, typeof(Entity), options, (Entity?)(IEntity?)existingValue?.EntityOrNull, null);
                     }
                     break;
                 default: throw new JsonException("unexpected property " + propName);
@@ -125,23 +125,24 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
         reader.Assert(JsonTokenType.EndObject);
 
-        Type type = TypeLogic.GetType(typeStr!);
-
-        PrimaryKey? idOrNull = idObj == null ? (PrimaryKey?)null : PrimaryKey.Parse(idObj, type);
+        PrimaryKey? idOrNull = idObj == null ? (PrimaryKey?)null : PrimaryKey.Parse(idObj, type!);
 
 
-        Type modelType = modelTypeStr == null ? Lite.DefaultModelType(type) : Lite.ParseModelType(type, modelTypeStr);
+        Type getModelType()
+        {
+            return modelTypeStr == null ? Lite.DefaultModelType(type!) : Lite.ParseModelType(type!, modelTypeStr);
+        }
 
         if (entity == null)
         {
             return model != null ?
-                (Lite<T>)Lite.Create(type, idOrNull!.Value, model) :
-                (Lite<T>)Lite.Create(type, idOrNull!.Value, modelType);
+                (Lite<T>)Lite.Create(type!, idOrNull!.Value, model) :
+                (Lite<T>)Lite.Create(type!, idOrNull!.Value, getModelType());
         }
 
         var result = model != null ? 
             (Lite<T>)entity.ToLiteFat(model) : 
-            (Lite<T>)entity.ToLiteFat(modelType); ;
+            (Lite<T>)entity.ToLiteFat(getModelType()); ;
 
         if (result.EntityType != type)
             throw new InvalidOperationException("Types don't match");

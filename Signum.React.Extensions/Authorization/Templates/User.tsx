@@ -23,8 +23,10 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
   return (
     <div>
  	  <div className="row">
-        <div className="col-sm-2">
-          <ProfilePhoto user={ctx.value } />
+        <div className="col-sm-3 d-flex">
+          <div className="mx-auto mt-3">
+          <ProfilePhoto user={ctx.value} size={150 }/>
+          </div>
         </div>
         <div className="col-sm-8">
           <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
