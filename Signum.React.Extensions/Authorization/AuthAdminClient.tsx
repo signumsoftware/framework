@@ -41,7 +41,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     renderLite: (lite, subStr) => {
       if (UserLiteModel.isInstance(lite.model))
         return (
-          <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-2" /><span>{TypeaheadOptions.highlightedText(getToString(lite), subStr)}</span></span>
+          <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-1" /><span>{TypeaheadOptions.highlightedText(getToString(lite), subStr)}</span></span>
         );
 
       if (typeof lite.model == "string")
