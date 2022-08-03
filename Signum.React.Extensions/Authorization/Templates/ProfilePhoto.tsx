@@ -3,8 +3,8 @@ import { UserEntity } from "../Signum.Entities.Authorization";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './ProfilePhoto.css'
 import { getToString, Lite } from "@framework/Signum.Entities";
-import UserCircle from "../../ConcurrentUser/UserCircle";
-import { classes } from "../../../Signum.React/Scripts/Globals";
+import UserCircle from "./UserCircle";
+import { classes } from "@framework/Globals";
 
 export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | null)[] = []; 
 

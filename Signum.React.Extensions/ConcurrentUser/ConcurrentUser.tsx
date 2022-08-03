@@ -16,7 +16,6 @@ import './ConcurrentUser.css'
 import * as ConcurrentUserClient from './ConcurrentUserClient';
 import { exploreWindowsOpen } from '../../Signum.React/Scripts/Finder'
 import { HubConnectionState } from '@microsoft/signalr'
-import UserCircle from './UserCircle'
 import { SmallProfilePhoto } from '../Authorization/Templates/ProfilePhoto'
 
 export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }) {
