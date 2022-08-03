@@ -24,6 +24,7 @@ export const AlertEntity = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
   Type: "Alert";
   target: Entities.Lite<Entities.Entity> | null;
+  parentTarget: Entities.Lite<Entities.Entity> | null;
   creationDate: string /*DateTime*/;
   alertDate: string /*DateTime*/ | null;
   attendedDate: string /*DateTime*/ | null;

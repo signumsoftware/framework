@@ -9,6 +9,9 @@ public class AlertEntity : Entity
     [ImplementedByAll]
     public Lite<Entity>? Target { get; set; }
 
+    [ImplementedByAll]
+    public Lite<Entity>? ParentTarget { get; set; }
+
     public DateTime CreationDate { get; private set; } = Clock.Now;
 
     [NotNullValidator]
