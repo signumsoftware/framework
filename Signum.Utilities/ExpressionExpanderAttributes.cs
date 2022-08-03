@@ -102,6 +102,37 @@ public static class As
         throw new InvalidOperationException("This method is not meant to be called. Missing reference to Signum.MSBuildTask in this assembly?");
     }
 
+    public static LambdaExpression GetExpressionUntyped(MemberInfo methodOrProperty)
+    {
+        var attr = methodOrProperty.GetCustomAttribute<ExpressionFieldAttribute>();
+
+        if (attr == null)
+            throw new InvalidOperationException($"The member {methodOrProperty.Name} has not {nameof(ExpressionFieldAttribute)}");
+
+        var fi = methodOrProperty.DeclaringType!.GetField(attr.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!;
+
+        return (LambdaExpression)fi.GetValue(null)!;
+    }
+
+    public static Expression<Func<T, R>> GetExpression<T, R>(Expression<Func<T, R>> methodOrProperty)
+    {
+        MemberInfo member = GetMember(methodOrProperty);
+
+        return (Expression<Func<T, R>>)GetExpressionUntyped(member);
+    }
+
+    private static MemberInfo GetMember(LambdaExpression methodOrProperty)
+    {
+        var body = methodOrProperty.Body;
+
+        if (body is UnaryExpression u && u.NodeType == ExpressionType.Convert)
+            body = u.Operand;
+
+        var member = body is MemberExpression m ? m.Expression!.Type.GetProperty(((PropertyInfo)m.Member).Name) ?? m.Member :
+            body is MethodCallExpression mc ? mc.Object?.Type.GetMethod(mc.Method.Name, mc.Method.GetParameters().Select(p => p.ParameterType).ToArray()) ?? mc.Method :
+            throw new InvalidOperationException($"Unexpected expression of type {body.NodeType}");
+        return member;
+    }
 
     public static void ReplaceExpressionUntyped(MemberInfo methodOrProperty, LambdaExpression newExpression)
     {
@@ -117,14 +148,7 @@ public static class As
 
     public static void ReplaceExpression<T, R>(Expression<Func<T, R>> methodOrProperty, Expression<Func<T, R>> newExpression)
     {
-        var body = methodOrProperty.Body;
-
-        if (body is UnaryExpression u && u.NodeType == ExpressionType.Convert)
-            body = u.Operand;
-
-        var member = body is MemberExpression m ? m.Expression!.Type.GetProperty(((PropertyInfo)m.Member).Name) ?? m.Member:
-            body is MethodCallExpression mc ? mc.Object?.Type.GetMethod(mc.Method.Name, mc.Method.GetParameters().Select(p=> p.ParameterType).ToArray()) ?? mc.Method :
-            throw new InvalidOperationException($"Unexpected expression of type {body.NodeType}");
+        MemberInfo member = GetMember(methodOrProperty);
 
         ReplaceExpressionUntyped(member, newExpression);
     }
