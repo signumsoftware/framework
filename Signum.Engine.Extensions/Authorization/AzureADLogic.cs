@@ -503,21 +503,26 @@ public static class AzureADLogic
     }
 
 
-    public static async Task<MemoryStream?> GetUserPhoto(Guid OId)
+    public static Task<MemoryStream> GetUserPhoto(Guid OId, int size)
     {
         ClientCredentialProvider authProvider = GetClientCredentialProvider();
         GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-        var photo = await graphClient.Users[OId.ToString()].Photos["64x64"].Content.Request().GetAsync();
-        if (photo != null)
+        int imageSize = 
+            size <= 48 ? 48 : 
+            size <= 64 ? 64 : 
+            size <= 96 ? 96 : 
+            size <= 120 ? 120 : 
+            size <= 240 ? 240 : 
+            size <= 360 ? 360 : 
+            size <= 432 ? 432 : 
+            size <= 504 ? 504 : 648;
+
+        return graphClient.Users[OId.ToString()].Photos[$"{imageSize}x{imageSize}"].Content.Request().GetAsync().ContinueWith(photo =>
         {
             MemoryStream ms = new MemoryStream();
-            photo.CopyTo(ms);
+            photo.Result.CopyTo(ms);
             return ms;
-        }
-        else
-        {
-            return null;
-        }
+        }, TaskContinuationOptions.OnlyOnRanToCompletion);
     }
 }
 

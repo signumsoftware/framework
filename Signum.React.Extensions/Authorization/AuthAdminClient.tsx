@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite, getToString } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -14,12 +14,14 @@ import { EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
 import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage, ActiveDirectoryConfigurationEmbedded, UserState } from './Signum.Entities.Authorization'
+import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage, ActiveDirectoryConfigurationEmbedded, UserState, UserLiteModel } from './Signum.Entities.Authorization'
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isPermissionAuthorized } from './AuthClient';
 import { loginWithAzureAD } from './AzureAD/AzureAD';
+import ProfilePhoto, { SmallProfilePhoto } from './Templates/ProfilePhoto';
+import { TypeaheadOptions } from '../../Signum.React/Scripts/Components/Typeahead';
 
 export let types: boolean;
 export let properties: boolean;
@@ -35,7 +37,21 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
   queries = options.queries;
   permissions = options.permissions;
 
-  Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User')));
+  Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User'), {
+    renderLite: (lite, subStr) => {
+      if (UserLiteModel.isInstance(lite.model))
+        return (
+          <span className="d-flex align-items-center"><SmallProfilePhoto user={lite} className="me-2" />{TypeaheadOptions.highlightedText(getToString(lite), subStr)}</span>
+        );
+
+      if (typeof lite.model == "string")
+        return TypeaheadOptions.highlightedText(getToString(lite), subStr);
+
+      return lite.EntityType;
+    }
+  }));
+
+
   Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
   Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./AzureAD/ActiveDirectoryConfiguration')));
   Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
