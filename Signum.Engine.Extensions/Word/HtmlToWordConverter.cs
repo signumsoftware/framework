@@ -14,6 +14,10 @@ public static class HtmlToWordConverter
     public static IEnumerable<OpenXmlElement> HtmlToWord(string html, WordTemplateParameters p)
     {
         var htmlDoc = new HtmlDocument();
+
+        if (html == null)
+            return new List<OpenXmlElement>() { new Paragraph() };
+
         htmlDoc.LoadHtml(html);
         var currentParagraph = p.CurrentTokenNode!.Ancestors<Paragraph>().FirstEx();
 
