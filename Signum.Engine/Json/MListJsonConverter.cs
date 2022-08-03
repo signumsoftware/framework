@@ -7,18 +7,18 @@ namespace Signum.Engine.Json;
 
 interface IJsonConverterWithExisting
 {
-    object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, object? existingValue);
+    object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, object? existingValue, Func<string, Type>? parseType);
 }
 
 public abstract class JsonConverterWithExisting<T> : JsonConverter<T>, IJsonConverterWithExisting
 {
     public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        Read(ref reader, typeToConvert, options, default);
+        Read(ref reader, typeToConvert, options, default, null);
 
-    public object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, object? existingValue) =>
-        Read(ref reader, typeToConvert, options, (T?)existingValue);
+    public object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, object? existingValue, Func<string, Type>? parseType) =>
+        Read(ref reader, typeToConvert, options, (T?)existingValue, parseType);
 
-    public abstract T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, T? existingValue);
+    public abstract T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, T? existingValue, Func<string, Type>? parseType);
 }
 
 public class MListJsonConverterFactory : JsonConverterFactory
@@ -78,7 +78,7 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
         writer.WriteEndArray();
     }
 
-    public override MList<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, MList<T>? existingValue)
+    public override MList<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, MList<T>? existingValue, Func<string, Type>? parseType)
     {
 
         var existingMList = (IMListPrivate<T>?)existingValue;
@@ -134,7 +134,7 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
                         else
                         {
                             T newValue = converter is JsonConverterWithExisting<T> jcwe ?
-                                (T)jcwe.Read(ref reader, typeof(T), options, oldValue.Value.Element!)! :
+                                (T)jcwe.Read(ref reader, typeof(T), options, oldValue.Value.Element!, null)! :
                                 (T)converter.Read(ref reader, typeof(T), options)!;
 
                             if (oldValue.Value.Element!.Equals(newValue))

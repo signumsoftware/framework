@@ -501,6 +501,7 @@ export const UserLiteModel = new Type<UserLiteModel>("UserLiteModel");
 export interface UserLiteModel extends Entities.ModelEntity {
   Type: "UserLiteModel";
   userName: string;
+  toStringValue: string | null;
   oID: string /*Guid*/ | null;
   sID: string | null;
 }
