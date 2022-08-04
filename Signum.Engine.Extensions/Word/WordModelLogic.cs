@@ -3,23 +3,26 @@ using System.Globalization;
 using Signum.Engine.Templating;
 using Signum.Entities.Templating;
 using Signum.Entities.Basics;
+using DocumentFormat.OpenXml.Packaging;
 
 namespace Signum.Engine.Word;
 
 public class WordTemplateParameters : TemplateParameters
 {
     public WordTemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, 
-        IEnumerable<ResultRow> rows, WordTemplateEntity template, IWordModel? wordModel) : 
+        IEnumerable<ResultRow> rows, WordTemplateEntity template, IWordModel? wordModel, OpenXmlPackage document) : 
           base(entity, culture, columns, rows)
     {
         this.Template = template;
         this.Model = wordModel;
-
+        this.Document = document;
     }
 
     public IWordModel? Model;
 
     public WordTemplateEntity Template;
+
+    public OpenXmlPackage Document;
 
     public TokenNode? CurrentTokenNode; //To copy properties
 
