@@ -114,7 +114,7 @@ export function toAbsoluteUrl(appRelativeUrl: string): string {
   if (appRelativeUrl?.startsWith(relativeCrappyUrl))
     return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
 
-  if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
+  if (appRelativeUrl?.startsWith(window.__baseUrl) || appRelativeUrl?.startsWith("http"))
     return appRelativeUrl;
 
   return appRelativeUrl;
