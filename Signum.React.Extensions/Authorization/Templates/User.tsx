@@ -43,7 +43,6 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
               return AuthAdminClient.API.trivialMergeRole(rs);
             })} />
       	
-
             <ValueLine ctx={ctx.subCtx(e => e.email)} readOnly={User.emailReadonly(ctx.value) ? true : undefined} />
             <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
         </div>
