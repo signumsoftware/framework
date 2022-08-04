@@ -16,7 +16,7 @@ export default function ProfilePhoto(p: { user: UserEntity }) {
 return (
   <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
     {immageError ? <FontAwesomeIcon icon="user" size="6x" /> :
-      <img src={AppContext.toAbsoluteUrl("~/api/thumbnailphoto/" + p.user.userName)} style={{ width: "150px", height: "150px", borderRadius: "100px" }} onError={addDefaultSrc} />}
+      <img src={AppContext.toAbsoluteUrl("~/api/thumbnailphoto/" + p.user.userName)} style={{ width: "150px", height: "150px", borderRadius: "50%", objectFit: "cover", border: "3px solid white", boxShadow: "1px 1px 10px grey" }} onError={addDefaultSrc} />}
   </div>
   );
 }

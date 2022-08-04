@@ -66,9 +66,14 @@ public class ActiveDirectoryController : ControllerBase
 
 
     [HttpGet("api/thumbnailphoto/{username}"), SignumAllowAnonymous]
-    [ResponseCache(Duration = 20, Location = ResponseCacheLocation.Client)]
     public FileStreamResult? GetThumbnail(string username)
     {
+
+        this.Response.GetTypedHeaders().CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+        {
+            MaxAge = new TimeSpan(7, 0, 0, 0),
+        };
+
         using (AuthLogic.Disable())
         {
             var byteArray = ActiveDirectoryLogic.GetProfilePicture(username);
