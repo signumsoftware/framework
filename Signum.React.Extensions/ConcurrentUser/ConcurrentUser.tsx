@@ -16,6 +16,7 @@ import './ConcurrentUser.css'
 import * as ConcurrentUserClient from './ConcurrentUserClient';
 import { exploreWindowsOpen } from '../../Signum.React/Scripts/Finder'
 import { HubConnectionState } from '@microsoft/signalr'
+import { SmallProfilePhoto } from '../Authorization/Templates/ProfilePhoto'
 
 export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }) {
   
@@ -121,8 +122,8 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
           <Popover.Body>
             
             {otherUsers?.map((a, i) =>
-              <div key={i} style={{ whiteSpace: "nowrap" }} >
-                <UserCircle user={a.user} /> {getToString(a.user)} ({DateTime.fromISO(a.startTime).toRelative()})
+              <div key={i} className="d-flex align-items-center" >
+                <SmallProfilePhoto user={a.user} className="me-2"/> {getToString(a.user)} <small className="ms-1 text-muted">({DateTime.fromISO(a.startTime).toRelative()})</small>
                 {a.isModified && <FontAwesomeIcon icon="edit" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
               </div>)}
 
@@ -161,29 +162,3 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
     </OverlayTrigger>
   );
 }
-
-export namespace Options {
-
-  export let colors = "#750b1c #a4262c #d13438 #ca5010 #986f0b #498205 #0b6a0b #038387 #005b70 #0078d4 #004e8c #4f6bed #5c2e91 #8764b8 #881798 #c239b3 #e3008c #8e562e #7a7574 #69797e".split(" ");
-
-  export function getUserColor(u: Lite<UserEntity>): string {
-
-    var id = u.id as number;
-
-    return colors[id % colors.length];
-  }
-}
-
-export function getUserInitials(u: Lite<UserEntity>): string {
-  return getToString(u)?.split(" ").map(m => m[0]).filter((a, i) => i < 2).join("").toUpperCase() ?? "";
-}
-
-export function UserCircle(p: { user: Lite<UserEntity>, className?: string }) {
-  var color = Options.getUserColor(p.user);
-  return (
-    <span className={classes("concurrent-user-circle", p.className)} style={{ color: "white", backgroundColor: color }} title={getToString(p.user)}>
-      {getUserInitials(p.user)}
-    </span>
-  );
-}
-

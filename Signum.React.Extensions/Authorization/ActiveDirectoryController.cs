@@ -64,14 +64,18 @@ public class ActiveDirectoryController : ControllerBase
         return group.Execute(ADGroupOperation.Save).ToLite();
     }
 
+    public static TimeSpan PictureMaxAge = new TimeSpan(7, 0, 0);
+
 
     [HttpGet("api/thumbnailphoto/{username}"), SignumAllowAnonymous]
+    [ResponseCache(Duration = 20, Location = ResponseCacheLocation.Client)]
+    [HttpGet("api/thumbnailphoto/{username}"), SignumAllowAnonymous]
+    [HttpGet("api/adThumbnailphoto/{username}"), SignumAllowAnonymous]
     public FileStreamResult? GetThumbnail(string username)
     {
-
         this.Response.GetTypedHeaders().CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
         {
-            MaxAge = new TimeSpan(7, 0, 0, 0),
+            MaxAge = PictureMaxAge,
         };
 
         using (AuthLogic.Disable())
@@ -94,32 +98,23 @@ public class ActiveDirectoryController : ControllerBase
         }
     }
 
-    [HttpPost("api/getUserPhoto")]
-    public FileStreamResult GetUserPhoto([FromBody][Required] UserPhotoRequest request)
+    [HttpGet("api/azureUserPhoto/{size}/{oID}"), SignumAllowAnonymous]
+    public Task<ActionResult> GetUserPhoto(string oId, int size)
     {
-        if (request.OId != null)
+        this.Response.GetTypedHeaders().CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
         {
-            var photo = AzureADLogic.GetUserPhoto(request.OId.Value).Result;
-            if (photo != null)
-            {
-                photo.Position = 0;
-                return new FileStreamResult(photo, "image/jpeg");
-            }
-        }
+            MaxAge = PictureMaxAge,
+        };
 
-        if (request.SId != null)
+        return AzureADLogic.GetUserPhoto(new Guid(oId), size).ContinueWith(ms =>
         {
+            if (ms.IsFaulted || ms.IsCanceled)
+                return (ActionResult)new NotFoundResult();
 
-        }
-
-        throw new InvalidOperationException(ValidationMessage._0Or1ShouldBeSet.NiceToString("OId", "SId"));
-    }
-
-    public class UserPhotoRequest
-    {
-        public Guid? OId { get; set; }
-
-        public string? SId { get; set; }
+            var photo = ms.Result;
+            photo.Position = 0;
+            return new FileStreamResult(photo, "image/jpeg");
+        });
     }
 
     public class ADGroupRequest
