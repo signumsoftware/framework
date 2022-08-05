@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, Dic, KeyGenerator } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList, is } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList, is, liteKey } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import * as Navigator from '../Navigator'
 import { FilterOption, FindOptions } from '../FindOptions'
@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 import { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutoCompleteConfig'
 import { tryGetTypeInfos } from '../Reflection'
+import { KeyCodes } from '../Components'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -376,8 +377,12 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
         this.dropClass(index, orientation)),
       onDragStart: e => this.handleDragStart(e, index),
       onDragEnd: this.handleDragEnd,
+      onKeyDown: e => this.handleMoveKeyDown(e, index),
       onDragOver: e => this.handlerDragOver(e, index, orientation),
       onDrop: this.handleDrop,
+      title: !this.props.ctx.titleLabels ? undefined :
+        orientation == "h" ? EntityControlMessage.MoveWithDragAndDropOrCtrlLeftRight.niceToString() :
+          EntityControlMessage.MoveWithDragAndDropOrCtrlUpDown.niceToString()
     };
   }
 
@@ -387,6 +392,32 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     return dropBorderIndex != null && index == dropBorderIndex ? (orientation == "h" ? "drag-left" : "drag-top") :
       dropBorderIndex != null && index == dropBorderIndex - 1 ? (orientation == "h" ? "drag-right" : "drag-bottom") :
         undefined;
+  }
+
+  handleMoveKeyDown = (ke: React.KeyboardEvent<any>, index : number) => {
+    ke.preventDefault();
+
+    if (ke.ctrlKey) {
+      var direction =
+        ke.keyCode == KeyCodes.down || ke.keyCode == KeyCodes.right ? +1 :
+          ke.keyCode == KeyCodes.up || ke.keyCode == KeyCodes.left ? -1 :
+            null;
+
+      if (direction != null) {
+        const list = this.props.ctx.value!;
+        if (index + direction < 0 || list.length <= index + direction)
+          return;
+
+        var temp = list[index + direction];
+        list[index + direction] = list[index];
+        list[index] = temp;
+
+        this.setValue(list);
+        this.setDropBorderIndex(undefined);
+        this.setDragIndex(undefined);
+        this.forceUpdate();
+      }
+    }
   }
 
   handleDrop = (de: React.DragEvent<any>) => {
@@ -415,7 +446,9 @@ export interface DragConfig {
   onDragEnd?: React.DragEventHandler<any>;
   onDragOver?: React.DragEventHandler<any>;
   onDrop?: React.DragEventHandler<any>;
+  onKeyDown?: React.KeyboardEventHandler<any>;
   dropClass?: string;
+  title?: string;
 }
 
 

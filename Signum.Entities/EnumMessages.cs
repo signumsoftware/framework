@@ -96,6 +96,10 @@ public enum EntityControlMessage
     MoveDown,
     MoveUp,
     Move,
+    [Description("Move with Drag and Drop or Ctrl + Up / Down")]
+    MoveWithDragAndDropOrCtrlUpDown,
+    [Description("Move with Drag and Drop or Ctrl + Left / Right")]
+    MoveWithDragAndDropOrCtrlLeftRight,
     Navigate,
     Remove,
     View,
