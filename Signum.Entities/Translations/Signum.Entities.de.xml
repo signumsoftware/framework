@@ -415,6 +415,7 @@
     <Member Name="HiddenColumn" Description="Ausgeblendete Spalte" />
     <Member Name="HideHiddenColumns" Description="Ausgeblendete Spalten ausblenden" />
     <Member Name="HidePinnedFiltersOptions" Description="Vorgewahlter Filteroptionen ausblenden" />
+    <Member Name="InvalidColumnExpression" Description="Ungültiger Spaltenausdruck" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="Name" Description="Name" />
     <Member Name="NewColumnSName" Description="Neuer Spaltenname" />
