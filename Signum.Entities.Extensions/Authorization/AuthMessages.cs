@@ -202,7 +202,7 @@ public enum AuthAdminMessage
     [Description("Repeated Type Conditions")]
     RepeatedTypeCondition,
 
-    [Description("The following Type Conditiosn have already been used:")]
+    [Description("The following Type Conditions have already been used:")]
     TheFollowingTypeConditionsHaveAlreadyBeenUsed,
 
     [Description("Role {0} inherits from trivial merge role {1}")]
