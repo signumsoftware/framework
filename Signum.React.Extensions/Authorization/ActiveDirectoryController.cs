@@ -67,6 +67,7 @@ public class ActiveDirectoryController : ControllerBase
     public static TimeSpan PictureMaxAge = new TimeSpan(7, 0, 0);
 
 
+   
     [HttpGet("api/adThumbnailphoto/{username}"), SignumAllowAnonymous]
     public FileStreamResult? GetThumbnail(string username)
     {

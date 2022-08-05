@@ -7,7 +7,7 @@ import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import { useForceUpdate } from '@framework/Hooks'
 
 interface QueryTokenEmbeddedBuilderProps {
-  ctx: TypeContext<QueryTokenEmbedded | null | undefined>;
+  ctx: TypeContext<QueryTokenEmbedded | null>;
   queryKey: string;
   subTokenOptions: SubTokensOptions;
   onTokenChanged?: (newToken: QueryToken | undefined) => void;
@@ -17,8 +17,8 @@ interface QueryTokenEmbeddedBuilderProps {
 export default function QueryTokenEntityBuilder(p: QueryTokenEmbeddedBuilderProps) {
   const forceUpdate = useForceUpdate();
   function handleTokenChanged(newToken: QueryToken | undefined) {
-    if (newToken == undefined)
-      p.ctx.value = undefined;
+    if (newToken == null)
+      p.ctx.value = null;
     else
       p.ctx.value = QueryTokenEmbedded.New({
         tokenString: newToken.fullKey,
