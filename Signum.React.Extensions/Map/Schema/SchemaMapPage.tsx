@@ -83,8 +83,8 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
           setSchemaInfo(smi);
           setProviders(providers.toObject(a => a.name));
 
-        }).done();
-      }).done();
+        });
+      });
   }, []);
 
   const { size, setContainer } = useSize();

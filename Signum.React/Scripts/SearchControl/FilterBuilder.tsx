@@ -1,7 +1,10 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
-import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed } from '../FindOptions'
+import {
+  FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
+  isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox
+} from '../FindOptions'
 import { SearchMessage, Lite } from '../Signum.Entities'
 import { isNumber, trimDateToFormat } from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
@@ -59,14 +62,14 @@ export default function FilterBuilder(p: FilterBuilderProps) {
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
 
-    forceUpdate().then(handleHeightChanged).done();
+    forceUpdate().then(handleHeightChanged);
   };
 
   function handlerDeleteFilter(filter: FilterOptionParsed) {
     p.filterOptions.remove(filter);
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
-    forceUpdate().then(handleHeightChanged).done();
+    forceUpdate().then(handleHeightChanged);
   };
 
   function handleDeleteAllFilters(e: React.MouseEvent) {
@@ -79,7 +82,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
 
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
-    forceUpdate().then(handleHeightChanged).done();
+    forceUpdate().then(handleHeightChanged);
   };
 
   function handleFilterChanged() {
@@ -220,7 +223,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
     p.filterGroup.filters.remove(filter);
     if (p.onFilterChanged)
       p.onFilterChanged();
-    forceUpdatePromise().then(() => p.onHeightChanged()).done();
+    forceUpdatePromise().then(() => p.onHeightChanged());
   };
 
 
@@ -251,7 +254,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     p.onFilterChanged();
 
-    forceUpdatePromise().then(() => p.onHeightChanged()).done();
+    forceUpdatePromise().then(() => p.onHeightChanged());
   };
 
   function handleExpandCollapse(e: React.MouseEvent<any>) {
@@ -259,7 +262,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
     const fg = p.filterGroup;
     fg.expanded = !fg.expanded;
 
-    forceUpdatePromise().then(() => p.onHeightChanged()).done();
+    forceUpdatePromise().then(() => p.onHeightChanged());
   }
 
   const fg = p.filterGroup;
@@ -358,7 +361,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     lastToken={p.lastToken} onHeightChanged={p.onHeightChanged} renderValue={p.renderValue}
                     showPinnedFiltersOptions={p.showPinnedFiltersOptions}
                     showDashboardBehaviour={p.showDashboardBehaviour}
-                    disableValue={p.disableValue || fg.pinned != null && fg.pinned.active != "Checkbox_StartChecked" && fg.pinned.active != "Checkbox_StartUnchecked"}
+                    disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
                   /> :
 
                   <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
@@ -367,7 +370,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged} renderValue={p.renderValue}
                     showPinnedFiltersOptions={p.showPinnedFiltersOptions}
                     showDashboardBehaviour={p.showDashboardBehaviour}
-                    disableValue={p.disableValue || fg.pinned != null && fg.pinned.active != "Checkbox_StartChecked" && fg.pinned.active != "Checkbox_StartUnchecked"}
+                    disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
                   />
                 )}
                 {!p.readOnly &&
@@ -436,6 +439,7 @@ function isFilterActive(fo: FilterOptionParsed) {
   return fo.pinned.active == null /*Always*/ ||
     fo.pinned.active == "Always" ||
     fo.pinned.active == "Checkbox_StartChecked" ||
+    fo.pinned.active == "NotCheckbox_StartUnchecked" ||
     fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value == "");
 }
 

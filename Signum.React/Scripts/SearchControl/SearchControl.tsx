@@ -140,8 +140,8 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         else
           Finder.parseFindOptions(fo, qd, p.defaultIncludeDefaultFilters!).then(fop => {
             setState({ findOptions: fop, queryDescription: qd });
-          }).done();
-      }).done();
+          });
+      });
     });
   }, [p.findOptions]);
 

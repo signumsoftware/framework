@@ -67,8 +67,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
                       fillItem(newEntity);
                     }
                   }
-                })
-                .done();
+                });
             };
 
             fillItem(entity);
@@ -116,8 +115,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
                 this.setCurrentItem({ entity: entity, item: newItem });
                 this.setValue(entity);
               });
-          }))
-      .done();
+          }));
 
     return "";
   }
@@ -175,7 +173,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
       return;
     
     e.preventDefault();
-    c.paste(text)?.done();
+    c.paste(text);
   }
 
   function renderAutoComplete(renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {
@@ -185,7 +183,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     var ac = p.autocomplete;
 
     if (ac == null || ctx.readOnly) {
-      var fcr = <FormControlReadonly ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass) }>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
+      var fcr = <FormControlReadonly ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
       return renderInput ? renderInput(fcr) : fcr;
     }
 

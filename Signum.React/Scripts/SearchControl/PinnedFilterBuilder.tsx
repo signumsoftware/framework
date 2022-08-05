@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions,
-  isList, isFilterGroupOptionParsed
+  isList, isFilterGroupOptionParsed, isCheckBox
 } from '../FindOptions'
 import { ValueLine, FormGroup } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat } from '../Reflection'
@@ -55,11 +55,16 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
     const readOnly = f.frozen;
     var labelText = f.pinned!.label || f.token?.niceName;
 
-    if (f.pinned && (f.pinned.active == "Checkbox_StartChecked" || f.pinned.active == "Checkbox_StartUnchecked")) {
+    if (f.pinned && (isCheckBox(f.pinned.active))) {
       return (
         <div className="checkbox mt-4">
-          <label><input type="checkbox" className="form-check-input me-1" checked={f.pinned.active == "Checkbox_StartChecked"} readOnly={readOnly} onChange={() => {
-            f.pinned!.active = f.pinned!.active == "Checkbox_StartChecked" ? "Checkbox_StartUnchecked" : "Checkbox_StartChecked";
+          <label>
+            <input type="checkbox" className="form-check-input me-1" checked={f.pinned.active == "Checkbox_StartChecked" || f.pinned.active == "NotCheckbox_StartChecked"} readOnly={readOnly} onChange={() => {
+              f.pinned!.active =
+                f.pinned!.active == "Checkbox_StartChecked" ? "Checkbox_StartUnchecked" :
+                  f.pinned!.active == "Checkbox_StartUnchecked" ? "Checkbox_StartChecked" :
+                    f.pinned!.active == "NotCheckbox_StartChecked" ? "NotCheckbox_StartUnchecked" :
+                      f.pinned!.active == "NotCheckbox_StartUnchecked" ? "NotCheckbox_StartChecked" : undefined!;
             p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
           }} />{labelText}</label>
         </div>

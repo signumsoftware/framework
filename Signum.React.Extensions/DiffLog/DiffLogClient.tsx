@@ -5,7 +5,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Lite, Entity } from '@framework/Signum.Entities'
+import { Lite, Entity, getToString } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import * as QuickLinks from '@framework/QuickLinks'
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.Entities.DiffLog';
@@ -61,7 +61,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
 
       return new QuickLinks.QuickLinkAction("CompareTimeMachine",
         () => TimeMachineMessage.CompareVersions.niceToString(),
-        e => TimeMachineModal.show(lite, versions).done(), {
+        e => TimeMachineModal.show(lite, versions), {
         icon: "not-equal",
         iconColor: "blue",
       });
@@ -147,17 +147,17 @@ export default function TimeMachineLink(p : TimeMachineLinkProps){
   const { lite, inSearch, children, ...htmlAtts } = p;
 
   if (!Navigator.isViewable(lite.EntityType, { isSearch: p.inSearch }))
-    return <span data-entity={liteKey(lite)}>{p.children ?? lite.toStr}</span>;
+    return <span data-entity={liteKey(lite)}>{p.children ?? getToString(lite)}</span>;
 
 
   return (
     <Link
       to={timeMachineRoute(lite)}
-      title={lite.toStr}
+      title={getToString(lite)}
       onClick={handleClick}
       data-entity={liteKey(lite)}
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
-      {children ?? lite.toStr}
+      {children ?? getToString(lite)}
     </Link>
   );
 }

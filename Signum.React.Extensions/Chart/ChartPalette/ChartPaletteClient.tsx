@@ -3,7 +3,7 @@ import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { OrderOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../../Authorization/AuthClient'
@@ -32,7 +32,7 @@ export function navigatePalette(type: PseudoType): Promise<void> {
 
       return Navigator.view(cp,).then(pal => {
         if (pal) {
-          API.saveColorPalette(pal).then(() => notifySuccess()).done();
+          API.saveColorPalette(pal).then(() => notifySuccess());
         }
       });
     });
@@ -71,7 +71,7 @@ export function toColorPalete(model: ChartPaletteModel): ColorPalette {
 
   if (ti == null || ti.kind == "Enum") {
     var byName = model.colors.filter(a => a.element.color != null)
-      .toObject(a => a.element.related.toStr!, a => a.element.color);  
+      .toObject(a => getToString(a.element.related)!, a => a.element.color);  
     return { ...byId, ...byName };
   }
 

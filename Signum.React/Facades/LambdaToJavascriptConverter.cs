@@ -1,3 +1,5 @@
+using Signum.Engine.Basics;
+using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 
@@ -5,7 +7,7 @@ namespace Signum.React.Facades;
 
 internal class LambdaToJavascriptConverter
 {
-    public static string? ToJavascript(LambdaExpression lambdaExpression)
+    public static string? ToJavascript(LambdaExpression lambdaExpression, bool assert)
     {
         if (lambdaExpression == null)
             return null;
@@ -15,9 +17,14 @@ internal class LambdaToJavascriptConverter
         var body = ToJavascript(newLambda.Parameters.Single(), newLambda.Body);
 
         if (body == null)
-            return null;
+        {
+            if (assert)
+                throw new InvalidOperationException("Unable to convert to Javascript:" + lambdaExpression.ToString());
 
-        return "function(e){ return " + body + "; }";
+            return null;
+        }
+
+        return "return " + body;
     }
 
     static Dictionary<string, string> replacements = new Dictionary<string, string>
@@ -54,24 +61,34 @@ internal class LambdaToJavascriptConverter
         {
             var a = ToJavascript(param, me.Expression!);
 
-            if (a == null)
-                return null;
-
-            if (me.Expression!.Type.IsNullable())
+            if (a != null)
             {
-                if (me.Member.Name == "HasValue")
-                    return a + " != null";
-                else if (me.Member.Name == "Value")
-                    return a;
-            }
+                if (me.Expression!.Type.IsNullable())
+                {
+                    if (me.Member.Name == "HasValue")
+                        return a + " != null";
+                    else if (me.Member.Name == "Value")
+                        return a;
+                }
 
-            if (me.Expression.Type.IsEntity())
-            {
-                if (me.Member.Name == "IdOrNull")
-                    return a + "." + "id";
-            }
+                if (me.Expression.Type.IsEntity())
+                {
+                    if (me.Member.Name == "IdOrNull")
+                        return a + "." + "id";
+                }
 
-            return a + "." + me.Member.Name.FirstLower();
+                return a + "." + me.Member.Name.FirstLower();
+            }
+        }
+
+        if(expr is ConditionalExpression cond)
+        {
+            var test = ToJavascript(param, cond.Test);
+            var ifTrue = ToJavascript(param, cond.IfTrue);
+            var ifFalse = ToJavascript(param, cond.IfFalse);
+
+            if (test != null && ifTrue != null && ifFalse != null)
+                return "(" + test + " ? " + ifTrue + " : " + ifFalse + ")";
         }
 
         if (expr is BinaryExpression be)
@@ -84,8 +101,15 @@ internal class LambdaToJavascriptConverter
 
                 if (a != null && b != null)
                     return "(" + a + " + " + b + ")";
+            }
+            else if (be.NodeType == ExpressionType.Add)
+            {
 
-                return null;
+                var a = ToJavascript(param, be.Left);
+                var b = ToJavascript(param, be.Right);
+
+                if (a != null && b != null)
+                    return "(" + a + " + " + b + ")";
             }
             else
             {
@@ -95,11 +119,7 @@ internal class LambdaToJavascriptConverter
                 var op = ToJsOperator(be.NodeType);
 
                 if (a != null && op != null && b != null)
-                {
                     return a + op + b;
-                }
-
-                return null;
             }
         }
 
@@ -111,29 +131,69 @@ internal class LambdaToJavascriptConverter
             if (mc.Method.Name == "GetType" && mc.Object != null && (mc.Object.Type.IsIEntity() || mc.Object.Type.IsModelEntity()))
             {
                 var obj = ToJavascript(param, mc.Object!);
-                if (obj == null)
-                    return null;
+                if (obj != null)
+                    return "fd.getTypeInfo(" + obj + ")";
+            }
 
-                return "getTypeInfo(" + obj + ")";
+            if (mc.Method.Name == "ToLite" && mc.Arguments[0].Type.IsIEntity())
+            {
+                var obj = ToJavascript(param, mc.Arguments[0]);
+                if (obj != null)
+                    return "fd.toLite(" + obj + ")";
+            }
+
+            if (mc.Method.Name == nameof(Entity.Mixin))
+            {
+                var obj = ToJavascript(param, mc.Object!);
+                if (obj != null)
+                {
+                    var mixinType = mc.Method.GetGenericArguments().SingleEx();
+                    return $"{obj}.mixins['{ Reflector.CleanTypeName(mixinType)}']";
+
+                }
+            }
+
+            if (mc.Method.Name == nameof(string.Format) && mc.Method.DeclaringType == typeof(string) ||
+                mc.Method.Name == nameof(StringExtensions.FormatWith) && mc.Method.DeclaringType == typeof(StringExtensions))
+            {
+                var format = (mc.Object ?? mc.GetArgument("format"));
+
+                var args = mc.TryGetArgument("args")?.Let(a => ((NewArrayExpression)a).Expressions) ??
+                    new[] { mc.TryGetArgument("arg0"), mc.TryGetArgument("arg1"), mc.TryGetArgument("arg2"), mc.TryGetArgument("arg3") }.NotNull().ToReadOnly();
+
+                var strFormat = ToJavascriptToString(param, format);
+                var arguments = args.Select(a => ToJavascriptToString(param, a)).ToList();
+
+                return $"{strFormat}.formatWith(" + arguments.ToString(", ") + ")";
             }
 
             if (mc.Method.IsExtensionMethod() && mc.Arguments.Only()?.Type == typeof(Type))
             {
                 var obj = ToJavascript(param, mc.Arguments.SingleEx());
-                if (obj == null)
-                    return null;
+                if (obj != null)
+                {
+                    if (mc.Method.Name == nameof(DescriptionManager.NiceName))
+                        return obj + ".niceName";
 
-                if (mc.Method.Name == nameof(DescriptionManager.NiceName))
-                    return obj + ".niceName";
 
+                    if (mc.Method.Name == nameof(DescriptionManager.NicePluralName))
+                        return obj + ".nicePluralName";
 
-                if (mc.Method.Name == nameof(DescriptionManager.NicePluralName))
-                    return obj + ".nicePluralName";
+                    if (mc.Method.Name == nameof(Reflector.NewNiceName))
+                        return "fd.newNiceName(" + obj + ")";
 
-                if (mc.Method.Name == nameof(Reflector.NewNiceName))
-                    return "newNiceName(" + obj + ")";
-             
-                return null;
+                  
+                }
+            }
+
+            if (mc.Method.Name == nameof(Symbol.NiceToString))
+            {
+                if(mc.Object != null && (typeof(Symbol).IsAssignableFrom(mc.Object.Type) || typeof(SemiSymbol).IsAssignableFrom(mc.Object.Type)))
+                {
+                    var obj = ToJavascript(param, mc.Object!);
+                    if (obj != null)
+                        return "fd.getToString(" + obj + ")";
+                }
             }
 
 
@@ -185,8 +245,20 @@ internal class LambdaToJavascriptConverter
 
             if (t != null && a != null && b != null)
                 return "(" + t + " ? " + a + " : " + b + ")";
+        }
 
-            return null;
+        if(expr is MemberInitExpression mie && 
+            mie.NewExpression.Arguments.Count == 0 && 
+            mie.Bindings.All(b => b is MemberAssignment))
+        {
+            var fields = mie.Bindings.Cast<MemberAssignment>()
+                .ToString(ma => ma.Member.Name.FirstLower() + ": " + ToJavascript(param, ma.Expression) + ",", "\n");
+
+            var t = mie.Type;
+
+            var typeName = TypeLogic.TryGetCleanName(t) ?? t.Name;
+
+            return $"fd.New(\"{typeName}\", {{\n{fields}\n}})";
         }
 
         return null;
@@ -220,28 +292,28 @@ internal class LambdaToJavascriptConverter
             return r;
 
         if (expr.Type.IsModifiableEntity() || expr.Type.IsLite() || expr.Type.IsIEntity())
-            return "getToString(" + r + ")";
+            return "fd.getToString(" + r + ")";
 
         string? formatFull = format == null ? null : (", '" + format + "'");
 
         if (expr.Type.UnNullify() == typeof(DateTime))
-            return "dateToString(" + r + ", 'DateTime'" +  formatFull + ")";
+            return "fd.dateToString(" + r + ", 'DateTime'" +  formatFull + ")";
 
         if (expr.Type.UnNullify() == typeof(DateOnly))
-            return "dateToString(" + r + ", 'Date'" + formatFull + ")";
+            return "fd.dateToString(" + r + ", 'Date'" + formatFull + ")";
 
         if (expr.Type.UnNullify() == typeof(TimeSpan)) /*deprecate?*/
-            return "timeToString(" + r + formatFull + ")";
+            return "fd.timeToString(" + r + formatFull + ")";
 
         if (expr.Type.UnNullify() == typeof(TimeOnly))
-            return "timeToString(" + r + formatFull + ")";
+            return "fd.timeToString(" + r + formatFull + ")";
 
         if (ReflectionTools.IsIntegerNumber(expr.Type.UnNullify()))
-            return "numberToString(" + r + (formatFull ?? ", 'D'") + ")";
+            return "fd.numberToString(" + r + (formatFull ?? ", 'D'") + ")";
 
         if (ReflectionTools.IsDecimalNumber(expr.Type.UnNullify()))
-            return "numberToString(" + r + (formatFull ?? ", 'N'") + ")";
+            return "fd.numberToString(" + r + (formatFull ?? ", 'N'") + ")";
 
-        return "valToString(" + r + ")";
+        return "fd.valToString(" + r + ")";
     }
 }

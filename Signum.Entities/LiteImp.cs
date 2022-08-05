@@ -7,19 +7,19 @@ public abstract class LiteImp : Modifiable
 
 }
 
-public sealed class LiteImp<T> : LiteImp, Lite<T>
+public sealed class LiteImp<T, M> : LiteImp, Lite<T>
    where T : Entity
 {
     T? entityOrNull;
     PrimaryKey? id;
-    string? toStr;
+    M? model;
 
     // Methods
     private LiteImp()
     {
     }
 
-    public LiteImp(PrimaryKey id, string? toStr)
+    public LiteImp(PrimaryKey id, M? model)
     {
         if (typeof(T).IsAbstract)
             throw new InvalidOperationException(typeof(T).Name + " is abstract");
@@ -29,11 +29,11 @@ public sealed class LiteImp<T> : LiteImp, Lite<T>
                 + PrimaryKey.Type(typeof(T)).TypeName() + ", not " + id.Object.GetType().TypeName());
 
         this.id = id;
-        this.toStr = toStr;
+        this.model = model;
         this.Modified = ModifiedState.Clean;
     }
 
-    public LiteImp(T entity, string? toStr)
+    public LiteImp(T entity, M? model)
     {
         if (typeof(T).IsAbstract)
             throw new InvalidOperationException(typeof(T).Name + " is abstract");
@@ -43,7 +43,7 @@ public sealed class LiteImp<T> : LiteImp, Lite<T>
 
         this.entityOrNull = entity;
         this.id = entity.IdOrNull;
-        this.toStr = toStr;
+        this.model = model;
         this.Modified = entity.Modified;
     }
 
@@ -77,6 +77,11 @@ public sealed class LiteImp<T> : LiteImp, Lite<T>
         get { return typeof(T); }
     }
 
+    public Type ModelType
+    {
+        get { return typeof(M); }
+    }
+
     public PrimaryKey Id
     {
         get
@@ -92,6 +97,8 @@ public sealed class LiteImp<T> : LiteImp, Lite<T>
         get { return id; }
     }
 
+    public object? Model => this.model;
+
     public void SetEntity(Entity ei)
     {
         if (id == null)
@@ -101,8 +108,8 @@ public sealed class LiteImp<T> : LiteImp, Lite<T>
             throw new InvalidOperationException("Entities do not match");
 
         this.entityOrNull = (T)ei;
-        if (ei != null && this.toStr == null)
-            this.toStr = ei.ToString();
+        if (ei != null && this.model == null)
+            this.model = Lite.ConstructModel<T, M>(this.entityOrNull);
     }
 
     public void ClearEntity()
@@ -113,7 +120,7 @@ public sealed class LiteImp<T> : LiteImp, Lite<T>
         if (id == null)
             throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
-        this.toStr = this.entityOrNull?.ToString();
+        this.model = Lite.ConstructModel<T, M>(this.entityOrNull!);
         this.entityOrNull = null;
     }
 
@@ -137,7 +144,7 @@ public sealed class LiteImp<T> : LiteImp, Lite<T>
         if (this.entityOrNull != null)
             return this.entityOrNull.ToString();
 
-        return this.toStr;
+        return this.model?.ToString();
     }
 
     public override bool Equals(object? obj)
@@ -151,7 +158,7 @@ public sealed class LiteImp<T> : LiteImp, Lite<T>
         if (GetType() != obj.GetType())
             return false;
 
-        Lite<T> lite = (LiteImp<T>)obj;
+        Lite<T> lite = (Lite<T>)obj;
         if (IdOrNull != null && lite.IdOrNull != null)
             return Id == lite.Id;
         else
@@ -188,13 +195,18 @@ public sealed class LiteImp<T> : LiteImp, Lite<T>
         throw new InvalidOperationException("obj is not a Lite");
     }
 
-    public void SetToString(string toStr)
+    public void SetModel(object? model)
     {
-        this.toStr = toStr;
+        this.model = (M?)model;
     }
 
     public Lite<T> Clone()
     {
-        return new LiteImp<T>(Id, toStr);
+        return new LiteImp<T, M>(Id, model);
+    }
+
+    public M1 GetModel<M1>() where M1 : ModelEntity
+    {
+        return (M1)(object)this.model!;
     }
 }

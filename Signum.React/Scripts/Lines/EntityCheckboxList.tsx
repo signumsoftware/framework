@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { TypeReference } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { useController } from './LineBase'
 import { normalizeEmptyArray } from './EntityCombo'
@@ -47,7 +47,7 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
     else {
       this.convert(lite).then(e => {
         this.addElement(e);
-      }).done();
+      });
     }
   }
 
@@ -120,13 +120,11 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
       const fo = p.findOptions;
       if (fo) {
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
-          .then(data => setData(data))
-          .done();
+          .then(data => setData(data));
       }
       else
         Finder.API.fetchAllLites({ types: p.type!.name })
-          .then(data => setData(data.orderBy(a => a.toStr)))
-          .done();
+          .then(data => setData(data.orderBy(a => getToString(a))));
     }
   }, [normalizeEmptyArray(p.data), p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
@@ -196,7 +194,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
             name={liteKey(row.entity!)}
             onChange={e => c.handleOnChange(row.entity!)} />
           &nbsp;
-          {p.onRenderItem ? p.onRenderItem(row, i, checked, c, resultTable) : <span>{row.entity!.toStr}</span>}
+          {p.onRenderItem ? p.onRenderItem(row, i, checked, c, resultTable) : <span>{getToString(row.entity)}</span>}
         </label>
       );
     }

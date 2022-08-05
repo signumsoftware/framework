@@ -5,8 +5,9 @@ using Signum.Entities.Authorization;
 using Signum.React.Filters;
 using System.Threading.Tasks;
 using System.Threading;
-
-
+using System.Linq;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Authorization;
 
@@ -45,6 +46,7 @@ public class ActiveDirectoryController : ControllerBase
         throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
     }
 
+
     [HttpPost("api/createADGroup")]
     public Lite<ADGroupEntity> CreateADGroup([FromBody][Required] ADGroupRequest groupRequest)
     {
@@ -60,6 +62,57 @@ public class ActiveDirectoryController : ControllerBase
         }.SetId(groupRequest.Id);
 
         return group.Execute(ADGroupOperation.Save).ToLite();
+    }
+
+    public static TimeSpan PictureMaxAge = new TimeSpan(7, 0, 0);
+
+
+   
+    [HttpGet("api/adThumbnailphoto/{username}"), SignumAllowAnonymous]
+    public FileStreamResult? GetThumbnail(string username)
+    {
+        this.Response.GetTypedHeaders().CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+        {
+            MaxAge = PictureMaxAge,
+        };
+
+        using (AuthLogic.Disable())
+        {
+            var byteArray = ActiveDirectoryLogic.GetProfilePicture(username);
+
+            if (byteArray != null)
+            {
+                var memStream = new MemoryStream();
+
+                memStream.Write(byteArray);
+                memStream.Position = 0;
+
+                var streamResult = new FileStreamResult(memStream, "image/jpeg");
+
+                return streamResult;
+            }
+
+            return null;
+        }
+    }
+
+    [HttpGet("api/azureUserPhoto/{size}/{oID}"), SignumAllowAnonymous]
+    public Task<ActionResult> GetUserPhoto(string oId, int size)
+    {
+        this.Response.GetTypedHeaders().CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+        {
+            MaxAge = PictureMaxAge,
+        };
+
+        return AzureADLogic.GetUserPhoto(new Guid(oId), size).ContinueWith(ms =>
+        {
+            if (ms.IsFaulted || ms.IsCanceled)
+                return (ActionResult)new NotFoundResult();
+
+            var photo = ms.Result;
+            photo.Position = 0;
+            return new FileStreamResult(photo, "image/jpeg");
+        });
     }
 
     public class ADGroupRequest

@@ -78,8 +78,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
   React.useEffect(() => {
     Navigator.toEntityPack(p.entityOrPack)
-      .then(pack => loadComponent(pack).promise.then(getComponent => setPack(pack, getComponent)))
-      .done();
+      .then(pack => loadComponent(pack).promise.then(getComponent => setPack(pack, getComponent)));
   }, [p.entityOrPack]);
 
   function loadComponent(pack: EntityPack<ModifiableEntity>, callback?: () => void) {
@@ -100,7 +99,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       lastEntity: JSON.stringify(pack.entity),
       getComponent,
       refreshCount: packComponent ? packComponent.refreshCount + 1 : 0
-    }).then(callback).done();
+    }).then(callback);
   }
 
   function getSaveChangesOperations() {
@@ -139,7 +138,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         buttons: "ok",
         style: "warning",
         icon: "warning"
-      }).done();
+      });
     }
     else {
 
@@ -158,7 +157,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         }, ifError(ValidationError, e => {
           GraphExplorer.setModelState(pack!.entity, e.modelState, "");
           forceUpdate();
-        })).done();
+        }));
     }
   }
 
@@ -196,7 +195,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
             result.defaultClick();
           }
-        }).done();
+        });
     }
     else {
       setShow(false);
@@ -241,8 +240,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         if (reloadComponent) {
           setPackComponent(undefined)
             .then(() => loadComponent(newPack).promise)
-            .then(getComponent => setPack(newPack, getComponent, callback))
-            .done();
+            .then(getComponent => setPack(newPack, getComponent, callback));
         }
         else {
           setPack(newPack, packComponent!.getComponent, callback);
@@ -275,7 +273,6 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         }
       }
     };
-
     styleOptions = {
       readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(packComponent.pack, { isEmbedded: p.propertyRoute?.typeReference().isEmbedded }),
       frame: frame,

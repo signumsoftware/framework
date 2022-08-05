@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Lite } from '@framework/Signum.Entities'
+import { getToString, Lite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
@@ -27,8 +27,7 @@ export default function WordSearchMenu(p : WordSearchMenuProps){
         const m = await s.createFromQuery(wt, p.searchControl.getQueryRequest());
         return m && WordClient.API.createAndDownloadReport({ template: wt, entity: m });
       })
-      .then(response => response && saveFile(response))
-      .done();
+      .then(response => response && saveFile(response));
   }
 
   var wordReports = p.searchControl.props.queryDescription.wordTemplates;
@@ -44,7 +43,7 @@ export default function WordSearchMenu(p : WordSearchMenuProps){
         wordReports.map((wt, i) =>
           <Dropdown.Item key={i}
             onClick={() => handleOnClick(wt)}>
-            {wt.toStr}
+            {getToString(wt)}
           </Dropdown.Item>)
       }
     </DropdownButton>

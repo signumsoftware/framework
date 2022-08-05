@@ -10,7 +10,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { TypeContext } from '@framework/TypeContext'
 import { isTypeEntity, getTypeInfo, PropertyRoute } from '@framework/Reflection'
-import { Entity, ModifiableEntity } from '@framework/Signum.Entities'
+import { Entity, getToString, ModifiableEntity } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as Lines from '@framework/Lines'
@@ -69,12 +69,8 @@ export function start(options: { routes: JSX.Element[] }) {
   }));
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Delete, {
-    onClick: ctx => {
-      cleanCaches();
-      return ctx.defaultClick();
-    },
-    contextual: { onClick: ctx => { cleanCaches(); return ctx.defaultContextualClick(); } },
-    contextualFromMany: { onClick: ctx => { cleanCaches(); return ctx.defaultContextualClick(); } },
+    commonOnClick: oc => { cleanCaches(); return oc.defaultClick(); },
+    contextualFromMany: { onClick: ctx => { cleanCaches(); return ctx.defaultClick(); } },
   }));
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Save, {
@@ -85,12 +81,8 @@ export function start(options: { routes: JSX.Element[] }) {
   }));
 
   Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Delete, {
-    onClick: ctx => {
-      cleanCaches();
-      return ctx.defaultClick();
-    },
-    contextual: { onClick: ctx => { cleanCaches(); return ctx.defaultContextualClick(); } },
-    contextualFromMany: { onClick: ctx => { cleanCaches(); return ctx.defaultContextualClick(); } },
+    commonOnClick: ctx => { cleanCaches(); return ctx.defaultClick(); },
+    contextualFromMany: { onClick: ctx => { cleanCaches(); return ctx.defaultClick(); } },
   }));
 
   Navigator.setViewDispatcher(new DynamicViewViewDispatcher());
@@ -318,7 +310,7 @@ export function asSelectorFunction(dvs: DynamicViewSelectorEntity): (e: Entity) 
   try {
     return evalWithScope(code, globalModules);
   } catch (e) {
-    throw new Error("Syntax in DynamicViewSelector for '" + dvs.entityType!.toStr + "':\r\n" + code + "\r\n" + (e as Error).message);
+    throw new Error("Syntax in DynamicViewSelector for '" + getToString(dvs.entityType) + "':\r\n" + code + "\r\n" + (e as Error).message);
   }
 }
 
@@ -386,7 +378,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   try {
     return eval(code);
   } catch (e) {
-    throw new Error("Syntax in DynamicViewOverride for '" + dvo.entityType!.toStr + "':\r\n" + code + "\r\n" + (e as Error).message);
+    throw new Error("Syntax in DynamicViewOverride for '" + getToString(dvo.entityType) + "':\r\n" + code + "\r\n" + (e as Error).message);
   }
 }
 

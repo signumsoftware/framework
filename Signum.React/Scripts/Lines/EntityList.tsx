@@ -63,8 +63,7 @@ export class EntityListController extends EntityListBaseController<EntityListPro
         list.removeAt(selectedIndex!);
 
         this.setValue(list);
-      })
-      .done();
+      });
   };
 
   handleViewClick = (event: React.MouseEvent<any>) => {
@@ -101,8 +100,8 @@ export class EntityListController extends EntityListBaseController<EntityListPro
           list[selectedIndex] = { rowId: null, element: m };
           this.setValue(list);
         }
-      }).done();
-    }).done();
+      });
+    });
   }
 
   getTitle(e: Lite<Entity> | ModifiableEntity) {

@@ -355,6 +355,17 @@ export class TypeContext<T> extends StyleContext {
     return this.propertyRoute.tryAddLambda(property)?.member;
   }
 
+  memberInfo(property?: (val: T) => any): MemberInfo {
+
+    if (this.propertyRoute == undefined)
+      throw new Error("No propertyRoute");
+
+    if (property == undefined)
+      return this.propertyRoute.member!;
+
+    return this.propertyRoute.addLambda(property).member!;
+  }
+
   getUniqueId(suffix?: string): string {
     var path = suffix == null ? this.prefix : (this.prefix + "." + suffix);
 

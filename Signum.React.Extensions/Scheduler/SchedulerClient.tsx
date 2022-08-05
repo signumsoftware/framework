@@ -3,10 +3,11 @@ import * as React from 'react'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
+import * as Operations from '@framework/Operations'
 import { Lite } from '@framework/Signum.Entities'
 import {
   ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduleRuleMinutelyEntity, ScheduleRuleMonthsEntity,
-  ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission, SchedulerTaskExceptionLineEntity
+  ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission, SchedulerTaskExceptionLineEntity, ITaskOperation, ITaskMessage
 } from './Signum.Entities.Scheduler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -21,6 +22,23 @@ export function start(options: { routes: JSX.Element[] }) {
   Navigator.addSettings(new EntitySettings(ScheduleRuleWeekDaysEntity, e => import('./Templates/ScheduleRuleWeekDays')));
   Navigator.addSettings(new EntitySettings(ScheduleRuleMonthsEntity, e => import('./Templates/ScheduleRuleMonths')));
   Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => import('./Templates/HolidayCalendar')));
+
+  var group: Operations.EntityOperationGroup = {
+    key: "execute",
+    text: () => ITaskMessage.Execute.niceToString()
+  };
+
+  Operations.addSettings(new Operations.EntityOperationSettings(ITaskOperation.ExecuteAsync, {
+    icon: "hourglass-half",
+    iconColor: "#5499C7",
+    group: group
+  }));
+
+  Operations.addSettings(new Operations.EntityOperationSettings(ITaskOperation.ExecuteSync, {
+    icon: "bolt",
+    iconColor: "#F1C40F",
+    group: group
+  }));
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),

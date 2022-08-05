@@ -47,12 +47,12 @@ export function WorkflowScriptRunnerTab(p: {}) {
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => reloadState()).done();
+    API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => reloadState()).done();
+    API.start().then(() => reloadState());
   }
 
   var title = "WorkflowScriptRunner State";

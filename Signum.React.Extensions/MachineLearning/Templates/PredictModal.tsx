@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Navigator from "@framework/Navigator";
 import { IModalProps, openModal } from "@framework/Modals";
 import { API, PredictRequest, PredictOutputTuple, PredictSubQueryTable, AlternativePrediction } from "../PredictorClient";
-import { Lite, Entity, EntityControlMessage } from "@framework/Signum.Entities";
+import { Lite, Entity, EntityControlMessage, getToString } from "@framework/Signum.Entities";
 import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, ValueLine } from "@framework/Lines";
 import { QueryToken } from "@framework/FindOptions";
 import { tryGetTypeInfos, ReadonlyBinding, getTypeInfo, getTypeInfos, toNumberFormatOptions, toNumberFormat } from "@framework/Reflection";
@@ -45,8 +45,7 @@ export function PredictModal(p: PredictModalProps) {
   function hangleOnChange() {
     setHasChanged(true);
     abortableUpdateRequest.getData(predict)
-      .then(predict => setPredict(predict))
-      .done();
+      .then(predict => setPredict(predict));
   }
 
 
@@ -57,9 +56,9 @@ export function PredictModal(p: PredictModalProps) {
   return (
     <Modal onHide={handleOnClose} onExited={handleOnExited} show={show} className="message-modal" size="lg">
       <ModalHeaderButtons onClose={handleOnClose}>
-        {predict.predictor.toStr}<br />
+        {getToString(predict.predictor)}<br />
         <small>{PredictorEntity.niceName()}&nbsp;{predict.predictor.id} (<a href={Navigator.navigateRoute(predict.predictor)} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
-        {e && <span><br />{getTypeInfo(e.EntityType).niceName}: <a href={Navigator.navigateRoute(e)} target="_blank">{e.toStr}</a></span>}
+        {e && <span><br />{getTypeInfo(e.EntityType).niceName}: <a href={Navigator.navigateRoute(e)} target="_blank">{getToString(e)}</a></span>}
       </ModalHeaderButtons>
       <div className="modal-body">
         <div>
@@ -179,7 +178,7 @@ export function PredictTable(p : PredictTableProps){
   var sctx = new StyleContext(p.sctx, { formGroupStyle: "SrOnly" });
   return (
     <div>
-      <h4>{subQuery.toStr}</h4>
+      <h4>{getToString(subQuery)}</h4>
       <div style={{ maxHeight: "500px", overflowY: "scroll", marginBottom: "10px" }}>
         <table className="table table-sm">
           <thead>

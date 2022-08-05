@@ -5,6 +5,7 @@ using Signum.Engine.Scheduler;
 using Signum.Entities.Authorization;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Text.Json;
 
 namespace Signum.Engine.Authorization;
@@ -60,7 +61,7 @@ public static class AzureADLogic
         {
             ClientCredentialProvider authProvider = AzureADLogic.GetClientCredentialProvider();
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-            var result = graphClient.Users[oid.ToString()].MemberOf.WithODataCast("microsoft.graph.group").Request().Top(999).Select("id, displayName, ODataType").GetAsync().Result.ToList();
+            var result = graphClient.Users[oid.ToString()].TransitiveMemberOf.WithODataCast("microsoft.graph.group").Request().Top(999).Select("id, displayName, ODataType").GetAsync().Result.ToList();
 
             return result.Select(a => Guid.Parse(a.Id)).ToList();
         }
@@ -309,7 +310,7 @@ public static class AzureADLogic
 
         var client = (GraphServiceClient)groups.Client;
 
-        var url = client.Users[oid.ToString()].MemberOf.AppendSegmentToRequestUrl("microsoft.graph.group");
+        var url = client.Users[oid.ToString()].TransitiveMemberOf.AppendSegmentToRequestUrl("microsoft.graph.group");
 
         var constructor = groups.GetType().GetConstructors().SingleEx();
 
@@ -499,6 +500,29 @@ public static class AzureADLogic
         var msGraphUser = graphClient.Users[adUser.ObjectID.ToString()].Request().GetAsync().Result;
 
         return new MicrosoftGraphCreateUserContext(msGraphUser);
+    }
+
+
+    public static Task<MemoryStream> GetUserPhoto(Guid OId, int size)
+    {
+        ClientCredentialProvider authProvider = GetClientCredentialProvider();
+        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+        int imageSize = 
+            size <= 48 ? 48 : 
+            size <= 64 ? 64 : 
+            size <= 96 ? 96 : 
+            size <= 120 ? 120 : 
+            size <= 240 ? 240 : 
+            size <= 360 ? 360 : 
+            size <= 432 ? 432 : 
+            size <= 504 ? 504 : 648;
+
+        return graphClient.Users[OId.ToString()].Photos[$"{imageSize}x{imageSize}"].Content.Request().GetAsync().ContinueWith(photo =>
+        {
+            MemoryStream ms = new MemoryStream();
+            photo.Result.CopyTo(ms);
+            return ms;
+        }, TaskContinuationOptions.OnlyOnRanToCompletion);
     }
 }
 

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Lite } from '@framework/Signum.Entities'
+import { getToString, Lite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { EmailTemplateEntity, EmailMessageEntity } from './Signum.Entities.Mailing'
@@ -26,8 +26,7 @@ export default function MailingMenu(p : MailingMenuProps){
 
         return s.createFromQuery(et, p.searchControl.getQueryRequest())
           .then(m => m && MailingClient.createAndViewEmail(et, m));
-      })
-      .done();
+      });
   }
 
   const emailTemplates = p.searchControl.props.queryDescription.emailTemplates;
@@ -43,7 +42,7 @@ export default function MailingMenu(p : MailingMenuProps){
         emailTemplates.map((wt, i) =>
           <Dropdown.Item key={i}
             onClick={() => handleClick(wt)}>
-            {wt.toStr}
+            {getToString(wt)}
           </Dropdown.Item>)
       }
     </DropdownButton>

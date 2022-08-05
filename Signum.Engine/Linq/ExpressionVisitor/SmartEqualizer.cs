@@ -857,7 +857,7 @@ internal static class SmartEqualizer
 
             EntityExpression ere = new EntityExpression(lite.EntityType, new PrimaryKeyExpression(id), null, null, null, null, null, false);
 
-            return new LiteReferenceExpression(Lite.Generate(lite.EntityType), ere, null, false, false);
+            return new LiteReferenceExpression(Lite.Generate(lite.EntityType), ere, null, null, false, false);
         }
 
         return null;

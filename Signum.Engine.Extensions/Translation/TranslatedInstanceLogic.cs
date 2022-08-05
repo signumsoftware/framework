@@ -403,6 +403,14 @@ public static class TranslatedInstanceLogic
         return (Func<T, R>)compiledExpressions.GetOrAdd(propertyRoute, ld => ld.Compile());
     }
 
+    public static string ExportExcelFile(Type type, CultureInfo culture, string folder)
+    {
+        var fc = ExportExcelFile(type, culture);
+        var fileName = Path.Combine(folder, fc.FileName);
+        File.WriteAllBytes(fileName, fc.Bytes);
+        return fileName;
+    }
+
     public static FileContent ExportExcelFile(Type type, CultureInfo culture)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<TranslatedInstanceEntity>(userInterface: true);
@@ -470,7 +478,7 @@ public static class TranslatedInstanceLogic
             TranslatedText = cellValues[4]
         });
 
-        SaveRecords(records, type, culture);
+        SaveRecords(records, type, isSync: false, culture);
 
         return new TypeCulturePair(type, culture);
     }
@@ -523,9 +531,10 @@ public static class TranslatedInstanceLogic
 
 
 
-    public static void SaveRecords(List<TranslationRecord> records, Type t, CultureInfo? c)
+    public static void SaveRecords(List<TranslationRecord> records, Type t, bool isSync, CultureInfo? c)
     {
-        Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslationRecord> should = records.Where(a => a.TranslatedText.HasText())
+        Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslationRecord> should = records
+            .Where(a => !isSync || a.TranslatedText.HasText())
             .ToDictionary(a => (a.Culture, a.Key));
 
         Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslatedInstanceEntity> current =
@@ -537,10 +546,14 @@ public static class TranslatedInstanceLogic
         {
             Dictionary<PropertyRoute, PropertyRouteEntity> routes = should.Keys.Select(a => a.instanceKey.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteEntity());
 
+            routes.Values.Where(a => a.IsNew).SaveList();
+
+            List<TranslatedInstanceEntity> toInsert = new List<TranslatedInstanceEntity>(); 
+
             Synchronizer.Synchronize(
                 should,
                 current,
-                (k, n) => new TranslatedInstanceEntity
+                (k, n) => toInsert.Add(new TranslatedInstanceEntity
                 {
                     Culture = n.Culture.ToCultureInfoEntity(),
                     PropertyRoute = routes.GetOrThrow(n.Key.Route),
@@ -548,7 +561,7 @@ public static class TranslatedInstanceLogic
                     RowId  = n.Key.RowId?.ToString(),
                     OriginalText = n.OriginalText,
                     TranslatedText = n.TranslatedText,
-                }.Save(),
+                }),
                 (k, o) => { },
                 (k, n, o) =>
                 {
@@ -564,6 +577,8 @@ public static class TranslatedInstanceLogic
                         r.Save();
                     }
                 });
+
+            toInsert.BulkInsert(message: "auto");
 
             tr.Commit();
         }

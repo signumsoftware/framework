@@ -3,12 +3,12 @@ import * as AppContext from '@framework/AppContext'
 import { useAPI } from '@framework/Hooks'
 import * as Navigator from '@framework/Navigator'
 import { getTypeInfo } from '@framework/Reflection'
-import { is } from '@framework/Signum.Entities'
+import { getToString, is } from '@framework/Signum.Entities'
 import * as React from 'react'
 import { Nav } from 'react-bootstrap'
 import { PermissionSymbol } from '../Authorization/Signum.Entities.Authorization'
 import { ToolbarNavItem } from '../Toolbar/Renderers/ToolbarRenderer'
-import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import { CaseActivityQuery, WorkflowEntity, WorkflowMainEntityStrategy, WorkflowPermission } from '../Workflow/Signum.Entities.Workflow'
 import * as WorkflowClient from '../Workflow/WorkflowClient'
 
@@ -17,6 +17,13 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
   constructor() {
     var type = PermissionSymbol;
     super(type);
+  }
+
+  getDefaultIcon(): IconColor {
+    return ({
+      icon: "random",
+      iconColor: "#2471A3",
+    });
   }
 
   isApplicableTo(element: ToolbarResponse<PermissionSymbol>) {
@@ -85,7 +92,7 @@ function WorkflowDropdownImp() {
               icon={ToolbarConfig.coloredIcon("inbox", "steelblue")} />
 
             {getStarts(starts).flatMap((kvp, i) => kvp.elements.map((val, j) =>
-              <ToolbarNavItem key={i + "-" + j} title={val.workflow.toStr + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
+              <ToolbarNavItem key={i + "-" + j} title={getToString(val.workflow) + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
                 onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`, e); }}
                 active={false}
                 icon={ToolbarConfig.coloredIcon("plus-square", "seagreen")}

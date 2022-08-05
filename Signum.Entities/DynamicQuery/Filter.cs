@@ -283,6 +283,10 @@ public enum PinnedFilterActive
     Checkbox_StartChecked,
     [Description("Checkbox (start unchecked)")]
     Checkbox_StartUnchecked,
+    [Description("Not Checkbox (start checked)")]
+    NotCheckbox_StartChecked,
+    [Description("Not Checkbox (start unchecked)")]
+    NotCheckbox_StartUnchecked,
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]

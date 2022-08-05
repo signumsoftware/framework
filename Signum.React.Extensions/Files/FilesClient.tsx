@@ -137,7 +137,7 @@ interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file: IFile & ModifiableEntity;
 }
 
-function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
+export function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
   return <FileImage file={file} onClick={() => ImageModal.show(file)} {...attrs} />
 }
 

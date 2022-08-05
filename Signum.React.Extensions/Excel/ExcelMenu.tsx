@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder'
-import { Lite, PaginationMessage, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
+import { getToString, Lite, PaginationMessage, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage, ExcelReportOperation } from './Signum.Entities.Excel'
@@ -25,7 +25,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
 
   function handleSelectedToggle() {
     if (isOpen == false && excelReports == undefined)
-      reloadList().done();
+      reloadList();
 
     setIsOpen(!isOpen);
   }
@@ -61,8 +61,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
           }
 
           ExcelClient.API.generatePlainExcel(request);
-        })
-        .done();
+        });
     } else {
       ExcelClient.API.generatePlainExcel(request);
     }
@@ -77,14 +76,12 @@ export default function ExcelMenu(p: ExcelMenuProps) {
     Finder.API.fetchQueryEntity(p.searchControl.props.findOptions.queryKey)
       .then(qe => ExcelReportEntity.New({ query: qe }))
       .then(er => Navigator.view(er))
-      .then(() => reloadList())
-      .done();
+      .then(() => reloadList());
   }
 
   function handleAdmnister() {
     Finder.explore({ queryName: ExcelReportEntity, filterOptions: [{ token: ExcelReportEntity.token(a => a.query!.key), value: p.searchControl.props.findOptions.queryKey }]})
-      .then(() => reloadList())
-      .done();
+      .then(() => reloadList());
   }
 
   const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
@@ -104,7 +101,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
           excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}
               onClick={() => handleClick(uq)}>
-              {uq.toStr}
+              {getToString(uq)}
             </Dropdown.Item>)
         }
         {(p.plainExcel || excelReports && excelReports.length > 0) && <Dropdown.Divider />}

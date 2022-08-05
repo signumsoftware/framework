@@ -68,19 +68,10 @@ export function start(options: { routes: JSX.Element[] }) {
 
   Operations.addSettings(new EntityOperationSettings(PredictorOperation.Publish, {
     hideOnCanExecute: true,
-    onClick: eoc =>
-      API.publications(eoc.entity.mainQuery.query!.key)
-        .then(pubs => SelectorModal.chooseElement(pubs, { buttonDisplay: a => symbolNiceName(a), buttonName: a => a.key }))
-        .then(pps => pps && eoc.defaultClick(pps))
-    ,
-    contextual: {
-      onClick: coc =>
-        Navigator.API.fetch(coc.context.lites[0])
-          .then(p => API.publications(p.mainQuery.query!.key))
-          .then(pubs => SelectorModal.chooseElement(pubs, { buttonDisplay: a => symbolNiceName(a), buttonName: a => a.key }))
-          .then(pps => pps && coc.defaultContextualClick(pps))
-
-    }
+    commonOnClick: oc => oc.getEntity()
+      .then(p => API.publications(p.mainQuery.query!.key))
+      .then(pubs => SelectorModal.chooseElement(pubs, { buttonDisplay: a => symbolNiceName(a), buttonName: a => a.key }))
+      .then(pps => pps && oc.defaultClick(pps)),
   }));
 
   Operations.addSettings(new EntityOperationSettings(PredictorOperation.AfterPublishProcess, {
@@ -149,20 +140,17 @@ export namespace API {
 
   export function downloadCsvById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/csv/${lite.id}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function downloadTsvById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function downloadTsvMetadataById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}/metadata` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function getTrainingState(lite: Lite<PredictorEntity>): Promise<TrainingProgress> {

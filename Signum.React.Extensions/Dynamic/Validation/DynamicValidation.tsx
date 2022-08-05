@@ -78,7 +78,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
       title: "Mixin Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
 
 
@@ -90,8 +90,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
         dynamicValidation: p.ctx.value,
         exampleEntity: exampleEntityRef.current,
       })
-        .then(r => setResponse(r))
-        .done();
+        .then(r => setResponse(r));
     }
   }
 
@@ -204,7 +203,7 @@ return null;`;
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "200px" } },
-    }).done();
+    });
   }
 }
 

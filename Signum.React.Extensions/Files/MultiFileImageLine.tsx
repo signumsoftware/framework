@@ -4,7 +4,7 @@ import * as Constructor from '@framework/Constructor'
 import { TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EmbeddedEntity, EntityControlMessage } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EmbeddedEntity, EntityControlMessage, getToString } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import { FileUploader } from './FileUploader'
@@ -69,12 +69,10 @@ export class MultiFileImageLineController extends EntityListBaseController<Multi
   handleFileLoaded = (file: IFile & ModifiableEntity) => {
     if (this.props.createEmbedded)
       this.props.createEmbedded(file)
-        .then(em => em && this.addElement(em))
-        .done();
+        .then(em => em && this.addElement(em));
     else
       this.convert(file)
-        .then(f => this.addElement(f))
-        .done();
+        .then(f => this.addElement(f));
   }
 
   defaultCreate() {
@@ -101,7 +99,7 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
             c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
               <div className="sf-file-image-container m-2" key={mlec.index}>
                 {p.getComponent ? p.getComponent(mlec) :
-                  p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {mlec.value.toStr}</span > :
+                  p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {getToString(mlec.value)}</span > :
                     renderFile(p.getFile ? (mlec as TypeContext<EmbeddedEntity>).subCtx(p.getFile) : mlec as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>)}
                 {!p.ctx.readOnly &&
                   <a href="#" title={EntityControlMessage.Remove.niceToString()}

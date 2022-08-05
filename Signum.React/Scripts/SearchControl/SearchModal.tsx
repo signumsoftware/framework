@@ -57,7 +57,7 @@ function SearchModal(p: SearchModalProps) {
           okPressed.current = true;
           setShow(false);
         };
-      }).done();
+      });
   }
 
   function handleCancelClicked() {
@@ -96,7 +96,7 @@ function SearchModal(p: SearchModalProps) {
           setShow(false);
         } else
           scl.dataChanged();
-      }).done();
+      });
 
     } else 
       scl.dataChanged();

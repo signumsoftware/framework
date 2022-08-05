@@ -197,6 +197,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
                     new EntityToStringToken(this),
                     IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidFrom): null,
                     IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidTo): null,
+                    ((options & SubTokensOptions.CanOperation) != 0) ? new OperationsToken(this) : null,
                 }
                 .NotNull()
                 .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this);
@@ -468,6 +469,10 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     static string GetNiceTypeName(Type type, Implementations? implementations)
     {
+        if (type == typeof(CellOperationDTO))
+            return QueryTokenMessage.CellOperation.NiceToString();
+        if (type == typeof(OperationsToken))
+            return QueryTokenMessage.ContainerOfCellOperations.NiceToString();
         switch (QueryUtils.TryGetFilterType(type))
         {
             case FilterType.Integer: return QueryTokenMessage.Number.NiceToString();
@@ -669,4 +674,7 @@ public enum QueryTokenMessage
 
     [Description("RowID")]
     RowId,
+
+    CellOperation,
+    ContainerOfCellOperations
 }

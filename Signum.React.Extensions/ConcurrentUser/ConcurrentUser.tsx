@@ -4,7 +4,7 @@ import * as AppContext from '@framework/AppContext'
 import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from '../Alerts/useSignalR'
 import { ConcurrentUserEntity, ConcurrentUserMessage } from './Signum.Entities.ConcurrentUser'
 import { OverlayTrigger, Popover } from 'react-bootstrap';
-import { Entity, Lite, liteKey, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, toLite } from '@framework/Signum.Entities'
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization'
 import { useAPI, useForceUpdate, useUpdatedRef } from '../../Signum.React/Scripts/Hooks'
 import { GraphExplorer } from '@framework/Reflection'
@@ -15,6 +15,8 @@ import MessageModal from '@framework/Modals/MessageModal'
 import './ConcurrentUser.css'
 import * as ConcurrentUserClient from './ConcurrentUserClient';
 import { exploreWindowsOpen } from '../../Signum.React/Scripts/Finder'
+import { HubConnectionState } from '@microsoft/signalr'
+import { SmallProfilePhoto } from '../Authorization/Templates/ProfilePhoto'
 
 export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }) {
   
@@ -44,8 +46,8 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
       function updateModified() {
         GraphExplorer.propagateAll(p.entity);
 
-        if (p.entity.modified != isModified.current) {
-          conn?.send("EntityModified", entityKey, userKey, p.entity.modified).done();
+        if (p.entity.modified != isModified.current && conn?.state == HubConnectionState.Connected) {
+          conn?.send("EntityModified", entityKey, userKey, p.entity.modified);
           isModified.current = p.entity.modified;
         }
       }
@@ -83,7 +85,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
           style: "warning",
           message:
             <div>
-              <p>{ConcurrentUserMessage.LooksLikeSomeoneJustSaved0ToTheDatabase.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}</p>
+              <p>{ConcurrentUserMessage.LooksLikeSomeoneJustSaved0ToTheDatabase.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}</p>
               <p>{ConcurrentUserMessage.DoYouWantToReloadIt.niceToString()}</p>
               {isModified.current &&
                 <>
@@ -91,14 +93,13 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
                     {ConcurrentUserMessage.WarningYouWillLostYourCurrentChanges.niceToString()}
                   </p>
                   <p>
-                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{p.entity.toStr}</a>)}
+                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{getToString(p.entity)}</a>)}
                   </p>
                 </>
               }
             </div>,
           buttons: "yes_cancel",
-        }).then(b => b == "yes" && p.onReload())
-          .done();
+        }).then(b => b == "yes" && p.onReload());
       }
     }, 1000);
     return () => clearTimeout(handle);
@@ -120,8 +121,8 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
           <Popover.Body>
             
             {otherUsers?.map((a, i) =>
-              <div key={i} style={{ whiteSpace: "nowrap" }} >
-                <UserCircle user={a.user} /> {a.user.toStr} ({DateTime.fromISO(a.startTime).toRelative()})
+              <div key={i} className="d-flex align-items-center" >
+                <SmallProfilePhoto user={a.user} className="me-2"/> {getToString(a.user)} <small className="ms-1 text-muted">({DateTime.fromISO(a.startTime).toRelative()})</small>
                 {a.isModified && <FontAwesomeIcon icon="edit" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
               </div>)}
 
@@ -129,22 +130,22 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
               (ticks !== p.entity.ticks ?
                 <div className="mt-3">
                   <small>
-                  {ConcurrentUserMessage.YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}
-                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{p.entity.toStr}</a>)}
+                  {ConcurrentUserMessage.YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}
+                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{getToString(p.entity)}</a>)}
                   </small>
                 </div> :
                 otherUsers.some(u => u.isModified) && isModified.current ?
                   <div className="mt-3">
-                    <small>{ConcurrentUserMessage.LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}</small>
+                    <small>{ConcurrentUserMessage.LooksLikeYouAreNotTheOnlyOneCurrentlyModifiying0OnlyTheFirstOneWillBeAbleToSaveChanges.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}</small>
                   </div>
                 : 
                 <div className="mt-3">
-                  <small>{ConcurrentUserMessage.YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}</small>
+                  <small>{ConcurrentUserMessage.YouHaveLocalChangesIn0ThatIsCurrentlyOpenByOtherUsersSoFarNoOneElseHasMadeModifications.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}</small>
                 </div>
               ) : ticks !== p.entity.ticks ? 
                 <div className="mt-3">
                   <small>
-                    {ConcurrentUserMessage.ThisIsNotTheLatestVersionOf0.niceToString().formatHtml(<strong>{p.entity.toStr}</strong>)}
+                    {ConcurrentUserMessage.ThisIsNotTheLatestVersionOf0.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}
                     <button className="btn btn-primary btn-sm" onClick={p.onReload}>{ConcurrentUserMessage.ReloadIt.niceToString()}</button>
                   </small>
                 </div> : null
@@ -160,29 +161,3 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
     </OverlayTrigger>
   );
 }
-
-export namespace Options {
-
-  export let colors = "#750b1c #a4262c #d13438 #ca5010 #986f0b #498205 #0b6a0b #038387 #005b70 #0078d4 #004e8c #4f6bed #5c2e91 #8764b8 #881798 #c239b3 #e3008c #8e562e #7a7574 #69797e".split(" ");
-
-  export function getUserColor(u: Lite<UserEntity>): string {
-
-    var id = u.id as number;
-
-    return colors[id % colors.length];
-  }
-}
-
-export function getUserInitials(u: Lite<UserEntity>): string {
-  return u.toStr?.split(" ").map(m => m[0]).filter((a, i) => i < 2).join("").toUpperCase() ?? "";
-}
-
-export function UserCircle(p: { user: Lite<UserEntity>, className?: string }) {
-  var color = Options.getUserColor(p.user);
-  return (
-    <span className={classes("concurrent-user-circle", p.className)} style={{ color: "white", backgroundColor: color }} title={p.user.toStr}>
-      {getUserInitials(p.user)}
-    </span>
-  );
-}
-

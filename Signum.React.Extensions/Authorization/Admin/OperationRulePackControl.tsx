@@ -3,7 +3,7 @@ import { Button } from 'react-bootstrap'
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
-import { OperationSymbol } from '@framework/Signum.Entities'
+import { getToString, OperationSymbol } from '@framework/Signum.Entities'
 import { API } from '../AuthAdminClient'
 import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthEmailMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
@@ -20,15 +20,14 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
       .then(newPack => {
         notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
-      })
-      .done();
+      });
   }
 
   const forceUpdate = useForceUpdate();
 
   function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      { button: <Button variant="primary" onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" disabled={ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
     ];
   }
 
@@ -77,7 +76,7 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
           {ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
             <tr key={i}>
               <td>
-                {c.value.resource!.operation!.toStr}
+                {getToString(c.value.resource!.operation)}
               </td>
               <td style={{ textAlign: "center" }}>
                 {renderRadio(c.value, "Allow", "green")}
@@ -89,7 +88,7 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
                 {renderRadio(c.value, "None", "red")}
               </td>
               <td style={{ textAlign: "center" }}>
-                <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
+                <GrayCheckbox readOnly={c.readOnly} checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
                   c.value.allowed = c.value.allowedBase;
                   ctx.value.modified = true;
                   forceUpdate();
@@ -109,6 +108,7 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
     if (c.coercedValues!.contains(allowed))
       return;
 
-    return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
+    return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color}
+      onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
   }
 });

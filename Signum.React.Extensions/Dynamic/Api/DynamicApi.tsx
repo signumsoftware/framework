@@ -39,7 +39,7 @@ public PizzaEntity GetPizza(string id)
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: 150 } },
-    }).done();
+    });
   }
 
   function handlePostClick() {
@@ -68,7 +68,7 @@ public class PizzaDTO
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: 150 } },
-    }).done();
+    });
   }
 
   var ctx = p.ctx;

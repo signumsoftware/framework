@@ -102,10 +102,12 @@ public static class ExcelExtensions
         return GetCellValue(document, theCell);
     }
 
-    public static string? GetCellValue(this SpreadsheetDocument document, Row row, string addressName)
+    public static string? GetCellValue(this SpreadsheetDocument document, Row row, string columnName)
     {
-        Cell? theCell = row.Descendants<Cell>().
-          Where(c => c.CellReference == addressName).FirstOrDefault();
+        var address = columnName + row.RowIndex;
+
+        Cell? theCell = row.Descendants<Cell>()
+            .FirstOrDefault(c => c.CellReference == columnName || c.CellReference == address);
 
         // If the cell doesn't exist, return an empty string:
         if (theCell == null)
@@ -218,7 +220,8 @@ public static class ExcelExtensions
           Where(s => s.Name == sheetName).FirstOrDefault();
 
         if (sheet == null)
-            throw new ArgumentException("Sheet with name {0} not found".FormatWith(sheetName));
+            throw new ArgumentException("Sheet with name {0} not found.\nAvailable sheets:\n{1}".FormatWith(sheetName,
+                wbPart.Workbook.Descendants<Sheet>().Select(a => a.Name).ToString("\n")));
 
         // Retrieve a reference to the worksheet part, and then use its Worksheet property to get 
         // a reference to the cell whose address matches the address you've supplied:

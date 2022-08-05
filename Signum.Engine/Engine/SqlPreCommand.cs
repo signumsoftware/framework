@@ -368,14 +368,19 @@ public class SqlPreCommandSimple : SqlPreCommand
         return this;
     }
 
-    public SqlPreCommandSimple ReplaceFirstParameter(string? variableName)
+    internal SqlPreCommandSimple ReplaceFirstParameter(string? variableName)
     {
         if (variableName == null)
             return this;
 
-        var first = Parameters!.FirstEx();
-        Sql = Regex.Replace(Sql, $@"(?<toReplace>{first.ParameterName})(\b|$)", variableName); //HACK
-        Parameters!.Remove(first);
+        this.ReplaceParameter(this.Parameters!.FirstEx(), variableName);
+        return this;
+    }
+
+    internal SqlPreCommandSimple ReplaceParameter(DbParameter param, string variableName)
+    {
+        Sql = Regex.Replace(Sql, $@"(?<toReplace>{param.ParameterName})(\b|$)", variableName); //HACK
+        Parameters!.Remove(param);
         return this;
     }
 

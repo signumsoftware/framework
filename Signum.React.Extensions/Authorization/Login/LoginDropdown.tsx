@@ -6,6 +6,7 @@ import { LinkContainer } from '@framework/Components';
 import { Dropdown, NavItem, NavDropdown, Nav } from 'react-bootstrap';
 import { Lite, toLite, is } from '@framework/Signum.Entities';
 import * as CultureClient from '../../Translation/CultureClient'
+import { SmallProfilePhoto } from '../Templates/ProfilePhoto';
 
 
 export default function LoginDropdown(p: {
@@ -36,14 +37,13 @@ export default function LoginDropdown(p: {
       .then(Navigator =>
         Navigator.API.fetchEntityPack(toLite(user))
           .then(pack => Navigator.view(pack))
-          .then(u => u && AuthClient.API.fetchCurrentUser(true).then(nu => AuthClient.setCurrentUser(u))))
-      .done();
+          .then(u => u && AuthClient.API.fetchCurrentUser(true).then(nu => AuthClient.setCurrentUser(u))));
   }
 
   var extraButtons = p.extraMenuItems && p.extraMenuItems(user);
 
   return (
-    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={p.renderName ? p.renderName(user) : user.userName!} align="end">
+    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center"><SmallProfilePhoto user={toLite(user)} /> &nbsp;{p.renderName ? p.renderName(user) : user.userName!}</span>} align="end">
       {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-edit" fixedWidth className="me-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
       {cpv && <LinkContainer to="~/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth className="me-2" /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>

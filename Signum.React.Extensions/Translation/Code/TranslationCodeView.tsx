@@ -3,7 +3,7 @@ import { Link, RouteComponentProps } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations'
-import { Lite } from '@framework/Signum.Entities'
+import { getToString, Lite } from '@framework/Signum.Entities'
 import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult } from '../TranslationClient'
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
@@ -44,12 +44,12 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
   function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
     const params = p.match.params;
-    API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => notifySuccess()).done();
+    API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => notifySuccess());
   }
 
   const message = TranslationMessage.View0In1.niceToString(decodeDots(assembly),
     culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
-      cultures ? cultures[culture].toStr :
+      cultures ? getToString(cultures[culture]) :
         culture);
 
   useTitle(message);

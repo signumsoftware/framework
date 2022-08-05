@@ -87,14 +87,11 @@ export interface AllowedRuleCoerced<R, A> extends AllowedRule<R, A> {
 
 export module AuthAdminMessage {
   export const _0of1 = new MessageKey("AuthAdminMessage", "_0of1");
-  export const Nothing = new MessageKey("AuthAdminMessage", "Nothing");
-  export const Everything = new MessageKey("AuthAdminMessage", "Everything");
   export const TypeRules = new MessageKey("AuthAdminMessage", "TypeRules");
   export const PermissionRules = new MessageKey("AuthAdminMessage", "PermissionRules");
   export const Allow = new MessageKey("AuthAdminMessage", "Allow");
   export const Deny = new MessageKey("AuthAdminMessage", "Deny");
   export const Overriden = new MessageKey("AuthAdminMessage", "Overriden");
-  export const NoRoles = new MessageKey("AuthAdminMessage", "NoRoles");
   export const Filter = new MessageKey("AuthAdminMessage", "Filter");
   export const PleaseSaveChangesFirst = new MessageKey("AuthAdminMessage", "PleaseSaveChangesFirst");
   export const ResetChanges = new MessageKey("AuthAdminMessage", "ResetChanges");
@@ -112,6 +109,21 @@ export module AuthAdminMessage {
   export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships = new MessageKey("AuthAdminMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");
   export const ConflictMergingTypeConditions = new MessageKey("AuthAdminMessage", "ConflictMergingTypeConditions");
   export const Save = new MessageKey("AuthAdminMessage", "Save");
+  export const DefaultAuthorization = new MessageKey("AuthAdminMessage", "DefaultAuthorization");
+  export const MaximumOfThe0 = new MessageKey("AuthAdminMessage", "MaximumOfThe0");
+  export const MinumumOfThe0 = new MessageKey("AuthAdminMessage", "MinumumOfThe0");
+  export const SameAs0 = new MessageKey("AuthAdminMessage", "SameAs0");
+  export const Nothing = new MessageKey("AuthAdminMessage", "Nothing");
+  export const Everithing = new MessageKey("AuthAdminMessage", "Everithing");
+  export const SelectTypeConditions = new MessageKey("AuthAdminMessage", "SelectTypeConditions");
+  export const ThereAre0TypeConditionsDefinedFor1 = new MessageKey("AuthAdminMessage", "ThereAre0TypeConditionsDefinedFor1");
+  export const SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition = new MessageKey("AuthAdminMessage", "SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition");
+  export const SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime = new MessageKey("AuthAdminMessage", "SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime");
+  export const RepeatedTypeCondition = new MessageKey("AuthAdminMessage", "RepeatedTypeCondition");
+  export const TheFollowingTypeConditionsHaveAlreadyBeenUsed = new MessageKey("AuthAdminMessage", "TheFollowingTypeConditionsHaveAlreadyBeenUsed");
+  export const Role0InheritsFromTrivialMergeRole1 = new MessageKey("AuthAdminMessage", "Role0InheritsFromTrivialMergeRole1");
+  export const IncludeTrivialMerges = new MessageKey("AuthAdminMessage", "IncludeTrivialMerges");
+  export const Role0IsTrivialMerge = new MessageKey("AuthAdminMessage", "Role0IsTrivialMerge");
 }
 
 export module AuthEmailMessage {
@@ -205,7 +217,6 @@ export module LoginAuthMessage {
   export const _0HasBeenSucessfullyAssociatedWithUser1InThisDevice = new MessageKey("LoginAuthMessage", "_0HasBeenSucessfullyAssociatedWithUser1InThisDevice");
   export const TryToLogInWithIt = new MessageKey("LoginAuthMessage", "TryToLogInWithIt");
   export const LoginWith0 = new MessageKey("LoginAuthMessage", "LoginWith0");
-  export const LoginPopupAlreadyOpenedInAnotherWindow = new MessageKey("LoginAuthMessage", "LoginPopupAlreadyOpenedInAnotherWindow");
 }
 
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");
@@ -336,7 +347,9 @@ export interface RoleEntity extends Entities.Entity {
   Type: "Role";
   name: string;
   mergeStrategy: MergeStrategy;
-  roles: Entities.MList<Entities.Lite<RoleEntity>>;
+  isTrivialMerge: boolean;
+  inheritsFrom: Entities.MList<Entities.Lite<RoleEntity>>;
+  description: string | null;
 }
 
 export const RoleMappingEmbedded = new Type<RoleMappingEmbedded>("RoleMappingEmbedded");
@@ -377,17 +390,19 @@ export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAll
   Type: "RuleQuery";
 }
 
-export const RuleTypeConditionEmbedded = new Type<RuleTypeConditionEmbedded>("RuleTypeConditionEmbedded");
-export interface RuleTypeConditionEmbedded extends Entities.EmbeddedEntity {
-  Type: "RuleTypeConditionEmbedded";
-  condition: Signum.TypeConditionSymbol;
+export const RuleTypeConditionEntity = new Type<RuleTypeConditionEntity>("RuleTypeCondition");
+export interface RuleTypeConditionEntity extends Entities.Entity {
+  Type: "RuleTypeCondition";
+  ruleType: Entities.Lite<RuleTypeEntity>;
+  conditions: Entities.MList<Signum.TypeConditionSymbol>;
   allowed: TypeAllowed;
+  order: number;
 }
 
 export const RuleTypeEntity = new Type<RuleTypeEntity>("RuleType");
 export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
   Type: "RuleType";
-  conditions: Entities.MList<RuleTypeConditionEmbedded>;
+  conditionRules: Entities.MList<RuleTypeConditionEntity>;
 }
 
 export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
@@ -417,8 +432,8 @@ export type TypeAllowed =
 export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
   Type: "TypeAllowedAndConditions";
-  fallback: TypeAllowed | null;
-  conditions: Entities.MList<TypeConditionRuleEmbedded>;
+  fallback: TypeAllowed;
+  conditionRules: Entities.MList<TypeConditionRuleModel>;
 }
 
 export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic");
@@ -436,10 +451,10 @@ export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllo
   availableConditions: Array<Signum.TypeConditionSymbol>;
 }
 
-export const TypeConditionRuleEmbedded = new Type<TypeConditionRuleEmbedded>("TypeConditionRuleEmbedded");
-export interface TypeConditionRuleEmbedded extends Entities.EmbeddedEntity {
-  Type: "TypeConditionRuleEmbedded";
-  typeCondition: Signum.TypeConditionSymbol;
+export const TypeConditionRuleModel = new Type<TypeConditionRuleModel>("TypeConditionRuleModel");
+export interface TypeConditionRuleModel extends Entities.ModelEntity {
+  Type: "TypeConditionRuleModel";
+  typeConditions: Entities.MList<Signum.TypeConditionSymbol>;
   allowed: TypeAllowed;
 }
 
@@ -480,6 +495,15 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
   disabledOn: string /*DateTime*/ | null;
   state: UserState;
   loginFailedCounter: number;
+}
+
+export const UserLiteModel = new Type<UserLiteModel>("UserLiteModel");
+export interface UserLiteModel extends Entities.ModelEntity {
+  Type: "UserLiteModel";
+  userName: string;
+  toStringValue: string | null;
+  oID: string /*Guid*/ | null;
+  sID: string | null;
 }
 
 export module UserOIDMessage {

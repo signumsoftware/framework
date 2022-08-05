@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, softCast } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
-import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement } from '@framework/Signum.Entities'
+import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
@@ -42,7 +42,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined) {
     p.searchControl.extraUrlParams.userQuery = uq && liteKey(uq);
-    p.searchControl.pageSubTitle = uq?.toStr;
+    p.searchControl.pageSubTitle = getToString(uq);
     setCurrentUserQueryInternal(uq);
     p.searchControl.props.onPageTitleChanged?.();
   }
@@ -60,7 +60,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   function handleSelectedToggle(isOpen: boolean) {
     if (isOpen && userQueries == undefined)
-      reloadList().done();
+      reloadList();
 
     setIsOpen(isOpen);
   }
@@ -69,15 +69,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     return UserQueryClient.API.forQuery(p.searchControl.props.findOptions.queryKey)
       .then(list => {
         setUserQueries(list);
-        if (currentUserQuery && currentUserQuery.toStr == null) {
+        if (currentUserQuery && currentUserQuery.model == null) {
           const similar = list.firstOrNull(l => is(l, currentUserQuery));
           if (similar != null) {
-            currentUserQuery.toStr = similar.toStr;
+            currentUserQuery.model = similar.model;
             setCurrentUserQuery(currentUserQuery);
           } else {
-            Navigator.API.fillToStrings(currentUserQuery)
-              .then(() => setCurrentUserQuery(currentUserQuery))
-              .done();
+            Navigator.API.fillLiteModels(currentUserQuery)
+              .then(() => setCurrentUserQuery(currentUserQuery));
           }
         }
         return list;
@@ -106,7 +105,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
         }
-      }).done();
+      });
   }
 
 
@@ -124,7 +123,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
             sc.doSearchPage1();
           }
         });
-    }).done()
+    })
   }
 
   function handleOnClick(uq: Lite<UserQueryEntity>) {
@@ -135,8 +134,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     Navigator.API.fetch(currentUserQuery!)
       .then(userQuery => Navigator.view(userQuery))
       .then(() => reloadList())
-      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!))
-      .done();
+      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!));
   }
 
   async function applyChanges(): Promise<UserQueryEntity> {
@@ -166,8 +164,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     applyChanges()
       .then(uqOld => Navigator.view(uqOld))
       .then(() => reloadList())
-      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!))
-      .done();
+      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!));
   }
 
   async function createUserQuery(): Promise<UserQueryEntity> {
@@ -227,12 +224,12 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           reloadList().then(() => {
             setCurrentUserQuery(toLite(uq));
             applyUserQuery(toLite(uq));
-          }).done();
+          });
         }
-      }).done();
+      });
   }
 
-  const currentUserQueryToStr = currentUserQuery ? currentUserQuery.toStr : undefined;
+  const currentUserQueryToStr = currentUserQuery ? getToString(currentUserQuery) : undefined;
 
   var canSave = Operations.tryGetOperationInfo(UserQueryOperation.Save, UserQueryEntity) != null;
 
@@ -271,12 +268,12 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           </div>}
         <div id="userquery-items-container" style={{ maxHeight: "300px", overflowX: "auto" }}>
           {userQueries?.map((uq, i) => {
-            if (filter == undefined || uq.toStr?.search(new RegExp(RegExp.escape(filter), "i")) != -1)
+            if (filter == undefined || getToString(uq)?.search(new RegExp(RegExp.escape(filter), "i")) != -1)
               return (
                 <Dropdown.Item key={i}
                   className={classes("sf-userquery", is(uq, currentUserQuery) && "active")}
                   onClick={() => handleOnClick(uq)}>
-                  {uq.toStr}
+                  {getToString(uq)}
                 </Dropdown.Item>
               );
           })}

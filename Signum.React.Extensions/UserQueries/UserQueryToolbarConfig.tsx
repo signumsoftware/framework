@@ -5,7 +5,7 @@ import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { FindOptions, SearchValue } from '@framework/Search'
 import { Lite, liteKey } from '@framework/Signum.Entities'
-import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.Entities.UserQueries'
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
@@ -25,7 +25,14 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     if (element.iconName == "count")
       return <CountUserQueryIcon userQuery={element.content!} color={element.iconColor} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
-    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), ["far", "list-alt"]), element.iconColor ?? "dodgerblue");
+    return super.getIcon(element);
+  }
+
+  getDefaultIcon(): IconColor {
+    return ({
+      icon: ["far", "list-alt"],
+      iconColor: "dodgerblue",
+    });
   }
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<UserQueryEntity>) {
@@ -34,8 +41,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     else {
       Navigator.API.fetch(res.content!)
         .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-        .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content } } }))
-        .done();
+        .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content } } }));
     }
   }
 

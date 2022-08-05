@@ -10,12 +10,12 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
 import { TypeEntity, QueryEntity, ExceptionEntity } from './Signum.Entities.Basics';
 
 import {
@@ -37,6 +37,7 @@ import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
+import { Search } from "history";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -223,7 +224,7 @@ export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent
   if (e.ctrlKey || e.button == 1)
     window.open(findOptionsPath(findOptions));
   else
-    explore(findOptions).done();
+    explore(findOptions);
 }
 
 export function explore(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<void> {
@@ -435,7 +436,7 @@ export function parseOrderOptions(orderOptions: (OrderOption | null | undefined)
 export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: boolean, qd: QueryDescription): Promise<ColumnOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
-  var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
+  var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation);
   columnOptions.forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
@@ -739,7 +740,9 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
       fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
   }
 
-  var canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
+  const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
+  const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
+
   const completer = new TokenCompleter(qd);
 
 
@@ -750,7 +753,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
   if (fo.columnOptions) {
-    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregate));
+    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregateXorOperation));
     fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
   }
 
@@ -882,7 +885,7 @@ interface OverridenValue {
 
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
 
-  if (fop.pinned && fop.pinned.active == "Checkbox_StartUnchecked")
+  if (fop.pinned && (fop.pinned.active == "Checkbox_StartUnchecked" || fop.pinned.active == "NotCheckbox_StartChecked"))
     return undefined;
 
   if (fop.dashboardBehaviour == "UseAsInitialSelection")
@@ -1136,6 +1139,10 @@ export class TokenCompleter {
 
       if (hasElement(token) && (options & SubTokensOptions.CanElement) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Element not allowed)`);
+
+      if (hasOperation(token) && (options & SubTokensOptions.CanOperation) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Operation not allowed)`);
+
       return;
     }
 
@@ -1219,7 +1226,7 @@ export class TokenCompleter {
 
 export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<void> {
 
-  const needToStr: Lite<any>[] = [];
+  const needsModel: Lite<any>[] = [];
 
   function parseFilterValue(fo: FilterOptionParsed) {
     if (isFilterGroupOptionParsed(fo))
@@ -1229,27 +1236,27 @@ export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<
         if (!Array.isArray(fo.value))
           fo.value = [fo.value];
 
-        fo.value = (fo.value as any[]).map(v => parseValue(fo.token!, v, needToStr));
+        fo.value = (fo.value as any[]).map(v => parseValue(fo.token!, v, needsModel));
       }
       else {
         if (Array.isArray(fo.value))
           throw new Error("Unespected array for operation " + fo.operation);
 
-        fo.value = parseValue(fo.token!, fo.value, needToStr);
+        fo.value = parseValue(fo.token!, fo.value, needsModel);
       }
     }
   }
 
   filterOptions.forEach(fo => parseFilterValue(fo));
 
-  if (needToStr.length == 0)
+  if (needsModel.length == 0)
     return Promise.resolve(undefined);
 
-  return Navigator.API.fillToStringsArray(needToStr)
+  return Navigator.API.fillLiteModelsArray(needsModel)
 }
 
 
-function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
+function parseValue(token: QueryToken, val: any, needModel: Array<any>): any {
   switch (token.filterType) {
     case "Boolean": return parseBoolean(val);
     case "Integer": return nanToNull(parseInt(val));
@@ -1291,8 +1298,8 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
       {
         const lite = convertToLite(val);
 
-        if (lite && !lite.toStr)
-          needToStr.push(lite);
+        if (lite && !lite.model)
+          needModel.push(lite);
 
         return lite;
       }
@@ -1385,6 +1392,11 @@ export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenStri
 }
 
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
+export type ExtractQueryToken<T> = T extends QueryTokenString<infer S> ? AddToLite<S> : any;
+
+export type ExtractTokensObject<T> = {
+  [P in keyof T]: ExtractQueryToken<T[P]>;
+};
 
 export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
   return useAPI(
@@ -1445,6 +1457,29 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
 
   return resultTable.rows[0]?.columns[0] ?? null;
 }
+
+
+
+export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity> | null, tokensObject: TO, additionalDeps?: any[], options?: APIHookOptions): ExtractTokensObject<TO> | null | undefined {
+  var resultTable = useQuery(entity == null || isEntity(entity) && entity.isNew ? null : {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a  })),
+    columnOptionsMode: "Replace",
+  }, additionalDeps, options);
+
+  if (entity == null)
+    return null;
+
+  if (resultTable == null)
+    return undefined;
+
+  var firstRow = resultTable.rows[0]; 
+
+  return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+}
+
 
 export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: QueryTokenString<R> | string, additionalDeps?: any[], options?: APIHookOptions): AddToLite<R>[] | null | undefined {
   var resultTable = useQuery(entity == null || isEntity(entity) && entity.isNew ? null : {
@@ -1876,7 +1911,12 @@ function initFormatRules(): FormatRule[] {
     {
       name: "Object",
       isApplicable: qt => true,
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell.toStr ?? cell.toString()}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell?.toString()}</span> : undefined)
+    },
+    {
+      name: "Object",
+      isApplicable: qt => qt.filterType == "Embedded" || qt.filterType == "Lite",
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{getToString(cell)}</span> : undefined)
     },
     {
       name: "MultiLine",
@@ -1889,7 +1929,7 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{cell.toStr ?? cell.toString()}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined)
     },
     {
       name: "Password",

@@ -35,7 +35,7 @@ export default function EntityLink(p: EntityLinkProps) {
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}
       onClick={handleClick}
     >
-      {children ?? lite.toStr}
+      {children ?? Navigator.renderLite(lite)}
     </Link>
   );
 
@@ -60,7 +60,7 @@ export default function EntityLink(p: EntityLinkProps) {
     } else {
       Navigator.view(lite, { getViewPromise: p.getViewPromise, buttons: "close", extraProps: p.extraProps }).then(() => {
         p.onNavigated && p.onNavigated(lite);
-      }).done();
+      });
     }
   }
 }

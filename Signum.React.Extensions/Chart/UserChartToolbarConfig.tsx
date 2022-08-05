@@ -1,7 +1,7 @@
 import * as Navigator from '@framework/Navigator'
 import { Location } from 'history'
 import * as React from 'react'
-import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartClient from './ChartClient'
 import { UserChartEntity } from './Signum.Entities.Chart'
@@ -15,8 +15,11 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
     super(type);
   }
 
-  getIcon(element: ToolbarResponse<UserChartEntity>) {
-    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), "chart-bar"), element.iconColor ?? "darkviolet");
+  getDefaultIcon(): IconColor {
+    return ({
+      icon: "chart-bar",
+      iconColor: "darkviolet",
+    });
   }
 
   navigateTo(element: ToolbarResponse<UserChartEntity>): Promise<string> {

@@ -1,6 +1,7 @@
-﻿
+
 namespace Signum.Entities.Basics;
 
+[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class TypeConditionSymbol : Symbol
 {
     private TypeConditionSymbol() { }

@@ -6,7 +6,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'
 import { translated  } from '../Translation/TranslatedInstanceTools'
@@ -48,7 +48,7 @@ export function start(options: { routes: JSX.Element[] }) {
       API.forEntityType(ctx.lite.EntityType);
 
     return promise.then(uqs =>
-      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => uq.toStr ?? "", e => {
+      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
         window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
       }, { icon: ["far", "list-alt"], iconColor: "dodgerblue" })));
   });
@@ -66,9 +66,8 @@ export function start(options: { routes: JSX.Element[] }) {
                 return;
 
               window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
-            })
-            .done();
-      }).done();
+            });
+      });
     }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info" }));
 
   onContextualItems.push(getGroupUserQueriesContextMenu);
@@ -110,7 +109,7 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
         menuItems: uqs.map(uq =>
           <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, cic)}>
             <FontAwesomeIcon icon={["far", "list-alt"]} className="icon" color="dodgerblue" />
-            {uq.toStr}
+            {getToString(uq)}
           </Dropdown.Item>
         )
       } as MenuItemBlock);
@@ -130,7 +129,7 @@ function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParse
 
         return Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: uq } } })
           .then(() => cic.markRows({}));
-      })).done();
+      }));
 }
 
 export module Converter {

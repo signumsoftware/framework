@@ -92,14 +92,12 @@ export module API {
 
   export function downloadView(type: string, culture: string | undefined) {
     ajaxGetRaw({ url: `~/api/translatedInstance/viewFile/${type}?${QueryString.stringify({ culture })}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function downloadSync(type: string, culture: string | undefined) {
     ajaxGetRaw({ url: `~/api/translatedInstance/syncFile/${type}?${QueryString.stringify({ culture })}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function uploadFile(request: FileUpload): Promise<void> {
@@ -119,8 +117,8 @@ export module API {
     return ajaxGet({ url: `~/api/translatedInstance/sync/${type}?${QueryString.stringify({ culture })}` });
   }
 
-  export function saveTranslatedInstanceData(records: TranslationRecord[], type: string, culture?: string | undefined): Promise<void> {
-    return ajaxPost({ url: `~/api/translatedInstance/save/${type}?${QueryString.stringify({ culture })}` }, records);
+  export function saveTranslatedInstanceData(records: TranslationRecord[], type: string, isSync: boolean, culture?: string | undefined): Promise<void> {
+    return ajaxPost({ url: `~/api/translatedInstance/save/${type}?${QueryString.stringify({ isSync, culture })}` }, records);
   }
 
 }

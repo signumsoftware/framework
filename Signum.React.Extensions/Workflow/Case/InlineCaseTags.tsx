@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '@framework/Globals'
 import * as Navigator from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
-import { Lite, newMListElement } from '@framework/Signum.Entities'
+import { getToString, Lite, newMListElement } from '@framework/Signum.Entities'
 import { CaseTagTypeEntity, CaseEntity, CaseTagsModel, CaseOperation } from '../Signum.Entities.Workflow'
 import Tag from './Tag'
 import * as WorkflowClient from '../WorkflowClient'
@@ -26,8 +26,7 @@ export default function InlineCaseTags(p: InlineCaseTagsProps) {
       setTags(p.defaultTags);
     } else {
       WorkflowClient.API.fetchCaseTags(p.case)
-        .then(tags => setTags(tags))
-        .done();
+        .then(tags => setTags(tags));
     }
 
   }, [p.case, ...p.defaultTags ?? []]);
@@ -41,7 +40,7 @@ export default function InlineCaseTags(p: InlineCaseTagsProps) {
     });
 
     Navigator.view(model,
-      { title: p.case.toStr ?? "" })
+      { title: getToString(p.case) ?? "" })
       .then(cm => {
         if (!cm)
           return;
@@ -49,8 +48,7 @@ export default function InlineCaseTags(p: InlineCaseTagsProps) {
         Operations.API.executeLite(p.case, CaseOperation.SetTags, cm)
           .then(() => WorkflowClient.API.fetchCaseTags(p.case))
           .then(tags => setTags(tags))
-          .done()
-      }).done();
+      });
 
   }
 

@@ -158,12 +158,12 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
     API.pluralize(loc.culture, td.description!).then(plural => {
       td.pluralDescription = plural;
       forceUpdate();
-    }).done();
+    });
 
     API.gender(loc.culture, td.description!).then(gender => {
       td.gender = gender;
       forceUpdate();
-    }).done();
+    });
 
     forceUpdate();
   }

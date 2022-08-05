@@ -8,7 +8,7 @@ import { PrintLineState, PrintLineEntity, PrintPackageEntity } from './Signum.En
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { useAPI } from '@framework/Hooks'
-import { JavascriptMessage } from '@framework/Signum.Entities'
+import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
 
 export default function PrintPanelPage(p: {}) {
 
@@ -29,8 +29,7 @@ export default function PrintPanelPage(p: {}) {
     e.preventDefault();
     API.createPrintProcess(fileType)
       .then(p => p && Navigator.view(p))
-      .then(p => vsc.refreshValue())
-      .done();
+      .then(p => vsc.refreshValue());
   }
   var ctx = new StyleContext(undefined, undefined);
   return (
@@ -42,7 +41,7 @@ export default function PrintPanelPage(p: {}) {
           {stats == null ? JavascriptMessage.loading.niceToString() :
             stats.map((s, i) =>
             <SearchValueLine ctx={ctx} key={i} initialValue={s.count}
-              labelText={s.fileType.toStr.after(".")}
+              labelText={getToString(s.fileType).after(".")}
               extraButtons={vsc => renderStateButton(vsc, s.fileType)}
               findOptions={{
                 queryName: PrintLineEntity,

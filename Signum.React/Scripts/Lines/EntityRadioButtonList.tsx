@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { TypeContext } from '../TypeContext'
-import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { useController } from './LineBase'
 import { ResultTable } from '../Search'
@@ -39,8 +39,7 @@ export class EntityRadioButtonListController extends EntityBaseController<Entity
       this.setValue(lite);
     else
       this.convert(lite)
-        .then(v => this.setValue(v))
-        .done();
+        .then(v => this.setValue(v));
   }
 
 }
@@ -113,13 +112,11 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
       const fo = p.findOptions;
       if (fo) {
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
-          .then(data => setData(data))
-          .done();
+          .then(data => setData(data));
       }
       else
         Finder.API.fetchAllLites({ types: p.type!.name })
-          .then(data => setData(data.orderBy(a => a.toStr)))
-          .done();
+          .then(data => setData(data.orderBy(a => getToString(a))));
     }
   }, [p.data, p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
@@ -180,7 +177,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
           onClick={e => c.handleOnChange(row.entity!)}
           disabled={p.ctx.readOnly}/>
         &nbsp;
-        {c.props.onRenderItem ? c.props.onRenderItem(row.entity!) : <span>lite?.toStr ?? p.nullPlaceHolder ?? " - "</span>}
+        {c.props.onRenderItem ? c.props.onRenderItem(row.entity!) : <span>getToString(lite) ?? p.nullPlaceHolder ?? " - "</span>}
       </label>);
   }
 }

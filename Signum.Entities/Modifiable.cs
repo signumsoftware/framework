@@ -14,7 +14,7 @@ public abstract class Modifiable
         get { return modified; }
         protected internal set
         {
-            if (modified == ModifiedState.Sealed)
+            if (modified == ModifiedState.Sealed && value != ModifiedState.Sealed)
                 throw new InvalidOperationException("The instance {0} is sealed and can not be modified".FormatWith(this));
 
             modified = value;

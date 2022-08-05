@@ -1336,8 +1336,8 @@ NodeUtils.register<SearchControlNode>({
 
         /* Set entity properties here... */
         /* pack.entity.[propertyName] = ... */
-        modules.Navigator.view(pack).done();
-    }).done();
+        modules.Navigator.view(pack);
+    });
 }`} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.deps)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />

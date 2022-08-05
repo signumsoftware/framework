@@ -8,7 +8,7 @@ import * as BpmnUtils from './BpmnUtils'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
 import { QueryToken } from "@framework/FindOptions";
-import { is } from "@framework/Signum.Entities";
+import { getToString, is } from "@framework/Signum.Entities";
 
 export class WorkflowActivityMonitorRenderer extends CustomRenderer {
   workflowActivityMonitor!: WorkflowActivityMonitor;
@@ -60,7 +60,7 @@ export class WorkflowActivityMonitorRenderer extends CustomRenderer {
 }
 
 function getTitle(stats: WorkflowActivityStats, config: WorkflowActivityMonitorConfig) {
-  let result = `${stats.workflowActivity.toStr} (${stats.caseActivityCount})`;
+  let result = `${getToString(stats.workflowActivity)} (${stats.caseActivityCount})`;
 
   if (config.columns.length) {
     result += "\n" + config.columns.map((col, i) =>

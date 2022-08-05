@@ -6,7 +6,8 @@ import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos, 
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLiteList } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
 import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
-import { AutocompleteConstructor, getAutocompleteConstructors } from '../Navigator';
+import { AutocompleteConstructor } from '../Navigator';
+import * as Navigator from '../Navigator';
 import { Dic } from '../Globals'
 
 export interface AutocompleteConfig<T> {
@@ -83,11 +84,11 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 
     var toStr = getToString(item);
-    var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
+    var html = Navigator.renderLite(item, subStr);
     if (this.showType)
-      return <span style={{ wordBreak: "break-all" }} title={toStr}>{text}<TypeBadge entity={item} /></span>;
+      return <span className="d-flex align-items-center flex-wrap" title={toStr}>{html}<TypeBadge entity={item} /></span>;
     else
-      return text;
+      return html;
   }
 
   getEntityFromItem(item: Lite<T> | AutocompleteConstructor<T>): Promise<Lite<Entity> | ModifiableEntity | undefined> {
@@ -107,7 +108,6 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
   }
 
   getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<T>> {
-
     var lite = this.convertToLite(entity);;
 
     if (!this.requiresInitialLoad)
@@ -145,7 +145,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
 }
 
   getSortByString(item: Lite<T> | AutocompleteConstructor<T>): string {
-    return isLite(item) ? item.toStr! :
+    return isLite(item) ? getToString(item)! :
       isAutocompleteConstructor(item) ? getTypeName(item.type) :
         "";
   }
@@ -303,11 +303,11 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       return this.customRenderItem(item, this.resultTable!, subStr);
 
     var toStr = getToString(item.entity!);
-    var text = TypeaheadOptions.highlightedTextAll(toStr, subStr);
+    var html = Navigator.renderLite(item.entity!, subStr);
     if (this.showType)
-      return <span style={{ wordBreak: "break-all" }} title={toStr}>{text}<TypeBadge entity={item.entity!} /></span>;
+      return <span className="d-flex align-items-center flex-wrap"  title={toStr}>{html}<TypeBadge entity={item.entity!} /></span>;
     else
-      return text;
+      return html;
   }
 
   getEntityFromItem(item: ResultRow | AutocompleteConstructor<Entity>): Promise<Lite<Entity> | ModifiableEntity | undefined> {
@@ -373,7 +373,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   }
 
   getSortByString(item: ResultRow | AutocompleteConstructor<Entity>): string {
-    return isResultRow(item) ? item.entity?.toStr! :
+    return isResultRow(item) ? getToString(item.entity)! :
       isAutocompleteConstructor(item) ? getTypeName(item.type) :
         "";
   }

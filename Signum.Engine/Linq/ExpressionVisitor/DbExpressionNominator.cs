@@ -172,7 +172,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
     private static Expression GetImplmentedById(ImplementedByExpression ib)
     {
         return ib.Implementations.IsEmpty() ? new SqlConstantExpression(null, typeof(int?)) :
-                            ib.Implementations.Select(a => a.Value.ExternalId.Value).Aggregate((id1, id2) => Expression.Coalesce(id1, id2));
+            ib.Implementations.Select(a => a.Value.ExternalId.Value).Aggregate((id1, id2) => Expression.Coalesce(id1, id2));
     }
 
     protected internal override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)

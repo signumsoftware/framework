@@ -28,12 +28,12 @@ class CommandSimplifier : DbExpressionVisitor
         if (!TrivialWhere(delete, select))
             return delete;
 
-        return new DeleteExpression(delete.Table, delete.UseHistoryTable, table, select.Where, delete.ReturnRowCount);
+        return new DeleteExpression(delete.Table, delete.UseHistoryTable, table, select.Where, delete.ReturnRowCount, alias: table.Alias);
     }
 
     private bool TrivialWhere(DeleteExpression delete, SelectExpression select)
     {
-        if (select.SelectRoles != 0)
+        if (select.SelectRoles != SelectRoles.Where)
             return false;
 
         if (delete.Where == null)
@@ -112,6 +112,6 @@ class SelectRowRemover : DbExpressionVisitor
         if (delete.ReturnRowCount == false)
             return delete;
 
-        return new DeleteExpression(delete.Table, delete.UseHistoryTable, delete.Source, delete.Where, returnRowCount: false);
+        return new DeleteExpression(delete.Table, delete.UseHistoryTable, delete.Source, delete.Where, returnRowCount: false, alias: null);
     }
 }

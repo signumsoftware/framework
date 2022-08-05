@@ -16,6 +16,8 @@ export default function TranslationCodeStatus(p: RouteComponentProps<{}>) {
   const [file, setFile] = React.useState<API.FileUpload | undefined>(undefined);
   const [fileVer, setFileVer] = React.useState<number>(0);
 
+
+
   function renderFileInput() {
 
     function handleInputChange(e: React.FormEvent<any>) {
@@ -30,7 +32,7 @@ export default function TranslationCodeStatus(p: RouteComponentProps<{}>) {
         setFile(file);
         setFileVer(fileVer + 1);
 
-        API.uploadFile(file!).then(model => { notifySuccess(); reload(); }).done();
+        API.uploadFile(file!).then(model => { notifySuccess(); reload(); });
       };
       fileReader.readAsDataURL(f);
     }
@@ -61,14 +63,19 @@ function TranslationTable({ result }: { result: TranslatedTypeSummary[] }) {
   const tree = result.groupBy(a => a.type)
     .toObject(gr => gr.key, gr => gr.elements.toObject(a => a.culture));
 
+  const [onlyNeutral, setOnlyNeutral] = React.useState<boolean>(true);
+
   const types = Dic.getKeys(tree);
-  const cultures = Dic.getKeys(tree[types.first()]);
+  let cultures = Dic.getKeys(tree[types.first()]);
+
+  if (onlyNeutral)
+    cultures = cultures.filter(a => !onlyNeutral || !a.contains("-"));
 
   return (
     <table className="st">
       <thead>
         <tr>
-          <th></th>
+          <th><label><input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> Only Neutral Cultures</label></th>
           <th> {TranslationMessage.All.niceToString()} </th>
           {cultures.map(culture => <th key={culture}>{culture}</th>)}
         </tr>

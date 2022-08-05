@@ -74,7 +74,7 @@ class WordTemplateRenderer
 
     internal void RenderNodes()
     {
-        var parameters = new WordTemplateParameters(this.entity, this.culture, this.dicTokenColumn!, this.table!.Rows, template, model);
+        var parameters = new WordTemplateParameters(this.entity, this.culture, this.dicTokenColumn!, this.table!.Rows, template, model, document);
         
         foreach (var part in document.AllParts().Where(p => p.RootElement != null))
         {

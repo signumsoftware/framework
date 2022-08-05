@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Dropdown } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import { Lite, toLite, newMListElement, SearchMessage, MList } from '@framework/Signum.Entities'
+import { Lite, toLite, newMListElement, SearchMessage, MList, getToString } from '@framework/Signum.Entities'
 import { is } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
@@ -31,7 +31,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
 
   React.useEffect(() => {
     if (!isOpen && userCharts == undefined) {
-      reloadList().done();
+      reloadList();
     }
   }, [isOpen, p.chartRequestView && p.chartRequestView.userChart]);
 
@@ -41,15 +41,14 @@ export default function UserChartMenu(p: UserChartMenuProps) {
         setUserCharts(list);
         const userChart = p.chartRequestView.userChart;
 
-        if (userChart && userChart.toStr == null) {
+        if (userChart && userChart.model == null) {
           const similar = list.singleOrNull(a => is(a, userChart));
           if (similar) {
-            userChart.toStr = similar.toStr;
+            userChart.model = similar.model;
             forceUpdate();
           } else {
-            Navigator.API.fillToStrings(userChart)
-              .then(() => forceUpdate())
-              .done();
+            Navigator.API.fillLiteModels(userChart)
+              .then(() => forceUpdate());
           }
         }
         return list;
@@ -63,9 +62,8 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       const cr = crv.chartRequest;
       const newCR = ChartRequestModel.New({ queryKey: cr.queryKey });
       UserChartClient.Converter.applyUserChart(newCR, userChart, undefined)
-        .then(newChartRequest => { crv.onChange(newChartRequest, toLite(userChart, undefined, translated(userChart, a => a.displayName))); crv.hideFiltersAndSettings(); })
-        .done();
-    }).done();
+        .then(newChartRequest => { crv.onChange(newChartRequest, toLite(userChart, undefined, translated(userChart, a => a.displayName))); crv.hideFiltersAndSettings(); });
+    });
   }
 
   async function applyChanges(): Promise<UserChartEntity> {
@@ -101,8 +99,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           crv.onChange(p.chartRequestView.chartRequest, undefined);
         else
           handleSelect(crv.userChart!);
-      })
-      .done();
+      });
   }
 
   function handleEdit() {
@@ -116,8 +113,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           crv.onChange(p.chartRequestView.chartRequest, undefined);
         else
           handleSelect(crv.userChart!);
-      })
-      .done();
+      });
   }
 
 
@@ -130,7 +126,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           crView.onChange(crView.chartRequest, toLite(uc, undefined, translated(uc, a => a.displayName)));
           crView.hideFiltersAndSettings();
         }
-      }).done();
+      });
   }
 
   async function createUserChart() : Promise<UserChartEntity> {
@@ -162,7 +158,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
   }
 
   const crView = p.chartRequestView;
-  const labelText = !crView.userChart ? UserChartEntity.nicePluralName() : crView.userChart.toStr
+  const labelText = !crView.userChart ? UserChartEntity.nicePluralName() : getToString(crView.userChart)
 
   var canSave = tryGetOperationInfo(UserChartOperation.Save, UserChartEntity) != null;
 
@@ -187,12 +183,12 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           </div>}
         <div id="userchart-items-container" style={{ maxHeight: "300px", overflowX: "auto" }}>
           {userCharts?.map((uc, i) => {
-            if (filter == undefined || uc.toStr?.search(new RegExp(RegExp.escape(filter), "i")) != -1)
+            if (filter == undefined || getToString(uc)?.search(new RegExp(RegExp.escape(filter), "i")) != -1)
               return (
                 <Dropdown.Item key={i}
                   className={classes("sf-userquery", is(uc, crView.userChart) && "active")}
                   onClick={() => handleSelect(uc)}>
-                  {uc.toStr}
+                  {getToString(uc)}
                 </Dropdown.Item>)
           })}
         </div>

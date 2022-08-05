@@ -155,7 +155,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     if (this.props.searchOnLoad)
-      this.doSearch({ force: true }).done();
+      this.doSearch({ force: true });
   }
 
   componentDidUpdate(props: SearchControlLoadedProps) {
@@ -214,7 +214,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.containerDiv)
       this.containerDiv.scrollTop = 0;
 
-    this.doSearch({ force }).done();
+    this.doSearch({ force });
   };
 
   resetResults(continuation: () => void) {
@@ -331,7 +331,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.containerDiv)
       this.containerDiv.scrollTop = 0;
 
-    this.doSearch({}).done();
+    this.doSearch({});
   }
 
 
@@ -452,6 +452,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });
 
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
+    const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
 
     return (
       <div className="sf-search-control sf-control-container"
@@ -484,7 +485,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           columnOption={this.state.editingColumn}
           onChange={this.handleColumnChanged}
           queryDescription={qd}
-          subTokensOptions={SubTokensOptions.CanElement | canAggregate}
+          subTokensOptions={SubTokensOptions.CanElement | canAggregateXorOperation}
           close={this.handleColumnClose} />}
         <div ref={d => this.containerDiv = d}
           className="sf-scroll-table-container table-responsive"
@@ -522,7 +523,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         simpleFilterBuilder: undefined,
         showFilters: !this.state.showFilters
       }, () => this.handleHeightChanged());
-    }).done();
+    });
   }
 
   handleSystemTimeClick = () => {
@@ -701,8 +702,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         .then(val => {
           if (val != "no_change")
             this.handleCreated(val);
-        })
-        .done();
+        });
     }
     else {
       const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
@@ -732,7 +732,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 else
                   Navigator.createInNewTab(pack, viewName);
               }
-            }).done();
+            });
         } else {
 
           Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
@@ -743,11 +743,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               createNew: () => Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
                 .then(props => Constructor.constructPack(tn, props)!),
             }))
-            .then(entity => this.handleCreated(entity))
-            .done();
+            .then(entity => this.handleCreated(entity));
         }
         
-      }).done();
+      });
     }
   }
 
@@ -825,15 +824,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           container: this,
           styleContext: this.props.styleContext,
         }))
-        .then(menuItems => this.setState({ currentMenuItems: menuItems }))
-        .done();
+        .then(menuItems => this.setState({ currentMenuItems: menuItems }));
     }
   }
 
   markRows = (dic: MarkedRowsDictionary) => {
     this.dataChanged()
-      .then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary }))
-      .done();
+      .then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary }));
 
   }
 
@@ -955,7 +952,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (this.props.searchOnLoad)
           this.doSearchPage1();
 
-      }).done();
+      });
   
   }
 
@@ -1084,7 +1081,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       .map(r => liteKey(r.entity!))
       .join("|");
 
-    navigator.clipboard.writeText(text).done();
+    navigator.clipboard.writeText(text);
   }
   
   //SELECTED ROWS
@@ -1231,7 +1228,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           columns: rt.columns,
           row: rt.rows[0],
           rowIndex: 0,
-          refresh: () => scl.dataChanged().done(),
+          refresh: () => scl.dataChanged(),
           systemTime: scl.props.findOptions.systemTime
         }, summaryToken)}</div>
       );
@@ -1289,7 +1286,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (t.type.isCollection)
       return false;
 
-    if (t.type.isEmbedded || isTypeModel(t.type.name))
+    if (t.type.isEmbedded || isTypeModel(t.type.name) || t.type.name == "CellOperationDTO")
       return t.hasOrderAdapter == true;
 
     return true;
@@ -1395,7 +1392,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var resFo = this.state.resultFindOptions;
     if (resFo?.groupResults) {
 
-      this.openRowGroup(row).done();
+      this.openRowGroup(row);
 
       return;
     }
@@ -1428,7 +1425,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
           .then(() => {
             this.handleOnNavigated(lite);
-          }).done();
+          });
 
       }
     }
@@ -1489,7 +1486,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
 
       const ctx: Finder.CellFormatterContext = {
-        refresh: () => this.dataChanged().done(),
+        refresh: () => this.dataChanged(),
         systemTime: this.props.findOptions.systemTime,
         columns: resultTable.columns,
         row: row,

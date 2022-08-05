@@ -135,7 +135,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
     Dictionary<Lite<RoleEntity>, RoleAllowedCache> NewCache()
     {
-        List<Lite<RoleEntity>> roles = AuthLogic.RolesInOrder().ToList();
+        List<Lite<RoleEntity>> roles = AuthLogic.RolesInOrder(includeTrivialMerge: true).ToList();
 
         Dictionary<Lite<RoleEntity>, Dictionary<K, A>> realRules =
            Database.Query<RT>()
@@ -165,7 +165,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         RoleAllowedCache cache = runtimeRules.Value.GetOrThrow(rules.Role);
 
         rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
-        rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
+        rules.InheritFrom = AuthLogic.RelatedTo(rules.Role).ToMList();
         rules.Rules = (from r in resources
                        let k = ToKey(r)
                        select new AR()
@@ -282,8 +282,9 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         var rules = runtimeRules.Value;
 
         return new XElement(rootName,
-            (from r in AuthLogic.RolesInOrder()
+            (from r in AuthLogic.RolesInOrder(includeTrivialMerge: false)
              let rac = rules.GetOrThrow(r)
+
              select new XElement("Role",
                  new XAttribute("Name", r.ToString()!),
                      from k in allKeys ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()

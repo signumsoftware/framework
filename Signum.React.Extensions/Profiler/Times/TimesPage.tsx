@@ -19,7 +19,7 @@ export default function TimesPage(p: TimesPageProps) {
   useTitle("Times state");
 
   function handleClear(e: React.MouseEvent<any>) {
-    API.Times.clear().then(() => reloadTimes()).done();
+    API.Times.clear().then(() => reloadTimes());
   }
 
   if (times == undefined)

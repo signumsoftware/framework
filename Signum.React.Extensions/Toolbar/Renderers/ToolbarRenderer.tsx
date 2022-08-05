@@ -9,11 +9,10 @@ import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
+import { getToString } from '@framework/Signum.Entities'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
-import { SidebarMode  } from '../SidebarContainer'
-import { isActive } from '@framework/FindOptions';
-import { classes, Dic } from '@framework/Globals';
 import { urlVariables } from '../../Dashboard/UrlVariables';
+import { Dic } from '@framework/Globals';
 
 
 
@@ -100,7 +99,7 @@ export function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, active: T
     case "Header":
     case "Item":
       if (res.elements && res.elements.length) {
-        var title = res.label || res.content!.toStr;
+        var title = res.label || getToString(res.content);
         var icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
 
         return (
@@ -176,7 +175,7 @@ function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, ch
 export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode }) {
   return (
     <Nav.Item >
-      <Nav.Link title={p.title} onClick={p.onClick} active={p.active}>
+      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active}>
         {p.icon} 
         <span className={"nav-item-text"}>{p.title}</span>
         <div className={"nav-item-float"}>{p.title}</div>

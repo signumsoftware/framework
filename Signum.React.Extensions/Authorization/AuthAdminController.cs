@@ -17,7 +17,7 @@ public class AuthAdminController : ControllerBase
     public PermissionRulePack GetPermissionRules(string roleId)
     {
         BasicPermission.AdminRules.AssertAuthorized();
-        var rules = PermissionAuthLogic.GetPermissionRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString());
+        var rules = PermissionAuthLogic.GetPermissionRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillLiteModel());
         CleanChanges(rules);
         return rules;
     }
@@ -34,7 +34,7 @@ public class AuthAdminController : ControllerBase
     public TypeRulePack GetTypeRules(string roleId)
     {
         BasicPermission.AdminRules.AssertAuthorized();
-        var rules = TypeAuthLogic.GetTypeRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString());
+        var rules = TypeAuthLogic.GetTypeRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillLiteModel());
         CleanChanges(rules);
         return rules;
     }
@@ -52,7 +52,7 @@ public class AuthAdminController : ControllerBase
     public OperationRulePack GetOperationRules(string typeName, string roleId)
     {
         BasicPermission.AdminRules.AssertAuthorized();
-        var rules = OperationAuthLogic.GetOperationRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString(), TypeLogic.GetType(typeName).ToTypeEntity());
+        var rules = OperationAuthLogic.GetOperationRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillLiteModel(), TypeLogic.GetType(typeName).ToTypeEntity());
         CleanChanges(rules);
         return rules;
     }
@@ -71,7 +71,7 @@ public class AuthAdminController : ControllerBase
     public PropertyRulePack GetPropertyRule(string typeName, string roleId)
     {
         BasicPermission.AdminRules.AssertAuthorized();
-        var rules = PropertyAuthLogic.GetPropertyRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString(), TypeLogic.GetType(typeName).ToTypeEntity());
+        var rules = PropertyAuthLogic.GetPropertyRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillLiteModel(), TypeLogic.GetType(typeName).ToTypeEntity());
         CleanChanges(rules);
         return rules;
     }
@@ -90,7 +90,7 @@ public class AuthAdminController : ControllerBase
     public QueryRulePack GetQueryRules(string typeName, string roleId)
     {
         BasicPermission.AdminRules.AssertAuthorized();
-        var rules = QueryAuthLogic.GetQueryRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString(), TypeLogic.GetType(typeName).ToTypeEntity());
+        var rules = QueryAuthLogic.GetQueryRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillLiteModel(), TypeLogic.GetType(typeName).ToTypeEntity());
         CleanChanges(rules);
         return rules;
     }
@@ -117,10 +117,18 @@ public class AuthAdminController : ControllerBase
         }
     }
 
+    [HttpPost("api/authAdmin/trivialMergeRole")]
+    public Lite<RoleEntity> TrivialMergeRole([FromBody]List<Lite<RoleEntity>> roles)
+    {
+        //BasicPermission.AdminRules.AssertAuthorized();
+
+        return AuthLogic.GetOrCreateTrivialMergeRole(roles);
+    }
+
     private static void CleanChanges(ModelEntity rules)
     {
         var graph = GraphExplorer.FromRoot(rules);
-        var conditions = graph.OfType<TypeAllowedAndConditions>().SelectMany(a => a.Conditions).ToList();
+        var conditions = graph.OfType<TypeAllowedAndConditions>().SelectMany(a => a.ConditionRules).ToList();
         conditions.ForEach(con => graph.UnionWith(GraphExplorer.FromRoot(con)));
         GraphExplorer.CleanModifications(graph);
         GraphExplorer.SetDummyRowIds(graph);

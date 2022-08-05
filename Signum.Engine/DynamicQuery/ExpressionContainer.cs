@@ -395,7 +395,7 @@ public class ExtensionInfo
         });
 
         return new ExtensionToken(parent, Key, Type, IsProjection, info.Unit, info.Format,
-            info.Implementations, info.IsAllowed(), info.PropertyRoute, displayName: NiceName());
+            info.Implementations, info.IsAllowed, info.PropertyRoute, displayName: NiceName);
     }
 }
 

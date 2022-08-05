@@ -253,19 +253,19 @@ public static class UserQueryLogic
                     {
                         using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
                         {
-                            foreach (var item in uq.Filters.ToList())
+                            foreach (var filter in uq.Filters.ToList())
                             {
-                                if (item.Token == null)
+                                if (filter.Token == null)
                                     continue;
 
-                                QueryTokenEmbedded token = item.Token;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, options | SubTokensOptions.CanAnyAll, " {0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
+                                QueryTokenEmbedded token = filter.Token;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, options | SubTokensOptions.CanAnyAll, " {0} {1}".FormatWith(filter.Operation, filter.ValueString), allowRemoveToken: true, allowReCreate: false))
                                 {
                                     case FixTokenResult.Nothing: break;
                                     case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
-                                    case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
+                                    case FixTokenResult.RemoveToken: uq.Filters.Remove(filter); break;
                                     case FixTokenResult.SkipEntity: return null;
-                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.Fix: filter.Token = token; break;
                                     default: break;
                                 }
                             }
@@ -276,17 +276,31 @@ public static class UserQueryLogic
                     {
                         using (DelayedConsole.Delay(() => Console.WriteLine(" Columns:")))
                         {
-                            foreach (var item in uq.Columns.ToList())
+                            foreach (var col in uq.Columns.ToList())
                             {
-                                QueryTokenEmbedded token = item.Token;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, options, item.DisplayName.HasText() ? " '{0}'".FormatWith(item.DisplayName) : null, allowRemoveToken: true, allowReCreate: false))
+                                QueryTokenEmbedded token = col.Token;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, options, col.DisplayName.HasText() ? " '{0}' (Summary)".FormatWith(col.DisplayName) : null, allowRemoveToken: true, allowReCreate: false))
                                 {
                                     case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity:; return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
-                                    case FixTokenResult.RemoveToken: uq.Columns.Remove(item); break;
+                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                                    case FixTokenResult.RemoveToken: uq.Columns.Remove(col); break;
                                     case FixTokenResult.SkipEntity: return null;
-                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.Fix: col.Token = token; break;
                                     default: break;
+                                }
+
+                                if(col.SummaryToken != null)
+                                {
+                                    QueryTokenEmbedded sumToken = col.SummaryToken;
+                                    switch (QueryTokenSynchronizer.FixToken(replacements, ref sumToken, qd, options | SubTokensOptions.CanAggregate, col.DisplayName.HasText() ? " '{0}'".FormatWith(col.DisplayName) : null, allowRemoveToken: true, allowReCreate: false))
+                                    {
+                                        case FixTokenResult.Nothing: break;
+                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                                        case FixTokenResult.RemoveToken: col.SummaryToken = null; break;
+                                        case FixTokenResult.SkipEntity: return null;
+                                        case FixTokenResult.Fix: col.SummaryToken = sumToken; break;
+                                        default: break;
+                                    }
                                 }
                             }
                         }
@@ -296,16 +310,16 @@ public static class UserQueryLogic
                     {
                         using (DelayedConsole.Delay(() => Console.WriteLine(" Orders:")))
                         {
-                            foreach (var item in uq.Orders.ToList())
+                            foreach (var ord in uq.Orders.ToList())
                             {
-                                QueryTokenEmbedded token = item.Token;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, options, " " + item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
+                                QueryTokenEmbedded token = ord.Token;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, options, " " + ord.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
                                 {
                                     case FixTokenResult.Nothing: break;
                                     case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
-                                    case FixTokenResult.RemoveToken: uq.Orders.Remove(item); break;
+                                    case FixTokenResult.RemoveToken: uq.Orders.Remove(ord); break;
                                     case FixTokenResult.SkipEntity: return null;
-                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.Fix: ord.Token = token; break;
                                     default: break;
                                 }
                             }

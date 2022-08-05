@@ -56,7 +56,7 @@ export function FileDownloader(p: FileDownloaderProps) {
           configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity));
       }
 
-    }).done();
+    });
   }
 
   const entityOrLite = p.entityOrLite;
@@ -111,17 +111,19 @@ export function registerConfiguration<T extends IFile & ModifiableEntity>(type: 
 
 export interface FileDownloaderConfiguration<T extends IFile> {
   fileUrl?: (file: T) => string;
+  fileLiteUrl?: (file: Lite<T & Entity>) => string;
   downloadClick?: (event: React.MouseEvent<any>, file: T) => void;
   viewClick?: (event: React.MouseEvent<any>, file: T) => void;
 }
 
 registerConfiguration(FileEntity, {
   fileUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
-  viewClick: (event, file) => viewUrl(event, AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id))
+  fileLiteUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
 });
 
 registerConfiguration(FilePathEntity, {
   fileUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
+  fileLiteUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
 });
 
 registerConfiguration(FileEmbedded, {
@@ -142,8 +144,7 @@ function downloadUrl(e: React.MouseEvent<any>, url: string) {
 
   e.preventDefault();
   Services.ajaxGetRaw({ url: url })
-    .then(resp => Services.saveFile(resp))
-    .done();
+    .then(resp => Services.saveFile(resp));
 };
 
 function viewUrl(e: React.MouseEvent<any>, url: string) {
@@ -158,8 +159,7 @@ function viewUrl(e: React.MouseEvent<any>, url: string) {
     .then(blob => {
       const url = URL.createObjectURL(blob);
       win.location.assign(url);
-    })
-    .done();
+    });
 
 }
 

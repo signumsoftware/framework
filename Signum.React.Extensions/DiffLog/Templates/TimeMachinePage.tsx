@@ -6,7 +6,7 @@ import * as Finder from '@framework/Finder'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { SearchControl, ColumnOption } from '@framework/Search'
 import { QueryDescription, ResultTable } from '@framework/FindOptions'
-import { Entity, JavascriptMessage } from '@framework/Signum.Entities'
+import { Entity, getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TimeMachineMessage } from '../Signum.Entities.DiffLog'
 import { Lite } from '@framework/Signum.Entities'
@@ -28,9 +28,9 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
   const lite = useAPI(() => {
     var lite = newLite(params.type, params.id!);
 
-    return Navigator.API.fillToStrings(lite)
+    return Navigator.API.fillLiteModels(lite)
       .then(() => lite)
-      .catch(() => { lite.toStr = TimeMachineMessage.EntityDeleted.niceToString(); return lite });
+      .catch(() => { lite.model = TimeMachineMessage.EntityDeleted.niceToString(); lite.ModelType = undefined; return lite });
   }, [])
 
   const searchControl = React.useRef<SearchControlHandler>(null);
@@ -50,7 +50,7 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
         <br />
         <small className="sf-type-nice-name">
           <EntityLink lite={lite}>{"{0} {1}".formatWith(getTypeInfo(lite.EntityType).niceName, lite.id)}</EntityLink>
-          &nbsp;<span style={{ color: "#aaa" }}>{lite.toStr}</span>
+          &nbsp;<span style={{ color: "#aaa" }}>{getToString(lite)}</span>
         </small>
       </h4>
 

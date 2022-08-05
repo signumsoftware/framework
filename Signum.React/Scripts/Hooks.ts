@@ -204,8 +204,7 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
     var abortController = new AbortController();
 
     makeCall(abortController.signal, data && data.result)
-      .then(result => !abortController.signal.aborted && setData({ result, deps }))
-      .done();
+      .then(result => !abortController.signal.aborted && setData({ result, deps }));
 
     return () => {
       abortController.abort();

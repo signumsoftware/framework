@@ -27,6 +27,7 @@ export interface SearchValueProps {
   onExplored?: () => void;
   onTokenLoaded?: () => void;
   initialValue?: any;
+  onInitialValueLoaded?: () => void;
   customClass?: string | ((value: any | undefined) => (string | undefined));
   customStyle?: React.CSSProperties;
   format?: string;
@@ -111,8 +112,10 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       return Promise.resolve(undefined);
 
     if (p.initialValue != undefined) {
-      if (Hooks.areEqual(deps ?? [], initialDeps.current ?? []))
+      if (Hooks.areEqual(deps ?? [], initialDeps.current ?? [])) {
+        p.onInitialValueLoaded?.();
         return Promise.resolve(p.initialValue);
+      }
       else
         return makeRequest();
     } else {
@@ -266,8 +269,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     }
 
     Navigator.view(lite)
-      .then(() => { refreshValue(); p.onExplored && p.onExplored(); })
-      .done();
+      .then(() => { refreshValue(); p.onExplored && p.onExplored(); });
   }
 
   function renderValue(): React.ReactChild | null{
@@ -303,7 +305,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
           return Duration.fromISOTime(value).toFormat(luxonFormat ?? "hh:mm:ss");
         }
       case "String": return value;
-      case "Lite": return (value as Lite<Entity>).toStr ?? null;
+      case "Lite": return value && Navigator.renderLite(value as Lite<Entity>);
       case "Embedded": return getToString(value as EmbeddedEntity);
       case "Boolean": return <input type="checkbox" className="form-check-input" disabled={true} checked={value} />
       case "Enum": return getEnumInfo(token!.type.name, value).niceName;
@@ -327,7 +329,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 
         if (p.onExplored)
           p.onExplored();
-      }).done();
+      });
   }
 });
 

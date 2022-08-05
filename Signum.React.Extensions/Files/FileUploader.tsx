@@ -77,7 +77,7 @@ export function FileUploader(p: FileUploaderProps) {
         .catch(error => setNewError((error as Error).message)));
     }
 
-    Promise.all(promises).then(() => { setIsLodaing(false); setIsOver(false); }).done();
+    Promise.all(promises).then(() => { setIsLodaing(false); setIsOver(false); });
   }
 
   function setNewError(newError: string) {

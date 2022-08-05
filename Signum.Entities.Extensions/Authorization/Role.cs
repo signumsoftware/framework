@@ -8,39 +8,18 @@ namespace Signum.Entities.Authorization;
 public class RoleEntity : Entity
 {
     [UniqueIndex]
-    [StringLengthValidator(Min = 2, Max = 100)]
+    [StringLengthValidator(Min = 2, Max = 200)]
     public string Name { get; set; }
 
-    MergeStrategy mergeStrategy;
-    public MergeStrategy MergeStrategy
-    {
-        get { return mergeStrategy; }
-        set
-        {
-            if (Set(ref mergeStrategy, value))
-                Notify(() => StrategyHint);
-        }
-    }
+    public MergeStrategy MergeStrategy { get; set; }
 
-    [NotifyCollectionChanged]
-    public MList<Lite<RoleEntity>> Roles { get; set; } = new MList<Lite<RoleEntity>>();
+    public bool IsTrivialMerge { get; set; }
 
-    protected override void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
-    {
-        Notify(() => StrategyHint);
-    }
+    [NotifyCollectionChanged, NoRepeatValidator]
+    public MList<Lite<RoleEntity>> InheritsFrom { get; set; } = new MList<Lite<RoleEntity>>();
 
-    [HiddenProperty]
-    public string? StrategyHint
-    {
-        get
-        {
-            if (Roles.Any())
-                return null;
-
-            return AuthAdminMessage.NoRoles.NiceToString()  + "-> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString();
-        }
-    }
+    [StringLengthValidator(MultiLine = true)]
+    public string? Description { get; set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
@@ -55,6 +34,48 @@ public class RoleEntity : Entity
 
             return (Lite<RoleEntity>)userHolder.GetClaim("Role")!;
         }
+    }
+
+    internal static Func<Lite<RoleEntity>, RoleEntity> RetrieveFromCache = r => throw new NotImplementedException("RetrieveFromCache not set");
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (IsTrivialMerge)
+        {
+            if (pi.Name == nameof(InheritsFrom) && InheritsFrom.Count < 2)
+            {
+                return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.GreaterThan, 2);
+            }
+
+            if(pi.Name == nameof(Description) && Description.HasText())
+            {
+                return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+            }
+
+            if (pi.Name == nameof(MergeStrategy) && MergeStrategy != MergeStrategy.Union)
+            {
+                return ValidationMessage._0ShouldBe1.NiceToString(MergeStrategy.Union.NiceToString());
+            }
+        }
+
+        return base.PropertyValidation(pi);
+    }
+
+    protected override void PreSaving(PreSavingContext ctx)
+    {
+        if (IsTrivialMerge)
+        {
+            Name = CalculateTrivialMergeName(this.InheritsFrom);
+        }
+
+        base.PreSaving(ctx);
+    }
+
+    public static string CalculateTrivialMergeName(IEnumerable<Lite<RoleEntity>> roles)
+    {
+        var name = roles.OrderBy(a => a.ToString()).ToString(" + ");
+
+        return (StringHashEncoder.Codify(name) + ": " + name).Etc(200);
     }
 }
 

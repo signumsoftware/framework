@@ -209,7 +209,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     fixOperation(s, newProperty).then(() => {
       p.onSetterChanged();
       forceUpdate();
-    }).done();
+    });
   }
 
   function removeInitialPoin(str: string) {
@@ -226,7 +226,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     fixOperation(s, pr!).then(() => {
       p.onSetterChanged();
       forceUpdate();
-    }).done();
+    });
   }
 
   function handleChangeFilterOperation(event: React.FormEvent<HTMLSelectElement>) {
@@ -242,8 +242,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     p.setters = p.operation && showSetters(p.operation) ? [] : undefined;
     if (pr && (p.setters || p.predicate)) {
       var infos = tryGetTypeInfos(pr.typeReference());
-      var promise = infos.length == 1 && infos[0] ? Promise.resolve(undefined) :
-        SelectorModal.chooseType(infos.notNull().filter(tr => tr!.entityKind == "Part" || tr!.entityKind == "SharedPart"));
+      var promise = SelectorModal.chooseType(infos.notNull().filter(tr => tr!.entityKind == "Part" || tr!.entityKind == "SharedPart"));
 
       return promise.then(type => { p.entityType = type?.name; });
     }
@@ -261,8 +260,8 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
   var fOperations = filterType ? filterOperations[filterType] : null;
 
   var subRoot = pr &&
-    (pr.typeReference().isCollection ? (pr.typeReference().isEmbedded ? pr.addMember("Indexer", "Item", true) : PropertyRoute.root(getTypeInfo(pr.typeReference().name))):
-      p.setter.entityType != null ? PropertyRoute.root(getTypeInfo(p.setter.entityType)) : null);;
+    (pr.typeReference().isCollection ? (pr.typeReference().isEmbedded ? pr.addMember("Indexer", "Item", true) : PropertyRoute.root(getTypeInfo(pr.typeReference().name))) :
+      (pr.typeReference().isEmbedded ? pr : (p.setter.entityType != null ? PropertyRoute.root(getTypeInfo(p.setter.entityType)) : null)));
 
   return (
     <>

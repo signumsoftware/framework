@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Location } from 'history'
-import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as WorkflowClient from './WorkflowClient'
 import { WorkflowEntity } from './Signum.Entities.Workflow'
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
@@ -14,8 +14,11 @@ export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity>
     super(type);
   }
 
-  getIcon(element: ToolbarResponse<WorkflowEntity>) {
-    return ToolbarConfig.coloredIcon(coalesceIcon(parseIcon(element.iconName), "th-large"), element.iconColor ?? "darkslateblue");
+  getDefaultIcon(): IconColor {
+    return ({
+      icon: "random",
+      iconColor: "darkslateblue",
+    });
   }
 
   navigateTo(element: ToolbarResponse<WorkflowEntity>): Promise<string> {

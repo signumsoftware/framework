@@ -78,14 +78,13 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         if (pack) {
 
           this.setState({ pack: pack, refreshCount: 0 });
-          AppContext.setTitle(pack.activity.case.toStr);
+          AppContext.setTitle(getToString(pack.activity.case));
           this.loadComponent(pack);
 
         } else {
           AppContext.history.goBack();
         }
-      })
-      .done();
+      });
   }
 
   loadEntity(props: CaseFramePageProps): Promise<WorkflowClient.CaseEntityPack | undefined> {

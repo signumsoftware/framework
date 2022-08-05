@@ -25,14 +25,20 @@ function TranslationTable({ result }: { result: TranslationFileStatus[] }) {
   const tree = result.groupBy(a => a.assembly)
     .toObject(gr => gr.key, gr => gr.elements.toObject(a => a.culture));
 
+
+  const [onlyNeutral, setOnlyNeutral] = React.useState<boolean>(true);
+
   const assemblies = Dic.getKeys(tree);
-  const cultures = Dic.getKeys(tree[assemblies.first()]);
+  let cultures = Dic.getKeys(tree[assemblies.first()]);
+
+  if (onlyNeutral)
+    cultures = cultures.filter(a => !onlyNeutral || !a.contains("-"));
 
   return (
     <table className="st">
       <thead>
         <tr>
-          <th></th>
+          <th><label><input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> Only Neutral Cultures</label></th>
           <th> {TranslationMessage.All.niceToString()} </th>
           {cultures.map(culture => <th key={culture}>{culture}</th>)}
         </tr>

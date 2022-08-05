@@ -383,15 +383,14 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
         return GraphExplorer.FullIntegrityCheck(graph);
     }
 
-    [ForceEagerEvaluation]
-
-    protected static string NicePropertyName<R>(Expression<Func<R>> property)
+    [MethodExpander(typeof(NicePropertyNameExpander))]
+    public static string NicePropertyName<R>(Expression<Func<R>> property)
     {
         return ReflectionTools.GetPropertyInfo(property).NiceName();
     }
 
-    [ForceEagerEvaluation]
-    protected static string NicePropertyName<E, R>(Expression<Func<E, R>> property)
+    [MethodExpander(typeof(NicePropertyNameExpander))]
+    public static string NicePropertyName<E, R>(Expression<Func<E, R>> property)
     {
         return ReflectionTools.GetPropertyInfo(property).NiceName();
     }
@@ -600,5 +599,18 @@ public class IntegrityCheckWithEntity
                   validators.GetOrThrow(kvp.Key).GetValueUntyped(Entity) ?? "null", 
                   kvp.Value), 
                   "\r\n");
+    }
+}
+
+
+public class NicePropertyNameExpander : IMethodExpander
+{
+    public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
+    {
+        var lambda = (LambdaExpression)arguments[0].StripQuotes();
+
+        var niceName = ReflectionTools.BasePropertyInfo(lambda).NiceName();
+
+        return Expression.Constant(niceName, typeof(string));
     }
 }

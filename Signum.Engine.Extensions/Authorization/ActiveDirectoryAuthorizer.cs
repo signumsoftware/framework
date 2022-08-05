@@ -212,11 +212,13 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         var config = GetConfig();
         if (ctx is DirectoryServiceAutoCreateUserContext ds)
         {
-            var groups = ds.GetUserPrincipal().GetGroups();
+            var groups = ds.GetUserPrincipal().GetGroups(ds.PrincipalContext).ToList();
             var role = config.RoleMapping.FirstOrDefault(m =>
             {
                 Guid.TryParse(m.ADNameOrGuid, out var guid);
-                return groups.Any(g => g.Name == m.ADNameOrGuid || g.Guid == guid);
+                var found = groups.Any(g => g.Name == m.ADNameOrGuid || g.Guid == guid);
+       
+                return found;
             })?.Role ?? config.DefaultRole;
 
             if (role != null)

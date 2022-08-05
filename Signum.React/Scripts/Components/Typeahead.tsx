@@ -95,8 +95,8 @@ export class TypeaheadController {
       this.setItem(items);
       this.setShown(true);
       this.setQuery(query);
-      this.setSelectedIndex(0).done();
-    }).done();
+      this.setSelectedIndex(0);
+    });
   }
 
   select = (e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
@@ -155,14 +155,14 @@ export class TypeaheadController {
         {
           e.preventDefault();
           const newIndex = ((this.selectedIndex ?? 0) - 1 + this.items!.length) % this.items!.length;
-          this.setSelectedIndex(newIndex).done();
+          this.setSelectedIndex(newIndex);
           break;
         }
       case 40: // down arrow
         {
           e.preventDefault();
           const newIndex = ((this.selectedIndex ?? 0) + 1) % this.items!.length;
-          this.setSelectedIndex(newIndex).done();
+          this.setSelectedIndex(newIndex);
           break;
         }
     }
@@ -208,7 +208,7 @@ export class TypeaheadController {
     this.setSelectedIndex(index).then(() => {
       if (this.select(e))
         this.input!.focus()
-    }).done();
+    });
   }
 
   handleElementMouseEnter = (event: React.MouseEvent<any>, index: number) => {
@@ -301,7 +301,7 @@ Typeahead.defaultProps = {
 
 
 export namespace TypeaheadOptions {
-  export function highlightedText(val: string, query?: string): React.ReactNode {
+  export function highlightedText(val: string, query?: string): React.ReactChild {
 
     if (query == undefined)
       return val;
@@ -319,13 +319,13 @@ export namespace TypeaheadOptions {
     );
   }
 
-  export function highlightedTextAll(val: string, query: string | undefined): React.ReactNode {
+  export function highlightedTextAll(val: string, query: string | undefined): React.ReactChild {
     if (query == undefined)
       return val;
 
     const parts = query.toLocaleLowerCase().split(" ").filter(a => a.length > 0).orderByDescending(a => a.length);
 
-    function splitText(str: string, partIndex: number): React.ReactNode {
+    function splitText(str: string, partIndex: number): React.ReactChild {
 
       if (str.length == 0)
         return str;

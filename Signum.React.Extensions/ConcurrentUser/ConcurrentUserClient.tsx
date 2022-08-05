@@ -16,8 +16,7 @@ export function start(options: { routes: JSX.Element[] }) {
       const entity = me;
       return <ConcurrentUser entity={entity} onReload={() =>
         Navigator.API.fetchEntityPack(toLite(entity))
-          .then(pack => ctx.frame.onReload(pack))
-          .done()} />;
+          .then(pack => ctx.frame.onReload(pack))} />;
     }
 
     return undefined;

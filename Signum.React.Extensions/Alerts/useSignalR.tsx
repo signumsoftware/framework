@@ -61,8 +61,6 @@ export function useSignalRConnection(url: string, options?: signalR.IHttpConnect
 
       forceUpdate();
 
-      promise.done();
-
       return () => {
         promise
           .then(() => {
@@ -90,7 +88,7 @@ export function useSignalRGroup(connection: signalR.HubConnection | undefined, o
 
     if (connection) {
       if (connection.state == signalR.HubConnectionState.Connected) {
-        options.enterGroup(connection).done();
+        options.enterGroup(connection);
 
         return () => {
           if (connection.state == signalR.HubConnectionState.Connected) {
@@ -98,7 +96,7 @@ export function useSignalRGroup(connection: signalR.HubConnection | undefined, o
               if (connection.state == signalR.HubConnectionState.Connected)
                 throw e;
               else { /* Silent exception */ }
-            }).done();
+            });
           }
         };
       }

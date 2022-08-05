@@ -57,7 +57,7 @@ export function HtmlAttributesLine(p: HtmlAttributesLineProps) {
       }
 
       p.dn.context.refreshView();
-    }).done();
+    });
   }
 
 

@@ -1,4 +1,5 @@
 using Signum.Utilities.DataStructures;
+using System.Collections;
 using System.Xml.Linq;
 
 namespace Signum.Engine.Operations;
@@ -8,9 +9,27 @@ public interface IGraphHasStatesOperation
     bool HasFromStates { get; }
 }
 
+public interface IGraphFromToStatesOperations
+{
+    public List<(object? from, object? to)>? GetUntypedFromTo();
+}
+
 public class Graph<T, S>
     where T : Entity
 {
+
+    public static string GetNiceToString(S state)
+    {
+        if (state == null)
+            return "null";
+
+        if (state is Enum e)
+            return e.NiceToString();
+
+        return state.ToString()!;
+
+    }
+
     public interface IGraphOperation : IOperation
     {
     }
@@ -25,11 +44,14 @@ public class Graph<T, S>
         List<S> FromStates { get; }
     }
 
+
+
     public class Construct : Graph<T>.Construct, IGraphToStateOperation
     {
         public List<S> ToStates { get; private set; } = new List<S>();
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        IList? IOperation.UntypedToStates => ToStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
 
         public Construct(ConstructSymbol<T>.Simple symbol)
             : base(symbol)
@@ -50,7 +72,7 @@ public class Graph<T, S>
 
         protected override void AssertEntity(T entity)
         {
-            Graph<T, S>.AssertEnterState(entity, this);
+            Graph<T, S>.AssertToState(entity, this);
         }
 
         public override string ToString()
@@ -83,8 +105,9 @@ public class Graph<T, S>
         where F : class, IEntity
     {
         public List<S> ToStates { get; private set; } = new List<S>();
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        IList? IOperation.UntypedToStates => ToStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
 
         public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
             : base(symbol)
@@ -104,7 +127,7 @@ public class Graph<T, S>
 
         protected override void AssertEntity(T result)
         {
-            Graph<T, S>.AssertEnterState(result, this);
+            Graph<T, S>.AssertToState(result, this);
         }
 
 
@@ -127,8 +150,10 @@ public class Graph<T, S>
         where F : class, IEntity
     {
         public List<S> ToStates { get; private set; } = new List<S>();
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        IList? IOperation.UntypedToStates => ToStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
+
 
         public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
             : base(symbol)
@@ -151,7 +176,7 @@ public class Graph<T, S>
 
         protected override void AssertEntity(T result)
         {
-            Graph<T, S>.AssertEnterState(result, this);
+            Graph<T, S>.AssertToState(result, this);
         }
 
         public override string ToString()
@@ -169,27 +194,27 @@ public class Graph<T, S>
         }
     }
 
-    public class Execute : Graph<T>.Execute, IGraphToStateOperation, IGraphFromStatesOperation, IEntityOperation
+    public class Execute : Graph<T>.Execute, IGraphToStateOperation, IGraphFromStatesOperation, IEntityOperation, IGraphFromToStatesOperations
     {
         public List<S> FromStates { get; private set; }
         public List<S> ToStates { get; private set; }
-        IEnumerable<Enum>? IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        public List<(S from, S to)> FromToStates { get; private set; }
 
-        bool IGraphHasStatesOperation.HasFromStates
-        {
-            get { return !FromStates.IsNullOrEmpty(); }
-        }
+        IList? IOperation.UntypedToStates => ToStates;
+        IList? IOperation.UntypedFromStates => FromStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
+
+
+        bool IGraphHasStatesOperation.HasFromStates => !FromStates.IsNullOrEmpty();
 
         public Execute(ExecuteSymbol<T> symbol)
             : base(symbol)
         {
             FromStates = new List<S>();
             ToStates = new List<S>();
+            FromToStates = new List<(S from, S to)>();
         }
-
-        bool IEntityOperation.HasCanExecute { get { return true; } }
 
         protected override string? OnCanExecute(T entity)
         {
@@ -197,15 +222,33 @@ public class Graph<T, S>
 
             if (!FromStates.Contains(state))
                 return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
-                    FromStates.CommaOr(v => ((Enum?)(object?)v)?.NiceToString() ?? "null"),
-                    ((Enum?)(object?)state)?.NiceToString() ?? "null");
+                    FromStates.CommaOr(v => GetNiceToString(v)),
+                    GetNiceToString(state));
 
             return base.OnCanExecute(entity);
         }
 
-        protected override void AssertEntity(T entity)
+        protected override Action? AssertEntity(T entity)
         {
-            Graph<T, S>.AssertEnterState(entity, this);
+            if(this.FromToStates.Count == 0)
+            {
+                return () =>
+                {
+                    AssertToState(entity, this);
+                };
+            }
+            else
+            {
+                S initialState = GetStateFunc(entity);
+                var targetStates = this.FromToStates.Where(a => object.Equals(a.from, initialState)).Select(a => a.to).ToList();
+
+                return () =>
+                {
+                    S endState = GetStateFunc(entity);
+                    if (!targetStates.Contains(endState))
+                        throw new InvalidOperationException("After executing {0} from state {1} should be {2}, but is {3}".FormatWith(Symbol.Symbol, initialState, targetStates.CommaOr(), endState));
+                };
+            }
         }
 
         public override void AssertIsValid()
@@ -213,19 +256,42 @@ public class Graph<T, S>
             AssertGetState();
             base.AssertIsValid();
 
-            if (ToStates.IsEmpty())
-                throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
+            if (FromToStates.Any())
+            {
+                if (FromStates.Any())
+                    throw new InvalidOperationException("Operation {0} has FromStates and FromToStates at the same time".FormatWith(Symbol.Symbol));
 
-            if (FromStates.IsEmpty())
-                throw new InvalidOperationException("Operation {0} does not have FromStates initialized".FormatWith(Symbol));
+                if (ToStates.Any())
+                    throw new InvalidOperationException("Operation {0} has ToStates and FromToStates at the same time".FormatWith(Symbol.Symbol));
+
+                FromStates.AddRange(FromToStates.Select(a => a.from).Distinct());
+                ToStates.AddRange(FromToStates.Select(a => a.to).Distinct());
+            }
+            else
+            {
+                if (ToStates.IsEmpty())
+                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
+
+                if (FromStates.IsEmpty())
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".FormatWith(Symbol));
+            }
+        }
+
+        public List<(object? from, object? to)>? GetUntypedFromTo()
+        {
+            if (FromToStates.IsEmpty())
+                return null;
+
+            return FromToStates.Select(t => ((object?)t.from, (object?)t.to)).ToList();
         }
     }
 
     public class Delete : Graph<T>.Delete, IGraphOperation, IGraphFromStatesOperation
     {
         public List<S> FromStates { get; private set; }
-        IEnumerable<Enum>? IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
-        Type? IOperation.StateType { get { return typeof(S); } }
+        IList? IOperation.UntypedFromStates => FromStates;
+        Type? IOperation.StateType => typeof(S);
+        LambdaExpression? IOperation.GetStateExpression() => GetState;
 
         bool IGraphHasStatesOperation.HasFromStates
         {
@@ -244,8 +310,8 @@ public class Graph<T, S>
 
             if (!FromStates.Contains(state))
                 return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
-                    FromStates.CommaOr(v => ((Enum?)(object?)v)?.NiceToString() ?? "null"),
-                    ((Enum?)(object?)state)?.NiceToString() ?? "null");
+                    FromStates.CommaOr(v => GetNiceToString(v)),
+                    GetNiceToString(state));
 
             return base.OnCanDelete(entity);
         }
@@ -350,7 +416,7 @@ public class Graph<T, S>
         return result;
     }
 
-    internal static void AssertEnterState(T entity, IGraphToStateOperation operation)
+    internal static void AssertToState(T entity, IGraphToStateOperation operation)
     {
         S state = GetStateFunc(entity);
 

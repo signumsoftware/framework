@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/Lines'
 import { SearchValueLine } from '@framework/Search'
 import { symbolNiceName } from '@framework/Reflection'
 import { PreviewTask } from '../WorkflowClient'
-import { is } from "@framework/Signum.Entities";
+import { getToString, is } from "@framework/Signum.Entities";
 import { useForceUpdate } from '@framework/Hooks'
 
 export default function WorkflowReplacementComponent(p: { ctx: TypeContext<WorkflowReplacementModel> }) {
@@ -25,7 +25,7 @@ export default function WorkflowReplacementComponent(p: { ctx: TypeContext<Workf
               <tr>
                 <td>
                   <SearchValueLine ctx={ectx}
-                    labelText={ectx.value.oldNode.toStr}
+                    labelText={getToString(ectx.value.oldNode)}
                     findOptions={{
                       queryName: CaseActivityEntity,
                       filterOptions: [

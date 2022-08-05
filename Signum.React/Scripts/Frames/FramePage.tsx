@@ -49,7 +49,7 @@ export default function FramePage(p: FramePageProps) {
   const type = ti.name;
   const id = p.match.params.id;
 
-  useTitle(state?.pack.entity.toStr ?? "", [state?.pack.entity]);
+  useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
 
   React.useEffect(() => {
 
@@ -71,10 +71,9 @@ export default function FramePage(p: FramePageProps) {
             createNew: a.createNew,
             getComponent: getComponent,
             refreshCount: state ? state.refreshCount + 1 : 0
-          }) : undefined).done();
+          }) : undefined);
         }
-      })
-      .done();
+      });
   }, [type, id, p.location.search]);
 
 
@@ -247,10 +246,9 @@ export default function FramePage(p: FramePageProps) {
                 }
 
                 callback && callback();
-              }).done();
+              });
             }
-          })
-          .done();
+          });
       }
       else {
         setState({
@@ -266,7 +264,7 @@ export default function FramePage(p: FramePageProps) {
           }
 
           callback && callback();
-        }).done();
+        });
       }
     },
     onClose: () => onClose(),

@@ -132,7 +132,7 @@ public class TranslatedInstanceController : ControllerBase
     }
 
     [HttpPost("api/translatedInstance/save/{type}")]
-    public void Save([Required, FromBody] List<TranslationRecordTS> body, string type, string? culture)
+    public void Save([Required, FromBody] List<TranslationRecordTS> body, string type, bool isSync, string? culture)
     {
         Type t = TypeLogic.GetType(type);
 
@@ -140,7 +140,7 @@ public class TranslatedInstanceController : ControllerBase
 
         var records =  GetTranslationRecords(body, t);
 
-        TranslatedInstanceLogic.SaveRecords(records, t, c);
+        TranslatedInstanceLogic.SaveRecords(records, t, isSync, c);
     }
 
     private List<TranslationRecord> GetTranslationRecords(List<TranslationRecordTS> records, Type type)
