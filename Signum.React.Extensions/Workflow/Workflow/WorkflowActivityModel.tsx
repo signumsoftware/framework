@@ -34,8 +34,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
       const typeName = p.ctx.value.mainEntityType.cleanName;
 
       Navigator.viewDispatcher.getViewNames(typeName)
-        .then(vn => setViewNames(vn))
-        .done();
+        .then(vn => setViewNames(vn));
 
       fillViewProps();
     }
@@ -84,7 +83,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
       p.ctx.value.modified = true;
       forceUpdate();
-    }).done();
+    });
   }
 
   function handleViewNameChange(e: React.SyntheticEvent<HTMLSelectElement>) {
@@ -163,12 +162,12 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
               readOnly: true,
             })
         })
-      }).done();
+      });
     else
       DynamicViewClient.API.getDynamicView(typeName, viewName!)
         .then(dv => {
           Navigator.view(dv, { extraProps: props });
-        }).done();
+        });
   }
 
   function getViewNamePropsExpressionHelpText(ctx: TypeContext<ViewNamePropEmbedded>) {

@@ -23,7 +23,12 @@ export function getUserInitials(u: Lite<UserEntity>): string {
 export default function UserCircle(p: { user: Lite<UserEntity>, className?: string }) {
   var color = Options.getUserColor(p.user);
   return (
-    <span className={classes("user-circle", p.className)} style={{ color: "white", backgroundColor: color }} title={getToString(p.user)}>
+    <span className={classes("user-circle", p.className)} style={{
+      color: "white",
+      textDecoration: "underline",
+      textDecorationColor: color,
+      backgroundColor: color
+    }} title={getToString(p.user)}>
       {getUserInitials(p.user)}
     </span>
   );

@@ -24,8 +24,7 @@ export default function HeavyList(p: HeavyListProps) {
 
   function handleClear(e: React.MouseEvent<any>) {
     API.Heavy.clear()
-      .then(() => reloadEntries())
-      .done();
+      .then(() => reloadEntries());
   }
 
   function handleUpdate(e: React.MouseEvent<any>) {
@@ -35,8 +34,7 @@ export default function HeavyList(p: HeavyListProps) {
 
   function handleSetEnabled(value: boolean) {
     API.Heavy.setEnabled(value)
-      .then(() => { reloadEntries(); reloadEnabled(); })
-      .done();
+      .then(() => { reloadEntries(); reloadEnabled(); });
   }
 
   function handleDownload() {
@@ -60,8 +58,7 @@ export default function HeavyList(p: HeavyListProps) {
           setFileToUpload(undefined);
           setFileVer(fileVer + 1);
           reloadEntries();
-        })
-        .done();
+        });
     };
     fileReader.readAsDataURL(fileToUpload!);
   }

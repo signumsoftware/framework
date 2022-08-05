@@ -136,8 +136,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             this.search(true);
           });
         });
-      })
-      .done();
+      });
   }
 
   handleFullScreenClick = (ev: React.MouseEvent<any>) => {
@@ -183,8 +182,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   handleView = () => {
     const node = this.state.selectedNode!;
     Navigator.view(node.lite)
-      .then(() => this.search(false))
-      .done();
+      .then(() => this.search(false));
   }
 
 
@@ -234,8 +232,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       };
 
       renderContextualItems(options)
-        .then(menuItems => this.setState({ currentMenuItems: menuItems }))
-        .done();
+        .then(menuItems => this.setState({ currentMenuItems: menuItems }));
     }
   }
 
@@ -307,8 +304,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
         if (this.props.onSearch)
           this.props.onSearch();
-      })
-      .done();
+      });
   }
 
   renderSearch() {
@@ -337,8 +333,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           return;
         this.state.treeNodes!.push(toTreeNode(te));
         this.forceUpdate();
-      })
-      .done();
+      });
   }
 
   handleAddChildren = () => {
@@ -353,8 +348,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         parent.childrenCount++;
         fixState(parent);
         this.selectNode(newNode);
-      })
-      .done();
+      });
   }
 
   handleAddSibling = () => {
@@ -371,8 +365,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         const array = parent ? parent.loadedChildren : this.state.treeNodes!;
         array.insertAt(array.indexOf(sibling) + 1, newNode);
         this.selectNode(newNode);
-      })
-      .done();
+      });
   }
 
   handleCopyClick = () => {
@@ -381,7 +374,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       return;
 
     const text = liteKey(this.state.selectedNode!.lite);
-    navigator.clipboard.writeText(text).done();
+    navigator.clipboard.writeText(text);
   }
 
   findParent(childNode: TreeNode) {
@@ -465,7 +458,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     this.getFilterOptionsWithSFB().then(() => {
       this.simpleFilterBuilderInstance = undefined;
       this.setState({ simpleFilterBuilder: undefined, showFilters: !this.state.showFilters });
-    }).done();
+    });
   }
 
 
@@ -534,7 +527,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
           this.moveOrCopyOperation(nodeParent, dragged, over);
 
-        }).done()
+        })
     else
       this.moveOrCopyOperation(nodeParent, dragged, over);
   }
@@ -559,7 +552,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
           this.search(false);
         })
-      ).done();
+      );
 
     } else {
       const s = TreeClient.settings[this.props.typeName];
@@ -572,8 +565,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
             this.search(false);
           })
-        ))
-        .done();
+        ));
     };
   }
 }

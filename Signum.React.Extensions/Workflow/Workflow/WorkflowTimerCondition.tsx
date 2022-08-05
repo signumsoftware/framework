@@ -38,7 +38,7 @@ export default function WorkflowTimerConditionComponent(p : WorkflowTimerConditi
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
   var ctx = p.ctx;
 

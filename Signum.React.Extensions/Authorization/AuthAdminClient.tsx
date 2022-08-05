@@ -41,7 +41,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     renderLite: (lite, subStr) => {
       if (UserLiteModel.isInstance(lite.model))
         return (
-          <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-2" /><span>{TypeaheadOptions.highlightedText(getToString(lite), subStr)}</span></span>
+          <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-1" /><span>{TypeaheadOptions.highlightedText(getToString(lite), subStr)}</span></span>
         );
 
       if (typeof lite.model == "string")
@@ -118,7 +118,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),
-      e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })).done(),
+      e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "red", color: "danger", group: null }));
   }
 
@@ -137,7 +137,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Admin/PermissionRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(),
-      e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })).done(),
+      e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "orange", color: "warning", group: null }));
   }
 
@@ -270,8 +270,7 @@ export module API {
 
   export function downloadAuthRules(): void {
     ajaxGetRaw({ url: "~/api/authAdmin/downloadAuthRules" })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function trivialMergeRole(rule: Lite<RoleEntity>[]): Promise<Lite<RoleEntity>> {

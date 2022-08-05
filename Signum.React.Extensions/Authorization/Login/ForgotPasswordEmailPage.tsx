@@ -35,14 +35,13 @@ export default function ForgotPasswordEmailPage() {
         })
         .catch((e: ValidationError) => {
           if (e.modelState)
-            setModelState(e.modelState).done();
-        })
-        .done();
-    }).done();
+            setModelState(e.modelState);
+        });
+    });
   }
 
   function handleMailBlur(event: React.SyntheticEvent<any>) {
-    setModelState({ ...modelState, ...validateEmail() }).done();
+    setModelState({ ...modelState, ...validateEmail() });
   }
 
   function validateEmail() {

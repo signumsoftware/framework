@@ -17,8 +17,7 @@ export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEnt
         p.ctx.value.apiKey = key;
         p.ctx.value.modified = true;
         forceUpdate();
-      })
-      .done();
+      });
   }
 
   const ctx = p.ctx;

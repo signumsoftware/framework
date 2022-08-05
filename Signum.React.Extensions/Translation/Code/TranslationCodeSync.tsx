@@ -31,8 +31,7 @@ export default function TranslationCodeSync(p: RouteComponentProps<{ culture: st
   function handleSave() {
     API.save(assembly, culture ?? "", result!)
       .then(() => notifySuccess())
-      .then(() => reloadResult())
-      .done();
+      .then(() => reloadResult());
   }
 
   return (

@@ -78,8 +78,7 @@ export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise
     let cloned: React.ReactElement<IModalProps<T>>;
     const onExited = (val: T) => {
       current.popModal(cloned)
-        .then(() => resolve(val))
-        .done();
+        .then(() => resolve(val));
     }
 
     cloned = FunctionalAdapter.withRef(React.cloneElement(modal, { onExited: onExited, key: current.getCount() } as any),

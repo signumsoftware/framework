@@ -123,8 +123,7 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.persist();
         const handler = cdRef.current as UserChartPartHandler;
           ChartClient.Encoder.chartPathPromise(handler.chartRequest!, toLite(p.userChart!))
-          .then(path => AppContext.pushOrOpenInTab(path, ev))
-          .done();
+          .then(path => AppContext.pushOrOpenInTab(path, ev));
       },
     customTitleButtons: (c, entity, customDataRef) => {
       if (!c.createNew)
@@ -136,8 +135,7 @@ export function start(options: { routes: JSX.Element[] }) {
           .then(ti => ti && Finder.getPropsFromFilters(ti, handler.chartRequest!.filterOptions)
             .then(props => Constructor.constructPack(ti.name, props)))
           .then(pack => pack && Navigator.view(pack))
-          .then(() => handler.reloadQuery())
-          .done();
+          .then(() => handler.reloadQuery());
       }} />
     }
   });
@@ -170,10 +168,9 @@ export function start(options: { routes: JSX.Element[] }) {
           if (uc) {
             UserChartClient.Converter.toChartRequest(uc.userChart, e)
               .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc.userChart)))
-              .then(path => AppContext.pushOrOpenInTab(path, ev))
-              .done();
+              .then(path => AppContext.pushOrOpenInTab(path, ev));
           }
-        }).done();
+        });
       },
   });
 
@@ -208,8 +205,7 @@ export function start(options: { routes: JSX.Element[] }) {
             .then(pack => pack && Navigator.view(pack))
             .then(() => {
               handler.refresh();
-            }))
-          .done();
+            }));
 
       }} />
     }
@@ -232,7 +228,6 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.persist();
         UserQueryClient.Converter.toFindOptions(c.userQuery!, e)
           .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(c.userQuery!)) }), ev))
-          .done()
       }
   });
   registerRenderer(ImagePartEntity, {
@@ -287,8 +282,8 @@ export function start(options: { routes: JSX.Element[] }) {
                 return;
 
               AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
-            }).done();
-      }).done(), { group: null, icon: "eye", iconColor: "blue", color: "info" }));
+            });
+      }), { group: null, icon: "eye", iconColor: "blue", color: "info" }));
 }
 
 export function home(): Promise<Lite<DashboardEntity> | null> {

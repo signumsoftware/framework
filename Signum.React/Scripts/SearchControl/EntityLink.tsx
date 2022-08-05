@@ -60,7 +60,7 @@ export default function EntityLink(p: EntityLinkProps) {
     } else {
       Navigator.view(lite, { getViewPromise: p.getViewPromise, buttons: "close", extraProps: p.extraProps }).then(() => {
         p.onNavigated && p.onNavigated(lite);
-      }).done();
+      });
     }
   }
 }

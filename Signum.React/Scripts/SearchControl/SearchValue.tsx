@@ -269,8 +269,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     }
 
     Navigator.view(lite)
-      .then(() => { refreshValue(); p.onExplored && p.onExplored(); })
-      .done();
+      .then(() => { refreshValue(); p.onExplored && p.onExplored(); });
   }
 
   function renderValue(): React.ReactChild | null{
@@ -330,7 +329,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 
         if (p.onExplored)
           p.onExplored();
-      }).done();
+      });
   }
 });
 

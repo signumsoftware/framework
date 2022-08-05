@@ -119,7 +119,7 @@ export function CompileStep(p: DynamicCompileStepProps) {
         setSelectedErrorIndex(undefined);
         setCompilationErrors(errors);
         p.refreshView && p.refreshView();
-      }).done();
+      });
   }
 
   function handleCheck(e: React.MouseEvent<any>) {
@@ -128,8 +128,7 @@ export function CompileStep(p: DynamicCompileStepProps) {
       .then(errors => {
         setSelectedErrorIndex(undefined);
         setCompilationErrors(errors);
-      })
-      .done();
+      });
   }
 
 
@@ -268,8 +267,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
       .then(() => {
         p.setRestarting(DateTime.local());
         return Promise.all([refreshScreen(), reconnectWithServer()]);
-      })
-      .done();
+      });
   }
 
   useInterval(p.restarting ? 1000 : null, 0, a => a + 1);

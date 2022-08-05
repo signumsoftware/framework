@@ -72,8 +72,7 @@ const [show, setShow] = React.useState<boolean>(true);
     e.preventDefault();
 
     Navigator.API.fetch(p.stats.workflowActivity)
-      .then(wa => window.open(WorkflowClient.workflowActivityMonitorUrl(toLite(wa.subWorkflow!.workflow!))))
-      .done();
+      .then(wa => window.open(WorkflowClient.workflowActivityMonitorUrl(toLite(wa.subWorkflow!.workflow!))));
   }
 
   var ctx = new StyleContext(undefined, { labelColumns: 3 });

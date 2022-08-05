@@ -46,7 +46,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
 
   var ctx = p.ctx;
@@ -86,8 +86,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
         dynamicTypeCondition: p.ctx.value,
         exampleEntity: exampleEntityRef.current!,
       })
-        .then(r => setResponse(r))
-        .done();
+        .then(r => setResponse(r));
     }
   }
 

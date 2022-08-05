@@ -58,8 +58,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
         .then(pair => {
           updateState(pair.model);
           setIssues(pair.issues);
-        })
-        .done();
+        });
   }, [p.ctx.value.id, p.ctx.value.ticks]);
 
   React.useImperativeHandle(ref, () => ({

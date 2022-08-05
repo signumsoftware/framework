@@ -353,7 +353,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
           name: newName,
         });
       };
-    }).done();
+    });
   }
 
   handleElementChanged = (e: BPMN.ElementEvent) => {
@@ -506,7 +506,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
     if (d.classList && d.classList.contains("connection-icon")) {
       const lite = parseLite(d.dataset["key"]!);
-      Navigator.view(lite).done();
+      Navigator.view(lite);
     }
   }
 
@@ -548,6 +548,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         finally {
           document.body.removeChild(downloadLink);
         }
-      }).done();
+      });
   }
 }

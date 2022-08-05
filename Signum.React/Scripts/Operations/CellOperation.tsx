@@ -67,13 +67,12 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
   const handleOnClick = (event: React.MouseEvent<any>) => {
     coc.event = event;
     event.persist();
-    resolvedOnClick(coc)
-      .done();
+    resolvedOnClick(coc);
   }
 
   const onlySingleClick = useDoubleClick((e) => { }, handleOnClick);
 
-  var button = <Button variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
+  var button = <Button variant={(outline ? ("outline-" + color) : color)}
     {...props}
     key="button"
     size="sm"

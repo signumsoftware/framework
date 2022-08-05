@@ -41,8 +41,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     else {
       Navigator.API.fetch(res.content!)
         .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-        .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content } } }))
-        .done();
+        .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content } } }));
     }
   }
 

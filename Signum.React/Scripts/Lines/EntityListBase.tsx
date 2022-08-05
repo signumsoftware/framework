@@ -132,8 +132,8 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
             this.setValue(list);
           }
 
-        }).done();
-      }).done();
+        });
+      });
     }
   }
 
@@ -184,9 +184,8 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
           return;
 
         this.convert(e)
-          .then(m => this.addElement(m))
-          .done();
-      }).done();
+          .then(m => this.addElement(m));
+      });
   };
 
   defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> {
@@ -244,8 +243,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     event.preventDefault();
 
     navigator.clipboard.readText()
-      .then(text => this.paste(text))
-      .done();
+      .then(text => this.paste(text));
   }
 
   handleFindClick = (event: React.SyntheticEvent<any>) => {
@@ -263,8 +261,8 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
 
       Promise.all(lites.map(a => this.convert(a))).then(entites => {
         entites.forEach(e => this.addElement(e));
-      }).done();
-    }).done();
+      });
+    });
   };
 
   handleRemoveElementClick = (event: React.SyntheticEvent<any>, index: number) => {
@@ -280,7 +278,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
           return;
 
         this.removeElement(mle)
-      }).done();
+      });
   };
 
   removeElement(mle: MListElement<ModifiableEntity | Lite<Entity>>) {

@@ -177,7 +177,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
 
       this.recentlyCreated.current = entity;
       this.addElement(entity);
-    }).done();
+    });
   }
 
   

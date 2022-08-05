@@ -25,10 +25,9 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
         var query = QueryString.parse(p.location.search);
         var uc = query.userChart == null ? undefined : (parseLite(query.userChart) as Lite<UserChartEntity>);
         ChartClient.Decoder.parseChartRequest(p.match.params.queryName, query)
-          .then(cr => setPair({ chartRequest: cr, userChart: uc }))
-          .done();
+          .then(cr => setPair({ chartRequest: cr, userChart: uc }));
       }
-    }).done();
+    });
   }, [p.location.pathname, p.location.search, p.match.params.queryName])
 
   function handleOnChange(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
@@ -40,8 +39,7 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
 
   function changeUrl(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
     ChartClient.Encoder.chartPathPromise(cr, uc)
-      .then(path => AppContext.history.replace(path))
-      .done();
+      .then(path => AppContext.history.replace(path));
   }
 
   if (pair == null)

@@ -47,7 +47,7 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
     else {
       this.convert(lite).then(e => {
         this.addElement(e);
-      }).done();
+      });
     }
   }
 
@@ -120,13 +120,11 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
       const fo = p.findOptions;
       if (fo) {
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
-          .then(data => setData(data))
-          .done();
+          .then(data => setData(data));
       }
       else
         Finder.API.fetchAllLites({ types: p.type!.name })
-          .then(data => setData(data.orderBy(a => getToString(a))))
-          .done();
+          .then(data => setData(data.orderBy(a => getToString(a))));
     }
   }, [normalizeEmptyArray(p.data), p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 

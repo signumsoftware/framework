@@ -27,8 +27,7 @@ export default function WordSearchMenu(p : WordSearchMenuProps){
         const m = await s.createFromQuery(wt, p.searchControl.getQueryRequest());
         return m && WordClient.API.createAndDownloadReport({ template: wt, entity: m });
       })
-      .then(response => response && saveFile(response))
-      .done();
+      .then(response => response && saveFile(response));
   }
 
   var wordReports = p.searchControl.props.queryDescription.wordTemplates;

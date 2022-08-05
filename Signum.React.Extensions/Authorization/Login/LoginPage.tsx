@@ -94,8 +94,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
         } else {
           throw e;
         }
-      })
-      .done();
+      });
   }
 
   function error(field: string) {
@@ -173,13 +172,13 @@ export function LoginWithWindowsButton() {
     return AuthClient.API.loginWindowsAuthentication(true)
       .then(lr => {
         if (lr == null) {
-          MessageModal.showError(LoginAuthMessage.LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication.niceToString(), LoginAuthMessage.NoWindowsUserFound.niceToString()).done();
+          MessageModal.showError(LoginAuthMessage.LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication.niceToString(), LoginAuthMessage.NoWindowsUserFound.niceToString());
         } else {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
           AuthClient.Options.onLogin();
         }
-      }).done();
+      });
   }
 
   return (

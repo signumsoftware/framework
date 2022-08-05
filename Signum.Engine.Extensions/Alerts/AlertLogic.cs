@@ -62,6 +62,7 @@ public static class AlertLogic
                     a.Title,
                     Text = a.Text!.Etc(100),
                     a.Target,
+                    a.ParentTarget,
                     a.Recipient,
                     a.CreationDate,
                     a.CreatedBy,
@@ -294,12 +295,12 @@ public static class AlertLogic
         SystemAlertTypes.Add(alertType, options ?? new AlertTypeOptions());
     }
 
-    public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+    public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? parentTarget = null)
     {
-        return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient);
+        return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient, parentTarget);
     }
 
-    public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+    public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? parentTarget = null)
     {
         if (Started == false)
             return null;
@@ -314,6 +315,7 @@ public static class AlertLogic
                 TextArguments = textArguments?.ToString("\n###\n"),
                 TextField = text,
                 Target = (Lite<Entity>)entity,
+                ParentTarget = parentTarget,
                 AlertType = alertType,
                 Recipient = recipient
             };
@@ -412,6 +414,10 @@ public static class AlertLogic
         {
             Database.Query<AlertEntity>()
                 .Where(a => a.Target.Is(target))
+                .UnsafeDelete();
+
+            Database.Query<AlertEntity>()
+                .Where(a => a.ParentTarget.Is(target))
                 .UnsafeDelete();
         }
     }

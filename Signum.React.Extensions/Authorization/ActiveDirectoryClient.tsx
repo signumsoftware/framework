@@ -31,9 +31,14 @@ export function start(options: { routes: JSX.Element[] }) {
     var sid =
       (UserEntity.isLite(u)) ? (u.model as UserLiteModel).sID :
         tryGetMixin(u, UserADMixin)?.sID;
-    
-    return sid == null ? null : AppContext.toAbsoluteUrl("~/api/adThumbnailphoto/" +
-      UserEntity.isLite(u) ? ((u as Lite<UserEntity>).model as UserLiteModel).userName : (u as UserEntity).userName);
+    if (sid == null)
+      return null;
+    var url = "";
+    if (UserEntity.isLite(u))
+      url = AppContext.toAbsoluteUrl("~/api/adThumbnailphoto/" + ((u as Lite<UserEntity>).model as UserLiteModel)?.userName);
+    else
+      url = AppContext.toAbsoluteUrl("~/api/adThumbnailphoto/" + (u as UserEntity).userName);
+    return url;
   });
 
   Navigator.addSettings(new Navigator.EntitySettings(ADGroupEntity, e => import('./AzureAD/ADGroup'), { isCreable: "Never" }));
@@ -67,8 +72,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
             return promise.then(str => !str ? null : importADUser(str))
               .then(u => u && Navigator.view(u))
-              .then(u => u && ctx.searchControl.handleCreated(u))
-              .done();
+              .then(u => u && ctx.searchControl.handleCreated(u));
 
           }}>
           <FontAwesomeIcon icon="user-plus" /> {!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(search == null ? UserEntity.niceName() : <strong>{search}</strong>)}

@@ -103,11 +103,19 @@ export default function ErrorModal(p: ErrorModalProps) {
 
 ErrorModal.register = () => {
 
+  window.onunhandledrejection = p => {
+    var error = p.reason;
+    if (Modals.isStarted())
+      ErrorModal.showErrorModal(error);
+    else
+      console.error("Unhandled promise rejection:", error);
+  };
+
   var oldOnError = window.onerror;
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
 
     if (Modals.isStarted())
-      ErrorModal.showErrorModal(error).done();
+      ErrorModal.showErrorModal(error);
     else if (oldOnError != null) {
       if (error instanceof ServiceError)
         oldOnError(message, filename, lineno, colno, {

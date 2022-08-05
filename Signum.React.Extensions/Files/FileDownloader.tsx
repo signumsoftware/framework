@@ -56,7 +56,7 @@ export function FileDownloader(p: FileDownloaderProps) {
           configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity));
       }
 
-    }).done();
+    });
   }
 
   const entityOrLite = p.entityOrLite;
@@ -144,8 +144,7 @@ function downloadUrl(e: React.MouseEvent<any>, url: string) {
 
   e.preventDefault();
   Services.ajaxGetRaw({ url: url })
-    .then(resp => Services.saveFile(resp))
-    .done();
+    .then(resp => Services.saveFile(resp));
 };
 
 function viewUrl(e: React.MouseEvent<any>, url: string) {
@@ -160,8 +159,7 @@ function viewUrl(e: React.MouseEvent<any>, url: string) {
     .then(blob => {
       const url = URL.createObjectURL(blob);
       win.location.assign(url);
-    })
-    .done();
+    });
 
 }
 

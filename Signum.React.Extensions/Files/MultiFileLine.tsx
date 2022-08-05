@@ -68,12 +68,10 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
 
     if (this.props.createElementFromFile)
       this.props.createElementFromFile(file)
-        .then(em => em && this.addElement(em))
-        .done();
+        .then(em => em && this.addElement(em));
     else
       this.convert(file)
-        .then(f => this.addElement(f))
-        .done();
+        .then(f => this.addElement(f));
   }
 
   defaultCreate() {

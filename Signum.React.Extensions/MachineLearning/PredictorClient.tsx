@@ -140,20 +140,17 @@ export namespace API {
 
   export function downloadCsvById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/csv/${lite.id}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function downloadTsvById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function downloadTsvMetadataById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}/metadata` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function getTrainingState(lite: Lite<PredictorEntity>): Promise<TrainingProgress> {

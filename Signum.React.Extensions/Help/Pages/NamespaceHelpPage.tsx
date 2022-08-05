@@ -53,8 +53,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<NamespaceHelpEntity>,
       .then((() => {
         onSuccess();
         notifySuccess();
-      }))
-      .done();
+      }));
   }
 
   return <button className="btn btn-primary" onClick={onClick}>{oi.niceName}</button>;

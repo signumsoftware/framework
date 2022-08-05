@@ -51,8 +51,7 @@ export namespace API {
 
   export function generatePlainExcel(request: QueryRequest, overrideFileName?: string): void {
     ajaxPostRaw({ url: "~/api/excel/plain" }, request)
-      .then(response => saveFile(response, overrideFileName))
-      .done();
+      .then(response => saveFile(response, overrideFileName));
   }
 
   export function forQuery(queryKey: string): Promise<Lite<ExcelReportEntity>[]> {
@@ -62,8 +61,7 @@ export namespace API {
 
   export function generateExcelReport(queryRequest: QueryRequest, excelReport: Lite<ExcelReportEntity>): void {
     ajaxPostRaw({ url: "~/api/excel/excelReport" }, { queryRequest, excelReport })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 }
 

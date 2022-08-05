@@ -763,8 +763,7 @@ export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLo
         .then(() => {
           onLoaded && onLoaded();
           forceUpdate();
-        })
-        .done();
+        });
   }, [lite]);
 
 

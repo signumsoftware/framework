@@ -50,7 +50,7 @@ export function StyleOptionsLine(p : StyleOptionsLineProps){
       }
 
       p.dn.context.refreshView();
-    }).done();
+    });
   }
 
 

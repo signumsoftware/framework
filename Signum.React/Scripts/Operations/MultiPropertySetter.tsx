@@ -209,7 +209,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     fixOperation(s, newProperty).then(() => {
       p.onSetterChanged();
       forceUpdate();
-    }).done();
+    });
   }
 
   function removeInitialPoin(str: string) {
@@ -226,7 +226,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     fixOperation(s, pr!).then(() => {
       p.onSetterChanged();
       forceUpdate();
-    }).done();
+    });
   }
 
   function handleChangeFilterOperation(event: React.FormEvent<HTMLSelectElement>) {
