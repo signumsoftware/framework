@@ -78,6 +78,36 @@ export function addSettings(...settings: OperationSettings[]) {
   settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol, s));
 }
 
+export function overrideEntitySettings<T extends Entity>(operation: ExecuteSymbol<T> | ConstructSymbol_From<T, any> | DeleteSymbol<T>, options: EntityOperationOptions<T>) {
+  var es = getSettings(operation) as EntityOperationSettings<T>;
+
+  var { contextual, contextualFromMany, cell, ...otherOptions } = options;
+
+  Dic.assign(es, otherOptions);
+
+  if (contextual) {
+    if (es.contextual == null)
+      es.contextual = new ContextualOperationSettings(operation as any, contextual);
+    else
+      Dic.assign(es.contextual, contextual);
+  }
+
+  if (contextualFromMany) {
+    if (es.contextualFromMany == null)
+      es.contextualFromMany = new ContextualOperationSettings(operation as any, contextualFromMany);
+    else
+      Dic.assign(es.contextualFromMany, contextualFromMany);
+  }
+
+  if (cell) {
+    if (es.cell == null)
+      es.cell = new CellOperationSettings(operation as any, cell);
+    else
+      Dic.assign(es.cell, cell);
+  }
+ 
+}
+
 
 export function getSettings(operation: OperationSymbol | string): OperationSettings | undefined {
   const operationKey = (operation as OperationSymbol).key || operation as string;
