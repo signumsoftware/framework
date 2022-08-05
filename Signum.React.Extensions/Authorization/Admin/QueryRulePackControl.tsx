@@ -23,8 +23,7 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
       .then(newPack => {
         notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
-      })
-      .done();
+      });
   }
 
   function renderButtons(bc: ButtonsContext): ButtonBarElement[] {

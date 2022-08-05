@@ -39,7 +39,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
         window.open(AppContext.toAbsoluteUrl(path));
       else
         AppContext.pushOrOpenInTab(path, e);
-    }).done();
+    });
   }
 
   render() {

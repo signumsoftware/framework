@@ -31,7 +31,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
 
   React.useEffect(() => {
     if (!isOpen && userCharts == undefined) {
-      reloadList().done();
+      reloadList();
     }
   }, [isOpen, p.chartRequestView && p.chartRequestView.userChart]);
 
@@ -48,8 +48,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
             forceUpdate();
           } else {
             Navigator.API.fillLiteModels(userChart)
-              .then(() => forceUpdate())
-              .done();
+              .then(() => forceUpdate());
           }
         }
         return list;
@@ -63,9 +62,8 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       const cr = crv.chartRequest;
       const newCR = ChartRequestModel.New({ queryKey: cr.queryKey });
       UserChartClient.Converter.applyUserChart(newCR, userChart, undefined)
-        .then(newChartRequest => { crv.onChange(newChartRequest, toLite(userChart, undefined, translated(userChart, a => a.displayName))); crv.hideFiltersAndSettings(); })
-        .done();
-    }).done();
+        .then(newChartRequest => { crv.onChange(newChartRequest, toLite(userChart, undefined, translated(userChart, a => a.displayName))); crv.hideFiltersAndSettings(); });
+    });
   }
 
   async function applyChanges(): Promise<UserChartEntity> {
@@ -101,8 +99,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           crv.onChange(p.chartRequestView.chartRequest, undefined);
         else
           handleSelect(crv.userChart!);
-      })
-      .done();
+      });
   }
 
   function handleEdit() {
@@ -116,8 +113,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           crv.onChange(p.chartRequestView.chartRequest, undefined);
         else
           handleSelect(crv.userChart!);
-      })
-      .done();
+      });
   }
 
 
@@ -130,7 +126,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           crView.onChange(crView.chartRequest, toLite(uc, undefined, translated(uc, a => a.displayName)));
           crView.hideFiltersAndSettings();
         }
-      }).done();
+      });
   }
 
   async function createUserChart() : Promise<UserChartEntity> {

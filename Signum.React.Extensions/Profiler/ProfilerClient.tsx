@@ -63,8 +63,7 @@ export module API {
 
     export function download(indices?: string): void {
       ajaxGetRaw({ url: "~/api/profilerHeavy/download" + (indices ? ("?indices=" + indices) : "") })
-        .then(response => saveFile(response))
-        .done();
+        .then(response => saveFile(response));
     }
 
     export function upload(file: { fileName: string; content: string }): Promise<void> {

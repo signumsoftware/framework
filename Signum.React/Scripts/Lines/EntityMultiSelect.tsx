@@ -47,7 +47,7 @@ export class EntityMultiSelectController extends EntityListBaseController<Entity
 
     lites.filter(lite => !current.some(mle => is(mle.element, lite))).forEach(lite => {
       this.convert(lite)
-        .then(e => this.addElement(e)).done();
+        .then(e => this.addElement(e));
     });
 
     current.filter(mle => !lites.some(lite => is(lite, mle.element))).forEach(mle => {
@@ -88,13 +88,11 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
       const fo = p.findOptions;
       if (fo) {
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
-          .then(data => setData(data))
-          .done();
+          .then(data => setData(data));
       }
       else
         Finder.API.fetchAllLites({ types: p.type!.name })
-          .then(data => setData(data.orderBy(a => a)))
-          .done();
+          .then(data => setData(data.orderBy(a => a)));
     }
   }, [normalizeEmptyArray(p.data), p.type!.name, p.deps, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 

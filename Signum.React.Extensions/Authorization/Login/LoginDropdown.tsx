@@ -37,8 +37,7 @@ export default function LoginDropdown(p: {
       .then(Navigator =>
         Navigator.API.fetchEntityPack(toLite(user))
           .then(pack => Navigator.view(pack))
-          .then(u => u && AuthClient.API.fetchCurrentUser(true).then(nu => AuthClient.setCurrentUser(u))))
-      .done();
+          .then(u => u && AuthClient.API.fetchCurrentUser(true).then(nu => AuthClient.setCurrentUser(u))));
   }
 
   var extraButtons = p.extraMenuItems && p.extraMenuItems(user);

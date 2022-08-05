@@ -47,7 +47,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
         GraphExplorer.propagateAll(p.entity);
 
         if (p.entity.modified != isModified.current && conn?.state == HubConnectionState.Connected) {
-          conn?.send("EntityModified", entityKey, userKey, p.entity.modified).done();
+          conn?.send("EntityModified", entityKey, userKey, p.entity.modified);
           isModified.current = p.entity.modified;
         }
       }
@@ -99,8 +99,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
               }
             </div>,
           buttons: "yes_cancel",
-        }).then(b => b == "yes" && p.onReload())
-          .done();
+        }).then(b => b == "yes" && p.onReload());
       }
     }, 1000);
     return () => clearTimeout(handle);

@@ -50,7 +50,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
         setFile(file);
         setFileVer(fileVer + 1);
 
-        API.importPreview(file!).then(model => { setModel(model); setSuccess(false); }).done();
+        API.importPreview(file!).then(model => { setModel(model); setSuccess(false); });
       };
       fileReader.readAsDataURL(f);
     }
@@ -76,8 +76,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
           setSuccess(true);
           setModel(undefined);
           setFile(undefined);
-        })
-        .done();
+        });
     }
 
     function handleChangeConflict(conflict: LiteConflictEmbedded) {
@@ -146,7 +145,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
                               ea.customResolution = cr;
                               ea.modified = true;
                             }
-                          }).done();
+                          });
                       }}>{getToString(ea.customResolution)}</a>}</td>
                     </tr>
                     {ea.liteConflicts.length > 0 && <tr>

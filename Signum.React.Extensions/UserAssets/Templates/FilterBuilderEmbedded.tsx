@@ -257,8 +257,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
 
     if (lite != null) {
       Navigator.API.fillLiteModels(lite)
-        .then(() => forceUpdate())
-        .done();
+        .then(() => forceUpdate());
     }
   }, [p.ctx.value]);
 

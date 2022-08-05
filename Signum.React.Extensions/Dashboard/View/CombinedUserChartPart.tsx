@@ -106,9 +106,9 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
                 };
 
                 return c.makeQuery();
-              }).done();
+              });
           }
-        }).done();
+        });
     });
 
     return () => {
@@ -119,7 +119,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   React.useEffect(() => {
     infos.forEach(inf => {
-      inf.makeQuery?.().done();
+      inf.makeQuery?.();
     });
   }, [p.content, ...p.deps ?? [], infos.max(e => p.dashboardController.getLastChange(e.userChart.query.key))]);
 

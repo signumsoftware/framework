@@ -224,7 +224,7 @@ export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent
   if (e.ctrlKey || e.button == 1)
     window.open(findOptionsPath(findOptions));
   else
-    explore(findOptions).done();
+    explore(findOptions);
 }
 
 export function explore(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<void> {

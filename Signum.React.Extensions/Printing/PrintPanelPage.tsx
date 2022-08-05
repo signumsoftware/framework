@@ -29,8 +29,7 @@ export default function PrintPanelPage(p: {}) {
     e.preventDefault();
     API.createPrintProcess(fileType)
       .then(p => p && Navigator.view(p))
-      .then(p => vsc.refreshValue())
-      .done();
+      .then(p => vsc.refreshValue());
   }
   var ctx = new StyleContext(undefined, undefined);
   return (

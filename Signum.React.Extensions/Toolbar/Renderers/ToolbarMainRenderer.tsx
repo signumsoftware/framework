@@ -71,7 +71,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarClient.ToolbarResponse<any> }) {
 
   if (tr.elements && tr.elements.length > 0) {
     return (
-      <a href="#" onClick={e => { e.preventDefault(); ToolbarMainModalModal.show(tr).done(); }}>
+      <a href="#" onClick={e => { e.preventDefault(); ToolbarMainModalModal.show(tr); }}>
         <div className="card toolbar-card">
           <div className="card-img-top" style={{ fontSize: "60px" }}>
             {ToolbarConfig.coloredIcon(parseIcon(tr.iconName), tr.iconColor)}

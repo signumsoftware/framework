@@ -30,12 +30,12 @@ export default function SchedulerPanelPage(p: SchedulerPanelProps) {
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => reloadState()).done();
+    API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => reloadState()).done();
+    API.start().then(() => reloadState());
   }
 
   
@@ -130,8 +130,7 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerRunni
     e.preventDefault();
 
     Operations.API.executeLite(taskLog, ScheduledTaskLogOperation.CancelRunningTask)
-      .then(() => onReload())
-      .done();
+      .then(() => onReload());
   }
 
   return (

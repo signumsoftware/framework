@@ -22,8 +22,7 @@ export default React.forwardRef(function ChartPaletteControl(p: { ctx: TypeConte
       .then(newPack => {
         ChartPaletteClient.setColorPalette(newPack!);
         bc.frame.onReload({ entity: newPack!, canExecute: {} });
-      })
-      .done();
+      });
   }
 
   function handleSaveClick(bc: ButtonsContext) {
@@ -32,8 +31,7 @@ export default React.forwardRef(function ChartPaletteControl(p: { ctx: TypeConte
       .then(newPack => {
         notifySuccess();
         reload(bc);
-      })
-      .done();
+      });
   }
 
   function handleDeleteClick(bc: ButtonsContext) {
@@ -42,19 +40,17 @@ export default React.forwardRef(function ChartPaletteControl(p: { ctx: TypeConte
       .then(newPack => {
         notifySuccess();
         reload(bc);
-      })
-      .done();
+      });
   }
 
-  function handleNewPaletteClick(bc: ButtonsContext) {
+  async function handleNewPaletteClick(bc: ButtonsContext) {
     const pal = (bc.pack.entity as ChartPaletteModel);
-    SelectorModal.chooseElement(["Category10", "Category20", "Category20b", "Category20c"], { title: ChartMessage.ChooseABasePalette.niceToString() })
-      .then(palette => palette && ChartPaletteClient.API.newColorPalette(pal.typeName, palette)
-        .then(newPack => {
-          notifySuccess();
-          reload(bc);
-        }).done()
-      ).done();
+    const palette = await SelectorModal.chooseElement(["Category10", "Category20", "Category20b", "Category20c"], { title: ChartMessage.ChooseABasePalette.niceToString() });
+    if (palette) {
+      await ChartPaletteClient.API.newColorPalette(pal.typeName, palette);
+      notifySuccess();
+      reload(bc);
+    }
   }
 
   function renderButtons(bc: ButtonsContext) {

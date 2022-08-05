@@ -138,7 +138,7 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
             e => {
               setState({ state: "failed", errors: undefined });
               throw e;
-            }).done();
+            });
       });
   }
 

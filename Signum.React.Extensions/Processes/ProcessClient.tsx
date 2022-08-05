@@ -140,8 +140,8 @@ function defaultConstructProcessFromMany(coc: Operations.ContextualOperationCont
       else {
         Navigator.view(pack);
       }
-    }).done();
-  }).done();
+    });
+  });
 }
 
 export module API {

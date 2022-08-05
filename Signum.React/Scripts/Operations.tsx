@@ -583,7 +583,7 @@ export class EntityOperationContext<T extends Entity> {
         return this.settings.commonOnClick(this);
       else
         return defaultOnClick(this);
-    }).done();
+    });
   }
 
   textOrNiceName() {

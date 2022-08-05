@@ -26,8 +26,7 @@ export default function InlineCaseTags(p: InlineCaseTagsProps) {
       setTags(p.defaultTags);
     } else {
       WorkflowClient.API.fetchCaseTags(p.case)
-        .then(tags => setTags(tags))
-        .done();
+        .then(tags => setTags(tags));
     }
 
   }, [p.case, ...p.defaultTags ?? []]);
@@ -49,8 +48,7 @@ export default function InlineCaseTags(p: InlineCaseTagsProps) {
         Operations.API.executeLite(p.case, CaseOperation.SetTags, cm)
           .then(() => WorkflowClient.API.fetchCaseTags(p.case))
           .then(tags => setTags(tags))
-          .done()
-      }).done();
+      });
 
   }
 

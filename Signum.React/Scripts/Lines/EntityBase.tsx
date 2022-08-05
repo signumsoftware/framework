@@ -182,8 +182,8 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         //Modifying the sub entity, saving and coming back should change the entity in the UI (ToString, or EntityDetails), 
         //the parent entity is not really modified, but I'm not sure it his is a real problem in practice, till then the line is commented out
         //if (e.modified || !is(e, entity)) 
-        this.convert(e).then(m => this.setValue(m)).done();
-      }).done();
+        this.convert(e).then(m => this.setValue(m));
+      });
     }
   }
 
@@ -263,8 +263,8 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       if (!e)
         return;
 
-      this.convert(e).then(m => this.setValue(m)).done();
-    }).done();
+      this.convert(e).then(m => this.setValue(m));
+    });
   };
 
   paste(text: string) {
@@ -309,8 +309,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     event.preventDefault();
 
     navigator.clipboard.readText()
-      .then(text => this.paste(text))
-      .done();
+      .then(text => this.paste(text));
   }
 
   renderCreateButton(btn: boolean, createMessage?: string) {
@@ -376,8 +375,8 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       if (!entity)
         return;
 
-      this.convert(entity).then(e => this.setValue(e)).done();
-    }).done();
+      this.convert(entity).then(e => this.setValue(e));
+    });
   };
 
   renderFindButton(btn: boolean) {
@@ -403,7 +402,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
           return;
 
         this.setValue(null);
-      }).done();
+      });
   };
 
   renderRemoveButton(btn: boolean, item: ModifiableEntity | Lite<Entity>) {

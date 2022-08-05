@@ -35,7 +35,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
       ], fop.groupResults, p.queryDescription).then(cops => {
         fop.columnOptions = [...cops, ...fop.columnOptions];
         p.onChanged();
-      }).done();
+      });
     }
   }
 
@@ -75,7 +75,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
       ], fop.groupResults, p.queryDescription).then(cops => {
         fop.columnOptions = [...cops, ...fop.columnOptions];
         p.onChanged();
-      }).done();
+      });
     }
   }
 

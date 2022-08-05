@@ -44,7 +44,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
   function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
     const params = p.match.params;
-    API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => notifySuccess()).done();
+    API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => notifySuccess());
   }
 
   const message = TranslationMessage.View0In1.niceToString(decodeDots(assembly),

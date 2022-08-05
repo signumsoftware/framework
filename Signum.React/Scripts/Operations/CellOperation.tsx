@@ -67,8 +67,7 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
   const handleOnClick = (event: React.MouseEvent<any>) => {
     coc.event = event;
     event.persist();
-    resolvedOnClick(coc)
-      .done();
+    resolvedOnClick(coc);
   }
 
   const onlySingleClick = useDoubleClick((e) => { }, handleOnClick);

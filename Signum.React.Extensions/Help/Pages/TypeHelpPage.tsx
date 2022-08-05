@@ -197,8 +197,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
       .then((() => {
         onSuccess();
         notifySuccess();
-      }))
-      .done();
+      }));
   }
 
   return <button className="btn btn-primary" onClick={onClick}>{Operations.getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;

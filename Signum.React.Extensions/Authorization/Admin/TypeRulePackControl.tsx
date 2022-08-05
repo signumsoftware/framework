@@ -53,8 +53,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       .then(newPack => {
         notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
-      })
-      .done();
+      });
   }
 
   function handleResetChangesClick(bc: ButtonsContext) {
@@ -63,8 +62,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     API.fetchTypeRulePack(pack.role.id!)
       .then(newPack => {
         bc.frame.onReload({ entity: newPack, canExecute: {} });
-      })
-      .done();
+      });
   }
 
   function handleSwitchToClick(bc: ButtonsContext) {
@@ -75,8 +73,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
         return;
 
       API.fetchTypeRulePack(r.id!)
-        .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }))
-        .done();
+        .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }));
     });
   }
 
@@ -217,8 +214,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
         })));
 
         updateFrame();
-      })
-      .done();
+      });
   }
 
   function handleRemoveConditionClick(taac: TypeAllowedAndConditions, con: TypeConditionRuleModel) {
@@ -355,7 +351,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
           buttons: "ok",
           style: "warning",
           icon: "warning"
-        }).done();
+        });
       }
       else {
         action()
@@ -364,8 +360,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
           .then(m => {
             setNewValue(m);
             updateFrame();
-          })
-          .done();
+          });
       }
     };
 

@@ -41,11 +41,11 @@ export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps){
           message: "Copy to clipboard: Ctrl+C, ESC",
           initiallyFocused: true,
           valueHtmlAttributes: { style: { height: "200px" } },
-        }).done();
+        });
 
-      }).done();
+      });
 
-    }).done();
+    });
   }
   return (
     <input type="button"

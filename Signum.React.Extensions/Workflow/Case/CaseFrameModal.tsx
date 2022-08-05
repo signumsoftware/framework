@@ -53,8 +53,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
   componentWillMount() {
     WorkflowClient.toEntityPackWorkflow(this.props.entityOrPack)
       .then(ep => this.setPack(ep))
-      .then(pack => this.loadComponent(pack))
-      .done();
+      .then(pack => this.loadComponent(pack));
   }
 
   componentWillReceiveProps(props: any) {
@@ -62,8 +61,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     WorkflowClient.toEntityPackWorkflow(this.props.entityOrPack)
       .then(ep => this.setPack(ep))
-      .then(pack => this.loadComponent(pack))
-      .done();
+      .then(pack => this.loadComponent(pack));
   }
 
   handleKeyDown(e: KeyboardEvent) {
@@ -111,7 +109,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
       }).then(result => {
         if (result == "yes")
           this.setState({ show: false });
-      }).done();
+      });
     } else {
       this.setState({ show: false });
     }

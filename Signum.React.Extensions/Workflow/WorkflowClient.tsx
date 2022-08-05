@@ -117,8 +117,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), e => {
       API.fetchCaseFlowPack(ctx.lite)
         .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
-        .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
-        .done();
+        .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}));
     },
       {
         isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
@@ -315,7 +314,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
         return wa.decisionOptions.map(mle => ({
           order: s?.order ?? 0,
           shortcut: undefined,
-          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(mle.element.name).done()} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationButton>,
+          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationButton>,
         }));
       }
       else
@@ -548,7 +547,7 @@ public interface IWorkflowTransition
     message: "Copy to clipboard: Ctrl+C, ESC",
     initiallyFocused: true,
     valueHtmlAttributes: { style: { height: 215 } },
-  }).done();
+  });
 }
 
 

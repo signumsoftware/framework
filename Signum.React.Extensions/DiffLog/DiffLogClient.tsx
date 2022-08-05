@@ -61,7 +61,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
 
       return new QuickLinks.QuickLinkAction("CompareTimeMachine",
         () => TimeMachineMessage.CompareVersions.niceToString(),
-        e => TimeMachineModal.show(lite, versions).done(), {
+        e => TimeMachineModal.show(lite, versions), {
         icon: "not-equal",
         iconColor: "blue",
       });

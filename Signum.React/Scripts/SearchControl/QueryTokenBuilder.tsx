@@ -69,8 +69,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
       }
       else if (e.key == "v" && copiedToken?.queryKey == p.queryKey) {
         Finder.parseSingleToken(p.queryKey, copiedToken.fullKey, p.subTokenOptions)
-          .then(a => p.onTokenChange(a))
-          .done();
+          .then(a => p.onTokenChange(a));
         e.preventDefault();
       }
     }

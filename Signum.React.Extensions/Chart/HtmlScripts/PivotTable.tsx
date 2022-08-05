@@ -306,8 +306,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
       if (Array.isArray(p.gor) && p.gor.length == 1 && p.gor[0].entity != null) {
         Navigator.view(p.gor[0].entity as Lite<Entity>)
-          .then(() => onReload && onReload())
-          .done();
+          .then(() => onReload && onReload());
         return;
       }
 
@@ -376,8 +375,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       Finder.getPropsFromFilters(typeName, fop)
         .then(props => Constructor.construct(typeName, props))
         .then(e => e && Navigator.view(e))
-        .then(() => onReload && onReload())
-        .done();
+        .then(() => onReload && onReload());
     }
 
     var title = p.title ?? (p.gor instanceof RowGroup ? p.gor.getNiceName() : undefined);
@@ -404,8 +402,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     function handleLiteClick(e: React.MouseEvent) {
       e.preventDefault();
       Navigator.view(lite as Lite<Entity>)
-        .then(() => onReload && onReload())
-        .done();
+        .then(() => onReload && onReload());
     }
 
     var etcTitle = style && style.maxTextLength ? title.etc(style.maxTextLength) : title;

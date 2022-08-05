@@ -39,8 +39,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
       if (dashboardPinnedFilters.length) {
         Finder.getQueryDescription(fo.queryName)
           .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd))
-          .then(fops => p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops)))
-          .done();
+          .then(fops => p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops)));
       }
     }
   }, [fo]);
