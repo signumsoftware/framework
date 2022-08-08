@@ -38,8 +38,7 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
       WhatsNewClient.API.myNews()
         .then(als => {
           setNews(als);
-        })
-        .done();
+        });
     }
 
     return res;
@@ -51,8 +50,7 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
 
     if (!isOpen) {
       WhatsNewClient.API.myNews()
-        .then(wn => setNews(wn))
-        .done();
+        .then(wn => setNews(wn));
     }
 
     setIsOpen(!isOpen);
@@ -80,7 +78,7 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
 
     API.setNewsLogRead(toRemove.map(r => r.whatsNew.id)).then(res => {
       if (!res) {
-        MessageModal.showError(<div>The news couldn't be removed</div>).done();
+        MessageModal.showError(<div>The news couldn't be removed</div>);
       }
       // Pesimistic
       WhatsNewClient.API.myNews()
@@ -89,11 +87,10 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
             setIsOpen(true);
 
           setNews(wn);
-        })
-        .done();
+        });
 
       reloadCount();
-    }).done(), [toRemove];
+    }), [toRemove];
     }
 
   var newsGroups = whatsNew == null ? null : whatsNew.orderByDescending(w => w.creationDate);
