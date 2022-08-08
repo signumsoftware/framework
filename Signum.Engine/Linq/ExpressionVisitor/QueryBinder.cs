@@ -1395,8 +1395,8 @@ internal class QueryBinder : ExpressionVisitor
         Alias tableAlias = NextTableAlias(table.Name);
 
         Expression exp = 
-            table is Table t ? t.GetProjectorExpression(tableAlias, this) :
-            table is TableMList tml ? tml.GetProjectorExpression(tableAlias, this, st.DisableAssertAllowed) :
+            table is Table t ? t.GetProjectorExpression(tableAlias, this, st.DisableAssertAllowed) :
+            table is TableMList tml ? tml.GetProjectorExpression(tableAlias, this) :
             throw new UnexpectedValueException(table);
 
         Type resultType = typeof(IQueryable<>).MakeGenericType(query.ElementType);
