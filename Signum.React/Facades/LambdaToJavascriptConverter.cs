@@ -2,6 +2,7 @@ using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using System.Globalization;
 
 namespace Signum.React.Facades;
 
@@ -50,6 +51,9 @@ internal class LambdaToJavascriptConverter
 
                 return "\"" + str.Replace(replacements) + "\"";
             }
+
+            if (ReflectionTools.IsNumber(ce.Type) && ce.Value != null)
+                return ((IFormattable)ce.Value).ToString(null, CultureInfo.InvariantCulture);
 
             if(ce.Value == null)
             {
@@ -164,6 +168,9 @@ internal class LambdaToJavascriptConverter
                 var strFormat = ToJavascriptToString(param, format);
                 var arguments = args.Select(a => ToJavascriptToString(param, a)).ToList();
 
+                if (strFormat == null || arguments.Any(a => a == null))
+                    return null;
+
                 return $"{strFormat}.formatWith(" + arguments.ToString(", ") + ")";
             }
 
@@ -196,6 +203,22 @@ internal class LambdaToJavascriptConverter
                 }
             }
 
+            if (mc.Method.Name == nameof(DescriptionManager.NiceToString))
+            {
+                var arg = mc.Arguments.Only();
+                if (arg != null)
+                {
+                    if (arg is UnaryExpression u && u.NodeType == ExpressionType.Convert && u.Type == typeof(Enum))
+                        arg = u.Operand;
+
+                    if (arg.Type.IsEnum)
+                    {
+                        var obj = ToJavascript(param, arg);
+                        if (obj != null)
+                            return $"(fd.getTypeInfo(\"{arg.Type.Name}\").members[{obj}]?.niceName ?? \"\")";
+                    }
+                }
+            }
 
             if (mc.Method.DeclaringType == typeof(DateTime))
             {
