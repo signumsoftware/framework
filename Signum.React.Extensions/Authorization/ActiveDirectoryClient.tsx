@@ -72,8 +72,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
             return promise.then(str => !str ? null : importADUser(str))
               .then(u => u && Navigator.view(u))
-              .then(u => u && ctx.searchControl.handleCreated(u))
-              .done();
+              .then(u => u && ctx.searchControl.handleCreated(u));
 
           }}>
           <FontAwesomeIcon icon="user-plus" /> {!search ? UserADMessage.FindInActiveDirectory.niceToString() : UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(search == null ? UserEntity.niceName() : <strong>{search}</strong>)}

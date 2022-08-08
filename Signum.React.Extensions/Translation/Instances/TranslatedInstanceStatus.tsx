@@ -32,7 +32,7 @@ export default function TranslationCodeStatus(p: RouteComponentProps<{}>) {
         setFile(file);
         setFileVer(fileVer + 1);
 
-        API.uploadFile(file!).then(model => { notifySuccess(); reload(); }).done();
+        API.uploadFile(file!).then(model => { notifySuccess(); reload(); });
       };
       fileReader.readAsDataURL(f);
     }

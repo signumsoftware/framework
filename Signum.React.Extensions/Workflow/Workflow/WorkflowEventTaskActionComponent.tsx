@@ -33,7 +33,7 @@ export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskAc
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
 
   function handleCreateCaseClick() {
@@ -45,7 +45,7 @@ export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskAc
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
-    }).done();
+    });
   }
   var ctx = p.ctx;
 

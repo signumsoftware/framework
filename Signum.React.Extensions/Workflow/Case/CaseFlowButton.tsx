@@ -11,7 +11,7 @@ export default function CaseFlowButton(p: CaseFlowButtonProps) {
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
     var ca = p.caseActivity;
-    Navigator.view(ca.case, { extraProps: { caseActivity: ca } }).done();
+    Navigator.view(ca.case, { extraProps: { caseActivity: ca } });
   }
 
   return (

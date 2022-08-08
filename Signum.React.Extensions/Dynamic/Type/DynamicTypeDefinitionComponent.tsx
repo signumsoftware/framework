@@ -70,8 +70,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
     var dt = p.dynamicType;
     if (!dt.isNew && dt.typeName && eventKey == "query")
       DynamicTypeClient.API.expressionNames(dt.typeName + "Entity")
-        .then(exprNames => setExpressionNames(exprNames))
-        .done();
+        .then(exprNames => setExpressionNames(exprNames));
   }
 
   function handlePropertyRemoved(dp: DynamicProperty) {
@@ -117,7 +116,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
         }).then(result => {
           if (result == "yes")
             def.operationSave = undefined;
-        }).done();
+        });
       }
     }
   }
@@ -138,7 +137,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
 
 
@@ -634,7 +633,7 @@ public static class ${entityName}Operation2
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: 150 } },
-    }).done();
+    });
   }
   const def = p.definition;
   const dt = p.dynamicType;
@@ -1031,7 +1030,7 @@ function fetchPropertyType(p: DynamicProperty, dc: DynamicTypeDesignContext) {
   DynamicTypeClient.API.getPropertyType(p).then(s => {
     p._propertyType_ = s;
     dc.refreshView();
-  }).done()
+  })
 }
 
 function getConstructor(typeName: string, definition: DynamicTypeDefinition) {

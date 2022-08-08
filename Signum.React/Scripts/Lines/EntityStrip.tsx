@@ -75,7 +75,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
     this.props.autocomplete!.getEntityFromItem(item)
       .then(entity => entity && this.convert(entity)
         .then(e => this.addElement(e))
-      ).done();
+      );
 
     return "";
   }
@@ -155,7 +155,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
     e.preventDefault();
     c.paste(text)?.then(() => {
       c.typeahead.current?.writeInInput("");
-    }).done();
+    });
   }
 
   function renderAutoComplete(renderInput?: (input: React.ReactElement<any> | null) => React.ReactElement<any>) {
@@ -215,8 +215,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
               } else {
                 fillItem(newEntity);
               }
-            })
-            .done();
+            });
         };
         fillItem(newEntity);
       }

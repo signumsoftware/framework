@@ -43,8 +43,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
         columnOptionsMode: "Add",
         columnOptions: p.mainQuery.columns.map(mle => ({ token: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
       })
-        .then(lite => PredictorClient.predict(p, lite && { "Entity": lite }))
-        .done();
+        .then(lite => PredictorClient.predict(p, lite && { "Entity": lite }));
 
     } else {
 
@@ -56,8 +55,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
         columnOptionsMode: "Replace",
         columnOptions: fullKeys.map(fk => ({ token: fk }) as ColumnOption)
       }, { searchControlProps: { allowChangeColumns: false, showGroupButton: false } })
-        .then(a => PredictorClient.predict(p, a && fullKeys.map((fk, i) => ({ tokenString: fk, value: a.row.columns[i] })).toObject(a => a.tokenString, a => a.value)))
-        .done();
+        .then(a => PredictorClient.predict(p, a && fullKeys.map((fk, i) => ({ tokenString: fk, value: a.row.columns[i] })).toObject(a => a.tokenString, a => a.value)));
     }
   }
 
@@ -129,8 +127,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
 
   function handleOnFinished() {
     Navigator.API.fetchEntityPack(toLite(ctx.value))
-      .then(pack => ctx.frame!.onReload(pack))
-      .done();
+      .then(pack => ctx.frame!.onReload(pack));
   }
 
   function handlePreviewMainQuery(e: React.MouseEvent<any>) {
@@ -153,8 +150,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
         };
 
         Finder.exploreWindowsOpen(fo, e);
-      })
-      .done();
+      });
   }
 
   if (ctx.value.state != "Draft")

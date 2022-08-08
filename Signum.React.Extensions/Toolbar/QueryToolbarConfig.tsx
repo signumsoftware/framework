@@ -37,7 +37,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     if (!res.openInPopup)
       super.handleNavigateClick(e, res);
     else {
-      Finder.explore({ queryName: getToString(res.content)! }).done()
+      Finder.explore({ queryName: getToString(res.content)! })
     }
   }
 

@@ -230,7 +230,7 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
   const handleOnClick = (me: React.MouseEvent<any>) => {
     coc.event = me;
     onClick?.(me);
-    resolvedOnClick(coc).done();
+    resolvedOnClick(coc);
   }
 
   const item = (
@@ -291,8 +291,7 @@ export function defaultContextualOperationClick(coc: ContextualOperationContext<
               if (pack?.entity.id != null)
                 Navigator.raiseEntityChanged(pack.entity);
               Navigator.createNavigateOrTab(pack, coc.event!)
-                .then(() => coc.context.markRows({}))
-                .done();
+                .then(() => coc.context.markRows({}));
             }));
         }
       case "ConstructorFrom":

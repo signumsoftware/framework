@@ -69,12 +69,10 @@ export class MultiFileImageLineController extends EntityListBaseController<Multi
   handleFileLoaded = (file: IFile & ModifiableEntity) => {
     if (this.props.createEmbedded)
       this.props.createEmbedded(file)
-        .then(em => em && this.addElement(em))
-        .done();
+        .then(em => em && this.addElement(em));
     else
       this.convert(file)
-        .then(f => this.addElement(f))
-        .done();
+        .then(f => this.addElement(f));
   }
 
   defaultCreate() {

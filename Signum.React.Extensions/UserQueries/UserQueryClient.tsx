@@ -66,9 +66,8 @@ export function start(options: { routes: JSX.Element[] }) {
                 return;
 
               window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
-            })
-            .done();
-      }).done();
+            });
+      });
     }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info" }));
 
   onContextualItems.push(getGroupUserQueriesContextMenu);
@@ -130,7 +129,7 @@ function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParse
 
         return Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: uq } } })
           .then(() => cic.markRows({}));
-      })).done();
+      }));
 }
 
 export module Converter {

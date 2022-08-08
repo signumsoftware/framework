@@ -44,14 +44,13 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
         })
         .catch((e: ValidationError) => {
           if (e.modelState)
-            setModelState(e.modelState).done();
-        })
-        .done();
+            setModelState(e.modelState);
+        });
     });
   }
 
   function handleNewPasswordBlur(event: React.SyntheticEvent<any>) {
-    setModelState({ ...modelState, ...validateNewPassword(event.currentTarget == newPassword2.current) }).done();
+    setModelState({ ...modelState, ...validateNewPassword(event.currentTarget == newPassword2.current) });
   }
 
   function validateNewPassword(isSecond: boolean) {

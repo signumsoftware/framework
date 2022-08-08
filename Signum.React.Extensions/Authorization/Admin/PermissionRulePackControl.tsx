@@ -35,16 +35,14 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
       .then(newPack => {
         notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
-      })
-      .done();
+      });
   }
 
   function handleResetChangesClick(bc: ButtonsContext) {
     let pack = ctx.value;
 
     API.fetchPermissionRulePack(pack.role.id!)
-      .then(newPack => { bc.frame.onReload({ entity: newPack, canExecute: {} }); })
-      .done();
+      .then(newPack => { bc.frame.onReload({ entity: newPack, canExecute: {} }); });
   }
 
   function handleSwitchToClick(bc: ButtonsContext) {
@@ -54,8 +52,7 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
         return;
 
       API.fetchPermissionRulePack(r.id!)
-        .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }))
-        .done();
+        .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }));
     });
   }
 

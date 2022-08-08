@@ -161,8 +161,7 @@ export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualIte
       return s.createFromEntities(wt, ctx.lites)
         .then<Response | undefined>(m => m && API.createAndDownloadReport({ template: wt, entity: m }));
     })
-    .then(response => response && saveFile(response))
-    .done();
+    .then(response => response && saveFile(response));
 }
 
 export namespace API {

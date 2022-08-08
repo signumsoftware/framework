@@ -119,7 +119,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       }, ifError(ValidationError, e => {
         GraphExplorer.setModelState(cr, e.modelState, "");
         forceUpdate();
-      })).done();
+      }));
   }
 
   function handleFiltersChanged() {
@@ -135,8 +135,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
   function handleOnFullScreen(e: React.MouseEvent<any>) {
     e.preventDefault();
     ChartClient.Encoder.chartPathPromise(p.chartRequest)
-      .then(path => AppContext.history.push(path))
-      .done();
+      .then(path => AppContext.history.push(path));
   }
 
   function handleExplore(e: React.MouseEvent<any>) {

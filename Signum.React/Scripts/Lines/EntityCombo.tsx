@@ -64,8 +64,7 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
       this.setValue(lite);
     else
       this.convert(lite)
-        .then(v => this.setValue(v))
-        .done();
+        .then(v => this.setValue(v));
   }
 }
 
@@ -209,13 +208,11 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       const fo = p.findOptions;
       if (fo) {
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
-          .then(data => setData(data))
-          .done();
+          .then(data => setData(data));
       }
       else
         Finder.API.fetchAllLites({ types: p.type!.name })
-          .then(data => setData(data.orderBy(a => a)))
-          .done();
+          .then(data => setData(data.orderBy(a => a)));
     }
   }, [normalizeEmptyArray(p.data), p.type.name, p.deps, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 

@@ -30,8 +30,7 @@ export default function WordEntityMenu(p : WordEntityMenuProps){
         return s.createFromEntities(wt, [toLite(p.entityPack.entity)])
           .then<Response | undefined>(m => m && WordClient.API.createAndDownloadReport({ template: wt, entity: m }));
       })
-      .then(response => response && saveFile(response))
-      .done();
+      .then(response => response && saveFile(response));
   }
 
   const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{WordTemplateMessage.WordReport.niceToString()}</span>;

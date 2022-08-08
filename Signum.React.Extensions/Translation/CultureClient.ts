@@ -28,8 +28,7 @@ export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
     .then(() => loadCurrentCulture())
     .then(() => reloadTypes())
     .then(() => AppContext.resetUI())
-    .then(() => onCultureChanged(toLite(previousCulture), newCulture))
-    .done();
+    .then(() => onCultureChanged(toLite(previousCulture), newCulture));
 }
 
 let cachedCultures: Promise<CultureInfoEntity[]>;

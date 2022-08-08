@@ -28,8 +28,7 @@ export function FileImage(p: FileImageProps) {
 
       Services.ajaxGetRaw({ url: url })
         .then(resp => resp.blob())
-        .then(blob => setObjectUrl(URL.createObjectURL(blob)))
-        .done();
+        .then(blob => setObjectUrl(URL.createObjectURL(blob)));
 
     }
     return () => { objectUrl && URL.revokeObjectURL(objectUrl) };

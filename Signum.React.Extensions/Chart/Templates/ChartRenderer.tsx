@@ -77,8 +77,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
       window.open(Navigator.navigateRoute(r.entity));
     else
       Navigator.view(r.entity)
-        .then(() => onReload && onReload())
-        .done();
+        .then(() => onReload && onReload());
   } else {
     const filters = cr.filterOptions.map(f => {
       let f2 = withoutPinned(f);
@@ -126,7 +125,6 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
       window.open(Finder.findOptionsPath(fo));
     else
       Finder.explore(fo)
-        .then(() => onReload && onReload())
-        .done();
+        .then(() => onReload && onReload());
   }
 }

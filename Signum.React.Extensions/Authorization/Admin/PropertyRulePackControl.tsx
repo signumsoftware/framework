@@ -20,8 +20,7 @@ export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx
       .then(newPack => {
         notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
-      })
-      .done();
+      });
   }
 
   function renderButtons(bc: ButtonsContext) {

@@ -46,7 +46,7 @@ class MyResponse {}`,
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
-    }).done();
+    });
   }
 
   function handleSoapClick() {
@@ -60,7 +60,7 @@ e.[Property Name] = lib;`,
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
-    }).done();
+    });
   }
 
   function handleCtxClick() {
@@ -75,7 +75,7 @@ int RetryCount;`,
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
-    }).done();
+    });
   }
 
   function handleTryCatchClick() {
@@ -94,7 +94,7 @@ catch (Exception e)
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "180px" } },
-    }).done();
+    });
   }
 
   const ctx = p.ctx;

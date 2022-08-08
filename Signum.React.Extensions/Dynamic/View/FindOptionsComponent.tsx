@@ -63,7 +63,7 @@ export function FindOptionsLine(p : FindOptionsLineProps){
           filterOptions: [{ token: sfo?.parentToken, value: sfo && { __code__: "ctx.value" } as Expression<ModifiableEntity> }]
         } as FindOptionsExpr));
 
-    promise.then(fo => modifyFindOptions(fo)).done();
+    promise.then(fo => modifyFindOptions(fo));
   }
 
   function handleView(e: React.MouseEvent<any>) {
@@ -84,7 +84,7 @@ export function FindOptionsLine(p : FindOptionsLineProps){
       }
 
       p.dn.context.refreshView();
-    }).done();
+    });
   }
 
   function clean(fo: FindOptionsExpr) {
@@ -329,8 +329,7 @@ function QueryTokenBuilderString(p: QueryTokenBuilderStringProps) {
         Finder.parseSingleToken(p.queryKey, p.token, p.subTokenOptions);
 
       promise
-        .then(t => p.onChange(t))
-        .done();
+        .then(t => p.onChange(t));
     }
   }, [p.queryKey, p.token]);
 

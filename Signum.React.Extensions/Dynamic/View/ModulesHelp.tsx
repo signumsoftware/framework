@@ -30,11 +30,11 @@ modules.React.useEffect(() => {
   modules["Components"] = "";
   modules["Globals"] = "";
   modules["Navigator"] = `modules.Navigator.view(e);
-modules.Navigator.API.fetchEntity("${p.cleanName}", [id]).then(entity => { /* do something here ... */ }).done();
-modules.Navigator.API.fetch([lite]).then(entity => { /* do something here ... */ }).done();
+modules.Navigator.API.fetchEntity("${p.cleanName}", [id]).then(entity => { /* do something here ... */ });
+modules.Navigator.API.fetch([lite]).then(entity => { /* do something here ... */ });
 
 NOTE: fetchAndRemember stores the result entity in lite.entity.
-modules.Navigator.API.fetchAndRemember([lite]).then(entity => { /* do something here ... */ }).done();
+modules.Navigator.API.fetchAndRemember([lite]).then(entity => { /* do something here ... */ });
 `;
   modules["Finder"] = `modules.Finder.find("${p.cleanName}");
 modules.Finder.findMany("${p.cleanName}");
@@ -75,17 +75,15 @@ modules.Entities.is(entityOrLite1, entityOrLite2);`;
   modules["AuthClient"] = "modules.AuthClient.currentUser();";
   modules["Operations"] = "";
   modules["WorkflowClient"] = "";
-  modules["Constructor"] = `modules.Constructor.construct("${p.cleanName}").then(entity => { // do something here }).done();
-modules.Constructor.constructPack("${p.cleanName}").then(pack => // do something here).done();`;
+  modules["Constructor"] = `modules.Constructor.construct("${p.cleanName}").then(entity => { // do something here });
+modules.Constructor.constructPack("${p.cleanName}").then(pack => // do something here);`;
   modules["Services"] = `modules.Services.ajaxGet({ url: '~/api/dynamic/getData/{param1}/{param2}/...' })
   .then(result => /* do something here */)
-  .then(() => locals.forceUpdate())
-  .done();
+  .then(() => locals.forceUpdate());
 
 modules.Services.ajaxPost({ url: '~/api/dynamic/getData' }, data: null)
   .then(result => /* do something here */)
-  .then(() => locals.forceUpdate())
-  .done();
+  .then(() => locals.forceUpdate());
 `;
   modules["TreeClient"] = "";
   modules["AutoCompleteConfig"] = `new modules.AutoCompleteConfig.LiteAutocompleteConfig((signal, subStr) => [Custom API call here ...], /*requiresInitialLoad:*/ false, /*showType:*/ false)`;
@@ -98,14 +96,14 @@ const value = modules.Hooks.useAPI(signal => Your API calling here, [/*deps*/], 
   if (!option)
     return undefined;
   /* do something here ... */
-}).done();
+});
 
 modules.SelectorModal.default.chooseType(/*options:*/ ["${p.cleanName}", ....].map(tn => modules.Reflection.getTypeInfo(tn)))
 .then(ti => {
   if (!ti)
     return undefined;
   /* do something here ... */
-}).done();
+});
 
 //interface APIHookOptions {
 //  avoidReset?: boolean;
@@ -278,6 +276,6 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
       title: `${DynamicViewMessage.ModulesHelp.niceToString()}.${key}`,
       message: "Copy to clipboard: Ctrl+C, ESC",
       valueHtmlAttributes: { style: { height: "400px" } },
-    }).done();
+    });
   }
 }

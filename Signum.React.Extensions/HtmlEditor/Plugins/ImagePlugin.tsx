@@ -111,7 +111,7 @@ export default class ImagePlugin implements HtmlEditorPlugin{
         .then(datas => {
           var newState = datas.reduce<draftjs.EditorState>((state, data) => this.addImage(state, data), controller.editorState);
           controller.setEditorState(newState);
-        }).done();
+        });
 
       return "handled"
     }
@@ -128,7 +128,7 @@ export default class ImagePlugin implements HtmlEditorPlugin{
             .then(datas => {
               var newState = datas.reduce<draftjs.EditorState>((state, data) => this.addImage(state, data), controller.editorState);
               controller.setEditorState(newState);
-            }).done();
+            });
 
           return "handled";
         }
@@ -149,7 +149,7 @@ export default class ImagePlugin implements HtmlEditorPlugin{
         .then(datas => {
           var newState = datas.reduce<draftjs.EditorState>((state, data) => this.addImage(state, data), editorStateWithSelection);
           controller.setEditorState(newState);
-        }).done();
+        });
 
       return "handled"
     }

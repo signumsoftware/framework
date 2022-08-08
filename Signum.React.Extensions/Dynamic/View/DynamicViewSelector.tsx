@@ -50,7 +50,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
 
 
@@ -141,7 +141,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
       title: "View Name",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
 
   function renderViewNameButtons() {

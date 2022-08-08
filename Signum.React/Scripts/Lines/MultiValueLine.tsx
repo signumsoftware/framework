@@ -54,7 +54,7 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
       }
 
       this.setValue(list);
-    }).done();
+    });
   }
 
   defaultCreate() {

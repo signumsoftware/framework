@@ -31,7 +31,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
         title: "Template",
         message: "Copy to clipboard: Ctrl+C, ESC",
         initiallyFocused: true,
-      }).done()} />
+      })} />
   }
 
   function renderWidgetButton(text: React.ReactElement, getCode: () => Promise<string | undefined>) {
@@ -48,7 +48,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
               title: "Embedded Widget",
               message: "Make a similar-looking Chart or Table in Excel and copy it to Word or PowerPoint. Then add the following code in the Alternative Text to bind the data:",
               initiallyFocused: true,
-            })).done()} >{text}</button>
+            }))} >{text}</button>
   }
 
 

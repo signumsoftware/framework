@@ -123,7 +123,7 @@ function CaseActivityStatsButtonComponent(p: CaseActivityButtonBaseProps) {
       Navigator.API.fetch(rr.entity).then(caseActivity => {
         const bpmnElementID = ((caseActivity as CaseActivityEntity).workflowActivity as any).bpmnElementId;
         p.caseFlowViewer.showCaseActivityStatsModal(bpmnElementID);
-      }).done();
+      });
   }
   const sc = p.sc;
 
@@ -157,7 +157,7 @@ function WorkflowActivityLocateButtonComponent(p: WorkflowActivityLocateButtonCo
 
         if (p.onLocated)
           p.onLocated();
-      }).done();
+      });
     }
   }
   const sc = p.sc;

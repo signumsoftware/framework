@@ -92,14 +92,12 @@ export module API {
 
   export function downloadView(type: string, culture: string | undefined) {
     ajaxGetRaw({ url: `~/api/translatedInstance/viewFile/${type}?${QueryString.stringify({ culture })}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function downloadSync(type: string, culture: string | undefined) {
     ajaxGetRaw({ url: `~/api/translatedInstance/syncFile/${type}?${QueryString.stringify({ culture })}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function uploadFile(request: FileUpload): Promise<void> {

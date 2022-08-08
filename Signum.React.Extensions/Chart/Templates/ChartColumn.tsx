@@ -200,8 +200,7 @@ export const ChartPaletteLink = (props: ChartPaletteLinkProps) =>
     <a href="#" className={props.ctx.formControlPlainTextClass} onClick={e => {
       e.preventDefault();
       ChartPaletteClient.navigatePalette(props.type)
-        .then(() => props.refresh())
-        .done();
+        .then(() => props.refresh());
     }}>
       {props.currentPalettes.contains(props.type.name) ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()}
     </a>

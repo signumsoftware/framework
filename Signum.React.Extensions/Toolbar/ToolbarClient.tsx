@@ -86,7 +86,7 @@ export abstract class ToolbarConfig<T extends Entity> {
     e.persist();
     this.navigateTo(res).then(url => {
       AppContext.pushOrOpenInTab(url, e);
-    }).done();
+    });
   }
 
   isApplicableTo(element: ToolbarResponse<T>) {

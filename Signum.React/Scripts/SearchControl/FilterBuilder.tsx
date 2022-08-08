@@ -62,14 +62,14 @@ export default function FilterBuilder(p: FilterBuilderProps) {
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
 
-    forceUpdate().then(handleHeightChanged).done();
+    forceUpdate().then(handleHeightChanged);
   };
 
   function handlerDeleteFilter(filter: FilterOptionParsed) {
     p.filterOptions.remove(filter);
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
-    forceUpdate().then(handleHeightChanged).done();
+    forceUpdate().then(handleHeightChanged);
   };
 
   function handleDeleteAllFilters(e: React.MouseEvent) {
@@ -82,7 +82,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
 
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
-    forceUpdate().then(handleHeightChanged).done();
+    forceUpdate().then(handleHeightChanged);
   };
 
   function handleFilterChanged() {
@@ -223,7 +223,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
     p.filterGroup.filters.remove(filter);
     if (p.onFilterChanged)
       p.onFilterChanged();
-    forceUpdatePromise().then(() => p.onHeightChanged()).done();
+    forceUpdatePromise().then(() => p.onHeightChanged());
   };
 
 
@@ -254,7 +254,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     p.onFilterChanged();
 
-    forceUpdatePromise().then(() => p.onHeightChanged()).done();
+    forceUpdatePromise().then(() => p.onHeightChanged());
   };
 
   function handleExpandCollapse(e: React.MouseEvent<any>) {
@@ -262,7 +262,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
     const fg = p.filterGroup;
     fg.expanded = !fg.expanded;
 
-    forceUpdatePromise().then(() => p.onHeightChanged()).done();
+    forceUpdatePromise().then(() => p.onHeightChanged());
   }
 
   const fg = p.filterGroup;

@@ -102,8 +102,7 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
         { token: CaseEntity.token(e => e.entity).expression<CaseActivityEntity>("DecompositionSurrogateActivity"), value: p.stats.caseActivity },
       ]
     }, { autoSelectIfOne: true })
-      .then(c => c && Navigator.view(c))
-      .done();
+      .then(c => c && Navigator.view(c));
   }
 
   function renderSubWorkflowExtra(ctx: StyleContext) {

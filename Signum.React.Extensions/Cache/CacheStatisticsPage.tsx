@@ -12,15 +12,15 @@ export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
   var [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
 
   function handleDisabled(e: React.MouseEvent<any>) {
-    API.disable().then(() => reloadState()).done();
+    API.disable().then(() => reloadState());
   }
 
   function handleEnabled(e: React.MouseEvent<any>) {
-    API.enable().then(() => reloadState()).done();
+    API.enable().then(() => reloadState());
   }
 
   function handleClear(e: React.MouseEvent<any>) {
-    API.clear().then(() => reloadState()).done();
+    API.clear().then(() => reloadState());
   }
 
   if (state == null)

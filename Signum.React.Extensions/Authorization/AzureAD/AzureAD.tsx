@@ -76,8 +76,7 @@ export function signIn(ctx: LoginContext) {
         throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
 
       throw e;
-    })
-    .done();
+    });
 }
 
 export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undefined> {
@@ -159,7 +158,7 @@ export function signOut() {
   if (account) {
     msalClient.logout({
       account: account
-    }).done();
+    });
   }
 }
 

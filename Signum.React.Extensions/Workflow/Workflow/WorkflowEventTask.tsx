@@ -28,7 +28,7 @@ export default function WorkflowEventTaskComponent(p : WorkflowEventTaskComponen
           if (!ctx.value.action)
             ctx.value.action = WorkflowEventTaskActionEval.New();
           forceUpdate();
-        }).done();
+        });
   }
 
   function isConditional() {

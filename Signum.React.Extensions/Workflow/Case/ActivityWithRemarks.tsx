@@ -58,8 +58,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
 
     Finder.exploreOrView(fo)
       .then(() => Finder.getQueryValue(fo.queryName, fo.filterOptions!.notNull()))
-      .then(alerts => setAlerts(alerts))
-      .done();
+      .then(alerts => setAlerts(alerts));
   }
 
   function handleRemarksClick(e: React.MouseEvent<any>) {
@@ -79,10 +78,9 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
         return;
 
       Operations.API.executeLite(p.data.notification, CaseNotificationOperation.SetRemarks, remarks)
-        .then(n => setRemarks(n.entity.remarks))
-        .done();
+        .then(n => setRemarks(n.entity.remarks));
 
-    }).done();
+    });
   }
   return (
     <span>

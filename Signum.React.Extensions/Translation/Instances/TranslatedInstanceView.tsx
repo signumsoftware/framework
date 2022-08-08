@@ -70,8 +70,7 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
     }));
 
     lock(() => API.saveTranslatedInstanceData(records, type, false, culture)
-      .then(() => { reloadResult(); notifySuccess(); }))
-      .done();
+      .then(() => { reloadResult(); notifySuccess(); }));
   }
 
   const message = TranslationMessage.View0In1.niceToString(type,

@@ -1784,19 +1784,22 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
 
 
-interface ISignumTable
+interface IQuerySignumTable
 {
-    ITable Table { get; set; }
+    ITable Table { get; }
+    bool DisableAssertAllowed { get; }
 }
 
-internal class SignumTable<E> : Query<E>, ISignumTable
+internal class SignumTable<E> : Query<E>, IQuerySignumTable
 {
-    public ITable Table { get; set; }
+    public ITable Table { get; }
+    public bool DisableAssertAllowed { get; }
 
-    public SignumTable(QueryProvider provider, ITable table)
+    public SignumTable(QueryProvider provider, ITable table, bool disableAssertAllowed = false)
         : base(provider)
     {
         this.Table = table;
+        this.DisableAssertAllowed = disableAssertAllowed;
     }
 
     public override bool Equals(object? obj)

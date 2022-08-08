@@ -48,8 +48,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
         };
 
         Finder.exploreWindowsOpen(fo, e);
-      }))
-      .done();
+      }));
   }
 
   function getMainFilters() {

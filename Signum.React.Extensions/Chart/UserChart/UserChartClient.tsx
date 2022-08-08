@@ -57,9 +57,8 @@ export function start(options: { routes: JSX.Element[] }) {
                 return;
 
               window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(lite)}`));
-            })
-            .done();
-      }).done();
+            });
+      });
     }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting), group: null, icon: "eye", iconColor: "blue", color: "info" }));
 
 

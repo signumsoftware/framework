@@ -39,8 +39,7 @@ export class EntityRadioButtonListController extends EntityBaseController<Entity
       this.setValue(lite);
     else
       this.convert(lite)
-        .then(v => this.setValue(v))
-        .done();
+        .then(v => this.setValue(v));
   }
 
 }
@@ -113,13 +112,11 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
       const fo = p.findOptions;
       if (fo) {
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
-          .then(data => setData(data))
-          .done();
+          .then(data => setData(data));
       }
       else
         Finder.API.fetchAllLites({ types: p.type!.name })
-          .then(data => setData(data.orderBy(a => getToString(a))))
-          .done();
+          .then(data => setData(data.orderBy(a => getToString(a))));
     }
   }, [p.data, p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 

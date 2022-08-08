@@ -40,7 +40,6 @@ export default function CopyLiteButton(p: CopyLiteButtonProps) {
   function handleCopyLiteButton(e: React.MouseEvent<any>) {
     e.preventDefault();
     navigator.clipboard.writeText(lk)
-      .then(() => setShowTooltip(true))
-      .done();
+      .then(() => setShowTooltip(true));
   }
 }
