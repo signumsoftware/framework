@@ -615,6 +615,7 @@ export module SearchMessage {
   export const GroupKey = new MessageKey("SearchMessage", "GroupKey");
   export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
   export const Copy = new MessageKey("SearchMessage", "Copy");
+  export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
 }
 
 export module SelectorMessage {
