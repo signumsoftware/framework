@@ -1389,13 +1389,14 @@ internal class QueryBinder : ExpressionVisitor
 
     private ProjectionExpression GetTableProjection(IQueryable query)
     {
-        ITable table = ((ISignumTable)query).Table;
+        var st = (IQuerySignumTable)query;
+        ITable table = st.Table;
 
         Alias tableAlias = NextTableAlias(table.Name);
 
         Expression exp = 
             table is Table t ? t.GetProjectorExpression(tableAlias, this) :
-            table is TableMList tml ? tml.GetProjectorExpression(tableAlias, this) :
+            table is TableMList tml ? tml.GetProjectorExpression(tableAlias, this, st.DisableAssertAllowed) :
             throw new UnexpectedValueException(table);
 
         Type resultType = typeof(IQueryable<>).MakeGenericType(query.ElementType);
