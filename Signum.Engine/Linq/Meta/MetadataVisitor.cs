@@ -387,7 +387,7 @@ internal class MetadataVisitor : ExpressionVisitor
             {
                 var parentType = type.GetGenericArguments()[0];
 
-                ISignumTable st = (ISignumTable)c.Value!;
+                IQuerySignumTable st = (IQuerySignumTable)c.Value!;
                 TableMList rt = (TableMList)st.Table;
 
 

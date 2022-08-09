@@ -6,7 +6,7 @@ namespace Signum.Engine.Maps;
 
 public partial class Table
 {
-    internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder)
+    internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder, bool disableAssertAllowed = false)
     {
         Expression? id = GetIdExpression(tableAlias);
 
@@ -20,7 +20,8 @@ public partial class Table
         }
         else
         {
-            Schema.Current.AssertAllowed(Type, inUserInterface: false);
+            if(!disableAssertAllowed)
+                Schema.Current.AssertAllowed(Type, inUserInterface: false);
 
             var entityContext = new EntityContextInfo((PrimaryKeyExpression)id!, null);
 

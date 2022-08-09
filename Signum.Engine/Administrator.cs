@@ -6,6 +6,7 @@ using Signum.Engine.SchemaInfoTables;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace Signum.Engine;
 
@@ -337,6 +338,12 @@ public static class Administrator
     public static bool IsIdentityBehaviourDisabled(ITable table)
     {
         return identityBehaviourDisabled.Value?.Contains(table) == true;
+    }
+
+    [DebuggerStepThrough]
+    public static IQueryable<T> QueryDisableAssertAllowed<T>() where T : Entity
+    {
+        return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>(), disableAssertAllowed: true);
     }
 
     static AsyncThreadVariable<ImmutableStack<ITable>?> identityBehaviourDisabled = Statics.ThreadVariable<ImmutableStack<ITable>?>("identityBehaviourOverride");
