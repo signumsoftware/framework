@@ -230,6 +230,9 @@ public enum SearchMessage
     DerivedGroupKey,
 
     Copy,
+
+    [Description("More than one {0} selected")]
+    MoreThanOne0Selected
 }
 
 public enum SelectorMessage

@@ -1642,10 +1642,25 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const sc = this;
     const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
-    if (colIndex != -1) {
-      const row = sc.state.selectedRows!.first();
-      const val = row.columns[colIndex];
-      return { value: val };
+    if (colIndex != -1 && sc.state.selectedRows && sc.state.selectedRows?.length > 0) {
+      if (sc.state.selectedRows!.length == 1) {
+
+        const row = sc.state.selectedRows!.first();
+
+        const val = row.columns[colIndex];
+        return { value: val };
+      } else {
+
+        var distinctValues = sc.state.selectedRows!.map(r => r.columns[colIndex]).distinctBy(s => Finder.Encoder.stringValue(s));
+
+        if (distinctValues.length > 1) {
+          const co = sc.state.resultFindOptions!.columnOptions.single(co => co.token?.fullKey == tokenName);
+          throw new Error(SearchMessage.MoreThanOne0Selected.niceToString(co.token?.niceName));
+        }
+
+        return { value: distinctValues[0] }; 
+      }
+
     }
 
     var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
