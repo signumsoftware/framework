@@ -127,7 +127,7 @@ public class CollectionElementToken : QueryToken
     public static List<CollectionElementToken> GetElements(HashSet<QueryToken> allTokens)
     {
         return allTokens
-            .SelectMany(t => t.Follow(tt => tt.Parent))
+            .SelectMany(t => (t.HasToArray() ?? t).Follow(tt => tt.Parent))
             .OfType<CollectionElementToken>()
             .Distinct()
             .OrderBy(a => a.FullKey().Length)

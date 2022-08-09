@@ -149,7 +149,7 @@ public static class DQueryable
         if (str.HasText())
             throw new ApplicationException(str);
 
-        List<Expression> expressions = tokens.Select(t => t.BuildExpression(context)).ToList();
+        List<Expression> expressions = tokens.Select(t => t.BuildExpression(context, searchToArray: true)).ToList();
         Expression ctor = TupleReflection.TupleChainConstructor(expressions);
 
         var pe = Expression.Parameter(ctor.Type);
@@ -865,7 +865,7 @@ public static class DQueryable
             if (isQueryable)
             {
                 var tempContext = new BuildExpressionContext(keyTupleType, pk, rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, new ExpressionBox(TupleReflection.TupleChainProperty(pk, i)))).ToDictionary());
-                resultExpressions.AddRange(redundantKeyTokens.Select(t => KeyValuePair.Create(t, t.BuildExpression(tempContext))));
+                resultExpressions.AddRange(redundantKeyTokens.Select(t => KeyValuePair.Create(t, t.BuildExpression(tempContext, searchToArray: true))));
             }
             else
             {
@@ -873,7 +873,7 @@ public static class DQueryable
 
                 resultExpressions.AddRange(redundantKeyTokens.Select(t =>
                 {
-                    var exp = t.BuildExpression(context);
+                    var exp = t.BuildExpression(context, searchToArray: true);
                     var replaced = ExpressionReplacer.Replace(exp,
                     new Dictionary<ParameterExpression, Expression>
                     {
@@ -1101,7 +1101,7 @@ public static class DQueryable
 
             var rc = new ResultColumn(c, array);
 
-            if (c.Token.Type.IsLite() || isMultiKeyGrupping && c.Token is not AggregateToken)
+            if ((c.Token.Type.IsLite() || isMultiKeyGrupping && c.Token is not AggregateToken) && c.Token.HasToArray() == null)
                 rc.CompressUniqueValues = true;
 
             return rc;

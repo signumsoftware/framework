@@ -34,7 +34,7 @@ public class DateToken : QueryToken
 
     public override Type Type
     {
-        get { return typeof(DateTime?); }
+        get { return typeof(DateOnly?); }
     }
 
     public override string Key
@@ -47,13 +47,13 @@ public class DateToken : QueryToken
         return new List<QueryToken>();
     }
 
-    static PropertyInfo miDate = ReflectionTools.GetPropertyInfo((DateTime d) => d.Date);
+    static MethodInfo miDate = ReflectionTools.GetMethodInfo((DateTime d) => d.ToDateOnly());
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
         var exp = parent.BuildExpression(context);
 
-        return Expression.Property(exp.UnNullify(), miDate).Nullify();
+        return Expression.Call(miDate, exp.UnNullify()).Nullify();
     }
 
     public override PropertyRoute? GetPropertyRoute()
