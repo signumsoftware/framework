@@ -144,11 +144,12 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
   onDrillDown?: (value: unknown, e: React.MouseEvent<any> | MouseEvent) => void;
 }) {
 
+  const bandwith = x.bandwidth();
   var orderedKeys = keyValues.orderBy(keyColumn.getKey);
   return (
     <>
       {
-        showLines && <g className="x-key-line-group" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('content'))}>
+        showLines && <g className="x-key-line-group" transform={translate(xRule.start('content') + (bandwith / 2), yRule.start('content'))}>
           {orderedKeys.map(t => <line key={keyColumn.getKey(t)} className="x-key-line-group sf-transition"
             opacity={isActive?.(t) == false ? 0.5 : undefined}
             transform={translate(x(keyColumn.getKey(t))!, 0)}
@@ -157,7 +158,7 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
         </g>
       }
 
-      <g className="x-key-tick-group" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('ticks'))}>
+      <g className="x-key-tick-group" transform={translate(xRule.start('content') + (bandwith / 2), yRule.start('ticks'))}>
         {orderedKeys.map((t, i) => <line key={keyColumn.getKey(t)} className="x-key-tick sf-transition"
           opacity={isActive?.(t) == false ? 0.5 : undefined}
           transform={translate(x(keyColumn.getKey(t))!, 0)}
@@ -165,9 +166,9 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
           stroke="Black" />)}
       </g>
       {
-        (x.bandwidth() * 2) > 60 &&
-        <g className="x-key-label-group" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.middle('ticks'))}>
-          {orderedKeys.map((t, i) => <TextEllipsis key={keyColumn.getKey(t)} maxWidth={x.bandwidth() * 2} className="x-key-label sf-transition"
+        (bandwith * 2) > 60 &&
+        <g className="x-key-label-group" transform={translate(xRule.start('content') + (bandwith / 2), yRule.middle('ticks'))}>
+            {orderedKeys.map((t, i) => <TextEllipsis key={keyColumn.getKey(t)} maxWidth={bandwith * 2} className="x-key-label sf-transition"
             onClick={e => onDrillDown?.(t, e)}
             opacity={isActive?.(t) == false ? 0.5 : undefined}
             style={{ fontWeight: isActive?.(t) == true ? "bold" : undefined, cursor: onDrillDown ? "pointer" : undefined }}
@@ -175,7 +176,7 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
             y={yRule.size('labels') / 4 + (i % 2) * yRule.size('labels') / 2}
             dominantBaseline="middle"
             textAnchor="middle">
-            {keyColumn.getNiceName(t)}
+            {keyColumn.getNiceName(t, x.bandwidth())}
           </TextEllipsis>)}
         </g>
       }
