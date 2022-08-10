@@ -42,6 +42,11 @@ internal class LambdaToJavascriptConverter
 
         if (expr is ConstantExpression ce)
         {
+            if (ce.Value == null)
+            {
+                return "null";
+            }
+
             if (expr.Type == typeof(string))
             {
                 var str = (string)ce.Value!;
@@ -54,11 +59,6 @@ internal class LambdaToJavascriptConverter
 
             if (ReflectionTools.IsNumber(ce.Type) && ce.Value != null)
                 return ((IFormattable)ce.Value).ToString(null, CultureInfo.InvariantCulture);
-
-            if(ce.Value == null)
-            {
-                return "null";
-            }
         }
 
         if (expr is MemberExpression me)
@@ -306,6 +306,9 @@ internal class LambdaToJavascriptConverter
 
     private static string? ToJavascriptToString(ParameterExpression param, Expression expr, string? format = null)
     {
+        if (expr is ConstantExpression c && c.Value == null)
+            return "";
+
         var r = ToJavascript(param, expr);
 
         if (r == null)
