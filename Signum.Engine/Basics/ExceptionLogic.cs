@@ -18,6 +18,7 @@ public static class ExceptionLogic
                     e.Id,
                     e.CreationDate,
                     e.ExceptionType,
+                    e.IsClientSide,
                     e.ExceptionMessage,
                     e.StackTraceHash,
                 });

@@ -27,6 +27,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
           <ValueLine ctx={sc.subCtx(f => f.userHostAddress)} />
           <ValueLine ctx={sc.subCtx(f => f.userHostName)} />
           <ValueLine ctx={sc.subCtx(f => f.userAgent)} valueLineType="TextArea" />
+          <ValueLine ctx={sc.subCtx(f => f.isClientSide)}  />
         </div>
       </div>
       <ValueLine ctx={ctx.subCtx(f => f.requestUrl)} />

@@ -12,6 +12,15 @@ export interface BigStringEmbedded extends Entities.EmbeddedEntity {
   text: string | null;
 }
 
+export const ClientExceptionModel = new Type<ClientExceptionModel>("ClientExceptionModel");
+export interface ClientExceptionModel extends Entities.ModelEntity {
+  Type: "ClientExceptionModel";
+  typeErrorMessage: string;
+  typeErrorStack: string | null;
+  typeErrorName: string | null;
+  exceptionType: string | null;
+}
+
 export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
 export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
   Type: "DeleteLogParametersEmbedded";
@@ -57,6 +66,7 @@ export interface ExceptionEntity extends Entities.Entity {
   data: BigStringEmbedded;
   hResult: number;
   referenced: boolean;
+  isClientSide: boolean;
 }
 
 export interface IUserEntity extends Entities.Entity {

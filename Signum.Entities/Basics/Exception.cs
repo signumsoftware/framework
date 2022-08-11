@@ -1,5 +1,10 @@
 using System.Threading;
 using System.Collections.Specialized;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http.Extensions;
+using System.Net;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.Entities.Basics;
 
@@ -10,6 +15,34 @@ public class ExceptionEntity : Entity
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public ExceptionEntity() { }
+
+    public ExceptionEntity(ClientExceptionModel clientException, HttpContext httpContext) 
+    {
+        if (httpContext != null)
+        {
+            var req = httpContext.Request;
+            var connFeature = httpContext.Features.Get<IHttpConnectionFeature>()!;
+
+            this.ExceptionType = clientException.ExceptionType;
+            this.ExceptionMessage = clientException.TypeErrorMessage;
+            this.StackTrace = new BigStringEmbedded(clientException.TypeErrorStack);
+            this.ThreadId = -1;
+            this.UserAgent = Try(300, () => req.Headers["User-Agent"].FirstOrDefault());
+            this.RequestUrl = Try(int.MaxValue, () => req.GetDisplayUrl());
+            this.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
+            this.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress?.ToString());
+            this.UserHostName = Try(100, () => connFeature.RemoteIpAddress == null ? null : Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
+
+            this.MachineName = System.Environment.MachineName;
+            this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
+            this.IsClientSide = true;
+
+            this.Form = new BigStringEmbedded();
+            this.QueryString = new BigStringEmbedded();
+            this.Session = new BigStringEmbedded();
+            this.Data = new BigStringEmbedded();
+        }
+    }
 
     public ExceptionEntity(Exception ex)
     {
@@ -109,6 +142,8 @@ public class ExceptionEntity : Entity
 
     public bool Referenced { get; set; }
 
+    public bool IsClientSide { get; set; }
+
     public override string ToString()
     {
         return "{0}: {1}".FormatWith(ExceptionType, exceptionMessage).Etc(200);
@@ -117,6 +152,18 @@ public class ExceptionEntity : Entity
     public static string Dump(NameValueCollection nameValueCollection)
     {
         return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\r\n");
+    }
+
+    private static string? Try(int size, Func<string?> getValue)
+    {
+        try
+        {
+            return getValue()?.TryStart(size);
+        }
+        catch (Exception e)
+        {
+            return (e.GetType().Name + ":" + e.Message).TryStart(size);
+        }
     }
 }
 
@@ -177,4 +224,17 @@ public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
         return base.PropertyValidation(pi);
     }
 }
+
+public class ClientExceptionModel : ModelEntity
+{
+    public string TypeErrorMessage { get; set; }
+
+    public string? TypeErrorStack { get; set; }
+
+    public string? TypeErrorName { get; set; }
+
+    public string? ExceptionType { get; set; }
+}
+
+
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.

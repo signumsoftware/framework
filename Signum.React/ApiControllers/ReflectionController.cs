@@ -3,6 +3,8 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.React.Filters;
 using Microsoft.AspNetCore.Http;
+using Signum.Engine.Maps;
+using Signum.Entities.Authorization;
 
 namespace Signum.React.ApiControllers;
 
@@ -27,5 +29,22 @@ public class ReflectionController : ControllerBase
     public TypeEntity? GetTypeEntity(string typeName)
     {
         return TypeLogic.TryGetType(typeName)?.ToTypeEntity();
+    }
+
+
+    [HttpPost("api/registerClientError"), ValidateModelFilter, ProfilerActionSplitter]
+    public void ClientError([Required, FromBody] ClientExceptionModel error)
+    {
+        var httpContext = this.HttpContext;
+        var clientException =  new ExceptionEntity(error, httpContext);
+
+        clientException.Version = Schema.Current.Version.ToString();
+        clientException.ApplicationName = Schema.Current.ApplicationName;
+        clientException.User = UserEntity.Current;
+
+        if (Database.Query<ExceptionEntity>().Any(e => e.ExceptionMessageHash == clientException.ExceptionMessageHash && e.CreationDate.AddSeconds(60) > clientException.CreationDate))
+            return;
+
+        clientException.Save();
     }
 }

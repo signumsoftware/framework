@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as Modals from '../Modals';
 import { Dic } from '../Globals';
-import { ExternalServiceError, ServiceError, ValidationError } from '../Services';
+import { ajaxPost, ExternalServiceError, ServiceError, ValidationError } from '../Services';
 import { JavascriptMessage, FrameMessage, ConnectionMessage } from '../Signum.Entities'
-import { ExceptionEntity } from '../Signum.Entities.Basics'
+import { ClientExceptionModel, ExceptionEntity } from '../Signum.Entities.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
 import { newLite } from '../Reflection';
@@ -101,12 +101,32 @@ export default function ErrorModal(p: ErrorModalProps) {
   }
 }
 
+
+
+function logError(error: Error) {
+
+  if (error instanceof ServiceError || error instanceof ValidationError)
+    return; 
+
+  var errorModel: ClientExceptionModel = ClientExceptionModel.New({
+
+    exceptionType : (error as Object).constructor.name,
+    typeErrorMessage : error.message ?? error.toString(),
+    typeErrorStack : error.stack ?? null,
+    typeErrorName : error.name,
+  });
+
+  ajaxPost({ url: "~/api/registerClientError" }, errorModel);
+}
+
 ErrorModal.register = () => {
 
   window.onunhandledrejection = p => {
     var error = p.reason;
-    if (Modals.isStarted())
+    if (Modals.isStarted()) {
+      logError(error);
       ErrorModal.showErrorModal(error);
+    }
     else
       console.error("Unhandled promise rejection:", error);
   };

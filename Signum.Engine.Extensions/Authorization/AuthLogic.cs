@@ -460,7 +460,6 @@ public static class AuthLogic
                 }
             }
 
-
             return user;
         }
     }
