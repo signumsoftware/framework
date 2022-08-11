@@ -55,8 +55,8 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
 * [2022.08.11 Logging Client-Side Errors](https://github.com/signumsoftware/framework/commit/0b422b488458677614383875b4fbc0e499093bb7#comments)
-* [2022.08.10 Presenting SeparatedByNewLine / SeparatedByComma](https://github.com/signumsoftware/framework/commit/94401cd2b1a785b4e69735c80e54d67ca7a9e7d8#comments)
-* [2022.08.08 Remove Promise.done()](https://github.com/signumsoftware/framework/commit/390b34f5206f4467dc517747c351e206ffb89d63#comments)
+* [2022.08.09 Presenting SeparatedByNewLine / SeparatedByComma](https://github.com/signumsoftware/framework/commit/94401cd2b1a785b4e69735c80e54d67ca7a9e7d8#comments)
+* [2022.08.05 Remove Promise.done()](https://github.com/signumsoftware/framework/commit/390b34f5206f4467dc517747c351e206ffb89d63#comments)
 * [2022.07.30 CellOperationButton and commonOnClick](https://github.com/signumsoftware/framework/commit/65054d7a700dd6a5d14581e0427544f05a6be2d8#commitcomment-79818203)
 * [2022.07.27 RoleEntity IsTrivialMerge](https://github.com/signumsoftware/framework/commit/c468115b100f1d1df032afcbf7a8561d01dc6025#comments)
 * [2022.07.22 TypeCondition intersection](https://github.com/signumsoftware/framework/commit/15024fa5f81b7e627b564ee229edb19990411e1a#commitcomment-79437098)
