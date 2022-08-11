@@ -159,11 +159,11 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     }
   }
 
-  function tryCeil(date: string | null | undefined, unit: DateTimeUnit) {
+  function tryCeil(date: string | null | undefined, unit: DateTimeUnit): DateTime | undefined {
     if (date == null)
       return undefined;
 
-    return ceil(DateTime.fromISO(date), unit).toISO();
+    return ceil(DateTime.fromISO(date), unit);
   }
 
 
@@ -174,12 +174,12 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 
     return date.startOf(unit).plus({ [unit]: 1 });
   }
- 
-  function tryFloor(date: string | null | undefined, unit: DateTimeUnit) {
+
+  function tryFloor(date: string | null | undefined, unit: DateTimeUnit): DateTime | undefined {
     if (date == null)
       return undefined;
 
-    return floor(DateTime.fromISO(date), unit).toISO();
+    return floor(DateTime.fromISO(date), unit);
   }
 
   function floor(date: DateTime, unit: DateTimeUnit) {
@@ -215,6 +215,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     if (unit == null)
       return values;
 
+
     const min = d3.max(matchingFilters.filter(a => a.operation == "GreaterThan" || a.operation == "GreaterThanOrEqual" || a.operation == "EqualTo")
       .map(f => {
         const pair = normalizeToken(f.token!);
@@ -235,7 +236,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
           f.operation == "GreaterThan" ? floor(value, filterUnit).plus({ [filterUnit]: 1 }) : floor(value, filterUnit);
 
         return floor(newValue, unit).toISO();
-      }).notNull()) ?? tryFloor(d3.min(values as string[]), unit);
+      }).notNull()) ?? tryFloor(d3.min(values as string[]), unit)?.toISO();
 
     const max = d3.min(matchingFilters.filter(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual" || a.operation == "EqualTo")
       .map(f => {
@@ -256,14 +257,16 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
           f.operation == "LessThan" ? ceil(value, filterUnit) : floor(value, filterUnit).plus({ [filterUnit]: 1 });
 
         return ceil(newValue, unit).toISO();
-      }).notNull()) ?? tryCeil(d3.max(values as string[]), unit);
+      }).notNull()) ?? tryCeil(d3.max(values as string[]), unit)?.toISO();
 
 
     if (min == undefined  || max == undefined)
-      return values; 
+      return values;
 
-    const minDate = DateTime.fromISO(min);
-    const maxDate = DateTime.fromISO(max);
+    var isServerUtc = values.some(a => (a as string).endsWith("Z"));
+
+    const minDate = DateTime.fromISO(min, { zone: isServerUtc ? "utc" : undefined }).startOf(unit); //Needed to fix offset issues after UTC conversion
+    const maxDate = DateTime.fromISO(max, { zone: isServerUtc ? "utc" : undefined }).startOf(unit); //Needed to fix offset issues after UTC conversion
     let date = minDate;
 
     const allValues: string[] = [];

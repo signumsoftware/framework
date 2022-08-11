@@ -643,7 +643,7 @@ export module API {
     return v => v == null ? "#555" : null;
   }
 
-  export function getNiceName(token: QueryToken, chartColumn: ChartColumnEmbedded): ((val: unknown) => string) {
+  export function getNiceName(token: QueryToken, chartColumn: ChartColumnEmbedded): ((val: unknown, width?: number) => string) {
 
     if (token.type.isLite)
       return v => {
@@ -663,10 +663,18 @@ export module API {
       };
 
     if (token.filterType == "DateTime")
-      return v => {
+      return (v, width) => {
         var date = v as string | null;
+        if (date == null)
+          return String(null);
+
         var luxonFormat = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
-        return date == null ? String(null) : toFormatWithFixes(DateTime.fromISO(date), luxonFormat);
+        var result = toFormatWithFixes(DateTime.fromISO(date), luxonFormat);
+        if (luxonFormat == "D" && width != null && width < 80) {
+          var year = DateTime.fromISO(date).toFormat("yyyy");
+          return result.replace(year, "").replace(/^[\/\-.]/, "").replace(/[\/\-.]$/, "");
+        }
+        return result;
       };
 
     if (token.filterType == "Time")
@@ -872,12 +880,12 @@ export interface ChartColumn<V> {
   orderByType?: OrderType | null;
 
   getKey: (v: V | null) => string;
-  getNiceName: (v: V | null) => string;
+  getNiceName: (v: V | null, width?: number) => string;
   getColor: (v: V | null) => string | null;
 
   getValue: (row: ChartRow) => V;
   getValueKey: (row: ChartRow) => string;
-  getValueNiceName: (row: ChartRow) => string;
+  getValueNiceName: (row: ChartRow, width?: number) => string;
   getValueColor: (row: ChartRow) => string | null;
 }
 

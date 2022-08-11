@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -132,6 +132,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       refreshMode: props.defaultRefreshMode
     };
   }
+
+  static maxToArrayElements = 100;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
@@ -485,7 +487,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           columnOption={this.state.editingColumn}
           onChange={this.handleColumnChanged}
           queryDescription={qd}
-          subTokensOptions={SubTokensOptions.CanElement | canAggregateXorOperation}
+          subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray |  canAggregateXorOperation}
           close={this.handleColumnClose} />}
         <div ref={d => this.containerDiv = d}
           className="sf-scroll-table-container table-responsive"
@@ -866,23 +868,31 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
 
-  handleQuickFilter = () => {
+  handleQuickFilter = async () => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
 
     const token = fo.columnOptions[cm.columnIndex!].token;
+    let newToken = token;
+    let op: FilterOperation | undefined;
 
-    const op: FilterOperation | undefined =
-      token?.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
+    var toArray = hasToArray(token);
+    if (toArray) {
+      newToken = await Finder.parseSingleToken(fo.queryKey, token!.fullKey.split(".").map(p => p == toArray!.key ? "Any" : p).join("."), SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
+      op = "IsIn";
+    }
+    else {
+      op = token?.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
         token ? (filterOperations[token.filterType as any] || []).firstOrNull() as FilterOperation | undefined :
           undefined as FilterOperation | undefined;
+    }
 
     const rt = this.state.resultTable;
 
     fo.filterOptions.push({
-      token: token!,
+      token: newToken!,
       operation: op,
-      value: cm.rowIndex == undefined || rt == null || token == null ? undefined : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
+      value: cm.rowIndex == undefined || rt == null || token == null ? (op == "IsIn" ? [] : undefined) : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
       frozen: false
     });
 
@@ -985,9 +995,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return token && token.filterType != "Embedded" && token.filterType != undefined && token.format != "Password";
     }
 
+    function isColumnGroupable(columnIndex: number) {
+      var token = fo.columnOptions[columnIndex].token;
+      return token && !hasOperation(token) && !hasToArray(token);
+    }
+
     const menuItems: React.ReactElement<any>[] = [];
     if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex))
-      menuItems.push(<Dropdown.Item className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</Dropdown.Item>);
+      menuItems.push(<Dropdown.Item className="sf-quickfilter-header" onClick={this.handleQuickFilter}>
+        <FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}
+      </Dropdown.Item>);
 
     if (cm.rowIndex == undefined && p.allowChangeColumns) {
 
@@ -1016,11 +1033,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         menuItems.push(<Dropdown.Divider />);
 
-        menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
-        </span>&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
-        </Dropdown.Item>);
+        if (isColumnGroupable(cm.columnIndex))
+          menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
+            <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+            <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
+          </span>&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
+          </Dropdown.Item>);
       }
 
       menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
@@ -1234,7 +1252,23 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       );
     }
 
-    var rootKeys = !this.props.findOptions.groupResults ? [] : getRootKeyColumn(this.props.findOptions.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
+    var rootKeys = !this.props.findOptions.groupResults ? [] : getRootKeyColumn(this.props.findOptions.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasToArray(co.token)));
+
+    function isDerivedKey(token: QueryToken | undefined) : boolean {
+      if (token == null)
+        return false;
+
+      if (rootKeys.some(cop => cop.token!.fullKey == token!.fullKey))
+        return true;
+
+      return isDerivedKey(token!.parent);
+    }
+
+    function isNotDerivedToArray(token: QueryToken) {
+      var toArray = hasToArray(token);
+
+      return toArray != null && !isDerivedKey(toArray.parent);
+    }
 
     return (
       <tr>
@@ -1252,6 +1286,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               co.hiddenColumn && "sf-hidden-column",
               !this.canOrder(co) && "noOrder",
               co.token && co.token.type.isCollection && "error",
+              co.token && this.props.findOptions.groupResults && isNotDerivedToArray(co.token)  && "error", 
               this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
                 this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
             data-column-name={co.token && co.token.fullKey}
@@ -1284,6 +1319,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const t = column.token;
 
     if (t.type.isCollection)
+      return false;
+
+    if (hasToArray(t))
       return false;
 
     if (t.type.isEmbedded || isTypeModel(t.type.name) || t.type.name == "CellOperationDTO")
@@ -1470,7 +1508,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const qs = this.props.querySettings;
 
     const columns = columnOptions.map(co => ({
-      columnOption: co,
+      column: co,
+      hasToArray: hasToArray(co.token),
       cellFormatter: (co.token && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this))),
       resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
     }));
@@ -1493,6 +1532,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         rowIndex : i,
       };
 
+      function joinNodes(values: (React.ReactChild | undefined)[], separator: React.ReactChild) {
+
+        if (values.length > (SearchControlLoaded.maxToArrayElements - 1))
+          values = [...values.filter((a, i) => i < SearchControlLoaded.maxToArrayElements - 1), "…"];
+
+        return React.createElement(React.Fragment, undefined,
+          ...values.flatMap((v, i) => i == values.length - 1 ? [v] : [v, separator])
+        );
+      }
+
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
@@ -1513,10 +1562,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           {
             columns.map((c, j) =>
               <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx, c.columnOption!.token!)}
-              </td>)
+                {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
+                  c.hasToArray != null ? joinNodes((row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, ctx, c.column.token!)),
+                    c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistict" ? <span className="text-muted">, </span> : <br />) :
+                    c.cellFormatter.formatter(row.columns[c.resultIndex], ctx, c.column.token!)}
+              </td>
+            )
           }
-
         </tr>
       );
 
@@ -1590,10 +1642,25 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const sc = this;
     const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
-    if (colIndex != -1) {
-      const row = sc.state.selectedRows!.first();
-      const val = row.columns[colIndex];
-      return { value: val };
+    if (colIndex != -1 && sc.state.selectedRows && sc.state.selectedRows?.length > 0) {
+      if (sc.state.selectedRows!.length == 1) {
+
+        const row = sc.state.selectedRows!.first();
+
+        const val = row.columns[colIndex];
+        return { value: val };
+      } else {
+
+        var distinctValues = sc.state.selectedRows!.map(r => r.columns[colIndex]).distinctBy(s => Finder.Encoder.stringValue(s));
+
+        if (distinctValues.length > 1) {
+          const co = sc.state.resultFindOptions!.columnOptions.single(co => co.token?.fullKey == tokenName);
+          throw new Error(SearchMessage.MoreThanOne0Selected.niceToString(co.token?.niceName));
+        }
+
+        return { value: distinctValues[0] }; 
+      }
+
     }
 
     var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");

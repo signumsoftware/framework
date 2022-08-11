@@ -311,7 +311,7 @@ bdi.date {
     }
 /* sf-entity-ctxmenu-success */
 tr.sf-entity-ctxmenu-success {
-    opacity: .5;
+    font-weight: bold;
 }
 
 .sf-th-entity {

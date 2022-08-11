@@ -17,7 +17,11 @@ export namespace Options {
 }
 
 export function getUserInitials(u: Lite<UserEntity>): string {
-  return getToString(u)?.split(" ").map(m => m[0]).filter((a, i) => i < 2).join("").toUpperCase() ?? "";
+  var str = getToString(u);
+  if (!str)
+    return "";
+
+  return str.split(" ").map(m => m[0]).filter((a, i) => i < 2).join("").toUpperCase() ?? "";
 }
 
 export default function UserCircle(p: { user: Lite<UserEntity>, className?: string }) {

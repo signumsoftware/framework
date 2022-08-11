@@ -254,6 +254,11 @@ ul.nav-tabs {
     cursor: pointer;
 }
 
+a.sf-move:focus {
+    border: 2px solid #656565;
+    border-radius: 4px !important;
+}
+
 .sf-paste:not(.disabled):hover {
     color: #FFCC00;
 }

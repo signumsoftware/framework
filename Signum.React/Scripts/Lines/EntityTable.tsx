@@ -361,9 +361,10 @@ export function EntityTableRow(p: EntityTableRowProps) {
           {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
             onClick={e => e.preventDefault()}
             draggable={true}
+            onKeyDown={drag.onKeyDown}
             onDragStart={drag.onDragStart}
             onDragEnd={drag.onDragEnd}
-            title={ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
+            title={drag.title}>
             {EntityBaseController.moveIcon}
           </a>}
           {p.onView && <a href="#" className={classes("sf-line-button", "sf-view")}
