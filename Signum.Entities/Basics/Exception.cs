@@ -1,10 +1,5 @@
 using System.Threading;
 using System.Collections.Specialized;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Http.Extensions;
-using System.Net;
-using Microsoft.AspNetCore.Http;
 
 namespace Signum.Entities.Basics;
 
@@ -16,36 +11,22 @@ public class ExceptionEntity : Entity
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public ExceptionEntity() { }
 
-    public ExceptionEntity(ClientExceptionModel clientException, HttpContext httpContext) 
+    public ExceptionEntity(ClientErrorModel clientError)
     {
-        if (httpContext != null)
-        {
-            var req = httpContext.Request;
-            var connFeature = httpContext.Features.Get<IHttpConnectionFeature>()!;
-
-            this.ExceptionType = clientException.ExceptionType;
-            this.ExceptionMessage = clientException.TypeErrorMessage;
-            this.StackTrace = new BigStringEmbedded(clientException.TypeErrorStack);
-            this.ThreadId = -1;
-            this.UserAgent = Try(300, () => req.Headers["User-Agent"].FirstOrDefault());
-            this.RequestUrl = Try(int.MaxValue, () => req.GetDisplayUrl());
-            this.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
-            this.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress?.ToString());
-            this.UserHostName = Try(100, () => connFeature.RemoteIpAddress == null ? null : Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
-
-            this.MachineName = System.Environment.MachineName;
-            this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
-            this.IsClientSide = true;
-
-            this.Form = new BigStringEmbedded();
-            this.QueryString = new BigStringEmbedded();
-            this.Session = new BigStringEmbedded();
-            this.Data = new BigStringEmbedded();
-        }
+        this.RebindEvents();
+        this.ExceptionType = "/".Combine(clientError.ErrorType, clientError.Name);
+        this.ExceptionMessage = clientError.Message;
+        this.StackTrace = new BigStringEmbedded(clientError.Stack);
+        this.ThreadId = -1;
+     
+        this.MachineName = System.Environment.MachineName;
+        this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
+        this.Origin = ExceptionOrigin.Frontend_React;
     }
 
     public ExceptionEntity(Exception ex)
     {
+        this.RebindEvents();
         this.ExceptionType = ex.GetType().Name;
         this.ExceptionMessage = ex.Message!;
         this.StackTrace = new BigStringEmbedded(ex.StackTrace!);
@@ -53,6 +34,7 @@ public class ExceptionEntity : Entity
         ex.Data[ExceptionDataKey] = this;
         this.MachineName = System.Environment.MachineName;
         this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
+        this.Origin = ExceptionOrigin.Backend_DotNet;
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
@@ -142,7 +124,7 @@ public class ExceptionEntity : Entity
 
     public bool Referenced { get; set; }
 
-    public bool IsClientSide { get; set; }
+    public ExceptionOrigin Origin { get; set; }
 
     public override string ToString()
     {
@@ -153,18 +135,12 @@ public class ExceptionEntity : Entity
     {
         return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\r\n");
     }
+}
 
-    private static string? Try(int size, Func<string?> getValue)
-    {
-        try
-        {
-            return getValue()?.TryStart(size);
-        }
-        catch (Exception e)
-        {
-            return (e.GetType().Name + ":" + e.Message).TryStart(size);
-        }
-    }
+public enum ExceptionOrigin
+{
+    Backend_DotNet,
+    Frontend_React
 }
 
 
@@ -225,16 +201,16 @@ public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
     }
 }
 
-public class ClientExceptionModel : ModelEntity
+[AllowUnathenticated]
+public class ClientErrorModel : ModelEntity
 {
-    public string TypeErrorMessage { get; set; }
+    public string ErrorType { get; set; }
+    
+    public string Message { get; set; }
 
-    public string? TypeErrorStack { get; set; }
+    public string? Stack { get; set; }
 
-    public string? TypeErrorName { get; set; }
-
-    public string? ExceptionType { get; set; }
+    public string? Name { get; set; }
 }
-
 
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.

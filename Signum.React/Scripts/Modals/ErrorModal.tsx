@@ -3,7 +3,7 @@ import * as Modals from '../Modals';
 import { Dic } from '../Globals';
 import { ajaxPost, ExternalServiceError, ServiceError, ValidationError } from '../Services';
 import { JavascriptMessage, FrameMessage, ConnectionMessage } from '../Signum.Entities'
-import { ClientExceptionModel, ExceptionEntity } from '../Signum.Entities.Basics'
+import { ClientErrorModel, ExceptionEntity } from '../Signum.Entities.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
 import { newLite } from '../Reflection';
@@ -103,18 +103,35 @@ export default function ErrorModal(p: ErrorModalProps) {
 
 
 
+var lastError: { model: ClientErrorModel, date: Date } | undefined;
+
 function logError(error: Error) {
 
   if (error instanceof ServiceError || error instanceof ValidationError)
     return; 
 
-  var errorModel: ClientExceptionModel = ClientExceptionModel.New({
-
-    exceptionType : (error as Object).constructor.name,
-    typeErrorMessage : error.message ?? error.toString(),
-    typeErrorStack : error.stack ?? null,
-    typeErrorName : error.name,
+  var errorModel = ClientErrorModel.New({
+    errorType: (error as Object).constructor.name,
+    message: error.message ?? error.toString(),
+    stack: error.stack ?? null,
+    name: error.name,
   });
+
+  var date = new Date();
+
+  if (lastError != null) {
+    if (
+      lastError.model.errorType == errorModel.errorType &&
+      lastError.model.message == errorModel.message &&
+      lastError.model.stack == errorModel.stack &&
+      lastError.model.errorType == errorModel.errorType &&
+      ((date.valueOf() - lastError.date.valueOf()) / 1000) < 10 
+    ) {
+      return;
+    }
+  } 
+
+  lastError = { model: errorModel, date: date };
 
   ajaxPost({ url: "~/api/registerClientError" }, errorModel);
 }
@@ -123,8 +140,8 @@ ErrorModal.register = () => {
 
   window.onunhandledrejection = p => {
     var error = p.reason;
+    logError(error);
     if (Modals.isStarted()) {
-      logError(error);
       ErrorModal.showErrorModal(error);
     }
     else
@@ -134,7 +151,10 @@ ErrorModal.register = () => {
   var oldOnError = window.onerror;
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
 
-    if (Modals.isStarted())
+    if (error != null)
+      logError(error);
+
+    if (Modals.isStarted()) 
       ErrorModal.showErrorModal(error);
     else if (oldOnError != null) {
       if (error instanceof ServiceError)
