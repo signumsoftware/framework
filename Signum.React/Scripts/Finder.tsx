@@ -408,10 +408,9 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
       };
     }
   }
-  
 
   return {
-    mode: "Replace",
+    mode: "ReplaceAll",
     columns: current.map(c => toColumnOption(c)),
   };
 }
@@ -1066,7 +1065,7 @@ export function defaultNoColumnsAllRows(fo: FindOptions, count: number | undefin
   if (newFO.columnOptions == undefined && newFO.columnOptionsMode == undefined) {
 
     newFO.columnOptions = [];
-    newFO.columnOptionsMode = "Replace";
+    newFO.columnOptionsMode = "ReplaceAll";
   }
 
   if (newFO.pagination == undefined) {
