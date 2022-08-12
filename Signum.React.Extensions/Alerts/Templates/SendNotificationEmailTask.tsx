@@ -41,7 +41,7 @@ export default function SendNotificationEmailTask(p: { ctx: TypeContext<SendNoti
           { token: AlertEntity.token().count() },
           { token: AlertEntity.token(a => a.recipient) },
         ],
-        columnOptionsMode: "Replace"
+        columnOptionsMode: "ReplaceAll"
       }} />
     </div>
   );

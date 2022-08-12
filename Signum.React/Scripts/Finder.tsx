@@ -1386,7 +1386,7 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   };
 
   return getQueryDescription(fo.queryName)
@@ -1405,7 +1405,7 @@ export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenStri
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: tokens.map(t => softCast<ColumnOption>({ token: t})),
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   };
 
   return getQueryDescription(fo.queryName)
@@ -1469,7 +1469,7 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
   if (entity == null)
@@ -1489,7 +1489,7 @@ export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> |
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a  })),
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
   if (entity == null)
@@ -1510,7 +1510,7 @@ export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: Quer
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "All" },
     columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
   if (entity == null)
