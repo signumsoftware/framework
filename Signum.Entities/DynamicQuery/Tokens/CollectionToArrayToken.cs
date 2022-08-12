@@ -140,7 +140,7 @@ public class CollectionToArrayToken : QueryToken
 
         BuildExpressionContext subCtx;
         Expression query;
-        if(ept != null)
+        if (ept != null)
         {
             var collection = MListElementPropertyToken.BuildMListElements(ept, context);
             query = collection;
@@ -163,44 +163,36 @@ public class CollectionToArrayToken : QueryToken
             });
         }
 
-        Expression body;
-        if (token is CollectionToArrayToken)
+        var cets = token.Follow(a => a.Parent).TakeWhile(a => a != cta).OfType<CollectionElementToken>().Reverse().ToList();
+        foreach (var ce in cets)
         {
-            body = subCtx.Parameter.BuildLite();
-        }
-        else
-        {
-            var cets = token.Follow(a => a.Parent).TakeWhile(a => a != cta).OfType<CollectionElementToken>().Reverse().ToList();
-            foreach (var ce in cets)
+            var ept2 = MListElementPropertyToken.AsMListEntityProperty(ce.Parent!);
+            if (ept2 != null)
             {
-                var ept2 = MListElementPropertyToken.AsMListEntityProperty(ce.Parent!);
-                if (ept2 != null)
-                {
-                    var collection = MListElementPropertyToken.BuildMListElements(ept2, subCtx);
-                    Type mleType = collection.Type.ElementType()!;
-                    query = Expression.Call(miSelectMany.MakeGenericMethod(query.Type.ElementType()!, mleType), query, Expression.Lambda(collection, subCtx.Parameter));
-                    var param = Expression.Parameter(mleType, mleType.Name.Substring(0, 1).ToLower());
-                    subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>()
+                var collection = MListElementPropertyToken.BuildMListElements(ept2, subCtx);
+                Type mleType = collection.Type.ElementType()!;
+                query = Expression.Call(miSelectMany.MakeGenericMethod(query.Type.ElementType()!, mleType), query, Expression.Lambda(collection, subCtx.Parameter));
+                var param = Expression.Parameter(mleType, mleType.Name.Substring(0, 1).ToLower());
+                subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>()
                     {
                         { ce, new ExpressionBox(param, mlistElementRoute: ce.GetPropertyRoute())}
                     });
-                }
-                else
-                {
-                    var collection = ce.Parent!.BuildExpression(subCtx);
-                    Type elementType = collection.Type.ElementType()!;
-                    query = Expression.Call(miSelectMany.MakeGenericMethod(query.Type.ElementType()!, elementType), query, Expression.Lambda(collection, subCtx.Parameter));
+            }
+            else
+            {
+                var collection = ce.Parent!.BuildExpression(subCtx);
+                Type elementType = collection.Type.ElementType()!;
+                query = Expression.Call(miSelectMany.MakeGenericMethod(query.Type.ElementType()!, elementType), query, Expression.Lambda(collection, subCtx.Parameter));
 
-                    var param = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
-                    subCtx = new BuildExpressionContext(elementType, param, new Dictionary<QueryToken, ExpressionBox>()
+                var param = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
+                subCtx = new BuildExpressionContext(elementType, param, new Dictionary<QueryToken, ExpressionBox>()
                     {
                         { ce, new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { ce.GetPropertyRoute()! }))}
                     });
-                }
             }
-
-            body = token.BuildExpression(subCtx);
         }
+
+        Expression body = token.BuildExpression(subCtx);
 
         if (body != subCtx.Parameter)
             query = Expression.Call(miSelect.MakeGenericMethod(query.Type.ElementType()!, body.Type), query, Expression.Lambda(body, subCtx.Parameter));

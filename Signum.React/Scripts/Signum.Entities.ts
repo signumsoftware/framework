@@ -158,7 +158,7 @@ function getOrCreateToStringFunction(type: string) {
 
   const ti = Reflection.tryGetTypeInfo(type);
 
-  toStringDictionary[type] = ti?.toStringFunction ? compileFunction(ti.toStringFunction) : null;
+  f = toStringDictionary[type] = ti?.toStringFunction ? compileFunction(ti.toStringFunction) : null;
 
   return f;
 }

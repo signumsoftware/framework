@@ -21,7 +21,15 @@ export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, m
     .concat(fops.filterOptions.flatMap(fo => getFilterTokens(fo)))
     .concat(fops.orderOptions.map(a => a.token))
     .filter(a => a != undefined)
-    .flatMap(a => getTokenParents(a))
+    .flatMap(a => {
+      var parts = getTokenParents(a); 
+
+      var toArrayIndex = parts.findIndex(a => a.queryTokenType == "ToArray");
+      if (toArrayIndex == -1)
+        return parts;
+
+      return parts.slice(0, toArrayIndex);
+    })
     .filter(a => a.queryTokenType == "Element")
     .toObjectDistinct(a => a.fullKey);
 
