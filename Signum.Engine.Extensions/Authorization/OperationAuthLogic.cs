@@ -75,6 +75,8 @@ public static class OperationAuthLogic
                     }, EnumExtensions.ToEnum<OperationAllowed>);
             };
 
+            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
+
             sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteOperationSqlSync);
             sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteTypeSqlSync);
         }

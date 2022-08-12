@@ -93,6 +93,8 @@ public static class PermissionAuthLogic
                     s => SymbolLogic<PermissionSymbol>.TryToSymbol(replacements.Apply(replacementKey, s)), bool.Parse);
             };
 
+            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
+
             sb.Schema.Table<PermissionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
         }
     }
