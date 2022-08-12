@@ -332,19 +332,19 @@ public static class EnumerableExtensions
         return collection == null || collection.IsEmpty();
     }
 
-    public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IList<T>? collection)
+    public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this ICollection<T>? collection)
     {
         return collection == null || collection.Count == 0;
-    }
-
-    public static bool HasItems<T>([NotNullWhen(true)]this IList<T>? collection)
-    {
-        return collection != null && collection.Count > 0;
     }
 
     public static bool HasItems<T>([NotNullWhen(true)]this IEnumerable<T>? collection)
     {
         return collection != null && collection.Any();
+    }
+
+    public static bool HasItems<T>([NotNullWhen(true)] this ICollection<T>? collection)
+    {
+        return collection != null && collection.Count > 0;
     }
 
     public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> collection) where T : class

@@ -190,7 +190,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
                     { token: AlertEntity.token(a => a.entity.createdBy) },
                     { token: AlertEntity.token(a => a.entity.recipient) },
                   ],
-                  columnOptionsMode: "Replace"
+                  columnOptionsMode: "ReplaceAll"
                 })}>{AlertMessage.AllMyAlerts.niceToString()}</Link>
               </Toast.Body>
             </Toast>

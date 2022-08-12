@@ -97,7 +97,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
             { token: CaseActivityEntity.token(a => a.entity.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
             { token: CaseActivityEntity.token(e => e.entity.doneDate), operation: "EqualTo", value: null }
           ],
-          columnOptionsMode: "Replace",
+          columnOptionsMode: "ReplaceAll",
           columnOptions: [
             { token: CaseActivityEntity.token(e => e.id) },
             { token: CaseActivityEntity.token(e => e.startDate) },
@@ -138,7 +138,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
                 { token: CaseActivityEntity.token(e => e.entity.workflowActivity).cast(WorkflowActivityEntity).append(a => a.type), operation: "EqualTo", value: WorkflowActivityType.value("Script") },
                 { token: CaseActivityEntity.token(e => e.entity.doneDate), operation: "DistinctTo", value: null }
               ],
-              columnOptionsMode: "Replace",
+              columnOptionsMode: "ReplaceAll",
               columnOptions: [
                 { token: CaseActivityEntity.token(a => a.id) },
                 { token: CaseActivityEntity.token(e => e.startDate) },

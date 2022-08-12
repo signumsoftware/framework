@@ -337,9 +337,20 @@ export function mergeColumns(columnDescriptions: ColumnDescription[], mode: Colu
       return columnDescriptions.filter(cd => cd.name != "Entity" && !columnOptions.some(a => a.token == cd.name))
         .map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption);
 
-    case "Replace":
+    case "ReplaceAll":
       return columnOptions;
 
+    case "ReplaceOrAdd": {
+      var original = columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption);
+      columnOptions.forEach(toReplaceOrAdd => {
+        var index = original.findIndex(co => co.token.toString() == toReplaceOrAdd.token.toString());
+        if (index != -1)
+          original[index] = toReplaceOrAdd;
+        else
+          original.push(toReplaceOrAdd);
+      });
+      return original;
+    }
     default: throw new Error("Unexpected column mode");
   }
 }
@@ -349,6 +360,14 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
   const similar = (c: ColumnOptionParsed, d: ColumnDescription) =>
     c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null && !c.hiddenColumn;
 
+  const toColumnOption = (c: ColumnOptionParsed) => ({
+    token: c.token!.fullKey,
+    displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
+    summaryToken: c.summaryToken?.fullKey,
+    hiddenColumn: c.hiddenColumn,
+  }) as ColumnOption;
+ 
+
   ideal = ideal.filter(a => a.name != "Entity");
 
   current = current.filter(a => a.token != null);
@@ -356,12 +375,18 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
   if (ideal.every((idl, i) => i < current.length && similar(current[i], idl))) {
     return {
       mode: "Add",
-      columns: current.slice(ideal.length).map(c => ({
-        token: c.token!.fullKey,
-        displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
-        summaryToken: c.summaryToken?.fullKey,
-        hiddenColumn: c.hiddenColumn,
-      }) as ColumnOption)
+      columns: current.slice(ideal.length).map(c => toColumnOption(c))
+    };
+  }
+
+  if (ideal.every((idl, i) => i < current.length && current[i].token!.fullKey == idl.name)) {
+
+    var replacements = current.filter((curr, i) => i < ideal.length && !similar(curr, ideal[i])).map(c => toColumnOption(c));
+    var additions = current.slice(ideal.length).map(c => toColumnOption(c));
+
+    return {
+      mode: "ReplaceOrAdd",
+      columns: [...replacements, ...additions]
     };
   }
 
@@ -383,16 +408,10 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
       };
     }
   }
-  
 
   return {
-    mode: "Replace",
-    columns: current.map(c => ({
-      token: c.token!.fullKey,
-      displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
-      summaryToken: c.summaryToken?.fullKey,
-      hiddenColumn: c.hiddenColumn,
-    }) as ColumnOption),
+    mode: "ReplaceAll",
+    columns: current.map(c => toColumnOption(c)),
   };
 }
 
@@ -1046,7 +1065,7 @@ export function defaultNoColumnsAllRows(fo: FindOptions, count: number | undefin
   if (newFO.columnOptions == undefined && newFO.columnOptionsMode == undefined) {
 
     newFO.columnOptions = [];
-    newFO.columnOptionsMode = "Replace";
+    newFO.columnOptionsMode = "ReplaceAll";
   }
 
   if (newFO.pagination == undefined) {
@@ -1366,7 +1385,7 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   };
 
   return getQueryDescription(fo.queryName)
@@ -1385,7 +1404,7 @@ export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenStri
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: tokens.map(t => softCast<ColumnOption>({ token: t})),
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   };
 
   return getQueryDescription(fo.queryName)
@@ -1449,7 +1468,7 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
   if (entity == null)
@@ -1469,7 +1488,7 @@ export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> |
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a  })),
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
   if (entity == null)
@@ -1490,7 +1509,7 @@ export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: Quer
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "All" },
     columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
   if (entity == null)

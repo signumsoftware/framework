@@ -1241,8 +1241,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       var formatter = Finder.getCellFormatter(scl.props.querySettings, summaryToken, scl);
 
+      var prefix =
+        summaryToken.key == "Sum" ? "Σ" :
+          summaryToken.toStr;
+
       return (
-        <div className={formatter.cellClass}>{formatter.formatter(val, {
+        <div className={formatter.cellClass}>
+          <span className="text-muted me-1">{prefix}</span>
+
+          {formatter.formatter(val, {
           columns: rt.columns,
           row: rt.rows[0],
           rowIndex: 0,
@@ -1392,8 +1399,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var resFo = this.state.resultFindOptions!;
 
-    var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
-      .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);
+    var extraColumns = resFo.columnOptions.map(a =>
+      a.token == null ? null :
+        a.token.queryTokenType == "Aggregate" ? (!a.token.parent ? null : ({ token: a.token.parent.fullKey, summaryToken: a.token.fullKey }) as ColumnOption) :
+          ({ token: a.token.fullKey }) as ColumnOption)
+      .notNull();
 
     var filters = SearchControlLoaded.getGroupFilters(row, resFo);
 
@@ -1401,7 +1411,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       queryName: resFo.queryKey,
       filterOptions: filters,
       columnOptions: extraColumns,
-      columnOptionsMode: "Add",
+      columnOptionsMode: "ReplaceOrAdd",
       systemTime: resFo.systemTime && { ...resFo.systemTime },
       includeDefaultFilters: false,
     }).then(() => {

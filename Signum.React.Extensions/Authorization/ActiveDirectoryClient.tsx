@@ -140,7 +140,7 @@ function findActiveDirectoryUser(): Promise<Lite<UserEntity> | undefined> {
       { token: "Surname" },
       { token: "JobTitle" },
     ],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, { searchControlProps: { allowChangeOrder: false } })
     .then(a => a && API.createADUser(toActiveDirectoryUser(a.row, a.searchControl)));
 }
