@@ -72,6 +72,7 @@ public static class QueryAuthLogic
                 });
             };
 
+            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
             sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
         }
     }

@@ -210,8 +210,12 @@ public class CollectionToArrayToken : QueryToken
 [DescriptionOptions(DescriptionOptions.Members)]
 public enum CollectionToArrayType
 {
+    [Description("Separated by Comma")]
     SeparatedByComma,
+    [Description("Separated by Comma (Distinct)")]
     SeparatedByCommaDistict,
+    [Description("Separated by New Line")]
     SeparatedByNewLine,
+    [Description("Separated by New Line (Distinct)")]
     SeparatedByNewLineDistict,
 }
