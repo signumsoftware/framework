@@ -10,8 +10,9 @@ export const ColumnOptionsMode = new EnumType<ColumnOptionsMode>("ColumnOptionsM
 export type ColumnOptionsMode =
   "Add" |
   "Remove" |
-  "Replace" |
-  "InsertStart";
+  "ReplaceAll" |
+  "InsertStart" |
+  "ReplaceOrAdd";
 
 export const DashboardBehaviour = new EnumType<DashboardBehaviour>("DashboardBehaviour");
 export type DashboardBehaviour =
