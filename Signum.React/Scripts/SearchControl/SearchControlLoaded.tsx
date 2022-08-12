@@ -65,7 +65,7 @@ export interface SearchControlLoadedProps {
   showFilterButton: boolean;
   showSystemTimeButton: boolean;
   showGroupButton: boolean;
-  showFooter: boolean;
+  showFooter?: boolean;
   allowChangeColumns: boolean;
   allowChangeOrder: boolean;
   create: boolean;
@@ -501,7 +501,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             </tbody>
           </table>
         </div>
-        {p.showFooter && <PaginationSelector pagination={fo.pagination} onPagination={this.handlePagination} resultTable={this.state.resultTable} />}
+        {(p.showFooter ?? (this.state.resultTable != null && (this.state.resultTable.totalElements == null || this.state.resultTable.totalElements > this.state.resultTable.rows.length))) &&
+          <PaginationSelector pagination={fo.pagination} onPagination={this.handlePagination} resultTable={this.state.resultTable} />}
         {this.state.contextualMenu && this.renderContextualMenu()}
       </div>
     );
