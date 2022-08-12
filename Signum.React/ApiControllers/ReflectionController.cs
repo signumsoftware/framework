@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http.Extensions;
+using Signum.Engine.Authorization;
 
 namespace Signum.React.ApiControllers;
 
@@ -55,7 +56,10 @@ public class ReflectionController : ControllerBase
             User = UserEntity.Current,
         };
 
-        clientException.Save();
+        using (AuthLogic.Disable())
+        {
+            clientException.Save();
+        }
     }
 
     private static string? Try(int size, Func<string?> getValue)
