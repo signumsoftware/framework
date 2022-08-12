@@ -536,6 +536,11 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
 
 }
 
+.sf-small-column{
+    width: 0%;
+    min-width: 36px;
+}
+
 @media (min-width: 768px){
     .try-no-wrap {
         white-space: nowrap;

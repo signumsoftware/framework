@@ -1278,17 +1278,23 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return toArray != null && !isDerivedKey(toArray.parent);
     }
 
+    var qs = this.props.querySettings;
+    var fillWidths = this.props.findOptions.columnOptions.map(co => (co.token != null && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this)).fillWidth));
+
+    var allSmall = fillWidths.every(a => a == false);
+
     return (
       <tr>
-        {this.props.allowSelection && <th className="sf-th-selection">
+        {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
           <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
         </th>
         }
-        {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
+        {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
         {this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns).map((co, i) =>
           <th key={i}
             draggable={true}
             className={classes(
+              fillWidths[i] ? undefined : "sf-small-column",
               i == this.state.dragColumnIndex && "sf-draggin",
               co == this.state.editingColumn && "sf-current-column",
               co.hiddenColumn && "sf-hidden-column",
@@ -1316,6 +1322,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             {getSummary(co.summaryToken)}
           </th>
         )}
+        {allSmall && <th></th>}
       </tr>
     );
   }

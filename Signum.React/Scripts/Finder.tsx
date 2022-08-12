@@ -1879,6 +1879,7 @@ export interface FormatRule {
 export class CellFormatter {
   constructor(
     public formatter: (cell: any, ctx: CellFormatterContext, currentToken: QueryToken) => React.ReactChild | undefined,
+    public fillWidth: boolean,
     public cellClass?: string) {
   }
 }
@@ -1933,12 +1934,12 @@ function initFormatRules(): FormatRule[] {
     {
       name: "Object",
       isApplicable: qt => true,
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell?.toString()}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell?.toString()}</span> : undefined, true)
     },
     {
       name: "Object",
       isApplicable: qt => qt.filterType == "Embedded" || qt.filterType == "Lite",
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{getToString(cell)}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{getToString(cell)}</span> : undefined, true)
     },
     {
       name: "MultiLine",
@@ -1951,12 +1952,25 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, true)
+    },
+    {
+      name: "SmallText",
+      isApplicable: qt => {
+        if (qt.type.name == "string" && qt.propertyRoute != null) {
+          var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+          if (pr != null && pr.member != null && (!pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength < 20))
+            return true;
+        }
+
+        return false;
+      },
+      formatter: qt => new CellFormatter(cell => cell ? <span>{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, false)
     },
     {
       name: "Password",
       isApplicable: qt => qt.format == "Password",
-      formatter: qt => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined, false)
     },
     {
       name: "Enum",
@@ -1968,25 +1982,32 @@ function initFormatRules(): FormatRule[] {
         var ei = getEnumInfo(qt.type.name, cell);
 
         return <span className="try-no-wrap">{ei ? ei.niceName : cell}</span>
-      })
+      }, false)
     },
     {
       name: "Lite",
       isApplicable: qt => qt.filterType == "Lite",
-      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />, true)
     },
-
+    {
+      name: "LiteNoFill",
+      isApplicable: qt => {
+        debugger;
+        return qt.filterType == "Lite" && tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
+      },
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />, false)
+    },
     {
       name: "Guid",
       isApplicable: qt => qt.filterType == "Guid",
-      formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid try-no-wrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
+      formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid try-no-wrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>, false)
     },
     {
       name: "DateTime",
       isApplicable: qt => qt.filterType == "DateTime",
       formatter: qt => {
         const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
@@ -1995,7 +2016,7 @@ function initFormatRules(): FormatRule[] {
       formatter: qt => {
         const durationFormat = toLuxonDurationFormat(qt.format) ?? "hh:mm:ss";
 
-        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
@@ -2011,8 +2032,8 @@ function initFormatRules(): FormatRule[] {
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-        }, "date-cell");
+          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>;
+        }, false, "date-cell"); //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
@@ -2028,8 +2049,8 @@ function initFormatRules(): FormatRule[] {
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-        }, "date-cell");
+          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; 
+        }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
@@ -2037,7 +2058,7 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => qt.filterType == "Integer" || qt.filterType == "Decimal",
       formatter: qt => {
         const numberFormat = toNumberFormat(qt.format);
-        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, "numeric-cell");
+        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, false, "numeric-cell");
       }
     },
     {
@@ -2045,13 +2066,13 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
       formatter: qt => {
         const numberFormat = toNumberFormat(qt.format);
-        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, "numeric-cell");
+        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, false, "numeric-cell");
       }
     },
     {
       name: "Bool",
       isApplicable: qt => qt.filterType == "Boolean",
-      formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, "centered-cell")
+      formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, false, "centered-cell")
     },
   ];
 }
