@@ -132,8 +132,14 @@ function logError(error: Error) {
   } 
 
   lastError = { model: errorModel, date: date };
-
-  ajaxPost({ url: "~/api/registerClientError" }, errorModel);
+  ajaxPost({ url: "~/api/registerClientError" }, errorModel)
+    .catch(e => {
+      if (Modals.isStarted()) {
+        ErrorModal.showErrorModal(error);
+      }
+      else
+        console.error("Unable to save client-side error:", error);
+    });
 }
 
 ErrorModal.register = () => {

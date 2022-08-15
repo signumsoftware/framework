@@ -44,9 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj" />
-    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>

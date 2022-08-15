@@ -56,7 +56,7 @@ public class ReflectionController : ControllerBase
             User = UserEntity.Current,
         };
 
-        using (AuthLogic.Disable())
+        using (ExecutionMode.Global())
         {
             clientException.Save();
         }
