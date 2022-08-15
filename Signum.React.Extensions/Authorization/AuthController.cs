@@ -91,11 +91,14 @@ public class AuthController : ControllerBase
     [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
     public LoginResponse? LoginWindowsAuthentication(bool throwError)
     {
-        string? error = WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext);
-        if (error != null)
+        var exception = WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext);
+        if (exception != null)
         {
             if (throwError)
-                throw new InvalidOperationException(error);
+            {
+                exception.PreserveStackTrace();
+                throw exception;
+            }
 
             return null;
         }
