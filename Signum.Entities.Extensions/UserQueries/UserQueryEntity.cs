@@ -134,7 +134,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         GroupResults = element.Attribute("GroupResults")?.Let(a => bool.Parse(a.Value)) ?? false;
         ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
         PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
-        ColumnsMode = element.Attribute("ColumnsMode")!.Value.ToEnum<ColumnOptionsMode>();
+        ColumnsMode = element.Attribute("ColumnsMode")!.Value.Let(cm => cm == "Replace" ? "ReplaceAll" : cm).ToEnum<ColumnOptionsMode>();
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));

@@ -1,3 +1,4 @@
+using Microsoft.SqlServer.Server;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
@@ -6,7 +7,6 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using SqlMethodAttribute = Microsoft.Data.SqlClient.Server.SqlMethodAttribute;
 
 namespace Signum.Engine.Linq;
 
