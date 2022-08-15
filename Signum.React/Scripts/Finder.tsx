@@ -1992,7 +1992,6 @@ function initFormatRules(): FormatRule[] {
     {
       name: "LiteNoFill",
       isApplicable: qt => {
-        debugger;
         return qt.filterType == "Lite" && tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
       },
       formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />, false)

@@ -46,7 +46,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
   Finder.formatRules.push({
     name: type.typeName + "_Download",
     isApplicable: qt => qt.type.name == type.typeName && !isImage(qt.propertyRoute),
-    formatter: qt => new CellFormatter(cell => cell ? <FileDownloader entityOrLite={cell} /> : undefined)
+    formatter: qt => new CellFormatter(cell => cell ? <FileDownloader entityOrLite={cell} /> : undefined, true)
   });
 
   Finder.formatRules.push({
@@ -54,7 +54,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
     isApplicable: qt => qt.type.name == type.typeName && isImage(qt.propertyRoute),
     formatter: c => new CellFormatter(cell => !cell ? undefined :
       isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e as IFile & ModifiableEntity} />}</FetchInState> :
-        <FileThumbnail file={cell as IFile & ModifiableEntity} />)
+        <FileThumbnail file={cell as IFile & ModifiableEntity} />, false)
   });
 }
 
