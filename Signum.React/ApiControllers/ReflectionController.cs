@@ -4,10 +4,8 @@ using Signum.Engine.Basics;
 using Signum.React.Filters;
 using Microsoft.AspNetCore.Http;
 using Signum.Engine.Maps;
-using Signum.Entities.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http.Extensions;
-using Signum.Engine.Authorization;
 
 namespace Signum.React.ApiControllers;
 
@@ -53,7 +51,7 @@ public class ReflectionController : ControllerBase
 
             Version = Schema.Current.Version.ToString(),
             ApplicationName = Schema.Current.ApplicationName,
-            User = UserEntity.Current,
+            User = UserHolder.Current.User,
         };
 
         using (ExecutionMode.Global())
