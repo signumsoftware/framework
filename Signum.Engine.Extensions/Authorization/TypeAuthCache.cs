@@ -72,9 +72,18 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
     {
         TypeEntity type = (TypeEntity)arg;
 
-        var command = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(type)));
+        var ruleTypes = Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(type));
+        var ruleTypesCommand = Administrator.UnsafeDeletePreCommand(ruleTypes);
 
-        return command;
+        var ruleTypeConditions = Database.Query<RuleTypeConditionEntity>().Where(a => ruleTypes.Any(rt => rt.Is(a.RuleType)));
+        var ruleTypeConditionsCommand = Administrator.UnsafeDeletePreCommand(ruleTypeConditions);
+
+        var mlist = Administrator.UnsafeDeletePreCommandMList((RuleTypeConditionEntity rt) => rt.Conditions, 
+            Database.MListQuery((RuleTypeConditionEntity rt) => rt.Conditions).Where(mle => ruleTypeConditions.Any(rtc => rtc.Is(mle.Parent))));
+
+        var emptyRules = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(rt => rt.Conditions.Count == 0), force: true, avoidMList: true);
+
+        return SqlPreCommand.Combine(Spacing.Simple, mlist, ruleTypeConditionsCommand, emptyRules, ruleTypesCommand);
     }
 
     static SqlPreCommand? AuthCache_PreDeleteSqlSync_Condition(Entity arg)
