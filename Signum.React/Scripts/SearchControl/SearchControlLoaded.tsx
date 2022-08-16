@@ -1647,15 +1647,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   getSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
 
-    var result = this.tryGetSelectedValue(token, automaticEntityPrefix);
-    if (result == null)
-      throw new Error(`No column '${token}' found`);
+    var result = this.tryGetSelectedValue(token, automaticEntityPrefix, true);
 
-    return result.value;
+    return result!.value;
   }
 
-  tryGetSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): { value: Finder.AddToLite<T> | undefined } | undefined {
-    
+  tryGetSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true, throwError = false): { value: Finder.AddToLite<T> | undefined } | undefined {
+
     const tokenName = token.toString();
 
     const sc = this;
@@ -1672,13 +1670,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var distinctValues = sc.state.selectedRows!.map(r => r.columns[colIndex]).distinctBy(s => Finder.Encoder.stringValue(s));
 
         if (distinctValues.length > 1) {
-          const co = sc.state.resultFindOptions!.columnOptions.single(co => co.token?.fullKey == tokenName);
-          throw new Error(SearchMessage.MoreThanOne0Selected.niceToString(co.token?.niceName));
+          if (throwError) {
+            const co = sc.state.resultFindOptions!.columnOptions.single(co => co.token?.fullKey == tokenName);
+            throw new Error(SearchMessage.MoreThanOne0Selected.niceToString(co.token?.niceName));
+          }
+          else {
+            return undefined;
+          }
         }
 
-        return { value: distinctValues[0] }; 
+        return { value: distinctValues[0] };
       }
-
     }
 
     var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
@@ -1686,10 +1688,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return { value: filter?.value };
 
     if (automaticEntityPrefix) {
-      var result = this.tryGetSelectedValue(tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false);
+      var result = this.tryGetSelectedValue(tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false, false);
       if (result != null)
         return result as any;
     }
+
+    if (throwError)
+      throw new Error(`No column '${token}' found`);
 
     return undefined;
   }
