@@ -28,7 +28,9 @@ public class ExpressionEvaluator : ExpressionVisitor
 
         HashSet<Expression> candidates = ExpressionNominator.Nominate(exp);
 
-        return new ExpressionEvaluator(candidates).Visit(exp)!;
+        var result =  new ExpressionEvaluator(candidates).Visit(exp)!;
+
+        return result;
     }
 
     public static object? Eval(Expression expression)
@@ -232,6 +234,7 @@ public class ExpressionEvaluator : ExpressionVisitor
 
             return constant;
         }
-        return base.Visit(exp);
+        var result = base.Visit(exp);
+        return result;
     }
 }
