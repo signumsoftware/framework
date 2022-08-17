@@ -138,7 +138,7 @@ interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 export function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
-  return <FileImage file={file} onClick={() => ImageModal.show(file)} {...attrs} />
+  return <FileImage file={file} onClick={e => ImageModal.show(file, e)} {...attrs} />
 }
 
 FileThumbnail.defaultProps = {

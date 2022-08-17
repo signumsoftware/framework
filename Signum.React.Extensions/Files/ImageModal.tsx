@@ -1,11 +1,13 @@
 import * as React from 'react'
-import { ModifiableEntity, } from '@framework/Signum.Entities'
+import { isModifiableEntity, ModifiableEntity, } from '@framework/Signum.Entities'
 import { IFile } from './Signum.Entities.Files'
 import { Modal } from 'react-bootstrap';
 import "./Files.css"
 import { FileImage } from './FileImage';
 import { IModalProps, openModal } from '@framework/Modals'
 import { PropertyRoute } from '@framework/Lines';
+import  * as Services from '@framework/Services';
+import { configurtions } from './FileDownloader';
 
 interface ImageModalProps extends IModalProps<undefined> {
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
@@ -26,7 +28,7 @@ export function ImageModal(p: ImageModalProps) {
   }
 
   return (
-    <Modal onHide={handleCancelClicked} show={showImage} className="message-modal" size="lg" onExited={handleOnExited}>
+    <Modal onHide={handleCancelClicked} show={showImage} className="message-modal" size="xl" onExited={handleOnExited}>
       <div className="modal-header">
         <h4 className="modal-title">
           {p.title || p.file.fileName}
@@ -40,9 +42,30 @@ export function ImageModal(p: ImageModalProps) {
   );
 }
 
+ImageModal.show = (file: IFile & ModifiableEntity, event: React.MouseEvent<HTMLImageElement, MouseEvent>, title?: string, imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>) => {
+  if (event.ctrlKey || event.button == 1) {
 
-ImageModal.show = (file: IFile & ModifiableEntity, title?: string, imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>) => {
-  openModal(<ImageModal file={file} title={title} imageHtmlAttributes={imageHtmlAttributes} />);
+    var w = window.open("")!;
+
+    if (w == null)
+      return; 
+
+    var url =
+        configurtions[file.Type].fileUrl!(file);
+
+    Services.ajaxGetRaw({ url: url })
+      .then(resp => resp.blob())
+      .then(blob => {
+
+        var image = new Image();
+        image.src = URL.createObjectURL(blob);
+        w!.document.write(image.outerHTML);
+        w!.document.title = document.title;
+      });
+  }
+  else {
+    openModal(<ImageModal file={file} title={title} imageHtmlAttributes={imageHtmlAttributes} />);
+  }
 } 
 
 
