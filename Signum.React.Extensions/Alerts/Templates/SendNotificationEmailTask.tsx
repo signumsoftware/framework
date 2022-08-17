@@ -11,6 +11,9 @@ export default function SendNotificationEmailTask(p: { ctx: TypeContext<SendNoti
   const ctx = p.ctx;
   const forceUpdate = useForceUpdate();
 
+  var maxValue = React.useMemo(() => ctx.value.sendNotificationsOlderThan == null ? null :  DateTime.local().minus({ minutes: ctx.value.sendNotificationsOlderThan }).toISO(), [ctx.value.sendNotificationsOlderThan]);
+  var minValue = React.useMemo(() => ctx.value.ignoreNotificationsOlderThan == null ? null :  DateTime.local().minus({ days: ctx.value.ignoreNotificationsOlderThan }).toISO(), [ctx.value.ignoreNotificationsOlderThan]);
+
   return (
     <div>
       <ValueLine ctx={ctx.subCtx(n => n.sendNotificationsOlderThan)} labelColumns={4} onChange={forceUpdate} valueColumns={2} />
@@ -29,12 +32,9 @@ export default function SendNotificationEmailTask(p: { ctx: TypeContext<SendNoti
               operation: ctx.value.sendBehavior == "Include" ? "IsIn" : "IsNotIn",
               value: ctx.value.alertTypes.map(at => toLite(at.element))
             },
-          { token: AlertEntity.token(a => a.entity.alertDate), operation: "LessThan", value: DateTime.local().minus({ minutes: ctx.value.sendNotificationsOlderThan }).toISO() },
-          ctx.value.ignoreNotificationsOlderThan == null ? null : {
-            token: AlertEntity.token(a => a.entity.alertDate),
-            operation: "GreaterThan",
-            value: DateTime.local().minus({ days: ctx.value.ignoreNotificationsOlderThan! }).toISO()
-          },
+          { token: AlertEntity.token(a => a.entity.alertDate), operation: "LessThan", value: maxValue },
+          minValue == null ? null :
+            { token: AlertEntity.token(a => a.entity.alertDate), operation: "GreaterThan", value: minValue },
         ],
         groupResults: true,
         columnOptions: [
