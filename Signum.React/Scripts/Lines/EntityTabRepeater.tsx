@@ -173,7 +173,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                     </span>}
                   </div> as any
                 }>
-                <RenderEntity ctx={mlec} getComponent={p.getComponent} getViewPromise={p.getViewPromise} />
+                <RenderEntity ctx={mlec} getComponent={p.getComponent} getViewPromise={p.getViewPromise} extraProps={{ onChangeTitle: c.forceUpdate }} />
               </Tab>
             );
           })
