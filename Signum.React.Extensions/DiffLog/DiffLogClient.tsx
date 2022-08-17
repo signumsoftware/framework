@@ -91,7 +91,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
     Finder.formatRules.push({
       name: "LiteNoFill_TM",
       isApplicable: (qt, sc) => {
-        return qt.filterType == "Lite" && sc.props.findOptions.systemTime != null && isSystemVersioned(qt.type) &&
+        return qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(qt.type) &&
           tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
       },
       formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />, false)
