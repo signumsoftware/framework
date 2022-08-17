@@ -21,9 +21,20 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
           <ValueLine ctx={ctx.subCtx(e => e.creationDate)} readOnly={true} />
         </div>
       }
-      {ctx.value.target && <EntityLine ctx={ctx.subCtx(n => n.target)} readOnly={true} />}
+
+      <div className="row">
+        <div className="col-sm-6">
+          {ctx.value.target && <EntityLine ctx={ctx.subCtx(n => n.target)} readOnly={true} labelColumns={4} />}
+        </div>
+        <div className="col-sm-6">
+          {ctx.value.parentTarget && <EntityLine ctx={ctx.subCtx(n => n.parentTarget)} readOnly={true} labelColumns={4} />}
+        </div>
+      </div>
+
+    
       <EntityLine ctx={ctx.subCtx(n => n.recipient)} />
       <hr />
+
       <EntityCombo ctx={ctx.subCtx(n => n.alertType)} onChange={forceUpdate} />
       <ValueLine ctx={ctx.subCtx(n => n.alertDate)} />
       <ValueLine ctx={ctx.subCtx(n => n.titleField)} labelText={AlertMessage.Title.niceToString()} valueHtmlAttributes={{ placeholder: (ctx.value.alertType && AlertsClient.getTitle(null, ctx.value.alertType)) ?? undefined }} />
