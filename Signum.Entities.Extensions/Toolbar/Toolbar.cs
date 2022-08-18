@@ -41,7 +41,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
             new XAttribute("Guid", Guid),
             new XAttribute("Name", Name),
             new XAttribute("Location", Location),
-            Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             Priority == null ? null! : new XAttribute("Priority", Priority.Value.ToString()),
             new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
     }
@@ -195,7 +195,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
         return new XElement("ToolbarMenu",
             new XAttribute("Guid", Guid),
             new XAttribute("Name", Name),
-            Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
     }
 
