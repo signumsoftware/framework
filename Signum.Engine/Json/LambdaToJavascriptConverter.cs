@@ -45,6 +45,11 @@ public class LambdaToJavascriptConverter
 
         if (expr is ConstantExpression ce)
         {
+            if (ce.Value == null)
+            {
+                return "null";
+            }
+
             if (expr.Type == typeof(string))
             {
                 var str = (string)ce.Value!;
@@ -53,11 +58,6 @@ public class LambdaToJavascriptConverter
                     return "\"\"";
 
                 return "\"" + str.Replace(replacements) + "\"";
-            }
-
-            if (ce.Value == null)
-            {
-                return "null";
             }
 
             if (ReflectionTools.IsNumber(ce.Type) && ce.Value != null)
@@ -317,6 +317,11 @@ public class LambdaToJavascriptConverter
     {
         if(expr.NodeType == ExpressionType.Convert && expr.Type == typeof(object))
             expr = ((UnaryExpression)expr).Operand;
+
+        if (expr is ConstantExpression ce && ce.Value == null)
+        {
+            return "\"\"";
+        }
 
         if (expr is ConditionalExpression iff)
         {
