@@ -83,7 +83,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
       getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
       inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
       <div title={EntityControlMessage.View.niceToString()} className="d-inline-flex align-items-center">
-        <UserCircle user={row.entity as Lite<UserEntity>} className="me-1" />
+        <SmallProfilePhoto user={row.entity as Lite<UserEntity>} className="me-1" />
         {EntityBaseController.viewIcon}
       </div>
     </EntityLink>)
