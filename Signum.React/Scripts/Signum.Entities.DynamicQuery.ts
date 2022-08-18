@@ -133,6 +133,7 @@ export module QueryTokenMessage {
   export const RowId = new MessageKey("QueryTokenMessage", "RowId");
   export const CellOperation = new MessageKey("QueryTokenMessage", "CellOperation");
   export const ContainerOfCellOperations = new MessageKey("QueryTokenMessage", "ContainerOfCellOperations");
+  export const EntityType = new MessageKey("QueryTokenMessage", "EntityType");
 }
 
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");
