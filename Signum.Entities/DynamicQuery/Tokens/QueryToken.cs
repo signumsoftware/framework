@@ -192,6 +192,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (ut == typeof(string))
             return StringTokens().AndHasValue(this);
 
+        if (ut == typeof(Guid))
+            return new List<QueryToken>().AndHasValue(this);
+
         Type cleanType = type.CleanType();
         if (cleanType.IsIEntity())
         {
