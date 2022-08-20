@@ -20,7 +20,7 @@ public class IsolationFilter : SignumDisposableResourceFilter
         if (user == null)
             return null;
 
-        var isolation = user.GetClaim("Isolation") as Lite<IsolationEntity>;
+        var isolation = IsolationEntity.CurrentUserIsolation;
 
         if (isolation == null)
         {
@@ -29,7 +29,7 @@ public class IsolationFilter : SignumDisposableResourceFilter
                 isolation = Lite.Parse<IsolationEntity>(isolationKey);
         }
 
-        if(isolation == null)
+        if (isolation == null)
         {
             if (GetIsolationFromHttpContext != null)
                 isolation = GetIsolationFromHttpContext(context.HttpContext);
