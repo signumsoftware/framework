@@ -206,6 +206,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
             Text = elem.Value
         }).ToMList();
 
+        Attachments.SynchronizeAttachments(element.Element("Attachments")?.Elements().ToList(), ctx, this);
 
         Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script =  app.Value});
         ParseData(ctx.GetQueryDescription(Query));
@@ -347,9 +348,47 @@ public class EmailTemplateMessageEmbedded : EmbeddedEntity
     }
  }
 
+public static class AttachmentFromXmlExtensions
+{
+    public static Dictionary<string, Type> TypeMapping = new Dictionary<string, Type>();
+    public static void SynchronizeAttachments(this MList<IAttachmentGeneratorEntity> entities, List<XElement>? xElements, IFromXmlContext ctx, IUserAssetEntity userAsset)
+    {
+        if (xElements == null)
+            xElements = new List<XElement>();
+
+        for (int i = 0; i < xElements.Count; i++)
+        {
+            IAttachmentGeneratorEntity entity;
+            var type = TypeMapping.GetOrThrow<string, Type>(xElements[i].Name.LocalName);
+
+            if (entities.Count == i)
+            {
+                entity = (IAttachmentGeneratorEntity)Activator.CreateInstance(type)!;
+                entities.Add(entity);
+            }
+            else if(entities[i].GetType() != type)
+            {
+                entity = entities[i] = (IAttachmentGeneratorEntity)Activator.CreateInstance(type)!;
+            }
+            else
+                entity = entities[i];
+
+            entity.FromXml(xElements[i], ctx, userAsset);
+        }
+
+        if (entities.Count > xElements.Count)
+        {
+            entities.RemoveRange(xElements.Count, entities.Count - xElements.Count);
+        }
+    }
+}
+
 
 public interface IAttachmentGeneratorEntity : IEntity
 {
+    XElement ToXml(IToXmlContext ctx);
+
+    void FromXml(XElement element, IFromXmlContext ctx, IUserAssetEntity userAsset);
 }
 
 [AutoInit]
