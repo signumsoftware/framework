@@ -181,30 +181,31 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 
         IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml")!.Value);
 
-        From = element.Element("From")?.Let(from => new EmailTemplateFromEmbedded
+        From = From.CreateOrAssignEmbedded(element.Element("From"), (etf, xml) => 
         {
-            DisplayName = from.Attribute("DisplayName")?.Value,
-            EmailAddress = from.Attribute("EmailAddress")?.Value,
-            Token = from.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value)),
-            WhenMany = from.Attribute("WhenMany")?.Value.ToEnum<WhenManyFromBehaviour>() ?? WhenManyFromBehaviour.FistResult,
-            WhenNone = from.Attribute("WhenNone")?.Value.ToEnum<WhenNoneFromBehaviour>() ?? WhenNoneFromBehaviour.NoMessage,
+            etf.DisplayName = xml.Attribute("DisplayName")?.Value;
+            etf.EmailAddress = xml.Attribute("EmailAddress")?.Value;
+            etf.Token = xml.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
+            etf.WhenMany = xml.Attribute("WhenMany")?.Value.ToEnum<WhenManyFromBehaviour>() ?? WhenManyFromBehaviour.FistResult;
+            etf.WhenNone = xml.Attribute("WhenNone")?.Value.ToEnum<WhenNoneFromBehaviour>() ?? WhenNoneFromBehaviour.NoMessage;
         });
 
-        Recipients = element.Element("Recipients")!.Elements("Recipient").Select(rep => new EmailTemplateRecipientEmbedded
+        Recipients.Synchronize(element.Element("Recipients")!.Elements("Recipient").ToList(), (rep, xml) => 
         {
-            DisplayName = rep.Attribute("DisplayName")?.Value,
-            EmailAddress = rep.Attribute("EmailAddress")?.Value,
-            Kind = rep.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>(),
-            Token = rep.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value)),
-            WhenMany = rep.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipiensBehaviour>() ?? WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients,
-            WhenNone = rep.Attribute("WhenNone")?.Value?.ToEnum<WhenNoneRecipientsBehaviour>() ?? WhenNoneRecipientsBehaviour.ThrowException,
-        }).ToMList();
+            rep.DisplayName = xml.Attribute("DisplayName")?.Value;
+            rep.EmailAddress = xml.Attribute("EmailAddress")?.Value;
+            rep.Kind = xml.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>();
+            rep.Token = xml.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value));
+            rep.WhenMany = xml.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipiensBehaviour>() ?? WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients;
+            rep.WhenNone = xml.Attribute("WhenNone")?.Value?.ToEnum<WhenNoneRecipientsBehaviour>() ?? WhenNoneRecipientsBehaviour.ThrowException;
+        });
 
-        Messages = element.Element("Messages")!.Elements("Message").Select(elem => new EmailTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo")!.Value))
+        Messages.Synchronize(element.Element("Messages")!.Elements("Message").ToList(), (et, xml) =>
         {
-            Subject = elem.Attribute("Subject")!.Value,
-            Text = elem.Value
-        }).ToMList();
+            et.CultureInfo = ctx.GetCultureInfoEntity(xml.Attribute("CultureInfo")!.Value);
+            et.Subject = xml.Attribute("Subject")!.Value;
+            et.Text = xml.Value;
+        });
 
         Attachments.SynchronizeAttachments(element.Element("Attachments")?.Elements().ToList(), ctx, this);
 
@@ -301,7 +302,7 @@ public enum WhenManyFromBehaviour
 
 public class EmailTemplateMessageEmbedded : EmbeddedEntity
 {
-    private EmailTemplateMessageEmbedded() { }
+    public EmailTemplateMessageEmbedded() { }
 
     public EmailTemplateMessageEmbedded(CultureInfoEntity culture)
     {
