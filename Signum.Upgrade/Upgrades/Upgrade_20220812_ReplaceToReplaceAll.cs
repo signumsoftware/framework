@@ -14,7 +14,7 @@ class Upgrade_20220812_ReplaceToReplaceAll : CodeUpgradeBase
 
         uctx.ForeachCodeFile("*.csproj", file =>
         {
-            file.UpdateNugetReference("Microsoft.Graph", "4.46.0");
+            file.UpdateNugetReference("Microsoft.Graph", "4.36.0");
             file.UpdateNugetReference("Microsoft.Identity.Client", "4.46.0");
             file.UpdateNugetReference("Microsoft.NET.Test.Sdk", "17.3.0");
             file.UpdateNugetReference("xunit", "2.4.2");
@@ -25,7 +25,9 @@ class Upgrade_20220812_ReplaceToReplaceAll : CodeUpgradeBase
             file.UpdateNugetReference("Microsoft.VisualStudio.Azure.Containers.Tools.Targets", "1.16.1");
             file.UpdateNugetReference("Swashbuckle.AspNetCore", "6.4.0");
             file.UpdateNugetReference("Unofficial.Microsoft.SqlServer.Types", "5.0.0");
-            file.UpdateNugetReference("Microsoft.Data.SqlClient", "4.1.0");
+            file.UpdateNugetReference("Microsoft.Data.SqlClient", "5.0.0");
+            file.UpdateNugetReference("DocumentFormat.OpenXml", "2.17.1");
+            file.UpdateNugetReference("Azure.Storage.Blobs", "12.13.0");
         });
     }
 }
