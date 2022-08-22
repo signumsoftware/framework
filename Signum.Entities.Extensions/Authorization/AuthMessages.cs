@@ -185,7 +185,7 @@ public enum AuthAdminMessage
     [Description("Same as {0}")]
     SameAs0,
     Nothing,
-    Everithing,
+    Everything,
 
     [Description("Select Type Condition(s)")]
     SelectTypeConditions,
