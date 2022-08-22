@@ -1,3 +1,4 @@
+using Signum.Entities.Basics;
 using System.ComponentModel;
 
 namespace Signum.Entities.Isolation;
@@ -57,6 +58,18 @@ public class IsolationEntity : Entity
                 return tuple.Item1;
 
             return null;
+        }
+    }
+
+    public static Lite<IsolationEntity>? CurrentUserIsolation
+    {
+        get
+        {
+            var userHolder = UserHolder.Current;
+            if (userHolder == null)
+                return null;
+
+            return userHolder.GetClaim("Isolation") as Lite<IsolationEntity>;
         }
     }
 }

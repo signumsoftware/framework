@@ -281,7 +281,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
         var lastMember = members[members.Length - 1];
 
         if (lastMember is Type t)
-            return ((FieldImplementedBy)field!).ImplementationColumns.GetOrThrow(t);
+            return ((FieldImplementedBy)field!).ImplementationColumns.GetOrThrow(t.CleanType());
         else if (current != null)
             return (IColumn)current.GetField(lastMember);
         else
