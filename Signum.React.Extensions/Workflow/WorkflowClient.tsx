@@ -891,8 +891,9 @@ export interface CaseEntityPack {
 }
 
 export interface WorkflowScriptRunnerState {
-  scriptRunnerPeriod: number;
   running: boolean;
+  initialDelayMilliseconds: number | null;
+  scriptRunnerPeriod: number;
   isCancelationRequested: boolean;
   nextPlannedExecution: string;
   queuedItems: number;

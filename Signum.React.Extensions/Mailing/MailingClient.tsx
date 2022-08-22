@@ -235,6 +235,7 @@ export module API {
 export interface AsyncEmailSenderState {
   asyncSenderPeriod: number;
   running: boolean;
+  initialDelayMilliseconds: number | null;
   machineName: string;
   isCancelationRequested: boolean;
   nextPlannedExecution: string;

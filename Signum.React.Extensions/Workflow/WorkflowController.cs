@@ -218,6 +218,12 @@ public class WorkflowController : Controller
         public bool validationResult;
     }
 
+    [HttpGet("api/workflow/scriptRunner/simpleStatus"), SignumAllowAnonymous]
+    public SimpleStatus GetSimpleStatus()
+    {
+        return WorkflowScriptRunner.GetSimpleStatus();
+    }
+
     [HttpGet("api/workflow/scriptRunner/view")]
     public WorkflowScriptRunnerState ViewScriptRunner()
     {
@@ -233,7 +239,7 @@ public class WorkflowController : Controller
     {
         WorkflowPermission.ViewWorkflowPanel.AssertAuthorized();
 
-        WorkflowScriptRunner.StartRunningScripts(0);
+        WorkflowScriptRunner.StartRunningScripts();
 
         Thread.Sleep(1000);
     }
