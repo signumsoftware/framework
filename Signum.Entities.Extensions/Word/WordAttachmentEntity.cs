@@ -1,5 +1,7 @@
 using Signum.Entities.Mailing;
 using Signum.Entities.Templating;
+using Signum.Entities.UserAssets;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Word;
 
@@ -31,4 +33,19 @@ public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => FileName);
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        throw new NotImplementedException();
+    }
+
+    static WordAttachmentEntity()
+    {
+        AttachmentFromXmlExtensions.TypeMapping.Add("WordAttachment", typeof(WordAttachmentEntity));
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx, IUserAssetEntity userAsset)
+    {
+        throw new NotImplementedException();
+    }
 }
