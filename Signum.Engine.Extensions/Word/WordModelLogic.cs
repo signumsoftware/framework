@@ -240,6 +240,11 @@ public static class WordModelLogic
         return new FileContent(box.FileName!, bytes);
     }
 
+    public static WordModelEntity GetWordModelEntity(string fullClassName)
+    {
+        return WordModelTypeToEntity.Value.Where(x => x.Key.FullName == fullClassName).FirstOrDefault().Value;
+    }
+
     public static WordModelEntity GetWordModelEntity(Type type)
     {
         return WordModelTypeToEntity.Value.GetOrThrow(type);
