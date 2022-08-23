@@ -1034,7 +1034,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         menuItems.push(<Dropdown.Divider />);
 
-        if (isColumnGroupable(cm.columnIndex))
+        if (p.showGroupButton && isColumnGroupable(cm.columnIndex))
           menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
             <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
             <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />

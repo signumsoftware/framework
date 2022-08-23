@@ -18,16 +18,13 @@ class Upgrade_20220822_StartAfter : CodeUpgradeBase
                 "ProcessRunner.StartRunningProcessesAfter(");
 
             file.Replace(
-                "SchedulerLogic.StartScheduledTasks(",
-                "ScheduleTaskRunner.StartScheduledTaskAfter(");
+                "SchedulerLogic.StartScheduledTasks();",
+                "ScheduleTaskRunner.StartScheduledTaskAfter(5 * 1000);");
 
             file.Replace(
                 "AsyncEmailSenderLogic.StartRunningEmailSenderAsync(",
                 "AsyncEmailSender.StartAsyncEmailSenderAfter(");
 
-            file.Replace(
-                "ProcessRunnerLogic.StartRunningProcesses(",
-                "ProcessRunner.StartRunningProcessesAfter(");
         });
     }
 }
