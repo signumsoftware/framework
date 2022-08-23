@@ -1965,12 +1965,12 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span>{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, false)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, false)
     },
     {
       name: "Password",
       isApplicable: qt => qt.format == "Password",
-      formatter: qt => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined, false)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">•••••••</span> : undefined, false)
     },
     {
       name: "Enum",
