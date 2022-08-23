@@ -52,19 +52,19 @@ table.sf-search-results > tbody > tr > td {
 /*Drag and drop*/
 
 .drag-left {
-    box-shadow: inset #AAA 3px 0px 0px 0px;
+    box-shadow: inset #AAA 3px 0px 0px 0px !important;
 }
 
 .drag-right {
-    box-shadow: inset #AAA -3px 0px 0px 0px;
+    box-shadow: inset #AAA -3px 0px 0px 0px !important;
 }
 
 .drag-top {
-    box-shadow: inset #AAA 0px 3px 0px 0px;
+    box-shadow: inset #AAA 0px 3px 0px 0px !important;
 }
 
 .drag-bottom {
-    box-shadow: inset #AAA 0px -3px 0px 0px;
+    box-shadow: inset #AAA 0px -3px 0px 0px !important;
 }
 
 .sf-dragging {
