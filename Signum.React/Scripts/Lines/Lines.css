@@ -345,6 +345,15 @@ input[type=checkbox].form-control-xs {
     padding: 0 0 0 0.4em;
 }
 
+.input-group > .form-control.rw-dropdown-list{
+    display: flex;
+    padding: 0;
+}
+
+    .input-group > .form-control.rw-dropdown-list > .rw-widget-input {
+        flex: 1;
+    }
+
 .form-control-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-combobox-input {

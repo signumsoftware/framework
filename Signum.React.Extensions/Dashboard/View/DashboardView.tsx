@@ -21,6 +21,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
 
   const forceUpdate = useForceUpdate();
   const dashboardController = React.useMemo(() => new DashboardController(forceUpdate, p.dashboard), [p.dashboard]);
+  dashboardController.setIsLoading();
 
   function renderBasic() {
     const db = p.dashboard;

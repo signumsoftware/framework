@@ -8,6 +8,7 @@ import ChartRequestView from './ChartRequestView'
 import { RouteComponentProps } from 'react-router'
 import { useStateWithPromise } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
+import { getQueryNiceName } from '@framework/Reflection'
 
 interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string; }> {
 
@@ -29,6 +30,8 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
       }
     });
   }, [p.location.pathname, p.location.search, p.match.params.queryName])
+
+  AppContext.useTitle(getQueryNiceName(p.match.params.queryName));
 
   function handleOnChange(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
     if (pair!.userChart != uc)

@@ -114,7 +114,7 @@ export module AuthAdminMessage {
   export const MinumumOfThe0 = new MessageKey("AuthAdminMessage", "MinumumOfThe0");
   export const SameAs0 = new MessageKey("AuthAdminMessage", "SameAs0");
   export const Nothing = new MessageKey("AuthAdminMessage", "Nothing");
-  export const Everithing = new MessageKey("AuthAdminMessage", "Everithing");
+  export const Everything = new MessageKey("AuthAdminMessage", "Everything");
   export const SelectTypeConditions = new MessageKey("AuthAdminMessage", "SelectTypeConditions");
   export const ThereAre0TypeConditionsDefinedFor1 = new MessageKey("AuthAdminMessage", "ThereAre0TypeConditionsDefinedFor1");
   export const SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition = new MessageKey("AuthAdminMessage", "SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition");
