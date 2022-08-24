@@ -24,7 +24,7 @@ export function RenderEntity(p: RenderEntityProps) {
 
   var e = p.ctx.value
 
-  var entityFromLite = useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
+  useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
   var entity = isLite(e) ? e.entity : e;
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
