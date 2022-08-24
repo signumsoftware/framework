@@ -1,12 +1,13 @@
-import { DashboardEntity, InteractionGroup, PanelPartEmbedded } from '../Signum.Entities.Dashboard';
+import { DashboardEntity, InteractionGroup, PanelPartEmbedded, UserChartPartEntity, UserQueryPartEntity } from '../Signum.Entities.Dashboard';
 import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, FindOptions, isActive, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
-import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart';
+import { ChartRequestModel, UserChartEntity } from '../../Chart/Signum.Entities.Chart';
 import { ChartRow } from '../../Chart/ChartClient';
 import { Entity, is, Lite } from '@framework/Signum.Entities';
 import * as Finder from '../../../Signum.React/Scripts/Finder';
 import { getQueryKey } from '@framework/Reflection';
 import { Dic, softCast } from '../../../Signum.React/Scripts/Globals';
+import { UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries';
 
 
 export class DashboardController {
@@ -19,15 +20,23 @@ export class DashboardController {
   dashboard: DashboardEntity;
   queriesWithEquivalences: string/*queryKey*/[];
 
-
   invalidationMap: Map<PanelPartEmbedded, () => void> = new Map();
+
+  isLoading: boolean;
 
   constructor(forceUpdate: () => void, dashboard: DashboardEntity) {
     this.forceUpdate = forceUpdate;
     this.dashboard = dashboard;
 
     this.queriesWithEquivalences = dashboard.tokenEquivalencesGroups.flatMap(a => a.element.tokenEquivalences.map(a => a.element.query.key)).distinctBy(a => a);
-    
+
+    this.isLoading = true;
+  }
+
+  setIsLoading() {
+    this.isLoading = !this.dashboard.parts
+      .filter(p => UserQueryPartEntity.isInstance(p.element.content) || UserChartPartEntity.isInstance(p.element.content))
+      .every(p => this.invalidationMap.has(p.element));
   }
 
   registerInvalidations(embedded: PanelPartEmbedded, invalidation: () => void) {
@@ -47,6 +56,14 @@ export class DashboardController {
     this.forceUpdate();
   }
 
+  clearFilters(partEmbedded: PanelPartEmbedded) {
+    var current = this.filters.get(partEmbedded);
+    if (current)
+      this.lastChange.set(current.queryKey, new Date().getTime());
+    this.filters.delete(partEmbedded);
+    this.forceUpdate();
+  }
+
   setPinnedFilter(filter: DashboardPinnedFilters) {
     this.lastChange.set(filter.queryKey, new Date().getTime());
     this.pinnedFilters.set(filter.partEmbedded, filter);
@@ -59,14 +76,6 @@ export class DashboardController {
       this.lastChange.set(current.queryKey, new Date().getTime());
 
     this.pinnedFilters.delete(partEmbedded);
-    this.forceUpdate();
-  }
-
-  clearFilters(partEmbedded: PanelPartEmbedded) {
-    var current = this.filters.get(partEmbedded);
-    if (current)
-      this.lastChange.set(current.queryKey, new Date().getTime());
-    this.filters.delete(partEmbedded);
     this.forceUpdate();
   }
 
