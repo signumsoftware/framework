@@ -1453,6 +1453,17 @@ export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, add
   );
 }
 
+export function getResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
+  var fo2: FindOptions = {
+    ...fo,
+    columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+    columnOptionsMode: "ReplaceAll",
+  };
+
+  return getResultTable(fo2)
+    .then(fop => fop.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>));
+}
+
 export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
 
   fo = defaultNoColumnsAllRows(fo, undefined);
