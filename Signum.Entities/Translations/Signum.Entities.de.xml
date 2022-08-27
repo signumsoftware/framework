@@ -334,6 +334,7 @@
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
     <Member Name="Distinct" Description="Unterschiedlich" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
+    <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
     <Member Name="HasValue" Description="Hat einen Wert" />
     <Member Name="Hour" Description="Stunde" />

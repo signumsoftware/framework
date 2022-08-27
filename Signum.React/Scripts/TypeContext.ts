@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType, tryGetTypeInfo, MemberInfo } from './Reflection'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType, tryGetTypeInfo, MemberInfo, TypeInfo, getTypeInfos, getTypeInfo } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity, ModelEntity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
@@ -305,14 +305,17 @@ export class TypeContext<T> extends StyleContext {
     return result;
   }
 
-  cast<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R> {
-
+  cast<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R>;
+  cast(): TypeContext<any>;
+  cast(type?: Type<any>): TypeContext<any> 
+  {
     const entity = this.value as any as Entity;
 
-    if (type.typeName != entity.Type)
-      throw new Error(`Impossible to cast ${entity.Type} into ${type.typeName}`);
+    const typeName = type?.typeName ?? entity.Type;
+    if (typeName != entity.Type)
+      throw new Error(`Impossible to cast ${entity.Type} into ${typeName}`);
 
-    var newPr = this.propertyRoute == null ? undefined : this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
+    var newPr = this.propertyRoute == null ? undefined : this.propertyRoute.typeReference().name == typeName ? this.propertyRoute : PropertyRoute.root(typeName);
 
     const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, ""));
 
