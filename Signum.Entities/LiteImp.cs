@@ -155,10 +155,12 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
         if (this == obj)
             return true;
 
-        if (GetType() != obj.GetType())
+        if (!(obj is Lite<T> lite))
             return false;
 
-        Lite<T> lite = (Lite<T>)obj;
+        if (lite.EntityType != this.EntityType)
+            return false;
+
         if (IdOrNull != null && lite.IdOrNull != null)
             return Id == lite.Id;
         else
