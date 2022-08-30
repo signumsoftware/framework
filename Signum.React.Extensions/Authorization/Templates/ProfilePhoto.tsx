@@ -25,7 +25,7 @@ export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
     setImageError(true);
   }
 
-  var color = p.user == null || p.user.isNew ? "gray" : UserCircles.Options.getUserColor(toLite(p.user));
+  var color = p.user.isNew ? "gray" : UserCircles.Options.getUserColor(toLite(p.user));
 
   var iconSize = p.size >= 250 ? "10x" : `${Math.ceil(p.size / 25)}x`;
   return (

@@ -47,8 +47,7 @@ public class CurrentEntityConverter : IFilterValueConverter
     {
         if (expression.HasText() && expression.StartsWith(CurrentEntityKey))
         {
-            if (currentEntityType == null)
-                return new Result<Type>.Error("Parameter 'currentEntityType' is null");
+            currentEntityType = currentEntityType ?? typeof(Entity);
 
             string after = expression.Substring(CurrentEntityKey.Length).Trim();
 

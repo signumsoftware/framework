@@ -174,4 +174,4 @@ export function MicrosoftSignIn({ ctx }: { ctx: LoginContext }) {
   );
 }
 
-MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("~/signin_light.png");
+MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("~/signin_light.svg");

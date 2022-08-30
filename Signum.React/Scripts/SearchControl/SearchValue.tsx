@@ -113,6 +113,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 
     if (p.initialValue != undefined) {
       if (Hooks.areEqual(deps ?? [], initialDeps.current ?? [])) {
+        controller.value = p.initialValue;
         p.onInitialValueLoaded?.();
         return Promise.resolve(p.initialValue);
       }
@@ -320,10 +321,23 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
   function handleClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    if (e.ctrlKey || e.button == 1)
-      window.open(Finder.findOptionsPath(p.findOptions));
+    var fo: FindOptions;
+    if (p.findOptions.columnOptions == undefined && valueToken && valueToken.parent)
+      fo = {
+        ...p.findOptions,
+        columnOptions: [{
+          token: valueToken.queryTokenType == "Aggregate" ? valueToken.parent!.fullKey : valueToken.fullKey,
+          summaryToken: valueToken.queryTokenType == "Aggregate" ? valueToken.fullKey : undefined,
+        }],
+        columnOptionsMode: "ReplaceOrAdd",
+      }
     else
-      Finder.explore(p.findOptions, { searchControlProps: p.searchControlProps, modalSize: p.modalSize }).then(() => {
+      fo = p.findOptions;
+
+    if (e.ctrlKey || e.button == 1)
+      window.open(Finder.findOptionsPath(fo));
+    else
+      Finder.explore(fo, { searchControlProps: p.searchControlProps, modalSize: p.modalSize }).then(() => {
         if (!p.avoidAutoRefresh)
           refreshValue();
 

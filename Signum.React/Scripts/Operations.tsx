@@ -61,8 +61,7 @@ export function start() {
     isApplicable: c => {
       return c.type.name == "CellOperationDTO";
     },
-    formatter: c => new CellFormatter((dto: CellOperationDto, ctx) => dto ? <CellOperationButton coc={new CellOperationContext(ctx, dto)} />
-    : undefined)
+    formatter: c => new CellFormatter((dto: CellOperationDto, ctx) => dto ? <CellOperationButton coc={new CellOperationContext(ctx, dto)} /> : undefined, false)
 
   });
 

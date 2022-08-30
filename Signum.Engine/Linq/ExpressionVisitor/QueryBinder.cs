@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Data.SqlClient.Server;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Linq;
 
@@ -1665,6 +1666,38 @@ internal class QueryBinder : ExpressionVisitor
             return tablePeriod;
         }
 
+        if(m.Method.DeclaringType == typeof(TypeEntityExtensions) && m.Method.Name == nameof(TypeEntityExtensions.ToTypeEntity))
+        {
+            var arg = m.Arguments[0];
+
+
+            if (arg is TypeEntityExpression type)
+            {
+                var id = Condition(Expression.NotEqual(type.ExternalId, NullId(type.ExternalId.ValueType)),
+              ifTrue: Expression.Constant(TypeLogic.TypeToId.GetOrThrow(type.TypeValue).Object),
+              ifFalse: Expression.Constant(null, PrimaryKey.Type(typeof(TypeEntity)).Nullify()));
+
+                return new EntityExpression(typeof(TypeEntity), new PrimaryKeyExpression(id), null, null, null, null, null, false);
+            }
+
+            if (arg is TypeImplementedByExpression typeIB)
+            {
+                var id = typeIB.TypeImplementations.Aggregate(
+                    (Expression)Expression.Constant(null, PrimaryKey.Type(typeof(TypeEntity)).Nullify()),
+                    (acum, kvp) => Condition(Expression.NotEqual(kvp.Value, NullId(kvp.Value.Value.Type)),
+                   ifTrue: Expression.Constant(TypeLogic.TypeToId.GetOrThrow(kvp.Key).Object),
+                   ifFalse: acum));
+
+                return new EntityExpression(typeof(TypeEntity), new PrimaryKeyExpression(id), null, null, null, null, null, false);
+            }
+
+            if (arg is TypeImplementedByAllExpression typeIBA)
+            {
+                return new EntityExpression(typeof(TypeEntity), typeIBA.TypeColumn, null, null, null, null, null, false);
+            }
+
+        }
+
         Expression PartialEval(Expression ee)
         {
             if (m.Method.IsExtensionMethod())
@@ -1677,20 +1710,22 @@ internal class QueryBinder : ExpressionVisitor
             }
         }
 
-        if (source is TypeEntityExpression type)
         {
-            return Condition(Expression.NotEqual(type.ExternalId, NullId(type.ExternalId.ValueType)),
-              ifTrue: PartialEval(Expression.Constant(type.TypeValue)),
-              ifFalse: Expression.Constant(null, m.Type));
-        }
+            if (source is TypeEntityExpression type)
+            {
+                return Condition(Expression.NotEqual(type.ExternalId, NullId(type.ExternalId.ValueType)),
+                  ifTrue: PartialEval(Expression.Constant(type.TypeValue)),
+                  ifFalse: Expression.Constant(null, m.Type));
+            }
 
-        if(source is TypeImplementedByExpression typeIB)
-        {
-            return typeIB.TypeImplementations.Aggregate(
-               (Expression)Expression.Constant(null, m.Type),
-               (acum, kvp) => Condition(Expression.NotEqual(kvp.Value, NullId(kvp.Value.Value.Type)),
-               ifTrue: PartialEval(Expression.Constant(kvp.Key)),
-               ifFalse: acum));
+            if (source is TypeImplementedByExpression typeIB)
+            {
+                return typeIB.TypeImplementations.Aggregate(
+                   (Expression)Expression.Constant(null, m.Type),
+                   (acum, kvp) => Condition(Expression.NotEqual(kvp.Value, NullId(kvp.Value.Value.Type)),
+                   ifTrue: PartialEval(Expression.Constant(kvp.Key)),
+                   ifFalse: acum));
+            }
         }
 
         return m;

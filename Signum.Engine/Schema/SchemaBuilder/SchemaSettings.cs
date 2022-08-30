@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
 using Signum.Utilities.Reflection;
 using NpgsqlTypes;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine.Maps;
 

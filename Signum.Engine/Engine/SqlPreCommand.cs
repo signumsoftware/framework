@@ -118,9 +118,16 @@ public static class SqlPreCommandExtensions
         catch (ExecuteSqlScriptException)
         {
             Console.WriteLine("The current script is in saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
-            if (SafeConsole.Ask("retry?"))
+            var answer = SafeConsole.AskRetry("Open or retry?", "retry", "open", "exit");
+            if (answer == "retry")
                 goto retry;
-
+            if (answer == "open")
+            {
+                Thread.Sleep(1000);
+                Open(fileName);
+                if (SafeConsole.Ask("run now?"))
+                    ExecuteRetry(fileName);
+            }
         }
     }
 

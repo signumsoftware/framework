@@ -145,7 +145,8 @@ export function EntityRepeaterElement({ ctx, getComponent, getComponentWithIndex
               draggable={true}
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}
-              title={ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
+              onKeyDown={drag.onKeyDown}
+              title={drag.title}>
               {EntityListBaseController.moveIcon}
             </a>}
             {itemExtraButtons && itemExtraButtons()}

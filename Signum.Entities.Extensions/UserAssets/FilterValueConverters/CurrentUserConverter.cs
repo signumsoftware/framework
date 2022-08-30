@@ -1,4 +1,5 @@
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.UserAssets;
 
@@ -78,6 +79,21 @@ static class SimpleMemberEvaluator
                 if (result == null)
                     return new Result<object?>.Success(null);
             }
+            else if (part.StartsWith("(") && part.EndsWith(")"))
+            {
+                var typeName = part.Between("(", ")");
+
+                var asType = TypeEntity.TryGetType(typeName);
+
+                if (asType == null)
+                    return new Result<object?>.Error("Type {0} not found on {1}".FormatWith(typeName, result.GetType().FullName));
+
+                if (!asType.IsAssignableFrom(result.GetType()))
+                    return new Result<object?>.Error("Type {0} is not assignable from {1}".FormatWith(typeName, result.GetType().FullName));
+
+                if (result == null)
+                    return new Result<object?>.Success(null);
+            }
             else
             {
                 if (result.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public) is { } prop)
@@ -114,6 +130,17 @@ static class SimpleMemberEvaluator
                     return new Result<Type>.Error("Mixin {0} not found on {1}".FormatWith(mixinName, currentType));
 
                 currentType = mixin;
+            }
+            else if (part.StartsWith("(") && part.EndsWith(")"))
+            {
+                var typeName = part.Between("(", ")");
+
+                var asType = TypeEntity.TryGetType(typeName);
+
+                if (asType == null)
+                    return new Result<Type>.Error("Type {0} not found on {1}".FormatWith(typeName, currentType));
+
+                currentType = asType;
             }
             else
             {

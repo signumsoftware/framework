@@ -258,7 +258,6 @@ export function EntityStripElement(p: EntityStripElementProps) {
         onDragEnter={drag?.onDragOver}
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
-
       >
         {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}
         {
@@ -293,7 +292,8 @@ export function EntityStripElement(p: EntityStripElementProps) {
       draggable={true}
       onDragStart={drag.onDragStart}
       onDragEnd={drag.onDragEnd}
-      title={p.ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
+      onKeyDown={drag.onKeyDown}
+      title={drag.title}>
       {EntityBaseController.moveIcon}
     </span>;
   }

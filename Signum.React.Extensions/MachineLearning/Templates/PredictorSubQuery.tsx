@@ -44,7 +44,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
           filterOptions: filters.map(f => UserAssetsClient.Converter.toFilterOption(f)),
           columnOptions: [{ token: QueryTokenString.count() } as ColumnOption]
             .concat(sq.columns.map(mle => ({ token: mle.element.token && mle.element.token.tokenString, } as ColumnOption))),
-          columnOptionsMode: "Replace",
+          columnOptionsMode: "ReplaceAll",
         };
 
         Finder.exploreWindowsOpen(fo, e);

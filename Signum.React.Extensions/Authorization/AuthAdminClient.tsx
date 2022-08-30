@@ -1,11 +1,11 @@
 import * as React from 'react'
-import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite, getToString } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite, getToString, EntityControlMessage } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import { tasks, LineBaseProps, LineBaseController } from '@framework/Lines/LineBase'
-import { FormGroup, TypeContext } from '@framework/Lines'
+import { EntityBaseController, FormGroup, TypeContext } from '@framework/Lines'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -22,6 +22,8 @@ import { isPermissionAuthorized } from './AuthClient';
 import { loginWithAzureAD } from './AzureAD/AzureAD';
 import ProfilePhoto, { SmallProfilePhoto } from './Templates/ProfilePhoto';
 import { TypeaheadOptions } from '../../Signum.React/Scripts/Components/Typeahead';
+import { EntityLink } from '../../Signum.React/Scripts/Search';
+import UserCircle from './Templates/UserCircle';
 
 export let types: boolean;
 export let properties: boolean;
@@ -74,7 +76,17 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
         value: UserState.value("Active"),
         pinned: { label: AuthAdminMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_StartChecked" },
       },
-    ]
+    ],
+    entityFormatter: new Finder.EntityFormatter((row, cols, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined : <EntityLink lite={row.entity}
+      inSearch={true}
+      onNavigated={sc?.handleOnNavigated}
+      getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
+      inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
+      <div title={EntityControlMessage.View.niceToString()} className="d-inline-flex align-items-center">
+        <SmallProfilePhoto user={row.entity as Lite<UserEntity>} className="me-1" />
+        {EntityBaseController.viewIcon}
+      </div>
+    </EntityLink>)
   });
 
   Finder.addSettings({

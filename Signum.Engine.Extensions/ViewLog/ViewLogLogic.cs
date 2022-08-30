@@ -7,8 +7,6 @@ namespace Signum.Engine.ViewLog;
 
 public static class ViewLogLogic
 {
-    public static Func<DynamicQueryContainer.ExecuteType, object, BaseQueryRequest, IDisposable>? QueryExecutedLog;
-
     [AutoExpressionField]
     public static IQueryable<ViewLogEntity> ViewLogs(this Entity a) => 
         As.Expression(() => Database.Query<ViewLogEntity>().Where(log => log.Target.Is(a)));
@@ -20,7 +18,7 @@ public static class ViewLogLogic
 
     public static Func<Type, bool> LogType = type => true;
     public static Func<BaseQueryRequest, DynamicQueryContainer.ExecuteType, bool> LogQuery = (request, type) => true;
-    public static Func<BaseQueryRequest, StringWriter, string> GetData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
+    public static Func<BaseQueryRequest, StringWriter, string> GetQueryData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
 
 
     public static bool IsStarted = false;
@@ -61,9 +59,9 @@ public static class ViewLogLogic
         }
     }
 
-    private static IDisposable? ExecutionMode_OnApiRetrieved(Entity entity, string url)
+    private static IDisposable? ExecutionMode_OnApiRetrieved(Entity entity, string viewAction)
     {
-        return ViewLogLogic.LogView(entity.ToLite(), url);
+        return ViewLogLogic.LogView(entity.ToLite(), viewAction);
     }
 
   
@@ -96,7 +94,7 @@ public static class ViewLogLogic
         {
             try
             {
-                var str = GetData(request!, sw);
+                var str = GetQueryData(request!, sw);
 
                 using (ExecutionContext.SuppressFlow())
                     Task.Factory.StartNew(() =>

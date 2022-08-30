@@ -165,11 +165,11 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       };
     },
     formatters: {
-      "Activity": new Finder.CellFormatter(cell => <ActivityWithRemarks data={cell} />),
-      "MainEntity": new Finder.CellFormatter(cell => <span>{getToString(cell)}</span>),
-      "Actor": new Finder.CellFormatter(cell => <span>{getToString(cell)}</span>),
-      "Sender": new Finder.CellFormatter(cell => cell && <span>{getToString(cell)}</span>),
-      "Workflow": new Finder.CellFormatter(cell => <span>{getToString(cell)}</span>),
+      "Activity": new Finder.CellFormatter(cell => <ActivityWithRemarks data={cell} />, true),
+      "MainEntity": new Finder.CellFormatter(cell => <span>{getToString(cell)}</span>, true),
+      "Actor": new Finder.CellFormatter(cell => <span>{getToString(cell)}</span>, true),
+      "Sender": new Finder.CellFormatter(cell => cell && <span>{getToString(cell)}</span>, true),
+      "Workflow": new Finder.CellFormatter(cell => <span>{getToString(cell)}</span>, true),
     },
     defaultOrders: [{
       token: "StartDate",
@@ -891,8 +891,9 @@ export interface CaseEntityPack {
 }
 
 export interface WorkflowScriptRunnerState {
-  scriptRunnerPeriod: number;
   running: boolean;
+  initialDelayMilliseconds: number | null;
+  scriptRunnerPeriod: number;
   isCancelationRequested: boolean;
   nextPlannedExecution: string;
   queuedItems: number;

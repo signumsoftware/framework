@@ -34,12 +34,11 @@ public class QueryFilterer : ExpressionVisitor
                             {
                                 LambdaExpression? rawFilter = null;
                                 using (HeavyProfiler.LogNoStackTrace("rawFilter"))
-                                    rawFilter =giFilter.GetInvoker(queryType)(Schema.Current);
+                                    rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
 
                                 if (rawFilter != null)
                                 {
-                                    Expression clean = ExpressionCleaner.Clean(rawFilter)!;
-                                    var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
+                                    var cleanFilter = (LambdaExpression)DbQueryProvider.Clean(rawFilter, filter: false, null)!;
                                     using (HeavyProfiler.LogNoStackTrace("Call"))
                                         return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
                                 }
@@ -55,8 +54,7 @@ public class QueryFilterer : ExpressionVisitor
                                     var param = Expression.Parameter(queryType, "mle");
                                     var lambda = Expression.Lambda(Expression.Invoke(rawFilter, Expression.Property(param, "Parent")), param);
 
-                                    Expression clean = ExpressionCleaner.Clean(lambda)!;
-                                    var cleanFilter = (LambdaExpression)OverloadingSimplifier.Simplify(clean)!;
+                                    var cleanFilter = (LambdaExpression)DbQueryProvider.Clean(lambda, filter: false, null)!;
 
                                     return Expression.Call(miWhere.MakeGenericMethod(queryType), query.Expression, cleanFilter);
                                 }

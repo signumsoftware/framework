@@ -166,13 +166,14 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                     {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")}
                       draggable={true}
                       onDragStart={drag.onDragStart}
+                      onKeyDown={drag.onKeyDown}
                       onDragEnd={drag.onDragEnd}
-                      title={ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
+                      title={drag.title}>
                       {EntityBaseController.moveIcon}
                     </span>}
                   </div> as any
                 }>
-                <RenderEntity ctx={mlec} getComponent={p.getComponent} getViewPromise={p.getViewPromise} />
+                <RenderEntity ctx={mlec} getComponent={p.getComponent} getViewPromise={p.getViewPromise} extraProps={{ onChangeTitle: c.forceUpdate }} />
               </Tab>
             );
           })

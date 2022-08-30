@@ -177,6 +177,7 @@ export enum SubTokensOptions {
   CanAnyAll = 2,
   CanElement = 4,
   CanOperation = 8,
+  CanToArray = 16,
 }
 
 export interface QueryToken {
@@ -216,7 +217,7 @@ export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | stri
   return token == tokenStart || token.startsWith(tokenStart + ".");
 }
 
-export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "Operation";
+export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "Operation"  | "ToArray";
 
 export function hasAnyOrAll(token: QueryToken | undefined): boolean {
   if (token == undefined)
@@ -260,6 +261,16 @@ export function hasOperation(token: QueryToken | undefined): boolean {
     return true;
 
   return hasOperation(token.parent);
+}
+
+export function hasToArray(token: QueryToken | undefined): QueryToken | undefined {
+  if (token == undefined)
+    return undefined;
+
+  if (token.queryTokenType == "ToArray")
+    return token;
+
+  return hasToArray(token.parent);
 }
 
 export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | undefined {
