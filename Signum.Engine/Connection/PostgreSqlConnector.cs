@@ -74,6 +74,8 @@ public class PostgreSqlConnector : Connector
 
     public override bool RequiresRetry => false;
 
+    public override bool SupportsDateDifBig => false;
+
     public override bool AllowsIndexWithWhere(string where) => true;
 
     public override Connector ForDatabase(Maps.DatabaseName? database)

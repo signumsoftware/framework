@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
 using Signum.Engine.UserAssets;
 using Signum.Entities.Basics;
+using Signum.Engine.Translation;
 
 namespace Signum.Engine.Workflow;
 
@@ -425,6 +426,13 @@ public static class WorkflowLogic
 
             StartWorkflowScript(sb);
         }
+    }
+
+    public static void RegisterTranslatableRoutes()
+    {
+        TranslatedInstanceLogic.AddRoute((WorkflowEntity tb) => tb.Name);
+        TranslatedInstanceLogic.AddRoute((WorkflowActivityEntity tb) => tb.Name);
+        TranslatedInstanceLogic.AddRoute((WorkflowActivityEntity tb) => tb.UserHelp, Entities.Translation.TranslateableRouteType.Html);
     }
 
 
