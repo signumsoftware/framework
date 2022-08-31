@@ -46,6 +46,7 @@ export module WhatsNewMessage {
   export const ReadFurther = new MessageKey("WhatsNewMessage", "ReadFurther");
   export const Downloads = new MessageKey("WhatsNewMessage", "Downloads");
   export const _0ContiansNoVersionForCulture1 = new MessageKey("WhatsNewMessage", "_0ContiansNoVersionForCulture1");
+  export const Language = new MessageKey("WhatsNewMessage", "Language");
 }
 
 export const WhatsNewMessageEmbedded = new Type<WhatsNewMessageEmbedded>("WhatsNewMessageEmbedded");

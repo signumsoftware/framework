@@ -559,7 +559,9 @@ internal class DbExpressionNominator : DbExpressionVisitor
         {
             SqlFunctionExpression DateDiff(SqlEnums unit)
             {
-                return new SqlFunctionExpression(typeof(double), null, SqlFunction.DATEDIFF.ToString(), new Expression[]
+                var functionName = Connector.Current.SupportsDateDifBig ? SqlFunction.DATEDIFF_BIG.ToString() : SqlFunction.DATEDIFF.ToString();
+
+                return new SqlFunctionExpression(typeof(double), null, functionName, new Expression[]
                 {
                     new SqlLiteralExpression(unit),
                     right,

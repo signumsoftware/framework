@@ -143,9 +143,10 @@ public partial class TableMList
         return Expression.New(ci, exp, rowId.UnNullify(), order);
     }
 
-    internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder)
+    internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder, bool disableAssertAllowed = false)
     {
-        Schema.Current.AssertAllowed(this.BackReference.ReferenceTable.Type, inUserInterface: false);
+        if (!disableAssertAllowed)
+            Schema.Current.AssertAllowed(this.BackReference.ReferenceTable.Type, inUserInterface: false);
 
         Type elementType = typeof(MListElement<,>).MakeGenericType(BackReference.FieldType, Field.FieldType);
 

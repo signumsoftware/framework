@@ -464,6 +464,8 @@ public class SqlServerConnector : Connector
 
     public override bool RequiresRetry => this.Version == SqlServerVersion.AzureSQL;
 
+    public override bool SupportsDateDifBig => this.Version >= SqlServerVersion.SqlServer2016;
+
     public static List<string> ComplexWhereKeywords = new() { "OR" };
 
     public SqlPreCommand ShrinkDatabase(string databaseName)

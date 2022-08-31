@@ -95,6 +95,8 @@ public enum EntityControlMessage
     Detail,
     MoveDown,
     MoveUp,
+    MoveRight,
+    MoveLeft,
     Move,
     [Description("Move with Drag and Drop or Ctrl + Up / Down")]
     MoveWithDragAndDropOrCtrlUpDown,
@@ -291,6 +293,10 @@ public enum NormalControlMessage
     [Description("View for type {0} is not allowed")]
     ViewForType0IsNotAllowed,
     SaveChangesFirst,
+    [Description("Copy Entity Type and Id (for autocomplete)")]
+    CopyEntityTypeAndIdForAutocomplete,
+    [Description("Copy Entity URL")]
+    CopyEntityUrl
 }
 
 public enum SaveChangesMessage
