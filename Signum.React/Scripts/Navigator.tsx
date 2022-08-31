@@ -100,16 +100,16 @@ let renderId = (entity: Entity): React.ReactChild => {
   );
 }
 
-export function setRenderIdFunction(newFunction: (entity: Entity, viewName?: string) => React.ReactChild) {
+export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactChild) {
   renderId = newFunction;
 }
 
-let renderTitle = (typeInfo: TypeInfo, entity: ModifiableEntity, viewName?: string) => {
-  return "{0} {1}".formatHtml(typeInfo.niceName, renderId(entity as Entity, viewName));
+let renderTitle = (typeInfo: TypeInfo, entity: ModifiableEntity) => {
+  return "{0} {1}".formatHtml(typeInfo.niceName, renderId(entity as Entity));
   return null;
 }
 
-export function setRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity, viewName?: string) => React.ReactElement | null) {
+export function setRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity) => React.ReactElement | null) {
   renderTitle = newFunction;
 }
 
