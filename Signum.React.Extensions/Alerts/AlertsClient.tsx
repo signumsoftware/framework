@@ -71,7 +71,7 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
       textArguments: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.entity.textArguments).toString())]
     };
     return formatText(cell, alert);
-  });
+  }, true);
 
   Finder.registerPropertyFormatter(PropertyRoute.tryParse(AlertEntity, "Text"), cellFormatter);
 

@@ -52,7 +52,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
       Finder.findRow({
         queryName: queryDescription!.queryKey,
         groupResults: p.mainQuery.groupResults,
-        columnOptionsMode: "Replace",
+        columnOptionsMode: "ReplaceAll",
         columnOptions: fullKeys.map(fk => ({ token: fk }) as ColumnOption)
       }, { searchControlProps: { allowChangeColumns: false, showGroupButton: false } })
         .then(a => PredictorClient.predict(p, a && fullKeys.map((fk, i) => ({ tokenString: fk, value: a.row.columns[i] })).toObject(a => a.tokenString, a => a.value)));
@@ -146,7 +146,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
           columnOptions: mq.columns.orderBy(mle => mle.element.usage == "Input" ? 0 : 1).map(mle => ({
             token: mle.element.token && mle.element.token.tokenString,
           } as ColumnOption)),
-          columnOptionsMode: "Replace",
+          columnOptionsMode: "ReplaceAll",
         };
 
         Finder.exploreWindowsOpen(fo, e);

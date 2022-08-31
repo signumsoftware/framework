@@ -54,17 +54,17 @@ export namespace NavigatorManager {
   }
 }
 
-export const entityChanged: Array<(cleanName: string, entity?: Entity) => void> = [];
+export const entityChanged: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> = [];
 
 function cleanEntityChanged() {
   entityChanged.clear();
 }
 
-export function raiseEntityChanged(cleanNameOrEntity: string | Entity) {
+export function raiseEntityChanged(cleanNameOrEntity: string | Entity, isRedirect = false) {
   var cleanName = isEntity(cleanNameOrEntity) ? cleanNameOrEntity.Type : cleanNameOrEntity;
   var entity = isEntity(cleanNameOrEntity) ? cleanNameOrEntity : undefined;
 
-  entityChanged.forEach(a => a(cleanName, entity));
+  entityChanged.forEach(a => a(cleanName, entity, isRedirect));
 }
 
 export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
@@ -903,7 +903,9 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isReadOnly?: boolean;
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
+
   allowWrapEntityLink?: boolean;
+  avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
 
@@ -975,6 +977,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   supportsAdditionalTabs?: boolean;
 
   allowWrapEntityLink?: boolean;
+  avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
 

@@ -10,8 +10,9 @@ export const ColumnOptionsMode = new EnumType<ColumnOptionsMode>("ColumnOptionsM
 export type ColumnOptionsMode =
   "Add" |
   "Remove" |
-  "Replace" |
-  "InsertStart";
+  "ReplaceAll" |
+  "InsertStart" |
+  "ReplaceOrAdd";
 
 export const DashboardBehaviour = new EnumType<DashboardBehaviour>("DashboardBehaviour");
 export type DashboardBehaviour =
@@ -132,6 +133,7 @@ export module QueryTokenMessage {
   export const RowId = new MessageKey("QueryTokenMessage", "RowId");
   export const CellOperation = new MessageKey("QueryTokenMessage", "CellOperation");
   export const ContainerOfCellOperations = new MessageKey("QueryTokenMessage", "ContainerOfCellOperations");
+  export const EntityType = new MessageKey("QueryTokenMessage", "EntityType");
 }
 
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");

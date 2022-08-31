@@ -5,7 +5,7 @@ import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
-import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
+import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
@@ -101,18 +101,19 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
         <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
           {
             c.getMListItemContext(p.ctx).map(mlec =>
-              (<EntityStripElement key={c.keyGenerator.getKey(mlec.value)}
-                ctx={mlec}
-                iconStart={p.iconStart}
-                autoComplete={p.autocomplete}
-                onRenderItem={p.onRenderItem}
-                drag={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, p.vertical ? "v" : "h") : undefined}
-                onItemHtmlAttributes={p.onItemHtmlAttributes}
-                onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
-                onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
-                onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
-                showType={p.showType!}
-              />))
+            (<EntityStripElement key={c.keyGenerator.getKey(mlec.value)}
+              ctx={mlec}
+              iconStart={p.iconStart}
+              autoComplete={p.autocomplete}
+              onRenderItem={p.onRenderItem}
+              move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, p.vertical ? "v" : "h") : undefined}
+              drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, p.vertical ? "v" : "h") : undefined}
+              onItemHtmlAttributes={p.onItemHtmlAttributes}
+              onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
+              onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
+              onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
+              showType={p.showType!}
+            />))
           }
           {renderLastElement()}
         </ul>
@@ -191,6 +192,7 @@ export interface EntityStripElementProps {
   onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   drag?: DragConfig;
+  move?: MoveConfig;
   showType: boolean;
 }
 
@@ -246,21 +248,20 @@ export function EntityStripElement(p: EntityStripElementProps) {
   var url = isEntity(val) && !val.isNew ? Navigator.navigateRoute(val) :
     isLite(val) && !(val.entity && val.entity.isNew) ? Navigator.navigateRoute(val) : "#";
 
-  var hasIcon = p.onRemove || p.drag;
+  var hasIcon = p.onRemove || p.drag || p.move;
 
   var containerHtmlAttributes = (p.onItemContainerHtmlAttributes && p.onItemContainerHtmlAttributes(p.ctx.value));
 
   return (
-    <li className={classes("sf-strip-element", containerHtmlAttributes?.className)}
+    <li className={classes("sf-strip-element", containerHtmlAttributes?.className, drag?.dropClass)}
       {...EntityListBaseController.entityHtmlAttributes(p.ctx.value)}
       {...containerHtmlAttributes}>
-      <div className={classes(drag && "sf-strip-dropable", drag?.dropClass)}
+      <div className={classes(drag && "sf-strip-dropable")}
         onDragEnter={drag?.onDragOver}
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
-
       >
-        {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}
+        {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
         {
           p.onView ?
             <a href={url} className={classes("sf-strip-link", htmlAttributes?.className)} onClick={p.onView} {...htmlAttributes}>
@@ -271,7 +272,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
               {toStr}
             </span>
         }
-        {hasIcon && !p.iconStart && <span>{removeIcon()}&nbsp;{dragIcon()}</span>}
+        {hasIcon && !p.iconStart && <span>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
       </div>
     </li>
   );
@@ -293,7 +294,8 @@ export function EntityStripElement(p: EntityStripElementProps) {
       draggable={true}
       onDragStart={drag.onDragStart}
       onDragEnd={drag.onDragEnd}
-      title={p.ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
+      onKeyDown={drag.onKeyDown}
+      title={drag.title}>
       {EntityBaseController.moveIcon}
     </span>;
   }

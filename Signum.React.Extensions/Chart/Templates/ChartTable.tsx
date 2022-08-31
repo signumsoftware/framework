@@ -57,12 +57,16 @@ export default function ChartTableComponent(p: ChartTableProps) {
 
         if (t.parent != undefined) //Avoid Count and simple Columns that are already added
         {
-          var col = t.queryTokenType == "Aggregate" ? t.parent : t
-
-          if (col.parent)
+          if (t.queryTokenType == "Aggregate") {
             columns.push({
-              token: col.fullKey
+              token: t.parent.fullKey,
+              summaryToken: t.fullKey
             });
+          } else {
+            columns.push({
+              token: t.fullKey,
+            });
+          }
         }
       });
 
@@ -70,6 +74,7 @@ export default function ChartTableComponent(p: ChartTableProps) {
         queryName: lcr.queryKey,
         filterOptions: toFilterOptions(filters),
         columnOptions: columns,
+        columnOptionsMode: "ReplaceOrAdd"
       }));
     }
   }

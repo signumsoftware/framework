@@ -63,13 +63,19 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
         }
     }
 
+    internal bool HasRealOverrides(Lite<RoleEntity> role)
+    {
+        return Database.Query<RuleTypeEntity>().Any(rt => rt.Role.Is(role));
+    }
+
     static SqlPreCommand? AuthCache_PreDeleteSqlSync_Type(Entity arg)
     {
         TypeEntity type = (TypeEntity)arg;
 
-        var command = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(type)));
+        var ruleTypeConditions = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(a =>a.RuleType.Entity.Resource.Is(type)));
+        var ruleTypesCommand = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(type)));
 
-        return command;
+        return SqlPreCommand.Combine(Spacing.Simple, ruleTypeConditions, ruleTypesCommand);
     }
 
     static SqlPreCommand? AuthCache_PreDeleteSqlSync_Condition(Entity arg)
@@ -242,6 +248,11 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
     internal DefaultDictionary<Type, TypeAllowedAndConditions> GetDefaultDictionary()
     {
         return runtimeRules.Value.GetOrThrow(RoleEntity.Current).DefaultDictionary();
+    }
+
+    internal DefaultDictionary<Type, TypeAllowedAndConditions> GetDefaultDictionary(Lite<RoleEntity> role)
+    {
+        return runtimeRules.Value.GetOrThrow(role).DefaultDictionary();
     }
 
     public class RoleAllowedCache

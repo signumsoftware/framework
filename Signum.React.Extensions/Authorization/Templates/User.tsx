@@ -18,14 +18,12 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
   const ctx = p.ctx.subCtx({ labelColumns: { sm: 3 } });
   const entity = p.ctx.value;
 
-  var oid = tryGetMixin(entity, UserADMixin);
-
   return (
     <div>
- 	  <div className="row">
+      <div className="row">
         <div className="col-sm-3 d-flex">
           <div className="mx-auto mt-3">
-          <ProfilePhoto user={ctx.value} size={150 }/>
+            <ProfilePhoto user={ctx.value} size={150} />
           </div>
         </div>
         <div className="col-sm-8">
@@ -44,9 +42,9 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
 
               return AuthAdminClient.API.trivialMergeRole(rs);
             })} />
-      	
-            <ValueLine ctx={ctx.subCtx(e => e.email)} readOnly={User.emailReadonly(ctx.value) ? true : undefined} />
-            <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
+
+          <ValueLine ctx={ctx.subCtx(e => e.email)} readOnly={User.emailReadonly(ctx.value) ? true : undefined} />
+          <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
         </div>
       </div>
     </div>

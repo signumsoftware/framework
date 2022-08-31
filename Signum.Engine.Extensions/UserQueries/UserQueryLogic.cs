@@ -103,16 +103,29 @@ public static class UserQueryLogic
     {
         QueryDescription qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
 
-        var result = uq.ColumnsMode switch
+        switch (uq.ColumnsMode)
         {
-            ColumnOptionsMode.Add => qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(uq.Columns.Where(a => !a.HiddenColumn || !ignoreHidden).Select(co => ToColumn(co))).ToList(),
-            ColumnOptionsMode.Remove => qd.Columns.Where(cd => !cd.IsEntity && !uq.Columns.Any(co => co.Token.TokenString == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList(),
-            ColumnOptionsMode.Replace => uq.Columns.Where(a => !a.HiddenColumn || !ignoreHidden).Select(co => ToColumn(co)).ToList(),
-            _ => throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".FormatWith(uq.ColumnsMode))
-        };
-
-        return result; 
+            case ColumnOptionsMode.Add: return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(uq.Columns.Where(a => !a.HiddenColumn || !ignoreHidden).Select(co => ToColumn(co))).ToList();
+            case ColumnOptionsMode.Remove: return qd.Columns.Where(cd => !cd.IsEntity && !uq.Columns.Any(co => co.Token.TokenString == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
+            case ColumnOptionsMode.ReplaceAll: return uq.Columns.Where(a => !a.HiddenColumn || !ignoreHidden).Select(co => ToColumn(co)).ToList();
+            case ColumnOptionsMode.ReplaceOrAdd:
+                {
+                    var original = qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).ToList();
+                    var toReplaceOrAdd = uq.Columns.Where(a => !a.HiddenColumn || !ignoreHidden).Select(co => ToColumn(co)).ToList();
+                    foreach (var item in toReplaceOrAdd)
+                    {
+                        var index = original.FindIndex(o => o.Token.Equals(item.Token));
+                        if (index != -1)
+                            original[index] = item;
+                        else
+                            original.Add(item);
+                    }
+                    return original;
+                }
+            default: throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".FormatWith(uq.ColumnsMode));
+        }
     }
+
 
     private static Column ToColumn(QueryColumnEmbedded co)
     {

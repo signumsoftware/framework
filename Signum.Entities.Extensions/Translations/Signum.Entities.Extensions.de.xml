@@ -176,7 +176,7 @@
     <Member Name="ConflictMergingTypeConditions" Description="Konflikt durch Verschmelzung von Typbedingungen" />
     <Member Name="DefaultAuthorization" Description="Standardautorisierung: " />
     <Member Name="Deny" Description="Verweigern" />
-    <Member Name="Everithing" Description="Alles" />
+    <Member Name="Everything" Description="Alles" />
     <Member Name="Filter" Description="Filter" />
     <Member Name="IncludeTrivialMerges" Description="Einschließen trivialer Zusammenführungen" />
     <Member Name="MaximumOfThe0" Description="Maximum der {0}" />
@@ -1024,6 +1024,7 @@
     <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
   </Type>
   <Type Name="EmailMasterTemplateEntity" Description="Master E-Mail-Vorlage">
+    <Member Name="Attachments" Description="Anhänge" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="IsDefault" Description="Ist Standard" />
     <Member Name="Messages" Description="Nachrichten" />
@@ -2790,6 +2791,12 @@
     <Member Name="Expression" Description="Ausdruck" />
     <Member Name="Name" Description="Name" />
   </Type>
+  <Type Name="WhatsNewEntity" />
+  <Type Name="WhatsNewFileType" />
+  <Type Name="WhatsNewLogEntity" />
+  <Type Name="WhatsNewMessage" />
+  <Type Name="WhatsNewMessageEmbedded" />
+  <Type Name="WhatsNewOperation" />
   <Type Name="WhenManyFromBehaviour" Description="Verhalten Wenn viele Von ">
     <Member Name="FistResult" Description="Erstes Ergebnis" />
     <Member Name="SplitMessages" Description="Geteilte Nachrichten" />

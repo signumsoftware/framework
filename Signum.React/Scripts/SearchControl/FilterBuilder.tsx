@@ -486,16 +486,20 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
         if (f.value) {
           const type = newToken.type.name as "DateOnly" | "DateTime";
+
+          function convertDateToNewFormat(val: string) {
+            var date = DateTime.fromISO(val);
+            if (!date.isValid)
+              return val;
+
+            const trimmed = trimDateToFormat(date, type, newToken!.format);
+            return type == "DateOnly" ? trimmed.toISODate() : trimmed.toISO();
+          }
+
           if (f.operation && isList(f.operation)) {
-
-            f.value = (f.value as string[]).map(v => {
-              const date = trimDateToFormat(DateTime.fromISO(v), type, newToken.format);
-              return type == "DateOnly" ? date.toISODate() : date.toISO();
-            });
-
+            f.value = (f.value as string[]).map(v => convertDateToNewFormat(v));
           } else {
-            const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
-            f.value = type == "DateOnly" ? date.toISODate() : date.toISO();
+            f.value = convertDateToNewFormat(f.value);
           }
         }
       }

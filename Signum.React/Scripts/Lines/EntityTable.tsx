@@ -4,7 +4,7 @@ import { TypeContext } from '../TypeContext'
 import * as Navigator from '../Navigator'
 import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite, is } from '../Signum.Entities'
 import { EntityBaseController } from './EntityBase'
-import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
+import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from './DynamicComponent'
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -272,7 +272,8 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
                     rowHooks={p.rowHooks}
                     onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
                     onView={c.canView(mlec.value) && !readOnly ? e => c.handleViewElement(e, mlec.index!) : undefined}
-                    draggable={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
+                    move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
+                    drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
                     columns={p.columns!}
                     onBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleBlur : undefined}
                     onKeyDown={p.createOnBlurLastRow && p.create && !readOnly ? c.handleKeyDown : undefined}
@@ -318,7 +319,8 @@ export interface EntityTableRowProps {
   columns: EntityTableColumn<ModifiableEntity, any>[],
   onRemove?: (event: React.MouseEvent<any>) => void;
   onView?: (event: React.MouseEvent<any>) => void;
-  draggable?: DragConfig;
+  drag?: DragConfig;
+  move?: MoveConfig;
   rowHooks?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRowHandle) => Promise<any>;
   onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRowHandle, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   onBlur?: (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => void;
@@ -340,7 +342,7 @@ export function EntityTableRow(p: EntityTableRowProps) {
 
   var ctx = p.ctx;
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
-  const drag = p.draggable;
+  const drag = p.drag;
   return (
     <tr {...rowAtts}
       onDragEnter={drag?.onDragOver}
@@ -361,11 +363,14 @@ export function EntityTableRow(p: EntityTableRowProps) {
           {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
             onClick={e => e.preventDefault()}
             draggable={true}
+            onKeyDown={drag.onKeyDown}
             onDragStart={drag.onDragStart}
             onDragEnd={drag.onDragEnd}
-            title={ctx.titleLabels ? EntityControlMessage.Move.niceToString() : undefined}>
+            title={drag.title}>
             {EntityBaseController.moveIcon}
           </a>}
+          {p.move?.renderMoveUp()}
+          {p.move?.renderMoveDown()}
           {p.onView && <a href="#" className={classes("sf-line-button", "sf-view")}
             onClick={p.onView}
             title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>

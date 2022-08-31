@@ -158,7 +158,7 @@ function getOrCreateToStringFunction(type: string) {
 
   const ti = Reflection.tryGetTypeInfo(type);
 
-  toStringDictionary[type] = ti?.toStringFunction ? compileFunction(ti.toStringFunction) : null;
+  f = toStringDictionary[type] = ti?.toStringFunction ? compileFunction(ti.toStringFunction) : null;
 
   return f;
 }
@@ -378,7 +378,11 @@ export module EntityControlMessage {
   export const Detail = new MessageKey("EntityControlMessage", "Detail");
   export const MoveDown = new MessageKey("EntityControlMessage", "MoveDown");
   export const MoveUp = new MessageKey("EntityControlMessage", "MoveUp");
+  export const MoveRight = new MessageKey("EntityControlMessage", "MoveRight");
+  export const MoveLeft = new MessageKey("EntityControlMessage", "MoveLeft");
   export const Move = new MessageKey("EntityControlMessage", "Move");
+  export const MoveWithDragAndDropOrCtrlUpDown = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlUpDown");
+  export const MoveWithDragAndDropOrCtrlLeftRight = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlLeftRight");
   export const Navigate = new MessageKey("EntityControlMessage", "Navigate");
   export const Remove = new MessageKey("EntityControlMessage", "Remove");
   export const View = new MessageKey("EntityControlMessage", "View");
@@ -615,6 +619,7 @@ export module SearchMessage {
   export const GroupKey = new MessageKey("SearchMessage", "GroupKey");
   export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
   export const Copy = new MessageKey("SearchMessage", "Copy");
+  export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
 }
 
 export module SelectorMessage {

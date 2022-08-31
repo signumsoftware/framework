@@ -633,6 +633,7 @@ internal enum SqlFunction
     YEAR,
     DATEPART,
     DATEDIFF,
+    DATEDIFF_BIG,
     DATEADD,
 
     COALESCE,

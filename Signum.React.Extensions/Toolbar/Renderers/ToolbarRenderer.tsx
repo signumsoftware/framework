@@ -25,14 +25,10 @@ export default function ToolbarRenderer(p: {
 
   const [refresh, setRefresh] = React.useState(false);
   const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
-  const activeRef = useUpdatedRef(active);
 
   function changeActive(location: History.Location) {
     var query = QueryString.parse(location.search);
     if (responseRef.current) {
-      if (activeRef.current && isCompatibleWithUrl(activeRef.current, location, query)) {
-        return;
-      }
 
       var newActive = inferActive(responseRef.current, location, query);
       setActive(newActive?.response ?? null);

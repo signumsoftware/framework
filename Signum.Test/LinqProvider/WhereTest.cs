@@ -1,3 +1,4 @@
+using Signum.Engine.Maps;
 using System.Text.RegularExpressions;
 
 namespace Signum.Test.LinqProvider;
@@ -477,5 +478,42 @@ public class WhereTest
             .Where(a => ("Hi " + (a.IsMale ? "Mr." : "Ms.") + " " + a.Name + " ToStr " + a).Contains("Mr. Michael"))
             .Select(a => a.ToLite())
             .ToList();
+    }
+
+
+
+
+
+    [Fact]
+    public void WhereExternalMethod()
+    {
+        var album = Database.Query<ArtistEntity>()
+                .Where(a => ArtistsInBands().Contains(a))
+               .Select(a => a.ToLite())
+               .ToList();
+
+        try
+        {
+            Schema.Current.EntityEvents<ArtistEntity>().FilterQuery += WhereTest_FilterQuery;
+            var album2 = Database.Query<ArtistEntity>()
+                .Select(a => a.ToLite())
+                .ToList();
+        }
+        finally
+        {
+            Schema.Current.EntityEvents<ArtistEntity>().FilterQuery -= WhereTest_FilterQuery;
+        }
+
+    }
+
+    private FilterQueryResult<ArtistEntity>? WhereTest_FilterQuery()
+    {
+        return new FilterQueryResult<ArtistEntity>(a => ArtistsInBands().Contains(a), null);
+    }
+
+    public IQueryable<ArtistEntity> ArtistsInBands()
+    {
+        return Database.Query<BandEntity>().SelectMany(b => b.Members);
+
     }
 }

@@ -10,7 +10,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
@@ -337,9 +337,20 @@ export function mergeColumns(columnDescriptions: ColumnDescription[], mode: Colu
       return columnDescriptions.filter(cd => cd.name != "Entity" && !columnOptions.some(a => a.token == cd.name))
         .map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption);
 
-    case "Replace":
+    case "ReplaceAll":
       return columnOptions;
 
+    case "ReplaceOrAdd": {
+      var original = columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption);
+      columnOptions.forEach(toReplaceOrAdd => {
+        var index = original.findIndex(co => co.token.toString() == toReplaceOrAdd.token.toString());
+        if (index != -1)
+          original[index] = toReplaceOrAdd;
+        else
+          original.push(toReplaceOrAdd);
+      });
+      return original;
+    }
     default: throw new Error("Unexpected column mode");
   }
 }
@@ -349,6 +360,14 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
   const similar = (c: ColumnOptionParsed, d: ColumnDescription) =>
     c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null && !c.hiddenColumn;
 
+  const toColumnOption = (c: ColumnOptionParsed) => ({
+    token: c.token!.fullKey,
+    displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
+    summaryToken: c.summaryToken?.fullKey,
+    hiddenColumn: c.hiddenColumn,
+  }) as ColumnOption;
+ 
+
   ideal = ideal.filter(a => a.name != "Entity");
 
   current = current.filter(a => a.token != null);
@@ -356,12 +375,18 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
   if (ideal.every((idl, i) => i < current.length && similar(current[i], idl))) {
     return {
       mode: "Add",
-      columns: current.slice(ideal.length).map(c => ({
-        token: c.token!.fullKey,
-        displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
-        summaryToken: c.summaryToken?.fullKey,
-        hiddenColumn: c.hiddenColumn,
-      }) as ColumnOption)
+      columns: current.slice(ideal.length).map(c => toColumnOption(c))
+    };
+  }
+
+  if (ideal.every((idl, i) => i < current.length && current[i].token!.fullKey == idl.name)) {
+
+    var replacements = current.filter((curr, i) => i < ideal.length && !similar(curr, ideal[i])).map(c => toColumnOption(c));
+    var additions = current.slice(ideal.length).map(c => toColumnOption(c));
+
+    return {
+      mode: "ReplaceOrAdd",
+      columns: [...replacements, ...additions]
     };
   }
 
@@ -383,16 +408,10 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
       };
     }
   }
-  
 
   return {
-    mode: "Replace",
-    columns: current.map(c => ({
-      token: c.token!.fullKey,
-      displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
-      summaryToken: c.summaryToken?.fullKey,
-      hiddenColumn: c.hiddenColumn,
-    }) as ColumnOption),
+    mode: "ReplaceAll",
+    columns: current.map(c => toColumnOption(c)),
   };
 }
 
@@ -436,7 +455,7 @@ export function parseOrderOptions(orderOptions: (OrderOption | null | undefined)
 export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: boolean, qd: QueryDescription): Promise<ColumnOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
-  var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation);
+  var sto = SubTokensOptions.CanElement | SubTokensOptions.CanToArray | (groupResults ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation);
   columnOptions.forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
@@ -753,7 +772,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
 
   if (fo.columnOptions) {
-    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | canAggregateXorOperation));
+    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | canAggregateXorOperation));
     fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
   }
 
@@ -1046,7 +1065,7 @@ export function defaultNoColumnsAllRows(fo: FindOptions, count: number | undefin
   if (newFO.columnOptions == undefined && newFO.columnOptionsMode == undefined) {
 
     newFO.columnOptions = [];
-    newFO.columnOptionsMode = "Replace";
+    newFO.columnOptionsMode = "ReplaceAll";
   }
 
   if (newFO.pagination == undefined) {
@@ -1142,6 +1161,9 @@ export class TokenCompleter {
 
       if (hasOperation(token) && (options & SubTokensOptions.CanOperation) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Operation not allowed)`);
+
+      if (hasToArray(token) && (options & SubTokensOptions.CanToArray) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (ToArray not allowed)`);
 
       return;
     }
@@ -1363,7 +1385,7 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   };
 
   return getQueryDescription(fo.queryName)
@@ -1382,7 +1404,7 @@ export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenStri
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: tokens.map(t => softCast<ColumnOption>({ token: t})),
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   };
 
   return getQueryDescription(fo.queryName)
@@ -1431,6 +1453,17 @@ export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, add
   );
 }
 
+export function getResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
+  var fo2: FindOptions = {
+    ...fo,
+    columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+    columnOptionsMode: "ReplaceAll",
+  };
+
+  return getResultTable(fo2)
+    .then(fop => fop.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>));
+}
+
 export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
 
   fo = defaultNoColumnsAllRows(fo, undefined);
@@ -1446,7 +1479,7 @@ export function useInDB<R>(entity: Entity | Lite<Entity> | null, token: QueryTok
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
   if (entity == null)
@@ -1466,7 +1499,7 @@ export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> |
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
     columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a  })),
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
   if (entity == null)
@@ -1487,7 +1520,7 @@ export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: Quer
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "All" },
     columnOptions: [{ token: token }],
-    columnOptionsMode: "Replace",
+    columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
   if (entity == null)
@@ -1857,6 +1890,7 @@ export interface FormatRule {
 export class CellFormatter {
   constructor(
     public formatter: (cell: any, ctx: CellFormatterContext, currentToken: QueryToken) => React.ReactChild | undefined,
+    public fillWidth: boolean,
     public cellClass?: string) {
   }
 }
@@ -1911,12 +1945,12 @@ function initFormatRules(): FormatRule[] {
     {
       name: "Object",
       isApplicable: qt => true,
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell?.toString()}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell?.toString()}</span> : undefined, true)
     },
     {
       name: "Object",
       isApplicable: qt => qt.filterType == "Embedded" || qt.filterType == "Lite",
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{getToString(cell)}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{getToString(cell)}</span> : undefined, true)
     },
     {
       name: "MultiLine",
@@ -1929,12 +1963,25 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, true)
+    },
+    {
+      name: "SmallText",
+      isApplicable: qt => {
+        if (qt.type.name == "string" && qt.propertyRoute != null) {
+          var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+          if (pr != null && pr.member != null && (!pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength < 20))
+            return true;
+        }
+
+        return false;
+      },
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, false)
     },
     {
       name: "Password",
       isApplicable: qt => qt.format == "Password",
-      formatter: qt => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">•••••••</span> : undefined, false)
     },
     {
       name: "Enum",
@@ -1946,25 +1993,31 @@ function initFormatRules(): FormatRule[] {
         var ei = getEnumInfo(qt.type.name, cell);
 
         return <span className="try-no-wrap">{ei ? ei.niceName : cell}</span>
-      })
+      }, false)
     },
     {
       name: "Lite",
       isApplicable: qt => qt.filterType == "Lite",
-      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />, true)
     },
-
+    {
+      name: "LiteNoFill",
+      isApplicable: qt => {
+        return qt.filterType == "Lite" && tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
+      },
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />, false)
+    },
     {
       name: "Guid",
       isApplicable: qt => qt.filterType == "Guid",
-      formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid try-no-wrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
+      formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid try-no-wrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>, false)
     },
     {
       name: "DateTime",
       isApplicable: qt => qt.filterType == "DateTime",
       formatter: qt => {
         const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
@@ -1973,7 +2026,7 @@ function initFormatRules(): FormatRule[] {
       formatter: qt => {
         const durationFormat = toLuxonDurationFormat(qt.format) ?? "hh:mm:ss";
 
-        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+        return new CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
@@ -1989,8 +2042,8 @@ function initFormatRules(): FormatRule[] {
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-        }, "date-cell");
+          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>;
+        }, false, "date-cell"); //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
@@ -2006,8 +2059,8 @@ function initFormatRules(): FormatRule[] {
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; //To avoid flippig hour and date (L LT) in RTL cultures
-        }, "date-cell");
+          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; 
+        }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
@@ -2015,7 +2068,7 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => qt.filterType == "Integer" || qt.filterType == "Decimal",
       formatter: qt => {
         const numberFormat = toNumberFormat(qt.format);
-        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, "numeric-cell");
+        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, false, "numeric-cell");
       }
     },
     {
@@ -2023,13 +2076,13 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
       formatter: qt => {
         const numberFormat = toNumberFormat(qt.format);
-        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, "numeric-cell");
+        return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, false, "numeric-cell");
       }
     },
     {
       name: "Bool",
       isApplicable: qt => qt.filterType == "Boolean",
-      formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, "centered-cell")
+      formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, false, "centered-cell")
     },
   ];
 }

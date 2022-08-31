@@ -46,9 +46,10 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
       {tokenList.map((a, i) => i < initialIndex ? null : <QueryTokenPart key={i == 0 ? "__first__" : tokenList[i - 1]!.fullKey}
         queryKey={p.queryKey}
         readOnly={p.readOnly}
-        onTokenSelected={qt => {
-          lastTokenChanged.current = qt?.fullKey;
-          p.onTokenChange && p.onTokenChange(qt);
+        onTokenSelected={async qt => {
+          var nqt = (await tryApplyToken(p.queryToken, qt)) ?? qt; 
+          lastTokenChanged.current = nqt?.fullKey;
+          p.onTokenChange && p.onTokenChange(nqt);
         }}
         defaultOpen={lastTokenChanged.current && i > 0 && lastTokenChanged.current == tokenList[i - 1]!.fullKey ? true : false}
         subTokenOptions={p.subTokenOptions}
@@ -56,6 +57,43 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
         selectedToken={a} />)}
     </div>
   );
+
+  async function tryApplyToken(token: QueryToken | null | undefined, newToken: QueryToken | undefined) {
+    if (newToken == undefined)
+      return undefined;
+
+    if (token == null)
+      return newToken;
+
+    if (token.fullKey == newToken.fullKey)
+      return newToken;
+
+    if (token.fullKey.startsWith(newToken.fullKey + "."))
+      return newToken;
+
+    if (newToken.parent == null || token.fullKey.startsWith(newToken.parent.fullKey + ".")) {
+      var tokenParents = getTokenParents(token);
+      var newTokenParents = getTokenParents(newToken);
+
+      var extraTokens = tokenParents.slice(newTokenParents.length);
+
+      var tempToken = newToken;
+      for (var i = 0; i < extraTokens.length; i++) {
+        var key = extraTokens[i].key;
+        var t = (await Finder.API.getSubTokens(p.queryKey, tempToken, p.subTokenOptions)).singleOrNull(a => a.key == key);
+        if (t == null)
+          return newToken;
+
+        tempToken = t;
+      }
+
+      return tempToken;
+
+    } else {
+      return newToken;
+    }
+
+  }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
 

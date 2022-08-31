@@ -148,6 +148,7 @@ function SearchModal(p: SearchModalProps) {
           showGroupButton={p.findMode == "Explore"}
           showSystemTimeButton={p.findMode == "Explore"}
           largeToolbarButtons={true}
+          showFooter={true}
           maxResultsHeight={"none"}
           enableAutoFocus={true}
           onCreateFinished={handleCreateFinished}

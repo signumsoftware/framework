@@ -58,6 +58,7 @@ public enum ColumnOptionsMode
 {
     Add,
     Remove,
-    Replace,
+    ReplaceAll,
     InsertStart,
+    ReplaceOrAdd,
 }

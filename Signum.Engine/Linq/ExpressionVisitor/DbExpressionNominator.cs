@@ -1,3 +1,4 @@
+using Microsoft.SqlServer.Server;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
@@ -6,7 +7,6 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using SqlMethodAttribute = Microsoft.Data.SqlClient.Server.SqlMethodAttribute;
 
 namespace Signum.Engine.Linq;
 
@@ -559,7 +559,9 @@ internal class DbExpressionNominator : DbExpressionVisitor
         {
             SqlFunctionExpression DateDiff(SqlEnums unit)
             {
-                return new SqlFunctionExpression(typeof(double), null, SqlFunction.DATEDIFF.ToString(), new Expression[]
+                var functionName = Connector.Current.SupportsDateDifBig ? SqlFunction.DATEDIFF_BIG.ToString() : SqlFunction.DATEDIFF.ToString();
+
+                return new SqlFunctionExpression(typeof(double), null, functionName, new Expression[]
                 {
                     new SqlLiteralExpression(unit),
                     right,

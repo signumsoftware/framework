@@ -74,8 +74,8 @@ span.sf-today {
 }
 
 .sf-strip-dropable {
-    margin: -1px -10px -1px 0px;
-    padding: 1px 10px 1px 0px;
+    margin: -1px -12px -1px -12px;
+    padding: 1px 12px 1px 12px;
 }
 
 li.sf-strip-element {
@@ -225,6 +225,24 @@ ul.nav-tabs {
 }
 
 
+/*Accordion*/
+
+.sf-accordion-element.drag-top >h2 >button {
+    box-shadow: inset #AAA 0px 3px 0px 0px !important;
+}
+
+.sf-accordion-element.drag-bottom > h2 > button {
+    box-shadow: inset #AAA 0px -3px 0px 0px !important;
+}
+
+/*.sf-accordion-element {
+    padding-bottom: 3px;
+}
+
+.sf-accordion-element:first-child {
+    padding-top: 3px;
+}*/
+
 /*buton colors*/
 .sf-create:not(.disabled):hover {
     color: #22BA00;
@@ -252,6 +270,11 @@ ul.nav-tabs {
 }
 .sf-move:not(.disabled).sf-move-step:hover {
     cursor: pointer;
+}
+
+a.sf-move:focus {
+    border: 2px solid #656565;
+    border-radius: 4px !important;
 }
 
 .sf-paste:not(.disabled):hover {
@@ -339,6 +362,15 @@ input[type=checkbox].form-control-xs {
 .rw-dropdown-list-input {
     padding: 0 0 0 0.4em;
 }
+
+.input-group > .form-control.rw-dropdown-list{
+    display: flex;
+    padding: 0;
+}
+
+    .input-group > .form-control.rw-dropdown-list > .rw-widget-input {
+        flex: 1;
+    }
 
 .form-control-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-dropdown-list-input,
@@ -529,6 +561,11 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
 
 .try-no-wrap{
 
+}
+
+.sf-small-column{
+    width: 0%;
+    min-width: 36px;
 }
 
 @media (min-width: 768px){

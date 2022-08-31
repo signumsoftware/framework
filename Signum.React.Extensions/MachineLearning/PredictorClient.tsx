@@ -30,7 +30,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   function numbericCellFormatter(color: string) {
     var numberFormat = toNumberFormat("0.000");
-    return new CellFormatter((cell: number) => cell == undefined ? "" : <span style={{ color: color }}>{numberFormat.format(cell)}</span>, "numeric-cell");
+    return new CellFormatter((cell: number) => cell == undefined ? "" : <span style={{ color: color }}>{numberFormat.format(cell)}</span>, false, "numeric-cell");
   }
 
   Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossTraining), numbericCellFormatter("#1A5276"));

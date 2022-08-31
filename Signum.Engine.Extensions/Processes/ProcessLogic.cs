@@ -194,7 +194,7 @@ public static class ProcessLogic
 
                     p.SetAsQueued();
 
-                    ProcessRunnerLogic.WakeUp("Execute in this machine", null);
+                    ProcessRunner.WakeUp("Execute in this machine", null);
                 }
             }.Register();
 

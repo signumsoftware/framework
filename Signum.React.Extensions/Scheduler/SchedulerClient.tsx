@@ -75,6 +75,7 @@ export module API {
 
 export interface SchedulerState {
   running: boolean;
+  initialDelayMilliseconds: number | null;
   schedulerMargin: string;
   nextExecution: string;
   machineName: string;

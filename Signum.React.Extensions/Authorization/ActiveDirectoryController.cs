@@ -69,7 +69,7 @@ public class ActiveDirectoryController : ControllerBase
 
    
     [HttpGet("api/adThumbnailphoto/{username}"), SignumAllowAnonymous]
-    public FileStreamResult? GetThumbnail(string username)
+    public ActionResult GetThumbnail(string username)
     {
         this.Response.GetTypedHeaders().CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
         {
@@ -92,9 +92,10 @@ public class ActiveDirectoryController : ControllerBase
                 return streamResult;
             }
 
-            return null;
+            return (ActionResult)new NotFoundResult(); 
         }
     }
+
 
     [HttpGet("api/azureUserPhoto/{size}/{oID}"), SignumAllowAnonymous]
     public Task<ActionResult> GetUserPhoto(string oId, int size)

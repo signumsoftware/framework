@@ -120,7 +120,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
         if (id == null)
             throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
-        this.model = Lite.ConstructModel<T, M>(this.entityOrNull!);
+        this.model = this.entityOrNull == null ? (M)(object)null! : Lite.ConstructModel<T, M>(this.entityOrNull!);
         this.entityOrNull = null;
     }
 

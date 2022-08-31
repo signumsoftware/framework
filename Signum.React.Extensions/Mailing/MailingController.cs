@@ -17,7 +17,7 @@ public class MailingController : ControllerBase
     {
         AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
 
-        AsyncEmailSenderState state = AsyncEmailSenderLogic.ExecutionState();
+        AsyncEmailSenderState state = AsyncEmailSender.ExecutionState();
 
         return state;
     }
@@ -27,7 +27,7 @@ public class MailingController : ControllerBase
     {
         AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
 
-        AsyncEmailSenderLogic.StartRunningEmailSenderAsync(0);
+        AsyncEmailSender.StartAsyncEmailSender();
 
         Thread.Sleep(1000);
     }
@@ -37,9 +37,15 @@ public class MailingController : ControllerBase
     {
         AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
 
-        AsyncEmailSenderLogic.Stop();
+        AsyncEmailSender.Stop();
 
         Thread.Sleep(1000);
+    }
+
+    [HttpGet("api/asyncEmailSender/simpleStatus"), SignumAllowAnonymous]
+    public SimpleStatus SimpleStatus()
+    {
+        return AsyncEmailSender.GetSimpleStatus();
     }
 
 
