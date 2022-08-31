@@ -116,7 +116,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             new XAttribute("Guid", Guid),
             new XAttribute("DisplayName", DisplayName),
             new XAttribute("Query", Query.Key),
-            EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+            EntityType == null ? null! : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             new XAttribute("HideQuickLink", HideQuickLink),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),

@@ -28,7 +28,7 @@ public class WorkflowConditionEntity : Entity, IUserAssetEntity
         return new XElement("WorkflowCondition",
              new XAttribute("Guid", Guid),
              new XAttribute("Name", Name),
-             new XAttribute("MainEntityType", ctx.TypeToName(MainEntityType)),
+             new XAttribute("MainEntityType", MainEntityType.CleanName),
              new XElement("Eval",
                 new XElement("Script", new XCData(Eval.Script))));
     }

@@ -118,11 +118,6 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        if(this.Attachments != null && this.Attachments.Count() > 0)
-        {
-            throw new NotImplementedException("Attachments are not yet exportable");
-        }
-
         return new XElement("EmailTemplate",
             new XAttribute("Name", Name),
             new XAttribute("Guid", Guid),
@@ -152,6 +147,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
                      new XAttribute("WhenNone", rec.WhenNone)
                 )
             )),
+            Attachments.Any() ?  new XElement("Attachments", Attachments.Select(x => x.ToXml(ctx))) : null,
             new XElement("Messages", Messages.Select(x =>
                 new XElement("Message",
                     new XAttribute("CultureInfo", x.CultureInfo.Name),
