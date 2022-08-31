@@ -378,6 +378,8 @@ export module EntityControlMessage {
   export const Detail = new MessageKey("EntityControlMessage", "Detail");
   export const MoveDown = new MessageKey("EntityControlMessage", "MoveDown");
   export const MoveUp = new MessageKey("EntityControlMessage", "MoveUp");
+  export const MoveRight = new MessageKey("EntityControlMessage", "MoveRight");
+  export const MoveLeft = new MessageKey("EntityControlMessage", "MoveLeft");
   export const Move = new MessageKey("EntityControlMessage", "Move");
   export const MoveWithDragAndDropOrCtrlUpDown = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlUpDown");
   export const MoveWithDragAndDropOrCtrlLeftRight = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlLeftRight");

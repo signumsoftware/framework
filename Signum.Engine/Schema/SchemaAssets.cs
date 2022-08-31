@@ -15,8 +15,16 @@ public class SchemaAssets
 
     internal SqlPreCommand? Schema_Synchronizing(Replacements replacements)
     {
-        SqlPreCommand? views = SyncViews(replacements);
-        SqlPreCommand? procedures = SyncProcedures(replacements);
+        SqlPreCommand? views = SyncViews(replacements, drop: false);
+        SqlPreCommand? procedures = SyncProcedures(replacements, drop: false);
+
+        return SqlPreCommand.Combine(Spacing.Triple, views, procedures);
+    }
+
+    internal SqlPreCommand? Schema_SynchronizingDrop(Replacements replacements)
+    {
+        SqlPreCommand? views = SyncViews(replacements, drop: true);
+        SqlPreCommand? procedures = SyncProcedures(replacements, drop: true);
 
         return SqlPreCommand.Combine(Spacing.Triple, views, procedures);
     }
@@ -47,6 +55,11 @@ public class SchemaAssets
         {
             return new SqlPreCommandSimple("ALTER VIEW {0} ".FormatWith(Name) + Definition) { GoBefore = true, GoAfter = true };
         }
+
+        public SqlPreCommandSimple DropView()
+        {
+            return new SqlPreCommandSimple("DROP VIEW {0} ".FormatWith(Name)) { GoBefore = true, GoAfter = true };
+        }
     }
 
     public View IncludeView(string viewName, string viewDefinition)
@@ -66,7 +79,7 @@ public class SchemaAssets
         return Views.Values.Select(v => v.CreateView()).Combine(Spacing.Double);
     }
 
-    SqlPreCommand? SyncViews(Replacements replacements)
+    SqlPreCommand? SyncViews(Replacements replacements, bool drop)
     {
         var isPostgres = Schema.Current.Settings.IsPostgres;
         var oldView = Schema.Current.DatabaseNames().SelectMany(db =>
@@ -101,8 +114,9 @@ public class SchemaAssets
                 oldView,
                 createNew: (name, newView) => newView.CreateView(),
                 removeOld: null,
-                mergeBoth: (name, newDef, oldDef) => Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null : newDef.AlterView()
-            );
+                mergeBoth: (name, newDef, oldDef) => Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null :
+                drop ? newDef.DropView() : newDef.CreateView()
+            ); ;
     }
     #endregion
 
@@ -135,7 +149,7 @@ public class SchemaAssets
         return StoreProcedures.Select(p => p.Value.CreateSql()).Combine(Spacing.Double);
     }
 
-    SqlPreCommand? SyncProcedures(Replacements replacements)
+    SqlPreCommand? SyncProcedures(Replacements replacements, bool drop)
     {
         var isPostgres = Schema.Current.Settings.IsPostgres;
         var oldProcedures = Schema.Current.DatabaseNames().SelectMany(db =>
@@ -168,9 +182,10 @@ public class SchemaAssets
             Spacing.Double,
             StoreProcedures,
             oldProcedures,
-            createNew: (name, newProc) => newProc.CreateSql(),
+            createNew: (name, newProc) => drop ? null : newProc.CreateSql(),
             removeOld: null,
-            mergeBoth: (name, newProc, oldProc) => Clean(newProc.CreateSql().Sql) == Clean(oldProc) ? null : newProc.AlterSql()
+            mergeBoth: (name, newProc, oldProc) => Clean(newProc.CreateSql().Sql) == Clean(oldProc) ? null :
+            drop ? newProc.DropSql() : newProc.CreateSql()
             );
     }
 
@@ -195,6 +210,11 @@ public class SchemaAssets
         public SqlPreCommandSimple AlterSql()
         {
             return new SqlPreCommandSimple("ALTER {0} {1} ".FormatWith(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true, GoAfter = true };
+        }
+
+        public SqlPreCommandSimple DropSql()
+        {
+            return new SqlPreCommandSimple("DROP {0} {1} ".FormatWith(ProcedureType, ProcedureName)) { GoBefore = true, GoAfter = true };
         }
     }
     #endregion

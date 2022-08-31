@@ -74,8 +74,8 @@ span.sf-today {
 }
 
 .sf-strip-dropable {
-    margin: -1px -10px -1px 0px;
-    padding: 1px 10px 1px 0px;
+    margin: -1px -12px -1px -12px;
+    padding: 1px 12px 1px 12px;
 }
 
 li.sf-strip-element {
@@ -224,6 +224,24 @@ ul.nav-tabs {
     margin-bottom: 10px;
 }
 
+
+/*Accordion*/
+
+.sf-accordion-element.drag-top >h2 >button {
+    box-shadow: inset #AAA 0px 3px 0px 0px !important;
+}
+
+.sf-accordion-element.drag-bottom > h2 > button {
+    box-shadow: inset #AAA 0px -3px 0px 0px !important;
+}
+
+/*.sf-accordion-element {
+    padding-bottom: 3px;
+}
+
+.sf-accordion-element:first-child {
+    padding-top: 3px;
+}*/
 
 /*buton colors*/
 .sf-create:not(.disabled):hover {
