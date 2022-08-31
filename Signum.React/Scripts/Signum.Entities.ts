@@ -462,6 +462,8 @@ export interface ModelEntity extends ModifiableEntity {
 export module NormalControlMessage {
   export const ViewForType0IsNotAllowed = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
   export const SaveChangesFirst = new MessageKey("NormalControlMessage", "SaveChangesFirst");
+  export const CopyEntityTypeAndIdForAutocomplete = new MessageKey("NormalControlMessage", "CopyEntityTypeAndIdForAutocomplete");
+  export const CopyEntityUrl = new MessageKey("NormalControlMessage", "CopyEntityUrl");
 }
 
 export module OperationMessage {

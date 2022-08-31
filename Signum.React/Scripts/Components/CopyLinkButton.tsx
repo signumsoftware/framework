@@ -3,13 +3,15 @@ import { Overlay, Tooltip } from "react-bootstrap";
 import { Entity, FrameMessage, liteKey, NormalControlMessage, toLite } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useInterval } from '../Hooks';
+import * as Navigator from '../Navigator';
+import * as AppContext from '../AppContext';
 
-interface CopyLiteButtonProps {
+interface CopyLinkButtonProps {
   entity: Entity;
   className?: string;
 }
 
-export default function CopyLiteButton(p: CopyLiteButtonProps) {
+export default function CopyLinkButton(p: CopyLinkButtonProps) {
 
   const supportsClipboard = (navigator.clipboard && window.isSecureContext);
   if (p.entity.isNew || !supportsClipboard)
@@ -25,8 +27,9 @@ export default function CopyLiteButton(p: CopyLiteButtonProps) {
 
   return (
     <span className={p.className}>
-      <a ref={link} className="btn btn-sm btn-light text-dark sf-pointer mx-1" onClick={handleCopyLiteButton} title={NormalControlMessage.CopyEntityTypeAndIdForAutocomplete.niceToString()} >
-        <FontAwesomeIcon icon="copy" color="gray" />
+      <a ref={link} className="btn btn-sm btn-light text-dark sf-pointer mx-1" onClick={handleCopyLiteButton}
+        title={NormalControlMessage.CopyEntityUrl.niceToString()}>
+        <FontAwesomeIcon icon="link" color="gray" />
       </a>
       <Overlay target={link.current} show={showTooltip} placement="bottom">
         <Tooltip>
@@ -38,9 +41,8 @@ export default function CopyLiteButton(p: CopyLiteButtonProps) {
 
   function handleCopyLiteButton(e: React.MouseEvent<any>) {
     e.preventDefault();
-    const lk = liteKey(toLite(p.entity as Entity));
-
-    navigator.clipboard.writeText(lk)
+    var url = window.location.origin + AppContext.toAbsoluteUrl(Navigator.navigateRoute(p.entity));
+    navigator.clipboard.writeText(url)
       .then(() => setShowTooltip(true));
   }
 }
