@@ -28,7 +28,7 @@ public class WorkflowScriptEntity : Entity, IUserAssetEntity
         return new XElement("WorkflowScript",
              new XAttribute("Guid", Guid),
              new XAttribute("Name", Name),
-             new XAttribute("MainEntityType", ctx.TypeToName(MainEntityType)),
+             new XAttribute("MainEntityType", MainEntityType.CleanName),
              new XElement("Eval",
                new XElement("Script", new XCData(Eval.Script)),
                string.IsNullOrEmpty(Eval.CustomTypes) ? null! : new XElement("CustomTypes", new XCData(Eval.Script)))

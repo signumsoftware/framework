@@ -14,6 +14,8 @@ using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
 using Signum.Entities.Workflow;
 using Signum.Engine.Workflow;
+using Signum.Entities.Word;
+using Signum.Engine.Word;
 
 namespace Signum.Engine.UserAssets;
 
@@ -33,33 +35,18 @@ public static class UserAssetsExporter
 
         public Guid Include(Lite<IUserAssetEntity> content)
         {
-            return this.Include(content.RetrieveAndRemember());
-        }
-
-        public string TypeToName(Lite<TypeEntity> type)
-        {
-            return TypeLogic.GetCleanName(TypeLogic.LiteToType.GetOrThrow(type));
-        }
-        
-        public string TypeToName(TypeEntity type)
-        {
-            return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type));
-        }
-
-        public string QueryToName(Lite<QueryEntity> query)
-        {
-            return query.RetrieveAndRemember().Key;
-        }
-
-        public string PermissionToName(Lite<PermissionSymbol> symbol)
-        {
-            return symbol.RetrieveAndRemember().Key;
+            return this.Include(content.Retrieve());
         }
 
         public XElement GetFullWorkflowElement(WorkflowEntity workflow)
         {
             var wie = new WorkflowImportExport(workflow);
             return wie.ToXml(this);
+        }
+
+        T IToXmlContext.RetrieveLite<T>(Lite<T> lite)
+        {
+            return lite.Retrieve();
         }
     }
 
@@ -106,9 +93,6 @@ public static class UserAssetsImporter
         {
             elements = doc.Element("Entities")!.Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid")!.Value));
         }
-
-      
-
 
         public QueryEntity GetQuery(string queryKey)
         {
@@ -209,6 +193,12 @@ public static class UserAssetsImporter
             return EmailModelLogic.GetEmailModelEntity(fullClassName);
         }
 
+
+        public WordModelEntity GetWordModel(string fullClassName)
+        {
+            return WordModelLogic.GetWordModelEntity(fullClassName);
+        }
+
         public CultureInfoEntity GetCultureInfoEntity(string cultureName)
         {
             return CultureInfoLogic.GetCultureInfoEntity(cultureName);
@@ -249,6 +239,18 @@ public static class UserAssetsImporter
             }
 
             return lite;
+        }
+
+
+        T IFromXmlContext.RetrieveLite<T>(Lite<T> lite)
+        {
+            return lite.Retrieve();
+        }
+
+        public T GetSymbol<T>(string value)
+               where T : Symbol
+        {
+            return SymbolLogic<T>.ToSymbol(value);
         }
     }
 
@@ -397,6 +399,21 @@ public static class UserAssetsImporter
                 return alternative;
 
             return lite;
+        }
+
+        public WordModelEntity GetWordModel(string fullClassName)
+        {
+            throw new NotImplementedException();
+        }
+
+        T IFromXmlContext.RetrieveLite<T>(Lite<T> lite)
+        {
+            return lite.Retrieve();
+        }
+
+        public T GetSymbol<T>(string value) where T : Symbol
+        {
+            throw new NotImplementedException();
         }
     }
 
