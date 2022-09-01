@@ -12,6 +12,7 @@ export interface RenderEntityProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
   getViewPromise?: (e: any /*T*/) => undefined | string | Navigator.ViewPromise<any>;
+  onRefresh?: () => void;
   onEntityLoaded?: () => void;
   extraProps?: any;
 }
@@ -24,7 +25,7 @@ export function RenderEntity(p: RenderEntityProps) {
 
   var e = p.ctx.value
 
-  var entityFromLite = useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
+  useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
   var entity = isLite(e) ? e.entity : e;
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
@@ -65,7 +66,7 @@ export function RenderEntity(p: RenderEntityProps) {
   const prefix = ctx.propertyRoute!.typeReference().isLite ? ctx.prefix + ".entity" : ctx.prefix;
   const frame: EntityFrame = {
     tabs: undefined,
-    frameComponent: { forceUpdate, type: RenderEntity },
+    frameComponent: { forceUpdate: () => { forceUpdate(); p.onRefresh?.(); }, type: RenderEntity },
     entityComponent: entityComponent.current,
     pack: { entity, canExecute: {} },
     revalidate: () => p.ctx.frame && p.ctx.frame.revalidate(),

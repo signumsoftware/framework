@@ -21,6 +21,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
 
   const forceUpdate = useForceUpdate();
   const dashboardController = React.useMemo(() => new DashboardController(forceUpdate, p.dashboard), [p.dashboard]);
+  dashboardController.setIsLoading();
 
   function renderBasic() {
     const db = p.dashboard;
@@ -260,7 +261,7 @@ export function PanelPart(p: PanelPartProps) {
           {renderer.customTitleButtons?.(content, lite, customDataRef)}
           {
             renderer.handleEditClick &&
-            <a className="sf-pointer sf-hide" onClick={e => { e.preventDefault(); renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()).done(); }}>
+            <a className="sf-pointer sf-hide" onClick={e => { e.preventDefault(); renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }}>
               <FontAwesomeIcon icon="edit" className="me-1" />Edit
             </a>
           }

@@ -363,7 +363,7 @@ export function CollapsableTypeHelp(p: { initialTypeName?: string }) {
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
 
     return (
@@ -444,6 +444,6 @@ export function PropsHelp(p: { node: DesignerNode<BaseNode> }) {
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "200px" } },
-    }).done();
+    });
   }
 }

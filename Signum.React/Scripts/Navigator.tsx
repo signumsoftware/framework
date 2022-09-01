@@ -23,6 +23,7 @@ import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessage
 import CopyLiteButton from "./Components/CopyLiteButton";
 import { Typeahead } from "./Components";
 import { TypeaheadOptions } from "./Components/Typeahead";
+import CopyLinkButton from "./Components/CopyLinkButton";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || getToString(currentUser) == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -54,17 +55,17 @@ export namespace NavigatorManager {
   }
 }
 
-export const entityChanged: Array<(cleanName: string, entity?: Entity) => void> = [];
+export const entityChanged: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> = [];
 
 function cleanEntityChanged() {
   entityChanged.clear();
 }
 
-export function raiseEntityChanged(cleanNameOrEntity: string | Entity) {
+export function raiseEntityChanged(cleanNameOrEntity: string | Entity, isRedirect = false) {
   var cleanName = isEntity(cleanNameOrEntity) ? cleanNameOrEntity.Type : cleanNameOrEntity;
   var entity = isEntity(cleanNameOrEntity) ? cleanNameOrEntity : undefined;
 
-  entityChanged.forEach(a => a(cleanName, entity));
+  entityChanged.forEach(a => a(cleanName, entity, isRedirect));
 }
 
 export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
@@ -94,6 +95,7 @@ let renderId = (entity: Entity): React.ReactChild => {
         {entity.id}
       </span>
       <CopyLiteButton className={"sf-hide-id"} entity={entity} />
+      <CopyLinkButton className={"sf-hide-id"} entity={entity} />
     </>
   );
 }
@@ -763,8 +765,7 @@ export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLo
         .then(() => {
           onLoaded && onLoaded();
           forceUpdate();
-        })
-        .done();
+        });
   }, [lite]);
 
 
@@ -904,7 +905,9 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   isReadOnly?: boolean;
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
+
   allowWrapEntityLink?: boolean;
+  avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
 
@@ -976,6 +979,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   supportsAdditionalTabs?: boolean;
 
   allowWrapEntityLink?: boolean;
+  avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
 

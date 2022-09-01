@@ -344,8 +344,7 @@ export class QuickLinkLink extends QuickLink {
             window.open(url);
           else
             AppContext.pushOrOpenInTab(url, e)
-        })
-        .done();
+        });
     }
   }
 }
@@ -370,7 +369,7 @@ export class QuickLinkExplore extends QuickLink {
     if (e.ctrlKey || e.button == 1)
       window.open(Finder.findOptionsPath(this.findOptions));
     else
-      Finder.explore(this.findOptions).done();
+      Finder.explore(this.findOptions);
   }
 }
 
@@ -397,8 +396,8 @@ export class QuickLinkExplorePromise extends QuickLink {
       if (e.ctrlKey || e.button == 1)
         window.open(Finder.findOptionsPath(fo));
       else
-        Finder.explore(fo).done();
-    }).done();
+        Finder.explore(fo);
+    });
   }
 }
 

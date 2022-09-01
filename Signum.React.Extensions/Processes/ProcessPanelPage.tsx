@@ -5,6 +5,7 @@ import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, ProcessLogicState } from './ProcessClient'
 import { ProcessEntity } from './Signum.Entities.Processes'
 import { SearchControl } from '@framework/Search';
+import * as AppContext from '@framework/AppContext'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { toNumberFormat } from '@framework/Reflection'
@@ -16,12 +17,12 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => reloadState()).done();
+    API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => reloadState()).done();
+    API.start().then(() => reloadState());
   }
 
 
@@ -43,9 +44,10 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
         <br />
         State: <strong>
           {s.running ?
-            <span style={{ color: "Green" }}> RUNNING </span> :
-            <span style={{ color: "Red" }}> STOPPED </span>
+            <span style={{ color: "green" }}> RUNNING </span> :
+            <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
+          <a className="ms-2" href={AppContext.toAbsoluteUrl("~/api/processes/simpleStatus")} target="_blank">SimpleStatus</a>
         <br />
         JustMyProcesses: {s.justMyProcesses.toString()}
         <br />
@@ -55,7 +57,7 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
         <br />
         MaxDegreeOfParallelism: {s.maxDegreeOfParallelism}
         <br />
-        InitialDelayMiliseconds: {s.initialDelayMiliseconds}
+        InitialDelayMilliseconds: {s.initialDelayMilliseconds}
         <br />
         NextPlannedExecution: {s.nextPlannedExecution ?? "-None-"}
         <br />

@@ -44,7 +44,7 @@ export function start(options: { routes: JSX.Element[] }) {
         icon: "sms",
         iconColor: "green"
       }));
-  }).done();
+  });
 }
 
 function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {
@@ -54,7 +54,7 @@ function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {
       filterOptions: [{ token: "Referred", value: referred}],
       columnOptionsMode: "Remove",
       columnOptions: [{ token: "Referred" }],
-    }).done();
+    });
 }
 
 export module API {

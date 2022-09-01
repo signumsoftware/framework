@@ -83,6 +83,7 @@
     <Member Name="EmailNotificationsSent" Description="E-Mail-Benachrichtigungen gesendet" />
     <Member Name="Future" Description="Zukünftige" />
     <Member Name="NotAttended" Description="Nicht erledigte" />
+    <Member Name="ParentTarget" Description="Übergeordnetes Ziel" />
     <Member Name="Recipient" Description="Empfänger" />
     <Member Name="State" Description="Status" />
     <Member Name="Target" Description="Ziel" />
@@ -175,8 +176,9 @@
     <Member Name="ConflictMergingTypeConditions" Description="Konflikt durch Verschmelzung von Typbedingungen" />
     <Member Name="DefaultAuthorization" Description="Standardautorisierung: " />
     <Member Name="Deny" Description="Verweigern" />
-    <Member Name="Everithing" Description="Alles" />
+    <Member Name="Everything" Description="Alles" />
     <Member Name="Filter" Description="Filter" />
+    <Member Name="IncludeTrivialMerges" Description="Einschließen trivialer Zusammenführungen" />
     <Member Name="MaximumOfThe0" Description="Maximum der {0}" />
     <Member Name="MinumumOfThe0" Description="Minimum der {0}" />
     <Member Name="Nothing" Description="Nichts" />
@@ -184,10 +186,18 @@
     <Member Name="Overriden" Description="Überschrieben" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
     <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
+    <Member Name="RepeatedTypeCondition" Description="Wiederholte Typbedingungen" />
     <Member Name="ResetChanges" Description="Zurücksetzen von Änderungen" />
+    <Member Name="Role0InheritsFromTrivialMergeRole1" Description="Rolle {0} erbt von der triviale Zusammenführung Rolle {1}" />
+    <Member Name="Role0IsTrivialMerge" Description="Rolle {0} ist eine triviale Zusammenführung" />
     <Member Name="SameAs0" Description="Wie {0}" />
     <Member Name="Save" Description="Speichern" />
+    <Member Name="SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime" Description="Wählen Sie mehr als einen aus, um den Zugriff für {0} zu überschreiben, die alle Bedingungen gleichzeitig erfüllen." />
+    <Member Name="SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition" Description="Wählen Sie eine Option aus, um den Zugriff für {0} zu überschreiben, die diese Bedingung erfüllen." />
+    <Member Name="SelectTypeConditions" Description="Wählen Sie Typbedingung(en)" />
     <Member Name="SwitchTo" Description="Wechseln Sie zu" />
+    <Member Name="TheFollowingTypeConditionsHaveAlreadyBeenUsed" Description="Der folgende Typbedingungen wurden bereits verwendet:" />
+    <Member Name="ThereAre0TypeConditionsDefinedFor1" Description="Es sind {0} Typbedingungen für {1} definiert." />
     <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert werden." />
     <Member Name="TypeRules" Description="Typregeln" />
   </Type>
@@ -771,11 +781,31 @@
     <Member Name="DisconnectedMachine" Description="Getrennter Computer" />
     <Member Name="LastOnlineTicks" Description="Letzte Onlineticks" />
   </Type>
-  <Type Name="DiscoveryEntity" />
-  <Type Name="DiscoveryLogEntity" />
-  <Type Name="DiscoveryMessageEmbedded" />
-  <Type Name="DiscoveryOperation" />
-  <Type Name="DiscoveryType" />
+  <Type Name="DiscoveryEntity" Description="Entdeckung">
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Messages" Description="Nachrichten" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Related" Description="Verwandt" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="DiscoveryLogEntity" Description="Discovery-Protokoll" PluralDescription="Ermittlungsprotokolle" Gender="n">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Discovery" Description="Entdeckung" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="DiscoveryMessageEmbedded" Description="Discovery-Nachricht">
+    <Member Name="Content" Description="Inhalt" />
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Title" Description="Titel" />
+  </Type>
+  <Type Name="DiscoveryOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="DiscoveryType" Description="Discovery-Typ">
+    <Member Name="DidYouKnow" Description="Wussten Sie das?" />
+    <Member Name="WhatsNew" Description="Was ist neu?" />
+  </Type>
   <Type Name="DoneType" Description="Fertigstellungstypen">
     <Member Name="Jump" Description="Springen" />
     <Member Name="Next" Description="Nächstes" />
@@ -994,6 +1024,7 @@
     <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
   </Type>
   <Type Name="EmailMasterTemplateEntity" Description="Master E-Mail-Vorlage">
+    <Member Name="Attachments" Description="Anhänge" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="IsDefault" Description="Ist Standard" />
     <Member Name="Messages" Description="Nachrichten" />
@@ -2039,6 +2070,7 @@
   <Type Name="RoleEntity" Description="Rolle">
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="InheritsFrom" Description="Erbt von" />
+    <Member Name="IsTrivialMerge" Description="Ist triviale Zusammenführung" />
     <Member Name="MergeStrategy" Description="Zusammenführstrategie" />
     <Member Name="Name" Description="Name" />
   </Type>
@@ -2066,7 +2098,7 @@
     <Member Name="RuleType" Description="Typregel" />
   </Type>
   <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln" Gender="m">
-    <Member Name="Conditions" Description="Bedingungen" />
+    <Member Name="ConditionRules" Description="Bedingungsregeln" />
   </Type>
   <Type Name="ScheduledTaskEntity" Description="Geplante Task" PluralDescription="Geplanten Tasks" Gender="f">
     <Member Name="ApplicationName" Description="Anwendungsname" />
@@ -2646,6 +2678,12 @@
     <Member Name="State" Description="Status" />
     <Member Name="UserName" Description="Benutzername" />
   </Type>
+  <Type Name="UserLiteModel" Description="Benutzer-Lite">
+    <Member Name="OID" Description="OID" />
+    <Member Name="SID" Description="SID" />
+    <Member Name="ToStringValue" Description="Zum Zeichenfolgenwert" />
+    <Member Name="UserName" Description="Benutzername" />
+  </Type>
   <Type Name="UserOIDMessage">
     <Member Name="TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet" Description="Der Benutzer {0} ist mit Active Directory verbunden und kann kein lokales Kennwort festgelegt haben" />
   </Type>
@@ -2753,6 +2791,12 @@
     <Member Name="Expression" Description="Ausdruck" />
     <Member Name="Name" Description="Name" />
   </Type>
+  <Type Name="WhatsNewEntity" />
+  <Type Name="WhatsNewFileType" />
+  <Type Name="WhatsNewLogEntity" />
+  <Type Name="WhatsNewMessage" />
+  <Type Name="WhatsNewMessageEmbedded" />
+  <Type Name="WhatsNewOperation" />
   <Type Name="WhenManyFromBehaviour" Description="Verhalten Wenn viele Von ">
     <Member Name="FistResult" Description="Erstes Ergebnis" />
     <Member Name="SplitMessages" Description="Geteilte Nachrichten" />

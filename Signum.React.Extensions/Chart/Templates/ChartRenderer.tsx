@@ -77,8 +77,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
       window.open(Navigator.navigateRoute(r.entity));
     else
       Navigator.view(r.entity)
-        .then(() => onReload && onReload())
-        .done();
+        .then(() => onReload && onReload());
   } else {
     const filters = cr.filterOptions.map(f => {
       let f2 = withoutPinned(f);
@@ -91,26 +90,30 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
 
     cr.columns.map((a, i) => {
 
-      const t = a.element.token;
+      const qte = a.element.token;
 
-      if (t?.token && !hasAggregate(t!.token!) && r.hasOwnProperty("c" + i)) {
+      if (qte?.token && !hasAggregate(qte!.token!) && r.hasOwnProperty("c" + i)) {
         filters.push({
-          token: t!.token!,
+          token: qte!.token!,
           operation: "EqualTo",
           value: (r as any)["c" + i],
           frozen: false
         } as FilterOptionParsed);
       }
 
-      if (t?.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
+      if (qte?.token && qte.token.parent != undefined) //Avoid Count and simple Columns that are already added
       {
-        var token = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
-
-        if (token.parent || t.token.queryTokenType == "Aggregate")
+        var t = qte.token;
+        if (t.queryTokenType == "Aggregate") {
           columns.push({
-            token: token.fullKey,
-            summaryToken: t.token.queryTokenType == "Aggregate" ? t.token.fullKey : undefined,
+            token: t.parent!.fullKey,
+            summaryToken: t.fullKey
           });
+        } else {
+          columns.push({
+            token: t.fullKey,
+          });
+        }
       }
     });
 
@@ -119,14 +122,13 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
       filterOptions: toFilterOptions(filters),
       includeDefaultFilters: false,
       columnOptions: columns,
-      columnOptionsMode: "Add",
+      columnOptionsMode: "ReplaceOrAdd",
     };
 
     if (newWindow)
       window.open(Finder.findOptionsPath(fo));
     else
       Finder.explore(fo)
-        .then(() => onReload && onReload())
-        .done();
+        .then(() => onReload && onReload());
   }
 }

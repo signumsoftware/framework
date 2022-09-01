@@ -19,7 +19,7 @@ public class MListElementPropertyToken : QueryToken
    internal MListElementPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr, string key, Func<string> nicePropertyName)
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
-        if (parent is not (CollectionAnyAllToken or CollectionElementToken))
+        if (parent is not (CollectionAnyAllToken or CollectionElementToken or CollectionToArrayToken))
             throw new InvalidOperationException("Unexpected parent");
 
         this.PropertyInfo = pi ?? throw new ArgumentNullException(nameof(pi));

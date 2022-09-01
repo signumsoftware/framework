@@ -6,7 +6,7 @@ import { SearchControl } from '@framework/Search'
 import { API, AsyncEmailSenderState } from './MailingClient'
 import { EmailMessageEntity } from './Signum.Entities.Mailing'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
-import { useTitle } from '@framework/AppContext'
+import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
 
 export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
 
@@ -16,12 +16,12 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => reloadState()).done();
+    API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => reloadState()).done();
+    API.start().then(() => reloadState());
   }
 
   if (state == undefined)
@@ -39,10 +39,13 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
         <br />
         State: <strong>
           {state.running ?
-            <span style={{ color: "Green" }}> RUNNING </span> :
-            <span style={{ color: "Red" }}> STOPPED </span>
+            <span style={{ color: "green" }}> RUNNING </span> :
+            <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
+        <a className="ms-2" href={toAbsoluteUrl("~/api/asyncEmailSender/simpleStatus")} target="_blank">SimpleStatus</a>
         <br />
+        InitialDelayMilliseconds: {state.initialDelayMilliseconds}
+        <br/>
         MachineName: {state.machineName}
         <br />
         CurrentProcessIdentifier: {state.currentProcessIdentifier}

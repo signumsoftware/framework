@@ -90,6 +90,7 @@ public static class PropertyAuthLogic
                 }, EnumExtensions.ToEnum<PropertyAllowed>);
             };
 
+            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
             sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
         }
     }

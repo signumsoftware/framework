@@ -156,8 +156,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
         reload(pack.entity);
         DynamicViewClient.cleanCaches();
         return Operations.notifySuccess();
-      })
-      .done();
+      });
   }
 
   function handleCreate() {
@@ -166,10 +165,9 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
         return;
 
       DynamicViewClient.createDefaultDynamicView(p.typeName)
-        .then(entity => { reload(entity); return Operations.notifySuccess(); })
-        .done();
+        .then(entity => { reload(entity); return Operations.notifySuccess(); });
 
-    }).done();
+    });
   }
 
   function handleClone() {
@@ -178,9 +176,8 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
         return;
 
       Operations.API.constructFromEntity(p.dynamicView, DynamicViewOperation.Clone)
-        .then(pack => { reload(pack!.entity); return Operations.notifySuccess(); })
-        .done();
-    }).done();
+        .then(pack => { reload(pack!.entity); return Operations.notifySuccess(); });
+    });
   }
 
   function handleChangeView(viewName: string) {
@@ -189,16 +186,14 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
         return;
 
       DynamicViewClient.API.getDynamicView(p.typeName, viewName)
-        .then(entity => { reload(entity!); })
-        .done();
-    }).done();
+        .then(entity => { reload(entity!); });
+    });
   }
 
   function handleOnToggle() {
     if (!isDropdownOpen && !viewNames)
       DynamicViewClient.API.getDynamicViewNames(p.typeName)
-        .then(viewNames => setViewNames(viewNames))
-        .done();
+        .then(viewNames => setViewNames(viewNames));
 
 
     setIsDropdownOpen(!isDropdownOpen);

@@ -41,7 +41,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
             new XAttribute("Guid", Guid),
             new XAttribute("Name", Name),
             new XAttribute("Location", Location),
-            Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             Priority == null ? null! : new XAttribute("Priority", Priority.Value.ToString()),
             new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
     }
@@ -109,8 +109,8 @@ public class ToolbarElementEmbedded : EmbeddedEntity
             OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null!,
             AutoRefreshPeriod == null ? null! : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
             Content == null ? null! : new XAttribute("Content",
-            Content is Lite<QueryEntity> query ?  ctx.QueryToName(query) :
-            Content is Lite<PermissionSymbol> perm ?  ctx.PermissionToName(perm) :
+            Content is Lite<QueryEntity> query ?  ctx.RetrieveLite(query).Key :
+            Content is Lite<PermissionSymbol> perm ?  ctx.RetrieveLite(perm).Key :
             (object)ctx.Include((Lite<IUserAssetEntity>)Content)),
             string.IsNullOrEmpty(Url) ? null! : new XAttribute("Url", Url));
     }
@@ -195,7 +195,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
         return new XElement("ToolbarMenu",
             new XAttribute("Guid", Guid),
             new XAttribute("Name", Name),
-            Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
     }
 

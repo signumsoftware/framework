@@ -26,8 +26,7 @@ export default function MailingMenu(p : MailingMenuProps){
 
         return s.createFromQuery(et, p.searchControl.getQueryRequest())
           .then(m => m && MailingClient.createAndViewEmail(et, m));
-      })
-      .done();
+      });
   }
 
   const emailTemplates = p.searchControl.props.queryDescription.emailTemplates;

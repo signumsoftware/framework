@@ -11,7 +11,7 @@ import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation 
 import { Lite } from "@framework/Signum.Entities";
 import { StyleContext } from "@framework/Lines";
 import { useAPIWithReload } from '@framework/Hooks'
-import { useTitle } from '@framework/AppContext'
+import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
 
 interface SchedulerPanelProps extends RouteComponentProps<{}> {
 
@@ -30,12 +30,12 @@ export default function SchedulerPanelPage(p: SchedulerPanelProps) {
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => reloadState()).done();
+    API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => reloadState()).done();
+    API.start().then(() => reloadState());
   }
 
   
@@ -58,9 +58,12 @@ export default function SchedulerPanelPage(p: SchedulerPanelProps) {
         <br />
         State: <strong>
           {s.running ?
-            <span style={{ color: "Green" }}> RUNNING </span> :
-            <span style={{ color: "Red" }}> STOPPED </span>
+            <span style={{ color: "green" }}> RUNNING </span> :
+            <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
+        <a className="ms-2" href={toAbsoluteUrl("~/api/scheduler/simpleStatus")} target="_blank">SimpleStatus</a>
+        <br />
+        InitialDelayMilliseconds: {s.initialDelayMilliseconds}
         <br />
         SchedulerMargin: {s.schedulerMargin}
         <br />
@@ -130,8 +133,7 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerRunni
     e.preventDefault();
 
     Operations.API.executeLite(taskLog, ScheduledTaskLogOperation.CancelRunningTask)
-      .then(() => onReload())
-      .done();
+      .then(() => onReload());
   }
 
   return (

@@ -69,12 +69,10 @@ export class MultiFileImageLineController extends EntityListBaseController<Multi
   handleFileLoaded = (file: IFile & ModifiableEntity) => {
     if (this.props.createEmbedded)
       this.props.createEmbedded(file)
-        .then(em => em && this.addElement(em))
-        .done();
+        .then(em => em && this.addElement(em));
     else
       this.convert(file)
-        .then(f => this.addElement(f))
-        .done();
+        .then(f => this.addElement(f));
   }
 
   defaultCreate() {
@@ -139,7 +137,7 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
 
     return ctx.propertyRoute!.typeReference().isLite ?
       <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} />;
+      <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} />;
   }
 
 });

@@ -39,11 +39,10 @@ export default function ChangePasswordPage() {
         })
         .catch(ifError(ValidationError, e => {
           if (e.modelState)
-            setModelState(e.modelState).done();
-        }))
-        .done();
+            setModelState(e.modelState);
+        }));
 
-    }).done();
+    });
   }
 
   function error(field: string): string | undefined {
@@ -53,11 +52,11 @@ export default function ChangePasswordPage() {
   }
 
   function handleOldPasswordBlur(event: React.SyntheticEvent<any>) {
-    setModelState({ ...modelState, ...validateOldPassword() }).done();
+    setModelState({ ...modelState, ...validateOldPassword() });
   }
 
   function handleNewPasswordBlur(event: React.SyntheticEvent<any>) {
-    setModelState({ ...modelState, ...validateNewPassword(event.currentTarget == newPassword2!.current) }).done();
+    setModelState({ ...modelState, ...validateNewPassword(event.currentTarget == newPassword2!.current) });
   }
 
   function validateOldPassword(): ModelState {

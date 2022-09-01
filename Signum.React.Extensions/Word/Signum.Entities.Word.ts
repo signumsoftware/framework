@@ -7,6 +7,7 @@ import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
 import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 import * as Templating from '../Templating/Signum.Entities.Templating'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Files from '../Files/Signum.Entities.Files'
@@ -16,10 +17,10 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 export const WordAttachmentEntity = new Type<WordAttachmentEntity>("WordAttachment");
 export interface WordAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
   Type: "WordAttachment";
-  fileName: string;
+  fileName: string | null;
   wordTemplate: Entities.Lite<WordTemplateEntity>;
-  overrideModel: Entities.Lite<Entities.Entity>;
-  modelConverter: Templating.ModelConverterSymbol;
+  overrideModel: Entities.Lite<Entities.Entity> | null;
+  modelConverter: Templating.ModelConverterSymbol | null;
 }
 
 export const WordConverterSymbol = new Type<WordConverterSymbol>("WordConverter");
@@ -34,8 +35,9 @@ export interface WordModelEntity extends Entities.Entity {
 }
 
 export const WordTemplateEntity = new Type<WordTemplateEntity>("WordTemplate");
-export interface WordTemplateEntity extends Entities.Entity {
+export interface WordTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WordTemplate";
+  guid: string /*Guid*/;
   name: string;
   query: Basics.QueryEntity;
   model: WordModelEntity | null;
@@ -45,7 +47,7 @@ export interface WordTemplateEntity extends Entities.Entity {
   orders: Entities.MList<UserQueries.QueryOrderEmbedded>;
   applicable: Templating.TemplateApplicableEval | null;
   disableAuthorization: boolean;
-  template: Entities.Lite<Files.FileEntity> | null;
+  template: Entities.Lite<Files.FileEntity>;
   fileName: string;
   wordTransformer: WordTransformerSymbol | null;
   wordConverter: WordConverterSymbol | null;

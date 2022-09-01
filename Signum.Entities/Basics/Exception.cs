@@ -11,8 +11,22 @@ public class ExceptionEntity : Entity
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public ExceptionEntity() { }
 
+    public ExceptionEntity(ClientErrorModel clientError)
+    {
+        this.RebindEvents();
+        this.ExceptionType = "/".Combine(clientError.ErrorType, clientError.Name);
+        this.ExceptionMessage = clientError.Message;
+        this.StackTrace = new BigStringEmbedded(clientError.Stack);
+        this.ThreadId = -1;
+     
+        this.MachineName = System.Environment.MachineName;
+        this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
+        this.Origin = ExceptionOrigin.Frontend_React;
+    }
+
     public ExceptionEntity(Exception ex)
     {
+        this.RebindEvents();
         this.ExceptionType = ex.GetType().Name;
         this.ExceptionMessage = ex.Message!;
         this.StackTrace = new BigStringEmbedded(ex.StackTrace!);
@@ -20,6 +34,7 @@ public class ExceptionEntity : Entity
         ex.Data[ExceptionDataKey] = this;
         this.MachineName = System.Environment.MachineName;
         this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
+        this.Origin = ExceptionOrigin.Backend_DotNet;
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
@@ -109,6 +124,8 @@ public class ExceptionEntity : Entity
 
     public bool Referenced { get; set; }
 
+    public ExceptionOrigin Origin { get; set; }
+
     public override string ToString()
     {
         return "{0}: {1}".FormatWith(ExceptionType, exceptionMessage).Etc(200);
@@ -118,6 +135,12 @@ public class ExceptionEntity : Entity
     {
         return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\r\n");
     }
+}
+
+public enum ExceptionOrigin
+{
+    Backend_DotNet,
+    Frontend_React
 }
 
 
@@ -177,4 +200,17 @@ public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
         return base.PropertyValidation(pi);
     }
 }
+
+[AllowUnathenticated]
+public class ClientErrorModel : ModelEntity
+{
+    public string ErrorType { get; set; }
+    
+    public string Message { get; set; }
+
+    public string? Stack { get; set; }
+
+    public string? Name { get; set; }
+}
+
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.

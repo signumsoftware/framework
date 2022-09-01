@@ -58,8 +58,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
         AlertsClient.API.myAlerts()
           .then(als => {
             setAlerts(als);
-          })
-          .done();
+          });
       }
 
     } else {
@@ -89,8 +88,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 
     if (!isOpen) {
       AlertsClient.API.myAlerts()
-        .then(alerts => setAlerts(alerts))
-        .done();
+        .then(alerts => setAlerts(alerts));
     }
 
     setIsOpen(!isOpen);
@@ -116,7 +114,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 
         const errors = Dic.getValues(res.errors).filter(a => Boolean(a));
         if (errors.length) {
-          MessageModal.showError(<ul>{errors.map((a, i) => <li key={i}>{a}</li>)}</ul>, "Errors attending alerts").done();
+          MessageModal.showError(<ul>{errors.map((a, i) => <li key={i}>{a}</li>)}</ul>, "Errors attending alerts");
         }
 
         // Pesimistic
@@ -126,13 +124,11 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
               setIsOpen(true);
 
             setAlerts(alerts);
-          })
-          .done();
+          });
 
         reloadCount();
 
-      })
-      .done();
+      });
   }
 
   var alertsGroups = alerts == null ? null :
@@ -194,7 +190,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
                     { token: AlertEntity.token(a => a.entity.createdBy) },
                     { token: AlertEntity.token(a => a.entity.recipient) },
                   ],
-                  columnOptionsMode: "Replace"
+                  columnOptionsMode: "ReplaceAll"
                 })}>{AlertMessage.AllMyAlerts.niceToString()}</Link>
               </Toast.Body>
             </Toast>

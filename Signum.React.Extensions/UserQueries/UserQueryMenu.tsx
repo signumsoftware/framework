@@ -60,7 +60,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   function handleSelectedToggle(isOpen: boolean) {
     if (isOpen && userQueries == undefined)
-      reloadList().done();
+      reloadList();
 
     setIsOpen(isOpen);
   }
@@ -76,8 +76,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
             setCurrentUserQuery(currentUserQuery);
           } else {
             Navigator.API.fillLiteModels(currentUserQuery)
-              .then(() => setCurrentUserQuery(currentUserQuery))
-              .done();
+              .then(() => setCurrentUserQuery(currentUserQuery));
           }
         }
         return list;
@@ -106,7 +105,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
         }
-      }).done();
+      });
   }
 
 
@@ -124,7 +123,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
             sc.doSearchPage1();
           }
         });
-    }).done()
+    })
   }
 
   function handleOnClick(uq: Lite<UserQueryEntity>) {
@@ -135,8 +134,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     Navigator.API.fetch(currentUserQuery!)
       .then(userQuery => Navigator.view(userQuery))
       .then(() => reloadList())
-      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!))
-      .done();
+      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!));
   }
 
   async function applyChanges(): Promise<UserQueryEntity> {
@@ -158,7 +156,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     uqOld.orders = uqNew.orders;
     uqOld.paginationMode = uqNew.paginationMode;
     uqOld.elementsPerPage = uqNew.elementsPerPage;
-
+    uqOld.modified = true;
     return uqOld;
   }
 
@@ -166,8 +164,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     applyChanges()
       .then(uqOld => Navigator.view(uqOld))
       .then(() => reloadList())
-      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!))
-      .done();
+      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!));
   }
 
   async function createUserQuery(): Promise<UserQueryEntity> {
@@ -227,9 +224,9 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           reloadList().then(() => {
             setCurrentUserQuery(toLite(uq));
             applyUserQuery(toLite(uq));
-          }).done();
+          });
         }
-      }).done();
+      });
   }
 
   const currentUserQueryToStr = currentUserQuery ? getToString(currentUserQuery) : undefined;
@@ -332,9 +329,10 @@ export namespace UserQueryMerger {
       const newCol = ch.added.element;
 
       oldCol.token = newCol.token;
-      oldCol.displayName = newCol.displayName == translated(oldCol, a => a.displayName) ? oldCol.displayName : newCol.displayName;
+      oldCol.displayName = (newCol.displayName == translated(oldCol, a => a.displayName) ? oldCol.displayName : newCol.displayName) ?? null;
       oldCol.summaryToken = newCol.summaryToken;
       oldCol.hiddenColumn = newCol.hiddenColumn;
+      oldCol.modified = true;
       //preserve rowId
       return [ch.removed];
     });
@@ -414,7 +412,7 @@ export namespace UserQueryMerger {
     return (qc1.token?.tokenString == qc2.token?.tokenString ? 0 : 3) +
       (qc1.summaryToken?.tokenString == qc2.summaryToken?.tokenString ? 0 : 1) +
       (qc1.displayName == qc2.displayName ? 0 : 1) +
-      (qc1.hiddenColumn ? 0 : 1);
+      (qc1.hiddenColumn == qc2.hiddenColumn ? 0 : 1);
   }
 
   function distanceFilter(fo: FilterOption, fo2: FilterOption): number {

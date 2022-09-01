@@ -93,6 +93,7 @@ export interface EmailMasterTemplateEntity extends Entities.Entity, UserAssets.I
   isDefault: boolean;
   messages: Entities.MList<EmailMasterTemplateMessageEmbedded>;
   guid: string /*Guid*/;
+  attachments: Entities.MList<IAttachmentGeneratorEntity>;
 }
 
 export const EmailMasterTemplateMessageEmbedded = new Type<EmailMasterTemplateMessageEmbedded>("EmailMasterTemplateMessageEmbedded");

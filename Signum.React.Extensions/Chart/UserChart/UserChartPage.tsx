@@ -24,8 +24,7 @@ export default function UserChartPage(p : UserChartPageProps){
       .then(() => Navigator.API.fetchEntity(UserChartEntity, userChartId))
       .then(uc => UserChartClient.Converter.toChartRequest(uc, lite)
         .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc))))
-      .then(path => AppContext.history.replace(path))
-      .done();
+      .then(path => AppContext.history.replace(path));
   }, []);
 
   return <span>{JavascriptMessage.loading.niceToString()}</span>;

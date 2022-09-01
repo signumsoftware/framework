@@ -8,6 +8,7 @@ import ChartRequestView from './ChartRequestView'
 import { RouteComponentProps } from 'react-router'
 import { useStateWithPromise } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
+import { getQueryNiceName } from '@framework/Reflection'
 
 interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string; }> {
 
@@ -25,11 +26,12 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
         var query = QueryString.parse(p.location.search);
         var uc = query.userChart == null ? undefined : (parseLite(query.userChart) as Lite<UserChartEntity>);
         ChartClient.Decoder.parseChartRequest(p.match.params.queryName, query)
-          .then(cr => setPair({ chartRequest: cr, userChart: uc }))
-          .done();
+          .then(cr => setPair({ chartRequest: cr, userChart: uc }));
       }
-    }).done();
+    });
   }, [p.location.pathname, p.location.search, p.match.params.queryName])
+
+  AppContext.useTitle(getQueryNiceName(p.match.params.queryName));
 
   function handleOnChange(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
     if (pair!.userChart != uc)
@@ -40,8 +42,7 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
 
   function changeUrl(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
     ChartClient.Encoder.chartPathPromise(cr, uc)
-      .then(path => AppContext.history.replace(path))
-      .done();
+      .then(path => AppContext.history.replace(path));
   }
 
   if (pair == null)

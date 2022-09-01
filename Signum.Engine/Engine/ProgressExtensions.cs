@@ -45,6 +45,7 @@ public static class ProgressExtensions
         Action<T>? action = null,
         bool transactional = true,
         bool showProgress = true,
+        bool stopOnException = false,
         LogWriter? writer = null,
         ParallelOptions? parallelOptions = null,
         Type? disableIdentityFor = null)
@@ -62,7 +63,7 @@ public static class ProgressExtensions
 
         if (disableIdentityFor == null)
         {
-            collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, showProgress, action);
+            collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, showProgress, stopOnException, action);
         }
         else
         {
@@ -71,7 +72,7 @@ public static class ProgressExtensions
 
             Table table = Schema.Current.Table(disableIdentityFor);
 
-            collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, showProgress, action: item =>
+            collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, showProgress, stopOnException, action: item =>
             {
                 using (var tr = Transaction.ForceNew())
                 {
@@ -89,13 +90,14 @@ public static class ProgressExtensions
         ParallelOptions? parallelOptions,
         bool transactional,
         bool showProgress,
+        bool stopOnException, 
         Action<T> action
     )
     {
         if (parallelOptions != null)
-            collection.ProgressForeachParallel(elementID, writer, parallelOptions, transactional, showProgress, action);
+            collection.ProgressForeachParallel(elementID, writer, parallelOptions, transactional, showProgress, stopOnException, action);
         else
-            collection.ProgressForeachSequential(elementID, writer, transactional, showProgress, action);
+            collection.ProgressForeachSequential(elementID, writer, transactional, showProgress, stopOnException, action);
     }
 
     private static void ProgressForeachSequential<T>(this IEnumerable<T> collection,
@@ -103,6 +105,7 @@ public static class ProgressExtensions
         LogWriter writer,
         bool transactional,
         bool showProgress,
+        bool stopOnException, 
         Action<T> action)
     {
         var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
@@ -133,7 +136,7 @@ public static class ProgressExtensions
                     writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
                     writer(ConsoleColor.DarkRed, e.StackTrace!.Indent(4));
 
-                    if (StopOnException != null && StopOnException(elementID(item), e))
+                    if (stopOnException || (StopOnException != null && StopOnException(elementID(item), e)))
                         throw;
                 }
 
@@ -157,6 +160,7 @@ public static class ProgressExtensions
         ParallelOptions paralelOptions,
         bool transactional,
         bool showProgress,
+        bool stopOnException,
         Action<T> action
     )
     {
@@ -196,7 +200,7 @@ public static class ProgressExtensions
                                 writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
                                 writer(ConsoleColor.DarkRed, e.StackTrace!.Indent(4));
 
-                                if (StopOnException != null && StopOnException(elementID(item), e))
+                                if (stopOnException || (StopOnException != null && StopOnException(elementID(item), e)))
                                     stopException = e;
                             }
 

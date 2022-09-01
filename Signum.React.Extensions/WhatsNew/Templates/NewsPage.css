@@ -1,0 +1,30 @@
+﻿.sf-html-editor {
+    box-sizing: unset !important;
+    border: none !important;
+    padding: 0px !important;
+    border-radius: 0px !important;
+    margin-bottom: 0em !important;
+    box-shadow: none !important;
+}
+
+.sf-html-editor .public-DraftEditor-content {
+    min-height: unset !important;
+}
+
+.whatsnewbody{
+    width: 50%;
+    margin: auto;
+}
+
+@media (max-width: 800px) {
+    .whatsnewbody {
+        width: 100% !important;
+        margin: auto;
+    }
+}
+
+.headerpicture {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}

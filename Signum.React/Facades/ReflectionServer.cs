@@ -6,6 +6,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;
+using Signum.Engine.Json;
 
 namespace Signum.React.Facades;
 
@@ -193,7 +194,7 @@ public static class ReflectionServer
                           EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                           IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                           IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
-                          ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)!),
+                          ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)!, false),
                           QueryDefined = queries.QueryDefined(type),
                           Members = PropertyRoute.GenerateRoutes(type)
                             .Where(pr => InTypeScript(pr))
@@ -225,7 +226,7 @@ public static class ReflectionServer
                             .ToDictionary(lmc => lmc.ModelType.TypeName(), lmc => new CustomLiteModelTS
                             {
                                 IsDefault = lmc.IsDefault,
-                                ConstructorFunctionString = LambdaToJavascriptConverter.ToJavascript(lmc.GetConstructorExpression())!
+                                ConstructorFunctionString = LambdaToJavascriptConverter.ToJavascript(lmc.GetConstructorExpression(), true)!
                             }),
 
                           HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),

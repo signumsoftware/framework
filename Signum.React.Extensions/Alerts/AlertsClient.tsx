@@ -63,11 +63,15 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
       return undefined;
 
     var alert: Partial<AlertEntity> = {
+      createdBy: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.createdBy).toString())],
+      creationDate: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.creationDate).toString())],
+      alertDate: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.alertDate).toString())],
       target: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.target).toString())],
+      parentTarget: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.parentTarget).toString())],
       textArguments: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.entity.textArguments).toString())]
     };
-    return  formatText(cell, alert);
-  });
+    return formatText(cell, alert);
+  }, true);
 
   Finder.registerPropertyFormatter(PropertyRoute.tryParse(AlertEntity, "Text"), cellFormatter);
 
@@ -75,6 +79,7 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
     queryName: AlertEntity,
     hiddenColumns: [
       { token: AlertEntity.token(a => a.target) },
+      { token: AlertEntity.token(a => a.parentTarget) },
       { token: AlertEntity.token(a => a.entity.textArguments) }
     ],
     formatters: {
@@ -82,6 +87,8 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
     }
   })
 }
+
+
 
 function chooseDate(): Promise<DateTime | undefined> {
   return SelectorModal.chooseElement(DelayOption.values(), {

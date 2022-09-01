@@ -29,6 +29,7 @@ public class PivotTableScript : ChartScript
             CreateBlock("CSS Style (div) ", ChartParameterType.String, new StringValue(""), includeValues: true),
             CreateBlock("Max Text Length ", ChartParameterType.Number, new NumberInterval { DefaultValue = 50 }, includeValues: false),
             CreateBlock("Show Create Button ", ChartParameterType.Enum, EnumValueList.Parse("No|Yes"), includeValues: true),
+            CreateBlock("Show Aggregate Values ", ChartParameterType.Enum, EnumValueList.Parse("Yes|No"), includeValues: true),
             new ChartScriptParameterGroup()
             {
                 new ChartScriptParameter("SubTotal Horizontal Axis (2)", ChartParameterType.Enum) { ColumnIndex = 1, ValueDefinition = EnumValueList.Parse("no|yes")},

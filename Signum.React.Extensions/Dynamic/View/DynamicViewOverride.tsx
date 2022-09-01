@@ -102,7 +102,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
       title: "Mixin Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
 
 
@@ -252,7 +252,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
       title: title,
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
   const ctx = p.ctx;
 

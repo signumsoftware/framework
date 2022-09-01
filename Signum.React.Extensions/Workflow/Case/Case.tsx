@@ -86,7 +86,7 @@ export default function CaseComponent(p: CaseComponentProps) {
                   { token: CaseActivityEntity.token(e => e.case), value: ctx.value },
                   { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, pinned: { active: "Checkbox_StartUnchecked", label: WorkflowActivityMessage.InprogressCaseActivities.niceToString(), column: 2 } },
                 ],
-                columnOptionsMode: "Replace",
+                columnOptionsMode: "ReplaceAll",
                 columnOptions: [
                   { token: CaseActivityEntity.token(e => e.id) },
                   { token: CaseActivityEntity.token(e => e.workflowActivity) },
@@ -123,7 +123,7 @@ function CaseActivityStatsButtonComponent(p: CaseActivityButtonBaseProps) {
       Navigator.API.fetch(rr.entity).then(caseActivity => {
         const bpmnElementID = ((caseActivity as CaseActivityEntity).workflowActivity as any).bpmnElementId;
         p.caseFlowViewer.showCaseActivityStatsModal(bpmnElementID);
-      }).done();
+      });
   }
   const sc = p.sc;
 
@@ -157,7 +157,7 @@ function WorkflowActivityLocateButtonComponent(p: WorkflowActivityLocateButtonCo
 
         if (p.onLocated)
           p.onLocated();
-      }).done();
+      });
     }
   }
   const sc = p.sc;

@@ -16,12 +16,14 @@ public static class WorkflowScriptRunner
     static long queuedItems;
     static Guid processIdentifier;
     static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
+    static int? initialDelayMilliseconds;
 
     public static WorkflowScriptRunnerState ExecutionState()
     {
         return new WorkflowScriptRunnerState
         {
             Running = running,
+            InitialDelayMilliseconds = initialDelayMilliseconds,
             CurrentProcessIdentifier = processIdentifier,
             ScriptRunnerPeriod = WorkflowLogic.Configuration.ScriptRunnerPeriod,
             NextPlannedExecution = nextPlannedExecution,
@@ -30,22 +32,25 @@ public static class WorkflowScriptRunner
         };
     }
 
-    public static void StartRunningScripts(int initialDelayMilliseconds)
+    public static void StartRunningScriptsAfter(int initialDelayMilliseconds)
     {
-        if (initialDelayMilliseconds == 0)
-            ExecuteProcess();
-        else
-        {
-            using (ExecutionContext.SuppressFlow())
-                Task.Run(() =>
-                {
-                    Thread.Sleep(initialDelayMilliseconds);
-                    ExecuteProcess();
-                });
-        }
+        WorkflowScriptRunner.initialDelayMilliseconds = initialDelayMilliseconds;
+        using (ExecutionContext.SuppressFlow())
+            Task.Run(() =>
+            {
+                Thread.Sleep(initialDelayMilliseconds);
+                StartRunningScripts();
+            });
     }
 
-    private static void ExecuteProcess()
+    public static SimpleStatus GetSimpleStatus()
+    {
+        return running ? SimpleStatus.Ok :
+            initialDelayMilliseconds == null ? SimpleStatus.Disabled :
+            SimpleStatus.Error;
+    }
+
+    public static void StartRunningScripts()
     {
         if (running)
             throw new InvalidOperationException("WorkflowScriptRunner process is already running");
@@ -172,6 +177,8 @@ public static class WorkflowScriptRunner
     }
 
     static bool sqlDependencyRegistered = false;
+
+
     private static void SetSqlDependency()
     {
         if (sqlDependencyRegistered)
@@ -253,9 +260,11 @@ public static class WorkflowScriptRunner
 public class WorkflowScriptRunnerState
 {
     public int ScriptRunnerPeriod;
+    public int? InitialDelayMilliseconds;
     public bool Running;
     public bool IsCancelationRequested;
     public DateTime? NextPlannedExecution;
     public long QueuedItems;
     public Guid CurrentProcessIdentifier;
+
 }

@@ -210,7 +210,7 @@ public static class PlainExcelGenerator
         }
     }
 
-    static double GetColumnWidth(Type type)
+    public static double GetColumnWidth(Type type)
     { 
         type = type.UnNullify();
 

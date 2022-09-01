@@ -19,8 +19,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
       const lite = toLite(ctx.value);
       vscl.current && vscl.current.searchValue!.refreshValue();
       Navigator.API.fetchEntityPack(lite)
-        .then(pack => ctx.frame!.onReload(pack))
-        .done();
+        .then(pack => ctx.frame!.onReload(pack));
     }
   }, [tick]);
 

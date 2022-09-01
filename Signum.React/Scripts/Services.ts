@@ -131,8 +131,8 @@ export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Respon
 
   const promise = makeCall();
 
-  if (!(promise as any).__proto__.done)
-    (promise as any).__proto__.done = Promise.prototype.done;
+  if (!(promise as any).__proto__)
+    (promise as any).__proto__ = Promise.prototype;
 
   return promise;
 

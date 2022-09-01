@@ -427,6 +427,9 @@ public static class QueryUtils
         if (QueryToken.IsCollection(token.Type))
             return "Collections can not be ordered";
 
+        if (token.HasToArray() != null)
+            return "ToArray can not be ordered";
+
         if (token.HasAllOrAny())
             return "'{0}', '{1}', '{2}' or '{3}' can not be ordered".FormatWith(
                 CollectionAnyAllType.All.NiceToString(),
@@ -599,4 +602,5 @@ public enum SubTokensOptions
     CanAnyAll = 2,
     CanElement = 4,
     CanOperation = 8,
+    CanToArray = 16,
 }

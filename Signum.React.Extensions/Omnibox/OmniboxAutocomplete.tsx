@@ -32,7 +32,7 @@ export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
         .then(url => {
           if (url)
             AppContext.pushOrOpenInTab(url, e);
-        }).done();
+        });
     }
     typeahead.current!.blur();
 

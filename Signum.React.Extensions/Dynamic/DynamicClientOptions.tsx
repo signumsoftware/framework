@@ -33,7 +33,7 @@ export namespace Options {
 
       return (
         <SearchValueLine ctx={ctx} findOptions={findOptions} searchControlProps={{
-          formatters: columns.toObjectDistinct(a => a.token.toString(), a => new CellFormatter((cell, cfc) => cell && <HighlightText search={search} text={cell} type={a.type} />))
+          formatters: columns.toObjectDistinct(a => a.token.toString(), a => new CellFormatter((cell, cfc) => cell && <HighlightText search={search} text={cell} type={a.type} />, true))
         }} />
       );
     });

@@ -30,7 +30,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   function numbericCellFormatter(color: string) {
     var numberFormat = toNumberFormat("0.000");
-    return new CellFormatter((cell: number) => cell == undefined ? "" : <span style={{ color: color }}>{numberFormat.format(cell)}</span>, "numeric-cell");
+    return new CellFormatter((cell: number) => cell == undefined ? "" : <span style={{ color: color }}>{numberFormat.format(cell)}</span>, false, "numeric-cell");
   }
 
   Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossTraining), numbericCellFormatter("#1A5276"));
@@ -140,20 +140,17 @@ export namespace API {
 
   export function downloadCsvById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/csv/${lite.id}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function downloadTsvById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function downloadTsvMetadataById(lite: Lite<PredictorEntity>): void {
     ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}/metadata` })
-      .then(response => saveFile(response))
-      .done();
+      .then(response => saveFile(response));
   }
 
   export function getTrainingState(lite: Lite<PredictorEntity>): Promise<TrainingProgress> {

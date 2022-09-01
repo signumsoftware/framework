@@ -49,8 +49,7 @@ export class FileImageLineController extends EntityBaseController<FileImageLineP
 
   handleFileLoaded = (file: IFile & ModifiableEntity) =>{
     this.convert(file)
-      .then(f => this.setValue(f))
-      .done();
+      .then(f => this.setValue(f));
   }
 }
 
@@ -90,8 +89,8 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
     const val = ctx.value!;
 
     var content = ctx.propertyRoute!.typeReference().isLite ?
-      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(file as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity)} {...p.imageHtmlAttributes} />;
+      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(file as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
+      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} />;
 
     const removeButton = c.renderRemoveButton(true, val);
 

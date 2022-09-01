@@ -122,7 +122,7 @@ export function start(options: {
         color: "warning",
         group: options.quickLinkInDefaultGroup ? undefined : null,
       }));
-  }).done();
+  });
 
   registerExportAssertLink(EmailTemplateEntity);
   registerExportAssertLink(EmailMasterTemplateEntity);
@@ -185,15 +185,13 @@ export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualIt
 
       return s.createFromEntities(et, ctx.lites)
         .then(m => m && createAndViewEmail(et, m));
-    })
-    .done();
+    });
 }
 
 export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]) {
 
   Operations.API.constructFromLite(template, EmailMessageOperation.CreateEmailFromTemplate, ...args)
-    .then(pack => pack && Navigator.view(pack))
-    .done();
+    .then(pack => pack && Navigator.view(pack));
 }
 
 export module API {
@@ -237,6 +235,7 @@ export module API {
 export interface AsyncEmailSenderState {
   asyncSenderPeriod: number;
   running: boolean;
+  initialDelayMilliseconds: number | null;
   machineName: string;
   isCancelationRequested: boolean;
   nextPlannedExecution: string;

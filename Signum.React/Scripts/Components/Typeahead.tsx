@@ -95,8 +95,8 @@ export class TypeaheadController {
       this.setItem(items);
       this.setShown(true);
       this.setQuery(query);
-      this.setSelectedIndex(0).done();
-    }).done();
+      this.setSelectedIndex(0);
+    });
   }
 
   select = (e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
@@ -155,14 +155,14 @@ export class TypeaheadController {
         {
           e.preventDefault();
           const newIndex = ((this.selectedIndex ?? 0) - 1 + this.items!.length) % this.items!.length;
-          this.setSelectedIndex(newIndex).done();
+          this.setSelectedIndex(newIndex);
           break;
         }
       case 40: // down arrow
         {
           e.preventDefault();
           const newIndex = ((this.selectedIndex ?? 0) + 1) % this.items!.length;
-          this.setSelectedIndex(newIndex).done();
+          this.setSelectedIndex(newIndex);
           break;
         }
     }
@@ -208,7 +208,7 @@ export class TypeaheadController {
     this.setSelectedIndex(index).then(() => {
       if (this.select(e))
         this.input!.focus()
-    }).done();
+    });
   }
 
   handleElementMouseEnter = (event: React.MouseEvent<any>, index: number) => {

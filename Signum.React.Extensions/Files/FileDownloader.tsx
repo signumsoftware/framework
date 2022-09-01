@@ -17,7 +17,7 @@ export interface FileDownloaderProps {
   download?: DownloadBehaviour;
   configuration?: FileDownloaderConfiguration<IFile>;
   htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  children?: React.ReactNode;
+  children?: React.ReactNode | ((info: ExtensionInfo | undefined) => React.ReactNode)
   showFileIcon?: boolean;
 }
 
@@ -56,7 +56,7 @@ export function FileDownloader(p: FileDownloaderProps) {
           configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity));
       }
 
-    }).done();
+    });
   }
 
   const entityOrLite = p.entityOrLite;
@@ -66,6 +66,10 @@ export function FileDownloader(p: FileDownloaderProps) {
   const fileName = getFileName(toStr); //Hacky
 
   const info: ExtensionInfo | undefined = extensionInfo[fileName.tryAfterLast(".")?.toLowerCase()!]
+
+  function getChildren(){
+    return !p.children ? null : (typeof p.children === 'function') ? p.children(info) : p.children
+  }
 
   return (
     <div {...p.htmlAttributes}>
@@ -78,7 +82,7 @@ export function FileDownloader(p: FileDownloaderProps) {
         title={toStr ?? undefined}
         target="_blank"
       >
-        {p.children ??
+        {getChildren() ??
           <>
             {p.showFileIcon && <FontAwesomeIcon className="me-1" icon={["far", info?.icon ?? "file"]} color={info?.color ?? "grey"} />}
             {toStr}
@@ -144,8 +148,7 @@ function downloadUrl(e: React.MouseEvent<any>, url: string) {
 
   e.preventDefault();
   Services.ajaxGetRaw({ url: url })
-    .then(resp => Services.saveFile(resp))
-    .done();
+    .then(resp => Services.saveFile(resp));
 };
 
 function viewUrl(e: React.MouseEvent<any>, url: string) {
@@ -160,8 +163,7 @@ function viewUrl(e: React.MouseEvent<any>, url: string) {
     .then(blob => {
       const url = URL.createObjectURL(blob);
       win.location.assign(url);
-    })
-    .done();
+    });
 
 }
 

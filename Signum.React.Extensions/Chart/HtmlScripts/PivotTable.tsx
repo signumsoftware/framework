@@ -102,6 +102,7 @@ interface CellStyle {
   column?: ChartColumn<unknown>;
   maxTextLength?: number;
   showCreateButton: boolean;
+  showAggregateValues: boolean;
 }
 
 interface DimParameters {
@@ -115,6 +116,7 @@ interface DimParameters {
   cssStyleDiv?: string,
   maxTextLength?: number,
   createButton?: "No" | "Yes"
+  aggegrateValues?: "No" | "Yes"
 }
 
 
@@ -131,6 +133,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     return ({
       complete: parameters["Complete " + columnName] as "No" | "Yes" | "Consistent" | "FromFilters",
       createButton: parameters["Show Create Button " + columnName] as "No" | "Yes",
+      aggegrateValues: parameters["Show Aggregate Values " + columnName] as "No" | "Yes",
       order: parameters["Order " + columnName],
       gradient: parameters["Gradient " + columnName],
       scale: parameters["Scale " + columnName],
@@ -211,6 +214,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       _keys: column && params.complete == "Consistent" ? data!.rows.map(row => column.getValue(row)).distinctBy(val => column.getKey(val)) : undefined,
       _complete: params.complete == "Consistent" ? undefined : params.complete,
       showCreateButton: params.createButton == "Yes",
+      showAggregateValues: params.aggegrateValues == "Yes",
     });
   }
 
@@ -306,8 +310,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
       if (Array.isArray(p.gor) && p.gor.length == 1 && p.gor[0].entity != null) {
         Navigator.view(p.gor[0].entity as Lite<Entity>)
-          .then(() => onReload && onReload())
-          .done();
+          .then(() => onReload && onReload());
         return;
       }
 
@@ -323,7 +326,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     const val = sumValue(p.gor);
 
-    const link = p.gor == null ? null : <a href="#" onClick={e => handleNumberClick(e)}>{numbroFormat.format(val)}</a>;
+    const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <a href="#" onClick={e => handleNumberClick(e)}>{numbroFormat.format(val)}</a>;
 
     var color =
       p.isSummary == 4 ? "rgb(228, 228, 228)" :
@@ -376,8 +379,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       Finder.getPropsFromFilters(typeName, fop)
         .then(props => Constructor.construct(typeName, props))
         .then(e => e && Navigator.view(e))
-        .then(() => onReload && onReload())
-        .done();
+        .then(() => onReload && onReload());
     }
 
     var title = p.title ?? (p.gor instanceof RowGroup ? p.gor.getNiceName() : undefined);
@@ -404,8 +406,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     function handleLiteClick(e: React.MouseEvent) {
       e.preventDefault();
       Navigator.view(lite as Lite<Entity>)
-        .then(() => onReload && onReload())
-        .done();
+        .then(() => onReload && onReload());
     }
 
     var etcTitle = style && style.maxTextLength ? title.etc(style.maxTextLength) : title;

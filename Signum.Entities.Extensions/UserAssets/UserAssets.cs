@@ -5,6 +5,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.Mailing;
+using Signum.Entities.Word;
 using Signum.Entities.Workflow;
 
 namespace Signum.Entities.UserAssets;
@@ -87,13 +88,9 @@ public interface IToXmlContext
     Guid Include(IUserAssetEntity content);
     Guid Include(Lite<IUserAssetEntity> content);
 
-    string TypeToName(Lite<TypeEntity> type);
-    string TypeToName(TypeEntity type);
-
-    string QueryToName(Lite<QueryEntity> query);
-    string PermissionToName(Lite<PermissionSymbol> symbol);
-
     public XElement GetFullWorkflowElement(WorkflowEntity workflow);
+
+    public T RetrieveLite<T>(Lite<T> lite) where T : class, IEntity;
 }
 
 public interface IFromXmlContext
@@ -118,6 +115,7 @@ public interface IFromXmlContext
     DynamicQuery.QueryDescription GetQueryDescription(QueryEntity Query);
 
     EmailModelEntity GetEmailModel(string fullClassName);
+    WordModelEntity GetWordModel(string fullClassName);
     CultureInfoEntity GetCultureInfoEntity(string cultureName);
 
     public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element);
@@ -130,6 +128,10 @@ public interface IFromXmlContext
     {
         return (Lite<T>?)ParseLite(liteKey, entity, PropertyRoute.Construct(property));
     }
+
+    public T RetrieveLite<T>(Lite<T> lite) where T : class, IEntity;
+
+    public T GetSymbol<T>(string value) where T : Symbol;
 }
 
 

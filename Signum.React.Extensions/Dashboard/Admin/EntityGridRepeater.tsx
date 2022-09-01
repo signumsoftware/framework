@@ -84,7 +84,7 @@ export class EntityGridRepeaterController extends EntityListBaseController<Entit
 
         list.push({ rowId: null, element: e });
         this.setValue(list);
-      }).done();
+      });
   };
 
   handleRowDragOver = (e: React.DragEvent<any>, row: number) => {

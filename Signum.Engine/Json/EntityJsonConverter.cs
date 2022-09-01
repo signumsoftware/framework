@@ -171,10 +171,13 @@ public class EntityJsonConverterFactory: JsonConverterFactory
         throw new InvalidOperationException(@$"Impossible to determine PropertyRoute for {embedded.GetType().Name}.");
     }
 
-    public virtual Type ResolveType(string typeStr, Type objectType)
+    public virtual Type ResolveType(string typeStr, Type objectType, Func<string, Type>? parseType)
     {
         if (objectType.Name == typeStr || Reflector.CleanTypeName(objectType) == typeStr)
             return objectType;
+
+        if (parseType != null)
+            return parseType(typeStr);
 
         var type = TypeLogic.GetType(typeStr);
 
@@ -337,7 +340,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
   
 
-    public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, T? existingValue)
+    public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, T? existingValue, Func<string, Type>? parseType)
     {
         using (HeavyProfiler.LogNoStackTrace("ReadJson", () => typeToConvert.Name))
         {
@@ -348,7 +351,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
             {
                 reader.Assert(JsonTokenType.StartObject);
 
-                ModifiableEntity mod = GetEntity(ref reader, typeToConvert, existingValue, out bool markedAsModified);
+                ModifiableEntity mod = GetEntity(ref reader, typeToConvert, existingValue, parseType, out bool markedAsModified);
 
                 var tup = Factory.GetCurrentPropertyRoute(mod);
 
@@ -373,7 +376,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
                                     var converter = (IJsonConverterWithExisting)options.GetConverter(mixin.GetType());
                                     using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((tup.pr.Add(mixin.GetType()), mixin, null)))
-                                        converter.Read(ref reader, mixin.GetType(), options, mixin);
+                                        converter.Read(ref reader, mixin.GetType(), options, mixin, null);
 
                                     reader.Read();
                                 }
@@ -446,7 +449,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                 try
                 {
                     object? newValue = options.GetConverter(pi.PropertyType) is IJsonConverterWithExisting converter ?
-                        converter.Read(ref reader, pi.PropertyType, options, oldValue) :
+                        converter.Read(ref reader, pi.PropertyType, options, oldValue, null) :
                         JsonSerializer.Deserialize(ref reader, pi.PropertyType, options);
 
                     if (newValue is DateTime dt)
@@ -538,12 +541,12 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
     }
 
 
-    public ModifiableEntity GetEntity(ref Utf8JsonReader reader, Type objectType, IModifiableEntity? existingValue, out bool isModified)
+    public ModifiableEntity GetEntity(ref Utf8JsonReader reader, Type objectType, IModifiableEntity? existingValue, Func<string, Type>? parseType, out bool isModified)
     {
         IdentityInfo identityInfo = ReadIdentityInfo(ref reader);
         isModified = identityInfo.Modified == true;
 
-        Type type = Factory.ResolveType(identityInfo.Type, objectType);
+        Type type = Factory.ResolveType(identityInfo.Type, objectType, parseType);
 
         if (typeof(MixinEntity).IsAssignableFrom(objectType))
         {

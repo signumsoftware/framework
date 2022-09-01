@@ -57,7 +57,7 @@ function SearchModal(p: SearchModalProps) {
           okPressed.current = true;
           setShow(false);
         };
-      }).done();
+      });
   }
 
   function handleCancelClicked() {
@@ -96,7 +96,7 @@ function SearchModal(p: SearchModalProps) {
           setShow(false);
         } else
           scl.dataChanged();
-      }).done();
+      });
 
     } else 
       scl.dataChanged();
@@ -148,6 +148,7 @@ function SearchModal(p: SearchModalProps) {
           showGroupButton={p.findMode == "Explore"}
           showSystemTimeButton={p.findMode == "Explore"}
           largeToolbarButtons={true}
+          showFooter={true}
           maxResultsHeight={"none"}
           enableAutoFocus={true}
           onCreateFinished={handleCreateFinished}

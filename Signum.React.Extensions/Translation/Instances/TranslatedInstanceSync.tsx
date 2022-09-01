@@ -66,8 +66,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
     }).notNull());
 
     lock(() => API.saveTranslatedInstanceData(records, type, true, culture)
-      .then(() => { reloadResult(); notifySuccess(); }))
-      .done();
+      .then(() => { reloadResult(); notifySuccess(); }));
   }
 
   const message = result && result.totalInstances == 0 ? TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName) :

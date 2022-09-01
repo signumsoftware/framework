@@ -22,7 +22,7 @@ export interface EntityComboProps extends EntityBaseProps {
   deps?: React.DependencyList;
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem") => React.ReactChild;
+  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactChild;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
@@ -41,7 +41,7 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
   overrideProps(p: EntityComboProps, overridenProps: EntityComboProps) {
     super.overrideProps(p, overridenProps);
     if (p.onRenderItem === undefined && p.type && tryGetTypeInfos(p.type).some(a => a && Navigator.getSettings(a)?.renderLite)) {
-      p.onRenderItem = row => (row?.entity && Navigator.renderLite(row.entity)) ?? "";
+      p.onRenderItem = (row, role, searchTerm) => (row?.entity && Navigator.renderLite(row.entity, searchTerm)) ?? "";
     }
   }
 
@@ -64,8 +64,7 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
       this.setValue(lite);
     else
       this.convert(lite)
-        .then(v => this.setValue(v))
-        .done();
+        .then(v => this.setValue(v));
   }
 }
 
@@ -152,7 +151,7 @@ export interface EntityComboSelectProps {
   onDataLoaded?: (data: Lite<Entity>[] | ResultTable | undefined) => void;
   deps?: React.DependencyList;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem") => React.ReactNode;
+  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactNode;
   liteToString?: (e: Entity) => string;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
@@ -209,13 +208,11 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       const fo = p.findOptions;
       if (fo) {
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
-          .then(data => setData(data))
-          .done();
+          .then(data => setData(data));
       }
       else
         Finder.API.fetchAllLites({ types: p.type!.name })
-          .then(data => setData(data.orderBy(a => a)))
-          .done();
+          .then(data => setData(data.orderBy(a => a)));
     }
   }, [normalizeEmptyArray(p.data), p.type.name, p.deps, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
@@ -238,7 +235,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
           return query.toLowerCase().split(' ').every(part => toStr.contains(part));
         }}
         renderValue={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "Value")}
-        renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "ListItem")}
+        renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "ListItem", a.searchTerm)}
       />
     );
   } else {

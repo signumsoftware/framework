@@ -140,8 +140,8 @@ function defaultConstructProcessFromMany(coc: Operations.ContextualOperationCont
       else {
         Navigator.view(pack);
       }
-    }).done();
-  }).done();
+    });
+  });
 }
 
 export module API {
@@ -167,7 +167,7 @@ export module API {
 
 export interface ProcessLogicState {
   maxDegreeOfParallelism: number;
-  initialDelayMiliseconds: number;
+  initialDelayMilliseconds: number | null;
   running: boolean;
   machineName: string;
   applicationName: string;

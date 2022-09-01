@@ -84,8 +84,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         } else {
           AppContext.history.goBack();
         }
-      })
-      .done();
+      });
   }
 
   loadEntity(props: CaseFramePageProps): Promise<WorkflowClient.CaseEntityPack | undefined> {

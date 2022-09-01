@@ -61,7 +61,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
 
       return new QuickLinks.QuickLinkAction("CompareTimeMachine",
         () => TimeMachineMessage.CompareVersions.niceToString(),
-        e => TimeMachineModal.show(lite, versions).done(), {
+        e => TimeMachineModal.show(lite, versions), {
         icon: "not-equal",
         iconColor: "blue",
       });
@@ -83,9 +83,18 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
     });
 
     Finder.formatRules.push({
-      name: "Lite",
+      name: "Lite_TM",
       isApplicable: (qt, sc) => qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(qt.type),
-      formatter: qt => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />)
+      formatter: qt => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />, true)
+    });
+
+    Finder.formatRules.push({
+      name: "LiteNoFill_TM",
+      isApplicable: (qt, sc) => {
+        return qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(qt.type) &&
+          tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
+      },
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />, false)
     });
   }
 }

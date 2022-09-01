@@ -20,8 +20,7 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
       .then(newPack => {
         notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
-      })
-      .done();
+      });
   }
 
   const forceUpdate = useForceUpdate();

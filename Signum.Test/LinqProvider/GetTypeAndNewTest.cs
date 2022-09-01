@@ -1,3 +1,4 @@
+using Signum.Entities.Basics;
 using Signum.Utilities.DataStructures;
 using System.IO;
 using System.Text;
@@ -103,5 +104,89 @@ public class GetTypeAndNewTest
         Assert.NotEmpty(list);
     }
 
+    [Fact]
+    public void SelectToTypeEntity()
+    {
+        var list = (from f in Database.Query<ArtistEntity>()
+                    select f.GetType().ToTypeEntity())
+                    .ToList();
 
+        Assert.NotEmpty(list);
+    }
+
+    [Fact]
+    public void WhereToTypeEntity()
+    {
+        var list = (from f in Database.Query<ArtistEntity>()
+                    where f.GetType().ToTypeEntity().Is(typeof(ArtistEntity).ToTypeEntity())
+                    select f)
+                    .ToList();
+
+
+        Assert.NotEmpty(list);
+    }
+
+    [Fact]
+    public void SelectToTypeEntityIB()
+    {
+        var list = (from f in Database.Query<BandEntity>()
+                    select f.LastAward!.GetType().ToTypeEntity())
+                    .ToList();
+
+        Assert.NotEmpty(list);
+    }
+
+    [Fact]
+    public void WhereToTypeEntityIB()
+    {
+        var list = (from f in Database.Query<BandEntity>()
+                    where f.LastAward!.GetType().ToTypeEntity().Is(typeof(GrammyAwardEntity).ToTypeEntity())
+                    select f)
+                    .ToList();
+
+        Assert.NotEmpty(list);
+    }
+
+    [Fact]
+    public void WhereToTypeEntityIBGroupBy()
+    {
+        var list = (from f in Database.Query<BandEntity>()
+                    group f by f.LastAward!.GetType().ToTypeEntity() into g
+                    select new { g.Key, Count = g.Count() })
+                    .ToList();
+
+        Assert.NotEmpty(list);
+    }
+
+    [Fact]
+    public void SelectToTypeEntityIBA()
+    {
+        var list = (from f in Database.Query<NoteWithDateEntity>()
+                    select f.Target.GetType().ToTypeEntity())
+                    .ToList();
+
+        Assert.NotEmpty(list);
+    }
+
+    [Fact]
+    public void WhereToTypeEntityIBA()
+    {
+        var list = (from f in Database.Query<NoteWithDateEntity>()
+                    where f.Target.GetType().ToTypeEntity().Is(typeof(ArtistEntity).ToTypeEntity())
+                    select f)
+                    .ToList();
+
+        Assert.NotEmpty(list);
+    }
+
+    [Fact]
+    public void WhereToTypeEntityIBAGroupBy()
+    {
+        var list = (from f in Database.Query<NoteWithDateEntity>()
+                    group f by f.Target.GetType().ToTypeEntity() into g
+                    select new { g.Key, Count = g.Count() })
+                    .ToList();
+
+        Assert.NotEmpty(list);
+    }
 }

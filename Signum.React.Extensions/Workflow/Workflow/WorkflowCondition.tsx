@@ -57,7 +57,7 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
       initiallyFocused: true,
-    }).done();
+    });
   }
 
 

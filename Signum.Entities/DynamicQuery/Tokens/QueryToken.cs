@@ -2,9 +2,11 @@ using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
 using System.ComponentModel;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Signum.Entities.DynamicQuery;
 
+[DebuggerDisplay("{FullKey(),nq}")]
 public abstract class QueryToken : IEquatable<QueryToken>
 {
     public int Priority = 0;
@@ -74,10 +76,17 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return Expression.Lambda<Func<object, T>>(this.BuildExpression(context), context.Parameter).Compile();
     }
 
-    public Expression BuildExpression(BuildExpressionContext context)
+    public Expression BuildExpression(BuildExpressionContext context, bool searchToArray = false)
     {
-        if (context.Replacements != null && context.Replacements.TryGetValue(this, out var result))
+        if(context.Replacements.TryGetValue(this, out var result))
             return result.GetExpression();
+
+        if (searchToArray)
+        {
+            var cta = this.HasToArray();
+            if (cta != null)
+                return CollectionToArrayToken.BuildToArrayExpression(this, cta, context);
+        }
 
         return BuildExpressionInternal(context);
     }
@@ -183,11 +192,14 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (ut == typeof(string))
             return StringTokens().AndHasValue(this);
 
+        if (ut == typeof(Guid))
+            return new List<QueryToken>().AndHasValue(this);
+
         Type cleanType = type.CleanType();
         if (cleanType.IsIEntity())
         {
             if (implementations!.Value.IsByAll)
-                return ImplementedByAllSubTokens(this, type, options); // new[] { EntityPropertyToken.IdProperty(this) };
+                return ImplementedByAllSubTokens(this, type, options).PreAnd(new EntityTypeToken(this)).ToList().AndHasValue(this); // new[] { EntityPropertyToken.IdProperty(this) };
 
             var onlyType = implementations.Value.Types.Only();
 
@@ -202,7 +214,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
                 .NotNull()
                 .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this);
 
-            return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList().AndHasValue(this);
+            return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).PreAnd(new EntityTypeToken(this)).ToList().AndHasValue(this);
         }
 
         if (type.IsEmbeddedEntity() || type.IsModelEntity())
@@ -352,17 +364,28 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public static List<QueryToken> CollectionProperties(QueryToken parent, SubTokensOptions options)
     {
         if (parent.HasAllOrAny())
-            options &= ~SubTokensOptions.CanElement;
+            options &= ~(SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanOperation | SubTokensOptions.CanAggregate);
+
+        if (parent.HasToArray() != null)
+            options &= ~(SubTokensOptions.CanAnyAll | SubTokensOptions.CanToArray | SubTokensOptions.CanOperation | SubTokensOptions.CanAggregate);
 
         List<QueryToken> tokens = new List<QueryToken>() { new CountToken(parent) };
 
-        if ((options & SubTokensOptions.CanElement) == SubTokensOptions.CanElement)
+        if (options.HasFlag(SubTokensOptions.CanElement))
             tokens.AddRange(EnumExtensions.GetValues<CollectionElementType>().Select(cet => new CollectionElementToken(parent, cet)));
 
-        if ((options & SubTokensOptions.CanAnyAll) == SubTokensOptions.CanAnyAll)
+        if (options.HasFlag(SubTokensOptions.CanAnyAll))
             tokens.AddRange(EnumExtensions.GetValues<CollectionAnyAllType>().Select(caat => new CollectionAnyAllToken(parent, caat)));
 
+        if (options.HasFlag(SubTokensOptions.CanToArray))
+            tokens.AddRange(EnumExtensions.GetValues<CollectionToArrayType>().Select(ctat => new CollectionToArrayToken(parent, ctat)));
+
         return tokens;
+    }
+
+    public virtual CollectionToArrayToken? HasToArray()
+    {
+        return Parent?.HasToArray();
     }
 
     public virtual bool HasAllOrAny()
@@ -676,5 +699,7 @@ public enum QueryTokenMessage
     RowId,
 
     CellOperation,
-    ContainerOfCellOperations
+    ContainerOfCellOperations,
+    [Description("Entity Type")]
+    EntityType
 }

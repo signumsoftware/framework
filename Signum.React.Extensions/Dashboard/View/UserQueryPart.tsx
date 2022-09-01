@@ -39,20 +39,24 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
       if (dashboardPinnedFilters.length) {
         Finder.getQueryDescription(fo.queryName)
           .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd))
-          .then(fops => p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops)))
-          .done();
+          .then(fops => {
+            p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops));
+            p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
+          });
+      } else {
+        p.dashboardController.clearPinnesFilter(p.partEmbedded);
+        p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
       }
     }
-  }, [fo]);
-
-  React.useEffect(() => {
-    p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
-  }, [p.partEmbedded])
+  }, [fo, p.partEmbedded]);
 
   const cachedQuery = p.cachedQueries[liteKey(toLite(p.content.userQuery))];
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (p.dashboardController.isLoading)
+    return <span>{JavascriptMessage.loading.niceToString()}...</span>;
 
   const foExpanded = p.dashboardController.applyToFindOptions(p.partEmbedded, fo);
 

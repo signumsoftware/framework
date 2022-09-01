@@ -45,8 +45,7 @@ export function PredictModal(p: PredictModalProps) {
   function hangleOnChange() {
     setHasChanged(true);
     abortableUpdateRequest.getData(predict)
-      .then(predict => setPredict(predict))
-      .done();
+      .then(predict => setPredict(predict));
   }
 
 

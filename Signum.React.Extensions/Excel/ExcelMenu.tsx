@@ -25,7 +25,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
 
   function handleSelectedToggle() {
     if (isOpen == false && excelReports == undefined)
-      reloadList().done();
+      reloadList();
 
     setIsOpen(!isOpen);
   }
@@ -61,8 +61,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
           }
 
           ExcelClient.API.generatePlainExcel(request);
-        })
-        .done();
+        });
     } else {
       ExcelClient.API.generatePlainExcel(request);
     }
@@ -77,14 +76,12 @@ export default function ExcelMenu(p: ExcelMenuProps) {
     Finder.API.fetchQueryEntity(p.searchControl.props.findOptions.queryKey)
       .then(qe => ExcelReportEntity.New({ query: qe }))
       .then(er => Navigator.view(er))
-      .then(() => reloadList())
-      .done();
+      .then(() => reloadList());
   }
 
   function handleAdmnister() {
     Finder.explore({ queryName: ExcelReportEntity, filterOptions: [{ token: ExcelReportEntity.token(a => a.query!.key), value: p.searchControl.props.findOptions.queryKey }]})
-      .then(() => reloadList())
-      .done();
+      .then(() => reloadList());
   }
 
   const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;

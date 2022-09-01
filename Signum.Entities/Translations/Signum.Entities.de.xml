@@ -17,6 +17,12 @@
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Heute" />
   </Type>
+  <Type Name="ClientErrorModel" Description="Client-Fehler">
+    <Member Name="ErrorType" Description="Fehlertyp" />
+    <Member Name="Message" Description="Nachricht" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Stack" Description="Stapel" />
+  </Type>
   <Type Name="CollectionAnyAllType">
     <Member Name="All" Description="Alle" />
     <Member Name="Any" Description="Irgend" />
@@ -28,11 +34,18 @@
     <Member Name="Element2" Description="Element (2)" />
     <Member Name="Element3" Description="Element (3)" />
   </Type>
+  <Type Name="CollectionToArrayType">
+    <Member Name="SeparatedByComma" Description="Getrennt durch Komma" />
+    <Member Name="SeparatedByCommaDistict" Description="Getrennt durch Komma (Distinct)" />
+    <Member Name="SeparatedByNewLine" Description="Getrennt durch neue Zeile" />
+    <Member Name="SeparatedByNewLineDistict" Description="Getrennt durch neue Zeile (Distinct)" />
+  </Type>
   <Type Name="ColumnOptionsMode" Description="Spaltenoptionenmodus">
     <Member Name="Add" Description="Hinzufügen" />
     <Member Name="InsertStart" Description="Einfügen beim Start" />
     <Member Name="Remove" Description="Entfernen" />
-    <Member Name="Replace" Description="Ersetzen" />
+    <Member Name="ReplaceAll" Description="Alle ersetzen" />
+    <Member Name="ReplaceOrAdd" Description="Ersetzen oder Hinzufügen" />
   </Type>
   <Type Name="ComparisonType">
     <Member Name="DistinctTo" Description="ungleich" />
@@ -91,6 +104,8 @@
     <Member Name="Move" Description="Bewegen" />
     <Member Name="MoveDown" Description="Nach unten" />
     <Member Name="MoveUp" Description="Nach oben" />
+    <Member Name="MoveWithDragAndDropOrCtrlLeftRight" Description="Verschieben mit Drag &amp; Drop oder Strg + Links / Rechts" />
+    <Member Name="MoveWithDragAndDropOrCtrlUpDown" Description="Verschieben mit Drag &amp; Drop oder Strg + Auf / Ab" />
     <Member Name="Navigate" Description="Navigieren" />
     <Member Name="Paste" Description="Einfügen" />
     <Member Name="Remove" Description="Entfernen" />
@@ -110,6 +125,7 @@
     <Member Name="Form" Description="Formular" />
     <Member Name="HResult" Description="H Ergebnis" />
     <Member Name="MachineName" Description="Computername" />
+    <Member Name="Origin" Description="Herkunft" />
     <Member Name="QueryString" Description="Query string" />
     <Member Name="Referenced" Description="Auf die verwiesen wird" />
     <Member Name="RequestUrl" Description="Request url" />
@@ -123,6 +139,10 @@
     <Member Name="UserHostAddress" Description="Benutzer Hostadresse" />
     <Member Name="UserHostName" Description="Benutzer Hostname" />
     <Member Name="Version" Description="Version" />
+  </Type>
+  <Type Name="ExceptionOrigin" Description="Ausnahme Ursprung">
+    <Member Name="Backend_DotNet" Description="Backend DotNet" />
+    <Member Name="Frontend_React" Description="Frontend React" />
   </Type>
   <Type Name="FilterGroupOperation" Description="Filtergruppeoperation">
     <Member Name="And" Description="Und" />
@@ -314,6 +334,7 @@
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
     <Member Name="Distinct" Description="Unterschiedlich" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
+    <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
     <Member Name="HasValue" Description="Hat einen Wert" />
     <Member Name="Hour" Description="Stunde" />
@@ -415,7 +436,9 @@
     <Member Name="HiddenColumn" Description="Ausgeblendete Spalte" />
     <Member Name="HideHiddenColumns" Description="Ausgeblendete Spalten ausblenden" />
     <Member Name="HidePinnedFiltersOptions" Description="Vorgewahlter Filteroptionen ausblenden" />
+    <Member Name="InvalidColumnExpression" Description="Ungültiger Spaltenausdruck" />
     <Member Name="Label" Description="Etikett" />
+    <Member Name="MoreThanOne0Selected" Description="Mehr als ein {0} ausgewählt" />
     <Member Name="Name" Description="Name" />
     <Member Name="NewColumnSName" Description="Neuer Spaltenname" />
     <Member Name="NoActionsFound" Description="Keine Aktionen gefunden" />

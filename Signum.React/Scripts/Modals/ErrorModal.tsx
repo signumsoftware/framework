@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as Modals from '../Modals';
 import { Dic } from '../Globals';
-import { ExternalServiceError, ServiceError, ValidationError } from '../Services';
+import { ajaxPost, ExternalServiceError, ServiceError, ValidationError } from '../Services';
 import { JavascriptMessage, FrameMessage, ConnectionMessage } from '../Signum.Entities'
-import { ExceptionEntity } from '../Signum.Entities.Basics'
+import { ClientErrorModel, ExceptionEntity } from '../Signum.Entities.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
 import { newLite } from '../Reflection';
@@ -101,13 +101,67 @@ export default function ErrorModal(p: ErrorModalProps) {
   }
 }
 
+
+
+var lastError: { model: ClientErrorModel, date: Date } | undefined;
+
+function logError(error: Error) {
+
+  if (error instanceof ServiceError || error instanceof ValidationError)
+    return; 
+
+  var errorModel = ClientErrorModel.New({
+    errorType: (error as Object).constructor.name,
+    message: error.message ?? error.toString(),
+    stack: error.stack ?? null,
+    name: error.name,
+  });
+
+  var date = new Date();
+
+  if (lastError != null) {
+    if (
+      lastError.model.errorType == errorModel.errorType &&
+      lastError.model.message == errorModel.message &&
+      lastError.model.stack == errorModel.stack &&
+      lastError.model.errorType == errorModel.errorType &&
+      ((date.valueOf() - lastError.date.valueOf()) / 1000) < 10 
+    ) {
+      return;
+    }
+  } 
+
+  lastError = { model: errorModel, date: date };
+  ajaxPost({ url: "~/api/registerClientError" }, errorModel)
+    .catch(e => {
+      if (Modals.isStarted()) {
+        ErrorModal.showErrorModal(error);
+      }
+      else
+        console.error("Unable to save client-side error:", error);
+    });
+}
+
 ErrorModal.register = () => {
+
+  window.onunhandledrejection = p => {
+    var error = p.reason;
+    logError(error);
+    if (Modals.isStarted()) {
+      ErrorModal.showErrorModal(error);
+    }
+    else
+      console.error("Unhandled promise rejection:", error);
+  };
 
   var oldOnError = window.onerror;
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
 
-    if (Modals.isStarted())
-      ErrorModal.showErrorModal(error).done();
+    if (error != null)
+      logError(error);
+
+    if (Modals.isStarted()) 
+      ErrorModal.showErrorModal(error);
     else if (oldOnError != null) {
       if (error instanceof ServiceError)
         oldOnError(message, filename, lineno, colno, {

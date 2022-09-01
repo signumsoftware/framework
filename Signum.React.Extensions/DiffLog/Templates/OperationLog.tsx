@@ -53,7 +53,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
       <Tab eventKey="prev" className="linkTab" title={
         <LinkContainer to={Navigator.navigateRoute(prev)} onClick={e => {
           if (!(e.ctrlKey || e.button == 1)) {
-            Navigator.API.fetchEntityPack(prev).then(ep => p.ctx.frame!.onReload(ep)).done();
+            Navigator.API.fetchEntityPack(prev).then(ep => p.ctx.frame!.onReload(ep));
             e.preventDefault();
           }
         }}>
@@ -175,7 +175,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
       <Tab eventKey="next" className="linkTab" title={
         <LinkContainer to={Navigator.navigateRoute(next)} onClick={e => {
           if (!(e.ctrlKey || e.button == 1)) {
-            Navigator.API.fetchEntityPack(next).then(ep => p.ctx.frame!.onReload(ep)).done();
+            Navigator.API.fetchEntityPack(next).then(ep => p.ctx.frame!.onReload(ep));
             e.preventDefault();
           }
         }}>

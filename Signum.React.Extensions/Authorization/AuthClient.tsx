@@ -136,7 +136,7 @@ export function logout() {
   API.logout().then(() => {
     logoutInternal();
     logoutOtherTabs(user);
-  }).done();
+  });
 }
 
 function logoutInternal() {
@@ -178,8 +178,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
       if (newToken) {
         setAuthToken(newToken, getAuthenticationType());
         API.fetchCurrentUser()
-          .then(cu => setCurrentUser(cu))
-          .done();
+          .then(cu => setCurrentUser(cu));
       }
 
       return r;

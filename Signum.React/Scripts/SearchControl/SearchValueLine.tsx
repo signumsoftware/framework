@@ -200,7 +200,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       .then(() => {
         svRef.current!.refreshValue();
         p.onExplored && p.onExplored();
-      }).done();
+      });
   }
 
   function handleCreateClick(e: React.MouseEvent<any>) {
@@ -210,7 +210,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       p.onCreate().then(() => {
         if (!p.avoidAutoRefresh)
           svRef.current!.refreshValue();
-      }).done();
+      });
     } else {
 
       var fo = p.findOptions!;
@@ -237,11 +237,10 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
                   createNew: () => Finder.getPropsFromFilters(tn, fos)
                     .then(props => Constructor.constructPack(tn, props)!),
                 })))
-              .then(() => p.avoidAutoRefresh ? undefined : svRef.current!.refreshValue())
-              .done();
+              .then(() => p.avoidAutoRefresh ? undefined : svRef.current!.refreshValue());
           }
-        }).done();
-      }).done();
+        });
+      });
     }
   }
 

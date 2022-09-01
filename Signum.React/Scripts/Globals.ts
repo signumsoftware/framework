@@ -4,10 +4,6 @@ declare global {
     escape(s: string): string;
   }
 
-  interface Promise<T> {
-    done(this: Promise<T>): void;
-  }
-
   interface Window {
     __allowNavigatorWithoutUser?: boolean;
     __baseUrl: string;
@@ -904,10 +900,6 @@ String.prototype.repeat = function (this: string, n: number) {
   for (let i = 0; i < n; i++)
     result += this;
   return result;
-};
-
-Promise.prototype.done = function () {
-  this.catch(error => setTimeout(() => { throw error; }, 0));
 };
 
 export module Dic {

@@ -140,8 +140,8 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         else
           Finder.parseFindOptions(fo, qd, p.defaultIncludeDefaultFilters!).then(fop => {
             setState({ findOptions: fop, queryDescription: qd });
-          }).done();
-      }).done();
+          });
+      });
     });
   }, [p.findOptions]);
 
@@ -191,7 +191,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton ?? false) && (qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true))}
         showGroupButton={SearchControlOptions.showGroupButton(handler) && (p.showGroupButton ?? false)}
         showSelectedButton={SearchControlOptions.showSelectedButton(handler)}
-        showFooter={p.showFooter != null ? p.showFooter : true}
+        showFooter={p.showFooter}
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
         create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, { isSearch: true }))}

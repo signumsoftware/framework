@@ -46,8 +46,8 @@ public static class ExecutionMode
 
 
     public static event Func<Entity, string, IDisposable?>? OnApiRetrieved;
-    public static IDisposable? ApiRetrievedScope(Entity entity, string url)
+    public static IDisposable? ApiRetrievedScope(Entity entity, string viewAction)
     {
-        return Disposable.Combine(OnApiRetrieved, f => f(entity, url));
+        return Disposable.Combine(OnApiRetrieved, f => f(entity, viewAction));
     }
 }

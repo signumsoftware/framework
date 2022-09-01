@@ -90,6 +90,7 @@ function SearchPage(p: SearchPageProps) {
         showFilters={SearchPage.showFilters(fo, qd, qs)}
         showGroupButton={true}
         showSystemTimeButton={true}
+        showFooter={true}
         avoidChangeUrl={false}
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         maxResultsHeight={"none"}
