@@ -13,6 +13,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.Templating;
 using Signum.Engine.Authorization;
 using Signum.Entities.Basics;
+using Signum.Entities.Workflow;
 
 namespace Signum.Engine.Word;
 
@@ -80,6 +81,7 @@ public static class WordTemplateLogic
 
             sb.Schema.EntityEvents<WordTemplateEntity>().Retrieved += WordTemplateLogic_Retrieved;
 
+            UserAssetsImporter.Register<WordTemplateEntity>("WordTemplate", WordTemplateOperation.Save);
             PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
             WordModelLogic.Start(sb);
