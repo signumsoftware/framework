@@ -3,7 +3,7 @@ import { Dic } from './Globals'
 import { ajaxPost } from './Services'
 import {
   Lite, Entity, OperationMessage, EntityPack,
-  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage, EngineMessage, getToString, PropertyOperation
+  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage, EngineMessage, getToString, PropertyOperation, toLite
 } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName, QueryTokenString } from './Reflection';
@@ -318,12 +318,19 @@ export class ContextualOperationContext<T extends Entity> {
     return true;
   }
 
-  getEntity() {
+  getEntity(): Promise<T> {
 
     if (this.pack == null)
       throw new Error("Pack is not available for Contextual with many selected entities");
 
     return Promise.resolve(this.pack.entity);
+  }
+
+  getLite(): Lite<T> {
+    if (this.pack == null)
+      throw new Error("Pack is not available for Contextual with many selected entities");
+
+    return toLite(this.pack.entity);
   }
 
   createMenuItems(): React.ReactElement[]{
@@ -424,6 +431,10 @@ export class CellOperationContext<T extends Entity> {
     return Navigator.API.fetch(this.lite);
   }
 
+  getLite() {
+    return this.lite;
+  }
+
   isVisibleInCell(): boolean {
 
     const cos = this.settings;
@@ -520,8 +531,12 @@ export class EntityOperationContext<T extends Entity> {
     this.operationInfo = operationInfo;
   }
 
-  getEntity() {
+  getEntity() : Promise<T> {
     return Promise.resolve(this.entity);
+  }
+
+  getLite() : Lite<T> {
+    return toLite(this.entity);
   }
 
   isVisibleInButtonBar(ctx: ButtonsContext): unknown {
