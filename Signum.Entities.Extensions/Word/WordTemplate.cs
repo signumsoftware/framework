@@ -123,23 +123,23 @@ public class WordTemplateEntity : Entity, IUserAssetEntity
         Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });
         ParseData(ctx.GetQueryDescription(Query));
 
-        Template = ctx.RetrieveLite(Template).Let(t =>
+        Template = SyncFile(Template == null ? null : ctx.RetrieveLite(Template), element.Element("Template")!);
+    }
+
+    private Lite<FileEntity> SyncFile(FileEntity? fileEntity, XElement xElement)
+    {
+        var fileName = xElement.Attribute("FileName")!.Value!;
+        var bytes = Convert.FromBase64String(xElement.Value);
+
+        if (fileEntity != null && fileName == fileEntity.FileName &&
+            MemoryExtensions.SequenceEqual<byte>(bytes, fileEntity.BinaryFile))
+            return fileEntity.ToLite();
+
+        return new FileEntity
         {
-            var xml = element.Element("Template")!;
-
-            var fileName = xml.Attribute("FileName")!.Value!;
-            var bytes = Convert.FromBase64String(xml.Value);
-
-            if (fileName == t.FileName &&
-                MemoryExtensions.SequenceEqual<byte>(bytes, t.BinaryFile))
-                return t.ToLite();
-
-            return new FileEntity
-            {
-                FileName = fileName,
-                BinaryFile = bytes,
-            }.ToLiteFat();
-        });
+            FileName = fileName,
+            BinaryFile = bytes,
+        }.ToLiteFat();
     }
 }
 

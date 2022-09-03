@@ -51,7 +51,7 @@ public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
 
     public void FromXml(XElement element, IFromXmlContext ctx, IUserAssetEntity userAsset)
     {
-        WordTemplate = (Lite<WordTemplateEntity>)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(WordTemplate))!.Value)).ToLite();
+        WordTemplate = (Lite<WordTemplateEntity>)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(WordTemplate))!.Value)).ToLiteFat();
         FileName = element.Attribute(nameof(FileName))?.Value;
         OverrideModel = element.Attribute(nameof(OverrideModel))?.Let(om => ctx.ParseLite(om.Value, userAsset, PropertyRoute.Construct((WordAttachmentEntity wa) => wa.OverrideModel)));
         ModelConverter = element.Attribute(nameof(ModelConverter))?.Let(om => ctx.GetSymbol<ModelConverterSymbol>(om.Value));
