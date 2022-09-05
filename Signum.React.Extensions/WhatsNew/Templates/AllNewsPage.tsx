@@ -12,6 +12,8 @@ import { downloadFile } from '../../../../Framework/Signum.React.Extensions/File
 import * as Services from '@framework/Services'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { WhatsNewEntity, WhatsNewMessage } from '../Signum.Entities.WhatsNew';
+import { HtmlViewer } from './WhatsNewHtmlEditor';
+import { Link } from 'react-router-dom';
 
 export default function AllNews() {
   const news: WhatsNewFull[] | undefined = useAPI(() => API.getAllNews().then(w => w), []);
@@ -42,6 +44,21 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewFull}) {
     AppContext.history.push("~/newspage/" + p.news.whatsNew.id);
   }
 
+  //ignoring open tags other than img
+  function HTMLSubstring(text: string ) {
+    var substring = text.substring(0, 300);
+    if (substring.contains("<img")) {
+      var fullImageTag = substring.match(/(<img[^>] *)(\/>)/gmi);
+      if (fullImageTag != undefined && fullImageTag.length >= 1) {
+        return substring + "...";
+      }
+      else {
+        return substring.substring(0, substring.indexOf("<img")) + "...";
+      }
+    }
+    return substring + "...";
+  }
+
   if (whatsnew == undefined)
     return <div>{JavascriptMessage.loading.niceToString()}</div>;
 
@@ -51,9 +68,9 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewFull}) {
         {whatsnew.previewPicture != undefined && <img src={AppContext.toAbsoluteUrl("~/api/whatsnew/previewPicture/" + whatsnew.whatsNew.id)} style={{ width: "100%", height: "auto" }} /> }
         <div className={"card-body pt-2"}>
           <h5 className={"card-title"}>{whatsnew.title}</h5>
-          <small className={"card-text"}>{whatsnew.description.substring(0, 100)}...</small>
+          <small><HtmlViewer text={HTMLSubstring(whatsnew.description)} /></small>
           <br />
-          <a href="" onClick={() => handleClickNew(whatsnew)}>{WhatsNewMessage.ReadFurther.niceToString()}</a>
+          <Link to={"~/newspage/" + p.news.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
           {(whatsnew.attachments > 0) && <Attachments news={whatsnew} />
           }
         </div>

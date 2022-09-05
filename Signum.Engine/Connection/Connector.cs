@@ -151,6 +151,8 @@ public abstract class Connector
     public abstract bool SupportsTemporalTables { get; }
 
     public abstract bool RequiresRetry { get; }
+
+    public abstract bool SupportsDateDifBig { get; }
 }
 
 public abstract class ParameterBuilder

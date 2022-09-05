@@ -450,6 +450,7 @@
   <Type Name="WebAuthnCredentialEntity" />
   <Type Name="WebAuthnCredentialOperation" />
   <Type Name="WebAuthnMakeCredentialsOptionsEntity" />
+  <Type Name="WhatsNewEntity" Description="What's New" PluralDescription="What's New" />
   <Type Name="WordAttachmentEntity" />
   <Type Name="WordConverterSymbol" />
   <Type Name="WordModelEntity" />

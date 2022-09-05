@@ -797,7 +797,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return Promise.resolve([]);
 
     var resFO = this.state.resultFindOptions;
-    var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
+    var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFO));
     return Promise.all(filters.map(fs => Finder.fetchLites({ queryName: resFO.queryKey, filterOptions: fs, orderOptions: [], count: null })))
       .then(fss => fss.flatMap(fs => fs));
   }
@@ -1389,12 +1389,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ currentMenuItems: undefined });
   }
 
-  static getGroupFilters(row: ResultRow, resFo: FindOptionsParsed): FilterOption[] {
+  static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
     var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
 
     var keyFilters = resFo.columnOptions
-      .map((col, i) => ({ col, value: row.columns[i] }))
+      .map(col => ({ col, value: row.columns[resTable.columns.indexOf(col.token!.fullKey)] }))
       .filter(a => rootKeys.contains(a.col))
       .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
 
@@ -1413,7 +1413,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           ({ token: a.token.fullKey }) as ColumnOption)
       .notNull();
 
-    var filters = SearchControlLoaded.getGroupFilters(row, resFo);
+    var filters = SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFo);
 
     return Finder.explore({
       queryName: resFo.queryKey,

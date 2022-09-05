@@ -2791,12 +2791,47 @@
     <Member Name="Expression" Description="Ausdruck" />
     <Member Name="Name" Description="Name" />
   </Type>
-  <Type Name="WhatsNewEntity" />
-  <Type Name="WhatsNewFileType" />
-  <Type Name="WhatsNewLogEntity" />
-  <Type Name="WhatsNewMessage" />
-  <Type Name="WhatsNewMessageEmbedded" />
-  <Type Name="WhatsNewOperation" />
+  <Type Name="WhatsNewEntity" Description="Was ist neu" Gender="f">
+    <Member Name="Attachment" Description="Anhang" />
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Messages" Description="Nachrichten" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Owner" Description="Eigentümer" />
+    <Member Name="PreviewPicture" Description="Vorschaubild" />
+  </Type>
+  <Type Name="WhatsNewFileType">
+    <Member Name="WhatsNewAttachmentFileType" Description="Was ist neu Anhang dateityp" />
+    <Member Name="WhatsNewPreviewFileType" Description="Was ist neu Vorschau dateityp" />
+  </Type>
+  <Type Name="WhatsNewLogEntity" Description="Was ist neu" Gender="n">
+    <Member Name="ReadOn" Description="Gelesen am" />
+    <Member Name="User" Description="Benutzer" />
+    <Member Name="WhatsNew" Description="Was ist neu?" />
+  </Type>
+  <Type Name="WhatsNewMessage">
+    <Member Name="_0ContiansNoVersionForCulture1" Description="{0} enthält keine Version für Kultur '{1}'" />
+    <Member Name="AllMyNews" Description="Alle meine Neuigkeiten" />
+    <Member Name="CloseAll" Description="Alle schließen" />
+    <Member Name="Downloads" Description="Downloads" />
+    <Member Name="Language" Description="Sprache" />
+    <Member Name="MyActiveNews" Description="Meine aktiven News" />
+    <Member Name="NewNews" Description="Neuigkeiten" />
+    <Member Name="News" Description="Nachrichten" />
+    <Member Name="NewUnreadNews" Description="Neue ungelesene Nachrichten" />
+    <Member Name="ReadFurther" Description="Weiterlesen" />
+    <Member Name="ViewMore" Description="Mehr anzeigen" />
+    <Member Name="YouDoNotHaveAnyUnreadNews" Description="Sie haben keine ungelesenen Nachrichten" />
+    <Member Name="YourNews" Description="Ihre Neuigkeiten" />
+  </Type>
+  <Type Name="WhatsNewMessageEmbedded" Description="Was ist die neue Nachricht?">
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Title" Description="Titel" />
+  </Type>
+  <Type Name="WhatsNewOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="WhenManyFromBehaviour" Description="Verhalten Wenn viele Von ">
     <Member Name="FistResult" Description="Erstes Ergebnis" />
     <Member Name="SplitMessages" Description="Geteilte Nachrichten" />
@@ -2832,6 +2867,7 @@
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Model" Description="modell" />
     <Member Name="Name" Description="Name" />
     <Member Name="Orders" Description="Reihenfolge" />

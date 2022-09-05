@@ -6,7 +6,6 @@ import { useAPI } from '@framework/Hooks';
 import { IsolationEntity, IsolationMessage } from './Signum.Entities.Isolation';
 import * as IsolationClient from './IsolationClient';
 
-
 export default function IsolationDropdown(props: {}) {
 
   var isolations = useAPI(signal => IsolationClient.API.isolations(), []);
@@ -20,7 +19,7 @@ export default function IsolationDropdown(props: {}) {
   const current = IsolationClient.getOverridenIsolation();
 
   return (
-    <NavDropdown id="isolationDropdown" data-current-isolation={current?.id} title={getToString(current) ?? IsolationMessage.GlobalMode.niceToString()} className="sf-isolation-dropdown" >
+    <NavDropdown id="isolationDropdown" data-current-isolation={current?.id} title={current ? getToString(current) : <strong className="text-danger">{IsolationMessage.GlobalMode.niceToString()}</strong> } className="sf-isolation-dropdown" >
       <NavDropdown.Item data-isolation={name} disabled={is(undefined, current)} onClick={e => handleSelect(e, undefined)}>
         {IsolationMessage.GlobalMode.niceToString()}
       </NavDropdown.Item>

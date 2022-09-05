@@ -8,9 +8,9 @@ namespace Signum.Entities.Word;
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
 {
-    string fileName;
+    string? fileName;
     [StringLengthValidator(Min = 3, Max = 100), FileNameValidator]
-    public string FileName
+    public string? FileName
     {
         get { return fileName; }
         set
@@ -27,16 +27,21 @@ public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
     public Lite<WordTemplateEntity> WordTemplate { get; set; }
 
     [ImplementedByAll]
-    public Lite<Entity> OverrideModel { get; set; }
+    public Lite<Entity>? OverrideModel { get; set; }
 
-    public ModelConverterSymbol ModelConverter { get; set; }
+    public ModelConverterSymbol? ModelConverter { get; set; }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => FileName);
+    public override string ToString() => As.Expression(() => $"{WordTemplate}");
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        throw new NotImplementedException();
+        return new XElement("WordAttachment",
+            new XAttribute(nameof(WordTemplate), ctx.Include(WordTemplate)),
+            FileName?.Let(fn => new XAttribute(nameof(FileName), fn)),
+            OverrideModel?.Let(om => new XAttribute(nameof(OverrideModel), om.KeyLong())),
+            ModelConverter?.Let(om => new XAttribute(nameof(ModelConverter), om.Key))
+        );
     }
 
     static WordAttachmentEntity()
@@ -46,6 +51,9 @@ public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
 
     public void FromXml(XElement element, IFromXmlContext ctx, IUserAssetEntity userAsset)
     {
-        throw new NotImplementedException();
+        WordTemplate = (Lite<WordTemplateEntity>)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(WordTemplate))!.Value)).ToLiteFat();
+        FileName = element.Attribute(nameof(FileName))?.Value;
+        OverrideModel = element.Attribute(nameof(OverrideModel))?.Let(om => ctx.ParseLite(om.Value, userAsset, PropertyRoute.Construct((WordAttachmentEntity wa) => wa.OverrideModel)));
+        ModelConverter = element.Attribute(nameof(ModelConverter))?.Let(om => ctx.GetSymbol<ModelConverterSymbol>(om.Value));
     }
 }

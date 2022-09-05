@@ -23,6 +23,8 @@ export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/newspage/:newsId" onImportModule={() => import("./Templates/NewsPage")} />);
   options.routes.push(<ImportRoute path="~/news" onImportModule={() => import("./Templates/AllNewsPage")} />);
 
+  Navigator.addSettings(new EntitySettings(WhatsNewEntity, t => import('./Templates/WhatsNew'), { modalSize: "xl" }));
+
   //Operations.addSettings(new EntityOperationSettings(WhatsNewOperation.Read, {
   //  alternatives: eoc => [andClose(eoc)],
   //  hideOnCanExecute: true
