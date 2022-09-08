@@ -53,7 +53,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
     public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
     [PreserveOrder]
-    [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
+    [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty, NotifyCollectionChanged]
     public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
     public Lite<EmailMasterTemplateEntity>? MasterTemplate { get; set; }
@@ -118,11 +118,6 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        if(this.Attachments != null && this.Attachments.Count() > 0)
-        {
-            throw new NotImplementedException("Attachments are not yet exportable");
-        }
-
         return new XElement("EmailTemplate",
             new XAttribute("Name", Name),
             new XAttribute("Guid", Guid),
@@ -152,6 +147,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
                      new XAttribute("WhenNone", rec.WhenNone)
                 )
             )),
+            Attachments.Any() ?  new XElement("Attachments", Attachments.Select(x => x.ToXml(ctx))) : null,
             new XElement("Messages", Messages.Select(x =>
                 new XElement("Message",
                     new XAttribute("CultureInfo", x.CultureInfo.Name),
@@ -173,7 +169,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
         EditableMessage = bool.Parse(element.Attribute("EditableMessage")!.Value);
         Model = element.Attribute("Model")?.Let(at => ctx.GetEmailModel(at.Value));
 
-        MasterTemplate = element.Attribute("MasterTemplate")?.Let(a=>(Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLite());
+        MasterTemplate = element.Attribute("MasterTemplate")?.Let(a => (Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLiteFat());
 
         GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));

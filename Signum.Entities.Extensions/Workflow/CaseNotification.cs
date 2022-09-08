@@ -34,7 +34,7 @@ public static class CaseNotificationOperation
 {
     public static readonly ExecuteSymbol<CaseNotificationEntity> SetRemarks;
     public static readonly DeleteSymbol<CaseNotificationEntity> Delete;
-    public static readonly ConstructSymbol<CaseNotificationEntity>.From<CaseActivityEntity> CreteCaseNotificationFromCaseActivity;
+    public static readonly ConstructSymbol<CaseNotificationEntity>.From<CaseActivityEntity> CreateCaseNotificationFromCaseActivity;
 }
 
 public class InboxFilterModel : ModelEntity

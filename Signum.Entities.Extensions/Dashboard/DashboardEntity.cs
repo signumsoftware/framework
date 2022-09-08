@@ -161,7 +161,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
         return new XElement("Dashboard",
             new XAttribute("Guid", Guid),
             new XAttribute("DisplayName", DisplayName),
-            EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+            EntityType == null ? null! : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             HideDisplayName == false ? null! : new XAttribute("HideDisplayName", HideDisplayName.ToString()),
             DashboardPriority == null ? null! : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),

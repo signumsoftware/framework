@@ -1,4 +1,17 @@
-﻿.notify-badge {
+﻿.sf-html-editor {
+    box-sizing: unset !important;
+    border: none !important;
+    padding: 0px !important;
+    border-radius: 0px !important;
+    margin-bottom: 0em !important;
+    box-shadow: none !important;
+}
+
+.sf-html-editor .public-DraftEditor-content {
+     min-height: unset !important; 
+}
+
+.notify-badge {
     position: absolute;
     background: #2780e3;
     text-align: center;

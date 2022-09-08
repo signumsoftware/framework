@@ -12,17 +12,10 @@ import { LoginAuthMessage } from "../Signum.Entities.Authorization";
        var __tenantLogo = @Json.Serialize(TenantLogic.GetCurrentTenant()!.Logo.BinaryFile);
  * */
 
-interface TenantConfigurationEntityPart {
-  name: string | undefined;
-  navbarCSS: string | undefined;
-  lightNavbarCSS: string | undefined;
-}
-
 declare global {
   interface Window {
     __azureApplicationId: string | null;
     __azureTenantId: string | null;
-    __tenant: TenantConfigurationEntityPart;
   }
 }
 
