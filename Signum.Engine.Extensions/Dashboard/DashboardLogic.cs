@@ -136,8 +136,6 @@ public static class DashboardLogic
                     Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserChartPartEntity)mle.Element.Content).UserChart)).UnsafeDeleteMList();
                     Database.Query<UserChartPartEntity>().Where(uqp => query.Contains(uqp.UserChart)).UnsafeDelete();
 
-                    Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((CombinedUserChartPartEntity)mle.Element.Content).UserCharts.Any(uc => query.Contains(uc.UserChart))).UnsafeDeleteMList();
-
                     return null;
                 };
 
@@ -149,12 +147,33 @@ public static class DashboardLogic
                         .Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Is(uc)));
 
                     var parts = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>()
-                       .Where(mle => mle.UserChart.Is(uc)));
+                       .Where(ucp => ucp.UserChart.Is(uc)));
+
+                    return SqlPreCommand.Combine(Spacing.Simple, mlistElems, parts);
+                };
+            }
+
+            if (sb.Settings.ImplementedBy((DashboardEntity cp) => cp.Parts.First().Content, typeof(CombinedUserChartPartEntity)))
+            {
+                sb.Schema.EntityEvents<UserChartEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((CombinedUserChartPartEntity)mle.Element.Content).UserCharts.Any(uc => query.Contains(uc.UserChart))).UnsafeDeleteMList();
+                    Database.Query<CombinedUserChartPartEntity>().Where(cucp => cucp.UserCharts.Any(uc => query.Contains(uc.UserChart))).UnsafeDelete();
+
+                    return null;
+                };
+
+                sb.Schema.Table<UserChartEntity>().PreDeleteSqlSync += arg =>
+                {
+                    var uc = (UserChartEntity)arg;
 
                     var mlistElems2 = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
                         .Where(mle => ((CombinedUserChartPartEntity)mle.Element.Content).UserCharts.Any(ucm => ucm.UserChart.Is(uc))));
 
-                    return SqlPreCommand.Combine(Spacing.Simple, mlistElems, parts, mlistElems2);
+                    var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<CombinedUserChartPartEntity>()
+                         .Where(cucp => cucp.UserCharts.Any(ucm => ucm.UserChart.Is(uc))));
+
+                    return SqlPreCommand.Combine(Spacing.Simple, mlistElems2, parts2);
                 };
             }
 
@@ -200,7 +219,18 @@ public static class DashboardLogic
             {
                 CanBeNew = true,
                 CanBeModified = true,
-                Execute = (cp, _) => { }
+                Execute = (cp, _) => 
+                {
+                    var oldParts = cp.IsNew ? new() : cp.InDB().SelectMany(a => a.Parts).Select(p => p.Content).ToList();
+
+                    cp.Save();
+
+                    var newParts = cp.Parts.Select(a => a.Content).ToList();
+
+                    var toDelete = oldParts.Except(newParts).ToList();
+
+                    Database.DeleteList(toDelete);
+                }
             }.Register();
 
             new Delete(DashboardOperation.Delete)
