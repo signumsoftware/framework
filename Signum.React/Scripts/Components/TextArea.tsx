@@ -4,7 +4,7 @@ import { whenVisible } from '../Hooks';
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   innerRef?: React.Ref<HTMLTextAreaElement>;
   autoResize?: boolean;
-  minHeight?: string
+  minHeight?: string;
 }
 
 export default function TextArea(p: TextAreaProps) {
@@ -34,7 +34,7 @@ export default function TextArea(p: TextAreaProps) {
       if (ta.offsetParent != null)
         handleResize(ta);
       else
-        visibleObserver.current = whenVisible(ta, visible => visible && handleResize(ta), { root: document.documentElement });
+        visibleObserver.current = whenVisible(ta, visible => visible && handleResize(ta), { /*root: document.documentElement*/ });
     }
     innerRef && (typeof innerRef == "function" ? innerRef(ta) : (innerRef as any).current = ta);
   }, [innerRef, minHeight]);

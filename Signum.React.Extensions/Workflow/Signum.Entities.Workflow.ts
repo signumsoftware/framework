@@ -186,7 +186,7 @@ export interface CaseNotificationEntity extends Entities.Entity {
 export module CaseNotificationOperation {
   export const SetRemarks : Entities.ExecuteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.SetRemarks");
   export const Delete : Entities.DeleteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.Delete");
-  export const CreteCaseNotificationFromCaseActivity : Entities.ConstructSymbol_From<CaseNotificationEntity, CaseActivityEntity> = registerSymbol("Operation", "CaseNotificationOperation.CreteCaseNotificationFromCaseActivity");
+  export const CreateCaseNotificationFromCaseActivity : Entities.ConstructSymbol_From<CaseNotificationEntity, CaseActivityEntity> = registerSymbol("Operation", "CaseNotificationOperation.CreateCaseNotificationFromCaseActivity");
 }
 
 export const CaseNotificationState = new EnumType<CaseNotificationState>("CaseNotificationState");

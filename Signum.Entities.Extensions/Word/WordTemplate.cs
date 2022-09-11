@@ -14,8 +14,7 @@ namespace Signum.Entities.Word;
 public class WordTemplateEntity : Entity, IUserAssetEntity
 {
     [UniqueIndex]
-    public Guid Guid { get; set; }
-
+    public Guid Guid { get; set; } = Guid.NewGuid();
 
     [UniqueIndex]
     [StringLengthValidator(Min = 3, Max = 200)]
