@@ -127,6 +127,19 @@ public static class DashboardLogic
 
                     return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
                 };
+
+                Validator.PropertyValidator((UserQueryPartEntity e) => e.AggregateFromSummaryHeader).StaticPropertyValidation += (UserQueryPartEntity uqp, PropertyInfo pi) =>
+                {
+                    if(uqp.AggregateFromSummaryHeader && uqp.RenderMode == UserQueryPartRenderMode.BigValue && uqp.UserQuery != null)
+                    {
+                        var first = uqp.UserQuery.Columns.FirstOrDefault(a => a.SummaryToken != null);
+
+                        if (first == null)
+                            return DashboardMessage.TheUserQuery0HasNoColumnWithSummaryHeader.NiceToString(uqp.UserQuery);
+                    }
+
+                    return null;
+                };
             }
 
             if (sb.Settings.ImplementedBy((DashboardEntity cp) => cp.Parts.First().Content, typeof(UserChartPartEntity)))
