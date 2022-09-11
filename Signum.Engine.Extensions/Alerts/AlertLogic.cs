@@ -62,7 +62,7 @@ public static class AlertLogic
                     a.Title,
                     Text = a.Text!.Etc(100),
                     a.Target,
-                    a.ParentTarget,
+                    a.LinkTarget,
                     a.Recipient,
                     a.CreationDate,
                     a.CreatedBy,
@@ -295,12 +295,14 @@ public static class AlertLogic
         SystemAlertTypes.Add(alertType, options ?? new AlertTypeOptions());
     }
 
-    public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? parentTarget = null)
+    public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, 
+        Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
     {
-        return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient, parentTarget);
+        return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget);
     }
 
-    public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? parentTarget = null)
+    public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, 
+        Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
     {
         if (Started == false)
             return null;
@@ -315,7 +317,8 @@ public static class AlertLogic
                 TextArguments = textArguments?.ToString("\n###\n"),
                 TextField = text,
                 Target = (Lite<Entity>)entity,
-                ParentTarget = parentTarget,
+                LinkTarget = linkTarget,
+                GroupTarget = groupTarget,
                 AlertType = alertType,
                 Recipient = recipient
             };
@@ -324,7 +327,8 @@ public static class AlertLogic
         }
     }
 
-    public static int? UnsafeInsertAlerts(IQueryable<(Lite<IUserEntity>? recipient, Lite<Entity>? target)> query, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null)
+    public static int? UnsafeInsertAlerts(IQueryable<(Lite<IUserEntity>? recipient, Lite<Entity>? target)> query, AlertTypeSymbol alertType, string? text = null, 
+        string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
     {
         if (Started == false)
             return null;
@@ -343,6 +347,8 @@ public static class AlertLogic
                 TextArguments = txtArgumentJoined,
                 TextField = text,
                 Target = tuple.target,
+                LinkTarget = linkTarget,
+                GroupTarget= groupTarget,
                 AlertType = alertType,
                 Recipient = tuple.recipient,
                 State = AlertState.Saved,
@@ -352,19 +358,19 @@ public static class AlertLogic
     }
 
 
-    public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+    public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
     {
-        return CreateAlertForceNew(entity.ToLite(), alertType, text, textArguments, alertDate, createdBy, title, recipient);
+        return CreateAlertForceNew(entity.ToLite(), alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget);
     }
 
-    public static AlertEntity? CreateAlertForceNew(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null)
+    public static AlertEntity? CreateAlertForceNew(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
     {
         if (Started == false)
             return null;
 
         using (var tr = Transaction.ForceNew())
         {
-            var alert = entity.CreateAlert(alertType, text, textArguments, alertDate, createdBy, title, recipient);
+            var alert = entity.CreateAlert(alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget);
 
             return tr.Commit(alert);
         }
@@ -417,7 +423,7 @@ public static class AlertLogic
                 .UnsafeDelete();
 
             Database.Query<AlertEntity>()
-                .Where(a => a.ParentTarget.Is(target))
+                .Where(a => a.LinkTarget.Is(target))
                 .UnsafeDelete();
         }
     }

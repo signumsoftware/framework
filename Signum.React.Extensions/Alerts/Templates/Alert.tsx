@@ -27,7 +27,8 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
           {ctx.value.target && <EntityLine ctx={ctx.subCtx(n => n.target)} readOnly={true} labelColumns={4} />}
         </div>
         <div className="col-sm-6">
-          {ctx.value.parentTarget && <EntityLine ctx={ctx.subCtx(n => n.parentTarget)} readOnly={true} labelColumns={4} />}
+          {ctx.value.linkTarget && <EntityLine ctx={ctx.subCtx(n => n.linkTarget)} readOnly={true} labelColumns={4} />}
+          {ctx.value.groupTarget && <EntityLine ctx={ctx.subCtx(n => n.groupTarget)} readOnly={true} labelColumns={4} />}
         </div>
       </div>
 
