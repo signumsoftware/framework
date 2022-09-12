@@ -10,7 +10,7 @@ public class DynamicApiEntity : Entity
     [StringLengthValidator(Min = 3, Max = 100)]
     public string Name { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public DynamicApiEval Eval { get; set; }
 
     [AutoExpressionField]

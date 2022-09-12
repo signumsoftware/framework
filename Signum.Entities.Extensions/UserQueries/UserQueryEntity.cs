@@ -13,7 +13,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 {
     public UserQueryEntity()
     {
-        this.RebindEvents();
+        this.BindParent();
     }
 
     public UserQueryEntity(object queryName) : this()
@@ -44,7 +44,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 
     public RefreshMode RefreshMode { get; set; } = RefreshMode.Auto;
 
-    [PreserveOrder, NotifyChildProperty, NotifyCollectionChanged]
+    [PreserveOrder, BindParent, NotifyCollectionChanged]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]

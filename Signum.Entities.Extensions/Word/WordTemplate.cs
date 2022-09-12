@@ -35,7 +35,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity
     [PreserveOrder]
     public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
-    [NotifyChildProperty]
+    [BindParent]
     public TemplateApplicableEval? Applicable { get; set; }
 
     public bool DisableAuthorization { get; set; }

@@ -4,13 +4,7 @@ using Signum.Utilities.Reflection;
 namespace Signum.Entities;
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class NotifyCollectionChangedAttribute : Attribute
-{
-
-}
-
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class NotifyChildPropertyAttribute : Attribute
+public sealed class BindParentAttribute : Attribute
 {
 
 }

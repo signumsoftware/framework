@@ -7,7 +7,7 @@ public class ViewLogEntity : Entity
 {
     public ViewLogEntity()
     {
-        RebindEvents();
+        BindParent();
     }
 
     [ImplementedByAll]
@@ -24,7 +24,7 @@ public class ViewLogEntity : Entity
     [Format("G")]
     public DateTime EndDate { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded Data { get; set; } = new BigStringEmbedded();
 
     [AutoExpressionField, Unit("ms")]

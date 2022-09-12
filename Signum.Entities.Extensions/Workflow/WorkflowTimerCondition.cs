@@ -17,7 +17,7 @@ public class WorkflowTimerConditionEntity : Entity, IUserAssetEntity
 
     public TypeEntity MainEntityType { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowTimerConditionEval Eval { get; set; }
 
     [AutoExpressionField]
