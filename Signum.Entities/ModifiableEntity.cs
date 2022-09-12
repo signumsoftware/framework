@@ -173,7 +173,7 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
     //[OnDeserialized]
     //private void OnDeserialized(StreamingContext context)
     //{
-    //    RebindEvents();
+    //    BindParent();
     //}
 
     protected virtual void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)

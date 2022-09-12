@@ -44,7 +44,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 
     public RefreshMode RefreshMode { get; set; } = RefreshMode.Auto;
 
-    [PreserveOrder, BindParent, NotifyCollectionChanged]
+    [PreserveOrder, BindParent]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]

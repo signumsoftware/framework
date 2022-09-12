@@ -66,10 +66,10 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     [NoRepeatValidator]
     public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
-    [NotifyCollectionChanged, BindParent, PreserveOrder]
+    [BindParent, PreserveOrder]
     public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
-    [BindParent, NotifyCollectionChanged, PreserveOrder]
+    [BindParent, PreserveOrder]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [UniqueIndex]

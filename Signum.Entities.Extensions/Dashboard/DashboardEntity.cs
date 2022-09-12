@@ -48,7 +48,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
 
     public CacheQueryConfigurationEmbedded? CacheQueryConfiguration { get; set; }
 
-    [NotifyCollectionChanged, BindParent]
+    [BindParent]
     [NoRepeatValidator]
     public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 

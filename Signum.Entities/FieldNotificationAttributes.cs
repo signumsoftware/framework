@@ -10,7 +10,7 @@ public sealed class BindParentAttribute : Attribute
 }
 
 
-//Used by NotifyCollectionChangedAttribute, NotifyChildPropertyAttribute
+//Used by BindParentAttribute
 internal static class AttributeManager<T>
     where T : Attribute
 {

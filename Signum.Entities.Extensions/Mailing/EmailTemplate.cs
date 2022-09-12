@@ -60,7 +60,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 
     public bool IsBodyHtml { get; set; } = true;
 
-    [NotifyCollectionChanged, BindParent]
+    [BindParent]
     public MList<EmailTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailTemplateMessageEmbedded>();
 
     [BindParent]

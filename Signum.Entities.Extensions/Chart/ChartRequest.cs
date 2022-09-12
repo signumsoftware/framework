@@ -53,7 +53,7 @@ public class ChartRequestModel : ModelEntity, IChartBase
         return GetChartScriptFunc(this.ChartScript);
     }
 
-    [NotifyCollectionChanged, BindParent]
+    [BindParent]
     public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
     [NoRepeatValidator]

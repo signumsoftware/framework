@@ -14,7 +14,7 @@ public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
 
     public bool IsDefault { get; set; }
 
-    [NotifyCollectionChanged, BindParent, PreserveOrder]
+    [BindParent, PreserveOrder]
     public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
 
     [UniqueIndex]

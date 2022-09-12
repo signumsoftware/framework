@@ -43,7 +43,7 @@ public class PredictorEntity : Entity, IProcessDataEntity
     public PredictorMainQueryEmbedded MainQuery { get; set; }
 
     [Ignore, QueryableProperty] //virtual Mlist
-    [BindParent, NotifyCollectionChanged]
+    [BindParent]
     public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
 
     [PreserveOrder]
@@ -80,7 +80,7 @@ public class PredictorMainQueryEmbedded : EmbeddedEntity
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]
-    [NoRepeatValidator, BindParent, NotifyCollectionChanged]
+    [NoRepeatValidator, BindParent]
     public MList<PredictorColumnEmbedded> Columns { get; set; } = new MList<PredictorColumnEmbedded>();
 
     public void ParseData(QueryDescription qd)
@@ -316,7 +316,7 @@ public class PredictorSubQueryEntity : Entity, ICanBeOrdered
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]
-    [NoRepeatValidator, BindParent, NotifyCollectionChanged]
+    [NoRepeatValidator, BindParent]
     public MList<PredictorSubQueryColumnEmbedded> Columns { get; set; } = new MList<PredictorSubQueryColumnEmbedded>();
 
     public int Order { get; set; }
