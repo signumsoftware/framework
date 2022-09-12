@@ -169,7 +169,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
         EditableMessage = bool.Parse(element.Attribute("EditableMessage")!.Value);
         Model = element.Attribute("Model")?.Let(at => ctx.GetEmailModel(at.Value));
 
-        MasterTemplate = element.Attribute("MasterTemplate")?.Let(a=>(Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLite());
+        MasterTemplate = element.Attribute("MasterTemplate")?.Let(a => (Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLiteFat());
 
         GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));

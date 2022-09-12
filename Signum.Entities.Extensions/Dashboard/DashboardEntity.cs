@@ -288,7 +288,10 @@ public enum DashboardMessage
     ForPerformanceReasonsThisDashboardMayShowOutdatedInformation,
 
     [Description("Last update was on {0}")]
-    LasUpdateWasOn0
+    LasUpdateWasOn0,
+
+    [Description("The User Query '{0}' has no column with summary header")]
+    TheUserQuery0HasNoColumnWithSummaryHeader
 }
 
 public enum DashboardEmbedededInEntity

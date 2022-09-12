@@ -360,7 +360,7 @@ public static class CaseActivityLogic
                 Delete = (e, args) => e.Delete(),
             }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
-            new Graph<CaseNotificationEntity>.ConstructFrom<CaseActivityEntity>(CaseNotificationOperation.CreteCaseNotificationFromCaseActivity)
+            new Graph<CaseNotificationEntity>.ConstructFrom<CaseActivityEntity>(CaseNotificationOperation.CreateCaseNotificationFromCaseActivity)
             {
                 Construct = (e, args) => new CaseNotificationEntity
                 {

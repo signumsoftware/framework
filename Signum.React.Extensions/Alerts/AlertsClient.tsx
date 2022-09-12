@@ -67,7 +67,7 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
       creationDate: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.creationDate).toString())],
       alertDate: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.alertDate).toString())],
       target: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.target).toString())],
-      parentTarget: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.parentTarget).toString())],
+      linkTarget: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.linkTarget).toString())],
       textArguments: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.entity.textArguments).toString())]
     };
     return formatText(cell, alert);
@@ -79,7 +79,7 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
     queryName: AlertEntity,
     hiddenColumns: [
       { token: AlertEntity.token(a => a.target) },
-      { token: AlertEntity.token(a => a.parentTarget) },
+      { token: AlertEntity.token(a => a.linkTarget) },
       { token: AlertEntity.token(a => a.entity.textArguments) }
     ],
     formatters: {
