@@ -192,7 +192,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
             {alertGroups.length == 0 && <Toast><Toast.Body>{AlertMessage.YouDoNotHaveAnyActiveAlert.niceToString()}</Toast.Body></Toast>}
 
             <div style={{ position: 'relative' }}>
-              {alertGroups.orderByDescending(a => a.maxDate).filter((gr, i) => i < showGroups && i == 2).flatMap((gr, i) => [<AlertGroupToast
+              {alertGroups.orderByDescending(a => a.maxDate).filter((gr, i) => i < showGroups).flatMap((gr, i) => [<AlertGroupToast
 
                 key={gr.groupTarget?.id ?? "null"}
                 group={gr}
