@@ -382,6 +382,10 @@ input[type=checkbox].form-control-xs {
     padding: 0px;
 }
 
+.rw-widget-xs .rw-input {
+    padding: 0 0.4em;
+}
+
 .form-control-xs .rw-widget-picker,
 .rw-widget-xs .rw-widget-picker {
     min-height: 24px;

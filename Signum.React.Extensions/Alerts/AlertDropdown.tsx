@@ -66,7 +66,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
   
   const isOpenRef = useUpdatedRef(isOpen);
 
-  const [alertWithSize, setAlertsWithSize] = React.useState<AlertGroupWithSize[] | undefined>(undefined);
+  const [alertGroups, setAlertsWithSize] = React.useState<AlertGroupWithSize[] | undefined>(undefined);
 
   var [countResult, reloadCount] = useAPIWithReload<AlertsClient.NumAlerts>((signal, oldResult) => AlertsClient.API.myAlertsCount().then(res => {
     if (res.lastAlert != null) {
@@ -104,12 +104,12 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 
 
   function setAlerts(alerts: AlertEntity[], keepGroupOrder: boolean) {
-    var dictionary = alertWithSize?.flatMap(a => a.alerts).notNull().toObject(a => liteKey(toLite(a.alert)), a => a.height);
+    var dictionary = alertGroups?.flatMap(a => a.alerts).notNull().toObject(a => liteKey(toLite(a.alert)), a => a.height);
     var newGroup = alerts.orderByDescending(a => a.alertDate).groupBy(a => a.groupTarget ? liteKey(a.groupTarget) : "null");
 
-    if (keepGroupOrder && alertWithSize?.length == newGroup.length && alertWithSize.every(a =>
+    if (keepGroupOrder && alertGroups?.length == newGroup.length && alertGroups.every(a =>
       newGroup.some(n => a.groupTarget != undefined && liteKey(a.groupTarget) == n.key || a.groupTarget == undefined && n.key == "null"))) {
-      var oldGroup = alertWithSize.clone();
+      var oldGroup = alertGroups.clone();
       oldGroup.forEach(g => {
         g.alerts.clear;
         g.alerts = newGroup.filter(n => n.key == (g.groupTarget ? liteKey(g.groupTarget) : "null")).first().elements.map<AlertWithSize>(a => ({ alert: a, height: dictionary?.[liteKey(toLite(a))] }));
@@ -140,13 +140,13 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
   function handleOnCloseAlerts(toRemove: AlertWithSize[]) {
     //Optimistic
     let wasClosed = false;
-    if (alertWithSize) {
+    if (alertGroups) {
       if (toRemove.length > 1)
-        alertWithSize.extract(ag => ag.alerts.some(a => is(a.alert, toRemove[0].alert)));
+        alertGroups.extract(ag => ag.alerts.some(a => is(a.alert, toRemove[0].alert)));
       else
-        alertWithSize.filter(ag => ag.alerts.some(a => is(a.alert, toRemove[0].alert))).first().alerts.extract(a => is(a.alert, toRemove[0].alert));
+        alertGroups.filter(ag => ag.alerts.some(a => is(a.alert, toRemove[0].alert))).first().alerts.extract(a => is(a.alert, toRemove[0].alert));
 
-      if (alertWithSize.length == 0) {
+      if (alertGroups.length == 0) {
         setIsOpen(false);
         wasClosed = true;
       }
@@ -186,13 +186,13 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
       {isOpen && <div className="sf-alerts-toasts mt-2" style={{
         backgroundColor : "rgba(255,255,255, 0.7)",
       }}>
-        {alertWithSize == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :
+        {alertGroups == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :
 
           <>
-            {alertWithSize.length == 0 && <Toast><Toast.Body>{AlertMessage.YouDoNotHaveAnyActiveAlert.niceToString()}</Toast.Body></Toast>}
+            {alertGroups.length == 0 && <Toast><Toast.Body>{AlertMessage.YouDoNotHaveAnyActiveAlert.niceToString()}</Toast.Body></Toast>}
 
             <div style={{ position: 'relative' }}>
-              {alertWithSize.orderByDescending(a => a.maxDate).filter((gr, i) => i < showGroups).flatMap((gr, i) => [<AlertGroupToast
+              {alertGroups.orderByDescending(a => a.maxDate).filter((gr, i) => i < showGroups).flatMap((gr, i) => [<AlertGroupToast
 
                 key={gr.groupTarget?.id ?? "null"}
                 group={gr}
@@ -202,28 +202,28 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
                 style={{
                   width: "100%",
                   position: 'absolute',
-                  transform: `translateY(${alertWithSize.orderByDescending(a => a.maxDate).filter((a, j) => j < i).sum(a => (a.totalHight ?? 0))}px)`,
+                  transform: `translateY(${alertGroups.orderByDescending(a => a.maxDate).filter((a, j) => j < i).sum(a => (a.totalHight ?? 0))}px)`,
                   //transform: `translateY(${i * 200 + 100}px)`,
                   transition: "transform 0.4s ease"
                 }}
               />])
               }
             </div>
-            {showGroups < alertWithSize.length && <div style={{
-              transform: `translateY(${alertWithSize.orderByDescending(a => a.maxDate).filter((a, j) => j < showGroups).sum(a => (a.totalHight ?? 0))}px)`,
+            {showGroups < alertGroups.length && <div style={{
+              transform: `translateY(${alertGroups.orderByDescending(a => a.maxDate).filter((a, j) => j < showGroups).sum(a => (a.totalHight ?? 0))}px)`,
               transition: "transform 0.4s ease"
             }} >
               <Toast className="w-100 my-2">
                 <Toast.Body style={{ textAlign: "center" }}>
                   <span onClick={() => setShowGroups(showGroups + MaxNumberOfGroups)} style={{ cursor: 'pointer', color: 'darkgray', fontSize: "0.8rem", fontWeight: 'bold' }}>
-                    {AlertMessage.Show0GroupsMore1Remaining.niceToString(MaxNumberOfGroups, alertWithSize.length)}
+                    {AlertMessage.Show0GroupsMore1Remaining.niceToString(MaxNumberOfGroups, alertGroups.length)}
                   </span>
                 </Toast.Body>
               </Toast>
             </div>}
 
             <div style={{
-              transform: `translateY(${alertWithSize.orderByDescending(a => a.maxDate).filter((a, j) => j < showGroups).sum(a => (a.totalHight ?? 0))}px)`,
+              transform: `translateY(${alertGroups.orderByDescending(a => a.maxDate).filter((a, j) => j < showGroups).sum(a => (a.totalHight ?? 0))}px)`,
               transition: "transform 0.4s ease"
             }} > 
               <Toast className="w-100 mt-2">
@@ -259,17 +259,18 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 }
 
 
+
 export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: AlertWithSize[]) => void, refresh: () => void, style?: React.CSSProperties | undefined , onSizeSet: () => void}) {
 
-  const [showAlerts, setShowAlert] = React.useState<number>(Math.min(MaxNumberOfAlerts, p.group.alerts.length));
+  const [showAlerts, setShowAlert] = React.useState<number>(1);
+  const [showHiddenAlerts, setShowHiddenAlert] = React.useState<number>(MaxNumberOfAlerts);
 
-  const [expanded, setExpanded] = React.useState(false);
+  const showAlertsAndHidden = showAlerts + showHiddenAlerts;
+  var alerts = p.group.alerts.filter((a, i) => i < showAlertsAndHidden);
 
   const forceUpdate = useForceUpdate();
 
   const groupTarget = p.group.alerts[0]?.alert.groupTarget;
-
-  var wasExpanded = useThrottle(expanded, 0.4 * 1000);
 
   var htmlRef = React.useRef<HTMLDivElement>(null);
 
@@ -278,47 +279,55 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
     p.onSizeSet();
   }, [p.group, p.refresh]);
 
+  const lastExpandedAlert = alerts.filter((a, i) => i < showAlerts)?.lastOrNull();
+
+  const totalExpandedHeight = alerts.filter((a, i) => i < showAlerts).sum((a, i) => (a.height ?? 0));
+
   const textStyle: React.CSSProperties = { color: 'darkgray', fontSize: "0.8rem", fontWeight: 'bold' };
-  var alerts = p.group.alerts.filter((a, i) => i < showAlerts);
   return (
-    <div className="sf-alert-group" style={p.style} ref={htmlRef}>
+    <div className="sf-alert-group pb-2" style={p.style} ref={htmlRef}>
       <div className="p-2 mt-2 d-flex" style={{ backdropFilter: "blur(10px)", position: 'relative' }}>
         {groupTarget ? <span style={textStyle}>{`${getToString(groupTarget)} (${p.group.alerts.length})`}</span> : <span style={textStyle} >{`${AlertMessage.OtherNotifications.niceToString()} (${p.group.alerts.length})`}</span>}
 
-        {alerts.length > 1 && <span className="ms-auto me-2" style={{ cursor: 'pointer', ...textStyle }} onClick={() => setExpanded(!expanded)}>{expanded ? AlertMessage.Collapse.niceToString() : AlertMessage.Expand.niceToString()}</span>}
+        {alerts.length > 1 && <span className="ms-auto me-2" style={{ cursor: 'pointer', ...textStyle }} onClick={() => setShowAlert(showAlerts == 1 ? 1 + MaxNumberOfAlerts : 1)}>{showAlerts == 1 ? AlertMessage.Expand.niceToString() : AlertMessage.Collapse.niceToString()}</span>}
 
-        {alerts.length > 1 && <span style={{ cursor: 'pointer', ...textStyle }} onClick={() => p.onClose(p.group.alerts)}>{AlertMessage.CloseAll.niceToString()}</span>}
+        {alerts.length > 1 && <span style={{ whiteSpace: 'nowrap', cursor: 'pointer', ...textStyle }} onClick={() => p.onClose(p.group.alerts)}>{AlertMessage.CloseAll.niceToString()}</span>}
       </div>
       <div style={{
         perspective: "1000px",
         position: 'relative',
-        marginBottom: expanded ? "10px" : ((alerts.length - 1) * 15) + "px",
-        height: expanded ? alerts?.sum(a => (a.height ?? 0) + 2) : alerts[0]?.height ?? 0,
+        marginBottom: (Math.max(0, (alerts.length - showAlerts)) * 8) + "px",
+        height: alerts?.filter((a, i) => i < showAlerts).sum(a => (a.height ?? 0) + 2),
         transition: "transform .4s ease",
       }}>
-        {alerts.map((a, i) => alerts?.first().height != 0 && <AlertToast key={a.alert.id} alert={a} onClose={p.onClose}
-            expanded={expanded}
-            wasExpanded={wasExpanded}
-            onSizeSet={forceUpdate}
-            refresh={p.refresh} className="mb-0 mt-0"
-            style={{
-              borderRadius: ".15em",
-              boxShadow: "0 0 2px 1px rgba(0, 0, 0, 0.1), 0 2px 3px rgba(0, 0, 0, 0.16)",
-              width: "100%",
-              transformOrigin: "50% 0",
-              position: "absolute",
-              zIndex: -i,
-              maxHeight: !expanded && i > 0 ? alerts?.first().height : undefined,
-              overflow: !expanded && i > 0 ? 'hidden' : undefined,
-              transform: expanded ? `translateY(${alerts.filter((alert, j) => j < i).sum(alert => (alert?.height ?? 0) + 2)}px)` :
-                (alerts?.first().height ?? 0) > (a?.height ?? 0) ? `translate3d(0, ${(alerts?.first().height ?? 0) + (i * 10) - (a?.height ?? 0)}px, ${-i * 32}px)` :
-                  `translate3d(0, ${i * 10}px, ${-i * 32}px)`,
-              opacity: !expanded ? 1 - (i * 0.2) : undefined,
-              transition: "transform .4s ease",
-            }} />
-        )}
+        {alerts.map((a, i) => {
+          var expanded = i < showAlerts;
+
+          var hiddenIndex = (i - (showAlerts - 1));
+
+          return (
+            <AlertToast key={a.alert.id} alert={a} onClose={p.onClose}
+              expanded={expanded}
+              onSizeSet={forceUpdate}
+              refresh={p.refresh} className="mb-0 mt-0"
+              style={{
+                borderRadius: ".15em",
+                boxShadow: "0 0 2px 1px rgba(0, 0, 0, 0.1), 0 2px 3px rgba(0, 0, 0, 0.16)",
+                width: "100%",
+                transformOrigin: "50% 0",
+                position: "absolute",
+                zIndex: -i,
+                maxHeight: expanded ? undefined : lastExpandedAlert?.height,
+                overflow: expanded ? undefined : 'hidden',
+                transform: expanded ? `translateY(${alerts.filter((alert, j) => j < i).sum(alert => (alert?.height ?? 0) + 2)}px)` :
+                  `translate3d(0, ${totalExpandedHeight - (a.height ?? 0) + hiddenIndex * 8}px,                      ${-hiddenIndex * 32}px)`,
+                opacity: expanded ? undefined : Math.max(0, 1 - (hiddenIndex * 0.2)),
+                transition: "transform .4s ease",
+              }} />
+          );
+        })}
       </div>
-      {showAlerts < p.group.alerts.length && expanded && <div style={{ position: 'relative', backdropFilter: "blur(10px)", textAlign: 'center', marginTop: "-10px" }}>
+      {showAlerts < p.group.alerts.length && showAlerts > 1 && <div style={{ position: 'relative', backdropFilter: "blur(10px)", textAlign: 'center', marginTop: "-10px" }}>
         <span onClick={() => setShowAlert(showAlerts + MaxNumberOfAlerts)} style={{ cursor: 'pointer', color: 'darkgray', fontSize: "0.8rem", fontWeight: 'bold' }}>
           {AlertMessage.Show0AlertsMore.niceToString(MaxNumberOfAlerts)}
         </span>
@@ -327,18 +336,20 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
   );
 }
 
-export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, expanded: boolean, wasExpanded: boolean,  onClose: (e: AlertWithSize[]) => void, refresh: () => void, className?: string, style?: React.CSSProperties | undefined }) {
+export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, expanded: boolean, onClose: (e: AlertWithSize[]) => void, refresh: () => void, className?: string, style?: React.CSSProperties | undefined }) {
 
   var alert = p.alert.alert;
 
   var icon = alert.alertType && alert.alertType.key && AlertToast.icons[alert.alertType.key];
+
+  var wasExpanded = useThrottle(p.expanded, 0.4 * 1000);
 
   var htmlRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     p.alert.height = htmlRef.current?.getBoundingClientRect().height;
     p.onSizeSet();
-  }, [p.alert, p.expanded, p.wasExpanded]);
+  }, [p.alert, p.expanded, wasExpanded]);
 
   return (
     <Toast ref={htmlRef} onClose={() => p.onClose([p.alert])} className={classes(p.className, "w-100")} style={p.style}>
@@ -347,12 +358,12 @@ export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, exp
         <strong className="me-auto">{AlertsClient.getTitle(alert.titleField, alert.alertType)}</strong>
         <small>{DateTime.fromISO(alert.alertDate!).toRelative()}</small>
       </Toast.Header>
-      <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
+      <Toast.Body style={{ whiteSpace: "pre-wrap", opacity: p.expanded ? undefined : 0, transition: "transform .4s ease", }}>
         <div className="row">
           <div className="col-sm-1">
             {alert.createdBy && <SmallProfilePhoto user={alert.createdBy as Lite<UserEntity>} />}
           </div>
-          <div className="col-sm-11">
+          <div className="col-sm-11" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {AlertsClient.formatText(alert.textField || alert.textFromAlertType || "", alert, p.refresh)}
           </div>
         </div>

@@ -16,7 +16,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
 {
     public DashboardEntity()
     {
-        RebindEvents();
+        BindParent();
     }
 
     Lite<TypeEntity>? entityType;
@@ -48,7 +48,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
 
     public CacheQueryConfigurationEmbedded? CacheQueryConfiguration { get; set; }
 
-    [NotifyCollectionChanged, NotifyChildProperty]
+    [BindParent]
     [NoRepeatValidator]
     public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 

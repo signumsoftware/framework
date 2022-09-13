@@ -653,7 +653,7 @@ function equalFilters(as: FilterOption[] | undefined, bs: FilterOption[] | undef
       ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualTo") &&
       (a.value == b.value || is(a.value, b.value, false, false)) &&
       Dic.equals(a.pinned, b.pinned, true) &&
-      equalFilters((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
+      equalFilters((a as FilterGroupOption).filters?.notNull(), (b as FilterGroupOption).filters?.notNull());
   });
 }
 
@@ -841,7 +841,7 @@ export function validateNewEntities(fo: FindOptions): string | undefined {
 
   function getValues(fo: FilterOption): any[] {
     if (isFilterGroupOption(fo))
-      return fo.filters.flatMap(f => getValues(f));
+      return fo.filters.notNull().flatMap(f => getValues(f));
 
     return [fo.value];
   }
@@ -1136,7 +1136,7 @@ export class TokenCompleter {
     if (isFilterGroupOption(fo)) {
       fo.token && this.request(fo.token.toString(), options);
 
-      fo.filters.forEach(f => this.requestFilter(f, options));
+      fo.filters.notNull().forEach(f => this.requestFilter(f, options));
     } else {
 
       this.request(fo.token.toString(), options);
@@ -1224,7 +1224,7 @@ export class TokenCompleter {
         value: fo.value,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
         dashboardBehaviour: fo.dashboardBehaviour,
-        filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
+        filters: fo.filters.notNull().map(f => this.toFilterOptionParsed(f)),
         frozen: false,
         expanded: false,
       } as FilterGroupOptionParsed);
@@ -1657,7 +1657,7 @@ export module Encoder {
       if (isFilterGroupOption(fo)) {
         query["filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
 
-        fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || shouldIgnoreValues(fo.pinned)));
+        fo.filters.notNull().forEach(f => encodeFilter(f, identation + 1, ignoreValues || shouldIgnoreValues(fo.pinned)));
       } else {
         query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
       }

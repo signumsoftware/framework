@@ -14,7 +14,7 @@ public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
 
     public bool IsDefault { get; set; }
 
-    [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
+    [BindParent, PreserveOrder]
     public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
 
     [UniqueIndex]
@@ -26,7 +26,7 @@ public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
     public override string ToString() => As.Expression(() => Name);
 
     [PreserveOrder]
-    [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
+    [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), BindParent]
     public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
     protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)

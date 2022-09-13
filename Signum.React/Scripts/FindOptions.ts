@@ -70,7 +70,7 @@ export interface FilterConditionOption {
 export interface FilterGroupOption {
   token?: string | QueryTokenString<any>;
   groupOperation: FilterGroupOperation;
-  filters: FilterOption[];
+  filters: (FilterOption | null | undefined)[];
   pinned?: PinnedFilter;
   dashboardBehaviour?: DashboardBehaviour;
   value?: string; /*For search in multiple columns*/

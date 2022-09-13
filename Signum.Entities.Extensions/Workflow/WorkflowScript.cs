@@ -17,7 +17,7 @@ public class WorkflowScriptEntity : Entity, IUserAssetEntity
     
     public TypeEntity MainEntityType { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowScriptEval Eval { get; set; }
 
     [AutoExpressionField]
