@@ -279,7 +279,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
     p.onSizeSet();
   }, [p.group, p.refresh]);
 
-  const lastExpandedAlert = alerts.filter((a, i) => i < showAlerts).last();
+  const lastExpandedAlert = alerts.filter((a, i) => i < showAlerts)?.lastOrNull();
 
   const totalExpandedHeight = alerts.filter((a, i) => i < showAlerts).sum((a, i) => (a.height ?? 0));
 
@@ -317,7 +317,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
                 transformOrigin: "50% 0",
                 position: "absolute",
                 zIndex: -i,
-                maxHeight: expanded ? undefined : lastExpandedAlert.height,
+                maxHeight: expanded ? undefined : lastExpandedAlert?.height,
                 overflow: expanded ? undefined : 'hidden',
                 transform: expanded ? `translateY(${alerts.filter((alert, j) => j < i).sum(alert => (alert?.height ?? 0) + 2)}px)` :
                   `translate3d(0, ${totalExpandedHeight - (a.height ?? 0) + hiddenIndex * 8}px,                      ${-hiddenIndex * 32}px)`,
@@ -363,7 +363,7 @@ export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, exp
           <div className="col-sm-1">
             {alert.createdBy && <SmallProfilePhoto user={alert.createdBy as Lite<UserEntity>} />}
           </div>
-          <div className="col-sm-11">
+          <div className="col-sm-11" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {AlertsClient.formatText(alert.textField || alert.textFromAlertType || "", alert, p.refresh)}
           </div>
         </div>
