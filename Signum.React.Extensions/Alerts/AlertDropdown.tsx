@@ -291,7 +291,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
 
         {alerts.length > 1 && <span className="ms-auto me-2" style={{ cursor: 'pointer', ...textStyle }} onClick={() => setShowAlert(showAlerts == 1 ? 1 + MaxNumberOfAlerts : 1)}>{showAlerts == 1 ? AlertMessage.Expand.niceToString() : AlertMessage.Collapse.niceToString()}</span>}
 
-        {alerts.length > 1 && <span style={{ cursor: 'pointer', ...textStyle }} onClick={() => p.onClose(p.group.alerts)}>{AlertMessage.CloseAll.niceToString()}</span>}
+        {alerts.length > 1 && <span style={{ whiteSpace: 'nowrap', cursor: 'pointer', ...textStyle }} onClick={() => p.onClose(p.group.alerts)}>{AlertMessage.CloseAll.niceToString()}</span>}
       </div>
       <div style={{
         perspective: "1000px",
