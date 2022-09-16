@@ -360,8 +360,7 @@ export function EntityTableRow(p: EntityTableRowProps) {
             {EntityBaseController.removeIcon}
           </a>}
           &nbsp;
-          {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
-            onClick={e => e.preventDefault()}
+          {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
             draggable={true}
             onKeyDown={drag.onKeyDown}
             onDragStart={drag.onDragStart}
