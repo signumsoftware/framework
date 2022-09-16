@@ -1426,7 +1426,7 @@ export function inDBList<R>(entity: Entity | Lite<Entity>, token: QueryTokenStri
   return getQueryDescription(fo.queryName)
     .then(qd => parseFindOptions(fo!, qd, false))
     .then(fop => API.executeQuery(getQueryRequest(fop)))
-    .then(rt => rt.rows.map(r => r.columns[0]));
+    .then(rt => rt.rows.map(r => r.columns[0]).notNull());
 }
 
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
@@ -1545,7 +1545,7 @@ export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: Quer
   if (resultTable == null)
     return undefined;
 
-  return resultTable.rows.map(r => r.columns[0]);
+  return resultTable.rows.map(r => r.columns[0]).notNull();
 }
 
 export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {
