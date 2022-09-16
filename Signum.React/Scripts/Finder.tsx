@@ -1394,23 +1394,39 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
     .then(rt => rt.rows[0].columns[0]);
 }
 
-export function inDBArray<R1, R2>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null]>;
-export function inDBArray<R1, R2, R3>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null]>;
-export function inDBArray<R1, R2, R3, R4>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string, QueryTokenString<R4> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null, AddToLite<R4> | null]>;
-export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenString<any> | string)[]): Promise<any[]> {
+export function inDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity>, tokensObject: TO): Promise<ExtractTokensObject<TO>> {
 
   var fo: FindOptions = {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
-    columnOptions: tokens.map(t => softCast<ColumnOption>({ token: t})),
+    columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
     columnOptionsMode: "ReplaceAll",
   };
 
   return getQueryDescription(fo.queryName)
     .then(qd => parseFindOptions(fo!, qd, false))
     .then(fop => API.executeQuery(getQueryRequest(fop)))
-    .then(rt => rt.rows[0].columns);
+    .then(rt => {
+      var firstRow = rt.rows[0];
+      return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+    });
+}
+
+export function inDBList<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R>[]> {
+
+  var fo: FindOptions = {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: [{ token: token }],
+    columnOptionsMode: "ReplaceAll",
+  };
+
+  return getQueryDescription(fo.queryName)
+    .then(qd => parseFindOptions(fo!, qd, false))
+    .then(fop => API.executeQuery(getQueryRequest(fop)))
+    .then(rt => rt.rows.map(r => r.columns[0]));
 }
 
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
