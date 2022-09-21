@@ -364,7 +364,7 @@ export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, exp
             {alert.createdBy && <SmallProfilePhoto user={alert.createdBy as Lite<UserEntity>} />}
           </div>
           <div className="col-sm-11" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {AlertsClient.formatText(alert.textField || alert.textFromAlertType || "", alert, p.refresh)}
+            {AlertsClient.format(alert.textField || alert.textFromAlertType || "", alert, p.refresh)}
           </div>
         </div>
       </Toast.Body>
