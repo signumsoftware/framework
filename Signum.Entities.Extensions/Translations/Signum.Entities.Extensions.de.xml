@@ -110,7 +110,7 @@
     <Member Name="CreateAlert" Description="Benachrichtigung erstellen" />
     <Member Name="CustomDelay" Description="Benutzerdefinierte Verzögerung" />
     <Member Name="DelayDuration" Description="Dauer der Verzögerung" />
-    <Member Name="Expand" Description="Ausklappen " />
+    <Member Name="Expand" Description="Ausklappen" />
     <Member Name="FutureAlerts" Description="Zukünftige" />
     <Member Name="Hi0" Description="Hallo {0}," />
     <Member Name="MyActiveAlerts" Description="Meine aktiven Benachrichtigungen" />
@@ -636,7 +636,7 @@
     <Member Name="Part0OverlapsWith1" Description="Teil {0} überschneidet sich mit {1}" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="RowsSelected" Description="Zeile(n) ausgewählt" />
-    <Member Name="TheUserQuery0HasNoColumnWithSummaryHeader" Description="Die Benutzerabfrage '{0}' hat keine Spalte mit Zusammenfassung Token" />
+    <Member Name="TheUserQuery0HasNoColumnWithSummaryHeader" Description="Die Benutzerabfrage '{0}' hat keine Spalte mit Zusammenfassungskopfzeile" />
   </Type>
   <Type Name="DashboardOperation">
     <Member Name="Clone" Description="Klonen" />
@@ -2738,7 +2738,7 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
-    <Member Name="AggregateFromSummaryHeader" Description="Aggregieren aus Zusammenfassung Token" />
+    <Member Name="AggregateFromSummaryHeader" Description="Aggregieren aus Zusammenfassungskopfzeile" />
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
     <Member Name="AutoUpdate" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
