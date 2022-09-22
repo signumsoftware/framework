@@ -56,9 +56,12 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
   });
 
   useSignalRCallback(conn, "AlertsChanged", () => {
-    reloadAll();
+    if (!refIgnoreSignalR.current)
+      reloadAll();
   }, []);
 
+
+  const refIgnoreSignalR = React.useRef(false);
   const forceUpdate = useForceUpdate();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [ringing, setRinging] = React.useState<boolean>(false);
@@ -179,6 +182,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 
       forceUpdate();
 
+      refIgnoreSignalR.current = true;
       Operations.API.executeMultiple(alertsToRemove.map(a => toLite(a.alert)), AlertOperation.Attend)
         .then(res => {
 
@@ -188,6 +192,8 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
           }
 
           reloadAll();
+        }).finally(() => {
+          refIgnoreSignalR.current = false;
         });
 
     }, 400) 
