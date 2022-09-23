@@ -317,6 +317,24 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
   };
 }
 
+export function mapFilterTokens(fo: FilterOption, mapToken : (token: string) => string): FilterOption {
+  
+  if (isFilterGroupOption(fo)) {
+    return {
+      ...fo,
+      groupOperation: fo.groupOperation,
+      filters: fo.filters.map(f => f && mapFilterTokens(f, mapToken)),
+      token: fo.token && mapToken(fo.token.toString())
+    };
+  }
+  else {
+    return {
+      ...fo,
+      token: fo.token && mapToken(fo.token.toString()),
+    }
+  }
+}
+
 export function getTokenParents(token: QueryToken | null | undefined): QueryToken[] {
   const result: QueryToken[] = [];
   while (token) {

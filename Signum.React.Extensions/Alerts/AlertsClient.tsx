@@ -70,7 +70,7 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
       linkTarget: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.linkTarget).toString())],
       textArguments: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.entity.textArguments).toString())]
     };
-    return formatText(cell, alert);
+    return format(cell, alert);
   }, true);
 
   Finder.registerPropertyFormatter(PropertyRoute.tryParse(AlertEntity, "Text"), cellFormatter);
@@ -104,7 +104,7 @@ function chooseDate(): Promise<DateTime | undefined> {
       return ValueLineModal.show({
         title: AlertMessage.CustomDelay.niceToString(),
         type: mi.type,
-        unitText: mi.unit,
+        unit: mi.unit,
         labelText: mi.niceName,
         initiallyFocused: true,
         initialValue: result.toISO()
@@ -137,7 +137,7 @@ export function getTitle(titleField: string | null, type: AlertTypeSymbol | null
 
   return type.name;
 }
-export function formatText(text: string, alert: Partial<AlertEntity>, onNavigated?: () => void): React.ReactElement {
+export function format(text: string, alert: Partial<AlertEntity>, onNavigated?: () => void): React.ReactElement {
   var nodes: (string | React.ReactElement)[] = [];
   var pos = 0;
   for (const match of Array.from(text.matchAll(LinkPlaceholder))) {

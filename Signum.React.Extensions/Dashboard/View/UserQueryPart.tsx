@@ -164,7 +164,8 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
           </div>
           <div className={classes("col-9 flip", "text-end")}>
             <h1>
-              <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps} valueToken={!p.aggregateFromSummaryHeader ? undefined : p.findOptions.columnOptions!.first(a => a?.summaryToken != null)?.summaryToken}
+              <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
+                valueToken={!p.aggregateFromSummaryHeader ? undefined : p.findOptions.columnOptions!.first(a => a?.summaryToken != null)?.summaryToken}
                 customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}
               />
             </h1>
