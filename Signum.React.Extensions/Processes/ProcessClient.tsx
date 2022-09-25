@@ -167,7 +167,7 @@ export module API {
 
 export interface ProcessLogicState {
   maxDegreeOfParallelism: number;
-  initialDelayMiliseconds: number;
+  initialDelayMilliseconds: number | null;
   running: boolean;
   machineName: string;
   applicationName: string;

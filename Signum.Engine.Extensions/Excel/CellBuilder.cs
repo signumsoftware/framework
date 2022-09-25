@@ -138,7 +138,7 @@ public class CellBuilder
 
         if (ReflectionTools.IsNumber(c.Column.Type))
         {
-            if (c.Column.Unit.HasText() || c.Column.Format != Reflector.FormatString(c.Column.Type))
+            if (c.Column.Unit.HasText() || c.Column.Format != null && c.Column.Format != Reflector.FormatString(c.Column.Type))
             {
                 string formatExpression = GetCustomFormatExpression(c.Column.Unit, c.Column.Format);
                 var styleIndex = CustomDecimalStyles.GetOrCreate(formatExpression, () => CellFormatCount++);

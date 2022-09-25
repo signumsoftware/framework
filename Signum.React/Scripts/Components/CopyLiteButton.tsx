@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Overlay, Tooltip } from "react-bootstrap";
-import { Entity, FrameMessage, liteKey, toLite } from '../Signum.Entities';
+import { Entity, FrameMessage, liteKey, NormalControlMessage, toLite } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useInterval } from '../Hooks';
 
@@ -15,7 +15,6 @@ export default function CopyLiteButton(p: CopyLiteButtonProps) {
   if (p.entity.isNew || !supportsClipboard)
     return null;
 
-  const lk = liteKey(toLite(p.entity as Entity));
   const link = React.useRef<HTMLAnchorElement>(null);
   const [showTooltip, setShowTooltip] = React.useState<boolean>(false);
   const elapsed = useInterval(showTooltip ? 1000 : null, 0, d => d + 1);
@@ -26,11 +25,11 @@ export default function CopyLiteButton(p: CopyLiteButtonProps) {
 
   return (
     <span className={p.className}>
-      <a ref={link} className="btn btn-sm btn-light text-dark sf-pointer mx-2" onClick={handleCopyLiteButton} >
+      <a ref={link} className="btn btn-sm btn-light text-dark sf-pointer mx-1" onClick={handleCopyLiteButton} title={NormalControlMessage.CopyEntityTypeAndIdForAutocomplete.niceToString()} >
         <FontAwesomeIcon icon="copy" color="gray" />
       </a>
       <Overlay target={link.current} show={showTooltip} placement="bottom">
-        <Tooltip id={lk + "_tooltip"}>
+        <Tooltip>
           {FrameMessage.Copied.niceToString()}
         </Tooltip>
       </Overlay>
@@ -39,6 +38,8 @@ export default function CopyLiteButton(p: CopyLiteButtonProps) {
 
   function handleCopyLiteButton(e: React.MouseEvent<any>) {
     e.preventDefault();
+    const lk = liteKey(toLite(p.entity as Entity));
+
     navigator.clipboard.writeText(lk)
       .then(() => setShowTooltip(true));
   }

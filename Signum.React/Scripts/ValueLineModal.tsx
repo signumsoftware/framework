@@ -48,8 +48,8 @@ export default function ValueLineModal(p: ValueLineModalProps) {
 
   var vlp: ValueLineProps = {
     ctx: ctx,
-    formatText: props.formatText !== undefined ? props.formatText : props.member?.format,
-    unitText: props.unitText !== undefined ? props.unitText : props.member?.unit,
+    format: props.format !== undefined ? props.format : props.member?.format,
+    unit: props.unit !== undefined ? props.unit : props.member?.unit,
     labelText: props.labelText !== undefined ? props.labelText : props.member?.niceName,
     type: props.type ?? props.member?.type,
     valueLineType: props.valueLineType ?? (props.member?.isMultiline ? "TextArea" : undefined),
@@ -105,8 +105,8 @@ export interface ValueLineModalOptions {
   message?: React.ReactChild;
   labelText?: React.ReactChild;
   validateValue?: (val: any) => string | undefined;
-  formatText?: string;
-  unitText?: string;
+  format?: string;
+  unit?: string;
   initiallyFocused?: boolean;
   valueHtmlAttributes?: React.HTMLAttributes<any>;
   allowEmptyValue?: boolean;

@@ -378,6 +378,8 @@ export module EntityControlMessage {
   export const Detail = new MessageKey("EntityControlMessage", "Detail");
   export const MoveDown = new MessageKey("EntityControlMessage", "MoveDown");
   export const MoveUp = new MessageKey("EntityControlMessage", "MoveUp");
+  export const MoveRight = new MessageKey("EntityControlMessage", "MoveRight");
+  export const MoveLeft = new MessageKey("EntityControlMessage", "MoveLeft");
   export const Move = new MessageKey("EntityControlMessage", "Move");
   export const MoveWithDragAndDropOrCtrlUpDown = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlUpDown");
   export const MoveWithDragAndDropOrCtrlLeftRight = new MessageKey("EntityControlMessage", "MoveWithDragAndDropOrCtrlLeftRight");
@@ -462,6 +464,8 @@ export interface ModelEntity extends ModifiableEntity {
 export module NormalControlMessage {
   export const ViewForType0IsNotAllowed = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
   export const SaveChangesFirst = new MessageKey("NormalControlMessage", "SaveChangesFirst");
+  export const CopyEntityTypeAndIdForAutocomplete = new MessageKey("NormalControlMessage", "CopyEntityTypeAndIdForAutocomplete");
+  export const CopyEntityUrl = new MessageKey("NormalControlMessage", "CopyEntityUrl");
 }
 
 export module OperationMessage {
@@ -663,6 +667,7 @@ export module ValidationMessage {
   export const _0IsNotAllowed = new MessageKey("ValidationMessage", "_0IsNotAllowed");
   export const _0IsNotAllowedOnState1 = new MessageKey("ValidationMessage", "_0IsNotAllowedOnState1");
   export const _0IsNotSet = new MessageKey("ValidationMessage", "_0IsNotSet");
+  export const _0IsNotSetIn1 = new MessageKey("ValidationMessage", "_0IsNotSetIn1");
   export const _0AreNotSet = new MessageKey("ValidationMessage", "_0AreNotSet");
   export const _0IsSet = new MessageKey("ValidationMessage", "_0IsSet");
   export const _0IsNotA1_G = new MessageKey("ValidationMessage", "_0IsNotA1_G");

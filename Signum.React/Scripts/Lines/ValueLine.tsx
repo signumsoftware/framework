@@ -15,8 +15,8 @@ import { isPrefix, QueryToken } from '../FindOptions'
 
 export interface ValueLineProps extends LineBaseProps {
   valueLineType?: ValueLineType;
-  unitText?: React.ReactChild;
-  formatText?: string;
+  unit?: React.ReactChild;
+  format?: string;
   autoTrimString?: boolean;
   autoFixString?: boolean;
   inlineCheckbox?: boolean | "block";
@@ -138,13 +138,13 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
   }
 
   withItemGroup(input: JSX.Element): JSX.Element {
-    if (!this.props.unitText && !this.props.extraButtons)
+    if (!this.props.unit && !this.props.extraButtons)
       return input;
 
     return (
       <div className={this.props.ctx.inputGroupClass}>
         {input}
-        {this.props.unitText && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unitText}</span>}
+        {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
         {this.props.extraButtons && this.props.extraButtons(this)}
       </div>
     );
@@ -563,7 +563,7 @@ ValueLineRenderers.renderers.set("Decimal", (vl) => {
 function numericTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
   const s = vl.props
 
-  const numberFormat = toNumberFormat(s.formatText);
+  const numberFormat = toNumberFormat(s.format);
 
   if (s.ctx.readOnly)
     return (
@@ -735,7 +735,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
 
   const s = vl.props;
   const type = vl.props.type!.name as "DateOnly" | "DateTime";
-  const luxonFormat = toLuxonFormat(s.formatText, type);
+  const luxonFormat = toLuxonFormat(s.format, type);
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
   const showTime = s.showTimeBox != null ? s.showTimeBox : type != "DateOnly" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
@@ -755,7 +755,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
     var m = date && DateTime.fromJSDate(date);
 
     if (m)
-      m = trimDateToFormat(m, type, s.formatText);
+      m = trimDateToFormat(m, type, s.format);
 
     // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
     vl.setValue(m == null || !m.isValid ? null :
@@ -826,7 +826,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
       <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.props.valueHtmlAttributes, "numeric")} innerRef={vl.inputElement}>
-            {timeToString(s.ctx.value, s.formatText)}
+            {timeToString(s.ctx.value, s.format)}
           </FormControlReadonly>
         )}
       </FormGroup>
@@ -843,7 +843,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
   } as React.AllHTMLAttributes<any>;
 
   if (htmlAttributes.placeholder == undefined)
-    htmlAttributes.placeholder = s.formatText?.replaceAll("H", "h").replaceAll("\\:", ":");
+    htmlAttributes.placeholder = s.format?.replaceAll("H", "h").replaceAll("\\:", ":");
 
   return (
     <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -853,7 +853,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
           onChange={handleOnChange}
           validateKey={validateKey}
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
-          format={s.formatText}
+          format={s.format}
           innerRef={vl.inputElement as React.RefObject<HTMLInputElement>} />
       )}
     </FormGroup>
@@ -1003,10 +1003,10 @@ export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBasePr
   if (lineBase instanceof ValueLineController) {
     const vProps = state as ValueLineProps;
 
-    if (vProps.unitText === undefined &&
+    if (vProps.unit === undefined &&
       state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field") {
-      vProps.unitText = state.ctx.propertyRoute.member!.unit;
+      vProps.unit = state.ctx.propertyRoute.member!.unit;
     }
   }
 }
@@ -1016,10 +1016,10 @@ export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBase
   if (lineBase instanceof ValueLineController) {
     const vProps = state as ValueLineProps;
 
-    if (!vProps.formatText &&
+    if (!vProps.format &&
       state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field") {
-      vProps.formatText = state.ctx.propertyRoute.member!.format;
+      vProps.format = state.ctx.propertyRoute.member!.format;
       if (vProps.valueLineType == "TextBox" && state.ctx.propertyRoute.member!.format == "Password")
         vProps.valueLineType = "Password";
     }

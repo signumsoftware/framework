@@ -245,7 +245,7 @@ export function cloneFindOptions(fo: FindOptions): FindOptions {
       return ({
         groupOperation: f.groupOperation,
         token: f.token,
-        filters: f.filters.map(_ => cloneFilter(_)),
+        filters: f.filters.map(f => f && cloneFilter(f)),
         pinned: f.pinned && { ...f.pinned }
       } as FilterGroupOption);
     else

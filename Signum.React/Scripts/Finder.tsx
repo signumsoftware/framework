@@ -653,7 +653,7 @@ function equalFilters(as: FilterOption[] | undefined, bs: FilterOption[] | undef
       ((a as FilterConditionOption).operation ?? "EqualTo") == ((b as FilterConditionOption).operation ?? "EqualTo") &&
       (a.value == b.value || is(a.value, b.value, false, false)) &&
       Dic.equals(a.pinned, b.pinned, true) &&
-      equalFilters((a as FilterGroupOption).filters, (b as FilterGroupOption).filters);
+      equalFilters((a as FilterGroupOption).filters?.notNull(), (b as FilterGroupOption).filters?.notNull());
   });
 }
 
@@ -841,7 +841,7 @@ export function validateNewEntities(fo: FindOptions): string | undefined {
 
   function getValues(fo: FilterOption): any[] {
     if (isFilterGroupOption(fo))
-      return fo.filters.flatMap(f => getValues(f));
+      return fo.filters.notNull().flatMap(f => getValues(f));
 
     return [fo.value];
   }
@@ -1136,7 +1136,7 @@ export class TokenCompleter {
     if (isFilterGroupOption(fo)) {
       fo.token && this.request(fo.token.toString(), options);
 
-      fo.filters.forEach(f => this.requestFilter(f, options));
+      fo.filters.notNull().forEach(f => this.requestFilter(f, options));
     } else {
 
       this.request(fo.token.toString(), options);
@@ -1224,7 +1224,7 @@ export class TokenCompleter {
         value: fo.value,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
         dashboardBehaviour: fo.dashboardBehaviour,
-        filters: fo.filters.map(f => this.toFilterOptionParsed(f)),
+        filters: fo.filters.notNull().map(f => this.toFilterOptionParsed(f)),
         frozen: false,
         expanded: false,
       } as FilterGroupOptionParsed);
@@ -1394,23 +1394,39 @@ export function inDB<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R
     .then(rt => rt.rows[0].columns[0]);
 }
 
-export function inDBArray<R1, R2>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null]>;
-export function inDBArray<R1, R2, R3>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null]>;
-export function inDBArray<R1, R2, R3, R4>(entity: Entity | Lite<Entity>, tokens: [QueryTokenString<R1> | string, QueryTokenString<R2> | string, QueryTokenString<R3> | string, QueryTokenString<R4> | string]): Promise<[AddToLite<R1> | null, AddToLite<R2> | null, AddToLite<R3> | null, AddToLite<R4> | null]>;
-export function inDBArray(entity: Entity | Lite<Entity>, tokens: (QueryTokenString<any> | string)[]): Promise<any[]> {
+export function inDBMany<TO extends { [name: string]: QueryTokenString<any> | string }>(entity: Entity | Lite<Entity>, tokensObject: TO): Promise<ExtractTokensObject<TO>> {
 
   var fo: FindOptions = {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
-    columnOptions: tokens.map(t => softCast<ColumnOption>({ token: t})),
+    columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
     columnOptionsMode: "ReplaceAll",
   };
 
   return getQueryDescription(fo.queryName)
     .then(qd => parseFindOptions(fo!, qd, false))
     .then(fop => API.executeQuery(getQueryRequest(fop)))
-    .then(rt => rt.rows[0].columns);
+    .then(rt => {
+      var firstRow = rt.rows[0];
+      return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+    });
+}
+
+export function inDBList<R>(entity: Entity | Lite<Entity>, token: QueryTokenString<R> | string): Promise<AddToLite<R>[]> {
+
+  var fo: FindOptions = {
+    queryName: isEntity(entity) ? entity.Type : entity.EntityType,
+    filterOptions: [{ token: "Entity", value: entity }],
+    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    columnOptions: [{ token: token }],
+    columnOptionsMode: "ReplaceAll",
+  };
+
+  return getQueryDescription(fo.queryName)
+    .then(qd => parseFindOptions(fo!, qd, false))
+    .then(fop => API.executeQuery(getQueryRequest(fop)))
+    .then(rt => rt.rows.map(r => r.columns[0]).notNull());
 }
 
 export type AddToLite<T> = T extends Entity ? Lite<T> : T;
@@ -1451,6 +1467,17 @@ export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, add
     ],
     options,
   );
+}
+
+export function getResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
+  var fo2: FindOptions = {
+    ...fo,
+    columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+    columnOptionsMode: "ReplaceAll",
+  };
+
+  return getResultTable(fo2)
+    .then(fop => fop.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>));
 }
 
 export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
@@ -1518,7 +1545,7 @@ export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: Quer
   if (resultTable == null)
     return undefined;
 
-  return resultTable.rows.map(r => r.columns[0]);
+  return resultTable.rows.map(r => r.columns[0]).notNull();
 }
 
 export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {
@@ -1646,7 +1673,7 @@ export module Encoder {
       if (isFilterGroupOption(fo)) {
         query["filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
 
-        fo.filters.forEach(f => encodeFilter(f, identation + 1, ignoreValues || shouldIgnoreValues(fo.pinned)));
+        fo.filters.notNull().forEach(f => encodeFilter(f, identation + 1, ignoreValues || shouldIgnoreValues(fo.pinned)));
       } else {
         query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
       }
@@ -1965,12 +1992,12 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span>{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, false)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, false)
     },
     {
       name: "Password",
       isApplicable: qt => qt.format == "Password",
-      formatter: qt => new CellFormatter(cell => cell ? <span>•••••••</span> : undefined, false)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">•••••••</span> : undefined, false)
     },
     {
       name: "Enum",

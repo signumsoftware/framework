@@ -25,7 +25,7 @@ public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
     [NoRepeatValidator]
     public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowLaneActorsEval? ActorsEval { get; set; }
 
     public bool UseActorEvalForStart { get; set; }

@@ -15,6 +15,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 import { WhatsNewEntity, WhatsNewMessage, WhatsNewOperation } from '../Signum.Entities.WhatsNew'
 import * as AppContext from "@framework/AppContext"
 import { API, NumWhatsNews, WhatsNewFull, WhatsNewShort } from '../WhatsNewClient'
+import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
 
 export default function WhatsNewDropdown(props: { keepRingingFor?: number }) {
 
@@ -133,8 +134,21 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
 
 export function WhatsNewToast(p: { whatsnew: WhatsNewShort, onClose: (e: WhatsNewShort[]) => void, refresh: () => void, className?: string; })
 {
-  function handleClickSpecific(id: string | number) {
-    AppContext.history.push("~/newspage/" + id);
+  //ignoring open tags other than img
+  function HTMLSubstring(text: string) {
+    var substring = text.substring(0, 100);
+    substring = substring.replace("<p>", "");
+    substring = substring.replace("</p>", "");
+    if (substring.contains("<img")) {
+      var fullImageTag = substring.match(/(<img[^>] *)(\/>)/gmi);
+      if (fullImageTag != undefined && fullImageTag.length >= 1) {
+        return substring + "...";
+      }
+      else {
+        return substring.substring(0, substring.indexOf("<img")) + "...";
+      }
+    }
+    return substring + "...";
   }
 
   return (
@@ -144,9 +158,9 @@ export function WhatsNewToast(p: { whatsnew: WhatsNewShort, onClose: (e: WhatsNe
         <small>{DateTime.fromISO(p.whatsnew.creationDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
-        {p.whatsnew.description.substring(0, 100)}...
+          <HtmlViewer text={HTMLSubstring(p.whatsnew.description)} />
         <br />
-        <a href="" onClick={() => handleClickSpecific(p.whatsnew.whatsNew.id!)}>{WhatsNewMessage.ReadFurther.niceToString()}</a>
+        <Link to={"~/newspage/" + p.whatsnew.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
       </Toast.Body>
     </Toast>
   );

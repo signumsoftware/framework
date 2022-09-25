@@ -1731,22 +1731,24 @@ internal class QueryBinder : ExpressionVisitor
         return m;
     }
 
-    
-
 
     private ConditionalExpression DispatchConditional(MethodCallExpression m, Expression test, Expression ifTrue, Expression ifFalse)
     {
         if (m.Method.IsExtensionMethod())
         {
+            var argType = m.Arguments.FirstEx().Type;
+
             return Expression.Condition(test,
-                BindMethodCall(Expression.Call(m.Method, m.Arguments.Skip(1).PreAnd(ifTrue))),
-                BindMethodCall(Expression.Call(m.Method, m.Arguments.Skip(1).PreAnd(ifFalse))));
+                BindMethodCall(Expression.Call(m.Method, m.Arguments.Skip(1).PreAnd(ifTrue.TryConvert(argType)))),
+                BindMethodCall(Expression.Call(m.Method, m.Arguments.Skip(1).PreAnd(ifFalse.TryConvert(argType)))));
         }
         else
         {
+            var objType = m.Object!.Type;
+
             return Expression.Condition(test,
-                BindMethodCall(Expression.Call(ifTrue, m.Method, m.Arguments)),
-                BindMethodCall(Expression.Call(ifFalse, m.Method, m.Arguments)));
+                BindMethodCall(Expression.Call(ifTrue.TryConvert(objType), m.Method, m.Arguments)),
+                BindMethodCall(Expression.Call(ifFalse.TryConvert(objType), m.Method, m.Arguments)));
         }
     }
 

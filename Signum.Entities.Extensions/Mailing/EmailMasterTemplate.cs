@@ -14,7 +14,7 @@ public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
 
     public bool IsDefault { get; set; }
 
-    [NotifyCollectionChanged, NotifyChildProperty]
+    [BindParent, PreserveOrder]
     public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
 
     [UniqueIndex]
@@ -24,6 +24,10 @@ public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
+
+    [PreserveOrder]
+    [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), BindParent]
+    public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
     protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
     {
@@ -49,17 +53,22 @@ public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
                 new XElement("Message",
                     new XAttribute("CultureInfo", x.CultureInfo.Name),
                     new XCData(x.Text)
-            ))));
+            ))),
+
+            Attachments.IsEmpty() ? null : new XElement("Attachments", this.Attachments.Select(x => x.ToXml(ctx)))
+        );
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         Name = element.Attribute("Name")!.Value;
-        Messages = element.Element("Messages")!.Elements("Message").Select(elem => new EmailMasterTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo")!.Value))
+        Messages.Synchronize(element.Element("Messages")!.Elements("Message").ToList(), (et, xml) =>
         {
-            Text = elem.Value
-        }).ToMList();
+            et.CultureInfo = ctx.GetCultureInfoEntity(xml.Attribute("CultureInfo")!.Value);
+            et.Text = xml.Value;
+        });
 
+        Attachments.SynchronizeAttachments(element.Element("Attachments")?.Elements().ToList(), ctx, this);
     }
 }
 
@@ -72,7 +81,7 @@ public static class EmailMasterTemplateOperation
 
 public class EmailMasterTemplateMessageEmbedded : EmbeddedEntity
 {
-    private EmailMasterTemplateMessageEmbedded() { }
+    public EmailMasterTemplateMessageEmbedded() { }
 
     public EmailMasterTemplateMessageEmbedded(CultureInfoEntity culture)
     {

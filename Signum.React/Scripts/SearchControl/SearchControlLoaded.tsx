@@ -51,7 +51,7 @@ export interface SearchControlLoadedProps {
 
   defaultIncudeDefaultFilters: boolean;
   searchOnLoad: boolean;
-  allowSelection: boolean;
+  allowSelection: boolean | "single";
   showContextMenu: (fop: FindOptionsParsed) => boolean | "Basic";
   showSelectedButton: boolean;
   hideButtonBar: boolean;
@@ -76,6 +76,7 @@ export interface SearchControlLoadedProps {
   avoidChangeUrl: boolean;
   deps?: React.DependencyList;
   extraOptions: any;
+
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
@@ -797,7 +798,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return Promise.resolve([]);
 
     var resFO = this.state.resultFindOptions;
-    var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
+    var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFO));
     return Promise.all(filters.map(fs => Finder.fetchLites({ queryName: resFO.queryKey, filterOptions: fs, orderOptions: [], count: null })))
       .then(fss => fss.flatMap(fs => fs));
   }
@@ -1034,7 +1035,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         menuItems.push(<Dropdown.Divider />);
 
-        if (isColumnGroupable(cm.columnIndex))
+        if (p.showGroupButton && isColumnGroupable(cm.columnIndex))
           menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
             <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
             <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
@@ -1286,7 +1287,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return (
       <tr>
         {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
-          <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          {this.props.allowSelection == true &&
+            <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          }
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
@@ -1378,8 +1381,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var selectedRows = this.state.selectedRows!;
 
     if (cb.checked) {
-      if (!selectedRows.contains(row))
+      if (this.props.allowSelection == "single") {
+        selectedRows.clear();
         selectedRows.push(row);
+      } else {
+        if (!selectedRows.contains(row))
+          selectedRows.push(row);
+      }
     } else {
       selectedRows.remove(row);
     }
@@ -1389,12 +1397,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ currentMenuItems: undefined });
   }
 
-  static getGroupFilters(row: ResultRow, resFo: FindOptionsParsed): FilterOption[] {
+  static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
     var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
 
     var keyFilters = resFo.columnOptions
-      .map((col, i) => ({ col, value: row.columns[i] }))
+      .map(col => ({ col, value: row.columns[resTable.columns.indexOf(col.token!.fullKey)] }))
       .filter(a => rootKeys.contains(a.col))
       .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
 
@@ -1413,7 +1421,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           ({ token: a.token.fullKey }) as ColumnOption)
       .notNull();
 
-    var filters = SearchControlLoaded.getGroupFilters(row, resFo);
+    var filters = SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFo);
 
     return Finder.explore({
       queryName: resFo.queryKey,

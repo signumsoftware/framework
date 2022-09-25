@@ -10,7 +10,7 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }) {
 
   function rolesMessage(r: RoleEntity) {
     return AuthAdminMessage.DefaultAuthorization.niceToString() +
-      (r.inheritsFrom.length == 0 ? (r.mergeStrategy == "Union" ? AuthAdminMessage.Everithing : AuthAdminMessage.Nothing).niceToString() :
+      (r.inheritsFrom.length == 0 ? (r.mergeStrategy == "Union" ? AuthAdminMessage.Everything : AuthAdminMessage.Nothing).niceToString() :
         r.inheritsFrom.length == 1 ? AuthAdminMessage.SameAs0.niceToString(getToString(r.inheritsFrom.single().element)) :
           (r.mergeStrategy == "Union" ? AuthAdminMessage.MaximumOfThe0 : AuthAdminMessage.MinumumOfThe0).niceToString(RoleEntity.niceCount(r.inheritsFrom.length)));
   }

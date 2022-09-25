@@ -71,5 +71,6 @@ public enum WhatsNewMessage
     ReadFurther,
     Downloads,
     [Description("{0} contains no version for culture '{1}'")]
-    _0ContiansNoVersionForCulture1
+    _0ContiansNoVersionForCulture1,
+    Language,
 }

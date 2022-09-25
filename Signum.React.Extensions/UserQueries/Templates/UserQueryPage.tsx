@@ -10,10 +10,11 @@ import SearchControl, { SearchControlHandler } from '@framework/SearchControl/Se
 import { UserQueryEntity } from '../Signum.Entities.UserQueries'
 import * as UserQueryClient from '../UserQueryClient'
 import { RouteComponentProps } from "react-router";
-import { useAPI } from '@framework/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { useState } from 'react'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import SearchPage from '@framework/SearchControl/SearchPage'
+import { useTitle } from '../../../Signum.React/Scripts/AppContext'
 
 interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; entity?: string }> {
 
@@ -25,6 +26,8 @@ export default function UserQueryPage(p: UserQueryPageProps) {
 
   const { userQueryId, entity } = p.match.params;
 
+  const forceUpdate = useForceUpdate();
+  
   const fo = useAPI(() => {
     return Navigator.API.fetchEntity(UserQueryEntity, userQueryId)
       .then(uq => {
@@ -34,6 +37,13 @@ export default function UserQueryPage(p: UserQueryPageProps) {
           .then(() => UserQueryClient.Converter.toFindOptions(uq, lite))
       })
   }, [userQueryId, entity]);
+
+  const searchControl = React.useRef<SearchControlHandler>(null);
+
+  var subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
+
+
+  useTitle(fo == null ? JavascriptMessage.loading.niceToString() : (getQueryNiceName(fo.queryName) + (subTitle ? (" - " + subTitle) : "")));
 
   function onResize() {
     const sc = searchControl.current;
@@ -52,7 +62,6 @@ export default function UserQueryPage(p: UserQueryPageProps) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const searchControl = React.useRef<SearchControlHandler>(null);
 
   if (fo == undefined || currentUserQuery == null)
     return null;
@@ -60,15 +69,13 @@ export default function UserQueryPage(p: UserQueryPageProps) {
   var qs = Finder.getSettings(fo.queryName);
   return (
     <div id="divSearchPage" className="sf-search-page">
-      <h2>
-        <span className="sf-entity-title">{getQueryNiceName(fo.queryName)}</span>&nbsp;
-        <a className="sf-popup-fullscreen" href="#" onClick={(e) => searchControl.current!.searchControlLoaded!.handleFullScreenClick(e)}>
-          <FontAwesomeIcon icon="external-link-alt" />
-        </a>
-        <p className="lead">
-          ({translated(currentUserQuery, a => a.displayName)})
-      </p>
-      </h2>
+      <h3 className="display-6 sf-query-title">
+        <span>{getQueryNiceName(fo.queryName)}</span>
+        {searchControl.current?.searchControlLoaded?.pageSubTitle && <>
+          <small className="sf-type-nice-name text-muted"> - {searchControl.current?.searchControlLoaded?.pageSubTitle}</small>
+        </>
+        }
+      </h3>
 
       {currentUserQuery && <SearchControl ref={searchControl}
         defaultIncludeDefaultFilters={true}
@@ -80,12 +87,16 @@ export default function UserQueryPage(p: UserQueryPageProps) {
         hideFullScreenButton={true}
         largeToolbarButtons={true}
         showFilters={false /*consider adding uq.showFilters*/}
+        showGroupButton={true}
+        showSystemTimeButton={true}
+        showFooter={true}
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId) }}
         defaultRefreshMode={currentUserQuery.refreshMode}
         searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         onHeighChanged={onResize}
         extraButtons={qs?.extraButtons}
+        onPageSubTitleChanged={forceUpdate}
       />
       }
     </div>

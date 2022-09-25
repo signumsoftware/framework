@@ -80,8 +80,16 @@ public static class IsolationLogic
         {
             if (ident.Mixin<IsolationMixin>().Isolation == null)
             {
-                ident.Mixin<IsolationMixin>().Isolation = IsolationEntity.Current;
-                ctx.InvalidateGraph();
+                if (ident.IsNew)
+                {
+                    ident.Mixin<IsolationMixin>().Isolation = IsolationEntity.Current;
+                    ctx.InvalidateGraph();
+                }
+                else
+                {
+                    if (ident.IsGraphModified)
+                        throw new ApplicationException(IsolationMessage.Entity0HasIsolation1ButCurrentIsolationIs2.NiceToString(ident, "null", IsolationEntity.Current));
+                }
             }
             else if (!ident.Mixin<IsolationMixin>().Isolation.Is(IsolationEntity.Current))
                 throw new ApplicationException(IsolationMessage.Entity0HasIsolation1ButCurrentIsolationIs2.NiceToString(ident, ident.Mixin<IsolationMixin>().Isolation, IsolationEntity.Current));

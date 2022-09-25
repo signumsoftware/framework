@@ -196,7 +196,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   Operations.addSettings(new EntityOperationSettings(CaseNotificationOperation.SetRemarks, { isVisible: v => false }));
 
-  Operations.addSettings(new EntityOperationSettings(CaseNotificationOperation.CreteCaseNotificationFromCaseActivity, {
+  Operations.addSettings(new EntityOperationSettings(CaseNotificationOperation.CreateCaseNotificationFromCaseActivity, {
     onClick: eoc => {
       eoc.onConstructFromSuccess = pack => {
         Operations.notifySuccess(); return Promise.resolve();
@@ -891,8 +891,9 @@ export interface CaseEntityPack {
 }
 
 export interface WorkflowScriptRunnerState {
-  scriptRunnerPeriod: number;
   running: boolean;
+  initialDelayMilliseconds: number | null;
+  scriptRunnerPeriod: number;
   isCancelationRequested: boolean;
   nextPlannedExecution: string;
   queuedItems: number;

@@ -27,7 +27,8 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
           {ctx.value.target && <EntityLine ctx={ctx.subCtx(n => n.target)} readOnly={true} labelColumns={4} />}
         </div>
         <div className="col-sm-6">
-          {ctx.value.parentTarget && <EntityLine ctx={ctx.subCtx(n => n.parentTarget)} readOnly={true} labelColumns={4} />}
+          {ctx.value.linkTarget && <EntityLine ctx={ctx.subCtx(n => n.linkTarget)} readOnly={true} labelColumns={4} />}
+          {ctx.value.groupTarget && <EntityLine ctx={ctx.subCtx(n => n.groupTarget)} readOnly={true} labelColumns={4} />}
         </div>
       </div>
 
@@ -42,7 +43,7 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
         !ctx.value.isNew && !edit ?
           <FormGroup ctx={ctx.subCtx(n => n.titleField)} labelText={AlertMessage.Text.niceToString()} >
             <div style={{ whiteSpace: "pre-wrap" }}>
-              {AlertsClient.formatText(ctx.value.textField || ctx.value.textFromAlertType || "", ctx.value)}
+              {AlertsClient.format(ctx.value.textField || ctx.value.textFromAlertType || "", ctx.value)}
               <br />
               <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setEdit(true) }}>Edit</a>
             </div>

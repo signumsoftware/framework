@@ -103,6 +103,8 @@
     <Member Name="Find" Description="Finden" />
     <Member Name="Move" Description="Bewegen" />
     <Member Name="MoveDown" Description="Nach unten" />
+    <Member Name="MoveLeft" Description="Nach links" />
+    <Member Name="MoveRight" Description="Nach rechts" />
     <Member Name="MoveUp" Description="Nach oben" />
     <Member Name="MoveWithDragAndDropOrCtrlLeftRight" Description="Verschieben mit Drag &amp; Drop oder Strg + Links / Rechts" />
     <Member Name="MoveWithDragAndDropOrCtrlUpDown" Description="Verschieben mit Drag &amp; Drop oder Strg + Auf / Ab" />
@@ -238,6 +240,8 @@
   <Type Name="ModelEntity" Description="Modellentität" />
   <Type Name="ModifiableEntity" Description="Veränderbare Entität" />
   <Type Name="NormalControlMessage">
+    <Member Name="CopyEntityTypeAndIdForAutocomplete" Description="Entitätstyp und ID kopieren (für Autovervollständigung)" />
+    <Member Name="CopyEntityUrl" Description="Entitäts-URL kopieren" />
     <Member Name="SaveChangesFirst" Description="Erst Änderungen speichern" />
     <Member Name="ViewForType0IsNotAllowed" Description="Anzeigen des Typs {0} ist nicht zulässig" />
   </Type>
@@ -324,7 +328,7 @@
     <Member Name="Check" Description="Ja/Nein-Wert" />
     <Member Name="Column0NotFound" Description="Die Spalte {0} wurde nicht gefunden" />
     <Member Name="ContainerOfCellOperations" Description="Container für Zellenoperationen" />
-    <Member Name="Count" Description="Num" />
+    <Member Name="Count" Description="Anzahl" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
@@ -334,6 +338,7 @@
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
     <Member Name="Distinct" Description="Unterschiedlich" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
+    <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
     <Member Name="HasValue" Description="Hat einen Wert" />
     <Member Name="Hour" Description="Stunde" />
@@ -558,6 +563,7 @@
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
     <Member Name="_0IsNotCompatibleWith1" Description="{0} ist nicht mit {1} kompatibel" />
     <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
+    <Member Name="_0IsNotSetIn1" Description="{0} ist nicht in {1} festgelegt" />
     <Member Name="_0IsRepeated" Description="{0} ist wiederholt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />
     <Member Name="_0Or1ShouldBeSet" Description="{0} oder {1} sollten gesetzt sein" />

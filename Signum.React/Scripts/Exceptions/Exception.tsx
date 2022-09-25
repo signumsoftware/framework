@@ -14,7 +14,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
       <div className="row">
         <div className="col-sm-6">
           <ValueLine ctx={sc.subCtx(f => f.environment)} />
-          <ValueLine ctx={sc.subCtx(f => f.creationDate)} unitText={DateTime.fromISO(sc.value.creationDate!).toRelative() ?? undefined} />
+          <ValueLine ctx={sc.subCtx(f => f.creationDate)} unit={DateTime.fromISO(sc.value.creationDate!).toRelative() ?? undefined} />
           <EntityLine ctx={sc.subCtx(f => f.user)} />
           <ValueLine ctx={sc.subCtx(f => f.version)} />
           <ValueLine ctx={sc.subCtx(f => f.threadId)} />

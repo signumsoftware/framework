@@ -72,8 +72,8 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
               queryKey={ctxxs.value.query!.key}
-              showPinnedFilterOptions={true} />
-            <ValueLine ctx={ctxxs.subCtx(e => e.columnsMode)} />
+            showPinnedFilterOptions={true} />
+          <ValueLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
               {
                 property: a => a.token,
