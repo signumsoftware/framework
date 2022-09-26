@@ -290,7 +290,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
   }
 
   function dragIcon() {
-    return drag && <span className={classes("sf-line-button", "sf-move")}
+    return drag && <span className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
       draggable={true}
       onDragStart={drag.onDragStart}
       onDragEnd={drag.onDragEnd}

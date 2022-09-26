@@ -13,7 +13,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 {
     public EmailTemplateEntity()
     {
-        RebindEvents();
+        BindParent();
     }
 
     [UniqueIndex]
@@ -53,17 +53,17 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
     public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
     [PreserveOrder]
-    [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty, NotifyCollectionChanged]
+    [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), BindParent]
     public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
     public Lite<EmailMasterTemplateEntity>? MasterTemplate { get; set; }
 
     public bool IsBodyHtml { get; set; } = true;
 
-    [NotifyCollectionChanged, NotifyChildProperty]
+    [BindParent]
     public MList<EmailTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailTemplateMessageEmbedded>();
 
-    [NotifyChildProperty]
+    [BindParent]
     public TemplateApplicableEval? Applicable { get; set; }
 
 

@@ -23,7 +23,8 @@ export interface SearchValueLineProps {
   multipleValues?: { vertical?: boolean, showType?: boolean };
   labelText?: React.ReactChild | (() => React.ReactChild);
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
-  unitText?: React.ReactChild;
+  unit?: React.ReactChild;
+  format?: string;
   formGroupHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   helpText?: (vscc: SearchValueController) => React.ReactChild | undefined;
   initialValue?: any;
@@ -117,7 +118,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
   const isBadge = (p.isBadge ?? p.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
   const isFormControl = (p.isFormControl ?? p.valueToken != undefined);
 
-  const unit = isFormControl && (p.unitText ?? (token?.unit && <span className="input-group-text">{token.unit}</span>));
+  const unit = isFormControl && (p.unit ?? token?.unit) && <span className="input-group-text">{p.unit ?? token?.unit}</span>;
 
   const ctx = p.ctx;
 
@@ -160,6 +161,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
         <SearchValue
           ref={handleSearchValueLoaded}
           findOptions={fo}
+          format={p.format}
           initialValue={p.initialValue}
           onInitialValueLoaded={() => forceUpdate()}
           multipleValues={p.multipleValues}

@@ -17,7 +17,7 @@ public class WorkflowActionEntity : Entity, IUserAssetEntity
 
     public TypeEntity MainEntityType { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowActionEval Eval { get; set; }
 
     [AutoExpressionField]

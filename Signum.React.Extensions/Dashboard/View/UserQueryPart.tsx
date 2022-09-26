@@ -68,6 +68,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
   if (p.content.renderMode == "BigValue") {
     return <BigValueSearchCounter
       findOptions={foExpanded}
+      aggregateFromSummaryHeader={p.content.aggregateFromSummaryHeader}
       text={translated(p.partEmbedded, a => a.title) || translated(p.content.userQuery, a => a.displayName)}
       iconName={p.partEmbedded.iconName ?? undefined}
       iconColor={p.partEmbedded.iconColor ?? undefined}
@@ -135,6 +136,7 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
 
 interface BigValueBadgeProps {
   findOptions: FindOptions;
+  aggregateFromSummaryHeader: boolean;
   text?: string;
   iconName?: string;
   iconColor?: string;
@@ -163,6 +165,7 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
           <div className={classes("col-9 flip", "text-end")}>
             <h1>
               <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
+                valueToken={!p.aggregateFromSummaryHeader ? undefined : p.findOptions.columnOptions!.first(a => a?.summaryToken != null)?.summaryToken}
                 customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}
               />
             </h1>

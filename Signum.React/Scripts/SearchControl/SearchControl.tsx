@@ -27,7 +27,7 @@ export interface SearchControlProps {
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
   tag?: string | {};
   searchOnLoad?: boolean;
-  allowSelection?: boolean
+  allowSelection?: boolean | "single";
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   hideButtonBar?: boolean;
   hideFullScreenButton?: boolean;

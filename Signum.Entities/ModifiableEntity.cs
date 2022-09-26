@@ -54,17 +54,19 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
 
         if (field is INotifyCollectionChanged colb)
         {
-            if (AttributeManager<NotifyCollectionChangedAttribute>.FieldContainsAttribute(GetType(), pi))
+            if (AttributeManager<BindParentAttribute>.FieldContainsAttribute(GetType(), pi))
+            {
                 colb.CollectionChanged -= ChildCollectionChanged;
-
-            if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                foreach (var item in (IEnumerable<IModifiableEntity>)colb!)
-                    ((ModifiableEntity)item).ClearParentEntity(this);
+                if (colb is IEnumerable<IModifiableEntity> mlist)
+                {
+                    foreach (ModifiableEntity item in mlist)
+                        item.ClearParentEntity(this);
+                }
+            }
         }
-
-        if (field is ModifiableEntity modb)
+        else if (field is ModifiableEntity modb)
         {
-            if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+            if (AttributeManager<BindParentAttribute>.FieldContainsAttribute(GetType(), pi))
                 modb.ClearParentEntity(this);
         }
 
@@ -73,17 +75,20 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
 
         if (field is INotifyCollectionChanged cola)
         {
-            if (AttributeManager<NotifyCollectionChangedAttribute>.FieldContainsAttribute(GetType(), pi))
+            if (AttributeManager<BindParentAttribute>.FieldContainsAttribute(GetType(), pi))
+            {
                 cola.CollectionChanged += ChildCollectionChanged;
+                if (cola is IEnumerable<IModifiableEntity> mlist)
+                {
+                    foreach (ModifiableEntity item in mlist)
+                        item.SetParentEntity(this);
+                }
 
-            if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                foreach (var item in (IEnumerable<IModifiableEntity>)cola!)
-                    ((ModifiableEntity)item).SetParentEntity(this);
+            }
         }
-
-        if (field is ModifiableEntity moda)
+        else if (field is ModifiableEntity moda)
         {
-            if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+            if (AttributeManager<BindParentAttribute>.FieldContainsAttribute(GetType(), pi))
                 moda.SetParentEntity(this);
         }
 
@@ -136,30 +141,31 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
 
     protected internal override void PostRetrieving(PostRetrievingContext ctx)
     {
-        RebindEvents();
+        BindParent();
     }
 
-    protected virtual void RebindEvents()
+    protected virtual void BindParent()
     {
-        foreach (INotifyCollectionChanged? notify in AttributeManager<NotifyCollectionChangedAttribute>.FieldsWithAttribute(this))
-        {
-            if (notify == null)
-                continue;
-
-            notify.CollectionChanged += ChildCollectionChanged;
-        }
-
-        foreach (object? field in AttributeManager<NotifyChildPropertyAttribute>.FieldsWithAttribute(this))
+        foreach (object? field in AttributeManager<BindParentAttribute>.FieldsWithAttribute(this))
         {
             if (field == null)
                 continue;
 
             if (field is ModifiableEntity entity)
-                entity.SetParentEntity(this);
-            else
             {
-                foreach (var item in (IEnumerable<IModifiableEntity>)field!)
-                    ((ModifiableEntity)item).SetParentEntity(this);
+                entity.SetParentEntity(this);
+            }
+            else if (field is INotifyCollectionChanged col)
+            {
+                col.CollectionChanged += ChildCollectionChanged;
+
+                if (col is IEnumerable<IModifiableEntity> mlist)
+                {
+                    foreach (ModifiableEntity item in mlist)
+                    {
+                        item.SetParentEntity(this);
+                    }
+                }
             }
         }
     }
@@ -167,27 +173,30 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
     //[OnDeserialized]
     //private void OnDeserialized(StreamingContext context)
     //{
-    //    RebindEvents();
+    //    BindParent();
     //}
 
     protected virtual void ChildCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
     {
-        string? propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender!);
-        if (propertyName != null)
-            NotifyPrivate(propertyName);
-
-        if (AttributeManager<NotifyChildPropertyAttribute>.FieldsWithAttribute(this).Contains(sender))
+        if (AttributeManager<BindParentAttribute>.FieldsWithAttribute(this).Contains(sender))
         {
-            if (args.NewItems != null)
-            {
-                foreach (var p in args.NewItems.Cast<ModifiableEntity>())
-                    p.SetParentEntity(this);
-            }
+            string? propertyName = AttributeManager<BindableAttribute>.FindPropertyName(this, sender!);
+            if (propertyName != null)
+                NotifyPrivate(propertyName);
 
-            if (args.OldItems != null)
+            if (sender is IEnumerable<IModifiableEntity>)
             {
-                foreach (var p in args.OldItems.Cast<ModifiableEntity>())
-                    p.SetParentEntity(this);
+                if (args.NewItems != null)
+                {
+                    foreach (ModifiableEntity p in args.NewItems)
+                        p.SetParentEntity(this);
+                }
+
+                if (args.OldItems != null)
+                {
+                    foreach (ModifiableEntity p in args.OldItems)
+                        p.SetParentEntity(this);
+                }
             }
         }
     }
