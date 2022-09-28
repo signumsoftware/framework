@@ -51,7 +51,7 @@ public class ReflectionController : ControllerBase
 
             Version = Schema.Current.Version.ToString(),
             ApplicationName = Schema.Current.ApplicationName,
-            User = UserHolder.Current.User,
+            User = UserHolder.Current?.User,
         };
 
         using (ExecutionMode.Global())
