@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { IFile, IFilePath } from "./Signum.Entities.Files";
-import { configurtions } from "./FileDownloader";
+import { configurations } from "./FileDownloader";
 import { Entity, isLite, isModifiableEntity, Lite, ModifiableEntity } from '@framework/Signum.Entities';
 import * as Services from '@framework/Services'
 import { PropertyRoute } from '@framework/Lines';
@@ -23,8 +23,8 @@ export function FileImage(p: FileImageProps) {
 
       var url =
         isLite(file) ?
-          configurtions[file.EntityType].fileLiteUrl!(file) :
-          configurtions[file.Type].fileUrl!(file);
+          configurations[file.EntityType].fileLiteUrl!(file) :
+          configurations[file.Type].fileUrl!(file);
 
       Services.ajaxGetRaw({ url: url })
         .then(resp => resp.blob())

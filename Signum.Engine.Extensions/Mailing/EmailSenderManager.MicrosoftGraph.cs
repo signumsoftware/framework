@@ -13,7 +13,7 @@ namespace Signum.Engine.Mailing;
 //https://www.jeancloud.dev/2020/06/05/using-microsoft-graph-as-smtp-server.html
 public partial class EmailSenderManager : IEmailSenderManager
 {
-    static long SmallFileSize = 3 * 1024 * 1024;
+    public static long MicrosoftGraphFileSizeLimit = 3 * 1024 * 1024;
     protected virtual void SendMicrosoftGraph(EmailMessageEntity email, MicrosoftGraphEmbedded microsoftGraph)
     {
         try
@@ -22,7 +22,7 @@ public partial class EmailSenderManager : IEmailSenderManager
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
 
 
-            var bigAttachments = email.Attachments.Where(a => a.File.FileLength > SmallFileSize).ToList();
+            var bigAttachments = email.Attachments.Where(a => a.File.FileLength > MicrosoftGraphFileSizeLimit).ToList();
 
             var message = ToGraphMessageWithSmallAttachments(email);
             var user = graphClient.Users[email.From.AzureUserId.ToString()];
@@ -107,7 +107,7 @@ public partial class EmailSenderManager : IEmailSenderManager
         
         foreach (var a in attachments)
         {
-            if(a.File.FileLength <= SmallFileSize)
+            if(a.File.FileLength <= MicrosoftGraphFileSizeLimit)
                 result.Add(new FileAttachment
                 {
                     ContentId = a.ContentId,
