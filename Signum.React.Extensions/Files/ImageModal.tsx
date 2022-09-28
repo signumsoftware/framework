@@ -7,7 +7,7 @@ import { FileImage } from './FileImage';
 import { IModalProps, openModal } from '@framework/Modals'
 import { PropertyRoute } from '@framework/Lines';
 import  * as Services from '@framework/Services';
-import { configurtions } from './FileDownloader';
+import { configurations } from './FileDownloader';
 
 interface ImageModalProps extends IModalProps<undefined> {
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
@@ -51,7 +51,7 @@ ImageModal.show = (file: IFile & ModifiableEntity, event: React.MouseEvent<HTMLI
       return; 
 
     var url =
-        configurtions[file.Type].fileUrl!(file);
+        configurations[file.Type].fileUrl!(file);
 
     Services.ajaxGetRaw({ url: url })
       .then(resp => resp.blob())
