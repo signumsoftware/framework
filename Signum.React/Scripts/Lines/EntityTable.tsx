@@ -271,7 +271,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
                     onRowHtmlAttributes={p.onRowHtmlAttributes}
                     rowHooks={p.rowHooks}
                     onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
-                    onView={c.canView(mlec.value) && !readOnly ? e => c.handleViewElement(e, mlec.index!) : undefined}
+                    onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
                     move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
                     drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
                     columns={p.columns!}
