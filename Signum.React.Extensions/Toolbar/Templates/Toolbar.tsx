@@ -12,6 +12,8 @@ import * as Finder from '@framework/Finder';
 import * as Constructor from '@framework/Constructor';
 import * as Navigator from '@framework/Navigator';
 import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
+import { classes } from '../../../Signum.React/Scripts/Globals';
+import { ToolbarCount } from '../QueryToolbarConfig';
 
 export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
   const ctx = p.ctx;
@@ -75,13 +77,16 @@ export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarEle
     <EntityTable ctx={ctx} view
       onCreate={() => Promise.resolve(ToolbarElementEmbedded.New({ type: "Item" }))}
       columns={EntityTable.typedColumns<ToolbarElementEmbedded>([
-      {
-        header: "Icon",
-        headerHtmlAttributes: { style: { width: "5%" } },
-        template: ctx => {
-          var icon = parseIcon(ctx.value.iconName);
-          var bgColor = (ctx.value.iconColor && ctx.value.iconColor.toLowerCase() == "white" ? "black" : undefined)
-          return icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
+        {
+          header: "Icon",
+          headerHtmlAttributes: { style: { width: "5%" } },
+          template: ctx => {
+            var icon = parseIcon(ctx.value.iconName);
+            var bgColor = (ctx.value.iconColor && ctx.value.iconColor.toLowerCase() == "white" ? "black" : undefined)
+            return icon && <div>
+              <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} />
+              {ctx.value.showCount && <ToolbarCount num={ctx.value.showCount == "Always" ? 0 : 1} />}
+            </div>
         },
       },
         { property: a => a.type, headerHtmlAttributes: { style: { width: "15%" } }, template: (ctx, row) => <ValueLine ctx={ctx.subCtx(a => a.type)} onChange={() => { row.forceUpdate(); }} /> },

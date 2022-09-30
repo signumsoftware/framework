@@ -27,7 +27,7 @@ export interface SearchControlProps {
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
   tag?: string | {};
   searchOnLoad?: boolean;
-  allowSelection?: boolean
+  allowSelection?: boolean | "single";
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   hideButtonBar?: boolean;
   hideFullScreenButton?: boolean;
@@ -60,8 +60,8 @@ export interface SearchControlProps {
   onSelectionChanged?: (rows: ResultRow[]) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
-  onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
-  onResult?: (table: ResultTable, dataChange: boolean) => void;
+  onSearch?: (fo: FindOptionsParsed, dataChange: boolean, scl: SearchControlLoaded) => void;
+  onResult?: (table: ResultTable, dataChange: boolean, scl: SearchControlLoaded) => void;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
   onCreate?: (scl: SearchControlLoaded) => Promise<undefined | void | EntityPack<any> | ModifiableEntity | "no_change">;
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;

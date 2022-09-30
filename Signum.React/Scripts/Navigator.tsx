@@ -55,17 +55,40 @@ export namespace NavigatorManager {
   }
 }
 
-export const entityChanged: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> = [];
+export const entityChanged: { [typeName: string]: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> } = {};
 
-function cleanEntityChanged() {
-  entityChanged.clear();
+export function useEntityChanged<T extends Entity>(type: Type<T>, callback: (cleanName: string, entity: T | undefined, isRedirect: boolean) => void, deps: any[]) : void;
+export function useEntityChanged(types: string[], callback: (cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void, deps: any[]): void;
+export function useEntityChanged<T extends Entity>(typeOrTypes: Type<any> | string | string[], callback: (cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void, deps: any[]): void {
+
+  var types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes.toString()];
+
+  React.useEffect(() => {
+
+    types.forEach(cleanName => {
+      (entityChanged[cleanName] ??= []).push(callback);
+    });
+
+    return () => {
+      types.forEach(cleanName => {
+        entityChanged[cleanName]?.remove(callback);
+
+        if (entityChanged[cleanName]?.length == 0)
+          delete entityChanged[cleanName];
+      });
+    }
+  }, [types.join(","), ...deps]);
 }
 
-export function raiseEntityChanged(cleanNameOrEntity: string | Entity, isRedirect = false) {
-  var cleanName = isEntity(cleanNameOrEntity) ? cleanNameOrEntity.Type : cleanNameOrEntity;
-  var entity = isEntity(cleanNameOrEntity) ? cleanNameOrEntity : undefined;
+function cleanEntityChanged() {
+  Dic.clear(entityChanged);
+}
 
-  entityChanged.forEach(a => a(cleanName, entity, isRedirect));
+export function raiseEntityChanged(typeOrEntity: Type<any> | string | Entity, isRedirect = false) {
+  var cleanName = isEntity(typeOrEntity) ? typeOrEntity.Type : typeOrEntity.toString();
+  var entity = isEntity(typeOrEntity) ? typeOrEntity : undefined;
+
+  entityChanged[cleanName]?.forEach(func => func(cleanName, entity, isRedirect));
 }
 
 export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
@@ -925,6 +948,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild;
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  enforceFocusInModal?: boolean;
 
   namedViews?: NamedViewSettings<T>[];
 }
@@ -1003,6 +1027,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild; 
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  enforceFocusInModal?: boolean;
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 

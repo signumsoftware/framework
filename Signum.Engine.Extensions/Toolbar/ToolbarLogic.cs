@@ -59,12 +59,14 @@ public static class ToolbarLogic
             UserAssetsImporter.Register<ToolbarEntity>("Toolbar", ToolbarOperation.Save);
             UserAssetsImporter.Register<ToolbarMenuEntity>("ToolbarMenu", ToolbarMenuOperation.Save);
 
-            RegisterDelete<UserQueryEntity>(sb);
-            RegisterDelete<UserChartEntity>(sb);
+            RegisterDelete<UserQueryEntity>(sb, uq => uq.Query);
+            RegisterDelete<UserChartEntity>(sb, uq => uq.Query);
             RegisterDelete<QueryEntity>(sb);
             RegisterDelete<DashboardEntity>(sb);
             RegisterDelete<ToolbarMenuEntity>(sb);
             RegisterDelete<WorkflowEntity>(sb);
+
+
 
             RegisterContentConfig<ToolbarMenuEntity>(
                 lite => ToolbarMenus.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false),
@@ -174,7 +176,7 @@ public static class ToolbarLogic
             t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
     }
 
-    public static void RegisterDelete<T>(SchemaBuilder sb) where T : Entity
+    public static void RegisterDelete<T>(SchemaBuilder sb, Expression<Func<T, QueryEntity>>? querySelectorForSync = null) where T : Entity
     {
         if (sb.Settings.ImplementedBy((ToolbarEntity tb) => tb.Elements.First().Content, typeof(T)))
         {
@@ -194,6 +196,15 @@ public static class ToolbarLogic
 
                 return parts;
             };
+
+            if(querySelectorForSync != null)
+            {
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                {
+                    var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarEntity te) => te.Elements, Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => querySelectorForSync.Evaluate((T)mle.Element.Content!.Entity).Is(q)));
+                    return parts;
+                };
+            }
         }
 
         if (sb.Settings.ImplementedBy((ToolbarMenuEntity tb) => tb.Elements.First().Content, typeof(T)))
@@ -214,6 +225,15 @@ public static class ToolbarLogic
 
                 return parts;
             };
+
+            if (querySelectorForSync != null)
+            {
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                {
+                    var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarMenuEntity te) => te.Elements, Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => querySelectorForSync.Evaluate((T)mle.Element.Content!.Entity).Is(q)));
+                    return parts;
+                };
+            }
         }
     }
 
@@ -312,6 +332,7 @@ public static class ToolbarLogic
             label = transElement.TranslatedElement(a => a.Label!).DefaultText(null) ?? config?.DefaultLabel(element.Content!),
             iconName = element.IconName,
             iconColor = element.IconColor,
+            showCount = element.ShowCount,
             autoRefreshPeriod = element.AutoRefreshPeriod,
             openInPopup = element.OpenInPopup,
         };
@@ -418,8 +439,10 @@ public class ToolbarResponse
     public Lite<Entity>? content;
     public string? url;
     public List<ToolbarResponse>? elements;
+    
     public string? iconName;
     public string? iconColor;
+    public ShowCount? showCount;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? autoRefreshPeriod;

@@ -19,6 +19,7 @@ import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from './use
 import { SmallProfilePhoto } from '../Authorization/Templates/ProfilePhoto'
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization'
 import { translate } from '../Chart/D3Scripts/Components/ChartUtils'
+import { useRootClose } from '@restart/ui'
 
 const MaxNumberOfAlerts = 3;
 const MaxNumberOfGroups = 3;
@@ -198,6 +199,10 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 
     }, 400) 
   }
+
+  var divRef = React.useRef<HTMLDivElement>(null);
+
+  useRootClose(divRef, () => setIsOpen(false), { disabled: !isOpen });
 
   return (
     <>
