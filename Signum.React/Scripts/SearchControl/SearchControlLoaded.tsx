@@ -834,8 +834,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   markRows = (dic: MarkedRowsDictionary) => {
     this.dataChanged()
-      .then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary }));
+      .then(() => this.setMarkedRows(dic));
+  }
 
+  setMarkedRows(dic: MarkedRowsDictionary){
+    this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })
   }
 
   renderSelectedButton(): ButtonBarElement | null {
