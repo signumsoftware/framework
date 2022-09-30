@@ -35,9 +35,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
       .then(list => setExcelReports(list));
   }
 
-
-
-  function handleExcelRequest(apiMethod: (request: QueryRequest)=>void ) {
+  function selectPagination(apiMethod: (request: QueryRequest)=>void ) {
     var request = p.searchControl.getQueryRequest();
 
     const rt = p.searchControl.state.resultTable;
@@ -70,12 +68,12 @@ export default function ExcelMenu(p: ExcelMenuProps) {
 
 
   function handleExcelReport(er: Lite<ExcelReportEntity>) {
-    handleExcelRequest( (request) => ExcelClient.API.generateExcelReport(request, er));
+    selectPagination((request) => ExcelClient.API.generateExcelReport(request, er));
   }
 
 
   function handlePlainExcel() {
-    handleExcelRequest((request) => ExcelClient.API.generatePlainExcel(request));
+    selectPagination((request) => ExcelClient.API.generatePlainExcel(request));
   }
 
 
