@@ -88,8 +88,8 @@ export interface SearchControlLoadedProps {
   onSelectionChanged?: (rows: ResultRow[]) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
-  onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
-  onResult?: (table: ResultTable, dataChange: boolean) => void;
+  onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
+  onResult?: (table: ResultTable, dataChange: boolean, sc: SearchControlLoaded) => void;
   styleContext?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
@@ -263,7 +263,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     return this.getFindOptionsWithSFB().then(fop => {
       if (this.props.onSearch)
-        this.props.onSearch(fop, dataChanged ?? false);
+        this.props.onSearch(fop, dataChanged ?? false, this);
 
       if (this.simpleFilterBuilderInstance && this.simpleFilterBuilderInstance.onDataChanged)
         this.simpleFilterBuilderInstance.onDataChanged();
@@ -291,7 +291,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }, () => {
           this.fixScroll();
           if (this.props.onResult)
-            this.props.onResult(rt, dataChanged ?? false);
+            this.props.onResult(rt, dataChanged ?? false, this);
           this.notifySelectedRowsChanged();
         });
       });
