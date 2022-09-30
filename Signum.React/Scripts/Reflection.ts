@@ -1334,6 +1334,10 @@ export class Type<T extends ModifiableEntity> implements IType {
     else
       return new QueryTokenString(tokenSequence(lambdaToColumn, true));
   }
+
+  toString() {
+    return this.typeName;
+  }
 }
 
 /*  Some examples being in ExceptionEntity:

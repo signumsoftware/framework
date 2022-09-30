@@ -94,7 +94,7 @@
   dependencies:
     dequal "^2.0.2"
 
-"@restart/ui@^1.2.0":
+"@restart/ui@1.2.0", "@restart/ui@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@restart/ui/-/ui-1.2.0.tgz#fb90251aa25f99b41ccedc78a91d2a15f3c5e0fb"
   integrity sha512-oIh2t3tG8drZtZ9SlaV5CY6wGsUViHk8ZajjhcI+74IQHyWy+AnxDv8rJR5wVgsgcgrPBUvGNkC1AEdcGNPaLQ==

@@ -57,13 +57,27 @@ export namespace NavigatorManager {
 
 export const entityChanged: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> = [];
 
+export function useEntityChanged<T extends Entity>(type: Type<T>, callback: (entity: T | undefined, isRedirect: boolean) => void, deps: any[]) {
+
+  React.useEffect(() => {
+    var f = (cleanName: string, entity: Entity | undefined, isRedirect: boolean) => {
+      if (cleanName == type.typeName)
+        callback(entity as T | undefined, isRedirect);
+    }
+
+    entityChanged.push(f);
+
+    return () => { entityChanged.remove(f); }
+  }, deps);
+}
+
 function cleanEntityChanged() {
   entityChanged.clear();
 }
 
-export function raiseEntityChanged(cleanNameOrEntity: string | Entity, isRedirect = false) {
-  var cleanName = isEntity(cleanNameOrEntity) ? cleanNameOrEntity.Type : cleanNameOrEntity;
-  var entity = isEntity(cleanNameOrEntity) ? cleanNameOrEntity : undefined;
+export function raiseEntityChanged(typeOrEntity: Type<any> | string | Entity, isRedirect = false) {
+  var cleanName = isEntity(typeOrEntity) ? typeOrEntity.Type : typeOrEntity.toString();
+  var entity = isEntity(typeOrEntity) ? typeOrEntity : undefined;
 
   entityChanged.forEach(a => a(cleanName, entity, isRedirect));
 }
