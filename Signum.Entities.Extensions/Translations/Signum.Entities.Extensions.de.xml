@@ -373,7 +373,7 @@
   <Type Name="CaseActivityTask">
     <Member Name="Timeout" Description="Timeout" />
   </Type>
-  <Type Name="CaseEntity" Description="Fall" PluralDescription="Etuis" Gender="m">
+  <Type Name="CaseEntity" Description="Fall" PluralDescription="Fälle" Gender="m">
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="FinishDate" Description="Fertigstellungsdatum" />
     <Member Name="MainEntity" Description="Hauptentität" />

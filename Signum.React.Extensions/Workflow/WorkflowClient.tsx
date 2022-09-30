@@ -248,6 +248,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       eoc.onExecuteSuccess = pack => {
         Operations.notifySuccess();
         eoc.frame.onClose(pack);
+        Navigator.raiseEntityChanged(pack.entity);
         return Promise.resolve();
       }
       return getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))
@@ -271,6 +272,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       eoc.onExecuteSuccess = async pack => {
         Operations.notifySuccess();
         eoc.frame.onClose(pack);
+        Navigator.raiseEntityChanged(pack.entity);
       }
       return getWorkflowFreeJump(eoc.entity.case.workflow)
         .then(dest => dest && eoc.defaultClick(dest));
@@ -646,7 +648,11 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
       return;
 
     return Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
-      .then(pack => { eoc.frame.onClose(); return Operations.notifySuccess(); })
+      .then(pack => {
+        eoc.frame.onClose();
+        Navigator.raiseEntityChanged(pack.entity);
+        return Operations.notifySuccess();
+      })
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
   });
 }
