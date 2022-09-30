@@ -11,12 +11,18 @@ export interface IToolbarEntity extends Entities.Entity {
   elements: Entities.MList<ToolbarElementEmbedded>;
 }
 
+export const ShowCount = new EnumType<ShowCount>("ShowCount");
+export type ShowCount =
+  "MoreThan0" |
+  "Always";
+
 export const ToolbarElementEmbedded = new Type<ToolbarElementEmbedded>("ToolbarElementEmbedded");
 export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ToolbarElementEmbedded";
   type: ToolbarElementType;
   label: string | null;
   iconName: string | null;
+  showCount: ShowCount | null;
   iconColor: string | null;
   content: Entities.Lite<Entities.Entity> | null;
   url: string | null;

@@ -332,6 +332,7 @@ public static class ToolbarLogic
             label = transElement.TranslatedElement(a => a.Label!).DefaultText(null) ?? config?.DefaultLabel(element.Content!),
             iconName = element.IconName,
             iconColor = element.IconColor,
+            showCount = element.ShowCount,
             autoRefreshPeriod = element.AutoRefreshPeriod,
             openInPopup = element.OpenInPopup,
         };
@@ -438,8 +439,10 @@ public class ToolbarResponse
     public Lite<Entity>? content;
     public string? url;
     public List<ToolbarResponse>? elements;
+    
     public string? iconName;
     public string? iconColor;
+    public ShowCount? showCount;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? autoRefreshPeriod;
