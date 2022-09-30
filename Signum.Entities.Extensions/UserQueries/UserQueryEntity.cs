@@ -13,7 +13,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 {
     public UserQueryEntity()
     {
-        this.RebindEvents();
+        this.BindParent();
     }
 
     public UserQueryEntity(object queryName) : this()
@@ -44,7 +44,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 
     public RefreshMode RefreshMode { get; set; } = RefreshMode.Auto;
 
-    [PreserveOrder, NotifyChildProperty, NotifyCollectionChanged]
+    [PreserveOrder, BindParent]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]
@@ -106,7 +106,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
             new XAttribute("Guid", Guid),
             new XAttribute("DisplayName", DisplayName),
             new XAttribute("Query", Query.Key),
-            EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+            EntityType == null ? null! : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             !HideQuickLink ? null! : new XAttribute("HideQuickLink", HideQuickLink),
             IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),

@@ -112,8 +112,8 @@ public class ToolbarElementEmbedded : EmbeddedEntity
             OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null!,
             AutoRefreshPeriod == null ? null! : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
             Content == null ? null! : new XAttribute("Content",
-            Content is Lite<QueryEntity> query ?  ctx.QueryToName(query) :
-            Content is Lite<PermissionSymbol> perm ?  ctx.PermissionToName(perm) :
+            Content is Lite<QueryEntity> query ?  ctx.RetrieveLite(query).Key :
+            Content is Lite<PermissionSymbol> perm ?  ctx.RetrieveLite(perm).Key :
             (object)ctx.Include((Lite<IUserAssetEntity>)Content)),
             string.IsNullOrEmpty(Url) ? null! : new XAttribute("Url", Url));
     }

@@ -51,7 +51,7 @@ export interface SearchControlLoadedProps {
 
   defaultIncudeDefaultFilters: boolean;
   searchOnLoad: boolean;
-  allowSelection: boolean;
+  allowSelection: boolean | "single";
   showContextMenu: (fop: FindOptionsParsed) => boolean | "Basic";
   showSelectedButton: boolean;
   hideButtonBar: boolean;
@@ -77,6 +77,7 @@ export interface SearchControlLoadedProps {
   deps?: React.DependencyList;
   extraOptions: any;
 
+
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
@@ -87,8 +88,8 @@ export interface SearchControlLoadedProps {
   onSelectionChanged?: (rows: ResultRow[]) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
-  onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
-  onResult?: (table: ResultTable, dataChange: boolean) => void;
+  onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
+  onResult?: (table: ResultTable, dataChange: boolean, sc: SearchControlLoaded) => void;
   styleContext?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
@@ -262,7 +263,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     return this.getFindOptionsWithSFB().then(fop => {
       if (this.props.onSearch)
-        this.props.onSearch(fop, dataChanged ?? false);
+        this.props.onSearch(fop, dataChanged ?? false, this);
 
       if (this.simpleFilterBuilderInstance && this.simpleFilterBuilderInstance.onDataChanged)
         this.simpleFilterBuilderInstance.onDataChanged();
@@ -290,7 +291,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }, () => {
           this.fixScroll();
           if (this.props.onResult)
-            this.props.onResult(rt, dataChanged ?? false);
+            this.props.onResult(rt, dataChanged ?? false, this);
           this.notifySelectedRowsChanged();
         });
       });
@@ -797,7 +798,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return Promise.resolve([]);
 
     var resFO = this.state.resultFindOptions;
-    var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
+    var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFO));
     return Promise.all(filters.map(fs => Finder.fetchLites({ queryName: resFO.queryKey, filterOptions: fs, orderOptions: [], count: null })))
       .then(fss => fss.flatMap(fs => fs));
   }
@@ -833,8 +834,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   markRows = (dic: MarkedRowsDictionary) => {
     this.dataChanged()
-      .then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary }));
+      .then(() => this.setMarkedRows(dic));
+  }
 
+  setMarkedRows(dic: MarkedRowsDictionary){
+    this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })
   }
 
   renderSelectedButton(): ButtonBarElement | null {
@@ -1286,7 +1290,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return (
       <tr>
         {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
-          <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          {this.props.allowSelection == true &&
+            <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          }
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
@@ -1378,8 +1384,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var selectedRows = this.state.selectedRows!;
 
     if (cb.checked) {
-      if (!selectedRows.contains(row))
+      if (this.props.allowSelection == "single") {
+        selectedRows.clear();
         selectedRows.push(row);
+      } else {
+        if (!selectedRows.contains(row))
+          selectedRows.push(row);
+      }
     } else {
       selectedRows.remove(row);
     }
@@ -1389,12 +1400,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ currentMenuItems: undefined });
   }
 
-  static getGroupFilters(row: ResultRow, resFo: FindOptionsParsed): FilterOption[] {
+  static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
     var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
 
     var keyFilters = resFo.columnOptions
-      .map((col, i) => ({ col, value: row.columns[i] }))
+      .map(col => ({ col, value: row.columns[resTable.columns.indexOf(col.token!.fullKey)] }))
       .filter(a => rootKeys.contains(a.col))
       .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
 
@@ -1413,7 +1424,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           ({ token: a.token.fullKey }) as ColumnOption)
       .notNull();
 
-    var filters = SearchControlLoaded.getGroupFilters(row, resFo);
+    var filters = SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFo);
 
     return Finder.explore({
       queryName: resFo.queryKey,

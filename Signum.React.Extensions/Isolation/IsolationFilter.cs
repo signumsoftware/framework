@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Isolation;
@@ -15,14 +16,9 @@ public class IsolationFilter : SignumDisposableResourceFilter
 
     public override IDisposable? GetResource(ResourceExecutingContext context)
     {
-        var user = UserHolder.Current;
-
-        if (user == null)
-            return null;
-
         var isolation = IsolationEntity.CurrentUserIsolation;
 
-        if (isolation == null)
+        if (isolation == null && UserHolder.Current != null && !UserHolder.Current.User.Is(AuthLogic.AnonymousUser))
         {
             var isolationKey = context.HttpContext.Request.Headers[Signum_Isolation_Key].FirstOrDefault();
             if (isolationKey != null)

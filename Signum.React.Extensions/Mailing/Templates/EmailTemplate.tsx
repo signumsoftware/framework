@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable } from '@framework/Lines'
+import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded, EmailTemplateFromEmbedded } from '../Signum.Entities.Mailing'
@@ -31,7 +31,16 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
               <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => forceUpdate()}
                 onCreate={() => Promise.resolve(EmailTemplateFromEmbedded.New({ whenNone: "ThrowException", whenMany: "SplitMessages" }))}
                 getComponent={fctx => <EmailTemplateFrom ctx={fctx} query={p.ctx.value.query} />} />
-              <EntityRepeater ctx={ecXs.subCtx(e => e.recipients)} onChange={() => forceUpdate()}
+              <h5 className="text-muted">{ecXs.niceName(s => s.recipients)}</h5>
+              <EntityAccordion avoidFieldSet ctx={ecXs.subCtx(s => s.recipients)}
+                getTitle={(ctx: TypeContext<EmailTemplateRecipientEmbedded>) => <span>
+                  {ctx.value.kind && <strong className="me-1">{ctx.value.kind}:</strong>}
+                  {ctx.value.token && <span className="me-1">{ctx.value.token.tokenString}</span>}
+                  {ctx.value.displayName && <span className="me-1">{ctx.value.displayName}</span>}
+                  {ctx.value.emailAddress && <span>{"<"}{ctx.value.emailAddress}{">"}</span>}
+                </span>
+                }
+                onChange={() => forceUpdate()}
                 onCreate={() => Promise.resolve(EmailTemplateRecipientEmbedded.New({ whenNone: "ThrowException", whenMany: "SplitMessages" }))}
                 getComponent={rctx => <EmailTemplateRecipient ctx={rctx} query={p.ctx.value.query} />} />
             </Tab>

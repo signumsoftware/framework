@@ -103,18 +103,17 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
       {
         token: RoleEntity.token(a => a.entity.isTrivialMerge),
         value: false,
-        pinned: { active: "NotCheckbox_StartUnchecked", label: AuthAdminMessage.IncludeTrivialMerges.niceToString(), column : 2 }
+        pinned: { active: "NotCheckbox_StartUnchecked", label: AuthAdminMessage.IncludeTrivialMerges.niceToString(), column: 2 }
       }
-    ]
-  });
-
-  Finder.ButtonBarQuery.onButtonBarElements.push(ctx => ctx.findOptions.queryKey == RoleEntity.typeName && isPermissionAuthorized(BasicPermission.AdminRules) ? {
-    order: 6,
-    button: <button className="btn btn-info"
-      onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
-      <FontAwesomeIcon icon="download" /> Download AuthRules.xml
+    ],
+    extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {
+      order: 6,
+      button: <button className="btn btn-info"
+        onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
+        <FontAwesomeIcon icon="download" /> Download AuthRules.xml
       </button>
-  } : undefined)
+    }]
+  });
 
   if (options.properties) {
     tasks.push(taskAuthorizeProperties);

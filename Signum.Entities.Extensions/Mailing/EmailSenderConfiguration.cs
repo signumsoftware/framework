@@ -18,7 +18,7 @@ public class EmailSenderConfigurationEntity : Entity
     [StringLengthValidator(Min = 1, Max = 100)]
     public string Name { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public EmailFromEmbedded? DefaultFrom { get; set; }
 
     [NoRepeatValidator]

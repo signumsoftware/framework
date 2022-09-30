@@ -22,7 +22,7 @@ public class SMSTemplateEntity : Entity
 
     public SMSModelEntity? Model { get; set; }
 
-    [NotifyCollectionChanged]
+    [BindParent]
     public MList<SMSTemplateMessageEmbedded> Messages { get; set; } = new MList<SMSTemplateMessageEmbedded>();
 
     [StringLengthValidator(Max = 200)]

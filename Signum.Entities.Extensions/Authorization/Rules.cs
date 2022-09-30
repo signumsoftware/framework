@@ -56,7 +56,7 @@ public class RulePropertyEntity : RuleEntity<PropertyRouteEntity, PropertyAllowe
 public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
 {
     [PreserveOrder, Ignore, QueryableProperty]
-    [NotifyChildProperty, NotifyCollectionChanged]
+    [BindParent]
     public MList<RuleTypeConditionEntity> ConditionRules { get; set; } = new MList<RuleTypeConditionEntity>();
 
     protected override string? PropertyValidation(PropertyInfo pi)

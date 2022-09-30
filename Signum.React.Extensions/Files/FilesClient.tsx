@@ -46,7 +46,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
   Finder.formatRules.push({
     name: type.typeName + "_Download",
     isApplicable: qt => qt.type.name == type.typeName && !isImage(qt.propertyRoute),
-    formatter: qt => new CellFormatter(cell => cell ? <FileDownloader entityOrLite={cell} /> : undefined, true)
+    formatter: qt => new CellFormatter(cell => cell ? <FileDownloader entityOrLite={cell} htmlAttributes={{ className: "try-no-wrap" }} /> : undefined, true)
   });
 
   Finder.formatRules.push({
@@ -85,6 +85,10 @@ export const extensionInfo: { [ext: string]: ExtensionInfo } = {
 
   ["ppt"]: { icon: "file-powerpoint", color: "rgb(207 66 36)", mimeType: "application/vnd.ms-powerpoint" },
   ["pptx"]: { icon: "file-powerpoint", color: "rgb(207 66 36)", mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation" },
+
+  ["msg"]: { icon: "envelope", color: "#2980B9", mimeType: "application/vnd.ms-outlook" },
+  ["eml"]: { icon: "envelope", color: "#F39C12", mimeType: "message/rfc822" },
+
 
   ["pdf"]: { icon: "file-pdf", color: "#b30b00", mimeType: "application/pdf", browserView: true},
 

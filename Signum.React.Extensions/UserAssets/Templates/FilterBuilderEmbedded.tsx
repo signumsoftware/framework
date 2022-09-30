@@ -300,8 +300,8 @@ interface ValueLineOrExpressionProps {
   ctx: TypeContext<string | null | undefined>;
   onChange: () => void;
   type: TypeReference;
-  formatText?: string;
-  unitText?: string;
+  format?: string;
+  unit?: string;
   filterType?: FilterType;
 }
 
@@ -352,9 +352,9 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
     if (!ti)
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-    return <ValueLine ctx={ctx} type={type} formatText={p.formatText} unitText={p.unitText} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} />;
+    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} />;
   } else {
-    return <ValueLine ctx={ctx} type={type} formatText={p.formatText} unitText={p.unitText} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
   }
 }
 

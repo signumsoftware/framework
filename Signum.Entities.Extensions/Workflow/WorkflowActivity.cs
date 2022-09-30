@@ -40,16 +40,16 @@ public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
     [StringLengthValidator(Min = 3, Max = 255)]
     public string? ViewName { get; set; }
 
-    [PreserveOrder, NoRepeatValidator, NotifyChildProperty]
+    [PreserveOrder, NoRepeatValidator, BindParent]
     public MList<ViewNamePropEmbedded> ViewNameProps { get; set; } = new MList<ViewNamePropEmbedded>();
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowScriptPartEmbedded? Script { get; set; }
 
     [AvoidDump]
     public WorkflowXmlEmbedded Xml { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public SubWorkflowEmbedded? SubWorkflow { get; set; }
 
     [StringLengthValidator(MultiLine = true)]
@@ -275,7 +275,7 @@ public class SubWorkflowEmbedded : EmbeddedEntity
 {   
     public WorkflowEntity Workflow { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public SubEntitiesEval SubEntitiesEval { get; set; }
 
     public SubWorkflowEmbedded Clone()

@@ -82,8 +82,9 @@
     <Member Name="CurrentState" Description="Aktueller Status" />
     <Member Name="EmailNotificationsSent" Description="E-Mail-Benachrichtigungen gesendet" />
     <Member Name="Future" Description="Zukünftige" />
+    <Member Name="GroupTarget" Description="Gruppe-Ziel" />
+    <Member Name="LinkTarget" Description="Link-Ziel" />
     <Member Name="NotAttended" Description="Nicht erledigte" />
-    <Member Name="ParentTarget" Description="Übergeordnetes Ziel" />
     <Member Name="Recipient" Description="Empfänger" />
     <Member Name="State" Description="Status" />
     <Member Name="Target" Description="Ziel" />
@@ -105,15 +106,20 @@
     <Member Name="AllMyAlerts" Description="Alle meine Benachrichtigungen" />
     <Member Name="CheckedAlerts" Description="Erledigte" />
     <Member Name="CloseAll" Description="Alle schließen" />
+    <Member Name="Collapse" Description="Einklappen" />
     <Member Name="CreateAlert" Description="Benachrichtigung erstellen" />
     <Member Name="CustomDelay" Description="Benutzerdefinierte Verzögerung" />
     <Member Name="DelayDuration" Description="Dauer der Verzögerung" />
+    <Member Name="Expand" Description="Ausklappen" />
     <Member Name="FutureAlerts" Description="Zukünftige" />
     <Member Name="Hi0" Description="Hallo {0}," />
     <Member Name="MyActiveAlerts" Description="Meine aktiven Benachrichtigungen" />
     <Member Name="NewAlert" Description="Neue Benachrichtigungen" />
     <Member Name="NewUnreadNotifications" Description="Neue ungelesene Benachrichtigungen" />
+    <Member Name="OtherNotifications" Description="Andere Benachrichtigungen" />
     <Member Name="PleaseVisit0" Description="Bitte besuchen Sie {0}" />
+    <Member Name="Show0AlertsMore" Description="Weitere {0} Benachrichtigungen anzeigen" />
+    <Member Name="Show0GroupsMore1Remaining" Description="Weitere {0} Gruppen anzeigen ({1} verbleibend)" />
     <Member Name="Text" Description="Text" />
     <Member Name="Title" Description="Titel" />
     <Member Name="ViewMore" Description="Mehr sehen" />
@@ -630,6 +636,7 @@
     <Member Name="Part0OverlapsWith1" Description="Teil {0} überschneidet sich mit {1}" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="RowsSelected" Description="Zeile(n) ausgewählt" />
+    <Member Name="TheUserQuery0HasNoColumnWithSummaryHeader" Description="Die Benutzerabfrage '{0}' hat keine Spalte mit Zusammenfassungskopfzeile" />
   </Type>
   <Type Name="DashboardOperation">
     <Member Name="Clone" Description="Klonen" />
@@ -2731,6 +2738,7 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
+    <Member Name="AggregateFromSummaryHeader" Description="Aggregieren aus Zusammenfassungskopfzeile" />
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
     <Member Name="AutoUpdate" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
@@ -2791,12 +2799,47 @@
     <Member Name="Expression" Description="Ausdruck" />
     <Member Name="Name" Description="Name" />
   </Type>
-  <Type Name="WhatsNewEntity" />
-  <Type Name="WhatsNewFileType" />
-  <Type Name="WhatsNewLogEntity" />
-  <Type Name="WhatsNewMessage" />
-  <Type Name="WhatsNewMessageEmbedded" />
-  <Type Name="WhatsNewOperation" />
+  <Type Name="WhatsNewEntity" Description="Was ist neu" Gender="f">
+    <Member Name="Attachment" Description="Anhang" />
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Messages" Description="Nachrichten" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Owner" Description="Eigentümer" />
+    <Member Name="PreviewPicture" Description="Vorschaubild" />
+  </Type>
+  <Type Name="WhatsNewFileType">
+    <Member Name="WhatsNewAttachmentFileType" Description="Was ist neu Anhang dateityp" />
+    <Member Name="WhatsNewPreviewFileType" Description="Was ist neu Vorschau dateityp" />
+  </Type>
+  <Type Name="WhatsNewLogEntity" Description="Was ist neu" Gender="n">
+    <Member Name="ReadOn" Description="Gelesen am" />
+    <Member Name="User" Description="Benutzer" />
+    <Member Name="WhatsNew" Description="Was ist neu?" />
+  </Type>
+  <Type Name="WhatsNewMessage">
+    <Member Name="_0ContiansNoVersionForCulture1" Description="{0} enthält keine Version für Kultur '{1}'" />
+    <Member Name="AllMyNews" Description="Alle meine Neuigkeiten" />
+    <Member Name="CloseAll" Description="Alle schließen" />
+    <Member Name="Downloads" Description="Downloads" />
+    <Member Name="Language" Description="Sprache" />
+    <Member Name="MyActiveNews" Description="Meine aktiven News" />
+    <Member Name="NewNews" Description="Neuigkeiten" />
+    <Member Name="News" Description="Nachrichten" />
+    <Member Name="NewUnreadNews" Description="Neue ungelesene Nachrichten" />
+    <Member Name="ReadFurther" Description="Weiterlesen" />
+    <Member Name="ViewMore" Description="Mehr anzeigen" />
+    <Member Name="YouDoNotHaveAnyUnreadNews" Description="Sie haben keine ungelesenen Nachrichten" />
+    <Member Name="YourNews" Description="Ihre Neuigkeiten" />
+  </Type>
+  <Type Name="WhatsNewMessageEmbedded" Description="Was ist die neue Nachricht?">
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Title" Description="Titel" />
+  </Type>
+  <Type Name="WhatsNewOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="WhenManyFromBehaviour" Description="Verhalten Wenn viele Von ">
     <Member Name="FistResult" Description="Erstes Ergebnis" />
     <Member Name="SplitMessages" Description="Geteilte Nachrichten" />
@@ -2832,6 +2875,7 @@
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Model" Description="modell" />
     <Member Name="Name" Description="Name" />
     <Member Name="Orders" Description="Reihenfolge" />

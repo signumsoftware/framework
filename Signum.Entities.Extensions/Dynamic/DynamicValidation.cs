@@ -16,7 +16,7 @@ public class DynamicValidationEntity : Entity
 
     public static Func<DynamicValidationEntity, Type> GetMainType; 
 
-    [NotifyChildProperty]
+    [BindParent]
     public DynamicValidationEval Eval { get; set; }
 
     [AutoExpressionField]

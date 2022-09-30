@@ -13,7 +13,7 @@ public class ExceptionEntity : Entity
 
     public ExceptionEntity(ClientErrorModel clientError)
     {
-        this.RebindEvents();
+        this.BindParent();
         this.ExceptionType = "/".Combine(clientError.ErrorType, clientError.Name);
         this.ExceptionMessage = clientError.Message;
         this.StackTrace = new BigStringEmbedded(clientError.Stack);
@@ -26,7 +26,7 @@ public class ExceptionEntity : Entity
 
     public ExceptionEntity(Exception ex)
     {
-        this.RebindEvents();
+        this.BindParent();
         this.ExceptionType = ex.GetType().Name;
         this.ExceptionMessage = ex.Message!;
         this.StackTrace = new BigStringEmbedded(ex.StackTrace!);
@@ -58,7 +58,7 @@ public class ExceptionEntity : Entity
     public int ExceptionMessageHash { get; private set; }
 
     BigStringEmbedded stackTrace = new BigStringEmbedded();
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded StackTrace
     {
         get { return stackTrace; }
@@ -108,16 +108,16 @@ public class ExceptionEntity : Entity
     [DbType(Size = 100)]
     public string? UserHostName { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded Form { get; set; } = new BigStringEmbedded();
 
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded QueryString { get; set; } = new BigStringEmbedded();
 
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded Session { get; set; } = new BigStringEmbedded();
 
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded Data { get; set; } = new BigStringEmbedded();
 
     public int HResult { get; internal set; }

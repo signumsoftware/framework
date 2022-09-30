@@ -143,18 +143,20 @@ function logError(error: Error) {
 }
 
 ErrorModal.register = () => {
-
   window.onunhandledrejection = p => {
     var error = p.reason;
     logError(error);
     if (Modals.isStarted()) {
       ErrorModal.showErrorModal(error);
     }
-    else
+    else {
+      window.onerror?.("error", undefined, undefined, undefined, error);
       console.error("Unhandled promise rejection:", error);
+    }
   };
 
   var oldOnError = window.onerror;
+
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
 
     if (error != null)

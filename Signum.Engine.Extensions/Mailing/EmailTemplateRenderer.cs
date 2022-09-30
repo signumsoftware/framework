@@ -58,6 +58,13 @@ class EmailMessageBuilder
                 recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault()?.ToCultureInfo() ??
                 EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
 
+            var context = new EmailTemplateLogic.GenerateAttachmentContext(this.qd, template, dicTokenColumn, currentRows, ci)
+            {
+                ModelType = template.Model?.ToType(),
+                Model = model,
+                Entity = entity,
+            };
+
             email = new EmailMessageEntity
             {
                 Target = entity?.ToLite() ?? (this.model!.UntypedEntity as Entity)?.ToLite(),
@@ -66,13 +73,7 @@ class EmailMessageBuilder
                 IsBodyHtml = template.IsBodyHtml,
                 EditableMessage = template.EditableMessage,
                 Template = template.ToLite(),
-                Attachments = template.Attachments.SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g,
-                new EmailTemplateLogic.GenerateAttachmentContext(this.qd, template, dicTokenColumn, currentRows, ci)
-                {
-                    ModelType = template.Model?.ToType(),
-                    Model = model,
-                    Entity = entity,
-                })).ToMList()
+                Attachments = template.Attachments.Concat((template.MasterTemplate?.RetrieveAndRemember().Attachments).EmptyIfNull()).SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g, context)).ToMList()
             };
 
             EmailTemplateMessageEmbedded? message = 

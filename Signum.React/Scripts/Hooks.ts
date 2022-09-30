@@ -240,7 +240,7 @@ export function useMounted() {
   return mounted;
 }
 
-export function useThrottle<T>(value: T, limit: number, options?: { enabled?: boolean }): T {
+export function useThrottle<T>(value: T, timeout: number, options?: { enabled?: boolean }): T {
   const [throttledValue, setThrottledValue] = React.useState(value);
 
   const lastRequested = React.useRef<(undefined | { value: T })>(undefined);
@@ -265,7 +265,7 @@ export function useThrottle<T>(value: T, limit: number, options?: { enabled?: bo
           handleRef.current = setTimeout(function () {
             setThrottledValue(lastRequested.current!.value);
             stop();
-          }, limit);
+          }, timeout);
         }
       }
     },

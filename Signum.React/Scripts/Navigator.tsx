@@ -23,6 +23,7 @@ import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessage
 import CopyLiteButton from "./Components/CopyLiteButton";
 import { Typeahead } from "./Components";
 import { TypeaheadOptions } from "./Components/Typeahead";
+import CopyLinkButton from "./Components/CopyLinkButton";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || getToString(currentUser) == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -94,6 +95,7 @@ let renderId = (entity: Entity): React.ReactChild => {
         {entity.id}
       </span>
       <CopyLiteButton className={"sf-hide-id"} entity={entity} />
+      <CopyLinkButton className={"sf-hide-id"} entity={entity} />
     </>
   );
 }
@@ -923,6 +925,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild;
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  enforceFocusInModal?: boolean;
 
   namedViews?: NamedViewSettings<T>[];
 }
@@ -1001,6 +1004,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild; 
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  enforceFocusInModal?: boolean;
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 

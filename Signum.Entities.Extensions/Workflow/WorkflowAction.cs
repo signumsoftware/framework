@@ -17,7 +17,7 @@ public class WorkflowActionEntity : Entity, IUserAssetEntity
 
     public TypeEntity MainEntityType { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowActionEval Eval { get; set; }
 
     [AutoExpressionField]
@@ -28,7 +28,7 @@ public class WorkflowActionEntity : Entity, IUserAssetEntity
         return new XElement("WorkflowAction",
              new XAttribute("Guid", Guid),
              new XAttribute("Name", Name),
-             new XAttribute("MainEntityType", ctx.TypeToName(MainEntityType)),
+             new XAttribute("MainEntityType", MainEntityType.CleanName),
              new XElement("Eval",
                 new XElement("Script", new XCData(Eval.Script))));
     }

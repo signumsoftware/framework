@@ -79,7 +79,7 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
         <div className="row">
           <div className="col-sm-8">
             <ValueLine ctx={ctx.subCtx(dt => dt.baseType)} labelColumns={3} onChange={() => this.forceUpdate()} readOnly={!ctx.value.isNew} />
-            <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText={suffix} />
+            <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unit={suffix} />
           </div>
           <div className="col-sm-4">
             <button className={classes("btn btn-sm btn-success float-end", this.state.showDatabaseMapping && "active")}

@@ -363,8 +363,8 @@ export namespace UserQueryMerger {
       const merged = mergeFilters(
         ch.removed.elements,
         ch.added.elements,
-        isFilterGroupOption(ch.removed.filter) ? ch.removed.filter.filters : [],
-        isFilterGroupOption(ch.added.filter) ? ch.added.filter.filters : [], identation + 1, sd);
+        isFilterGroupOption(ch.removed.filter) ? ch.removed.filter.filters.notNull() : [],
+        isFilterGroupOption(ch.added.filter) ? ch.added.filter.filters.notNull() : [], identation + 1, sd);
 
 
       const oldF = ch.removed.key.element;
@@ -422,7 +422,7 @@ export namespace UserQueryMerger {
           (fo.groupOperation == fo2.groupOperation ? 0 : 1) +
           (similarValues(fo.value, fo2.value) ? 0 : 1) +
           distancePinned(fo.pinned, fo2.pinned) +
-          Array.range(0, Math.max(fo.filters.length, fo2.filters.length)).sum(i => fo.filters[i] == null ? 5 : fo2.filters[i] == null ? 5 : distanceFilter(fo.filters[i], fo2.filters[i]));
+          Array.range(0, Math.max(fo.filters.length, fo2.filters.length)).sum(i => fo.filters[i] == null ? 5 : fo2.filters[i] == null ? 5 : distanceFilter(fo.filters[i]!, fo2.filters[i]!));
       }
       else return 10;
     }

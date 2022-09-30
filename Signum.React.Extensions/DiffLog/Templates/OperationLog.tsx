@@ -199,7 +199,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
           <span title={DiffLogMessage.NavigatesToTheCurrentEntity.niceToString()}>
             {DiffLogMessage.CurrentEntity.niceToString()}
             &nbsp;
-                        <FontAwesomeIcon icon="external-link-alt" />
+            <FontAwesomeIcon icon="external-link-alt" />
           </span>
         </LinkContainer> as any}>
       </Tab>

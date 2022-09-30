@@ -1,3 +1,4 @@
+using Signum.Entities.Basics;
 using System.IO;
 using System.Xml.Linq;
 
@@ -17,6 +18,7 @@ public class FileEmbedded : EmbeddedEntity, IFile
 
     [StringLengthValidator(Min = 3, Max = 200)]
     public string FileName { get; set; }
+
 
     public byte[] BinaryFile { get; set; }
 
@@ -46,4 +48,7 @@ public class FileEmbedded : EmbeddedEntity, IFile
         if (!MemoryExtensions.SequenceEqual<byte>(bytes, this.BinaryFile))
             this.BinaryFile = bytes;
     }
+
+    public FileContent ToFileContent() => new FileContent(FileName, BinaryFile);
+
 }
