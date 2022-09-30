@@ -939,6 +939,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild;
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  enforceFocusInModal?: boolean;
 
   namedViews?: NamedViewSettings<T>[];
 }
@@ -1017,6 +1018,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild; 
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  enforceFocusInModal?: boolean;
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 

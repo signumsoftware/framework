@@ -33,6 +33,8 @@ public static class EmailSenderConfigurationLogic
                     s.SMTP!.PickupDirectoryLocation,
                     s.Exchange!.ExchangeVersion,
                     s.Exchange!.Url,
+                    s.MicrosoftGraph!.UseActiveDirectoryConfiguration,
+                    s.MicrosoftGraph!.Azure_ApplicationID,
                 });
             
             SmtpConfigCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToDictionary(a => a.ToLite()),

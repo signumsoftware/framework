@@ -481,8 +481,8 @@ export interface LineBaseNode extends BaseNode {
 export interface ValueLineNode extends LineBaseNode {
   kind: "ValueLine",
   textArea?: ExpressionOrValue<string>;
-  unitText?: ExpressionOrValue<string>;
-  formatText?: ExpressionOrValue<string>;
+  unit?: ExpressionOrValue<string>;
+  format?: ExpressionOrValue<string>;
   autoTrim?: ExpressionOrValue<boolean>;
   inlineCheckbox?: ExpressionOrValue<boolean>;
   valueHtmlAttributes?: HtmlAttributesExpression;
@@ -502,8 +502,8 @@ NodeUtils.register<ValueLineNode>({
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
     valueHtmlAttributes: node.valueHtmlAttributes,
-    unitText: node.unitText,
-    formatText: node.formatText,
+    unit: node.unit,
+    format: node.format,
     readOnly: node.readOnly,
     mandatory: node.mandatory,
     inlineCheckbox: node.inlineCheckbox,
@@ -519,8 +519,8 @@ NodeUtils.register<ValueLineNode>({
     labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
     formGroupHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.formGroupHtmlAttributes)}
     valueHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.valueHtmlAttributes)}
-    unitText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.unitText, NodeUtils.isStringOrNull)}
-    formatText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.formatText, NodeUtils.isStringOrNull)}
+    unit={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.unit, NodeUtils.isStringOrNull)}
+    format={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.format, NodeUtils.isStringOrNull)}
     readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
     mandatory={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.mandatory, NodeUtils.isBooleanOrNull)}
     inlineCheckbox={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
@@ -539,8 +539,8 @@ NodeUtils.register<ValueLineNode>({
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.valueHtmlAttributes)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unitText)} type="string" defaultValue={m?.unit ?? ""} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.formatText)} type="string" defaultValue={m?.format ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unit)} type="string" defaultValue={m?.unit ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.format)} type="string" defaultValue={m?.format ?? ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />

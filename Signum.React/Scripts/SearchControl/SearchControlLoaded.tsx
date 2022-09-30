@@ -51,7 +51,7 @@ export interface SearchControlLoadedProps {
 
   defaultIncudeDefaultFilters: boolean;
   searchOnLoad: boolean;
-  allowSelection: boolean;
+  allowSelection: boolean | "single";
   showContextMenu: (fop: FindOptionsParsed) => boolean | "Basic";
   showSelectedButton: boolean;
   hideButtonBar: boolean;
@@ -76,6 +76,7 @@ export interface SearchControlLoadedProps {
   avoidChangeUrl: boolean;
   deps?: React.DependencyList;
   extraOptions: any;
+
 
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
@@ -1286,7 +1287,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return (
       <tr>
         {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
-          <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          {this.props.allowSelection == true &&
+            <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          }
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
@@ -1378,8 +1381,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var selectedRows = this.state.selectedRows!;
 
     if (cb.checked) {
-      if (!selectedRows.contains(row))
+      if (this.props.allowSelection == "single") {
+        selectedRows.clear();
         selectedRows.push(row);
+      } else {
+        if (!selectedRows.contains(row))
+          selectedRows.push(row);
+      }
     } else {
       selectedRows.remove(row);
     }
