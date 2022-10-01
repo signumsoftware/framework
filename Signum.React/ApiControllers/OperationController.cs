@@ -194,11 +194,11 @@ public class OperationController : Controller
     }
 
     [HttpPost("api/operation/constructFromMultiple"), ProfilerActionSplitter]
-    public MultiOperationResponse ConstructFromMultiple([Required, FromBody] MultiOperationRequest request)
+    public IEnumerable<OperationResult> ConstructFromMultiple([Required, FromBody] MultiOperationRequest request)
     {
         if (request.Setters.HasItems())
         {
-            var errors = ForeachMultiple(request.Lites, lite =>
+            return ForeachMultiple(request.Lites, lite =>
             {
                 var entity = lite.Retrieve();
 
@@ -208,29 +208,25 @@ public class OperationController : Controller
 
                 OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
             });
-
-            return new MultiOperationResponse(errors);
         }
         else
         {
-            var errors = ForeachMultiple(request.Lites, lite =>
+            return ForeachMultiple(request.Lites, lite =>
             {
                 var op = request.GetOperationSymbol(lite.EntityType);
 
                 OperationLogic.ServiceConstructFromLite(lite, op, request.ParseArgs(op));
             });
-
-            return new MultiOperationResponse(errors);
         }
     }
 
 
     [HttpPost("api/operation/executeMultiple"), ProfilerActionSplitter]
-    public MultiOperationResponse ExecuteMultiple([Required, FromBody] MultiOperationRequest request)
+    public IEnumerable<OperationResult> ExecuteMultiple([Required, FromBody] MultiOperationRequest request)
     {
         if (request.Setters.HasItems())
         {
-            var errors = ForeachMultiple(request.Lites, lite =>
+            return ForeachMultiple(request.Lites, lite =>
             {
                 var entity = lite.Retrieve();
 
@@ -238,28 +234,24 @@ public class OperationController : Controller
                 var op = request.GetOperationSymbol(entity.GetType());
                 OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
             });
-
-            return new MultiOperationResponse(errors);
         }
         else
         {
-            var errors = ForeachMultiple(request.Lites, lite =>
+            return ForeachMultiple(request.Lites, lite =>
             {
                 var op = request.GetOperationSymbol(lite.EntityType);
                 OperationLogic.ServiceExecuteLite(lite, op, request.ParseArgs(op));
             });
-
-            return new MultiOperationResponse(errors);
         }
     }
 
 
     [HttpPost("api/operation/deleteMultiple"), ProfilerActionSplitter]
-    public MultiOperationResponse DeleteMultiple([Required, FromBody] MultiOperationRequest request)
+    public IEnumerable<OperationResult> DeleteMultiple([Required, FromBody] MultiOperationRequest request)
     {
         if (request.Setters.HasItems())
         {
-            var errors = ForeachMultiple(request.Lites, lite =>
+            return ForeachMultiple(request.Lites, lite =>
             {
                 var entity = lite.Retrieve();
 
@@ -269,39 +261,46 @@ public class OperationController : Controller
 
                 OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
             });
-
-            return new MultiOperationResponse(errors);
         }
         else
         {
-            var errors = ForeachMultiple(request.Lites, lite =>
+            return ForeachMultiple(request.Lites, lite =>
             {
                 var op = request.GetOperationSymbol(lite.EntityType);
                 OperationLogic.ServiceDelete(lite, op, request.ParseArgs(op));
             });
-
-            return new MultiOperationResponse(errors);
         }
     }
 
-    static Dictionary<string, string> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Action<Lite<Entity>> action)
+    public class OperationResult
     {
-        Dictionary<string, string> errors = new Dictionary<string, string>();
+        public Lite<Entity> Entity;
+        public string? Error;
+
+        public OperationResult(Lite<Entity> entity)
+        {
+            Entity = entity;
+        }
+
+    }
+
+    static IEnumerable<OperationResult> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Action<Lite<Entity>> action)
+    {
         foreach (var lite in lites.Distinct())
         {
+            string? error = null;
             try
             {
                 action(lite);
-                errors.Add(lite.Key(), "");
             }
             catch (Exception e)
             {
                 e.Data["lite"] = lite;
                 e.LogException();
-                errors.Add(lite.Key(), e.Message);
+                error = e.Message;
             }
+            yield return new OperationResult(lite) { Error = error };
         }
-        return errors;
     }
 
 

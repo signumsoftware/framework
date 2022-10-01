@@ -898,8 +898,10 @@ export namespace API {
     errors: { [liteKey: string]: string; }
   }
 
-
-
+  export interface OperationResult {
+    entity: Lite<Entity>;
+    error: string;
+  }
 
   export function getOperationKey(operationKey: string | OperationSymbol) {
     return (operationKey as OperationSymbol).key || operationKey as string;
