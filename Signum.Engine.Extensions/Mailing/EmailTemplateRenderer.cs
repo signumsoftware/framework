@@ -70,7 +70,7 @@ class EmailMessageBuilder
                 Target = entity?.ToLite() ?? (this.model!.UntypedEntity as Entity)?.ToLite(),
                 Recipients = recipients.Select(r => new EmailRecipientEmbedded(r.OwnerData) { Kind = r.Kind }).ToMList(),
                 From = from,
-                IsBodyHtml = template.IsBodyHtml,
+                IsBodyHtml = template.MessageFormat == EmailMessageFormat.HtmlComplex || template.MessageFormat == EmailMessageFormat.HtmlSimple,
                 EditableMessage = template.EditableMessage,
                 Template = template.ToLite(),
                 Attachments = template.Attachments.Concat((template.MasterTemplate?.RetrieveAndRemember().Attachments).EmptyIfNull()).SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g, context)).ToMList()
@@ -97,7 +97,7 @@ class EmailMessageBuilder
                 email.Body = new BigStringEmbedded(TextNode(message).Print(
                     new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
                     {
-                        IsHtml = template.IsBodyHtml,
+                        IsHtml = template.MessageFormat == EmailMessageFormat.HtmlComplex || template.MessageFormat == EmailMessageFormat.HtmlSimple,
                         Model = model,
                     }));
             }

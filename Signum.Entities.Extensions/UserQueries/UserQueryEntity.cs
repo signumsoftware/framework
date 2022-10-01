@@ -545,10 +545,10 @@ public enum UserQueryMessage
     [Description("Use {0} to filter current entity")]
     Use0ToFilterCurrentEntity,
     Preview,
-    [Description("Makes the user query available in the contextual menu when grouping {0}")]
-    MakesTheUserQueryAvailableInContextualMenuWhenGrouping0,
-    [Description("Makes the user query available as quick link of {0}")]
-    MakesTheUserQueryAvailableAsAQuickLinkOf0,
+    [Description("Makes the {0} available in the contextual menu when grouping {1}")]
+    MakesThe0AvailableInContextualMenuWhenGrouping0,
+    [Description("Makes the {0} available as Quick Link of {1}")]
+    MakesThe0AvailableAsAQuickLinkOf1,
     [Description("the selected {0}")]
     TheSelected0,
 }

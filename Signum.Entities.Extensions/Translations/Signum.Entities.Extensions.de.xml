@@ -2653,7 +2653,7 @@
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="Guid" Description="Guid" />
-    <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="MaxRows" Description="Max. Zeilen" />
     <Member Name="Owner" Description="Eigentümer" />
@@ -2712,7 +2712,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
     <Member Name="Guid" Description="Guid" />
-    <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Owner" Description="Eigentümer" />
@@ -2726,12 +2726,12 @@
     <Member Name="BackToDefault" Description="Zurück zum Standard" />
     <Member Name="CreateNew" Description="Erstellen" />
     <Member Name="Edit" Description="Bearbeiten" />
-    <Member Name="MakesTheUserQueryAvailableAsAQuickLinkOf0" Description="Stellt die Benutzerabfrage als Quicklink von {0} zur Verfügung" />
-    <Member Name="MakesTheUserQueryAvailableInContextualMenuWhenGrouping0" Description="Macht die Benutzerabfrage im Kontextmenü beim Gruppieren verfügbar {0}" />
+    <Member Name="MakesThe0AvailableAsAQuickLinkOf1" Description="Stellt die {0} als Quick Link of {1} zur Verfügung" />
+    <Member Name="MakesThe0AvailableInContextualMenuWhenGrouping0" Description="Stellt die {0} im Kontextmenü zur Verfügung, wenn {1} gruppiert wird" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Der Filtervorgang {0} ist nicht kompatibel mit {1}" />
     <Member Name="TheSelected0" Description="die ausgewählte {0}" />
-    <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um aktuelle Entität Filtern" />
+    <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um nach der aktuellen Entität zu filtern" />
   </Type>
   <Type Name="UserQueryOperation">
     <Member Name="Delete" Description="Löschen" />
