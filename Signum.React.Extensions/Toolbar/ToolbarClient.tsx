@@ -9,7 +9,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
 import { Type } from '@framework/Reflection'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation } from './Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation, ShowCount } from './Signum.Entities.Toolbar'
 import * as Constructor from '@framework/Constructor'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { parseIcon } from '../Basics/Templates/IconTypeahead';
@@ -34,23 +34,12 @@ export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarCon
 
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(ToolbarEntity);
-
-  Navigator.entityChanged.push((cleanName) => document.dispatchEvent(new RefreshCounterEvent(cleanName)));
 }
 
 export function cleanConfigs() {
   Dic.clear(configs);
 }
 
-export class RefreshCounterEvent extends Event {
-
-  queryKey: string | string[];
-
-  constructor(queryKey: string[] | string,) {
-    super("count-user-query");
-    this.queryKey = queryKey;
-  }
-}
 
 export interface IconColor {
   icon: IconProp;
@@ -129,6 +118,7 @@ export interface ToolbarResponse<T extends Entity> {
   type: ToolbarElementType;
   iconName?: string;
   iconColor?: string;
+  showCount?: ShowCount;
   label?: string;
   content?: Lite<T>;
   url?: string;

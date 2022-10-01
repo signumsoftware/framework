@@ -10,7 +10,7 @@ import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.Entities.UserQueries'
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI } from '@framework/Hooks';
-import { CountIcon } from '../Toolbar/QueryToolbarConfig';
+import { SearchToolbarCount, ToolbarCount } from '../Toolbar/QueryToolbarConfig';
 import { useFetchInState } from '@framework/Navigator'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
 
@@ -22,8 +22,14 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
 
   getIcon(element: ToolbarResponse<UserQueryEntity>) {
 
-    if (element.iconName == "count")
-      return <CountUserQueryIcon userQuery={element.content!} color={element.iconColor} autoRefreshPeriod={element.autoRefreshPeriod} />;
+    if (element.showCount != null) {
+      return (
+        <>
+          {super.getIcon(element)}
+          <SearchUserQueryCount userQuery={element.content!} color={element.iconColor} autoRefreshPeriod={element.autoRefreshPeriod} />
+        </>
+      );
+    }
 
     return super.getIcon(element);
   }
@@ -70,13 +76,13 @@ interface CountUserQueryIconProps {
 }
 
 
-export function CountUserQueryIcon(p: CountUserQueryIconProps) {
+export function SearchUserQueryCount(p: CountUserQueryIconProps) {
 
   var userQuery = useFetchInState(p.userQuery)
   var findOptions = useAPI(signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined), [userQuery]);
 
   if (findOptions == null)
-    return <span className="icon" style={{ color: p.color }}>…</span>;
+    return <ToolbarCount num={ undefined} />;
 
-  return <CountIcon findOptions={findOptions} autoRefreshPeriod={p.autoRefreshPeriod} color={p.color} />
+  return <SearchToolbarCount findOptions={findOptions} autoRefreshPeriod={p.autoRefreshPeriod} color={p.color} />
 }

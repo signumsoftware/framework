@@ -7,12 +7,14 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useHistoryListen, useWindowEvent, useAPIWithReload } from '@framework/Hooks'
+import * as Navigator from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
 import { getToString } from '@framework/Signum.Entities'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { urlVariables } from '../../Dashboard/UrlVariables';
 import { Dic } from '@framework/Globals';
+import { ToolbarEntity, ToolbarMenuEntity } from '../Signum.Entities.Toolbar';
 
 
 
@@ -20,7 +22,11 @@ export default function ToolbarRenderer(p: {
   onAutoClose?: () => void;
   appTitle: React.ReactNode
 }): React.ReactElement | null {
-  const response = useAPI(() => ToolbarClient.API.getCurrentToolbar("Side"), []);
+
+  Navigator.useEntityChanged(ToolbarEntity, () => reload(), []);
+  Navigator.useEntityChanged(ToolbarMenuEntity, () => reload(), []);
+
+  const [response, reload] = useAPIWithReload(() => ToolbarClient.API.getCurrentToolbar("Side"), [], { avoidReset: true });
   const responseRef = useUpdatedRef(response);
 
   const [refresh, setRefresh] = React.useState(false);

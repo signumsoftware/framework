@@ -58,7 +58,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 
     public Lite<EmailMasterTemplateEntity>? MasterTemplate { get; set; }
 
-    public bool IsBodyHtml { get; set; } = true;
+    public EmailMessageFormat MessageFormat { get; set; }
 
     [BindParent]
     public MList<EmailTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailTemplateMessageEmbedded>();
@@ -129,7 +129,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
             new XAttribute("GroupResults", GroupResults),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
-            new XAttribute("IsBodyHtml", IsBodyHtml),
+            new XAttribute("MessageEditor", MessageFormat),
             From == null ? null! : new XElement("From",
                 From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null!,
                 From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null!,
@@ -158,7 +158,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
             this.Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script)))!
         );
     }
-
+       
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         Guid = Guid.Parse(element.Attribute("Guid")!.Value);
@@ -175,7 +175,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
-        IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml")!.Value);
+        MessageFormat = element.Attribute("IsBodyHtml")?.Value.ToEnum<EmailMessageFormat>() ?? EmailMessageFormat.HtmlComplex;
 
         From = From.CreateOrAssignEmbedded(element.Element("From"), (etf, xml) => 
         {
@@ -259,6 +259,12 @@ public class EmailTemplateRecipientEmbedded : EmailTemplateAddressEmbedded
     }
 }
 
+public enum EmailMessageFormat
+{
+    PlainText,
+    HtmlComplex,
+    HtmlSimple
+}
 
 public enum WhenNoneRecipientsBehaviour
 {
