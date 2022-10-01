@@ -40,18 +40,15 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
       {query &&
         (<div>
           <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters} onChange={() => forceUpdate()}
-            helpText={UserQueryMessage.MakesTheUserQueryAvailableAsAQuickLinkOf0.niceToString(getToString(ctx.value.entityType) ?? UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))} />
-          {
-            p.ctx.value.entityType &&
-            <div className="row">
-              <div className="col-sm-4 offset-sm-2">
-                <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />
-              </div>
-              <div className="col-sm-4">
-                {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<pre style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></pre>)}
-              </div>
+          helpText={
+            <div>
+              {UserQueryMessage.MakesThe0AvailableAsAQuickLinkOf1.niceToString(UserQueryEntity.niceName(), ctx.value.entityType ? getToString(ctx.value.entityType) : UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))}
+              {p.ctx.value.entityType && <br />}
+              {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
+              {p.ctx.value.entityType && <br />}
+              {p.ctx.value.entityType && <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
             </div>
-        }
+          } />
          
 
 
@@ -59,7 +56,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
           <div className="col-sm-6">
             <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} />
             <ValueLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
-              helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
+              helpText={UserQueryMessage.MakesThe0AvailableInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
 
           </div>
           <div className="col-sm-6">
