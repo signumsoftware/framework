@@ -184,7 +184,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
       forceUpdate();
 
       refIgnoreSignalR.current = true;
-      Operations.API.executeMultiple(alertsToRemove.map(a => toLite(a.alert)), AlertOperation.Attend)
+      Operations.API.executeMultiple(alertsToRemove.map(a => toLite(a.alert)), AlertOperation.Attend, { progressModal: false })
         .then(res => {
 
           const errors = Dic.getValues(res.errors).filter(a => Boolean(a));

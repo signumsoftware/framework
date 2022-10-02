@@ -48,6 +48,15 @@ public enum OperationMessage
     AddSetter,
     [Description("multi setter")]
     MultiSetter,
+
+    [Description("Deleting")]
+    Deleting,
+
+    [Description("Executing {0}")]
+    Executing0,
+
+    [Description("{0} error[s]")]
+    _0Errors,
 }
 
 public enum SynchronizerMessage

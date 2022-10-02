@@ -1,3 +1,4 @@
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
@@ -6,6 +7,8 @@ using Signum.React.Filters;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using static Signum.React.ApiControllers.OperationController;
 
 namespace Signum.React.ApiControllers;
@@ -194,82 +197,45 @@ public class OperationController : Controller
     }
 
     [HttpPost("api/operation/constructFromMultiple"), ProfilerActionSplitter]
-    public IEnumerable<OperationResult> ConstructFromMultiple([Required, FromBody] MultiOperationRequest request)
+    public IAsyncEnumerable<OperationResult> ConstructFromMultiple([Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
-        if (request.Setters.HasItems())
+        return ForeachMultiple(request.Lites, async lite =>
         {
-            return ForeachMultiple(request.Lites, lite =>
-            {
-                var entity = lite.Retrieve();
-
+            var entity = await lite.RetrieveAsync(cancellationToken);
+            if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
-
-                var op = request.GetOperationSymbol(entity.GetType());
-
-                OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
-            });
-        }
-        else
-        {
-            return ForeachMultiple(request.Lites, lite =>
-            {
-                var op = request.GetOperationSymbol(lite.EntityType);
-
-                OperationLogic.ServiceConstructFromLite(lite, op, request.ParseArgs(op));
-            });
-        }
+            var op = request.GetOperationSymbol(entity.GetType());
+            OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
+        }, cancellationToken);
     }
 
 
     [HttpPost("api/operation/executeMultiple"), ProfilerActionSplitter]
-    public IEnumerable<OperationResult> ExecuteMultiple([Required, FromBody] MultiOperationRequest request)
+    public IAsyncEnumerable<OperationResult> ExecuteMultiple([Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
-        if (request.Setters.HasItems())
+        return ForeachMultiple(request.Lites, async lite =>
         {
-            return ForeachMultiple(request.Lites, lite =>
-            {
-                var entity = lite.Retrieve();
-
+            var entity = await lite.RetrieveAsync(cancellationToken);
+            if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
-                var op = request.GetOperationSymbol(entity.GetType());
-                OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
-            });
-        }
-        else
-        {
-            return ForeachMultiple(request.Lites, lite =>
-            {
-                var op = request.GetOperationSymbol(lite.EntityType);
-                OperationLogic.ServiceExecuteLite(lite, op, request.ParseArgs(op));
-            });
-        }
+            var op = request.GetOperationSymbol(entity.GetType());
+            OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
+        }, cancellationToken);
     }
 
 
     [HttpPost("api/operation/deleteMultiple"), ProfilerActionSplitter]
-    public IEnumerable<OperationResult> DeleteMultiple([Required, FromBody] MultiOperationRequest request)
+    public IAsyncEnumerable<OperationResult> DeleteMultiple([Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
-        if (request.Setters.HasItems())
+        return ForeachMultiple(request.Lites, async lite =>
         {
-            return ForeachMultiple(request.Lites, lite =>
-            {
-                var entity = lite.Retrieve();
-
+            var entity = await lite.RetrieveAsync(cancellationToken);
+            if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 
-                var op = request.GetOperationSymbol(entity.GetType());
-
-                OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
-            });
-        }
-        else
-        {
-            return ForeachMultiple(request.Lites, lite =>
-            {
-                var op = request.GetOperationSymbol(lite.EntityType);
-                OperationLogic.ServiceDelete(lite, op, request.ParseArgs(op));
-            });
-        }
+            var op = request.GetOperationSymbol(entity.GetType());
+            OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
+        }, cancellationToken);
     }
 
     public class OperationResult
@@ -284,14 +250,17 @@ public class OperationController : Controller
 
     }
 
-    static IEnumerable<OperationResult> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Action<Lite<Entity>> action)
+    async static IAsyncEnumerable<OperationResult> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Func<Lite<Entity>, Task> action, CancellationToken cancellationToken)
     {
         foreach (var lite in lites.Distinct())
         {
+            if (cancellationToken.IsCancellationRequested)
+                yield break;
+
             string? error = null;
             try
             {
-                action(lite);
+                await action(lite);
             }
             catch (Exception e)
             {

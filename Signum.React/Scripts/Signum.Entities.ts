@@ -489,6 +489,9 @@ export module OperationMessage {
   export const Setters = new MessageKey("OperationMessage", "Setters");
   export const AddSetter = new MessageKey("OperationMessage", "AddSetter");
   export const MultiSetter = new MessageKey("OperationMessage", "MultiSetter");
+  export const Deleting = new MessageKey("OperationMessage", "Deleting");
+  export const Executing0 = new MessageKey("OperationMessage", "Executing0");
+  export const _0Errors = new MessageKey("OperationMessage", "_0Errors");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
