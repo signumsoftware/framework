@@ -129,7 +129,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
             new XAttribute("GroupResults", GroupResults),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
-            new XAttribute("MessageEditor", MessageFormat),
+            new XAttribute("MessageFormat", MessageFormat),
             From == null ? null! : new XElement("From",
                 From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null!,
                 From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null!,
@@ -175,7 +175,8 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
-        MessageFormat = element.Attribute("IsBodyHtml")?.Value.ToEnum<EmailMessageFormat>() ?? EmailMessageFormat.HtmlComplex;
+        MessageFormat = element.Attribute("MessageFormat")?.Value.ToEnum<EmailMessageFormat>() ??
+            (element.Attribute("IsBodyHtml")?.Value.ToBool() == true ? EmailMessageFormat.HtmlComplex : EmailMessageFormat.PlainText);
 
         From = From.CreateOrAssignEmbedded(element.Element("From"), (etf, xml) => 
         {
