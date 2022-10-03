@@ -258,6 +258,7 @@
   <Type Name="OperationMessage">
     <Member Name="_0AndClose" Description="{0} &amp; Schließen" />
     <Member Name="_0AndNew" Description="{0} &amp; Neu" />
+    <Member Name="_0Errors" Description="{0} Fehler" />
     <Member Name="AddSetter" Description="Setter hinzufügen" />
     <Member Name="BulkModifications" Description="Massenänderungen" />
     <Member Name="Condition" Description="Bedingung" />
@@ -265,6 +266,8 @@
     <Member Name="Create" Description="Erstellen..." />
     <Member Name="Create0" Description="{0} erstellen" />
     <Member Name="CreateFromRegex" Description="^(.*) aus .* erstellen$" />
+    <Member Name="Deleting" Description="Löschen" />
+    <Member Name="Executing0" Description="Ausführen {0}" />
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="MultiSetter" Description="Multi-Setter" />

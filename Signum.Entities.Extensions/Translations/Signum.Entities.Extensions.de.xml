@@ -1066,6 +1066,11 @@
     <Member Name="Template" Description="Vorlage" />
     <Member Name="UniqueIdentifier" Description="Einzigartiger Identifikator" />
   </Type>
+  <Type Name="EmailMessageFormat" Description="Format der E-Mail-Nachricht">
+    <Member Name="HtmlComplex" Description="HTML-Komplex" />
+    <Member Name="HtmlSimple" Description="Html-Einfach" />
+    <Member Name="PlainText" Description="Klartext" />
+  </Type>
   <Type Name="EmailMessageMessage">
     <Member Name="_01requiresExtraParameters" Description="{0} {1} erfordert zusätzliche Parameter" />
     <Member Name="ExceptionMessages" Description="Ausnahmenachrichten" />
@@ -1156,8 +1161,8 @@
     <Member Name="From" Description="Von" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren " />
     <Member Name="Guid" Description="Guid" />
-    <Member Name="IsBodyHtml" Description="Ist Körper html" />
     <Member Name="MasterTemplate" Description="Hauptvorlage" />
+    <Member Name="MessageFormat" Description="Nachrichtenformat" />
     <Member Name="Messages" Description="Nachrichten" />
     <Member Name="Model" Description="Modell" />
     <Member Name="Name" Description="Name" />
@@ -2238,6 +2243,10 @@
   <Type Name="SessionLogPermission">
     <Member Name="TrackSession" Description="Sitzungskontrolle" />
   </Type>
+  <Type Name="ShowCount" Description="Anzahl anzeigen">
+    <Member Name="Always" Description="Immer" />
+    <Member Name="MoreThan0" Description="Mehr als 0" />
+  </Type>
   <Type Name="SimpleTaskSymbol" Description="Einfache Task" PluralDescription="Einfache Tasks" Gender="f" />
   <Type Name="SMSCharactersMessage">
     <Member Name="Insert" Description="Einfügen" />
@@ -2409,6 +2418,7 @@
     <Member Name="IconName" Description="Symbolname" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="OpenInPopup" Description="Im Popup öffnen" />
+    <Member Name="ShowCount" Description="Anzahl anzeigen" />
     <Member Name="Type" Description="Typ" />
     <Member Name="Url" Description="URL" />
   </Type>
