@@ -232,6 +232,7 @@ public class WorkflowActivityInfo
     public WorkflowActivityEntity? WorkflowActivity => CaseActivity?.WorkflowActivity as WorkflowActivityEntity;
     public CaseActivityEntity? CaseActivity { get; internal set; }
     public WorkflowConnectionEntity? Connection { get; internal set; }
+    public string? Decision { get; set; }
 
     public bool Is(string workflowName, string activityName)
     {
