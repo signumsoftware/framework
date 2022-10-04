@@ -262,8 +262,11 @@ public class EmailTemplateRecipientEmbedded : EmailTemplateAddressEmbedded
 
 public enum EmailMessageFormat
 {
+    [Description("Plain Text")]
     PlainText,
+    [Description("HTML (Complex)")]
     HtmlComplex,
+    [Description("HTML (Simple)")]
     HtmlSimple
 }
 
