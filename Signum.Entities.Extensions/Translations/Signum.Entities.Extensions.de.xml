@@ -1067,9 +1067,9 @@
     <Member Name="UniqueIdentifier" Description="Einzigartiger Identifikator" />
   </Type>
   <Type Name="EmailMessageFormat" Description="Format der E-Mail-Nachricht">
-    <Member Name="HtmlComplex" Description="HTML-Komplex" />
-    <Member Name="HtmlSimple" Description="Html-Einfach" />
-    <Member Name="PlainText" Description="Klartext" />
+    <Member Name="HtmlComplex" Description="HTML (Komplex)" />
+    <Member Name="HtmlSimple" Description="HTML (Simpel)" />
+    <Member Name="PlainText" Description="Plain Text" />
   </Type>
   <Type Name="EmailMessageMessage">
     <Member Name="_01requiresExtraParameters" Description="{0} {1} erfordert zusätzliche Parameter" />
