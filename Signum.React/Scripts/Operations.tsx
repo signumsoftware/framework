@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Dic } from './Globals'
-import { ajaxPost } from './Services'
+import { ajaxGetRaw, ajaxPost, ajaxPostRaw } from './Services'
 import {
   Lite, Entity, OperationMessage, EntityPack,
   OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage, EngineMessage, getToString, PropertyOperation, toLite
@@ -26,6 +26,7 @@ import { SearchControlLoaded } from "./Search";
 import { isActive, isFilterGroupOption, isFilterGroupOptionParsed } from "./FindOptions";
 import { CellFormatter, CellFormatterContext } from "./Finder";
 import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperation";
+import { ProgressModal } from "./Operations/ProgressModal";
 
 export namespace Options {
   export function maybeReadonly(ti: TypeInfo) {
@@ -854,9 +855,11 @@ export namespace API {
     return ajaxPost({ url: "~/api/operation/constructFromLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
-  export function constructFromMultiple<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, setters?: PropertySetter[], ...args: any[]): Promise<ErrorReport> {
+  export function constructFromMultiple<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, options: MultiOperationOptions, ...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost({ url: "~/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: setters, args: args } as MultiOperationRequest);
+    var abortController = options.abortController ?? new AbortController();
+    return ProgressModal.showIfNecessary(lites, operationKey.toString(), options.progressModal, abortController,
+      () => ajaxPostRaw({ url: "~/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest));;
   }
 
   export function constructFromMany<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T> | undefined> {
@@ -874,9 +877,12 @@ export namespace API {
     return ajaxPost({ url: "~/api/operation/executeLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
-  export function executeMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T>, setters?: PropertySetter[], ...args: any[]): Promise<ErrorReport> {
+  export function executeMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T>, options: MultiOperationOptions, ...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost({ url: "~/api/operation/executeMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: setters, args: args } as MultiOperationRequest);
+    var abortController = options.abortController ?? new AbortController();
+    return ProgressModal.showIfNecessary(lites, operationKey.toString(), options.progressModal, abortController,
+      () => ajaxPostRaw({ url: "~/api/operation/executeMultiple", signal: abortController.signal }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest)
+    );
   }
 
   export function deleteEntity<T extends Entity>(entity: T, operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<void> {
@@ -889,23 +895,32 @@ export namespace API {
     return ajaxPost({ url: "~/api/operation/deleteLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
-  export function deleteMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | DeleteSymbol<T>, setters?: PropertySetter[],...args: any[]): Promise<ErrorReport> {
+  export function deleteMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | DeleteSymbol<T>, options: MultiOperationOptions,...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost({ url: "~/api/operation/deleteMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: setters, args: args } as MultiOperationRequest);
+    var abortController = options.abortController ?? new AbortController();
+    return ProgressModal.showIfNecessary(lites, operationKey.toString(), options.progressModal, abortController,
+      () => ajaxPostRaw({ url: "~/api/operation/deleteMultiple", signal: abortController.signal }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest)
+    );
   }
 
   export interface ErrorReport {
     errors: { [liteKey: string]: string; }
   }
 
-
-
+  export interface OperationResult {
+    entity: Lite<Entity>;
+    error: string;
+  }
 
   export function getOperationKey(operationKey: string | OperationSymbol) {
     return (operationKey as OperationSymbol).key || operationKey as string;
   }
 
-
+  export interface MultiOperationOptions {
+    progressModal?: boolean;
+    setters?: PropertySetter[];
+    abortController?: AbortController;
+  }
 
   export interface MultiOperationRequest {
     operationKey: string;

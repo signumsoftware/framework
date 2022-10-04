@@ -3,6 +3,7 @@ import Collapse from 'react-bootstrap/Collapse'
 import { classes } from '@framework/Globals'
 import { BsColor } from '@framework/Components/Basic';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 export interface CollapsableCardProps {
   color?: BsColor;
@@ -12,6 +13,8 @@ export interface CollapsableCardProps {
   isOpen?: boolean;
   toggle?: (isOpen: boolean) => void;
   cardId?: string | number;
+  expandIcon?: IconProp;
+  collapseIcon?: IconProp;
   cardStyle?: CardStyle;
   headerStyle?: CardStyle;
   bodyStyle?: CardStyle;
@@ -65,7 +68,7 @@ export default function CollapsableCard(p: CollapsableCardProps) {
             className={"float-end"}
             style={{ cursor: "pointer" }}
             onClick={() => setIsOpen(!isOpen)}>
-            <FontAwesomeIcon icon={isOpen ? "chevron-up" : "chevron-down"} />
+            <FontAwesomeIcon icon={isOpen ? (p.collapseIcon ?? "chevron-up") : (p.expandIcon ?? "chevron-down")} />
           </span>
         }
         {p.header}
