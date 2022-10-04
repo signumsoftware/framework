@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as Operations from '@framework/Operations'
+import { useRootClose } from '@restart/ui'
 import * as Finder from '@framework/Finder'
 import { is, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { Toast, Button, ButtonGroup } from 'react-bootstrap'
@@ -12,10 +13,12 @@ import "./WhatsNewDropdown.css"
 import { Link } from 'react-router-dom';
 import { classes, Dic } from '@framework/Globals'
 import MessageModal from '@framework/Modals/MessageModal'
-import { WhatsNewEntity, WhatsNewMessage, WhatsNewOperation } from '../Signum.Entities.WhatsNew'
+import { WhatsNewEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.Entities.WhatsNew'
 import * as AppContext from "@framework/AppContext"
 import { API, NumWhatsNews, WhatsNewFull, WhatsNewShort } from '../WhatsNewClient'
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
+import { useHistory } from 'react-router-dom'
+import { useEffect } from 'react' 
 
 export default function WhatsNewDropdown(props: { keepRingingFor?: number }) {
 
@@ -29,7 +32,7 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
 
   const forceUpdate = useForceUpdate();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  
+
   const [showNews, setShowNews] = React.useState<number>(5);
   
   const isOpenRef = useUpdatedRef(isOpen);
@@ -96,13 +99,17 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
 
   var newsGroups = whatsNew == null ? null : whatsNew.orderByDescending(w => w.creationDate);
 
+  var divRef = React.useRef<HTMLDivElement>(null);
+
+  useRootClose(divRef, () => setIsOpen(false), { disabled: !isOpen });
+
   return (
     <>
       <div className="nav-link sf-bell-container" onClick={handleOnToggle}>
         <FontAwesomeIcon icon="bullhorn" className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")} />
         {countResult && countResult.numWhatsNews > 0 && <span className="badge btn-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
       </div>
-      {isOpen && <div className="sf-news-toasts">
+      {isOpen && <div className="sf-news-toasts" ref={divRef}>
         {newsGroups == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :
 
           <>
@@ -110,7 +117,7 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
 
             {
               newsGroups.filter((gr, i) => i < showNews)
-                .map(a => <WhatsNewToast whatsnew={a} key={a.whatsNew.id} onClose={handleOnCloseNews} refresh={reloadCount} />)
+                .map(a => <WhatsNewToast whatsnew={a} key={a.whatsNew.id} onClose={handleOnCloseNews} refresh={reloadCount} setIsOpen={setIsOpen} />)
             }
             {
               newsGroups.length > showNews &&
@@ -132,7 +139,7 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
   );
 }
 
-export function WhatsNewToast(p: { whatsnew: WhatsNewShort, onClose: (e: WhatsNewShort[]) => void, refresh: () => void, className?: string; })
+export function WhatsNewToast(p: { whatsnew: WhatsNewShort, onClose: (e: WhatsNewShort[]) => void, refresh: () => void, className?: string; setIsOpen: (isOpen: boolean) => void })
 {
   //ignoring open tags other than img
   function HTMLSubstring(text: string) {
@@ -151,16 +158,23 @@ export function WhatsNewToast(p: { whatsnew: WhatsNewShort, onClose: (e: WhatsNe
     return substring + "...";
   }
 
+  function handleClickPreviewPicture(e: React.MouseEvent) {
+    e.preventDefault();
+    p.setIsOpen(false);
+    AppContext.history.push("~/newspage/" + p.whatsnew.whatsNew.id);
+  }
+
   return (
     <Toast onClose={() => p.onClose([p.whatsnew])} className={p.className}>
       <Toast.Header>
-        <strong className="me-auto">{p.whatsnew.title}</strong>
+        <strong className="me-auto">{p.whatsnew.title} {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "#d50a30" }}>{(p.whatsnew.status == "Draft") ? p.whatsnew.status : undefined}</small>}</strong>
         <small>{DateTime.fromISO(p.whatsnew.creationDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
-          <HtmlViewer text={HTMLSubstring(p.whatsnew.description)} />
+        <img onClick={handleClickPreviewPicture} src={AppContext.toAbsoluteUrl("~/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)} style={{ maxHeight: "30vh", cursor:"pointer", maxWidth: "10vw", margin: "0px 0px 0px 10px" }} />
+        <HtmlViewer text={HTMLSubstring(p.whatsnew.description)} />
         <br />
-        <Link to={"~/newspage/" + p.whatsnew.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
+        <Link onClick={handleClickPreviewPicture} to={"~/newspage/" + p.whatsnew.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
       </Toast.Body>
     </Toast>
   );

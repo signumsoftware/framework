@@ -28,3 +28,18 @@
     height: auto;
     margin-bottom: 20px;
 }
+
+.headerpicture-shadow {
+    border: thin solid #d3d1d1;
+    padding: 10px;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s
+}
+
+.whatsnew-image {
+    border: thin solid #d3d1d1;
+    padding: 10px;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s;
+    max-width: 90% !important;
+}

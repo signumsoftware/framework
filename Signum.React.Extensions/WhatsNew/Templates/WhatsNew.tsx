@@ -12,6 +12,7 @@ export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
 
   return (
     <div>
+      <ValueLine ctx={ctx.subCtx(w => w.status)} readOnly />
       <ValueLine ctx={ctx.subCtx(w => w.name)} />
       <FileLine ctx={ctx.subCtx(w => w.previewPicture)} mandatory />
 
