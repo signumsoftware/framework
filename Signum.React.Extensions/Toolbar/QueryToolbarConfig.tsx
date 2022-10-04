@@ -1,12 +1,13 @@
 import * as React from 'react'
 import { Location } from 'history'
-import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
+import { getQueryKey, getQueryNiceName, getTypeInfos, IsByAll } from '@framework/Reflection'
 import { getToString } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'
-import { IconColor, RefreshCounterEvent, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { SearchValue, FindOptions } from '@framework/Search';
+import * as Navigator from '@framework/Navigator';
 import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useDocumentEvent, useInterval, useUpdatedRef } from '@framework/Hooks'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
@@ -71,19 +72,11 @@ export function SearchToolbarCount(p: CountIconProps) {
   const [invalidations, setInvalidation] = React.useState<number>(0);
 
   var qd = useAPI(() => Finder.getQueryDescription(p.findOptions.queryName), [p.findOptions.queryName]);
-  var qdRef = useUpdatedRef(qd);
 
+  var type = qd?.columns["Entity"].type.name;
+  var types = type == null || type == IsByAll ? [] : type.split(",");
 
-
-  useDocumentEvent("count-user-query", (e: Event) => {
-    if (e instanceof RefreshCounterEvent && qd != null) {
-      var col = qd.columns["Entity"];
-
-      if (e.queryKey == qd?.columns || Array.isArray(e.queryKey) && e.queryKey.contains(queryKey)) {
-        setInvalidation(a => a + 1);
-      } 
-    }
-  }, []);
+  Navigator.useEntityChanged(types, () => setInvalidation(a => a + 1), []);
 
   return <SearchValue deps={[deps, invalidations]}
     findOptions={p.findOptions}

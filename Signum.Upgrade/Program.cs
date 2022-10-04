@@ -21,7 +21,7 @@ class Program
         Console.Write("  ApplicationName = "); SafeConsole.WriteLineColor(ConsoleColor.DarkGray, uctx.ApplicationName);
 
 
-        UpgradeContext.DefaultIgnoreDirectories = UpgradeContext.DefaultIgnoreDirectories.Where(a => a != "Framework").ToArray();
+        //UpgradeContext.DefaultIgnoreDirectories = UpgradeContext.DefaultIgnoreDirectories.Where(a => a != "Framework").ToArray();
 
         new CodeUpgradeRunner(autoDiscover: true).Run(uctx);
     }
