@@ -248,6 +248,7 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
   return (
     <div className="sf-email-template-message">
       <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} onChange={p.invalidate} />
+      <br/>
       <div>
         <TemplateControls queryKey={p.queryKey} forHtml={true} />
         <ValueLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
