@@ -201,7 +201,6 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
   }
 
   var divRef = React.useRef<HTMLDivElement>(null);
-
   useRootClose(divRef, () => setIsOpen(false), { disabled: !isOpen });
 
   return (
@@ -210,7 +209,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
         <FontAwesomeIcon icon={window.__disableSignalR ? "bell-slash" : "bell"} className={classes("sf-bell", ringing && "ringing", isOpen && "open", countResult && countResult.numAlerts > 0 && "active")} />
         {countResult && countResult.numAlerts > 0 && <span className="badge btn-danger badge-pill sf-alerts-badge">{countResult.numAlerts}</span>}
       </div>
-      {isOpen && <div className="sf-alerts-toasts mt-2" style={{
+      {isOpen && <div className="sf-alerts-toasts mt-2" ref={divRef} style={{
         backgroundColor: "rgba(255,255,255, 0.7)",
         backdropFilter: "blur(10px)",
         transition: "transform .4s ease",
