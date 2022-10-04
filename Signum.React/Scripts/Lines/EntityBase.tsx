@@ -42,8 +42,8 @@ export interface EntityBaseProps extends LineBaseProps {
 export class EntityBaseController<P extends EntityBaseProps> extends LineBaseController<P>{
 
   static createIcon = <FontAwesomeIcon icon="plus" />;
-  static findIcon = <FontAwesomeIcon icon="search" />;
-  static removeIcon = <FontAwesomeIcon icon="times" />;
+  static findIcon = <FontAwesomeIcon icon="magnifying-glass" />;
+  static removeIcon = <FontAwesomeIcon icon="xmark" />;
   static viewIcon = <FontAwesomeIcon icon="arrow-right" />;
   static moveIcon = <FontAwesomeIcon icon="bars" />;
   static pasteIcon = <FontAwesomeIcon icon="clipboard" />;

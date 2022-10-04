@@ -21,7 +21,7 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
 
   getDefaultIcon(): IconColor {
     return ({
-      icon: "random",
+      icon: "shuffle",
       iconColor: "#2471A3",
     });
   }

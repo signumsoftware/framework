@@ -105,7 +105,7 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
                   <a href="#" title={EntityControlMessage.Remove.niceToString()}
                     className="sf-line-button sf-remove"
                     onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
-                    <FontAwesomeIcon icon="times" />
+                    <FontAwesomeIcon icon="xmark" />
                   </a>}
               </div>
             )

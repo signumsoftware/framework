@@ -258,8 +258,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     var menuItems = [
       Navigator.isViewable(type, { isSearch: true }) && <Dropdown.Item onClick={this.handleView} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
-      Operations.tryGetOperationInfo(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
-      Operations.tryGetOperationInfo(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
+      Operations.tryGetOperationInfo(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="square-caret-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
+      Operations.tryGetOperationInfo(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="square-caret-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
       <Dropdown.Item onClick={this.handleCopyClick}><FontAwesomeIcon icon="copy" />&nbsp;{SearchMessage.Copy.niceToString()}</Dropdown.Item>,
     ].filter(a => a != false) as React.ReactElement<any>[];
 
@@ -428,7 +428,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
           </Dropdown.Menu>
         </Dropdown>
-        <button className="btn btn-light" onClick={this.handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+        <button className="btn btn-light" onClick={this.handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
       </div>
     );
   }

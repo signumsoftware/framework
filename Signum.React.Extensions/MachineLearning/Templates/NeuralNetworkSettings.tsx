@@ -141,7 +141,7 @@ export function LabelWithHelp(p: LabelWithHelpProps) {
           <div className="popover-body">{p.text}</div>
         </Popover>}>
         <span key="s">
-          {p.ctx.niceName()} <FontAwesomeIcon icon="question-circle" />
+          {p.ctx.niceName()} <FontAwesomeIcon icon="circle-question" />
         </span>
       </OverlayTrigger>
     );

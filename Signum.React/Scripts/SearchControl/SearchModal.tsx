@@ -129,7 +129,7 @@ function SearchModal(p: SearchModalProps) {
           &nbsp;
           </span>
         <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e)}>
-          <FontAwesomeIcon icon="external-link-alt" />
+          <FontAwesomeIcon icon="up-right-from-square" />
         </a>
         {p.message && <>
           <br />

@@ -316,7 +316,7 @@ export function EntityGridItem(p : EntityGridItemProps){
         {p.onRemove &&
           <a href="#" className="sf-line-button sf-remove float-end" onClick={p.onRemove}
               title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon icon="times" />
+              <FontAwesomeIcon icon="xmark" />
             </a>
           }
         {p.title}

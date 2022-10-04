@@ -86,7 +86,7 @@ export function start(options: { routes: JSX.Element[] }) {
   Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
     isVisible: () => false,
     color: "warning",
-    icon: "cogs",
+    icon: "gears",
     contextual: { isVisible: () => true },
     contextualFromMany: { isVisible: () => true },
   }));
@@ -266,7 +266,7 @@ export function start(options: { routes: JSX.Element[] }) {
     return promise.then(das =>
       das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d) ?? "", e => {
         AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
-      }, { icon: "tachometer-alt", iconColor: "darkslateblue" })));
+      }, { icon: "gauge", iconColor: "darkslateblue" })));
   });
 
   QuickLinks.registerQuickLink(DashboardEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),

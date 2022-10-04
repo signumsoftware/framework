@@ -70,7 +70,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   useSignalRCallback(conn, "ConcurrentUsersChanged", () => setRefreshKey(a => a + 1), []);
 
   if (window.__disableSignalR)
-    return <FontAwesomeIcon icon="exclamation-triangle" color={"#ddd"} title={window.__disableSignalR} />;
+    return <FontAwesomeIcon icon="triangle-exclamation" color={"#ddd"} title={window.__disableSignalR} />;
 
   const ticksRef = useUpdatedRef(ticks);
   const entityRef = useUpdatedRef(p.entity);
@@ -123,7 +123,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
             {otherUsers?.map((a, i) =>
               <div key={i} className="d-flex align-items-center" >
                 <SmallProfilePhoto user={a.user} className="me-2"/> {getToString(a.user)} <small className="ms-1 text-muted">({DateTime.fromISO(a.startTime).toRelative()})</small>
-                {a.isModified && <FontAwesomeIcon icon="edit" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
+                {a.isModified && <FontAwesomeIcon icon="pen-to-square" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
               </div>)}
 
             {isModified.current ?

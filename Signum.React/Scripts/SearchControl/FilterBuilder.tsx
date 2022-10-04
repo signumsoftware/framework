@@ -109,7 +109,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                 <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
                   className="sf-line-button sf-remove"
                   onClick={handleDeleteAllFilters}>
-                  <FontAwesomeIcon icon="times" />
+                  <FontAwesomeIcon icon="xmark" />
                 </a>}</th>
               <th>{SearchMessage.Field.niceToString()}</th>
               <th>{SearchMessage.Operation.niceToString()}</th>
@@ -281,7 +281,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
           <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteFilter}>
-            <FontAwesomeIcon icon="times" />
+            <FontAwesomeIcon icon="xmark" />
           </a>}
       </td>
       <td colSpan={3 + (p.showPinnedFiltersOptions ? 1 : 0) + (p.showDashboardBehaviour ? 1 : 0)} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
@@ -541,7 +541,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
             <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className="sf-line-button sf-remove"
               onClick={handleDeleteFilter}>
-              <FontAwesomeIcon icon="times" />
+              <FontAwesomeIcon icon="xmark" />
             </a>}
         </td>
         <td>
@@ -695,7 +695,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
     <Dropdown>
       <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "light"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
         title={StyleContext.default.titleLabels ? "Behaviour of the filter when used inside of a Dashboard" : undefined}>
-        {<FontAwesomeIcon icon="tachometer-alt" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
+        {<FontAwesomeIcon icon="gauge" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
@@ -779,7 +779,7 @@ export function MultiValue(p: MultiValueProps) {
                   <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
                     className="sf-line-button sf-remove"
                     onClick={e => handleDeleteValue(e, i)}>
-                    <FontAwesomeIcon icon="times" />
+                    <FontAwesomeIcon icon="xmark" />
                   </a>}
               </td>
               <td>

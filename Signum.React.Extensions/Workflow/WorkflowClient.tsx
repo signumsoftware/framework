@@ -121,7 +121,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     },
       {
         isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
-        icon: "random",
+        icon: "shuffle",
         iconColor: "green"
       })
   ]);
@@ -139,7 +139,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
     new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] },
-      { icon: "tasks", iconColor: "blue" })
+      { icon: "list-check", iconColor: "blue" })
   ]);
 
   OmniboxClient.registerSpecialAction({
@@ -264,7 +264,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     }
   }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.FreeJump, {
-    icon: "share-square",
+    icon: "share-from-square",
     color: "danger",
     iconColor: "#800080",
     hideOnCanExecute: true,
@@ -361,13 +361,13 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
     () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
     workflowActivityMonitorUrl(ctx.lite),
-    { icon: "tachometer-alt", iconColor: "green" }));
+    { icon: "gauge", iconColor: "green" }));
 
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave, alternatives: eoc => [] }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Activate, {
-    contextual: { icon: "heartbeat", iconColor: "red" },
-    contextualFromMany: { icon: "heartbeat", iconColor: "red" },
+    contextual: { icon: "heart-pulse", iconColor: "red" },
+    contextualFromMany: { icon: "heart-pulse", iconColor: "red" },
   }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Deactivate, {
     onClick: eoc => chooseWorkflowExpirationDate([toLite(eoc.entity)]).then(val => !val ? undefined : eoc.defaultClick(val)),

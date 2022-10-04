@@ -53,7 +53,7 @@ export function start() {
   },
     {
       isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).operations && Finder.isFindable(OperationLogEntity, false),
-      icon: "history",
+      icon: "clock-rotate-left",
       iconColor: "green",
     }));
 
