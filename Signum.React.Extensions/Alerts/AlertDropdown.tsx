@@ -333,7 +333,9 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
         transition: "transform .4s ease",
       }}>
         {alerts.map((a, i) => {
-          var expanded = i < showAlerts;
+          var expanded = i < showAlerts ? true :
+            alerts.filter((a, j) => j < i && !a.removing).length < showAlerts ? "comming" :
+              false;
 
           var hiddenIndex = (i - (showAlerts - 1));
 
@@ -369,7 +371,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
   );
 }
 
-export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, expanded: boolean, onClose: (e: AlertWithSize) => void, refresh: () => void, className?: string, style?: React.CSSProperties | undefined }) {
+export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, expanded: boolean | "comming", onClose: (e: AlertWithSize) => void, refresh: () => void, className?: string, style?: React.CSSProperties | undefined }) {
 
   var alert = p.alert.alert;
 

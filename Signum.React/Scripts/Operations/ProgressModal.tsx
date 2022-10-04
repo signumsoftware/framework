@@ -6,6 +6,7 @@ import { Entity, External, JavascriptMessage, Lite, liteKey, OperationMessage, O
 import { useForceUpdate, useThrottle } from '../Hooks';
 import { getTypeInfo, OperationInfo } from '../Reflection';
 import { useState } from 'react';
+import { softCast } from '../Globals';
 
 
 interface ProgressModalProps extends IModalProps<API.ErrorReport> {
@@ -92,7 +93,7 @@ ProgressModal.showIfNecessary = (lites: Lite<Entity>[], operationKey: string | O
   } else {
     return makeRequest().then(r => r.json()).then(obj => {
       var results = obj as API.OperationResult[];
-      return safeCast<API.ErrorReport>(results.toObject(a => liteKey(a.entity), a => a.error));
+      return softCast<API.ErrorReport>({ errors: results.toObject(a => liteKey(a.entity), a => a.error) });
     });
   }
 };
@@ -223,8 +224,4 @@ function consumeObject(str: string, startIndex: number): number  | null{
   }
 
   return null;
-}
-
-function safeCast<T>(arg0: { [key: string]: string; }): any {
-    throw new Error('Function not implemented.');
 }
