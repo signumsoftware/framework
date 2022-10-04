@@ -65,7 +65,7 @@ export function start(options: { routes: JSX.Element[], adGroups: boolean }) {
               valueLineType: "TextBox",
               modalSize: "md",
               title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
-              labelText: UserADMessage.NameOrEmail.niceToString(),
+              label: UserADMessage.NameOrEmail.niceToString(),
               initialValue: search
             }) as Promise<string>;
 

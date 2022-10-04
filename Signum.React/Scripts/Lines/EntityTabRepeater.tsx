@@ -104,7 +104,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
       {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           {renderButtons()}
         </div>
       </legend>

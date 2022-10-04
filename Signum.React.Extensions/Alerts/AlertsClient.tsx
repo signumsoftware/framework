@@ -105,7 +105,7 @@ function chooseDate(): Promise<DateTime | undefined> {
         title: AlertMessage.CustomDelay.niceToString(),
         type: mi.type,
         unit: mi.unit,
-        labelText: mi.niceName,
+        label: mi.niceName,
         initiallyFocused: true,
         initialValue: result.toISO()
       });

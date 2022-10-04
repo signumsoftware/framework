@@ -92,7 +92,7 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
     <fieldset className={classes("sf-checkbox-list", p.ctx.errorClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           {renderButtons()}
         </div>
       </legend>

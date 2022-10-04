@@ -111,7 +111,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
-        type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} labelColumns={3} />
+        type={{ name: typeName }} label={DynamicViewMessage.ExampleEntity.niceToString()} labelColumns={3} />
     );
   }
 

@@ -63,7 +63,7 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
     <fieldset className={classes("sf-radiobutton-list", p.ctx.errorClass, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           {renderButtons()}
         </div>
       </legend>
