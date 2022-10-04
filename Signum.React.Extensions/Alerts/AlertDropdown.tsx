@@ -333,7 +333,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
         transition: "transform .4s ease",
       }}>
         {alerts.map((a, i) => {
-          var expanded = i < showAlerts ? true :
+          var expanded: boolean | "comming" = i < showAlerts ? true :
             alerts.filter((a, j) => j < i && !a.removing).length < showAlerts ? "comming" :
               false;
 
