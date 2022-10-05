@@ -226,7 +226,7 @@ public static class DashboardLogic
         }
     }
 
-    public static void UpdateIconNamesInDB()
+    public static void UpdateDashboardIconNameInDB()
     {
         Database.Query<DashboardEntity>().Where(db => db.Parts.Any(p => p.IconName.HasText())).ToList().ForEach(db => {
             db.Parts.Where(p => p.IconName.HasText()).ToList().ForEach(p => {

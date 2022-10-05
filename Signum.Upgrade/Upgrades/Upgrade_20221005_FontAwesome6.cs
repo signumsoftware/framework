@@ -16,7 +16,7 @@ class Upgrade_20221005_FontAwesome6 : CodeUpgradeBase
         {
             file.Replace(IconDefRegex, m =>
             {
-                return Regex.Replace(m.Groups["iconDef"].Value, @"""(?<iconName>[^""]+)""", s => {
+                return m.ToString().Replace(m.Groups["iconDef"].Value, Regex.Replace(m.Groups["iconDef"].Value, @"""(?<iconName>[^""]+)""", s => {
                     var oldName = s.Groups["iconName"].Value;
 
                     var newName = FontAwesomeV6Upgrade.iconNamesDic.TryGetC(oldName);
@@ -24,7 +24,7 @@ class Upgrade_20221005_FontAwesome6 : CodeUpgradeBase
                     if (newName == null)
                         return s.ToString();
                     return s.ToString().Replace(oldName, newName);
-                });
+                }));
             });
         });
 
@@ -37,12 +37,18 @@ class Upgrade_20221005_FontAwesome6 : CodeUpgradeBase
             file.UpdateNpmPackage("@fortawesome/react-fontawesome", "0.2.0");
         });
 
-        uctx.ChangeCodeFile(@"SouthwindMigration.cs ", file =>
+        uctx.ChangeCodeFile(@"Southwind.Terminal/SouthwindMigrations.cs ", file =>
         {
+            file.InsertBeforeFirstLine(a => a.Contains("namespace"),
+@"using Signum.Engine.Toolbar;
+using Signum.Engine.Dashboard;
+
+");
+
             file.InsertBeforeFirstLine(a => a.Contains("Run(autoRun);"),
 @"
-            ToolbarLogic.UpdateIconNamesInDB,
-            DashboardLogic.UpdateIconNamesInDB,
+    ToolbarLogic.UpdateToolbarIconNameInDB,
+    DashboardLogic.UpdateDashboardIconNameInDB,
 ");
         });
     }
