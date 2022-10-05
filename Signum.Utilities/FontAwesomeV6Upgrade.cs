@@ -1,16 +1,10 @@
-using Signum.Utilities;
-using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
-namespace Signum.Upgrade.Upgrades;
+namespace Signum.Utilities;
 
-class Upgrade_20221004_FontAwesome6 : CodeUpgradeBase
+public static class FontAwesomeV6Upgrade 
 {
-    public override string Description => "upgrade FontAwesome 6";
-
-public static Regex IconNameRegex = new Regex(@"icon *[:=] *[\'\""](?<iconName>[a-z\d\-]+)[\'\""]");
-    public override void Execute(UpgradeContext uctx)
-    {
-        var dic = new Dictionary<string, string> {
+    public static Dictionary<string, string> iconNamesDic = new Dictionary<string, string> {
             { "ad", "rectangle-ad"},
             { "adjust", "circle-half-stroke"},
             { "air-freshener", "spray-can-sparkles"},
@@ -686,32 +680,31 @@ public static Regex IconNameRegex = new Regex(@"icon *[:=] *[\'\""](?<iconName>[
             { "wine-glass-alt", "wine-glass-empty"}
         };
 
+    public static string UpdateIconName(string oldName) 
+    {
+        Regex regex = new Regex(@"(?<class>[a-z]{3}) (?<prefix>fa-)(?<iconName>[a-z]{1,})");
 
-        uctx.ForeachCodeFile(@"*.tsx, *.ts", file =>
+        var m = regex.Match(oldName);
+        
+        var className = m.Groups["class"].Value;
+        var prefix = m.Groups["prefix"].Value;
+        var iconName = m.Groups["iconName"].Value;
+        if (className != null)
         {
-            file.Replace(IconNameRegex, m =>
+            switch (className)
             {
-                var oldName = m.Groups["iconName"].Value;
+                case "fas": className = "fa-solid"; break;
+                case "far": className = "fa-regular"; break;
+                case "fal": className = "fa-light"; break;
+                case "fat": className = "fa-thin"; break;
+                case "fad": className = "fa-duotone"; break;
+                default: break;
+            };
+        }
 
-                var newName = dic.TryGetC(oldName);
-
-                if (newName == null)
-                    return m.ToString();
-
-                return m.ToString().Replace(oldName, newName);
-            });
-        });
-
-        uctx.ForeachCodeFile("package.json", file =>
-        {
-            file.UpdateNpmPackage("@fortawesome/fontawesome-svg-core", "6.2.0");
-            file.UpdateNpmPackage("@fortawesome/free-brands-svg-icons", "6.2.0");
-            file.UpdateNpmPackage("@fortawesome/free-regular-svg-icons", "6.2.0");
-            file.UpdateNpmPackage("@fortawesome/free-solid-svg-icons", "6.2.0");
-            file.UpdateNpmPackage("@fortawesome/react-fontawesome", "0.2.0");
-        });
+        var newName = className + " " + prefix + (iconNamesDic.TryGetC(iconName) ?? iconName);
+        return newName;    
     }
 }
-
 
 

@@ -10,14 +10,12 @@ using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.Toolbar;
-using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Workflow;
 using Signum.Utilities.DataStructures;
 using System.Text.Json.Serialization;
 
 namespace Signum.Engine.Toolbar;
-
 
 public static class ToolbarLogic
 {
@@ -65,8 +63,6 @@ public static class ToolbarLogic
             RegisterDelete<DashboardEntity>(sb);
             RegisterDelete<ToolbarMenuEntity>(sb);
             RegisterDelete<WorkflowEntity>(sb);
-
-
 
             RegisterContentConfig<ToolbarMenuEntity>(
                 lite => ToolbarMenus.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false),
@@ -128,6 +124,23 @@ public static class ToolbarLogic
             ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToDictionary(a => a.ToLite()),
                new InvalidateWith(typeof(ToolbarMenuEntity)));
         }
+    }
+
+    public static void UpdateIconNamesInDB()
+    {
+        Database.Query<ToolbarEntity>().Where(t => t.Elements.Any(e => e.IconName.HasText())).ToList().ForEach(t => {
+            t.Elements.Where(e => e.IconName.HasText()).ToList().ForEach(e => {
+                e.IconName = FontAwesomeV6Upgrade.UpdateIconName(e.IconName!);
+            });
+            t.Save();
+        });
+
+        Database.Query<ToolbarMenuEntity>().Where(t => t.Elements.Any(e => e.IconName.HasText())).ToList().ForEach(t => {
+            t.Elements.Where(e => e.IconName.HasText()).ToList().ForEach(e => {
+                e.IconName = FontAwesomeV6Upgrade.UpdateIconName(e.IconName!);
+            });
+            t.Save();
+        });
     }
 
     private static void IToolbar_Saving(IToolbarEntity tool)
