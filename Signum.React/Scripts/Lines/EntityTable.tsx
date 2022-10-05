@@ -212,7 +212,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
       <fieldset className={classes("sf-table-field sf-control-container", ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
         <legend>
           <div>
-            <span>{p.labelText}</span>
+            <span>{p.label}</span>
             {renderButtons()}
           </div>
         </legend>

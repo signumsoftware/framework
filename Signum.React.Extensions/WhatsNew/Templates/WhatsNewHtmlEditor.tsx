@@ -90,7 +90,7 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
     if (fp.entityId == null && fp.binaryFile == null)
       return <div className="alert alert-danger">{JSON.stringify(info)}</div>;
 
-    return <FileImage file={fp} className="mw-100" onClick={e => ImageModal.show(fp as IFile & ModifiableEntity, e)} />;
+    return <FileImage file={fp} className="mw-100 whatsnew-image" onClick={e => ImageModal.show(fp as IFile & ModifiableEntity, e)} />;
   }
 
   toHtml(val: ImageInfo): string | undefined {

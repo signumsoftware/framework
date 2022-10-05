@@ -82,7 +82,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={() => evaluateTest()}
-        type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
+        type={{ name: typeName }} label={DynamicViewMessage.ExampleEntity.niceToString()} />
     );
   }
 

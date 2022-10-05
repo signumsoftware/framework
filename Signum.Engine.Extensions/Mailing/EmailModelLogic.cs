@@ -4,6 +4,7 @@ using Signum.Entities.Templating;
 using Signum.Engine.UserAssets;
 using Signum.Engine.Authorization;
 using System.Globalization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Mailing;
 
@@ -11,6 +12,8 @@ public interface IEmailModel
 {
     ModifiableEntity UntypedEntity { get; }
     List<EmailOwnerRecipientData> GetRecipients();
+    
+    EmailOwnerData? GetFrom() { return null; }
 
     List<Filter> GetFilters(QueryDescription qd);
     Pagination GetPagination();
@@ -41,6 +44,11 @@ public abstract class EmailModel<T> : IEmailModel
     ModifiableEntity IEmailModel.UntypedEntity
     {
         get { return Entity; }
+    }
+
+    public virtual EmailOwnerData? GetFrom()
+    {
+        return null;
     }
 
     public virtual List<EmailOwnerRecipientData> GetRecipients()

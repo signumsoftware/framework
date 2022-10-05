@@ -38,10 +38,10 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
 
       <EntityCombo ctx={ctx.subCtx(n => n.alertType)} onChange={forceUpdate} />
       <ValueLine ctx={ctx.subCtx(n => n.alertDate)} />
-      <ValueLine ctx={ctx.subCtx(n => n.titleField)} labelText={AlertMessage.Title.niceToString()} valueHtmlAttributes={{ placeholder: (ctx.value.alertType && AlertsClient.getTitle(null, ctx.value.alertType)) ?? undefined }} />
+      <ValueLine ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Title.niceToString()} valueHtmlAttributes={{ placeholder: (ctx.value.alertType && AlertsClient.getTitle(null, ctx.value.alertType)) ?? undefined }} />
       {
         !ctx.value.isNew && !edit ?
-          <FormGroup ctx={ctx.subCtx(n => n.titleField)} labelText={AlertMessage.Text.niceToString()} >
+          <FormGroup ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Text.niceToString()} >
             <div style={{ whiteSpace: "pre-wrap" }}>
               {AlertsClient.format(ctx.value.textField || ctx.value.textFromAlertType || "", ctx.value)}
               <br />
@@ -49,7 +49,7 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
             </div>
           </FormGroup>
           :
-          <ValueLine ctx={ctx.subCtx(n => n.textField)} labelText={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
+          <ValueLine ctx={ctx.subCtx(n => n.textField)} label={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
       }
       {ctx.value.state == "Attended" &&
         <div>

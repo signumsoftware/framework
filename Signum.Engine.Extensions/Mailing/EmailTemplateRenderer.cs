@@ -207,6 +207,17 @@ class EmailMessageBuilder
                 };
             }
         }
+        else if(this.model?.GetFrom() != null)
+        {
+            var from = this.model.GetFrom()!;
+            yield return new EmailFromEmbedded
+            {
+                EmailOwner = from.Owner,
+                EmailAddress = from.Email!,
+                DisplayName = from.DisplayName,
+                AzureUserId = from.AzureUserId,
+            };
+        }
         else
         {
             if (smtpConfig != null && smtpConfig.DefaultFrom != null)
