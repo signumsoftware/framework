@@ -50,7 +50,7 @@ export function start(options: { routes: JSX.Element[] }) {
     return promise.then(uqs =>
       uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
         window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
-      }, { icon: ["far", "list-alt"], iconColor: "dodgerblue" })));
+      }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue" })));
   });
 
   QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(),
@@ -109,7 +109,7 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
         header: UserQueryEntity.nicePluralName(),
         menuItems: uqs.map(uq =>
           <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, resTable, cic)}>
-            <FontAwesomeIcon icon={["far", "list-alt"]} className="icon" color="dodgerblue" />
+            <FontAwesomeIcon icon={["far", "rectangle-list"]} className="icon" color="dodgerblue" />
             {getToString(uq)}
           </Dropdown.Item>
         )

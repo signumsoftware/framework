@@ -176,7 +176,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   registerRenderer(UserQueryPartEntity, {
     component: () => import('./View/UserQueryPart').then((a: any) => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "#2E86C1" }),
+    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "#2E86C1" }),
     defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
     withPanel: c => c.renderMode != "BigValue",
     getQueryNames: c => [c.userQuery?.query].notNull(),
@@ -232,12 +232,12 @@ export function start(options: { routes: JSX.Element[] }) {
   });
   registerRenderer(ImagePartEntity, {
     component: () => import('./View/ImagePartView').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "forestgreen" }),
     withPanel: () => false
   });
   registerRenderer(SeparatorPartEntity, {
     component: () => import('./View/SeparatorPartView').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "forestgreen" }),
     withPanel: () => false
   });
 

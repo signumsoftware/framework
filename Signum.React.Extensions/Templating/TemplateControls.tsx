@@ -155,7 +155,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
             return text;
           })))}
           {
-            UserQueryEntity.tryTypeInfo() && renderWidgetButton(<><FontAwesomeIcon icon={["far", "list-alt"]} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
+            UserQueryEntity.tryTypeInfo() && renderWidgetButton(<><FontAwesomeIcon icon={["far", "rectangle-list"]} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
               queryName: UserQueryEntity,
               filterOptions: [{
                 token: UserQueryEntity.token(a => a.entity!.entityType!.entity!.cleanName),

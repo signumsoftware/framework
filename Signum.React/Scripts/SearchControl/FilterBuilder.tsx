@@ -289,7 +289,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
           <div className="row gx-1">
             <div className="col-auto">
               <a href="#" onClick={handleExpandCollapse} className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
-                <FontAwesomeIcon icon={fg.expanded ? ["far", "minus-square"] : ["far", "plus-square"]} className="me-2" />
+                <FontAwesomeIcon icon={fg.expanded ? ["far", "square-minus"] : ["far", "square-plus"]} className="me-2" />
               </a>
             </div>
             <div className="col-auto">

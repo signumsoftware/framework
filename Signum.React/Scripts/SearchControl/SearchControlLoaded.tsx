@@ -637,7 +637,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       {
         order: -3,
         button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
-          <FontAwesomeIcon icon={"search"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
+          <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
         </button>
       },
 

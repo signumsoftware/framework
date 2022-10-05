@@ -682,14 +682,14 @@ public static class FontAwesomeV6Upgrade
 
     public static string UpdateIconName(string oldName) 
     {
-        Regex regex = new Regex(@"(?<class>[a-z]{3}) (?<prefix>fa-)(?<iconName>[a-z]{1,})");
+        Regex regex = new Regex(@"(?<class>[a-z]{3}) (?<prefix>fa-)(?<iconName>[a-z-]{1,})");
 
         var m = regex.Match(oldName);
         
         var className = m.Groups["class"].Value;
         var prefix = m.Groups["prefix"].Value;
         var iconName = m.Groups["iconName"].Value;
-        if (className != null)
+        if (className.HasText())
         {
             switch (className)
             {
@@ -702,7 +702,7 @@ public static class FontAwesomeV6Upgrade
             };
         }
 
-        var newName = className + " " + prefix + (iconNamesDic.TryGetC(iconName) ?? iconName);
+        var newName = (className.HasText() ?  (className+ " ") : "") + prefix + (iconNamesDic.TryGetC(iconName) ?? iconName);
         return newName;    
     }
 }

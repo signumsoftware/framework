@@ -19,7 +19,7 @@ export function ColorRadio(p : ColorRadioProps){
     <a onClick={e => { e.preventDefault(); !p.readOnly && p.onClicked(e); }} title={p.title}
       className={classes("sf-auth-chooser", p.readOnly && "sf-not-allowed")}
       style={{ color: p.checked ? p.color : "#aaa" }}>
-      <FontAwesomeIcon icon={coalesceIcon(p.icon, ["far", (p.checked ? "dot-circle" : "circle")])!} />
+      <FontAwesomeIcon icon={coalesceIcon(p.icon, ["far", (p.checked ? "circle-dot" : "circle")])!} />
     </a>
   );
 }
@@ -28,7 +28,7 @@ export function GrayCheckbox(p : { checked: boolean, onUnchecked: () => void, re
   return (
     <span className={classes("sf-auth-checkbox", p.readOnly && "sf-not-allowed")}
       onClick={p.checked && !p.readOnly ? p.onUnchecked : undefined}>
-      <FontAwesomeIcon icon={["far", p.checked ? "check-square" : "square"]} />
+      <FontAwesomeIcon icon={["far", p.checked ? "square-check" : "square"]} />
     </span>
   );
 }

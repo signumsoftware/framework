@@ -154,7 +154,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
         </Popover>
       }>
       <div className={classes("sf-pointer", isModified.current ? "blinking" : undefined)} title={window.__disableSignalR ?? undefined}>
-        <FontAwesomeIcon icon={otherUsers.length == 1 ? "user" : otherUsers.length == 2 ? "user-friends" : "users"}
+        <FontAwesomeIcon icon={otherUsers.length == 1 ? "user" : otherUsers.length == 2 ? "user-group" : "users"}
           color={ticks !== p.entity.ticks ? "#E4032E" : otherUsers.some(u => u.isModified) ? "#FFAA44" : "#6BB700"} />
         <strong className="ms-1 me-3" style={{ userSelect: "none" }}>{UserEntity.niceCount(otherUsers.length)}</strong>
       </div>
