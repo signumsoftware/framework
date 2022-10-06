@@ -718,7 +718,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
   );
 }
 
-export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, labelText?: string, forceNullable?: boolean): React.ReactElement<any> {
+export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, label?: string, forceNullable?: boolean): React.ReactElement<any> {
 
   var tokenType = token.type;
   if (forceNullable)
@@ -727,19 +727,19 @@ export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToke
   switch (token.filterType) {
     case "Lite":
       if (tokenType.name == IsByAll || getTypeInfos(tokenType).some(ti => !ti.isLowPopulation))
-        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} labelText={labelText} />;
+        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} />;
       else
-        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} labelText={labelText} />
+        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} />
     case "Embedded":
-      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} labelText={labelText} />;
+      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} label={label} />;
     case "Enum":
       const ti = tryGetTypeInfos(tokenType).single();
       if (!ti)
         throw new Error(`EnumType ${tokenType.name} not found`);
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} optionItems={members} onChange={handleValueChange} labelText={labelText} />;
+      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} optionItems={members} onChange={handleValueChange} label={label} />;
     default:
-      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} onChange={handleValueChange} labelText={labelText} />;
+      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} onChange={handleValueChange} label={label} />;
   }
 }
 

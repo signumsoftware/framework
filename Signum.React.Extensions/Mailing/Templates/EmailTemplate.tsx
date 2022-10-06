@@ -135,7 +135,7 @@ function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, que
     <div>
       <div className="row">
         <div className="col-sm-2" >
-          <FormGroup labelText={EmailTemplateEntity.nicePropertyName(a => a.recipients![0].element.kind)} ctx={sc}>
+          <FormGroup label={EmailTemplateEntity.nicePropertyName(a => a.recipients![0].element.kind)} ctx={sc}>
             <span className={sc.formControlClass}>{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>
           </FormGroup>
         </div>
@@ -247,7 +247,7 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
   const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
   return (
     <div className="sf-email-template-message">
-      <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} onChange={p.invalidate} />
+      <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} label={EmailTemplateViewMessage.Language.niceToString()} onChange={p.invalidate} />
       <br/>
       <div>
         <TemplateControls queryKey={p.queryKey} forHtml={true} />

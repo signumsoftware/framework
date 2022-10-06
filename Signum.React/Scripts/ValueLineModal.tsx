@@ -50,7 +50,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
     ctx: ctx,
     format: props.format !== undefined ? props.format : props.member?.format,
     unit: props.unit !== undefined ? props.unit : props.member?.unit,
-    labelText: props.labelText !== undefined ? props.labelText : props.member?.niceName,
+    label: props.label !== undefined ? props.label : props.member?.niceName,
     type: props.type ?? props.member?.type,
     valueLineType: props.valueLineType ?? (props.member?.isMultiline ? "TextArea" : undefined),
     valueHtmlAttributes: props.valueHtmlAttributes,
@@ -73,7 +73,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
         </p>
         <AutoFocus>
           <ValueLine
-            formGroupStyle={vlp.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={forceUpdate} />
+            formGroupStyle={vlp.label ? "Basic" : "SrOnly"} {...vlp} onChange={forceUpdate} />
         </AutoFocus>
         {p.options.validateValue && <p className="text-danger">
           { error}
@@ -103,7 +103,7 @@ export interface ValueLineModalOptions {
   initialValue?: any;
   title?: React.ReactChild;
   message?: React.ReactChild;
-  labelText?: React.ReactChild;
+  label?: React.ReactChild;
   validateValue?: (val: any) => string | undefined;
   format?: string;
   unit?: string;

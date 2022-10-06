@@ -52,7 +52,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
       {...{ ...c.baseHtmlAttributes(), ...c.props.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           {renderButtons()}
         </div>
       </legend>

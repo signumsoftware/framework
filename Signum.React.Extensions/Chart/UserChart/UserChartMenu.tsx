@@ -158,14 +158,14 @@ export default function UserChartMenu(p: UserChartMenuProps) {
   }
 
   const crView = p.chartRequestView;
-  const labelText = !crView.userChart ? UserChartEntity.nicePluralName() : getToString(crView.userChart)
+  const label = !crView.userChart ? UserChartEntity.nicePluralName() : getToString(crView.userChart)
 
   var canSave = tryGetOperationInfo(UserChartOperation.Save, UserChartEntity) != null;
 
   return (
     <Dropdown onToggle={() => setIsOpen(!isOpen)} show={isOpen}>
       <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light">
-        <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {labelText}</span>
+        <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {label}</span>
       </Dropdown.Toggle>
       <Dropdown.Menu>
         {userCharts && userCharts.length > 10 &&

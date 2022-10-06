@@ -222,7 +222,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
     <fieldset className={classes("sf-grid-repeater-field sf-control-container", p.ctx.errorClass)} {...p.ctx.errorAttributes()}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           <span className="float-end ms-2">
             {p.extraButtonsBefore && p.extraButtonsBefore(c)}
             {c.renderCreateButton(false)}

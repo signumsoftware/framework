@@ -153,7 +153,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
   getPlaceholder(): string | undefined {
     const p = this.props;
     return p.valueHtmlAttributes?.placeholder ??
-      (p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.labelText) :
+      (p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.label) :
       undefined;
   }
 }
@@ -237,14 +237,14 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
           className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))}
         />
-        {" "}{s.labelText}
+        {" "}{s.label}
         {s.helpText && <small className="form-text text-muted">{s.helpText}</small>}
       </label>
     );
   }
   else {
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
           className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))} disabled={s.ctx.readOnly} />
       </FormGroup>
@@ -316,7 +316,7 @@ function internalDropDownList(vl: ValueLineController) {
     }
 
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes}} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes}} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={{
             ...vl.props.valueHtmlAttributes,
@@ -343,7 +343,7 @@ function internalDropDownList(vl: ValueLineController) {
     var oi = optionItems.single(a => a.value == s.ctx.value);
 
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <DropdownList<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems} onChange={handleOptionItem} value={oi}
             filter={false}
@@ -366,7 +366,7 @@ function internalDropDownList(vl: ValueLineController) {
     };
 
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <select {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formSelectClass, vl.mandatoryClass))} onChange={handleEnumOnChange} >
             {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
@@ -402,7 +402,7 @@ function internalComboBoxText(vl: ValueLineController) {
     }
 
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={{
             ...vl.props.valueHtmlAttributes,
@@ -421,7 +421,7 @@ function internalComboBoxText(vl: ValueLineController) {
   var renderItem = vl.props.onRenderDropDownListItem ? (a: any) => vl.props.onRenderDropDownListItem!(a.item) : undefined;
 
   return (
-    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <Combobox<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
           dataKey="value"
@@ -452,7 +452,7 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
 
   if (s.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={htmlAtts} ctx={s.ctx} innerRef={vl.inputElement}>
           {s.ctx.value}
         </FormControlReadonly>)}
@@ -478,7 +478,7 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
   }
 
   return (
-    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <input type={password ? "password" : "text"}
           autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
@@ -514,7 +514,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
 
   if (s.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         <TextArea {...htmlAtts} autoResize={autoResize} className={addClass(htmlAtts, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           disabled />
       </FormGroup>
@@ -539,7 +539,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
   }
 
   return (
-    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
@@ -567,7 +567,7 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
 
   if (s.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={vl.inputElement}>
             {s.ctx.value == null ? "" : numberFormat.format(s.ctx.value)}
@@ -598,7 +598,7 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
   } as React.AllHTMLAttributes<any>;
 
   return (
-    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <NumericTextBox
           htmlAttributes={htmlAttributes}
@@ -743,7 +743,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
 
   if (s.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
           {m && toFormatWithFixes(m, luxonFormat)}
         </FormControlReadonly>)}
@@ -770,7 +770,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
   } as React.AllHTMLAttributes<any>;
 
   return (
-    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined, s.calendarAlignEnd && "sf-calendar-end")}>
           <DatePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(vl.props.initiallyFocused)}
@@ -823,7 +823,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
 
   if (s.ctx.readOnly) {
     return (
-      <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.props.valueHtmlAttributes, "numeric")} innerRef={vl.inputElement}>
             {timeToString(s.ctx.value, s.format)}
@@ -846,7 +846,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
     htmlAttributes.placeholder = s.format?.replaceAll("H", "h").replaceAll("\\:", ":");
 
   return (
-    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <TimeTextBox htmlAttributes={htmlAttributes}
           value={s.ctx.value}
@@ -964,7 +964,7 @@ function internalRadioGroup(vl: ValueLineController) {
   };
 
   return (
-    <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       <div style={getColumnStyle()}>
         {optionItems.map((oi, i) =>
           <label {...vl.props.valueHtmlAttributes} className={classes("sf-radio-element", vl.props.ctx.errorClass)}>

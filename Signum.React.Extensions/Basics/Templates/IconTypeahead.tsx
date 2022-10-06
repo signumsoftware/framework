@@ -29,7 +29,7 @@ export function IconTypeaheadLine(p : IconTypeaheadLineProps){
   var ctx = p.ctx;
 
   return (
-    <FormGroup ctx={ctx} labelText={ctx.niceName()} >
+    <FormGroup ctx={ctx} label={ctx.niceName()} >
       <IconTypeahead icon={ctx.value}
         placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined}
         extraIcons={p.extraIcons}

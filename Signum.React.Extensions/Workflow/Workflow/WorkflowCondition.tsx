@@ -79,7 +79,7 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={forceUpdate}
-        type={{ name: typeName }} labelText="Example Entity" />
+        type={{ name: typeName }} label="Example Entity" />
     );
   }
 

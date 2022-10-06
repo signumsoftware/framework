@@ -128,7 +128,7 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
     return null;
 
   return (
-    <FormGroup ctx={p.ctx} labelText={p.labelText}
+    <FormGroup ctx={p.ctx} label={p.label}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       <div className="sf-entity-line">
