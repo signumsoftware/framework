@@ -257,11 +257,11 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
             <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
           </div> : <HtmlEditor binding={Binding.create(ec.value, e => e.text)} readOnly={ec.readOnly} />}
         <br />
-        <a href="#" onClick={handlePreviewClick}>
+        {p.messageFormat == 'HtmlComplex' && <a href="#" onClick={handlePreviewClick}>
           {showPreview ?
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
-        </a>
+        </a>}
         {showPreview && <IFrameRenderer style={{ width: "100%" }} html={ec.value.text} />}
       </div>
     </div>
