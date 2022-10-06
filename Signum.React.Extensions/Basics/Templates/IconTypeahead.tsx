@@ -50,6 +50,17 @@ export interface IconTypeaheadProps {
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
+function toFamilyName(prefix: string) {
+  switch (prefix) {
+    case "fas": return "fa-solid"; 
+    case "far": return "fa-regular"; 
+    case "fal": return "fa-light"; 
+    case "fat": return "fa-thin"; 
+    case "fad": return "fa-duotone";
+    default: break;
+  };
+}
+
 export function IconTypeahead(p: IconTypeaheadProps) {
   const forceUpdate = useForceUpdate();
 
@@ -61,12 +72,12 @@ export function IconTypeahead(p: IconTypeaheadProps) {
     }
   };
 
-  var fontAwesome = Dic.getKeys(lib.definitions).flatMap(prefix => Dic.getKeys(lib.definitions[prefix]).map(name => `${prefix} fa-${name}`));
+  var fontAwesome = Dic.getKeys(lib.definitions).flatMap(prefix => Dic.getKeys(lib.definitions[prefix]).map(name => `${toFamilyName(prefix)} fa-${name}`));
   var icons = ([] as string[]).concat(p.extraIcons ?? []).concat(fontAwesome);
 
   function handleGetItems(query: string) {
     if (!query)
-      return Promise.resolve(([] as string[]).concat(p.extraIcons ?? []).concat(["far fa-", "fas fa-"]));
+      return Promise.resolve(([] as string[]).concat(p.extraIcons ?? []).concat(["fa-regular fa-", "fa-solid fa-"]));
 
     const result = icons
       .filter(k => k.toLowerCase().contains(query.toLowerCase()))
