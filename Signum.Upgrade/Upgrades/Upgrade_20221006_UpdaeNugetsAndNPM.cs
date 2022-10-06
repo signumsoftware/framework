@@ -5,7 +5,7 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20221006_UpdaeNugetsAndNPM : CodeUpgradeBase
 {
-    public override string Description => "Updates Nuget and NPM packages";
+    public override string Description => "Updates Nuget and NPM packages and remove polyfills";
 
     public override void Execute(UpgradeContext uctx)
     {
@@ -38,6 +38,23 @@ class Upgrade_20221006_UpdaeNugetsAndNPM : CodeUpgradeBase
             file.UpdateNpmPackage("webpack", "5.74.0");
             file.UpdateNpmPackage("webpack-bundle-analyzer", "4.6.1");
             file.UpdateNpmPackage("webpack-cli", "4.10.0");
+
+            file.Replace(" && webpack --config webpack.config.polyfills.js", "");
+            file.RemoveNpmPackage("abortcontroller-polyfill");
+            file.RemoveNpmPackage("core-js");
+            file.RemoveNpmPackage("whatwg-fetch");
+        });
+
+        uctx.DeleteFile("Southwind.React/App/polyfills.js");
+        uctx.DeleteFile("Southwind.React/webpack.config.polyfills.js");
+
+        uctx.ChangeCodeFile(@"Southwind.React\Views\Home\Index.cshtml", file =>
+        {
+            file.RemoveAllLines(a => a.Contains(@"@Url.Content(""~/dist/"" + polyfills)"));
+            file.RemoveAllLines(a => a.Contains("string jsonPolyfills"));
+            file.RemoveAllLines(a => a.Contains("var polyfills"));
+
+            file.ReplaceBetweenIncluded(a => a.Contains(@"if (!(browser == ""old edge"" "), a => a.Contains("}"), "");
         });
     }
 }
