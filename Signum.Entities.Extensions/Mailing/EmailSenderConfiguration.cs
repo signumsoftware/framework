@@ -24,35 +24,20 @@ public class EmailSenderConfigurationEntity : Entity
     [NoRepeatValidator]
     public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
-    public SmtpEmbedded? SMTP { get; set; }
+    [ImplementedBy(typeof(SmtpEntity), typeof(ExchangeWebServiceEntity), typeof(MicrosoftGraphEntity))]
+    public IEntity Service { get; set; }
 
-    public ExchangeWebServiceEmbedded? Exchange { get; set; }
+    [Ignore, InTypeScript(false)]
+    public SmtpEntity? SMTP { get { return Service as SmtpEntity; } }
 
-    public MicrosoftGraphEmbedded? MicrosoftGraph { get; set; }
+    [Ignore, InTypeScript(false)]
+    public ExchangeWebServiceEntity? Exchange { get { return Service as ExchangeWebServiceEntity; } }
+
+    [Ignore, InTypeScript(false)]
+    public MicrosoftGraphEntity? MicrosoftGraph { get { return Service as MicrosoftGraphEntity; } }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
-
-    protected override string? PropertyValidation(PropertyInfo pi)
-    {
-        if (pi.Name == nameof(SMTP) || pi.Name == nameof(Exchange) || pi.Name == nameof(MicrosoftGraph))
-        {
-            var count = new[] { SMTP != null, Exchange != null, MicrosoftGraph != null }.Count(a => a);
-
-            if (count == 0)
-                return ValidationMessage._0Or1ShouldBeSet.NiceToString(
-                    NicePropertyName(() => SMTP) + ", " + NicePropertyName(() => Exchange),
-                    NicePropertyName(() => MicrosoftGraph));
-
-
-            if (count > 1)
-                return ValidationMessage._0And1CanNotBeSetAtTheSameTime.NiceToString(
-                    NicePropertyName(() => SMTP) + ", " + NicePropertyName(() => Exchange),
-                    NicePropertyName(() => MicrosoftGraph));
-        }
-
-        return base.PropertyValidation(pi);
-    }
 
     protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
     {
@@ -73,7 +58,14 @@ public static class EmailSenderConfigurationOperation
     public static ExecuteSymbol<EmailSenderConfigurationEntity> Save;
 }
 
-public class SmtpEmbedded : EmbeddedEntity
+public interface IEmailServiceInfo
+{ 
+}
+
+public abstract class EmailServiceInfoEntity : Entity, IEmailServiceInfo { }
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class SmtpEntity : EmailServiceInfoEntity
 {
     public SmtpDeliveryFormat DeliveryFormat { get; set; }
 
@@ -84,7 +76,7 @@ public class SmtpEmbedded : EmbeddedEntity
     [StringLengthValidator(Min = 3, Max = 300), FileNameValidator]
     public string? PickupDirectoryLocation { get; set; }
 
-    static StateValidator<SmtpEmbedded, SmtpDeliveryMethod> stateValidator = new StateValidator<SmtpEmbedded, SmtpDeliveryMethod>(
+    static StateValidator<SmtpEntity, SmtpDeliveryMethod> stateValidator = new StateValidator<SmtpEntity, SmtpDeliveryMethod>(
        a => a.DeliveryMethod, a => a.Network, a => a.PickupDirectoryLocation)
         {
             {SmtpDeliveryMethod.Network,        true, null },
@@ -136,7 +128,8 @@ public enum CertFileType
     SignedFile
 }
 
-public class ExchangeWebServiceEmbedded : EmbeddedEntity
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class ExchangeWebServiceEntity : EmailServiceInfoEntity
 {
     public ExchangeVersion ExchangeVersion { get; set; }
 
@@ -153,7 +146,8 @@ public class ExchangeWebServiceEmbedded : EmbeddedEntity
     public bool UseDefaultCredentials { get; set; } = true;
 }
 
-public class MicrosoftGraphEmbedded : EmbeddedEntity
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class MicrosoftGraphEntity : EmailServiceInfoEntity
 {
     public bool UseActiveDirectoryConfiguration { get; set; }
 

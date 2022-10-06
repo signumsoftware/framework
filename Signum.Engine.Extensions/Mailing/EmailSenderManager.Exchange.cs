@@ -7,7 +7,7 @@ namespace Signum.Engine.Mailing;
 
 public partial class EmailSenderManager : IEmailSenderManager
 {
-    protected virtual void SendExchangeWebService(EmailMessageEntity email, ExchangeWebServiceEmbedded exchange)
+    protected virtual void SendExchangeWebService(EmailMessageEntity email, ExchangeWebServiceEntity exchange)
     {
         ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2007_SP1);
         service.UseDefaultCredentials = exchange.UseDefaultCredentials;

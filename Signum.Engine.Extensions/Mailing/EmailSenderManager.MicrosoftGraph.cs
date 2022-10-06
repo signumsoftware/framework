@@ -12,7 +12,7 @@ namespace Signum.Engine.Mailing;
 //https://www.jeancloud.dev/2020/06/05/using-microsoft-graph-as-smtp-server.html
 public partial class EmailSenderManager : IEmailSenderManager
 {
-    protected virtual void SendMicrosoftGraph(EmailMessageEntity email, MicrosoftGraphEmbedded microsoftGraph)
+    protected virtual void SendMicrosoftGraph(EmailMessageEntity email, MicrosoftGraphEntity microsoftGraph)
     {
         ClientCredentialProvider authProvider = microsoftGraph.GetAuthProvider();
         GraphServiceClient graphClient = new GraphServiceClient(authProvider);
@@ -89,7 +89,7 @@ public static class MicrosoftGraphExtensions
         };
     }
 
-    public static ClientCredentialProvider GetAuthProvider(this MicrosoftGraphEmbedded microsoftGraph, string[]? scopes = null)
+    public static ClientCredentialProvider GetAuthProvider(this MicrosoftGraphEntity microsoftGraph, string[]? scopes = null)
     {
         if (microsoftGraph.UseActiveDirectoryConfiguration)
             return AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada ? ada.GetConfig().GetAuthProvider() :

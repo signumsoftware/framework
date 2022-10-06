@@ -57,7 +57,7 @@ public static class EmailSenderConfigurationLogic
         return SmtpConfigCache.Value.GetOrThrow(config);
     }
 
-    public static SmtpClient GenerateSmtpClient(this SmtpEmbedded config)
+    public static SmtpClient GenerateSmtpClient(this SmtpEntity config)
     {
         if (config.DeliveryMethod != SmtpDeliveryMethod.Network)
         {

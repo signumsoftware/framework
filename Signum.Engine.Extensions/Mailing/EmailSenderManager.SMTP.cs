@@ -7,7 +7,7 @@ namespace Signum.Engine.Mailing;
 
 public partial class EmailSenderManager : IEmailSenderManager
 {
-    protected virtual void SendSMTP(EmailMessageEntity email, SmtpEmbedded smtp)
+    protected virtual void SendSMTP(EmailMessageEntity email, SmtpEntity smtp)
     {
         System.Net.Mail.MailMessage message = CreateMailMessage(email);
 

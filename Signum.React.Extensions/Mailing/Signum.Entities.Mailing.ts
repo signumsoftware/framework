@@ -22,7 +22,7 @@ export interface SmtpNetworkDeliveryEmbedded {
     newPassword: string;
 }
 
-export interface ExchangeWebServiceEmbedded {
+export interface ExchangeWebServiceEntity {
     newPassword: string;
 }
 
@@ -215,13 +215,14 @@ export interface EmailSenderConfigurationEntity extends Entities.Entity {
   name: string;
   defaultFrom: EmailFromEmbedded | null;
   additionalRecipients: Entities.MList<EmailRecipientEmbedded>;
-  sMTP: SmtpEmbedded | null;
-  exchange: ExchangeWebServiceEmbedded | null;
-  microsoftGraph: MicrosoftGraphEmbedded | null;
+  service: Entities.Entity;
 }
 
 export module EmailSenderConfigurationOperation {
   export const Save : Entities.ExecuteSymbol<EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Save");
+}
+
+export interface EmailServiceInfoEntity extends Entities.Entity {
 }
 
 export interface EmailTemplateAddressEmbedded extends Entities.EmbeddedEntity {
@@ -309,9 +310,9 @@ export type EmailTemplateVisibleOn =
   "Multiple" |
   "Query";
 
-export const ExchangeWebServiceEmbedded = new Type<ExchangeWebServiceEmbedded>("ExchangeWebServiceEmbedded");
-export interface ExchangeWebServiceEmbedded extends Entities.EmbeddedEntity {
-  Type: "ExchangeWebServiceEmbedded";
+export const ExchangeWebServiceEntity = new Type<ExchangeWebServiceEntity>("ExchangeWebService");
+export interface ExchangeWebServiceEntity extends EmailServiceInfoEntity {
+  Type: "ExchangeWebService";
   exchangeVersion: External.ExchangeVersion;
   url: string | null;
   username: string | null;
@@ -334,9 +335,9 @@ export interface ImageAttachmentEntity extends Entities.Entity, IAttachmentGener
   file: Files.FileEmbedded;
 }
 
-export const MicrosoftGraphEmbedded = new Type<MicrosoftGraphEmbedded>("MicrosoftGraphEmbedded");
-export interface MicrosoftGraphEmbedded extends Entities.EmbeddedEntity {
-  Type: "MicrosoftGraphEmbedded";
+export const MicrosoftGraphEntity = new Type<MicrosoftGraphEntity>("MicrosoftGraph");
+export interface MicrosoftGraphEntity extends EmailServiceInfoEntity {
+  Type: "MicrosoftGraph";
   useActiveDirectoryConfiguration: boolean;
   azure_ApplicationID: string /*Guid*/ | null;
   azure_DirectoryID: string /*Guid*/ | null;
@@ -402,9 +403,9 @@ export module SendEmailTaskOperation {
   export const Save : Entities.ExecuteSymbol<SendEmailTaskEntity> = registerSymbol("Operation", "SendEmailTaskOperation.Save");
 }
 
-export const SmtpEmbedded = new Type<SmtpEmbedded>("SmtpEmbedded");
-export interface SmtpEmbedded extends Entities.EmbeddedEntity {
-  Type: "SmtpEmbedded";
+export const SmtpEntity = new Type<SmtpEntity>("Smtp");
+export interface SmtpEntity extends EmailServiceInfoEntity {
+  Type: "Smtp";
   deliveryFormat: External.SmtpDeliveryFormat;
   deliveryMethod: External.SmtpDeliveryMethod;
   network: SmtpNetworkDeliveryEmbedded | null;

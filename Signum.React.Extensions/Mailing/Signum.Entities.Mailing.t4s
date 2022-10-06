@@ -6,6 +6,6 @@ export interface SmtpNetworkDeliveryEmbedded {
     newPassword: string;
 }
 
-export interface ExchangeWebServiceEmbedded {
+export interface ExchangeWebServiceEntity {
     newPassword: string;
 }
