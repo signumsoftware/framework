@@ -73,7 +73,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDro
   return ({
     name: "andClose",
     text: OperationMessage._0AndClose.niceToString(eoc.textOrNiceName()),
-    icon: "times",
+    icon: "xmark",
     keyboardShortcut: eoc.keyboardShortcut && { shiftKey: true, ...eoc.keyboardShortcut },
     isVisible: true,
     inDropdown: inDropdown,

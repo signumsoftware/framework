@@ -262,7 +262,7 @@ export function PanelPart(p: PanelPartProps) {
           {
             renderer.handleEditClick &&
             <a className="sf-pointer sf-hide" onClick={e => { e.preventDefault(); renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }}>
-              <FontAwesomeIcon icon="edit" className="me-1" />Edit
+              <FontAwesomeIcon icon="pen-to-square" className="me-1" />Edit
             </a>
           }
         </div>

@@ -109,7 +109,7 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
     return (
       <FormGroup ctx={ctx}>
         <button className="btn btn-light" onClick={handleClick}>
-          <FontAwesomeIcon icon="random" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
+          <FontAwesomeIcon icon="shuffle" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
         </button>
       </FormGroup>
     );

@@ -89,7 +89,7 @@ export default function Notify() {
     var icon: IconProp | undefined;
     switch (opt.type) {
       case "loading":
-        icon = "cog";
+        icon = "gear";
         break;
       case "error":
       case "warning":

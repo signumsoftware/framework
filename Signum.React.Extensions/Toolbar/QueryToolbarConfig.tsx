@@ -36,7 +36,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
 
   getDefaultIcon(): IconColor {
     return ({
-      icon: ["far", "list-alt"],
+      icon: ["far", "rectangle-list"],
       iconColor: "dodgerblue",
     });
   }

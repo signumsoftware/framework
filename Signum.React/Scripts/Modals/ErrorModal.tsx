@@ -65,7 +65,7 @@ export default function ErrorModal(p: ErrorModalProps) {
 
   function renderTitle(e: any) {
     return (
-      <span><FontAwesomeIcon icon="exclamation-triangle" /> Error </span>
+      <span><FontAwesomeIcon icon="triangle-exclamation" /> Error </span>
     );
   }
 
@@ -95,7 +95,7 @@ export default function ErrorModal(p: ErrorModalProps) {
   function renderValidationTitle(ve: ValidationError) {
     return (
       <span>
-        <FontAwesomeIcon icon="exclamation-triangle" /> {FrameMessage.ThereAreErrors.niceToString()}
+        <FontAwesomeIcon icon="triangle-exclamation" /> {FrameMessage.ThereAreErrors.niceToString()}
       </span>
     );
   }
@@ -188,7 +188,7 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
         <div>
           {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
           <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }}>
-            <FontAwesomeIcon icon="sync-alt" />
+            <FontAwesomeIcon icon="rotate" />
           </button>
         </div>,
       buttons: "cancel",

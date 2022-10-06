@@ -630,14 +630,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
           onClick={this.handleSystemTimeClick}
           title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
-          <FontAwesomeIcon icon="history" />
+          <FontAwesomeIcon icon="clock-rotate-left" />
         </button>
       },
 
       {
         order: -3,
         button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
-          <FontAwesomeIcon icon={"search"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
+          <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
         </button>
       },
 
@@ -661,7 +661,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
         button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
-          <FontAwesomeIcon icon="external-link-alt" />
+          <FontAwesomeIcon icon="up-right-from-square" />
         </button>
       }
     ] as (ButtonBarElement | null | false | undefined)[])
@@ -1019,20 +1019,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
           <span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-            <FontAwesomeIcon icon="plus-square" transform="shrink-4 up-8 right-8" color="#008400" />
+            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+            <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
           </span>&nbsp;{JavascriptMessage.insertColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="pen-square" transform="shrink-4 up-8 right-8" color="orange" />
+          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="square-pen" transform="shrink-4 up-8 right-8" color="orange" />
         </span>&nbsp;{JavascriptMessage.editColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="minus-square" transform="shrink-4 up-8 right-9" color="#ca0000" />
+          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="square-minus" transform="shrink-4 up-8 right-9" color="#ca0000" />
         </span>&nbsp;{JavascriptMessage.removeColumn.niceToString()}
         </Dropdown.Item>);
 
@@ -1040,15 +1040,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         if (p.showGroupButton && isColumnGroupable(cm.columnIndex))
           menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
             <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
           </span>&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
           </Dropdown.Item>);
       }
 
       menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="undo-alt" transform="shrink-4 up-8 right-8" color="black" />
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
       </span>&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
       </Dropdown.Item>);
 

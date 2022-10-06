@@ -28,7 +28,7 @@ export function VersionChangedAlert(p: { blink?: boolean }) {
 
   return (
     <div className={classes("alert alert-warning", "version-alert", p.blink && "blink")} style={{ textAlign: "center" }}>
-      <FontAwesomeIcon icon="sync-alt" aria-hidden="true" />&nbsp;
+      <FontAwesomeIcon icon="rotate" aria-hidden="true" />&nbsp;
                 {ConnectionMessage.ANewVersionHasJustBeenDeployedSaveChangesAnd0.niceToString()
         .formatHtml(<a href="#" onClick={handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</a>)}
     </div>
@@ -48,7 +48,7 @@ export function VersionInfo(p: { extraInformation?: string }) {
             <VersionInfoTooltip extraInformation={p.extraInformation} />
           </Tooltip>
         }>
-        <div><FontAwesomeIcon icon="info-circle" className="sf-version-info" /></div>
+        <div><FontAwesomeIcon icon="circle-info" className="sf-version-info" /></div>
       </OverlayTrigger>
     </div>
   );

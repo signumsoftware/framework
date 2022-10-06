@@ -123,7 +123,7 @@ export function MultiValueLineElement(props: MultiValueLineElementProps) {
         <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
           className="sf-line-button sf-remove"
           onClick={props.onRemove}>
-          <FontAwesomeIcon icon="times" />
+          <FontAwesomeIcon icon="xmark" />
         </a>
       }
       {renderItem(ctx)}

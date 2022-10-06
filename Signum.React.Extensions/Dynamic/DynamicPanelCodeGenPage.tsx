@@ -56,11 +56,11 @@ export default function DynamicPanelPage(p: RouteComponentProps<{}>) {
       {restarting ? undefined :
         startErrors?.length ?
           <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
-            <FontAwesomeIcon icon="exclamation-triangle" />
+            <FontAwesomeIcon icon="triangle-exclamation" />
             {" "}The server started, but there {startErrors.length > 1 ? "are" : "is"} <a href="#" onClick={handleErrorClick}>{startErrors.length} {startErrors.length > 1 ? "errors" : "error"}</a>.
         </div> :
           <div role="alert" className="alert alert-success">
-            <FontAwesomeIcon icon="check-circle" />
+            <FontAwesomeIcon icon="circle-check" />
             {" "}The server is started successfully.
         </div>
       }

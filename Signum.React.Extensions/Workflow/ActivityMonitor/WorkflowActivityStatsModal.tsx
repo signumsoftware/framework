@@ -62,7 +62,7 @@ const [show, setShow] = React.useState<boolean>(true);
     return (
       <FormGroup ctx={ctx}>
         <button className="btn btn-default" onClick={handleClick}>
-          <FontAwesomeIcon icon="tachometer-alt" color="green" /> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
+          <FontAwesomeIcon icon="gauge" color="green" /> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
         </button>
       </FormGroup>
     );
