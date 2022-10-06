@@ -1960,7 +1960,7 @@ export class PropertyRoute {
             return {};
 
           const ti = tryGetTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
-          if (ti && isTypeEntity(ti))
+          if (ti && (isTypeEntity(ti) || isTypeModel(ti)))
             return simpleMembersAfter(ti, "");
           else
             return simpleMembersAfter(this.findRootType(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));
