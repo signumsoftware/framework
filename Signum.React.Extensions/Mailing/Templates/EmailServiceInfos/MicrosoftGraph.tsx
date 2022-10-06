@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityCombo } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailConfigurationEmbedded, MicrosoftGraphEntity } from '../Signum.Entities.Mailing'
+import { EmailConfigurationEmbedded, MicrosoftGraphEntity } from '../../Signum.Entities.Mailing'
 import { useForceUpdate } from '@framework/Hooks';
 
 export default function MicrosoftGraph(p: { ctx: TypeContext<MicrosoftGraphEntity> }) {

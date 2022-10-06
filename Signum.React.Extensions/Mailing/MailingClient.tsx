@@ -9,7 +9,7 @@ import { Lite, Entity, registerToString, JavascriptMessage } from '@framework/Si
 import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName, isTypeEntity } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity, EmailFromEmbedded, MicrosoftGraphEntity } from './Signum.Entities.Mailing'
+import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity, EmailFromEmbedded, MicrosoftGraphEntity, SmtpEntity, ExchangeWebServiceEntity } from './Signum.Entities.Mailing'
 import { EmailSenderConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
 import { SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
@@ -58,7 +58,9 @@ export function start(options: {
   Navigator.addSettings(new EntitySettings(EmailRecipientEmbedded, e => import('./Templates/EmailRecipient')));
   Navigator.addSettings(new EntitySettings(EmailFromEmbedded, e => import('./Templates/EmailFrom')));
   Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => import('./Templates/EmailConfiguration')));
-  Navigator.addSettings(new EntitySettings(MicrosoftGraphEntity, e => import('./Templates/MicrosoftGraph')));
+  Navigator.addSettings(new EntitySettings(SmtpEntity, e => import('./Templates/EmailServiceInfos/Smtp')));
+  Navigator.addSettings(new EntitySettings(ExchangeWebServiceEntity, e => import('./Templates/EmailServiceInfos/ExchangeWebService')));
+  Navigator.addSettings(new EntitySettings(MicrosoftGraphEntity, e => import('./Templates/EmailServiceInfos/MicrosoftGraph')));
 
   Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateEmailFromTemplate, {
     onClick: (ctx) => {
