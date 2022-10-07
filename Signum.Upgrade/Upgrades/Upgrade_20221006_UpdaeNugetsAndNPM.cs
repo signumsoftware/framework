@@ -19,7 +19,6 @@ class Upgrade_20221006_UpdaeNugetsAndNPM : CodeUpgradeBase
 
         uctx.ChangeCodeFile(@"Southwind.React/package.json", file =>
         {
-            file.UpdateNpmPackage("@types/codemirror", "5.60.5");
             file.UpdateNpmPackage("codemirror", "5.65.9");
             file.UpdateNpmPackage("bootstrap", "5.2.2");
             file.UpdateNpmPackage("@types/luxon", "3.0.1");
@@ -38,7 +37,8 @@ class Upgrade_20221006_UpdaeNugetsAndNPM : CodeUpgradeBase
             file.UpdateNpmPackage("webpack", "5.74.0");
             file.UpdateNpmPackage("webpack-bundle-analyzer", "4.6.1");
             file.UpdateNpmPackage("webpack-cli", "4.10.0");
-
+            
+            file.Replace(" && webpack --config webpack.config.polyfills.js --mode=production", "");
             file.Replace(" && webpack --config webpack.config.polyfills.js", "");
             file.RemoveNpmPackage("abortcontroller-polyfill");
             file.RemoveNpmPackage("core-js");
