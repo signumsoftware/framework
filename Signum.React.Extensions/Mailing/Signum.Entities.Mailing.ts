@@ -215,14 +215,14 @@ export interface EmailSenderConfigurationEntity extends Entities.Entity {
   name: string;
   defaultFrom: EmailFromEmbedded | null;
   additionalRecipients: Entities.MList<EmailRecipientEmbedded>;
-  service: EmailServiceInfoEntity;
+  service: EmailSenderServiceConfigurationEntity;
 }
 
 export module EmailSenderConfigurationOperation {
   export const Save : Entities.ExecuteSymbol<EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Save");
 }
 
-export interface EmailServiceInfoEntity extends Entities.Entity {
+export interface EmailSenderServiceConfigurationEntity extends Entities.Entity {
 }
 
 export interface EmailTemplateAddressEmbedded extends Entities.EmbeddedEntity {
@@ -311,7 +311,7 @@ export type EmailTemplateVisibleOn =
   "Query";
 
 export const ExchangeWebServiceEntity = new Type<ExchangeWebServiceEntity>("ExchangeWebService");
-export interface ExchangeWebServiceEntity extends EmailServiceInfoEntity {
+export interface ExchangeWebServiceEntity extends EmailSenderServiceConfigurationEntity {
   Type: "ExchangeWebService";
   exchangeVersion: External.ExchangeVersion;
   url: string | null;
@@ -336,7 +336,7 @@ export interface ImageAttachmentEntity extends Entities.Entity, IAttachmentGener
 }
 
 export const MicrosoftGraphEntity = new Type<MicrosoftGraphEntity>("MicrosoftGraph");
-export interface MicrosoftGraphEntity extends EmailServiceInfoEntity {
+export interface MicrosoftGraphEntity extends EmailSenderServiceConfigurationEntity {
   Type: "MicrosoftGraph";
   useActiveDirectoryConfiguration: boolean;
   azure_ApplicationID: string /*Guid*/ | null;
@@ -404,7 +404,7 @@ export module SendEmailTaskOperation {
 }
 
 export const SmtpEntity = new Type<SmtpEntity>("Smtp");
-export interface SmtpEntity extends EmailServiceInfoEntity {
+export interface SmtpEntity extends EmailSenderServiceConfigurationEntity {
   Type: "Smtp";
   deliveryFormat: External.SmtpDeliveryFormat;
   deliveryMethod: External.SmtpDeliveryMethod;

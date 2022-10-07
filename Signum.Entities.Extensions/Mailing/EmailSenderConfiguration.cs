@@ -25,7 +25,7 @@ public class EmailSenderConfigurationEntity : Entity
     public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
     [ImplementedBy(typeof(SmtpEntity), typeof(ExchangeWebServiceEntity), typeof(MicrosoftGraphEntity))]
-    public EmailServiceInfoEntity Service { get; set; }
+    public EmailSenderServiceConfigurationEntity Service { get; set; }
 
     [Ignore, InTypeScript(false)]
     public SmtpEntity? SMTP { get { return Service as SmtpEntity; } }
@@ -36,8 +36,7 @@ public class EmailSenderConfigurationEntity : Entity
     [Ignore, InTypeScript(false)]
     public MicrosoftGraphEntity? MicrosoftGraph { get { return Service as MicrosoftGraphEntity; } }
 
-    [AutoExpressionField]
-    public override string ToString() => As.Expression(() => Name);
+    public override string ToString() => $"{Name} - {Service}";
 
     protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
     {
@@ -58,14 +57,14 @@ public static class EmailSenderConfigurationOperation
     public static ExecuteSymbol<EmailSenderConfigurationEntity> Save;
 }
 
-public interface IEmailServiceInfo
+public interface IEmailSenderService //todo: remove? interface or inheritance?
 { 
 }
 
-public abstract class EmailServiceInfoEntity : Entity, IEmailServiceInfo { }
+public abstract class EmailSenderServiceConfigurationEntity : Entity, IEmailSenderService { }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class SmtpEntity : EmailServiceInfoEntity
+public class SmtpEntity : EmailSenderServiceConfigurationEntity
 {
     public SmtpDeliveryFormat DeliveryFormat { get; set; }
 
@@ -88,6 +87,7 @@ public class SmtpEntity : EmailServiceInfoEntity
     {
         return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
     }
+
 }
 
 public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
@@ -129,7 +129,7 @@ public enum CertFileType
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class ExchangeWebServiceEntity : EmailServiceInfoEntity
+public class ExchangeWebServiceEntity : EmailSenderServiceConfigurationEntity
 {
     public ExchangeVersion ExchangeVersion { get; set; }
 
@@ -143,10 +143,11 @@ public class ExchangeWebServiceEntity : EmailServiceInfoEntity
     public string? Password { get; set; }
 
     public bool UseDefaultCredentials { get; set; } = true;
+
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class MicrosoftGraphEntity : EmailServiceInfoEntity
+public class MicrosoftGraphEntity : EmailSenderServiceConfigurationEntity
 {
     public bool UseActiveDirectoryConfiguration { get; set; }
 
