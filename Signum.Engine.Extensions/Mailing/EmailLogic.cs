@@ -33,7 +33,7 @@ public static class EmailLogic
     public static void Start(
         SchemaBuilder sb,
         Func<EmailConfigurationEmbedded> getConfiguration,
-        Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
+        IEmailSenderManager senderManager,
         IFileTypeAlgorithm? attachment = null)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -41,7 +41,7 @@ public static class EmailLogic
             FilePathEmbeddedLogic.AssertStarted(sb);
             CultureInfoLogic.AssertStarted(sb);
             EmailLogic.getConfiguration = getConfiguration;
-            EmailTemplateLogic.Start(sb, getEmailSenderConfiguration);
+            EmailTemplateLogic.Start(sb, senderManager.GetEmailSenderConfiguration);
             EmailSenderConfigurationLogic.Start(sb);
             if (attachment != null)
                 FileTypeLogic.Register(EmailFileType.Attachment, attachment);
@@ -64,7 +64,7 @@ public static class EmailLogic
 
             PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
 
-            SenderManager = new EmailSenderManager(getEmailSenderConfiguration);
+            SenderManager = senderManager;
 
             EmailGraph.Register();
 
@@ -314,6 +314,7 @@ public static class EmailLogic
 
 public interface IEmailSenderManager
 {
+    Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> GetEmailSenderConfiguration { get; }
     void Send(EmailMessageEntity email);
 }
 

@@ -4,11 +4,11 @@ namespace Signum.Engine.Mailing;
 
 public partial class EmailSenderManager : IEmailSenderManager
 {
-    private Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
+    public Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> GetEmailSenderConfiguration { get; private set; }
 
     public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
     {
-        this.getEmailSenderConfiguration = getEmailSenderConfiguration;
+        this.GetEmailSenderConfiguration = getEmailSenderConfiguration;
     }
 
     public virtual void Send(EmailMessageEntity email)
@@ -59,7 +59,7 @@ public partial class EmailSenderManager : IEmailSenderManager
     {
         var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
 
-        var config = getEmailSenderConfiguration(template, email.Target, email);
+        var config = GetEmailSenderConfiguration(template, email.Target, email);
 
         if (config.SMTP != null)
         {
