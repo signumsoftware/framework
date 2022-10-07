@@ -25,7 +25,7 @@ public class EmailSenderConfigurationEntity : Entity
     public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
     [ImplementedBy(typeof(SmtpEntity), typeof(ExchangeWebServiceEntity), typeof(MicrosoftGraphEntity))]
-    public IEntity Service { get; set; }
+    public EmailServiceInfoEntity Service { get; set; }
 
     [Ignore, InTypeScript(false)]
     public SmtpEntity? SMTP { get { return Service as SmtpEntity; } }
@@ -135,7 +135,6 @@ public class ExchangeWebServiceEntity : EmailServiceInfoEntity
 
     [StringLengthValidator(Max = 300)]
     public string? Url { get; set; }
-
 
     [StringLengthValidator(Max = 100)]
     public string? Username { get; set; }

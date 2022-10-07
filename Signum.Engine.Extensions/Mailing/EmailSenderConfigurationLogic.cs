@@ -14,6 +14,10 @@ public static class EmailSenderConfigurationLogic
 
     public static void Start(SchemaBuilder sb, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
     {
+        sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(SmtpEntity));
+        sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(ExchangeWebServiceEntity));
+        sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(MicrosoftGraphEntity));
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             if (encryptPassword != null)

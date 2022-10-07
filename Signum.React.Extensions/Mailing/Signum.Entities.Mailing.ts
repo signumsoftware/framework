@@ -215,7 +215,7 @@ export interface EmailSenderConfigurationEntity extends Entities.Entity {
   name: string;
   defaultFrom: EmailFromEmbedded | null;
   additionalRecipients: Entities.MList<EmailRecipientEmbedded>;
-  service: Entities.Entity;
+  service: EmailServiceInfoEntity;
 }
 
 export module EmailSenderConfigurationOperation {
