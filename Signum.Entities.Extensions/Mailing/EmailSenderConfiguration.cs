@@ -57,11 +57,9 @@ public static class EmailSenderConfigurationOperation
     public static ExecuteSymbol<EmailSenderConfigurationEntity> Save;
 }
 
-public interface IEmailSenderService //todo: remove? interface or inheritance?
-{ 
+public abstract class EmailSenderServiceConfigurationEntity : Entity
+{
 }
-
-public abstract class EmailSenderServiceConfigurationEntity : Entity, IEmailSenderService { }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class SmtpEntity : EmailSenderServiceConfigurationEntity
@@ -87,7 +85,6 @@ public class SmtpEntity : EmailSenderServiceConfigurationEntity
     {
         return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
     }
-
 }
 
 public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
@@ -143,7 +140,6 @@ public class ExchangeWebServiceEntity : EmailSenderServiceConfigurationEntity
     public string? Password { get; set; }
 
     public bool UseDefaultCredentials { get; set; } = true;
-
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
