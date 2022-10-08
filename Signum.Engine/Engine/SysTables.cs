@@ -112,7 +112,7 @@ public class SysTables : IView
         As.Expression(() => Database.View<SysForeignKeys>().Where(fk => fk.parent_object_id == this.object_id));
 
     [AutoExpressionField]
-    public IQueryable<SysForeignKeys> IncommingForeignKeys() => 
+    public IQueryable<SysForeignKeys> IncomingForeignKeys() => 
         As.Expression(() => Database.View<SysForeignKeys>().Where(fk => fk.referenced_object_id == this.object_id));
 
     [AutoExpressionField]
