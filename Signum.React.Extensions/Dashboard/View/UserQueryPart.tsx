@@ -151,12 +151,15 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
   const vsc = React.useRef<SearchValueController>(null);
 
   return (
-    <div className={classes(
-      "card",
-      !p.customColor && ("bg-ligth"),
-      "o-hidden"
-    )} style={{ backgroundColor: p.customColor ?? undefined, color: p.customColor != null ? getColorContrasColorBWByHex(p.customColor) : "black" }}>
-      <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{ cursor: "pointer", color: p.sameColor ? p.iconColor : (p.customColor != null ? getColorContrasColorBWByHex(p.customColor) : "black") }}>
+    <div className={classes("card", !p.customColor && "bg-ligth", "o-hidden")}
+      style={{
+      backgroundColor: p.customColor ?? undefined,
+      color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black"
+    }}>
+      <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{
+        cursor: "pointer",
+        color: p.sameColor ? p.iconColor : (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
+      }}>
         <div className="row">
           <div className="col-3">
             {p.iconName &&

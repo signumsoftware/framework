@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Signum.Engine.Translation;
 using Signum.Entities.Mailing;
 using Signum.Entities.Reflection;
@@ -129,6 +130,9 @@ public abstract class ValueProviderBase
                         if (!(vp is TokenValueProvider))
                             return new ContinueValueProvider(token.TryAfter('.'), vp, tp);
                     }
+
+                    if (ConstantValueProvider.TryParseConstantValue(token, out var val))
+                        return new ConstantValueProvider(val, tp);
 
                     ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.QueryDescription, tp.Variables, tp.AddError);
 
@@ -507,8 +511,13 @@ public class ModelValueProvider : ValueProviderBase
                 return pi.GetValue(model, null);
 
             if (mwa.Member is MethodInfo mi)
-                return mi.Invoke(model, mwa.Arguments == null ? new object[] { p } :
-                mwa.Arguments.Select(a => a.GetValue(p)).And(p).ToArray());
+            {
+                var arguments = mwa.Arguments == null ? 
+                    new object[] { p } :
+                    mwa.Arguments.Select(a => a.GetValue(p)).And(p).ToArray();
+
+                return mi.Invoke(model, arguments);
+            }
 
             return ((FieldInfo)mwa.Member).GetValue(model);
         }
@@ -736,6 +745,86 @@ public class DateValueProvider : ValueProviderBase
     public override int GetHashCode() => dateTimeExpression?.GetHashCode() ?? 0;
     public override bool Equals(object? obj) => obj is DateValueProvider gvp
         && Equals(gvp.dateTimeExpression, dateTimeExpression);
+}
+
+public class ConstantValueProvider : ValueProviderBase
+{
+    public object? Value;
+
+    public static bool TryParseConstantValue(string valueExpression, out object? value)
+    {
+        if(valueExpression.ToLower() == "null")
+        {
+            value = null;
+            return true;
+        }
+
+        if(int.TryParse(valueExpression, NumberStyles.Integer, CultureInfo.InvariantCulture, out int a))
+        {
+            value = a;
+            return true;
+        }
+
+        if (decimal.TryParse(valueExpression, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal d))
+        {
+            value = d;
+            return  true;
+        }
+
+        if(valueExpression.StartsWith('\"') && valueExpression.EndsWith('\"'))
+        {
+            value = valueExpression.Trim('\"');
+            return true;
+        }
+
+        if (valueExpression.StartsWith('\'') && valueExpression.EndsWith('\''))
+        {
+            value = valueExpression.Trim('\'');
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+
+    public ConstantValueProvider(object? value, ITemplateParser tp)
+    {
+        this.Value = value;
+    }
+
+    public override Type? Type => Value?.GetType() ?? typeof(object);
+
+    public override object? GetValue(TemplateParameters p)
+    {
+        return Value;
+    }
+
+    public override void FillQueryTokens(List<QueryToken> list)
+    {
+    }
+
+    public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
+    {
+        var val = Value == null ? "null" :
+            Value is int a ? a.ToString(CultureInfo.InvariantCulture) :
+            Value is decimal d ? d.ToString(CultureInfo.InvariantCulture) :
+            Value is string str ? @"""{str}""" :
+            throw new NotImplementedException();
+
+        sb.Append(val);
+    }
+
+    public override void Synchronize(TemplateSynchronizationContext sc, string remainingText)
+    {
+
+
+    }
+
+    public override string? Format => null;
+
+    public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+    public override bool Equals(object? obj) => obj is ConstantValueProvider gvp
+        && Equals(gvp.Value, Value);
 
 }
 
