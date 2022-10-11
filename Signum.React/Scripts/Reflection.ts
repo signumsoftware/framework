@@ -1414,6 +1414,23 @@ export class QueryTokenString<T> {
     return new QueryTokenString<S>(this.token + ".AnyNo");
   }
 
+  separatedByComma<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByComma");
+  }
+
+  separatedByCommaDistinct<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByCommaDistinct");
+  }
+
+  separatedByNewLine<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByNewLine");
+  }
+
+  separatedByNewLineDistinct<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByNewLineDistinct");
+  }
+  
+
   noOne<S = ArrayElement<T>>(): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + ".NoOne");
   }
