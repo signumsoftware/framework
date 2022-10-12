@@ -83,7 +83,7 @@ type MultiNum = number | number[];
 
 function getMultiAggregator(columns: ChartColumn<number>[]): (values: MultiNum[]) => MultiNum {
 
-  function getSingleAggregator(token: QueryToken): (values: MultiNum[], selector?: (mn: number[]) => number, sumSelector?: (mn: number[]) => number) => number {
+  function getSingleAggregator(token: QueryToken): (values: MultiNum[], selector?: (mn: number[]) => number, countSelector?: (mn: number[]) => number) => number {
     if (token.queryTokenType != "Aggregate")
       return (vals, selector) => vals.sum(selector as (mn: MultiNum) => number);
 
@@ -105,14 +105,14 @@ function getMultiAggregator(columns: ChartColumn<number>[]): (values: MultiNum[]
     throw new Error('getSingleAggregator not implemented for ' + token.key);
   }
 
-  function getSumSelectors(c: ChartColumn<number>){
+  function getCountNNSelectors(c: ChartColumn<number>){
     if (c.token!.queryTokenType == "Aggregate" && c.token!.key == "Avg") {
-      var sumColumn = columns.firstOrNull(s => s.token?.queryTokenType == "Aggregate" && s.token!.key == "Sum" && s.token?.parent?.fullKey == c.token?.parent?.fullKey);
+      const countNNColumn = columns.firstOrNull(s => s.token?.queryTokenType == "Aggregate" && s.token!.key == "CountNotNull" && s.token?.parent?.fullKey == c.token?.parent?.fullKey);
 
-      if (sumColumn == null)
-        throw new Error(`Unable to combine values an Avg token (${c.token!.fullKey}) because no equivalent Sum token found (${c.token?.parent?.fullKey + ".Sum"})`);
+      if (countNNColumn == null)
+        throw new Error(`Unable to combine values an Avg token (${c.token!.fullKey}) because no equivalent CountNotNull token found (${c.token?.parent?.fullKey + ".CountNotNull"})`);
 
-      var index = columns.indexOf(sumColumn);
+      const index = columns.indexOf(countNNColumn);
       return (array: number[]) => array[index];
     }
 
@@ -123,38 +123,38 @@ function getMultiAggregator(columns: ChartColumn<number>[]): (values: MultiNum[]
     return getSingleAggregator(columns[0].token!) as (values: MultiNum[]) => MultiNum;
 
   if (columns.length == 2) {
-    var ag0 = getSingleAggregator(columns[0].token!); var sum0 = getSumSelectors(columns[0]);
-    var ag1 = getSingleAggregator(columns[1].token!); var sum1 = getSumSelectors(columns[1]);
+    const ag0 = getSingleAggregator(columns[0].token!); const count0 = getCountNNSelectors(columns[0]);
+    const ag1 = getSingleAggregator(columns[1].token!); const count1 = getCountNNSelectors(columns[1]);
 
     return ((values: number[][]) => [
-      ag0(values, a => a[0], sum0),
-      ag1(values, a => a[1], sum1),
+      ag0(values, a => a[0], count0),
+      ag1(values, a => a[1], count1),
     ]) as (values: MultiNum[]) => MultiNum;
   }
 
   if (columns.length == 3) {
-    var ag0 = getSingleAggregator(columns[0].token!); var sum0 = getSumSelectors(columns[0]);
-    var ag1 = getSingleAggregator(columns[1].token!); var sum1 = getSumSelectors(columns[1]);
-    var ag2 = getSingleAggregator(columns[2].token!); var sum2 = getSumSelectors(columns[2]);
+    const ag0 = getSingleAggregator(columns[0].token!); const count0 = getCountNNSelectors(columns[0]);
+    const ag1 = getSingleAggregator(columns[1].token!); const count1 = getCountNNSelectors(columns[1]);
+    const ag2 = getSingleAggregator(columns[2].token!); const count2 = getCountNNSelectors(columns[2]);
 
     return ((values: number[][]) => [
-      ag0(values, a => a[0], sum0),
-      ag1(values, a => a[1], sum1),
-      ag2(values, a => a[2], sum2),
+      ag0(values, a => a[0], count0),
+      ag1(values, a => a[1], count1),
+      ag2(values, a => a[2], count2),
     ]) as (values: MultiNum[]) => MultiNum;
   }
 
   if (columns.length == 4) {
-    var ag0 = getSingleAggregator(columns[0].token!); var sum0 = getSumSelectors(columns[0]);
-    var ag1 = getSingleAggregator(columns[1].token!); var sum1 = getSumSelectors(columns[1]);
-    var ag2 = getSingleAggregator(columns[2].token!); var sum2 = getSumSelectors(columns[2]);
-    var ag3 = getSingleAggregator(columns[3].token!); var sum3 = getSumSelectors(columns[3]);
+    const ag0 = getSingleAggregator(columns[0].token!); const count0 = getCountNNSelectors(columns[0]);
+    const ag1 = getSingleAggregator(columns[1].token!); const count1 = getCountNNSelectors(columns[1]);
+    const ag2 = getSingleAggregator(columns[2].token!); const count2 = getCountNNSelectors(columns[2]);
+    const ag3 = getSingleAggregator(columns[3].token!); const count3 = getCountNNSelectors(columns[3]);
 
     return ((values: number[][]) => [
-      ag0(values, a => a[0], sum0),
-      ag1(values, a => a[1], sum1),
-      ag2(values, a => a[2], sum2),
-      ag3(values, a => a[3], sum3),
+      ag0(values, a => a[0], count0),
+      ag1(values, a => a[1], count1),
+      ag2(values, a => a[2], count2),
+      ag3(values, a => a[3], count3),
     ]) as (values: MultiNum[]) => MultiNum;
   }
 
