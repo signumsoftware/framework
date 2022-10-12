@@ -1310,7 +1310,7 @@ NodeUtils.register<SearchControlNode>({
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.extraButtons)} type={null} defaultValue={null} exampleExpression={`sc => [
   { 
     order: -1.1,
-    button: modules.React.createElement("button", { className: "btn btn-light", title: "Setting", onClick: e => alert(e) },
+    button: modules.React.createElement("button", { className: "btn bg-light", title: "Setting", onClick: e => alert(e) },
                                           modules.React.createElement(modules.FontAwesomeIcon, { icon: "gear", color: "green" }), " ", "Setting")
   },
 ]`} />

@@ -606,7 +606,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       p.showFilterButton && {
         order: -5,
         button: <button
-          className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "btn-light")}
+          className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "bg-light")}
           style={!s.showFilters && p.findOptions.filterOptions.filter(a => !a.pinned).length > 0 ? { border: "1px solid #6c757d" } : undefined}
           onClick={this.handleToggleFilters}
           title={titleLabels ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
@@ -617,7 +617,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       p.showGroupButton && {
         order: -4,
         button: < button
-          className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
+          className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "bg-light")}
           onClick={this.handleToggleGroupBy}
           title={titleLabels ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
           Ʃ
@@ -627,7 +627,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       p.showSystemTimeButton && {
         order: -3.5,
         button: < button
-          className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
+          className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "bg-light")}
           onClick={this.handleSystemTimeClick}
           title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
           <FontAwesomeIcon icon="clock-rotate-left" />
@@ -636,7 +636,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       {
         order: -3,
-        button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
+        button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "bg-danger" : "bg-primary") : (isManualOrAll ? "border-danger text-danger bg-light" : "border-primary text-primary bg-light"))} onClick={this.handleSearchClick} >
           <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
         </button>
       },
@@ -645,7 +645,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       p.create && {
         order: -2,
-        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
+        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "bg-light", "sf-create ms-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
           <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
         </button>
       },
@@ -660,7 +660,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       ...(this.props.hideButtonBar ? [] : buttonBarElements),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
-        button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
+        button: <button className="sf-query-button btn bg-light" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
           <FontAwesomeIcon icon="up-right-from-square" />
         </button>
       }

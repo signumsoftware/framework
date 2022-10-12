@@ -146,7 +146,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
 
       <div className="row" style={{ paddingTop: "1rem" }}>
         <div className="col-md-6 offset-md-3">
-          <button type="submit" id="login" className="btn btn-success" disabled={p.ctx.loading != null}>
+          <button type="submit" id="login" className="btn bg-success" disabled={p.ctx.loading != null}>
             {p.ctx.loading == "password" ?
               <FontAwesomeIcon icon="gear" fixedWidth style={{ fontSize: "larger" }} spin /> : < FontAwesomeIcon icon="right-to-bracket" />}
             &nbsp;
@@ -184,7 +184,7 @@ export function LoginWithWindowsButton() {
   return (
     <div className="row mt-2">
       <div className="col-md-6 offset-md-3">
-        <button onClick={e => { e.preventDefault(); onClick(); }} className="btn btn-info">
+        <button onClick={e => { e.preventDefault(); onClick(); }} className="btn bg-info">
           <FontAwesomeIcon icon={["fab", "windows"]} /> {LoginAuthMessage.LoginWithWindowsUser.niceToString()}
         </button>
       </div>

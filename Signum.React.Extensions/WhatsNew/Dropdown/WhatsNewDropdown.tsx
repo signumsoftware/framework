@@ -107,7 +107,7 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
     <>
       <div className="nav-link sf-bell-container" onClick={handleOnToggle}>
         <FontAwesomeIcon icon="bullhorn" className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")} />
-        {countResult && countResult.numWhatsNews > 0 && <span className="badge btn-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
+        {countResult && countResult.numWhatsNews > 0 && <span className="badge bg-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
       </div>
       {isOpen && <div className="sf-news-toasts" ref={divRef}>
         {newsGroups == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :

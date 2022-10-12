@@ -23,7 +23,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
   const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
 
   function renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
-    return <input type="button" disabled={!!canClick} className="btn btn-light btn-sm sf-button"
+    return <input type="button" disabled={!!canClick} className="btn bg-light btn-sm sf-button"
       title={canClick} value={text}
       onClick={() => ValueLineModal.show({
         type: { name: "string" },
@@ -35,7 +35,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
   }
 
   function renderWidgetButton(text: React.ReactElement, getCode: () => Promise<string | undefined>) {
-    return <button className="btn btn-light btn-sm sf-button"
+    return <button className="btn bg-light btn-sm sf-button"
 
       onClick={() =>
         getCode()

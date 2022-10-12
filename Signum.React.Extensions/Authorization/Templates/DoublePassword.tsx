@@ -33,7 +33,7 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean, ma
   if (!withPassword) {
     return (
       <FormGroup label={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx}>
-        <a className="btn btn-light btn-sm" onClick={() => setWithPassword(true)}>
+        <a className="btn bg-light btn-sm" onClick={() => setWithPassword(true)}>
           <FontAwesomeIcon icon="key" /> {LoginAuthMessage.ChangePassword.niceToString()}
         </a>
       </FormGroup>

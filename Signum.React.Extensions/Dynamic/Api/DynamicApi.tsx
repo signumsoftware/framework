@@ -79,8 +79,8 @@ public class PizzaDTO
       <div className="row">
         <div className="col-sm-7">
           <div className="btn-group" style={{ marginBottom: "3px" }}>
-            <input type="button" className="btn btn-success btn-sm sf-button" value="GET" onClick={handleGetClick} />
-            <input type="button" className="btn btn-warning btn-sm sf-button" value="POST" onClick={handlePostClick} />
+            <input type="button" className="btn bg-success btn-sm sf-button" value="GET" onClick={handleGetClick} />
+            <input type="button" className="btn bg-warning btn-sm sf-button" value="POST" onClick={handlePostClick} />
           </div>
           <div className="code-container">
             <pre style={{ border: "0px", margin: "0px" }} />

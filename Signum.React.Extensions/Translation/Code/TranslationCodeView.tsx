@@ -36,7 +36,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
     return (
       <div>
         {Dic.getValues(result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={p.match.params.culture} />)}
-        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary" onClick={handleSave} />
+        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn bg-primary" onClick={handleSave} />
       </div>
     );
   }

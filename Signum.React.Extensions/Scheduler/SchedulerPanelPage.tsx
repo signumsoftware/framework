@@ -50,9 +50,9 @@ export default function SchedulerPanelPage(p: SchedulerPanelProps) {
     <div>
       <h2 className="display-6">SchedulerLogic state</h2>
       <div className="btn-toolbar">
-        {s.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
-        {!s.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
-        <a href="#" className="sf-button btn btn-light" onClick={handleUpdate}>Update</a>
+        {s.running && <a href="#" className="sf-button btn bg-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
+        {!s.running && <a href="#" className="sf-button btn bg-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
+        <a href="#" className="sf-button btn bg-light" onClick={handleUpdate}>Update</a>
       </div >
       <div id="processMainDiv">
         <br />
@@ -155,7 +155,7 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerRunni
                 <td><EntityLink lite={item.schedulerTaskLog} inSearch={true} onNavigated={onReload} /></td>
                 <td>{item.startTime} ({DateTime.fromISO(item.startTime).toRelative()})</td>
                 <td><pre>{item.remarks}</pre></td>
-                <td><button className="btn btn-light btn-xs btn-danger" type="button" onClick={e => handleCancelClick(e, item.schedulerTaskLog)}>Cancel</button></td>
+                <td><button className="btn bg-light btn-xs bg-danger" type="button" onClick={e => handleCancelClick(e, item.schedulerTaskLog)}>Cancel</button></td>
               </tr>)
             }
           </tbody>

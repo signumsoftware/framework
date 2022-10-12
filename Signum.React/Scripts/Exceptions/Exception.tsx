@@ -82,7 +82,7 @@ export function FormatJson(p: { code: string | undefined | null }) {
 
   return (
     <div>
-      <button className={classes("btn btn-sm btn-light", formatJson && "active")} onClick={() => setFormatJson(!formatJson)}>
+      <button className={classes("btn btn-sm bg-light", formatJson && "active")} onClick={() => setFormatJson(!formatJson)}>
         <FontAwesomeIcon icon="code" /> Format JSON 
       </button>
       <pre style={{ whiteSpace: "pre-wrap" }}>

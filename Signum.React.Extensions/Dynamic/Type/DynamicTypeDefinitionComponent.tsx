@@ -649,12 +649,12 @@ public static class ${entityName}Operation2
             <div>
               <div className="btn-group" style={{ marginBottom: "3px" }}>
                 {dt.baseType == "Entity" && CustomCodeTab.suggestWorkflow &&
-                  <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={handleWorkflowCustomInheritanceClick} />}
+                  <input type="button" className="btn bg-success btn-xs sf-button" value="Workflow" onClick={handleWorkflowCustomInheritanceClick} />}
 
                 {dt.baseType == "Entity" && CustomCodeTab.suggestTree &&
-                  <input type="button" className="btn btn-warning btn-xs sf-button" value="Tree" onClick={handleTreeCustomInheritanceClick} />}
+                  <input type="button" className="btn bg-warning btn-xs sf-button" value="Tree" onClick={handleTreeCustomInheritanceClick} />}
                 {dt.baseType == "Entity" &&
-                  <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS" onClick={handleSMSInheritanceClick} />}
+                  <input type="button" className="btn bg-danger btn-xs sf-button" value="SMS" onClick={handleSMSInheritanceClick} />}
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}:`}</pre>
@@ -671,11 +671,11 @@ public static class ${entityName}Operation2
           renderContent={e =>
             <div>
               <div className="btn-group" style={{ marginBottom: "3px" }}>
-                <input type="button" className="btn btn-warning btn-xs sf-button" value="Pre Saving" onClick={handlePreSavingClick} />
-                <input type="button" className="btn btn-success btn-xs sf-button" value="Post Retrieving" onClick={handlePostRetrievingClick} />
-                <input type="button" className="btn btn-info btn-xs sf-button" value="Property Validator" onClick={handlePropertyValidatorClick} />
+                <input type="button" className="btn bg-warning btn-xs sf-button" value="Pre Saving" onClick={handlePreSavingClick} />
+                <input type="button" className="btn bg-success btn-xs sf-button" value="Post Retrieving" onClick={handlePostRetrievingClick} />
+                <input type="button" className="btn bg-info btn-xs sf-button" value="Property Validator" onClick={handlePropertyValidatorClick} />
                 {dt.baseType == "Entity" &&
-                  <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS Owner Data" onClick={handleSMSOwnerDataClick} />}
+                  <input type="button" className="btn bg-danger btn-xs sf-button" value="SMS Owner Data" onClick={handleSMSOwnerDataClick} />}
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}
@@ -696,21 +696,21 @@ public static class ${entityName}Operation2
               {dt.baseType == "Entity" &&
                 <div>
                   <div className="btn-group" style={{ marginBottom: "3px" }}>
-                    {CustomCodeTab.suggestWorkflow && <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={handleWithWorkflowClick} />}
-                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="Tree" onClick={handleWithTreeClick} />}
-                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateRoot" onClick={handleOverrideCreateRoot} />}
-                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateChild" onClick={handleOverrideCreateChild} />}
-                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="NextSibling" onClick={handleOverrideNextSibling} />}
-                    <input type="button" className="btn btn-warning btn-xs sf-button" value="Register Operations" onClick={handleRegisterOperationsClick} />
-                    <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={handleRegisterExpressionsClick} />
-                    <input type="button" className="btn btn-info btn-xs sf-button" value="Add Unit" onClick={handleAddUnitClick} />
+                    {CustomCodeTab.suggestWorkflow && <input type="button" className="btn bg-success btn-xs sf-button" value="Workflow" onClick={handleWithWorkflowClick} />}
+                    {CustomCodeTab.suggestTree && <input type="button" className="btn bg-info btn-xs sf-button" value="Tree" onClick={handleWithTreeClick} />}
+                    {CustomCodeTab.suggestTree && <input type="button" className="btn bg-info btn-xs sf-button" value="CreateRoot" onClick={handleOverrideCreateRoot} />}
+                    {CustomCodeTab.suggestTree && <input type="button" className="btn bg-info btn-xs sf-button" value="CreateChild" onClick={handleOverrideCreateChild} />}
+                    {CustomCodeTab.suggestTree && <input type="button" className="btn bg-info btn-xs sf-button" value="NextSibling" onClick={handleOverrideNextSibling} />}
+                    <input type="button" className="btn bg-warning btn-xs sf-button" value="Register Operations" onClick={handleRegisterOperationsClick} />
+                    <input type="button" className="btn bg-danger btn-xs sf-button" value="Register Expressions" onClick={handleRegisterExpressionsClick} />
+                    <input type="button" className="btn bg-info btn-xs sf-button" value="Add Unit" onClick={handleAddUnitClick} />
                   </div>
                 </div>}
               <div className="btn-group" style={{ marginBottom: "3px" }}>
                 {dt.baseType == "Entity" &&
-                  <input type="button" className="btn btn-success btn-xs sf-button" value="Register SMS Owner Data" onClick={handleRegisterSMSOwnerDataClick} />}
-                <input type="button" className="btn btn-danger btn-xs sf-button" value="Register SMS Model" onClick={handleRegisterSMSModelClick} />
-                <input type="button" className="btn btn-info btn-xs sf-button" value="Override SMS Provider" onClick={handleOverrideSMSProviderClick} />
+                  <input type="button" className="btn bg-success btn-xs sf-button" value="Register SMS Owner Data" onClick={handleRegisterSMSOwnerDataClick} />}
+                <input type="button" className="btn bg-danger btn-xs sf-button" value="Register SMS Model" onClick={handleRegisterSMSModelClick} />
+                <input type="button" className="btn bg-info btn-xs sf-button" value="Override SMS Provider" onClick={handleOverrideSMSProviderClick} />
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, FluentInclude<${entityName}> fi`}</pre>
@@ -726,10 +726,10 @@ public static class ${entityName}Operation2
           renderContent={e =>
             <div>
               <div className="btn-group" style={{ marginBottom: "3px" }}>
-                {dt.baseType == "Entity" && <input type="button" className="btn btn-success btn-xs sf-button" value="Query Expression" onClick={handleQueryExpressionClick} />}
-                {dt.baseType == "Entity" || dt.baseType == "EmbeddedEntity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Scalar Expression" onClick={handleScalarExpressionClick} />}
-                <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS Model" onClick={handleCreateSMSModelClick} />
-                <input type="button" className="btn btn-info btn-xs sf-button" value="SMS Provider" onClick={handleSMSProviderClick} />
+                {dt.baseType == "Entity" && <input type="button" className="btn bg-success btn-xs sf-button" value="Query Expression" onClick={handleQueryExpressionClick} />}
+                {dt.baseType == "Entity" || dt.baseType == "EmbeddedEntity" && <input type="button" className="btn bg-warning btn-xs sf-button" value="Scalar Expression" onClick={handleScalarExpressionClick} />}
+                <input type="button" className="btn bg-danger btn-xs sf-button" value="SMS Model" onClick={handleCreateSMSModelClick} />
+                <input type="button" className="btn bg-info btn-xs sf-button" value="SMS Provider" onClick={handleSMSProviderClick} />
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`public static class ${dt.typeName}Logic
@@ -748,8 +748,8 @@ public static class ${entityName}Operation2
           renderContent={e =>
             <div>
               <div className="btn-group" style={{ marginBottom: "3px" }}>
-                <input type="button" className="btn btn-success btn-xs sf-button" value="Enum" onClick={handleEnumClick} />
-                {dt.baseType == "Entity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Operation" onClick={handleOperationClick} />}
+                <input type="button" className="btn bg-success btn-xs sf-button" value="Enum" onClick={handleEnumClick} />
+                {dt.baseType == "Entity" && <input type="button" className="btn bg-warning btn-xs sf-button" value="Operation" onClick={handleOperationClick} />}
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`public namespace Signum.Entities.CodeGen
@@ -769,7 +769,7 @@ public static class ${entityName}Operation2
           renderContent={e =>
             <div>
               <div className="btn-group" style={{ marginBottom: "3px" }}>
-                <input type="button" className="btn btn-success btn-xs sf-button" value="Override" onClick={handleOverrideClick} />
+                <input type="button" className="btn bg-success btn-xs sf-button" value="Override" onClick={handleOverrideClick} />
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`public void OverrideSchema(SchemaBuilder sb)

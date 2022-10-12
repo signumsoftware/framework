@@ -93,7 +93,7 @@ export function CheckEvalsStep() {
   return (
     <div>
       {Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={autoStart} />)}
-      <button className="btn btn-success" onClick={handleOnClick}><FontAwesomeIcon icon="arrows-rotate" /> Refresh all</button>
+      <button className="btn bg-success" onClick={handleOnClick}><FontAwesomeIcon icon="arrows-rotate" /> Refresh all</button>
     </div>
   );
 }
@@ -185,7 +185,7 @@ export function RefreshClientsStep() {
   return (
     <div>
       <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
-      <a href="#" className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</a>
+      <a href="#" className="sf-button btn bg-warning" onClick={handleRefreshClient}>Refresh this client</a>
     </div>
   );
 }

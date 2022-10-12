@@ -208,8 +208,8 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
 
     return (
       <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px" }}>
-        {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
-        <button type="button" className="btn btn-success" onClick={handleShowCode}>Show code</button>
+        {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn bg-primary" onClick={handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
+        <button type="button" className="btn bg-success" onClick={handleShowCode}>Show code</button>
         <Dropdown onToggle={handleOnToggle} show={isDropdownOpen} >
           <Dropdown.Toggle id="bg-nested-dropdown" size="sm">
             {" … "}

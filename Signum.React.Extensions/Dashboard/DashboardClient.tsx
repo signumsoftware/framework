@@ -327,7 +327,7 @@ function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd:
   var title =  SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
 
   return (
-    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm btn-light sf-create me-2" title={title}>
+    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm bg-light sf-create me-2" title={title}>
       <FontAwesomeIcon icon={"plus"} /> {title}
     </a>
   );

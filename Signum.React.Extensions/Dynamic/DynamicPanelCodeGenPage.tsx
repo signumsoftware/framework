@@ -242,8 +242,8 @@ export function CompileStep(p: DynamicCompileStepProps) {
 
 
       <br />
-      {<a href="#" className="sf-button btn btn-warning" onClick={handleCheck}>Check</a>}&nbsp;
-      {<a href="#" className="sf-button btn btn-success" onClick={handleCompile}>Compile</a>}
+      {<a href="#" className="sf-button btn bg-warning" onClick={handleCheck}>Check</a>}&nbsp;
+      {<a href="#" className="sf-button btn bg-success" onClick={handleCompile}>Compile</a>}
       {compilationErrors && renderCompileResult(compilationErrors)}
     </div>
   );
@@ -311,7 +311,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
     <div>
       {
         AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
-        <a href="#" className="sf-button btn btn-danger" onClick={handleRestartApplication}>Restart Server Application</a>
+        <a href="#" className="sf-button btn bg-danger" onClick={handleRestartApplication}>Restart Server Application</a>
       }
       {p.startErrors && p.startErrors.map((e, i) => <ErrorBlock key={i} error={e} />)}
     </div>
@@ -360,7 +360,7 @@ export function RefreshClientsStep() {
   return (
     <div>
       <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
-      <a href="#" className="sf-button btn btn-warning" onClick={handleRefreshClient}>Refresh this client</a>
+      <a href="#" className="sf-button btn bg-warning" onClick={handleRefreshClient}>Refresh this client</a>
     </div>
   );
 }

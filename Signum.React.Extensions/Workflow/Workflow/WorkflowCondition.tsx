@@ -119,9 +119,9 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
           <br />
           <div className="row">
             <div className="col-sm-7">
-              {exampleEntityRef.current && <button className="btn btn-success" onClick={reloadResponse}><FontAwesomeIcon icon="play" /> Evaluate</button>}
+              {exampleEntityRef.current && <button className="btn bg-success" onClick={reloadResponse}><FontAwesomeIcon icon="play" /> Evaluate</button>}
               <div className="btn-group" style={{ marginBottom: "3px" }}>
-                <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
+                <input type="button" className="btn bg-success btn-sm sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>

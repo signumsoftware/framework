@@ -77,7 +77,7 @@ export function ProgressModal(p: ProgressModalProps) {
 
       </div>
       <div className="modal-footer">
-        <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button className="btn bg-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>
