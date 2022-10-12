@@ -6,6 +6,8 @@ using Microsoft.Graph.Auth;
 using Microsoft.Graph;
 using Signum.Entities.Authorization;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Signum.Engine.Mailing;
 
@@ -18,14 +20,15 @@ public partial class EmailSenderManager : IEmailSenderManager
     {
         try
         {
-            ClientCredentialProvider authProvider = microsoftGraph.GetAuthProvider();
+            var authProvider = microsoftGraph.GetAuthProvider();
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
 
 
             var bigAttachments = email.Attachments.Where(a => a.File.FileLength > MicrosoftGraphFileSizeLimit).ToList();
 
             var message = ToGraphMessageWithSmallAttachments(email);
-            var user = graphClient.Users[email.From.AzureUserId.ToString()];
+            var userId = email.From.AzureUserId.ToString();
+            var user = graphClient.Users[userId];
 
             if (bigAttachments.IsEmpty())
             {
@@ -149,8 +152,21 @@ public static class MicrosoftGraphExtensions
         };
     }
 
-    public static ClientCredentialProvider GetAuthProvider(this MicrosoftGraphEmbedded microsoftGraph, string[]? scopes = null)
+    static AsyncThreadVariable<IAuthenticationProvider?> AuthenticationProvider = Statics.ThreadVariable<IAuthenticationProvider?>("OverrideAuthenticationProvider");
+
+
+    public static IDisposable OverrideAuthenticationProvider(IAuthenticationProvider value)
     {
+        var old = AuthenticationProvider.Value;
+        AuthenticationProvider.Value = value;
+        return new Disposable(() => AuthenticationProvider.Value = old);
+    }
+
+    public static IAuthenticationProvider GetAuthProvider(this MicrosoftGraphEmbedded microsoftGraph, string[]? scopes = null)
+    {
+        if (AuthenticationProvider.Value is var ap && ap != null)
+            return ap;
+
         if (microsoftGraph.UseActiveDirectoryConfiguration)
             return AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada ? ada.GetConfig().GetAuthProvider() :
                 throw new InvalidOperationException("AuthLogic.Authorizer is not an ActiveDirectoryAuthorizer");
@@ -168,8 +184,11 @@ public static class MicrosoftGraphExtensions
         return authProvider;
     }
 
-    public static ClientCredentialProvider GetAuthProvider(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
+    public static IAuthenticationProvider GetAuthProvider(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
     {
+        if (AuthenticationProvider.Value is var ap && ap != null)
+            return ap;
+
         IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
         .Create(activeDirectoryConfig.Azure_ApplicationID.ToString())
         .WithTenantId(activeDirectoryConfig.Azure_DirectoryID.ToString())
@@ -183,5 +202,23 @@ public static class MicrosoftGraphExtensions
         return authProvider;
     }
 
+    public static IDisposable OverrideAuthenticationProvider(string accessToken) =>
+        OverrideAuthenticationProvider(new AccessTokenProvider(accessToken));
+}
 
+public class AccessTokenProvider : IAuthenticationProvider
+{
+    private string accessToken;
+
+    public AccessTokenProvider(string accessToken)
+    {
+        this.accessToken = accessToken;
+    }
+
+    public Task AuthenticateRequestAsync(HttpRequestMessage request)
+    {
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        return Task.CompletedTask;
+    }
 }
