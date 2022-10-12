@@ -88,7 +88,7 @@ export function SearchToolbarCount(p: CountIconProps) {
 
 
 export function ToolbarCount(p: { num: number | null | undefined }) {
-  return <div className="sf-toolbar-count-container"><div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "btn-light text-secondary" : "btn-danger")}>{p.num ?? "…"}</div></div>
+  return <div className="sf-toolbar-count-container"><div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "bg-light text-secondary" : "bg-danger")}>{p.num ?? "…"}</div></div>
 }
 
 

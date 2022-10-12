@@ -178,7 +178,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
           if (first.group == null)
             return (
               <a key={i}
-                className={classes("badge badge-pill sf-quicklinks", "btn-" + first.color)}
+                className={classes("badge badge-pill sf-quicklinks", "bg-" + first.color, first.color == "light" ? undefined : "text-white")}
                 title={StyleContext.default.titleLabels ? gr.elements[0].text() : undefined}
                 role="button"
                 href="#"

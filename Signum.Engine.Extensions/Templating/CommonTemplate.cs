@@ -233,11 +233,11 @@ public static class ParsedModel
 
                 var parameterString = parensDic[argumentsIndex];
 
-                var arguments = parameterString.TrimStart('(').TrimEnd(')').SplitNoEmpty(",").Select(arg => ValueProviderBase.TryParse(arg, null, tp)).ToList();
+                var arguments = parameterString.TrimStart('(').TrimEnd(')').SplitNoEmpty(",").Select(arg => ValueProviderBase.TryParse(arg.Trim(), null, tp)).ToList();
 
                 var methodName = part.Before("($$");
 
-                var method = type.GetMethod(methodName, Flags);
+                var method = type.GetMethod(methodName.Trim(), Flags);
 
                 if (method == null)
                 {
@@ -252,8 +252,11 @@ public static class ParsedModel
                     return null;
                 }
 
-                var errors = miParameters.Take(miParameters.Length - 1).Zip(arguments, (p, a) => (p, a))
-                    .Select(tuple => tuple.a?.Type == null ? null : !tuple.p.ParameterType.IsAssignableFrom(tuple.a.Type) ? $"Unable to assign the expression {tuple.a} ({tuple.a.Type!.TypeName()}) to the parameter {tuple.p.Name} ({tuple.p.ParameterType.TypeName()}) of {methodName}": null)
+                var errors = miParameters.Take(miParameters.Length - 1).ZipOrDefault(arguments, (p, a) => 
+                    a == null ? $"The parameter {p.Name} ({p.ParameterType.TypeName()}) is not set for method {method.MethodSignature()}":
+                    p == null ? $"Extra argument {a} in method {method.MethodSignature()}" :
+                    !p.ParameterType.IsAssignableFrom(a.Type) ? $"Unable to assign the expression {a} ({a.Type!.TypeName()}) to the parameter {p.Name} ({p.ParameterType.TypeName()}) in {methodName}": 
+                    null)
                     .NotNull().ToString("\n");
 
                 if (errors.HasText())
