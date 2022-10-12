@@ -231,9 +231,9 @@ public static class UserAssetsImporter
         {
             var lite = Lite.Parse(liteKey);
 
-            var newLite = Database.TryRetrieveLite(lite.EntityType, lite.Id);
+            var newLite = lite.EntityType == typeof(RoleEntity) ? AuthLogic.GetRole(lite.ToString()!) : Database.TryRetrieveLite(lite.EntityType, lite.Id);
 
-            if (newLite == null || lite.ToString() != newLite.ToString())
+            if (newLite == null || lite.ToString() != newLite.ToString() || lite.Id != newLite.Id)
             {
                 this.liteConflicts.GetOrCreate(userAsset.Guid)[(lite, route)] = newLite;
             }
@@ -340,6 +340,10 @@ public static class UserAssetsImporter
         {
             return EmailModelLogic.GetEmailModelEntity(fullClassName);
         }
+        public WordModelEntity GetWordModel(string fullClassName)
+        {
+            return WordModelLogic.GetWordModelEntity(fullClassName);
+        }
 
         public IPartEntity GetPart(IPartEntity old, XElement element)
         {
@@ -401,10 +405,7 @@ public static class UserAssetsImporter
             return lite;
         }
 
-        public WordModelEntity GetWordModel(string fullClassName)
-        {
-            throw new NotImplementedException();
-        }
+    
 
         T IFromXmlContext.RetrieveLite<T>(Lite<T> lite)
         {
