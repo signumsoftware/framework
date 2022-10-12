@@ -1066,6 +1066,11 @@
     <Member Name="Template" Description="Vorlage" />
     <Member Name="UniqueIdentifier" Description="Einzigartiger Identifikator" />
   </Type>
+  <Type Name="EmailMessageFormat" Description="Format der E-Mail-Nachricht">
+    <Member Name="HtmlComplex" Description="HTML (Komplex)" />
+    <Member Name="HtmlSimple" Description="HTML (Simpel)" />
+    <Member Name="PlainText" Description="Plain Text" />
+  </Type>
   <Type Name="EmailMessageMessage">
     <Member Name="_01requiresExtraParameters" Description="{0} {1} erfordert zusätzliche Parameter" />
     <Member Name="ExceptionMessages" Description="Ausnahmenachrichten" />
@@ -1156,8 +1161,8 @@
     <Member Name="From" Description="Von" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren " />
     <Member Name="Guid" Description="Guid" />
-    <Member Name="IsBodyHtml" Description="Ist Körper html" />
     <Member Name="MasterTemplate" Description="Hauptvorlage" />
+    <Member Name="MessageFormat" Description="Nachrichtenformat" />
     <Member Name="Messages" Description="Nachrichten" />
     <Member Name="Model" Description="Modell" />
     <Member Name="Name" Description="Name" />
@@ -2238,6 +2243,10 @@
   <Type Name="SessionLogPermission">
     <Member Name="TrackSession" Description="Sitzungskontrolle" />
   </Type>
+  <Type Name="ShowCount" Description="Anzahl anzeigen">
+    <Member Name="Always" Description="Immer" />
+    <Member Name="MoreThan0" Description="Mehr als 0" />
+  </Type>
   <Type Name="SimpleTaskSymbol" Description="Einfache Task" PluralDescription="Einfache Tasks" Gender="f" />
   <Type Name="SMSCharactersMessage">
     <Member Name="Insert" Description="Einfügen" />
@@ -2409,6 +2418,7 @@
     <Member Name="IconName" Description="Symbolname" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="OpenInPopup" Description="Im Popup öffnen" />
+    <Member Name="ShowCount" Description="Anzahl anzeigen" />
     <Member Name="Type" Description="Typ" />
     <Member Name="Url" Description="URL" />
   </Type>
@@ -2653,7 +2663,7 @@
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="Guid" Description="Guid" />
-    <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="MaxRows" Description="Max. Zeilen" />
     <Member Name="Owner" Description="Eigentümer" />
@@ -2712,7 +2722,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
     <Member Name="Guid" Description="Guid" />
-    <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Owner" Description="Eigentümer" />
@@ -2726,12 +2736,12 @@
     <Member Name="BackToDefault" Description="Zurück zum Standard" />
     <Member Name="CreateNew" Description="Erstellen" />
     <Member Name="Edit" Description="Bearbeiten" />
-    <Member Name="MakesTheUserQueryAvailableAsAQuickLinkOf0" Description="Stellt die Benutzerabfrage als Quicklink von {0} zur Verfügung" />
-    <Member Name="MakesTheUserQueryAvailableInContextualMenuWhenGrouping0" Description="Macht die Benutzerabfrage im Kontextmenü beim Gruppieren verfügbar {0}" />
+    <Member Name="MakesThe0AvailableAsAQuickLinkOf1" Description="Stellt die {0} als Quick Link of {1} zur Verfügung" />
+    <Member Name="MakesThe0AvailableInContextualMenuWhenGrouping0" Description="Stellt die {0} im Kontextmenü zur Verfügung, wenn {1} gruppiert wird" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Der Filtervorgang {0} ist nicht kompatibel mit {1}" />
     <Member Name="TheSelected0" Description="die ausgewählte {0}" />
-    <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um aktuelle Entität Filtern" />
+    <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um nach der aktuellen Entität zu filtern" />
   </Type>
   <Type Name="UserQueryOperation">
     <Member Name="Delete" Description="Löschen" />
@@ -2804,8 +2814,8 @@
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="Messages" Description="Nachrichten" />
     <Member Name="Name" Description="Name" />
-    <Member Name="Owner" Description="Eigentümer" />
     <Member Name="PreviewPicture" Description="Vorschaubild" />
+    <Member Name="Status" Description="Status" />
   </Type>
   <Type Name="WhatsNewFileType">
     <Member Name="WhatsNewAttachmentFileType" Description="Was ist neu Anhang dateityp" />
@@ -2819,14 +2829,18 @@
   <Type Name="WhatsNewMessage">
     <Member Name="_0ContiansNoVersionForCulture1" Description="{0} enthält keine Version für Kultur '{1}'" />
     <Member Name="AllMyNews" Description="Alle meine Neuigkeiten" />
+    <Member Name="BackToOverview" Description="Zurück zur Übersicht" />
     <Member Name="CloseAll" Description="Alle schließen" />
     <Member Name="Downloads" Description="Downloads" />
     <Member Name="Language" Description="Sprache" />
     <Member Name="MyActiveNews" Description="Meine aktiven News" />
     <Member Name="NewNews" Description="Neuigkeiten" />
     <Member Name="News" Description="Nachrichten" />
+    <Member Name="NewsPage" Description="News-Seite" />
     <Member Name="NewUnreadNews" Description="Neue ungelesene Nachrichten" />
+    <Member Name="Preview" Description="Vorschau" />
     <Member Name="ReadFurther" Description="Weiterlesen" />
+    <Member Name="ThisNewIsNoLongerAvailable" Description="Diese Neuigkeit ist nicht mehr verfügbar" />
     <Member Name="ViewMore" Description="Mehr anzeigen" />
     <Member Name="YouDoNotHaveAnyUnreadNews" Description="Sie haben keine ungelesenen Nachrichten" />
     <Member Name="YourNews" Description="Ihre Neuigkeiten" />
@@ -2838,7 +2852,13 @@
   </Type>
   <Type Name="WhatsNewOperation">
     <Member Name="Delete" Description="Löschen" />
+    <Member Name="Publish" Description="Veröffentlichen" />
     <Member Name="Save" Description="Speichern" />
+    <Member Name="Unpublish" Description="Unveröffentlichen" />
+  </Type>
+  <Type Name="WhatsNewState" Description="Neuigkeiten Status">
+    <Member Name="Draft" Description="Entwurf " />
+    <Member Name="Publish" Description="Veröffentlichen" />
   </Type>
   <Type Name="WhenManyFromBehaviour" Description="Verhalten Wenn viele Von ">
     <Member Name="FistResult" Description="Erstes Ergebnis" />

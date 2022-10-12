@@ -8,6 +8,7 @@ import { useFetchInState } from '../../Signum.React/Scripts/Navigator';
 
 interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file?: IFile & ModifiableEntity | Lite<IFile & Entity> | null;
+  placeholderSrc?: string
 }
 
 export function FileImage(p: FileImageProps) {
@@ -34,7 +35,7 @@ export function FileImage(p: FileImageProps) {
     return () => { objectUrl && URL.revokeObjectURL(objectUrl) };
   }, [p.file]);
 
-  var src = file == null ? undefined :
+  var src = !file ? p.placeholderSrc :
     isModifiableEntity(file) && file.fullWebPath ? file.fullWebPath :
       isModifiableEntity(file) && file.binaryFile ? "data:image/jpeg;base64," + file.binaryFile :
         objectUrl;

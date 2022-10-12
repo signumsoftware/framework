@@ -57,6 +57,11 @@ export namespace NavigatorManager {
 
 export const entityChanged: { [typeName: string]: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> } = {};
 
+export function registerEntityChanged<T extends Entity>(type: Type<T>, callback: (cleanName: string, entity: T | undefined, isRedirect: boolean) => void) {
+  var cleanName = type.typeName;
+  (entityChanged[cleanName] ??= []).push(callback as any);
+}
+
 export function useEntityChanged<T extends Entity>(type: Type<T>, callback: (cleanName: string, entity: T | undefined, isRedirect: boolean) => void, deps: any[]) : void;
 export function useEntityChanged(types: string[], callback: (cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void, deps: any[]): void;
 export function useEntityChanged<T extends Entity>(typeOrTypes: Type<any> | string | string[], callback: (cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void, deps: any[]): void {

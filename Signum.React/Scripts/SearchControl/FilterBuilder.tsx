@@ -109,7 +109,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                 <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
                   className="sf-line-button sf-remove"
                   onClick={handleDeleteAllFilters}>
-                  <FontAwesomeIcon icon="times" />
+                  <FontAwesomeIcon icon="xmark" />
                 </a>}</th>
               <th>{SearchMessage.Field.niceToString()}</th>
               <th>{SearchMessage.Operation.niceToString()}</th>
@@ -281,7 +281,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
           <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteFilter}>
-            <FontAwesomeIcon icon="times" />
+            <FontAwesomeIcon icon="xmark" />
           </a>}
       </td>
       <td colSpan={3 + (p.showPinnedFiltersOptions ? 1 : 0) + (p.showDashboardBehaviour ? 1 : 0)} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
@@ -289,7 +289,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
           <div className="row gx-1">
             <div className="col-auto">
               <a href="#" onClick={handleExpandCollapse} className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
-                <FontAwesomeIcon icon={fg.expanded ? ["far", "minus-square"] : ["far", "plus-square"]} className="me-2" />
+                <FontAwesomeIcon icon={fg.expanded ? ["far", "square-minus"] : ["far", "square-plus"]} className="me-2" />
               </a>
             </div>
             <div className="col-auto">
@@ -541,7 +541,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
             <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className="sf-line-button sf-remove"
               onClick={handleDeleteFilter}>
-              <FontAwesomeIcon icon="times" />
+              <FontAwesomeIcon icon="xmark" />
             </a>}
         </td>
         <td>
@@ -661,7 +661,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
 
   function renderButton(binding: Binding<boolean | undefined>, label: string, title: string) {
     return (
-      <button type="button" className={classes("px-1 btn btn-light", binding.getValue() && "active")} disabled={p.readonly}
+      <button type="button" className={classes("px-1 btn bg-light", binding.getValue() && "active")} disabled={p.readonly}
         onClick={e => { binding.setValue(binding.getValue() ? undefined : true); p.onChange(); }}
         title={StyleContext.default.titleLabels ? title : undefined}>
         {label}
@@ -695,7 +695,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
     <Dropdown>
       <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "light"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
         title={StyleContext.default.titleLabels ? "Behaviour of the filter when used inside of a Dashboard" : undefined}>
-        {<FontAwesomeIcon icon="tachometer-alt" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
+        {<FontAwesomeIcon icon="gauge" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
@@ -718,7 +718,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
   );
 }
 
-export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, labelText?: string, forceNullable?: boolean): React.ReactElement<any> {
+export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, label?: string, forceNullable?: boolean): React.ReactElement<any> {
 
   var tokenType = token.type;
   if (forceNullable)
@@ -727,19 +727,19 @@ export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToke
   switch (token.filterType) {
     case "Lite":
       if (tokenType.name == IsByAll || getTypeInfos(tokenType).some(ti => !ti.isLowPopulation))
-        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} labelText={labelText} />;
+        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} />;
       else
-        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} labelText={labelText} />
+        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} />
     case "Embedded":
-      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} labelText={labelText} />;
+      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} label={label} />;
     case "Enum":
       const ti = tryGetTypeInfos(tokenType).single();
       if (!ti)
         throw new Error(`EnumType ${tokenType.name} not found`);
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} optionItems={members} onChange={handleValueChange} labelText={labelText} />;
+      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} optionItems={members} onChange={handleValueChange} label={label} />;
     default:
-      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} onChange={handleValueChange} labelText={labelText} />;
+      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} onChange={handleValueChange} label={label} />;
   }
 }
 
@@ -779,7 +779,7 @@ export function MultiValue(p: MultiValueProps) {
                   <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
                     className="sf-line-button sf-remove"
                     onClick={e => handleDeleteValue(e, i)}>
-                    <FontAwesomeIcon icon="times" />
+                    <FontAwesomeIcon icon="xmark" />
                   </a>}
               </td>
               <td>

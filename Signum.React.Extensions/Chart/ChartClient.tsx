@@ -852,6 +852,9 @@ export interface ChartTable {
     c6?: ChartColumn<unknown>;
     c7?: ChartColumn<unknown>;
     c8?: ChartColumn<unknown>;
+    c9?: ChartColumn<unknown>;
+    c10?: ChartColumn<unknown>;
+    c11?: ChartColumn<unknown>;
   },
   rows: ChartRow[]
 }
@@ -867,6 +870,9 @@ export interface ChartRow {
   c6?: unknown;
   c7?: unknown;
   c8?: unknown;
+  c9?: unknown;
+  c10?: unknown;
+  c11?: unknown;
 }
 
 

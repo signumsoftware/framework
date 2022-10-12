@@ -998,7 +998,7 @@ public static class CaseActivityLogic
 
         public static void ExecuteStep(CaseActivityEntity ca, DoneType doneType, string? decision, WorkflowConnectionEntity? firstConnection)
         {
-            using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = firstConnection }))
+            using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = firstConnection, Decision = decision }))
             {
                 SaveEntity(ca.Case.MainEntity);
             }

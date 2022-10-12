@@ -44,7 +44,7 @@ export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, m
 
   return (
     <div className="sf-search-message alert alert-warning">
-      <FontAwesomeIcon icon="exclamation-triangle" />&nbsp;{message}
+      <FontAwesomeIcon icon="triangle-exclamation" />&nbsp;{message}
     </div>
   );
 }

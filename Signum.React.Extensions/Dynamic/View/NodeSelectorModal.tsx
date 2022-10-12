@@ -51,7 +51,7 @@ export default function NodeSelectorModal(p: IModalProps<any | undefined>) {
                     {
                       gr.elements.orderBy(n => n.order!).map(n =>
                         <button key={n.kind} type="button" onClick={() => handleButtonClicked(n)}
-                          className="sf-chooser-button sf-close-button btn btn-light">
+                          className="sf-chooser-button sf-close-button btn bg-light">
                           {n.kind}
                         </button>)
                     }

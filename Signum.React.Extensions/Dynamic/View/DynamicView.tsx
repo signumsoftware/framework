@@ -37,7 +37,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
   renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      { button: <button key="showCode" type="button" className="btn btn-success float-end" disabled={!this.state.rootNode} onClick={this.handleShowCode}>Show code</button> }
+      { button: <button key="showCode" type="button" className="btn bg-success float-end" disabled={!this.state.rootNode} onClick={this.handleShowCode}>Show code</button> }
     ];
   }
 
@@ -161,7 +161,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
         <div className="design-left open">
           <div className="code-container">
             <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} viewOnCreate={false} view={false} onChange={() => this.forceUpdate()} formGroupStyle="Basic"
-              type={{ name: this.props.ctx.value.entityType!.cleanName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
+              type={{ name: this.props.ctx.value.entityType!.cleanName }} label={DynamicViewMessage.ExampleEntity.niceToString()} />
             <DynamicViewTabs ctx={this.props.ctx} rootNode={root} />
             <CollapsableTypeHelp initialTypeName={ctx.value.entityType!.cleanName} />
           </div>

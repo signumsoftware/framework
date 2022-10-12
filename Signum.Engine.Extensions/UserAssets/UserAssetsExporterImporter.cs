@@ -353,8 +353,6 @@ public static class UserAssetsImporter
 
             part.FromXml(element, this);
 
-            if (old != null && part != old)
-                toRemove.Add(old);
 
             return part;
         }

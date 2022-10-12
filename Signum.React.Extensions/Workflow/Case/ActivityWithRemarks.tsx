@@ -69,7 +69,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
       valueLineType: "TextArea",
       title: CaseNotificationEntity.nicePropertyName(a => a.remarks),
       message: CaseActivityMessage.PersonalRemarksForThisNotification.niceToString(),
-      labelText: undefined,
+      label: undefined,
       initialValue: remarks,
       initiallyFocused: true
     }).then(remarks => {

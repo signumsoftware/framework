@@ -16,6 +16,10 @@ input[type=checkbox].form-control {
     margin-top: 9px;
 }
 
+.checkbox {
+    user-select: none;
+}
+
 .input-group {
     flex-wrap: nowrap;
 }

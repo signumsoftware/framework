@@ -585,7 +585,7 @@ public static class Administrator
                 TruncateTableSystemVersioning(mlist);
             });
 
-            using (DropAndCreateIncommingForeignKeys(table))
+            using (DropAndCreateIncomingForeignKeys(table))
                 TruncateTableSystemVersioning(table);
 
             tr.Commit();
@@ -607,7 +607,7 @@ public static class Administrator
         }
     }
 
-    public static IDisposable DropAndCreateIncommingForeignKeys(Table table)
+    public static IDisposable DropAndCreateIncomingForeignKeys(Table table)
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
         var isPostgres = Schema.Current.Settings.IsPostgres;
@@ -615,7 +615,7 @@ public static class Administrator
         var foreignKeys = Administrator.OverrideDatabaseInSysViews(table.Name.Schema.Database).Using(_ =>
         (from targetTable in Database.View<SysTables>()
          where targetTable.name == table.Name.Name && targetTable.Schema().name == table.Name.Schema.Name
-         from ifk in targetTable.IncommingForeignKeys()
+         from ifk in targetTable.IncomingForeignKeys()
          let parentTable = ifk.ParentTable()
          select new
          {

@@ -184,7 +184,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
       forceUpdate();
 
       refIgnoreSignalR.current = true;
-      Operations.API.executeMultiple(alertsToRemove.map(a => toLite(a.alert)), AlertOperation.Attend)
+      Operations.API.executeMultiple(alertsToRemove.map(a => toLite(a.alert)), AlertOperation.Attend, { progressModal: false })
         .then(res => {
 
           const errors = Dic.getValues(res.errors).filter(a => Boolean(a));
@@ -201,16 +201,15 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
   }
 
   var divRef = React.useRef<HTMLDivElement>(null);
-
   useRootClose(divRef, () => setIsOpen(false), { disabled: !isOpen });
 
   return (
     <>
       <div className="nav-link sf-bell-container" onClick={handleOnToggle} title={window.__disableSignalR ?? undefined}>
         <FontAwesomeIcon icon={window.__disableSignalR ? "bell-slash" : "bell"} className={classes("sf-bell", ringing && "ringing", isOpen && "open", countResult && countResult.numAlerts > 0 && "active")} />
-        {countResult && countResult.numAlerts > 0 && <span className="badge btn-danger badge-pill sf-alerts-badge">{countResult.numAlerts}</span>}
+        {countResult && countResult.numAlerts > 0 && <span className="badge bg-danger badge-pill sf-alerts-badge">{countResult.numAlerts}</span>}
       </div>
-      {isOpen && <div className="sf-alerts-toasts mt-2" style={{
+      {isOpen && <div className="sf-alerts-toasts mt-2" ref={divRef} style={{
         backgroundColor: "rgba(255,255,255, 0.7)",
         backdropFilter: "blur(10px)",
         transition: "transform .4s ease",
@@ -334,7 +333,9 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
         transition: "transform .4s ease",
       }}>
         {alerts.map((a, i) => {
-          var expanded = i < showAlerts;
+          var expanded: boolean | "comming" = i < showAlerts ? true :
+            alerts.filter((a, j) => j < i && !a.removing).length < showAlerts ? "comming" :
+              false;
 
           var hiddenIndex = (i - (showAlerts - 1));
 
@@ -370,7 +371,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
   );
 }
 
-export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, expanded: boolean, onClose: (e: AlertWithSize) => void, refresh: () => void, className?: string, style?: React.CSSProperties | undefined }) {
+export function AlertToast(p: { alert: AlertWithSize, onSizeSet: () => void, expanded: boolean | "comming", onClose: (e: AlertWithSize) => void, refresh: () => void, className?: string, style?: React.CSSProperties | undefined }) {
 
   var alert = p.alert.alert;
 

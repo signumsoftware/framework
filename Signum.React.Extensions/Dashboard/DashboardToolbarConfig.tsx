@@ -16,7 +16,7 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
 
   getDefaultIcon(): IconColor{
     return ({
-      icon: "th-large",
+      icon: "table-cells-large",
       iconColor: "darkslateblue",
     });
   }

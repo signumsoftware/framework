@@ -38,7 +38,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
 
       return (
         <button
-          className="sf-query-button sf-chart-script-edit btn btn-light"
+          className="sf-query-button sf-chart-script-edit btn bg-light"
           onClick={() => { API.generatePlainExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
           <FontAwesomeIcon icon={["far", "file-excel"]} /> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
         </button>

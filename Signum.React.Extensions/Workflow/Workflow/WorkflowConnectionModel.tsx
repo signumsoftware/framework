@@ -28,7 +28,7 @@ export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<W
 
 
       {ctx.value.type == "Decision" &&
-        < FormGroup ctx={ctx.subCtx(e => e.decisionOptionName)} labelText={ctx.niceName(e => e.decisionOptionName)}>
+        < FormGroup ctx={ctx.subCtx(e => e.decisionOptionName)} label={ctx.niceName(e => e.decisionOptionName)}>
         {
           <select value={ctx.value.decisionOptionName ? ctx.value.decisionOptionName : ""} className="form-select" onChange={handleDecisionNameChange} >
             <option value="" />

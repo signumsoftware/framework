@@ -50,7 +50,7 @@ export function EmailTemplateMessageComponent(p : EmailMasterTemplateMessageComp
   const ec = p.ctx;
   return (
     <div className="sf-email-template-message">
-      <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} onChange={p.invalidate} />
+      <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} label={EmailTemplateViewMessage.Language.niceToString()} onChange={p.invalidate} />
       <div>
         <div className="code-container">
           <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />

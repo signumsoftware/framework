@@ -71,10 +71,10 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
             )}
         </p>
         <br />
-        <button className="btn btn-primary sf-entity-button sf-ok-button" disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
+        <button className="btn bg-primary sf-entity-button sf-ok-button" disabled={p.setters.some(s => !isValid(s)) || p.mandatory && p.setters.length == 0} onClick={handleOkClicked}>
           {JavascriptMessage.ok.niceToString()}
         </button>
-        <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button className="btn bg-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>
@@ -270,7 +270,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
           {<a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteSetter}>
-            <FontAwesomeIcon icon="times" />
+            <FontAwesomeIcon icon="xmark" />
           </a>}
         </td>
         <td>

@@ -48,9 +48,9 @@ export function SidebarToggleItem(p: { isMobile: boolean, simpleMode?: boolean, 
       }
     }}>
       <div style={{ display: "flex", height: "100%", alignItems: "center" }}>
-        <FontAwesomeIcon icon={"angle-double-left"} style={{ transition: "all 400ms", width: p.mode == "Wide" ? "15px" : "0.1px" }} />
+        <FontAwesomeIcon icon={"angles-left"} style={{ transition: "all 400ms", width: p.mode == "Wide" ? "15px" : "0.1px" }} />
         <FontAwesomeIcon icon={"bars"} style={{ transition: "all 400ms", width: p.mode == "Hidden" ? "15px" : "0.1px" }} />
-        {!p.simpleMode && <FontAwesomeIcon icon={"angle-double-right"} style={{ transition: "all 400ms", width: p.mode == "Narrow" ? "15px" : "0.1px" }} />}
+        {!p.simpleMode && <FontAwesomeIcon icon={"angles-right"} style={{ transition: "all 400ms", width: p.mode == "Narrow" ? "15px" : "0.1px" }} />}
       </div>
     </a>
   );

@@ -132,6 +132,12 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
   attachments: Entities.MList<EmailAttachmentEmbedded>;
 }
 
+export const EmailMessageFormat = new EnumType<EmailMessageFormat>("EmailMessageFormat");
+export type EmailMessageFormat =
+  "PlainText" |
+  "HtmlComplex" |
+  "HtmlSimple";
+
 export module EmailMessageMessage {
   export const TheEmailMessageCannotBeSentFromState0 = new MessageKey("EmailMessageMessage", "TheEmailMessageCannotBeSentFromState0");
   export const Message = new MessageKey("EmailMessageMessage", "Message");
@@ -247,7 +253,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   orders: Entities.MList<UserQueries.QueryOrderEmbedded>;
   attachments: Entities.MList<IAttachmentGeneratorEntity>;
   masterTemplate: Entities.Lite<EmailMasterTemplateEntity> | null;
-  isBodyHtml: boolean;
+  messageFormat: EmailMessageFormat;
   messages: Entities.MList<EmailTemplateMessageEmbedded>;
   applicable: Templating.TemplateApplicableEval | null;
 }

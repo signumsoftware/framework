@@ -264,7 +264,12 @@ OperationMenuItem.getText = (coc: ContextualOperationContext<any>): React.ReactN
   if (coc.settings && coc.settings.text)
     return coc.settings.text(coc);
 
-  return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ms-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
+  var cos = coc.settings;
+
+  var multiSetter = coc.operationInfo.canBeModified && !((cos?.settersConfig ?? Defaults.defaultSetterConfig)(coc) == "NoDialog") ?
+    <small className="ms-2">{OperationMessage.MultiSetter.niceToString()}</small> : null;
+
+  return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{multiSetter}</>;
 
 };
 
@@ -306,7 +311,7 @@ export function defaultContextualOperationClick(coc: ContextualOperationContext<
             }));
         } else {
           return getSetters(coc)
-            .then(setters => setters && API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
+            .then(setters => setters && API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
               .then(coc.onContextualSuccess ?? (report => {
                 //Navigator.raiseEntityChanged(??);
                 notifySuccess();
@@ -315,7 +320,7 @@ export function defaultContextualOperationClick(coc: ContextualOperationContext<
         }
       case "Execute":
         return getSetters(coc)
-          .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
+          .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
             .then(coc.onContextualSuccess ?? (report => {
               coc.raiseEntityChanged();
               notifySuccess();
@@ -323,7 +328,7 @@ export function defaultContextualOperationClick(coc: ContextualOperationContext<
             })));
       case "Delete":
         return getSetters(coc)
-          .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, setters, ...args)
+          .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
             .then(coc.onContextualSuccess ?? (report => {
               coc.raiseEntityChanged();
               notifySuccess();

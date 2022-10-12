@@ -448,10 +448,10 @@ public class DeclareNode : BaseNode
 
     internal DeclareNode(INodeProvider nodeProvider, ValueProviderBase valueProvider, Action<bool, string> addError): base(nodeProvider)
     {
-        if (!valueProvider.Variable.HasText())
-            addError(true, "declare{0} should end with 'as $someVariable'".FormatWith(valueProvider.ToString()));
+        if (valueProvider != null && !valueProvider.Variable.HasText())
+            addError(true, "declare {0} should end with 'as $someVariable'".FormatWith(valueProvider.ToString()));
 
-        this.ValueProvider = valueProvider;
+        this.ValueProvider = valueProvider!;
     }
 
     public DeclareNode(DeclareNode original)

@@ -36,7 +36,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
 
   getDefaultIcon(): IconColor {
     return ({
-      icon: ["far", "list-alt"],
+      icon: ["far", "rectangle-list"],
       iconColor: "dodgerblue",
     });
   }

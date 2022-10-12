@@ -45,6 +45,7 @@ public class WhatsNewController : ControllerBase
                     CreationDate = wn.CreationDate,
                     Title = cm.Title,
                     Description = cm.Description,
+                    Status = wn.Status.ToString()
                 };
             })
             .ToList();
@@ -56,6 +57,7 @@ public class WhatsNewController : ControllerBase
         public DateTime CreationDate; 
         public string Title;
         public string Description;
+        public string Status;
     }
 
 
@@ -75,6 +77,7 @@ public class WhatsNewController : ControllerBase
                 Description = cm.Description,
                 Attachments = wn.Attachment.Count(),
                 PreviewPicture = (wn.PreviewPicture != null) ? true : false,
+                Status = wn.Status.ToString(),
                 Read = wn.IsRead(),
             };
         })
@@ -89,7 +92,8 @@ public class WhatsNewController : ControllerBase
         public string Title;
         public string Description;
         public int Attachments; 
-        public bool PreviewPicture; 
+        public bool PreviewPicture;
+        public string Status;
         public bool Read;
     }
 
@@ -114,6 +118,7 @@ public class WhatsNewController : ControllerBase
     {
         var wne = Database.Retrieve<WhatsNewEntity>(id);
         var cm = wne.GetCurrentMessage();
+
         return new WhatsNewFull
         {
             WhatsNew = wne.ToLite(),
@@ -121,6 +126,7 @@ public class WhatsNewController : ControllerBase
             Description = cm.Description,
             Attachments = wne.Attachment.Count(),
             PreviewPicture = (wne.PreviewPicture != null) ? true : false,
+            Status = wne.Status.ToString(),
             Read = wne.IsRead(),
         };
     }

@@ -30,7 +30,9 @@ public static class WhatsNewLogic
                 {
                     Entity = e,
                     e.Id,
+                    e.Status,
                     e.Name,
+                    e.CreationDate,
                 });
 
             sb.Include<WhatsNewLogEntity>()
@@ -57,8 +59,12 @@ public static class WhatsNewLogic
                 }
                 return null;
             };
+
+            WhatsNewGraph.Register();
         }
     }
+
+
 
     private static IDisposable? WhatsNewLogic_PreUnsafeDelete(IQueryable<WhatsNewEntity> query)
     {
@@ -74,12 +80,33 @@ public static class WhatsNewLogic
         wn.Messages.FirstEx();
     }
 
-    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+    public static void RegisterPublishedTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
     {
-        sb.Schema.Settings.AssertImplementedBy((WhatsNewEntity wn) => wn.Owner, typeof(RoleEntity));
+        TypeConditionLogic.RegisterCompile<WhatsNewEntity>(typeCondition, wn => wn.Status == WhatsNewState.Publish);
+    }
 
-        TypeConditionLogic.RegisterCompile<WhatsNewEntity>(typeCondition,
-            wn => AuthLogic.CurrentRoles().Contains(wn.Owner) || wn.Owner == null);
+
+    public class WhatsNewGraph : Graph<WhatsNewEntity, WhatsNewState>
+    {
+        public static void Register()
+        {
+            GetState = f => f.Status;
+
+            new Execute(WhatsNewOperation.Publish)
+            {
+                FromStates = { WhatsNewState.Draft },
+                ToStates = { WhatsNewState.Publish },
+                CanBeNew = true,
+                Execute = (e, _) => { e.Status = WhatsNewState.Publish; },
+            }.Register();
+
+            new Execute(WhatsNewOperation.Unpublish)
+            {
+                FromStates = { WhatsNewState.Publish },
+                ToStates = { WhatsNewState.Draft },
+                CanBeNew = true,
+                Execute = (e, _) => { e.Status = WhatsNewState.Draft; },
+            }.Register();
+        } 
     }
 }
-

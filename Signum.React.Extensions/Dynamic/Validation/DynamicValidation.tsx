@@ -111,7 +111,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
-        type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} labelColumns={3} />
+        type={{ name: typeName }} label={DynamicViewMessage.ExampleEntity.niceToString()} labelColumns={3} />
     );
   }
 
@@ -153,7 +153,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
           <br />
           <div className="row">
             <div className="col-sm-7">
-              {exampleEntityRef && <button className="btn btn-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play" /> Evaluate</button>}
+              {exampleEntityRef && <button className="btn bg-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play" /> Evaluate</button>}
               <div className="code-container">
                 <TypeHelpButtonBarComponent typeName={ctx.value.entityType.cleanName} mode="CSharp" ctx={ctx} extraButtons={
                   <PropertyIsHelpComponent route={getCurrentRoute(ctx.value.entityType.cleanName)} />
