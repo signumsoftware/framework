@@ -77,15 +77,11 @@ export module API {
   }
 
   export function newsPage(id: number | string): Promise<WhatsNewFull> {
-    return ajaxPost({ url: "~/api/whatsnew/specificNews" }, id);
+    return ajaxGet({ url: "~/api/whatsnew/" + id });
   }
 
-  export function attachments(id: number | string): Promise<WhatsNewEntity> {
-    return ajaxPost({ url: "~/api/whatsnew/entityforattachments" }, id);
-  }
-
-  export function setNewsLogRead(ids: (number | string | undefined)[]): Promise<boolean> {
-    return ajaxPost({ url: "~/api/whatsnew/setNewsLog" }, ids);
+  export function setNewsLogRead(lites: Lite<WhatsNewEntity>[]): Promise<void> {
+    return ajaxPost({ url: "~/api/whatsnew/setNewsLog" }, lites);
   }
 }
 

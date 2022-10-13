@@ -13,27 +13,25 @@ import "./WhatsNewDropdown.css"
 import { Link } from 'react-router-dom';
 import { classes, Dic } from '@framework/Globals'
 import MessageModal from '@framework/Modals/MessageModal'
-import { WhatsNewEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.Entities.WhatsNew'
+import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.Entities.WhatsNew'
 import * as AppContext from "@framework/AppContext"
 import { API, NumWhatsNews, WhatsNewFull, WhatsNewShort } from '../WhatsNewClient'
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
-import { useHistory } from 'react-router-dom'
-import { useEffect } from 'react' 
 
-export default function WhatsNewDropdown(props: { keepRingingFor?: number }) {
+export default function WhatsNewDropdown() {
 
   if (!Navigator.isViewable(WhatsNewEntity))
     return null;
 
-  return <WhatsNewDropdownImp keepRingingFor={props.keepRingingFor ?? 10 * 1000} />;
+  return <WhatsNewDropdownImp />;
 }
 
-function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
+function WhatsNewDropdownImp() {
 
   const forceUpdate = useForceUpdate();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
-  const [showNews, setShowNews] = React.useState<number>(5);
+  const showNews = 3; 
   
   const isOpenRef = useUpdatedRef(isOpen);
 
@@ -47,6 +45,8 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
 
     return res;
   }), [], { avoidReset: true });
+
+  Navigator.useEntityChanged(WhatsNewLogEntity, () => reloadCount(), []);
 
   const [whatsNew, setNews] = React.useState<WhatsNewShort[] | undefined>(undefined);
 
@@ -80,10 +80,8 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
       countResult.numWhatsNews -= 1;
     forceUpdate();
 
-    API.setNewsLogRead(toRemove.map(r => r.whatsNew.id)).then(res => {
-      if (!res) {
-        MessageModal.showError(<div>The news couldn't be removed</div>);
-      }
+    API.setNewsLogRead(toRemove.map(r => r.whatsNew)).then(res => {
+
       // Pesimistic
       WhatsNewClient.API.myNews()
         .then(wn => {
@@ -95,9 +93,9 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
 
       reloadCount();
     }), [toRemove];
-    }
+  }
 
-  var newsGroups = whatsNew == null ? null : whatsNew.orderByDescending(w => w.creationDate);
+  var newsInOrder = whatsNew == null ? null : whatsNew.orderByDescending(w => w.creationDate);
 
   var divRef = React.useRef<HTMLDivElement>(null);
 
@@ -109,18 +107,21 @@ function WhatsNewDropdownImp(props: { keepRingingFor: number }) {
         <FontAwesomeIcon icon="bullhorn" className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")} />
         {countResult && countResult.numWhatsNews > 0 && <span className="badge btn-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
       </div>
-      {isOpen && <div className="sf-news-toasts" ref={divRef}>
-        {newsGroups == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :
+      {isOpen && <div className="sf-news-toasts mt-2" ref={divRef} style={{
+        backgroundColor: "rgba(255,255,255, 0.7)",
+        backdropFilter: "blur(10px)",
+        transition: "transform .4s ease" }}>
+        {newsInOrder == null ? <Toast> <Toast.Body>{JavascriptMessage.loading.niceToString()}</Toast.Body></Toast> :
 
           <>
-            {newsGroups.length == 0 && <Toast><Toast.Body>{WhatsNewMessage.YouDoNotHaveAnyUnreadNews.niceToString()}</Toast.Body></Toast>}
+            {newsInOrder.length == 0 && <Toast><Toast.Body>{WhatsNewMessage.YouDoNotHaveAnyUnreadNews.niceToString()}</Toast.Body></Toast>}
 
             {
-              newsGroups.filter((gr, i) => i < showNews)
+              newsInOrder.filter((gr, i) => i < showNews)
                 .map(a => <WhatsNewToast whatsnew={a} key={a.whatsNew.id} onClose={handleOnCloseNews} refresh={reloadCount} setIsOpen={setIsOpen} />)
             }
             {
-              newsGroups.length > showNews &&
+              newsInOrder.length > showNews &&
               <Toast onClose={() => handleOnCloseNews(whatsNew!.map(a => a))}>
                 <Toast.Header>
                     <small>{WhatsNewMessage.CloseAll.niceToString()}</small>
@@ -171,10 +172,10 @@ export function WhatsNewToast(p: { whatsnew: WhatsNewShort, onClose: (e: WhatsNe
         <small>{DateTime.fromISO(p.whatsnew.creationDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
-        <img onClick={handleClickPreviewPicture} src={AppContext.toAbsoluteUrl("~/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)} style={{ maxHeight: "30vh", cursor:"pointer", maxWidth: "10vw", margin: "0px 0px 0px 10px" }} />
+        <img onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }} src={AppContext.toAbsoluteUrl("~/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)} style={{ maxHeight: "30vh", cursor:"pointer", maxWidth: "10vw", margin: "0px 0px 0px 10px" }} />
         <HtmlViewer text={HTMLSubstring(p.whatsnew.description)} />
         <br />
-        <Link onClick={handleClickPreviewPicture} to={"~/newspage/" + p.whatsnew.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
+        <Link onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }} to={"~/newspage/" + p.whatsnew.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
       </Toast.Body>
     </Toast>
   );

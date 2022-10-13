@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { JavascriptMessage, toLite } from '@framework/Signum.Entities';
-import { WhatsNewEntity, WhatsNewMessage } from '../Signum.Entities.WhatsNew';
+import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage } from '../Signum.Entities.WhatsNew';
 import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks';
 import { API, WhatsNewFull } from "../WhatsNewClient";
 import "./NewsPage.css"
@@ -17,9 +17,12 @@ import * as Navigator from '@framework/Navigator'
 import EntityLink from '../../../Signum.React/Scripts/SearchControl/EntityLink';
 
 export default function NewsPage(p: RouteComponentProps<{ newsId: string }>) {
-  const whatsnew = useAPI(() => API.newsPage(p.match.params.newsId).then(w => w), [p.match.params.newsId]);
 
-  const [refreshValue, setRefreshValue] = React.useState<number>(0)
+  const [refreshValue, setRefreshValue] = React.useState<number>(0);
+  const whatsnew = useAPI(() => API.newsPage(p.match.params.newsId).then(w => {
+    Navigator.raiseEntityChanged(WhatsNewLogEntity);
+    return w;
+  }), [p.match.params.newsId, refreshValue]);
 
   if (whatsnew == undefined)
     return <div>{JavascriptMessage.loading.niceToString()}</div>;

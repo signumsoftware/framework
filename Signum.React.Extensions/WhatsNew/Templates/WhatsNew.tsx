@@ -32,11 +32,11 @@ export function WhatsNewMessageComponent(p: WhatsNewMessageComponentProps) {
 
   const ec = p.ctx.subCtx({labelColumns: 4});
   return (
-    <div className="sf-email-template-message">
+    <div>
       <EntityCombo ctx={ec.subCtx(e => e.culture)} labelText={WhatsNewMessage.Language.niceToString()} onChange={p.invalidate} />
       <ValueLine ctx={ec.subCtx(e => e.title)} labelText={ec.subCtx(e => e.title).niceName()} onChange={p.invalidate} />
       <div>
-        <div className="code-container">
+        <div>
           <p>{ec.subCtx(e => e.description).niceName()}</p>
           <WhatsNewHtmlEditor binding={Binding.create(ec.value, w => w.description)} />
         </div>        
