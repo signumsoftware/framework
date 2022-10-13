@@ -231,7 +231,9 @@ public static class UserAssetsImporter
         {
             var lite = Lite.Parse(liteKey);
 
-            var newLite = lite.EntityType == typeof(RoleEntity) ? AuthLogic.GetRole(lite.ToString()!) : Database.TryRetrieveLite(lite.EntityType, lite.Id);
+            var newLite = 
+                lite.EntityType == typeof(RoleEntity) && lite.ToString() is string str ? AuthLogic.TryGetRole(str) : 
+                Database.TryRetrieveLite(lite.EntityType, lite.Id);
 
             if (newLite == null || lite.ToString() != newLite.ToString() || lite.Id != newLite.Id)
             {

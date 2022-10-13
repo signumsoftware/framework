@@ -351,6 +351,11 @@ public static class AuthLogic
         return rolesByName.Value.GetOrThrow(roleName);
     }
 
+    public static Lite<RoleEntity>? TryGetRole(string roleName)
+    {
+        return rolesByName.Value.TryGetC(roleName);
+    }
+
     public static IEnumerable<Lite<RoleEntity>> RelatedTo(Lite<RoleEntity> role)
     {
         return rolesGraph.Value.RelatedTo(role);
