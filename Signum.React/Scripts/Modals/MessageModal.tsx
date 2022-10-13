@@ -78,7 +78,7 @@ export default function MessageModal(p: MessageModalProps) {
 
     const htmlAtts = p.buttonHtmlAttributes && p.buttonHtmlAttributes(res);
 
-    const baseButtonClass = classes("btn", res == 'yes' || res == 'ok' ? "bg-primary" : "bg-secondary", `sf-close-button sf-${res}-button ms-1`)
+    const baseButtonClass = classes("btn", res == 'yes' || res == 'ok' ? "btn-primary" : "btn-secondary", `sf-close-button sf-${res}-button ms-1`)
 
     return (
       <button

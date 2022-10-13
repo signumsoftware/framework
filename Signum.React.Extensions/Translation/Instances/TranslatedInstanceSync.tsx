@@ -41,7 +41,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
     return (
       <div>
         <TranslatedInstances data={result} currentCulture={p.match.params.culture} cultures={cultures} />
-        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn bg-primary mt-2" onClick={handleSave} disabled={isLocked} />
+        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary mt-2" onClick={handleSave} disabled={isLocked} />
       </div>
     );
   }

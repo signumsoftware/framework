@@ -80,10 +80,10 @@ export default function ValueLineModal(p: ValueLineModalProps) {
         </p>}
       </div>
       <div className="modal-footer">
-        <button disabled={disabled || error != null} className="btn bg-primary sf-entity-button sf-ok-button" onClick={handleOkClick}>
+        <button disabled={disabled || error != null} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick}>
           {JavascriptMessage.ok.niceToString()}
         </button>
-        <button className="btn bg-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+        <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
           {JavascriptMessage.cancel.niceToString()}
         </button>
       </div>

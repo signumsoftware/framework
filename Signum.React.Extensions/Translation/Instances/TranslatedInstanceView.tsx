@@ -47,7 +47,7 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
     return (
       <div>
         <TranslatedInstances data={result} currentCulture={p.match.params.culture} cultures={culture ? [culture] : otherCultures} />
-        {result.instances.length > 0 && <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn bg-primary mt-2" onClick={handleSave} disabled={isLocked} />}
+        {result.instances.length > 0 && <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary mt-2" onClick={handleSave} disabled={isLocked} />}
       </div>
     );
   }

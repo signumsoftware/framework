@@ -52,7 +52,7 @@ export default function SimpleResultButton(p : SimpleResultButtonProps){
 
   return (
     <div>
-      <a href="#" className="btn btn-sm bg-info" onClick={handleOnClick} >
+      <a href="#" className="btn btn-sm btn-info" onClick={handleOnClick} >
         <FontAwesomeIcon icon="chart-line" />&nbsp;
         {is(col.element.encoding, DefaultColumnEncodings.OneHot) ? "Confusion matrix" : "Regression Scatterplot"}
       </a>

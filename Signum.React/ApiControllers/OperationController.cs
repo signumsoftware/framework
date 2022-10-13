@@ -6,6 +6,7 @@ using Signum.React.Facades;
 using Signum.React.Filters;
 using Signum.Utilities.Reflection;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -250,7 +251,7 @@ public class OperationController : Controller
 
     }
 
-    async static IAsyncEnumerable<OperationResult> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Func<Lite<Entity>, Task> action, CancellationToken cancellationToken)
+    async static IAsyncEnumerable<OperationResult> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Func<Lite<Entity>, Task> action, [EnumeratorCancellation]CancellationToken cancellationToken)
     {
         foreach (var lite in lites.Distinct())
         {

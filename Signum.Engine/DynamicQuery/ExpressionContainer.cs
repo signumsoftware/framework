@@ -1,3 +1,4 @@
+using Microsoft.Identity.Client;
 using Signum.Engine.Linq;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.Reflection;
@@ -10,8 +11,8 @@ public class ExpressionContainer
     public Polymorphic<Dictionary<string, ExtensionInfo>> RegisteredExtensions =
         new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
-    public Dictionary<PropertyRoute, IExtensionDictionaryInfo> RegisteredExtensionsDictionaries =
-        new Dictionary<PropertyRoute, IExtensionDictionaryInfo>();
+    public Dictionary<Type, Dictionary<string, IExtensionDictionaryInfo>> RegisteredExtensionsWithParameter =
+        new Dictionary<Type, Dictionary<string, IExtensionDictionaryInfo>>();
 
     internal Expression BuildExtension(Type parentType, string key, Expression parentExpression)
     {
@@ -85,18 +86,14 @@ public class ExpressionContainer
         return extensionsTokens;
     }
 
-    public IEnumerable<QueryToken> GetDictionaryExtensionsTokens(QueryToken parent)
+    public IEnumerable<QueryToken> GetExtensionsWithParameterTokens(QueryToken parent)
     {
         var parentTypeClean = parent.Type.CleanType();
 
-        var pr = parentTypeClean.IsEntity() && !parentTypeClean.IsAbstract ? PropertyRoute.Root(parentTypeClean) :
-            parentTypeClean.IsEmbeddedEntity() ? parent.GetPropertyRoute() :
-            null;
-
-        var edi = pr == null ? null : RegisteredExtensionsDictionaries.TryGetC(pr);
+        var edi = RegisteredExtensionsWithParameter.TryGetC(parentTypeClean);
 
         IEnumerable<QueryToken> dicExtensionsTokens = edi == null ? Enumerable.Empty<QueryToken>() :
-            edi.GetAllTokens(parent);
+            edi.Values.SelectMany(e => e.GetAllTokens(parent));
 
         return dicExtensionsTokens;
     }
@@ -159,62 +156,27 @@ public class ExpressionContainer
 
 
 
-    public ExtensionDictionaryInfo<T, KVP, K, V> RegisterDictionary<T, KVP, K, V>(
-        Expression<Func<T, IEnumerable<KVP>>> collectionSelector,
-        Expression<Func<KVP, K>> keySelector,
-        Expression<Func<KVP, V>> valueSelector,
+    public ExtensionWithParameterInfo<T, K, V> RegisterWithParameter<T, K, V>(
+        Expression<Func<T, K, V>> extensionLambda,
+        string prefix = "",
         Func<QueryToken, IEnumerable<K>>? getKeys = null)
-        where T : Entity
-        where K : notnull
-    {
-
-        if (getKeys == null)
-        {
-            var lazy = GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector);
-            getKeys = t => lazy.Value;
-        }
-
-        var mei = new ExtensionDictionaryInfo<T, KVP, K, V>(collectionSelector, keySelector, valueSelector, getKeys);
-
-        RegisteredExtensionsDictionaries.Add(PropertyRoute.Root(typeof(T)), mei);
-
-        return mei;
-    }
-
-    public ExtensionDictionaryInfo<M, KVP, K, V> RegisterDictionaryInEmbedded<T, M, KVP, K, V>(
-            Expression<Func<T, M>> embeddedSelector,
-            Expression<Func<M, IEnumerable<KVP>>> collectionSelector,
-            Expression<Func<KVP, K>> keySelector,
-            Expression<Func<KVP, V>> valueSelector,
-              Func<QueryToken, IEnumerable<K>>? getKeys = null)
-        where T : Entity
-        where M : ModifiableEntity
         where K : notnull
     {
         if (getKeys == null)
         {
-            var lazy = GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector), keySelector);
+            var lazy = GetAllKeysLazy<K>();
             getKeys = t => lazy.Value;
         }
 
-        var mei = new ExtensionDictionaryInfo<M, KVP, K, V>(collectionSelector, keySelector, valueSelector, getKeys);
-        
-        RegisteredExtensionsDictionaries.Add(PropertyRoute.Construct(embeddedSelector), mei);
+        var ei = new ExtensionWithParameterInfo<T, K, V>(extensionLambda, prefix, getKeys);
 
-        return mei;
+        RegisteredExtensionsWithParameter.GetOrCreate(typeof(T)).Add(ei.Prefix, ei);
+
+        return ei;
     }
 
-    private Expression<Func<T, IEnumerable<KVP>>> CombineSelectors<T, M, KVP>(Expression<Func<T, M>> embeddedSelector, Expression<Func<M, IEnumerable<KVP>>> collectionSelector)
-        where T : Entity
-        where M : ModifiableEntity
-    {
-        Expression<Func<T, IEnumerable<KVP>>> result = e => collectionSelector.Evaluate(embeddedSelector.Evaluate(e));
 
-        return (Expression<Func<T, IEnumerable<KVP>>>)ExpressionCleaner.Clean(result)!;
-    }
-
-    private ResetLazy<HashSet<K>> GetAllKeysLazy<T, KVP, K>(Expression<Func<T, IEnumerable<KVP>>> collectionSelector, Expression<Func<KVP, K>> keySelector)
-        where T : Entity
+    private ResetLazy<HashSet<K>> GetAllKeysLazy<K>()
     {
         if (typeof(K).IsEnum)
             return new ResetLazy<HashSet<K>>(() => EnumExtensions.GetValues<K>().ToHashSet());
@@ -222,16 +184,7 @@ public class ExpressionContainer
         if (typeof(K).IsLite())
             return GlobalLazy.WithoutInvalidations(() => Database.RetrieveAllLite(typeof(K).CleanType()).Cast<K>().ToHashSet());
 
-        if (collectionSelector.Body.Type.IsMList())
-        {
-            var lambda = Expression.Lambda<Func<T, MList<KVP>>>(collectionSelector.Body, collectionSelector.Parameters);
-
-            return GlobalLazy.WithoutInvalidations(() => Database.MListQuery(lambda).Select(kvp => keySelector.Evaluate(kvp.Element)).Distinct().ToHashSet());
-        }
-        else
-        {
-            return GlobalLazy.WithoutInvalidations(() => Database.Query<T>().SelectMany(collectionSelector).Select(keySelector).Distinct().ToHashSet());
-        }
+        throw new InvalidOperationException("Unable to get all the possible keys for " + typeof(K).TypeName());
     }
 }
 
@@ -240,28 +193,22 @@ public interface IExtensionDictionaryInfo
     IEnumerable<QueryToken> GetAllTokens(QueryToken parent);
 }
 
-public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
-    where K : notnull
+public class ExtensionWithParameterInfo<T, K, V> : IExtensionDictionaryInfo
 {
+    public string Prefix; 
     public Func<QueryToken, IEnumerable<K>> AllKeys;
 
-    public Expression<Func<T, IEnumerable<KVP>>> CollectionSelector { get; set; }
-
-    public Expression<Func<KVP, K>> KeySelector { get; set; }
-
-    public Expression<Func<KVP, V>> ValueSelector { get; set; }
+    public Expression<Func<T, K, V>> LambdaExpression { get; set; }
 
     readonly ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
 
-    public ExtensionDictionaryInfo(
-        Expression<Func<T, IEnumerable<KVP>>> collectionSelector, 
-        Expression<Func<KVP, K>> keySelector, 
-        Expression<Func<KVP, V>> valueSelector,
+    public ExtensionWithParameterInfo(
+        Expression<Func<T, K, V>> expression,
+        string prefix,
         Func<QueryToken, IEnumerable<K>> allKeys)
     {
-        CollectionSelector = collectionSelector;
-        KeySelector = keySelector;
-        ValueSelector = valueSelector;
+        LambdaExpression = expression;
+        Prefix = prefix;
         AllKeys = allKeys;
     }
 
@@ -269,7 +216,9 @@ public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
     {
         var info = metas.GetOrAdd(parent, qt =>
         {
-            Expression<Func<T, V>> lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx()!);
+            var defaultValue = typeof(K).IsValueType && !typeof(K).IsNullable() ? Activator.CreateInstance<K>() : (K)(object)null!;
+
+            Expression<Func<T, V>> lambda = t => LambdaExpression.Evaluate(t, defaultValue);
 
             Expression e = MetadataVisitor.JustVisit(lambda, MetaExpression.FromToken(qt, typeof(T)));
             
@@ -288,13 +237,14 @@ public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
             return result;
         });
 
-        return AllKeys(parent).Select(key => new ExtensionDictionaryToken<T, K, V>(parent,
-            key: key,
+        return AllKeys(parent).Select(key => new ExtensionWithParameterToken<T, K, V>(parent,
+            parameterValue: key,
+            prefix: Prefix,
             unit: info.Unit,
             format: info.Format,
             implementations: info.Implementations,
             propertyRoute: info.PropertyRoute,
-            lambda: t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key))!)
+            lambda: t => LambdaExpression.Evaluate(t, key)
         ));
     }
 }

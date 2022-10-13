@@ -35,9 +35,9 @@ export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
     <div>
       <h2>Cache Statistics</h2>
       <div className="btn-toolbar">
-        {state.isEnabled == true && <button onClick={handleDisabled} className="sf-button btn bg-light" style={{ color: "red" }}>Disable</button>}
-        {state.isEnabled == false && <button onClick={handleEnabled} className="sf-button btn bg-light" style={{ color: "green" }}>Enabled</button>}
-        {<button onClick={handleClear} className="sf-button btn bg-light" style={{ color: "blue" }}>Clear</button>}
+        {state.isEnabled == true && <button onClick={handleDisabled} className="sf-button btn btn-light" style={{ color: "red" }}>Disable</button>}
+        {state.isEnabled == false && <button onClick={handleEnabled} className="sf-button btn btn-light" style={{ color: "green" }}>Enabled</button>}
+        {<button onClick={handleClear} className="sf-button btn btn-light" style={{ color: "blue" }}>Clear</button>}
       </div >
       <div className="m-2">
         <strong>Server Broadcast:</strong> <code>{state.serverBroadcast}</code>

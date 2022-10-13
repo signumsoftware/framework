@@ -204,17 +204,17 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       </div >
       <div className="sf-query-button-bar btn-toolbar mb-2">
         <button
-          className={classes("sf-query-button btn", showChartSettings && "active", "bg-light")}
+          className={classes("sf-query-button btn", showChartSettings && "active", "btn-light")}
           onClick={() => { setShowChartSettings(!showChartSettings); }}
           title={titleLabels ? showChartSettings ? ChartMessage.HideChartSettings.niceToString() : ChartMessage.ShowChartSettings.niceToString() : undefined}>
           <FontAwesomeIcon icon="sliders" />
         </button>
-        <button type="submit" className="sf-query-button sf-chart-draw btn bg-primary" onClick={handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
+        <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
         {ChartClient.ButtonBarChart.getButtonBarElements({
           chartRequest: cr,
           chartRequestView: { chartRequest: cr, userChart: p.userChart, onChange: p.onChange, hideFiltersAndSettings: handleHideFiltersAndSettings }
         }).map((a, i) => React.cloneElement(a, { key: i }))}
-        <button className="btn bg-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+        <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
       </div>
       <div className="sf-chart-tab-container">
         <Tabs id="chartResultTabs" key={showChartSettings + ""}>

@@ -76,7 +76,7 @@ export default function SelectorModal(p: SelectorModalProps) {
             <div>{
               p.options.map((o, i) =>
                 <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.name}
-                  className="sf-chooser-button sf-close-button btn bg-light" {...o.htmlAttributes}>
+                  className="sf-chooser-button sf-close-button btn btn-light" {...o.htmlAttributes}>
                   {o.displayName}
                 </button>)
             }</div>
@@ -86,7 +86,7 @@ export default function SelectorModal(p: SelectorModalProps) {
 
       {p.multiSelect && <div className="modal-footer">
         <button type="button" onClick={() => handleOkClicked()}
-          className="btn bg-primary mt-2 sf-ok-button" disabled={
+          className="btn btn-primary mt-2 sf-ok-button" disabled={
             p.multiSelect.minElements != null && selectedItems.length < p.multiSelect.minElements ||
             p.multiSelect.maxElements != null && selectedItems.length > p.multiSelect.maxElements}>
           {JavascriptMessage.ok.niceToString()}

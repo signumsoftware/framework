@@ -109,10 +109,10 @@ catch (Exception e)
           <div className="row">
             <div className="col-sm-7">
               <div className="btn-group" style={{ marginBottom: "3px" }}>
-                <input type="button" className="btn bg-danger btn-sm sf-button" value="try-catch" onClick={handleTryCatchClick} />
-                <input type="button" className="btn bg-success btn-sm sf-button" value="REST" onClick={handleRestClick} />
-                <input type="button" className="btn bg-warning btn-sm sf-button" value="SOAP" onClick={handleSoapClick} />
-                <input type="button" className="btn bg-danger btn-sm sf-button" value="ctx" onClick={handleCtxClick} />
+                <input type="button" className="btn btn-danger btn-sm sf-button" value="try-catch" onClick={handleTryCatchClick} />
+                <input type="button" className="btn btn-success btn-sm sf-button" value="REST" onClick={handleRestClick} />
+                <input type="button" className="btn btn-warning btn-sm sf-button" value="SOAP" onClick={handleSoapClick} />
+                <input type="button" className="btn btn-danger btn-sm sf-button" value="ctx" onClick={handleCtxClick} />
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`public static void ScriptCode(${ctx.value.mainEntityType.cleanName}Entity e, WorkflowScriptContext ctx)\n{`}</pre>

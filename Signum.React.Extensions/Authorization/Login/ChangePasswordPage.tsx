@@ -104,7 +104,7 @@ export default function ChangePasswordPage() {
                 {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
               </div>
             </div>
-            <button type="submit" className="btn bg-primary" id="changePassword">{LoginAuthMessage.ChangePassword.niceToString()}</button>
+            <button type="submit" className="btn btn-primary" id="changePassword">{LoginAuthMessage.ChangePassword.niceToString()}</button>
           </form>
         </div>
       </div>

@@ -57,7 +57,7 @@ export default function ErrorModal(p: ErrorModalProps) {
       </div>
 
       <div className="modal-footer">
-        <button className="btn bg-primary sf-close-button sf-ok-button" onClick={handleCloseClicked}>
+        <button className="btn btn-primary sf-close-button sf-ok-button" onClick={handleCloseClicked}>
           {JavascriptMessage.ok.niceToString()}</button>
       </div>
     </Modal>
@@ -187,7 +187,7 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
       message:
         <div>
           {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
-          <button className="btn bg-warning" onClick={e => { e.preventDefault(); window.location.reload(); }}>
+          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }}>
             <FontAwesomeIcon icon="rotate" />
           </button>
         </div>,
