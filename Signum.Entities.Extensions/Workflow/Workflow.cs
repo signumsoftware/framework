@@ -130,6 +130,9 @@ public enum WorkflowMessage
     _0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow,
     [Description("You are not member of any lane containing an Start event in workflow '{0}'")]
     YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0,
+
+    [Description("Evaluation order of the contition (if... else)")]
+    EvaluationOrderOfTheConnectionForIfElse
 }
 
 public class WorkflowXmlEmbedded : EmbeddedEntity

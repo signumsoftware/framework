@@ -16,3 +16,9 @@ public class WhatsNewLogEntity : Entity
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => $"{WhatsNew}: {User}");
 }
+
+[AutoInit]
+public static class WhatsNewLogOperation
+{
+    public static readonly DeleteSymbol<WhatsNewLogEntity> Delete;
+}

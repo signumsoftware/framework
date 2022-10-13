@@ -7,11 +7,11 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20221012_ReplaceButtonClass : CodeUpgradeBase
 {
-    public override string Description => "Replaces btn-primary -> bg-primary and btn-... -> bg-...";
+    public override string Description => "Replaces badge btn-primary -> badge bg-primary...";
 
     public override void Execute(UpgradeContext uctx)
     {
-        Regex regexButtonClass = new Regex(@"btn-(primary|secondary|success|warning|danger|info|light|dark)");
+        Regex regexButtonClass = new Regex(@"badge btn-(primary|secondary|success|warning|danger|info|light|dark)");
 
         uctx.ForeachCodeFile($@"*.tsx", file =>
         {

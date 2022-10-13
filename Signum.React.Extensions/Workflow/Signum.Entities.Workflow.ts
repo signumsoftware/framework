@@ -676,6 +676,7 @@ export module WorkflowMessage {
   export const WorkflowProperties = new MessageKey("WorkflowMessage", "WorkflowProperties");
   export const _0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow = new MessageKey("WorkflowMessage", "_0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow");
   export const YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0 = new MessageKey("WorkflowMessage", "YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0");
+  export const EvaluationOrderOfTheConnectionForIfElse = new MessageKey("WorkflowMessage", "EvaluationOrderOfTheConnectionForIfElse");
 }
 
 export const WorkflowModel = new Type<WorkflowModel>("WorkflowModel");
