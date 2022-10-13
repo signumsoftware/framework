@@ -29,8 +29,8 @@ export default function TimesPage(p: TimesPageProps) {
     <div>
       <h3>Times</h3>
       <div className="btn-toolbar">
-        <button onClick={() => reloadTimes()} className="btn bg-light">Reload</button>
-        <button onClick={handleClear} className="btn bg-warning">Clear</button>
+        <button onClick={() => reloadTimes()} className="btn btn-light">Reload</button>
+        <button onClick={handleClear} className="btn btn-warning">Clear</button>
       </div>
       <br />
       <Tabs id="timeMachineTabs">

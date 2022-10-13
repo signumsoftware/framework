@@ -174,7 +174,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
             }
           </tbody>
         </table>
-        <button onClick={handleImport} className="btn bg-info"><FontAwesomeIcon icon="cloud-arrow-up" /> Import</button>
+        <button onClick={handleImport} className="btn btn-info"><FontAwesomeIcon icon="cloud-arrow-up" /> Import</button>
       </div>
     );
   }

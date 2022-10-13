@@ -21,6 +21,6 @@ export function IsolationWidget(p: IsolationWidgetProps) {
   const isolation = entity.isNew ? IsolationClient.getOverridenIsolation() : mixin.isolation;
 
   return (
-    <strong className="badge bg-secondary" style={{ display: "flex" }}>{isolation == null ? IsolationMessage.GlobalEntity.niceToString() : getToString(isolation)}</strong>
+    <strong className="badge btn-secondary" style={{ display: "flex" }}>{isolation == null ? IsolationMessage.GlobalEntity.niceToString() : getToString(isolation)}</strong>
   );
 }

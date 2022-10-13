@@ -37,7 +37,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
   renderButtons(bc: ButtonsContext): ButtonBarElement[] {
     return [
-      { button: <button key="showCode" type="button" className="btn bg-success float-end" disabled={!this.state.rootNode} onClick={this.handleShowCode}>Show code</button> }
+      { button: <button key="showCode" type="button" className="btn btn-success float-end" disabled={!this.state.rootNode} onClick={this.handleShowCode}>Show code</button> }
     ];
   }
 

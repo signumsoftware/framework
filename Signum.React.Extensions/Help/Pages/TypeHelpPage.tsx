@@ -200,5 +200,5 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
       }));
   }
 
-  return <button className="btn bg-primary" onClick={onClick}>{Operations.getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}>{Operations.getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
 }

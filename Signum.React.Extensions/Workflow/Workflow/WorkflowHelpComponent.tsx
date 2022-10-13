@@ -49,7 +49,7 @@ export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps){
   }
   return (
     <input type="button"
-      className="btn bg-success btn-sm sf-button"
+      className="btn btn-success btn-sm sf-button"
       style={{ marginBottom: "3px" }}
       value={WorkflowActivityMessage.ActivityIs.niceToString()}
       onClick={() => handleActivityIsClick()} />

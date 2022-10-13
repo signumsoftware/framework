@@ -88,7 +88,7 @@ export default function ForgotPasswordEmailPage() {
               <label className="col-form-label col-sm-2" style={success === false ? { display: "inline" } : { display: "none" }}>{message}</label>
             </div>
 
-            <button type="submit" className="btn bg-primary" id="changePasswordRequest">{LoginAuthMessage.SendEmail.niceToString()}</button>
+            <button type="submit" className="btn btn-primary" id="changePasswordRequest">{LoginAuthMessage.SendEmail.niceToString()}</button>
           </form>
         </div>
       </div>

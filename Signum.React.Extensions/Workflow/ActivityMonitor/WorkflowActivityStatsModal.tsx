@@ -98,7 +98,7 @@ const [show, setShow] = React.useState<boolean>(true);
       }
     </div>
     <div className="modal-footer">
-      <button className="btn bg-primary sf-entity-button sf-ok-button" onClick={handleCloseClicked}>
+      <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleCloseClicked}>
         {JavascriptMessage.ok.niceToString()}
       </button>
     </div>

@@ -108,7 +108,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     ],
     extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {
       order: 6,
-      button: <button className="btn bg-info"
+      button: <button className="btn btn-info"
         onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
         <FontAwesomeIcon icon="download" /> Download AuthRules.xml
       </button>

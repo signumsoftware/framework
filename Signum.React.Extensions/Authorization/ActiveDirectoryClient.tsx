@@ -57,7 +57,7 @@ export function start(options: { routes: JSX.Element[], adGroups: boolean }) {
     return (
       {
         order: -1,
-        button: <button className="btn bg-info ms-2"
+        button: <button className="btn btn-info ms-2"
           onClick={e => {
             e.preventDefault();
             var promise = ValueLineModal.show({

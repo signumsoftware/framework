@@ -64,7 +64,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
       if ((ctx.pack.entity as PredictorEntity).state == "Trained") {
         return [{
           order: 10000,
-          button: <button className="btn bg-info" onClick={handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >
+          button: <button className="btn btn-info" onClick={handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >
         }];
       } else {
         return [];

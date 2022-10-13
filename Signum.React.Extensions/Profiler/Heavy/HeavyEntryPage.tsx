@@ -53,8 +53,8 @@ export default function HeavyEntry(p: HeavyEntryProps) {
           <tr>
             <td colSpan={2}>
               <div className="btn-toolbar">
-                <button onClick={handleDownload} className="btn bg-info">Download</button>
-                {!current.isFinished && <button onClick={() => reloadEntries()} className="btn bg-light">Update</button>}
+                <button onClick={handleDownload} className="btn btn-info">Download</button>
+                {!current.isFinished && <button onClick={() => reloadEntries()} className="btn btn-light">Update</button>}
               </div>
             </td>
           </tr>

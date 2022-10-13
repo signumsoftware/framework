@@ -42,7 +42,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
         }
       </div>
       {p.showSearchButton &&
-        <button className={classes("sf-query-button sf-search btn bg-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
+        <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
           <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{SearchMessage.Search.niceToString()}
         </button>}
 

@@ -64,8 +64,8 @@ export function WorkflowScriptRunnerTab(p: {}) {
     <div>
       <h4>{title}</h4>
       <div className="btn-toolbar">
-        {state.running && <a href="#" className="sf-button btn bg-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
-        {!state.running && <a href="#" className="sf-button btn bg-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
+        {state.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
+        {!state.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
       </div >
 
       <div>
