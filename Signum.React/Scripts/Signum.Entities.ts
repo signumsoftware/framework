@@ -478,6 +478,7 @@ export module OperationMessage {
   export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
   export const Confirm = new MessageKey("OperationMessage", "Confirm");
   export const PleaseConfirmYouWouldLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeToDelete0FromTheSystem");
+  export const PleaseConfirmYouWouldLikeTo01 = new MessageKey("OperationMessage", "PleaseConfirmYouWouldLikeTo01");
   export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
   export const Logs = new MessageKey("OperationMessage", "Logs");
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");

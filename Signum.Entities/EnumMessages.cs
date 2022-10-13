@@ -29,6 +29,10 @@ public enum OperationMessage
     Confirm,
     [Description("Please confirm you would like to delete {0} from the system")]
     PleaseConfirmYouWouldLikeToDelete0FromTheSystem,
+
+    [Description("Please confirm you would like to {0} {1}")]
+    PleaseConfirmYouWouldLikeTo01,
+
     [Description("{0} didn't return an entity")]
     TheOperation0DidNotReturnAnEntity,
     Logs,
