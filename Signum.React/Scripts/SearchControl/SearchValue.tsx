@@ -217,7 +217,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
   function bg(color: BsColor) {
 
     if (p.isLink)
-      return "btn-" + color + (color == "light" ? " text-dark" : "");
+      return "bg-" + color + (color == "light" ? " text-dark" : "");
     
     return "bg-" + color;
   }
