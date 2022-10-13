@@ -131,7 +131,7 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
     return (
       <div>
         <div className="btn-toolbar" style={{ marginBottom: "5px" }}>
-          <button className="btn btn-primary" onClick={this.props.onDraw}>{WorkflowActivityMonitorMessage.Draw.niceToString()}</button>
+          <button className="btn bg-primary" onClick={this.props.onDraw}>{WorkflowActivityMonitorMessage.Draw.niceToString()}</button>
           <button className="btn btn-default" onClick={this.handleZoomClick}>{WorkflowActivityMonitorMessage.ResetZoom.niceToString()}</button>
           <button className="btn btn-default" onClick={this.handleSearchClick}>{WorkflowActivityMonitorMessage.Find.niceToString()}</button>
         </div>

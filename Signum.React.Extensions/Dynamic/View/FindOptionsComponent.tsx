@@ -117,7 +117,7 @@ export function FindOptionsLine(p : FindOptionsLineProps){
             <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={handleRemove}
               title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon icon="times" />
+              <FontAwesomeIcon icon="xmark" />
             </a></div> :
             <a href="#" title={EntityControlMessage.Create.niceToString()}
               className="sf-line-button sf-create"
@@ -280,13 +280,13 @@ export function QueryKeyLine(p : { queryKey: string | undefined, label: string; 
   function renderLink() {
     return (
       <div className="input-group">
-        <span className="form-control btn-light sf-entity-line-entity">
+        <span className="form-control bg-light sf-entity-line-entity">
           {p.queryKey}
         </span>
-        <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
+        <a href="#" className={classes("sf-line-button", "sf-remove btn bg-light")}
           onClick={() => p.onChange(undefined)}
           title={EntityControlMessage.Remove.niceToString()}>
-          <FontAwesomeIcon icon="times" />
+          <FontAwesomeIcon icon="xmark" />
         </a>
       </div>
     );
@@ -407,7 +407,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
       <a href="#" className={classes("sf-line-button", "sf-remove")}
         onClick={e => this.handleOnRemove(e, index)}
         title={EntityControlMessage.Remove.niceToString()}>
-        <FontAwesomeIcon icon="times" />
+        <FontAwesomeIcon icon="xmark" />
       </a>
 
       <a href="#" className={classes("sf-line-button", "move-up")}

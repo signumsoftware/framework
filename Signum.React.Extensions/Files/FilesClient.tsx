@@ -108,14 +108,14 @@ export const extensionInfo: { [ext: string]: ExtensionInfo } = {
   ["vb"]: { icon: "file-code", color: "#373377", mimeType: "text/plain" },
   ["fs"]: { icon: "file-code", color: "#373377", mimeType: "text/plain" },
 
-  ["zip"]: { icon: "file-archive", color: "#F5B041", mimeType: "application/zip" },
-  ["rar"]: { icon: "file-archive", color: "#F5B041", mimeType: "application/vnd.rar" },
-  ["7z"]: { icon: "file-archive", color: "#F5B041", mimeType: "application/x-7z-compressed" },
+  ["zip"]: { icon: "file-zipper", color: "#F5B041", mimeType: "application/zip" },
+  ["rar"]: { icon: "file-zipper", color: "#F5B041", mimeType: "application/vnd.rar" },
+  ["7z"]: { icon: "file-zipper", color: "#F5B041", mimeType: "application/x-7z-compressed" },
 
-  ["txt"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain", browserView: true },
-  ["rtf"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain"  },
-  ["info"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain", browserView: true  },
-  ["log"]: { icon: "file-alt", color: "#566573", mimeType: "text/plain", browserView: true},
+  ["txt"]: { icon: "file-lines", color: "#566573", mimeType: "text/plain", browserView: true },
+  ["rtf"]: { icon: "file-lines", color: "#566573", mimeType: "text/plain"  },
+  ["info"]: { icon: "file-lines", color: "#566573", mimeType: "text/plain", browserView: true  },
+  ["log"]: { icon: "file-lines", color: "#566573", mimeType: "text/plain", browserView: true},
 
   ["csv"]: { icon: "file-csv", color: "#566573", mimeType: "text/plain"  },
 

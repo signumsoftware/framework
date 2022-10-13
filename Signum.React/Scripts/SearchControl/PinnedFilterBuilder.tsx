@@ -42,8 +42,8 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
         }
       </div>
       {p.showSearchButton &&
-        <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
-          <FontAwesomeIcon icon={"search"} />&nbsp;{SearchMessage.Search.niceToString()}
+        <button className={classes("sf-query-button sf-search btn bg-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
+          <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{SearchMessage.Search.niceToString()}
         </button>}
 
     </div>
@@ -53,7 +53,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const f = filter;
     const readOnly = f.frozen;
-    var labelText = f.pinned!.label || f.token?.niceName;
+    var label = f.pinned!.label || f.token?.niceName;
 
     if (f.pinned && (isCheckBox(f.pinned.active))) {
       return (
@@ -66,7 +66,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
                     f.pinned!.active == "NotCheckbox_StartChecked" ? "NotCheckbox_StartUnchecked" :
                       f.pinned!.active == "NotCheckbox_StartUnchecked" ? "NotCheckbox_StartChecked" : undefined!;
             p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
-          }} />{labelText}</label>
+          }} />{label}</label>
         </div>
       );
     }
@@ -75,18 +75,18 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
 
     if (isFilterGroupOptionParsed(f)) {
-      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange(f)} labelText={labelText || SearchMessage.Search.niceToString()} />
+      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange(f)} label={label || SearchMessage.Search.niceToString()} />
     }
 
     if (isList(f.operation!))
       return (
-        <FormGroup ctx={ctx} labelText={labelText}>
+        <FormGroup ctx={ctx} label={label}>
           <MultiValue values={f.value} readOnly={readOnly} onChange={() => handleValueChange(f)}
             onRenderItem={ctx => createFilterValueControl(ctx, f.token!, () => handleValueChange(f))} />
         </FormGroup>
       );
 
-    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), labelText, f.pinned!.active == "WhenHasValue");
+    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), label, f.pinned!.active == "WhenHasValue");
   }
 
 

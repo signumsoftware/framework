@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
-import { tryGetTypeInfos, TypeReference, TypeInfo, IsByAll } from '../Reflection'
+import { tryGetTypeInfos, TypeReference, TypeInfo, IsByAll, isTypeModel } from '../Reflection'
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
@@ -92,7 +92,7 @@ export function getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: Typ
       if (tis.length == 1 && tis.first().kind == "Enum")
         return ctx => <EnumCheckboxList ctx={ctx} />;
 
-      if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart") && !tr.isLite)
+      if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart" || isTypeModel(tis.first())) && !tr.isLite)
         return ctx => <EntityTable ctx={ctx} />;
 
       if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))

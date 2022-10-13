@@ -56,7 +56,7 @@ export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskAc
         <div className="col-sm-7">
           <div className="code-container">
             <div className="btn-group" style={{ marginBottom: "3px" }}>
-              <input type="button" className="btn btn-success btn-sm sf-button" value="Create case" onClick={handleCreateCaseClick} />
+              <input type="button" className="btn bg-success btn-sm sf-button" value="Create case" onClick={handleCreateCaseClick} />
             </div>
             <pre style={{ border: "0px", margin: "0px" }}>{"public void CustomAction() \n{"}</pre>
             <CSharpCodeMirror script={ctx.value.script ?? ""} onChange={handleCodeChange} />

@@ -1414,6 +1414,23 @@ export class QueryTokenString<T> {
     return new QueryTokenString<S>(this.token + ".AnyNo");
   }
 
+  separatedByComma<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByComma");
+  }
+
+  separatedByCommaDistinct<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByCommaDistinct");
+  }
+
+  separatedByNewLine<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByNewLine");
+  }
+
+  separatedByNewLineDistinct<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByNewLineDistinct");
+  }
+  
+
   noOne<S = ArrayElement<T>>(): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + ".NoOne");
   }
@@ -1960,7 +1977,7 @@ export class PropertyRoute {
             return {};
 
           const ti = tryGetTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
-          if (ti && isTypeEntity(ti))
+          if (ti && (isTypeEntity(ti) || isTypeModel(ti)))
             return simpleMembersAfter(ti, "");
           else
             return simpleMembersAfter(this.findRootType(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));

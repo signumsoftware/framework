@@ -400,7 +400,7 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
 
     return (
       <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={handlePopupFullScreen} title={FrameMessage.Fullscreen.niceToString()}>
-        <FontAwesomeIcon icon="external-link-alt" />
+        <FontAwesomeIcon icon="up-right-from-square" />
       </a>
     );
   }

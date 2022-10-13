@@ -74,15 +74,15 @@ export default function HeavyList(p: HeavyListProps) {
       <br />
       <div className="btn-toolbar" style={{ float: "right" }}>
         <input key={fileVer} type="file" className="form-control" onChange={handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
-        <button onClick={handleUpload} className="btn btn-info" disabled={!fileToUpload}><FontAwesomeIcon icon="cloud-upload-alt" /> Upload</button>
+        <button onClick={handleUpload} className="btn bg-info" disabled={!fileToUpload}><FontAwesomeIcon icon="cloud-arrow-up" /> Upload</button>
       </div>
       <div className="btn-toolbar">
-        {!enabled ? <button onClick={() => handleSetEnabled(true)} className="btn btn-light primary">Enable</button> :
-          <button onClick={() => handleSetEnabled(false)} className="btn btn-light" style={{ color: "red" }}>Disable</button>
+        {!enabled ? <button onClick={() => handleSetEnabled(true)} className="btn bg-light primary">Enable</button> :
+          <button onClick={() => handleSetEnabled(false)} className="btn bg-light" style={{ color: "red" }}>Disable</button>
         }
-        <button onClick={handleUpdate} className="btn btn-light">Update</button>
-        <button onClick={handleClear} className="btn btn-light">Clear</button>
-        <button onClick={handleDownload} className="btn btn-info"><FontAwesomeIcon icon="cloud-download-alt" /> Download</button>
+        <button onClick={handleUpdate} className="btn bg-light">Update</button>
+        <button onClick={handleClear} className="btn bg-light">Clear</button>
+        <button onClick={handleDownload} className="btn bg-info"><FontAwesomeIcon icon="cloud-arrow-down" /> Download</button>
       </div>
       <br />
       <p className="help-block">Upload previous runs to compare performance.</p>

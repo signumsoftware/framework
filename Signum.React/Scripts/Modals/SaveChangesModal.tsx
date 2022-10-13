@@ -54,13 +54,13 @@ export default function SaveChangesModal(p: SaveChangesModalProps) {
         <div className="btn-toolbar">
           {p.eocs.map(eoc => <OperationButton key={eoc.operationInfo.key} eoc={eoc} avoidAlternatives onOperationClick={() => handleButtonClicked(eoc)} />)}
           <button
-            className="btn btn-secondary sf-close-button sf-no-button"
+            className="btn bg-secondary sf-close-button sf-no-button"
             onClick={() => handleButtonClicked("loseChanges")}
             name="no">
-            <FontAwesomeIcon icon={"undo"} />&nbsp;{SaveChangesMessage.LoseChanges.niceToString()}
+            <FontAwesomeIcon icon={"arrow-rotate-left"} />&nbsp;{SaveChangesMessage.LoseChanges.niceToString()}
           </button>
           <button
-            className="btn btn-secondary sf-close-button sf-cancel-button"
+            className="btn bg-secondary sf-close-button sf-cancel-button"
             onClick={() => handleButtonClicked("cancel")}
             name="cancel">
             {JavascriptMessage.cancel.niceToString()}

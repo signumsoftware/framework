@@ -126,7 +126,7 @@ export function ColumnComponent(p: ColumnComponentProps) {
           <a title={StyleContext.default.titleLabels ? JavascriptMessage.removeColumn.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteColumn}>
-            <FontAwesomeIcon icon="times" />
+            <FontAwesomeIcon icon="xmark" />
           </a>
         }
       </td>

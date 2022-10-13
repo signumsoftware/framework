@@ -24,10 +24,10 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
 
     if (element.showCount != null) {
       return (
-        <div>
+        <>
           {super.getIcon(element)}
           <SearchToolbarCount findOptions={{ queryName: getToString(element.content)! }} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />
-        </div>
+        </>
       );
     }
 
@@ -36,7 +36,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
 
   getDefaultIcon(): IconColor {
     return ({
-      icon: ["far", "list-alt"],
+      icon: ["far", "rectangle-list"],
       iconColor: "dodgerblue",
     });
   }
@@ -87,8 +87,8 @@ export function SearchToolbarCount(p: CountIconProps) {
 }
 
 
-export function ToolbarCount(p: { num: number  | null | undefined }) {
-  return <div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "btn-light text-secondary" : "btn-danger")}>{p.num ?? "…"}</div>
+export function ToolbarCount(p: { num: number | null | undefined }) {
+  return <div className="sf-toolbar-count-container"><div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "bg-light text-secondary" : "bg-danger")}>{p.num ?? "…"}</div></div>
 }
 
 

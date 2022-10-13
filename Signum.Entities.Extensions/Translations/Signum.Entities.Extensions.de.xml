@@ -2106,7 +2106,7 @@
   <Type Name="RuleTypeConditionEntity" Description="Regeltypbedingung" PluralDescription="Bedingungen für Regeltypen">
     <Member Name="Allowed" Description="Erlaubt" />
     <Member Name="Conditions" Description="Bedingungen" />
-    <Member Name="Order" Description="Bestellung" />
+    <Member Name="Order" Description="Reihenfolge" />
     <Member Name="RuleType" Description="Typregel" />
   </Type>
   <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln" Gender="m">
@@ -3009,14 +3009,14 @@
     <Member Name="Condition" Description="Bedingung" />
     <Member Name="From" Description="Von" />
     <Member Name="Name" Description="Name" />
-    <Member Name="Order" Description="Bestellung" />
+    <Member Name="Order" Description="Reihenfolge" />
     <Member Name="To" Description="An" />
     <Member Name="Xml" Description="XML" />
   </Type>
   <Type Name="WorkflowConnectionModel" Description="Workflow-Verbindung">
     <Member Name="Condition" Description="Bedingung" />
     <Member Name="Name" Description="Name" />
-    <Member Name="Order" Description="Bestellung" />
+    <Member Name="Order" Description="Reihenfolge" />
   </Type>
   <Type Name="WorkflowConnectionOperation">
     <Member Name="Delete" Description="Löschen" />

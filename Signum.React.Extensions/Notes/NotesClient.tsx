@@ -13,7 +13,7 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
 
   Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {
     isVisible: eoc => couldHaveNotes!(eoc.entity.Type),
-    icon: "sticky-note",
+    icon: "note-sticky",
     iconColor: "#0e4f8c",
     color: "info",
     contextual: { isVisible: ctx => couldHaveNotes(ctx.context.lites[0].EntityType), }
@@ -24,7 +24,7 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
     filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite}]
   }, {
     isVisible: Navigator.isViewable(NoteEntity) && couldHaveNotes(ctx.lite.EntityType),
-    icon: "sticky-note",
+    icon: "note-sticky",
     iconColor: "#337ab7",
   }));
 }

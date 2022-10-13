@@ -108,7 +108,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     ],
     extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {
       order: 6,
-      button: <button className="btn btn-info"
+      button: <button className="btn bg-info"
         onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
         <FontAwesomeIcon icon="download" /> Download AuthRules.xml
       </button>
@@ -130,7 +130,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),
       e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "red", color: "danger", group: null }));
+      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null }));
   }
 
   if (options.operations) {
@@ -149,7 +149,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(),
       e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-alt", iconColor: "orange", color: "warning", group: null }));
+      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null }));
   }
 
   OmniboxClient.registerSpecialAction({

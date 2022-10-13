@@ -41,7 +41,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
     return (
       <div>
         <TranslatedInstances data={result} currentCulture={p.match.params.culture} cultures={cultures} />
-        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary mt-2" onClick={handleSave} disabled={isLocked} />
+        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn bg-primary mt-2" onClick={handleSave} disabled={isLocked} />
       </div>
     );
   }
@@ -124,7 +124,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
       <input type="text" className="form-control"
         placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} onKeyDown={handleKeyDown} />
       <button className="btn btn-outline-secondary" type="submit" title={TranslationMessage.Search.niceToString()}>
-        <FontAwesomeIcon icon="search" />
+        <FontAwesomeIcon icon="magnifying-glass" />
       </button>
     </form>
   );

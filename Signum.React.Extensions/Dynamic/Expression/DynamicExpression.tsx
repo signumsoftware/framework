@@ -112,7 +112,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
-        type={{ name: typeName }} labelText="Example Entity" />
+        type={{ name: typeName }} label="Example Entity" />
     );
   }
 
@@ -155,7 +155,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
       <br />
       <div className="row">
         <div className="col-sm-7">
-          {exampleEntity && <button className="btn btn-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play"></FontAwesomeIcon> Evaluate</button>}
+          {exampleEntity && <button className="btn bg-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play"></FontAwesomeIcon> Evaluate</button>}
           <div className="code-container">
             <pre style={{ border: "0px", margin: "0px", display: "flex", overflow: "visible" }}>
               {renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))}&nbsp;{renderInput(ctx.subCtx(dt => dt.name))}&nbsp;({renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) {"=>"}

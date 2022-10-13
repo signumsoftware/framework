@@ -134,7 +134,7 @@ function CaseActivityStatsButtonComponent(p: CaseActivityButtonBaseProps) {
       {WorkflowActivityMessage.OpenCaseActivityStats.niceToString()}
     </Tooltip>}>
       <div>
-        <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
+        <a className={classes("sf-line-button btn bg-light", enabled ? undefined : "disabled")}
           onClick={() => handleOnClick(sc.state.selectedRows![0])}>
           <FontAwesomeIcon icon="list" />
         </a>
@@ -168,9 +168,9 @@ function WorkflowActivityLocateButtonComponent(p: WorkflowActivityLocateButtonCo
       {WorkflowActivityMessage.LocateWorkflowActivityInDiagram.niceToString()}
     </Tooltip>}>
       <div>
-        <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
+        <a className={classes("sf-line-button btn bg-light", enabled ? undefined : "disabled")}
           onClick={() => handleOnClick(sc.state.selectedRows![0])}>
-          <FontAwesomeIcon icon="map-marker" />
+          <FontAwesomeIcon icon="location-pin" />
         </a>
       </div>
     </OverlayTrigger>

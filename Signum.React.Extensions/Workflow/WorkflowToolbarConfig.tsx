@@ -16,7 +16,7 @@ export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity>
 
   getDefaultIcon(): IconColor {
     return ({
-      icon: "random",
+      icon: "shuffle",
       iconColor: "darkslateblue",
     });
   }

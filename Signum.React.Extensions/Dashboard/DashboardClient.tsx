@@ -86,7 +86,7 @@ export function start(options: { routes: JSX.Element[] }) {
   Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
     isVisible: () => false,
     color: "warning",
-    icon: "cogs",
+    icon: "gears",
     contextual: { isVisible: () => true },
     contextualFromMany: { isVisible: () => true },
   }));
@@ -176,7 +176,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   registerRenderer(UserQueryPartEntity, {
     component: () => import('./View/UserQueryPart').then((a: any) => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "#2E86C1" }),
+    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "#2E86C1" }),
     defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
     withPanel: c => c.renderMode != "BigValue",
     getQueryNames: c => [c.userQuery?.query].notNull(),
@@ -232,12 +232,12 @@ export function start(options: { routes: JSX.Element[] }) {
   });
   registerRenderer(ImagePartEntity, {
     component: () => import('./View/ImagePartView').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "forestgreen" }),
     withPanel: () => false
   });
   registerRenderer(SeparatorPartEntity, {
     component: () => import('./View/SeparatorPartView').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" }),
+    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "forestgreen" }),
     withPanel: () => false
   });
 
@@ -266,7 +266,7 @@ export function start(options: { routes: JSX.Element[] }) {
     return promise.then(das =>
       das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d) ?? "", e => {
         AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
-      }, { icon: "tachometer-alt", iconColor: "darkslateblue" })));
+      }, { icon: "gauge", iconColor: "darkslateblue" })));
   });
 
   QuickLinks.registerQuickLink(DashboardEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
@@ -327,7 +327,7 @@ function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd:
   var title =  SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
 
   return (
-    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm btn-light sf-create me-2" title={title}>
+    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm bg-light sf-create me-2" title={title}>
       <FontAwesomeIcon icon={"plus"} /> {title}
     </a>
   );

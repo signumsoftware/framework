@@ -36,7 +36,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
     return (
       <div>
         {Dic.getValues(result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={p.match.params.culture} />)}
-        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary" onClick={handleSave} />
+        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn bg-primary" onClick={handleSave} />
       </div>
     );
   }
@@ -79,7 +79,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
       <input type="text" className="form-control"
         placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} />
       <button className="btn btn-outline-secondary" type="submit" title={TranslationMessage.Search.niceToString()}>
-        <FontAwesomeIcon icon="search" />
+        <FontAwesomeIcon icon="magnifying-glass" />
       </button>
     </form>
   );

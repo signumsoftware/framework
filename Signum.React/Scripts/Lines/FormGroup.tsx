@@ -4,7 +4,7 @@ import { classes, addClass } from '../Globals';
 import "./Lines.css"
 
 export interface FormGroupProps {
-  labelText?: React.ReactNode;
+  label?: React.ReactNode;
   controlId?: string;
   ctx: StyleContext;
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
@@ -36,7 +36,7 @@ export function FormGroup(p: FormGroupProps) {
   );
 
   let pr = tCtx.propertyRoute;
-  var labelText = p.labelText ?? (pr?.member?.niceName);
+  var labelText = p.label ?? (pr?.member?.niceName);
   const label = (
     <label htmlFor={p.controlId} {...p.labelHtmlAttributes} className={addClass(p.labelHtmlAttributes, labelClasses)} >
       {labelText}

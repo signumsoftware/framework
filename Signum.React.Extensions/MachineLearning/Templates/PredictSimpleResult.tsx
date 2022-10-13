@@ -47,7 +47,7 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
   renderButtons(ctx: ButtonsContext): (ButtonBarElement | undefined)[] {
     return [{
       order: 10000,
-      button: <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >
+      button: <button className="btn bg-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >
     }];
   }
 }

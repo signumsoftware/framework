@@ -33,13 +33,11 @@ export function WhatsNewMessageComponent(p: WhatsNewMessageComponentProps) {
   const ec = p.ctx.subCtx({labelColumns: 4});
   return (
     <div>
-      <EntityCombo ctx={ec.subCtx(e => e.culture)} labelText={WhatsNewMessage.Language.niceToString()} onChange={p.invalidate} />
-      <ValueLine ctx={ec.subCtx(e => e.title)} labelText={ec.subCtx(e => e.title).niceName()} onChange={p.invalidate} />
+      <EntityCombo ctx={ec.subCtx(e => e.culture)} label={WhatsNewMessage.Language.niceToString()} onChange={p.invalidate} />
+      <ValueLine ctx={ec.subCtx(e => e.title)} label={ec.subCtx(e => e.title).niceName()} onChange={p.invalidate} />
       <div>
-        <div>
-          <p>{ec.subCtx(e => e.description).niceName()}</p>
-          <WhatsNewHtmlEditor binding={Binding.create(ec.value, w => w.description)} />
-        </div>        
+        <p>{ec.subCtx(e => e.description).niceName()}</p>
+        <WhatsNewHtmlEditor binding={Binding.create(ec.value, w => w.description)} />
       </div>
     </div>
   );

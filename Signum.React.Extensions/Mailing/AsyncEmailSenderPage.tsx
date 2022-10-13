@@ -31,8 +31,8 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
     <div>
       <h2>AsyncEmailSender State</h2>
       <div className="btn-toolbar">
-        {state.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
-        {!state.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
+        {state.running && <a href="#" className="sf-button btn bg-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
+        {!state.running && <a href="#" className="sf-button btn bg-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
       </div >
 
       <div>

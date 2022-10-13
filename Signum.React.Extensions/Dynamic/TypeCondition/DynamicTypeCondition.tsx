@@ -61,7 +61,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
           <div className="row">
             <div className="col-sm-7">
 
-              {exampleEntityRef && <button className="btn btn-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play" /> Evaluate</button>}
+              {exampleEntityRef && <button className="btn bg-success" onClick={handleEvaluate}><FontAwesomeIcon icon="play" /> Evaluate</button>}
 
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.entityType.cleanName + "Entity e) =>"}</pre>
@@ -107,7 +107,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
-        type={{ name: typeName }} labelText="Example Entity" />
+        type={{ name: typeName }} label="Example Entity" />
     );
   }
 

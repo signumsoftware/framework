@@ -207,9 +207,8 @@ class EmailMessageBuilder
                 };
             }
         }
-        else if(this.model?.GetFrom() != null)
+        else if(this.model?.GetFrom() is var from && from != null)
         {
-            var from = this.model.GetFrom()!;
             yield return new EmailFromEmbedded
             {
                 EmailOwner = from.Owner,

@@ -27,7 +27,7 @@ export default function CopyLinkButton(p: CopyLinkButtonProps) {
 
   return (
     <span className={p.className}>
-      <a ref={link} className="btn btn-sm btn-light text-dark sf-pointer mx-1" onClick={handleCopyLiteButton}
+      <a ref={link} className="btn btn-sm bg-light text-dark sf-pointer mx-1" onClick={handleCopyLiteButton}
         title={NormalControlMessage.CopyEntityUrl.niceToString()}>
         <FontAwesomeIcon icon="link" color="gray" />
       </a>

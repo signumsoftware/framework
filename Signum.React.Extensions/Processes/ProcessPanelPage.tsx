@@ -37,8 +37,8 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
     <div>
       <h2>ProcessLogic state</h2>
       <div className="btn-toolbar">
-        {s.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
-        {!s.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
+        {s.running && <a href="#" className="sf-button btn bg-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
+        {!s.running && <a href="#" className="sf-button btn bg-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
       </div >
       <div id="processMainDiv">
         <br />

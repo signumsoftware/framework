@@ -56,7 +56,7 @@ export default function ToolbarRenderer(p: {
       {p.appTitle}
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
-        <FontAwesomeIcon icon={"angle-double-left"} />
+        <FontAwesomeIcon icon={"angles-left"} />
       </div>
 
       <div>

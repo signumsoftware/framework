@@ -265,7 +265,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
     return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
       onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
       title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
-      <FontAwesomeIcon icon={[isValue ? "far" : "fas", "edit"]} />
+      <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
     </a>)
   }
 
@@ -330,7 +330,7 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
           foceUpdate();
         }}
         title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
-        <FontAwesomeIcon icon={[isValue ? "far" : "fas", "edit"]} />
+        <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
       </a>
     );
   }

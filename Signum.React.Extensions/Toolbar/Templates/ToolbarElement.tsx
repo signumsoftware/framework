@@ -58,8 +58,8 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") && <ValueLine ctx={ctx4.subCtx(a => a.showCount)} onChange={() => forceUpdate()} />}
           </div>
           <div className="col-sm-1">
-            {icon && <div>
-              <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />
+            {icon && <div style={{ marginTop: "17px" }}>
+              <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px",  }} />
               {ctx.value.showCount && <ToolbarCount num={ctx.value.showCount == "Always" ? 0 : 1} />}
             </div>
             }

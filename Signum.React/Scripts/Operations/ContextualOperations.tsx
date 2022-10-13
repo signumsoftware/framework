@@ -264,7 +264,12 @@ OperationMenuItem.getText = (coc: ContextualOperationContext<any>): React.ReactN
   if (coc.settings && coc.settings.text)
     return coc.settings.text(coc);
 
-  return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{coc.operationInfo.canBeModified ? <small className="ms-2">{OperationMessage.MultiSetter.niceToString()}</small> : null}</>;
+  var cos = coc.settings;
+
+  var multiSetter = coc.operationInfo.canBeModified && !((cos?.settersConfig ?? Defaults.defaultSetterConfig)(coc) == "NoDialog") ?
+    <small className="ms-2">{OperationMessage.MultiSetter.niceToString()}</small> : null;
+
+  return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{multiSetter}</>;
 
 };
 

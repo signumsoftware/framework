@@ -102,7 +102,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
   function getLabelText() {
 
     if (p.labelTextWithData == null)
-      return p.labelText;
+      return p.label;
 
     var data = c.props.data || comboRef.current && comboRef.current.getData();
 
@@ -111,7 +111,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
 
   return (
     <FormGroup ctx={c.props.ctx}
-      labelText={getLabelText()}
+      label={getLabelText()}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes} >

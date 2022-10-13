@@ -30,7 +30,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
       new QuickLinks.QuickLinkLink("TimeMachine",
         () => TimeMachineMessage.TimeMachine.niceToString(),
         timeMachineRoute(ctx.lite), {
-          icon: "history",
+          icon: "clock-rotate-left",
           iconColor: "blue",
       }) : undefined);
 
