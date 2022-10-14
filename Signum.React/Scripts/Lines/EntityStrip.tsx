@@ -27,7 +27,7 @@ export interface EntityStripProps extends EntityListBaseProps {
   onItemContainerHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   avoidDuplicates?: boolean;
   groupElementsBy?: (e: any /*T*/) => string;
-  renderGroupTitle?: (key: string) => React.ReactElement;
+  renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
 }
 
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
@@ -107,7 +107,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
 
               c.getMListItemContext(p.ctx).groupBy(a => p.groupElementsBy!(a)).map((gr, i) =>
                 <div className={classes("mb-2")} key={i} >
-                  <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key) : gr.key}</small>
+                  <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
                   {gr.elements.map(mlec => renderElement(mlec))}
                 </div>)
           }
