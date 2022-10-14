@@ -114,7 +114,7 @@ public static class AsyncEmailSenderLogic
                                             {
                                                 using (var tr = Transaction.ForceNew())
                                                 {
-                                                    EmailLogic.SenderManager.Send(email);
+                                                    EmailLogic.SendMail(email);
                                                     tr.Commit();
                                                 }
                                             }

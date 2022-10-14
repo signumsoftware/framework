@@ -3,11 +3,18 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Files;
 using Microsoft.Exchange.WebServices.Data;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Engine.Mailing.Senders;
 
-public partial class EmailSenderManager : IEmailSenderManager
+public class ExchangeWebServiceSender : BaseEmailSender
 {
-    protected virtual void SendExchangeWebService(EmailMessageEntity email, ExchangeWebServiceEntity exchange)
+    ExchangeWebServiceEntity exchange;
+
+    public ExchangeWebServiceSender(ExchangeWebServiceEntity service)
+    {
+        exchange = service;
+    }
+
+    protected override void SendInternal(EmailMessageEntity email)
     {
         ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2007_SP1);
         service.UseDefaultCredentials = exchange.UseDefaultCredentials;

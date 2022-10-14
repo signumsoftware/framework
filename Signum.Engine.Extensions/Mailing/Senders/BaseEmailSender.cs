@@ -1,16 +1,9 @@
 using Signum.Entities.Mailing;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Engine.Mailing.Senders;
 
-public partial class EmailSenderManager : IEmailSenderManager
+public abstract class BaseEmailSender
 {
-    public Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> GetEmailSenderConfiguration { get; private set; }
-
-    public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
-    {
-        this.GetEmailSenderConfiguration = getEmailSenderConfiguration;
-    }
-
     public virtual void Send(EmailMessageEntity email)
     {
         using (OperationLogic.AllowSave<EmailMessageEntity>())
@@ -55,25 +48,5 @@ public partial class EmailSenderManager : IEmailSenderManager
         }
     }
 
-    protected virtual void SendInternal(EmailMessageEntity email)
-    {
-        var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
-
-        var config = GetEmailSenderConfiguration(template, email.Target, email);
-
-        if (config.SMTP != null)
-        {
-            SendSMTP(email, config.SMTP);
-        }
-        else if (config.Exchange != null)
-        {
-            SendExchangeWebService(email, config.Exchange);
-        }
-        else if (config.MicrosoftGraph != null)
-        {
-            SendMicrosoftGraph(email, config.MicrosoftGraph);
-        }
-        else
-            throw new InvalidOperationException("No way to send email found");
-    }
+    protected abstract void SendInternal(EmailMessageEntity email);
 }

@@ -3,11 +3,19 @@ using Signum.Entities.Mailing;
 using Signum.Engine.Authorization;
 using Signum.Engine.Files;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Engine.Mailing.Senders;
 
-public partial class EmailSenderManager : IEmailSenderManager
+public class SmtpSender: BaseEmailSender
 {
-    protected virtual void SendSMTP(EmailMessageEntity email, SmtpEntity smtp)
+
+    SmtpEntity smtp;
+
+    public SmtpSender(SmtpEntity service)
+    {
+        smtp = service;
+    }
+
+    protected override void SendInternal(EmailMessageEntity email)
     {
         System.Net.Mail.MailMessage message = CreateMailMessage(email);
 
@@ -15,7 +23,7 @@ public partial class EmailSenderManager : IEmailSenderManager
             smtp.GenerateSmtpClient().Send(message);
     }
 
-    protected virtual MailMessage CreateMailMessage(EmailMessageEntity email)
+    MailMessage CreateMailMessage(EmailMessageEntity email)
     {
         System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage()
         {
@@ -48,6 +56,7 @@ public partial class EmailSenderManager : IEmailSenderManager
 
         return message;
     }
+
 }
 
 public static class SmtpExtensions

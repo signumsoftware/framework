@@ -5,14 +5,22 @@ using Microsoft.Identity.Client;
 using Microsoft.Graph.Auth;
 using Microsoft.Graph;
 using Signum.Entities.Authorization;
+using Entity = Signum.Entities.Entity;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Engine.Mailing.Senders;
 
 //https://jatindersingh81.medium.com/c-code-to-to-send-emails-using-microsoft-graph-api-2a90da6d648a
 //https://www.jeancloud.dev/2020/06/05/using-microsoft-graph-as-smtp-server.html
-public partial class EmailSenderManager : IEmailSenderManager
+public class MicrosoftGraphSender : BaseEmailSender
 {
-    protected virtual void SendMicrosoftGraph(EmailMessageEntity email, MicrosoftGraphEntity microsoftGraph)
+    MicrosoftGraphEntity microsoftGraph;
+
+    public MicrosoftGraphSender(MicrosoftGraphEntity service)
+    {
+        microsoftGraph = service;
+    }
+
+    protected override void SendInternal(EmailMessageEntity email)
     {
         ClientCredentialProvider authProvider = microsoftGraph.GetAuthProvider();
         GraphServiceClient graphClient = new GraphServiceClient(authProvider);

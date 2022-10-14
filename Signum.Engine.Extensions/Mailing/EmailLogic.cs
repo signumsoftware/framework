@@ -8,6 +8,7 @@ using Signum.Engine.Files;
 using Microsoft.AspNetCore.StaticFiles;
 using Signum.Entities.Basics;
 using Signum.Entities.Files;
+using Signum.Engine.Mailing.Senders;
 
 namespace Signum.Engine.Mailing;
 
@@ -23,7 +24,15 @@ public static class EmailLogic
         get { return getConfiguration(); }
     }
 
-    public static IEmailSenderManager SenderManager = null!;
+    static Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration = null!;
+
+    public static Polymorphic<Func<EmailSenderServiceConfigurationEntity, BaseEmailSender>> EmailSenders = new();       
+    public static BaseEmailSender GetEmailSender(EmailMessageEntity email)
+    {
+        var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
+        var config = getEmailSenderConfiguration(template, email.Target, email);
+        return EmailSenders.Invoke(config.Service);
+    }
 
     internal static void AssertStarted(SchemaBuilder sb)
     {
@@ -33,7 +42,7 @@ public static class EmailLogic
     public static void Start(
         SchemaBuilder sb,
         Func<EmailConfigurationEmbedded> getConfiguration,
-        IEmailSenderManager senderManager,
+        Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
         IFileTypeAlgorithm? attachment = null)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -41,7 +50,7 @@ public static class EmailLogic
             FilePathEmbeddedLogic.AssertStarted(sb);
             CultureInfoLogic.AssertStarted(sb);
             EmailLogic.getConfiguration = getConfiguration;
-            EmailTemplateLogic.Start(sb, senderManager.GetEmailSenderConfiguration);
+            EmailTemplateLogic.Start(sb, getEmailSenderConfiguration);
             EmailSenderConfigurationLogic.Start(sb);
             if (attachment != null)
                 FileTypeLogic.Register(EmailFileType.Attachment, attachment);
@@ -64,7 +73,11 @@ public static class EmailLogic
 
             PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
 
-            SenderManager = senderManager;
+            EmailLogic.getEmailSenderConfiguration = getEmailSenderConfiguration;
+
+            EmailSenders.Register((SmtpEntity s) => new SmtpSender(s));
+            EmailSenders.Register((MicrosoftGraphEntity s) => new MicrosoftGraphSender(s));
+            EmailSenders.Register((ExchangeWebServiceEntity s) => new ExchangeWebServiceSender(s));
 
             EmailGraph.Register();
 
@@ -133,18 +146,19 @@ public static class EmailLogic
     public static void SendMail(this IEmailModel model)
     {
         foreach (var email in model.CreateEmailMessage())
-            SenderManager.Send(email);
+            GetEmailSender(email).Send(email);
     }
 
     public static void SendMail(this Lite<EmailTemplateEntity> template, ModifiableEntity entity)
     {
         foreach (var email in template.CreateEmailMessage(entity))
-            SenderManager.Send(email);
+            GetEmailSender(email).Send(email);
     }
 
     public static void SendMail(this EmailMessageEntity email)
     {
-        SenderManager.Send(email);
+        var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
+        GetEmailSender(email).Send(email);
     }
 
     public static void SendMailAsync(this IEmailModel model)
@@ -278,7 +292,7 @@ public static class EmailLogic
                 CanBeModified = true,
                 FromStates = { EmailMessageState.Created, EmailMessageState.Draft, EmailMessageState.ReadyToSend, EmailMessageState.Outdated },
                 ToStates = { EmailMessageState.Sent },
-                Execute = (m, _) => EmailLogic.SenderManager.Send(m)
+                Execute = (m, _) => EmailLogic.GetEmailSender(m).Send(m)
             }.Register();
 
 
@@ -311,13 +325,6 @@ public static class EmailLogic
         }
     }
 }
-
-public interface IEmailSenderManager
-{
-    Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> GetEmailSenderConfiguration { get; }
-    void Send(EmailMessageEntity email);
-}
-
 
 public static class MimeMapping
 {

@@ -58,9 +58,9 @@ export function start(options: {
   Navigator.addSettings(new EntitySettings(EmailRecipientEmbedded, e => import('./Templates/EmailRecipient')));
   Navigator.addSettings(new EntitySettings(EmailFromEmbedded, e => import('./Templates/EmailFrom')));
   Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => import('./Templates/EmailConfiguration')));
-  Navigator.addSettings(new EntitySettings(SmtpEntity, e => import('./Templates/EmailServiceInfos/Smtp')));
-  Navigator.addSettings(new EntitySettings(ExchangeWebServiceEntity, e => import('./Templates/EmailServiceInfos/ExchangeWebService')));
-  Navigator.addSettings(new EntitySettings(MicrosoftGraphEntity, e => import('./Templates/EmailServiceInfos/MicrosoftGraph')));
+  Navigator.addSettings(new EntitySettings(SmtpEntity, e => import('./Templates/SenderServices/Smtp')));
+  Navigator.addSettings(new EntitySettings(ExchangeWebServiceEntity, e => import('./Templates/SenderServices/ExchangeWebService')));
+  Navigator.addSettings(new EntitySettings(MicrosoftGraphEntity, e => import('./Templates/SenderServices/MicrosoftGraph')));
 
   Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateEmailFromTemplate, {
     onClick: (ctx) => {

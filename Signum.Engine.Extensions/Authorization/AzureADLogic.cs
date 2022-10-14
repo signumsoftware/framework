@@ -1,6 +1,6 @@
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
-using Signum.Engine.Mailing;
+using Signum.Engine.Mailing.Senders;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Authorization;
 using Signum.Utilities.Reflection;
