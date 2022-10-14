@@ -223,7 +223,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
-  confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
+  confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null | true;
   createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
@@ -244,7 +244,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
-  confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null;
+  confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null | true;
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
@@ -353,7 +353,7 @@ export class ContextualOperationContext<T extends Entity> {
 export class CellOperationSettings<T extends Entity> extends OperationSettings {
   text?: (coc: CellOperationContext<T>) => string;
   isVisible?: (coc: CellOperationContext<T>) => boolean;
-  confirmMessage?: (coc: CellOperationContext<T>) => string | undefined | null;
+  confirmMessage?: (coc: CellOperationContext<T>) => string | undefined | null | true;
   onClick?: (coc: CellOperationContext<T>) => Promise<void>;
   hideOnCanExecute?: boolean;
   //showOnReadOnly?: boolean;
@@ -376,7 +376,7 @@ export class CellOperationSettings<T extends Entity> extends OperationSettings {
 export interface CellOperationOptions<T extends Entity> {
   text?: (coc: CellOperationContext<T>) => string;
   isVisible?: (coc: CellOperationContext<T>) => boolean;
-  confirmMessage?: (coc: CellOperationContext<T>) => string | undefined | null;
+  confirmMessage?: (coc: CellOperationContext<T>) => string | undefined | null | true;
   onClick?: (coc: CellOperationContext<T>) => Promise<void>;
   hideOnCanExecute?: boolean;
   //showOnReadOnly?: boolean;
@@ -653,7 +653,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
   text?: (coc: EntityOperationContext<T>) => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
-  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null | true;
   overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
   commonOnClick?: (oc: EntityOperationContext<T> | ContextualOperationContext<T> | CellOperationContext<T>) => Promise<void>;
@@ -691,7 +691,7 @@ export interface EntityOperationOptions<T extends Entity> {
   text?: (coc: EntityOperationContext<T>) => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
-  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
+  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null | true;
   onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
   commonOnClick?: (oc: EntityOperationContext<T> | ContextualOperationContext<T> | CellOperationContext<T>) => Promise<void>;
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];
