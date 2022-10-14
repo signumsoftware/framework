@@ -361,6 +361,7 @@ internal static class MultiSetter
             if (pr.Type.IsMList())
             {
                 var elementPr = pr.Add("Item");
+
                 var mlist = pr.GetLambdaExpression<ModifiableEntity, IMListPrivate>(false).Compile()(entity);
                 switch (setter.Operation)
                 {
@@ -373,7 +374,9 @@ internal static class MultiSetter
                     case PropertyOperation.AddNewElement:
                         {
                             var item = (ModifiableEntity)Activator.CreateInstance(elementPr.Type)!;
-                            SetSetters(item, setter.Setters!, elementPr);
+                            var normalizedPr = elementPr.Type.IsEntity() ? PropertyRoute.Root(elementPr.Type) : elementPr;
+                                
+                            SetSetters(item, setter.Setters!, normalizedPr);
                             ((IList)mlist).Add(item);
                         }
                         break;
@@ -381,9 +384,10 @@ internal static class MultiSetter
                         {
                             var predicate = GetPredicate(setter.Predicate!, elementPr, options);
                             var toChange = ((IEnumerable<object>)mlist).Where(predicate.Compile()).ToList();
+                            var normalizedPr = elementPr.Type.IsEntity() ? PropertyRoute.Root(elementPr.Type) : elementPr;
                             foreach (var item in toChange)
                             {
-                                SetSetters((ModifiableEntity)item, setter.Setters!, elementPr);
+                                SetSetters((ModifiableEntity)item, setter.Setters!, normalizedPr);
                             }
                         }
                         break;
