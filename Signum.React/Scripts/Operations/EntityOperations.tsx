@@ -441,14 +441,31 @@ function getConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
   if (eoc.settings && eoc.settings.confirmMessage === null)
     return undefined;
 
-  if (eoc.settings && eoc.settings.confirmMessage != undefined)
-    return eoc.settings.confirmMessage(eoc);
+  if (eoc.settings && eoc.settings.confirmMessage != undefined) {
+    var result = eoc.settings.confirmMessage(eoc);
+    if (result == true)
+      return getDefaultConfirmMessage(eoc);
+
+    return result;
+  }
 
   //eoc.settings.confirmMessage === undefined
+  if (eoc.operationInfo.operationType == "Delete")
+    return getDefaultConfirmMessage(eoc);
+
+  return undefined;
+}
+
+function getDefaultConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
+
   if (eoc.operationInfo.operationType == "Delete")
     return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(
       <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
     );
+  else
+    return OperationMessage.PleaseConfirmYouWouldLikeTo01.niceToString().formatHtml(
+      <strong>{eoc.operationInfo.niceName}</strong>, 
+      <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
+    );
 
-  return undefined;
 }

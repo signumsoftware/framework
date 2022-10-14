@@ -10,7 +10,7 @@ import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
 import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
-import { getTypeInfo, getTypeInfos, getTypeName, tryGetTypeInfos } from '../Reflection'
+import { getTypeInfo, getTypeInfos, getTypeName, QueryTokenString, tryGetTypeInfos } from '../Reflection'
 import { FilterOperation } from '../Signum.Entities.DynamicQuery'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
@@ -26,6 +26,8 @@ export interface EntityStripProps extends EntityListBaseProps {
   onItemHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   avoidDuplicates?: boolean;
+  groupElementsBy?: (e: any /*T*/) => string;
+  renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
 }
 
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
@@ -100,26 +102,35 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
       <div className="sf-entity-strip sf-control-container">
         <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
           {
-            c.getMListItemContext(p.ctx).map(mlec =>
-            (<EntityStripElement key={c.keyGenerator.getKey(mlec.value)}
-              ctx={mlec}
-              iconStart={p.iconStart}
-              autoComplete={p.autocomplete}
-              onRenderItem={p.onRenderItem}
-              move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, p.vertical ? "v" : "h") : undefined}
-              drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, p.vertical ? "v" : "h") : undefined}
-              onItemHtmlAttributes={p.onItemHtmlAttributes}
-              onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
-              onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
-              onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
-              showType={p.showType!}
-            />))
+            p.groupElementsBy == undefined ?
+              c.getMListItemContext(p.ctx).map(mlec => renderElement(mlec)) :
+
+              c.getMListItemContext(p.ctx).groupBy(a => p.groupElementsBy!(a)).map((gr, i) =>
+                <div className={classes("mb-2")} key={i} >
+                  <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
+                  {gr.elements.map(mlec => renderElement(mlec))}
+                </div>)
           }
           {renderLastElement()}
         </ul>
       </div>
     </FormGroup>
   );
+
+  function renderElement(mlec: TypeContext<any>): JSX.Element {
+    return <EntityStripElement key={c.keyGenerator.getKey(mlec.value)}
+      ctx={mlec}
+      iconStart={p.iconStart}
+      autoComplete={p.autocomplete}
+      onRenderItem={p.onRenderItem}
+      move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, p.vertical ? "v" : "h") : undefined}
+      drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, p.vertical ? "v" : "h") : undefined}
+      onItemHtmlAttributes={p.onItemHtmlAttributes}
+      onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
+      onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
+      onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
+      showType={p.showType!} />
+  }
 
   function renderLastElement() {
     

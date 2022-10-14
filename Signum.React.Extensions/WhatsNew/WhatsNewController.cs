@@ -11,6 +11,7 @@ using Signum.React.Filters;
 using Signum.Entities.Files;
 using System.ComponentModel.DataAnnotations;
 using Signum.React.Facades;
+using Signum.Entities;
 
 namespace Signum.React.WhatsNew;
 
@@ -113,10 +114,19 @@ public class WhatsNewController : ControllerBase
         return new FileStreamResult(stream, mime);
     }
 
-    [HttpPost("api/whatsnew/specificNews")]
-    public WhatsNewFull SpecificNews([FromBody, Required] int id)
+    [HttpGet("api/whatsnew/{id}")]
+    public WhatsNewFull SpecificNews(int id)
     {
         var wne = Database.Retrieve<WhatsNewEntity>(id);
+        if (!wne.IsRead())
+        {
+            new WhatsNewLogEntity()
+            {
+                WhatsNew = wne.ToLite(),
+                User = UserEntity.Current,
+                ReadOn = Clock.Now
+            }.Save();
+        }
         var cm = wne.GetCurrentMessage();
 
         return new WhatsNewFull
@@ -131,27 +141,16 @@ public class WhatsNewController : ControllerBase
         };
     }
 
-    [HttpPost("api/whatsnew/entityforattachments")]
-    public WhatsNewEntity Attachments([FromBody, Required] int id)
-    {
-        return Database.Retrieve<WhatsNewEntity>(id);
-    }
-
     [HttpPost("api/whatsnew/setNewsLog")]
-    public bool setNewsLogRead([FromBody, Required] int[] ids)
+    public void setNewsLogRead([FromBody, Required] Lite<WhatsNewEntity>[] lites)
     {
-        using (OperationLogic.AllowSave<WhatsNewLogEntity>())
-        {
-            foreach (int id in ids)
+        Database.Query<WhatsNewEntity>()
+            .Where(wn => lites.Contains(wn.ToLite()) && !wn.IsRead())
+            .UnsafeInsert(wn => new WhatsNewLogEntity()
             {
-                new WhatsNewLogEntity()
-                {
-                    WhatsNew = Database.Retrieve<WhatsNewEntity>(id).ToLite(),
-                    User = UserEntity.Current,
-                    ReadOn = Clock.Now
-                }.Save();
-            }
-            return true;
-        }
+                WhatsNew = wn.ToLite(),
+                User = UserEntity.Current,
+                ReadOn = Clock.Now
+            });
     }
 }

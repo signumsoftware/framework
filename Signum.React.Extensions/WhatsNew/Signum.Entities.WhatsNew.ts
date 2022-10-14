@@ -33,6 +33,10 @@ export interface WhatsNewLogEntity extends Entities.Entity {
   readOn: string /*DateTime*/;
 }
 
+export module WhatsNewLogOperation {
+  export const Delete : Entities.DeleteSymbol<WhatsNewLogEntity> = registerSymbol("Operation", "WhatsNewLogOperation.Delete");
+}
+
 export module WhatsNewMessage {
   export const News = new MessageKey("WhatsNewMessage", "News");
   export const NewNews = new MessageKey("WhatsNewMessage", "NewNews");

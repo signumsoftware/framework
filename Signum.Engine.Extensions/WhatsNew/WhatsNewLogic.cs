@@ -37,12 +37,14 @@ public static class WhatsNewLogic
 
             sb.Include<WhatsNewLogEntity>()
                .WithExpressionFrom((WhatsNewEntity wn) => wn.WhatsNewLogs())
+               .WithDelete(WhatsNewLogOperation.Delete)
                .WithQuery(() => e => new
                {
                    Entity = e,
                    e.Id,
-                   e.WhatsNew,
                    e.ReadOn,
+                   e.User,
+                   e.WhatsNew,
                });
 
             sb.Schema.EntityEvents<WhatsNewEntity>().PreUnsafeDelete += WhatsNewLogic_PreUnsafeDelete;

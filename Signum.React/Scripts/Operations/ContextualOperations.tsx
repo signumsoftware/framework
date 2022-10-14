@@ -175,26 +175,45 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
   if (coc.settings && coc.settings.confirmMessage === null)
     return undefined;
 
-  if (coc.settings && coc.settings.confirmMessage != undefined)
-    return coc.settings.confirmMessage(coc);
+  if (coc.settings && coc.settings.confirmMessage != undefined) {
+
+    var result = coc.settings.confirmMessage(coc);
+    if (result == true)
+      return getDefaultConfirmMessage(coc);
+    else
+      return result;
+  }
+
 
   if (coc.operationInfo.operationType == "Delete") {
-
-    if (coc.context.lites.length > 1) {
-      var message = coc.context.lites
-        .groupBy(a => a.EntityType)
-        .map(gr => gr.elements.length + " " + (gr.elements.length == 1 ? getTypeInfo(gr.key).niceName : getTypeInfo(gr.key).nicePluralName))
-        .joinComma(External.CollectionMessage.And.niceToString());
-
-      return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{message}</strong>);
-    }
-    else {
-      var lite = coc.context.lites.single();
-      return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{getToString(lite)} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);;
-    }
+    return getDefaultConfirmMessage(coc);
   }
 
   return undefined;
+}
+
+function getDefaultConfirmMessage(coc: ContextualOperationContext<Entity>) {
+
+  if (coc.context.lites.length > 1) {
+    var message = coc.context.lites
+      .groupBy(a => a.EntityType)
+      .map(gr => gr.elements.length + " " + (gr.elements.length == 1 ? getTypeInfo(gr.key).niceName : getTypeInfo(gr.key).nicePluralName))
+      .joinComma(External.CollectionMessage.And.niceToString());
+
+    if (coc.operationInfo.operationType == "Delete")
+      return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{message}</strong>);
+    else
+      return OperationMessage.PleaseConfirmYouWouldLikeTo01.niceToString().formatHtml(<strong>{coc.operationInfo.niceName}</strong>, <strong>{message}</strong>);
+
+  }
+  else {
+    var lite = coc.context.lites.single();
+    if (coc.operationInfo.operationType == "Delete")
+      return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{getToString(lite)} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);
+    else
+      return OperationMessage.PleaseConfirmYouWouldLikeTo01.niceToString().formatHtml(<strong>{coc.operationInfo.niceName}</strong>, <strong>{getToString(lite)} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);
+
+  }
 }
 
 

@@ -137,17 +137,34 @@ function getConfirmMessage(coc: CellOperationContext<Entity>) {
   if (coc.settings && coc.settings.confirmMessage === null)
     return undefined;
 
-  if (coc.settings && coc.settings.confirmMessage != undefined)
-    return coc.settings.confirmMessage(coc);
+  if (coc.settings && coc.settings.confirmMessage != undefined) {
+
+    var result = coc.settings.confirmMessage(coc);
+    if (result == true)
+      return getDefaultConfirmMessage(coc);
+
+    return result;
+  }
 
   if (coc.operationInfo.operationType == "Delete") {
-    const lite = coc.lite;
-    if (lite) {
-      return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{getToString(lite)} ({getTypeInfo(lite.EntityType).niceName} {lite.id})</strong>);;
-    }
+    return getDefaultConfirmMessage(coc);
   }
 
   return undefined;
+}
+
+function getDefaultConfirmMessage(coc: CellOperationContext<Entity>) {
+
+  if (coc.operationInfo.operationType == "Delete")
+    return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(
+      <strong>{getToString(coc.lite)} ({getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
+    );
+  else
+    return OperationMessage.PleaseConfirmYouWouldLikeTo01.niceToString().formatHtml(
+      <strong>{coc.operationInfo.niceName}</strong>,
+      <strong>{getToString(coc.lite)} ({getTypeInfo(coc.lite.EntityType).niceName} {coc.lite.id})</strong>
+    );
+
 }
 
 
