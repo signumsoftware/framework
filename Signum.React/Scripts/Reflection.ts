@@ -1,10 +1,11 @@
 import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
 import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, OperationSymbol, ModelEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
-import { ajaxGet } from './Services';
+import { ajaxGet, ThrowErrorFilter } from './Services';
 import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
 import { QueryString } from './QueryString';
+import { func } from 'prop-types';
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -116,6 +117,48 @@ export function toLuxonFormat(netFormat: string | undefined, type: "DateOnly" | 
       return result;
     }
   }
+}
+
+export function splitLuxonFormat(luxonFormat: string) : [dateFormat: string, durationFormat: string | null] {
+
+  switch (luxonFormat) {
+    case "D": return ["D", null];
+    case "DD": return ["DD", null];
+    case "DDD": return ["DDD", null];
+    case "DDDD": return ["DDDD", null];
+    case "F": return ["D", "hh:mm:ss"];
+    case "FF": return ["DD", "hh:mm:ss"];
+    case "FFF": return ["DDD", "hh:mm:ss"];
+    case "FFFF": return ["DDDD", "hh:mm:ss"];
+    case "f": return ["D", "hh:mm"];
+    case "ff": return ["DD", "hh:mm"];
+    case "fff": return ["DDD", "hh:mm"];
+    case "ffff": return ["DDDD", "hh:mm"];
+  }
+
+  if (luxonFormat.contains("'T'"))
+    return [luxonFormat.before("'T'"), luxonFormat.after("'T'").replaceAll("H", "h")];
+
+  if (luxonFormat.contains(" ") && !luxonFormat.after(" ").contains(" "))
+    return [luxonFormat.before(" "), luxonFormat.after(" ").replaceAll("H", "h")];
+
+  throw new Error("Unable to split " + luxonFormat);
+}
+
+export function dateTimePlaceholder(luxonFormat: string) {
+  var result = DateTime.expandFormat(luxonFormat);
+
+  return result
+    .replace(/\bd\b/, "dd")
+    .replace(/\bMM?\b/, "mm")
+    .replace(/\bh\b/, "hh")
+    .replace(/\bHH?\b/, "hh")
+    .replace(/\bm\b/, "mm");
+
+}
+
+export function timePlaceholder(durationFormat: string) {
+  return durationFormat;
 }
 
 const oneDigitCulture = new Set([
@@ -371,7 +414,7 @@ export function timeToString(val: any, netFormat?: string) {
     return "";
 
   var duration = Duration.fromISOTime(val);
-  return duration.toFormat(toLuxonDurationFormat(netFormat) ?? "hh:mm:ss");
+  return duration.toFormat(toLuxonDurationFormat(netFormat) ?? "HH:mm:ss");
 }
 
 
