@@ -300,7 +300,7 @@ public class QueryRequestTS
         };
     }
 
-    public QueryRequest ToQueryRequest(JsonSerializerOptions jsonSerializerOptions, string referrerUrl)
+    public QueryRequest ToQueryRequest(JsonSerializerOptions jsonSerializerOptions, string? referrerUrl)
     {
         var qn = QueryLogic.ToQueryName(this.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
