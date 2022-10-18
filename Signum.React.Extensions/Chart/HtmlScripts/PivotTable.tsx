@@ -18,6 +18,8 @@ import { EntityBaseController } from '@framework/Lines';
 import { isBooleanOrFunctionOrNull } from '../../Dynamic/View/NodeUtils';
 import { MultiValueLineController } from '../../../Signum.React/Scripts/Lines/MultiValueLine';
 import { BigValueSearchCounter } from '../../Dashboard/View/UserQueryPart';
+import { QueryString } from '../../../Signum.React/Scripts/QueryString';
+import { QueryTokenMessage } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };
@@ -54,7 +56,10 @@ class RowGroup {
       return this.column.title + " = " +
         (this.value == true ? BooleanEnum.niceToString("True") :
           this.value == false ? BooleanEnum.niceToString("False") :
-            "null");
+            "-" + QueryTokenMessage.Null.niceToString() + "-");
+
+    if (this.value == null)
+      return "-" + QueryTokenMessage.Null.niceToString() + "-";
 
     return this.column.getNiceName(this.value);
   }
@@ -526,7 +531,6 @@ export default function renderPivotTable({ data, width, height, parameters, load
     }
 
     var title = p.title ?? (p.gor instanceof RowGroup ? p.gor.getNiceName() : undefined);
-
     if (title == null) {
       if (style?.cssStyleDiv)
         return (
@@ -789,7 +793,6 @@ function getCellFormatter(multiValueFormat: string, valueColumns: ChartColumn<nu
 }
 
 function compileFormatter(format: string): (...args: string[]) => string {
-  debugger;
   var matches = [...format.matchAll(/\{(?<num>\d)\}/g)];
 
   if (matches.length == 0)

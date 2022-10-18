@@ -356,7 +356,7 @@
     <Member Name="MonthStart" Description="Monatsbeginn " />
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
     <Member Name="Not" Description="Nicht" />
-    <Member Name="Null" Description="Null" />
+    <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />
     <Member Name="Quarter" Description="Quartal" />
     <Member Name="QuarterStart" Description="Quartalsstart" />

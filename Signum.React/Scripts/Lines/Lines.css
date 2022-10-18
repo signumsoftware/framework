@@ -443,7 +443,7 @@ input[type=checkbox].form-control-xs {
 }
 
 .form-control-sm .rw-widget-picker {
-    min-height: 30px;
+    min-height: 31px;
 }
 
 /*.rw-widget-sm .rw-multiselect-input {
@@ -452,7 +452,7 @@ input[type=checkbox].form-control-xs {
 }*/
 
 .rw-widget-sm .rw-widget-picker {
-    min-height: 28px;
+    min-height: 31px;
 }
 
 .input-group > .form-control-plaintext {
