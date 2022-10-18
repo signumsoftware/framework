@@ -556,6 +556,10 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     border-left: 2px solid #ffdd00;
 }
 
+.rw-dropdown-list .rw-popup-container{
+    right: unset;
+}
+
 .sf-no-padding {
     padding: 1px !important;
 }
