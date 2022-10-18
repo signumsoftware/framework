@@ -32,11 +32,7 @@ public static class EmailSenderConfigurationLogic
                     Entity = s,
                     s.Id,
                     s.Name,
-                    s.SMTP!.DeliveryMethod,
-                    s.SMTP!.Network!.Host,
-                    s.SMTP!.PickupDirectoryLocation,
-                    s.Exchange!.ExchangeVersion,
-                    s.Exchange!.Url,
+                    s.Service
                 });
             
             SmtpConfigCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToDictionary(a => a.ToLite()),
@@ -53,7 +49,7 @@ public static class EmailSenderConfigurationLogic
 
     public static SmtpClient GenerateSmtpClient(this Lite<EmailSenderConfigurationEntity> config)
     {
-        return config.RetrieveFromCache().SMTP.ThrowIfNull("No SMTP config").GenerateSmtpClient();
+        return (config.RetrieveFromCache().Service as SmtpEntity).ThrowIfNull("No SMTP config").GenerateSmtpClient();
     }
 
     public static EmailSenderConfigurationEntity RetrieveFromCache(this Lite<EmailSenderConfigurationEntity> config)

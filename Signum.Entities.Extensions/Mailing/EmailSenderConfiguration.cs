@@ -27,23 +27,14 @@ public class EmailSenderConfigurationEntity : Entity
     [ImplementedBy(typeof(SmtpEntity), typeof(ExchangeWebServiceEntity), typeof(MicrosoftGraphEntity))]
     public EmailSenderServiceConfigurationEntity Service { get; set; }
 
-    [Ignore, InTypeScript(false)]
-    public SmtpEntity? SMTP { get { return Service as SmtpEntity; } }
-
-    [Ignore, InTypeScript(false)]
-    public ExchangeWebServiceEntity? Exchange { get { return Service as ExchangeWebServiceEntity; } }
-
-    [Ignore, InTypeScript(false)]
-    public MicrosoftGraphEntity? MicrosoftGraph { get { return Service as MicrosoftGraphEntity; } }
-
     public override string ToString() => $"{Name} - {Service}";
 
     protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
     {
         if (sender == DefaultFrom && pi.Name == nameof(DefaultFrom.AzureUserId))
         {
-            if (DefaultFrom.AzureUserId == null && MicrosoftGraph != null)
-                return ValidationMessage._0IsMandatoryWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => MicrosoftGraph));
+            if (DefaultFrom.AzureUserId == null && Service is MicrosoftGraphEntity microsoftGraph)
+                return ValidationMessage._0IsMandatoryWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => microsoftGraph));
         }
 
         return base.ChildPropertyValidation(sender, pi);
