@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -1774,5 +1774,24 @@ function canHaveMin(typeName: string): boolean {
 
 
 function getRootKeyColumn(columnOptions: ColumnOptionParsed[]): ColumnOptionParsed[] {
-  return columnOptions.filter(t => t.token != null && !columnOptions.some(t2 => t2.token != null && t.token!.fullKey.startsWith(t2.token.fullKey + ".")));
+  return columnOptions.filter(t => t.token != null && !columnOptions.some(root => root.token != null && dominates(root.token, t.token!)));
+}
+
+
+function dominates(root: QueryToken, big: QueryToken) {
+
+  if (hasElement(big)) {
+
+    if (!hasElement(root))
+      return false;
+
+    var elemBig = getTokenParents(big).last(a => a.queryTokenType == "Element");
+    var elemRoot = getTokenParents(root).last(a => a.queryTokenType == "Element");
+
+    if (elemBig.fullKey != elemRoot.fullKey)
+      return false;
+  }
+
+  return big.fullKey.startsWith(root.fullKey + ".")
+
 }
