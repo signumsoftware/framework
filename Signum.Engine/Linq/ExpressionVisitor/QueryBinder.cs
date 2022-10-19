@@ -590,7 +590,7 @@ internal class QueryBinder : ExpressionVisitor
         ProjectedColumns pc = ColumnProjector.ProjectColumns(proj, alias, isGroupKey: true, selectTrivialColumns: true);
         return new ProjectionExpression(
             new SelectExpression(alias, true, null, pc.Columns, projection.Select, null, null, null, 0),
-            proj, null, resultType);
+            pc.Projector, null, resultType);
     }
 
     private Expression BindReverse(Type resultType, Expression source)
@@ -1219,10 +1219,21 @@ internal class QueryBinder : ExpressionVisitor
         this.groupByMap.Add(elementAlias, new GroupByInfo(alias, elemExpr, select));
 
         var result = new ProjectionExpression(
-            new SelectExpression(alias, false, null, keyPC.Columns, select, null, null, keyPC.Columns.Select(c => c.Expression), 0),
+            new SelectExpression(alias, false, null, keyPC.Columns, select, null, null, keyPC.Columns.Select(c => c.Expression).Where(e => !IsTrivialGroupKey(e)), 0),
             resultExpr, null, resultType.GetGenericTypeDefinition().MakeGenericType(resultExpr.Type));
 
         return result;
+    }
+
+    private bool IsTrivialGroupKey(Expression e)
+    {
+        if (e is ConstantExpression or SqlConstantExpression)
+            return true;
+
+        if (e.NodeType == ExpressionType.Convert)
+            return IsTrivialGroupKey(((UnaryExpression)e).Operand);
+
+        return false;
     }
 
     class ContainsAggregateVisitor : DbExpressionVisitor
