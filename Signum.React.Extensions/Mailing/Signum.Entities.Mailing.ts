@@ -221,6 +221,7 @@ export interface EmailSenderConfigurationEntity extends Entities.Entity {
 
 export module EmailSenderConfigurationOperation {
   export const Save : Entities.ExecuteSymbol<EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Save");
+  export const Clone : Entities.ConstructSymbol_From<EmailSenderConfigurationEntity, EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Clone");
 }
 
 export interface EmailSenderServiceConfigurationEntity extends Entities.Entity {

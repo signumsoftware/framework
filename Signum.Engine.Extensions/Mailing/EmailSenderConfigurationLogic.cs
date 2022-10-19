@@ -44,6 +44,13 @@ public static class EmailSenderConfigurationLogic
                 CanBeModified = true,
                 Execute = (sc, _) => { },
             }.Register();
+
+            new Graph<EmailSenderConfigurationEntity>.ConstructFrom<EmailSenderConfigurationEntity>(EmailSenderConfigurationOperation.Clone)
+            { 
+                Construct = (sc, _) => sc.Clone()
+            
+            }.Register();
+
         }
     }
 

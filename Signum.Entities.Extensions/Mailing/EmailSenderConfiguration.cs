@@ -44,7 +44,17 @@ public class EmailSenderConfigurationEntity : Entity
     { 
         if (!IsNew && pi.Name == nameof(Service))
             return true;
+
         return base.IsPropertyReadonly(pi);
+    }
+    public EmailSenderConfigurationEntity Clone()
+    {
+        return new EmailSenderConfigurationEntity
+        {
+            DefaultFrom = DefaultFrom?.Clone(),
+            AdditionalRecipients = AdditionalRecipients.ToMList(),
+            Service = Service
+        };
     }
 }
 
@@ -52,11 +62,13 @@ public class EmailSenderConfigurationEntity : Entity
 [AutoInit]
 public static class EmailSenderConfigurationOperation
 {
-    public static ExecuteSymbol<EmailSenderConfigurationEntity> Save;
+    public static readonly ExecuteSymbol<EmailSenderConfigurationEntity> Save;
+    public static readonly ConstructSymbol<EmailSenderConfigurationEntity>.From<EmailSenderConfigurationEntity> Clone;
 }
 
 public abstract class EmailSenderServiceConfigurationEntity : Entity
 {
+    public abstract EmailSenderServiceConfigurationEntity Clone();
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
@@ -83,6 +95,18 @@ public class SmtpEntity : EmailSenderServiceConfigurationEntity
     {
         return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
     }
+
+    public override SmtpEntity Clone()
+    {
+        return new SmtpEntity 
+        { 
+            DeliveryFormat = DeliveryFormat,
+            DeliveryMethod = DeliveryMethod,
+            Network = Network?.Clone(),
+            PickupDirectoryLocation = PickupDirectoryLocation
+        
+        };
+    }
 }
 
 public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
@@ -104,6 +128,20 @@ public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
 
     
     public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
+
+    public SmtpNetworkDeliveryEmbedded Clone()
+    {
+        return new SmtpNetworkDeliveryEmbedded
+        {
+            Host = Host,
+            Port = Port,
+            Username = Username,
+            Password = Password,
+            UseDefaultCredentials = UseDefaultCredentials,
+            EnableSSL = EnableSSL
+        };
+    }
+
 }
 
 public class ClientCertificationFileEmbedded : EmbeddedEntity
@@ -138,6 +176,19 @@ public class ExchangeWebServiceEntity : EmailSenderServiceConfigurationEntity
     public string? Password { get; set; }
 
     public bool UseDefaultCredentials { get; set; } = true;
+
+    public override ExchangeWebServiceEntity Clone()
+    {
+        return new ExchangeWebServiceEntity
+        {
+            ExchangeVersion = ExchangeVersion,
+            Url = Url,
+            Username = Username,
+            Password = Password,
+            UseDefaultCredentials = UseDefaultCredentials,
+        };
+
+    }
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
@@ -170,4 +221,15 @@ public class MicrosoftGraphEntity : EmailSenderServiceConfigurationEntity
 
         return base.PropertyValidation(pi);
     }
+    public override MicrosoftGraphEntity Clone()
+    {
+        return new MicrosoftGraphEntity
+        {
+            UseActiveDirectoryConfiguration = UseActiveDirectoryConfiguration,
+            Azure_ApplicationID = Azure_ApplicationID,
+            Azure_DirectoryID = Azure_DirectoryID,
+            Azure_ClientSecret = Azure_ClientSecret,
+        };
+    }
+
 }
