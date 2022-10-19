@@ -11,7 +11,7 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
       <ValueLine ctx={sc.subCtx(s => s.name)} />
       <EntityDetail ctx={sc.subCtx(s => s.defaultFrom)} />
       <EntityRepeater ctx={sc.subCtx(s => s.additionalRecipients)} />
-      <EntityDetail ctx={sc.subCtx(s => s.service)} find={true} />
+      <EntityDetail ctx={sc.subCtx(s => s.service)} />
     </div >
   );
 }

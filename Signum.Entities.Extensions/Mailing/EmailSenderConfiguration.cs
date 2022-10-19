@@ -39,6 +39,13 @@ public class EmailSenderConfigurationEntity : Entity
 
         return base.ChildPropertyValidation(sender, pi);
     }
+
+    protected override bool IsPropertyReadonly(PropertyInfo pi)
+    { 
+        if (!IsNew && pi.Name == nameof(Service))
+            return true;
+        return base.IsPropertyReadonly(pi);
+    }
 }
 
 
