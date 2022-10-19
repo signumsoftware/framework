@@ -9,7 +9,7 @@ public class ExchangeWebServiceSender : BaseEmailSender
 {
     ExchangeWebServiceEntity exchange;
 
-    public ExchangeWebServiceSender(ExchangeWebServiceEntity service)
+    public ExchangeWebServiceSender(EmailSenderConfigurationEntity senderConfig, ExchangeWebServiceEntity service) : base(senderConfig)
     {
         exchange = service;
     }

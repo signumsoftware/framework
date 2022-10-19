@@ -10,7 +10,7 @@ public class SmtpSender: BaseEmailSender
 
     SmtpEntity smtp;
 
-    public SmtpSender(SmtpEntity service)
+    public SmtpSender(EmailSenderConfigurationEntity senderConfig, SmtpEntity service) : base(senderConfig)
     {
         smtp = service;
     }

@@ -31,6 +31,8 @@ public class EmailMessageEntity : Entity, IProcessLineDataEntity
 
     public DateTime? Sent { get; set; }
 
+    public Lite<EmailSenderConfigurationEntity>? SentBy { get; set; }
+
     public DateTime? ReceptionNotified { get; set; }
 
     [DbType(Size = int.MaxValue)]

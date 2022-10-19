@@ -4,6 +4,14 @@ namespace Signum.Engine.Mailing.Senders;
 
 public abstract class BaseEmailSender
 {
+
+    EmailSenderConfigurationEntity senderConfig;
+    protected BaseEmailSender(EmailSenderConfigurationEntity senderConfig)
+
+    {
+        this.senderConfig = senderConfig;
+    }
+
     public virtual void Send(EmailMessageEntity email)
     {
         using (OperationLogic.AllowSave<EmailMessageEntity>())
@@ -22,6 +30,7 @@ public abstract class BaseEmailSender
 
                 email.State = EmailMessageState.Sent;
                 email.Sent = Clock.Now;
+                email.SentBy = senderConfig.ToLite();
                 email.Save();
             }
             catch (Exception ex)

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Signum.Entities.Basics;
 using Signum.Entities.Files;
 using Signum.Engine.Mailing.Senders;
+using Signum.Utilities;
 
 namespace Signum.Engine.Mailing;
 
@@ -26,12 +27,12 @@ public static class EmailLogic
 
     static Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration = null!;
 
-    public static Polymorphic<Func<EmailSenderServiceConfigurationEntity, BaseEmailSender>> EmailSenders = new();       
+    public static Polymorphic<Func<EmailSenderServiceConfigurationEntity, EmailSenderConfigurationEntity, BaseEmailSender>> EmailSenders = new ();       
     public static BaseEmailSender GetEmailSender(EmailMessageEntity email)
     {
         var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
         var config = getEmailSenderConfiguration(template, email.Target, email);
-        return EmailSenders.Invoke(config.Service);
+        return EmailSenders.Invoke(config.Service, config);
     }
 
     internal static void AssertStarted(SchemaBuilder sb)
@@ -68,6 +69,7 @@ public static class EmailLogic
                     e.Sent,
                     e.Target,
                     e.Package,
+                    e.SentBy,
                     e.Exception,
                 });
 
@@ -75,9 +77,9 @@ public static class EmailLogic
 
             EmailLogic.getEmailSenderConfiguration = getEmailSenderConfiguration;
 
-            EmailSenders.Register((SmtpEntity s) => new SmtpSender(s));
-            EmailSenders.Register((MicrosoftGraphEntity s) => new MicrosoftGraphSender(s));
-            EmailSenders.Register((ExchangeWebServiceEntity s) => new ExchangeWebServiceSender(s));
+            EmailSenders.Register((SmtpEntity s, EmailSenderConfigurationEntity c) => new SmtpSender(c, s));
+            EmailSenders.Register((MicrosoftGraphEntity s, EmailSenderConfigurationEntity c) => new MicrosoftGraphSender(c, s));
+            EmailSenders.Register((ExchangeWebServiceEntity s, EmailSenderConfigurationEntity c) => new ExchangeWebServiceSender(c, s));
 
             EmailGraph.Register();
 

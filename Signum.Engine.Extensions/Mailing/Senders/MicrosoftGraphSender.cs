@@ -15,7 +15,7 @@ public class MicrosoftGraphSender : BaseEmailSender
 {
     MicrosoftGraphEntity microsoftGraph;
 
-    public MicrosoftGraphSender(MicrosoftGraphEntity service)
+    public MicrosoftGraphSender(EmailSenderConfigurationEntity senderConfig, MicrosoftGraphEntity service) : base(senderConfig)
     {
         microsoftGraph = service;
     }

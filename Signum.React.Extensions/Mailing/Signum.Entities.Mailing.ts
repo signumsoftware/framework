@@ -116,6 +116,7 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
   template: Entities.Lite<EmailTemplateEntity> | null;
   creationDate: string /*DateTime*/;
   sent: string /*DateTime*/ | null;
+  sentBy: Entities.Lite<EmailSenderConfigurationEntity> | null;
   receptionNotified: string /*DateTime*/ | null;
   subject: string | null;
   body: Signum.BigStringEmbedded;
