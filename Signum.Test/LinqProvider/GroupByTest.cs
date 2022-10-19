@@ -671,6 +671,15 @@ public class GroupByTest
         query.ToList();
     }
 
+    [Fact]
+    public void GroupByWithCheapNullPropagation()
+    {
+        var nullableList = Database.Query<ArtistEntity>().GroupBy(a => a == null ? (Sex?)null : a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+        var notNullableList = Database.Query<ArtistEntity>().GroupBy(a => a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+
+        Assert.Equal(nullableList.Count, notNullableList.Count);
+
+    }
 
     [Fact]
     public void GroupByCoallesceLabel()
