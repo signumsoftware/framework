@@ -2,7 +2,6 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import "./AuthAdmin.css"
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { classes } from '../../../Signum.React/Scripts/Globals';
 
 interface ColorRadioProps {
@@ -19,7 +18,7 @@ export function ColorRadio(p : ColorRadioProps){
     <a onClick={e => { e.preventDefault(); !p.readOnly && p.onClicked(e); }} title={p.title}
       className={classes("sf-auth-chooser", p.readOnly && "sf-not-allowed")}
       style={{ color: p.checked ? p.color : "#aaa" }}>
-      <FontAwesomeIcon icon={coalesceIcon(p.icon, ["far", (p.checked ? "circle-dot" : "circle")])!} />
+      <FontAwesomeIcon icon={p.icon ?? ["far", (p.checked ? "circle-dot" : "circle")]!} />
     </a>
   );
 }

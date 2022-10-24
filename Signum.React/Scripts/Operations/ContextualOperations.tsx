@@ -374,16 +374,3 @@ export function defaultContextualOperationClick(coc: ContextualOperationContext<
     return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo, settersConfig == "Mandatory");
   }
 }
-
-
-export function coalesceIcon(icon: IconProp | undefined, icon2: IconProp | undefined): IconProp | undefined{ //Till the error is fixed
-
-  if (icon === null)
-    return undefined;
-
-  if (icon === undefined)
-    return icon2
-
-  return icon;
-}
-
