@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using System.Globalization;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Signum.Entities.UserAssets;
 
@@ -22,9 +23,7 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
         public static Result<SmartDateTimeSpan>? TryParse(string? str)
         {
             if (string.IsNullOrEmpty(str))
-            {
                 return null;
-            }
 
             Match match = regex.Match(str);
             if (!match.Success)
@@ -244,9 +243,19 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
 
     }
 
+    static bool IsDate(Type targetType)
+    {
+        var uType = targetType.UnNullify();
+
+        return uType == typeof(DateTime) || uType == typeof(DateOnly);
+    }
+
     public Result<string?>? TryGetExpression(object? value, Type targetType)
     {
         if (value == null)
+            return null;
+
+        if (!IsDate(targetType))
             return null;
 
         DateTime dateTime = 
@@ -261,6 +270,9 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
 
     public Result<object?>? TryParseExpression(string? expression, Type targetType)
     {
+        if (!IsDate(targetType))
+            return null;
+
         var res = SmartDateTimeSpan.TryParse(expression);
         if (res == null)
             return null;
@@ -276,6 +288,9 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
 
     public Result<Type>? IsValidExpression(string? expression, Type targetType, Type? currentEntityType)
     {
+        if (!IsDate(targetType))
+            return null;
+
         var res = SmartDateTimeSpan.TryParse(expression);
         if (res == null)
             return null;
