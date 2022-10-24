@@ -8,7 +8,6 @@ import { Lite, liteKey } from '@framework/Signum.Entities'
 import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.Entities.UserQueries'
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI } from '@framework/Hooks';
 import { SearchToolbarCount, ToolbarCount } from '../Toolbar/QueryToolbarConfig';
 import { useFetchInState } from '@framework/Navigator'

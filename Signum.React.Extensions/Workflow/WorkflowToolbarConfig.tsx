@@ -3,7 +3,6 @@ import { Location } from 'history'
 import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as WorkflowClient from './WorkflowClient'
 import { WorkflowEntity } from './Signum.Entities.Workflow'
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import * as AppContext from '@framework/AppContext'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
 

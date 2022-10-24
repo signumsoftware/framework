@@ -265,7 +265,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
       group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
         eoc.operationInfo.niceName;
 
-    return withIcon(text, eoc?.icon, eoc?.iconColor, eoc?.iconAlign);
+    return withIcon(text, eoc?.icon, eoc?.settings?.iconColor, eoc?.settings?.iconAlign);
   }
 
   function handleOnClick(event: React.MouseEvent<any>) {

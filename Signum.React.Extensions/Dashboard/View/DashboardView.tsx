@@ -7,7 +7,6 @@ import * as DashboardClient from '../DashboardClient'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage, CachedQueryEntity } from '../Signum.Entities.Dashboard'
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
@@ -221,7 +220,7 @@ export function PanelPart(p: PanelPartProps) {
 
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
   const defaultIcon = renderer.defaultIcon();
-  const icon = coalesceIcon(parseIcon(part.iconName), defaultIcon?.icon);
+  const icon = parseIcon(part.iconName) ?? defaultIcon?.icon;
   const iconColor = part.iconColor ?? defaultIcon?.iconColor;
 
   const title = !icon ? titleText :

@@ -221,7 +221,15 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
   const ctx = p.ctx;
 
   if (ctx.readOnly)
-    return <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
+    return (
+      <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>
+        {ctx.value &&
+          (p.onRenderItem ? p.onRenderItem({ entity: lite } as ResultRow, "Value", undefined) :
+          p.liteToString ? getToString(lite!, p.liteToString) :
+            Navigator.renderLite(lite!))
+        }
+      </FormControlReadonly>
+    );
 
   if (p.onRenderItem) {
     return (
