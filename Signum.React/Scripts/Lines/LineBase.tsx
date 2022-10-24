@@ -149,7 +149,7 @@ export function taskSetNiceName(lineBase: LineBaseController<any>, state: LineBa
 
 tasks.push(taskSetReadOnlyProperty);
 export function taskSetReadOnlyProperty(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (!state.ctx.readOnly &&
+  if (state.ctx.styleOptions.readOnly === undefined && !state.ctx.readOnly && 
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.isReadOnly) {
@@ -159,7 +159,7 @@ export function taskSetReadOnlyProperty(lineBase: LineBaseController<any>, state
 
 tasks.push(taskSetReadOnly);
 export function taskSetReadOnly(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (!state.ctx.readOnly &&
+  if (state.ctx.styleOptions.readOnly === undefined && !state.ctx.readOnly &&
     state.ctx.binding.getIsReadonly()) {
     state.ctx.readOnly = true;
   }

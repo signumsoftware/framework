@@ -263,6 +263,9 @@ export class ContextualOperationContext<T extends Entity> {
   pack?: EntityPack<T>; /*only for single contextual*/
   canExecute?: string;
   isReadonly?: boolean;
+  color?: BsColor;
+  icon?: IconProp;
+
   event?: React.MouseEvent<any>;
   onContextualSuccess?: (pack: API.ErrorReport) => void;
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
@@ -271,9 +274,13 @@ export class ContextualOperationContext<T extends Entity> {
     return defaultContextualOperationClick(this, ...args);
   }
 
-  constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>) {
+  constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>, cos: ContextualOperationSettings<T> | undefined, eos?: EntityOperationSettings<T>) {
     this.operationInfo = operationInfo;
     this.context = context;
+    this.settings = cos;
+    this.entityOperationSettings = eos;
+    this.color = cos?.color ?? eos?.color ?? Defaults.getColor(this.operationInfo);
+    this.icon = cos?.icon ?? eos?.icon ?? Defaults.getIcon(this.operationInfo) as any;
   }
 
   getValueFromSearchControl<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
@@ -299,6 +306,9 @@ export class ContextualOperationContext<T extends Entity> {
       return cos.isVisible(this);
 
     const oi = this.operationInfo;
+
+    if (oi.operationType == "ConstructorFromMany")
+      return true;
 
     if ((cos?.settersConfig ?? Defaults.defaultSetterConfig)(this) == "NoButton")
       return false;
@@ -519,8 +529,6 @@ export class EntityOperationContext<T extends Entity> {
 
   color?: BsColor;
   icon?: IconProp;
-  iconColor?: string;
-  iconAlign?: "start" | "end";
   outline?: boolean;
   group?: EntityOperationGroup;
   keyboardShortcut?: KeyboardShortcut;
@@ -579,8 +587,6 @@ export class EntityOperationContext<T extends Entity> {
     this.color = s?.color ?? Defaults.getColor(this.operationInfo);
     this.outline = s?.outline ?? Defaults.getOutline(this.operationInfo);
     this.icon = s?.icon ?? Defaults.getIcon(this.operationInfo) as any;
-    this.iconColor = s?.iconColor;
-    this.iconAlign = s?.iconAlign;
     this.group = s?.group !== undefined ? (s.group ?? undefined) : Defaults.getGroup(this.operationInfo);
     this.keyboardShortcut = s?.keyboardShortcut !== undefined ? (s.keyboardShortcut ?? undefined) : Defaults.getKeyboardShortcut(this.operationInfo);
     this.alternatives = s?.alternatives != null ? s.alternatives(this) : Defaults.getAlternatives(this);
