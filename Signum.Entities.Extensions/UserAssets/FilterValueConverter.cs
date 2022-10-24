@@ -12,6 +12,8 @@ public static class FilterValueConverter
         {
             { FilterType.DateTime, new List<IFilterValueConverter>{ new CurrentEntityConverter(), new SmartDateTimeFilterValueConverter() } },
             { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter()} },
+            { FilterType.String, new List<IFilterValueConverter>{ new CurrentEntityConverter(), new StringFilterValueConverter() } },
+
         };
 
     public static string? ToString(object? value, Type type)
