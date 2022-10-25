@@ -148,7 +148,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
         <div className="col-md-6 offset-md-3">
           <button type="submit" id="login" className="btn btn-success" disabled={p.ctx.loading != null}>
             {p.ctx.loading == "password" ?
-              <FontAwesomeIcon icon="cog" fixedWidth style={{ fontSize: "larger" }} spin /> : < FontAwesomeIcon icon="sign-in-alt" />}
+              <FontAwesomeIcon icon="gear" fixedWidth style={{ fontSize: "larger" }} spin /> : < FontAwesomeIcon icon="right-to-bracket" />}
             &nbsp;
             {p.ctx.loading == "password" ? JavascriptMessage.loading.niceToString() : AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}
           </button>

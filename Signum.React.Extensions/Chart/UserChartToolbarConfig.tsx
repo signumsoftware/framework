@@ -5,7 +5,6 @@ import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarCli
 import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartClient from './ChartClient'
 import { UserChartEntity } from './Signum.Entities.Chart'
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { liteKey } from '@framework/Signum.Entities'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
 

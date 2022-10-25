@@ -14,7 +14,7 @@ public class EmailMessageEntity : Entity, IProcessLineDataEntity
     public EmailMessageEntity()
     {
         this.UniqueIdentifier = Guid.NewGuid();
-        this.RebindEvents();
+        this.BindParent();
     }
 
     [CountIsValidator(ComparisonType.GreaterThan, 0)]
@@ -44,7 +44,7 @@ public class EmailMessageEntity : Entity, IProcessLineDataEntity
 
     [DbType(Size = int.MaxValue)]
     BigStringEmbedded body = new BigStringEmbedded();
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded Body
     {
         get { return body; }
@@ -123,10 +123,10 @@ public class EmailReceptionMixin : MixinEntity
 {
     protected EmailReceptionMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
     {
-        this.RebindEvents();
+        this.BindParent();
     }
 
-    [NotifyChildProperty]
+    [BindParent]
     public EmailReceptionInfoEmbedded? ReceptionInfo { get; set; }
 }
 
@@ -134,7 +134,7 @@ public class EmailReceptionInfoEmbedded : EmbeddedEntity
 {
     public EmailReceptionInfoEmbedded()
     {
-        this.RebindEvents();
+        this.BindParent();
     }
 
     [UniqueIndex(AllowMultipleNulls = true)]
@@ -144,7 +144,7 @@ public class EmailReceptionInfoEmbedded : EmbeddedEntity
 
     public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded RawContent { get; set; } = new BigStringEmbedded();
 
 

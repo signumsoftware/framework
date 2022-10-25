@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
 using Signum.Engine.UserAssets;
 using Signum.Entities.Basics;
+using Signum.Engine.Translation;
 
 namespace Signum.Engine.Workflow;
 
@@ -427,9 +428,24 @@ public static class WorkflowLogic
         }
     }
 
+    public static void RegisterTranslatableRoutes()
+    {
+        TranslatedInstanceLogic.AddRoute((WorkflowEntity tb) => tb.Name);
+        TranslatedInstanceLogic.AddRoute((WorkflowActivityEntity tb) => tb.Name);
+        TranslatedInstanceLogic.AddRoute((WorkflowActivityEntity tb) => tb.UserHelp, Entities.Translation.TranslateableRouteType.Html);
+    }
+
 
     public static ResetLazy<Dictionary<Lite<WorkflowTimerConditionEntity>, WorkflowTimerConditionEntity>> TimerConditions = null!;
-    public static WorkflowTimerConditionEntity RetrieveFromCache(this Lite<WorkflowTimerConditionEntity> wc) => TimerConditions.Value.GetOrThrow(wc);
+    public static bool Evaluate(this Lite<WorkflowTimerConditionEntity> wc, CaseActivityEntity ca, DateTime now)
+    {
+        var tc = TimerConditions.Value.GetOrThrow(wc);
+        using (HeavyProfiler.Log("WorkflowTimerCondition", ()=> tc.Name))
+        {
+            return tc.Eval.Algorithm.EvaluateUntyped(ca, now);
+        }
+    }
+
     private static void StartWorkflowTimerConditions(SchemaBuilder sb)
     {
         sb.Include<WorkflowTimerConditionEntity>()
@@ -486,7 +502,16 @@ public static class WorkflowLogic
     }
 
     public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions = null!;
-    public static WorkflowActionEntity RetrieveFromCache(this Lite<WorkflowActionEntity> wa) => Actions.Value.GetOrThrow(wa);
+    public static void Execute(this Lite<WorkflowActionEntity> wa, ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
+    {
+        var waEntity = Actions.Value.GetOrThrow(wa);
+
+        using(HeavyProfiler.Log("WorkflowAction", ()=> waEntity.Name))
+        {
+            waEntity.Eval.Algorithm.ExecuteUntyped(mainEntity, ctx);
+        }
+    }
+
     private static void StartWorkflowActions(SchemaBuilder sb)
     {
         sb.Include<WorkflowActionEntity>()
@@ -543,7 +568,16 @@ public static class WorkflowLogic
     }
 
     public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions = null!;
-    public static WorkflowConditionEntity RetrieveFromCache(this Lite<WorkflowConditionEntity> wc) => Conditions.Value.GetOrThrow(wc);
+    public static bool Evaluate(this Lite<WorkflowConditionEntity> wc, ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
+    {
+        var wcEntity = Conditions.Value.GetOrThrow(wc);
+
+        using (HeavyProfiler.Log("WorkflowCondition", () => wcEntity.Name))
+        {
+            return wcEntity.Eval.Algorithm.EvaluateUntyped(mainEntity, ctx);
+        }
+    }
+
     private static void StartWorkflowConditions(SchemaBuilder sb)
     {
         sb.Include<WorkflowConditionEntity>()

@@ -128,7 +128,7 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
     return null;
 
   return (
-    <FormGroup ctx={p.ctx} labelText={p.labelText}
+    <FormGroup ctx={p.ctx} label={p.label}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       <div className="sf-entity-line">
@@ -141,8 +141,8 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
             {c.renderFindButton(true)}
             {selectedIndex != undefined && c.renderViewButton(true, list[selectedIndex].element)}
             {selectedIndex != undefined && c.renderRemoveButton(true, list[selectedIndex].element)}
-            {selectedIndex != undefined && p.move && selectedIndex != null && selectedIndex > 0 && c.renderMoveUp(true, selectedIndex!)}
-            {selectedIndex != undefined && p.move && selectedIndex != null && selectedIndex < list.length - 1 && c.renderMoveDown(true, selectedIndex!)}
+            {selectedIndex != undefined && p.move && selectedIndex != null && selectedIndex > 0 && c.renderMoveUp(true, selectedIndex!, "v")}
+            {selectedIndex != undefined && p.move && selectedIndex != null && selectedIndex < list.length - 1 && c.renderMoveDown(true, selectedIndex!, "v")}
           </span>
         </div>
       </div>

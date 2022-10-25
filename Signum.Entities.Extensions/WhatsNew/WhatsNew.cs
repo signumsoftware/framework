@@ -21,10 +21,9 @@ public class WhatsNewEntity : Entity
     [DefaultFileType(nameof(WhatsNewFileType.WhatsNewAttachmentFileType))]
     public MList<FilePathEmbedded> Attachment { get; set; } = new MList<FilePathEmbedded>();
 
-    public Lite<Entity>? Owner { get; set; }
-
     public DateTime CreationDate { get; private set; } = Clock.Now;
 
+    public WhatsNewState Status { get; set; } = WhatsNewState.Draft;
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
@@ -35,6 +34,8 @@ public static class WhatsNewOperation
 {
     public static readonly ExecuteSymbol<WhatsNewEntity> Save;
     public static readonly DeleteSymbol<WhatsNewEntity> Delete;
+    public static readonly ExecuteSymbol<WhatsNewEntity> Publish;
+    public static readonly ExecuteSymbol<WhatsNewEntity> Unpublish;
 }
 
 [AutoInit]
@@ -71,5 +72,16 @@ public enum WhatsNewMessage
     ReadFurther,
     Downloads,
     [Description("{0} contains no version for culture '{1}'")]
-    _0ContiansNoVersionForCulture1
+    _0ContiansNoVersionForCulture1,
+    Language,
+    ThisNewIsNoLongerAvailable,
+    BackToOverview,
+    NewsPage,
+    Preview,
+}
+
+public enum WhatsNewState
+{
+    Draft,
+    Publish
 }

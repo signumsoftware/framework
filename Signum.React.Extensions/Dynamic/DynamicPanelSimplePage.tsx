@@ -70,7 +70,7 @@ export function SearchPanel(props: {}) {
       <div className="row">
         <div className="col-sm-6">
           <div className="form-group has-search">
-            <span className="form-control-feedback"><FontAwesomeIcon icon="search" /></span>
+            <span className="form-control-feedback"><FontAwesomeIcon icon="magnifying-glass" /></span>
             <input type="text" className="form-control" value={search} onChange={e => setSearch(e.currentTarget.value)} />
           </div>
           {React.cloneElement(<div />, undefined, ...elements)}
@@ -93,7 +93,7 @@ export function CheckEvalsStep() {
   return (
     <div>
       {Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={autoStart} />)}
-      <button className="btn btn-success" onClick={handleOnClick}><FontAwesomeIcon icon="sync" /> Refresh all</button>
+      <button className="btn btn-success" onClick={handleOnClick}><FontAwesomeIcon icon="arrows-rotate" /> Refresh all</button>
     </div>
   );
 }
@@ -143,15 +143,15 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
   }
 
   return (
-    <FormGroup ctx={p.ctx} labelText={getQueryNiceName(p.findOptions.queryName)}>
+    <FormGroup ctx={p.ctx} label={getQueryNiceName(p.findOptions.queryName)}>
       <SearchValue findOptions={p.findOptions} isLink={true} />
       {
         state == "loading" ?
-          <FontAwesomeIcon icon="sync" spin={true} /> :
-          <span onClick={e => { e.preventDefault(); loadData(p); }} style={{ cursor: "pointer" }}><FontAwesomeIcon icon="sync" className="sf-line-button" /></span>
+          <FontAwesomeIcon icon="arrows-rotate" spin={true} /> :
+          <span onClick={e => { e.preventDefault(); loadData(p); }} style={{ cursor: "pointer" }}><FontAwesomeIcon icon="arrows-rotate" className="sf-line-button" /></span>
       }
       {
-        state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="exclamation-triangle" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
+        state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="triangle-exclamation" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
           errors && errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{errors.length}</strong> {errors.length == 1 ? "Error" : "Errors"} found</span> :
             errors && errors?.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
               undefined

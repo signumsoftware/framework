@@ -270,24 +270,6 @@ public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IEnt
         });
     }
 }
-
-public class PackageSave<T> : IProcessAlgorithm where T : class, IEntity
-{
-    public virtual void Execute(ExecutingProcess executingProcess)
-    {
-        PackageEntity package = (PackageEntity)executingProcess.Data!;
-
-        var args = package.GetOperationArgs();
-
-        using (OperationLogic.AllowSave<T>())
-            executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
-            {
-                ((T)(object)line.Target).Save();
-                line.FinishTime = Clock.Now;
-                line.Save();
-            });
-    }
-}
    
 public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IEntity
 {

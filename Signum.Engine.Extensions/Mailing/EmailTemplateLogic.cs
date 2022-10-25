@@ -90,7 +90,8 @@ public static class EmailTemplateLogic
                     Entity = t,
                     t.Id,
                     t.Name,
-                    t.IsBodyHtml
+                    t.Query,
+                    t.Model,
                 });       
 
             EmailTemplatesLazy = sb.GlobalLazy(() => 

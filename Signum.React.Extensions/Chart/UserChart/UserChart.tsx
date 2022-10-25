@@ -11,6 +11,7 @@ import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbe
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import "../Chart.css"
 import { useForceUpdate } from '@framework/Hooks'
+import { getToString } from '@framework/Signum.Entities'
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
@@ -30,16 +31,16 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
             <span>{getQueryNiceName(queryKey)}</span>
         }
       </FormGroup>
-      <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => forceUpdate()} />
-      {
-        entity.entityType &&
-        <div>
-          <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} />
-          <p className="messageEntity col-sm-offset-2">
-            {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey)}
-          </p>
-        </div>
-      }
+      <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => forceUpdate()}
+        helpText={
+          <div>
+            {UserQueryMessage.MakesThe0AvailableAsAQuickLinkOf1.niceToString(UserChartEntity.niceName(), ctx.value.entityType ? getToString(ctx.value.entityType) : UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))}
+            {p.ctx.value.entityType && <br />}
+            {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
+            {p.ctx.value.entityType && <br/>}
+            {p.ctx.value.entityType && <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
+          </div>
+        }/>
       <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} />
       <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={p.ctx.value.query.key}
         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}

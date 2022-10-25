@@ -270,7 +270,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
           {<a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteSetter}>
-            <FontAwesomeIcon icon="times" />
+            <FontAwesomeIcon icon="xmark" />
           </a>}
         </td>
         <td>

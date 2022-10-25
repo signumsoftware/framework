@@ -14,7 +14,7 @@ import * as Finder from '@framework/Finder'
 import { Entity, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'
 import { EntityLink } from '@framework/Search'
 import { ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
-import { WhatsNewMessageEmbedded, WhatsNewEntity, WhatsNewOperation } from './Signum.Entities.WhatsNew'
+import { WhatsNewMessageEmbedded, WhatsNewEntity, WhatsNewOperation, WhatsNewMessage } from './Signum.Entities.WhatsNew'
 import { ImportRoute } from '../../../Framework/Signum.React/Scripts/AsyncImport'
 import { FilePathEmbedded } from '../Files/Signum.Entities.Files'
 
@@ -23,10 +23,18 @@ export function start(options: { routes: JSX.Element[] }) {
   options.routes.push(<ImportRoute path="~/newspage/:newsId" onImportModule={() => import("./Templates/NewsPage")} />);
   options.routes.push(<ImportRoute path="~/news" onImportModule={() => import("./Templates/AllNewsPage")} />);
 
+  Navigator.addSettings(new EntitySettings(WhatsNewEntity, t => import('./Templates/WhatsNew'), { modalSize: "xl" }));
+
   //Operations.addSettings(new EntityOperationSettings(WhatsNewOperation.Read, {
   //  alternatives: eoc => [andClose(eoc)],
   //  hideOnCanExecute: true
   //}));
+
+  QuickLinks.registerQuickLink(WhatsNewEntity, ctx => new QuickLinks.QuickLinkLink("Preview",
+    () => WhatsNewMessage.Preview.niceToString(), "~/newspage/" + ctx.lite.id, {
+    icon: "newspaper",
+    iconColor: "purple",
+  }));
 
   const TextPlaceholder = /{(?<prop>(\w|\d|\.)+)}/
   const NumericPlaceholder = /^[ \d]+$/;
@@ -38,9 +46,6 @@ export function start(options: { routes: JSX.Element[] }) {
     return value.replace(TextPlaceholder, args => {
 
       var prop = args[1];
-
-      //if (NumericPlaceholder.test(prop))
-      //  return whatsnew.message?.description?.split("\n###\n")[parseInt(prop)];
 
       return getPropertyValue(prop, whatsnew)?.ToString()! ?? "";
     });
@@ -72,15 +77,11 @@ export module API {
   }
 
   export function newsPage(id: number | string): Promise<WhatsNewFull> {
-    return ajaxPost({ url: "~/api/whatsnew/specificNews" }, id);
+    return ajaxGet({ url: "~/api/whatsnew/" + id });
   }
 
-  export function attachments(id: number | string): Promise<WhatsNewEntity> {
-    return ajaxPost({ url: "~/api/whatsnew/entityforattachments" }, id);
-  }
-
-  export function setNewsLogRead(ids: (number | string | undefined)[]): Promise<boolean> {
-    return ajaxPost({ url: "~/api/whatsnew/setNewsLog" }, ids);
+  export function setNewsLogRead(lites: Lite<WhatsNewEntity>[]): Promise<void> {
+    return ajaxPost({ url: "~/api/whatsnew/setNewsLog" }, lites);
   }
 }
 
@@ -94,7 +95,8 @@ export interface WhatsNewShort
   whatsNew: Lite<WhatsNewEntity>,
   creationDate: string /*DateTime*/;
   title: string,
-  description: string;
+  description: string,
+  status: string,
 };
 
 export interface WhatsNewFull
@@ -105,5 +107,6 @@ export interface WhatsNewFull
   description: string,
   attachments: number,
   previewPicture: boolean,
+  status: string,
   read: boolean,
 };

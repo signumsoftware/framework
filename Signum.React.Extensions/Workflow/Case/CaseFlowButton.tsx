@@ -16,7 +16,7 @@ export default function CaseFlowButton(p: CaseFlowButtonProps) {
 
   return (
     <a href="#" className="btn btn-info btn-xs px-2" onClick={handleClick}>
-      <FontAwesomeIcon icon="random" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
+      <FontAwesomeIcon icon="shuffle" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
     </a>
   );
 }

@@ -156,7 +156,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     uqOld.orders = uqNew.orders;
     uqOld.paginationMode = uqNew.paginationMode;
     uqOld.elementsPerPage = uqNew.elementsPerPage;
-
+    uqOld.modified = true;
     return uqOld;
   }
 
@@ -235,7 +235,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const label = (
     <span title={currentUserQueryToStr}>
-      <FontAwesomeIcon icon={["far", "list-alt"]} />
+      <FontAwesomeIcon icon={["far", "rectangle-list"]} />
       {p.searchControl.props.largeToolbarButtons == true && <>
         &nbsp;
         {UserQueryEntity.nicePluralName()}
@@ -279,9 +279,9 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           })}
         </div>
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
-        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "undo"]} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>
-        {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={["fas", "share-square"]} className="me-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
-        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "edit"]} className="me-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
+        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "arrow-rotate-left"]} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={["fas", "share-from-square"]} className="me-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "pen-to-square"]} className="me-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
         {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>
     </Dropdown>
   );
@@ -329,9 +329,10 @@ export namespace UserQueryMerger {
       const newCol = ch.added.element;
 
       oldCol.token = newCol.token;
-      oldCol.displayName = newCol.displayName == translated(oldCol, a => a.displayName) ? oldCol.displayName : newCol.displayName;
+      oldCol.displayName = (newCol.displayName == translated(oldCol, a => a.displayName) ? oldCol.displayName : newCol.displayName) ?? null;
       oldCol.summaryToken = newCol.summaryToken;
       oldCol.hiddenColumn = newCol.hiddenColumn;
+      oldCol.modified = true;
       //preserve rowId
       return [ch.removed];
     });
@@ -362,8 +363,8 @@ export namespace UserQueryMerger {
       const merged = mergeFilters(
         ch.removed.elements,
         ch.added.elements,
-        isFilterGroupOption(ch.removed.filter) ? ch.removed.filter.filters : [],
-        isFilterGroupOption(ch.added.filter) ? ch.added.filter.filters : [], identation + 1, sd);
+        isFilterGroupOption(ch.removed.filter) ? ch.removed.filter.filters.notNull() : [],
+        isFilterGroupOption(ch.added.filter) ? ch.added.filter.filters.notNull() : [], identation + 1, sd);
 
 
       const oldF = ch.removed.key.element;
@@ -411,7 +412,7 @@ export namespace UserQueryMerger {
     return (qc1.token?.tokenString == qc2.token?.tokenString ? 0 : 3) +
       (qc1.summaryToken?.tokenString == qc2.summaryToken?.tokenString ? 0 : 1) +
       (qc1.displayName == qc2.displayName ? 0 : 1) +
-      (qc1.hiddenColumn ? 0 : 1);
+      (qc1.hiddenColumn == qc2.hiddenColumn ? 0 : 1);
   }
 
   function distanceFilter(fo: FilterOption, fo2: FilterOption): number {
@@ -421,7 +422,7 @@ export namespace UserQueryMerger {
           (fo.groupOperation == fo2.groupOperation ? 0 : 1) +
           (similarValues(fo.value, fo2.value) ? 0 : 1) +
           distancePinned(fo.pinned, fo2.pinned) +
-          Array.range(0, Math.max(fo.filters.length, fo2.filters.length)).sum(i => fo.filters[i] == null ? 5 : fo2.filters[i] == null ? 5 : distanceFilter(fo.filters[i], fo2.filters[i]));
+          Array.range(0, Math.max(fo.filters.length, fo2.filters.length)).sum(i => fo.filters[i] == null ? 5 : fo2.filters[i] == null ? 5 : distanceFilter(fo.filters[i]!, fo2.filters[i]!));
       }
       else return 10;
     }

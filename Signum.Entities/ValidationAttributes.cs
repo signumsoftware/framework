@@ -1054,6 +1054,8 @@ public enum ValidationMessage
     _0IsNotAllowedOnState1,
     [Description("{0} is not set")]
     _0IsNotSet,
+    [Description("{0} is not set in {1}")]
+    _0IsNotSetIn1,
     [Description("{0} are not set")]
     _0AreNotSet,
     [Description("{0} is set")]

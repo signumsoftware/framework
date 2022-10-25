@@ -13,7 +13,7 @@ export interface ChangeEvent {
 export interface LineBaseProps extends StyleOptions {
   ctx: TypeContext<any>;
   type?: TypeReference;
-  labelText?: React.ReactNode;
+  label?: React.ReactNode;
   visible?: boolean;
   hideIfNull?: boolean;
   onChange?: (e: ChangeEvent) => void;
@@ -140,16 +140,16 @@ export function runTasks(lineBase: LineBaseController<LineBaseProps>, state: Lin
 
 tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (!state.labelText &&
+  if (!state.label &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
-    state.labelText = state.ctx.propertyRoute.member!.niceName;
+    state.label = state.ctx.propertyRoute.member!.niceName;
   }
 }
 
 tasks.push(taskSetReadOnlyProperty);
 export function taskSetReadOnlyProperty(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (!state.ctx.readOnly &&
+  if (state.ctx.styleOptions.readOnly === undefined && !state.ctx.readOnly && 
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.isReadOnly) {
@@ -159,7 +159,7 @@ export function taskSetReadOnlyProperty(lineBase: LineBaseController<any>, state
 
 tasks.push(taskSetReadOnly);
 export function taskSetReadOnly(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (!state.ctx.readOnly &&
+  if (state.ctx.styleOptions.readOnly === undefined && !state.ctx.readOnly &&
     state.ctx.binding.getIsReadonly()) {
     state.ctx.readOnly = true;
   }

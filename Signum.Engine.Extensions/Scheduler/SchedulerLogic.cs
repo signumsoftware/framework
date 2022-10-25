@@ -10,7 +10,6 @@ namespace Signum.Engine.Scheduler;
 
 public static class SchedulerLogic
 {
-    public static Action<ScheduledTaskLogEntity>? OnFinally;
 
     [AutoExpressionField]
     public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity t) =>
@@ -32,29 +31,9 @@ public static class SchedulerLogic
     public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>> ExecuteTask =
         new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>>();
 
-    public class ScheduledTaskPair
-    {
-        public ScheduledTaskEntity ScheduledTask;
-        public DateTime NextDate;
+    public static Action<ScheduledTaskLogEntity>? OnFinally;
 
-        public ScheduledTaskPair(ScheduledTaskEntity scheduledTask, DateTime nextDate)
-        {
-            ScheduledTask = scheduledTask;
-            NextDate = nextDate;
-        }
-    }
-
-    static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy = null!;
-
-    static PriorityQueue<ScheduledTaskPair> priorityQueue = new PriorityQueue<ScheduledTaskPair>((a, b) => a.NextDate.CompareTo(b.NextDate));
-
-    static Timer timer = new Timer(new TimerCallback(TimerCallback), // main timer
-                            null,
-                            Timeout.Infinite,
-                            Timeout.Infinite);
-
-    public static ConcurrentDictionary<ScheduledTaskLogEntity, ScheduledTaskContext> RunningTasks = new ConcurrentDictionary<ScheduledTaskLogEntity, ScheduledTaskContext>();
-
+    public static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -115,8 +94,8 @@ public static class SchedulerLogic
 
             new Graph<ScheduledTaskLogEntity>.Execute(ScheduledTaskLogOperation.CancelRunningTask)
             {
-                CanExecute = e => RunningTasks.ContainsKey(e) ? null : SchedulerMessage.TaskIsNotRunning.NiceToString(),
-                Execute = (e, _) => { RunningTasks[e].CancellationTokenSource.Cancel(); },
+                CanExecute = e => ScheduleTaskRunner.RunningTasks.ContainsKey(e) ? null : SchedulerMessage.TaskIsNotRunning.NiceToString(),
+                Execute = (e, _) => { ScheduleTaskRunner.RunningTasks[e].CancellationTokenSource.Cancel(); },
             }.Register();
 
             sb.Include<HolidayCalendarEntity>()
@@ -166,12 +145,12 @@ public static class SchedulerLogic
 
             new Graph<ScheduledTaskLogEntity>.ConstructFrom<ITaskEntity>(ITaskOperation.ExecuteSync)
             {
-                Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current.User.Retrieve())
+                Construct = (task, _) => ScheduleTaskRunner.ExecuteSync(task, null, UserHolder.Current.User.Retrieve())
             }.Register();
 
             new Graph<ITaskEntity>.Execute(ITaskOperation.ExecuteAsync)
             {
-                Execute = (task, _) => ExecuteAsync(task, null, UserHolder.Current.User.Retrieve())
+                Execute = (task, _) => ScheduleTaskRunner.ExecuteAsync(task, null, UserHolder.Current.User.Retrieve())
             }.Register();
 
             ScheduledTasksLazy = sb.GlobalLazy(() =>
@@ -179,7 +158,7 @@ public static class SchedulerLogic
                     (a.MachineName == ScheduledTaskEntity.None || a.MachineName == Schema.Current.MachineName && a.ApplicationName == Schema.Current.ApplicationName)).ToList(),
                 new InvalidateWith(typeof(ScheduledTaskEntity)));
 
-            ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
+            ScheduledTasksLazy.OnReset += ScheduleTaskRunner.ScheduledTasksLazy_OnReset;
 
             sb.Schema.EntityEvents<ScheduledTaskLogEntity>().PreUnsafeDelete += query =>
             {
@@ -217,393 +196,8 @@ public static class SchedulerLogic
         Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(ScheduledTaskLogEntity).ToTypeEntity()), withExceptions: true);
     }
 
-    static void ScheduledTasksLazy_OnReset(object? sender, EventArgs e)
-    {
-        if (running)
-            using (ExecutionContext.SuppressFlow())
-                Task.Run(() => { Thread.Sleep(1000); ReloadPlan(); });
-    }
 
 
-    static bool running = false;
-    public static bool Running
-    {
-        get { return running; }
-    }
 
-    public static void StartScheduledTasks()
-    {
-        if (running)
-            throw new InvalidOperationException("SchedulerLogic is already Running in {0}".FormatWith(Schema.Current.MachineName));
-
-        running = true;
-
-        ReloadPlan();
-
-        SystemEventLogLogic.Log("Start ScheduledTasks");
-    }
-
-    public static void StartScheduledTaskAfter(int initialDelayMilliseconds)
-    {
-        using (ExecutionContext.SuppressFlow())
-            Task.Run(() =>
-            {
-                Thread.Sleep(initialDelayMilliseconds);
-                StartScheduledTasks();
-            });
-    }
-
-    public static void StopScheduledTasks()
-    {
-        if (!running)
-            throw new InvalidOperationException("SchedulerLogic is already Stopped in {0}".FormatWith(Schema.Current.MachineName));
-
-        lock (priorityQueue)
-        {
-            if (!running)
-                return;
-
-            running = false;
-
-            timer.Change(Timeout.Infinite, Timeout.Infinite);
-            priorityQueue.Clear();
-        }
-
-        SystemEventLogLogic.Log("Stop ScheduledTasks");
-    }
-
-    static void ReloadPlan()
-    {
-        if (!running)
-            return;
-
-        using (new EntityCache(EntityCacheType.ForceNew))
-        using (AuthLogic.Disable())
-            lock (priorityQueue)
-            {
-                DateTime now = Clock.Now;
-                var lastExecutions = Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask != null).GroupBy(a => a.ScheduledTask!).Select(gr => KeyValuePair.Create(
-                      gr.Key,
-                      gr.Max(a => a.StartTime)
-                  )).ToDictionary();
-
-                priorityQueue.Clear();
-                priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st =>
-                {
-
-                    var previous = lastExecutions.TryGetS(st);
-
-                    var next = previous == null ?
-                        st.Rule.Next(st.Rule.StartingOn) :
-                        st.Rule.Next(previous.Value.Add(SchedulerMargin));
-
-                    bool isMiss = next < now;
-
-                    return new ScheduledTaskPair
-                    (
-                        scheduledTask: st,
-                        nextDate: isMiss ? now : next
-                    );
-                }));
-
-                SetTimer();
-            }
-    }
-
-    static TimeSpan SchedulerMargin = TimeSpan.FromSeconds(0.5); //stabilize sub-day schedulers
-
-    static DateTime? NextExecution;
-
-    //Lock priorityQueue
-    static void SetTimer()
-    {
-        lock (priorityQueue)
-            NextExecution = priorityQueue.Empty ? (DateTime?)null : priorityQueue.Peek().NextDate;
-
-        if (NextExecution == null)
-            timer.Change(Timeout.Infinite, Timeout.Infinite);
-        else
-        {
-            TimeSpan ts = NextExecution.Value - Clock.Now;
-
-            if (ts < TimeSpan.Zero)
-                ts = TimeSpan.Zero; // cannot be negative !
-            if (ts.TotalMilliseconds > int.MaxValue)
-                ts = TimeSpan.FromMilliseconds(int.MaxValue);
-
-            timer.Change(ts.Add(SchedulerMargin), new TimeSpan(-1)); // invoke after the timespan
-        }
-    }
-
-    static void TimerCallback(object? obj) // obj ignored
-    {
-        try
-        {
-            using (new EntityCache(EntityCacheType.ForceNew))
-            using (AuthLogic.Disable())
-                lock (priorityQueue)
-                {
-                    if (priorityQueue.Empty)
-                        throw new InvalidOperationException("Inconstency in SchedulerLogic PriorityQueue");
-
-                    DateTime now = Clock.Now;
-
-                    while (priorityQueue.Peek().NextDate < now)
-                    {
-                        var pair = priorityQueue.Pop();
-
-                        ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, pair.ScheduledTask.User.RetrieveAndRemember());
-
-                        pair.NextDate = pair.ScheduledTask.Rule.Next(now);
-
-                        priorityQueue.Push(pair);
-                    }
-
-                    SetTimer();
-
-                    return;
-                }
-        }
-        catch (ThreadAbortException)
-        {
-
-        }
-        catch (Exception e)
-        {
-            e.LogException(ex =>
-            {
-                ex.ControllerName = "SchedulerLogic";
-                ex.ActionName = "TimerCallback";
-            });
-        }
-    }
-
-    public static void ExecuteAsync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity user)
-    {
-        using (ExecutionContext.SuppressFlow())
-            Task.Run(() =>
-            {
-                try
-                {
-                    ExecuteSync(task, scheduledTask, user);
-                }
-                catch (Exception e)
-                {
-                    e.LogException(ex =>
-                    {
-                        ex.ControllerName = "SchedulerLogic";
-                        ex.ActionName = "ExecuteAsync";
-                    });
-                }
-            });
-    }
-
-    public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity user)
-    {
-        var isolation = !Isolation.IsolationLogic.IsStarted ? null :
-                        user.TryIsolation() ?? (task as IEntity).TryIsolation();
-
-        using (IsolationEntity.Override(isolation))
-        {
-            ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
-            {
-                Task = task,
-                ScheduledTask = scheduledTask,
-                StartTime = Clock.Now,
-                MachineName = Schema.Current.MachineName,
-                ApplicationName = Schema.Current.ApplicationName,
-                User = user.ToLite(),
-            };
-
-            using (AuthLogic.Disable())
-            {
-                using (var tr = Transaction.ForceNew())
-                {
-                    stl.Save();
-
-                    tr.Commit();
-                }
-            }
-
-            try
-            {
-                var ctx = new ScheduledTaskContext(stl);
-                RunningTasks.TryAdd(stl, ctx);
-
-                using (UserHolder.UserSession(user))
-                {
-                    using (var tr = Transaction.ForceNew())
-                    {
-                        stl.ProductEntity = ExecuteTask.Invoke(task, ctx);
-
-                        using (AuthLogic.Disable())
-                        {
-                            stl.EndTime = Clock.Now;
-                            stl.Remarks = ctx.StringBuilder.ToString();
-                            stl.Save();
-                        }
-
-                        tr.Commit();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                using (AuthLogic.Disable())
-                {
-                    if (Transaction.InTestTransaction)
-                        throw;
-
-                    var exLog = ex.LogException().ToLite();
-
-                    using (var tr = Transaction.ForceNew())
-                    {
-                        stl.Exception = exLog;
-                        stl.EndTime = Clock.Now;
-                        stl.Save();
-
-                        tr.Commit();
-                    }
-                }
-                throw;
-
-            }
-            finally
-            {
-                RunningTasks.TryRemove(stl, out var ctx);
-                OnFinally?.Invoke(stl);
-            }
-
-            return stl;
-        }
-    }
-
-    public static SchedulerState GetSchedulerState()
-    {
-        return new SchedulerState
-        {
-            Running = Running,
-            SchedulerMargin = SchedulerMargin,
-            NextExecution = NextExecution,
-            MachineName = Schema.Current.MachineName,
-            ApplicationName = Schema.Current.ApplicationName,
-            Queue = priorityQueue.GetOrderedList().Select(p => new SchedulerItemState
-            {
-                ScheduledTask = p.ScheduledTask.ToLite(),
-                Rule = p.ScheduledTask.Rule.ToString()!,
-                NextDate = p.NextDate,
-            }).ToList(),
-
-            RunningTask = RunningTasks.OrderBy(a => a.Key.StartTime).Select(p => new SchedulerRunningTaskState
-            {
-                SchedulerTaskLog = p.Key.ToLite(),
-                StartTime = p.Key.StartTime,
-                Remarks = p.Value.StringBuilder.ToString()
-            }).ToList()
-        };
-    }
-
-    public static void StopRunningTasks()
-    {
-        foreach (var item in RunningTasks.Values)
-        {
-            item.CancellationTokenSource.Cancel();
-        }
-    }
-}
-
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
-public class SchedulerState
-{
-    public bool Running;
-    public TimeSpan SchedulerMargin;
-    public DateTime? NextExecution;
-    public List<SchedulerItemState> Queue;
-    public string MachineName;
-    public string ApplicationName;
-
-    public List<SchedulerRunningTaskState> RunningTask;
-}
-
-public class SchedulerItemState
-{
-    public Lite<ScheduledTaskEntity> ScheduledTask;
-    public string Rule;
-    public DateTime NextDate;
-}
-
-public class SchedulerRunningTaskState
-{
-    public Lite<ScheduledTaskLogEntity> SchedulerTaskLog;
-    public DateTime StartTime;
-    public string Remarks;
-}
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
-
-public class ScheduledTaskContext
-{
-    public ScheduledTaskContext(ScheduledTaskLogEntity log)
-    {
-        Log = log;
-    }
-
-    public ScheduledTaskLogEntity Log { internal get; set; }
-
-    public StringBuilder StringBuilder { get; } = new StringBuilder();
-    internal CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
-
-    public CancellationToken CancellationToken => CancellationTokenSource.Token;
-
-    public void Foreach<T>(IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
-    {
-        foreach (var item in collection)
-        {
-            this.CancellationToken.ThrowIfCancellationRequested();
-
-            using (HeavyProfiler.Log("Foreach", () => elementID(item)))
-            {
-                try
-                {
-                    using (var tr = Transaction.ForceNew())
-                    {
-                        action(item);
-                        tr.Commit();
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception e)
-                {
-                    SafeConsole.WriteLineColor(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.StackTrace!.Indent(4));
-
-                    var ex = e.LogException();
-                    using (ExecutionMode.Global())
-                    using (var tr = Transaction.ForceNew())
-                    {
-                        new SchedulerTaskExceptionLineEntity
-                        {
-                            Exception = ex.ToLite(),
-                            SchedulerTaskLog = this.Log.ToLite(),
-                            ElementInfo = elementID(item)
-                        }.Save();
-
-                        tr.Commit();
-                    }
-                }
-            }
-        }
-    }
-
-
-    public void ForeachWriting<T>(IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
-    {
-        this.Foreach(collection, elementID, e =>
-        {
-            this.StringBuilder.AppendLine(elementID(e));
-            action(e);
-        });
-    }
+   
 }

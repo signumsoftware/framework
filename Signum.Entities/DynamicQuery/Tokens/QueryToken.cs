@@ -192,11 +192,14 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (ut == typeof(string))
             return StringTokens().AndHasValue(this);
 
+        if (ut == typeof(Guid))
+            return new List<QueryToken>().AndHasValue(this);
+
         Type cleanType = type.CleanType();
         if (cleanType.IsIEntity())
         {
             if (implementations!.Value.IsByAll)
-                return ImplementedByAllSubTokens(this, type, options); // new[] { EntityPropertyToken.IdProperty(this) };
+                return ImplementedByAllSubTokens(this, type, options).PreAnd(new EntityTypeToken(this)).ToList().AndHasValue(this); // new[] { EntityPropertyToken.IdProperty(this) };
 
             var onlyType = implementations.Value.Types.Only();
 
@@ -211,7 +214,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
                 .NotNull()
                 .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this);
 
-            return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList().AndHasValue(this);
+            return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).PreAnd(new EntityTypeToken(this)).ToList().AndHasValue(this);
         }
 
         if (type.IsEmbeddedEntity() || type.IsModelEntity())
@@ -696,5 +699,7 @@ public enum QueryTokenMessage
     RowId,
 
     CellOperation,
-    ContainerOfCellOperations
+    ContainerOfCellOperations,
+    [Description("Entity Type")]
+    EntityType
 }

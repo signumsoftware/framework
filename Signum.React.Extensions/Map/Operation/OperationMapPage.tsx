@@ -109,7 +109,7 @@ export default function OperationMapPage(p: RouteComponentProps<{ type: string }
             </span>
             &nbsp;
             <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
-              <FontAwesomeIcon icon="external-link-alt" />
+              <FontAwesomeIcon icon="up-right-from-square" />
             </a>
           </div>
         </div>

@@ -2,6 +2,8 @@ using Signum.Engine.Mailing;
 using Signum.Entities.Word;
 using Signum.Entities.Mailing;
 using Signum.Engine.Templating;
+using Signum.Entities.Files;
+using Signum.Engine.Files;
 
 namespace Signum.Engine.Word;
 
@@ -38,18 +40,18 @@ public class WordAttachmentLogic
             {
                 WordTemplateEntity template = WordTemplateLogic.GetFromCache(wa.WordTemplate);
 
-                var fileName = GetTemplateString(wa.FileName, ref wa.FileNameNode, ctx);
+                var fileName = string.IsNullOrEmpty(wa.FileName) ? null : GetTemplateString(wa.FileName, ref wa.FileNameNode, ctx);
 
                 var model = template.Model != null && !WordModelLogic.RequiresExtraParameters(template.Model) ?
                 WordModelLogic.CreateDefaultWordModel(template.Model, entity) : null;
 
-                var bytes = WordTemplateLogic.CreateReport(template, entity, model);
+                var fileContent = WordTemplateLogic.CreateReportFileContent(template, entity, model);
 
                 return new List<EmailAttachmentEmbedded>
                 {
                     new EmailAttachmentEmbedded
                     {
-                        File = Files.FilePathEmbeddedLogic.SaveFile(new Entities.Files.FilePathEmbedded(EmailFileType.Attachment, fileName, bytes)),
+                        File = FilePathEmbeddedLogic.SaveFile(new FilePathEmbedded(EmailFileType.Attachment, fileName ?? fileContent.FileName, fileContent.Bytes)),
                         Type = EmailAttachmentType.Attachment,
                     }
                 };
@@ -68,7 +70,7 @@ public class WordAttachmentLogic
     static string? WordAttachmentFileName_StaticPropertyValidation(WordAttachmentEntity wordAttachment, PropertyInfo pi)
     {
         var template = wordAttachment.TryGetParentEntity<EmailTemplateEntity>();
-        if (template != null && wordAttachment.FileNameNode as TextTemplateParser.BlockNode == null)
+        if (template != null && wordAttachment.FileName.HasText() && wordAttachment.FileNameNode as TextTemplateParser.BlockNode == null)
         {
             try
             {

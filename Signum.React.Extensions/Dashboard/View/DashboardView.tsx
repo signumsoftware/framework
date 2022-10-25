@@ -7,7 +7,6 @@ import * as DashboardClient from '../DashboardClient'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage, CachedQueryEntity } from '../Signum.Entities.Dashboard'
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
@@ -21,6 +20,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
 
   const forceUpdate = useForceUpdate();
   const dashboardController = React.useMemo(() => new DashboardController(forceUpdate, p.dashboard), [p.dashboard]);
+  dashboardController.setIsLoading();
 
   function renderBasic() {
     const db = p.dashboard;
@@ -220,7 +220,7 @@ export function PanelPart(p: PanelPartProps) {
 
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
   const defaultIcon = renderer.defaultIcon();
-  const icon = coalesceIcon(parseIcon(part.iconName), defaultIcon?.icon);
+  const icon = parseIcon(part.iconName) ?? defaultIcon?.icon;
   const iconColor = part.iconColor ?? defaultIcon?.iconColor;
 
   const title = !icon ? titleText :
@@ -261,7 +261,7 @@ export function PanelPart(p: PanelPartProps) {
           {
             renderer.handleEditClick &&
             <a className="sf-pointer sf-hide" onClick={e => { e.preventDefault(); renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }}>
-              <FontAwesomeIcon icon="edit" className="me-1" />Edit
+              <FontAwesomeIcon icon="pen-to-square" className="me-1" />Edit
             </a>
           }
         </div>

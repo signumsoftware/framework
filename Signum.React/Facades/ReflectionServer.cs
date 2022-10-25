@@ -6,6 +6,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;
+using Signum.Engine.Json;
 
 namespace Signum.React.Facades;
 

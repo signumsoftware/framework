@@ -4,6 +4,8 @@ using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 using System.Globalization;
 using Signum.Entities.Scheduler;
+using Signum.Entities.Authorization;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Workflow;
 
@@ -44,7 +46,7 @@ public class WorkflowImportExport
         return new XElement("Workflow",
           new XAttribute("Guid", workflow.Guid),
           new XAttribute("Name", workflow.Name),
-          new XAttribute("MainEntityType", ctx.TypeToName(workflow.MainEntityType.ToLite())),
+          new XAttribute("MainEntityType", workflow.MainEntityType.CleanName),
           new XAttribute("MainEntityStrategies", workflow.MainEntityStrategies.ToString(",")),
           workflow.ExpirationDate == null ? null! : new XAttribute("ExpirationDate", workflow.ExpirationDate.Value.ToString("o", CultureInfo.InvariantCulture)),
 
@@ -308,6 +310,7 @@ public class WorkflowImportExport
             {
                 lane.Name = xml.Attribute("Name")!.Value;
                 lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool")!.Value);
+
                 lane.Actors.Synchronize((xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => ctx.ParseLite(a.Value, this.workflow, actorsPr)).NotNull().ToMList());
                 lane.ActorsEval = lane.ActorsEval.CreateOrAssignEmbedded(xml.Element("ActorsEval"), (ae, aex) => { ae.Script = aex.Value; });
                 lane.UseActorEvalForStart = xml.Attribute("UseActorEvalForStart")?.Value.ToBool() ?? false;

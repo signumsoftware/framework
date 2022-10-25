@@ -27,7 +27,7 @@ public class ProcessController : ControllerBase
     [HttpGet("api/processes/view")]
     public ProcessLogicState View()
     {
-        ProcessLogicState state = ProcessRunnerLogic.ExecutionState();
+        ProcessLogicState state = ProcessRunner.ExecutionState();
 
         return state;
     }
@@ -37,7 +37,7 @@ public class ProcessController : ControllerBase
     {
         ProcessPermission.ViewProcessPanel.AssertAuthorized();
 
-        ProcessRunnerLogic.StartRunningProcesses();
+        ProcessRunner.StartRunningProcesses();
 
         Thread.Sleep(1000);
     }
@@ -47,8 +47,14 @@ public class ProcessController : ControllerBase
     {
         ProcessPermission.ViewProcessPanel.AssertAuthorized();
 
-        ProcessRunnerLogic.Stop();
+        ProcessRunner.Stop();
 
         Thread.Sleep(1000);
+    }
+
+    [HttpGet("api/processes/simpleStatus"), SignumAllowAnonymous]
+    public SimpleStatus SimpleStatus()
+    {
+        return ProcessRunner.GetSimpleStatus();
     }
 }

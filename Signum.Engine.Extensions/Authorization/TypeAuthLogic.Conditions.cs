@@ -695,8 +695,8 @@ public static partial class TypeAuthLogic
         using (rep.WithReplacedDatabaseName())
             return errors.Select(a =>
             {
-                return Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt) => rt.ConditionRules, Database.MListQuery((RuleTypeEntity rt) => rt.ConditionRules)
-                    .Where(mle => mle.Element.Conditions.Contains(a.Key.s) && mle.Parent.Resource.Is(a.Key.Resource)))!
+                return Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>()
+                    .Where(rule => rule.Conditions.Contains(a.Key.s) && rule.RuleType.Entity.Resource.Is(a.Key.Resource)))!
                     .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.s, a.Key.Resource, a.ToString(", ")));
             }).Combine(Spacing.Double);
     }

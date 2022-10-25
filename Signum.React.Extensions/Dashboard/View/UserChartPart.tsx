@@ -33,6 +33,8 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   const dashboardPinnedFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == "PromoteToDasboardPinnedFilter"), [chartRequest]);
   const useWhenNoFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == "UseWhenNoFilters"), [chartRequest]);
   const simpleFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == null), [chartRequest]);
+  const [refreshKey, setRefreshKey] = React.useState<number>(0);
+
 
   if (chartRequest != null) {
     chartRequest.filterOptions.clear();
@@ -53,6 +55,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }
 
   React.useEffect(() => {
+
     if (initialSelection) {
 
       if (isFilterGroupOptionParsed(initialSelection))
@@ -65,7 +68,10 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
         (initialSelection.value as any[]).forEach(val => dashboarFilter.rows.push({ filters: [{ token: initialSelection!.token!, value: val }] }));
       } else
         throw new Error("DashboardFilter is not compatible with filter operation " + initialSelection.operation);
-      p.dashboardController.setFilter(dashboarFilter)
+
+      p.dashboardController.setFilter(dashboarFilter);
+
+
     } else {
       p.dashboardController.clearFilters(p.partEmbedded);
     }
@@ -73,15 +79,19 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     if (dashboardPinnedFilters) {
       p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, chartRequest!.queryKey, dashboardPinnedFilters));
     } else {
-      p.dashboardController.clearFilters(p.partEmbedded);
+      p.dashboardController.clearPinnesFilter(p.partEmbedded);
     }
-  }, [initialSelection, dashboardPinnedFilters]);
 
-  
+    if (chartRequest) {
+      p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
+    }
+
+  }, [chartRequest]);
+
   const cachedQuery = p.cachedQueries[liteKey(toLite(p.content.userChart))];
 
   const [resultOrError, reloadQuery] = useAPIWithReload<undefined | { error?: any, result?: ChartClient.API.ExecuteChartResult }>(() => {
-    if (chartRequest == null)
+    if (chartRequest == null || p.dashboardController.isLoading)
       return Promise.resolve(undefined);
 
     if (cachedQuery)
@@ -93,12 +103,20 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       .then(cs => ChartClient.API.executeChart(chartRequest!, cs))
       .then(result => ({ result }), error => ({ error }));
 
-  }, [chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(chartRequest, null)), ...p.deps ?? []], { avoidReset: true });
+  }, [
+    chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(chartRequest, null)),
+    p.dashboardController.isLoading,
+    ...p.deps ?? []
+  ], { avoidReset: true });
 
   p.customDataRef.current = softCast<UserChartPartHandler>({
     chartRequest,
     reloadQuery
   });
+
+  React.useEffect(() => {
+    p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
+  }, [p.partEmbedded])
 
   const [showData, setShowData] = React.useState(p.content.showData);
   
@@ -117,6 +135,9 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   if (!chartRequest)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (p.dashboardController.isLoading)
+    return <span>{JavascriptMessage.loading.niceToString()}...</span>;
 
   if (resultOrError?.error) {
     return (

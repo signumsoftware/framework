@@ -3,8 +3,8 @@ import { WorkflowConnectionModel, WorkflowConditionEntity, WorkflowActionEntity,
 import { ValueLine, EntityLine, TypeContext, FormGroup, EntityTable } from '@framework/Lines'
 import { useForceUpdate } from '@framework/Hooks';
 
-export default function WorkflowConnectionModelComponent(p : { ctx: TypeContext<WorkflowConnectionModel> }){
-  var ctx = p.ctx;
+export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<WorkflowConnectionModel> }) {
+  var ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });
   const forceUpdate = useForceUpdate();
 
   function handleDecisionNameChange(e: React.SyntheticEvent<HTMLSelectElement>) {
@@ -16,11 +16,19 @@ export default function WorkflowConnectionModelComponent(p : { ctx: TypeContext<
 
   return (
     <div>
+
+      <div className="row">
+        <div className="col-sm-6">
       <ValueLine ctx={ctx.subCtx(e => e.name)} />
+        </div>
+        <div className="col-sm-6">
       <ValueLine ctx={ctx.subCtx(e => e.type)} onChange={() => { ctx.value.decisionOptionName = null; forceUpdate(); }} />
+        </div>
+      </div>
+
 
       {ctx.value.type == "Decision" &&
-        < FormGroup ctx={ctx.subCtx(e => e.decisionOptionName)} labelText={ctx.niceName(e => e.decisionOptionName)}>
+        < FormGroup ctx={ctx.subCtx(e => e.decisionOptionName)} label={ctx.niceName(e => e.decisionOptionName)}>
         {
           <select value={ctx.value.decisionOptionName ? ctx.value.decisionOptionName : ""} className="form-select" onChange={handleDecisionNameChange} >
             <option value="" />
@@ -29,26 +37,32 @@ export default function WorkflowConnectionModelComponent(p : { ctx: TypeContext<
           }
         </FormGroup>}
 
-      {ctx.value.needCondition ?
-        ctx.value.mainEntityType ?
-          <EntityLine ctx={ctx.subCtx(e => e.condition)} findOptions={{
-            queryName: WorkflowConditionEntity,
-            filterOptions: [
-              { token: WorkflowConditionEntity.token(e => e.entity.mainEntityType), operation: "EqualTo", value: ctx.value.mainEntityType }
-            ]
-          }} /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.condition), ctx.niceName(e => e.mainEntityType))}</div>
-        : undefined}
 
-      {ctx.value.mainEntityType ?
-        <EntityLine ctx={ctx.subCtx(e => e.action)} findOptions={{
-          queryName: WorkflowActionEntity,
-          filterOptions: [
-            { token: WorkflowActionEntity.token(e => e.entity.mainEntityType), operation: "EqualTo", value: ctx.value.mainEntityType }
-          ]
-        }} />
-        : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.action), ctx.niceName(e => e.mainEntityType))}</div>}
+      <div className="row">
+        <div className="col-sm-6">
+          {ctx.value.needCondition ?
+            ctx.value.mainEntityType ?
+              <EntityLine ctx={ctx.subCtx(e => e.condition)} findOptions={{
+                queryName: WorkflowConditionEntity,
+                filterOptions: [
+                  { token: WorkflowConditionEntity.token(e => e.entity.mainEntityType), operation: "EqualTo", value: ctx.value.mainEntityType }
+                ]
+              }} /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.condition), ctx.niceName(e => e.mainEntityType))}</div>
+            : undefined}
+          {ctx.value.needOrder && <ValueLine ctx={ctx.subCtx(e => e.order)} helpText={WorkflowMessage.EvaluationOrderOfTheConnectionForIfElse.niceToString()} />}
+        </div>
+        <div className="col-sm-6">
+          {ctx.value.mainEntityType ?
+            <EntityLine ctx={ctx.subCtx(e => e.action)} findOptions={{
+              queryName: WorkflowActionEntity,
+              filterOptions: [
+                { token: WorkflowActionEntity.token(e => e.entity.mainEntityType), operation: "EqualTo", value: ctx.value.mainEntityType }
+              ]
+            }} />
+            : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.action), ctx.niceName(e => e.mainEntityType))}</div>}
 
-      {ctx.value.needOrder && <ValueLine ctx={ctx.subCtx(e => e.order)} />}
+        </div>
+      </div>    
     </div>
   );
 }

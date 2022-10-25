@@ -89,7 +89,7 @@ export default function Notify() {
     var icon: IconProp | undefined;
     switch (opt.type) {
       case "loading":
-        icon = "cog";
+        icon = "gear";
         break;
       case "error":
       case "warning":
@@ -117,7 +117,9 @@ export default function Notify() {
     <div style={styleLock}>
       <div id="sfNotify" >
         <Transition in={opt != undefined} timeout={200}>
-          {(state: string) => <span className={classes(opt?.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{getIcon()}&nbsp;{opt?.text}</span>}
+          {/*translation is made off for this span to avoid rendering error (Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.) 
+           * that occurs with Google/Microsoft page translator extensions*/}
+          {(state: string) => <span className={classes(opt?.type, "notify", state == "entering" || state == "entered" ? "in" : undefined, "notranslate")} translate="no">{getIcon()}&nbsp;{opt?.text}</span>}
         </Transition>
       </div>
     </div>

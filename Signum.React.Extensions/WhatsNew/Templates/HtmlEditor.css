@@ -1,0 +1,17 @@
+﻿.whatsnewbody{
+    width: 50%;
+    margin: auto;
+}
+
+@media (max-width: 800px) {
+    .whatsnewbody {
+        width: 100% !important;
+        margin: auto;
+    }
+}
+
+.headerpicture {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}

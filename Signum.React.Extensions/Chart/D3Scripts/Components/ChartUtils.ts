@@ -187,11 +187,18 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     return date.startOf(unit);
   }
 
+  function withoutEntity(fullKey: string) {
+    if (fullKey.startsWith("Entity."))
+      return fullKey.after("Entity.");
+
+    return fullKey;
+  }
+
   const columnNomalized = normalizeToken(column.token!);  
 
   const matchingFilters = column.token && (completeValues == "FromFilters" || completeValues == "Auto") ?
     (filterOptions.filter(f => !isFilterGroupOptionParsed(f)) as FilterConditionOptionParsed[])
-      .filter(f => f.token && normalizeToken(f.token).normalized.fullKey == columnNomalized.normalized.fullKey) :
+      .filter(f => f.token && withoutEntity(normalizeToken(f.token).normalized.fullKey) == withoutEntity(columnNomalized.normalized.fullKey)) :
     [];
 
   if (completeValues == "FromFilters" && matchingFilters.length == 0)

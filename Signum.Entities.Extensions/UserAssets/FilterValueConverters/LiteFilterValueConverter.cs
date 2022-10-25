@@ -7,10 +7,11 @@ public class LiteFilterValueConverter : IFilterValueConverter
 
     public Result<string?>? TryGetExpression(object? value, Type targetType)
     {
-        if (!(value is Lite<Entity> lite))
-        {
+        if (!targetType.IsLite())
             return null;
-        }
+
+        if (!(value is Lite<Entity> lite))
+            return null;
 
         return new Result<string?>.Success(lite.Key());
     }
@@ -18,6 +19,9 @@ public class LiteFilterValueConverter : IFilterValueConverter
     public Result<object?>? TryParseExpression(string? expression, Type targetType)
     {
         if (!expression.HasText())
+            return null;
+
+        if (!targetType.IsLite())
             return null;
 
         string? error = Lite.TryParseLite(expression, out Lite<Entity>? lite);
@@ -30,6 +34,9 @@ public class LiteFilterValueConverter : IFilterValueConverter
     public Result<Type>? IsValidExpression(string? expression, Type targetType, Type? currentEntityType)
     {
         if (!expression.HasText())
+            return null;
+
+        if (!targetType.IsLite())
             return null;
 
         string? error = Lite.TryParseLite(expression, out Lite<Entity>? lite);

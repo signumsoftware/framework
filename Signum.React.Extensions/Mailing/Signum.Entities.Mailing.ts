@@ -93,6 +93,7 @@ export interface EmailMasterTemplateEntity extends Entities.Entity, UserAssets.I
   isDefault: boolean;
   messages: Entities.MList<EmailMasterTemplateMessageEmbedded>;
   guid: string /*Guid*/;
+  attachments: Entities.MList<IAttachmentGeneratorEntity>;
 }
 
 export const EmailMasterTemplateMessageEmbedded = new Type<EmailMasterTemplateMessageEmbedded>("EmailMasterTemplateMessageEmbedded");
@@ -130,6 +131,12 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
   sendRetries: number;
   attachments: Entities.MList<EmailAttachmentEmbedded>;
 }
+
+export const EmailMessageFormat = new EnumType<EmailMessageFormat>("EmailMessageFormat");
+export type EmailMessageFormat =
+  "PlainText" |
+  "HtmlComplex" |
+  "HtmlSimple";
 
 export module EmailMessageMessage {
   export const TheEmailMessageCannotBeSentFromState0 = new MessageKey("EmailMessageMessage", "TheEmailMessageCannotBeSentFromState0");
@@ -246,7 +253,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   orders: Entities.MList<UserQueries.QueryOrderEmbedded>;
   attachments: Entities.MList<IAttachmentGeneratorEntity>;
   masterTemplate: Entities.Lite<EmailMasterTemplateEntity> | null;
-  isBodyHtml: boolean;
+  messageFormat: EmailMessageFormat;
   messages: Entities.MList<EmailTemplateMessageEmbedded>;
   applicable: Templating.TemplateApplicableEval | null;
 }

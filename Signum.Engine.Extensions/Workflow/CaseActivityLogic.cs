@@ -313,9 +313,7 @@ public static class CaseActivityLogic
                     if (cond == null)
                         return candidates.Where(a => a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(a.Activity.StartDate) < now).Select(a => a.Activity.ToLite()).ToList();
 
-                    var condEval = cond.RetrieveFromCache().Eval.Algorithm;
-
-                    return candidates.Where(a => a.Event.Timer!.Condition.Is(cond) && condEval.EvaluateUntyped(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
+                    return candidates.Where(a => a.Event.Timer!.Condition.Is(cond) && cond.Evaluate(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
                 }).Distinct().ToList();
 
                 if (!activities.Any())
@@ -360,7 +358,7 @@ public static class CaseActivityLogic
                 Delete = (e, args) => e.Delete(),
             }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
-            new Graph<CaseNotificationEntity>.ConstructFrom<CaseActivityEntity>(CaseNotificationOperation.CreteCaseNotificationFromCaseActivity)
+            new Graph<CaseNotificationEntity>.ConstructFrom<CaseActivityEntity>(CaseNotificationOperation.CreateCaseNotificationFromCaseActivity)
             {
                 Construct = (e, args) => new CaseNotificationEntity
                 {
@@ -528,8 +526,7 @@ public static class CaseActivityLogic
 
             if (connection.Action != null)
             {
-                var alg = connection.Action.RetrieveFromCache().Eval.Algorithm;
-                alg.ExecuteUntyped(Case.MainEntity, wctx);
+                connection.Action.Execute(Case.MainEntity, wctx);
             };
 
             this.Connections.Add(connection);
@@ -569,9 +566,7 @@ public static class CaseActivityLogic
 
         if (wc.Condition != null)
         {
-            var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
-            var result = alg.EvaluateUntyped(ctx.Case.MainEntity, ctx.NewTransitionContext(wc));
-
+            var result = wc.Condition.Evaluate(ctx.Case.MainEntity, ctx.NewTransitionContext(wc));
 
             return result;
         }
@@ -850,7 +845,7 @@ public static class CaseActivityLogic
                         if (t.Timer!.Duration != null)
                             return t.Timer!.Duration!.Add(ca.StartDate) < now;
 
-                        return t.Timer!.Condition!.RetrieveFromCache().Eval.Algorithm.EvaluateUntyped(ca, now);
+                        return t.Timer!.Condition!.Evaluate(ca, now);
                     });
 
                     if (timer == null)
@@ -1003,7 +998,7 @@ public static class CaseActivityLogic
 
         public static void ExecuteStep(CaseActivityEntity ca, DoneType doneType, string? decision, WorkflowConnectionEntity? firstConnection)
         {
-            using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = firstConnection }))
+            using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = firstConnection, Decision = decision }))
             {
                 SaveEntity(ca.Case.MainEntity);
             }
@@ -1017,8 +1012,7 @@ public static class CaseActivityLogic
                 if (firstConnection.Condition != null)
                 {
                     var jumpCtx = ctx.NewTransitionContext(firstConnection);
-                    var alg = firstConnection.Condition.RetrieveFromCache().Eval.Algorithm;
-                    var result = alg.EvaluateUntyped(ca.Case.MainEntity, jumpCtx);
+                    var result = firstConnection.Condition.Evaluate(ca.Case.MainEntity, jumpCtx);
                     if (!result)
                         throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(firstConnection.To, firstConnection.Condition));
                 }
@@ -1139,8 +1133,7 @@ public static class CaseActivityLogic
             if (transition.Condition != null)
             {
                 var jumpCtx = new WorkflowTransitionContext(@case, null, transition);
-                var alg = transition.Condition.RetrieveFromCache().Eval.Algorithm;
-                var result = alg.EvaluateUntyped(@case.MainEntity, jumpCtx);
+                var result = transition.Condition.Evaluate(@case.MainEntity, jumpCtx);
                 if (!result)
                     throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(transition, transition.Condition));
             }
@@ -1518,8 +1511,7 @@ public static class CaseActivityLogic
 
                 if (wc.Condition != null)
                 {
-                    var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
-                    var result = alg.EvaluateUntyped(CaseActivity.Case.MainEntity, new WorkflowTransitionContext(CaseActivity.Case, CaseActivity, wc));
+                    var result = wc.Condition.Evaluate(CaseActivity.Case.MainEntity, new WorkflowTransitionContext(CaseActivity.Case, CaseActivity, wc));
 
                     return result;
                 }

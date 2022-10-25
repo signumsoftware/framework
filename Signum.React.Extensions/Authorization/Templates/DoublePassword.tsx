@@ -32,7 +32,7 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean, ma
 
   if (!withPassword) {
     return (
-      <FormGroup labelText={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx}>
+      <FormGroup label={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx}>
         <a className="btn btn-light btn-sm" onClick={() => setWithPassword(true)}>
           <FontAwesomeIcon icon="key" /> {LoginAuthMessage.ChangePassword.niceToString()}
         </a>
@@ -42,10 +42,10 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean, ma
 
   return (
     <div>
-      <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.NewPassword.niceToString()}>
+      <FormGroup ctx={p.ctx} label={LoginAuthMessage.NewPassword.niceToString()}>
         <input type="password" ref={newPass} autoComplete="off" placeholder={LoginAuthMessage.NewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />
       </FormGroup>
-      <FormGroup ctx={p.ctx} labelText={LoginAuthMessage.ConfirmNewPassword.niceToString()}>
+      <FormGroup ctx={p.ctx} label={LoginAuthMessage.ConfirmNewPassword.niceToString()}>
         <input type="password" ref={newPass2} autoComplete="off" placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass2.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />
       </FormGroup>
     </div>

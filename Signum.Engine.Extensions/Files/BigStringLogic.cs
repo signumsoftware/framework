@@ -160,8 +160,8 @@ public static class BigStringLogic
         if (sb.Schema.Tables.ContainsKey(route.RootType))
             throw new InvalidOperationException($"{route.RootType} is already included in the Schema. You need to call BigStringLogic.Register earlier in your Starter.Start method.");
 
-        if(route.PropertyInfo!.GetCustomAttribute<NotifyChildPropertyAttribute>() == null)
-            throw new InvalidOperationException($"BigString {route} should have a [NotifyChildPropertyAttribute]."); 
+        if(route.PropertyInfo!.GetCustomAttribute<BindParentAttribute>() == null)
+            throw new InvalidOperationException($"BigString {route} should have a [BindParentAttribute]."); 
 
         if (config.Mode == BigStringMode.Database)
             sb.Schema.Settings.FieldAttributes(route.Add(typeof(BigStringMixin)).Add(piFile))!.Add(new IgnoreAttribute());

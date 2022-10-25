@@ -9,7 +9,7 @@ import * as ExcelClient from './ExcelClient'
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import * as Operations from '@framework/Operations';
 import SelectorModal from '@framework/SelectorModal'
-import { PaginationMode } from '@framework/FindOptions'
+import { PaginationMode, QueryRequest } from '@framework/FindOptions'
 
 export interface ExcelMenuProps {
   searchControl: SearchControlLoaded;
@@ -35,8 +35,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
       .then(list => setExcelReports(list));
   }
 
-
-  function handlePlainExcel() {
+  function selectPagination(apiMethod: (request: QueryRequest)=>void ) {
     var request = p.searchControl.getQueryRequest();
 
     const rt = p.searchControl.state.resultTable;
@@ -60,17 +59,24 @@ export default function ExcelMenu(p: ExcelMenuProps) {
             request.pagination = { mode: "All" };
           }
 
-          ExcelClient.API.generatePlainExcel(request);
+          apiMethod(request);
         });
     } else {
-      ExcelClient.API.generatePlainExcel(request);
+      apiMethod(request);
     }
   }
 
 
-  function handleClick(er: Lite<ExcelReportEntity>) {
-    ExcelClient.API.generateExcelReport(p.searchControl.getQueryRequest(), er);
+  function handleExcelReport(er: Lite<ExcelReportEntity>) {
+    selectPagination((request) => ExcelClient.API.generateExcelReport(request, er));
   }
+
+
+  function handlePlainExcel() {
+    selectPagination((request) => ExcelClient.API.generatePlainExcel(request));
+  }
+
+
 
   function handleCreate() {
     Finder.API.fetchQueryEntity(p.searchControl.props.findOptions.queryKey)
@@ -100,12 +106,12 @@ export default function ExcelMenu(p: ExcelMenuProps) {
         {
           excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}
-              onClick={() => handleClick(uq)}>
+              onClick={() => handleExcelReport(uq)}>
               {getToString(uq)}
             </Dropdown.Item>)
         }
         {(p.plainExcel || excelReports && excelReports.length > 0) && <Dropdown.Divider />}
-        {Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "search"]} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
+        {Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "magnifying-glass"]} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
         {Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
     </Dropdown>

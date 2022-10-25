@@ -1,4 +1,17 @@
-﻿.whatsnewbody{
+﻿.sf-html-editor {
+    box-sizing: unset !important;
+    border: none !important;
+    padding: 0px !important;
+    border-radius: 0px !important;
+    margin-bottom: 0em !important;
+    box-shadow: none !important;
+}
+
+.sf-html-editor .public-DraftEditor-content {
+    min-height: unset !important;
+}
+
+.whatsnewbody{
     width: 50%;
     margin: auto;
 }
@@ -14,4 +27,19 @@
     width: 100%;
     height: auto;
     margin-bottom: 20px;
+}
+
+.headerpicture-shadow {
+    border: thin solid #d3d1d1;
+    padding: 10px;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s
+}
+
+.whatsnew-image {
+    border: thin solid #d3d1d1;
+    padding: 10px;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s;
+    max-width: 90% !important;
 }

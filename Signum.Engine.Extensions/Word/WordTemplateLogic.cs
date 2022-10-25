@@ -13,6 +13,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.Templating;
 using Signum.Engine.Authorization;
 using Signum.Entities.Basics;
+using Signum.Entities.Workflow;
 
 namespace Signum.Engine.Word;
 
@@ -80,6 +81,7 @@ public static class WordTemplateLogic
 
             sb.Schema.EntityEvents<WordTemplateEntity>().Retrieved += WordTemplateLogic_Retrieved;
 
+            UserAssetsImporter.Register<WordTemplateEntity>("WordTemplate", WordTemplateOperation.Save);
             PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
             WordModelLogic.Start(sb);
@@ -513,7 +515,7 @@ public static class WordTemplateLogic
 
     public static byte[] ProcessOpenXmlPackage(this WordTemplateEntity template, Action<OpenXmlPackage> processPackage)
     {
-        var file = template.Template!.RetrieveAndRemember();
+        var file = template.Template.RetrieveAndRemember();
 
         using (var memory = new MemoryStream())
         {
@@ -552,12 +554,12 @@ public static class WordTemplateLogic
         if (newTemplate == null)
             return null;
 
-        var file = template.Template!.RetrieveAndRemember();
+        var file = template.Template.RetrieveAndRemember();
 
         using (file.AllowChanges())
         {
-            file.BinaryFile = newTemplate.Template!.Entity.BinaryFile;
-            file.FileName = newTemplate.Template!.Entity.FileName;
+            file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
+            file.FileName = newTemplate.Template.Entity.FileName;
 
             return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate Regenerated: " + template.Name);
         }

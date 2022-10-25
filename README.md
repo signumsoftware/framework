@@ -54,6 +54,9 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+
+* [2022.08.30 Presenting EntityAccordion](https://github.com/signumsoftware/framework/commit/3ba48fae1456207992abadf74075bb05502507f5#comments)
+* [2022.08.18 Presenting EntityTypeToken](https://github.com/signumsoftware/framework/commit/2ec0dd7c53067c34e01e4570968ae9e14263a65e#comments) 
 * [2022.08.11 Logging Client-Side Errors](https://github.com/signumsoftware/framework/commit/0b422b488458677614383875b4fbc0e499093bb7#comments)
 * [2022.08.09 Presenting SeparatedByNewLine / SeparatedByComma](https://github.com/signumsoftware/framework/commit/94401cd2b1a785b4e69735c80e54d67ca7a9e7d8#comments)
 * [2022.08.05 Remove Promise.done()](https://github.com/signumsoftware/framework/commit/390b34f5206f4467dc517747c351e206ffb89d63#comments)
