@@ -9,21 +9,15 @@ import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { Tabs, Tab } from 'react-bootstrap';
-import { useAPIWithReload } from '@framework/Hooks'
+import { useAPIWithReload, useInterval } from '@framework/Hooks'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { classes } from '@framework/Globals'
 
 export default function WorkflowPanelPage(p: RouteComponentProps<{}>, {}){
-  function componentWillMount() {
-    AuthClient.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
-    AppContext.setTitle("WorkflowPanel State");
-  }
-
-  function componentWillUnmount() {
-    AppContext.setTitle();
-  }
 
   return (
     <div>
-      <h2 className="display-6">Workflow Panel</h2>
+      <h2 className="display-6"><FontAwesomeIcon icon={["fas", "shuffle"]} /> Workflow Panel</h2>
 
       <Tabs id="workflowTabs">
         <Tab title="Script Runner" eventKey="scriptRunner">
@@ -45,6 +39,12 @@ export function WorkflowScriptRunnerTab(p: {}) {
     return API.view();
   }, []);
 
+  const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
+
+  React.useEffect(() => {
+    reloadState();
+  }, [tick]);
+
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
     API.stop().then(() => reloadState());
@@ -55,7 +55,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
     API.start().then(() => reloadState());
   }
 
-  var title = "WorkflowScriptRunner State";
+  var title =  "WorkflowScriptRunner State";
 
   if (state == undefined)
     return <h4>{title} (loading...) </h4>;
@@ -63,13 +63,12 @@ export function WorkflowScriptRunnerTab(p: {}) {
   return (
     <div>
       <h4>{title}</h4>
-      <div className="btn-toolbar">
-        {state.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
-        {!state.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
+      <div className="btn-toolbar mt-3">
+        <button className={classes("sf-button btn btn-outline-success", state.running && "active pe-none")} onClick={!state.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
+        <button className={classes("sf-button btn btn-outline-danger", !state.running && "active pe-none")} onClick={state.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
       </div >
 
       <div>
-        <br />
         State: <strong>
           {state.running ?
             <span style={{ color: "green" }}> RUNNING </span> :
