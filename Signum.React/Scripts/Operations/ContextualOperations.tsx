@@ -29,15 +29,10 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
   const menuItems = operationInfos(ti)
     .filter(oi => oi.operationType == "ConstructorFromMany")
     .map(oi => {
-      const os = getSettings(oi.key) as ContextualOperationSettings<Entity>;
-      const coc = new ContextualOperationContext<Entity>(oi, ctx);
-      coc.settings = os;
-      if (os == undefined || os.isVisible == undefined || os.isVisible(coc))
-        return coc;
-
-      return undefined;
+      const cos = getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
+      return new ContextualOperationContext<Entity>(oi, ctx, cos);
     })
-    .filter(coc => coc != undefined)
+    .filter(coc => coc.isVisibleInContextualMenu())
     .map(coc => coc!)
     .orderBy(coc => coc.settings && coc.settings.order)
     .flatMap(coc => coc.createMenuItems());
@@ -71,11 +66,8 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
       const eos = getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
       const cos = eos == undefined ? undefined :
         ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-      const coc = new ContextualOperationContext<Entity>(oi, ctx);
-      coc.settings = cos;
-      coc.entityOperationSettings = eos;
-
-        return coc;
+      const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
+      return coc;
     })
     .filter(coc => coc.isVisibleInContextualMenu())
     .map(coc => coc!)
@@ -234,10 +226,10 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
   const eos = coc.entityOperationSettings;
 
   if (color == null)
-    color = coc.settings?.color ?? eos?.color ?? Defaults.getColor(coc.operationInfo);
+    color = coc.color;
 
   if (icon == null)
-    icon = coalesceIcon(coc.settings?.icon, eos?.icon);
+    icon = coc.icon;
 
   if (iconColor == null)
     iconColor = coc.settings?.iconColor || eos?.iconColor;
@@ -257,10 +249,10 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
       onClick={disabled ? undefined : handleOnClick}
       disabled={disabled}
       style={{ pointerEvents: "initial" }}
-      data-operation={coc.operationInfo.key}>
+      data-operation={coc.operationInfo.key}
+      className={color ? "text-" + color : undefined}>
       {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
-        color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
-      {(icon != null || color != null) && " "}
+        color ? <span className={classes("icon", "empty-icon")}></span> : undefined}
       {text}
       {extraButtons}
     </Dropdown.Item>
@@ -374,16 +366,3 @@ export function defaultContextualOperationClick(coc: ContextualOperationContext<
     return MultiPropertySetterModal.show(getTypeInfo(onlyType), coc.context.lites, coc.operationInfo, settersConfig == "Mandatory");
   }
 }
-
-
-export function coalesceIcon(icon: IconProp | undefined, icon2: IconProp | undefined): IconProp | undefined{ //Till the error is fixed
-
-  if (icon === null)
-    return undefined;
-
-  if (icon === undefined)
-    return icon2
-
-  return icon;
-}
-
