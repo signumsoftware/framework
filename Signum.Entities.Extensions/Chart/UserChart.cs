@@ -118,7 +118,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             new XAttribute("Query", Query.Key),
             EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
             new XAttribute("HideQuickLink", HideQuickLink),
-            Owner == null ? null! : new XAttribute("Owner", Owner.Key()),
+            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
             new XAttribute("ChartScript", this.ChartScript.Key),
             MaxRows == null ? null! : new XAttribute("MaxRows", MaxRows.Value),

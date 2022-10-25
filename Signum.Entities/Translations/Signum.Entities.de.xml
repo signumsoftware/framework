@@ -324,7 +324,7 @@
     <Member Name="Check" Description="Ja/Nein-Wert" />
     <Member Name="Column0NotFound" Description="Die Spalte {0} wurde nicht gefunden" />
     <Member Name="ContainerOfCellOperations" Description="Container für Zellenoperationen" />
-    <Member Name="Count" Description="Num" />
+    <Member Name="Count" Description="Anzahl" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
