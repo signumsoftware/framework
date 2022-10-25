@@ -309,7 +309,7 @@ public static class CaseActivityLogic
                 var candidates = boundaryCandidates.Concat(intermediateCandidates).Distinct().ToList();
                 var conditions = candidates.Select(a => a.Event.Timer!.Condition).Distinct().ToList();
                 var lastExecutions = boundaryCandidates
-                    .Where(a => a.Event.Type == WorkflowEventType.BoundaryForkTimer)
+                    .Where(a => a.Event.Type == WorkflowEventType.BoundaryForkTimer && a.Event.RunRepeatedly)
                     .Select(a => new { ActivityEvent = a, LastExecution = a.Activity.LastExecutedTimer(a.Event.ToLite()) })
                     .ToList();
 
