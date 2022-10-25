@@ -17,9 +17,9 @@ namespace Signum.Engine.Mailing.Senders;
 public class MicrosoftGraphSender : BaseEmailSender
 {
     public static long MicrosoftGraphFileSizeLimit = 3 * 1024 * 1024;
-    MicrosoftGraphEntity microsoftGraph;
+    MicrosoftGraphEmailServiceEntity microsoftGraph;
 
-    public MicrosoftGraphSender(EmailSenderConfigurationEntity senderConfig, MicrosoftGraphEntity service) : base(senderConfig)
+    public MicrosoftGraphSender(EmailSenderConfigurationEntity senderConfig, MicrosoftGraphEmailServiceEntity service) : base(senderConfig)
     {
         microsoftGraph = service;
     }
@@ -170,7 +170,7 @@ public static class MicrosoftGraphExtensions
         return new Disposable(() => AuthenticationProvider.Value = old);
     }
 
-    public static IAuthenticationProvider GetAuthProvider(this MicrosoftGraphEntity microsoftGraph, string[]? scopes = null)
+    public static IAuthenticationProvider GetAuthProvider(this MicrosoftGraphEmailServiceEntity microsoftGraph, string[]? scopes = null)
     {
         if (AuthenticationProvider.Value is var ap && ap != null)
             return ap;

@@ -12,6 +12,7 @@ public class EmailSenderConfigurationEntity : Entity
         DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryFormat), m => m.Name);
         DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryMethod), m => m.Name);
         DescriptionManager.ExternalEnums.Add(typeof(ExchangeVersion), m => m.Name);
+
     }
 
     [UniqueIndex]
@@ -24,29 +25,23 @@ public class EmailSenderConfigurationEntity : Entity
     [NoRepeatValidator]
     public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
-    [ImplementedBy(typeof(SmtpEntity), typeof(ExchangeWebServiceEntity), typeof(MicrosoftGraphEntity))]
-    public EmailSenderServiceConfigurationEntity Service { get; set; }
+    [ImplementedBy(typeof(SmtpEmailServiceEntity), typeof(ExchangeWebServiceEmailServiceEntity), typeof(MicrosoftGraphEmailServiceEntity))]
+    public EmailServiceEntity Service { get; set; }
 
-    public override string ToString() => $"{Name} - {Service}";
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Name);
 
     protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
     {
         if (sender == DefaultFrom && pi.Name == nameof(DefaultFrom.AzureUserId))
         {
-            if (DefaultFrom.AzureUserId == null && Service is MicrosoftGraphEntity microsoftGraph)
+            if (DefaultFrom.AzureUserId == null && Service is MicrosoftGraphEmailServiceEntity microsoftGraph)
                 return ValidationMessage._0IsMandatoryWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => microsoftGraph));
         }
 
         return base.ChildPropertyValidation(sender, pi);
     }
 
-    protected override bool IsPropertyReadonly(PropertyInfo pi)
-    { 
-        if (!IsNew && pi.Name == nameof(Service))
-            return true;
-
-        return base.IsPropertyReadonly(pi);
-    }
     public EmailSenderConfigurationEntity Clone()
     {
         return new EmailSenderConfigurationEntity
@@ -66,14 +61,16 @@ public static class EmailSenderConfigurationOperation
     public static readonly ConstructSymbol<EmailSenderConfigurationEntity>.From<EmailSenderConfigurationEntity> Clone;
 }
 
-public abstract class EmailSenderServiceConfigurationEntity : Entity
+public abstract class EmailServiceEntity : Entity
 {
-    public abstract EmailSenderServiceConfigurationEntity Clone();
+    public abstract EmailServiceEntity Clone();
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class SmtpEntity : EmailSenderServiceConfigurationEntity
+public class SmtpEmailServiceEntity : EmailServiceEntity
 {
+
+
     public SmtpDeliveryFormat DeliveryFormat { get; set; }
 
     public SmtpDeliveryMethod DeliveryMethod { get; set; }
@@ -83,7 +80,7 @@ public class SmtpEntity : EmailSenderServiceConfigurationEntity
     [StringLengthValidator(Min = 3, Max = 300), FileNameValidator]
     public string? PickupDirectoryLocation { get; set; }
 
-    static StateValidator<SmtpEntity, SmtpDeliveryMethod> stateValidator = new StateValidator<SmtpEntity, SmtpDeliveryMethod>(
+    static StateValidator<SmtpEmailServiceEntity, SmtpDeliveryMethod> stateValidator = new StateValidator<SmtpEmailServiceEntity, SmtpDeliveryMethod>(
        a => a.DeliveryMethod, a => a.Network, a => a.PickupDirectoryLocation)
         {
             {SmtpDeliveryMethod.Network,        true, null },
@@ -96,15 +93,14 @@ public class SmtpEntity : EmailSenderServiceConfigurationEntity
         return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
     }
 
-    public override SmtpEntity Clone()
+    public override SmtpEmailServiceEntity Clone()
     {
-        return new SmtpEntity 
+        return new SmtpEmailServiceEntity 
         { 
             DeliveryFormat = DeliveryFormat,
             DeliveryMethod = DeliveryMethod,
             Network = Network?.Clone(),
             PickupDirectoryLocation = PickupDirectoryLocation
-        
         };
     }
 }
@@ -162,8 +158,10 @@ public enum CertFileType
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class ExchangeWebServiceEntity : EmailSenderServiceConfigurationEntity
+public class ExchangeWebServiceEmailServiceEntity : EmailServiceEntity
 {
+
+
     public ExchangeVersion ExchangeVersion { get; set; }
 
     [StringLengthValidator(Max = 300)]
@@ -177,9 +175,9 @@ public class ExchangeWebServiceEntity : EmailSenderServiceConfigurationEntity
 
     public bool UseDefaultCredentials { get; set; } = true;
 
-    public override ExchangeWebServiceEntity Clone()
+    public override ExchangeWebServiceEmailServiceEntity Clone()
     {
-        return new ExchangeWebServiceEntity
+        return new ExchangeWebServiceEmailServiceEntity
         {
             ExchangeVersion = ExchangeVersion,
             Url = Url,
@@ -192,7 +190,7 @@ public class ExchangeWebServiceEntity : EmailSenderServiceConfigurationEntity
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
-public class MicrosoftGraphEntity : EmailSenderServiceConfigurationEntity
+public class MicrosoftGraphEmailServiceEntity : EmailServiceEntity
 {
     public bool UseActiveDirectoryConfiguration { get; set; }
 
@@ -221,9 +219,9 @@ public class MicrosoftGraphEntity : EmailSenderServiceConfigurationEntity
 
         return base.PropertyValidation(pi);
     }
-    public override MicrosoftGraphEntity Clone()
+    public override MicrosoftGraphEmailServiceEntity Clone()
     {
-        return new MicrosoftGraphEntity
+        return new MicrosoftGraphEmailServiceEntity
         {
             UseActiveDirectoryConfiguration = UseActiveDirectoryConfiguration,
             Azure_ApplicationID = Azure_ApplicationID,

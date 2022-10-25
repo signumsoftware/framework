@@ -8,9 +8,9 @@ namespace Signum.Engine.Mailing.Senders;
 public class SmtpSender: BaseEmailSender
 {
 
-    SmtpEntity smtp;
+    SmtpEmailServiceEntity smtp;
 
-    public SmtpSender(EmailSenderConfigurationEntity senderConfig, SmtpEntity service) : base(senderConfig)
+    public SmtpSender(EmailSenderConfigurationEntity senderConfig, SmtpEmailServiceEntity service) : base(senderConfig)
     {
         smtp = service;
     }

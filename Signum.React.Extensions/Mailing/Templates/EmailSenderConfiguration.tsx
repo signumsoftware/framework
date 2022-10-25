@@ -1,9 +1,8 @@
 import * as React from 'react'
-import { ValueLine, EntityRepeater, EntityDetail, EntityAccordion } from '@framework/Lines'
+import { ValueLine, EntityDetail, EntityAccordion } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailSenderConfigurationEntity, SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmbedded, ExchangeWebServiceEmbedded, MicrosoftGraphEmbedded, EmailRecipientEmbedded, EmailTemplateAddressEmbedded } from '../Signum.Entities.Mailing'
-import { Binding } from '@framework/Reflection'
-import { DoublePassword } from '../../Authorization/Templates/DoublePassword'
+import { EmailSenderConfigurationEntity, EmailRecipientEmbedded, EmailMessageEntity } from '../Signum.Entities.Mailing'
+import { SearchValueLine } from '@framework/Search';
 
 export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSenderConfigurationEntity> }) {
   const sc = p.ctx;
@@ -18,7 +17,9 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
           {ctx.value.displayName && <span className="me-1">{ctx.value.displayName}</span>}
           {ctx.value.emailAddress && <span>{"<"}{ctx.value.emailAddress}{">"}</span>}
         </span>
-        }/>
+        } />
+
+      {!sc.value.isNew && <SearchValueLine ctx={sc} findOptions={{ queryName: EmailMessageEntity, filterOptions: [{ token: EmailMessageEntity.token(a => a.entity.sentBy), value: sc.value }] }} />}
       <EntityDetail ctx={sc.subCtx(s => s.service)} />
     </div >
   );

@@ -27,7 +27,7 @@ public static class EmailLogic
 
     static Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration = null!;
 
-    public static Polymorphic<Func<EmailSenderServiceConfigurationEntity, EmailSenderConfigurationEntity, BaseEmailSender>> EmailSenders = new ();       
+    public static Polymorphic<Func<EmailServiceEntity, EmailSenderConfigurationEntity, BaseEmailSender>> EmailSenders = new ();       
     public static BaseEmailSender GetEmailSender(EmailMessageEntity email)
     {
         var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
@@ -77,9 +77,9 @@ public static class EmailLogic
 
             EmailLogic.getEmailSenderConfiguration = getEmailSenderConfiguration;
 
-            EmailSenders.Register((SmtpEntity s, EmailSenderConfigurationEntity c) => new SmtpSender(c, s));
-            EmailSenders.Register((MicrosoftGraphEntity s, EmailSenderConfigurationEntity c) => new MicrosoftGraphSender(c, s));
-            EmailSenders.Register((ExchangeWebServiceEntity s, EmailSenderConfigurationEntity c) => new ExchangeWebServiceSender(c, s));
+            EmailSenders.Register((SmtpEmailServiceEntity s, EmailSenderConfigurationEntity c) => new SmtpSender(c, s));
+            EmailSenders.Register((MicrosoftGraphEmailServiceEntity s, EmailSenderConfigurationEntity c) => new MicrosoftGraphSender(c, s));
+            EmailSenders.Register((ExchangeWebServiceEmailServiceEntity s, EmailSenderConfigurationEntity c) => new ExchangeWebServiceSender(c, s));
 
             EmailGraph.Register();
 

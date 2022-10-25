@@ -7,9 +7,9 @@ namespace Signum.Engine.Mailing.Senders;
 
 public class ExchangeWebServiceSender : BaseEmailSender
 {
-    ExchangeWebServiceEntity exchange;
+    ExchangeWebServiceEmailServiceEntity exchange;
 
-    public ExchangeWebServiceSender(EmailSenderConfigurationEntity senderConfig, ExchangeWebServiceEntity service) : base(senderConfig)
+    public ExchangeWebServiceSender(EmailSenderConfigurationEntity senderConfig, ExchangeWebServiceEmailServiceEntity service) : base(senderConfig)
     {
         exchange = service;
     }
