@@ -292,11 +292,11 @@ public static class WorkflowLogic
                     Entity = e,
                     e.Id,
                     e.Type,
-                    e.RunRepeatedly,
                     e.Name,
                     e.BpmnElementId,
                     e.Lane,
                     e.Lane.Pool.Workflow,
+                    e.RunRepeatedly,
                 });
 
 

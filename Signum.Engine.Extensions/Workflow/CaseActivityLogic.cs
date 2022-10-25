@@ -310,7 +310,8 @@ public static class CaseActivityLogic
                 var conditions = candidates.Select(a => a.Event.Timer!.Condition).Distinct().ToList();
                 var lastExecutions = boundaryCandidates
                     .Where(a => a.Event.Type == WorkflowEventType.BoundaryForkTimer)
-                    .ToDictionary(a => a.Event.ToLite(), a => a.Activity.LastExecutedTimer(a.Event.ToLite()));
+                    .Select(a => new { ActivityEvent = a, LastExecution = a.Activity.LastExecutedTimer(a.Event.ToLite()) })
+                    .ToList();
 
                 var now = Clock.Now;
                 var activities = conditions.SelectMany(cond =>
@@ -318,7 +319,7 @@ public static class CaseActivityLogic
                     if (cond == null)
                         return candidates.Where(a =>
                         {
-                            var startDate = lastExecutions.GetValueOrDefault(a.Event.ToLite())?.CreationDate ?? a.Activity.StartDate;
+                            var startDate = lastExecutions.SingleOrDefaultEx(le => le.ActivityEvent.Is(a))?.LastExecution?.CreationDate ?? a.Activity.StartDate;
                             return a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(startDate) < now;
                         }).Select(a => a.Activity.ToLite()).ToList();
 
@@ -435,6 +436,11 @@ public static class CaseActivityLogic
         {
             Activity = activity;
             Event = @event;
+        }
+
+        public bool Is(ActivityEvent other)
+        {
+            return this.Activity.Is(other.Activity) && this.Event.Is(other.Event);
         }
 
         public CaseActivityEntity Activity { get; set; }
