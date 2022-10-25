@@ -125,6 +125,7 @@ public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
             Name = we.Name,
             MainEntityType = we.Lane.Pool.Workflow.MainEntityType,
             Type = we.Type,
+            RunRepeatedly = we.RunRepeatedly,
             Timer = we.Timer,
             BpmnElementId = we.BpmnElementId
         }).ToMList());

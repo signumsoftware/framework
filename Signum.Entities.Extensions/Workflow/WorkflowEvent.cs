@@ -17,6 +17,8 @@ public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
 
     public WorkflowEventType Type { get; set; }
 
+    public bool RunRepeatedly { get; set; }
+
     public WorkflowTimerEmbedded? Timer { get; set; }
 
     public Lite<WorkflowActivityEntity>? BoundaryOf { get; set; }
@@ -34,6 +36,7 @@ public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
             MainEntityType = this.Lane.Pool.Workflow.MainEntityType,
             Name = this.Name,
             Type = this.Type,
+            RunRepeatedly = this.RunRepeatedly,
             Task = WorkflowEventTaskModel.GetModel(this),
             Timer = this.Timer,
             BpmnElementId = this.BpmnElementId,
@@ -47,10 +50,19 @@ public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
         var wModel = (WorkflowEventModel)model;
         this.Name = wModel.Name;
         this.Type = wModel.Type;
+        this.RunRepeatedly = wModel.RunRepeatedly;
         this.Timer = wModel.Timer;
         this.BpmnElementId = wModel.BpmnElementId;
         this.CopyMixinsFrom(wModel);
         //WorkflowEventTaskModel.ApplyModel(this, wModel.Task);
+    }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(RunRepeatedly) && RunRepeatedly && Type != WorkflowEventType.BoundaryForkTimer)
+            RunRepeatedly = false;
+
+        return base.PropertyValidation(pi);
     }
 }
 
@@ -131,6 +143,8 @@ public class WorkflowEventModel : ModelEntity
     public string? Name { get; set; }
 
     public WorkflowEventType Type { get; set; }
+
+    public bool RunRepeatedly { get; set; }
 
     public WorkflowEventTaskModel? Task { get; set; }
 

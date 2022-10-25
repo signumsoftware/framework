@@ -502,6 +502,7 @@ export interface WorkflowEventEntity extends Entities.Entity, IWorkflowNodeEntit
   bpmnElementId: string;
   lane: WorkflowLaneEntity;
   type: WorkflowEventType;
+  runRepeatedly: boolean;
   timer: WorkflowTimerEmbedded | null;
   boundaryOf: Entities.Lite<WorkflowActivityEntity> | null;
   xml: WorkflowXmlEmbedded;
@@ -513,6 +514,7 @@ export interface WorkflowEventModel extends Entities.ModelEntity {
   mainEntityType: Basics.TypeEntity;
   name: string | null;
   type: WorkflowEventType;
+  runRepeatedly: boolean;
   task: WorkflowEventTaskModel | null;
   timer: WorkflowTimerEmbedded | null;
   bpmnElementId: string;
