@@ -44,14 +44,12 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
 
   const s = state;
 
-  var percentageFormat = toNumberFormat("P2");
-
   return (
     <div>
       <h2 className="display-6"><FontAwesomeIcon icon={["fas", "gears"]} /> Process Panel</h2>
       <div className="btn-toolbar mt-3">
-        <button className={classes("sf-button btn btn-outline-success", s.running && "active pe-none")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
-        <button className={classes("sf-button btn btn-outline-danger", !s.running && "active pe-none")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
+        <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
+        <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
       </div >
       <div id="processMainDiv">
         State: <strong>

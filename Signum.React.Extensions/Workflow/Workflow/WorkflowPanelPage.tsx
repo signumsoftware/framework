@@ -37,7 +37,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
   const [state, reloadState] = useAPIWithReload(() => {
     AuthClient.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
     return API.view();
-  }, []);
+  }, [], { avoidReset: true });
 
   const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
 
@@ -60,12 +60,14 @@ export function WorkflowScriptRunnerTab(p: {}) {
   if (state == undefined)
     return <h4>{title} (loading...) </h4>;
 
+  const s = state;
+
   return (
     <div>
       <h4>{title}</h4>
       <div className="btn-toolbar mt-3">
-        <button className={classes("sf-button btn btn-outline-success", state.running && "active pe-none")} onClick={!state.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
-        <button className={classes("sf-button btn btn-outline-danger", !state.running && "active pe-none")} onClick={state.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
+        <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
+        <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
       </div >
 
       <div>
