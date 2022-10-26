@@ -69,8 +69,9 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
             <div className="col-sm-8">
               <EntityLine ctx={ctx.subCtx(f => f.target, { labelColumns: 2 })} />
               <EntityLine ctx={ctx.subCtx(f => f.template)} />
-              <EntityLine ctx={ctx.subCtx(f => f.package)} />
-              <EntityLine ctx={ctx.subCtx(f => f.exception)} />
+              <EntityLine ctx={ctx.subCtx(f => f.sentBy)} hideIfNull />
+              <EntityLine ctx={ctx.subCtx(f => f.package)} hideIfNull />
+              <EntityLine ctx={ctx.subCtx(f => f.exception)} hideIfNull />
             </div>
           </div>
           <hr />

@@ -3,15 +3,17 @@ import { DateTime, Duration, DurationObjectUnits } from 'luxon'
 import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes, softCast } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes } from '../Reflection'
+import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes, Type, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import { KeyCodes } from '../Components/Basic';
-import { format } from 'd3';
+import { format, html } from 'd3';
 import { isPrefix, QueryToken } from '../FindOptions'
+import { useState } from 'react'
+import { validateNewEntities } from '../Finder'
 
 export interface ValueLineProps extends LineBaseProps {
   valueLineType?: ValueLineType;
@@ -49,6 +51,7 @@ export type ValueLineType =
   "DropDownList" | /*For Enums! (only values in optionItems can be selected)*/
   "ComboBoxText" | /*For Text! (with freedom to choose a different value not in optionItems)*/
   "DateTime" |
+  "DateTimeSplitted" |
   "TextBox" |
   "TextArea" |
   "Number" |
@@ -77,7 +80,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
               element.setSelectionRange(0, element.value.length);
             element.focus();
           }
-        }, this.props.initiallyFocused  == true ? 0 : this.props.initiallyFocused as number);
+        }, this.props.initiallyFocused == true ? 0 : this.props.initiallyFocused as number);
       }
 
     }, []);
@@ -316,7 +319,7 @@ function internalDropDownList(vl: ValueLineController) {
     }
 
     return (
-      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes}} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
           <FormControlReadonly htmlAttributes={{
             ...vl.props.valueHtmlAttributes,
@@ -486,8 +489,7 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
           className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
           value={s.ctx.value ?? ""}
           onBlur={handleBlur || htmlAtts?.onBlur}
-          onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211
-          onInput={isIE11() ? handleTextOnChange : undefined}
+          onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
           placeholder={vl.getPlaceholder()}
           list={s.datalist ? s.ctx.getUniqueId("dataList") : undefined}
           ref={vl.inputElement as React.RefObject<HTMLInputElement>} />)
@@ -499,10 +501,6 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
       }
     </FormGroup>
   );
-}
-
-function isIE11(): boolean {
-  return (!!(window as any).MSInputMethodContext && !!(document as any).documentMode);
 }
 
 ValueLineRenderers.renderers.set("TextArea", (vl) => {
@@ -542,8 +540,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
-          onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
-          onInput={isIE11() ? handleTextOnChange : undefined}
+          onChange={handleTextOnChange}
           onBlur={handleBlur ?? htmlAtts?.onBlur}
           placeholder={vl.getPlaceholder()}
           innerRef={vl.inputElement as any} />
@@ -658,14 +655,12 @@ export function NumericTextBox(p: NumericTextBoxProps) {
     autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
     className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))} value={value}
     onBlur={handleOnBlur}
-    onChange={isIE11() ? undefined : handleOnChange} //https://github.com/facebook/react/issues/7211
-    onInput={isIE11() ? handleOnChange : undefined}
+    onChange={handleOnChange} //https://github.com/facebook/react/issues/7211
     onKeyDown={handleKeyDown}
-    onFocus={handleOnFocus}/>
+    onFocus={handleOnFocus} />
 
 
-  function handleOnFocus(e: React.FocusEvent<any>)
-  {
+  function handleOnFocus(e: React.FocusEvent<any>) {
     const input = e.currentTarget as HTMLInputElement;
 
     input.setSelectionRange(0, input.value != null ? input.value.length : 0);
@@ -691,7 +686,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
       p.htmlAttributes.onBlur(e);
   }
 
- 
+
   function unformat(format: Intl.NumberFormat, str: string): number {
 
     var options = format.resolvedOptions();
@@ -706,7 +701,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
     if (separators.decimal)
       str = str.replace(new RegExp('\\' + separators.decimal), '.');
 
-    var result =  parseFloat(str);
+    var result = parseFloat(str);
 
     if (isPercentage)
       return result / 100;
@@ -769,15 +764,20 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
     ...vl.props.valueHtmlAttributes,
   } as React.AllHTMLAttributes<any>;
 
+  if (htmlAttributes.placeholder === undefined)
+    htmlAttributes.placeholder = dateTimePlaceholder(luxonFormat);
+
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <div className={classes(s.ctx.rwWidgetClass, vl.mandatoryClass ? vl.mandatoryClass + "-widget" : undefined, s.calendarAlignEnd && "sf-calendar-end")}>
-          <DatePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(vl.props.initiallyFocused)}
+          <DatePicker
+            value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(vl.props.initiallyFocused)}
             valueEditFormat={luxonFormat}
             valueDisplayFormat={luxonFormat}
             includeTime={showTime}
-            inputProps={htmlAttributes as any} placeholder={htmlAttributes.placeholder}
+            inputProps={htmlAttributes as any}
+            placeholder={htmlAttributes.placeholder}
             messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
             min={s.minDate}
             max={s.maxDate}
@@ -798,7 +798,7 @@ function defaultRenderDay({ date, label }: { date: Date; label: string }) {
 
   var today = dateStr == DateTime.local().toISODate();
 
-  return <span className={today? "sf-today" : undefined}>{label}</span>;
+  return <span className={today ? "sf-today" : undefined}>{label}</span>;
 }
 
 export function trimDateToFormat(date: DateTime, type: "DateOnly" | "DateTime", format: string | undefined): DateTime {
@@ -806,11 +806,169 @@ export function trimDateToFormat(date: DateTime, type: "DateOnly" | "DateTime", 
   const luxonFormat = toLuxonFormat(format, type);
 
   if (!luxonFormat)
-    return date; 
+    return date;
 
   // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
   const formatted = date.toFormat(luxonFormat, { locale: 'en-GB' });
-  return DateTime.fromFormat(formatted, luxonFormat,{locale:'en-GB'}); 
+  return DateTime.fromFormat(formatted, luxonFormat, { locale: 'en-GB' });
+}
+
+
+ValueLineRenderers.renderers.set("DateTimeSplitted", (vl) => {
+
+  const s = vl.props;
+  const type = vl.props.type!.name as "DateOnly" | "DateTime";
+  const luxonFormat = toLuxonFormat(s.format, type);
+
+  const dt = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
+
+  if (s.ctx.readOnly)
+    return (
+      <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
+          {dt && toFormatWithFixes(dt, luxonFormat)}
+        </FormControlReadonly>)}
+      </FormGroup>
+    );
+
+  const handleDatePickerOnChange = (date: Date | null | undefined) => {
+
+    var newDT = date && DateTime.fromJSDate(date);
+
+    if (newDT)
+      newDT = trimDateToFormat(newDT, type, s.format);
+
+    // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
+    vl.setValue(newDT == null || !newDT.isValid ? null : newDT.toISO());
+  };
+
+  return (
+    <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      {vl.withItemGroup(
+        <DateTimePickerSplitted value={dt?.toJSDate()} onChange={handleDatePickerOnChange}
+          initiallyFocused={Boolean(vl.props.initiallyFocused)}
+          luxonFormat={luxonFormat}
+          minDate={s.minDate}
+          maxDate={s.maxDate}
+          mandatoryClass={vl.mandatoryClass}
+          timeTextBoxClass={s.ctx.formControlClass}
+          htmlAttributes={s.valueHtmlAttributes}
+          widgetClass={s.ctx.rwWidgetClass}
+          calendarProps={{
+            renderDay: defaultRenderDay,
+            ...s.calendarProps
+          }}
+        />
+      )}
+    </FormGroup>
+  );
+});
+
+function DateTimePickerSplitted(p: {
+  value: Date | null | undefined;
+  onChange: (newDateTime: Date | null | undefined) => void,
+  luxonFormat: string,
+  htmlAttributes?: React.AllHTMLAttributes<HTMLInputElement>,
+  mandatoryClass?: string | null,
+  widgetClass?: string
+  timeTextBoxClass?: string;
+  minDate?: Date,
+  maxDate?: Date,
+  initiallyFocused?: boolean,
+  calendarProps?: Partial<CalendarProps>;
+}) {
+
+  const [dateFormat, timeFormat] = splitLuxonFormat(p.luxonFormat);
+
+  const [temp, setTemp] = React.useState<{ type: "Date", date: string } | { type: "Time", time: string } | null>(null);
+
+  function handleTimeChange(time: string | null) {
+    if (time == null) {
+      if (p.value != null && temp == null) {
+        setTemp({ type: "Date", date: DateTime.fromJSDate(p.value).startOf("day").toISODate() });
+      } else if (temp?.type == "Time") {
+        setTemp(null);
+      }
+    } else {
+      if (p.value != null) {
+        p.onChange(DateTime.fromJSDate(p.value).startOf("day").plus(Duration.fromISOTime(time)).toJSDate());
+        setTemp(null);
+      } else if (temp?.type == "Date") {
+        p.onChange(DateTime.fromISO(temp.date).plus(Duration.fromISOTime(time)).toJSDate());
+        setTemp(null);
+      } else {
+        setTemp({ type: "Time", time: time });
+      }
+    }
+  }
+
+  function handleDateChange(date: Date | null | undefined) {
+    if (date == null) {
+      if (p.value != null && temp == null) {
+        p.onChange(null);
+        setTemp({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime() });
+      } else if (temp?.type == "Date") {
+        p.onChange(null);
+        setTemp(null);
+      }
+    } else {
+      if (p.value != null) {
+        p.onChange(DateTime.fromJSDate(date).startOf("day").plus(getTimeOfDay(DateTime.fromJSDate(p.value))).toJSDate());
+        setTemp(null);
+      } else if (temp?.type == "Time") {
+        p.onChange(DateTime.fromJSDate(date).startOf("day").plus(Duration.fromISOTime(temp.time)).toJSDate());
+        setTemp(null);
+      } else {
+        setTemp({ type: "Date", date: DateTime.fromJSDate(date).toISODate() });
+      }
+    }
+  }
+
+  function getTimeOfDay(dt: DateTime): Duration {
+    return dt.diff(dt.startOf("day"));
+  }
+
+  return (
+    <div className="d-flex">
+      <div style={{ flex: 2 }} className={classes(p.widgetClass, temp?.type == "Time" ? "sf-mandatory-widget" : p.mandatoryClass ? p.mandatoryClass + "-widget" : null, "pe-1")}>
+        <DatePicker
+          value={temp == null ? (p.value ? DateTime.fromJSDate(p.value).startOf("day").toJSDate() : null) :
+            (temp?.type == "Date" ? DateTime.fromISO(temp.date).toJSDate() : null)}
+          onChange={handleDateChange}
+          autoFocus={Boolean(p.initiallyFocused)}
+          valueEditFormat={dateFormat}
+          valueDisplayFormat={dateFormat}
+          includeTime={false}
+          inputProps={p.htmlAttributes as any}
+          placeholder={(p.htmlAttributes?.placeholder ?? dateTimePlaceholder(dateFormat))}
+          messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
+          min={p.minDate}
+          max={p.maxDate}
+          calendarProps={{
+            renderDay: defaultRenderDay,
+            ...p.calendarProps
+          }}
+        />
+      </div>
+      <div style={{ flex: 1 }}>
+        {timeFormat == null ?
+          <span className="text-danger">Error: No timeFormat in {p.luxonFormat}</span> :
+          <TimeTextBox
+            value={temp == null ?
+              (p.value ? getTimeOfDay(DateTime.fromJSDate(p.value))?.toISOTime() : null) :
+              (temp.type == "Time" ? temp.time : null)}
+            onChange={handleTimeChange}
+            validateKey={isDuration}
+            htmlAttributes={{
+              ...p.htmlAttributes,
+              placeholder: timePlaceholder(timeFormat),
+            }}
+            formControlClass={classes(p.timeTextBoxClass, temp?.type == "Date" ? "sf-mandatory" : p.mandatoryClass)}
+            durationFormat={timeFormat!} />
+        }
+      </div>
+    </div>
+  );
 }
 
 ValueLineRenderers.renderers.set("Time", (vl) => {
@@ -842,8 +1000,10 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
     ...vl.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
 
+  const durationFormat = toLuxonDurationFormat(s.format) ?? "hh:mm:ss"
+
   if (htmlAttributes.placeholder == undefined)
-    htmlAttributes.placeholder = s.format?.replaceAll("H", "h").replaceAll("\\:", ":");
+    htmlAttributes.placeholder = timePlaceholder(durationFormat);
 
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -853,29 +1013,29 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
           onChange={handleOnChange}
           validateKey={validateKey}
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
-          format={s.format}
+          durationFormat={durationFormat}
           innerRef={vl.inputElement as React.RefObject<HTMLInputElement>} />
       )}
     </FormGroup>
   );
 }
 
-export interface DurationTextBoxProps {
+export interface TimeTextBoxProps {
   value: string | null;
   onChange: (newValue: string | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   formControlClass?: string;
-  format?: string;
+  durationFormat?: string;
   htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
   innerRef?: React.RefObject<HTMLInputElement>;
 }
 
-export function TimeTextBox(p: DurationTextBoxProps) {
+export function TimeTextBox(p: TimeTextBoxProps) {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 
   const value = text != undefined ? text :
-    p.value != undefined ? timeToString(p.value, p.format) :
+    p.value != undefined ? Duration.fromISOTime(p.value).toFormat(p.durationFormat!) :
       "";
 
   return <input ref={p.innerRef}
@@ -885,8 +1045,7 @@ export function TimeTextBox(p: DurationTextBoxProps) {
     className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))}
     value={value}
     onBlur={handleOnBlur}
-    onChange={isIE11() ? undefined : handleOnChange} //https://github.com/facebook/react/issues/7211
-    onInput={isIE11() ? handleOnChange : undefined}
+    onChange={handleOnChange} //https://github.com/facebook/react/issues/7211
     onKeyDown={handleKeyDown}
     onFocus={handleOnFocus} />
 
@@ -924,27 +1083,28 @@ export function TimeTextBox(p: DurationTextBoxProps) {
     if (!p.validateKey(e))
       e.preventDefault();
   }
-}
 
-function fixCasual(val: string) {
+  function fixCasual(val: string) {
 
-  if (val.contains(":"))
-    return val.split(":").map(a => a.padStart(2, "0")).join(":");
+    if (val.contains(":"))
+      return val.split(":").map(a => a.padStart(2, "0")).join(":");
 
-  if (val.length == 1)
-    return "0" + val + "00";
+    if (val.length == 1)
+      return "0" + val + "00";
 
-  if (val.length == 2)
-    return  val + "00";
+    if (val.length == 2)
+      return val + "00";
 
-  if (val.length == 3)
-    return "0" + val;
+    if (val.length == 3)
+      return "0" + val;
 
-  return val;
+    return val;
+  }
+
 }
 
 TimeTextBox.defaultProps = {
-  format: "hh:mm:ss"
+  durationFormat: "hh:mm:ss"
 };
 
 ValueLineRenderers.renderers.set("RadioGroup", (vl) => {

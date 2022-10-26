@@ -21,19 +21,19 @@ public static class FilePathEmbeddedLogic
 
             FilePathEmbedded.CloneFunc = fp => new FilePathEmbedded(fp.FileType, fp.FileName, fp.GetByteArray());
 
-            FilePathEmbedded.OnPreSaving += efp =>
+            FilePathEmbedded.OnPreSaving += fpe =>
             {
-                if (efp.BinaryFile != null) //First time
+                if (fpe.BinaryFile != null) //First time
                 {
                     if (SyncFileSave)
-                        efp.SaveFile();
+                        fpe.SaveFile();
                     else
                     {
-                        var task = efp.SaveFileAsync();
+                        var task = fpe.SaveFileAsync();
                         Transaction.PreRealCommit += data =>
                         {
                             //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                            var a = efp; //For debugging
+                            var a = fpe; //For debugging
 
                             task.Wait();
                         };
@@ -176,43 +176,48 @@ public static class FilePathEmbeddedLogic
             (t, rowId, retriever) => propertyRoute);
     }
 
-    static PrefixPair CalculatePrefixPair(this FilePathEmbedded efp)
+    static PrefixPair CalculatePrefixPair(this FilePathEmbedded fpe)
     {
         using (new EntityCache(EntityCacheType.ForceNew))
-            return efp.FileType.GetAlgorithm().GetPrefixPair(efp);
+            return fpe.FileType.GetAlgorithm().GetPrefixPair(fpe);
     }
 
-    public static byte[] GetByteArray(this FilePathEmbedded efp)
+    public static byte[] GetByteArray(this FilePathEmbedded fpe)
     {
-        return efp.BinaryFile ?? efp.FileType.GetAlgorithm().ReadAllBytes(efp);
+        return fpe.BinaryFile ?? fpe.FileType.GetAlgorithm().ReadAllBytes(fpe);
     }
 
-    public static Stream OpenRead(this FilePathEmbedded efp)
+    public static FileContent ToFileContent(this FilePathEmbedded fpe)
     {
-        return efp.FileType.GetAlgorithm().OpenRead(efp);
+        return new FileContent(fpe.FileName, fpe.GetByteArray());
     }
 
-    public static FilePathEmbedded SaveFile(this FilePathEmbedded efp)
+    public static Stream OpenRead(this FilePathEmbedded fpe)
     {
-        var alg = efp.FileType.GetAlgorithm();
-        alg.ValidateFile(efp);
-        alg.SaveFile(efp);
-        return efp;
+        return fpe.FileType.GetAlgorithm().OpenRead(fpe);
     }
 
-
-    public static Task SaveFileAsync(this FilePathEmbedded efp)
+    public static FilePathEmbedded SaveFile(this FilePathEmbedded fpe)
     {
-        var alg = efp.FileType.GetAlgorithm();
-        alg.ValidateFile(efp);
-        return alg.SaveFileAsync(efp);
+        var alg = fpe.FileType.GetAlgorithm();
+        alg.ValidateFile(fpe);
+        alg.SaveFile(fpe);
+        return fpe;
     }
 
-    public static void DeleteFileOnCommit(this FilePathEmbedded efp)
+
+    public static Task SaveFileAsync(this FilePathEmbedded fpe)
+    {
+        var alg = fpe.FileType.GetAlgorithm();
+        alg.ValidateFile(fpe);
+        return alg.SaveFileAsync(fpe);
+    }
+
+    public static void DeleteFileOnCommit(this FilePathEmbedded fpe)
     {
         Transaction.PostRealCommit += dic =>
         {
-            efp.FileType.GetAlgorithm().DeleteFiles(new List<IFilePath> { efp });
+            fpe.FileType.GetAlgorithm().DeleteFiles(new List<IFilePath> { fpe });
         };
     }
 }
