@@ -19,6 +19,9 @@ public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
 
     public bool RunRepeatedly { get; set; }
 
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string? DecisionOptionName { get; set; }
+
     public WorkflowTimerEmbedded? Timer { get; set; }
 
     public Lite<WorkflowActivityEntity>? BoundaryOf { get; set; }
@@ -37,6 +40,7 @@ public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
             Name = this.Name,
             Type = this.Type,
             RunRepeatedly = this.RunRepeatedly,
+            DecisionOptionName = this.DecisionOptionName,
             Task = WorkflowEventTaskModel.GetModel(this),
             Timer = this.Timer,
             BpmnElementId = this.BpmnElementId,
@@ -51,6 +55,7 @@ public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
         this.Name = wModel.Name;
         this.Type = wModel.Type;
         this.RunRepeatedly = wModel.RunRepeatedly;
+        this.DecisionOptionName = wModel.DecisionOptionName;
         this.Timer = wModel.Timer;
         this.BpmnElementId = wModel.BpmnElementId;
         this.CopyMixinsFrom(wModel);
@@ -61,6 +66,9 @@ public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
         if (pi.Name == nameof(RunRepeatedly) && RunRepeatedly && Type != WorkflowEventType.BoundaryForkTimer)
             RunRepeatedly = false;
+
+        if (pi.Name == nameof(DecisionOptionName) && !string.IsNullOrWhiteSpace(DecisionOptionName) && Type != WorkflowEventType.BoundaryInterruptingTimer)
+            DecisionOptionName = null;
 
         return base.PropertyValidation(pi);
     }
@@ -145,6 +153,9 @@ public class WorkflowEventModel : ModelEntity
     public WorkflowEventType Type { get; set; }
 
     public bool RunRepeatedly { get; set; }
+
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string? DecisionOptionName { get; set; }
 
     public WorkflowEventTaskModel? Task { get; set; }
 

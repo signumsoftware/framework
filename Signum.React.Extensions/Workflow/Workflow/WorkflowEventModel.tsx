@@ -62,6 +62,7 @@ export default function WorkflowEventModelComponent(p: WorkflowEventModelCompone
       <ValueLine ctx={ctx.subCtx(we => we.name)} />
       <ValueLine ctx={ctx.subCtx(we => we.type)} readOnly={isTimer(ctx.value.type!)} optionItems={getTypeComboItems()} onChange={loadTask} />
       {ctx.value.type == "BoundaryForkTimer" && <ValueLine ctx={ctx.subCtx(a => a.runRepeatedly)} />}
+      {ctx.value.type == "BoundaryInterruptingTimer" && <ValueLine ctx={ctx.subCtx(a => a.decisionOptionName)} />}
       {ctx.value.task && <WorkflowEventTask ctx={ctx.subCtx(a => a.task!)} mainEntityType={ctx.value.mainEntityType} isConditional={isConditional()} />}
       {ctx.value.timer && <WorkflowTimer ctx={ctx.subCtx(a => a.timer!)} mainEntityType={ctx.value.mainEntityType}/>}
     </div>

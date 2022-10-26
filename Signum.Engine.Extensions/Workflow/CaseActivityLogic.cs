@@ -1121,7 +1121,7 @@ public static class CaseActivityLogic
                     }.Save();
                     break;
                 case WorkflowEventType.BoundaryInterruptingTimer:
-                    ca.MakeDone(DoneType.Timeout, null);
+                    ca.MakeDone(DoneType.Timeout, boundaryEvent.DecisionOptionName);
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected Boundary Timer Type " + boundaryEvent.Type);

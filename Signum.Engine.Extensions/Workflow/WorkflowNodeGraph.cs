@@ -2,6 +2,7 @@ using Signum.Entities.Workflow;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Workflow;
 
@@ -223,6 +224,19 @@ public class WorkflowNodeGraph
 
             if (e.Type.IsTimer())
             {
+                if (e.Type == WorkflowEventType.BoundaryInterruptingTimer)
+                {
+                    var activity = Activities.GetOrThrow(e.BoundaryOf!);
+                    if (string.IsNullOrWhiteSpace(e.DecisionOptionName) && activity.Type == WorkflowActivityType.Decision)
+                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHave2BecauseActivityIs3.NiceToString(e, activity, e.NicePropertyName(a => a.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
+
+                    if (!string.IsNullOrWhiteSpace(e.DecisionOptionName) && activity.Type != WorkflowActivityType.Decision)
+                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1CanNotHave2BecauseActivityIsNot3.NiceToString(e, activity, e.NicePropertyName(a => a.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
+
+                    if (!string.IsNullOrWhiteSpace(e.DecisionOptionName) && !activity.DecisionOptions.Any(a => a.Name == e.DecisionOptionName))
+                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1HasInvalid23.NiceToString(e, activity, e.NicePropertyName(a => a.DecisionOptionName), e.DecisionOptionName));
+                }
+
                 var boundaryOutput = NextConnections(e).Only();
 
                 if (boundaryOutput == null || boundaryOutput.Type != ConnectionType.Normal)

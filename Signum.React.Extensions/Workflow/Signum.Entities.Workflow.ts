@@ -503,6 +503,7 @@ export interface WorkflowEventEntity extends Entities.Entity, IWorkflowNodeEntit
   lane: WorkflowLaneEntity;
   type: WorkflowEventType;
   runRepeatedly: boolean;
+  decisionOptionName: string | null;
   timer: WorkflowTimerEmbedded | null;
   boundaryOf: Entities.Lite<WorkflowActivityEntity> | null;
   xml: WorkflowXmlEmbedded;
@@ -515,6 +516,7 @@ export interface WorkflowEventModel extends Entities.ModelEntity {
   name: string | null;
   type: WorkflowEventType;
   runRepeatedly: boolean;
+  decisionOptionName: string | null;
   task: WorkflowEventTaskModel | null;
   timer: WorkflowTimerEmbedded | null;
   bpmnElementId: string;
@@ -847,6 +849,9 @@ export module WorkflowValidationMessage {
   export const Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3 = new MessageKey("WorkflowValidationMessage", "Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3");
   export const DecisionOption0IsDeclaredButNeverUsedInAConnection = new MessageKey("WorkflowValidationMessage", "DecisionOption0IsDeclaredButNeverUsedInAConnection");
   export const DecisionOptionName0IsNotDeclaredInAnyActivity = new MessageKey("WorkflowValidationMessage", "DecisionOptionName0IsNotDeclaredInAnyActivity");
+  export const BoundaryTimer0OfActivity1CanNotHave2BecauseActivityIsNot3 = new MessageKey("WorkflowValidationMessage", "BoundaryTimer0OfActivity1CanNotHave2BecauseActivityIsNot3");
+  export const BoundaryTimer0OfActivity1ShouldHave2BecauseActivityIs3 = new MessageKey("WorkflowValidationMessage", "BoundaryTimer0OfActivity1ShouldHave2BecauseActivityIs3");
+  export const BoundaryTimer0OfActivity1HasInvalid23 = new MessageKey("WorkflowValidationMessage", "BoundaryTimer0OfActivity1HasInvalid23");
 }
 
 export const WorkflowXmlEmbedded = new Type<WorkflowXmlEmbedded>("WorkflowXmlEmbedded");
