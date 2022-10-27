@@ -1,14 +1,15 @@
 using Signum.Entities.Mailing;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Engine.Mailing.Senders;
 
-public partial class EmailSenderManager : IEmailSenderManager
+public abstract class BaseEmailSender
 {
-    private Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration;
 
-    public EmailSenderManager(Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration)
+    EmailSenderConfigurationEntity senderConfig;
+    protected BaseEmailSender(EmailSenderConfigurationEntity senderConfig)
+
     {
-        this.getEmailSenderConfiguration = getEmailSenderConfiguration;
+        this.senderConfig = senderConfig;
     }
 
     public virtual void Send(EmailMessageEntity email)
@@ -29,6 +30,7 @@ public partial class EmailSenderManager : IEmailSenderManager
 
                 email.State = EmailMessageState.Sent;
                 email.Sent = Clock.Now;
+                email.SentBy = senderConfig.ToLite();
                 email.Save();
             }
             catch (Exception ex)
@@ -55,25 +57,5 @@ public partial class EmailSenderManager : IEmailSenderManager
         }
     }
 
-    protected virtual void SendInternal(EmailMessageEntity email)
-    {
-        var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
-
-        var config = getEmailSenderConfiguration(template, email.Target, email);
-
-        if (config.SMTP != null)
-        {
-            SendSMTP(email, config.SMTP);
-        }
-        else if (config.Exchange != null)
-        {
-            SendExchangeWebService(email, config.Exchange);
-        }
-        else if (config.MicrosoftGraph != null)
-        {
-            SendMicrosoftGraph(email, config.MicrosoftGraph);
-        }
-        else
-            throw new InvalidOperationException("No way to send email found");
-    }
+    protected abstract void SendInternal(EmailMessageEntity email);
 }
