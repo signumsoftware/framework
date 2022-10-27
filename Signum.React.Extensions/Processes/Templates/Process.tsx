@@ -4,7 +4,7 @@ import { SearchValueLine, SearchValueLineController } from '@framework/Search'
 import { toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TypeContext } from '@framework/TypeContext'
-import { ProcessEntity, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
+import { ProcessEntity, ProcessExceptionLineEntity, ProcessState } from '../Signum.Entities.Processes'
 import ProgressBar from '../../MachineLearning/Templates/ProgressBar';
 import { BsColor } from '@framework/Components';
 import { useInterval } from '@framework/Hooks'
@@ -54,7 +54,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
 
       <h4>{ctx.niceName(a => a.progress)}</h4>
 
-      <ProcessProgressBar p={ctx.value}/>
+      <ProcessProgressBar state={ctx.value.state} status={ctx.value.status} progress={ctx.value.progress} />
 
       <SearchValueLine ctx={ctx3}
         badgeColor="danger"
@@ -67,24 +67,24 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
   );
 }
 
-function ProcessProgressBar({ p }: { p: ProcessEntity }) {
+export function ProcessProgressBar({ state, status, progress }: { state: ProcessState, status?: string |null, progress: number | null }) {
 
   const color: BsColor | undefined =
-    p.state == "Queued" ? "info" :
-      p.state == "Executing" ? undefined :
-        p.state == "Finished" ? "success" :
-          p.state == "Suspending" || p.state == "Suspended" ? "warning" :
-            p.state == "Error" ? "danger" :
+    state == "Queued" ? "info" :
+      state == "Executing" ? undefined :
+        state == "Finished" ? "success" :
+          state == "Suspending" || state == "Suspended" ? "warning" :
+            state == "Error" ? "danger" :
               undefined;
 
   return (
     <ProgressBar
-      message={p.state == "Finished" ? null : p.status}
-      value={p.state == "Created" ? 0 : p.progress}
+      message={state == "Finished" ? null : status}
+      value={state == "Created" ? 0 : progress}
       color={color}
-      showPercentageInMessage={p.state != "Created" && p.state != "Finished"}
-      animated={p.state == "Finished" ? false : undefined}
-      striped={p.state == "Finished" ? false : undefined}
+      showPercentageInMessage={state != "Created" && state != "Finished"}
+      animated={state == "Finished" ? false : undefined}
+      striped={state == "Finished" ? false : undefined}
     />
   );
 }

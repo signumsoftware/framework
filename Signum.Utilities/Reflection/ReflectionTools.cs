@@ -11,11 +11,6 @@ public static class ReflectionTools
 {
     public static bool? IsNullable(this FieldInfo fi)
     {
-        if (fi.Name.Contains("Resource"))
-        {
-
-        }
-
         var info = new NullabilityInfoContext().Create(fi);
 
         if (info.ReadState == NullabilityState.Unknown)
@@ -26,11 +21,6 @@ public static class ReflectionTools
 
     public static bool? IsNullable(this PropertyInfo pi)
     {
-        if (pi.Name.Contains("Resource"))
-        {
-
-        }
-
         var info = new NullabilityInfoContext().Create(pi);
 
         if (info.ReadState == NullabilityState.Unknown)

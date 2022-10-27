@@ -8,7 +8,7 @@ import * as Navigator from '@framework/Navigator';
 import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { CaseActivityStats, formatDuration } from "../WorkflowClient";
 import { FormGroup, StyleContext } from "@framework/Lines";
-import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity } from "../Signum.Entities.Workflow";
+import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity, WorkflowEventType } from "../Signum.Entities.Workflow";
 import { EntityLink, SearchControl } from "@framework/Search";
 import { OperationLogEntity } from "@framework/Signum.Entities.Basics";
 import { Tab, Tabs, Modal } from 'react-bootstrap';
@@ -128,7 +128,8 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
       <FormGroup ctx={ctx} label={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)}>{formatMinutes(stats.estimatedDuration)}</FormGroup>
       <FormGroup ctx={ctx} label={WorkflowActivityMessage.AverageDuration.niceToString()}>{formatMinutes(stats.averageDuration)}</FormGroup>
       <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.duration)}>{formatMinutes(stats.duration)}</FormGroup>
-      <FormGroup ctx={ctx} label={WorkflowActivityType.niceTypeName()}>{WorkflowActivityType.niceToString(stats.workflowActivityType)}</FormGroup>
+      {stats.workflowActivityType && <FormGroup ctx={ctx} label={WorkflowActivityType.niceTypeName()}>{WorkflowActivityType.niceToString(stats.workflowActivityType)}</FormGroup>}
+      {stats.workflowEventType && <FormGroup ctx={ctx} label={WorkflowEventType.niceTypeName()}>{WorkflowEventType.niceToString(stats.workflowEventType)}</FormGroup>}
       {
         stats.workflowActivityType == "Task" || stats.workflowActivityType == "Decision" ? renderTaskExtra() :
           stats.workflowActivityType == "Script" ? renderScriptTaskExtra() :
