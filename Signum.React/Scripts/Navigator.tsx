@@ -472,27 +472,27 @@ export function typeRequiresSaveOperation(typeName: string): boolean {
 }
 
 export interface IsFindableOptions {
-    isSearch?: boolean;
-    isEmbedded?: boolean;
+    fullScreenSearch?: boolean;
+    isEmbeddedEntity?: boolean;
 }
 
 export function isFindable(type: PseudoType, options?: IsFindableOptions) {
 
   const typeName = getTypeName(type);
 
-  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbedded);
+  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbeddedEntity);
 
-  return baseIsReadOnly && Finder.isFindable(typeName, true);
+  return baseIsReadOnly && Finder.isFindable(typeName, options?.fullScreenSearch);
 }
 
-function typeIsFindable(typeName: string, isEmbedded: boolean | undefined) {
+function typeIsFindable(typeName: string, isEmbeddedEntity: boolean | undefined) {
 
   const es = entitySettings[typeName];
 
   if (es != undefined && es.isFindable != undefined)
     return es.isFindable;
 
-  if (isEmbedded)
+  if (isEmbeddedEntity)
     return false;
 
   const typeInfo = tryGetTypeInfo(typeName);
@@ -606,38 +606,16 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (type.isEmbedded || type.name == IsByAll)
     return null;
 
-  const types = tryGetTypeInfos(type).notNull();
+  let types = tryGetTypeInfos(type).notNull();
   showType ??= types.length > 1;
+
+  types = types.filter(t => isFindable(t));
 
   if (types.length == 0)
     return null;
 
   if (types.length == 1)
     return getAutoCompleteBasic(types[0]!, findOptions, ctx, create, showType);
-
-  if (findOptionsDictionary == null && types.every(t => {
-    var s = getSettings(t!);
-    return s?.autocomplete == null && s?.defaultFindOptions == null;
-  })) {
-
-    var maxDelay = types.map(t => getSettings(t!)?.autocompleteDelay).notNull().max() ?? undefined;
-
-    return new LiteAutocompleteConfig((signal, subStr: string) => {
-      return Finder.API.findLiteLike({
-        types: type.name,
-        subString: subStr,
-        count: 5
-      }, signal)
-        .then(lites => [
-          ...lites,
-          ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
-        ]);
-    },
-      {
-        showType: showType,
-        itemsDelay: maxDelay,
-      });
-  }
 
   return new MultiAutoCompleteConfig(types.toObject(t => t!.name,
     t => getAutoCompleteBasic(t!, (findOptionsDictionary && findOptionsDictionary[t!.name]), ctx, create, showType!)
@@ -656,30 +634,12 @@ export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | 
       return acc;
   }
 
-  findOptions ??= s?.defaultFindOptions;
+  var fo = findOptions ?? s?.defaultFindOptions ?? { queryName: type.name };
 
-  if (findOptions)
-    return new FindOptionsAutocompleteConfig(findOptions, {
-      itemsDelay: s?.autocompleteDelay,
-      getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
-    });
-
-  return new LiteAutocompleteConfig((signal, subStr: string) => {
-
-    return Finder.API.findLiteLike({
-      types: type.name,
-      subString: subStr,
-      count: 5
-    }, signal)
-      .then(lites => [
-        ...lites,
-        ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
-      ]);
-  },
-    {
-      showType: showType ?? type.name.contains(","),
-      itemsDelay: s?.autocompleteDelay,
-    });
+  return new FindOptionsAutocompleteConfig(fo, {
+    itemsDelay: s?.autocompleteDelay,
+    getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
+  });
 }
 
 export interface ViewOptions {

@@ -281,7 +281,6 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       .then(qd => Finder.parseFindOptions({
         ...fo,
         filterOptions: FindOptionsAutocompleteConfig.filtersWithSubStr(fo, qd, qs, subStr),
-        includeDefaultFilters: false,
       }, qd, true))
       .then(fop => this.abortableRequest.getData(Finder.getQueryRequest(fop)))
       .then(rt => {
