@@ -480,9 +480,9 @@ export function isFindable(type: PseudoType, options?: IsFindableOptions) {
 
   const typeName = getTypeName(type);
 
-  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbeddedEntity);
+  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbeddedEntity ?? true);
 
-  return baseIsReadOnly && Finder.isFindable(typeName, options?.fullScreenSearch);
+  return baseIsReadOnly && Finder.isFindable(typeName, options?.fullScreenSearch ?? true);
 }
 
 function typeIsFindable(typeName: string, isEmbeddedEntity: boolean | undefined) {
