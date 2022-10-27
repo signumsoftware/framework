@@ -10,10 +10,10 @@ public static class FilterValueConverter
 {
     public static List<IFilterValueConverter> SpecificConverters = new List<IFilterValueConverter>()
     {
-        new LiteFilterValueConverter(),
-        new SmartDateTimeFilterValueConverter(),
         new CurrentEntityConverter(), 
         new CurrentUserConverter(), 
+        new SmartDateTimeFilterValueConverter(),
+        new LiteFilterValueConverter(),
     };
 
     public static string? ToString(object? value, Type type)

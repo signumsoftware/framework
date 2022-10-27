@@ -1176,8 +1176,13 @@ public static class CaseActivityLogic
                 if (decompositionCaseActivity.DoneDate != null)
                     throw new InvalidOperationException("The DecompositionCaseActivity is already finished");
 
-                var lastActivities = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault()).ToList();
-                decompositionCaseActivity.Note = lastActivities.NotNull().Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
+                var lastActivitiesNotes = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault())
+                    .Where(ca => ca != null)
+                    .Select(ca =>  new { ca!.DoneBy, ca!.Note})
+                    .ToList()
+                    .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
+
+                decompositionCaseActivity.Note = lastActivitiesNotes;
                 ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);
             }
         }
