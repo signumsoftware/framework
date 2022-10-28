@@ -124,7 +124,7 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
                 <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
               </div>
               <div className="code-container">
-                <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
+                <pre style={{ border: "0px", margin: "0px" }}>{"bool Evaluate(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
                 <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
               </div>

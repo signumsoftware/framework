@@ -23,7 +23,7 @@ import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation, CaseActivityMessage, CaseMessage, WorkflowScriptRetryStrategyEntity
+  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation, CaseActivityMessage, CaseMessage, WorkflowScriptRetryStrategyEntity, WorkflowEventType
 } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -910,8 +910,9 @@ export interface CaseActivityStats {
   caseActivity: Lite<CaseActivityEntity>;
   previousActivity: Lite<CaseActivityEntity>;
   workflowActivity: Lite<WorkflowActivityEntity>;
-  workflowActivityType: WorkflowActivityType;
-  subWorkflow: Lite<WorkflowEntity>;
+  workflowActivityType?: WorkflowActivityType;
+  workflowEventType?: WorkflowEventType;
+  subWorkflow?: Lite<WorkflowEntity>;
   notifications: number;
   startDate: string;
   doneDate?: string;
