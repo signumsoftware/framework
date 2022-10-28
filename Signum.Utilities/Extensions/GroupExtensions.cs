@@ -61,6 +61,14 @@ public static class GroupExtensions
             .ToDictionaryEx(g => g.Key, g=>g.ToList());
     }
 
+    public static Dictionary<K, List<V>> GroupToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector, IEqualityComparer<K> comparer)
+    where K : notnull
+    {
+        return collection
+            .GroupBy(keySelector, valueSelector, comparer)
+            .ToDictionaryEx(g => g.Key, g => g.ToList(), comparer);
+    }
+
 
     public static Dictionary<K, List<T>> GroupToDictionaryDescending<T, K>(this IEnumerable<T> collection, Func<T, K> keySelector)
         where K : notnull
