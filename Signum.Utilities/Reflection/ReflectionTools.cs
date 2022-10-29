@@ -384,10 +384,10 @@ public static class ReflectionTools
         }
     }
 
-    public static T Parse<T>(string value)
+    public static T Parse<T>(string? value)
     {
         if (typeof(T) == typeof(string))
-            return (T)(object)value;
+            return (T)(object)value!;
 
         if (value == null || value == "")
             return (T)(object?)null!;
@@ -405,10 +405,10 @@ public static class ReflectionTools
         return (T)Convert.ChangeType(value, utype)!;
     }
 
-    public static object? Parse(string value, Type type)
+    public static object? Parse(string? value, Type type)
     {
         if (type == typeof(string))
-            return (object)value;
+            return (object?)value;
 
         if (value == null || value == "" || value == " ")
             return (object?)null;

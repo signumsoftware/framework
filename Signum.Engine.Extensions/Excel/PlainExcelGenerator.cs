@@ -67,7 +67,7 @@ public static class PlainExcelGenerator
         }
     }
 
-    public static void WritePlainExcel(ResultTable results, string fileName,string title)
+    public static void WritePlainExcel(ResultTable results, string fileName, string title)
     {
         using (FileStream fs = File.Create(fileName))
             WritePlainExcel(results, fs,title);
