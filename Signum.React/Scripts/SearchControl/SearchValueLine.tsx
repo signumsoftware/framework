@@ -39,7 +39,7 @@ export interface SearchValueLineProps {
   avoidAutoRefresh?: boolean;
   deps?: React.DependencyList;
   extraButtons?: (vscc: SearchValueController) => React.ReactNode;
-  create?: boolean;
+  create?: boolean | "ifNull" ;
   onCreate?: () => Promise<any>;
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
   searchControlProps?: Partial<SearchControlProps>;
@@ -129,8 +129,8 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
       {EntityBaseController.findIcon}
     </a>;
-
-  const create = (p.create ?? false) &&
+  
+  const create = ((p.create == "ifNull" && value === null) || (p.create ?? false)) &&
     <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
