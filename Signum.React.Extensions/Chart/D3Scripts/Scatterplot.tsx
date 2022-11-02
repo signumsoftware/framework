@@ -276,7 +276,7 @@ function CanvasScatterplot(p: {
       vctx.strokeStyle = vColor;
       colorToData[vColor] = r;
 
-      if (horizontalColumn2 == null && verticalColumn2) {
+      if (horizontalColumn2 == null && verticalColumn2 == null) {
 
         var xVal = x(horizontalColumn.getValue(r))!;
         var yVal = h - y(verticalColumn.getValue(r))!;
