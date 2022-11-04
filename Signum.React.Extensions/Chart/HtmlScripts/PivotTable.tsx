@@ -128,8 +128,10 @@ function getMultiAggregator(columns: ChartColumn<number>[]): (values: MultiNum[]
     return undefined;
   };
 
-  if (columns.length == 1)
+  if (columns.length == 1) {
+    const count0 = getCountNNSelectors(columns[0]); //Just for the error
     return getSingleAggregator(columns[0].token!) as (values: MultiNum[]) => MultiNum;
+  }
 
   if (columns.length == 2) {
     const ag0 = getSingleAggregator(columns[0].token!); const count0 = getCountNNSelectors(columns[0]);
@@ -312,7 +314,11 @@ export default function renderPivotTable({ data, width, height, parameters, load
   const horizontalDic = multiDictionary(data.rows, horCols);
   const verticalDic = multiDictionary(data.rows, vertCols);
 
-  var aggregate = getMultiAggregator(valueColumns);
+  var aggregate = (
+    horColsWitParams.some(a => a.params.aggegrateValues == "Yes") ||
+    vertColsWitParams.some(a => a.params.aggegrateValues == "Yes")
+  ) ? getMultiAggregator(valueColumns) : null;
+
   var selector = getMultiSelector(valueColumns);
 
   var firstValue: (array: MultiNum) => number =
@@ -328,15 +334,15 @@ export default function renderPivotTable({ data, width, height, parameters, load
       if (dor.length == 1)
         return selector(dor[0]);
 
-      return aggregate(dor.map(row => selector(row)));
+      return aggregate!(dor.map(row => selector(row)));
     }
 
     if (dor instanceof RowGroup)
-      return dor.subGroups ? aggregate(dor.subGroups.map(a => sumValue(a))) :
+      return dor.subGroups ? aggregate!(dor.subGroups.map(a => sumValue(a))) :
         dor.rows ? sumValue(dor.rows) :
           0;
 
-    return aggregate(Dic.getValues(dor).map(group2 => sumValue(group2.dicOrRows)));
+    return aggregate!(Dic.getValues(dor).map(group2 => sumValue(group2.dicOrRows)));
   }
 
   function getLevelValues(dor: RowDictionary, level: number): MultiNum[] {
@@ -346,16 +352,16 @@ export default function renderPivotTable({ data, width, height, parameters, load
       return Dic.getValues(dor).flatMap(a => getLevelValues(a.dicOrRows as RowDictionary, level - 1));
   }
 
-  function getCellStyle(values: number[], params: DimParameters, column?: ChartColumn<unknown>): CellStyle {
+  function getCellStyle(values: ()=> number[], params: DimParameters, column?: ChartColumn<unknown>): CellStyle {
 
     let background: ((key: unknown, num: number) => string | undefined) | undefined = undefined;
     if (params.gradient == "EntityPalette" && column != null) {
       background = (key: unknown, num: number) => column.getColor(key) ?? undefined;
     }
     else if (params.scale && params.gradient != "None") {
-      const scaleFunc = ChartUtils.scaleFor(valueColumns[0], values, 0, 1, params.scale);
+      const scaleFunc = ChartUtils.scaleFor(valueColumns[0], values(), 0, 1, params.scale);
       const gradient = ChartUtils.getColorInterpolation(params.gradient)!;
-      background = (key: unknown, num: number) => gradient(scaleFunc(num)!);
+      background = (key: unknown, num: number) => num == null ? "white" : gradient(scaleFunc(num)!);
     }
 
     return ({
@@ -427,15 +433,15 @@ export default function renderPivotTable({ data, width, height, parameters, load
     });
   }
 
-  const horStyles = horColsWitParams.map((cp, i) => getCellStyle(getLevelValues(horizontalDic as RowDictionary, i).map(firstValue), cp.params, cp.col));
-  const vertStyles = vertColsWitParams.map((cp, i) => getCellStyle(getLevelValues(verticalDic as RowDictionary, i).map(firstValue), cp.params, cp.col));
+  const horStyles = horColsWitParams.map((cp, i) => getCellStyle(() => getLevelValues(horizontalDic as RowDictionary, i).map(firstValue), cp.params, cp.col));
+  const vertStyles = vertColsWitParams.map((cp, i) => getCellStyle(() => getLevelValues(verticalDic as RowDictionary, i).map(firstValue), cp.params, cp.col));
 
 
   const baseFilters = chartRequest.filterOptions.filter(fo => !isFilterGroupOptionParsed(fo)) as FilterConditionOptionParsed[];
   const horizontalGroups = getRowGroups(horizontalDic, horStyles, 0, []);
   const verticalGroups = getRowGroups(verticalDic, vertStyles, 0, []);
 
-  const valueStyle = getCellStyle(data.rows.map(row => firstValue(selector(row))), getDimParameters("Value"));
+  const valueStyle = getCellStyle(() => data.rows.map(row => firstValue(selector(row))), getDimParameters("Value"));
 
   const cellFormatter = getCellFormatter(multiValueFormat, valueColumns);
 
@@ -480,16 +486,16 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     var lite = gr && isLite(gr.value) ? gr.value : undefined;
 
-    const multiVal = sumValue(p.gor);
+    let multiVal: MultiNum |undefined ;
 
-    const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <a href="#" onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal)}</a>;
+    const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <a href="#" onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal ??= sumValue(p.gor))}</a>;
 
     var color =
       p.isSummary == 4 ? "rgb(228, 228, 228)" :
         p.isSummary == 3 ? "rgb(236, 236, 236)" :
           p.isSummary == 2 ? "rgb(241, 241, 241)" :
             p.isSummary == 1 ? "#f8f8f8" :
-              style && style.background && style.background(gr?.value, firstValue(multiVal));
+              style && style.background && style.background(gr?.value, firstValue(multiVal ??= sumValue(p.gor)));
 
     
 
