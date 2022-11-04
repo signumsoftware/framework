@@ -76,7 +76,7 @@ export default function renderColumns({ data, width, height, parameters, loading
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />
       </g>
 
-      {paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, initialLoad, onDrillDown, colIndex: 0, colCount: 1, memo, detector })}
+      {paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, hasHorizontalScale: false, initialLoad, onDrillDown, colIndex: 0, colCount: 1, memo, detector })}
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
       <g opacity={dashboardFilter ? .5 : undefined}>
@@ -88,9 +88,14 @@ export default function renderColumns({ data, width, height, parameters, loading
 }
 
 
-export function paintColumns({ xRule, yRule, x, y, keyValues, data, parameters, initialLoad, onDrillDown, colIndex, colCount, memo, detector }: ChartScriptHorizontalProps & {
+export function paintColumns({ xRule, yRule, x : x2, y, keyValues, data, parameters, hasHorizontalScale, initialLoad, onDrillDown, colIndex, colCount, memo, detector }: ChartScriptHorizontalProps & {
   colIndex: number, colCount: number
 }) {
+
+  if (hasHorizontalScale)
+    throw new Error("hasHorizontalScale is not supported");
+
+  const x = x2 as d3.ScaleBand<string>;
 
   var labelsPadding = 5;
 

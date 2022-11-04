@@ -609,7 +609,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   let types = tryGetTypeInfos(type).notNull();
   showType ??= types.length > 1;
 
-  types = types.filter(t => isFindable(t));
+  types = types.filter(t => isFindable(t, { fullScreenSearch: false }));
 
   if (types.length == 0)
     return null;

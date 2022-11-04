@@ -97,10 +97,10 @@ internal class DbExpressionComparer : ExpressionComparer
             DbExpressionType.MList => CompareMList((MListExpression)a, (MListExpression)b),
             DbExpressionType.MListElement => CompareMListElement((MListElementExpression)a, (MListElementExpression)b),
             DbExpressionType.PrimaryKey => ComparePrimaryKey((PrimaryKeyExpression)a, (PrimaryKeyExpression)b),
+            DbExpressionType.AdditionalField => CompareAdditionalField((AdditionalFieldExpression)a, (AdditionalFieldExpression)b),
             _ => throw new InvalidOperationException("Unexpected " + ((DbExpression)a).DbNodeType),
         };
     }
-
 
     protected virtual bool CompareTable(TableExpression a, TableExpression b)
     {
@@ -487,7 +487,7 @@ internal class DbExpressionComparer : ExpressionComparer
             && Compare(a.BackID, b.BackID);
     }
 
-    protected virtual bool CompareMList(AdditionalFieldExpression a, AdditionalFieldExpression b)
+    protected virtual bool CompareAdditionalField(AdditionalFieldExpression a, AdditionalFieldExpression b)
     {
         return a.Route.Equals(b.Route)
             && Compare(a.BackID, b.BackID);

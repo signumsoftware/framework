@@ -426,6 +426,9 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
         return acc.renderItem(item, subStr);
     }
 
+    if (isLite(item))
+      return Navigator.renderLite(item, subStr);
+
     throw new Error("Unexpected " + JSON.stringify(item));
   }
   getEntityFromItem(item: unknown): Promise<ModifiableEntity | Lite<Entity> | undefined> {
@@ -434,6 +437,9 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
       if (acc.isCompatible(item, type))
         return acc.getEntityFromItem(item);
     }
+
+    if (isLite(item))
+      return Promise.resolve(item);
 
     throw new Error("Unexpected " + JSON.stringify(item));
   }
@@ -444,6 +450,9 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
         return acc.getDataKeyFromItem(item);
     }
 
+    if (isLite(item))
+      return liteKey(item);
+
     throw new Error("Unexpected " + JSON.stringify(item));
   }
   getItemFromEntity(entity: ModifiableEntity | Lite<Entity>): Promise<unknown> {
@@ -451,10 +460,16 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
     var type = isLite(entity) ? entity.EntityType : entity.Type;
 
     var acc = this.implementations[type];
-    if (acc == null)
-      throw new Error("Unexpected " + type);
+    if (acc != null)
+      return acc.getItemFromEntity(entity);
 
-    return acc.getItemFromEntity(entity);
+    if (isLite(entity))
+      return Promise.resolve(entity);
+
+    if (isEntity(entity))
+      return Promise.resolve(toLite(entity, entity.isNew));
+
+    throw new Error("Unexpected " + type);
   }
 
   abort(): void {
