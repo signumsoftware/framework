@@ -92,7 +92,7 @@ function getMultiAggregator(columns: ChartColumn<number>[]): (values: MultiNum[]
     if (token.queryTokenType != "Aggregate")
       return (vals, selector) => vals.sum(selector as (mn: MultiNum) => number);
 
-    if (token.key == "Count")
+    if (token.key.startsWith("Count"))
       return (vals, selector) => vals.sum(selector as (mn: MultiNum) => number);
 
     if (token.key == "Sum")
@@ -104,14 +104,18 @@ function getMultiAggregator(columns: ChartColumn<number>[]): (values: MultiNum[]
     if (token.key == "Max")
       return (vals, selector) => vals.max(selector as (mn: MultiNum) => number)!;
 
-    if (token.key == "Avg")
-      return (vals, selector, sumSelector) => vals.sum(a => selector!(a as number[]) * sumSelector!(a as number[])) / vals.sum(a => sumSelector!(a as number[]))!;
+    if (token.key == "Average")
+      return (vals, selector, countSelector) => {
+        var sel = selector as (mn: MultiNum) => number;
+        var cnt = countSelector as (mn: MultiNum) => number;
+        return vals.sum(mn => sel(mn) * cnt(mn)) / vals.sum(cnt)!
+      }
 
     throw new Error('getSingleAggregator not implemented for ' + token.key);
   }
 
-  function getCountNNSelectors(c: ChartColumn<number>){
-    if (c.token!.queryTokenType == "Aggregate" && c.token!.key == "Avg") {
+  function getCountNNSelectors(c: ChartColumn<number>) {
+    if (c.token!.queryTokenType == "Aggregate" && c.token!.key == "Average") {
       const countNNColumn = columns.firstOrNull(s => s.token?.queryTokenType == "Aggregate" && s.token!.key == "CountNotNull" && s.token?.parent?.fullKey == c.token?.parent?.fullKey);
 
       if (countNNColumn == null)
@@ -320,8 +324,12 @@ export default function renderPivotTable({ data, width, height, parameters, load
     if (dor == undefined)
       return 0;
 
-    if (Array.isArray(dor))
+    if (Array.isArray(dor)) {
+      if (dor.length == 1)
+        return selector(dor[0]);
+
       return aggregate(dor.map(row => selector(row)));
+    }
 
     if (dor instanceof RowGroup)
       return dor.subGroups ? aggregate(dor.subGroups.map(a => sumValue(a))) :
