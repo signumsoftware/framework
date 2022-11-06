@@ -5,7 +5,7 @@ import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { PivotRow, groupedPivotTable, toPivotTable } from './Components/PivotTable';
 import { ChartTable, ChartColumn, ChartRow } from '../ChartClient';
-import { XKeyTicks, YScaleTicks } from './Components/Ticks';
+import { XKeyTicks, XScaleTicks, YScaleTicks } from './Components/Ticks';
 import Legend from './Components/Legend';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
@@ -60,9 +60,13 @@ export default function renderStackedLines({ data, width, height, parameters, lo
     toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
+  var hasHorizontalScale = parameters["HorizontalScale"] != "Bands";
+
   var keyValues: unknown[] = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
 
-  var x = d3.scaleBand()
+  var x = hasHorizontalScale ?
+    scaleFor(keyColumn, data.rows.map(r => keyColumn.getValue(r) as number), 0, xRule.size('content'), parameters["HorizontalScale"]) :
+    d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
     .range([0, xRule.size('content')]);
 
@@ -90,8 +94,13 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
   var pInterpolate = parameters["Interpolate"];
 
+  const getX: (row: d3.SeriesPoint<unknown>) => number =
+    hasHorizontalScale ?
+      (row => (x as d3.ScaleContinuousNumeric<number, number>)(row.data as number)) :
+      (row => (x as d3.ScaleBand<string>)(keyColumn.getKey(row.data))!); 
+
   var area = d3.area<d3.SeriesPoint<unknown>>()
-    .x(v => x(keyColumn.getKey(v.data))!)
+    .x(v => getX(v)!)
     .y0(v => -y(v[0])!)
     .y1(v => -y(v[1])!)
     .curve(ChartUtils.getCurveByName(pInterpolate) as d3.CurveFactory);
@@ -105,15 +114,20 @@ export default function renderStackedLines({ data, width, height, parameters, lo
   var rectRadious = 2;
 
   var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var bw = hasHorizontalScale ? 0 : (x as d3.ScaleBand<string>).bandwidth();
 
   return (
     <svg direction="ltr" width={width} height={height}>
-      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
-      <g opacity={dashboardFilter ? .5 : undefined}>
+
+      {hasHorizontalScale ?
+        <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :
+        <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x as d3.ScaleBand<string>} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
+      }
+        <g opacity={dashboardFilter ? .5 : undefined}>
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} format={format} />
       </g>
       {stackedSeries.orderBy(s => s.key).map(s => <g key={s.key} opacity={dashboardFilter && !(c.c1 && detector?.({ c1: columnsByKey[s.key].value }) == true) ? .5 : undefined} className="shape-serie"
-        transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))}>
+        transform={translate(xRule.start('content') + bw / 2, yRule.end('content'))}>
         <path className="shape sf-transition" fill={colorByKey[s.key] ?? color(s.key)} shapeRendering="initial" d={area(s)!} transform={(initialLoad ? scale(1, 0) : scale(1, 1))}>
           <title>
             {columnsByKey[s.key].niceName!}
@@ -122,7 +136,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
       </g>)}
 
       {stackedSeries.orderBy(s => s.key).map((s) => <g key={s.key} className="hover-trigger-serie"
-        transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))}>
+        transform={translate(xRule.start('content') + bw / 2, yRule.end('content'))}>
 
         {s.orderBy(v => keyColumn.getKey(v.data))
           .map(v => {
@@ -143,7 +157,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
             return (
               <g className="hover-group" key={dataKey} >
                 <rect className="point sf-transition hover-target"
-                  transform={translate(x(dataKey)! - rectRadious, -y(v[1])!)}
+                  transform={translate(getX(v)! - rectRadious, -y(v[1])!)}
                   width={2 * rectRadious}
                   fillOpacity={active == true ? undefined : .2}
                   fill={active == true ? "black" : colorByKey[s.key] ?? color(s.key)}
@@ -155,7 +169,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
                   </title>
                 </rect>
 
-                {x.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
+                {(bw > 15 || hasHorizontalScale) && parseFloat(parameters["NumberOpacity"]) > 0 &&
                   <TextRectangle className="number-label sf-transition"
                     rectangleAtts={{
                       fill: colorByKey[s.key] ?? color(s.key),
@@ -164,7 +178,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
                       strokeWidth: active == true ? 2 : undefined,
                       className: "hover-target"
                     }}
-                    transform={translate(x(dataKey)!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
+                    transform={translate(getX(v)!, -y(v[1])! * 0.5 - y(v[0])! * 0.5)}
                     fill={parameters["NumberColor"]}
                     dominantBaseline="middle"
                     onClick={e => onDrillDown(row.rowClick, e)}
