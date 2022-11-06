@@ -90,11 +90,11 @@ public static class WordTemplateLogic
             SymbolLogic<WordConverterSymbol>.Start(sb, () => Converters.Keys.ToHashSet());
 
             sb.Include<WordTransformerSymbol>()
-            .WithQuery(() => f => new
-            {
-                Entity = f,
-                f.Key
-            });
+                .WithQuery(() => f => new
+                {
+                    Entity = f,
+                    f.Key
+                });
 
             sb.Include<WordConverterSymbol>()
                 .WithQuery(() => f => new
@@ -152,6 +152,7 @@ public static class WordTemplateLogic
             Schema.Current.Synchronizing += Schema_Synchronize_Tokens;
 
             Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
+            Validator.PropertyValidator((WordTemplateEntity e) => e.FileName).StaticPropertyValidation += ValidateFileName;
         }
     }
 
@@ -256,6 +257,21 @@ public static class WordTemplateLogic
             });
 
             return error;
+        }
+    }
+
+    static string? ValidateFileName(WordTemplateEntity template, PropertyInfo pi)
+    {
+        if (template.FileName == null)
+            return null;
+
+        using (template.DisableAuthorization ? ExecutionMode.Global() : null)
+        {
+            QueryDescription qd = QueryLogic.Queries.QueryDescription(template.Query.ToQueryName());
+
+            TextTemplateParser.TryParse(template.FileName, qd, template.Model?.ToType(), out var errors);
+
+            return errors.DefaultToNull();
         }
     }
 
