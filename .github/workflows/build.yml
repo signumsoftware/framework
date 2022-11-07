@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - marija
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
