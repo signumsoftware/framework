@@ -755,10 +755,9 @@ public class EntityCodeGenerator
         }
 
         var defaultScale = CurrentSchema.Settings.GetSqlScale(null, null, col.DbType);
-        if (defaultScale != null)
+        if (defaultScale != null && col.Scale != defaultScale)
         {
-            if (col.Scale != defaultScale)
-                parts.Add("Scale = " + col.Scale);
+            parts.Add("Scale = " + col.Scale);
         }
 
         if (col.DefaultConstraint != null)
