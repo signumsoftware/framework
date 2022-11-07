@@ -19,10 +19,11 @@ public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
 
     public bool RunRepeatedly { get; set; }
 
-    [StringLengthValidator(Min = 3, Max = 100)]
+    [StringLengthValidator(Min = 3, Max = 100)] 
     public string? DecisionOptionName { get; set; }
 
-    public WorkflowTimerEmbedded? Timer { get; set; }
+
+     public WorkflowTimerEmbedded? Timer { get; set; }
 
     public Lite<WorkflowActivityEntity>? BoundaryOf { get; set; }
 
@@ -62,15 +63,15 @@ public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
         //WorkflowEventTaskModel.ApplyModel(this, wModel.Task);
     }
 
-    protected override string? PropertyValidation(PropertyInfo pi)
+    protected override void PreSaving(PreSavingContext ctx)
     {
-        if (pi.Name == nameof(RunRepeatedly) && RunRepeatedly && Type != WorkflowEventType.BoundaryForkTimer)
+        if (Type != WorkflowEventType.BoundaryForkTimer && RunRepeatedly)
             RunRepeatedly = false;
 
-        if (pi.Name == nameof(DecisionOptionName) && !string.IsNullOrWhiteSpace(DecisionOptionName) && Type != WorkflowEventType.BoundaryInterruptingTimer)
+        if (Type != WorkflowEventType.BoundaryInterruptingTimer && !string.IsNullOrWhiteSpace(DecisionOptionName))
             DecisionOptionName = null;
 
-        return base.PropertyValidation(pi);
+        base.PreSaving(ctx);
     }
 }
 
