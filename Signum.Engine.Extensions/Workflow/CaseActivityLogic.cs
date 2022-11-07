@@ -83,10 +83,13 @@ public static class CaseActivityLogic
     public static IQueryable<CaseNotificationEntity> Notifications(this CaseActivityEntity e) =>
         As.Expression(() => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.Is(e)));
 
-
     [AutoExpressionField]
     public static IQueryable<CaseActivityExecutedTimerEntity> ExecutedTimers(this CaseActivityEntity e) =>
         As.Expression(() => Database.Query<CaseActivityExecutedTimerEntity>().Where(a => a.CaseActivity.Is(e)));
+
+    [AutoExpressionField]
+    public static CaseActivityExecutedTimerEntity? LastExecutedTimer(this CaseActivityEntity ca, Lite<WorkflowEventEntity> we) =>
+        As.Expression(() => ca.ExecutedTimers().Where(a => a.BoundaryEvent.Is(we)).OrderByDescending(a => a.CreationDate).FirstOrDefault());
 
     public static void Start(SchemaBuilder sb)
     {
@@ -291,10 +294,9 @@ public static class CaseActivityLogic
                  where ca.State == CaseActivityState.Pending
                  from we in ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers
                  where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
-                 we.Type == WorkflowEventType.BoundaryForkTimer ? !ca.ExecutedTimers().Any(t => t.BoundaryEvent.Is(we)) :
+                 we.Type == WorkflowEventType.BoundaryForkTimer ? (we.RunRepeatedly || !ca.ExecutedTimers().Any(t => t.BoundaryEvent.Is(we))) :
                  false
                  select new ActivityEvent(ca, we)).ToList();
-
 
                 var intermediateCandidates =
                 (from ca in Database.Query<CaseActivityEntity>()
@@ -306,12 +308,20 @@ public static class CaseActivityLogic
 
                 var candidates = boundaryCandidates.Concat(intermediateCandidates).Distinct().ToList();
                 var conditions = candidates.Select(a => a.Event.Timer!.Condition).Distinct().ToList();
+                var lastExecutions = boundaryCandidates
+                    .Where(a => a.Event.Type == WorkflowEventType.BoundaryForkTimer && a.Event.RunRepeatedly)
+                    .Select(a => new { ActivityEvent = a, LastExecution = a.Activity.LastExecutedTimer(a.Event.ToLite()) })
+                    .ToList();
 
                 var now = Clock.Now;
                 var activities = conditions.SelectMany(cond =>
                 {
                     if (cond == null)
-                        return candidates.Where(a => a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(a.Activity.StartDate) < now).Select(a => a.Activity.ToLite()).ToList();
+                        return candidates.Where(a =>
+                        {
+                            var startDate = lastExecutions.SingleOrDefaultEx(le => le.ActivityEvent.Is(a))?.LastExecution?.CreationDate ?? a.Activity.StartDate;
+                            return a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(startDate) < now;
+                        }).Select(a => a.Activity.ToLite()).ToList();
 
                     return candidates.Where(a => a.Event.Timer!.Condition.Is(cond) && cond.Evaluate(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
                 }).Distinct().ToList();
@@ -424,6 +434,11 @@ public static class CaseActivityLogic
         {
             Activity = activity;
             Event = @event;
+        }
+
+        public bool Is(ActivityEvent other)
+        {
+            return this.Activity.Is(other.Activity) && this.Event.Is(other.Event);
         }
 
         public CaseActivityEntity Activity { get; set; }
@@ -835,15 +850,22 @@ public static class CaseActivityLogic
                 {
                     var now = Clock.Now;
 
-                    var alreadyExecuted = ca.ExecutedTimers().Select(a => a.BoundaryEvent).ToHashSet();
-
                     var candidateEvents = ca.WorkflowActivity is WorkflowEventEntity @event ? new WorkflowEventEntity[] { @event } :
                     ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.ToArray();
 
-                    var timer = candidateEvents.Where(e => e.Type == WorkflowEventType.BoundaryInterruptingTimer || !alreadyExecuted.Contains(e.ToLite())).FirstOrDefault(t =>
+                    var lastExecutions = (
+                        from et in ca.ExecutedTimers()
+                        group et by et.BoundaryEvent into g
+                        select new { Event = g.Key, LastExecution = g.OrderByDescending(a => a.CreationDate).FirstOrDefault() }
+                        ).ToDictionary(a => a.Event, a => a.LastExecution);
+
+                    var timer = candidateEvents.Where(e => e.Type == WorkflowEventType.BoundaryInterruptingTimer || e.RunRepeatedly || !lastExecutions.ContainsKey(e.ToLite())).FirstOrDefault(t =>
                     {
                         if (t.Timer!.Duration != null)
-                            return t.Timer!.Duration!.Add(ca.StartDate) < now;
+                        {
+                            var startDate = lastExecutions.GetValueOrDefault(t.ToLite())?.CreationDate ?? ca.StartDate;
+                            return t.Timer!.Duration!.Add(startDate) < now;
+                        }
 
                         return t.Timer!.Condition!.Evaluate(ca, now);
                     });
@@ -1098,7 +1120,7 @@ public static class CaseActivityLogic
                     }.Save();
                     break;
                 case WorkflowEventType.BoundaryInterruptingTimer:
-                    ca.MakeDone(DoneType.Timeout, null);
+                    ca.MakeDone(DoneType.Timeout, boundaryEvent.DecisionOptionName);
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected Boundary Timer Type " + boundaryEvent.Type);

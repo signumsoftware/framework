@@ -43,7 +43,14 @@ public static class CaseFlowLogic
                 if (from is WorkflowActivityEntity wa)
                 {
                     var conns = wa.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer)
-                    .SelectMany(e => gr.GetAllConnections(e, to, path => path.All(a => a.Type == ConnectionType.Normal)));
+                    .SelectMany(e => gr.GetAllConnections(e, to, path =>
+                    {
+                        if (prev.DoneDecision != null)
+                            return IsValidPath(DoneType.Timeout, prev.DoneDecision, path);
+
+                        return path.All(a => a.Type == ConnectionType.Normal);
+                    }));
+
                     if (conns.Any())
                         return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
                 }
@@ -192,10 +199,10 @@ public static class CaseFlowLogic
             case DoneType.Next: 
             case DoneType.ScriptSuccess:
             case DoneType.Recompose:
+            case DoneType.Timeout:
                 return path.All(a => a.Type == ConnectionType.Normal || doneDecision != null && (a.DoneDecision() == doneDecision));
             case DoneType.Jump: return path.All(a => a.Is(path.FirstEx()) ? a.Type == ConnectionType.Jump : a.Type == ConnectionType.Normal);
             case DoneType.ScriptFailure: return path.All(a => a.Is(path.FirstEx()) ? a.Type == ConnectionType.ScriptException : a.Type == ConnectionType.Normal);
-            case DoneType.Timeout:
             default:
                 throw new InvalidOperationException();
         }
