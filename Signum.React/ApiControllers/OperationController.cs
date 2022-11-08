@@ -96,25 +96,24 @@ public class OperationController : Controller
     }
 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class ConstructOperationRequest : BaseOperationRequest
     {
-        public string Type { get; set; }
+        public required string Type { get; set; }
     }
 
     public class EntityOperationRequest : BaseOperationRequest
     {
-        public Entity entity { get; set; }
+        public required Entity entity { get; set; }
     }
 
     public class LiteOperationRequest : BaseOperationRequest
     {
-        public Lite<Entity> lite { get; set; }
+        public required Lite<Entity> lite { get; set; }
     }
 
     public class BaseOperationRequest
     {
-        public string OperationKey { get; set; }
+        public required string OperationKey { get; set; }
 
         public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.OperationKey, entityType);
 
@@ -184,7 +183,6 @@ public class OperationController : Controller
 
         public override string ToString() => OperationKey;
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     [HttpPost("api/operation/constructFromMany"), ProfilerActionSplitter]
     public EntityPackTS? ConstructFromMany([Required, FromBody]MultiOperationRequest request)
@@ -274,18 +272,17 @@ public class OperationController : Controller
     }
 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class MultiOperationRequest : BaseOperationRequest
     {
         public string? Type { get; set; }
-        public Lite<Entity>[] Lites { get; set; }
+        public required Lite<Entity>[] Lites { get; set; }
 
         public List<PropertySetter>? Setters { get; set; }
     }
 
     public class PropertySetter
     {
-        public string Property;
+        public required string Property;
         public PropertyOperation? Operation;
         public FilterOperation? FilterOperation;
         public object? Value;
@@ -294,7 +291,6 @@ public class OperationController : Controller
         public List<PropertySetter>? Setters;
     }
 
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class MultiOperationResponse
     {
@@ -327,13 +323,11 @@ public class OperationController : Controller
 
     public static Func<Lite<Entity>[], bool>? AnyReadonly; 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class StateCanExecuteRequest
     {
-        public string[] OperationKeys { get; set; }
-        public Lite<Entity>[] Lites { get; set; }
+        public required string[] OperationKeys { get; set; }
+        public required Lite<Entity>[] Lites { get; set; }
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class StateCanExecuteResponse
     {

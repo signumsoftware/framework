@@ -85,9 +85,8 @@ public class WorkflowNodeGraph
         this.PreviousGraph = graph.Inverse();
     }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    public Dictionary<IWorkflowNodeEntity, int> TrackId;
-    public Dictionary<int, IWorkflowNodeEntity> TrackCreatedBy;
+    public Dictionary<IWorkflowNodeEntity, int> TrackId = null!;
+    public Dictionary<int, IWorkflowNodeEntity> TrackCreatedBy = null!;
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public IWorkflowNodeEntity GetSplit(WorkflowGatewayEntity entity)

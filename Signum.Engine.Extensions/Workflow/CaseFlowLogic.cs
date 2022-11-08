@@ -227,28 +227,26 @@ public static class CaseFlowLogic
     }
 }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class CaseActivityStats
 {
-    public Lite<CaseActivityEntity> CaseActivity;
-    public Lite<CaseActivityEntity>? PreviousActivity;
-    public Lite<IWorkflowNodeEntity> WorkflowActivity;
-    public WorkflowActivityType? WorkflowActivityType;
-    public WorkflowEventType? WorkflowEventType;
-    public Lite<WorkflowEntity>? SubWorkflow;
-    public int Notifications;
-    public DateTime StartDate;
-    public DateTime? DoneDate;
-    public DoneType? DoneType;
-    public string? DoneDecision;
-    public Lite<IUserEntity>? DoneBy;
-    public double? Duration;
-    public double? AverageDuration;
-    public double? EstimatedDuration;
+    public required Lite<CaseActivityEntity> CaseActivity;
+    public required Lite<CaseActivityEntity>? PreviousActivity;
+    public required Lite<IWorkflowNodeEntity> WorkflowActivity;
+    public required WorkflowActivityType? WorkflowActivityType;
+    public required WorkflowEventType? WorkflowEventType;
+    public required Lite<WorkflowEntity>? SubWorkflow;
+    public required int Notifications;
+    public required DateTime StartDate;
+    public required DateTime? DoneDate;
+    public required DoneType? DoneType;
+    public required string? DoneDecision;
+    public required Lite<IUserEntity>? DoneBy;
+    public required double? Duration;
+    public required double? AverageDuration;
+    public required double? EstimatedDuration;
 
-    public string BpmnElementId { get; internal set; }
+    public required string BpmnElementId;
 }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
 public class CaseConnectionStats
 {
