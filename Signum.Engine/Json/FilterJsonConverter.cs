@@ -125,7 +125,7 @@ public class FilterGroupTS : FilterTS
 public class ColumnTS
 {
     public required string token;
-    public required string? displayName;
+    public string? displayName;
 
     public Column ToColumn(QueryDescription qd, bool canAggregate)
     {
@@ -250,8 +250,8 @@ public class SystemTimeTS
 public class QueryValueRequestTS
 {
     public required string querykey;
-    public required List<FilterTS> filters;
-    public required string valueToken;
+    public List<FilterTS>? filters;
+    public string? valueToken;
     public bool? multipleValues;
     public SystemTimeTS? systemTime;
 
@@ -283,7 +283,7 @@ public class QueryRequestTS
     public required List<OrderTS> orders;
     public required List<ColumnTS> columns;
     public required PaginationTS pagination;
-    public required SystemTimeTS? systemTime;
+    public SystemTimeTS? systemTime;
 
     public static QueryRequestTS FromQueryRequest(QueryRequest qr)
     {
