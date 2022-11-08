@@ -338,7 +338,7 @@ public class FieldReader
             TypeCode.Byte => (Int64)reader.GetByte(ordinal),
             TypeCode.Int16 => (Int64)reader.GetInt16(ordinal),
             TypeCode.Int32 => (Int64)reader.GetInt32(ordinal),
-            TypeCode.Int64 => (Int64)reader.GetInt64(ordinal),
+            TypeCode.Int64 => reader.GetInt64(ordinal),
             TypeCode.Double => (Int64)reader.GetDouble(ordinal),
             TypeCode.Single => (Int64)reader.GetFloat(ordinal),
             TypeCode.Decimal => (Int64)reader.GetDecimal(ordinal),

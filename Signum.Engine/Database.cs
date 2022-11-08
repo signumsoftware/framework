@@ -1225,7 +1225,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mListProperty)
         where E : Entity
     {
-        PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
+
+        //PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
 
         var list = (FieldMList)Schema.Current.Field(mListProperty);
 
