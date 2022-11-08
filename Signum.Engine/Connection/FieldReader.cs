@@ -43,7 +43,7 @@ public class FieldReader
         return tc;
     }
 
-    bool isPostgres;
+    readonly bool isPostgres;
 
     public FieldReader(DbDataReader reader)
     {

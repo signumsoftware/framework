@@ -233,7 +233,7 @@ public static class DQueryable
 
             var tupleType = subQueryExp.Body.Type;
 
-            var miSelect = colExpre.Type.IsInstanceOfType(typeof(IQueryable<>)) ? OverloadingSimplifier.miSelectQ : OverloadingSimplifier.miSelectE;
+            var miSelect = colExpre.Type.IsInstanceOfType("IQueryable<>") ? OverloadingSimplifier.miSelectQ : OverloadingSimplifier.miSelectE;
             var select = Expression.Call(miSelect.MakeGenericMethod(pe2.Type!, tupleType), colExpre, subQueryExp);
             var toList = Expression.Call(miToList.MakeGenericMethod(tupleType), select);
 

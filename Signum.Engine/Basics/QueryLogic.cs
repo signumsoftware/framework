@@ -54,7 +54,7 @@ public static class QueryLogic
             QueryEntity.GetEntityImplementations = query => Queries.GetEntityImplementations(query.ToQueryName());
             FilterCondition.ToLowerString = () => Schema.Current.Settings.IsPostgres;
 
-            // QueryManagers = queryManagers;
+            
             sb.Schema.Initializing += () =>
             {
                 queryNamesLazy.Load();

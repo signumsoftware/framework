@@ -534,10 +534,9 @@ public class SqlParameterBuilder : ParameterBuilder
             else if (value is DateOnly d)
                 value = d.ToDateTime();
         }
-        else if (dbType.IsTime())
+        else if (dbType.IsTime() && value is TimeOnly to)
         {
-            if (value is TimeOnly to)
-                value = to.ToTimeSpan();
+            value = to.ToTimeSpan();
         }
 
         var result = new SqlParameter(parameterName, value ?? DBNull.Value)

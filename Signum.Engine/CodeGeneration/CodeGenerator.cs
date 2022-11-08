@@ -4,7 +4,7 @@ namespace Signum.Engine.CodeGeneration;
 
 public static class CodeGenerator
 {
-    public static EntityCodeGenerator Entities = new EntityCodeGenerator();
+    public static readonly EntityCodeGenerator Entities = new EntityCodeGenerator();
     public static LogicCodeGenerator Logic = new LogicCodeGenerator();
     public static ReactCodeGenerator React = new ReactCodeGenerator();
     public static ReactHookConverter Hook = new ReactHookConverter();
