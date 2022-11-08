@@ -21,9 +21,9 @@ public static class RestServer
         ctx.HttpContext.Request.Query.TryGetValue(RestApiKeyLogic.ApiKeyQueryParameter, out var val);
         ctx.HttpContext.Request.Headers.TryGetValue(RestApiKeyLogic.ApiKeyHeader, out var headerKeys);
 
-        var keys = val.Distinct().Union(headerKeys.Distinct()).ToList();
+        var keys = val.Distinct().Union(headerKeys.Distinct()).NotNull().ToList()!;
 
-        if (keys.Count() == 1)
+        if (keys.Count == 1)
         {
             using (AuthLogic.Disable())
             {

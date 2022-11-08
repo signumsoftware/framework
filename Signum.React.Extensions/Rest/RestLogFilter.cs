@@ -32,7 +32,7 @@ public class RestLogFilter : ActionFilterAttribute
             var connection = context.HttpContext.Features.Get<IHttpConnectionFeature>()!;
 
             var queryParams = context.HttpContext.Request.Query
-                 .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value })
+                 .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value.ToString() })
                  .ToMList();
 
             var restLog = new RestLogEntity
