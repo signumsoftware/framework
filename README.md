@@ -54,6 +54,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2022.11.08 Upgrade to .Net 7](https://github.com/signumsoftware/framework/commit/8377d1b78b12c2572e881f06da6680d27d21fa1b#commitcomment-89296558)
 * [2022.10.25 Cleanup in EmailSenderConfigurationEntity](https://github.com/signumsoftware/framework/commit/d9d219a5f68f3b035a8477254c3adc396de98d2c#comments)
 * [2022.08.30 Presenting EntityAccordion](https://github.com/signumsoftware/framework/commit/3ba48fae1456207992abadf74075bb05502507f5#comments)
 * [2022.08.18 Presenting EntityTypeToken](https://github.com/signumsoftware/framework/commit/2ec0dd7c53067c34e01e4570968ae9e14263a65e#comments) 
