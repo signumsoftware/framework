@@ -12,7 +12,7 @@ namespace Signum.Engine;
 
 public static class Administrator
 {
-    public static Func<bool>? OnTotalGeneration;
+    protected static Func<bool>? OnTotalGeneration;
 
     public static void TotalGeneration()
     {
