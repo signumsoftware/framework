@@ -465,8 +465,17 @@ public static class SchemaSynchronizer
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix is UniqueTableIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                         removeOld: null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
-                            mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);
+                        mergeBoth: (i, mix, dix) => {
+                            if (!dix.IndexEquals(dif, mix)) 
+                            {
+                                return sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true);
+                            }
+                            if (mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName)
+                            {
+                               return sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName));
+                            }
+                            return null;
+                        });
 
                     return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
                 });

@@ -205,11 +205,11 @@ public static class Administrator
     {
         var view = Schema.Current.View<T>();
 
-        IColumn[] columns = IndexKeyColumns.Split(view, fields);
+        IColumn[] secondColumns = IndexKeyColumns.Split(view, fields);
 
         var index = unique ?
-            new UniqueTableIndex(view, columns) :
-            new TableIndex(view, columns);
+            new UniqueTableIndex(view, secondColumns) :
+            new TableIndex(view, secondColumns);
 
         Connector.Current.SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
     }
