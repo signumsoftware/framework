@@ -5,8 +5,9 @@ import * as d3 from 'd3'
 import * as AppContext from '@framework/AppContext'
 import { API, HeavyProfilerEntry } from '../ProfilerClient'
 import "./Profiler.css"
-import { useAPI, useAPIWithReload, useSize } from '@framework/Hooks'
+import { useAPI, useAPIWithReload, useInterval, useSize } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
+import { classes } from '@framework/Globals'
 
 interface HeavyListProps extends RouteComponentProps<{}> {
 
@@ -19,6 +20,14 @@ export default function HeavyList(p: HeavyListProps) {
 
   const [fileToUpload, setFileToUpload] = React.useState<File | undefined>(undefined);
   const [fileVer, setFileVer] = React.useState<number>(0)
+
+
+  var tick = useInterval(enabled ? 500 : null, 0, a => a + 1);
+
+  React.useEffect(() => {
+    reloadEnabled();
+    reloadEntries();
+  }, [tick]);
 
   useTitle("Heavy Profiler");
 
@@ -77,12 +86,10 @@ export default function HeavyList(p: HeavyListProps) {
         <button onClick={handleUpload} className="btn btn-info" disabled={!fileToUpload}><FontAwesomeIcon icon="cloud-arrow-up" /> Upload</button>
       </div>
       <div className="btn-toolbar">
-        {!enabled ? <button onClick={() => handleSetEnabled(true)} className="btn btn-light primary">Enable</button> :
-          <button onClick={() => handleSetEnabled(false)} className="btn btn-light" style={{ color: "red" }}>Disable</button>
-        }
-        <button onClick={handleUpdate} className="btn btn-light">Update</button>
-        <button onClick={handleClear} className="btn btn-light">Clear</button>
-        <button onClick={handleDownload} className="btn btn-info"><FontAwesomeIcon icon="cloud-arrow-down" /> Download</button>
+        <button className={classes("sf-button btn", enabled ? "btn-outline-danger" : "btn-outline-secondary")} onClick={() => handleSetEnabled(!enabled)}><FontAwesomeIcon icon="circle" /> Record</button>
+        <button onClick={handleUpdate} className="btn btn-light"><FontAwesomeIcon icon="refresh" /> Update</button>
+        <button onClick={handleClear} className="btn btn-light"><FontAwesomeIcon icon="trash" /> Clear</button>
+        <button onClick={handleDownload} className="btn btn-outline-info"><FontAwesomeIcon icon="cloud-arrow-down" /> Download</button>
       </div>
       <br />
       <p className="help-block">Upload previous runs to compare performance.</p>
