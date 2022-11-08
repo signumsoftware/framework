@@ -242,13 +242,13 @@ public class WorkflowNodeGraph
                 {
                     var parentActivity = Activities.Values.Where(a => a.BoundaryTimers.Contains(e)).SingleEx();
                     if (string.IsNullOrWhiteSpace(e.DecisionOptionName) && parentActivity.Type == WorkflowActivityType.Decision)
-                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHave2BecauseActivityIs3.NiceToString(e, parentActivity, e.NicePropertyName(a => a.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
+                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHave2BecauseActivityIs3.NiceToString(e, parentActivity, Entity.NicePropertyName(() => e.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
 
                     if (!string.IsNullOrWhiteSpace(e.DecisionOptionName) && parentActivity.Type != WorkflowActivityType.Decision)
-                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1CanNotHave2BecauseActivityIsNot3.NiceToString(e, parentActivity, e.NicePropertyName(a => a.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
+                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1CanNotHave2BecauseActivityIsNot3.NiceToString(e, parentActivity, Entity.NicePropertyName(() => e.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
 
                     if (!string.IsNullOrWhiteSpace(e.DecisionOptionName) && !parentActivity.DecisionOptions.Any(a => a.Name == e.DecisionOptionName))
-                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1HasInvalid23.NiceToString(e, parentActivity, e.NicePropertyName(a => a.DecisionOptionName), e.DecisionOptionName));
+                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1HasInvalid23.NiceToString(e, parentActivity, Entity.NicePropertyName(() => e.DecisionOptionName), e.DecisionOptionName));
                 }
             }
         });
@@ -379,7 +379,7 @@ public class WorkflowNodeGraph
             }
             else if (prev is WorkflowActivityEntity act && IsSplitActivity(act) ||
                 prev is WorkflowEventEntity we && we.Type == WorkflowEventType.BoundaryInterruptingTimer &&
-                IsSplitActivity( this.Activities.GetOrThrow(we.BoundaryOf!)))
+                IsSplitActivity(this.Activities.GetOrThrow(we.BoundaryOf!)))
             {
                 if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
                     newTrackId = prevTrackId;
@@ -392,7 +392,7 @@ public class WorkflowNodeGraph
                         .Concat(activity.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer).SelectMany(we => NextConnections(we)))
                         .Select(c => TrackId.TryGetS(c.To))
                         .Where(c => c != null)
-                        .Distinct()  
+                        .Distinct()
                         .SingleOrDefaultEx();
 
                     if (mainTrackId.HasValue)
@@ -490,7 +490,7 @@ public class WorkflowNodeGraph
                     issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1CanNotHaveConnectionsOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
             }
 
-            if(wa.Type == WorkflowActivityType.Decision)
+            if (wa.Type == WorkflowActivityType.Decision)
             {
                 foreach (var item in wa.DecisionOptions)
                 {
@@ -538,7 +538,7 @@ public class WorkflowNodeGraph
     }
 }
 
-  
+
 
 public class WorkflowIssue
 {
