@@ -13,6 +13,17 @@ class Upgrade_20221108_DotNet7 : CodeUpgradeBase
         {
             file.Replace("<TargetFramework>net6.0</TargetFramework>", "<TargetFramework>net7.0</TargetFramework>");
         });
+
+        uctx.ForeachCodeFile(@"deploy*.ps1", file =>
+        {
+            file.Replace("net6.0", "net7.0");
+        });
+
+        uctx.ChangeCodeFile(@"Southwind.React\Dockerfile", file =>
+        {
+            file.Replace("dotnet/aspnet:6.0.0", "dotnet/aspnet:7.0.0");
+            file.Replace("dotnet/sdk:6.0.100", "dotnet/sdk:7.0.100");
+        });
     }
 }
 
