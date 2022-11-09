@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Signum.TSGenerator</id>
-    <version>6.0.0</version>
+    <version>7.0.0</version>
     <title>TypeScript generator for Signum Framework applications</title>
     <authors>Olmo del Corral</authors>
     <license type="expression">MIT</license>
@@ -17,8 +17,8 @@
   <files>
     <file src="SignumLogo.png" target="" />
     <file src="bin\**\*.*" target="lib" exclude="bin\**\*.*" />
-    <file src="bin\Release\net6.0\*.dll" target="build" />
-    <file src="bin\Release\net6.0\*.json" target="build" />
+    <file src="bin\Release\net7.0\*.dll" target="build" />
+    <file src="bin\Release\net7.0\*.json" target="build" />
     <file src="Signum.TSGenerator.targets" target="build" />
   </files>
 </package>
