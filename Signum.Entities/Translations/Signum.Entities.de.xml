@@ -273,6 +273,7 @@
     <Member Name="MultiSetter" Description="Multi-Setter" />
     <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) ist nicht autorisiert." />
     <Member Name="PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12" Description="Bitte bestätigen Sie, dass Sie die obigen Änderungen anwenden und {0} über {1} {2} ausführen möchten" />
+    <Member Name="PleaseConfirmYouWouldLikeTo01" Description="Bitte bestätigen Sie, dass Sie {1} {0} möchten" />
     <Member Name="PleaseConfirmYouWouldLikeToDelete0FromTheSystem" Description="Bitte bestätigen Sie, dass Sie {0} aus dem System löschen möchten" />
     <Member Name="PreviousOperationLog" Description="Vorheriges Operationsprotokoll" />
     <Member Name="Setters" Description="Setters" />
