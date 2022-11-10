@@ -230,10 +230,11 @@ public static class EnumerableUniqueExtensions
         if (predicate == null)
             throw new ArgumentNullException(nameof(predicate));
 
-        foreach (T item in collection)
+        foreach (var item in from T item in collection
+                             where predicate(item)
+                             select item)
         {
-            if (predicate(item))
-                return item;
+            return item;
         }
 
         throw new InvalidOperationException("Sequence contains no {0}".FormatWith(typeof(T).TypeName()));
@@ -912,7 +913,7 @@ public static class EnumerableExtensions
         using (var enumA = colA.GetEnumerator())
         using (var enumB = colB.GetEnumerator())
         {
-            while (okA & (okA = enumA.MoveNext()) | okB & (okB = enumB.MoveNext()))
+            while (okA && (okA = enumA.MoveNext()) || okB && (okB = enumB.MoveNext()))
             {
                 yield return resultSelector(
                     okA ? enumA.Current : default!,

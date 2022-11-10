@@ -56,7 +56,7 @@ public static class Administrator
     {
         using (OverrideDatabaseInSysViews(tableName.Schema.Database))
         {
-            var columns =
+            var column =
                 (from t in Database.View<SysTables>()
                  where t.name == tableName.Name && t.Schema().name == tableName.Schema.Name
                  from c in t.Columns()
@@ -73,7 +73,7 @@ public static class Administrator
             sb.AppendLine($@"[TableName(""{tableName}"")]");
             sb.AppendLine($"public class {tableName.Name} : IView");
             sb.AppendLine(@"{");
-            foreach (var c in columns)
+            foreach (var c in column)
             {
                 sb.Append(GenerateColumnCode(c).Indent(4));
             }
@@ -205,11 +205,11 @@ public static class Administrator
     {
         var view = Schema.Current.View<T>();
 
-        IColumn[] columns = IndexKeyColumns.Split(view, fields);
+        IColumn[] secondColumns = IndexKeyColumns.Split(view, fields);
 
         var index = unique ?
-            new UniqueTableIndex(view, columns) :
-            new TableIndex(view, columns);
+            new UniqueTableIndex(view, secondColumns) :
+            new TableIndex(view, secondColumns);
 
         Connector.Current.SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
     }
@@ -784,10 +784,16 @@ public static class Administrator
     {
         var table = Schema.Current.Table<T>();
         var f = Schema.Current.Field(field);
-
-        var column = f is IColumn c ? c : 
-            f is FieldImplementedBy fib ? fib.ImplementationColumns.GetOrThrow(value.GetType()) : 
+        IColumn column;
+        if (f is IColumn c)
+        {
+            column = c;
+        }
+        else {
+             column = f is FieldImplementedBy fib ? fib.ImplementationColumns.GetOrThrow(value.GetType()) :
             throw new UnexpectedValueException(f);
+        }
+         
 
         return DeleteWhereScript(table, column, value.Id);
     }

@@ -18,7 +18,7 @@ public class OperationSymbol : Symbol
             return new SimpleImp(new OperationSymbol(declaringType, fieldName));
         }
 
-        public static ConstructSymbol<T>.From<F> From<F>(Type declaringType, string fieldName)
+        public static ConstructSymbol<T>.IFrom<F> From<F>(Type declaringType, string fieldName)
             where F : class,  IEntity
         {
             return new FromImp<F>(new OperationSymbol(declaringType, fieldName));
@@ -45,7 +45,7 @@ public class OperationSymbol : Symbol
             }
         }
 
-        class FromImp<F> : ConstructSymbol<T>.From<F>
+        class FromImp<F> : ConstructSymbol<T>.IFrom<F>
             where F : class, IEntity
         {
             public FromImp(OperationSymbol symbol)
@@ -88,19 +88,19 @@ public class OperationSymbol : Symbol
         }
     }
 
-    public static ExecuteSymbol<T> Execute<T>(Type declaringType, string fieldName)
+    public static IExecuteSymbol<T> Execute<T>(Type declaringType, string fieldName)
         where T : class,  IEntity
     {
         return new ExecuteSymbolImp<T>(new OperationSymbol(declaringType, fieldName));
     }
 
-    public static DeleteSymbol<T> Delete<T>(Type declaringType, string fieldName)
+    public static IDeleteSymbol<T> Delete<T>(Type declaringType, string fieldName)
         where T : class, IEntity
     {
         return new DeleteSymbolImp<T>(new OperationSymbol(declaringType, fieldName));
     }
 
-    class ExecuteSymbolImp<T> : ExecuteSymbol<T>
+    class ExecuteSymbolImp<T> : IExecuteSymbol<T>
       where T : class, IEntity
     {
         public ExecuteSymbolImp(OperationSymbol symbol)
@@ -121,7 +121,7 @@ public class OperationSymbol : Symbol
         }
     }
 
-    class DeleteSymbolImp<T> : DeleteSymbol<T>
+    class DeleteSymbolImp<T> : IDeleteSymbol<T>
       where T : class, IEntity
     {
         public DeleteSymbolImp(OperationSymbol symbol)
@@ -168,7 +168,7 @@ public static class ConstructSymbol<T>
     {
     }
 
-    public interface From<in F> : IEntityOperationSymbolContainer<F>
+    public interface IFrom<in F> : IEntityOperationSymbolContainer<F>
         where F : class, IEntity
     {
     }
@@ -180,12 +180,12 @@ public static class ConstructSymbol<T>
     }
 }
 
-public interface ExecuteSymbol<in T> : IEntityOperationSymbolContainer<T>
+public interface IExecuteSymbol<in T> : IEntityOperationSymbolContainer<T>
     where T : class, IEntity
 {
 }
 
-public interface DeleteSymbol<in T> : IEntityOperationSymbolContainer<T>
+public interface IDeleteSymbol<in T> : IEntityOperationSymbolContainer<T>
     where T : class, IEntity
 {
 }

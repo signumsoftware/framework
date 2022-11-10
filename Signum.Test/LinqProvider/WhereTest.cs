@@ -395,7 +395,7 @@ public class WhereTest
 
     public static bool Throw(PrimaryKey a)
     {
-        throw new ArgumentException("a");
+        throw new ArgumentException("Thrown Argument Exception");
     }
 
     [Fact]

@@ -838,11 +838,7 @@ public class TimePrecisionValidatorAttribute : ValidatorAttribute
 public class StringCaseValidatorAttribute : ValidatorAttribute
 {
     private StringCase textCase;
-    public StringCase TextCase
-    {
-        get { return this.textCase; }
-        set { this.textCase = value; }
-    }
+    public StringCase TextCase { get; set; }
 
     public StringCaseValidatorAttribute(StringCase textCase)
     {

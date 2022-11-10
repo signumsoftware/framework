@@ -462,7 +462,7 @@ public class EntityCodeGenerator
 
     protected virtual DiffColumn? GetMListParentColumn(DiffTable table)
     {
-        return table.Columns.Values.Where(c => c.ForeignKey != null && c.Nullable == false && table.Name.Name.StartsWith(c.ForeignKey.TargetTable.Name)).OrderByDescending(a => a.ForeignKey!.TargetTable.Name.Length).FirstOrDefault();
+        return table.Columns.Values.Where(c => c.ForeignKey != null && table.Name.Name.StartsWith(c.ForeignKey.TargetTable.Name)).OrderByDescending(a => a.ForeignKey!.TargetTable.Name.Length).FirstOrDefault();
     }
     protected virtual IEnumerable<string> GetEntityAttributes(DiffTable table)
     {
@@ -570,9 +570,9 @@ public class EntityCodeGenerator
         var mListInfo = GetMListInfo(table);
 
         return Singularize(table.Name.Name) +
-            (IsEnum(table) ? "" :
-            mListInfo != null && !mListInfo.IsVirtual ? "Embedded" :
-            "Entity");
+            (IsEnum(table) ? " " :
+            mListInfo != null && !mListInfo.IsVirtual ? "Embedded" : "Entity"); 
+
     }
 
     protected virtual string Singularize(string name)
@@ -655,7 +655,7 @@ public class EntityCodeGenerator
 
     protected virtual string GetFieldName(DiffTable table, DiffColumn col)
     {
-        string name = !IdentifierValidatorAttribute.PascalAscii.IsMatch(col.Name) || col.Name.Contains("_") ? col.Name.ToPascal(false, false) : col.Name;
+        string name = !IdentifierValidatorAttribute.PascalAscii.IsMatch(col.Name) || col.Name.Contains('_') ? col.Name.ToPascal(false, false) : col.Name;
 
         if (this.GetRelatedEntity(table, col) != null)
         {
@@ -741,26 +741,31 @@ public class EntityCodeGenerator
             parts.Add("SqlDbType = SqlDbType." + col.DbType.SqlServer);
 
         var defaultSize = CurrentSchema.Settings.GetSqlSize(null, null, pair.DbType);
-        if (defaultSize != null)
+        if (defaultSize != null && !(defaultSize == col.Length || defaultSize == int.MaxValue && col.Length == -1))
         {
             if (!(defaultSize == col.Length || defaultSize == int.MaxValue && col.Length == -1))
-                parts.Add("Size = " + (col.Length == -1 ? "int.MaxValue" :
-                                    col.Length != 0 ? col.Length.ToString() :
-                                    col.Precision != 0 ? col.Precision.ToString() : "0"));
+                if (col.Length == -1)
+                {
+                    parts.Add("Size = " + "int.MaxValue");
+                }
+                else
+                {
+                    parts.Add("Size = " + (col.Length != 0 ? col.Length.ToString() :
+                    col.Precision != 0 ? col.Precision.ToString() : "0"));
+                }
         }
 
         var defaultPrecision = CurrentSchema.Settings.GetSqlPrecision(null, null, pair.DbType);
-        if (defaultPrecision != null)
+        if (defaultPrecision != null && defaultPrecision != col.Precision)
         {
-            if (defaultPrecision != col.Precision)
-                parts.Add("Precision = " + (col.Precision != 0 ? col.Precision.ToString() : "0"));
+            parts.Add("Precision = " + (col.Precision != 0 ? col.Precision.ToString() : "0"));
         }
 
         var defaultScale = CurrentSchema.Settings.GetSqlScale(null, null, col.DbType);
-        if ((defaultScale != null) && (!(col.Scale == defaultScale)))     
+
+        if (defaultScale != null && col.Scale != defaultScale)
         {
-          
-                parts.Add("Scale = " + col.Scale);
+            parts.Add("Scale = " + col.Scale);
         }
 
         if (col.DefaultConstraint != null)

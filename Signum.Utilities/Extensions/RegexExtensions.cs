@@ -79,7 +79,6 @@ public static class RegexExtensions
                 var from = matches[i].EndIndex();
                 var to = i < matches.Count - 1 ? matches[i + 1].Index : input.Length;
 
-                var str = input.Substring(from, to - from);
                 yield return (matches[i], input.Substring(from, to - from));
             }
         }

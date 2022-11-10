@@ -93,7 +93,7 @@ class SelectRowRemover : DbExpressionVisitor
 {   
     protected internal override Expression VisitUpdate(UpdateExpression update)
     {
-        if (update.ReturnRowCount == false)
+        if (!update.ReturnRowCount)
             return update;
 
         return new UpdateExpression(update.Table, update.UseHistoryTable, update.Source, update.Where, update.Assigments, returnRowCount: false);
@@ -101,7 +101,7 @@ class SelectRowRemover : DbExpressionVisitor
 
     protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
     {
-        if (insertSelect.ReturnRowCount == false)
+        if (!insertSelect.ReturnRowCount)
             return insertSelect;
 
         return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, insertSelect.Source, insertSelect.Assigments, returnRowCount: false);

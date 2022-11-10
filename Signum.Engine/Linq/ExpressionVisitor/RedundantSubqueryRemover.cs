@@ -70,7 +70,7 @@ class RedundantSubqueryRemover : DbExpressionVisitor
         // in from.
         for (int i = 0, n = select.Columns.Count; i < n; i++)
         {
-            if (select.Columns[i].Expression is not ColumnExpression col || !(col.Name == fromColumns[i].Name))
+            if (select.Columns[i].Expression is not ColumnExpression col || (col.Name != fromColumns[i].Name))
                 return false;
         }
         return true;

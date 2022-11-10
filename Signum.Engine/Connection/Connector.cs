@@ -39,7 +39,7 @@ public abstract class Connector
         return new Disposable(() => scopeTimeout.Value = old);
     }
 
-    public Connector(Schema schema)
+    protected Connector(Schema schema)
     {
         this.Schema = schema;
         this.IsolationLevel = IsolationLevel.Unspecified;
@@ -183,9 +183,8 @@ public abstract class ParameterBuilder
     protected static DateTime? AssertDateTime(DateTime? dateTime)
     {
 
-        if (dateTime.HasValue)
+        if (dateTime.HasValue && Schema.Current.TimeZoneMode == TimeZoneMode.Utc && dateTime.Value.Kind != DateTimeKind.Utc)
         {
-            if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc && dateTime.Value.Kind != DateTimeKind.Utc)
                 throw new InvalidOperationException("Attempt to use a non-Utc date in the database");
 
             //Problematic with Time machine

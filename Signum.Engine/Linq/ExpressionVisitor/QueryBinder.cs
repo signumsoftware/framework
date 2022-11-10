@@ -245,6 +245,7 @@ internal class QueryBinder : ExpressionVisitor
         if (modelType is ConstantExpression ce)
         {
             if (ce.IsNull())
+
                 return null;
                
             if(ce.Value is Type t)
@@ -2102,7 +2103,7 @@ internal class QueryBinder : ExpressionVisitor
 
     public class SwitchStrategy : ICombineStrategy
     {
-        ImplementedByExpression ImplementedBy;
+        readonly ImplementedByExpression ImplementedBy;
 
         public SwitchStrategy(ImplementedByExpression implementedBy)
         {
@@ -2646,11 +2647,17 @@ internal class QueryBinder : ExpressionVisitor
         ProjectionExpression pr = VisitCastProjection(source);
 
         Alias alias = aliasGenerator.Table(table.Name);
+        Expression toInsert;
 
-        Expression toInsert =
-            table is Table t ? t.GetProjectorExpression(alias, this) :
-            table is TableMList tml ? tml.GetProjectorExpression(alias, this) :
-            throw new UnexpectedValueException(table);
+        if (table is Table t)
+        {
+             toInsert = t.GetProjectorExpression(alias, this);
+}
+        else
+        {
+             toInsert = table is TableMList tml ? tml.GetProjectorExpression(alias, this) :
+                                  throw new UnexpectedValueException(table);
+        }
 
         ParameterExpression param = constructor.Parameters[0];
         ParameterExpression toInsertParam = Expression.Parameter(toInsert.Type, "toInsert");
@@ -2749,7 +2756,6 @@ internal class QueryBinder : ExpressionVisitor
             if (ne.Arguments.Any())
                 throw InvalidBody();
 
-            return;
         }
         else
         {

@@ -213,7 +213,7 @@ internal static class SmartEqualizer
                     return null;
             }
 
-            if (type.IsAssignableFrom(val.GetType()))
+            if (type.IsInstanceOfType(val.GetType()))
                 return Expression.Constant(val, type);
 
             return null;
