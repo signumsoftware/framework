@@ -41,7 +41,7 @@ public static class SchemaGenerator
 
         SqlPreCommand? indices = tables.Select(t =>
         {
-            var allIndexes = t.GeneratAllIndexes().Where(a => !(a is PrimaryKeyIndex)); ;
+            var allIndexes = t.GeneratAllIndexes().Where(a => !(a is PrimaryKeyIndex));
 
             var mainIndices = allIndexes.Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
 

@@ -5,6 +5,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
 using System.Data;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Signum.Engine;
 
@@ -66,10 +67,10 @@ public static class SchemaSynchronizer
                 tab.Columns.Keys.Except(newIBAs).ToHashSet(), key);
 
             var incompatibleTypes = diff.Columns.JoinDictionary(tab.Columns, (cn, diff, col) => new { cn, diff, col }).Values.Where(a => !a.diff.CompatibleTypes(a.col) || a.diff.Identity != a.col.Identity).ToList();
-
-            foreach (var inc in incompatibleTypes.Where(kvp => kvp.col.Name == kvp.diff.Name))
+            foreach (var (inc, newColName) in from inc in incompatibleTypes.Where(kvp => kvp.col.Name == kvp.diff.Name)
+                                              let newColName = inc.diff.Name + "_OLD"
+                                              select (inc, newColName))
             {
-                var newColName = inc.diff.Name + "_OLD";
                 preRenameColumnsList.GetOrCreate(diff.Name).Add(inc.diff.Name, newColName);
                 inc.diff.Name = newColName;
             }
@@ -734,8 +735,8 @@ WHERE {where}"))!;
                 var newCols = newIx.Columns.Select(c => diff.Columns.TryGetC(c.Name)?.Name).NotNull().ToHashSet();
                 var newIncCols = newIx.IncludeColumns.EmptyIfNull().Select(c => diff.Columns.TryGetC(c.Name)?.Name).NotNull().ToHashSet();
 
-                var oldCols = oldIx.Columns.Where(a => a.IsIncluded == false).Select(a => a.ColumnName);
-                var oldIncCols = oldIx.Columns.Where(a => a.IsIncluded == true).Select(a => a.ColumnName);
+                var oldCols = oldIx.Columns.Where(a => !a.IsIncluded).Select(a => a.ColumnName);
+                var oldIncCols = oldIx.Columns.Where(a => a.IsIncluded).Select(a => a.ColumnName);
 
                 if (!newCols.SetEquals(oldCols))
                     return false;

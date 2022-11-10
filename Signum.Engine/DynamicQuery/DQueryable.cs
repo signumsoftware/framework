@@ -699,7 +699,6 @@ public static class DQueryable
         {
             if(systemTime is SystemTime.Interval)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
             {
-                var q = Untyped.OrderAlsoByKeys(query.Query, elemType);
 
                 var list = Untyped.ToList(query.Query /*q?*/, elemType);
 

@@ -419,7 +419,7 @@ Consider the following options:
 
 
     #region Execute
-    public static T Execute<T>(this T entity, ExecuteSymbol<T> symbol, params object?[]? args)
+    public static T Execute<T>(this T entity, IExecuteSymbol<T> symbol, params object?[]? args)
         where T : class, IEntity
     {
         var op = Find<IExecuteOperation>(entity.GetType(), symbol.Symbol).AssertEntity((Entity)(IEntity)entity);
@@ -434,7 +434,7 @@ Consider the following options:
         return (Entity)(IEntity)entity;
     }
 
-    public static T ExecuteLite<T>(this Lite<T> lite, ExecuteSymbol<T> symbol, params object?[]? args)
+    public static T ExecuteLite<T>(this Lite<T> lite, IExecuteSymbol<T> symbol, params object?[]? args)
         where T : class, IEntity
     {
         T entity = lite.Retrieve();
@@ -468,7 +468,7 @@ Consider the following options:
 
     #region Delete
 
-    public static void DeleteLite<T>(this Lite<T> lite, DeleteSymbol<T> symbol, params object?[]? args)
+    public static void DeleteLite<T>(this Lite<T> lite, IDeleteSymbol<T> symbol, params object?[]? args)
         where T : class, IEntity
     {
         IEntity entity = lite.Retrieve();
@@ -483,7 +483,7 @@ Consider the following options:
         op.Delete(entity, args);
     }
 
-    public static void Delete<T>(this T entity, DeleteSymbol<T> symbol, params object?[]? args)
+    public static void Delete<T>(this T entity, IDeleteSymbol<T> symbol, params object?[]? args)
         where T : class, IEntity
     {
         var op = Find<IDeleteOperation>(entity.GetType(), symbol.Symbol).AssertEntity((Entity)(IEntity)entity);
@@ -610,13 +610,13 @@ Consider the following options:
         return (Graph<T>.ConstructFromMany<F>)FindOperation(typeof(F), symbol.Symbol);
     }
 
-    public static Graph<T>.Execute FindExecute<T>(ExecuteSymbol<T> symbol)
+    public static Graph<T>.Execute FindExecute<T>(IExecuteSymbol<T> symbol)
         where T : class, IEntity
     {
         return (Graph<T>.Execute)FindOperation(typeof(T), symbol.Symbol);
     }
 
-    public static Graph<T>.Delete FindDelete<T>(DeleteSymbol<T> symbol)
+    public static Graph<T>.Delete FindDelete<T>(IDeleteSymbol<T> symbol)
         where T : class, IEntity
     {
         return (Graph<T>.Delete)FindOperation(typeof(T), symbol.Symbol);
@@ -794,7 +794,7 @@ Consider the following options:
 
 public static class FluentOperationInclude
 {
-    public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation)
+    public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, IExecuteSymbol<T> saveOperation)
         where T : Entity
     {
         new Graph<T>.Execute(saveOperation)
@@ -807,7 +807,7 @@ public static class FluentOperationInclude
         return fi;
     }
 
-    public static FluentInclude<T> WithDelete<T>(this FluentInclude<T> fi, DeleteSymbol<T> delete)
+    public static FluentInclude<T> WithDelete<T>(this FluentInclude<T> fi, IDeleteSymbol<T> delete)
            where T : Entity
     {
         new Graph<T>.Delete(delete)

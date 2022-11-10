@@ -466,7 +466,7 @@ public class SqlServerConnector : Connector
 
     public override bool SupportsDateDifBig => this.Version >= SqlServerVersion.SqlServer2016;
 
-    public static List<string> ComplexWhereKeywords = new() { "OR" };
+    protected static List<string> ComplexWhereKeywords = new() { "OR" };
 
     public SqlPreCommand ShrinkDatabase(string databaseName)
     {

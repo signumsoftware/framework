@@ -4,7 +4,7 @@ namespace Signum.Engine.CodeGeneration;
 
 public static class CodeGenerator
 {
-    public static readonly EntityCodeGenerator Entities = new EntityCodeGenerator();
+    public static EntityCodeGenerator Entities = new EntityCodeGenerator();
     public static LogicCodeGenerator Logic = new LogicCodeGenerator();
     public static ReactCodeGenerator React = new ReactCodeGenerator();
     public static ReactHookConverter Hook = new ReactHookConverter();
@@ -85,6 +85,7 @@ public static class CodeGenerator
 public class Module
 {
     public string ModuleName;
+
     public List<Type> Types;
 
     public Module(string moduleName, List<Type> types)

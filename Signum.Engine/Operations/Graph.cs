@@ -470,7 +470,7 @@ public class Graph<T>
 
     public class Execute : _Execute<T>, IExecuteOperation
     {
-        protected readonly ExecuteSymbol<T> Symbol;
+        protected readonly IExecuteSymbol<T> Symbol;
         OperationSymbol IOperation.OperationSymbol => Symbol.Symbol;
         Type IOperation.OverridenType => typeof(T);
         OperationType IOperation.OperationType => OperationType.Execute;
@@ -504,9 +504,9 @@ public class Graph<T>
             this.Execute = overrider(this.Execute);
         }
 
-        public Execute(ExecuteSymbol<T> symbol)
+        public Execute(IExecuteSymbol<T> symbol)
         {
-            this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
+            this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(IExecuteSymbol<T>), nameof(symbol));
         }
 
         LambdaExpression? IEntityOperation.CanExecuteExpression()
@@ -626,7 +626,7 @@ public class Graph<T>
 
     public class Delete : _Delete<T>, IDeleteOperation
     {
-        protected readonly DeleteSymbol<T> Symbol;
+        protected readonly IDeleteSymbol<T> Symbol;
         OperationSymbol IOperation.OperationSymbol => Symbol.Symbol;
         Type IOperation.OverridenType => typeof(T);
         OperationType IOperation.OperationType => OperationType.Delete;
@@ -659,9 +659,9 @@ public class Graph<T>
             this.Delete = overrider(this.Delete);
         }
 
-        public Delete(DeleteSymbol<T> symbol)
+        public Delete(IDeleteSymbol<T> symbol)
         {
-            this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
+            this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(IDeleteSymbol<T>), nameof(symbol));
         }
 
         LambdaExpression? IEntityOperation.CanExecuteExpression()

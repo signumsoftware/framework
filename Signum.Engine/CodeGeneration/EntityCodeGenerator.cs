@@ -569,12 +569,9 @@ public class EntityCodeGenerator
     {
         var mListInfo = GetMListInfo(table);
 
-        if (IsEnum(table))
-        {
-            return Singularize(table.Name.Name) + "";
-        }
-        return Singularize(table.Name.Name) + mListInfo != null && !mListInfo.IsVirtual ? "Embedded" :
-            "Entity";
+        return Singularize(table.Name.Name) +
+            (IsEnum(table) ? " " :
+            mListInfo != null && !mListInfo.IsVirtual ? "Embedded" : "Entity"); 
 
     }
 

@@ -111,7 +111,7 @@ public class ProgressEnumerator<T>: IEnumerable<T>, IEnumerator<T>, IProgressInf
 
     TimeSpan IProgressInfo.Elapsed
     {
-        get { return TimeSpan.FromMilliseconds((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds); }
+        get { return TimeSpan.FromMilliseconds((double)(PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds); }
     }
 
     TimeSpan IProgressInfo.Remaining

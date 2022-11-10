@@ -51,8 +51,8 @@ public static class VirtualMList
     public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
         Expression<Func<T, MList<L>>> mListField,
         Expression<Func<L, Lite<T>?>> backReference,
-        ExecuteSymbol<L> saveOperation,
-        DeleteSymbol<L> deleteOperation)
+        IExecuteSymbol<L> saveOperation,
+        IDeleteSymbol<L> deleteOperation)
         where T : Entity
         where L : Entity
     {
