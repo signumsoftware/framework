@@ -99,7 +99,7 @@ public class HasValueToken : QueryToken
 
     public override PropertyRoute? GetPropertyRoute()
     {
-        return null; ;
+        return null; 
     }
 
     public override string NiceName()

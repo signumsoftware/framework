@@ -83,7 +83,7 @@ public static class AutocompleteUtils
                             return results;
                     }
                 }
-            };
+            }
         }
 
 

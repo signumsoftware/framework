@@ -1009,10 +1009,16 @@ internal class IntervalExpression : DbExpression
         :base(DbExpressionType.Interval, type)
     {
 #pragma warning disable IDE0075 // Simplify conditional expression
-        var isNullable =
-             type.IsInstantiationOf(typeof(NullableInterval<>)) ? true :
-             type.IsInstantiationOf(typeof(Interval<>)) ? false :
-             throw new UnexpectedValueException(type);
+        var isNullable=true;
+        if (type.IsInstantiationOf(typeof(NullableInterval<>)))
+        {
+             isNullable = true;
+}
+        else
+        {
+             isNullable = type.IsInstantiationOf(typeof(Interval<>)) ? false :
+            throw new UnexpectedValueException(type);
+        }
 #pragma warning restore IDE0075 // Simplify conditional expression
 
         this.ElementType = isNullable ?  type.GetGenericArguments()[0].Nullify() : type.GetGenericArguments()[0];

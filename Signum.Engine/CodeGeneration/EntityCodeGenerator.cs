@@ -743,9 +743,16 @@ public class EntityCodeGenerator
         var defaultSize = CurrentSchema.Settings.GetSqlSize(null, null, pair.DbType);
         if (defaultSize != null && !(defaultSize == col.Length || defaultSize == int.MaxValue && col.Length == -1))
         {
-            parts.Add("Size = " + (col.Length == -1 ? "int.MaxValue" :
-                                col.Length != 0 ? col.Length.ToString() :
-                                col.Precision != 0 ? col.Precision.ToString() : "0"));
+            if (!(defaultSize == col.Length || defaultSize == int.MaxValue && col.Length == -1))
+                if (col.Length == -1)
+                {
+                    parts.Add("Size = " + "int.MaxValue");
+                }
+                else
+                {
+                    parts.Add("Size = " + (col.Length != 0 ? col.Length.ToString() :
+                    col.Precision != 0 ? col.Precision.ToString() : "0"));
+                }
         }
 
         var defaultPrecision = CurrentSchema.Settings.GetSqlPrecision(null, null, pair.DbType);

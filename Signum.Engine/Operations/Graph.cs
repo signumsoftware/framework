@@ -181,10 +181,10 @@ public class Graph<T>
             this.Construct = overrider(this.Construct);
         }
 
-        public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
+        public ConstructFrom(ConstructSymbol<T>.IFrom<F> symbol)
         {
             if (symbol == null)
-                throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.From<F>), nameof(symbol));
+                throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.IFrom<F>), nameof(symbol));
 
             this.operationSymbol = symbol.Symbol;
             this.baseType = symbol.BaseType;
@@ -196,7 +196,7 @@ public class Graph<T>
             this.baseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
         }
 
-        public static ConstructFrom<F> Untyped<B>(ConstructSymbol<B>.From<F> symbol)
+        public static ConstructFrom<F> Untyped<B>(ConstructSymbol<B>.IFrom<F> symbol)
             where B : class, IEntity
         {
             return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);

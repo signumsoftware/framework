@@ -784,10 +784,16 @@ public static class Administrator
     {
         var table = Schema.Current.Table<T>();
         var f = Schema.Current.Field(field);
-
-        var column = f is IColumn c ? c : 
-            f is FieldImplementedBy fib ? fib.ImplementationColumns.GetOrThrow(value.GetType()) : 
+        IColumn column;
+        if (f is IColumn c)
+        {
+            column = c;
+        }
+        else {
+             column = f is FieldImplementedBy fib ? fib.ImplementationColumns.GetOrThrow(value.GetType()) :
             throw new UnexpectedValueException(f);
+        }
+         
 
         return DeleteWhereScript(table, column, value.Id);
     }
