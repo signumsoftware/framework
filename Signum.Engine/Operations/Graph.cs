@@ -28,10 +28,10 @@ public class Graph<T>
         //public Func<object[]?, T> Construct { get; set; } (inherited)
         public bool Lite { get { return false; } }
 
-        public Construct(ConstructSymbol<T>.Simple symbol)
+        public Construct(ConstructSymbol<T>.ISimple symbol)
         {
             if (symbol == null)
-                throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.Simple), nameof(symbol));
+                throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.ISimple), nameof(symbol));
 
             this.operationSymbol = symbol.Symbol;
         }
@@ -41,7 +41,7 @@ public class Graph<T>
             this.operationSymbol = operationSymbol ?? throw new ArgumentNullException(nameof(operationSymbol));
         }
 
-        public static Construct Untyped<B>(ConstructSymbol<B>.Simple symbol)
+        public static Construct Untyped<B>(ConstructSymbol<B>.ISimple symbol)
             where B: class, IEntity
         {
             return new Construct(symbol.Symbol);

@@ -4107,7 +4107,7 @@ class AssignAdapterExpander : DbExpressionVisitor
                             (dic.TryGetC(fi.Name) ?? Expression.Constant(null, fi.FieldType)))
                         ).ToReadOnly();
 
-        return new EmbeddedEntityExpression(init.Type, Expression.Constant(true), bindings, null /*TODO*/, embedded.FieldEmbedded, embedded.ViewTable, embedded.EntityContext);
+        return new EmbeddedEntityExpression(init.Type, Expression.Constant(true), bindings, null /*tags are commonly used to mark places where some more code is required*/, embedded.FieldEmbedded, embedded.ViewTable, embedded.EntityContext);
     }
 
     IDisposable OverrideColExpression(Expression newColExpression)

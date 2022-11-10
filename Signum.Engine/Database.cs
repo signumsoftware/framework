@@ -400,7 +400,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
     public static async Task<Lite<T>> FillLiteModelAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
     {
-        lite.SetModel(await GetLiteModelAsync(lite.EntityType, lite.Id, token, lite.ModelType));
+        lite.SetModel(await GetLiteModelAsync(lite.EntityType, lite.Id, lite.ModelType, token));
 
         return lite;
     }
@@ -445,10 +445,10 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
 
 
-    public static Task<object> GetLiteModelAsync(Type type, PrimaryKey id, CancellationToken token, Type? modelType) => giGetToStrAsync.GetInvoker(type)(id, token, modelType);
-    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Type?, Task<object>>> giGetToStrAsync =
-        new((id, token, modelType) => GetLiteModelAsync<Entity>(id, token, modelType));
-    public static async Task<object> GetLiteModelAsync<T>(PrimaryKey id, CancellationToken token, Type? modelType = null)
+    public static Task<object> GetLiteModelAsync(Type type, PrimaryKey id, Type? modelType, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, modelType, token);
+    static readonly GenericInvoker<Func<PrimaryKey, Type?, CancellationToken, Task<object>>> giGetToStrAsync =
+        new((id, modelType, token) => GetLiteModelAsync<Entity>(id, token, modelType));
+    public static async Task<object> GetLiteModelAsync<T>(PrimaryKey id,  CancellationToken token, Type? modelType = null)
         where T : Entity
     {
         try
@@ -1225,7 +1225,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mListProperty)
         where E : Entity
     {
-        PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
+
+        //PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
 
         var mlistTable = Schema.Current.TableMList(mListProperty);
 

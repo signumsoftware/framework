@@ -37,7 +37,7 @@ internal class EntityExpression : DbExpression
             throw new ArgumentNullException(nameof(type));
 
         if (!type.IsEntity())
-            throw new ArgumentException("type");
+            throw new ArgumentException("Trow argument exception");
         this.Table = Schema.Current.Table(type);
         this.ExternalId = externalId ?? throw new ArgumentNullException(nameof(externalId));
 

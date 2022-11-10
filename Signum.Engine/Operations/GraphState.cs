@@ -53,7 +53,7 @@ public class Graph<T, S>
         Type? IOperation.StateType => typeof(S);
         LambdaExpression? IOperation.GetStateExpression() => GetState;
 
-        public Construct(ConstructSymbol<T>.Simple symbol)
+        public Construct(ConstructSymbol<T>.ISimple symbol)
             : base(symbol)
         {
             ToStates = new List<S>();
@@ -64,7 +64,7 @@ public class Graph<T, S>
         {
         }
 
-        public static new Construct Untyped<B>(ConstructSymbol<B>.Simple symbol)
+        public static new Construct Untyped<B>(ConstructSymbol<B>.ISimple symbol)
              where B : class, IEntity
         {
             return new Construct(symbol.Symbol);

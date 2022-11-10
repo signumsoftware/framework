@@ -107,7 +107,8 @@ public static class TypeLogic
         Dictionary<string, TypeEntity> current = ApplyReplacementsToOld(replacements,
             currentList.ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
 
-        { //Temporal solution until applications are updated
+        { 
+            /*Temporal solution until applications are updated*/
             var repeated =
                 should.Keys.Select(k => ObjectName.Parse(k, isPostgres)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key).Concat(
                 current.Keys.Select(k => ObjectName.Parse(k, isPostgres)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key)).ToList();

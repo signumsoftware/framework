@@ -13,7 +13,7 @@ public class OperationSymbol : Symbol
     public static class Construct<T>
         where T : class, IEntity
     {
-        public static ConstructSymbol<T>.Simple Simple(Type declaringType, string fieldName)
+        public static ConstructSymbol<T>.ISimple Simple(Type declaringType, string fieldName)
         {
             return new SimpleImp(new OperationSymbol(declaringType, fieldName));
         }
@@ -30,7 +30,7 @@ public class OperationSymbol : Symbol
             return new FromManyImp<F>(new OperationSymbol(declaringType, fieldName));
         }
 
-        class SimpleImp : ConstructSymbol<T>.Simple
+        class SimpleImp : ConstructSymbol<T>.ISimple
         {
             public SimpleImp(OperationSymbol symbol)
             {
@@ -164,7 +164,7 @@ public static class ConstructSymbol<T>
 {
  
 
-    public interface Simple : IOperationSymbolContainer
+    public interface ISimple : IOperationSymbolContainer
     {
     }
 

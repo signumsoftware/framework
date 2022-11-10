@@ -504,7 +504,7 @@ public class PerfCounter
     static PerfCounter()
     {
         if (!Stopwatch.IsHighResolution)
-            throw new InvalidOperationException("Low performance performance counter");
+            throw new NotImplementedException("Low performance performance counter");
 
         FrequencyMilliseconds = Stopwatch.Frequency / 1000;
     }

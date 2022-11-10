@@ -340,7 +340,7 @@ public class InvariantDataTableValueConverter : NiceDataTableValueConverter
 
     public override object? ConvertValue(object? value, Column column)
     {
-        var type = column.Token.Type;
+       // var type = column.Token.Type;
 
         if (value is Lite<Entity>)
             return ((Lite<Entity>)value).KeyLong();

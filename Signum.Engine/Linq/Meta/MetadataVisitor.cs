@@ -19,7 +19,7 @@ internal class MetadataVisitor : ExpressionVisitor
     static internal Dictionary<string, Meta?>? GatherMetadata(Expression expression)
     {
         if (expression == null)
-            throw new ArgumentException("expression");
+            throw new ArgumentException("Argument expression");
 
         if (!typeof(IQueryable).IsAssignableFrom(expression.Type))
             throw new InvalidOperationException("Expression type is not IQueryable");

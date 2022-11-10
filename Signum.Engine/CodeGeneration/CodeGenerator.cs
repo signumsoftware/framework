@@ -69,7 +69,7 @@ public static class CodeGenerator
 
     public static string? GetDefaultModuleName(Type[] selected, string solutionName)
     {
-        StringDistance sd = new StringDistance();
+        
 
         string? name = selected.Select(a => (a.Namespace ?? "").RemovePrefix(solutionName + ".Entities")).Distinct().Only();
 
