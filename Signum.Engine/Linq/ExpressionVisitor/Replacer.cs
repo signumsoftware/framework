@@ -7,7 +7,7 @@ namespace Signum.Engine.Linq;
 /// </summary>
 internal class Replacer : DbExpressionVisitor
 {
-    Expression searchFor;
+    readonly Expression searchFor;
     Expression replaceWith;
 
     private Replacer(Expression searchFor, Expression replaceWith)

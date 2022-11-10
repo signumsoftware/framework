@@ -7,7 +7,7 @@ public static class CodeGenerator
     public static EntityCodeGenerator Entities = new EntityCodeGenerator();
     public static LogicCodeGenerator Logic = new LogicCodeGenerator();
     public static ReactCodeGenerator React = new ReactCodeGenerator();
-    public static ReactHookConverter Hook = new ReactHookConverter();
+    readonly public static ReactHookConverter Hook = new ReactHookConverter();
 
     public static void GenerateCodeConsole()
     {
@@ -85,7 +85,8 @@ public static class CodeGenerator
 public class Module
 {
     public string ModuleName;
-    public List<Type> Types;
+
+    public List<Type> Types { get; private set; }
 
     public Module(string moduleName, List<Type> types)
     {

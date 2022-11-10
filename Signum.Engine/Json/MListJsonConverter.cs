@@ -127,15 +127,15 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
                     {
                         if (oldValue == null)
                         {
-                            T newValue = (T)converter.Read(ref reader, typeof(T), options)!;
+                            T newValue = converter.Read(ref reader, typeof(T), options)!;
 
                             newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
                         }
                         else
                         {
                             T newValue = converter is JsonConverterWithExisting<T> jcwe ?
-                                (T)jcwe.Read(ref reader, typeof(T), options, oldValue.Value.Element!, null)! :
-                                (T)converter.Read(ref reader, typeof(T), options)!;
+                                jcwe.Read(ref reader, typeof(T), options, oldValue.Value.Element!, null)! :
+                                converter.Read(ref reader, typeof(T), options)!;
 
                             if (oldValue.Value.Element!.Equals(newValue))
                                 newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));

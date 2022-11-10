@@ -33,7 +33,7 @@ public static class HeavyProfiler
 
     static readonly Variable<HeavyProfilerEntry?> current = Statics.ThreadVariable<HeavyProfilerEntry?>("heavy"); 
 
-    public static readonly List<HeavyProfilerEntry> Entries = new List<HeavyProfilerEntry>();
+    public static List<HeavyProfilerEntry> Entries = new List<HeavyProfilerEntry>();
 
     public static void Clean()
     {

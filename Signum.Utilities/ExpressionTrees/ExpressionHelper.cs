@@ -6,7 +6,7 @@ namespace Signum.Utilities.ExpressionTrees;
 
 public static class ExpressionHelper
 {
-    static MethodInfo miAsQueryable = ReflectionTools.GetMethodInfo(() => Queryable.AsQueryable<int>(null!)).GetGenericMethodDefinition();
+  
 
     [DebuggerStepThrough]
     public static Expression TryConvert(this Expression expression, Type type)

@@ -43,7 +43,7 @@ public class ColaboratorsMixin : MixinEntity
 [AutoInit]
 public static class NoteWithDateOperation
 {
-    public static ExecuteSymbol<NoteWithDateEntity> Save;
+    public static IExecuteSymbol<NoteWithDateEntity> Save;
 }
 
 [DescriptionOptions(DescriptionOptions.All)]
@@ -99,8 +99,8 @@ public class ArtistEntity : Entity, IAuthorEntity
 [AutoInit]
 public static class ArtistOperation
 {
-    public static ExecuteSymbol<ArtistEntity> Save;
-    public static ExecuteSymbol<ArtistEntity> AssignPersonalAward;
+    public static IExecuteSymbol<ArtistEntity> Save;
+    public static IExecuteSymbol<ArtistEntity> AssignPersonalAward;
 }
 
 [Flags]
@@ -151,7 +151,7 @@ public class BandEntity : Entity, IAuthorEntity
 [AutoInit]
 public static class BandOperation
 {
-    public static ExecuteSymbol<BandEntity> Save;
+    public static IExecuteSymbol<BandEntity> Save;
 }
 
 [EntityKind(EntityKind.Shared, EntityData.Transactional), PrimaryKey(typeof(long))]
@@ -168,7 +168,7 @@ public abstract class AwardEntity : Entity
 [AutoInit]
 public static class AwardOperation
 {
-    public static ExecuteSymbol<AwardEntity> Save;
+    public static IExecuteSymbol<AwardEntity> Save;
 }
 
 public enum AwardResult
@@ -226,7 +226,7 @@ public class LabelEntity : Entity
 [AutoInit]
 public static class LabelOperation
 {
-    public static ExecuteSymbol<LabelEntity> Save;
+    public static IExecuteSymbol<LabelEntity> Save;
 }
 
 [EntityKind(EntityKind.SystemString, EntityData.Master)]
@@ -286,13 +286,13 @@ public enum AlbumState
 [AutoInit]
 public static class AlbumOperation
 {
-    public static ExecuteSymbol<AlbumEntity> Save;
-    public static ExecuteSymbol<AlbumEntity> Modify;
-    public static ConstructSymbol<AlbumEntity>.From<BandEntity> CreateAlbumFromBand;
-    public static DeleteSymbol<AlbumEntity> Delete;
-    public static ConstructSymbol<AlbumEntity>.From<AlbumEntity> Clone;
-    public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateGreatestHitsAlbum;
-    public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum;
+    public static ConstructSymbol<AlbumEntity>.IFromMany<AlbumEntity> CreateGreatestHitsAlbum;
+    public static ConstructSymbol<AlbumEntity>.IFromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum;
+    public static IExecuteSymbol<AlbumEntity> Save;
+    public static IExecuteSymbol<AlbumEntity> Modify;
+    public static IDeleteSymbol<AlbumEntity> Delete;
+    public static ConstructSymbol<AlbumEntity>.IFrom<BandEntity> CreateAlbumFromBand;
+    public static ConstructSymbol<AlbumEntity>.IFrom<AlbumEntity> Clone;
 }
 
 public class SongEmbedded : EmbeddedEntity
@@ -356,7 +356,7 @@ public class ConfigEntity : Entity
 [AutoInit]
 public static class ConfigOperation
 {
-    public static ExecuteSymbol<ConfigEntity> Save;
+    public static IExecuteSymbol<ConfigEntity> Save;
 }
 
 public class EmbeddedConfigEmbedded : EmbeddedEntity
@@ -460,6 +460,6 @@ public class AlbumReEditionEntity : Entity
 [AutoInit]
 public static class AlbumReEditionOperation
 {
-    public static readonly ExecuteSymbol<AlbumReEditionEntity> Save;
-    public static readonly DeleteSymbol<AlbumReEditionEntity> Delete;
+    public static readonly IExecuteSymbol<AlbumReEditionEntity> Save;
+    public static readonly IDeleteSymbol<AlbumReEditionEntity> Delete;
 }

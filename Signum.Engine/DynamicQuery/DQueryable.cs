@@ -233,7 +233,7 @@ public static class DQueryable
 
             var tupleType = subQueryExp.Body.Type;
 
-            var miSelect = colExpre.Type.IsInstanceOfType(typeof(IQueryable<>)) ? OverloadingSimplifier.miSelectQ : OverloadingSimplifier.miSelectE;
+            var miSelect = colExpre.Type.IsInstanceOfType("IQueryable<>") ? OverloadingSimplifier.miSelectQ : OverloadingSimplifier.miSelectE;
             var select = Expression.Call(miSelect.MakeGenericMethod(pe2.Type!, tupleType), colExpre, subQueryExp);
             var toList = Expression.Call(miToList.MakeGenericMethod(tupleType), select);
 
@@ -518,7 +518,7 @@ public static class DQueryable
             .ToString("\r\n");
 
         if (str.HasText())
-            throw new ApplicationException(str);
+            throw new FormatException(str);
 
         Expression body = filters.Select(f => f.GetExpression(context)).AggregateAnd();
 
@@ -643,7 +643,6 @@ public static class DQueryable
         {
             if (systemTime is SystemTime.Interval)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
             {
-                var q = Untyped.OrderAlsoByKeys(query.Query, elemType);
 
                 var list = await Untyped.ToListAsync(query.Query /*q maybe?*/, token, elemType);
 
@@ -699,7 +698,6 @@ public static class DQueryable
         {
             if(systemTime is SystemTime.Interval)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
             {
-                var q = Untyped.OrderAlsoByKeys(query.Query, elemType);
 
                 var list = Untyped.ToList(query.Query /*q?*/, elemType);
 

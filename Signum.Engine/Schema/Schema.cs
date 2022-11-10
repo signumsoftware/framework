@@ -537,7 +537,7 @@ public class Schema : IImplementationsFinder
 
     public void OnBeforeDatabaseAccess()
     {
-        if (IsCompleted == false)
+        if (!IsCompleted)
             throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method");
 
         if (BeforeDatabaseAccess == null)

@@ -34,7 +34,7 @@ internal class DbExpressionComparer : ExpressionComparer
         bool result = ComparePrivate(a, b);
 
         if (result == false)
-            result = !!result; //Breakpoint here to check the first offender
+            result = !result; //Breakpoint here to check the first offender
 
         return result;
     }
@@ -120,10 +120,9 @@ internal class DbExpressionComparer : ExpressionComparer
         if (a == null || b == null)
             return false;
 
-        if (aliasMap != null)
+        if (aliasMap != null && aliasMap.TryGetValue(a, out Alias? mapped))
         {
-            if (aliasMap.TryGetValue(a, out Alias? mapped))
-                return mapped == b;
+            return mapped == b;
         }
         return a == b;
     }

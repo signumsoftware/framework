@@ -93,7 +93,7 @@ internal class EntityCompleter : DbExpressionVisitor
     {
         if (previousTypes.Contains(ee.Type) || IsCached(ee.Type) || ee.AvoidExpandOnRetrieving)
         {
-            ee = new EntityExpression(ee.Type, ee.ExternalId, null, null, null, null, null /*ee.SystemPeriod TODO*/ , ee.AvoidExpandOnRetrieving);
+            ee = new EntityExpression(ee.Type, ee.ExternalId, null, null, null, null, null /*ee.SystemPeriod It should be supplemented in the future, to improve the functionality of the application*/ , ee.AvoidExpandOnRetrieving);
         }
         else
             ee = binder.Completed(ee);

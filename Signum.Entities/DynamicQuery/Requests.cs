@@ -197,18 +197,13 @@ public class QueryValueRequest : BaseQueryRequest
 public class UniqueEntityRequest : BaseQueryRequest
 {
     List<Order> orders;
-    public List<Order> Orders
-    {
-        get { return orders; }
-        set { orders = value; }
-    }
+    public List<Order> Orders { get; set; }
+  
+
+
 
     UniqueType uniqueType;
-    public UniqueType UniqueType
-    {
-        get { return uniqueType; }
-        set { uniqueType = value; }
-    }
+    public UniqueType UniqueType { get; set;}
 
     public List<CollectionElementToken> Multiplications
     {
@@ -228,11 +223,7 @@ public class UniqueEntityRequest : BaseQueryRequest
 public class QueryEntitiesRequest: BaseQueryRequest
 {
     List<Order> orders = new List<Order>();
-    public List<Order> Orders
-    {
-        get { return orders; }
-        set { orders = value; }
-    }
+    public List<Order> Orders{ get; set; }
 
     public List<CollectionElementToken> Multiplications
     {

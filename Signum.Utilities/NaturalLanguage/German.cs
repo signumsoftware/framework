@@ -273,7 +273,6 @@ public class GermanNumberWriter : INumberWriter
             case 16: return "sechzehn";
             case 17: return "siebzehn";
         }
-        string tempString = number.ToString();
 
         if (number < 20)
         {

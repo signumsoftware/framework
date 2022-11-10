@@ -1228,8 +1228,6 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
         //PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
 
-        var list = (FieldMList)Schema.Current.Field(mListProperty);
-
         var mlistTable = Schema.Current.TableMList(mListProperty);
 
         return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, mlistTable);

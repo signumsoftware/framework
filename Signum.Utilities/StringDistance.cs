@@ -223,10 +223,10 @@ public class StringDistance
     public int LongestCommonSubstring<T>(T[] str1, T[] str2, out int startPos1, out int startPos2, IEqualityComparer<T>? comparer = null)
     {
         if (str1 == null)
-            throw new ArgumentNullException("str1");
+            throw new ArgumentNullException(nameof(str1));
 
         if (str2 == null)
-            throw new ArgumentNullException("str2");
+            throw new ArgumentNullException(nameof(str2));
 
         return LongestCommonSubstring(new Slice<T>(str1), new Slice<T>(str2), out startPos1, out startPos2, comparer);
     }

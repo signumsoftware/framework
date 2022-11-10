@@ -70,7 +70,7 @@ public static class ObjectDumper
             {
                 Sb.Append("typeof(");
                 Sb.Append(CSharpRenderer.TypeName(type));
-                Sb.Append(")");
+                Sb.Append(')');
                 return;
             }
 

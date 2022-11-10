@@ -88,7 +88,10 @@ public static class ExceptionLogic
         {
             entity.User = UserHolder.Current?.User; //Session special situations
         }
-        catch { }
+        catch 
+        {
+            //no need for exception
+        }
 
         try
         {
@@ -134,7 +137,9 @@ public static class ExceptionLogic
 
     public static event Action<DeleteLogParametersEmbedded, StringBuilder, CancellationToken>? DeleteLogs;
 
-    public static int DeleteLogsTimeOut = 10 * 60 * 1000;
+    public static int DeleteLogsTimeOut = 10 * 60 * 100;
+  
+ 
 
     public static void DeleteLogsAndExceptions(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
     {

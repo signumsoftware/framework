@@ -72,7 +72,7 @@ public class ReactHookConverter
                  + endMatch.Value;
 
 
-            content = content.Substring(0, m.Index) + newComponent + content[endMatch.EndIndex()..];
+            content = string.Concat(content.AsSpan(0, m.Index), newComponent, content.AsSpan()[endMatch.EndIndex()..]);
         }
 
 
@@ -80,9 +80,12 @@ public class ReactHookConverter
         {
             var lastImport = Regex.Matches(content, "^import.*\r\n", RegexOptions.Multiline).Cast<Match>().Last();
 
+            /*return content.Concat(content.AsSpan(0, lastImport.EndIndex()),
+                 $"import {{ {hookImports.ToString(", ")} }} from '@framework/Hooks'\r\n",
+                 content[lastImport.EndIndex()..]);*/
             return content.Substring(0, lastImport.EndIndex()) +
-                $"import {{ {hookImports.ToString(", ")} }} from '@framework/Hooks'\r\n" +
-                content[lastImport.EndIndex()..];
+                 $"import {{ {hookImports.ToString(", ")} }} from '@framework/Hooks'\r\n" +
+                 content[lastImport.EndIndex()..];
         }
         else
         {

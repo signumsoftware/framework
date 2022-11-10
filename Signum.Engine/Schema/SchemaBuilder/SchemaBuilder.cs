@@ -517,9 +517,8 @@ public class SchemaBuilder
         if (Reflector.IsMList(route.Type))
             return KindOfField.MList;
 
-        if (Settings.IsPostgres && route.Type.IsArray)
+        if ((Settings.IsPostgres && route.Type.IsArray) && (Settings.TryGetSqlDbType(Settings.FieldAttribute<DbTypeAttribute>(route), route.Type.ElementType()!) != null))
         {
-            if (Settings.TryGetSqlDbType(Settings.FieldAttribute<DbTypeAttribute>(route), route.Type.ElementType()!) != null)
                 return KindOfField.Value;
         }
 
