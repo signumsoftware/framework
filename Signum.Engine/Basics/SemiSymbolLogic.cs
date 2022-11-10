@@ -54,8 +54,7 @@ public static class SemiSymbolLogic<T>
             sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
             SemiSymbol.CallRetrieved += (ss) =>
             {
-                if (ss is T t)
-                    if (t.Key != null && t.FieldInfo == null)
+                if (ss is T t && t.Key != null && t.FieldInfo == null)
                         SymbolLogic_Retrieved(t, new PostRetrievingContext());
             };
         }

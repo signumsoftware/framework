@@ -9,7 +9,7 @@ public static class PropertyRouteLogic
     public static bool IsPropertyRoute(this PropertyRouteEntity prdn, PropertyRoute pr) =>
         As.Expression(() => prdn.RootType.Is(pr.RootType.ToTypeEntity()) && prdn.Path == pr.PropertyString());
 
-    public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties = null!;
+     public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties = null!;
 
     public static void Start(SchemaBuilder sb)
     {

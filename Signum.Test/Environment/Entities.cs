@@ -288,9 +288,9 @@ public static class AlbumOperation
 {
     public static ExecuteSymbol<AlbumEntity> Save;
     public static ExecuteSymbol<AlbumEntity> Modify;
-    public static ConstructSymbol<AlbumEntity>.From<BandEntity> CreateAlbumFromBand;
+    public static ConstructSymbol<AlbumEntity>.IFrom<BandEntity> CreateAlbumFromBand;
     public static DeleteSymbol<AlbumEntity> Delete;
-    public static ConstructSymbol<AlbumEntity>.From<AlbumEntity> Clone;
+    public static ConstructSymbol<AlbumEntity>.IFrom<AlbumEntity> Clone;
     public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateGreatestHitsAlbum;
     public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum;
 }

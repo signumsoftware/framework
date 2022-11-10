@@ -913,7 +913,7 @@ public static class EnumerableExtensions
         using (var enumA = colA.GetEnumerator())
         using (var enumB = colB.GetEnumerator())
         {
-            while (okA & (okA = enumA.MoveNext()) | okB & (okB = enumB.MoveNext()))
+            while (okA && (okA = enumA.MoveNext()) || okB && (okB = enumB.MoveNext()))
             {
                 yield return resultSelector(
                     okA ? enumA.Current : default!,

@@ -80,7 +80,7 @@ public class Transaction : IDisposableException
             parent.Rollback(ex);
         }
 
-        public void Commit() { }
+        public void Commit() { /*it is going to be implemented in future*/ }
 
         public void Finish() { }
 
@@ -354,11 +354,6 @@ public class Transaction : IDisposableException
 
         public void Finish()
         {
-            //if (Transaction != null)
-            //{
-            //    Transaction.Dispose();
-            //    Transaction = null;
-            //}
 
             if (Connection != null)
             {

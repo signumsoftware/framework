@@ -1605,7 +1605,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "DateTime.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
             case "DateTime.ToLongTimeString": return GetDateTimeToStringSqlFunction(m, "T");
 
-            //dateadd(month, datediff(month, 0, SomeDate),0);
+            
             case "DateTimeExtensions.YearStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.year);
             case "DateTimeExtensions.MonthStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.month);
             case "DateTimeExtensions.QuarterStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.quarter);
