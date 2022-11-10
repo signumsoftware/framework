@@ -18,7 +18,7 @@ public class OperationSymbol : Symbol
             return new SimpleImp(new OperationSymbol(declaringType, fieldName));
         }
 
-        public static ConstructSymbol<T>.From<F> From<F>(Type declaringType, string fieldName)
+        public static ConstructSymbol<T>.IFrom<F> From<F>(Type declaringType, string fieldName)
             where F : class,  IEntity
         {
             return new FromImp<F>(new OperationSymbol(declaringType, fieldName));
@@ -45,7 +45,7 @@ public class OperationSymbol : Symbol
             }
         }
 
-        class FromImp<F> : ConstructSymbol<T>.From<F>
+        class FromImp<F> : ConstructSymbol<T>.IFrom<F>
             where F : class, IEntity
         {
             public FromImp(OperationSymbol symbol)
@@ -168,7 +168,7 @@ public static class ConstructSymbol<T>
     {
     }
 
-    public interface From<in F> : IEntityOperationSymbolContainer<F>
+    public interface IFrom<in F> : IEntityOperationSymbolContainer<F>
         where F : class, IEntity
     {
     }

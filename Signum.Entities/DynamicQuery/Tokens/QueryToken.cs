@@ -512,7 +512,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
             case FilterType.Enum: return type.UnNullify().NiceName();
             case FilterType.Lite:
                 {
-                    var cleanType = type.CleanType();
+                    
                     var imp = implementations!.Value;
 
                     if (imp.IsByAll)

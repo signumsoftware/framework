@@ -36,7 +36,7 @@ public static class SqlServerRetry
 
     public static IDisposable Suspend()
     {
-        var val = _suspended.Value;
+        
         _suspended.Value = true;
         return new Disposable(() => _suspended.Value = true);
     }

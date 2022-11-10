@@ -309,9 +309,9 @@ public struct NullableInterval<T> : IEquatable<NullableInterval<T>>, IComparable
         if (string.IsNullOrEmpty(format))
             return BuildString(formatProvider, "{0} - {1}", "< {0}", "{0} ≤", "All");
 
-        if (format.HasText() && format.Contains("{"))
+        if (format.HasText() && format.Contains('{'))
         {
-            if (format.Contains("|"))
+            if (format.Contains('|'))
             {
                 string[] parts = format.Split('|');
                 if (parts.Length != 4)
@@ -481,7 +481,7 @@ public struct IntervalWithEnd<T> : IEquatable<IntervalWithEnd<T>>, IComparable<I
     {
         if (format == null)
             return string.Format(formatProvider, "{0} - {1}", min, max);
-        else if (format.Contains("{"))
+        else if (format.Contains('{'))
             return string.Format(formatProvider, format, min, max);
         else
             return string.Format(formatProvider, "{0:" + format + "} - {1:" + format + "}", min, max);

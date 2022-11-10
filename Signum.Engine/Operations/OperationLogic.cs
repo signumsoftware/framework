@@ -514,7 +514,7 @@ Consider the following options:
 
     #region ConstructFrom
 
-    public static T ConstructFrom<F, T>(this F entity, ConstructSymbol<T>.From<F> symbol, params object?[]? args)
+    public static T ConstructFrom<F, T>(this F entity, ConstructSymbol<T>.IFrom<F> symbol, params object?[]? args)
         where T : class, IEntity
         where F : class, IEntity
     {
@@ -528,7 +528,7 @@ Consider the following options:
         return (Entity)op.Construct(entity, args);
     }
 
-    public static T ConstructFromLite<F, T>(this Lite<F> lite, ConstructSymbol<T>.From<F> symbol, params object?[]? args)
+    public static T ConstructFromLite<F, T>(this Lite<F> lite, ConstructSymbol<T>.IFrom<F> symbol, params object?[]? args)
         where T : class, IEntity
         where F : class, IEntity
     {
@@ -596,7 +596,7 @@ Consider the following options:
         return (Graph<T>.Construct)FindOperation(typeof(T), symbol.Symbol);
     }
 
-    public static Graph<T>.ConstructFrom<F> FindConstructFrom<F, T>(ConstructSymbol<T>.From<F> symbol)
+    public static Graph<T>.ConstructFrom<F> FindConstructFrom<F, T>(ConstructSymbol<T>.IFrom<F> symbol)
         where T : class, IEntity
         where F : class, IEntity
     {

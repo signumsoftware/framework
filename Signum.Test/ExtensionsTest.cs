@@ -7,6 +7,9 @@ public class ExtensionsTest
     public void CartesianProduct()
     {
         var result1 = new[] { "ab", "xy", "01" }.CartesianProduct().ToString(a => a.ToString(""), " ");
+        Assert.Equal("abxy01", result1);
+            
+        
     }
 
     [Fact]

@@ -120,10 +120,9 @@ internal class DbExpressionComparer : ExpressionComparer
         if (a == null || b == null)
             return false;
 
-        if (aliasMap != null)
+        if (aliasMap != null && aliasMap.TryGetValue(a, out Alias? mapped))
         {
-            if (aliasMap.TryGetValue(a, out Alias? mapped))
-                return mapped == b;
+            return mapped == b;
         }
         return a == b;
     }

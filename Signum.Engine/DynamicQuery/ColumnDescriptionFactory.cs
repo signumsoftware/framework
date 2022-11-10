@@ -92,9 +92,6 @@ public class ColumnDescriptionFactory
         Type = mi.ReturningType();
         Meta = meta;
 
-        //if (Type.IsIEntity())
-        //    throw new InvalidOperationException("The Type of column {0} is a subtype of IEntity, use a Lite instead".FormatWith(mi.MemberName()));
-
         if (IsEntity && !Type.CleanType().IsIEntity())
             throw new InvalidOperationException("Entity must be a Lite or an IEntity");
 

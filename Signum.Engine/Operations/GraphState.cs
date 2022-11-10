@@ -109,7 +109,7 @@ public class Graph<T, S>
         Type? IOperation.StateType => typeof(S);
         LambdaExpression? IOperation.GetStateExpression() => GetState;
 
-        public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
+        public ConstructFrom(ConstructSymbol<T>.IFrom<F> symbol)
             : base(symbol)
         {
         }
@@ -119,7 +119,7 @@ public class Graph<T, S>
         {
         }
 
-        public static new ConstructFrom<F> Untyped<B>(ConstructSymbol<B>.From<F> symbol)
+        public static new ConstructFrom<F> Untyped<B>(ConstructSymbol<B>.IFrom<F> symbol)
              where B : class, IEntity
         {
             return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);

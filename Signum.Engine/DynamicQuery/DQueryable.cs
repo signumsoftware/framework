@@ -518,7 +518,7 @@ public static class DQueryable
             .ToString("\r\n");
 
         if (str.HasText())
-            throw new ApplicationException(str);
+            throw new FormatException(str);
 
         Expression body = filters.Select(f => f.GetExpression(context)).AggregateAnd();
 

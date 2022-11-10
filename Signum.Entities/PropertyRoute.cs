@@ -282,7 +282,7 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
             case PropertyRouteType.LiteEntity:
                 return Parent!.ToString() + ".Entity";
         }
-        throw new InvalidOperationException();
+        throw new NotImplementedException();
     }
 
     public string PropertyString()

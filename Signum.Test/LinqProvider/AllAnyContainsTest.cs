@@ -131,6 +131,9 @@ public class AllAnyContainsTest
         var years = new[] { 1992, 1993, 1995 };
 
         var list = Database.Query<AlbumEntity>().Where(a => years.Any(y => a.Year == y)).Select(a => a.Name).ToList();
+
+
+
     }
 
     [Fact]

@@ -22,10 +22,6 @@ public static class PostgresCatalogSchema
             {
                 var databaseName = db == null ? Connector.Current.DatabaseName() : db.Name;
 
-                //var sysDb = Database.View<SysDatabases>().Single(a => a.name == databaseName);
-
-                var con = Connector.Current;
-
                 var tables =
                     (from ns in Database.View<PgNamespace>()
                      where !ns.IsInternal()

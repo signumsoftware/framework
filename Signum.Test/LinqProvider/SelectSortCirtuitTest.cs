@@ -74,7 +74,7 @@ public class SelectSortCircuitTest
         var list = Database.Query<AlbumEntity>().Where(a => false == (a.Year == 1900)).Select(a => a.Year).ToList();
     }
 
-    public T Throw<T>()
+    public static T Throw<T>()
     {
         throw new InvalidOperationException("This {0} should not be evaluated".FormatWith(typeof(T).Name));
     }

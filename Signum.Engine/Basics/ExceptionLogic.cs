@@ -88,7 +88,10 @@ public static class ExceptionLogic
         {
             entity.User = UserHolder.Current?.User; //Session special situations
         }
-        catch { }
+        catch 
+        {
+            //no need for exception
+        }
 
         try
         {

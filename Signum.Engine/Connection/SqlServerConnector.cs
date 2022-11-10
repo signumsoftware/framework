@@ -405,9 +405,9 @@ public class SqlServerConnector : Connector
         ((SqlTransaction)transaction).Save(savePointName);
     }
 
-    public override void RollbackTransactionPoint(DbTransaction transaction, string savePointName)
+    public override void RollbackTransactionPoint(DbTransaction Transaction, string savePointName)
     {
-        ((SqlTransaction)transaction).Rollback(savePointName);
+        ((SqlTransaction)Transaction).Rollback(savePointName);
     }
 
     public override string GetSqlDbType(DbParameter p)

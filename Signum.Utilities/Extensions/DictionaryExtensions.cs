@@ -1,6 +1,7 @@
 using Signum.Utilities.ExpressionTrees;
 using System.Collections.Concurrent;
 using System.Collections.Specialized;
+using System.Linq;
 
 namespace Signum.Utilities;
 
@@ -516,14 +517,15 @@ public static class DictionaryExtensions
     {
         Dictionary<K, V> result = new Dictionary<K, V>();
         var aux = new Dictionary<K, V>(dictionary);
-        foreach (var kvp in aux)
+
+        foreach (var kvp in from kvp in aux
+                            where condition(kvp.Key, kvp.Value)
+                            select kvp)
         {
-            if (condition(kvp.Key, kvp.Value))
-            {
-                result.Add(kvp.Key, kvp.Value);
-                dictionary.Remove(kvp.Key);
-            }
+            result.Add(kvp.Key, kvp.Value);
+            dictionary.Remove(kvp.Key);
         }
+
         return result;
     }
 

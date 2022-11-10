@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.29424.173
+VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Utilities", "Signum.Utilities\Signum.Utilities.csproj", "{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}"
 EndProject
@@ -40,9 +40,11 @@ Global
 		{32990F1A-6A78-439E-8194-68F05AA1CCB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{32990F1A-6A78-439E-8194-68F05AA1CCB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32990F1A-6A78-439E-8194-68F05AA1CCB1}.Release|Any CPU.ActiveCfg = Release|x64
+		{32990F1A-6A78-439E-8194-68F05AA1CCB1}.Release|Any CPU.Build.0 = Release|x64
 		{5D992EC2-1F54-4B7B-AF47-CB76E340B658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D992EC2-1F54-4B7B-AF47-CB76E340B658}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D992EC2-1F54-4B7B-AF47-CB76E340B658}.Release|Any CPU.ActiveCfg = Release|x64
+		{5D992EC2-1F54-4B7B-AF47-CB76E340B658}.Release|Any CPU.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
