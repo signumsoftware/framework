@@ -344,7 +344,6 @@ public static class BulkInserter
 
             var list = entities.ToList();
 
-            bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
 
             var columns = t.Columns.Values.ToList();
             DataTable dt = new DataTable();

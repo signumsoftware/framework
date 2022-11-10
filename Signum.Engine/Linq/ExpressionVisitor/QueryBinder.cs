@@ -2756,7 +2756,6 @@ internal class QueryBinder : ExpressionVisitor
             if (ne.Arguments.Any())
                 throw InvalidBody();
 
-            return;
         }
         else
         {

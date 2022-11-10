@@ -84,11 +84,7 @@ internal class QueryFormatter : DbExpressionVisitor
         Outer
     }
 
-    internal int IndentationWidth
-    {
-        get { return this.indent; }
-        set { this.indent = value; }
-    }
+    internal int IndentationWidth { get; set; }
 
     private void AppendNewLine(Indentation style)
     {

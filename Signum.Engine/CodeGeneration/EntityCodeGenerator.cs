@@ -570,9 +570,9 @@ public class EntityCodeGenerator
         var mListInfo = GetMListInfo(table);
 
         return Singularize(table.Name.Name) +
-            (IsEnum(table) ? "" :
-            mListInfo != null && !mListInfo.IsVirtual ? "Embedded" :
-            "Entity");
+            (IsEnum(table) ? " " :
+            mListInfo != null && !mListInfo.IsVirtual ? "Embedded" : "Entity"); 
+
     }
 
     protected virtual string Singularize(string name)

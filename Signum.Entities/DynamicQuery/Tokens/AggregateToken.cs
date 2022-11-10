@@ -24,7 +24,7 @@ public class AggregateToken : QueryToken
             throw new ArgumentException("function should be Count for this overload");
 
         this.parent = null;
-        this.queryName = queryName ?? throw new ArgumentNullException("queryName");
+        this.queryName = queryName ?? throw new ArgumentNullException(nameof(queryName));
         this.AggregateFunction = function;
     }
 

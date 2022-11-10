@@ -56,7 +56,7 @@ public static class Administrator
     {
         using (OverrideDatabaseInSysViews(tableName.Schema.Database))
         {
-            var columns =
+            var column =
                 (from t in Database.View<SysTables>()
                  where t.name == tableName.Name && t.Schema().name == tableName.Schema.Name
                  from c in t.Columns()
@@ -73,7 +73,7 @@ public static class Administrator
             sb.AppendLine($@"[TableName(""{tableName}"")]");
             sb.AppendLine($"public class {tableName.Name} : IView");
             sb.AppendLine(@"{");
-            foreach (var c in columns)
+            foreach (var c in column)
             {
                 sb.Append(GenerateColumnCode(c).Indent(4));
             }

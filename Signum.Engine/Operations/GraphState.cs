@@ -208,7 +208,7 @@ public class Graph<T, S>
 
         bool IGraphHasStatesOperation.HasFromStates => !FromStates.IsNullOrEmpty();
 
-        public Execute(ExecuteSymbol<T> symbol)
+        public Execute(IExecuteSymbol<T> symbol)
             : base(symbol)
         {
             FromStates = new List<S>();
@@ -298,7 +298,7 @@ public class Graph<T, S>
             get { return !FromStates.IsNullOrEmpty(); }
         }
 
-        public Delete(DeleteSymbol<T> symbol)
+        public Delete(IDeleteSymbol<T> symbol)
             : base(symbol)
         {
             FromStates = new List<S>();

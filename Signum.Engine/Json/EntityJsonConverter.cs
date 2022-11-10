@@ -608,13 +608,13 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                  (Entity)Activator.CreateInstance(type, nonPublic: true)!;
 
                 if (identityInfo.Id != null)
-                    ((Entity)result).SetId(PrimaryKey.Parse(identityInfo.Id, type));
+                    (result).SetId(PrimaryKey.Parse(identityInfo.Id, type));
 
                 if (!identityInfo.Modified!.Value)
-                    ((Entity)result).SetCleanModified(isSealed: false);
+                    (result).SetCleanModified(isSealed: false);
 
                 if (identityInfo.IsNew != true)
-                    ((Entity)result).SetIsNew(false);
+                    (result).SetIsNew(false);
 
                 if (identityInfo.Ticks != null)
                     result.Ticks = identityInfo.Ticks.Value;
