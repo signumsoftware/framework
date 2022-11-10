@@ -65,13 +65,22 @@ export default function FramePage(p: FramePageProps) {
         }
         else {
 
-          loadComponent(a.pack!).then(getComponent => mounted.current ? setState({
-            pack: a.pack!,
-            lastEntity: JSON.stringify(a.pack!.entity),
-            createNew: a.createNew,
-            getComponent: getComponent,
-            refreshCount: state ? state.refreshCount + 1 : 0
-          }) : undefined);
+          loadComponent(a.pack!).then(getComponent => {
+            if (!mounted.current)
+              return undefined;
+
+            return setState({
+              pack: a.pack!,
+              lastEntity: JSON.stringify(a.pack!.entity),
+              createNew: a.createNew,
+              getComponent: getComponent,
+              refreshCount: state ? state.refreshCount + 1 : 0
+            }).then(() => {
+              if (id == null && a.pack!.entity.id != null) { //Constructor returns saved entity
+                AppContext.history.replace(Navigator.navigateRoute(a.pack!.entity));
+              }
+            })
+          });
         }
       });
   }, [type, id, p.location.search]);
@@ -97,7 +106,7 @@ export default function FramePage(p: FramePageProps) {
   }
 
 
-  function loadEntity(): Promise<undefined | { pack?: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
+  function loadEntity(): Promise<undefined | { pack: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
 
     const queryString = QueryString.parse(p.location.search);
 
