@@ -3,6 +3,7 @@ using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using Signum.Engine.UserAssets;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Templating;
 
@@ -398,7 +399,7 @@ public class TemplateSynchronizationContext
         Type type = initialType;
         foreach (var field in fieldOrPropertyChain.Split('.'))
         {
-            var allMembers = type.GetFields(ParsedModel.Flags).Cast<MemberInfo>()
+            var allMembers = type.GetFields(ParsedModel.Flags).Where(f => !f.IsBackingField()).Cast<MemberInfo>()
                 .Concat(type.GetProperties(ParsedModel.Flags))
                 .ToDictionary(a => a.Name);
 
