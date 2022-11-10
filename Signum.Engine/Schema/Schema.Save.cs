@@ -248,7 +248,6 @@ public partial class Table
 
         Action<List<Entity>, DirectedGraph<Entity>?> GetInsertMultiIdentity(int num)
         {
-            var isPostgres = Schema.Current.Settings.IsPostgres;
             string sqlMulti = SqlInsertPattern(Enumerable.Range(0, num).Select(i => i.ToString()).ToArray(), "" /*output but no name*/);
 
             return (entities, graph) =>
