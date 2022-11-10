@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Xml.Linq;
+using System.Linq;
 
 namespace Signum.Utilities.DataStructures;
 
@@ -237,10 +238,9 @@ public class DirectedEdgedGraph<T, E> : IEnumerable<T>
 
     public void DepthExploreConnections(T node, Func<T, E, T, bool> condition)
     {
-        foreach (var kvp in RelatedTo(node))
+        foreach (var kvp in RelatedTo(node).Where(kvp => condition(node, kvp.Value, kvp.Key)))
         {
-            if (condition(node, kvp.Value, kvp.Key))
-                DepthExploreConnections(kvp.Key, condition);
+            DepthExploreConnections(kvp.Key, condition);
         }
     }
 

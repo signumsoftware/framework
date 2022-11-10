@@ -504,7 +504,7 @@ Consider the following options:
         return (Entity)op.Construct(args);
     }
 
-    public static T Construct<T>(ConstructSymbol<T>.Simple symbol, params object?[]? args)
+    public static T Construct<T>(ConstructSymbol<T>.ISimple symbol, params object?[]? args)
         where T : class, IEntity
     {
         var op = Find<IConstructOperation>(typeof(T), symbol.Symbol);
@@ -590,7 +590,7 @@ Consider the following options:
         return operations.TryGetValue(type.CleanType())?.TryGetC(operationSymbol);
     }
 
-    public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol)
+    public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.ISimple symbol)
         where T : class, IEntity
     {
         return (Graph<T>.Construct)FindOperation(typeof(T), symbol.Symbol);
@@ -817,7 +817,7 @@ public static class FluentOperationInclude
         return fi;
     }
 
-    public static FluentInclude<T> WithConstruct<T>(this FluentInclude<T> fi, ConstructSymbol<T>.Simple construct, Func<object?[]?, T> constructFunction)
+    public static FluentInclude<T> WithConstruct<T>(this FluentInclude<T> fi, ConstructSymbol<T>.ISimple construct, Func<object?[]?, T> constructFunction)
            where T : Entity
     {
         new Graph<T>.Construct(construct)
@@ -827,7 +827,7 @@ public static class FluentOperationInclude
         return fi;
     }
 
-    public static FluentInclude<T> WithConstruct<T>(this FluentInclude<T> fi, ConstructSymbol<T>.Simple construct)
+    public static FluentInclude<T> WithConstruct<T>(this FluentInclude<T> fi, ConstructSymbol<T>.ISimple construct)
            where T : Entity, new()
     {
         new Graph<T>.Construct(construct)

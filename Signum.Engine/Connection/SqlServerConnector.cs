@@ -457,9 +457,9 @@ public class SqlServerConnector : Connector
 
     public override bool AllowsSetSnapshotIsolation => this.Version >= SqlServerVersion.SqlServer2008;
 
-    public override bool AllowsIndexWithWhere(string Where)
+    public override bool AllowsIndexWithWhere(string where)
     {
-        return Version > SqlServerVersion.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains);
+        return Version > SqlServerVersion.SqlServer2005 && !ComplexWhereKeywords.Any(where.Contains);
     }
 
     public override bool RequiresRetry => this.Version == SqlServerVersion.AzureSQL;

@@ -373,7 +373,7 @@ public static class Csv
                 if (isCollection)
                 {
                     if (type.IsArray)
-                        throw new InvalidOperationException($"{me.MemberInfo.Name} is an array, use a List<T> instead");
+                        throw new NotImplementedException($"{me.MemberInfo.Name} is an array, use a List<T> instead");
 
                     if (i != memberEntries.Count - 1)
                         throw new InvalidOperationException($"{me.MemberInfo.Name} is of {type} but is not the last member");

@@ -36,9 +36,9 @@ internal class AggregateRewriter : DbExpressionVisitor
         return select;
     }
 
-    protected internal override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
+    protected internal override Expression VisitAggregateRequest(AggregateRequestsExpression request)
     {
-        return this.map.GetOrThrow(aggregate);
+        return this.map.GetOrThrow(request);
     }
 
     class AggregateGatherer : DbExpressionVisitor

@@ -698,7 +698,7 @@ public class EntityCodeGenerator
     {
         return table.Indices.Values.Any(ix =>
             ix.FilterDefinition == null &&
-            ix.Columns.Only()?.Let(ic => ic.ColumnName == col.Name && ic.IsIncluded == false) == true &&
+            ix.Columns.Only()?.Let(ic => ic.ColumnName == col.Name && !ic.IsIncluded ) == true &&
             ix.IsUnique &&
             ix.IsPrimary);
     }
@@ -841,7 +841,7 @@ public class EntityCodeGenerator
         StringBuilder sb = new StringBuilder();
 
         fieldName = fieldName.FirstLower();
-        string propertyName = fieldName.FirstUpper();
+       // string propertyName = fieldName.FirstUpper();
         string typeName = GetEmbeddedTypeName(fieldName);
 
         sb.AppendLine("public {0} {1} { get; set; }".FormatWith(typeName, fieldName.FirstUpper()));
