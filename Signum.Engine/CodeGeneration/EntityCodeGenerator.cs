@@ -698,7 +698,7 @@ public class EntityCodeGenerator
     {
         return table.Indices.Values.Any(ix =>
             ix.FilterDefinition == null &&
-            ix.Columns.Only()?.Let(ic => ic.ColumnName == col.Name && ic.IsIncluded == false) == true &&
+            ix.Columns.Only()?.Let(ic => ic.ColumnName == col.Name && ic.IsIncluded== false) == true &&
             ix.IsUnique &&
             ix.IsPrimary);
     }
@@ -757,9 +757,9 @@ public class EntityCodeGenerator
         }
 
         var defaultScale = CurrentSchema.Settings.GetSqlScale(null, null, col.DbType);
-        if (defaultScale != null)
+        if ((defaultScale != null) && (!(col.Scale == defaultScale)))     
         {
-            if (!(col.Scale == defaultScale))
+          
                 parts.Add("Scale = " + col.Scale);
         }
 

@@ -34,7 +34,7 @@ internal class DbExpressionComparer : ExpressionComparer
         bool result = ComparePrivate(a, b);
 
         if (result == false)
-            result = !!result; //Breakpoint here to check the first offender
+            result = !result; //Breakpoint here to check the first offender
 
         return result;
     }

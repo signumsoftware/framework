@@ -348,10 +348,10 @@ public class Graph<T>
             this.Construct = overrider(this.Construct);
         }
 
-        public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
+        public ConstructFromMany(ConstructSymbol<T>.IFromMany<F> symbol)
         {
             if (symbol == null)
-                throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.FromMany<F>), nameof(symbol));
+                throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.IFromMany<F>), nameof(symbol));
 
             this.operationSymbol = symbol.Symbol;
             this.baseType = symbol.BaseType;
@@ -364,7 +364,7 @@ public class Graph<T>
             this.baseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
         }
 
-        public static ConstructFromMany<F> Untyped<B>(ConstructSymbol<B>.FromMany<F> symbol)
+        public static ConstructFromMany<F> Untyped<B>(ConstructSymbol<B>.IFromMany<F> symbol)
             where B : class, IEntity
         {
             return new ConstructFromMany<F>(symbol.Symbol, symbol.BaseType);

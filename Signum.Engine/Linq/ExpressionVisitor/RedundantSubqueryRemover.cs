@@ -214,7 +214,7 @@ class RedundantSubqueryRemover : DbExpressionVisitor
                 var groupBy = select.GroupBy.Count > 0 ? select.GroupBy : fromSelect.GroupBy;
                 //Expression skip = select.Skip != null ? select.Skip : fromSelect.Skip;
                 Expression? top = select.Top ?? fromSelect.Top;
-                bool isDistinct = select.IsDistinct | fromSelect.IsDistinct;
+                bool isDistinct = select.IsDistinct || fromSelect.IsDistinct;
 
                 if (where != select.Where
                     || orderBy != select.OrderBy

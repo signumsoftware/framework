@@ -35,7 +35,7 @@ public class ExpressionContainer
         return ExpressionReplacer.Replace(Expression.Invoke(extensionInfo.Lambda, pe));
     }
 
-    public IEnumerable<Type> CompatibleTypes(Type type)
+    public static IEnumerable<Type> CompatibleTypes(Type type)
     {
         yield return type;
         if (type.IsValueType)

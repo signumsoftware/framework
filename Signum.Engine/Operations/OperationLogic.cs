@@ -551,7 +551,7 @@ Consider the following options:
         return (Entity)Find<IConstructorFromManyOperation>(onlyType ?? type, operationSymbol).Construct(lites, args);
     }
 
-    public static T ConstructFromMany<F, T>(List<Lite<F>> lites, ConstructSymbol<T>.FromMany<F> symbol, params object?[]? args)
+    public static T ConstructFromMany<F, T>(List<Lite<F>> lites, ConstructSymbol<T>.IFromMany<F> symbol, params object?[]? args)
         where T : class, IEntity
         where F : class, IEntity
     {
@@ -603,7 +603,7 @@ Consider the following options:
         return (Graph<T>.ConstructFrom<F>)FindOperation(typeof(F), symbol.Symbol);
     }
 
-    public static Graph<T>.ConstructFromMany<F> FindConstructFromMany<F, T>(ConstructSymbol<T>.FromMany<F> symbol)
+    public static Graph<T>.ConstructFromMany<F> FindConstructFromMany<F, T>(ConstructSymbol<T>.IFromMany<F> symbol)
         where T : class, IEntity
         where F : class, IEntity
     {

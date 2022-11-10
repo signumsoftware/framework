@@ -461,7 +461,7 @@ public static IQueryable<{to}> {Method}(this {from} {f}) => As.Expression(() => 
 
         if (type.Contains("FromManyImp"))
             return OperationType.ConstructorFromMany;
-;
+
         throw new InvalidOperationException();
     }
 

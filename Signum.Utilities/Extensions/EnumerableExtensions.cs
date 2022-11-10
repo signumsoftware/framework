@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 
 namespace Signum.Utilities;
 
@@ -50,16 +51,14 @@ public static class EnumerableUniqueExtensions
 
         T result = default!;
         bool found = false;
-        foreach (T item in collection)
+        foreach (var item in from T item in collection
+                             where predicate(item)
+                             select item)
         {
-            if (predicate(item))
-            {
-                if (found)
-                    throw new InvalidOperationException("Sequence contains more than one {0}".FormatWith(typeof(T).TypeName()));
-
-                result = item;
-                found = true;
-            }
+            if (found)
+                throw new InvalidOperationException("Sequence contains more than one {0}".FormatWith(typeof(T).TypeName()));
+            result = item;
+            found = true;
         }
 
         if (found)

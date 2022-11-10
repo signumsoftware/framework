@@ -278,7 +278,7 @@ public class AdditionalBinding<T, V> : IAdditionalBinding
 }
 
 public delegate void PreSavingEventHandler<T>(T ident, PreSavingContext ctx) where T : Entity;
-public delegate void RetrievedEventHandler<T>(T ident, PostRetrievingContext ctx) where T : Entity;
+public delegate void RetrievedEventHandler<in T>(T ident, PostRetrievingContext ctx) where T : Entity;
 public delegate void SavingEventHandler<T>(T ident) where T : Entity;
 public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
 public delegate FilterQueryResult<T>? FilterQueryEventHandler<T>() where T : Entity;

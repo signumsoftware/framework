@@ -24,7 +24,7 @@ public class OperationSymbol : Symbol
             return new FromImp<F>(new OperationSymbol(declaringType, fieldName));
         }
 
-        public static ConstructSymbol<T>.FromMany<F>  FromMany<F>(Type declaringType, string fieldName)
+        public static ConstructSymbol<T>.IFromMany<F>  FromMany<F>(Type declaringType, string fieldName)
             where F : class, IEntity
         {
             return new FromManyImp<F>(new OperationSymbol(declaringType, fieldName));
@@ -66,7 +66,7 @@ public class OperationSymbol : Symbol
             }
         }
 
-        class FromManyImp<F> : ConstructSymbol<T>.FromMany<F>
+        class FromManyImp<F> : ConstructSymbol<T>.IFromMany<F>
             where F : class, IEntity
         {
             public FromManyImp(OperationSymbol symbol)
@@ -173,7 +173,7 @@ public static class ConstructSymbol<T>
     {
     }
 
-    public interface FromMany<in F> : IOperationSymbolContainer
+    public interface IFromMany<in F> : IOperationSymbolContainer
         where F : class, IEntity
     {
         Type BaseType { get; }

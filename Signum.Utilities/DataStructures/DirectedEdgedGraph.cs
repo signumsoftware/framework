@@ -484,7 +484,7 @@ public class DirectedEdgedGraph<T, E> : IEnumerable<T>
             }
 
             var sources = inv.Sinks();
-            if (sources.Count() != 0)
+            if (sources.Any())
             {
                 foreach (var source in sources)
                 {

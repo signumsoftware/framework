@@ -291,8 +291,8 @@ public static class AlbumOperation
     public static ConstructSymbol<AlbumEntity>.From<BandEntity> CreateAlbumFromBand;
     public static DeleteSymbol<AlbumEntity> Delete;
     public static ConstructSymbol<AlbumEntity>.From<AlbumEntity> Clone;
-    public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateGreatestHitsAlbum;
-    public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum;
+    public static ConstructSymbol<AlbumEntity>.IFromMany<AlbumEntity> CreateGreatestHitsAlbum;
+    public static ConstructSymbol<AlbumEntity>.IFromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum;
 }
 
 public class SongEmbedded : EmbeddedEntity
