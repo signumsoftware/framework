@@ -309,7 +309,6 @@ public class Transaction : IDisposableException
                 Connection = Connector.Current.CreateConnection();
 
                 Connection.Open();
-                //Transaction = Connection.BeginTransaction(IsolationLevel ?? con.IsolationLevel);
                 Started = true;
             }
         }

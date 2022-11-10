@@ -296,7 +296,7 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
             return Distance(sd, o, n);
         }));
 
-        new Dictionary<string, string>();
+        
 
         while (oldOnly.Count > 0 && newOnly.Count > 0)
         {

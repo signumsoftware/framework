@@ -192,7 +192,7 @@ public static class SafeConsole
             do
             {
                 var userAnswer = (Console.ReadLine() ?? "").ToLower();
-                bool remember = userAnswer.Contains("!");
+                bool remember = userAnswer.Contains('!');
                 if (remember)
                     userAnswer = userAnswer.Replace("!", "");
 

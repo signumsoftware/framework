@@ -134,7 +134,7 @@ class IntervalMethodExpander : IMethodExpander
 {
     public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
     {
-        return Expression.And( //min <= value && value < max;
+        return Expression.And(
             Expression.LessThanOrEqual(Expression.Property(instance!, "Min"), arguments[0]),
             Expression.LessThan(arguments[0], Expression.Property(instance!, "Max")));
     }
@@ -466,7 +466,7 @@ public struct IntervalWithEnd<T> : IEquatable<IntervalWithEnd<T>>, IComparable<I
 
     public override bool Equals(object? obj)
     {
-        if (obj == null || !(obj is IntervalWithEnd<T>))
+        if (!(obj is IntervalWithEnd<T>))
             return false;
 
         return Equals((IntervalWithEnd<T>)obj);

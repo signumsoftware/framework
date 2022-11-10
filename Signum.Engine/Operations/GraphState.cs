@@ -155,7 +155,7 @@ public class Graph<T, S>
         LambdaExpression? IOperation.GetStateExpression() => GetState;
 
 
-        public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
+        public ConstructFromMany(ConstructSymbol<T>.IFromMany<F> symbol)
             : base(symbol)
         {
             ToStates = new List<S>();
@@ -167,7 +167,7 @@ public class Graph<T, S>
         {
         }
 
-        public static new ConstructFromMany<F> Untyped<B>(ConstructSymbol<B>.FromMany<F> symbol)
+        public static new ConstructFromMany<F> Untyped<B>(ConstructSymbol<B>.IFromMany<F> symbol)
              where B : class, IEntity
         {
             return new ConstructFromMany<F>(symbol.Symbol, symbol.BaseType);

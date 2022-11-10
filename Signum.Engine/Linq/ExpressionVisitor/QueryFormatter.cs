@@ -570,7 +570,7 @@ internal class QueryFormatter : DbExpressionVisitor
             this.Visit(sqlFunction.Arguments[1]);
             sb.Append(')');
         }
-        else if(isPostgres && PostgressOperator.All.Contains(sqlFunction.SqlFunction))
+        else if (isPostgres && PostgressOperator.All.Contains(sqlFunction.SqlFunction))
         {
             sb.Append('(');
             this.Visit(sqlFunction.Arguments[0]);

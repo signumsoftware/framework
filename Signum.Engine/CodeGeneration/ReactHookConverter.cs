@@ -72,7 +72,7 @@ public class ReactHookConverter
                  + endMatch.Value;
 
 
-            content = content.Substring(0, m.Index) + newComponent + content[endMatch.EndIndex()..];
+            content = string.Concat(content.AsSpan(0, m.Index), newComponent, content.AsSpan()[endMatch.EndIndex()..]);
         }
 
 

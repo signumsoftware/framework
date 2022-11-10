@@ -429,7 +429,7 @@ internal class TypeEntityExpression : TypeDbExpression
         : base(DbExpressionType.TypeEntity, typeof(Type))
     {
         this.TypeValue = typeValue ?? throw new ArgumentException("Expected argument exception");
-        this.ExternalId = externalId ?? throw new ArgumentException("externalId");
+        this.ExternalId = externalId ?? throw new ArgumentNullException(nameof(externalId), "externalId");
     }
 
     public override string ToString()
