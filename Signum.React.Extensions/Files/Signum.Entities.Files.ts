@@ -79,7 +79,6 @@ export interface FilePathEmbedded extends Entities.EmbeddedEntity {
   hash: string | null;
   fileLength: number;
   suffix: string;
-  calculatedDirectory: string | null;
   fileType: FileTypeSymbol;
 }
 
@@ -92,7 +91,6 @@ export interface FilePathEntity extends Entities.Entity {
   hash: string | null;
   fileLength: number;
   suffix: string;
-  calculatedDirectory: string | null;
   fileType: FileTypeSymbol;
 }
 
