@@ -91,7 +91,7 @@ public class Transaction : IDisposableException
 
         public void CallPostRealCommit()
         {
-
+            throw new NotSupportedException();
         }
 
         public ICoreTransaction? Parent

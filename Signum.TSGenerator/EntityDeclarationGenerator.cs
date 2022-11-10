@@ -663,10 +663,11 @@ static class EntityDeclarationGenerator
         {
             var td = type.Resolve();
 
-            foreach (var item in td.Interfaces)
+            foreach (var _ in from item in td.Interfaces
+                              where func(item.InterfaceType)
+                              select new { })
             {
-                if (func(item.InterfaceType))
-                    return true;
+                return true;
             }
 
             if (td.BaseType == null)

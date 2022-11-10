@@ -39,7 +39,7 @@ public abstract class Connector
         return new Disposable(() => scopeTimeout.Value = old);
     }
 
-    public Connector(Schema schema)
+    protected Connector(Schema schema)
     {
         this.Schema = schema;
         this.IsolationLevel = IsolationLevel.Unspecified;

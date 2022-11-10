@@ -85,7 +85,8 @@ public static class CodeGenerator
 public class Module
 {
     public string ModuleName;
-    public List<Type> Types;
+
+    public List<Type> Types { get; private set; }
 
     public Module(string moduleName, List<Type> types)
     {
