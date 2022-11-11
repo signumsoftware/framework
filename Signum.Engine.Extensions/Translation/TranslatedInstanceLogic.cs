@@ -457,15 +457,15 @@ public static class TranslatedInstanceLogic
             .ToDictionary();
 
         var list = result
-            .OrderBy(a=>a.Key.Instance.Id)
-            .ThenBy(a=>a.Key.Route.PropertyInfo!.MetadataToken).Select(r => new ExcelRow
-        {
-            Instance = r.Key.Instance.Key(),
-            Path = r.Key.Route.PropertyString(),
-            RowId = r.Key.RowId?.ToString(),
-            Original = r.Value.OriginalText,
-            Translated = r.Value.TranslatedText
-        }).ToList();
+            .OrderBy(a => a.Key.Instance.Id)
+            .ThenBy(a => a.Key.Route.PropertyInfo!.MetadataToken).Select(r => new ExcelRow
+            {
+                Instance = r.Key.Instance.Key(),
+                Path = r.Key.Route.PropertyString(),
+                RowId = r.Key.RowId?.ToString(),
+                Original = r.Value.OriginalText,
+                Translated = r.Value.TranslatedText
+            }).ToList();
 
         return new FileContent(
             fileName: "{0}.{1}.View.xlsx".FormatWith(TypeLogic.GetCleanName(type), culture.Name),
@@ -651,13 +651,12 @@ public struct TranslatableElement<T>
     }
 }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class TranslationRecord
 {
-    public CultureInfo Culture;
-    public LocalizedInstanceKey Key;
-    public string TranslatedText;
-    public string OriginalText;
+    public required CultureInfo Culture;
+    public required LocalizedInstanceKey Key;
+    public required string TranslatedText;
+    public required string OriginalText;
 
     public override string ToString()
     {
@@ -667,9 +666,9 @@ public class TranslationRecord
 
 public class InstanceChanges
 {
-    public Lite<Entity> Instance { get; set; }
+    public required Lite<Entity> Instance { get; set; }
 
-    public Dictionary<IndexedPropertyRoute, Dictionary<CultureInfo, PropertyRouteConflict>> RouteConflicts { get; set; }
+    public required Dictionary<IndexedPropertyRoute, Dictionary<CultureInfo, PropertyRouteConflict>> RouteConflicts { get; set; }
 
     public override string ToString()
     {
@@ -721,7 +720,7 @@ public class PropertyRouteConflict
     public string? OldOriginal;
     public string? OldTranslation;
 
-    public string Original;
+    public required string Original;
     public List<AutomaticTranslation> AutomaticTranslations = new List<AutomaticTranslation>();
 
     public override string ToString()
@@ -732,11 +731,11 @@ public class PropertyRouteConflict
 
 class ExcelRow
 {
-    public string Instance; 
-    public string Path;
-    public string? RowId; 
-    public string Original; 
-    public string? Translated; 
+    public required string Instance; 
+    public required string Path;
+    public required string? RowId; 
+    public required string Original; 
+    public required string? Translated; 
 }
 
 public struct LocalizedInstanceKey : IEquatable<LocalizedInstanceKey>
@@ -786,8 +785,7 @@ public struct LocalizedInstanceKey : IEquatable<LocalizedInstanceKey>
 
 public class TranslatedTypeSummary
 {
-    public Type Type;
-    public CultureInfo CultureInfo;
-    public TranslatedSummaryState? State;
+    public required Type Type;
+    public required CultureInfo CultureInfo;
+    public required TranslatedSummaryState? State;
 }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.

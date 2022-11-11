@@ -38,6 +38,8 @@ export interface EntityTableColumn<T, RS = undefined> {
   cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRowHandle, rowState: RS) => React.TdHTMLAttributes<any> | null | undefined;
   template?: (ctx: TypeContext<T>, row: EntityTableRowHandle, rowState: RS) => React.ReactChild | null | undefined | false;
   mergeCells?: (boolean | ((a: T) => any) | string);
+  footer?: React.ReactNode | null;
+  footerHtmlAttributes?: React.ThHTMLAttributes<any>;
 }
 
 export class EntityTableController extends EntityListBaseController<EntityTableProps> {
@@ -242,6 +244,9 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
       var isEmpty = p.avoidEmptyTable && elementCtxs.length == 0;
       var firstColumnVisible = !(p.readOnly || p.remove == false && p.move == false && p.view == false);
 
+      var showCreateRow = p.createAsLink && p.create && !readOnly;
+      var hasFooters = p.columns!.some(a => a.footer != null);
+
       return (
         <div ref={c.containerDiv}
           className={classes(p.scrollable ? "sf-scroll-table-container" : undefined, p.responsive  && "table-responsive")}
@@ -282,18 +287,27 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
               }
             </tbody>
             {
-              p.createAsLink && p.create && !readOnly &&
+              (showCreateRow || hasFooters) &&
               <tfoot ref={c.tfoot}>
-                <tr>
-                  <td colSpan={1 + p.columns!.length} className={isEmpty ? "border-0" : undefined}>
-                    {typeof p.createAsLink == "function" ? p.createAsLink(c) :
-                      <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
-                        className="sf-line-button sf-create"
-                        onClick={c.handleCreateClick}>
-                        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
-                      </a>}
-                  </td>
-                </tr>
+                  {
+                    showCreateRow && <tr>
+                      <td colSpan={1 + p.columns!.length} className={isEmpty ? "border-0" : undefined}>
+                        {typeof p.createAsLink == "function" ? p.createAsLink(c) :
+                          <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+                            className="sf-line-button sf-create"
+                            onClick={c.handleCreateClick}>
+                            <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
+                          </a>}
+                      </td>
+                    </tr>
+                  }
+                  {
+                    hasFooters && <tr>
+                      {firstColumnVisible && <td></td>}
+                      {p.columns!.map((c, i) =>
+                        <td key={i} {...c.footerHtmlAttributes}>{c.footer}</td>)}
+                    </tr>
+                  }
               </tfoot>
             }
           </table>

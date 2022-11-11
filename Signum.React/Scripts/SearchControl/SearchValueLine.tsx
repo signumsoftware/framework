@@ -39,7 +39,7 @@ export interface SearchValueLineProps {
   avoidAutoRefresh?: boolean;
   deps?: React.DependencyList;
   extraButtons?: (vscc: SearchValueController) => React.ReactNode;
-  create?: boolean;
+  create?: boolean | "ifNull" ;
   onCreate?: () => Promise<any>;
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
   searchControlProps?: Partial<SearchControlProps>;
@@ -48,6 +48,7 @@ export interface SearchValueLineProps {
   onViewEntity?: (entity: Lite<Entity>) => void;
   onValueChanged?: (value: any) => void;
   customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, signal: AbortSignal) => Promise<any>,
+  onRender?: (value: any | undefined, vsc: SearchValueController) => React.ReactElement | null | undefined | false,
 }
 
 export interface SearchValueLineController {
@@ -129,8 +130,8 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
       {EntityBaseController.findIcon}
     </a>;
-
-  const create = (p.create ?? false) &&
+  
+  const create = ((p.create == "ifNull" && value === null) || (p.create ?? false)) &&
     <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
@@ -178,6 +179,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           searchControlProps={p.searchControlProps}
           modalSize={p.modalSize}
           deps={p.deps}
+          onRender={p.onRender}
           customRequest={p.customRequest}
         />
 

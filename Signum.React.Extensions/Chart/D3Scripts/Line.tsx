@@ -5,11 +5,12 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import { ChartTable, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
 import { KeyCodes } from '@framework/Components';
 import TextEllipsis from './Components/TextEllipsis';
-import { XKeyTicks, YScaleTicks } from './Components/Ticks';
+import { XKeyTicks, XScaleTicks, YScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { MemoRepository } from './Components/ReactChart';
+import { ChartColumnType } from 'Chart/Signum.Entities.Chart';
 
 export default function renderLine({ data, width, height, parameters, loading, chartRequest, onDrillDown, initialLoad, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
@@ -50,25 +51,32 @@ export default function renderLine({ data, width, height, parameters, loading, c
   var keyColumn = data.columns.c0! as ChartColumn<unknown>;
   var valueColumn = data.columns.c1! as ChartColumn<number>;
 
+  var hasHorizontalScale = parameters["HorizontalScale"] != "Bands";
+
+
   var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn));
+  var x = hasHorizontalScale ?
+    scaleFor(keyColumn, data.rows.map(r => keyColumn.getValue(r) as number), 0, xRule.size('content'), parameters["HorizontalScale"]) :
+    d3.scaleBand()
+      .domain(keyValues.map(v => keyColumn.getKey(v)))
+      .range([0, xRule.size('content')]);
 
-  var x = d3.scaleBand()
-    .domain(keyValues.map(v => keyColumn.getKey(v)))
-    .range([0, xRule.size('content')]);
-
-  var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), parameters["Scale"]);
+  var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), parameters["VerticalScale"]);
 
   var detector = dashboardFilter?.getActiveDetector(chartRequest);
 
   return (
     <svg direction="ltr" width={width} height={height}>
-
-      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={x.bandwidth() > 5} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
+      {hasHorizontalScale ?
+        <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :
+        <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x as d3.ScaleBand<string>} showLines={(x as d3.ScaleBand<string>).bandwidth() > 5}
+          isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
+      }
       <g opacity={dashboardFilter ? .5 : undefined}>
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y}  />
       </g>
 
-      {paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onDrillDown, initialLoad, memo, detector })}
+      {paintLine({ xRule, yRule, x, y, keyValues, data, parameters, hasHorizontalScale, onDrillDown, initialLoad, memo, detector })}
 
       <InitialMessage data={data} x={xRule.middle("content")} y={yRule.middle("content")} loading={loading} />
       <g opacity={dashboardFilter ? .5 : undefined}>
@@ -82,7 +90,8 @@ export default function renderLine({ data, width, height, parameters, loading, c
 export interface ChartScriptHorizontalProps {
   xRule: Rule<"content">;
   yRule: Rule<"content" | "labels">;
-  x: d3.ScaleBand<string>;
+  hasHorizontalScale: boolean;
+  x: d3.ScaleBand<string> | d3.ScaleContinuousNumeric<number, number>;
   y: d3.ScaleContinuousNumeric<number, number>;
   keyValues: unknown[];
   data: ChartTable;
@@ -93,18 +102,23 @@ export interface ChartScriptHorizontalProps {
   detector?: (row: ChartRow) => boolean;
 }
 
-export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onDrillDown, initialLoad, detector }: ChartScriptHorizontalProps) {
+export function paintLine({ xRule, yRule, x, y, keyValues, data, hasHorizontalScale, parameters, onDrillDown, initialLoad, detector }: ChartScriptHorizontalProps) {
 
   var keyColumn = data.columns.c0! as ChartColumn<unknown>;
   var valueColumn = data.columns.c1! as ChartColumn<number>;
 
-  var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
+  var orderedRows = data.rows.orderBy(r => keyColumn.getValueKey(r)).filter(a => valueColumn.getValue(a) != null);
 
   var rowByKey = data.rows.toObject(r => keyColumn.getValueKey(r));
 
+  const getX: (row: ChartRow) => number =
+    hasHorizontalScale ?
+      (row => (x as d3.ScaleContinuousNumeric<number, number>)(keyColumn.getValue(row) as number)) :
+      (row => (x as d3.ScaleBand<string>)(keyColumn.getValueKey(row))!); 
+
   var line = d3.line<unknown>()
     .defined(key => rowByKey[keyColumn.getKey(key)] != null)
-    .x(key => x(keyColumn.getKey(key))!)
+    .x(key => getX(rowByKey[keyColumn.getKey(key)])!)
     .y(key => -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)]))!)
     .curve(ChartUtils.getCurveByName(parameters["Interpolate"]!)!);//"linear"
 
@@ -113,38 +127,43 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
   var circleStroke = parseFloat(parameters["CircleStroke"]!);
   var circleRadiusHover = parseFloat(parameters["CircleRadiusHover"]!);
 
-  var bw = x.bandwidth();
-  if (parameters["CircleAutoReduce"]! == "Yes") {
+  var bw = hasHorizontalScale ? 0 : (x as d3.ScaleBand<string>).bandwidth();
 
-    if (circleRadius > bw / 3)
-      circleRadius = bw / 3;
+  if (!hasHorizontalScale) {
+    if (parameters["CircleAutoReduce"]! == "Yes") {
 
-    if (circleRadiusHover > bw / 2)
-      circleRadiusHover = bw / 2;
+      if (circleRadius > bw / 3)
+        circleRadius = bw / 3;
 
-    if (circleStroke > bw / 8)
-      circleStroke = bw / 8;
+      if (circleRadiusHover > bw / 2)
+        circleRadiusHover = bw / 2;
+
+      if (circleStroke > bw / 8)
+        circleStroke = bw / 8;
+    }
+
+    var numberOpacity = parseFloat(parameters["NumberOpacity"]!);
+    if (numberOpacity > 0 && bw < parseFloat(parameters["NumberMinWidth"]!))
+      numberOpacity = 0;
   }
 
-  var numberOpacity = parseFloat(parameters["NumberOpacity"]!);
-  if (numberOpacity > 0 && bw < parseFloat(parameters["NumberMinWidth"]!))
-    numberOpacity = 0;
 
+ 
   return (
     <>
       {/*PAINT CHART'*/}
-      <g className="shape" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
+      <g className="shape" transform={translate(xRule.start('content') + (bw / 2), yRule.end('content'))}>
         <path className="shape sf-transition" stroke={color} fill="none" strokeWidth={3} shapeRendering="initial" d={line(keyValues)!} transform={initialLoad ? scale(1, 0) : scale(1, 1)} />
       </g>
 
       {/*paint graph - hover area trigger*/}
-      {circleRadiusHover > 0 && <g className="hover-trigger" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
+      {circleRadiusHover > 0 && <g className="hover-trigger" transform={translate(xRule.start('content') + (bw / 2), yRule.end('content'))}>
         {orderedRows
           .map(r => {
             var key = keyColumn.getValueKey(r);
             return (
               <circle key={key}
-                transform={translate(x(key)!, -y(valueColumn.getValue(r))!)}
+                transform={translate(getX(r)!, -y(valueColumn.getValue(r))!)}
                 className="hover-trigger"
                 fill="#fff"
                 fillOpacity={0}
@@ -162,7 +181,7 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
       }
 
       {/*paint graph - points*/}
-      {circleRadius > 0 && circleStroke > 0 && <g className="point sf-transition" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
+      {circleRadius > 0 && circleStroke > 0 && <g className="point sf-transition" transform={translate(xRule.start('content') + (bw / 2), yRule.end('content')) + (initialLoad ? scale(1, 0) : scale(1, 1))}>
         {orderedRows
           .map(r => {
             var key = keyColumn.getValueKey(r);
@@ -171,7 +190,7 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
             return (
               <g className="hover-group" key={key}>
                 <circle
-                  transform={translate(x(key)!, -y(valueColumn.getValue(r))!)}
+                  transform={translate(getX(r)!, -y(valueColumn.getValue(r))!)}
                   className="point sf-transition hover-target"
                   opacity={active == false ? .5 : undefined}
                   stroke={active == true ? "black" : color}
@@ -188,7 +207,7 @@ export function paintLine({ xRule, yRule, x, y, keyValues, data, parameters, onD
                 { /*Point labels*/
                   numberOpacity > 0 &&
                   <g className="point-label" >
-                    <text transform={translate(x(key)!, -y(valueColumn.getValue(r))! - 10)}
+                    <text transform={translate(getX(r)!, -y(valueColumn.getValue(r))! - 10)}
                       className="point-label sf-transition"
                       r={5}
                       opacity={active == false ? .5 : active == true ? 1 : numberOpacity}

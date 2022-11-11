@@ -11,10 +11,11 @@ using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using Signum.Engine.Json;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Azure.Core;
 
 namespace Signum.React.ApiControllers;
-
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 
 [ValidateModelFilter]
 public class QueryController : ControllerBase
@@ -67,7 +68,7 @@ public class QueryController : ControllerBase
 
     public class TokenRequest
     {
-        public string token;
+        public required string token;
         public SubTokensOptions options;
 
         public override string ToString() => $"{token} ({options})";
@@ -75,8 +76,8 @@ public class QueryController : ControllerBase
 
     public class ParseTokensRequest
     {
-        public string queryKey;
-        public List<TokenRequest> tokens;
+        public required string queryKey;
+        public required List<TokenRequest> tokens;
     }
 
     [HttpPost("api/query/subTokens")]
@@ -95,7 +96,7 @@ public class QueryController : ControllerBase
 
     public class SubTokensRequest
     {
-        public string queryKey;
+        public required string queryKey;
         public string? token;
         public SubTokensOptions options;
     }
@@ -119,10 +120,22 @@ public class QueryController : ControllerBase
         return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }
 
-    [HttpPost("api/query/queryValue"), ProfilerActionSplitter]
+    [HttpPost("api/query/queryValue"), ProfilerActionSplitter, EmbeddedPropertyRouteAttribute<QueryValueResolver>]
     public async Task<object?> QueryValue([Required, FromBody]QueryValueRequestTS request, CancellationToken token)
     {
-        return await QueryLogic.Queries.ExecuteQueryValueAsync(request.ToQueryValueRequest(SignumServer.JsonSerializerOptions), token);
+        var qvRequest = request.ToQueryValueRequest(SignumServer.JsonSerializerOptions);
+
+        HttpContext.Items["queryValueRequests"] = qvRequest;
+        return await QueryLogic.Queries.ExecuteQueryValueAsync(qvRequest, token);
+    }
+
+    class QueryValueResolver : IEmbeddedPropertyRouteResolver
+    {
+        public PropertyRoute GetPropertyRoute(EmbeddedEntity embedde, FilterContext filterContext)
+        {
+            var qvr = (QueryValueRequest)filterContext.HttpContext.Items["queryValueRequests"]!;
+            return qvr.ValueToken!.GetPropertyRoute()!;
+        }
     }
 }
 
@@ -147,7 +160,7 @@ public class QueryDescriptionTS
     [JsonExtensionData]
     public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
 
-    public static Action<QueryDescriptionTS> AddExtension;
+    public static Action<QueryDescriptionTS>? AddExtension;
 }
 
 public class ColumnDescriptionTS
@@ -191,7 +204,9 @@ public class ColumnDescriptionTS
 
 public class QueryTokenTS
 {
-    public QueryTokenTS() { }
+
+    QueryTokenTS() { }
+    [SetsRequiredMembers]
     public QueryTokenTS(QueryToken qt, bool recursive)
     {
         this.toStr = qt.ToString();
@@ -238,14 +253,14 @@ public class QueryTokenTS
         return null;
     }
 
-    public string toStr;
-    public string niceName;
-    public string key;
-    public string fullKey;
-    public string typeColor;
-    public string niceTypeName;
+    public required string toStr;
+    public required string niceName;
+    public required string key;
+    public required string fullKey;
+    public required string typeColor;
+    public required string niceTypeName;
     public QueryTokenType? queryTokenType;
-    public TypeReferenceTS type;
+    public required TypeReferenceTS type;
     public FilterType? filterType;
     public string? format;
     public string? unit;

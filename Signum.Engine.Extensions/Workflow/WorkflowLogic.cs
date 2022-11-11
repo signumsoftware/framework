@@ -297,6 +297,8 @@ public static class WorkflowLogic
                     e.BpmnElementId,
                     e.Lane,
                     e.Lane.Pool.Workflow,
+                    e.RunRepeatedly,
+                    e.DecisionOptionName,
                 });
 
 

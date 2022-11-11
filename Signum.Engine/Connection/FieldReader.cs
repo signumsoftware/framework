@@ -654,9 +654,7 @@ public class FieldReaderException : DbException
         this.ColumnName = columnName;
         this.MethodName = methodName;
     }
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     protected FieldReaderException(
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
       System.Runtime.Serialization.SerializationInfo info,
       System.Runtime.Serialization.StreamingContext context)
         : base(info, context) { }

@@ -370,6 +370,14 @@ public class CodeFile
         });
     }
 
+    public void UpdateNugetReferences(string xmlSnippets)
+    {
+        foreach (var line in xmlSnippets.Lines().Where(a=>a.HasText()))
+        {
+            UpdateNugetReference(line.Between("Include=\"", "\""), line.Between("Version=\"", "\""));
+        }
+    }
+
     public void UpdateNugetReference(string packageName, string version)
     {
         AssertExtension(".csproj");

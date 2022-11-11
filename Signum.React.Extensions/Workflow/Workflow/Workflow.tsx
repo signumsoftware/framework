@@ -158,7 +158,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
             <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
           </div>
           <div className="col-sm-6">
-            <EnumCheckboxList ctx={ctx.subCtx(d => d.mainEntityStrategies)} columnCount={1} formGroupHtmlAttributes={{ style: { marginTop: "-25px" } }} />
+            <EnumCheckboxList ctx={ctx.subCtx(d => d.mainEntityStrategies)} columnCount={1} formGroupHtmlAttributes={{ style: { marginTop: "-15px" } }} />
           </div>
         </div>
       </CollapsableCard>
