@@ -13,6 +13,7 @@ class Program
         {
             Console.WriteLine("Usage: CheckUrl alive/dead \"http://www.google.com\" 10");
         }
+        // Test comm
 
         var alive = 
             args[0]?.ToLower() == "alive" ? true :
