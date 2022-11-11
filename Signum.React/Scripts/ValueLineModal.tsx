@@ -55,6 +55,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
     valueLineType: props.valueLineType ?? (props.member?.isMultiline ? "TextArea" : undefined),
     valueHtmlAttributes: props.valueHtmlAttributes,
     initiallyFocused: props.initiallyFocused,
+    initiallyShowOnly: props.initiallyShowOnly,
   };
 
   const disabled = p.options.allowEmptyValue == false && (ctx.value == null || ctx.value == "");
@@ -108,6 +109,7 @@ export interface ValueLineModalOptions {
   format?: string;
   unit?: string;
   initiallyFocused?: boolean;
+  initiallyShowOnly?: "Date" | "Time";
   valueHtmlAttributes?: React.HTMLAttributes<any>;
   allowEmptyValue?: boolean;
   modalSize?: BsSize;
