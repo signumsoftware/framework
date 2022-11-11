@@ -860,7 +860,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
   );
 }
 
-export interface DurationTextBoxProps {
+export interface TimeTextBoxProps {
   value: string | null;
   onChange: (newValue: string | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
@@ -870,7 +870,7 @@ export interface DurationTextBoxProps {
   innerRef?: React.RefObject<HTMLInputElement>;
 }
 
-export function TimeTextBox(p: DurationTextBoxProps) {
+export function TimeTextBox(p: TimeTextBoxProps) {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 
