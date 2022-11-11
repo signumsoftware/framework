@@ -6,17 +6,6 @@ using System.IO;
 
 namespace Signum.Engine.Files;
 
-public static class BlobContainerClientPool
-{
-    static ConcurrentDictionary<(string connectionString, string blobContainerName), BlobContainerClient> Pool =
-        new ConcurrentDictionary<(string connectionString, string blobContainerName), BlobContainerClient>();
-
-    public static BlobContainerClient Get(string connectionString, string blobContainerName)
-    {
-        return Pool.GetOrAdd((connectionString, blobContainerName), t => new BlobContainerClient(t.connectionString, t.blobContainerName));
-    }
-}
-
 public enum BlobAction 
 {
     Open,

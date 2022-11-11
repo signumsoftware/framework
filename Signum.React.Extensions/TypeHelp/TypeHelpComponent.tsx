@@ -104,11 +104,11 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
           renderInput={input => <div className="input-group input-group-sm" style={{ position: "initial" }}>
             <button className="btn input-group-text" disabled={!canBack()}
               onClick={e => handleGoHistory(e, historyIndex - 1)} type="button">
-              <FontAwesomeIcon icon="arrow-circle-left" />
+              <FontAwesomeIcon icon="circle-arrow-left" />
             </button>
             <button className="btn input-group-text" disabled={!canForth()}
               onClick={e => handleGoHistory(e, historyIndex + 1)} type="button">
-              <FontAwesomeIcon icon="arrow-circle-right" />
+              <FontAwesomeIcon icon="circle-arrow-right" />
             </button>
             {input}
             <div className="input-group-text" style={{ color: "white", backgroundColor: p.mode == "CSharp" ? "#007e01" : "#017acc" }}>

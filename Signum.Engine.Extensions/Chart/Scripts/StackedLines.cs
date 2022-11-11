@@ -9,7 +9,7 @@ public class StackedLinesChartScript : ChartScript
         this.Icon = ChartScriptLogic.LoadIcon("stackedareas.png");
         this.Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
+            new ChartScriptColumn("Horizontal Axis", ChartColumnType.Any),
             new ChartScriptColumn("Areas", ChartColumnType.Groupable) { IsOptional = true },
             new ChartScriptColumn("Height", ChartColumnType.Magnitude) ,
             new ChartScriptColumn("Height 2", ChartColumnType.Magnitude) { IsOptional = true },
@@ -22,6 +22,7 @@ public class StackedLinesChartScript : ChartScript
             new ChartScriptParameterGroup()
             {
                 new ChartScriptParameter("CompleteValues", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
+                new ChartScriptParameter("HorizontalScale", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Bands|ZeroMax (M)|MinMax (P)|Log (M)") },
             },
             new ChartScriptParameterGroup("Margin")
             {

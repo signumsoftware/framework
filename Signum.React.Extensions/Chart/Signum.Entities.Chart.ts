@@ -57,7 +57,8 @@ export type ChartColumnType =
   "Time" |
   "Magnitude" |
   "Groupable" |
-  "Positionable";
+  "Positionable" |
+  "Any";
 
 export module ChartMessage {
   export const _0CanOnlyBeCreatedFromTheChartWindow = new MessageKey("ChartMessage", "_0CanOnlyBeCreatedFromTheChartWindow");

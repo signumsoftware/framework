@@ -11,11 +11,6 @@ public static class ReflectionTools
 {
     public static bool? IsNullable(this FieldInfo fi)
     {
-        if (fi.Name.Contains("Resource"))
-        {
-
-        }
-
         var info = new NullabilityInfoContext().Create(fi);
 
         if (info.ReadState == NullabilityState.Unknown)
@@ -26,11 +21,6 @@ public static class ReflectionTools
 
     public static bool? IsNullable(this PropertyInfo pi)
     {
-        if (pi.Name.Contains("Resource"))
-        {
-
-        }
-
         var info = new NullabilityInfoContext().Create(pi);
 
         if (info.ReadState == NullabilityState.Unknown)
@@ -904,5 +894,10 @@ public static class ReflectionTools
         DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         DateTime dateTimeUTC = dt.AddSeconds(secondsSince1970);
         return dateTimeUTC;
+    }
+
+    public static bool IsBackingField(this FieldInfo f)
+    {
+        return f.Name.StartsWith("<") && f.Name.EndsWith(">k__BackingField");
     }
 }

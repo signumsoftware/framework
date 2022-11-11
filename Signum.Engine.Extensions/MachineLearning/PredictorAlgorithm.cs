@@ -190,28 +190,25 @@ public class PredictorTrainingContext
     }
 }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class MainQuery
 {
-    public QueryRequest QueryRequest { get; internal set; }
-    public ResultTable ResultTable { get; internal set; }
-    public Func<ResultRow, object?[]> GetParentKey { get; internal set; }
+    public required QueryRequest QueryRequest { get; set; }
+    public required ResultTable ResultTable { get; set; }
+    public required Func<ResultRow, object?[]> GetParentKey { get; set; }
 }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class SubQuery
 {
-    public PredictorSubQueryEntity SubQueryEntity;
-    public QueryRequest QueryGroupRequest;
-    public ResultTable ResultTable;
-    public Dictionary<object?[], Dictionary<object?[], object?[]>> GroupedValues;
+    public required PredictorSubQueryEntity SubQueryEntity;
+    public required QueryRequest QueryGroupRequest;
+    public required ResultTable ResultTable;
+    public required Dictionary<object?[], Dictionary<object?[], object?[]>> GroupedValues;
 
 
-    public ResultColumn[] SplitBy { get; internal set; }
-    public ResultColumn[] ValueColumns { get; internal set; }
+    public required ResultColumn[] SplitBy { get; set; }
+    public required ResultColumn[] ValueColumns { get; set; }
     //From ColumnIndex (i.e: [3->0, 4->1)
-    public Dictionary<int, int> ColumnIndexToValueIndex { get; internal set; }
+    public required Dictionary<int, int> ColumnIndexToValueIndex { get; set; }
 }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 

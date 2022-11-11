@@ -25,7 +25,7 @@ export function EditableComponent({ ctx, markdown, defaultText, inline, onChange
           defaultText ? <span>{defaultText}</span> :
             <span className="sf-no-text">[{ctx.niceName()}]</span>)
       }
-      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", markdown && ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}><FontAwesomeIcon icon="edit" className="ms-2" /></a>}
+      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", markdown && ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}><FontAwesomeIcon icon="pen-to-square" className="ms-2" /></a>}
       {editable && <ValueLine ctx={ctx} formGroupStyle="SrOnly" onChange={() => { forceUpdate(); onChange && onChange(); }} />}
     </Tag>
   );

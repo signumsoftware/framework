@@ -61,6 +61,28 @@ public class UpgradeContext
         return new CodeFile(fileName, this);
     }
 
+    public void DeleteFile(string fileName, WarningLevel showWarning = WarningLevel.Error)
+    {
+        fileName = this.AbsolutePath(fileName.Replace("Southwind", ApplicationName));
+        if (!File.Exists(fileName))
+        {
+            if (showWarning != WarningLevel.None)
+            {
+                if (HasWarnings != WarningLevel.Error)
+                    HasWarnings = showWarning;
+
+                SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
+                     showWarning.ToString().ToUpper() + " file " + fileName + " not found");
+            }
+
+        }
+        else
+        {
+            File.Delete(fileName);
+        }
+    }
+           
+
 
     public void CreateCodeFile(string fileName, string content, WarningLevel showWarning = WarningLevel.Error)
     {

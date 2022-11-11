@@ -183,7 +183,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
 
   const vl: ValueLineProps = {
     ctx: ctx.subCtx(a => a.value),
-    labelText: scriptParameter.name!,
+    label: scriptParameter.name!,
   };
 
   if (scriptParameter.type == "Number" || scriptParameter.type == "String") {

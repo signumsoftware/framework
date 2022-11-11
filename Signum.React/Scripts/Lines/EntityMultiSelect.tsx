@@ -110,7 +110,7 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
 
   return (
     <FormGroup ctx={p.ctx!}
-      labelText={p.labelText}
+      label={p.label}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>

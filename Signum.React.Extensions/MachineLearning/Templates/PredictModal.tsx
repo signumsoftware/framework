@@ -157,7 +157,7 @@ export default function PredictLine(p : PredictLineProps){
       predicted == original || isLite(predicted) && isLite(original) && is(predicted, original) ? "green" : "red";
   }
   return (
-    <FormGroup ctx={p.sctx} labelText={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
+    <FormGroup ctx={p.sctx} label={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
       {renderValue()}
     </FormGroup>
   );
@@ -244,16 +244,16 @@ export function PredictValue(p : PredictValueProps){
   switch (token.filterType) {
     case "Lite":
       if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
-        return <EntityLine ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={handleValueChange} />;
+        return <EntityLine ctx={ctx} type={token.type} create={false} label={label} labelHtmlAttributes={lha} onChange={handleValueChange} />;
       else
-        return <EntityCombo ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={handleValueChange} />
+        return <EntityCombo ctx={ctx} type={token.type} create={false} label={label} labelHtmlAttributes={lha} onChange={handleValueChange} />
     case "Enum":
       const ti = tryGetTypeInfos(token.type).single();
       if (!ti)
         throw new Error(`EnumType ${token.type.name} not found`);
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={handleValueChange} optionItems={members} />;
+      return <ValueLine ctx={ctx} type={token.type} format={token.format} unit={token.unit} labelHtmlAttributes={lha} label={label} onChange={handleValueChange} optionItems={members} />;
     default:
-      return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={handleValueChange} />;
+      return <ValueLine ctx={ctx} type={token.type} format={token.format} unit={token.unit} labelHtmlAttributes={lha} label={label} onChange={handleValueChange} />;
   }
 }

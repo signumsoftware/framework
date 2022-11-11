@@ -320,7 +320,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     return (
       <a href="#" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
-        <FontAwesomeIcon icon="external-link-alt" />
+        <FontAwesomeIcon icon="up-right-from-square" />
       </a>
     );
   }

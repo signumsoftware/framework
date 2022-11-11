@@ -5,7 +5,7 @@ import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { PivotRow, toPivotTable, groupedPivotTable } from './Components/PivotTable';
 import { ChartTable, ChartColumn, ChartScriptProps } from '../ChartClient';
-import { XKeyTicks, YScaleTicks } from './Components/Ticks';
+import { XKeyTicks, XScaleTicks, YScaleTicks } from './Components/Ticks';
 import Legend from './Components/Legend';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
@@ -58,16 +58,18 @@ export default function renderMultiLines({ data, width, height, parameters, load
     toPivotTable(data, c.c0!, [c.c2, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined) as ChartColumn<number>[]) :
     groupedPivotTable(data, c.c0!, c.c1, c.c2 as ChartColumn<number>);
 
+  var hasHorizontalScale = parameters["HorizontalScale"] != "Bands";
 
   var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), parameters['CompleteValues'], chartRequest.filterOptions, ChartUtils.insertPoint(keyColumn, valueColumn0));
 
-  var x = d3.scaleBand()
+  var x = hasHorizontalScale ?
+    scaleFor(keyColumn, data.rows.map(r => keyColumn.getValue(r) as number), 0, xRule.size('content'), parameters["HorizontalScale"]) : d3.scaleBand()
     .domain(keyValues.map(v => keyColumn.getKey(v)))
     .range([0, xRule.size('content')]);
 
   var allValues = pivot.rows.flatMap(r => pivot.columns.map(function (c) { return r.values[c.key]?.value; }));
 
-  var y = scaleFor(valueColumn0, allValues, 0, yRule.size('content'), parameters["Scale"]);
+  var y = scaleFor(valueColumn0, allValues, 0, yRule.size('content'), parameters["VerticalScale"]);
 
   var columnsInOrder = pivot.columns.orderBy(a => a.key);
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
@@ -79,28 +81,39 @@ export default function renderMultiLines({ data, width, height, parameters, load
   var circleStroke = parseFloat(parameters["CircleStroke"]!);
   var circleRadiusHover = parseFloat(parameters["CircleRadiusHover"]!);
 
-  var bw = x.bandwidth();
-  if (parameters["CircleAutoReduce"]! == "Yes") {
+  var bw = hasHorizontalScale ? 0 : (x as d3.ScaleBand<string>).bandwidth();
 
-    if (circleRadius > bw / 3)
-      circleRadius = bw / 3;
+  if (!hasHorizontalScale) {
+    if (parameters["CircleAutoReduce"]! == "Yes") {
 
-    if (circleRadiusHover > bw / 2)
-      circleRadiusHover = bw / 2;
+      if (circleRadius > bw / 3)
+        circleRadius = bw / 3;
 
-    if (circleStroke > bw / 8)
-      circleStroke = bw / 8;
+      if (circleRadiusHover > bw / 2)
+        circleRadiusHover = bw / 2;
+
+      if (circleStroke > bw / 8)
+        circleStroke = bw / 8;
+    }
+
+    var numberOpacity = parseFloat(parameters["NumberOpacity"]!);
+    if (numberOpacity > 0 && bw < parseFloat(parameters["NumberMinWidth"]!))
+      numberOpacity = 0;
   }
-
-  var numberOpacity = parseFloat(parameters["NumberOpacity"]!);
-  if (numberOpacity > 0 && bw < parseFloat(parameters["NumberMinWidth"]!))
-    numberOpacity = 0;
 
   var detector = dashboardFilter?.getActiveDetector(chartRequest);
 
+  const getX: (row: PivotRow) => number =
+    hasHorizontalScale ?
+      (row => (x as d3.ScaleContinuousNumeric<number, number>)(row.rowValue as number)) :
+      (row => (x as d3.ScaleBand<string>)(keyColumn.getKey(row.rowValue))!); 
+
   return (
     <svg direction="ltr" width={width} height={height}>
-      <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
+      {hasHorizontalScale ?
+        <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :
+        <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x as d3.ScaleBand<string>} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
+      }
       <g opacity={dashboardFilter ? .5 : undefined}>
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />
       </g>
@@ -109,7 +122,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
 
         return (
           <g key={s.key} className="shape-serie-hover sf-transition"
-            transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
+            transform={translate(xRule.start('content') + bw / 2, yRule.end('content'))} >
             <path className="shape sf-transition"
               stroke={s.color || color(s.key)}
               opacity={dashboardFilter && !(c.c1 && detector?.({ c1: s.value }) == true) ? .5 : undefined}
@@ -119,7 +132,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
               shapeRendering="initial"
               d={d3.line<PivotRow | undefined>()
                 .defined(r => r?.values[s.key]?.value != null)
-                .x(r => x(keyColumn.getKey(r!.rowValue))!)
+                .x(r => getX(r!)!)
                 .y(r => -y(r!.values[s.key].value)!)
                 .curve(ChartUtils.getCurveByName(pInterpolate)!)
                 (keyValues.map(k => rowByKey[keyColumn.getKey(k)]))!}
@@ -127,21 +140,21 @@ export default function renderMultiLines({ data, width, height, parameters, load
             {/*paint graph - hover area trigger*/}
             {circleRadiusHover > 0 && rowsInOrder
               .map(r => {
-                var row = r.values[s.key];
-                if (row == null)
+                var pv = r.values[s.key];
+                if (pv == null || pv.value == null)
                   return undefined;
 
                 return (
                   <circle key={keyColumn.getKey(r.rowValue)} className="hover"
-                    transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(row.value)!)}
+                    transform={translate(getX(r)!, -y(pv.value)!)}
                     r={circleRadiusHover}
                     fill="#fff"
                     fillOpacity={0}
                     stroke="none"
-                    onClick={e => onDrillDown(row.rowClick, e)}
+                    onClick={e => onDrillDown(pv.rowClick, e)}
                     cursor="pointer">
                     <title>
-                      {row.valueTitle}
+                      {pv.valueTitle}
                     </title>
                   </circle>
                 );
@@ -153,15 +166,15 @@ export default function renderMultiLines({ data, width, height, parameters, load
       {
         columnsInOrder.map(s =>
           <g key={s.key} className="shape-serie sf-transition"
-            transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content'))} >
+            transform={translate(xRule.start('content') + bw / 2, yRule.end('content'))} >
             {/*paint graph - points and texts*/}
             {circleRadius > 0 && circleStroke > 0 && rowsInOrder
               .map(r => {
-                var row = r.values[s.key];
-                if (row == null)
+                var pv = r.values[s.key];
+                if (pv == null || pv.value == null)
                   return undefined;
 
-                var active = detector?.(row.rowClick);
+                var active = detector?.(pv.rowClick);
                 var key = keyColumn.getKey(r.rowValue);
 
                 return (
@@ -171,24 +184,24 @@ export default function renderMultiLines({ data, width, height, parameters, load
                       stroke={active == true ? "black" : s.color || color(s.key)}
                       strokeWidth={active == true ? 3 : circleStroke}
                       fill="white"
-                      transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(x(key)!, -y(row.value)!)}
+                      transform={(initialLoad ? scale(1, 0) : scale(1, 1)) + translate(getX(r)!, -y(pv.value)!)}
                       r={circleRadius}
                       shapeRendering="initial"
-                      onClick={e => onDrillDown(row.rowClick, e)}
+                      onClick={e => onDrillDown(pv.rowClick, e)}
                       cursor="pointer">
                       <title>
-                        {row.valueTitle}
+                        {pv.valueTitle}
                       </title>
                     </circle>
                     {numberOpacity > 0 &&
                       <text className="point-label sf-transition"
                         textAnchor="middle"
                         opacity={active == false ? .5 : active == true ? 1 : numberOpacity}
-                        transform={translate(x(keyColumn.getKey(r.rowValue))!, -y(row.value)! - 8)}
-                        onClick={e => onDrillDown(row.rowClick, e)}
+                        transform={translate(getX(r), -y(pv.value)! - 8)}
+                        onClick={e => onDrillDown(pv.rowClick, e)}
                         cursor="pointer"
                         shapeRendering="initial">
-                        {row.valueNiceName}
+                        {pv.valueNiceName}
                       </text>
                     }
                   </g>

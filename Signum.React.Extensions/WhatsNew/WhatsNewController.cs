@@ -11,6 +11,7 @@ using Signum.React.Filters;
 using Signum.Entities.Files;
 using System.ComponentModel.DataAnnotations;
 using Signum.React.Facades;
+using Signum.Entities;
 
 namespace Signum.React.WhatsNew;
 
@@ -45,6 +46,7 @@ public class WhatsNewController : ControllerBase
                     CreationDate = wn.CreationDate,
                     Title = cm.Title,
                     Description = cm.Description,
+                    Status = wn.Status.ToString()
                 };
             })
             .ToList();
@@ -56,6 +58,7 @@ public class WhatsNewController : ControllerBase
         public DateTime CreationDate; 
         public string Title;
         public string Description;
+        public string Status;
     }
 
 
@@ -75,6 +78,7 @@ public class WhatsNewController : ControllerBase
                 Description = cm.Description,
                 Attachments = wn.Attachment.Count(),
                 PreviewPicture = (wn.PreviewPicture != null) ? true : false,
+                Status = wn.Status.ToString(),
                 Read = wn.IsRead(),
             };
         })
@@ -89,7 +93,8 @@ public class WhatsNewController : ControllerBase
         public string Title;
         public string Description;
         public int Attachments; 
-        public bool PreviewPicture; 
+        public bool PreviewPicture;
+        public string Status;
         public bool Read;
     }
 
@@ -109,11 +114,21 @@ public class WhatsNewController : ControllerBase
         return new FileStreamResult(stream, mime);
     }
 
-    [HttpPost("api/whatsnew/specificNews")]
-    public WhatsNewFull SpecificNews([FromBody, Required] int id)
+    [HttpGet("api/whatsnew/{id}")]
+    public WhatsNewFull SpecificNews(int id)
     {
         var wne = Database.Retrieve<WhatsNewEntity>(id);
+        if (!wne.IsRead())
+        {
+            new WhatsNewLogEntity()
+            {
+                WhatsNew = wne.ToLite(),
+                User = UserEntity.Current,
+                ReadOn = Clock.Now
+            }.Save();
+        }
         var cm = wne.GetCurrentMessage();
+
         return new WhatsNewFull
         {
             WhatsNew = wne.ToLite(),
@@ -121,31 +136,21 @@ public class WhatsNewController : ControllerBase
             Description = cm.Description,
             Attachments = wne.Attachment.Count(),
             PreviewPicture = (wne.PreviewPicture != null) ? true : false,
+            Status = wne.Status.ToString(),
             Read = wne.IsRead(),
         };
     }
 
-    [HttpPost("api/whatsnew/entityforattachments")]
-    public WhatsNewEntity Attachments([FromBody, Required] int id)
-    {
-        return Database.Retrieve<WhatsNewEntity>(id);
-    }
-
     [HttpPost("api/whatsnew/setNewsLog")]
-    public bool setNewsLogRead([FromBody, Required] int[] ids)
+    public void setNewsLogRead([FromBody, Required] Lite<WhatsNewEntity>[] lites)
     {
-        using (OperationLogic.AllowSave<WhatsNewLogEntity>())
-        {
-            foreach (int id in ids)
+        Database.Query<WhatsNewEntity>()
+            .Where(wn => lites.Contains(wn.ToLite()) && !wn.IsRead())
+            .UnsafeInsert(wn => new WhatsNewLogEntity()
             {
-                new WhatsNewLogEntity()
-                {
-                    WhatsNew = Database.Retrieve<WhatsNewEntity>(id).ToLite(),
-                    User = UserEntity.Current,
-                    ReadOn = Clock.Now
-                }.Save();
-            }
-            return true;
-        }
+                WhatsNew = wn.ToLite(),
+                User = UserEntity.Current,
+                ReadOn = Clock.Now
+            });
     }
 }

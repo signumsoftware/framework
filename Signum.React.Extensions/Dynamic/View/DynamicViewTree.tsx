@@ -81,7 +81,7 @@ export function DynamicViewTree(p: DynamicViewTreeProps) {
         {no.isContainer && cn.children.length > 0 && <Dropdown.Item onClick={handleClearChildren} color="danger"><FontAwesomeIcon icon="trash" />&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</Dropdown.Item>}
 
         {!isRoot && <Dropdown.Divider />}
-        {!isRoot && <Dropdown.Item onClick={handleRemove} color="danger"><FontAwesomeIcon icon="times" />&nbsp; {DynamicViewMessage.Remove.niceToString()}</Dropdown.Item>}
+        {!isRoot && <Dropdown.Item onClick={handleRemove} color="danger"><FontAwesomeIcon icon="xmark" />&nbsp; {DynamicViewMessage.Remove.niceToString()}</Dropdown.Item>}
       </ContextMenu>
     );
   }
@@ -210,13 +210,13 @@ export function DynamicViewNode(p: DynamicViewNodeProps) {
     if (isOpened) {
       return (
         <span onClick={handleIconClick} className="tree-icon">
-          <FontAwesomeIcon icon={["far", "minus-square"]} />
+          <FontAwesomeIcon icon={["far", "square-minus"]} />
         </span>);
     }
     else {
       return (
         <span onClick={handleIconClick} className="tree-icon">
-          <FontAwesomeIcon icon={["far", "plus-square"]} />
+          <FontAwesomeIcon icon={["far", "square-plus"]} />
         </span>);
     }
   }

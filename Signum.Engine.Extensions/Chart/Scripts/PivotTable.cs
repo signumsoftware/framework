@@ -18,6 +18,9 @@ public class PivotTableScript : ChartScript
             new ChartScriptColumn("Vertical Axis (3)", ChartColumnType.Groupable){ IsOptional = true },
             new ChartScriptColumn("Vertical Axis (4)", ChartColumnType.Groupable){ IsOptional = true },
             new ChartScriptColumn("Value", ChartColumnType.Magnitude),
+            new ChartScriptColumn("Value (2)", ChartColumnType.Magnitude){ IsOptional = true },
+            new ChartScriptColumn("Value (3)", ChartColumnType.Magnitude){ IsOptional = true },
+            new ChartScriptColumn("Value (4)", ChartColumnType.Magnitude){ IsOptional = true },
         };
         this.ParameterGroups = new List<ChartScriptParameterGroup>
         {
@@ -39,6 +42,10 @@ public class PivotTableScript : ChartScript
                 new ChartScriptParameter("Placeholder Vertical Axis (2)", ChartParameterType.Enum) { ColumnIndex = 5, ValueDefinition = EnumValueList.Parse("no|empty|filled")},
                 new ChartScriptParameter("Placeholder Vertical Axis (3)", ChartParameterType.Enum) { ColumnIndex = 6, ValueDefinition = EnumValueList.Parse("no|empty|filled")},
             },
+            new ChartScriptParameterGroup()
+            {
+                new ChartScriptParameter("Multi-Value Format", ChartParameterType.String) { ColumnIndex = 8, ValueDefinition = new StringValue("")},
+            }
         };
     }
 

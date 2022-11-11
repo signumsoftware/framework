@@ -104,7 +104,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
       {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           {renderButtons()}
         </div>
       </legend>
@@ -161,7 +161,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                         {EntityBaseController.removeIcon}
                       </span>
                     }
-                    {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")}
+                    {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                       draggable={true}
                       onDragStart={drag.onDragStart}
                       onKeyDown={drag.onKeyDown}

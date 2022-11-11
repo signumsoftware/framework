@@ -1,18 +1,20 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import { TypeContext } from '../TypeContext'
-import { ModifiableEntity, Lite, Entity } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, isLite, isEntity } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { RenderEntity } from './RenderEntity'
 import { useController } from './LineBase'
 import { getTypeInfos, tryGetTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { TypeBadge } from './AutoCompleteConfig'
 
 export interface EntityDetailProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
   avoidFieldSet?: boolean;
   showAsCheckBox?: boolean;
   onEntityLoaded?: () => void;
+  showType?: boolean;
 }
 
 
@@ -37,6 +39,19 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
   var showAsCheckBox = p.showAsCheckBox ??
     ((p.type!.isEmbedded || ti != null && ti.entityKind == "Part") && p.extraButtonsAfter == undefined && p.extraButtonsBefore == undefined);
 
+
+  function renderType() {
+    var entity = p.ctx.value;
+    if (entity == null)
+      return null;
+
+    if (isLite(entity) || isEntity(entity)) {
+      if (p.showType ?? tryGetTypeInfos(p.type!).length > 1)
+        return <TypeBadge entity={entity!} />;
+    }
+
+  }
+
   if (p.avoidFieldSet == true)
     return (
       <div className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass, p.ctx.value && "mb-4")}
@@ -44,11 +59,11 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
         {showAsCheckBox ?
           <label className="lead">
             {renderCheckBox()}
-            {p.labelText}
+            {p.label} {renderType()}
           </label>
           :
           <div className="lead">
-            <span>{p.labelText}</span>
+            <span>{p.label} {renderType()}</span>
             {renderButtons()}
           </div>
         }
@@ -65,11 +80,11 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
         {showAsCheckBox ?
           <label>
             {renderCheckBox()}
-            {p.labelText}
+            {p.label} {renderType()}
           </label>
           :
           <div>
-            <span>{p.labelText}</span>
+            <span>{p.label} {renderType()}</span>
             {renderButtons()}
           </div>
         }

@@ -11,7 +11,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
 {
     public UserChartEntity()
     {
-        this.RebindEvents();
+        this.BindParent();
     }
 
     public UserChartEntity(object queryName) : this()
@@ -66,10 +66,10 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     [NoRepeatValidator]
     public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
-    [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
+    [BindParent, PreserveOrder]
     public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
-    [NotifyChildProperty, NotifyCollectionChanged, PreserveOrder]
+    [BindParent, PreserveOrder]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [UniqueIndex]

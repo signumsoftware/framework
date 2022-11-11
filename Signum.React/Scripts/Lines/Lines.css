@@ -16,6 +16,10 @@ input[type=checkbox].form-control {
     margin-top: 9px;
 }
 
+.checkbox {
+    user-select: none;
+}
+
 .input-group {
     flex-wrap: nowrap;
 }
@@ -382,6 +386,10 @@ input[type=checkbox].form-control-xs {
     padding: 0px;
 }
 
+.rw-widget-xs .rw-input {
+    padding: 0 0.4em;
+}
+
 .form-control-xs .rw-widget-picker,
 .rw-widget-xs .rw-widget-picker {
     min-height: 24px;
@@ -435,7 +443,7 @@ input[type=checkbox].form-control-xs {
 }
 
 .form-control-sm .rw-widget-picker {
-    min-height: 30px;
+    min-height: 31px;
 }
 
 /*.rw-widget-sm .rw-multiselect-input {
@@ -444,7 +452,7 @@ input[type=checkbox].form-control-xs {
 }*/
 
 .rw-widget-sm .rw-widget-picker {
-    min-height: 28px;
+    min-height: 31px;
 }
 
 .input-group > .form-control-plaintext {
@@ -546,6 +554,10 @@ body:not(.rtl) .sf-mandatory-warning,
 body:not(.rtl) .sf-mandatory-warning-widget .rw-input,
 body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     border-left: 2px solid #ffdd00;
+}
+
+.rw-dropdown-list .rw-popup-container{
+    right: unset;
 }
 
 .sf-no-padding {

@@ -24,7 +24,8 @@ export const AlertEntity = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
   Type: "Alert";
   target: Entities.Lite<Entities.Entity> | null;
-  parentTarget: Entities.Lite<Entities.Entity> | null;
+  linkTarget: Entities.Lite<Entities.Entity> | null;
+  groupTarget: Entities.Lite<Entities.Entity> | null;
   creationDate: string /*DateTime*/;
   alertDate: string /*DateTime*/ | null;
   attendedDate: string /*DateTime*/ | null;
@@ -66,6 +67,11 @@ export module AlertMessage {
   export const Hi0 = new MessageKey("AlertMessage", "Hi0");
   export const YouHaveSomePendingAlerts = new MessageKey("AlertMessage", "YouHaveSomePendingAlerts");
   export const PleaseVisit0 = new MessageKey("AlertMessage", "PleaseVisit0");
+  export const OtherNotifications = new MessageKey("AlertMessage", "OtherNotifications");
+  export const Expand = new MessageKey("AlertMessage", "Expand");
+  export const Collapse = new MessageKey("AlertMessage", "Collapse");
+  export const Show0AlertsMore = new MessageKey("AlertMessage", "Show0AlertsMore");
+  export const Show0GroupsMore1Remaining = new MessageKey("AlertMessage", "Show0GroupsMore1Remaining");
 }
 
 export module AlertOperation {

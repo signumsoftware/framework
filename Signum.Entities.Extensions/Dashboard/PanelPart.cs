@@ -34,7 +34,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 
     public bool UseIconColorForTitle { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     [ImplementedBy(
         typeof(UserChartPartEntity),
         typeof(CombinedUserChartPartEntity),
@@ -147,6 +147,8 @@ public class UserQueryPartEntity : Entity, IPartEntity
 
     public UserQueryPartRenderMode RenderMode { get; set; }
 
+    public bool AggregateFromSummaryHeader { get; set; }
+
     public AutoUpdate AutoUpdate { get; set; }
 
     public bool AllowSelection { get; set; }
@@ -183,6 +185,7 @@ public class UserQueryPartEntity : Entity, IPartEntity
             new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
             new XAttribute(nameof(RenderMode), RenderMode),
             new XAttribute(nameof(AllowSelection), AllowSelection),
+            AggregateFromSummaryHeader ? new XAttribute(nameof(AggregateFromSummaryHeader), AggregateFromSummaryHeader) : null,
             ShowFooter ? new XAttribute(nameof(ShowFooter), ShowFooter) : null,
             CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null,
             IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null
@@ -195,6 +198,7 @@ public class UserQueryPartEntity : Entity, IPartEntity
         RenderMode = element.Attribute(nameof(RenderMode))?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
         AllowSelection = element.Attribute(nameof(AllowSelection))?.Value.ToBool() ?? true;
         ShowFooter = element.Attribute(nameof(ShowFooter))?.Value.ToBool() ?? false;
+        AggregateFromSummaryHeader = element.Attribute(nameof(AggregateFromSummaryHeader))?.Value.ToBool() ?? false;
         CreateNew = element.Attribute(nameof(CreateNew))?.Value.ToBool() ?? false;
         IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
     }
@@ -224,7 +228,6 @@ public enum UserQueryPartRenderMode
     SearchControl,
     BigValue,
 }
-
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class UserTreePartEntity : Entity, IPartEntity

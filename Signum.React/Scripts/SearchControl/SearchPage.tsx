@@ -110,7 +110,7 @@ function anyPinned(filterOptions?: FilterOption[]): boolean {
   if (filterOptions == null)
     return false;
 
-  return filterOptions.some(a => Boolean(a.pinned) || isFilterGroupOption(a) && anyPinned(a.filters));
+  return filterOptions.some(a => Boolean(a.pinned) || isFilterGroupOption(a) && anyPinned(a.filters.notNull()));
 }
 
 

@@ -96,6 +96,6 @@ END $$;");
         if (PreDeleteSqlSync == null)
             return null;
 
-        return PreDeleteSqlSync.GetInvocationListTyped().Select(a => a(entity)).Combine(Spacing.Simple);
+        return PreDeleteSqlSync.GetInvocationListTyped().Reverse().Select(a => a(entity)).Combine(Spacing.Simple);
     }
 }

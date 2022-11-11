@@ -25,7 +25,7 @@ export function ColorTypeaheadLine(p: { ctx: TypeContext<string | null | undefin
   var ctx = p.ctx;
 
   return (
-    <FormGroup ctx={ctx} labelText={ctx.niceName()} >
+    <FormGroup ctx={ctx} label={ctx.niceName()} >
       <ColorTypeahead color={ctx.value}
         inputAttrs={p.inputAttrs}
         formControlClass={ctx.formControlClass}

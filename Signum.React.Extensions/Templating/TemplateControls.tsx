@@ -8,8 +8,10 @@ import { useAPI } from '../../Signum.React/Scripts/Hooks'
 import * as Navigator from '../../Signum.React/Scripts/Navigator'
 import * as Finder from '../../Signum.React/Scripts/Finder'
 import { UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries'
-import { getTypeInfos } from '@framework/Reflection'
+import { getTypeInfos, TypeReference } from '@framework/Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ajaxGet } from '../../Signum.React/Scripts/Services'
+import { softCast } from '../../Signum.React/Scripts/Globals'
 
 export interface TemplateControlsProps {
   queryKey: string;
@@ -19,7 +21,7 @@ export interface TemplateControlsProps {
 
 export default function TemplateControls(p: TemplateControlsProps) {
 
-  const [currentToken, setCurrentToken] = React.useState<QueryToken | undefined>(undefined);
+  const [currentToken, setCurrentToken] = React.useState<{ type: "Query", token?: QueryToken} | { type: "Global", expression?: GlobalVariable }>({ type: 'Query'});
   const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
 
   function renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
@@ -27,7 +29,8 @@ export default function TemplateControls(p: TemplateControlsProps) {
       title={canClick} value={text}
       onClick={() => ValueLineModal.show({
         type: { name: "string" },
-        initialValue: buildPattern(currentToken ? currentToken.fullKey : ""),
+        initialValue: buildPattern(
+          currentToken.type == 'Query' ? (currentToken.token ? currentToken.token.fullKey : "") : (currentToken.expression ? ("g:" + currentToken.expression.key) : "")),
         title: "Template",
         message: "Copy to clipboard: Ctrl+C, ESC",
         initiallyFocused: true,
@@ -52,33 +55,40 @@ export default function TemplateControls(p: TemplateControlsProps) {
   }
 
 
+  function tokenHasAnyOrAll(): boolean {
 
+    if (currentToken.type == 'Query')
+      return hasAnyOrAll(currentToken.token)
+    else {
+      return false;
+    }
+  }
+
+  function tokenIsCollection(): boolean {
+
+    if (currentToken.type == 'Query')
+      return Boolean(currentToken.token?.type.isCollection);
+
+    return Boolean(currentToken.expression?.type.isCollection);
+  }
 
   function canElement(): string | undefined {
-    let token = currentToken;
 
-    if (token == undefined)
-      return TemplateTokenMessage.NoColumnSelected.niceToString();
-
-    if (token.type.isCollection)
+    if (tokenIsCollection())
       return TemplateTokenMessage.YouCannotAddIfBlocksOnCollectionFields.niceToString();
 
-    if (hasAnyOrAll(token))
+    if (tokenHasAnyOrAll())
       return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
 
     return undefined;
   }
 
   function canIf(): string | undefined {
-    let token = currentToken;
 
-    if (token == undefined)
-      return TemplateTokenMessage.NoColumnSelected.niceToString();
-
-    if (token.type.isCollection)
+    if (tokenIsCollection())
       return TemplateTokenMessage.YouCannotAddIfBlocksOnCollectionFields.niceToString();
 
-    if (hasAnyOrAll(token))
+    if (tokenHasAnyOrAll())
       return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
 
     return undefined;
@@ -86,27 +96,18 @@ export default function TemplateControls(p: TemplateControlsProps) {
 
   function canForeach(): string | undefined {
 
-    let token = currentToken;
-
-    if (token == undefined)
-      return TemplateTokenMessage.NoColumnSelected.niceToString();
-
-    if (token.type.isCollection)
+    if (tokenIsCollection())
       return TemplateTokenMessage.YouHaveToAddTheElementTokenToUseForeachOnCollectionFields.niceToString();
 
-    if (hasAnyOrAll(token))
+    if (tokenHasAnyOrAll())
       return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
 
     return undefined;
   }
 
   function canAny() {
-    let token = currentToken;
 
-    if (token == undefined)
-      return TemplateTokenMessage.NoColumnSelected.niceToString();
-
-    if (hasAnyOrAll(token))
+    if (tokenHasAnyOrAll())
       return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
 
     return undefined;
@@ -118,8 +119,14 @@ export default function TemplateControls(p: TemplateControlsProps) {
 
   return (
     <div className="d-flex">
+      <select className="form-select form-select-sm w-auto" onChange={(e: React.FormEvent<any>) => setCurrentToken({ type: (e.currentTarget as HTMLSelectElement).value as "Query" | "Global" })} >
+        <option value="Query">Query</option>
+        <option value="Global">Global</option>
+      </select>
+      <span className="mx-1">:</span>
       <span className="rw-widget-sm">
-        <QueryTokenBuilder queryToken={ct} queryKey={p.queryKey} onTokenChange={t => setCurrentToken(t ?? undefined)} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
+        {ct.type == "Query" ? <QueryTokenBuilder queryToken={ct.token} queryKey={p.queryKey} onTokenChange={t => setCurrentToken({ type: "Query", token: t ?? undefined })} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} /> :
+          <GlobalVariables onTokenChange={t => setCurrentToken({ type: 'Global', expression: t ?? undefined})} />}
       </span>
       <div className="btn-group" style={{ marginLeft: "10px" }}>
         {renderButton(TemplateTokenMessage.Insert.niceToString(), canElement(), token => `@[${token}]`)}
@@ -132,10 +139,6 @@ export default function TemplateControls(p: TemplateControlsProps) {
         {renderButton("any", canElement(), token => p.forHtml ?
           `<!--@any[${token}]--> <!--@notany--> <!--@endany-->` :
           `@any[${token}] @notany @endany`)}
-
-
-
-
       </div>
       {p.widgetButtons &&
         <div className="btn-group" style={{ marginLeft: "auto" }}>
@@ -155,7 +158,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
             return text;
           })))}
           {
-            UserQueryEntity.tryTypeInfo() && renderWidgetButton(<><FontAwesomeIcon icon={["far", "list-alt"]} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
+            UserQueryEntity.tryTypeInfo() && renderWidgetButton(<><FontAwesomeIcon icon={["far", "rectangle-list"]} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
               queryName: UserQueryEntity,
               filterOptions: [{
                 token: UserQueryEntity.token(a => a.entity!.entityType!.entity!.cleanName),
@@ -171,6 +174,20 @@ export default function TemplateControls(p: TemplateControlsProps) {
 }
 
 
+function GlobalVariables(p: { onTokenChange: (newToken: GlobalVariable | undefined) => void }) {
+  var variableList = useAPI(signal => getGlobalVariables(), []);
+  return (
+    <select id="variables" className="form-select form-select-sm w-auto" onChange={(e: React.FormEvent<any>) => p.onTokenChange(variableList?.[parseInt((e.currentTarget as HTMLSelectElement).value)])}>
+      {variableList?.map((v, i) => <option key={i} value={i}>{v.key}</option>)}
+    </select>
+    );
+}
 
+function getGlobalVariables(): Promise<Array<GlobalVariable>> {
+  return ajaxGet({ url: `~/api/templating/getGlobalVariables` });
+}
 
-
+interface GlobalVariable {
+  key: string;
+  type: TypeReference;
+}

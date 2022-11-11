@@ -133,7 +133,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
     return (
       <div className="code-container">
         <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEntityChange} formGroupStyle="Basic"
-          type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
+          type={{ name: typeName }} label={DynamicViewMessage.ExampleEntity.niceToString()} />
       </div>
     );
   }
@@ -261,7 +261,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
       <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={forceUpdate} onRemove={handleTypeRemove} />
       {
         ctx.value.entityType && viewNames &&
-        <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
+        <FormGroup ctx={ctx.subCtx(d => d.viewName)} label={ctx.niceName(d => d.viewName)}>
           {
             <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-select" onChange={handleViewNameChange}>
               <option value="">{" - "}</option>

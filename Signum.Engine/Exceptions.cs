@@ -151,48 +151,6 @@ public class UniqueKeyException : ApplicationException
                 Values);
         }
     }
-
-    public static void AssertNoOne<T>(IQueryable<T> query, Expression<Func<T, bool>> expression)
-        where T : Entity
-    {
-        if (query.Any(expression))
-        {
-
-            var param = expression.Parameters.SingleEx();
-
-            IEnumerable<(PropertyInfo pi, object? value)> PropPairs(Expression exp)
-            {
-                return exp switch
-                {
-                    BinaryExpression { NodeType: ExpressionType.And or ExpressionType.AndAlso } be => PropPairs(be.Left).Concat(PropPairs(be.Right)),
-
-                    BinaryExpression
-                    {
-                        NodeType: ExpressionType.Equal,
-                        Left: MemberExpression { Member: PropertyInfo pi, Expression: ParameterExpression p },
-                        Right: var other
-                    } when p.Equals(param) => new[] { (pi, ExpressionEvaluator.Eval(other)) },
-
-                    BinaryExpression
-                    {
-                        NodeType: ExpressionType.Equal,
-                        Left: var other,
-                        Right: MemberExpression { Member: PropertyInfo pi, Expression: ParameterExpression p },
-                    } when p.Equals(param) => new[] { (pi, ExpressionEvaluator.Eval(other)) },
-
-                    _ => throw new UnexpectedValueException(exp)
-                };
-            }
-
-            var pairs = PropPairs(expression.Body);
-
-            throw new InvalidOperationException(EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(typeof(T).GetGender()).FormatWith(
-                typeof(T).NiceName(),
-                pairs.CommaAnd(a => a.pi.NiceName()),
-                pairs.CommaAnd(a => a.value is string ? $"'{a}'" : a.value == null ? "NULL" : a.value.ToString())));
-
-        }
-    }
 }
 
 

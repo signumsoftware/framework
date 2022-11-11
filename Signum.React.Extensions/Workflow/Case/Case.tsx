@@ -170,7 +170,7 @@ function WorkflowActivityLocateButtonComponent(p: WorkflowActivityLocateButtonCo
       <div>
         <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
           onClick={() => handleOnClick(sc.state.selectedRows![0])}>
-          <FontAwesomeIcon icon="map-marker" />
+          <FontAwesomeIcon icon="location-pin" />
         </a>
       </div>
     </OverlayTrigger>

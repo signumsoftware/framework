@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -51,7 +51,7 @@ export interface SearchControlLoadedProps {
 
   defaultIncudeDefaultFilters: boolean;
   searchOnLoad: boolean;
-  allowSelection: boolean;
+  allowSelection: boolean | "single";
   showContextMenu: (fop: FindOptionsParsed) => boolean | "Basic";
   showSelectedButton: boolean;
   hideButtonBar: boolean;
@@ -77,6 +77,7 @@ export interface SearchControlLoadedProps {
   deps?: React.DependencyList;
   extraOptions: any;
 
+
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
@@ -87,8 +88,8 @@ export interface SearchControlLoadedProps {
   onSelectionChanged?: (rows: ResultRow[]) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
-  onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
-  onResult?: (table: ResultTable, dataChange: boolean) => void;
+  onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
+  onResult?: (table: ResultTable, dataChange: boolean, sc: SearchControlLoaded) => void;
   styleContext?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
@@ -262,7 +263,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     return this.getFindOptionsWithSFB().then(fop => {
       if (this.props.onSearch)
-        this.props.onSearch(fop, dataChanged ?? false);
+        this.props.onSearch(fop, dataChanged ?? false, this);
 
       if (this.simpleFilterBuilderInstance && this.simpleFilterBuilderInstance.onDataChanged)
         this.simpleFilterBuilderInstance.onDataChanged();
@@ -290,7 +291,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }, () => {
           this.fixScroll();
           if (this.props.onResult)
-            this.props.onResult(rt, dataChanged ?? false);
+            this.props.onResult(rt, dataChanged ?? false, this);
           this.notifySelectedRowsChanged();
         });
       });
@@ -616,7 +617,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       p.showGroupButton && {
         order: -4,
         button: < button
-          className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
+          className={"sf-query-button btn " + (p.findOptions.groupResults ? "btn-info active" : "btn-light")}
           onClick={this.handleToggleGroupBy}
           title={titleLabels ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
           Ʃ
@@ -629,14 +630,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
           onClick={this.handleSystemTimeClick}
           title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
-          <FontAwesomeIcon icon="history" />
+          <FontAwesomeIcon icon="clock-rotate-left" />
         </button>
       },
 
       {
         order: -3,
         button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
-          <FontAwesomeIcon icon={"search"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
+          <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
         </button>
       },
 
@@ -660,7 +661,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
         button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
-          <FontAwesomeIcon icon="external-link-alt" />
+          <FontAwesomeIcon icon="up-right-from-square" />
         </button>
       }
     ] as (ButtonBarElement | null | false | undefined)[])
@@ -833,8 +834,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   markRows = (dic: MarkedRowsDictionary) => {
     this.dataChanged()
-      .then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary }));
+      .then(() => this.setMarkedRows(dic));
+  }
 
+  setMarkedRows(dic: MarkedRowsDictionary){
+    this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })
   }
 
   renderSelectedButton(): ButtonBarElement | null {
@@ -1015,20 +1019,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
           <span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-            <FontAwesomeIcon icon="plus-square" transform="shrink-4 up-8 right-8" color="#008400" />
+            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+            <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
           </span>&nbsp;{JavascriptMessage.insertColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="pen-square" transform="shrink-4 up-8 right-8" color="orange" />
+          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="square-pen" transform="shrink-4 up-8 right-8" color="orange" />
         </span>&nbsp;{JavascriptMessage.editColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="minus-square" transform="shrink-4 up-8 right-9" color="#ca0000" />
+          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="square-minus" transform="shrink-4 up-8 right-9" color="#ca0000" />
         </span>&nbsp;{JavascriptMessage.removeColumn.niceToString()}
         </Dropdown.Item>);
 
@@ -1036,15 +1040,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         if (p.showGroupButton && isColumnGroupable(cm.columnIndex))
           menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
             <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
           </span>&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
           </Dropdown.Item>);
       }
 
       menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="undo-alt" transform="shrink-4 up-8 right-8" color="black" />
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
       </span>&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
       </Dropdown.Item>);
 
@@ -1286,7 +1290,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return (
       <tr>
         {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
-          <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          {this.props.allowSelection == true &&
+            <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          }
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
@@ -1378,8 +1384,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var selectedRows = this.state.selectedRows!;
 
     if (cb.checked) {
-      if (!selectedRows.contains(row))
+      if (this.props.allowSelection == "single") {
+        selectedRows.clear();
         selectedRows.push(row);
+      } else {
+        if (!selectedRows.contains(row))
+          selectedRows.push(row);
+      }
     } else {
       selectedRows.remove(row);
     }
@@ -1763,5 +1774,24 @@ function canHaveMin(typeName: string): boolean {
 
 
 function getRootKeyColumn(columnOptions: ColumnOptionParsed[]): ColumnOptionParsed[] {
-  return columnOptions.filter(t => t.token != null && !columnOptions.some(t2 => t2.token != null && t.token!.fullKey.startsWith(t2.token.fullKey + ".")));
+  return columnOptions.filter(t => t.token != null && !columnOptions.some(root => root.token != null && dominates(root.token, t.token!)));
+}
+
+
+function dominates(root: QueryToken, big: QueryToken) {
+
+  if (hasElement(big)) {
+
+    if (!hasElement(root))
+      return false;
+
+    var elemBig = getTokenParents(big).last(a => a.queryTokenType == "Element");
+    var elemRoot = getTokenParents(root).last(a => a.queryTokenType == "Element");
+
+    if (elemBig.fullKey != elemRoot.fullKey)
+      return false;
+  }
+
+  return big.fullKey.startsWith(root.fullKey + ".")
+
 }

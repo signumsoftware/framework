@@ -41,7 +41,7 @@ export function start(options: { routes: JSX.Element[] }) {
       e => getSMSMessages(ctx.lite),
       {
         isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(SMSMessageEntity),
-        icon: "sms",
+        icon: "comment-sms",
         iconColor: "green"
       }));
   });

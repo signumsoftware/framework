@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>nullable</WarningsAsErrors>
   </PropertyGroup>
@@ -13,7 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Signum.Analyzer" Version="3.2.0" />
-    <PackageReference Include="Signum.MSBuildTask" Version="6.0.0" />
+    <PackageReference Include="Signum.MSBuildTask" Version="7.0.0" />
     <PackageReference Include="TensorFlow.Keras" Version="0.7.0" />
   </ItemGroup>
 

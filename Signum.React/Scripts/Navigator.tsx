@@ -55,17 +55,45 @@ export namespace NavigatorManager {
   }
 }
 
-export const entityChanged: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> = [];
+export const entityChanged: { [typeName: string]: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> } = {};
 
-function cleanEntityChanged() {
-  entityChanged.clear();
+export function registerEntityChanged<T extends Entity>(type: Type<T>, callback: (cleanName: string, entity: T | undefined, isRedirect: boolean) => void) {
+  var cleanName = type.typeName;
+  (entityChanged[cleanName] ??= []).push(callback as any);
 }
 
-export function raiseEntityChanged(cleanNameOrEntity: string | Entity, isRedirect = false) {
-  var cleanName = isEntity(cleanNameOrEntity) ? cleanNameOrEntity.Type : cleanNameOrEntity;
-  var entity = isEntity(cleanNameOrEntity) ? cleanNameOrEntity : undefined;
+export function useEntityChanged<T extends Entity>(type: Type<T>, callback: (cleanName: string, entity: T | undefined, isRedirect: boolean) => void, deps: any[]) : void;
+export function useEntityChanged(types: string[], callback: (cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void, deps: any[]): void;
+export function useEntityChanged<T extends Entity>(typeOrTypes: Type<any> | string | string[], callback: (cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void, deps: any[]): void {
 
-  entityChanged.forEach(a => a(cleanName, entity, isRedirect));
+  var types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes.toString()];
+
+  React.useEffect(() => {
+
+    types.forEach(cleanName => {
+      (entityChanged[cleanName] ??= []).push(callback);
+    });
+
+    return () => {
+      types.forEach(cleanName => {
+        entityChanged[cleanName]?.remove(callback);
+
+        if (entityChanged[cleanName]?.length == 0)
+          delete entityChanged[cleanName];
+      });
+    }
+  }, [types.join(","), ...deps]);
+}
+
+function cleanEntityChanged() {
+  Dic.clear(entityChanged);
+}
+
+export function raiseEntityChanged(typeOrEntity: Type<any> | string | Entity, isRedirect = false) {
+  var cleanName = isEntity(typeOrEntity) ? typeOrEntity.Type : typeOrEntity.toString();
+  var entity = isEntity(typeOrEntity) ? typeOrEntity : undefined;
+
+  entityChanged[cleanName]?.forEach(func => func(cleanName, entity, isRedirect));
 }
 
 export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
@@ -444,27 +472,27 @@ export function typeRequiresSaveOperation(typeName: string): boolean {
 }
 
 export interface IsFindableOptions {
-    isSearch?: boolean;
-    isEmbedded?: boolean;
+    fullScreenSearch?: boolean;
+    isEmbeddedEntity?: boolean;
 }
 
 export function isFindable(type: PseudoType, options?: IsFindableOptions) {
 
   const typeName = getTypeName(type);
 
-  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbedded);
+  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbeddedEntity);
 
-  return baseIsReadOnly && Finder.isFindable(typeName, true);
+  return baseIsReadOnly && Finder.isFindable(typeName, options?.fullScreenSearch ?? true);
 }
 
-function typeIsFindable(typeName: string, isEmbedded: boolean | undefined) {
+function typeIsFindable(typeName: string, isEmbeddedEntity: boolean | undefined) {
 
   const es = entitySettings[typeName];
 
   if (es != undefined && es.isFindable != undefined)
     return es.isFindable;
 
-  if (isEmbedded)
+  if (isEmbeddedEntity)
     return false;
 
   const typeInfo = tryGetTypeInfo(typeName);
@@ -578,38 +606,16 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (type.isEmbedded || type.name == IsByAll)
     return null;
 
-  const types = tryGetTypeInfos(type).notNull();
+  let types = tryGetTypeInfos(type).notNull();
   showType ??= types.length > 1;
+
+  types = types.filter(t => isFindable(t, { fullScreenSearch: false }));
 
   if (types.length == 0)
     return null;
 
   if (types.length == 1)
     return getAutoCompleteBasic(types[0]!, findOptions, ctx, create, showType);
-
-  if (findOptionsDictionary == null && types.every(t => {
-    var s = getSettings(t!);
-    return s?.autocomplete == null && s?.defaultFindOptions == null;
-  })) {
-
-    var maxDelay = types.map(t => getSettings(t!)?.autocompleteDelay).notNull().max() ?? undefined;
-
-    return new LiteAutocompleteConfig((signal, subStr: string) => {
-      return Finder.API.findLiteLike({
-        types: type.name,
-        subString: subStr,
-        count: 5
-      }, signal)
-        .then(lites => [
-          ...lites,
-          ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
-        ]);
-    },
-      {
-        showType: showType,
-        itemsDelay: maxDelay,
-      });
-  }
 
   return new MultiAutoCompleteConfig(types.toObject(t => t!.name,
     t => getAutoCompleteBasic(t!, (findOptionsDictionary && findOptionsDictionary[t!.name]), ctx, create, showType!)
@@ -628,30 +634,13 @@ export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | 
       return acc;
   }
 
-  findOptions ??= s?.defaultFindOptions;
+  var fo = findOptions ?? s?.defaultFindOptions ?? { queryName: type.name };
 
-  if (findOptions)
-    return new FindOptionsAutocompleteConfig(findOptions, {
-      itemsDelay: s?.autocompleteDelay,
-      getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
-    });
-
-  return new LiteAutocompleteConfig((signal, subStr: string) => {
-
-    return Finder.API.findLiteLike({
-      types: type.name,
-      subString: subStr,
-      count: 5
-    }, signal)
-      .then(lites => [
-        ...lites,
-        ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
-      ]);
-  },
-    {
-      showType: showType ?? type.name.contains(","),
-      itemsDelay: s?.autocompleteDelay,
-    });
+  return new FindOptionsAutocompleteConfig(fo, {
+    showType: showType,
+    itemsDelay: s?.autocompleteDelay,
+    getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
+  });
 }
 
 export interface ViewOptions {
@@ -925,6 +914,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild;
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  enforceFocusInModal?: boolean;
 
   namedViews?: NamedViewSettings<T>[];
 }
@@ -1003,6 +993,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild; 
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  enforceFocusInModal?: boolean;
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 

@@ -54,7 +54,7 @@ export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
 
   return (
     <div>
-      <FormGroup ctx={ctx} labelText={ctx.value.label ?? getQueryNiceName(fo.queryName)}>
+      <FormGroup ctx={ctx} label={ctx.value.label ?? getQueryNiceName(fo.queryName)}>
         <div className="row align-items-center">
           <div className="col-auto">
             <span>{ctx.value.label ?? getQueryNiceName(fo.queryName)}</span>

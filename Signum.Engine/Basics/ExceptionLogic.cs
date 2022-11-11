@@ -27,19 +27,31 @@ public static class ExceptionLogic
         }
     }
 
+    public static event Action<Exception, ExceptionEntity>? OnExceptionLogged;
+
     public static ExceptionEntity LogException(this Exception ex, Action<ExceptionEntity> completeContext)
     {
         var entity = GetEntity(ex);
 
         completeContext(entity);
 
-        return entity.SaveForceNew();
+        entity = entity.SaveForceNew();
+
+        if (OnExceptionLogged is not null)
+            OnExceptionLogged(ex, entity);
+
+        return entity;
     }
 
     public static ExceptionEntity LogException(this Exception ex)
     {
         var entity = GetEntity(ex);
-        return entity.SaveForceNew();
+        entity = entity.SaveForceNew();
+
+        if (OnExceptionLogged is not null)
+            OnExceptionLogged(ex, entity);
+
+        return entity;
     }
 
     public static ExceptionEntity? GetExceptionEntity(this Exception ex)

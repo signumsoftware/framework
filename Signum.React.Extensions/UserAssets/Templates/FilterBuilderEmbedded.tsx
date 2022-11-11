@@ -265,7 +265,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
     return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
       onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
       title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
-      <FontAwesomeIcon icon={[isValue ? "far" : "fas", "edit"]} />
+      <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
     </a>)
   }
 
@@ -300,8 +300,8 @@ interface ValueLineOrExpressionProps {
   ctx: TypeContext<string | null | undefined>;
   onChange: () => void;
   type: TypeReference;
-  formatText?: string;
-  unitText?: string;
+  format?: string;
+  unit?: string;
   filterType?: FilterType;
 }
 
@@ -330,7 +330,7 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
           foceUpdate();
         }}
         title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
-        <FontAwesomeIcon icon={[isValue ? "far" : "fas", "edit"]} />
+        <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
       </a>
     );
   }
@@ -352,9 +352,9 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
     if (!ti)
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-    return <ValueLine ctx={ctx} type={type} formatText={p.formatText} unitText={p.unitText} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} />;
+    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} />;
   } else {
-    return <ValueLine ctx={ctx} type={type} formatText={p.formatText} unitText={p.unitText} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
   }
 }
 

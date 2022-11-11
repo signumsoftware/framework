@@ -196,7 +196,7 @@ export interface ChartPaletteLinkProps {
 
 export const ChartPaletteLink = (props: ChartPaletteLinkProps) =>
   <FormGroup ctx={props.ctx}
-    labelText={ChartMessage.ColorsFor0.niceToString(props.type.niceName)}>
+    label={ChartMessage.ColorsFor0.niceToString(props.type.niceName)}>
     <a href="#" className={props.ctx.formControlPlainTextClass} onClick={e => {
       e.preventDefault();
       ChartPaletteClient.navigatePalette(props.type)

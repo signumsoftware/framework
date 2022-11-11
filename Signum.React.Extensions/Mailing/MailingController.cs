@@ -6,6 +6,7 @@ using System.Threading;
 using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
 using Signum.React.Filters;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Mailing;
 
@@ -81,6 +82,13 @@ public class MailingController : ControllerBase
     public List<string> GetAllTypes()
     {
         return EmailLogic.GetAllTypes().Select(t => TypeLogic.TypeToEntity.GetOrThrow(t).CleanName).ToList();
+    }
+
+    [HttpGet("api/email/getDefaultCulture")]
+    public CultureInfoEntity GetDefaultCulture()
+    {
+        using (AuthLogic.Disable())
+            return EmailLogic.Configuration.DefaultCulture;
     }
 
     public class GetEmailTemplatesRequest

@@ -258,6 +258,7 @@
   <Type Name="OperationMessage">
     <Member Name="_0AndClose" Description="{0} &amp; Schließen" />
     <Member Name="_0AndNew" Description="{0} &amp; Neu" />
+    <Member Name="_0Errors" Description="{0} Fehler" />
     <Member Name="AddSetter" Description="Setter hinzufügen" />
     <Member Name="BulkModifications" Description="Massenänderungen" />
     <Member Name="Condition" Description="Bedingung" />
@@ -265,11 +266,14 @@
     <Member Name="Create" Description="Erstellen..." />
     <Member Name="Create0" Description="{0} erstellen" />
     <Member Name="CreateFromRegex" Description="^(.*) aus .* erstellen$" />
+    <Member Name="Deleting" Description="Löschen" />
+    <Member Name="Executing0" Description="Ausführen {0}" />
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="MultiSetter" Description="Multi-Setter" />
     <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) ist nicht autorisiert." />
     <Member Name="PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12" Description="Bitte bestätigen Sie, dass Sie die obigen Änderungen anwenden und {0} über {1} {2} ausführen möchten" />
+    <Member Name="PleaseConfirmYouWouldLikeTo01" Description="Bitte bestätigen Sie, dass Sie {1} {0} möchten" />
     <Member Name="PleaseConfirmYouWouldLikeToDelete0FromTheSystem" Description="Bitte bestätigen Sie, dass Sie {0} aus dem System löschen möchten" />
     <Member Name="PreviousOperationLog" Description="Vorheriges Operationsprotokoll" />
     <Member Name="Setters" Description="Setters" />
@@ -328,7 +332,7 @@
     <Member Name="Check" Description="Ja/Nein-Wert" />
     <Member Name="Column0NotFound" Description="Die Spalte {0} wurde nicht gefunden" />
     <Member Name="ContainerOfCellOperations" Description="Container für Zellenoperationen" />
-    <Member Name="Count" Description="Num" />
+    <Member Name="Count" Description="Anzahl" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
@@ -353,7 +357,7 @@
     <Member Name="MonthStart" Description="Monatsbeginn " />
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
     <Member Name="Not" Description="Nicht" />
-    <Member Name="Null" Description="Null" />
+    <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />
     <Member Name="Quarter" Description="Quartal" />
     <Member Name="QuarterStart" Description="Quartalsstart" />

@@ -14,7 +14,7 @@ public class PredictorEntity : Entity, IProcessDataEntity
 {
     public PredictorEntity()
     {
-        RebindEvents();
+        BindParent();
     }
 
     [StringLengthValidator(Min = 3, Max = 100)]
@@ -34,16 +34,16 @@ public class PredictorEntity : Entity, IProcessDataEntity
     [ImplementedBy(typeof(UserEntity))]
     public Lite<IUserEntity>? User { get; set; }
 
-    [ImplementedBy(typeof(NeuralNetworkSettingsEntity)), NotifyChildProperty]
+    [ImplementedBy(typeof(NeuralNetworkSettingsEntity)), BindParent]
     public IPredictorAlgorithmSettings AlgorithmSettings { get; set; }
 
     public PredictorState State { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public PredictorMainQueryEmbedded MainQuery { get; set; }
 
     [Ignore, QueryableProperty] //virtual Mlist
-    [NotifyChildProperty, NotifyCollectionChanged]
+    [BindParent]
     public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
 
     [PreserveOrder]
@@ -68,7 +68,7 @@ public class PredictorMainQueryEmbedded : EmbeddedEntity
 {
     public PredictorMainQueryEmbedded()
     {
-        RebindEvents();
+        BindParent();
     }
 
 
@@ -80,7 +80,7 @@ public class PredictorMainQueryEmbedded : EmbeddedEntity
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]
-    [NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
+    [NoRepeatValidator, BindParent]
     public MList<PredictorColumnEmbedded> Columns { get; set; } = new MList<PredictorColumnEmbedded>();
 
     public void ParseData(QueryDescription qd)
@@ -300,7 +300,7 @@ public class PredictorSubQueryEntity : Entity, ICanBeOrdered
 {
     public PredictorSubQueryEntity()
     {
-        RebindEvents();
+        BindParent();
     }
 
     [NotNullValidator(Disabled = true)]
@@ -316,7 +316,7 @@ public class PredictorSubQueryEntity : Entity, ICanBeOrdered
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]
-    [NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
+    [NoRepeatValidator, BindParent]
     public MList<PredictorSubQueryColumnEmbedded> Columns { get; set; } = new MList<PredictorSubQueryColumnEmbedded>();
 
     public int Order { get; set; }

@@ -171,7 +171,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       <h2>
         <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
         <a className="sf-popup-fullscreen" href="#" onClick={handleOnFullScreen}>
-          <FontAwesomeIcon icon="external-link-alt" />
+          <FontAwesomeIcon icon="up-right-from-square" />
         </a>
       </h2 >
       <ValidationErrors entity={cr} prefix="chartRequest" />
@@ -207,14 +207,14 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
           className={classes("sf-query-button btn", showChartSettings && "active", "btn-light")}
           onClick={() => { setShowChartSettings(!showChartSettings); }}
           title={titleLabels ? showChartSettings ? ChartMessage.HideChartSettings.niceToString() : ChartMessage.ShowChartSettings.niceToString() : undefined}>
-          <FontAwesomeIcon icon="sliders-h" />
+          <FontAwesomeIcon icon="sliders" />
         </button>
         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
         {ChartClient.ButtonBarChart.getButtonBarElements({
           chartRequest: cr,
           chartRequestView: { chartRequest: cr, userChart: p.userChart, onChange: p.onChange, hideFiltersAndSettings: handleHideFiltersAndSettings }
         }).map((a, i) => React.cloneElement(a, { key: i }))}
-        <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+        <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
       </div>
       <div className="sf-chart-tab-container">
         <Tabs id="chartResultTabs" key={showChartSettings + ""}>

@@ -43,7 +43,7 @@ export function FullscreenComponent(p: FullscreenComponentProps) {
         </a>
         {p.onReload &&
           <a onClick={p.onReload} href="#" className="sf-chart-mini-icon" title={ChartMessage.Reload.niceToString()} >
-            <FontAwesomeIcon icon={"redo"} />
+            <FontAwesomeIcon icon={"arrow-rotate-right"} />
           </a>
         }
       </div>

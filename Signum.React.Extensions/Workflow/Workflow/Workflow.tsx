@@ -98,8 +98,8 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
 
               <li key={i}>
                 {issue.type == "Error" ?
-                  <FontAwesomeIcon icon="times-circle" className="text-danger me-1" /> :
-                  <FontAwesomeIcon icon="exclamation-triangle" className="text-warning me-1" />}
+                  <FontAwesomeIcon icon="circle-xmark" className="text-danger me-1" /> :
+                  <FontAwesomeIcon icon="triangle-exclamation" className="text-warning me-1" />}
 
                 {issue.bpmnElementId && <span className="me-1">(in <a href="#" onClick={e => handleHighlightClick(e, issue)}>{issue.bpmnElementId}</a>)</span>}
                 {issue.message}
@@ -118,9 +118,9 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
     return (
       <div>
         <span className="display-7">{WorkflowMessage.WorkflowIssues.niceToString()}&nbsp;</span>
-        {errorCount > 0 && <FontAwesomeIcon icon="times-circle" className="text-danger me-1" />}
+        {errorCount > 0 && <FontAwesomeIcon icon="circle-xmark" className="text-danger me-1" />}
         {errorCount > 0 && errorCount}
-        {warningCount > 0 && <FontAwesomeIcon icon="exclamation-triangle" className="text-warning me-1" />}
+        {warningCount > 0 && <FontAwesomeIcon icon="triangle-exclamation" className="text-warning me-1" />}
         {warningCount > 0 && warningCount}
       </div>
     );
@@ -158,7 +158,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
             <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
           </div>
           <div className="col-sm-6">
-            <EnumCheckboxList ctx={ctx.subCtx(d => d.mainEntityStrategies)} columnCount={1} formGroupHtmlAttributes={{ style: { marginTop: "-25px" } }} />
+            <EnumCheckboxList ctx={ctx.subCtx(d => d.mainEntityStrategies)} columnCount={1} formGroupHtmlAttributes={{ style: { marginTop: "-15px" } }} />
           </div>
         </div>
       </CollapsableCard>

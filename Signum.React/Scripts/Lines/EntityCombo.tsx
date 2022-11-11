@@ -102,7 +102,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
   function getLabelText() {
 
     if (p.labelTextWithData == null)
-      return p.labelText;
+      return p.label;
 
     var data = c.props.data || comboRef.current && comboRef.current.getData();
 
@@ -111,7 +111,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
 
   return (
     <FormGroup ctx={c.props.ctx}
-      labelText={getLabelText()}
+      label={getLabelText()}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes} >
@@ -221,7 +221,15 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
   const ctx = p.ctx;
 
   if (ctx.readOnly)
-    return <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
+    return (
+      <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>
+        {ctx.value &&
+          (p.onRenderItem ? p.onRenderItem({ entity: lite } as ResultRow, "Value", undefined) :
+          p.liteToString ? getToString(lite!, p.liteToString) :
+            Navigator.renderLite(lite!))
+        }
+      </FormControlReadonly>
+    );
 
   if (p.onRenderItem) {
     return (

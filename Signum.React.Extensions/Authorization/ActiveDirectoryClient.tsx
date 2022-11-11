@@ -16,7 +16,7 @@ import ProfilePhoto, { urlProviders } from './Templates/ProfilePhoto';
 import * as AppContext from "@framework/AppContext"
 import { TypeaheadOptions } from '../../Signum.React/Scripts/Components/Typeahead';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: JSX.Element[], adGroups: boolean }) {
   if (window.__azureApplicationId) {
     urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
       var oid =
@@ -41,7 +41,6 @@ export function start(options: { routes: JSX.Element[] }) {
     return url;
   });
 
-  Navigator.addSettings(new Navigator.EntitySettings(ADGroupEntity, e => import('./AzureAD/ADGroup'), { isCreable: "Never" }));
 
   Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ? ({
     type: UserEntity,
@@ -66,7 +65,7 @@ export function start(options: { routes: JSX.Element[] }) {
               valueLineType: "TextBox",
               modalSize: "md",
               title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
-              labelText: UserADMessage.NameOrEmail.niceToString(),
+              label: UserADMessage.NameOrEmail.niceToString(),
               initialValue: search
             }) as Promise<string>;
 
@@ -81,49 +80,52 @@ export function start(options: { routes: JSX.Element[] }) {
     );
   });
 
-  Finder.addSettings({
-    queryName: UserADQuery.ActiveDirectoryUsers,
-    defaultFilters: [
-      {
-        groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
-        filters: [
-          { token: "DisplayName", operation: "Contains" },
-          { token: "GivenName", operation: "Contains" },
-          { token: "Surname", operation: "Contains" },
-          { token: "Mail", operation: "Contains" },
-        ],
-      },
-      {
-        pinned: { label: ()=> ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_StartChecked", column: 2, row: 0 },
-        token: "AccountEnabled", operation: "EqualTo", value: true
-      },
-      { token: "CreationType", operation: "DistinctTo", value: "Invitation" }
-    ],
-    hiddenColumns: [
-      { token: "Id" },
-      { token: "OnPremisesImmutableId" },
-    ],
-    defaultOrders: [
-      { token: "DisplayName", orderType: "Ascending" }
-    ],
-  });
+  if (options.adGroups) {
+    Navigator.addSettings(new Navigator.EntitySettings(ADGroupEntity, e => import('./AzureAD/ADGroup'), { isCreable: "Never" }));
+    Finder.addSettings({
+      queryName: UserADQuery.ActiveDirectoryUsers,
+      defaultFilters: [
+        {
+          groupOperation: "Or",
+          pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+          filters: [
+            { token: "DisplayName", operation: "Contains" },
+            { token: "GivenName", operation: "Contains" },
+            { token: "Surname", operation: "Contains" },
+            { token: "Mail", operation: "Contains" },
+          ],
+        },
+        {
+          pinned: { label: () => ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_StartChecked", column: 2, row: 0 },
+          token: "AccountEnabled", operation: "EqualTo", value: true
+        },
+        { token: "CreationType", operation: "DistinctTo", value: "Invitation" }
+      ],
+      hiddenColumns: [
+        { token: "Id" },
+        { token: "OnPremisesImmutableId" },
+      ],
+      defaultOrders: [
+        { token: "DisplayName", orderType: "Ascending" }
+      ],
+    });
 
-  Finder.addSettings({
-    queryName: UserADQuery.ActiveDirectoryGroups,
-    defaultFilters: [
-      {
-        groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
-        filters: [
-          { token: "DisplayName", operation: "Contains" },
-        ],
-      },
-    ],
-    defaultOrders: [
-      { token: "DisplayName", orderType: "Ascending" }
-    ],
-  });
+    Finder.addSettings({
+      queryName: UserADQuery.ActiveDirectoryGroups,
+      defaultFilters: [
+        {
+          groupOperation: "Or",
+          pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+          filters: [
+            { token: "DisplayName", operation: "Contains" },
+          ],
+        },
+      ],
+      defaultOrders: [
+        { token: "DisplayName", orderType: "Ascending" }
+      ],
+    });
+  }
 
 }
 

@@ -3,6 +3,7 @@ using Signum.Entities.DiffLog;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Authorization;
 using System.Text.RegularExpressions;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.DiffLog;
 
@@ -73,7 +74,7 @@ public static class DiffLogLogic
     {
         if (entity != null && ShouldLog.Invoke(entity, operation))
         {
-            if (operation.OperationType == OperationType.Execute && !entity.IsNew && ((IEntityOperation)operation).CanBeModified)
+            if (operation.OperationType == OperationType.Execute && !entity.IsNew && ((IEntityOperation)operation).CanBeModified && GraphExplorer.IsGraphModified(entity))
                 entity = RetrieveFresh(entity);
 
             using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))

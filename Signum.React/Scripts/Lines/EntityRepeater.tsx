@@ -52,7 +52,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
       {...{ ...c.baseHtmlAttributes(), ...c.props.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           {renderButtons()}
         </div>
       </legend>
@@ -137,7 +137,7 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
             &nbsp;
             {move?.renderMoveUp()} 
             {move?.renderMoveDown()}
-            {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
+            {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
               draggable={true}
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}
