@@ -371,12 +371,11 @@ public class SqlMigrationRunner
         SafeConsole.WriteLineColor(ConsoleColor.Green, "Initial Migration saved and marked as executed");
     }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class MigrationInfo
     {
-        public string? FileName;
-        public string Version;
-        public string Comment;
+        public required string? FileName;
+        public required string Version;
+        public required string Comment;
 
         public bool IsExecuted;
 
@@ -385,5 +384,4 @@ public class SqlMigrationRunner
             return Version;
         }
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 }

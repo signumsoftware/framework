@@ -637,6 +637,7 @@ export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | 
   var fo = findOptions ?? s?.defaultFindOptions ?? { queryName: type.name };
 
   return new FindOptionsAutocompleteConfig(fo, {
+    showType: showType,
     itemsDelay: s?.autocompleteDelay,
     getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
   });

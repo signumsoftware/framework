@@ -48,6 +48,7 @@ export interface SearchValueLineProps {
   onViewEntity?: (entity: Lite<Entity>) => void;
   onValueChanged?: (value: any) => void;
   customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, signal: AbortSignal) => Promise<any>,
+  onRender?: (value: any | undefined, vsc: SearchValueController) => React.ReactElement | null | undefined | false,
 }
 
 export interface SearchValueLineController {
@@ -178,6 +179,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           searchControlProps={p.searchControlProps}
           modalSize={p.modalSize}
           deps={p.deps}
+          onRender={p.onRender}
           customRequest={p.customRequest}
         />
 

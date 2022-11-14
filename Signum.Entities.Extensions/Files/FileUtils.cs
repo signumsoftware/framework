@@ -4,8 +4,6 @@ namespace Signum.Entities.Files;
 
 public interface IFilePath : IFile
 {
-    string? CalculatedDirectory { get; }
-
     string FullPhysicalPath();
 
     FileTypeSymbol FileType { get; }

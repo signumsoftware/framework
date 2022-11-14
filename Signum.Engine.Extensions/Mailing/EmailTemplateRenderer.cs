@@ -269,8 +269,8 @@ class EmailMessageBuilder
 
             var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]!).ToList();
 
-            var groupsWithEmail = groups.Where(a => a.Key.Email.HasText()).ToList();
-
+            var groupsWithEmail = groups.Where(a => a.Key !=null && a.Key.Email.HasText()).ToList();
+            
             if (groupsWithEmail.IsEmpty())
             {
                 switch (tr.WhenNone)

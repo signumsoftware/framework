@@ -117,14 +117,11 @@ public class AzureServiceBusBroadcast : IServerBroadcast, IAsyncDisposable
 
 }
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 public class AzureInvalidationMessage
 {
-    public DateTime CreationDate;
-    public string OriginMachineName;
-    public string OriginApplicationName;
-    public string MethodName;
-
-    public string Argument { get; internal set; }
+    public required DateTime CreationDate;
+    public required string OriginMachineName;
+    public required string OriginApplicationName;
+    public required string MethodName;
+    public required string Argument;
 }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
