@@ -93,7 +93,7 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
         }
 
         NotifyPrivate(pi.Name);
-        NotifyPrivate("Error");
+        NotifyPrivate(nameof(Error));
         NotifyToString();
 
         ClearTemporalError(pi.Name);

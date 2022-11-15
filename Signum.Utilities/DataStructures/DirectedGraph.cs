@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Xml.Linq;
+using System.Linq;
 
 namespace Signum.Utilities.DataStructures;
 
@@ -192,9 +193,12 @@ public class DirectedGraph<T> : IEnumerable<T>
 
     void IndirectlyRelatedTo(T node, HashSet<T> set)
     {
-        foreach (var item in RelatedTo(node))
-            if (set.Add(item))
-                IndirectlyRelatedTo(item, set);
+        foreach (var item in from item in RelatedTo(node)
+                             where set.Add(item)
+                             select item)
+        {
+            IndirectlyRelatedTo(item, set);
+        }
     }
 
     public HashSet<T> IndirectlyRelatedTo(T node, Func<T, bool> condition)

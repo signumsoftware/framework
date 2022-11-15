@@ -498,7 +498,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
         return Add(new SqlFunctionExpression(type, newObj, sqlFunction, newExpressions));
     }
-
+    static int DaysBetween(DateOnly a, DateOnly b) => a.DayNumber - b.DayNumber;
     private Expression? TrySqlDifference(SqlEnums unit, Type type, Expression expression)
     {
         if (innerProjection)
@@ -515,7 +515,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         return null;
     }
 
-    static int DaysBetween(DateOnly a, DateOnly b) => a.DayNumber - b.DayNumber;
+   
 
     private Expression? TrySqlDifference(SqlEnums unit, Type type, Expression leftSide, Expression rightSide)
     {
@@ -1569,7 +1569,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "StringExtensions.End":
                 return TrySqlFunction(null, SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
             case "StringExtensions.Replicate":
-                return TrySqlFunction(null, isPostgres ? PostgresFunction.repeat.ToString() : SqlFunction.REPLICATE.ToString(), m.Type, m.GetArgument("str"), m.GetArgument("times")); ;
+                return TrySqlFunction(null, isPostgres ? PostgresFunction.repeat.ToString() : SqlFunction.REPLICATE.ToString(), m.Type, m.GetArgument("str"), m.GetArgument("times")); 
             case "StringExtensions.Reverse":
                 return TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
             case "StringExtensions.Like":

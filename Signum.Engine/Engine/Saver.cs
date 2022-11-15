@@ -5,12 +5,14 @@ namespace Signum.Engine;
 
 internal static class Saver
 {
+
+    static readonly Entity[] None = Array.Empty<Entity>();
     public static void Save(Entity entity)
     {
         Save(new[] { entity });
     }
 
-    static readonly Entity[] None = Array.Empty<Entity>();
+    
 
     public static void Save(Entity[] entities)
     {

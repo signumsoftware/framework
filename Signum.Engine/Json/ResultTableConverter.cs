@@ -13,7 +13,7 @@ public class ResultTableConverter : JsonConverter<ResultTable>
     {
         using (HeavyProfiler.LogNoStackTrace("ReadJson", () => typeof(ResultTable).Name))
         {
-            var rt = (ResultTable)value!;
+            var rt = value!;
 
             writer.WriteStartObject();
 

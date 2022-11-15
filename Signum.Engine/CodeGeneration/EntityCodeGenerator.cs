@@ -846,7 +846,7 @@ public class EntityCodeGenerator
         StringBuilder sb = new StringBuilder();
 
         fieldName = fieldName.FirstLower();
-       // string propertyName = fieldName.FirstUpper();
+       
         string typeName = GetEmbeddedTypeName(fieldName);
 
         sb.AppendLine("public {0} {1} { get; set; }".FormatWith(typeName, fieldName.FirstUpper()));

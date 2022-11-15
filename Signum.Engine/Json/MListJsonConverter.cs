@@ -148,7 +148,7 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
                 {
                     using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod, null)))
                     {
-                        var newValue = (T)converter.Read(ref reader, typeof(T), options)!;
+                        var newValue = converter.Read(ref reader, typeof(T), options)!;
                         newList.Add(new MList<T>.RowIdElement(newValue));
                     }
                 }

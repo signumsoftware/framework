@@ -376,6 +376,7 @@ class ChildRetriever : IRetriever
 
     public void CompleteAll()
     {
+        throw new NotSupportedException();
     }
 
     public Task CompleteAllAsync(CancellationToken token)

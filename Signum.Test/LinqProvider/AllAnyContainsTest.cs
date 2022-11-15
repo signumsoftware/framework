@@ -18,6 +18,7 @@ public class AllAnyContainsTest
         IEnumerable<PrimaryKey> ids = new PrimaryKey[] { 1, 2, 3 }.Select(a => a);
 
         var artist = Database.Query<ArtistEntity>().Where(a => ids.Contains(a.Id)).ToList();
+        Assert.NotEmpty(artist);
     }
 
     [Fact]
@@ -42,6 +43,7 @@ public class AllAnyContainsTest
         var artistsInBands = Database.Query<BandEntity>().SelectMany(b => b.Members).Select(a => a.ToLite()).ToList();
 
         var michael = Database.Query<ArtistEntity>().SingleEx(a => !artistsInBands.Contains(a.ToLite()));
+        Assert.NotNull(artistsInBands);
     }
 
     [Fact]
@@ -50,6 +52,7 @@ public class AllAnyContainsTest
         var artistsInBands = Database.Query<BandEntity>().SelectMany(b => b.Members).Select(a => a).ToList();
 
         var michael = Database.Query<ArtistEntity>().SingleEx(a => !artistsInBands.Contains(a));
+        Assert.NotNull(michael);
     }
 
     [Fact]

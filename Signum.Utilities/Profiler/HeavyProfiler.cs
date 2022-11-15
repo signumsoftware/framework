@@ -165,7 +165,7 @@ public static class HeavyProfiler
                 return;
 
             if (current.Value != newCurrent)
-                throw new InvalidOperationException("Unexpected");
+                throw new NotImplementedException("Unexpected");
 
             var cur = newCurrent;
             cur.End = PerfCounter.Ticks;

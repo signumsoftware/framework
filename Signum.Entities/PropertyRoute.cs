@@ -372,7 +372,7 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
 
         Sequence<string> splitIndexer(string text) 
         {
-            if (text.Contains("/"))
+            if (text.Contains('/'))
                 return new Sequence<string>
                 {
                     splitDot(text.Before("/")),

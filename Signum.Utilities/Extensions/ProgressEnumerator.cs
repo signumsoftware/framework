@@ -129,7 +129,7 @@ public class ProgressEnumerator<T>: IEnumerable<T>, IEnumerator<T>, IProgressInf
 
             long lastToFinish = (long)(lastToNow / ratio);
 
-            return TimeSpan.FromMilliseconds((lastToFinish - lastToNow) / PerfCounter.FrequencyMilliseconds);
+            return TimeSpan.FromMilliseconds((double)(lastToFinish - lastToNow) / PerfCounter.FrequencyMilliseconds);
         }
     }
 

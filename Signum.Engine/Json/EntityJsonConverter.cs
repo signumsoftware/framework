@@ -413,9 +413,9 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
                 Factory.AfterDeserilization.Invoke(mod);
 
-                if(Factory.Strategy == EntityJsonConverterStrategy.Full)
+                if(Factory.Strategy == EntityJsonConverterStrategy.Full && !markedAsModified)
                 {
-                    if (!markedAsModified)
+                   
                         mod.SetCleanModified(isSealed: false);
                 }
 

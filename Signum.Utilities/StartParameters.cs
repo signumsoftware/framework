@@ -27,7 +27,7 @@ public static class StartParameters
                 //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).  
                 //In development, consider synchronize.  
                 StartParameters.IgnoredDatabaseMismatches.Add(ex);
-                continue;
+                
             }
         }
         return result;

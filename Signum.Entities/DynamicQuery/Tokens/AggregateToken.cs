@@ -55,7 +55,7 @@ public class AggregateToken : QueryToken
 
     public override string ToString()
     {
-        //string? suffix = GetNiceOperation();
+        
 
         return " ".Combine(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue());
     }

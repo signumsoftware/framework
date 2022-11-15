@@ -76,10 +76,12 @@ internal class ProjectionRowEnumerator<T> : IProjectionRow, IEnumerator<T>
 
     public void Reset()
     {
+        throw new NotSupportedException();
     }
 
     public void Dispose()
     {
+        throw new NotSupportedException();
     }
 
     public IEnumerable<S> Lookup<K, S>(LookupToken token, K key)

@@ -1,4 +1,6 @@
 
+using System.Collections.Generic;
+
 namespace Signum.Test.LinqProvider;
 
 /// <summary>
@@ -18,6 +20,7 @@ public class GroupByTest
     public void GroupStringByEnum()
     {
         var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex, a => a.Name).ToList();
+        Assert.NotEmpty(list);
     }
 
 
@@ -48,6 +51,7 @@ public class GroupByTest
                         Avg = g.Average(),
                     };
         sexos.ToList();
+        Assert.NotEmpty(sexos);
     }
 
     [Fact]
@@ -228,6 +232,8 @@ public class GroupByTest
         var songs = (from a in Database.Query<AlbumEntity>()
                      group a by a.Label.Name into g
                      select new { g.Key, Count = g.Count() }).ToList();
+
+        Assert.NotEmpty(songs);
     }
 
     [Fact]

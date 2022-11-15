@@ -445,9 +445,10 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
 
 
-    public static Task<object> GetLiteModelAsync(Type type, PrimaryKey id, Type? modelType, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, modelType, token);
+   
     static readonly GenericInvoker<Func<PrimaryKey, Type?, CancellationToken, Task<object>>> giGetToStrAsync =
         new((id, modelType, token) => GetLiteModelAsync<Entity>(id, token, modelType));
+    public static Task<object> GetLiteModelAsync(Type type, PrimaryKey id, Type? modelType, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, modelType, token);
     public static async Task<object> GetLiteModelAsync<T>(PrimaryKey id,  CancellationToken token, Type? modelType = null)
         where T : Entity
     {
@@ -1226,7 +1227,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         where E : Entity
     {
 
-        //PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
+       
 
         var mlistTable = Schema.Current.TableMList(mListProperty);
 
