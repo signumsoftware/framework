@@ -103,9 +103,10 @@ public abstract class Entity : ModifiableEntity, IEntity
 
     public override int GetHashCode()
     {
-        return id == null ?
+        var hash1 = id == null ?
             base.GetHashCode() :
             StringHashEncoder.GetHashCode32(GetType().FullName!) ^ id.Value.GetHashCode();
+        return hash1;
     }
 
     public void SetGraphErrors(IntegrityCheckException ex)

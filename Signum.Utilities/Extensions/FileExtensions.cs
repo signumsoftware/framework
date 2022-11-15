@@ -55,7 +55,7 @@ public static class FileTools
         private void Create(byte[] data, string extension)
         {
             tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
-                "{0}{1}".FormatWith(System.IO.Path.GetTempFileName(), extension.HasText() ? "." + extension.Replace(".", null) : null));
+                "{0}{1}".FormatWith(System.IO.Path.GetRandomFileName(), extension.HasText() ? "." + extension.Replace(".", null) : null));
             File.WriteAllBytes(tempFile, data);
         }
 

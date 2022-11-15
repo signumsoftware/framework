@@ -115,7 +115,7 @@ public class StringDistance
                 case ChoiceType.Substitute: return "[-{0}+{1}]".FormatWith(Removed, Added);
                 case ChoiceType.Remove: return "-{0}".FormatWith(Removed);
                 case ChoiceType.Add: return "+{0}".FormatWith(Added);
-                default: return null;
+                default: return string.Empty;
             }
         }
 
@@ -467,7 +467,7 @@ public class StringDistance
 
     void TryDiff<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T>? comparer, List<DiffPair<T>> result)
     {
-        if (sliceOld.Length > 0 && sliceOld.Length > 0)
+        if (sliceOld.Length > 0)
         {
             DiffPrivate(sliceOld, sliceNew, comparer, result);
         }

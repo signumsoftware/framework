@@ -154,6 +154,7 @@ public class WhereTest
         var albums = (from a in Database.Query<AlbumEntity>()
                       where a.Author == michael
                       select a.ToLite()).ToList();
+        Assert.NotEmpty(albums);
     }
 
     [Fact]
@@ -308,12 +309,14 @@ public class WhereTest
     public void WhereMixinField()
     {
         var list = Database.Query<NoteWithDateEntity>().Where(n => n.Mixin<CorruptMixin>().Corrupt == false).ToList();
+        Assert.NotEmpty(list);
     }
 
     [Fact]
     public void WhereMixinMainEntityField()
     {
         var list = Database.Query<NoteWithDateEntity>().Where(n => n.Mixin<CorruptMixin>().MainEntity == n).ToList();
+        Assert.NotEmpty(list);
     }
 
     [Fact]

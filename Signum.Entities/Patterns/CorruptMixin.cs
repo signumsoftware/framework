@@ -3,7 +3,7 @@ namespace Signum.Entities;
 
 public class CorruptMixin : MixinEntity
 {
-    CorruptMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) 
+    public CorruptMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) 
     {
         if (!(mainEntity is Entity))
             throw new InvalidOperationException("mainEntity should be an Entity");

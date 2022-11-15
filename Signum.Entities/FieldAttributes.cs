@@ -162,7 +162,8 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
     public override int GetHashCode()
     {
-        return arrayOrType == null ? 0 : Types.Aggregate(0, (acum, type) => acum ^ type.GetHashCode());
+        var hash = this.arrayOrType == null ? 0 : Types.Aggregate(0, (acum, type) => acum ^ type.GetHashCode());
+        return hash;
     }
 
     public static bool operator ==(Implementations left, Implementations right)
