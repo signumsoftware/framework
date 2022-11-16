@@ -23,6 +23,8 @@ class Upgrade_20221108_DotNet7 : CodeUpgradeBase
         {
             file.Replace("dotnet/aspnet:6.0.0", "dotnet/aspnet:7.0.0");
             file.Replace("dotnet/sdk:6.0.100", "dotnet/sdk:7.0.100");
+            file.WarningLevel = WarningLevel.None;
+            file.Replace("dotnet/aspnet:6.0", "dotnet/aspnet:7.0.0");
         });
     }
 }

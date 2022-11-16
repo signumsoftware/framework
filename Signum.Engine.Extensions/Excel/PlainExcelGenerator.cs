@@ -1,4 +1,3 @@
-using spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
@@ -91,7 +90,7 @@ public static class PlainExcelGenerator
             
             worksheetPart.Worksheet = new Worksheet();
 
-            worksheetPart.Worksheet.Append(new Columns(results.Columns.Select((c, i) => new spreadsheet.Column()
+            worksheetPart.Worksheet.Append(new Columns(results.Columns.Select((c, i) => new DocumentFormat.OpenXml.Spreadsheet.Column()
                 {
                     Min = (uint)i + 1,
                     Max = (uint)i + 1,
@@ -182,7 +181,7 @@ public static class PlainExcelGenerator
 
             worksheetPart.Worksheet = new Worksheet();
 
-            worksheetPart.Worksheet.Append(new Columns(members.Select((c, i) => new spreadsheet.Column()
+            worksheetPart.Worksheet.Append(new Columns(members.Select((c, i) => new DocumentFormat.OpenXml.Spreadsheet.Column()
             {
                 Min = (uint)i + 1,
                 Max = (uint)i + 1,

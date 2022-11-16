@@ -12,6 +12,8 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using Signum.Engine.Json;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Azure.Core;
 
 namespace Signum.React.ApiControllers;
 
@@ -118,10 +120,22 @@ public class QueryController : ControllerBase
         return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }
 
-    [HttpPost("api/query/queryValue"), ProfilerActionSplitter]
+    [HttpPost("api/query/queryValue"), ProfilerActionSplitter, EmbeddedPropertyRouteAttribute<QueryValueResolver>]
     public async Task<object?> QueryValue([Required, FromBody]QueryValueRequestTS request, CancellationToken token)
     {
-        return await QueryLogic.Queries.ExecuteQueryValueAsync(request.ToQueryValueRequest(SignumServer.JsonSerializerOptions), token);
+        var qvRequest = request.ToQueryValueRequest(SignumServer.JsonSerializerOptions);
+
+        HttpContext.Items["queryValueRequests"] = qvRequest;
+        return await QueryLogic.Queries.ExecuteQueryValueAsync(qvRequest, token);
+    }
+
+    class QueryValueResolver : IEmbeddedPropertyRouteResolver
+    {
+        public PropertyRoute GetPropertyRoute(EmbeddedEntity embedde, FilterContext filterContext)
+        {
+            var qvr = (QueryValueRequest)filterContext.HttpContext.Items["queryValueRequests"]!;
+            return qvr.ValueToken!.GetPropertyRoute()!;
+        }
     }
 }
 

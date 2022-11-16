@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Signum.MSBuildTask</id>
-    <version>6.0.0</version>
+    <version>7.0.0</version>
     <title>IL rewriter for Signum Framework applications</title>
     <authors>Olmo del Corral</authors>
     <projectUrl>http://www.signumframework.com</projectUrl>
@@ -11,14 +11,14 @@
     <license type="expression">MIT</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>IL rewriter for Signum Framework applications (auto-properties in entities, [AutoInit] and [ExpressionField])</description>
-    <copyright>Copyright 2020</copyright>
+    <copyright>Copyright 2022</copyright>
     <tags>signum msbuild linq react</tags>
   </metadata>
   <files>
     <file src="SignumLogo.png" target="" />
     <file src="bin\**\*.*" target="lib" exclude="bin\**\*.*" />
-    <file src="bin\Release\net6.0\*.dll" target="build" />
-    <file src="bin\Release\net6.0\*.json" target="build" />
+    <file src="bin\Release\net7.0\*.dll" target="build" />
+    <file src="bin\Release\net7.0\*.json" target="build" />
     <file src="Signum.MSBuildTask.targets" target="build" />
   </files>
 </package>
