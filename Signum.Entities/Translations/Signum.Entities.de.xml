@@ -404,8 +404,8 @@
     <Member Name="Manual" Description="Manuell" />
   </Type>
   <Type Name="RoundingType">
-    <Member Name="Ceil" Description="Decke" />
-    <Member Name="Floor" Description="Boden" />
+    <Member Name="Ceil" Description="Übergrenze" />
+    <Member Name="Floor" Description="Untergrenze" />
     <Member Name="Round" Description="Runde" />
     <Member Name="RoundMiddle" Description="Runde Mitte" />
   </Type>
