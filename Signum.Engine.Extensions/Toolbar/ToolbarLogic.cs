@@ -54,6 +54,10 @@ public static class ToolbarLogic
                     e.Name
                 });
 
+            AuthLogic.HasRuleOverridesEvent += role =>
+                Database.Query<ToolbarEntity>().Any(a => a.Owner.Is(role)) ||
+                Database.Query<ToolbarMenuEntity>().Any(a => a.Owner.Is(role));
+
             UserAssetsImporter.Register<ToolbarEntity>("Toolbar", ToolbarOperation.Save);
             UserAssetsImporter.Register<ToolbarMenuEntity>("ToolbarMenu", ToolbarMenuOperation.Save);
 
