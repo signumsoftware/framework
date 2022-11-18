@@ -95,7 +95,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
 
   function renderCheckBox() {
     const hasValue = !!p.ctx.value;
-    var disabled = p.ctx.readOnly || hasValue ? !p.remove : !p.create;
+    var disabled = p.ctx.readOnly || (hasValue ? !p.remove : !p.create);
 
     return <input type="checkbox" className="form-check-input me-1" checked={hasValue} disabled={disabled}
       onChange={e => {
