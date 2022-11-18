@@ -763,47 +763,45 @@ function getCellFormatter(multiValueFormat: string, valueColumns: ChartColumn<nu
 
   var fmtWith = compileFormatter(multiValueFormat);
 
-  var numberFormats = valueColumns.map(vc => toNumberFormat(vc.token?.format));
-
-  if (numberFormats.length == 1) {
-    const f0 = numberFormats[0];
-    return n => fmtWith(f0.format(n as number));
+  if (valueColumns.length == 1) {
+    const f0 = valueColumns[0];
+    return n => fmtWith(f0.getNiceName(n as number));
   }
 
-  if (numberFormats.length == 2) {
-    const f0 = numberFormats[0];
-    const f1 = numberFormats[1];
+  if (valueColumns.length == 2) {
+    const f0 = valueColumns[0];
+    const f1 = valueColumns[1];
     return n => fmtWith(
-      f0.format((n as number[])[0]),
-      f1.format((n as number[])[1]),
+      f0.getNiceName((n as number[])[0]),
+      f1.getNiceName((n as number[])[1]),
     );
   }
 
-  if (numberFormats.length == 3) {
-    const f0 = numberFormats[0];
-    const f1 = numberFormats[1];
-    const f2 = numberFormats[2];
+  if (valueColumns.length == 3) {
+    const f0 = valueColumns[0];
+    const f1 = valueColumns[1];
+    const f2 = valueColumns[2];
     return n => fmtWith(
-      f0.format((n as number[])[0]),
-      f1.format((n as number[])[1]),
-      f2.format((n as number[])[2]),
+      f0.getNiceName((n as number[])[0]),
+      f1.getNiceName((n as number[])[1]),
+      f2.getNiceName((n as number[])[2]),
     );
   }
 
-  if (numberFormats.length == 4) {
-    const f0 = numberFormats[0];
-    const f1 = numberFormats[1];
-    const f2 = numberFormats[2];
-    const f3 = numberFormats[3];
+  if (valueColumns.length == 4) {
+    const f0 = valueColumns[0];
+    const f1 = valueColumns[1];
+    const f2 = valueColumns[2];
+    const f3 = valueColumns[3];
     return n => fmtWith(
-      f0.format((n as number[])[0]),
-      f1.format((n as number[])[1]),
-      f2.format((n as number[])[2]),
-      f3.format((n as number[])[3]),
+      f0.getNiceName((n as number[])[0]),
+      f1.getNiceName((n as number[])[1]),
+      f2.getNiceName((n as number[])[2]),
+      f3.getNiceName((n as number[])[3]),
     );
   }
 
-  throw new Error("Unexpected " + numberFormats.length);
+  throw new Error("Unexpected " + valueColumns.length);
 }
 
 function compileFormatter(format: string): (...args: string[]) => string {
