@@ -233,7 +233,7 @@ export module CaseTagTypeOperation {
 
 export const ConnectionType = new EnumType<ConnectionType>("ConnectionType");
 export type ConnectionType =
-  "Normal" |
+  "md" |
   "Decision" |
   "Jump" |
   "ScriptException";

@@ -77,7 +77,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
 
   const chartScript = chartScripts?.single(cs => is(cs.symbol, chart.chartScript));
 
-  var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
+  var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "xs", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
 
   return (
     <div className="row sf-chart-builder gx-2">
@@ -93,7 +93,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
               </div>)}
           </div>
           <div className="card-body">
-            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="ExtraSmall" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
+            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="xs" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
           </div>
         </div>
       </div >
@@ -115,7 +115,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
                 </tr>
               </thead>
               <tbody>
-                {chartScript && colorPalettes && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "ExtraSmall" })).map((ctx, i) =>
+                {chartScript && colorPalettes && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "xs" })).map((ctx, i) =>
                   <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
                     queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}
                     onRedraw={handleOnRedraw}

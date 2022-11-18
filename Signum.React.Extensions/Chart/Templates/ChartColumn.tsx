@@ -115,7 +115,7 @@ export function ChartColumn(p: ChartColumnProps) {
 
   const ctx = p.ctx;
 
-  const ctxBasic = ctx.subCtx({ formSize: "ExtraSmall", formGroupStyle: "Basic" });
+  const ctxBasic = ctx.subCtx({ formSize: "xs", formGroupStyle: "Basic" });
 
   var numParameters = p.chartScript.parameterGroups.flatMap(a => a.parameters).filter(a => a.columnIndex == p.columnIndex).length
 

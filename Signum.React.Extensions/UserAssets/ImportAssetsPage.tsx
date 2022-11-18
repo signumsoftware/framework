@@ -94,7 +94,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
       }
     }
 
-    const tc = TypeContext.root(model!, { formSize: "ExtraSmall" });
+    const tc = TypeContext.root(model!, { formSize: "xs" });
 
     return (
       <div>

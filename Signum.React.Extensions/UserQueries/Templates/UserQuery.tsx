@@ -20,7 +20,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
   const query = p.ctx.value.query;
   const ctx = p.ctx;
   const ctx4 = ctx.subCtx({ labelColumns: 4 });
-  const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
+  const ctxxs = ctx.subCtx({ formSize: "xs" });
 
   const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
 

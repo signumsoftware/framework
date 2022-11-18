@@ -22,7 +22,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
 
   function renderQueryPart() {
     const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
-    const ecXs = ec.subCtx({ formSize: "ExtraSmall" });
+    const ecXs = ec.subCtx({ formSize: "xs" });
     var canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
     return (
       <div>
