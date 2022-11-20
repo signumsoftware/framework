@@ -29,7 +29,7 @@ export class CustomRenderer extends BpmnRenderer {
     var ct = this.getConnectionType(element);
     var ds = this.getDecisionStyle(element);
 
-    if (ct && ct != "md")
+    if (ct && ct != "Normal")
       result.style.setProperty('stroke',
         ct == "Jump" ? "blue" :
           ct == "ScriptException" ? "magenta" :

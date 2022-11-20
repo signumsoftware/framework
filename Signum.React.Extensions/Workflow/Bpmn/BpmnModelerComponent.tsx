@@ -243,7 +243,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
       return WorkflowConnectionModel.New({
         name: elementName,
         mainEntityType: mainEntityType,
-        type: "md",
+        type: "Normal",
       });
 
     throw new Error("Impossible to create new Model: Unexpected " + elementType);
