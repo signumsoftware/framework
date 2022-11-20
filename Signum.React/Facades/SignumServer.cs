@@ -214,5 +214,5 @@ public class EmbeddedPropertyRouteAttribute<T> : EmbeddedPropertyRouteAttributeB
 
 public interface IEmbeddedPropertyRouteResolver
 {
-    PropertyRoute GetPropertyRoute(EmbeddedEntity embedde, FilterContext filterContext);
+    PropertyRoute GetPropertyRoute(EmbeddedEntity embedded, FilterContext filterContext);
 }
