@@ -243,13 +243,13 @@ public class WorkflowNodeGraph
                 {
                     var parentActivity = Activities.Values.Where(a => a.BoundaryTimers.Contains(e)).SingleEx();
                     if (string.IsNullOrWhiteSpace(e.DecisionOptionName) && parentActivity.Type == WorkflowActivityType.Decision)
-                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHave2BecauseActivityIs3.NiceToString(e, parentActivity, e.NicePropertyName(a => a.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
+                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHave2BecauseActivityIs3.NiceToString(e, parentActivity, Entity.NicePropertyName(()=> e.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
 
                     if (!string.IsNullOrWhiteSpace(e.DecisionOptionName) && parentActivity.Type != WorkflowActivityType.Decision)
-                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1CanNotHave2BecauseActivityIsNot3.NiceToString(e, parentActivity, e.NicePropertyName(a => a.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
+                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1CanNotHave2BecauseActivityIsNot3.NiceToString(e, parentActivity, Entity.NicePropertyName(() => e.DecisionOptionName), WorkflowActivityType.Decision.NiceToString()));
 
                     if (!string.IsNullOrWhiteSpace(e.DecisionOptionName) && !parentActivity.DecisionOptions.Any(a => a.Name == e.DecisionOptionName))
-                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1HasInvalid23.NiceToString(e, parentActivity, e.NicePropertyName(a => a.DecisionOptionName), e.DecisionOptionName));
+                        issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1HasInvalid23.NiceToString(e, parentActivity, Entity.NicePropertyName(() => e.DecisionOptionName), e.DecisionOptionName));
                 }
             }
         });
