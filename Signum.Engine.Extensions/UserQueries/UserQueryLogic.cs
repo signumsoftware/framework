@@ -6,6 +6,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Workflow;
 
 namespace Signum.Engine.UserQueries;
 
@@ -43,6 +44,8 @@ public static class UserQueryLogic
                     uq.EntityType,
                     uq.Owner,
                 });
+
+            AuthLogic.HasRuleOverridesEvent += role => Database.Query<UserQueryEntity>().Any(a => a.Owner.Is(role));
 
             sb.Schema.EntityEvents<UserQueryEntity>().Retrieved += UserQueryLogic_Retrieved;
 

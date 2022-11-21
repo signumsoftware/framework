@@ -38,6 +38,8 @@ public static class UserChartLogic
                     uq.Owner,
                 });
 
+            AuthLogic.HasRuleOverridesEvent += role => Database.Query<UserChartEntity>().Any(a => a.Owner.Is(role));
+
             sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
 
             sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>

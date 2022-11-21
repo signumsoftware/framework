@@ -213,21 +213,30 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         if (ctx is DirectoryServiceAutoCreateUserContext ds)
         {
             var groups = ds.GetUserPrincipal().GetGroups(ds.PrincipalContext).ToList();
-            var role = config.RoleMapping.FirstOrDefault(m =>
+            var roles = config.RoleMapping.Where(m =>
             {
                 Guid.TryParse(m.ADNameOrGuid, out var guid);
                 var found = groups.Any(g => g.Name == m.ADNameOrGuid || g.Guid == guid);
-       
+
                 return found;
-            })?.Role ?? config.DefaultRole;
+            }).Select(a=>a.Role).Distinct().NotNull().ToList();
 
-            if (role != null)
-                return role;
+            if (roles.Any())
+            {
+                var result = AuthLogic.GetOrCreateTrivialMergeRole(roles);
 
-            if (throwIfNull)
-                throw new InvalidOperationException("No Default Role set and no matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Name, "\r\n"));
+                return result;
+            }
             else
-                return null;
+            {
+                if (config.DefaultRole != null)
+                    return config.DefaultRole;
+
+                if (throwIfNull)
+                    throw new InvalidOperationException("No Default Role set and no matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Name, "\r\n"));
+                else
+                    return null;
+            }
         }
         else
         {

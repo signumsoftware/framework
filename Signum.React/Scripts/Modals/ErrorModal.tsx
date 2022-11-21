@@ -115,7 +115,7 @@ function logError(error: Error) {
 
   var errorModel = ClientErrorModel.New({
     errorType: (error as Object).constructor.name,
-    message: error.message ?? error.toString(),
+    message: error.message || error.toString(),
     stack: error.stack ?? null,
     name: error.name,
   });
@@ -137,11 +137,7 @@ function logError(error: Error) {
   lastError = { model: errorModel, date: date };
   ajaxPost({ url: "~/api/registerClientError" }, errorModel)
     .catch(e => {
-      if (Modals.isStarted()) {
-        ErrorModal.showErrorModal(error);
-      }
-      else
-        console.error("Unable to save client-side error:", error);
+      console.error("Unable to save client-side error:", error, e);
     });
 }
 
@@ -263,7 +259,7 @@ export function RenderMessageDefault(p: { error: any }) {
   const e = p.error;
   return (
     <div>
-      {textDanger(e.message ? e.message : e)}
+      {textDanger(e.message ? e.message : e.toString())}
     </div>
   );
 }
