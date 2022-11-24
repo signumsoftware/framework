@@ -56,28 +56,28 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
                     e.Session = new BigStringEmbedded();
                     ApplyMixins?.Invoke(context, e);
                 });
+            }
 
-                if (ExpectsJsonResult(context))
+            if (ExpectsJsonResult(context))
+            {
+                var statusCode = GetStatus(context.Exception.GetType());
+                var error = CustomHttpErrorFactory(context.Exception);
+
+                var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
+
+                using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
                 {
-                    var statusCode = GetStatus(context.Exception.GetType());
-                    var error = CustomHttpErrorFactory(context.Exception);
+                    var response = context.HttpContext.Response;
+                    response.StatusCode = (int)statusCode;
+                    response.ContentType = "application/json";
 
-                    var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
+                    var userWithClaims = (UserWithClaims?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key];
 
-                    using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
+                    using (UserHolder.Current == null && userWithClaims != null ? UserHolder.UserSession(userWithClaims) : null)
                     {
-                        var response = context.HttpContext.Response;
-                        response.StatusCode = (int)statusCode;
-                        response.ContentType = "application/json";
-
-                        var userWithClaims = (UserWithClaims?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key];
-
-                        using (UserHolder.Current == null && userWithClaims != null ? UserHolder.UserSession(userWithClaims) : null)
-                        {
-                            await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
-                        }
-                        context.ExceptionHandled = true;
+                        await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
                     }
+                    context.ExceptionHandled = true;
                 }
             }
         }
