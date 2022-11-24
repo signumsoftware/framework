@@ -1241,7 +1241,15 @@ export class Type<T extends ModifiableEntity> implements IType {
     public typeName: string) { }
 
   tryTypeInfo(): TypeInfo | undefined {
-    return tryGetTypeInfo(this.typeName);
+    var result = tryGetTypeInfo(this.typeName);
+
+    if (result == null && this.typeName.endsWith("Embedded")) 
+      throw new Error(`Type ${this.typeName} has no TypeInfo because is an EmbeddedEntity. 
+Start from the main Entity Type containing the embedded entity, like: MyEntity.propertyRoute(m => m.myEmbedded.someProperty).
+In case of a collection of embedded entities, use something like: MyEntity.propertyRoute(m => m.myCollection[0].element.someProperty)`);
+
+    return result;
+
   }
 
   typeInfo(): TypeInfo {
@@ -1249,7 +1257,7 @@ export class Type<T extends ModifiableEntity> implements IType {
     const result = this.tryTypeInfo();
 
     if (!result)
-      throw new Error(`Type ${this.typeName} has no TypeInfo. \nNote: If is an EmbeddedEntity, start from some main Entity Type containing it to get metadata for the embedded properties (example: MyEntity.propertyRoute(m => m.myEmbedded.someProperty)`);
+      throw new Error(`Type ${this.typeName} has no TypeInfo.`);
 
     return result;
   }
