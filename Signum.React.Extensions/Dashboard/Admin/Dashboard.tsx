@@ -64,7 +64,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   var colors = ["#DFFF00", "#FFBF00", "#FF7F50", "#DE3163", "#9FE2BF", "#40E0D0", "#6495ED", "#CCCCFF"]
 
   function renderPart(tc: TypeContext<PanelPartEmbedded>) {
-    const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "ExtraSmall", placeholderLabels: true });
+    const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "xs", placeholderLabels: true });
 
     var icon = parseIcon(tc.value.iconName);
 
@@ -177,7 +177,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           </div>
         </Tab>
         <Tab title={ctxBasic.niceName(a => a.tokenEquivalencesGroups)} eventKey="equivalences">
-          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "ExtraSmall" })} avoidFieldSet getComponent={(ctxGr: TypeContext<TokenEquivalenceGroupEntity>) => 
+          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "xs" })} avoidFieldSet getComponent={(ctxGr: TypeContext<TokenEquivalenceGroupEntity>) => 
             <div>
               <ValueLine ctx={ctxGr.subCtx(pp => pp.interactionGroup)}
                 onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />

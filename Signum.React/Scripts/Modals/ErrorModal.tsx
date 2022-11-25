@@ -110,6 +110,9 @@ function logError(error: Error) {
   if (error instanceof ServiceError || error instanceof ValidationError)
     return; 
 
+  if (error instanceof DOMException && error.name == "AbortError")
+    return;
+
   var errorModel = ClientErrorModel.New({
     errorType: (error as Object).constructor.name,
     message: error.message || error.toString(),

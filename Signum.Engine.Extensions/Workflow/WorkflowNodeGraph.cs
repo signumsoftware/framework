@@ -379,7 +379,7 @@ public class WorkflowNodeGraph
             }
             else if (prev is WorkflowActivityEntity act && IsSplitActivity(act) ||
                 prev is WorkflowEventEntity we && we.Type == WorkflowEventType.BoundaryInterruptingTimer &&
-                IsSplitActivity(this.Activities.GetOrThrow(we.BoundaryOf!)))
+                IsSplitActivity( this.Activities.GetOrThrow(we.BoundaryOf!)))
             {
                 if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
                     newTrackId = prevTrackId;
@@ -392,7 +392,7 @@ public class WorkflowNodeGraph
                         .Concat(activity.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer).SelectMany(we => NextConnections(we)))
                         .Select(c => TrackId.TryGetS(c.To))
                         .Where(c => c != null)
-                        .Distinct()
+                        .Distinct()  
                         .SingleOrDefaultEx();
 
                     if (mainTrackId.HasValue)
@@ -490,7 +490,7 @@ public class WorkflowNodeGraph
                     issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1CanNotHaveConnectionsOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
             }
 
-            if (wa.Type == WorkflowActivityType.Decision)
+            if(wa.Type == WorkflowActivityType.Decision)
             {
                 foreach (var item in wa.DecisionOptions)
                 {
@@ -538,7 +538,7 @@ public class WorkflowNodeGraph
     }
 }
 
-
+  
 
 public class WorkflowIssue
 {
