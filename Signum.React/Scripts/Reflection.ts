@@ -1438,7 +1438,8 @@ export class QueryTokenString<T> {
    * @param lambdaToProperty for a typed lambda like a => a.name will append "Name" to the QueryTokenString
    */
   append<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + tokenSequence(lambdaToProperty, !this.token));
+    var seq = tokenSequence(lambdaToProperty, !this.token);
+    return new QueryTokenString<S>(this.token + (this.token && seq ? "." : "") + seq);
   }
 
   mixin<M extends MixinEntity>(t: Type<M>): QueryTokenString<M> {
