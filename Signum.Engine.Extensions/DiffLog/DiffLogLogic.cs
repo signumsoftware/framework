@@ -79,7 +79,7 @@ public static class DiffLogLogic
 
             using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
             {
-                log.Mixin<DiffLogMixin>().InitialState = new BigStringEmbedded(entity.Dump());
+                log.Mixin<DiffLogMixin>().InitialState = new BigStringEmbedded(ObjectDumper.Dump(entity));
             }
         }
         else
@@ -95,7 +95,7 @@ public static class DiffLogLogic
             {
                 using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
                 {
-                    log.Mixin<DiffLogMixin>().FinalState = new BigStringEmbedded(target.Dump());
+                    log.Mixin<DiffLogMixin>().FinalState = new BigStringEmbedded(ObjectDumper.Dump(target));
                 }
             }
             else

@@ -108,6 +108,7 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
           orderOptions: [{ token: ProcessEntity.token(e => e.creationDate), orderType: "Descending" }],
           pagination: { elementsPerPage: 10, mode: "Firsts" }
         }}
+          deps={[tick]}
         />
       </div>
     </div>
