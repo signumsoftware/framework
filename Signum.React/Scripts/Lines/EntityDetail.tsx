@@ -60,6 +60,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
           <label className="lead">
             {renderCheckBox()}
             {p.label} {renderType()}
+            {p.extraButtonsAfter && p.extraButtonsAfter(c)}
           </label>
           :
           <div className="lead">
@@ -81,6 +82,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
           <label>
             {renderCheckBox()}
             {p.label} {renderType()}
+            {p.extraButtonsAfter && p.extraButtonsAfter(c)}
           </label>
           :
           <div>
