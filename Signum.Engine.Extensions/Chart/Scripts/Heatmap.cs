@@ -27,7 +27,7 @@ public class HeatmapChartScript : ChartScript
             },
             new ChartScriptParameterGroup("Color Gradient")
             {
-                new ChartScriptParameter("ColorGradient", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Default|Blue-Red|Purple-Blue|Orange-Red|Fire|Emerald|Cobalt|Purples|Greys") },
+                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             }
         };
     }      

@@ -5,9 +5,9 @@ import { is } from '@framework/Signum.Entities'
 import { ValueLine, ValueLineProps, OptionItem } from '@framework/Lines'
 import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartParameterEmbedded, ChartRequestModel } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
-import * as ChartPaletteClient from '../ChartPalette/ChartPaletteClient'
 import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
 import { ChartColumn } from './ChartColumn'
+import * as  ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { UserState } from '../../Authorization/Signum.Entities.Authorization'
 
@@ -24,7 +24,6 @@ export interface ChartBuilderProps {
 export default function ChartBuilder(p: ChartBuilderProps) {
   const forceUpdate = useForceUpdate();
 
-  const colorPalettes = useAPI(signal => ChartPaletteClient.getColorPaletteTypes(), []);
   const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);
 
   function chartTypeImgClass(script: ChartScript): string {
@@ -115,11 +114,11 @@ export default function ChartBuilder(p: ChartBuilderProps) {
                 </tr>
               </thead>
               <tbody>
-                {chartScript && colorPalettes && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "xs" })).map((ctx, i) =>
+                {chartScript && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "xs" })).map((ctx, i) =>
                   <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
                     queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}
                     onRedraw={handleOnRedraw}
-                    onOrderChanged={handleOrderChart} colorPalettes={colorPalettes!} columnIndex={i} parameterDic={parameterDic} />)
+                    onOrderChanged={handleOrderChart} columnIndex={i} parameterDic={parameterDic} />)
                 }
               </tbody>
             </table>

@@ -131,9 +131,8 @@ public static class ChartUtils
                             Name = sp.Name,
                             parentChart = chart,
                             ScriptParameter = sp,
+                            Value = sp.ValueDefinition.DefaultValue(sp.GetToken(chart))
                         };
-
-                        cp.Value = sp.ValueDefinition.DefaultValue(sp.GetToken(chart));
                     }
 
                     chart.Parameters.Add(cp);

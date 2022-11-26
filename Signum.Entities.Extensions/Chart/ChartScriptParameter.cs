@@ -48,6 +48,8 @@ public class ChartScriptParameterGroup : IEnumerable<ChartScriptParameter>
     }
 }
 
+
+
 public class ChartScriptParameter
 {
     public ChartScriptParameter(string name, ChartParameterType type)
@@ -144,6 +146,32 @@ public class NumberInterval : IChartParameterValueDefinition
     string IChartParameterValueDefinition.DefaultValue(QueryToken? token)
     {
         return DefaultValue?.ToString(CultureInfo.InvariantCulture) ?? "";
+    }
+}
+
+public enum SpecialParameterType
+{
+    ColorCategory,
+    ColorInterpolate,
+}
+
+public class SpecialParameter : IChartParameterValueDefinition
+{
+    public SpecialParameterType SpecialParameterType { get;  }
+
+    public SpecialParameter(SpecialParameterType specialParameterType)
+    {
+        SpecialParameterType = specialParameterType;
+    }
+
+    public string DefaultValue(QueryToken? token)
+    {
+        return "";
+    }
+
+    public string? Validate(string? parameter, QueryToken? token)
+    {
+        return null;
     }
 }
 
@@ -252,14 +280,6 @@ public class EnumValue
     public bool CompatibleWith(QueryToken? token)
     {
         return TypeFilter == null || token != null && ChartUtils.IsChartColumnType(token, TypeFilter.Value);
-    }
-
-    internal string ToCode()
-    {
-        if (this.TypeFilter.HasValue)
-            return $@"new EnumValue(""{ this.Name }"", ChartColumnType.{this.TypeFilter.Value})";
-        else
-            return $@"new EnumValue(""{ this.Name }"")";
     }
 }
 

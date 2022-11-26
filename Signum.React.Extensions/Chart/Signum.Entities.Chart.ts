@@ -27,13 +27,6 @@ export interface ChartScriptParameterEmbedded {
 
 export type IChartBase = ChartRequestModel | UserChartEntity;
 
-export const ChartColorEntity = new Type<ChartColorEntity>("ChartColor");
-export interface ChartColorEntity extends Entities.Entity {
-  Type: "ChartColor";
-  related: Entities.Lite<Entities.Entity>;
-  color: string;
-}
-
 export const ChartColumnEmbedded = new Type<ChartColumnEmbedded>("ChartColumnEmbedded");
 export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartColumnEmbedded";
@@ -103,13 +96,6 @@ export module ChartMessage {
   export const QueryResultReachedMaxRows0 = new MessageKey("ChartMessage", "QueryResultReachedMaxRows0");
 }
 
-export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");
-export interface ChartPaletteModel extends Entities.ModelEntity {
-  Type: "ChartPaletteModel";
-  typeName: string;
-  colors: Entities.MList<ChartColorEntity>;
-}
-
 export const ChartParameterEmbedded = new Type<ChartParameterEmbedded>("ChartParameterEmbedded");
 export interface ChartParameterEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartParameterEmbedded";
@@ -141,6 +127,20 @@ export interface ChartScriptSymbol extends Entities.Symbol {
   Type: "ChartScript";
 }
 
+export const ColorPaletteEntity = new Type<ColorPaletteEntity>("ColorPalette");
+export interface ColorPaletteEntity extends Entities.Entity {
+  Type: "ColorPalette";
+  type: Basics.TypeEntity;
+  categoryName: string;
+  seed: number;
+  specificColors: Entities.MList<SpecificColorEmbedded>;
+}
+
+export module ColorPaletteOperation {
+  export const Save : Entities.ExecuteSymbol<ColorPaletteEntity> = registerSymbol("Operation", "ColorPaletteOperation.Save");
+  export const Delete : Entities.DeleteSymbol<ColorPaletteEntity> = registerSymbol("Operation", "ColorPaletteOperation.Delete");
+}
+
 export module D3ChartScript {
   export const Bars : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Bars");
   export const Columns : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Columns");
@@ -168,6 +168,13 @@ export module GoogleMapsChartScript {
 
 export module HtmlChartScript {
   export const PivotTable : ChartScriptSymbol = registerSymbol("ChartScript", "HtmlChartScript.PivotTable");
+}
+
+export const SpecificColorEmbedded = new Type<SpecificColorEmbedded>("SpecificColorEmbedded");
+export interface SpecificColorEmbedded extends Entities.Entity {
+  Type: "SpecificColorEmbedded";
+  entity: Entities.Lite<Entities.Entity>;
+  color: string;
 }
 
 export module SvgMapsChartScript {

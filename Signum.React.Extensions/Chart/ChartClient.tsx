@@ -18,7 +18,7 @@ import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
-import * as ChartPaletteClient from './ChartPalette/ChartPaletteClient'
+import * as ColorPaletteClient from './ColorPalette/ColorPaletteClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
 import { toLuxonFormat } from '@framework/Reflection';
@@ -30,7 +30,7 @@ import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
 import { softCast } from '../../Signum.React/Scripts/Globals';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
-
+  
   options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
 
   AppContext.clearSettingsActions.push(ButtonBarChart.clearOnButtonBarElements);
@@ -45,7 +45,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   });
 
   UserChartClient.start({ routes: options.routes });
-  ChartPaletteClient.start({ routes: options.routes });
+  ColorPaletteClient.start({ routes: options.routes });
 
   registerChartScriptComponent(D3ChartScript.Bars, () => import("./D3Scripts/Bars"));
   registerChartScriptComponent(D3ChartScript.BubblePack, () => import("./D3Scripts/BubblePack"));
@@ -615,7 +615,7 @@ export module API {
     return v => String(v);
   }
 
-  export function getColor(token: QueryToken, palettes: { [type: string] : ChartPaletteClient.ColorPalette | null }): ((val: unknown) => string | null) {
+  export function getColor(token: QueryToken, palettes: { [type: string]: ColorPaletteClient.ColorPalette | null }): ((val: unknown) => string | null) {
 
     var tis = tryGetTypeInfos(token.type);
 
@@ -626,7 +626,7 @@ export module API {
           return "#555";
 
         var cp = palettes[typeName];
-        return cp && cp[v as string] || null;
+        return cp && cp.getColor(v as string) || null;
       }
     }
 
@@ -635,8 +635,10 @@ export module API {
         if (v == null)
           return "#555";
 
-        var cp = palettes[(v as Lite<Entity>).EntityType];
-        return cp && cp[(v as Lite<Entity>).id!] || null;
+        var lite = (v as Lite<Entity>);
+
+        var cp = palettes[lite.EntityType];
+        return cp && cp.getColor(lite.id!.toString()) || null;
       };
     }
 
@@ -705,7 +707,7 @@ export module API {
     return request.parameters.toObject(a => a.element.name!, a => a.element.value ?? defaultValues[a.element.name!])
   }
 
-  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript, palettes: { [type: string]: ChartPaletteClient.ColorPalette | null }): ExecuteChartResult {
+  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript, palettes: { [type: string]: ColorPaletteClient.ColorPalette | null }): ExecuteChartResult {
 
     var cols = request.columns.map((mle, i) => {
       const token = mle.element.token && mle.element.token.token;
@@ -811,7 +813,7 @@ export module API {
       .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
   }
 
-  export function getPalletes(request: ChartRequestModel): Promise<{ [type: string]: ChartPaletteClient.ColorPalette | null }> {
+  export function getPalletes(request: ChartRequestModel): Promise<{ [type: string]: ColorPaletteClient.ColorPalette | null }> {
     var allTypes = request.columns
       .map(c => c.element.token)
       .notNull()
@@ -821,7 +823,7 @@ export module API {
       .notNull()
       .distinctBy(a => a.name);
 
-    var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
+    var palettesPromise = Promise.all(allTypes.map(ti => ColorPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
       .then(list => list.toObject(a => a.type, a => a.palette));
 
     return palettesPromise;
