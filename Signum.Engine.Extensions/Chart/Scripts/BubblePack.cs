@@ -39,11 +39,11 @@ public class BubblePackChartScript : ChartScript
             new ChartScriptParameterGroup("Color Scale")
             {
                 new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) {  ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
             new ChartScriptParameterGroup("Color Category")
             {
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Enum) { ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) { ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             },
         };
     }      

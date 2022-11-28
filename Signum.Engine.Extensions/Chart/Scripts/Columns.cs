@@ -32,7 +32,7 @@ public class ColumnsChartScript : ChartScript
             },
             new ChartScriptParameterGroup("Color")
             {
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Enum) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
                 new ChartScriptParameter("ForceColor", ChartParameterType.String) {  ValueDefinition = new StringValue("") },
             }
         };

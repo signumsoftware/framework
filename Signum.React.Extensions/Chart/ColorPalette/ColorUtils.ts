@@ -1,105 +1,163 @@
+import a from "bpmn-js/lib/features/search";
 import * as d3 from "d3"
 import * as d3sc from "d3-scale-chromatic";
 import { MemoRepository } from "../D3Scripts/Components/ReactChart";
 
-interface InterpolatorGroup {
-  categoryName: string;
-  interpolators: Interpolator[]
-}
 
 interface Interpolator {
+  categoryName: string;
   name: string;
   interpolate: (value: number) => string;
 }
 
-export const colorInterpolatorGroups: InterpolatorGroup[] = [
-  {
-    categoryName: "Diverging",
-    interpolators: [
-      { name: "BrBG", interpolate: d3sc.interpolateBrBG },
-      { name: "PRGn", interpolate: d3sc.interpolatePRGn },
-      { name: "PiYG", interpolate: d3sc.interpolatePiYG },
-      { name: "PuOr", interpolate: d3sc.interpolatePuOr },
-      { name: "RdBu", interpolate: d3sc.interpolateRdBu },
-      { name: "RdGy", interpolate: d3sc.interpolateRdGy },
-      { name: "RdYlBu", interpolate: d3sc.interpolateRdYlBu },
-      { name: "RdYlGn", interpolate: d3sc.interpolateRdYlGn },
-      { name: "Spectral", interpolate: d3sc.interpolateSpectral },
-    ]
-  },
-  {
-    categoryName: "Single Hue",
-    interpolators: [
-      { name: "Blues", interpolate: d3sc.interpolateBlues },
-      { name: "Greens", interpolate: d3sc.interpolateGreens },
-      { name: "Greys", interpolate: d3sc.interpolateGreys },
-      { name: "Oranges", interpolate: d3sc.interpolateOranges },
-      { name: "Purples", interpolate: d3sc.interpolatePurples },
-      { name: "Reds", interpolate: d3sc.interpolateReds },
-    ]
-  },
-  {
-    categoryName: "Multi-Hue",
-    interpolators: [
-      { name: "Turbo", interpolate: d3sc.interpolateTurbo },
-      { name: "Viridis", interpolate: d3sc.interpolateViridis },
-      { name: "Inferno", interpolate: d3sc.interpolateInferno },
-      { name: "Magma", interpolate: d3sc.interpolateMagma },
-      { name: "Plasma", interpolate: d3sc.interpolatePlasma },
-      { name: "Cividis", interpolate: d3sc.interpolateCividis },
-      { name: "Warm", interpolate: d3sc.interpolateWarm },
-      { name: "Cool", interpolate: d3sc.interpolateCool },
-      { name: "CubehelixDefault", interpolate: d3sc.interpolateCubehelixDefault },
-
-      { name: "BuGn", interpolate: d3sc.interpolateBuGn },
-      { name: "BuPu", interpolate: d3sc.interpolateBuPu },
-      { name: "GnBu", interpolate: d3sc.interpolateGnBu },
-      { name: "OrRd", interpolate: d3sc.interpolateOrRd },
-      { name: "PuBuGn", interpolate: d3sc.interpolatePuBuGn },
-      { name: "PuBu", interpolate: d3sc.interpolatePuBu },
-      { name: "PuRd", interpolate: d3sc.interpolatePuRd },
-      { name: "RdPu", interpolate: d3sc.interpolateRdPu },
-      { name: "YlGnBu", interpolate: d3sc.interpolateYlGnBu },
-      { name: "YlGn", interpolate: d3sc.interpolateTurbo },
-      { name: "YlOrBr", interpolate: d3sc.interpolateYlOrBr },
-      { name: "YlOrRd", interpolate: d3sc.interpolateYlOrRd },
-    ]
-  },
-  {
-    categoryName: "Cyclical",
-    interpolators: [
-      { name: "Rainbow", interpolate: d3sc.interpolateRainbow },
-      { name: "Sidebow", interpolate: d3sc.interpolateSinebow },
-    ]
-  }
-];
-
-export let allInterpolators: undefined | { [key: string]: Interpolator } = undefined;
-
 //https://github.com/d3/d3-scale-chromatic
+export const colorInterpolators: { [name: string]: Interpolator } = [
+  { categoryName: "Diverging", name: "BrBG", interpolate: d3sc.interpolateBrBG },
+  { categoryName: "Diverging", name: "PRGn", interpolate: d3sc.interpolatePRGn },
+  { categoryName: "Diverging", name: "PiYG", interpolate: d3sc.interpolatePiYG },
+  { categoryName: "Diverging", name: "PuOr", interpolate: d3sc.interpolatePuOr },
+  { categoryName: "Diverging", name: "RdBu", interpolate: d3sc.interpolateRdBu },
+  { categoryName: "Diverging", name: "RdGy", interpolate: d3sc.interpolateRdGy },
+  { categoryName: "Diverging", name: "RdYlBu", interpolate: d3sc.interpolateRdYlBu },
+  { categoryName: "Diverging", name: "RdYlGn", interpolate: d3sc.interpolateRdYlGn },
+  { categoryName: "Diverging", name: "Spectral", interpolate: d3sc.interpolateSpectral },
+
+  { categoryName: "Single Hue", name: "Blues", interpolate: d3sc.interpolateBlues },
+  { categoryName: "Single Hue", name: "Greens", interpolate: d3sc.interpolateGreens },
+  { categoryName: "Single Hue", name: "Greys", interpolate: d3sc.interpolateGreys },
+  { categoryName: "Single Hue", name: "Oranges", interpolate: d3sc.interpolateOranges },
+  { categoryName: "Single Hue", name: "Purples", interpolate: d3sc.interpolatePurples },
+  { categoryName: "Single Hue", name: "Reds", interpolate: d3sc.interpolateReds },
+
+  { categoryName: "Multi-Hue", name: "Turbo", interpolate: d3sc.interpolateTurbo },
+  { categoryName: "Multi-Hue", name: "Viridis", interpolate: d3sc.interpolateViridis },
+  { categoryName: "Multi-Hue", name: "Inferno", interpolate: d3sc.interpolateInferno },
+  { categoryName: "Multi-Hue", name: "Magma", interpolate: d3sc.interpolateMagma },
+  { categoryName: "Multi-Hue", name: "Plasma", interpolate: d3sc.interpolatePlasma },
+  { categoryName: "Multi-Hue", name: "Cividis", interpolate: d3sc.interpolateCividis },
+  { categoryName: "Multi-Hue", name: "Warm", interpolate: d3sc.interpolateWarm },
+  { categoryName: "Multi-Hue", name: "Cool", interpolate: d3sc.interpolateCool },
+  { categoryName: "Multi-Hue", name: "CubehelixDefault", interpolate: d3sc.interpolateCubehelixDefault },
+
+  { categoryName: "Multi-Hue", name: "BuGn", interpolate: d3sc.interpolateBuGn },
+  { categoryName: "Multi-Hue", name: "BuPu", interpolate: d3sc.interpolateBuPu },
+  { categoryName: "Multi-Hue", name: "GnBu", interpolate: d3sc.interpolateGnBu },
+  { categoryName: "Multi-Hue", name: "OrRd", interpolate: d3sc.interpolateOrRd },
+  { categoryName: "Multi-Hue", name: "PuBuGn", interpolate: d3sc.interpolatePuBuGn },
+  { categoryName: "Multi-Hue", name: "PuBu", interpolate: d3sc.interpolatePuBu },
+  { categoryName: "Multi-Hue", name: "PuRd", interpolate: d3sc.interpolatePuRd },
+  { categoryName: "Multi-Hue", name: "RdPu", interpolate: d3sc.interpolateRdPu },
+  { categoryName: "Multi-Hue", name: "YlGnBu", interpolate: d3sc.interpolateYlGnBu },
+  { categoryName: "Multi-Hue", name: "YlGn", interpolate: d3sc.interpolateTurbo },
+  { categoryName: "Multi-Hue", name: "YlOrBr", interpolate: d3sc.interpolateYlOrBr },
+  { categoryName: "Multi-Hue", name: "YlOrRd", interpolate: d3sc.interpolateYlOrRd },
+
+  { categoryName: "Cyclical", name: "Rainbow", interpolate: d3sc.interpolateRainbow },
+  { categoryName: "Cyclical", name: "Sidebow", interpolate: d3sc.interpolateSinebow },
+].toObject(a => a.name);
+
+
 export function getColorInterpolation(interpolationName: string | undefined | null): ((value: number) => string) | undefined {
 
-  if (allInterpolators == null)
-    allInterpolators = colorInterpolatorGroups.flatMap(a => a.interpolators).toObject(a => a.name);
+  if (interpolationName == null)
+    return undefined;
 
+  var inver = interpolationName.startsWith("-");
 
-  return interpolationName ? allInterpolators[interpolationName]?.interpolate : undefined;
+  if (inver)
+    interpolationName = interpolationName.after("-");
+
+  var interp = colorInterpolators[interpolationName]?.interpolate;
+
+  if (inver)
+    return val => interp(1 - val);
+
+  return interp;
 }
+
+
+
 
 
 //https://fluentcolors.com/
 export const fluentColors: ReadonlyArray<string> = [
-  "#FFB900", "#E74856", "#0078D7", "#0099BC", "#7A7574", "#767676", "#FF8C00", "#E81123", "#0063B1", "#2D7D9A", "#5D5A58", "#4C4A48", "#F7630C", "#EA005E",
-  "#8E8CD8", "#00B7C3", "#68768A", "#69797E", "#CA5010", "#C30052", "#6B69D6", "#038387", "#515C6B", "#4A5459", "#DA3B01", "#E3008C", "#8764B8", "#00B294",
-  "#567C73", "#647C64", "#EF6950", "#BF0077", "#744DA9", "#018574", "#486860", "#525E54", "#D13438", "#C239B3", "#B146C2", "#00CC6A", "#498205", "#847545",
-  "#FF4343", "#9A0089", "#881798", "#10893E", "#107C10", "#7E735F"
+  "#FFB900", 
+  "#FF8C00", 
+  "#F7630C", 
+  "#CA5010", 
+  "#DA3B01", 
+  "#EF6950", 
+  "#D13438", 
+  "#FF4343", 
+  "#E74856", 
+  "#E81123", 
+  "#EA005E", 
+  "#C30052", 
+  "#E3008C", 
+  "#BF0077", 
+  "#C239B3", 
+  "#9A0089", 
+  "#0078D7", 
+  "#0063B1", 
+  "#8E8CD8", 
+  "#6B69D6", 
+  "#8764B8", 
+  "#744DA9", 
+  "#B146C2", 
+  "#881798", 
+  "#0099BC", 
+  "#2D7D9A", 
+  "#00B7C3", 
+  "#038387", 
+  "#00B294", 
+  "#018574", 
+  "#00CC6A", 
+  "#10893E", 
+  "#7A7574", 
+  "#5D5A58", 
+  "#68768A", 
+  "#515C6B", 
+  "#567C73", 
+  "#486860", 
+  "#498205", 
+  "#107C10", 
+  "#767676",
+  "#4C4A48",
+  "#69797E",
+  "#4A5459",
+  "#647C64",
+  "#525E54",
+  "#847545",
+  "#7E735F",
 ];
 
 //https://materialui.co/flatuicolors/
 export const flatUIColors: ReadonlyArray<string> = [
 
-  "#1ABC9C", "#2ECC71", "#3498DB", "#9B59B6", "#34495E", "#16A085", "#27AE60", "#2980B9", "#8E44AD", "#2C3E50", "#F1C40F", "#E67E22", "#E74C3C", "#ECF0F1",
-  "#95A5A6", "#F39C12", "#D35400", "#C0392B", "#BDC3C7", "#7F8C8D"
+  "#F1C40F",
+  "#F39C12",
+  "#E67E22", 
+  "#D35400",
+  "#E74C3C",
+  "#C0392B",
+
+  "#9B59B6",
+  "#8E44AD",
+
+  "#3498DB",
+  "#2980B9",
+
+  "#1ABC9C",
+  "#16A085",
+  "#2ECC71",
+  "#27AE60", 
+
+  "#ECF0F1",
+  "#BDC3C7",
+  "#34495E",
+  "#2C3E50",
+  "#95A5A6",
+  "#7F8C8D"
 ];
 
 //https://materialui.co/metrocolors/

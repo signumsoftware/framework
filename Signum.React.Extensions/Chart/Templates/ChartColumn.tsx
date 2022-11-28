@@ -199,7 +199,10 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps) {
   return (
     <FormGroup ctx={p.ctx}
       label={ChartMessage.ColorsFor0.niceToString(p.type.niceName)}>
-      {palette === null ? JavascriptMessage.loading.niceToString() :
+      {palette === undefined ?
+        <span className={p.ctx.formControlPlainTextClass}>
+          {JavascriptMessage.loading.niceToString()}
+        </span> :
         <a href="#" className={p.ctx.formControlPlainTextClass} onClick={e => {
           e.preventDefault();
           if (palette)

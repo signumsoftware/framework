@@ -20,6 +20,7 @@ public static class ColorPaletteLogic
                 .WithQuery(() => cc => new
                 {
                     Entity = cc,
+                    cc.Id,
                     cc.Type,
                     cc.CategoryName,
                     cc.Seed,

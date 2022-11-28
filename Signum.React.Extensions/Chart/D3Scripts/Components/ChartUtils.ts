@@ -9,6 +9,7 @@ import { ChartRequestModel } from "../../Signum.Entities.Chart";
 import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken, FilterConditionOption } from "@framework/FindOptions";
 import { MemoRepository } from "./ReactChart";
 import * as ColorUtils from "../../ColorPalette/ColorUtils"
+import { colorInterpolators } from "../../ColorPalette/ColorUtils"
 
 
 
@@ -441,7 +442,8 @@ export function colorCategory(parameters: { [name: string]: string }, domain: st
 }
 
 export function getColorInterpolation(interpolationName: string | undefined | null): ((value: number) => string) | undefined {
-  return ColorUtils.getColorInterpolation(interpolationName)
+
+  return ColorUtils.getColorInterpolation(interpolationName);
 }
 
 

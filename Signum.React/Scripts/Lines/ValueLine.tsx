@@ -344,7 +344,10 @@ function internalDropDownList(vl: ValueLineController) {
       vl.setValue(e.value);
     };
 
-    var oi = optionItems.single(a => a.value == s.ctx.value);
+    var oi = optionItems.singleOrNull(a => a.value == s.ctx.value) ?? {
+      value: s.ctx.value,
+      label: s.ctx.value,
+    };
 
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>

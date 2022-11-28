@@ -27,7 +27,7 @@ public class HeatmapChartScript : ChartScript
             },
             new ChartScriptParameterGroup("Color Gradient")
             {
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             }
         };
     }      

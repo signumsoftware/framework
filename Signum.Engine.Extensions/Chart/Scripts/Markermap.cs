@@ -38,8 +38,8 @@ public class MarkermapChartScript : ChartScript
             new ChartScriptParameterGroup()
             {
                 new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 6,  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter("ColorInterpolation", ChartParameterType.Enum) {  ColumnIndex = 6, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Enum) {  ColumnIndex = 7, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory)}
+                new ChartScriptParameter("ColorInterpolation", ChartParameterType.Special) {  ColumnIndex = 6, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ColumnIndex = 7, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory)}
             },
             new ChartScriptParameterGroup("Zoom")
             {

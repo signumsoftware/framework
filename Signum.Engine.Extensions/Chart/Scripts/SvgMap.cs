@@ -43,12 +43,12 @@ public class SvgMapScript : ChartScript
             new ChartScriptParameterGroup("Color Scale")
             {
                 new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 2,  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) {  ColumnIndex = 2, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ColumnIndex = 2, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
                 new ChartScriptParameter("ColorScaleMaxValue", ChartParameterType.Number) { ColumnIndex = 2, ValueDefinition = new NumberInterval{  DefaultValue = null}  },
             },
             new ChartScriptParameterGroup("Color Category")
             {
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
     }      

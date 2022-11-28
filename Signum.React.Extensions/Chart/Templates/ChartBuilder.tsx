@@ -8,8 +8,11 @@ import * as ChartClient from '../ChartClient'
 import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
 import { ChartColumn } from './ChartColumn'
 import * as  ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
+import { ColorInterpolate, ColorScheme } from '../ColorPalette/ColorPaletteClient'
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { UserState } from '../../Authorization/Signum.Entities.Authorization'
+import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
+import { Dic } from '@framework/Globals'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/
@@ -175,9 +178,46 @@ export function Parameters(props: {
 
 function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }) {
 
-  const forceUpdate = useForceUpdate();
+
+  if (scriptParameter.type == "Special") {
+    var sp = scriptParameter.valueDefinition as ChartClient.SpecialParameter;
+
+    if (sp.specialParameterType == "ColorCategory") {
+      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.name} onChange={onRedraw}
+        valueLineType="DropDownList"
+        optionItems={Dic.getKeys(colorSchemes)}
+        onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+          <ColorScheme colorScheme={oi.value} />
+          {oi.label}
+        </div>} />
+    }
+
+    if (sp.specialParameterType == "ColorInterpolate") {
+      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.name} onChange={onRedraw}
+        valueLineType="DropDownList"
+        optionItems={Dic.getKeys(colorInterpolators).map(a => (ctx.value.value?.startsWith("-") ? "-" : "") + a)}
+        onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+          <ColorInterpolate colorInterpolator={oi.value} />
+          {oi.label}
+        </div>}
+        helpText={<label>
+          <input type="checkbox" className="form-check me-2"
+            checked={ctx.value.value?.startsWith("-")}
+            onChange={e => {
+              if (ctx.value.value)
+                ctx.value.value = e.currentTarget.checked ? ("-" + ctx.value.value) : ctx.value.value.after("-");
+
+              onRedraw?.();
+            }} />
+          Invert
+        </label>}
+      />
+    }
+  }
+
   const token = scriptParameter.columnIndex == undefined ? undefined :
     chart.columns[scriptParameter.columnIndex].element.token?.token;
+
 
 
   const vl: ValueLineProps = {

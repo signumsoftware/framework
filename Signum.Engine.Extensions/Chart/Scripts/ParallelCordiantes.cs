@@ -35,7 +35,7 @@ public class ParallelCoordiantesChartScript : ChartScript
             },
             new ChartScriptParameterGroup("Color")
             {
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
             new ChartScriptParameterGroup("Form")
             {

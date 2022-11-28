@@ -12,7 +12,7 @@ import {
 import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
-  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SvgMapsChartScript
+  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SvgMapsChartScript, SpecialParameterType
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
@@ -27,7 +27,9 @@ import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 import { MemoRepository } from './D3Scripts/Components/ReactChart';
 import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
-import { softCast } from '../../Signum.React/Scripts/Globals';
+import { Dic, softCast } from '../../Signum.React/Scripts/Globals';
+import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
+import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
   
@@ -151,13 +153,17 @@ export interface ChartScriptParameter {
   name: string;
   columnIndex?: number;
   type: ChartParameterType;
-  valueDefinition: NumberInterval | EnumValueList | StringValue | null;
+  valueDefinition: NumberInterval | EnumValueList | StringValue | SpecialParameter | null;
 }
 
 export interface NumberInterval {
   defaultValue: number;
   minValue: number | null;
   maxValue: number | null;
+}
+
+export interface SpecialParameter {
+  specialParameterType: SpecialParameterType; 
 }
 
 export interface EnumValueList extends Array<EnumValue> {
@@ -249,12 +255,14 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
       "DateOnly",
       "String",
       "Lite",
-      "Enum"].contains(type);
+      "Enum"
+    ].contains(type);
 
     case "Magnitude": return [
       "Integer",
       "Real",
-      "RealGroupable"].contains(type);
+      "RealGroupable"
+    ].contains(type);
 
     case "Positionable": return [
       "Integer",
@@ -262,9 +270,9 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
       "RealGroupable",
       "DateOnly",
       "DateTime",
-      "Time"].contains(type);
+      "Time"
+    ].contains(type);
   }
-
 
   return false;
 }
@@ -331,12 +339,21 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
 
 }
 
-function isValidParameterValue(value: string | null | undefined, scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
+function isValidParameterValue(value: string | null | undefined, scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) : boolean{
 
   switch (scriptParameter.type) {
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).some(a => a.name == value);
     case "Number": return !isNaN(parseFloat(value!));
     case "String": return true;
+    case "Special": {
+      const specialParameterType = (scriptParameter.valueDefinition as SpecialParameter).specialParameterType;
+      switch (specialParameterType) {
+        case "ColorCategory": return value != null && colorSchemes[value] != null;
+        case "ColorInterpolate": return value != null && getColorInterpolation(value) != null;
+        default: throw new Error("Unexpected parameter type " + specialParameterType);
+      }
+
+    }
     default: throw new Error("Unexpected parameter type");
   }
 
@@ -347,6 +364,14 @@ export function defaultParameterValue(scriptParameter: ChartScriptParameter, rel
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
     case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue?.toString();
     case "String": return (scriptParameter.valueDefinition as StringValue).defaultValue?.toString();
+    case "Special": {
+      const specialParameterType = (scriptParameter.valueDefinition as SpecialParameter).specialParameterType;
+      switch (specialParameterType) {
+        case "ColorCategory": return Dic.getKeys(colorSchemes)[0];
+        case "ColorInterpolate": return Dic.getKeys(colorInterpolators)[0];
+        default: throw new Error("Unexpected parameter type " + specialParameterType);
+      }
+    }
     default: throw new Error("Unexpected parameter type");
   }
 

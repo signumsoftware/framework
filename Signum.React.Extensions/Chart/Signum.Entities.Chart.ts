@@ -107,7 +107,8 @@ export const ChartParameterType = new EnumType<ChartParameterType>("ChartParamet
 export type ChartParameterType =
   "Enum" |
   "Number" |
-  "String";
+  "String" |
+  "Special";
 
 export module ChartPermission {
   export const ViewCharting : Authorization.PermissionSymbol = registerSymbol("Permission", "ChartPermission.ViewCharting");
@@ -134,6 +135,11 @@ export interface ColorPaletteEntity extends Entities.Entity {
   categoryName: string;
   seed: number;
   specificColors: Entities.MList<SpecificColorEmbedded>;
+}
+
+export module ColorPaletteMessage {
+  export const FillAutomatically = new MessageKey("ColorPaletteMessage", "FillAutomatically");
+  export const Select0OnlyIfYouWantToOverrideTheAutomaticColor = new MessageKey("ColorPaletteMessage", "Select0OnlyIfYouWantToOverrideTheAutomaticColor");
 }
 
 export module ColorPaletteOperation {
@@ -170,8 +176,13 @@ export module HtmlChartScript {
   export const PivotTable : ChartScriptSymbol = registerSymbol("ChartScript", "HtmlChartScript.PivotTable");
 }
 
+export const SpecialParameterType = new EnumType<SpecialParameterType>("SpecialParameterType");
+export type SpecialParameterType =
+  "ColorCategory" |
+  "ColorInterpolate";
+
 export const SpecificColorEmbedded = new Type<SpecificColorEmbedded>("SpecificColorEmbedded");
-export interface SpecificColorEmbedded extends Entities.Entity {
+export interface SpecificColorEmbedded extends Entities.EmbeddedEntity {
   Type: "SpecificColorEmbedded";
   entity: Entities.Lite<Entities.Entity>;
   color: string;

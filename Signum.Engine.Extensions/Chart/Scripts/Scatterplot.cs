@@ -34,11 +34,11 @@ public class ScatterplotChartScript : ChartScript
             new ChartScriptParameterGroup("Color Scale")
             {
                 new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Ordinal|ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) {  ColumnIndex = 0, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ColumnIndex = 0, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
             new ChartScriptParameterGroup("Color Category")
             { 
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Enum) {  ColumnIndex = 0, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory)  }
+                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ColumnIndex = 0, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory)  }
             },
             
         };

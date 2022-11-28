@@ -149,6 +149,7 @@ public class NumberInterval : IChartParameterValueDefinition
     }
 }
 
+[InTypeScript(true)]
 public enum SpecialParameterType
 {
     ColorCategory,
@@ -289,6 +290,7 @@ public enum ChartParameterType
     Enum,
     Number,
     String,
+    Special,
 }
 
 public class StringValue : IChartParameterValueDefinition
