@@ -80,6 +80,13 @@ public static class EnumEntity
         return (Enum)Enum.ToObject(enumType, ident.id!.Value.Object);
     }
 
+    public static Enum ToEnum(Lite<Entity> lite)
+    {
+        Type enumType = Extract(lite.EntityType)!;
+
+        return (Enum)Enum.ToObject(enumType, lite.Id.Object);
+    }
+
     public static bool IsEnumEntity(this Type type)
     {
         return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(EnumEntity<>);
