@@ -14,7 +14,7 @@ export default function renderMarkermapChart(p: ChartClient.ChartScriptProps) {
   return <MarkermapChartImp {...p} />
 }
 
-export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient.ChartScriptProps) {
+export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: ChartClient.ChartScriptProps) {
 
   const divElement = React.useRef<HTMLDivElement>(null);
 
@@ -104,8 +104,7 @@ export function MarkermapChartImp({ data, parameters, onDrillDown }: ChartClient
         color = r => colorInterpolator!(scaleFunc(colorScaleColumn!.getValue(r))!);
       }
       else if (colorSchemeColumn != null) {
-        var scheme = ChartUtils.getColorScheme(parameters["ColorCategory"])!;
-        var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(colorSchemeColumn.getValueKey));
+        var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(colorSchemeColumn.getValueKey), memo);
         color = r => colorSchemeColumn!.getValueColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
       }
 
