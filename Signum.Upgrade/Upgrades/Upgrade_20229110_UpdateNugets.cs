@@ -24,7 +24,10 @@ class Upgrade_20229110_UpdateNugets : CodeUpgradeBase
                     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.0" />
                     <PackageReference Include="System.ServiceModel.Security" Version="4.10.0" />
                     """);
+        });
 
+        uctx.ChangeCodeFile("Southwind.React/package.json", file =>
+        {
             file.UpdateNpmPackages("""
                 "typescript": "4.9.3",
                 """);
