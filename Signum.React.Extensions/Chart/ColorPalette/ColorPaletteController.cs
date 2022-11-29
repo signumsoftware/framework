@@ -27,7 +27,7 @@ public class ColorPaletteController : ControllerBase
             TypeName = TypeLogic.GetCleanName(type),
             CategoryName = palette.CategoryName,
             Seed = palette.Seed,
-            SpecificColors = type.IsEnum ?
+            SpecificColors = EnumEntity.Extract(type) != null ?
             palette.SpecificColors.ToDictionary(a => EnumEntity.ToEnum(a.Entity).ToString(), a => a.Color) :
             palette.SpecificColors.ToDictionary(a => a.Entity.Id.ToString(), a => a.Color)
         };
