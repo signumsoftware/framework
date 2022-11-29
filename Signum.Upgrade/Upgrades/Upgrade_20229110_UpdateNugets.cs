@@ -30,6 +30,12 @@ class Upgrade_20229110_UpdateNugets : CodeUpgradeBase
         {
             file.UpdateNpmPackages("""
                 "typescript": "4.9.3",
+                "css-loader": "6.7.2",
+                "sass": "1.56.1",
+                "sass-loader": "13.2.0",
+                "webpack": "5.75.0",
+                "webpack-bundle-analyzer": "4.7.0",
+                "webpack-cli": "5.0.0",
                 """);
         });
     }
