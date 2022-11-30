@@ -35,7 +35,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.25.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.25.0" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.8.4">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.9.3">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
@@ -77,8 +77,6 @@
 	<ItemGroup>
 		<None Remove="Authorization\AuthClient.tsx" />
 		<None Remove="Authorization\Templates\DoublePassword.tsx" />
-		<None Remove="Chart\ChartPalette\ChartPaletteClient.tsx" />
-		<None Remove="Chart\ChartPalette\ChartPaletteControl.tsx" />
 		<None Remove="Chart\HtmlScripts\PivotTable.tsx" />
 		<None Remove="Dashboard\View\UserTreePart.tsx" />
 		<None Remove="Files\ImageModal.tsx" />

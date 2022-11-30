@@ -104,6 +104,11 @@ public static class ProcessRunner
         process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
     }
 
+    internal static void WakeupExecuteInThisMachine(Dictionary<string, object> dic)
+    {
+        ProcessRunner.WakeUp("Execute in this machine", null);
+    }
+
     [AutoExpressionField]
     public static bool IsMine(this ProcessEntity p) => 
         As.Expression(() => p.MachineName == Schema.Current.MachineName && p.ApplicationName == Schema.Current.ApplicationName);

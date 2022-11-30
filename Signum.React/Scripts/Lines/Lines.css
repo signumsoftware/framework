@@ -78,6 +78,7 @@ span.sf-today {
 }
 
 .sf-strip-dropable {
+    display: flex;
     margin: -1px -12px -1px -12px;
     padding: 1px 12px 1px 12px;
 }

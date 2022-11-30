@@ -1170,14 +1170,19 @@ Consider Synchronize.");
         if (extra.Count != 0)
         {
             if (missing.Count != 0)
-                return $" Extra: {extra.ToString(", ")}\r\n Missing: {missing.ToString(", ")}";
+                return @$" Extra:
+{extra.ToString(",\n").Indent(2)}
+Missing:
+{missing.ToString(",\n").Indent(2)}";
             else
-                return $" Extra: {extra.ToString(", ")}";
+                return @$" Extra: 
+{extra.ToString(",\n")}";
         }
         else
         {
             if (missing.Count != 0)
-                return $" Missing: {missing.ToString(", ")}";
+                return @$" Missing:
+{missing.ToString(",\n")}";
             else
                 return null;
         }

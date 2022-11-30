@@ -41,7 +41,7 @@ public class DiffLogController : ControllerBase
         var entity = target.Retrieve();
 
         using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
-            return entity.Dump();
+            return ObjectDumper.Dump(entity);
     }
 }
 

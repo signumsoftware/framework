@@ -35,7 +35,7 @@ public class TimeMachineController : ControllerBase
     private string GetDump(Entity entity)
     {
         using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
-            return entity.Dump();
+            return ObjectDumper.Dump(entity);
     }
 
 }

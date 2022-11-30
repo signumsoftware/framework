@@ -88,7 +88,7 @@ public static class DashboardLogic
                     cp.DashboardPriority,
                 });
 
-            sb.Schema.EntityEvents<DashboardEntity>().Retrieved += DashboardLogic_Retrieved; ;
+            sb.Schema.EntityEvents<DashboardEntity>().Retrieved += DashboardLogic_Retrieved;
 
 
             sb.Include<CachedQueryEntity>()
@@ -187,8 +187,7 @@ public static class DashboardLogic
             {
                 sb.Schema.EntityEvents<UserChartEntity>().PreUnsafeDelete += query =>
                 {
-                    Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((CombinedUserChartPartEntity)mle.Element.Content).UserCharts.Any(uc => query.Contains(uc.UserChart))).UnsafeDeleteMList();
-                    Database.Query<CombinedUserChartPartEntity>().Where(cucp => cucp.UserCharts.Any(uc => query.Contains(uc.UserChart))).UnsafeDelete();
+                    Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => query.Contains(mle.Element.UserChart)).UnsafeDeleteMList();
 
                     return null;
                 };
@@ -196,14 +195,20 @@ public static class DashboardLogic
                 sb.Schema.Table<UserChartEntity>().PreDeleteSqlSync += arg =>
                 {
                     var uc = (UserChartEntity)arg;
+                   
+                    var mlistElems2 = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
+                         Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Is(uc)));
 
-                    var mlistElems2 = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
-                        .Where(mle => ((CombinedUserChartPartEntity)mle.Element.Content).UserCharts.Any(ucm => ucm.UserChart.Is(uc))));
+                    return SqlPreCommand.Combine(Spacing.Simple, mlistElems2);
+                };
 
-                    var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<CombinedUserChartPartEntity>()
-                         .Where(cucp => cucp.UserCharts.Any(ucm => ucm.UserChart.Is(uc))));
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += arg =>
+                {
+                    var query = (QueryEntity)arg;
 
-                    return SqlPreCommand.Combine(Spacing.Simple, mlistElems2, parts2);
+                    var parts = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
+                         Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Query.Is(query)));
+                    return SqlPreCommand.Combine(Spacing.Simple, parts);
                 };
             }
 
