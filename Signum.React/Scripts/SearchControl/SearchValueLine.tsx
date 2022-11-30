@@ -178,6 +178,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           onExplored={p.onExplored}
           searchControlProps={p.searchControlProps}
           modalSize={p.modalSize}
+          unit={null}
           deps={p.deps}
           onRender={p.onRender}
           customRequest={p.customRequest}
