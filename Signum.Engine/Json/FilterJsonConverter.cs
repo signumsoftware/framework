@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Signum.Engine.Json;
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class FilterJsonConverter : JsonConverter<FilterTS>
 {
     public override bool CanConvert(Type objectType)
@@ -81,7 +80,7 @@ public abstract class FilterTS
 
 public class FilterConditionTS : FilterTS
 {
-    public string token;
+    public required string token;
     public FilterOperation operation;
     public object? value;
 
@@ -110,7 +109,7 @@ public class FilterGroupTS : FilterTS
 {
     public FilterGroupOperation groupOperation;
     public string? token;
-    public List<FilterTS> filters;
+    public required List<FilterTS> filters;
 
     public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions)
     {
@@ -125,7 +124,7 @@ public class FilterGroupTS : FilterTS
 
 public class ColumnTS
 {
-    public string token;
+    public required string token;
     public string? displayName;
 
     public Column ToColumn(QueryDescription qd, bool canAggregate)
@@ -250,11 +249,11 @@ public class SystemTimeTS
 
 public class QueryValueRequestTS
 {
-    public string querykey;
-    public List<FilterTS> filters;
-    public string valueToken;
+    public required string querykey;
+    public List<FilterTS>? filters;
+    public string? valueToken;
     public bool? multipleValues;
-    public SystemTimeTS/*?*/ systemTime;
+    public SystemTimeTS? systemTime;
 
     public QueryValueRequest ToQueryValueRequest(JsonSerializerOptions jsonSerializerOptions)
     {
@@ -278,12 +277,12 @@ public class QueryValueRequestTS
 
 public class QueryRequestTS
 {
-    public string queryKey;
-    public bool groupResults;
-    public List<FilterTS> filters;
-    public List<OrderTS> orders;
-    public List<ColumnTS> columns;
-    public PaginationTS pagination;
+    public required string queryKey;
+    public required bool groupResults;
+    public required List<FilterTS> filters;
+    public required List<OrderTS> orders;
+    public required List<ColumnTS> columns;
+    public required PaginationTS pagination;
     public SystemTimeTS? systemTime;
 
     public static QueryRequestTS FromQueryRequest(QueryRequest qr)
@@ -300,7 +299,7 @@ public class QueryRequestTS
         };
     }
 
-    public QueryRequest ToQueryRequest(JsonSerializerOptions jsonSerializerOptions, string referrerUrl)
+    public QueryRequest ToQueryRequest(JsonSerializerOptions jsonSerializerOptions, string? referrerUrl)
     {
         var qn = QueryLogic.ToQueryName(this.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
@@ -324,9 +323,9 @@ public class QueryRequestTS
 
 public class QueryEntitiesRequestTS
 {
-    public string queryKey;
-    public List<FilterTS> filters;
-    public List<OrderTS> orders;
+    public required string queryKey;
+    public required List<FilterTS> filters;
+    public required List<OrderTS> orders;
     public int? count;
 
     public override string ToString() => queryKey;
@@ -347,8 +346,8 @@ public class QueryEntitiesRequestTS
 
 public class OrderTS
 {
-    public string token;
-    public OrderType orderType;
+    public required string token;
+    public required OrderType orderType;
 
     public Order ToOrder(QueryDescription qd, bool canAggregate)
     {

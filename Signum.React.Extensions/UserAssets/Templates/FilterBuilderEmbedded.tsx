@@ -99,7 +99,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
 
       const readOnly = fc.readonly || f.frozen;
 
-      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
       return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={"String"} type={{ name: "string" }} />
 
@@ -109,7 +109,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
 
       const readOnly = fc.readonly || f.frozen;
 
-      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
       if (isList(f.operation!))
         return <MultiLineOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fc, onChange)} onChange={fc.handleValueChange} />;
@@ -272,7 +272,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
   if (liteRef.current === undefined)
     return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} />;
 
-  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(liteRef, a => a.current));
+  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(liteRef, a => a.current));
 
   const handleChangeValue = () => {
     p.ctx.value = ctx.value ? liteKey(ctx.value) : null;
@@ -337,7 +337,7 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
   if (valueRef.current === undefined)
     return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} />;
 
-  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(valueRef, a => a.current));
+  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(valueRef, a => a.current));
 
   const handleChangeValue = () => {
     p.ctx.value = toStringValue(ctx.value, p.filterType);

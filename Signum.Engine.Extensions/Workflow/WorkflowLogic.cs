@@ -7,6 +7,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.UserAssets;
 using Signum.Entities.Basics;
 using Signum.Engine.Translation;
+using Microsoft.Graph.SecurityNamespace;
 
 namespace Signum.Engine.Workflow;
 
@@ -297,7 +298,11 @@ public static class WorkflowLogic
                     e.BpmnElementId,
                     e.Lane,
                     e.Lane.Pool.Workflow,
+                    e.RunRepeatedly,
+                    e.DecisionOptionName,
                 });
+
+            AuthLogic.HasRuleOverridesEvent += role => Database.Query<WorkflowLaneEntity>().Any(a => a.Actors.Contains(role));
 
 
             new Graph<WorkflowEventEntity>.Execute(WorkflowEventOperation.Save)

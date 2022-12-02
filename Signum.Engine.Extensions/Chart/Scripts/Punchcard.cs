@@ -52,7 +52,7 @@ public class PunchcardChartScript : ChartScript
             new ChartScriptParameterGroup("Fill Color")
             {
                 new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn") },
+                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
                 new ChartScriptParameter("FillColor", ChartParameterType.String) {  ValueDefinition = new StringValue("gray") },
             },
             new ChartScriptParameterGroup("Stroke")

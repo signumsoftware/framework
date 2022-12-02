@@ -92,7 +92,7 @@ public static class ExceptionLogic
 
         try
         {
-            entity.Data = new BigStringEmbedded(ex.Data.Dump());
+            entity.Data = new BigStringEmbedded(ObjectDumper.Dump(ex.Data));
         }
         catch (Exception e)
         {

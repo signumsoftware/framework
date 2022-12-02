@@ -72,9 +72,6 @@ public class FilePathEntity : Entity, IFile, IFilePath
     [StringLengthValidator(Min = 3, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
     public string Suffix { get; set; }
 
-    [Ignore]
-    public string? CalculatedDirectory { get; set; }
-
     public FileTypeSymbol FileType { get; internal set; }
 
     [Ignore]

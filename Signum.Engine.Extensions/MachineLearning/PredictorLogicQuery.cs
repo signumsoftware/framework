@@ -17,6 +17,7 @@ public static class PredictorLogicQuery
             {
                 QueryRequest = mainQueryRequest,
                 ResultTable = mainResult,
+                GetParentKey = null!,
             };
 
             if (!mainQueryRequest.GroupResults)

@@ -87,9 +87,6 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     [StringLengthValidator(Min = 1, Max = 260), NotNullValidator(DisabledInModelBinder = true)]
     public string Suffix { get; set; }
 
-    [Ignore]
-    public string? CalculatedDirectory { get; set; }
-
     [ForceNotNullable]
     public FileTypeSymbol FileType { get; internal set; }
 

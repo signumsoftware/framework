@@ -617,7 +617,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       p.showGroupButton && {
         order: -4,
         button: < button
-          className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
+          className={"sf-query-button btn " + (p.findOptions.groupResults ? "btn-info active" : "btn-light")}
           onClick={this.handleToggleGroupBy}
           title={titleLabels ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
           Ʃ

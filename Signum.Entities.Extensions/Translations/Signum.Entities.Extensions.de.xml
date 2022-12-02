@@ -453,6 +453,7 @@
     <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="ChartColumnType">
+    <Member Name="Any" Description="Any" />
     <Member Name="DateOnly" Description="Datum" />
     <Member Name="DateTime" Description="Datum Uhrzeit" />
     <Member Name="Enum" Description="Enum" />
@@ -1060,6 +1061,7 @@
     <Member Name="Recipients" Description="Empfänger" />
     <Member Name="SendRetries" Description="Sendungswiederholungen" />
     <Member Name="Sent" Description="Gesendet" />
+    <Member Name="SentBy" Description="Gesendet von" />
     <Member Name="State" Description="Status" />
     <Member Name="Subject" Description="Betreff" />
     <Member Name="Target" Description="Ziel" />
@@ -1139,14 +1141,14 @@
   <Type Name="EmailSenderConfigurationEntity" Description="Konfiguration E-Mail-Absender" PluralDescription="Konfigurationen E-Mail-Absender" Gender="m">
     <Member Name="AdditionalRecipients" Description="Zusätzliche Empfänger" />
     <Member Name="DefaultFrom" Description="Standard von" />
-    <Member Name="Exchange" Description="Exchange" />
-    <Member Name="MicrosoftGraph" Description="Microsoft Graph" />
     <Member Name="Name" Description="Name" />
-    <Member Name="SMTP" Description="SMTP" />
+    <Member Name="Service" Description="Dienst" />
   </Type>
   <Type Name="EmailSenderConfigurationOperation">
+    <Member Name="Clone" Description="Klonen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="EmailServiceEntity" Description="E-Mail-Dienst" PluralDescription="E-Mail-Dienste" Gender="m" />
   <Type Name="EmailTemplateAddressEmbedded" Description="E-Mail-Vorlagenadresse">
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
@@ -1249,8 +1251,8 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="ExchangeWebServiceEmbedded" Description="Exchange web service">
-    <Member Name="ExchangeVersion" Description="Exchange version" />
+  <Type Name="ExchangeWebServiceEmailServiceEntity" Description="Exchange-Webdienstes-E-Mail-Dienst " Gender="m">
+    <Member Name="ExchangeVersion" Description="Exchange-Version" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="Url" Description="URL" />
     <Member Name="UseDefaultCredentials" Description="Use default credentials" />
@@ -1619,7 +1621,7 @@
     <Member Name="NotAllowed" Description="Nicht erlaubt" />
     <Member Name="TextPruning" Description="Text beschneiden" />
   </Type>
-  <Type Name="MicrosoftGraphEmbedded" Description="Microsoft Graph">
+  <Type Name="MicrosoftGraphEmailServiceEntity" Description="Microsoft Graph-E-Mail-Dienst" PluralDescription="Microsoft Graph-E-Mail-Dienste" Gender="m">
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
     <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
@@ -2343,10 +2345,10 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="SMSUpdatePackageEntity" Description="SMS-Updatepaket" PluralDescription="SMS-Updatepakete" Gender="n" />
-  <Type Name="SmtpEmbedded" Description="Smtp">
+  <Type Name="SmtpEmailServiceEntity" Description="SMTP-E-Mail-Dienst" PluralDescription="SMTP-E-Mail-Dienste" Gender="m">
     <Member Name="DeliveryFormat" Description="Delivery format" />
     <Member Name="DeliveryMethod" Description="Delivery method" />
-    <Member Name="Network" Description="Network" />
+    <Member Name="Network" Description="Netzwerk" />
     <Member Name="PickupDirectoryLocation" Description="Pickup directory location" />
   </Type>
   <Type Name="SmtpNetworkDeliveryEmbedded" Description="SMTP-Netzwerk-Zustellung">
@@ -2825,6 +2827,9 @@
     <Member Name="ReadOn" Description="Gelesen am" />
     <Member Name="User" Description="Benutzer" />
     <Member Name="WhatsNew" Description="Was ist neu?" />
+  </Type>
+  <Type Name="WhatsNewLogOperation">
+    <Member Name="Delete" Description="Löschen" />
   </Type>
   <Type Name="WhatsNewMessage">
     <Member Name="_0ContiansNoVersionForCulture1" Description="{0} enthält keine Version für Kultur '{1}'" />

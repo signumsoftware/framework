@@ -5,7 +5,7 @@ import { SMSMessageEntity } from '../Signum.Entities.SMS'
 
 export default function SMSMessage(p: { ctx: TypeContext<SMSMessageEntity> }) {
 
-  var ctx4 = p.ctx.subCtx({ labelColumns: 4, formSize: "ExtraSmall" });
+  var ctx4 = p.ctx.subCtx({ labelColumns: 4, formSize: "xs" });
 
   return (
     <div>

@@ -39,6 +39,7 @@ export interface ValueLineProps extends LineBaseProps {
   maxDate?: Date;
   calendarProps?: Partial<CalendarProps>;
   calendarAlignEnd?: boolean;
+  initiallyShowOnly?: "Date" | "Time";
 }
 
 export interface OptionItem {
@@ -343,7 +344,10 @@ function internalDropDownList(vl: ValueLineController) {
       vl.setValue(e.value);
     };
 
-    var oi = optionItems.single(a => a.value == s.ctx.value);
+    var oi = optionItems.singleOrNull(a => a.value == s.ctx.value) ?? {
+      value: s.ctx.value,
+      label: s.ctx.value,
+    };
 
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -847,6 +851,7 @@ ValueLineRenderers.renderers.set("DateTimeSplitted", (vl) => {
       {vl.withItemGroup(
         <DateTimePickerSplitted value={dt?.toJSDate()} onChange={handleDatePickerOnChange}
           initiallyFocused={Boolean(vl.props.initiallyFocused)}
+          initiallyShowOnly={vl.props.initiallyShowOnly}
           luxonFormat={luxonFormat}
           minDate={s.minDate}
           maxDate={s.maxDate}
@@ -876,11 +881,23 @@ function DateTimePickerSplitted(p: {
   maxDate?: Date,
   initiallyFocused?: boolean,
   calendarProps?: Partial<CalendarProps>;
+  initiallyShowOnly?: "Date" | "Time";
 }) {
 
   const [dateFormat, timeFormat] = splitLuxonFormat(p.luxonFormat);
 
-  const [temp, setTemp] = React.useState<{ type: "Date", date: string } | { type: "Time", time: string } | null>(null);
+  const [temp, setTemp] = React.useState<{ type: "Date", date: string } | { type: "Time", time: string } | null>(() => {
+    if (p.initiallyShowOnly == null || p.value == null)
+      return null;
+
+    if (p.initiallyShowOnly == "Date")
+      return ({ type: "Date", date: DateTime.fromJSDate(p.value).toISODate() });
+
+    if (p.initiallyShowOnly == "Time")
+      return ({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime() });
+
+    return null;
+  });
 
   function handleTimeChange(time: string | null) {
     if (time == null) {

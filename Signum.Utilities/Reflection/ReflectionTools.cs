@@ -895,4 +895,9 @@ public static class ReflectionTools
         DateTime dateTimeUTC = dt.AddSeconds(secondsSince1970);
         return dateTimeUTC;
     }
+
+    public static bool IsBackingField(this FieldInfo f)
+    {
+        return f.Name.StartsWith("<") && f.Name.EndsWith(">k__BackingField");
+    }
 }

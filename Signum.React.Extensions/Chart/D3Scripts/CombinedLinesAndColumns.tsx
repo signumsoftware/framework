@@ -121,8 +121,8 @@ export function renderCombinedLinesAndColumns({ infos, width, height, initialLoa
         infos.map((info, i) => info.data == null ? null :
           <g key={i}>
             {
-              info.chartRequest.chartScript.key == D3ChartScript.Line.key ? paintLine({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, x: x, y: yScales[i]!, memo: info.memo }) :
-                info.chartRequest.chartScript.key == D3ChartScript.Columns.key ? paintColumns({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, x: x, y: yScales[i]!, colCount, colIndex: colIndex++, memo: info.memo }) :
+              info.chartRequest.chartScript.key == D3ChartScript.Line.key ? paintLine({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, hasHorizontalScale: false, x: x, y: yScales[i]!, memo: info.memo }) :
+                info.chartRequest.chartScript.key == D3ChartScript.Columns.key ? paintColumns({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, hasHorizontalScale: false, x: x, y: yScales[i]!, colCount, colIndex: colIndex++, memo: info.memo }) :
                   null
             }
           </g>

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
@@ -144,16 +145,17 @@ public class WebEntityJsonConverterFactory : EntityJsonConverterFactory
 
     protected override PropertyRoute GetCurrentPropertyRouteEmbedded(EmbeddedEntity embedded)
     {
-        var controller = ((ControllerActionDescriptor)SignumCurrentContextFilter.CurrentContext!.ActionDescriptor);
+        var filterContext = SignumCurrentContextFilter.CurrentContext!;
+        var controller = (ControllerActionDescriptor)filterContext.ActionDescriptor;
         var att =
-            controller.MethodInfo.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
-            controller.MethodInfo.DeclaringType!.GetCustomAttribute<EmbeddedPropertyRouteAttribute>() ??
+            controller.MethodInfo.GetCustomAttribute< EmbeddedPropertyRouteAttributeBase>() ??
+            controller.MethodInfo.DeclaringType!.GetCustomAttribute<EmbeddedPropertyRouteAttributeBase>() ??
             throw new InvalidOperationException(@$"Impossible to determine PropertyRoute for {embedded.GetType().Name}. 
-        Consider adding someting like [EmbeddedPropertyRoute(typeof({embedded.GetType().Name}), typeof(SomeEntity), nameof(SomeEntity.SomeProperty))] to your action or controller.
+        Consider adding someting like [EmbeddedPropertyRoute<T>] to your action or controller.
         Current action: {controller.MethodInfo.MethodSignature()}
         Current controller: {controller.MethodInfo.DeclaringType!.FullName}");
 
-        return att.PropertyRoute;
+        return att.GetResolver().GetPropertyRoute(embedded, filterContext);
     }
 
     public override Type ResolveType(string typeStr, Type objectType, Func<string, Type>? parseType)
@@ -193,16 +195,24 @@ public class EntityPackTS
     }
 }
 
-[System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
-public class EmbeddedPropertyRouteAttribute : Attribute
+public abstract class EmbeddedPropertyRouteAttributeBase : Attribute
 {
+    public abstract IEmbeddedPropertyRouteResolver GetResolver();
+}
 
-    public Type EmbeddedType { get; private set; }
-    public PropertyRoute PropertyRoute { get; private set; }
-    // This is a positional argument
-    public EmbeddedPropertyRouteAttribute(Type embeddedType, Type propertyRouteRoot, string propertyRouteText)
+[System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+public class EmbeddedPropertyRouteAttribute<T> : EmbeddedPropertyRouteAttributeBase
+    where T : class, IEmbeddedPropertyRouteResolver, new()
+{
+    T? resolver;
+    public override IEmbeddedPropertyRouteResolver GetResolver() => resolver ??= new();
+
+    public EmbeddedPropertyRouteAttribute()
     {
-        this.EmbeddedType = embeddedType;
-        this.PropertyRoute = PropertyRoute.Parse(propertyRouteRoot, propertyRouteText);
     }
+}
+
+public interface IEmbeddedPropertyRouteResolver
+{
+    PropertyRoute GetPropertyRoute(EmbeddedEntity embedded, FilterContext filterContext);
 }

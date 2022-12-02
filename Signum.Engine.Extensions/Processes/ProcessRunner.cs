@@ -104,6 +104,11 @@ public static class ProcessRunner
         process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
     }
 
+    internal static void WakeupExecuteInThisMachine(Dictionary<string, object> dic)
+    {
+        ProcessRunner.WakeUp("Execute in this machine", null);
+    }
+
     [AutoExpressionField]
     public static bool IsMine(this ProcessEntity p) => 
         As.Expression(() => p.MachineName == Schema.Current.MachineName && p.ApplicationName == Schema.Current.ApplicationName);
@@ -517,29 +522,27 @@ public sealed class ExecutingProcess
 
 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class ProcessLogicState
 {
-    public int MaxDegreeOfParallelism;
-    public int? InitialDelayMilliseconds;
-    public string MachineName;
-    public string ApplicationName;
-    public bool Running;
-    public bool JustMyProcesses;
-    public DateTime? NextPlannedExecution;
-    public List<ExecutionState> Executing;
+    public required int MaxDegreeOfParallelism;
+    public required int? InitialDelayMilliseconds;
+    public required string MachineName;
+    public required string ApplicationName;
+    public required bool Running;
+    public required bool JustMyProcesses;
+    public required DateTime? NextPlannedExecution;
+    public required List<ExecutionState> Executing;
 }
 
 public class ExecutionState
 {
-    public Lite<ProcessEntity> Process;
-    public ProcessState State;
-    public bool IsCancellationRequested;
-    public decimal? Progress;
-    public string MachineName;
-    public string ApplicationName; 
+    public required Lite<ProcessEntity> Process;
+    public required ProcessState State;
+    public required bool IsCancellationRequested;
+    public required decimal? Progress;
+    public required string MachineName;
+    public required string ApplicationName; 
 }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
 
 

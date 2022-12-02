@@ -71,7 +71,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
       );
     }
 
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: p.extraSmall ? "ExtraSmall" : "Small" }, undefined as any, Binding.create(f, a => a.value));
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: p.extraSmall ? "xs" : "sm" }, undefined as any, Binding.create(f, a => a.value));
 
 
     if (isFilterGroupOptionParsed(f)) {
