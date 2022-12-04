@@ -1,5 +1,6 @@
 using Signum.Engine.Basics;
 using Signum.Engine.Operations.Internal;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using System.Collections;
 
@@ -549,6 +550,10 @@ public class Graph<T>
 
                 try
                 {
+
+                    OperationLogic.OnOperationBeforeExecuteHandlerArgs(Symbol.Symbol, entity, args);
+
+
                     using (var tr = new Transaction())
                     {
                         using (OperationLogic.AllowSave(entity.GetType()))
@@ -572,6 +577,8 @@ public class Graph<T>
 
                         tr.Commit();
                     }
+
+                    OperationLogic.OnOperationExecutedHandlerArgs(Symbol.Symbol, entity, args);
                 }
                 catch (Exception ex)
                 {
@@ -707,6 +714,10 @@ public class Graph<T>
                     {
                         try
                         {
+
+                            OperationLogic.OnOperationBeforeExecuteHandlerArgs(Symbol.Symbol, entity, args);
+
+
                             using (var tr = new Transaction())
                             {
                                 OnDelete((T)entity, args);
@@ -718,6 +729,8 @@ public class Graph<T>
 
                                 tr.Commit();
                             }
+
+                            OperationLogic.OnOperationExecutedHandlerArgs(Symbol.Symbol, entity, args);
                         }
                         catch (Exception ex)
                         {

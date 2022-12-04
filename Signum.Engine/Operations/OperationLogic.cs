@@ -277,7 +277,24 @@ Consider the following options:
     #region Events
 
     public static event SurroundOperationHandler? SurroundOperation;
+    public static event OperationHandlerArgs? OperationBeforeExecute;
+    public static event OperationHandlerArgs? OperationExecuted;
     public static event AllowOperationHandler? AllowOperation;
+
+
+
+    internal static void OnOperationBeforeExecuteHandlerArgs(OperationSymbol operation, IEntity entity, object?[]? args)
+    {
+        if (OperationBeforeExecute != null)
+            OperationBeforeExecute(operation, entity, args);
+    }
+
+    internal static void OnOperationExecutedHandlerArgs(OperationSymbol operation, IEntity entity, object?[]? args)
+    {
+        if (OperationExecuted != null)
+            OperationExecuted(operation, entity, args);
+    }
+
 
     internal static IDisposable? OnSuroundOperation(IOperation operation, OperationLogEntity log, IEntity? entity, object?[]? args)
     {
@@ -871,5 +888,6 @@ public delegate IDisposable? SurroundOperationHandler(IOperation operation, Oper
 public delegate void OperationHandler(IOperation operation, Entity entity);
 public delegate void ErrorOperationHandler(IOperation operation, Entity entity, Exception ex);
 public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, Type entityType, bool inUserInterface);
+public delegate void OperationHandlerArgs(OperationSymbol operation, IEntity entity, object?[]? args);
 
 
