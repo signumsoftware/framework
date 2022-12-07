@@ -223,6 +223,7 @@ public static class AuthLogic
             return db;
 
         using (AuthLogic.Disable()) 
+        using (OperationLogic.AllowSave<RoleEntity>())
         {
             var result = new RoleEntity
             {
@@ -231,7 +232,7 @@ public static class AuthLogic
                 Description = null,
                 IsTrivialMerge = true,
                 InheritsFrom = flatRoles.ToMList()
-            }.Execute(RoleOperation.Save);
+            }.Save();
 
             return result.ToLite();
         }
@@ -437,6 +438,7 @@ public static class AuthLogic
         using (AuthLogic.Disable())
         {
             UserEntity? user = RetrieveUser(username);
+
             if (user == null)
                 throw new IncorrectUsernameException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
@@ -635,13 +637,19 @@ public static class AuthLogic
         var roleInfos = doc.Root!.Element("Roles")!.Elements("Role").Select(x => new
         {
             Name = x.Attribute("Name")!.Value,
-            MergeStrategy = x.Attribute("MergeStrategy")?.Let(ms => ms.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union,
-            IsTrivialMerge = x.Attribute("IsTrivialMerge")?.Let(t => t.Value.ToBool()) ?? false,
+            MergeStrategy = x.Attribute("MergeStrategy")?.Value.ToEnum<MergeStrategy>() ?? MergeStrategy.Union,
+            IsTrivialMerge = x.Attribute("IsTrivialMerge")?.Value.ToBool() ?? false,
             SubRoles = x.Attribute("Contains")!.Value.SplitNoEmpty(','),
             Description = x.Attribute("Description")?.Value,
         }).ToList();
 
-        var roles = roleInfos.ToDictionary(a => a.Name!, a => new RoleEntity { Name = a.Name!, MergeStrategy = a.MergeStrategy, Description = a.Description, });
+        var roles = roleInfos.ToDictionary(a => a.Name!, a => new RoleEntity
+        {
+            Name = a.Name!,
+            MergeStrategy = a.MergeStrategy,
+            IsTrivialMerge = a.IsTrivialMerge,
+            Description = a.Description,
+        });
 
         foreach (var ri in roleInfos)
         {
