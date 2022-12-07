@@ -33,6 +33,9 @@ import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { getBreakpoint, Breakpoints } from '../Hooks'
+
+export type SearchControlViewMode = "Responsive" | "Default";
 
 export interface ShowBarExtensionOption { }
 
@@ -92,6 +95,9 @@ export interface SearchControlLoadedProps {
   styleContext?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
+
+  responsiveShowSwitchViewModesButton: boolean;
+  responsiveDefaultViewMode: SearchControlViewMode;
 }
 
 export interface SearchControlLoadedState {
@@ -120,6 +126,8 @@ export interface SearchControlLoadedState {
   refreshMode?: RefreshMode;
   editingColumn?: ColumnOptionParsed;
   lastToken?: QueryToken;
+  responsive?: boolean;
+  viewMode?: SearchControlViewMode;
 }
 
 export default class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
@@ -129,16 +137,27 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.state = {
       isSelectOpen: false,
       showFilters: props.showFilters,
-      refreshMode: props.defaultRefreshMode
+      refreshMode: props.defaultRefreshMode,
     };
   }
 
   static maxToArrayElements = 100;
+  static getResponsiveStyles: ((sc: SearchControlLoaded) => JSX.Element | null) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
 
+  onResize = () => {
+    const responsive = (getBreakpoint() <= Breakpoints.sm);
+    this.setState({
+      responsive: responsive,
+      viewMode: responsive ? this.props.responsiveDefaultViewMode : "Default",
+    });
+  }
+
   componentDidMount() {
+    window.addEventListener('resize', this.onResize);
+    this.onResize();
 
     const fo = this.props.findOptions;
     const qs = Finder.getSettings(fo.queryKey);
@@ -169,10 +188,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   isUnmounted = false;
   componentWillUnmount() {
     this.isUnmounted = true;
+    window.removeEventListener('resize', this.onResize);
     this.abortableSearch.abort();
     this.abortableSearchSummary.abort();
   }
-
 
   entityColumn(): ColumnDescription {
     return this.props.queryDescription.columns["Entity"];
@@ -504,6 +523,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {(p.showFooter ?? (this.state.resultTable != null && (this.state.resultTable.totalElements == null || this.state.resultTable.totalElements > this.state.resultTable.rows.length))) &&
           <PaginationSelector pagination={fo.pagination} onPagination={this.handlePagination} resultTable={this.state.resultTable} />}
         {this.state.contextualMenu && this.renderContextualMenu()}
+        {this.state.responsive == true && this.state.resultTable != null && this.state.viewMode == "Responsive" &&
+          SearchControlLoaded.getResponsiveStyles?.(this)}
       </div>
     );
   }
@@ -662,6 +683,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
           <FontAwesomeIcon icon="external-link-alt" />
         </button>
+      },
+
+      this.state.responsive == true && this.props.responsiveShowSwitchViewModesButton && SearchControlLoaded.getResponsiveStyles && {
+        button: <button className="sf-query-button btn btn-light" onClick={this.handleViewModeClick}>
+          {this.state.viewMode == "Responsive" ? <FontAwesomeIcon icon="desktop" /> :
+            <FontAwesomeIcon icon="mobile-alt" />}
+        </button>
       }
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
@@ -766,6 +794,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     else
       AppContext.history.push(path);
   };
+
+  handleViewModeClick = (ev: React.MouseEvent<any>) => {
+    this.setState({ viewMode: (this.state.viewMode == "Responsive" ? "Default" : "Responsive") });
+  }
 
   createTitle() {
 
@@ -1282,15 +1314,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fillWidths = this.props.findOptions.columnOptions.map(co => (co.token != null && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this)).fillWidth));
 
     var allSmall = fillWidths.every(a => a == false);
+    var allColumns = this.getAllColumns();
 
     return (
       <tr>
-        {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
-          <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
-        </th>
-        }
-        {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
-        {this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns).map((co, i) =>
+        {allColumns.map((co, i) =>
+          co == "Selection" ? <th className="sf-small-column sf-th-selection">
+              <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+            </th> : co == "Entity" ? <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th> :
           <th key={i}
             draggable={true}
             className={classes(
@@ -1325,6 +1356,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {allSmall && <th></th>}
       </tr>
     );
+  }
+
+  getAllColumns() {
+    var result: (ColumnOptionParsed | "Selection" | "Entity")[] = [];
+    if (this.props.allowSelection)
+      result.push("Selection");
+
+    if (this.props.view || this.props.findOptions.groupResults) 
+      result.push("Entity");
+    
+    const columns = this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns);
+    result.push(...columns);
+
+    return result;
   }
 
   canOrder(column: ColumnOptionParsed) {
@@ -1566,7 +1611,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           {...ra}
           className={classes(mark?.className, ra?.className)}>
           {this.props.allowSelection &&
-            <td style={{ textAlign: "center" }}>
+            <td className="centered-cell">
               <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
             </td>
           }
