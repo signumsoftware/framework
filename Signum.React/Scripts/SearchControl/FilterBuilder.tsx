@@ -412,7 +412,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const readOnly = p.readOnly || f.frozen;
 
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
     return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange()} />
 
@@ -604,7 +604,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
     if (isList(f.operation!))
       return <MultiValue values={f.value} onRenderItem={ctx => createFilterValueControl(ctx, f.token!, handleValueChange)} readOnly={readOnly} onChange={handleValueChange} />;
 
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
     return createFilterValueControl(ctx, f.token!, handleValueChange);
   }
@@ -787,7 +787,7 @@ export function MultiValue(p: MultiValueProps) {
                   p.onRenderItem(new TypeContext<any>(undefined,
                     {
                       formGroupStyle: "None",
-                      formSize: "ExtraSmall",
+                      formSize: "xs",
                       readOnly: p.readOnly
                     }, undefined as any, new Binding<any>(p.values, i)))
                 }

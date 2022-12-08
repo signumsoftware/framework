@@ -90,7 +90,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
   }
 
   const ctx = p.ctx;
-  const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
+  const ctxxs = ctx.subCtx({ formSize: "xs" });
   const entity = ctx.value;
   const queryKey = entity.query && entity.query.key;
 

@@ -1,9 +1,9 @@
 import * as React from "react"
 import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
-import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo } from './Reflection';
+import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo, EnumType } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
@@ -24,6 +24,7 @@ import CopyLiteButton from "./Components/CopyLiteButton";
 import { Typeahead } from "./Components";
 import { TypeaheadOptions } from "./Components/Typeahead";
 import CopyLinkButton from "./Components/CopyLinkButton";
+import { object } from "prop-types";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || getToString(currentUser) == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -884,6 +885,24 @@ export module API {
 
     return ajaxGet({ url: `~/api/reflection/typeEntity/${typeName}` });
   }
+
+  export function getEnumEntities<T extends string>(type: EnumType<T>): Promise<EnumConverter<T>>;
+  export function getEnumEntities(typeName: string): Promise<EnumConverter<string>>;
+  export function getEnumEntities(type: string | EnumType<string>): Promise<EnumConverter<string>> {
+
+    var typeName = typeof type == "string" ? type : type.type;
+
+    return ajaxGet<{ [enumValue: string]: Entity }>({ url: `~/api/reflection/enumEntities/${typeName}` })
+      .then(enumToEntity => softCast<EnumConverter<string>>({
+        enumToEntity: enumToEntity,
+        idToEnum: Object.entries(enumToEntity).toObject(a => a[1].id!.toString(), a => a[0])
+      }));
+  }
+}
+
+export interface EnumConverter<T> {
+  enumToEntity: { [enumValue: string]: EnumEntity<T> };
+  idToEnum: { [id: string]: T };
 }
 
 

@@ -16,9 +16,9 @@ public class CalendarStreamChartScript : ChartScript
         {
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter("StartDate", ChartParameterType.Enum) { ColumnIndex = 0, ValueDefinition = EnumValueList.Parse("Sunday|Monday") },
+                new ChartScriptParameter("StartDate", ChartParameterType.Enum) { ColumnIndex = 0, ValueDefinition = EnumValueList.Parse("Monday|Sunday") },
                 new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 1, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) { ColumnIndex = 1, ValueDefinition = EnumValueList.Parse("YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn") },
+                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) { ColumnIndex = 1, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             }
         };
     }      

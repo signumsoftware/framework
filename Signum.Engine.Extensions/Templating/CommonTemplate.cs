@@ -369,7 +369,7 @@ public class TemplateSynchronizationContext
                     break;
                 case FixTokenResult.SkipEntity:
                 case FixTokenResult.RemoveToken:
-                 case FixTokenResult.ReGenerateEntity:
+                 case FixTokenResult.RegenerateEntity:
                     throw new TemplateSyncException(result);
             }
         }
