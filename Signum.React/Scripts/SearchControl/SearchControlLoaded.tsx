@@ -1319,9 +1319,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return (
       <tr>
         {allColumns.map((co, i) =>
-          co == "Selection" ? <th className="sf-small-column sf-th-selection">
+          co == "Selection" ? <th key={i} className="sf-small-column sf-th-selection">
               <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
-            </th> : co == "Entity" ? <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th> :
+            </th> : co == "Entity" ? <th key={i} className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th> :
           <th key={i}
             draggable={true}
             className={classes(
