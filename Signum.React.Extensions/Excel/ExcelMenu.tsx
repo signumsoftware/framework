@@ -10,10 +10,12 @@ import { Dropdown, DropdownButton } from 'react-bootstrap';
 import * as Operations from '@framework/Operations';
 import SelectorModal from '@framework/SelectorModal'
 import { PaginationMode, QueryRequest } from '@framework/FindOptions'
+import ExcelReport from './Templates/ExcelReport'
 
 export interface ExcelMenuProps {
   searchControl: SearchControlLoaded;
   plainExcel: boolean;
+  importFromExcel: boolean;
   excelReport: boolean;
   importFromExcel: boolean;
 }
@@ -77,7 +79,10 @@ export default function ExcelMenu(p: ExcelMenuProps) {
     selectPagination((request) => ExcelClient.API.generatePlainExcel(request));
   }
 
-
+  function handleImportExcel() {
+    var request = p.searchControl.getQueryRequest();
+    request.pagination = { mode: "All" };
+  }
 
   function handleCreate() {
     Finder.API.fetchQueryEntity(p.searchControl.props.findOptions.queryKey)
@@ -104,23 +109,47 @@ export default function ExcelMenu(p: ExcelMenuProps) {
       {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>
-        {p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>}
-        {p.plainExcel && <Dropdown.Divider />}
-        {p.plainExcel && hasExcelReports && <Dropdown.Divider />}
-        {
-          excelReports?.map((uq, i) =>
+        {addDropdownDividers([
+          p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>,
+          p.importFromExcel && <Dropdown.Item onClick={handleImportExcel} ><span><FontAwesomeIcon icon={["fas", "file-excel"]} />&nbsp; {ExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
+          p.excelReport && addDropdownDividers([
+            excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}
               onClick={() => handleExcelReport(uq)}>
               {getToString(uq)}
-            </Dropdown.Item>)
-        }
-        {(p.plainExcel || hasExcelReports) && <Dropdown.Divider />}
-        {Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "magnifying-glass"]} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
-        {Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>}
+            </Dropdown.Item>),
+            Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "magnifying-glass"]} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>,
+            Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>,
+          ])
+        ]) }
       </Dropdown.Menu>
     </Dropdown>
   );
 }
 
+
+function addDropdownDividers(elements: (React.ReactElement | React.ReactElement[] | false | null | undefined)[]): React.ReactElement[] {
+  const result: React.ReactElement[] = [];
+
+  for (let i = 0; i < elements.length; i++) {
+
+    var elem = elements[i]; 
+
+    if (!elem || Array.isArray(elem) && elem.length == 0) {
+      continue;
+    }
+
+    if (Array.isArray(elem))
+      result.push(...elem);
+    else
+      result.push(elem);
+
+    if (i < elements.length - 1) {
+      result.push(<Dropdown.Divider />);
+    }
+  }
+
+  return result;
+};
 
 
