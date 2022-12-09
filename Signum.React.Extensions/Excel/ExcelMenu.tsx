@@ -15,6 +15,7 @@ export interface ExcelMenuProps {
   searchControl: SearchControlLoaded;
   plainExcel: boolean;
   excelReport: boolean;
+  importFromExcel: boolean;
 }
 
 export default function ExcelMenu(p: ExcelMenuProps) {
@@ -92,8 +93,10 @@ export default function ExcelMenu(p: ExcelMenuProps) {
 
   const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
 
-  if (p.plainExcel && !p.excelReport)
+  if (p.plainExcel && !p.excelReport && !p.importFromExcel)
     return <button className={"sf-query-button sf-search btn btn-light"} title={ExcelMessage.ExcelReport.niceToString() } onClick={handlePlainExcel}>{label} </button>;
+
+  var hasExcelReports = excelReports && excelReports.length > 0; 
 
   return (
     <Dropdown show={isOpen} onToggle={handleSelectedToggle} title={ExcelMessage.ExcelReport.niceToString()}>
@@ -102,7 +105,8 @@ export default function ExcelMenu(p: ExcelMenuProps) {
       </Dropdown.Toggle>
       <Dropdown.Menu>
         {p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>}
-        {p.plainExcel && excelReports && excelReports.length > 0 && <Dropdown.Divider />}
+        {p.plainExcel && <Dropdown.Divider />}
+        {p.plainExcel && hasExcelReports && <Dropdown.Divider />}
         {
           excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}
@@ -110,7 +114,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
               {getToString(uq)}
             </Dropdown.Item>)
         }
-        {(p.plainExcel || excelReports && excelReports.length > 0) && <Dropdown.Divider />}
+        {(p.plainExcel || hasExcelReports) && <Dropdown.Divider />}
         {Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "magnifying-glass"]} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>}
         {Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>

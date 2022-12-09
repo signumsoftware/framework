@@ -43,7 +43,7 @@ internal class TokenGettersAndSetters
 
 public class ImporterFromExcel
 {
-    public async IAsyncEnumerable<ImportResult> ImportExcel(QueryRequest request, FileContent file, OperationSymbol saveOperation)
+    public static async IAsyncEnumerable<ImportResult> ImportExcel(QueryRequest request, FileContent file, OperationSymbol saveOperation)
     {
         var (mainType, columns, simpleFilters) = ParseQueryRequest(request);
 
@@ -58,7 +58,6 @@ public class ImporterFromExcel
             WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
 
             var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
-
 
             foreach (var row in data.Descendants<Row>().Skip(1))
             {
@@ -169,30 +168,34 @@ public class ImporterFromExcel
         return columnGetterSetter.ToDictionaryEx();
     }
 
-    public void ValdidateQueryRequest(QueryRequest request) => ParseQueryRequest(request);
-
     public static (Type mainType, List<QueryToken> columns, Dictionary<QueryToken, object?> simpleFilters) ParseQueryRequest(QueryRequest request)
     {
         var qd = QueryLogic.Queries.QueryDescription(request.QueryName);
 
-        var implementations = qd.Columns.Single(a => a.IsEntity).Implementations;
+        Type entityType = GetEntityType(qd);
 
-        if (implementations == null || implementations.Value.IsByAll || implementations.Value.Types.Only() == null)
-            throw new ApplicationException($"Implementations of Entity column should be a simple entity (instead of {implementations})");
+        var simpleFilters = GetSimpleFilters(request.Filters, qd, entityType);
 
-        var mainType = implementations.Value.Types.SingleEx();
-
-        var simpleFilters = GetSimpleFilters(request.Filters, qd, mainType);
-
-        var columns = GetSimpleColumns(request.Columns, qd, mainType);
+        var columns = GetSimpleColumns(request.Columns, qd, entityType);
 
         var repeatedColumns = columns.Where(token => simpleFilters.ContainsKey(token)).ToList();
 
         if (repeatedColumns.Any())
             throw new ApplicationException($"Column(s) {repeatedColumns.CommaAnd()} have constant values from filters");
 
-        return (mainType, columns, simpleFilters);
+        return (entityType, columns, simpleFilters);
 
+    }
+
+    public static Type GetEntityType(QueryDescription qd)
+    {
+        var implementations = qd.Columns.Single(a => a.IsEntity).Implementations;
+
+        if (implementations == null || implementations.Value.IsByAll || implementations.Value.Types.Only() == null)
+            throw new ApplicationException($"Implementations of Entity column should be a simple entity (instead of {implementations})");
+
+        var mainType = implementations.Value.Types.SingleEx();
+        return mainType;
     }
 
     static List<QueryToken> GetSimpleColumns(List<Column> columns, QueryDescription qd, Type mainType)

@@ -53,5 +53,5 @@ public enum ExcelMessage
 public static class ExcelPermission
 {
     public static PermissionSymbol PlainExcel;
-    //public static PermissionSymbol ImportFromExcel;
+    public static PermissionSymbol ImportFromExcel;
 }

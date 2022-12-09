@@ -53,4 +53,46 @@ public class ExcelController : ControllerBase
         public QueryRequestTS queryRequest;
         public Lite<ExcelReportEntity> excelReport;
     }
+
+    [HttpPost("api/excel/validateForImport")]
+    public void ImportFromExcel(QueryRequestTS queryRequest)
+    {
+        ExcelPermission.ImportFromExcel.AssertAuthorized();
+
+        ImporterFromExcel.ParseQueryRequest(queryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
+    }
+
+
+    [HttpPost("api/excel/import")]
+    public IAsyncEnumerable<ImportResult> ImportFromExcel(ExcelImportRequest request)
+    {
+        ExcelPermission.ImportFromExcel.AssertAuthorized();
+
+        var queryRequest = request.QueryRequests.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
+
+        var qd = QueryLogic.Queries.QueryDescription(queryRequest.QueryName);
+
+        Type mainType = ImporterFromExcel.GetEntityType(qd);
+
+        return ImporterFromExcel.ImportExcel(queryRequest, request.ImportModel.ExcelFile.ToFileContent(), request.GetOperationSymbol(mainType));
+    }
+}
+
+public class ExcelImportRequest
+{
+    public ExcelImportModel ImportModel { get; set; }
+    public QueryRequestTS QueryRequests { get; set; }
+    public required string OperationKey { get; set; }
+
+    public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.OperationKey, entityType);
+
+    public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType)
+    {
+        var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
+
+        OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
+
+        return symbol;
+    }
+
 }
