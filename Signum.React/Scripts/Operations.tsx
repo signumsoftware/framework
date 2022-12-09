@@ -868,7 +868,7 @@ export namespace API {
       () => ajaxPostRaw({ url: "~/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest));;
   }
 
-  export function constructFromMany<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T> | undefined> {
+  export function constructFromMany<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_FromMany<T, F>, ...args: any[]): Promise<EntityPack<T> | undefined> {
     GraphExplorer.propagateAll(lites, args);
     return ajaxPost({ url: "~/api/operation/constructFromMany" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
   }
