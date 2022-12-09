@@ -12,7 +12,7 @@ import * as ChartClient from '../Chart/ChartClient'
 import { ChartPermission } from '../Chart/Signum.Entities.Chart'
 import ExcelMenu from './ExcelMenu'
 
-export function start(options: { routes: JSX.Element[], plainExcel: boolean, excelReport: boolean }) {
+export function start(options: { routes: JSX.Element[], plainExcel: boolean, importFromExcel: boolean, excelReport: boolean }) {
 
   if (options.excelReport) {
     Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => import('./Templates/ExcelReport')));
@@ -28,7 +28,12 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
       !(options.excelReport && Navigator.isViewable(ExcelReportEntity)))
       return undefined;
 
-    return { button: <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport && Navigator.isViewable(ExcelReportEntity)} /> };
+    return {
+      button: <ExcelMenu searchControl={ctx.searchControl}
+        plainExcel={options.plainExcel}
+        importFromExcel={options.importFromExcel}
+        excelReport={options.excelReport && Navigator.isViewable(ExcelReportEntity)} />
+    };
   });
 
   if (options.plainExcel) {

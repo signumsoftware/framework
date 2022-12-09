@@ -45,7 +45,8 @@ public enum ExcelMessage
     [Description("The Excel Template has a column {0} not present in the Find Window")]
     TheExcelTemplateHasAColumn0NotPresentInTheFindWindow,
     ThereAreNoResultsToWrite,
-    CreateNew
+    CreateNew,
+    ImportFromExcel
 }
 
 

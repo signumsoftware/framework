@@ -32,6 +32,7 @@ export module ExcelMessage {
   export const TheExcelTemplateHasAColumn0NotPresentInTheFindWindow = new MessageKey("ExcelMessage", "TheExcelTemplateHasAColumn0NotPresentInTheFindWindow");
   export const ThereAreNoResultsToWrite = new MessageKey("ExcelMessage", "ThereAreNoResultsToWrite");
   export const CreateNew = new MessageKey("ExcelMessage", "CreateNew");
+  export const ImportFromExcel = new MessageKey("ExcelMessage", "ImportFromExcel");
 }
 
 export module ExcelPermission {

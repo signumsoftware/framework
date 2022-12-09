@@ -53,4 +53,14 @@ public class ExcelController : ControllerBase
         public QueryRequestTS queryRequest;
         public Lite<ExcelReportEntity> excelReport;
     }
+
+    [HttpPost("api/excel/excelImport")]
+    public FileStreamResult GenerateExcelReport([Required, FromBody] ExcelReportRequest request)
+    {
+        byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
+
+        var fileName = request.excelReport.ToString() + "-" + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
+
+        return FilesController.GetFileStreamResult(new MemoryStream(file), fileName);
+    }
 }
