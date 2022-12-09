@@ -29,13 +29,19 @@ import SystemTimeEditor from './SystemTimeEditor';
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Search.css"
+import "./SearchMobile.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { getBreakpoint, Breakpoints } from '../Hooks'
 
-export type SearchControlViewMode = "Responsive" | "Default";
+export type SearchControlViewMode = "Mobile" | "Desktop";
+
+export interface SearchControlMobileOptions {
+  showSwitchViewModesButton: boolean;
+  defaultViewMode: SearchControlViewMode;
+}
 
 export interface ShowBarExtensionOption { }
 
@@ -95,9 +101,7 @@ export interface SearchControlLoadedProps {
   styleContext?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
-
-  responsiveShowSwitchViewModesButton: boolean;
-  responsiveDefaultViewMode: SearchControlViewMode;
+  mobileOptions?: SearchControlMobileOptions;
 }
 
 export interface SearchControlLoadedState {
@@ -126,7 +130,7 @@ export interface SearchControlLoadedState {
   refreshMode?: RefreshMode;
   editingColumn?: ColumnOptionParsed;
   lastToken?: QueryToken;
-  responsive?: boolean;
+  isMobile?: boolean;
   viewMode?: SearchControlViewMode;
 }
 
@@ -142,16 +146,24 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   static maxToArrayElements = 100;
-  static getResponsiveStyles: ((sc: SearchControlLoaded) => JSX.Element | null) | null = null;
+  static mobileOptions: SearchControlMobileOptions | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
 
+  getMobileOptions() {
+    const fo = this.props.findOptions;
+    const qs = Finder.getSettings(fo.queryKey);
+
+    return this.props.mobileOptions ?? qs?.mobileOptions ?? SearchControlLoaded.mobileOptions ??
+      ({ showSwitchViewModesButton: true, defaultViewMode: "Mobile" } as SearchControlMobileOptions);
+  }
+
   onResize = () => {
-    const responsive = (getBreakpoint() <= Breakpoints.sm);
+    const isMobile = (getBreakpoint() <= Breakpoints.sm);
     this.setState({
-      responsive: responsive,
-      viewMode: responsive ? this.props.responsiveDefaultViewMode : "Default",
+      isMobile: isMobile,
+      viewMode: isMobile ? this.getMobileOptions().defaultViewMode : "Desktop",
     });
   }
 
@@ -511,7 +523,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <div ref={d => this.containerDiv = d}
           className="sf-scroll-table-container table-responsive"
           style={{ maxHeight: this.props.maxResultsHeight }}>
-          <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined} >
+          <table className={classes("sf-search-results table table-hover table-sm", this.state.isMobile == true && this.state.viewMode == "Mobile" && "mobile")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
             <thead>
               {this.renderHeaders()}
             </thead>
@@ -523,8 +535,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {(p.showFooter ?? (this.state.resultTable != null && (this.state.resultTable.totalElements == null || this.state.resultTable.totalElements > this.state.resultTable.rows.length))) &&
           <PaginationSelector pagination={fo.pagination} onPagination={this.handlePagination} resultTable={this.state.resultTable} />}
         {this.state.contextualMenu && this.renderContextualMenu()}
-        {this.state.responsive == true && this.state.resultTable != null && this.state.viewMode == "Responsive" &&
-          SearchControlLoaded.getResponsiveStyles?.(this)}
       </div>
     );
   }
@@ -685,9 +695,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         </button>
       },
 
-      this.state.responsive == true && this.props.responsiveShowSwitchViewModesButton && SearchControlLoaded.getResponsiveStyles && {
+      this.state.isMobile == true && this.getMobileOptions().showSwitchViewModesButton && {
         button: <button className="sf-query-button btn btn-light" onClick={this.handleViewModeClick}>
-          {this.state.viewMode == "Responsive" ? <FontAwesomeIcon icon="desktop" /> :
+          {this.state.viewMode == "Mobile" ? <FontAwesomeIcon icon="desktop" /> :
             <FontAwesomeIcon icon="mobile-alt" />}
         </button>
       }
@@ -796,7 +806,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   };
 
   handleViewModeClick = (ev: React.MouseEvent<any>) => {
-    this.setState({ viewMode: (this.state.viewMode == "Responsive" ? "Default" : "Responsive") });
+    this.setState({ viewMode: (this.state.viewMode == "Mobile" ? "Desktop" : "Mobile") });
   }
 
   createTitle() {
@@ -1625,6 +1635,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           {
             columns.map((c, j) =>
               <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
+                {this.state.isMobile == true && this.state.viewMode == "Mobile" &&
+                  <span className="span-before">{c.column.displayName}</span>}
                 {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
                   c.hasToArray != null ? joinNodes((row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, ctx, c.column.token!)),
                     c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistict" ? <span className="text-muted">, </span> : <br />) :

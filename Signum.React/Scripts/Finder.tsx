@@ -27,7 +27,7 @@ import {
 
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
-import SearchControlLoaded from './SearchControl/SearchControlLoaded';
+import SearchControlLoaded, { SearchControlMobileOptions } from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
 import { ButtonBarElement } from "./TypeContext";
@@ -1860,6 +1860,7 @@ export interface QuerySettings {
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   customGetPropsFromFilter?: (filters: FilterOptionParsed[]) => Promise<any>;
+  mobileOptions?: SearchControlMobileOptions;
 }
 
 

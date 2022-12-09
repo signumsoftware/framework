@@ -1,0 +1,67 @@
+﻿@media only screen and (max-width: 768px) {
+
+    table.sf-search-results.mobile tr:nth-of-type(odd) {
+        background: #eee;
+    }
+
+        table.sf-search-results.mobile tr:nth-of-type(odd) td {
+            border-color: white;
+        }
+
+    table.sf-search-results.mobile .numeric-cell,
+    table.sf-search-results.mobile .centered-cell,
+    table.sf-search-results.mobile .date-cell {
+        text-align: left;
+    }
+
+    /* Force table to not be like tables anymore */
+    table.sf-search-results.mobile,
+    table.sf-search-results.mobile thead,
+    table.sf-search-results.mobile tbody,
+    table.sf-search-results.mobile th,
+    table.sf-search-results.mobile td,
+    table.sf-search-results.mobile tr {
+        display: block;
+    }
+
+        table.sf-search-results.mobile td {
+            min-height: 2.4rem;
+            word-break: break-word;
+        }
+
+        /* Hide table headers (but not display: none;, for accessibility) */
+        table.sf-search-results.mobile thead tr {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+
+        table.sf-search-results.mobile tr {
+            border: 1px solid #ccc;
+        }
+
+        table.sf-search-results.mobile td {
+            /* Behave  like a "row" */
+            border: none;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 50% !important;
+        }
+
+            table.sf-search-results.mobile td:before, table.sf-search-results.mobile .span-before {
+                /* Now like a table header */
+                position: absolute;
+                /* Top/left values mimic padding */
+                top: 6px;
+                left: 6px;
+                width: 47%;
+                padding-right: 10px;
+                white-space: nowrap;
+            }
+
+        table.sf-search-results.mobile .span-before {
+            font-weight: bold;
+            max-width: 47%;
+            overflow: auto;
+        }
+}
