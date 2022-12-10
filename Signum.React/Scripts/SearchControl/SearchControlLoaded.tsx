@@ -156,7 +156,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const qs = Finder.getSettings(fo.queryKey);
 
     return this.props.mobileOptions ?? qs?.mobileOptions ?? SearchControlLoaded.mobileOptions ??
-      ({ showSwitchViewModesButton: true, defaultViewMode: "Mobile" } as SearchControlMobileOptions);
+      {
+        showSwitchViewModesButton: true,
+        defaultViewMode: "Mobile"
+      };
   }
 
   onResize = () => {
