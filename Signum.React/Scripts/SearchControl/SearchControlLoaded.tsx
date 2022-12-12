@@ -36,7 +36,7 @@ import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { getBreakpoint, Breakpoints } from '../Hooks'
 
-export type SearchControlViewMode = "Mobile" | "Desktop";
+export type SearchControlViewMode = "Mobile" | "Standard";
 
 export interface SearchControlMobileOptions {
   showSwitchViewModesButton: boolean;
@@ -101,7 +101,7 @@ export interface SearchControlLoadedProps {
   styleContext?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
-  mobileOptions?: SearchControlMobileOptions;
+  mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
 }
 
 export interface SearchControlLoadedState {
@@ -146,16 +146,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   }
 
   static maxToArrayElements = 100;
-  static mobileOptions: SearchControlMobileOptions | null = null;
+  static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
 
-  getMobileOptions() {
+  getMobileOptions(fop: FindOptionsParsed) {
     const fo = this.props.findOptions;
     const qs = Finder.getSettings(fo.queryKey);
 
-    return this.props.mobileOptions ?? qs?.mobileOptions ?? SearchControlLoaded.mobileOptions ??
+    return this.props.mobileOptions?.(fop) ?? qs?.mobileOptions?.(fop) ?? SearchControlLoaded.mobileOptions?.(fop) ??
       {
         showSwitchViewModesButton: true,
         defaultViewMode: "Mobile"
@@ -166,7 +166,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const isMobile = (getBreakpoint() <= Breakpoints.sm);
     this.setState({
       isMobile: isMobile,
-      viewMode: isMobile ? this.getMobileOptions().defaultViewMode : "Desktop",
+      viewMode: isMobile ? this.getMobileOptions(this.props.findOptions).defaultViewMode : "Standard",
     });
   }
 
@@ -376,19 +376,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     event.preventDefault();
     event.stopPropagation();
 
-    const td = DomUtils.closest(event.target as HTMLElement, "td, th")!;
-    const columnIndex = td.getAttribute("data-column-index") ? parseInt(td.getAttribute("data-column-index")!) : null;
+    const n = (DomUtils.closest(event.target as HTMLElement, "td, th") ?? DomUtils.closest(event.target as HTMLElement, "div"))!;
+    const columnIndex = n.getAttribute("data-column-index") ? parseInt(n.getAttribute("data-column-index")!) : null;
 
 
-    const tr = td.parentNode as HTMLElement;
-    const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index")!) : null;
+    const pn = n.parentNode as HTMLElement;
+    const rowIndex = pn.getAttribute("data-row-index") ? parseInt(pn.getAttribute("data-row-index")!) : null;
 
     this.setState({
       contextualMenu: {
         position: ContextMenu.getPositionEvent(event),
         columnIndex,
         rowIndex,
-        columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
+        columnOffset: n.tagName == "TH" ? this.getOffset(event.pageX, n.getBoundingClientRect(), Number.MAX_VALUE) : undefined
       }
     });
 
@@ -491,7 +491,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
 
     return (
-      <div className="sf-search-control sf-control-container"
+      <div className={classes("sf-search-control sf-control-container", this.state.isMobile == true && this.state.viewMode == "Mobile" && "mobile")}
         data-search-count={this.state.searchCount}
         data-query-key={fo.queryKey}>
         {p.showHeader == true &&
@@ -517,27 +517,44 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
-        {this.state.editingColumn && <ColumnEditor
-          columnOption={this.state.editingColumn}
-          onChange={this.handleColumnChanged}
-          queryDescription={qd}
-          subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray |  canAggregateXorOperation}
-          close={this.handleColumnClose} />}
-        <div ref={d => this.containerDiv = d}
-          className="sf-scroll-table-container table-responsive"
-          style={{ maxHeight: this.props.maxResultsHeight }}>
-          <table className={classes("sf-search-results table table-hover table-sm", this.state.isMobile == true && this.state.viewMode == "Mobile" && "mobile")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
-            <thead>
-              {this.renderHeaders()}
-            </thead>
-            <tbody>
-              {this.renderRows()}
-            </tbody>
-          </table>
-        </div>
+        {this.state.isMobile == true && this.state.viewMode == "Mobile" ? this.renderMobile() :
+          <>
+            {
+              this.state.editingColumn && <ColumnEditor
+                columnOption={this.state.editingColumn}
+                onChange={this.handleColumnChanged}
+                queryDescription={qd}
+                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | canAggregateXorOperation}
+                close={this.handleColumnClose} />
+            }
+            <div ref={d => this.containerDiv = d}
+              className="sf-scroll-table-container table-responsive"
+              style={{ maxHeight: this.props.maxResultsHeight }}>
+              <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+                <thead>
+                  {this.renderHeaders()}
+                </thead>
+                <tbody>
+                  {this.renderRows()}
+                </tbody>
+              </table>
+            </div>
+          </>}
         {(p.showFooter ?? (this.state.resultTable != null && (this.state.resultTable.totalElements == null || this.state.resultTable.totalElements > this.state.resultTable.rows.length))) &&
           <PaginationSelector pagination={fo.pagination} onPagination={this.handlePagination} resultTable={this.state.resultTable} />}
         {this.state.contextualMenu && this.renderContextualMenu()}
+      </div>
+    );
+  }
+
+  renderMobile() {
+    return (
+      <div ref={d => this.containerDiv = d}
+        className="sf-scroll-table-container"
+        style={{ maxHeight: this.props.maxResultsHeight }}>
+        <div className="sf-search-results" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+          {this.renderRowsMobile()}
+        </div>
       </div>
     );
   }
@@ -698,7 +715,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         </button>
       },
 
-      this.state.isMobile == true && this.getMobileOptions().showSwitchViewModesButton && {
+      this.state.isMobile == true && this.getMobileOptions(this.props.findOptions).showSwitchViewModesButton && {
         button: <button className="sf-query-button btn btn-light" onClick={this.handleViewModeClick}>
           {this.state.viewMode == "Mobile" ? <FontAwesomeIcon icon="desktop" /> :
             <FontAwesomeIcon icon="mobile-alt" />}
@@ -809,7 +826,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   };
 
   handleViewModeClick = (ev: React.MouseEvent<any>) => {
-    this.setState({ viewMode: (this.state.viewMode == "Mobile" ? "Desktop" : "Mobile") });
+    this.setState({ viewMode: (this.state.viewMode == "Mobile" ? "Standard" : "Mobile") });
   }
 
   createTitle() {
@@ -1327,14 +1344,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fillWidths = this.props.findOptions.columnOptions.map(co => (co.token != null && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this)).fillWidth));
 
     var allSmall = fillWidths.every(a => a == false);
-    var allColumns = this.getAllColumns();
 
     return (
       <tr>
-        {allColumns.map((co, i) =>
-          co == "Selection" ? <th key={i} className="sf-small-column sf-th-selection">
-              <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
-            </th> : co == "Entity" ? <th key={i} className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th> :
+        {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
+          <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+        </th>
+        }
+        {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
+        {this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns).map((co, i) =>
           <th key={i}
             draggable={true}
             className={classes(
@@ -1369,20 +1387,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         {allSmall && <th></th>}
       </tr>
     );
-  }
-
-  getAllColumns() {
-    var result: (ColumnOptionParsed | "Selection" | "Entity")[] = [];
-    if (this.props.allowSelection)
-      result.push("Selection");
-
-    if (this.props.view || this.props.findOptions.groupResults) 
-      result.push("Entity");
-    
-    const columns = this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns);
-    result.push(...columns);
-
-    return result;
   }
 
   canOrder(column: ColumnOptionParsed) {
@@ -1545,6 +1549,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
   }
 
+  joinNodes(values: (React.ReactChild | undefined)[], separator: React.ReactChild) {
+
+    if (values.length > (SearchControlLoaded.maxToArrayElements - 1))
+      values = [...values.filter((a, i) => i < SearchControlLoaded.maxToArrayElements - 1), "…"];
+
+    return React.createElement(React.Fragment, undefined,
+      ...values.flatMap((v, i) => i == values.length - 1 ? [v] : [v, separator])
+    );
+  }
+
   renderRows(): React.ReactNode {
 
     const columnOptions = this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns);
@@ -1608,16 +1622,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         rowIndex : i,
       };
 
-      function joinNodes(values: (React.ReactChild | undefined)[], separator: React.ReactChild) {
-
-        if (values.length > (SearchControlLoaded.maxToArrayElements - 1))
-          values = [...values.filter((a, i) => i < SearchControlLoaded.maxToArrayElements - 1), "…"];
-
-        return React.createElement(React.Fragment, undefined,
-          ...values.flatMap((v, i) => i == values.length - 1 ? [v] : [v, separator])
-        );
-      }
-
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
@@ -1638,10 +1642,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           {
             columns.map((c, j) =>
               <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                {this.state.isMobile == true && this.state.viewMode == "Mobile" &&
-                  <span className="span-before">{c.column.displayName}</span>}
                 {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-                  c.hasToArray != null ? joinNodes((row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, ctx, c.column.token!)),
+                  c.hasToArray != null ? this.joinNodes((row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, ctx, c.column.token!)),
                     c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistict" ? <span className="text-muted">, </span> : <br />) :
                     c.cellFormatter.formatter(row.columns[c.resultIndex], ctx, c.column.token!)}
               </td>
@@ -1658,6 +1660,115 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         <OverlayTrigger
           overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"}>{message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
           {tr}
+        </OverlayTrigger>
+      );
+    });
+  }
+
+  renderRowsMobile() {
+    const columnOptions = this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns);
+
+    if (!this.state.resultTable) {
+      if (this.props.findOptions.pagination.mode == "All" && this.props.showFooter)
+        return <div className="text-danger">{SearchMessage.ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton.niceToString()}</div>;
+
+      return <div>{JavascriptMessage.searchForResults.niceToString()}</div>;
+    }
+
+    var resultTable = this.state.resultTable;
+
+    var resFO = this.state.resultFindOptions!;
+
+    if (resultTable.rows.length == 0) {
+      if (resultTable.totalElements == 0 || this.props.showFooter == false || resFO.pagination.mode != "Paginate")
+        return <div>{SearchMessage.NoResultsFound.niceToString()}</div>;
+      else
+        return <div>{SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
+          resFO.pagination.currentPage,
+          <a href="#" onClick={e => {
+            e.preventDefault();
+            this.handlePagination({
+              mode: "Paginate",
+              elementsPerPage: resFO.pagination.elementsPerPage,
+              currentPage: 1
+            });
+          }}>{SearchMessage.GoBackToPageOne.niceToString()}</a>
+        )}</div>;
+    }
+
+    const qs = this.props.querySettings;
+
+    const columns = columnOptions.map(co => ({
+      column: co,
+      hasToArray: hasToArray(co.token),
+      cellFormatter: (co.token && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this))),
+      resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
+    }));
+
+    const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
+
+    var entityFormatter = this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter;
+    
+    const hasSelectionOrView = this.props.allowSelection || this.props.findOptions.groupResults || this.props.view;
+
+    return resultTable.rows.map((row, i) => {
+
+      const mark = row.entity && this.getMarkedRow(row.entity);
+
+      var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
+
+      const ctx: Finder.CellFormatterContext = {
+        refresh: () => this.dataChanged(),
+        systemTime: this.props.findOptions.systemTime,
+        columns: resultTable.columns,
+        row: row,
+        rowIndex: i,
+      };
+
+      var div = (
+        <div key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
+          onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
+          {...ra}
+          className={classes("row-container", mark?.className, ra?.className)}>
+          {hasSelectionOrView &&
+            <div className="row-data row-header">
+              {this.props.allowSelection &&
+                <span className="row-selection">
+                  <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
+                </span>
+              }
+
+              {(this.props.findOptions.groupResults || this.props.view) &&
+                <span className={entityFormatter.cellClass}>
+                  {entityFormatter.formatter(row, resultTable.columns, this)}
+                </span>
+              }
+            </div>}
+
+          {
+            columns.map((c, j) =>
+              <div className={classes("row-data", !hasSelectionOrView && j == 0 && "row-header")}>
+                {<span className="row-title">{c.column.displayName}</span>}
+                <span key={j} data-column-index={j} className={classes("row-value", c.cellFormatter && c.cellFormatter.cellClass)}>
+                  {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
+                    c.hasToArray != null ? this.joinNodes((row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, ctx, c.column.token!)),
+                      c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistict" ? <span className="text-muted">, </span> : <br />) :
+                      c.cellFormatter.formatter(row.columns[c.resultIndex], ctx, c.column.token!)}
+                </span>
+              </div>
+            )
+          }
+        </div>
+      );
+
+      const message = mark?.message;
+      if (!message)
+        return div;
+
+      return (
+        <OverlayTrigger
+          overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"}>{message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
+          {div}
         </OverlayTrigger>
       );
     });

@@ -1860,7 +1860,7 @@ export interface QuerySettings {
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   customGetPropsFromFilter?: (filters: FilterOptionParsed[]) => Promise<any>;
-  mobileOptions?: SearchControlMobileOptions;
+  mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
 }
 
 
@@ -2103,9 +2103,10 @@ function initEntityFormatRules(): EntityFormatRule[] {
           onNavigated={sc?.handleOnNavigated}
           getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
           inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
-          <span title={EntityControlMessage.View.niceToString()}>
-            {EntityBaseController.viewIcon}
-          </span>
+          {sc?.state.isMobile == true && sc?.state.viewMode == "Mobile" ? undefined :
+            <span title={EntityControlMessage.View.niceToString()}>
+              {EntityBaseController.viewIcon}
+            </span>}
         </EntityLink>, "centered-cell")
     },
     {

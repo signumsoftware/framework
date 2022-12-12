@@ -68,7 +68,7 @@ export interface SearchControlProps {
   styleContext?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>;
   onPageSubTitleChanged?: () => void;
-  mobileOptions?: SearchControlMobileOptions;
+  mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
 }
 
 export interface SearchControlState {
