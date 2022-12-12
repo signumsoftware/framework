@@ -1709,7 +1709,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var entityFormatter = this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter;
     
-    const hasSelectionOrView = this.props.allowSelection || this.props.findOptions.groupResults || this.props.view;
+    const hasView = this.props.findOptions.groupResults || this.props.view;
 
     return resultTable.rows.map((row, i) => {
 
@@ -1730,7 +1730,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
           {...ra}
           className={classes("row-container", mark?.className, ra?.className)}>
-          {hasSelectionOrView &&
+          {(this.props.allowSelection || hasView) &&
             <div className="row-data row-header">
               {this.props.allowSelection &&
                 <span className="row-selection">
@@ -1738,8 +1738,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 </span>
               }
 
-              {(this.props.findOptions.groupResults || this.props.view) &&
-                <span className={entityFormatter.cellClass}>
+              {hasView &&
+                <span className={classes("row-view", entityFormatter.cellClass)}>
                   {entityFormatter.formatter(row, resultTable.columns, this)}
                 </span>
               }
@@ -1747,7 +1747,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
           {
             columns.map((c, j) =>
-              <div className={classes("row-data", !hasSelectionOrView && j == 0 && "row-header")}>
+              <div className={classes("row-data", !(this.props.allowSelection || hasView) && j == 0 && "row-header")}>
                 {<span className="row-title">{c.column.displayName}</span>}
                 <span key={j} data-column-index={j} className={classes("row-value", c.cellFormatter && c.cellFormatter.cellClass)}>
                   {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
