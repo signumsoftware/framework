@@ -81,10 +81,3 @@ public enum RestLogReplayState
     NoChanges,
     WithChanges
 }
-
-public class RestDiffResult
-{
-    public string? previous { get; set; }
-    public string current { get; set; }
-    public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diff { get; set; }
-}

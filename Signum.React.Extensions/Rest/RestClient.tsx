@@ -37,19 +37,8 @@ export module API {
     return ajaxGet({ url: "~/api/auth/loginFromApiKey?apiKey=" + apiKey, avoidAuthToken: true });
   }
 
-  export function replayRestLog(restLogID: string | number, host: string) : Promise<RestLogDiff> {
+  export function replayRestLog(restLogID: string | number, host: string) : Promise<string> {
     return ajaxGet({ url: "~/api/restLog?id=" + restLogID + "&url=" + host });
 
   }
-}
-
-export interface RestLogDiff {
-  previous: string
-  diff: Array<DiffPair<Array<DiffPair<string>>>>;
-  current: string
-}
-
-export interface DiffPair<T> {
-  action: "Equal" | "Added" | "Removed";
-  value: T;
 }
