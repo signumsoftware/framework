@@ -107,6 +107,7 @@ public class WorkflowImportExport
                 e.Event.Name.HasText() ? new XAttribute("Name", e.Event.Name) : null!,
                 new XAttribute("Lane", e.Event.Lane.BpmnElementId),
                 new XAttribute("Type", e.Event.Type.ToString()),
+                e.Event.DecisionOptionName.HasText() ? new XAttribute("DecisionOptionName", e.Event.DecisionOptionName) : null,
                 e.Event.Timer == null ? null! : new XElement("Timer",
                     e.Event.Timer.Duration?.ToXml("Duration")!,
                     e.Event.Timer.Condition == null ? null! : new XAttribute("Condition", ctx.Include(e.Event.Timer.Condition))),
@@ -361,6 +362,7 @@ public class WorkflowImportExport
                         ev.Name = xml.Attribute("Name")?.Value;
                         ev.Lane = this.lanes.GetOrThrow(xml.Attribute("Lane")!.Value);
                         ev.Type = xml.Attribute("Type")!.Value.ToEnum<WorkflowEventType>();
+                        ev.DecisionOptionName = xml.Attribute("DecisionOptionName")?.Value;
                         ev.Timer = ev.Timer.CreateOrAssignEmbedded(xml.Element("Timer"), (time, xml) =>
                         {
                             time.Duration = time.Duration.CreateOrAssignEmbedded(xml.Element("Duration"), (ts, xml) => ts.FromXml(xml));
