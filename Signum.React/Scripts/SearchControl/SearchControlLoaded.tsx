@@ -552,7 +552,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       <div ref={d => this.containerDiv = d}
         className="sf-scroll-table-container"
         style={{ maxHeight: this.props.maxResultsHeight }}>
-        <div className="sf-search-results" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
+        <div className="sf-search-results mobile" onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
           {this.renderRowsMobile()}
         </div>
       </div>

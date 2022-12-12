@@ -20,12 +20,17 @@
     background-color: #eee;
 }
 
-.sf-search-control.sf-control-container.mobile .date-cell,
-.sf-search-control.sf-control-container.mobile .numeric-cell {
+.sf-search-results.mobile .date-cell,
+.sf-search-results.mobile .numeric-cell {
     position: absolute;
     right: 5px;
+}
+
+.sf-search-results.mobile .multi-line {
+    word-break: break-word;
 }
 
 .sf-search-control.sf-control-container.mobile .sf-pagination-right {
     text-align: center;
 }
+
