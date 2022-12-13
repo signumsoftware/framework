@@ -13,6 +13,7 @@ using System.Data;
 using Signum.Engine.Scheduler;
 using System.Runtime.InteropServices;
 using Microsoft.Data.SqlClient;
+using Microsoft.Exchange.WebServices.Data;
 
 namespace Signum.Engine.Cache;
 
@@ -888,6 +889,12 @@ Remember that the Start could be called with an empty database!");
 
 
     internal static AsyncThreadVariable<Dictionary<Type, bool>?> assumeMassiveChangesAsInvalidations = Statics.ThreadVariable<Dictionary<Type, bool>?>("assumeMassiveChangesAsInvalidations");
+
+
+    public static bool? AssumeMassiveChangesAsInvalidations(Type type)
+    {
+      return assumeMassiveChangesAsInvalidations.Value?.TryGetS(type);
+    }
 
     public static IDisposable AssumeMassiveChangesAsInvalidations<T>(bool assumeInvalidations) where T : Entity
     {
