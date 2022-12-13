@@ -153,7 +153,7 @@ public class PostgreSqlConnector : Connector
         else
         {
             cmd.Connection = (NpgsqlConnection)Transaction.CurrentConnection!;
-            cmd.Transaction = (NpgsqlTransaction)Transaction.CurrentTransaccion!;
+            cmd.Transaction = (NpgsqlTransaction)Transaction.CurrentTransaction!;
         }
 
         cmd.CommandText = preCommand.Sql;
