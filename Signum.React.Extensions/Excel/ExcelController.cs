@@ -18,14 +18,14 @@ namespace Signum.React.Excel;
 public class ExcelController : ControllerBase
 {
     [HttpPost("api/excel/plain")]
-    public async Task<FileStreamResult> ToPlainExcel([Required, FromBody]QueryRequestTS request, CancellationToken token)
+    public async Task<FileStreamResult> ToPlainExcel([Required, FromBody]QueryRequestTS request, [FromQuery]bool forImport, CancellationToken token)
     {
         ExcelPermission.PlainExcel.AssertAuthorized();
 
         var queryRequest = request.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
 
         ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);
-        byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName));
+        byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName), forImport: forImport);
 
         var fileName = request.queryKey + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
@@ -55,36 +55,32 @@ public class ExcelController : ControllerBase
     }
 
     [HttpPost("api/excel/validateForImport")]
-    public void ImportFromExcel(QueryRequestTS queryRequest)
+    public void ValidateForImport([Required, FromBody] QueryRequestTS queryRequest)
     {
         ExcelPermission.ImportFromExcel.AssertAuthorized();
 
         ImporterFromExcel.ParseQueryRequest(queryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
     }
 
-
     [HttpPost("api/excel/import")]
-    public IAsyncEnumerable<ImportResult> ImportFromExcel(ExcelImportRequest request)
+    public IAsyncEnumerable<ImportResult> ImportFromExcel([Required, FromBody] ImportFromExcelRequest request)
     {
         ExcelPermission.ImportFromExcel.AssertAuthorized();
 
-        var queryRequest = request.QueryRequests.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
+        var qr = request.QueryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
 
-        var qd = QueryLogic.Queries.QueryDescription(queryRequest.QueryName);
+        Type mainType = TypeLogic.GetType(request.ImportModel.TypeName);
 
-        Type mainType = ImporterFromExcel.GetEntityType(qd);
-
-        return ImporterFromExcel.ImportExcel(queryRequest, request.ImportModel.ExcelFile.ToFileContent(), request.GetOperationSymbol(mainType));
+        return ImporterFromExcel.ImportExcel(qr, request.ImportModel,  request.GetOperationSymbol(mainType));
     }
 }
 
-public class ExcelImportRequest
+public class ImportFromExcelRequest
 {
-    public ExcelImportModel ImportModel { get; set; }
-    public QueryRequestTS QueryRequests { get; set; }
-    public required string OperationKey { get; set; }
+    public ImportExcelModel ImportModel { get; set; }
+    public QueryRequestTS QueryRequest { get; set; }
 
-    public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.OperationKey, entityType);
+    public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.ImportModel.OperationKey, entityType);
 
     public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType)
     {

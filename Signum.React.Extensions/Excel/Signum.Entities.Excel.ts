@@ -32,11 +32,11 @@ export module ExcelMessage {
   export const TheExcelTemplateHasAColumn0NotPresentInTheFindWindow = new MessageKey("ExcelMessage", "TheExcelTemplateHasAColumn0NotPresentInTheFindWindow");
   export const ThereAreNoResultsToWrite = new MessageKey("ExcelMessage", "ThereAreNoResultsToWrite");
   export const CreateNew = new MessageKey("ExcelMessage", "CreateNew");
-  export const ImportFromExcel = new MessageKey("ExcelMessage", "ImportFromExcel");
 }
 
 export module ExcelPermission {
   export const PlainExcel : Authorization.PermissionSymbol = registerSymbol("Permission", "ExcelPermission.PlainExcel");
+  export const ImportFromExcel : Authorization.PermissionSymbol = registerSymbol("Permission", "ExcelPermission.ImportFromExcel");
 }
 
 export const ExcelReportEntity = new Type<ExcelReportEntity>("ExcelReport");
@@ -50,6 +50,48 @@ export interface ExcelReportEntity extends Entities.Entity {
 export module ExcelReportOperation {
   export const Save : Entities.ExecuteSymbol<ExcelReportEntity> = registerSymbol("Operation", "ExcelReportOperation.Save");
   export const Delete : Entities.DeleteSymbol<ExcelReportEntity> = registerSymbol("Operation", "ExcelReportOperation.Delete");
+}
+
+export const ImportExcelMode = new EnumType<ImportExcelMode>("ImportExcelMode");
+export type ImportExcelMode =
+  "Insert" |
+  "Update" |
+  "InsertOrUpdate";
+
+export const ImportExcelModel = new Type<ImportExcelModel>("ImportExcelModel");
+export interface ImportExcelModel extends Entities.ModelEntity {
+  Type: "ImportExcelModel";
+  typeName: string;
+  excelFile: Files.FileEmbedded;
+  operationKey: string;
+  transactional: boolean;
+  identityInsert: boolean;
+  mode: ImportExcelMode;
+  matchByColumn: string | null;
+}
+
+export module ImportFromExcelMessage {
+  export const ImportFromExcel = new MessageKey("ImportFromExcelMessage", "ImportFromExcel");
+  export const _0Errors = new MessageKey("ImportFromExcelMessage", "_0Errors");
+  export const Importing0 = new MessageKey("ImportFromExcelMessage", "Importing0");
+  export const Import0FromExcel = new MessageKey("ImportFromExcelMessage", "Import0FromExcel");
+  export const DownloadTemplate = new MessageKey("ImportFromExcelMessage", "DownloadTemplate");
+  export const Columns0AlreadyHaveConstanValuesFromFilters = new MessageKey("ImportFromExcelMessage", "Columns0AlreadyHaveConstanValuesFromFilters");
+  export const ThisQueryHasMultipleImplementations0 = new MessageKey("ImportFromExcelMessage", "ThisQueryHasMultipleImplementations0");
+  export const SomeColumnsAreIncompatibleForImportingFromExcel = new MessageKey("ImportFromExcelMessage", "SomeColumnsAreIncompatibleForImportingFromExcel");
+  export const Operation0IsNotSupported = new MessageKey("ImportFromExcelMessage", "Operation0IsNotSupported");
+  export const _01IsNotSupported = new MessageKey("ImportFromExcelMessage", "_01IsNotSupported");
+  export const SomeFiltersAreIncompatibleForImportingFromExcel = new MessageKey("ImportFromExcelMessage", "SomeFiltersAreIncompatibleForImportingFromExcel");
+  export const SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed = new MessageKey("ImportFromExcelMessage", "SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed");
+  export const ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1 = new MessageKey("ImportFromExcelMessage", "ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1");
+  export const _0IsNotSupported = new MessageKey("ImportFromExcelMessage", "_0IsNotSupported");
+  export const _01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently = new MessageKey("ImportFromExcelMessage", "_01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently");
+  export const _01CannotBeAssignedDirectly = new MessageKey("ImportFromExcelMessage", "_01CannotBeAssignedDirectly");
+  export const _01CanAlsoBeUsed = new MessageKey("ImportFromExcelMessage", "_01CanAlsoBeUsed");
+  export const _0IsReadOnly = new MessageKey("ImportFromExcelMessage", "_0IsReadOnly");
+  export const _01IsIncompatible = new MessageKey("ImportFromExcelMessage", "_01IsIncompatible");
+  export const ErrorsIn0Rows_N = new MessageKey("ImportFromExcelMessage", "ErrorsIn0Rows_N");
+  export const No0FoundInThisQueryWith1EqualsTo2 = new MessageKey("ImportFromExcelMessage", "No0FoundInThisQueryWith1EqualsTo2");
 }
 
 

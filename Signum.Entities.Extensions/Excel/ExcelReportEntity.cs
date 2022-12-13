@@ -46,7 +46,68 @@ public enum ExcelMessage
     TheExcelTemplateHasAColumn0NotPresentInTheFindWindow,
     ThereAreNoResultsToWrite,
     CreateNew,
-    ImportFromExcel
+}
+
+public enum ImportFromExcelMessage
+{
+    ImportFromExcel,
+    [Description("{0} errors")]
+    _0Errors,
+    [Description("Importing {0}")]
+    Importing0,
+    [Description("Import {0} from Excel")]
+    Import0FromExcel,
+    [Description("Download Excel Template for this Query")]
+    DownloadTemplate,
+    [Description("Column(s) {0} already have constant values from filters")]
+    Columns0AlreadyHaveConstanValuesFromFilters,
+
+    [Description("This query has multiple implementations {0}")]
+    ThisQueryHasMultipleImplementations0,
+
+
+    [Description("Some Columns are incompatible for importinng from Excel:")]
+    SomeColumnsAreIncompatibleForImportingFromExcel,
+
+    [Description("Operation {0} is no supported")]
+    Operation0IsNotSupported,
+
+    [Description("{0}/{1} is not supported in: ")]
+    _01IsNotSupported,
+
+    [Description("Some Filters are incompatible for Importing from Excel")]
+    SomeFiltersAreIncompatibleForImportingFromExcel,
+
+    [Description("Simple 'Property = Value' filters can be used to assign constant values, anything else is not allowed:")]
+    SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed,
+
+    [Description("Many filters try to assign the same property {0} with different values {1}")]
+    ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1,
+
+    [Description("{0} is not supported")]
+    _0IsNotSupported,
+
+
+    [Description("{0} ({1}) can not be assigned directly. Each nested field should be assigned independently.")]
+    _01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently,
+
+    [Description("{0} ({1}) can not be assigned directly. Each nested field should be assigned independently.")]
+    _01CannotBeAssignedDirectly,
+
+    [Description("{0}.[{1}] can also be used")]
+    _01CanAlsoBeUsed,
+
+    [Description("{0} is read-only")]
+    _0IsReadOnly,
+ 
+    [Description("{0} ({1}) is incompatible")]
+    _01IsIncompatible,
+
+    [Description("Errors in {0} row[s]")]
+    ErrorsIn0Rows_N,
+
+    [Description("No {0} found in this query with {1} equals to {2}")]
+    No0FoundInThisQueryWith1EqualsTo2
 }
 
 

@@ -4,20 +4,21 @@ import * as Finder from '@framework/Finder'
 import { getToString, Lite, PaginationMessage, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import { ExcelReportEntity, ExcelMessage, ExcelReportOperation } from './Signum.Entities.Excel'
+import { ExcelReportEntity, ExcelMessage, ExcelReportOperation, ImportFromExcelMessage } from './Signum.Entities.Excel'
 import * as ExcelClient from './ExcelClient'
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import * as Operations from '@framework/Operations';
 import SelectorModal from '@framework/SelectorModal'
 import { PaginationMode, QueryRequest } from '@framework/FindOptions'
-import ExcelReport from './Templates/ExcelReport'
+import { getTypeInfos } from '@framework/Reflection'
+import { onImportFromExcel } from './Templates/ImportExcelModel'
+
 
 export interface ExcelMenuProps {
   searchControl: SearchControlLoaded;
   plainExcel: boolean;
   importFromExcel: boolean;
   excelReport: boolean;
-  importFromExcel: boolean;
 }
 
 export default function ExcelMenu(p: ExcelMenuProps) {
@@ -38,50 +39,18 @@ export default function ExcelMenu(p: ExcelMenuProps) {
       .then(list => setExcelReports(list));
   }
 
-  function selectPagination(apiMethod: (request: QueryRequest)=>void ) {
-    var request = p.searchControl.getQueryRequest();
-
-    const rt = p.searchControl.state.resultTable;
-
-    if (request.pagination.mode == "Firsts" || request.pagination.mode == "Paginate" && (rt == null || rt!.totalElements! > rt!.rows.length)) {
-
-      SelectorModal.chooseElement<PaginationMode>([request.pagination.mode, "All"], {
-        buttonDisplay: a => <span>{PaginationMode.niceToString(a)} {rt && SearchMessage._0Results_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(
-          <span className="sf-pagination-strong" key={1}>{a == "All" ? rt?.totalElements : rt?.rows.length}</span>)
-        }</span>,
-        buttonName: a => a,
-        title: SelectorMessage._0Selector.niceToString(PaginationMode.niceTypeName()),
-        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(PaginationMode.niceTypeName()),
-        size: "md",
-      })
-        .then(pm => {
-          if (pm == undefined)
-            return;
-
-          if (pm == "All") {
-            request.pagination = { mode: "All" };
-          }
-
-          apiMethod(request);
-        });
-    } else {
-      apiMethod(request);
-    }
-  }
-
 
   function handleExcelReport(er: Lite<ExcelReportEntity>) {
-    selectPagination((request) => ExcelClient.API.generateExcelReport(request, er));
+    selectPagination(p.searchControl).then(req => req && ExcelClient.API.generateExcelReport(req, er));
   }
 
 
   function handlePlainExcel() {
-    selectPagination((request) => ExcelClient.API.generatePlainExcel(request));
+    selectPagination(p.searchControl).then(req => req && ExcelClient.API.generatePlainExcel(req));
   }
 
-  function handleImportExcel() {
-    var request = p.searchControl.getQueryRequest();
-    request.pagination = { mode: "All" };
+  function handleImportFromExcel() {
+    onImportFromExcel(p.searchControl);
   }
 
   function handleCreate() {
@@ -101,8 +70,6 @@ export default function ExcelMenu(p: ExcelMenuProps) {
   if (p.plainExcel && !p.excelReport && !p.importFromExcel)
     return <button className={"sf-query-button sf-search btn btn-light"} title={ExcelMessage.ExcelReport.niceToString() } onClick={handlePlainExcel}>{label} </button>;
 
-  var hasExcelReports = excelReports && excelReports.length > 0; 
-
   return (
     <Dropdown show={isOpen} onToggle={handleSelectedToggle} title={ExcelMessage.ExcelReport.niceToString()}>
       <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light">
@@ -111,15 +78,18 @@ export default function ExcelMenu(p: ExcelMenuProps) {
       <Dropdown.Menu>
         {addDropdownDividers([
           p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>,
-          p.importFromExcel && <Dropdown.Item onClick={handleImportExcel} ><span><FontAwesomeIcon icon={["fas", "file-excel"]} />&nbsp; {ExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
+          p.importFromExcel && <Dropdown.Item onClick={handleImportFromExcel} ><span><FontAwesomeIcon icon={["fas", "file-excel"]} />&nbsp; {ImportFromExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
           p.excelReport && addDropdownDividers([
             excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}
               onClick={() => handleExcelReport(uq)}>
               {getToString(uq)}
             </Dropdown.Item>),
-            Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "magnifying-glass"]} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>,
-            Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>,
+            Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) &&
+            [
+              <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "magnifying-glass"]} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>,
+              <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>,
+            ]
           ])
         ]) }
       </Dropdown.Menu>
@@ -153,3 +123,34 @@ function addDropdownDividers(elements: (React.ReactElement | React.ReactElement[
 };
 
 
+export async function selectPagination(sc: SearchControlLoaded): Promise<QueryRequest | undefined> {
+  var request = sc.getQueryRequest();
+
+  const rt = sc.state.resultTable;
+
+  if (request.pagination.mode == "Firsts" || request.pagination.mode == "Paginate" && (rt == null || rt!.totalElements! > rt!.rows.length)) {
+
+    const pm = await SelectorModal.chooseElement<PaginationMode>([request.pagination.mode, "All"], {
+      buttonDisplay: a => <span>{PaginationMode.niceToString(a)} {rt && SearchMessage._0Results_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(
+        <span className="sf-pagination-strong" key={1}>{a == "All" ? rt?.totalElements : rt?.rows.length}</span>)
+      }</span>,
+      buttonName: a => a,
+      title: SelectorMessage._0Selector.niceToString(PaginationMode.niceTypeName()),
+      message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(PaginationMode.niceTypeName()),
+      size: "md",
+    });
+
+    if (pm == undefined)
+      return undefined;
+
+    if (pm == "All")
+      request.pagination = { mode: "All" };
+
+    return request;
+
+  } else {
+
+    return request;
+
+  }
+}

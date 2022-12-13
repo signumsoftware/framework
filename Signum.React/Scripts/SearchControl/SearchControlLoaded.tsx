@@ -1607,7 +1607,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       return (
         <OverlayTrigger
-          overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"}>{message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
+          overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"} style={{ "--bs-tooltip-max-width": "100%" } as any}>
+            {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
+          </Tooltip>}>
           {tr}
         </OverlayTrigger>
       );
@@ -1618,16 +1620,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const fo = this.props.findOptions;
 
-    return <AutoFocus disabled={!this.props.enableAutoFocus}>
-      <PinnedFilterBuilder
-        filterOptions={fo.filterOptions}
-        pinnedFilterVisible={this.props.pinnedFilterVisible}
-        onFiltersChanged={this.handlePinnedFilterChanged}
-        onSearch={() => this.doSearchPage1(true)}
-        showSearchButton={this.state.refreshMode == "Manual" && this.props.showHeader != true}
-        extraSmall={extraSmall}
-      />
-    </AutoFocus>
+    return (
+      <AutoFocus disabled={!this.props.enableAutoFocus}>
+        <PinnedFilterBuilder
+          filterOptions={fo.filterOptions}
+          pinnedFilterVisible={this.props.pinnedFilterVisible}
+          onFiltersChanged={this.handlePinnedFilterChanged}
+          onSearch={() => this.doSearchPage1(true)}
+          showSearchButton={this.state.refreshMode == "Manual" && this.props.showHeader != true}
+          extraSmall={extraSmall}
+        />
+      </AutoFocus>
+    );
   }
   
   handleOnNavigated = (lite: Lite<Entity>) => {
