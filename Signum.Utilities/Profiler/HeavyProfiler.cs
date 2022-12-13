@@ -193,8 +193,10 @@ public static class HeavyProfiler
     public static IEnumerable<HeavyProfilerEntry> AllEntries()
     {
         List<HeavyProfilerEntry> result = new List<HeavyProfilerEntry>();
-        foreach (var item in Entries)
+        var count = Entries.Count;
+        for (int i = 0; i < count; i++)
         {
+            var item = Entries[i];
             result.Add(item);
             item.FillDescendants(result);
         }
@@ -373,8 +375,10 @@ public class HeavyProfilerEntry
         {
             lock (Entries)
             {
-                foreach (var item in Entries)
+                var count = Entries.Count;
+                for (int i = 0; i < count; i++)
                 {
+                    var item = Entries[i];
                     list.Add(item);
                     item.FillDescendants(list);
                 }
