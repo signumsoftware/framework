@@ -3,7 +3,6 @@
 }
 
 .row-data {
-    position: relative;
     padding: 4px 8px;
 }
 
@@ -22,8 +21,7 @@
 
 .sf-search-results.mobile .date-cell,
 .sf-search-results.mobile .numeric-cell {
-    position: absolute;
-    right: 5px;
+    float: right;
 }
 
 .sf-search-results.mobile .multi-line {

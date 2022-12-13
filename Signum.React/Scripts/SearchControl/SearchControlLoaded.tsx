@@ -1739,7 +1739,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               }
 
               {hasView &&
-                <span className={classes("row-view", entityFormatter.cellClass)}>
+                <span className={classes("row-entity-view", entityFormatter.cellClass)}>
                   {entityFormatter.formatter(row, resultTable.columns, this)}
                 </span>
               }
