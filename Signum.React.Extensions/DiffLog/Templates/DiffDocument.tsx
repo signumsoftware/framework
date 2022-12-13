@@ -1,12 +1,18 @@
 import * as React from 'react'
-import { DiffPair } from '../DiffLogClient';
 import { NumericTextBox, ValueLine, isNumber } from '@framework/Lines/ValueLine';
 import { useForceUpdate } from '@framework/Hooks'
 import { toNumberFormat } from '@framework/Reflection';
+import { Change, diffLines, diffWords } from 'diff';
 
-export function DiffDocument(p: { diff: Array<DiffPair<Array<DiffPair<string>>>> }) {
 
-  const [margin, setMargin] = React.useState<number | null>(DiffDocument.defaultMarginLines)
+export interface LineDiff {
+  lineChange: Change;
+  lineDetail: Array<Change>;
+}
+
+export function DiffDocument(p: { first: string, second: string }) {
+  
+  const [margin, setMargin] = React.useState<number | null>(4);
 
   return (
     <div>
@@ -14,10 +20,10 @@ export function DiffDocument(p: { diff: Array<DiffPair<Array<DiffPair<string>>>>
         <label>
           <input type="checkbox" className="form-check-input" checked={margin != null} onChange={() => setMargin(margin == null ? DiffDocument.defaultMarginLines : null)} />
           <span className="mx-2">Show only</span><NumericTextBox format={toNumberFormat("0")} value={margin == null ? 4 : margin} onChange={num => setMargin(num == null ? 0 : Math.max(num, 0))}
-          validateKey={isNumber} /> lines arround each change</label>
+            validateKey={isNumber} /> lines arround each change</label>
       </div>
       <div>
-        <DiffDocumentSimple diff={p.diff} margin={margin} />
+        <DiffDocumentSimple first={p.first} second={p.second} margin={margin} />
       </div>
     </div>
   );
@@ -25,60 +31,67 @@ export function DiffDocument(p: { diff: Array<DiffPair<Array<DiffPair<string>>>>
 
 DiffDocument.defaultMarginLines = 4 as (number | null);
 
+export function DiffDocumentSimple(p: { first: string, second: string, margin?: number | null }) {
 
-export function DiffDocumentSimple({ diff, margin }: { diff: Array<DiffPair<Array<DiffPair<string>>>>, margin?: number | null }) {
+  const linesDiff = React.useMemo<Array<LineDiff>>(() => {
 
+    var diffs = diffLines(p.first, p.second);
+    var linesD: Array<LineDiff> = [];
 
-  function renderDiffLine(list: Array<DiffPair<string>>): Array<React.ReactElement<any>> {
-    const result = list.map((a, i) => {
-      if (a.action == "Equal")
-        return <span key={i}>{a.value}</span>;
-      else if (a.action == "Added")
-        return <span key={i} style={{ backgroundColor: "#72F272" }}>{a.value}</span>;
-      else if (a.action == "Removed")
-        return <span key={i} style={{ backgroundColor: "#FF8B8B" }}>{a.value}</span>;
-      else
-        throw Error("");
-    });
-
-    result.push(<br key={result.length} />);
-    return result;
-  }
-
-
-  var indices = margin == null ? Array.range(0, diff.length) :
-    expandNumbers(diff.map((a, i) => a.action != "Equal" || a.value.length != 1 ? i : null).filter(n => n != null) as number[], diff.length, margin);
-
-  const result =
-    indices
-      .flatMap(ix => {
-        if (typeof ix == "object")
-          return [<span style={{ backgroundColor: "#DDD" }}><span> ----- {ix.numLines} Lines Removed ----- </span><br /></span>];
-
-        var line = diff[ix];
-
-        if (line.action == "Removed") {
-          return [<span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.value)}</span>];
-        }
-        if (line.action == "Added") {
-          return [<span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.value)}</span>];
-        }
-        else if (line.action == "Equal") {
-          if (line.value.length == 1) {
-            return [<span>{renderDiffLine(line.value)}</span>];
+    for (var i = 0; i < diffs.length; i++) {
+      var change = diffs[i];
+      if (change.count != null && change.count > 1) {
+        change.value.split("\r\n").notNull().map(v => linesD.push({ lineChange: { value: v + "\r\n", count: 1 }, lineDetail: [] }));
+      }
+      else {
+        if (change.removed) {
+          if (i + 1 < diffs.length && diffs[i + 1].added) {
+            var nextChange = diffs[i + 1];
+            var wordDiffs = diffWords(change.value, nextChange.value);
+            linesD.push({ lineChange: change, lineDetail: wordDiffs });
+            linesD.push({ lineChange: nextChange, lineDetail: wordDiffs });
+            i++;
+            continue;
           }
-          else {
-            return [
-              <span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.value.filter(a => a.action == "Removed" || a.action == "Equal"))}</span>,
-              <span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.value.filter(a => a.action == "Added" || a.action == "Equal"))}</span>
-            ];
-          }
+          linesD.push({ lineChange: change, lineDetail: [] });
         }
-        else
-          throw new Error("Unexpected");
-      });
+      }
+    }
 
-  return <pre className="m-0">{result.map((e, i) => React.cloneElement(e, { key: i }))}</pre>;
+    return [...linesD]
+  }, [p.first, p.second]);
+
+
+  var indices = p.margin == null ? Array.range(0, linesDiff.length) :
+    expandNumbers(linesDiff.map((a, i) => a.lineChange.added || a.lineChange.removed ? i : null).filter(n => n != null) as number[], linesDiff.length, p.margin);
+
+  return <pre className="m-0">{indices.map((ix, i) => {
+    if (typeof ix == "object")
+      return [<span key={i} style={{ backgroundColor: "#DDD" }}><span> ----- {ix.numLines} Lines Removed ----- </span><br /></span>];
+
+    var line = linesDiff[ix];
+
+    var color = line.lineChange.added ? "#CEF3CE" : line.lineChange.removed ? "#FFD1D1" : undefined;
+
+    if (line.lineDetail.length > 0) {
+      if (line.lineChange.removed)
+        return (<span key={i} style={{ backgroundColor: color }}>
+          {line.lineDetail.filter(c => !c.added).map((c, j) => {
+            var changeColor = c.added ? "#72F272" : c.removed ? "#FF8B8B" : undefined;
+            return <span key={j} style={{ backgroundColor: changeColor }}>{c.value}</span>;
+          })}
+        </span>);
+      if (line.lineChange.added)
+        return (<span key={i} style={{ backgroundColor: color }}>
+          {line.lineDetail.filter(c => !c.removed).map((c, j) => {
+            var changeColor = c.added ? "#72F272" : c.removed ? "#FF8B8B" : undefined;
+            return <span key={j} style={{ backgroundColor: changeColor }}>{c.value}</span>;
+          })}
+        </span>);
+    }
+    else
+      return <span key={i} style={{ backgroundColor: color }}>{line.lineChange.value}</span>
+  })}</pre >;
 }
 
 interface LinesRemoved {
