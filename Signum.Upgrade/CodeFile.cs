@@ -337,7 +337,7 @@ public class CodeFile
             var indent = GetIndent(lines[pos]);
             lines.RemoveRange(pos, 1);
 
-            var comma = lines[pos].Trim().StartsWith("}") ? "" : ", ";
+            var comma = lines[pos].Trim().StartsWith("}") ? "" : ",";
             lines.Insert(pos, IndentAndReplace(@$"""{packageName}"": ""{version}""" + comma, indent));
             return true;
         });

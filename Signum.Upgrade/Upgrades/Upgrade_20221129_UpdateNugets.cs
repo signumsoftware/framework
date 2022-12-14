@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Signum.Upgrade.Upgrades;
 
-class Upgrade_20229110_UpdateNugets : CodeUpgradeBase
+class Upgrade_20221129_UpdateNugets : CodeUpgradeBase
 {
     public override string Description => "Updates Nuget 2";
 
