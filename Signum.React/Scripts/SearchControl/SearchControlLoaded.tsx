@@ -175,7 +175,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       this.setState({
         isMobile: isMobile,
         viewMode: isMobile ? this.getMobileOptions(this.props.findOptions).defaultViewMode : "Standard",
-      });
+      }, () => this.fixScroll());
   }
 
   componentDidMount() {
@@ -834,7 +834,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
   };
 
   handleViewModeClick = (ev: React.MouseEvent<any>) => {
-    this.setState({ viewMode: (this.state.viewMode == "Mobile" ? "Standard" : "Mobile") });
+    this.setState({ viewMode: (this.state.viewMode == "Mobile" ? "Standard" : "Mobile") }, () => this.fixScroll());
   }
 
   createTitle() {
@@ -1571,62 +1571,79 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return this.props.findOptions.columnOptions.filter(co => !co.hiddenColumn || this.state.showHiddenColumns);
   }
 
-  getRenderRowsContext() {
+  getColumnOptionsParsed() {
     const columnOptions = this.getColumnOptions();
+    const resultColumns = this.state.resultTable!.columns;
     const qs = this.props.querySettings;
+
+    return columnOptions.map(co => ({
+      column: co,
+      hasToArray: hasToArray(co.token),
+      cellFormatter: (co.token && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this))),
+      resultIndex: co.token == undefined ? -1 : resultColumns.indexOf(co.token.fullKey)
+    }));
+  }
+
+  getNoResultsElement() {
     const resultTable = this.state.resultTable!;
     const resFO = this.state.resultFindOptions!;
+
+    if (resultTable.rows.length == 0) {
+      if (resultTable.totalElements == 0 || this.props.showFooter == false || resFO.pagination.mode != "Paginate")
+        return SearchMessage.NoResultsFound.niceToString();
+      else
+        return SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
+          resFO.pagination.currentPage,
+          <a href="#" onClick={e => {
+            e.preventDefault();
+            this.handlePagination({
+              mode: "Paginate",
+              elementsPerPage: resFO.pagination.elementsPerPage,
+              currentPage: 1
+            });
+          }}>{SearchMessage.GoBackToPageOne.niceToString()}</a>
+        );
+    }
+
+    return undefined;
+  }
+
+  getRowAttributes(resultRow: ResultRow) {
+    const qs = this.props.querySettings;
+    const resultColumns = this.state.resultTable!.columns;
+    const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
+
+    return rowAttributes ? rowAttributes(resultRow, resultColumns) : undefined;
+  }
+
+  getEntityFormatter() {
+    const qs = this.props.querySettings;
+    return this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter;
+  }
+
+  hasEntityColumn() {
+    return this.props.findOptions.groupResults || this.props.view;
+  }
+
+  getRowMarked(row: ResultRow) {
+    return row.entity && this.getMarkedRow(row.entity);
+  }
+
+  getColumnElement(row: ResultRow, rowIndex: number, c: ColumnParsed) {
     const resultColumns = this.state.resultTable!.columns;
 
-    return {
-      columnOptionsParsed: (): ColumnParsed[] => columnOptions.map(co => ({
-          column: co,
-          hasToArray: hasToArray(co.token),
-          cellFormatter: (co.token && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this))),
-          resultIndex: co.token == undefined ? -1 : resultColumns.indexOf(co.token.fullKey)
-        })),
-      noResultsElement: () => {
-        if (resultTable.rows.length == 0) {
-          if (resultTable.totalElements == 0 || this.props.showFooter == false || resFO.pagination.mode != "Paginate")
-            return SearchMessage.NoResultsFound.niceToString();
-          else
-            return SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
-              resFO.pagination.currentPage,
-              <a href="#" onClick={e => {
-                e.preventDefault();
-                this.handlePagination({
-                  mode: "Paginate",
-                  elementsPerPage: resFO.pagination.elementsPerPage,
-                  currentPage: 1
-                });
-              }}>{SearchMessage.GoBackToPageOne.niceToString()}</a>
-            );
-        }
-
-        return undefined;
-      },      
-      rowAttributes: (resultRow: ResultRow) => {
-        const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
-        return rowAttributes ? rowAttributes(resultRow, resultColumns) : undefined;
-      },
-      entityFormatter: () => this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter,
-      hasEntityColumn: this.props.findOptions.groupResults || this.props.view,
-      mark: (row: ResultRow) => row.entity && this.getMarkedRow(row.entity),
-      columnElement: (row: ResultRow, rowIndex: number, c: ColumnParsed) => {
-        const fctx: Finder.CellFormatterContext = {
-          refresh: () => this.dataChanged(),
-          systemTime: this.props.findOptions.systemTime,
-          columns: resultColumns,
-          row: row,
-          rowIndex: rowIndex,
-        };
-
-        return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-          c.hasToArray != null ? this.joinNodes((row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
-            c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistict" ? <span className="text-muted">, </span> : <br />) :
-            c.cellFormatter.formatter(row.columns[c.resultIndex], fctx, c.column.token!)
-      },
+    const fctx: Finder.CellFormatterContext = {
+      refresh: () => this.dataChanged(),
+      systemTime: this.props.findOptions.systemTime,
+      columns: resultColumns,
+      row: row,
+      rowIndex: rowIndex,
     };
+
+    return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
+      c.hasToArray != null ? this.joinNodes((row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
+        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistict" ? <span className="text-muted">, </span> : <br />) :
+        c.cellFormatter.formatter(row.columns[c.resultIndex], fctx, c.column.token!);
   }
 
   renderRows(): React.ReactNode {
@@ -1643,18 +1660,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return <tr><td colSpan={columnsCount}>{JavascriptMessage.searchForResults.niceToString()}</td></tr>;
     }
 
-    const ctx = this.getRenderRowsContext();
-
-    var noResultsElement = ctx.noResultsElement();
+    var noResultsElement = this.getNoResultsElement();
     if (noResultsElement != null) 
       return <tr><td colSpan={columnsCount}>{noResultsElement}</td></tr>;
 
-    const entityFormatter = ctx.entityFormatter();
-    const columns = ctx.columnOptionsParsed();
+    const entityFormatter = this.getEntityFormatter();
+    const columns = this.getColumnOptionsParsed();
 
     return resultTable.rows.map((row, i) => {
-      const mark = ctx.mark(row);
-      var ra = ctx.rowAttributes(row);
+      const mark = this.getRowMarked(row);
+      var ra = this.getRowAttributes(row);
 
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
@@ -1667,7 +1682,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             </td>
           }
 
-          {ctx.hasEntityColumn &&
+          {this.hasEntityColumn() &&
             <td className={entityFormatter.cellClass}>
               {entityFormatter.formatter(row, resultTable.columns, this)}
             </td>
@@ -1676,7 +1691,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           {
             columns.map((c, j) =>
               <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                {ctx.columnElement(row, i, c)}
+                {this.getColumnElement(row, i, c)}
               </td>
             )
           }
@@ -1705,25 +1720,23 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return <div>{JavascriptMessage.searchForResults.niceToString()}</div>;
     }
 
-    const ctx = this.getRenderRowsContext();
-
-    var noResultsElement = ctx.noResultsElement();
+    var noResultsElement = this.getNoResultsElement();
     if (noResultsElement != null)
       return <div>{noResultsElement}</div>;
 
-    const entityFormatter = ctx.entityFormatter();
-    const columns = ctx.columnOptionsParsed();
+    const entityFormatter = this.getEntityFormatter();
+    const columns = this.getColumnOptionsParsed();
 
     return resultTable.rows.map((row, i) => {
-      const mark = ctx.mark(row);
-      var ra = ctx.rowAttributes(row);
+      const mark = this.getRowMarked(row);
+      var ra = this.getRowAttributes(row);
 
       var div = (
         <div key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
           {...ra}
           className={classes("row-container", mark?.className, ra?.className)}>
-          {(this.props.allowSelection || ctx.hasEntityColumn) &&
+          {(this.props.allowSelection || this.hasEntityColumn()) &&
             <div className="row-data row-header">
               {this.props.allowSelection &&
                 <span className="row-selection">
@@ -1731,7 +1744,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 </span>
               }
 
-              {ctx.hasEntityColumn &&
+              {this.hasEntityColumn() &&
                 <span className={classes("row-entity", entityFormatter.cellClass)}>
                   {entityFormatter.formatter(row, resultTable.columns, this)}
                 </span>
@@ -1740,10 +1753,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
           {
             columns.map((c, j) =>
-              <div className={classes("row-data", !(this.props.allowSelection || ctx.hasEntityColumn) && j == 0 && "row-header")}>
+              <div className={classes("row-data", !(this.props.allowSelection || this.hasEntityColumn()) && j == 0 && "row-header")}>
                 {<span className="row-title">{c.column.displayName}</span>}
                 <span key={j} data-column-index={j} className={classes("row-value", c.cellFormatter && c.cellFormatter.cellClass)}>
-                  {ctx.columnElement(row, i, c)}
+                  {this.getColumnElement(row, i, c)}
                 </span>
               </div>
             )
