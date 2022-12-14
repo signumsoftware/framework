@@ -3,11 +3,12 @@ import { NumericTextBox, ValueLine, isNumber } from '@framework/Lines/ValueLine'
 import { useForceUpdate } from '@framework/Hooks'
 import { toNumberFormat } from '@framework/Reflection';
 import { Change, diffLines, diffWords } from 'diff';
+import { softCast } from '../../../Signum.React/Scripts/Globals';
 
 
-export interface LineDiff {
+export interface LineOrWordsChange {
   lineChange: Change;
-  lineDetail: Array<Change>;
+  wordChanges?: Array<Change>;
 }
 
 export function DiffDocument(p: { first: string, second: string }) {
@@ -33,65 +34,60 @@ DiffDocument.defaultMarginLines = 4 as (number | null);
 
 export function DiffDocumentSimple(p: { first: string, second: string, margin?: number | null }) {
 
-  const linesDiff = React.useMemo<Array<LineDiff>>(() => {
-
+  const linesDiff = React.useMemo<Array<LineOrWordsChange>>(() => {
+    
     var diffs = diffLines(p.first, p.second);
-    var linesD: Array<LineDiff> = [];
+    var result: Array<LineOrWordsChange> = [];
 
     for (var i = 0; i < diffs.length; i++) {
       var change = diffs[i];
-      if (change.count != null && change.count > 1) {
-        change.value.split("\r\n").notNull().map(v => linesD.push({ lineChange: { value: v + "\r\n", count: 1 }, lineDetail: [] }));
-      }
-      else {
-        if (change.removed) {
-          if (i + 1 < diffs.length && diffs[i + 1].added) {
-            var nextChange = diffs[i + 1];
-            var wordDiffs = diffWords(change.value, nextChange.value);
-            linesD.push({ lineChange: change, lineDetail: wordDiffs });
-            linesD.push({ lineChange: nextChange, lineDetail: wordDiffs });
-            i++;
-            continue;
-          }
-          linesD.push({ lineChange: change, lineDetail: [] });
-        }
+      if (change.removed && change.count == 1 && i + 1 < diffs.length && diffs[i + 1].added && diffs[i + 1].count == 1) {
+        var nextChange = diffs[i + 1];
+        var wordDiffs = diffWords(change.value, nextChange.value);
+        result.push({ lineChange: change, wordChanges: wordDiffs.filter(c => !c.added) });
+        result.push({ lineChange: nextChange, wordChanges: wordDiffs.filter(c => !c.removed) });
+        i++;
+      } else {
+        var lines = change.value.replaceAll("\r", "").split("\n");
+        if (lines.last() == "")
+          lines.removeAt(lines.length - 1);
+
+        var lineChanges = lines.map(v => softCast<LineOrWordsChange>({
+          lineChange: { value: v + "\n", count: 1, added: change.added, removed: change.removed }
+        }));
+        result.push(...lineChanges);
       }
     }
 
-    return [...linesD]
+    return [...result]
   }, [p.first, p.second]);
 
 
   var indices = p.margin == null ? Array.range(0, linesDiff.length) :
     expandNumbers(linesDiff.map((a, i) => a.lineChange.added || a.lineChange.removed ? i : null).filter(n => n != null) as number[], linesDiff.length, p.margin);
 
-  return <pre className="m-0">{indices.map((ix, i) => {
-    if (typeof ix == "object")
-      return [<span key={i} style={{ backgroundColor: "#DDD" }}><span> ----- {ix.numLines} Lines Removed ----- </span><br /></span>];
+  return (
+    <pre className="m-0">{indices.map((ix, i) => {
+      if (typeof ix == "object")
+        return [<span key={i} style={{ backgroundColor: "#DDD" }}><span> ----- {ix.numLines} Lines Removed ----- </span><br /></span>];
 
-    var line = linesDiff[ix];
+      var line = linesDiff[ix];
 
-    var color = line.lineChange.added ? "#CEF3CE" : line.lineChange.removed ? "#FFD1D1" : undefined;
+      var color = line.lineChange.added ? "#CEF3CE" : line.lineChange.removed ? "#FFD1D1" : undefined;
 
-    if (line.lineDetail.length > 0) {
-      if (line.lineChange.removed)
+      if (line.wordChanges) {
         return (<span key={i} style={{ backgroundColor: color }}>
-          {line.lineDetail.filter(c => !c.added).map((c, j) => {
+          {line.wordChanges.map((c, j) => {
             var changeColor = c.added ? "#72F272" : c.removed ? "#FF8B8B" : undefined;
             return <span key={j} style={{ backgroundColor: changeColor }}>{c.value}</span>;
           })}
         </span>);
-      if (line.lineChange.added)
-        return (<span key={i} style={{ backgroundColor: color }}>
-          {line.lineDetail.filter(c => !c.removed).map((c, j) => {
-            var changeColor = c.added ? "#72F272" : c.removed ? "#FF8B8B" : undefined;
-            return <span key={j} style={{ backgroundColor: changeColor }}>{c.value}</span>;
-          })}
-        </span>);
-    }
-    else
-      return <span key={i} style={{ backgroundColor: color }}>{line.lineChange.value}</span>
-  })}</pre >;
+      }
+      else
+        return <span key={i} style={{ backgroundColor: color }}>{line.lineChange.value}</span>
+    })}
+    </pre >
+  );
 }
 
 interface LinesRemoved {

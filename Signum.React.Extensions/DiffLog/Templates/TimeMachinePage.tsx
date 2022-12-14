@@ -12,12 +12,11 @@ import { Lite } from '@framework/Signum.Entities'
 import { newLite, QueryTokenString, toFormatWithFixes, toLuxonFormat } from '@framework/Reflection'
 import { getTypeInfo } from '@framework/Reflection'
 import { Tabs, Tab, Modal } from 'react-bootstrap'
-import { DiffDocument, LineDiff } from './DiffDocument'
+import { DiffDocument, LineOrWordsChange } from './DiffDocument'
 import * as DiffLogClient from '../DiffLogClient'
 import { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { IModalProps, openModal } from '@framework/Modals'
-import { Change, diffLines, diffWords } from 'diff'
 import { EntityDump } from '../DiffLogClient'
 
 

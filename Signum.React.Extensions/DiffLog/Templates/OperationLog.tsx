@@ -142,7 +142,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
 
     return (
       <Tab eventKey="diff" title={title as any}>
-        {<DiffDocument first={initialState} second={finalState} />}
+        <DiffDocument first={initialState} second={finalState} />
       </Tab>
     );
   }
@@ -209,19 +209,24 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
     );
   }
   const target = p.ctx.value.target;
-  
+
+  var prevSimple = React.useMemo(() => simplifyDump(prev?.dump, simplify), [prev, simplify]);
+  var initialSimple = React.useMemo(() => simplifyDump(mixin.initialState.text, simplify), [mixin.initialState.text, simplify]);
+  var finalSimple = React.useMemo(() => simplifyDump(mixin.finalState.text, simplify), [mixin.finalState.text, simplify]);
+  var nextSimple = React.useMemo(() => simplifyDump(next?.dump, simplify), [next, simplify]);
+
   return (
     <div>
       <label>
         <input type="checkbox" className="form-check-input" checked={simplify} onChange={e => setSimplify(e.currentTarget.checked)} /> Simplify Changes
       </label>
-      <Tabs id="diffTabs" defaultActiveKey="diff" key={p.ctx.value.id}>
+      <Tabs id="diffTabs" defaultActiveKey="diff" key={p.ctx.value.id} mountOnEnter>
         {prev ? renderPrev(prev.operationLog) : renderPrevDisabled()}
-        {prev && mixin.initialState.text ? renderPrevDiff(prev.dump, mixin.initialState.text) : renderPrevDiffDisabled()}
-        {mixin.initialState.text && renderInitialState(mixin.initialState.text)}
-        {mixin.initialState.text && mixin.finalState.text && renderDiff(mixin.initialState.text, mixin.finalState.text)}
-        {mixin.finalState.text && renderFinalState(mixin.finalState.text)}
-        {mixin.finalState.text && next && renderNextDiff(mixin.finalState.text, next.dump ?? "")}
+        {prevSimple && initialSimple ? renderPrevDiff(prevSimple, initialSimple) : renderPrevDiffDisabled()}
+        {initialSimple && renderInitialState(initialSimple)}
+        {initialSimple && finalSimple && renderDiff(initialSimple, finalSimple)}
+        {finalSimple && renderFinalState(finalSimple)}
+        {finalSimple && nextSimple && renderNextDiff(finalSimple, nextSimple)}
         {next === undefined ? undefined : (next?.operationLog ? renderNext(next.operationLog) : target && renderCurrentEntity(target))}
       </Tabs>
     </div>
@@ -229,4 +234,37 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
 }
 
 
+const LiteImpRegex = /^(?<space> *)(?<prop>\w[\w\d_]+) = new LiteImp</;
+
+function simplifyDump(text: string | null | undefined, simplifyFatLites: boolean) {
+
+  if (text == null)
+    return null;
+
+  var lines = text.replaceAll("\r", "").split("\n");
+  
+  if (!simplifyFatLites)
+    return lines.join("\n");
+
+  for (var i = 0; i < lines.length; i++) {
+    var current = lines[i];
+    if (current.contains("= new LiteImp<") && !current.endsWith(",")) {
+      var match = LiteImpRegex.exec(current);
+      if (match) {
+        var spaces = match.groups!["space"];
+        if (lines[i + 1] == spaces + "{") {
+          var lastIndex = lines.indexOf(spaces + "},", i + 1);
+
+          if (lastIndex != -1) {
+            lines.splice(i + 1, lastIndex - (i + 1) + 1);
+          }
+
+          lines[i] = current + " { Entity = /* Loaded */ },";
+        }
+      }
+    }
+  }
+
+  return lines.join("\n");
+}
 

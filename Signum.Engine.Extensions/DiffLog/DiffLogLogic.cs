@@ -26,44 +26,9 @@ public static class DiffLogLogic
         }
     }
 
-    static Regex LiteImpRegex = new Regex(@"^(?<space> *)(?<prop>\w[\w\d_]+) = new LiteImp<");
+    
 
-    public static string? SimplifyDump(string? text, bool simplify)
-    {
-        if (text == null)
-            return null;
-
-        if (!simplify)
-            return text;
-
-        var lines = text.Lines().ToList();
-
-        for (int i = 0; i < lines.Count; i++)
-        {
-            var current = lines[i];
-            if(current.Contains("= new LiteImp<") && !current.EndsWith(","))
-            {
-                var match = LiteImpRegex.Match(current);
-                if (match.Success)
-                {
-                    var spaces = match.Groups["space"].Value;
-                    if (lines[i + 1] == spaces + "{")
-                    {
-                        var lastIndex = lines.IndexOf(spaces + "},", i + 1);
-
-                        if(lastIndex != -1)
-                        {
-                            lines.RemoveRange(i + 1, lastIndex - (i + 1) + 1);
-                        }
-
-                        lines[i] = current + " { Entity = /* Loaded */ },";
-                    }
-                }
-            }
-        }
-
-        return lines.ToString("\r\n");
-    }
+   
 
     public static void RegisterShouldLog<T>(Func<IEntity, IOperation, bool> func) where T : Entity
     {
