@@ -66,14 +66,15 @@ export abstract class ToolbarConfig<T extends Entity> {
     return <FontAwesomeIcon icon={icon} className={"icon"} color={color} />;
   }
 
-  abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
+  abstract navigateTo(element: ToolbarResponse<T>): Promise<string | null>;
   abstract isCompatibleWithUrlPrio(element: ToolbarResponse<T>, location: Location, query: any): number;
 
   handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
     e.preventDefault();
     e.persist();
     this.navigateTo(res).then(url => {
-      AppContext.pushOrOpenInTab(url, e);
+      if (url)
+        AppContext.pushOrOpenInTab(url, e);
     });
   }
 
