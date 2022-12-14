@@ -110,13 +110,4 @@ public static class DiffLogLogic
         using (new EntityCache(EntityCacheType.ForceNew))
             return entity.ToLite().RetrieveAndRemember();
     }
-
-    public static MinMax<OperationLogEntity?> OperationLogNextPrev(OperationLogEntity log)
-    {
-        var logs = Database.Query<OperationLogEntity>().Where(a => a.Exception == null && a.Target.Is(log.Target));
-
-        return new MinMax<OperationLogEntity?>(
-             log.Mixin<DiffLogMixin>().InitialState.Text == null ? null : logs.Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault(),
-             log.Mixin<DiffLogMixin>().FinalState.Text == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
-    }
 }

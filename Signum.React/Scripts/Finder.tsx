@@ -1979,7 +1979,7 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, true)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{cell.toString()}</span> : undefined, true)
     },
     {
       name: "SmallText",
@@ -1992,7 +1992,7 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, false)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell.toString()}</span> : undefined, false)
     },
     {
       name: "Password",

@@ -66,7 +66,7 @@ public class TranslatedInstanceController : ControllerBase
                                     gr => gr.ToDictionary(a => a.culture.Name, a => new TranslatedPairViewTS
                                     {
                                         OriginalText = a.translatedInstance.OriginalText,
-                                        Diff = a.translatedInstance.OriginalText.Equals(a.newText) ? null : sd.DiffText(a.translatedInstance.OriginalText, a.newText),
+                                        NewText = a.newText, 
                                         TranslatedText = a.translatedInstance.TranslatedText
                                     })
                                 ))).ToDictionary();
@@ -121,7 +121,6 @@ public class TranslatedInstanceController : ControllerBase
                             Original = c.Value.Original,
                             OldOriginal = c.Value.OldOriginal,
                             OldTranslation = c.Value.OldTranslation,
-                            Diff = c.Value.OldOriginal == null || c.Value.Original == null || c.Value.OldOriginal.Equals(c.Value.Original) ? null : sd.DiffText(c.Value.OldOriginal, c.Value.Original),
                             AutomaticTranslations = c.Value.AutomaticTranslations.ToArray(),
                         })
                     }
@@ -243,8 +242,6 @@ public class PropertyRouteConflictTS
 
     public string Original;
     public AutomaticTranslation[]? AutomaticTranslations;
-
-    public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? Diff { get; set; }
 }
 
 public class FileUpload
@@ -271,8 +268,8 @@ public class TranslatedInstanceViewTS
 public class TranslatedPairViewTS
 {
     public string OriginalText { get; set; }
+    public string NewText { get; set; }
     public string TranslatedText { get; set; }
-    public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? Diff { get; set; }
 }
 
 public class TranslatedTypeSummaryTS

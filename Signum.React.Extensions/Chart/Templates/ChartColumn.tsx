@@ -11,7 +11,7 @@ import { ChartScriptColumn, ChartScript } from '../ChartClient'
 import * as ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { External, JavascriptMessage, toLite } from '@framework/Signum.Entities';
-import { useAPI, useForceUpdate } from '@framework/Hooks'
+import { useAPI, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Parameters } from './ChartBuilder'
 
 export interface ChartColumnProps {
@@ -194,7 +194,7 @@ export interface ChartPaletteLinkProps {
 
 export function ChartPaletteLink(p: ChartPaletteLinkProps) {
 
-  const palette = useAPI(() => ColorPaletteClient.getColorPalette(p.type.name), [p.type.name]);
+  const [palette, reload] = useAPIWithReload(() => ColorPaletteClient.getColorPalette(p.type.name), [p.type.name]);
 
   return (
     <FormGroup ctx={p.ctx}
@@ -203,16 +203,18 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps) {
         <span className={p.ctx.formControlPlainTextClass}>
           {JavascriptMessage.loading.niceToString()}
         </span> :
-        <a href="#" className={p.ctx.formControlPlainTextClass} onClick={e => {
+        <a href="#" className={p.ctx.formControlPlainTextClass} onClick={async e => {
           e.preventDefault();
           if (palette)
-            Navigator.view(palette.lite);
+            await Navigator.view(palette.lite);
           else {
-            Navigator.API.getType(p.type.name)
-              .then(t => Navigator.view(ColorPaletteEntity.New({
-                type: t!
-              })));
+            var t = await Navigator.API.getType(p.type.name)
+            await Navigator.view(ColorPaletteEntity.New({
+              type: t!
+            }));
           }
+
+          reload();
         }}>
           {palette ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()}
         </a>
