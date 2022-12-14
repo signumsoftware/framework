@@ -14,7 +14,8 @@ export interface LineOrWordsChange {
 export function DiffDocument(p: { first: string, second: string }) {
   
   const [margin, setMargin] = React.useState<number | null>(4);
-
+  const [force, setForce] = React.useState<number>(false);
+  var formatter = toNumberFormat("N0");
   return (
     <div>
       <div>
@@ -24,18 +25,31 @@ export function DiffDocument(p: { first: string, second: string }) {
             validateKey={isNumber} /> lines arround each change</label>
       </div>
       <div>
-        <DiffDocumentSimple first={p.first} second={p.second} margin={margin} />
+        {(p.first.length * p.second.length > DiffDocument.maxSize * DiffDocument.maxSize) && !force ?
+          <div class="alert alert-warning mt-2" role="alert">
+            The two strings are too big ({formatter.format(p.first.length)} ch. and {formatter.format(p.second.length)} ch.) and could freeze your browser...
+            <br />
+            <a href="#" className="btn btn-sm btn-warning mt-3" onClick={e => { e.preventDefault(); setForce(true); }}>Try anyway!</a>
+          </div> :
+          <DiffDocumentSimple first={p.first} second={p.second} margin={margin} />
+        }
       </div>
     </div>
   );
 }
 
 DiffDocument.defaultMarginLines = 4 as (number | null);
+DiffDocument.maxSize = 300000;
+
+
 
 export function DiffDocumentSimple(p: { first: string, second: string, margin?: number | null }) {
 
+  
+
+
   const linesDiff = React.useMemo<Array<LineOrWordsChange>>(() => {
-    
+ 
     var diffs = diffLines(p.first, p.second);
     var result: Array<LineOrWordsChange> = [];
 
