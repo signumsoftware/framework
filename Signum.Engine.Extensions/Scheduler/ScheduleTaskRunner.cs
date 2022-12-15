@@ -268,9 +268,9 @@ public static class ScheduleTaskRunner
                 }
             }
 
+            var ctx = new ScheduledTaskContext(stl);
             try
             {
-                var ctx = new ScheduledTaskContext(stl);
                 RunningTasks.TryAdd(stl, ctx);
 
                 using (UserHolder.UserSession(user))
@@ -303,6 +303,7 @@ public static class ScheduleTaskRunner
                     {
                         stl.Exception = exLog;
                         stl.EndTime = Clock.Now;
+                        stl.Remarks = ctx.StringBuilder.ToString();
                         stl.Save();
 
                         tr.Commit();
@@ -313,7 +314,7 @@ public static class ScheduleTaskRunner
             }
             finally
             {
-                RunningTasks.TryRemove(stl, out var ctx);
+                RunningTasks.TryRemove(stl, out ctx);
                 SchedulerLogic.OnFinally?.Invoke(stl);
             }
 

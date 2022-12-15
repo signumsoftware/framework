@@ -8,6 +8,7 @@ import "./Profiler.css"
 import { useAPI, useAPIWithReload, useInterval, useSize } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { classes } from '@framework/Globals'
+import a from 'bpmn-js/lib/features/search'
 
 interface HeavyListProps extends RouteComponentProps<{}> {
 
@@ -15,8 +16,11 @@ interface HeavyListProps extends RouteComponentProps<{}> {
 
 export default function HeavyList(p: HeavyListProps) {
 
+    const[ignoreProfilerHeavyEntries, setIgnoreProfilerHeavyEntries] = React.useState<boolean>(true)
+
+
   const [enabled, reloadEnabled] = useAPIWithReload(() => API.Heavy.isEnabled(), [], { avoidReset: true });
-  const [entries, reloadEntries] = useAPIWithReload(() => API.Heavy.entries(), [], { avoidReset: true });
+  const [entries, reloadEntries] = useAPIWithReload(() => API.Heavy.entries(ignoreProfilerHeavyEntries), [], { avoidReset: true });
 
   const [fileToUpload, setFileToUpload] = React.useState<File | undefined>(undefined);
   const [fileVer, setFileVer] = React.useState<number>(0)
@@ -91,6 +95,10 @@ export default function HeavyList(p: HeavyListProps) {
         <button onClick={handleClear} className="btn btn-light"><FontAwesomeIcon icon="trash" /> Clear</button>
         <button onClick={handleDownload} className="btn btn-outline-info"><FontAwesomeIcon icon="cloud-arrow-down" /> Download</button>
       </div>
+      <label>
+        <input type="checkbox" className="form-check-input me-1" checked={ignoreProfilerHeavyEntries} onChange={e => setIgnoreProfilerHeavyEntries(e.currentTarget.checked)} />
+        Ignore Heavy Profiler Entries
+      </label>
       <br />
       <p className="help-block">Upload previous runs to compare performance.</p>
       <p className="help-block">Enable the profiler with the debugger with <code>HeavyProfiler.Enabled = true</code> and save the results with <code>HeavyProfiler.ExportXml().Save("profile.xml") </code>.</p>
@@ -141,14 +149,18 @@ function EntrieListPath({ width, entries }: { width: number, entries: HeavyProfi
 
   return (
     <svg width={width + "px"} height={height + "px"}>
-      {data.map((v, i) => <g className="entry" data-full-key={v.fullIndex} onClick={e => handleOnClick(e, v)}>
-        <rect className="left-background" x={0} y={y(i)} width={labelWidth} height={entryHeight} fill="#ddd" stroke="#fff" />
-        <text className="label label-left" y={y(i)} dy={fontPadding + fontSize} fill="#000">{v.role + " " + v.additionalData}</text>
-        <rect className="right-background" x={labelWidth} y={y(i)} width={width - labelWidth} height={entryHeight} fill="#fff" stroke="#ddd" />
-        <rect className="shape" x={x(v.start)} y={y(i)} width={x(v.end)! - x(v.start)!} height={entryHeight} fill={v.color} />
-        <text className="label label-right" x={x(v.end)! + 3} y={y(i)} width={x(v.end)! - x(v.start)!} dy={fontPadding + fontSize} height={entryHeight} fill='#000'>{v.elapsed}</text>
-        <title>{v.elapsed + " - " + v.additionalData}</title>
-      </g>)}
+      {data.map((v, i) => {
+        var isPH = v.role == "Web.API GET" && v.additionalData != null && v.additionalData.contains("/api/profilerHeavy/");
+        return (<g className="entry" data-full-key={v.fullIndex} key={v.fullIndex} onClick={e => handleOnClick(e, v)} opacity={isPH ? 0.5 : undefined}>
+          <rect className="left-background" x={0} y={y(i)} width={labelWidth} height={entryHeight} fill="#ddd" stroke="#fff" />
+          <text className="label label-left" y={y(i)} dy={fontPadding + fontSize} fill="#000">{v.role + " " + v.additionalData}</text>
+          <rect className="right-background" x={labelWidth} y={y(i)} width={width - labelWidth} height={entryHeight} fill="#fff" stroke="#ddd" />
+          <rect className="shape" x={x(v.start)} y={y(i)} width={x(v.end)! - x(v.start)!} height={entryHeight} fill={v.color} />
+          <text className="label label-right" x={x(v.end)! + 3} y={y(i)} width={x(v.end)! - x(v.start)!} dy={fontPadding + fontSize} height={entryHeight} fill='#000'>{v.elapsed}</text>
+          <title>{v.elapsed + " - " + v.additionalData}</title>
+        </g>)
+
+      })}
     </svg>
   );
 }
