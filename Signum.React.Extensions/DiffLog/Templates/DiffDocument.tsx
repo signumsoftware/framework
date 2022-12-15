@@ -14,7 +14,7 @@ export interface LineOrWordsChange {
 export function DiffDocument(p: { first: string, second: string }) {
   
   const [margin, setMargin] = React.useState<number | null>(4);
-  const [force, setForce] = React.useState<number>(false);
+  const [force, setForce] = React.useState<boolean>(false);
   var formatter = toNumberFormat("N0");
   return (
     <div>
@@ -26,7 +26,7 @@ export function DiffDocument(p: { first: string, second: string }) {
       </div>
       <div>
         {(p.first.length * p.second.length > DiffDocument.maxSize * DiffDocument.maxSize) && !force ?
-          <div class="alert alert-warning mt-2" role="alert">
+          <div className="alert alert-warning mt-2" role="alert">
             The two strings are too big ({formatter.format(p.first.length)} ch. and {formatter.format(p.second.length)} ch.) and could freeze your browser...
             <br />
             <a href="#" className="btn btn-sm btn-warning mt-3" onClick={e => { e.preventDefault(); setForce(true); }}>Try anyway!</a>
