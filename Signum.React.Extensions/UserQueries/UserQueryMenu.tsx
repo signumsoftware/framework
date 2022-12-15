@@ -238,9 +238,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       <FontAwesomeIcon icon={["far", "list-alt"]} />
       {p.searchControl.props.largeToolbarButtons == true && <>
         &nbsp;
-        {UserQueryEntity.nicePluralName()}
-        {currentUserQueryToStr && " - "}
-        {currentUserQueryToStr && <strong>{currentUserQueryToStr.etc(50)}</strong>}
+        <span className="d-none d-sm-inline">
+          {UserQueryEntity.nicePluralName()}
+          {currentUserQueryToStr && " - "}
+          {currentUserQueryToStr && <strong>{currentUserQueryToStr.etc(50)}</strong>}
+        </span>
+        <span className="d-inline d-sm-none">
+          {currentUserQueryToStr && <span>{currentUserQueryToStr.etc(20)}</span>}
+        </span>
       </>
       }
     </span>

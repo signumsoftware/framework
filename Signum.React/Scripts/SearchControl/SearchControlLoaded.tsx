@@ -696,7 +696,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       {
         order: -3,
         button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
-          <FontAwesomeIcon icon={"search"} />&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}
+          <FontAwesomeIcon icon={"search"} /><span className="d-none d-sm-inline">&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}</span>
         </button>
       },
 
@@ -705,7 +705,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       p.create && {
         order: -2,
         button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
-          <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.Create.niceToString()}
+          <FontAwesomeIcon icon="plus" className="sf-create" /><span className="d-none d-sm-inline">&nbsp;{SearchMessage.Create.niceToString()}</span>
         </button>
       },
 
@@ -913,7 +913,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (this.state.selectedRows == undefined)
       return null;
 
-    const title = JavascriptMessage.Selected.niceToString() + " (" + this.state.selectedRows!.length + ")";
+    const title = <>
+      <span className="d-none d-sm-inline">{JavascriptMessage.Selected.niceToString()}</span>
+      {" (" + this.state.selectedRows!.length + ")"}
+    </>;
 
     return {
       order: -1,
