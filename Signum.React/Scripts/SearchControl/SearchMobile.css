@@ -19,6 +19,11 @@
     background-color: #eee;
 }
 
+.row-mark-icon {
+    margin-left: 5px;
+    opacity: 0.8;
+}
+
 .sf-search-results.mobile .date-cell,
 .sf-search-results.mobile .numeric-cell {
     float: right;

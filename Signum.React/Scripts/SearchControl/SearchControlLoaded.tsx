@@ -35,6 +35,7 @@ import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { getBreakpoint, Breakpoints } from '../Hooks'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 
 interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -1669,13 +1670,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     return resultTable.rows.map((row, i) => {
       const mark = this.getRowMarked(row);
+      const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
+        mark?.status == "Warning" ? "table-warning" :
+          mark?.status == "Error" ? "table-danger" : undefined;
+
       var ra = this.getRowAttributes(row);
 
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
           {...ra}
-          className={classes(mark?.className, ra?.className)}>
+          className={classes(markClassName, ra?.className)}>
           {this.props.allowSelection &&
             <td className="centered-cell">
               <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
@@ -1711,6 +1716,31 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     });
   }
 
+  getRowMarketIcon(row: ResultRow, rowIndex: number) {
+    const mark = this.getRowMarked(row);
+    if (!mark)
+      return undefined;
+
+    const markIcon: IconProp = mark.status == "Success" ? "check-circle" :
+      mark.status == "Warning" ? "exclamation-circle" : "times-circle";
+
+    const markIconColor: string = mark.status == "Success" ? "green" :
+      mark.status == "Warning" ? "orange" : "red";
+        
+    const icon = <span><FontAwesomeIcon icon={markIcon} color={markIconColor} /></span>;
+
+    return (
+      <span className="row-mark-icon">
+        {mark.message ?
+          <OverlayTrigger
+            trigger="click"
+            overlay={<Tooltip placement="bottom" id={"result_row_" + rowIndex + "_tooltip"}>{mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
+            {icon}
+          </OverlayTrigger> : icon}
+      </span>
+    );
+  }
+
   renderRowsMobile() {
     const resultTable = this.state.resultTable;
     if (!resultTable) {
@@ -1728,14 +1758,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const columns = this.getColumnOptionsParsed();
 
     return resultTable.rows.map((row, i) => {
-      const mark = this.getRowMarked(row);
+      const markIcon = this.getRowMarketIcon(row, i);
       var ra = this.getRowAttributes(row);
 
       var div = (
         <div key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
           {...ra}
-          className={classes("row-container", mark?.className, ra?.className)}>
+          className={classes("row-container", ra?.className)}>
           {(this.props.allowSelection || this.hasEntityColumn()) &&
             <div className="row-data row-header">
               {this.props.allowSelection &&
@@ -1749,31 +1779,28 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                   {entityFormatter.formatter(row, resultTable.columns, this)}
                 </span>
               }
+
+              {markIcon}
             </div>}
 
           {
-            columns.map((c, j) =>
-              <div className={classes("row-data", !(this.props.allowSelection || this.hasEntityColumn()) && j == 0 && "row-header")}>
-                {<span className="row-title">{c.column.displayName}</span>}
-                <span key={j} data-column-index={j} className={classes("row-value", c.cellFormatter && c.cellFormatter.cellClass)}>
-                  {this.getColumnElement(row, i, c)}
-                </span>
-              </div>
-            )
+            columns.map((c, j) => {
+              const isHeader = !(this.props.allowSelection || this.hasEntityColumn()) && j == 0;
+              return (
+                <div key={j} className={classes("row-data", isHeader && "row-header")}>
+                  {<span className="row-title">{c.column.displayName}</span>}
+                  <span data-column-index={j} className={classes("row-value", c.cellFormatter && c.cellFormatter.cellClass)}>
+                    {this.getColumnElement(row, i, c)}
+                  </span>
+                  {isHeader && markIcon}
+                </div>
+              );
+            })
           }
         </div>
       );
 
-      const message = mark?.message;
-      if (!message)
-        return div;
-
-      return (
-        <OverlayTrigger
-          overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"}>{message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
-          {div}
-        </OverlayTrigger>
-      );
+      return div;
     });
   }
 
@@ -1810,9 +1837,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     if (typeof m === "string") {
       if (m == "")
-        return { className: "sf-entity-ctxmenu-success", message: undefined };
+        return { status: "Success", message: undefined };
       else
-        return { className: "table-danger", message: m };
+        return { status: "Error", message: m };
     }
     else {
       return m;
