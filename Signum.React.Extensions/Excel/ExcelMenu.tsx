@@ -65,7 +65,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
       .then(() => reloadExcelReports());
   }
 
-  const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
+  const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />{p.searchControl.props.largeToolbarButtons == true ? <span className="d-none d-sm-inline">{" " + ExcelMessage.ExcelReport.niceToString()}</span> : undefined}</span>;
 
   if (p.plainExcel && !p.excelReport && !p.importFromExcel)
     return <button className={"sf-query-button sf-search btn btn-light"} title={ExcelMessage.ExcelReport.niceToString() } onClick={handlePlainExcel}>{label} </button>;
