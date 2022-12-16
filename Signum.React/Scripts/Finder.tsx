@@ -2102,7 +2102,7 @@ function initFormatRules(): FormatRule[] {
 
         return (
           <span className={multiLineClass}>
-            {cell.split(",").map((t, i) => <a key={i} href="tel:">{t.trim()}</a>).joinCommaHtml(",")}
+            {cell.split(",").map((t, i) => <a key={i} href={`tel:${t.trim()}`}>{t.trim()}</a>).joinCommaHtml(",")}
           </span>
         );
       }, false, "telephone-link-cell")
@@ -2126,7 +2126,7 @@ function initFormatRules(): FormatRule[] {
 
         return (
           <span className={multiLineClass}>
-            <a href="mailto:">{cell}</a>
+            <a href={`mailto:${cell}`}>{cell}</a>
           </span>
         );
       }, false, "email-link-cell")
