@@ -2049,7 +2049,7 @@ function initFormatRules(): FormatRule[] {
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; 
+          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
@@ -2073,6 +2073,41 @@ function initFormatRules(): FormatRule[] {
       name: "Bool",
       isApplicable: qt => qt.filterType == "Boolean",
       formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, false, "centered-cell")
+    },
+    {
+      name: "Phone",
+      isApplicable: qt => {
+        if (qt.type.name == "string" && qt.propertyRoute != null) {
+          var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+          if (pr != null && pr.member != null && pr.member.isPhone == true)
+            return true;
+        }
+
+        return false;
+      },
+      formatter: qt => new CellFormatter((cell: string | undefined) => {
+        if (cell == undefined)
+          return undefined;
+
+        return (
+          <span>
+            {cell.split(",").map((t, i) => <a key={i} href="tel:">{t.trim()}</a>).joinCommaHtml(",")}
+          </span>
+        );
+      }, false, "telephone-link-cell")
+    },
+    {
+      name: "Email",
+      isApplicable: qt => {
+        if (qt.type.name == "string" && qt.propertyRoute != null) {
+          var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+          if (pr != null && pr.member != null && pr.member.isMail == true)
+            return true;
+        }
+
+        return false;
+      },
+      formatter: qt => new CellFormatter((cell: string | undefined) => cell == undefined ? undefined : <span><a href="mailto:">{cell}</a></span>, false, "email-link-cell")
     },
   ];
 }

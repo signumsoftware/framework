@@ -215,6 +215,8 @@ public static class ReflectionServer
                                     MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                     PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
                                     AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
+                                    IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
+                                    IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
                                 };
 
                                 return KeyValuePair.Create(p.PropertyString(), OnPropertyRouteExtension(mi, p)!);
@@ -400,6 +402,8 @@ public class MemberInfoTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool PreserveOrder { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool AvoidDuplicates { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public object? Id { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsPhone { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsMail { get; set; }
 
     [JsonExtensionData]
     public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
