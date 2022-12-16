@@ -371,7 +371,7 @@ public class ImporterFromExcel
         var errors = columns.Select(c => IsSimpleProperty(c.Token, mainType)).NotNull();
 
         if (errors.Any())
-            throw new ApplicationException(ImportFromExcelMessage.SomeColumnsAreIncompatibleForImportingFromExcel.NiceToString() + "\n" +  errors.ToString("\n"));
+            throw new ApplicationException(ImportFromExcelMessage.SomeColumnsAreIncompatibleWithImportingFromExcel.NiceToString() + "\n" +  errors.ToString("\n"));
 
         var pairs = columns.GroupBy(c => Normalize(c.Token, qd, mainType)).Select(gr => new { gr.Key, Error = gr.Count() == 1 ? null : $"Column '{gr.Key}' is repeated {gr.Count()} times" }).ToList();
 
@@ -393,7 +393,7 @@ public class ImporterFromExcel
 
         if (errors.Any())
             throw new ApplicationException(
-                ImportFromExcelMessage.SomeFiltersAreIncompatibleForImportingFromExcel.NiceToString() + "\n" +
+                ImportFromExcelMessage.SomeFiltersAreIncompatibleWithImportingFromExcel.NiceToString() + "\n" +
                 ImportFromExcelMessage.SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed.NiceToString() + "\n" +
                 errors.ToString("\n"));
 
