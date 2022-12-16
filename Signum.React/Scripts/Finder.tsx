@@ -38,6 +38,8 @@ import { QueryString } from "./QueryString";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
 import { Search } from "history";
+import { parse } from "@fortawesome/fontawesome-svg-core";
+import { faUnderline } from "@fortawesome/free-solid-svg-icons";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -1928,6 +1930,13 @@ export function registerPropertyFormatter(pr: PropertyRoute | string/*For expres
   registeredPropertyFormatters[pr.toString()] = formater;
 }
 
+export function isMultiline(pr?: PropertyRoute) {
+  if (pr == null || pr.member == null)
+    return false;
+
+  return pr.member.isMultiline || pr.member.maxLength != null && pr.member.maxLength > 150;
+}
+
 export const formatRules: FormatRule[] = initFormatRules();
 
 function initFormatRules(): FormatRule[] {
@@ -1947,7 +1956,7 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => {
         if (qt.type.name == "string" && qt.propertyRoute != null) {
           var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
-          if (pr != null && pr.member != null && (pr.member.isMultiline || pr.member.maxLength != null && pr.member.maxLength > 150))
+          if (pr != null && pr.member != null && !pr.member.isPhone && !pr.member.isMail && isMultiline(pr))
             return true;
         }
 
@@ -1960,7 +1969,7 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => {
         if (qt.type.name == "string" && qt.propertyRoute != null) {
           var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
-          if (pr != null && pr.member != null && (!pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength < 20))
+          if (pr != null && pr.member != null && !pr.member.isPhone && !pr.member.isMail && (!pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength < 20))
             return true;
         }
 
@@ -2089,8 +2098,10 @@ function initFormatRules(): FormatRule[] {
         if (cell == undefined)
           return undefined;
 
+        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : undefined;
+
         return (
-          <span>
+          <span className={multiLineClass}>
             {cell.split(",").map((t, i) => <a key={i} href="tel:">{t.trim()}</a>).joinCommaHtml(",")}
           </span>
         );
@@ -2107,7 +2118,18 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter((cell: string | undefined) => cell == undefined ? undefined : <span><a href="mailto:">{cell}</a></span>, false, "email-link-cell")
+      formatter: qt => new CellFormatter((cell: string | undefined) => {
+        if (cell == undefined)
+          return undefined;
+
+        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : undefined;
+
+        return (
+          <span className={multiLineClass}>
+            <a href="mailto:">{cell}</a>
+          </span>
+        );
+      }, false, "email-link-cell")
     },
   ];
 }
