@@ -145,19 +145,19 @@ export async function onImportFromExcel(sc: SearchControlLoaded) {
   var state = resport.results.filter(a => a.entity != null).toObject(a => liteKey(a.entity!), a => {
 
     if (a.error) {
-      return softCast<MarkedRow>({ message: `Error in Row ${a.rowIndex}: ${a.error}`, className: "text-danger" });
+      return softCast<MarkedRow>({ message: `Error in Row ${a.rowIndex}: ${a.error}`, status: "Error" });
     }
 
     if (a.action == "Updated") {
-      return softCast<MarkedRow>({ message: `Updated from Row ${a.rowIndex}`, className: "text-warning" });
+      return softCast<MarkedRow>({ message: `Updated from Row ${a.rowIndex}`, status: "Warning" });
     }
 
     if (a.action == "Inserted") {
-      return softCast<MarkedRow>({ message: `Inserted from Row ${a.rowIndex}`, className: "text-success" });
+      return softCast<MarkedRow>({ message: `Inserted from Row ${a.rowIndex}`, status: "Success" });
     }
 
     if (a.action == "NoChanges") {
-      return softCast<MarkedRow>({ message: `No changes in row Row ${a.rowIndex}`, className: "text-muted" });
+      return softCast<MarkedRow>({ message: `No changes in row Row ${a.rowIndex}`, status: "Muted" });
     }
 
     throw new Error("Unexpected value " + a.action);

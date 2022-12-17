@@ -1686,7 +1686,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       const mark = this.getRowMarked(row);
       const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
         mark?.status == "Warning" ? "table-warning" :
-          mark?.status == "Error" ? "table-danger" : undefined;
+          mark?.status == "Error" ? "table-danger" :
+          mark?.status == "Muted" ? "text-muted" :
+            undefined;
 
       var ra = this.getRowAttributes(row);
 
@@ -1737,11 +1739,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (!mark)
       return undefined;
 
-    const markIcon: IconProp = mark.status == "Success" ? "check-circle" :
-      mark.status == "Warning" ? "exclamation-circle" : "times-circle";
+    const markIcon: IconProp =
+      mark.status == "Success" ? "check-circle" :
+        mark.status == "Warning" ? "exclamation-circle" :
+          mark.status == "Error" ? "times-circle" :
+            mark.status == "Muted" ? "xmark" : null!;
 
-    const markIconColor: string = mark.status == "Success" ? "green" :
-      mark.status == "Warning" ? "orange" : "red";
+    const markIconColor: string =
+      mark.status == "Success" ? "green" :
+        mark.status == "Warning" ? "orange" :
+          mark.status == "Error" ? "red" : 
+            mark.status == "Muted" ? "gray" : null!;
         
     const icon = <span><FontAwesomeIcon icon={markIcon} color={markIconColor} /></span>;
 
