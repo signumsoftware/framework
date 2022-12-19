@@ -441,10 +441,6 @@
     <Member Name="CertFile" Description="Zertiikationsdatei" />
     <Member Name="SignedFile" Description="Signierte Datei" />
   </Type>
-  <Type Name="ChartColorEntity" Description="Diagrammfarbe">
-    <Member Name="Color" Description="Farbe" />
-    <Member Name="Related" Description="In Beziehung mit" />
-  </Type>
   <Type Name="ChartColumnEmbedded" Description="Diagrammspalte">
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="Format" Description="Format" />
@@ -509,10 +505,6 @@
     <Member Name="TypeNotFound" Description="Typ nicht gefunden" />
     <Member Name="ViewPalette" Description="Palette anzeigen" />
   </Type>
-  <Type Name="ChartPaletteModel" Description="Diagrammpalette">
-    <Member Name="Colors" Description="Farben" />
-    <Member Name="TypeName" Description="Typname" />
-  </Type>
   <Type Name="ChartParameterEmbedded" Description="Diagramm-parameter">
     <Member Name="Name" Description="Name" />
     <Member Name="ScriptParameter" Description="Skriptparameter" />
@@ -534,6 +526,20 @@
   <Type Name="ClientCertificationFileEmbedded" Description="Client-Zertifikat-Datei">
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
+  </Type>
+  <Type Name="ColorPaletteEntity" Description="Farbpalette">
+    <Member Name="CategoryName" Description="Name der Kategorie" />
+    <Member Name="Seed" Description="Seed" />
+    <Member Name="SpecificColors" Description="Spezifische Farben" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="ColorPaletteMessage">
+    <Member Name="FillAutomatically" Description="Automatisch ausfüllen" />
+    <Member Name="Select0OnlyIfYouWantToOverrideTheAutomaticColor" Description="Wählen Sie {0} nur aus, wenn Sie die automatische Farbe überschreiben möchten" />
+  </Type>
+  <Type Name="ColorPaletteOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="CombinedUserChartElementEmbedded" Description="Kombiniertes Benutzerdiagrammelement">
     <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
@@ -1240,6 +1246,7 @@
     <Member Name="ThereAreNoResultsToWrite" Description="Es gibt keine Ergebnisse für den Bericht zu exportieren" />
   </Type>
   <Type Name="ExcelPermission">
+    <Member Name="ImportFromExcel" Description="Import aus Excel" />
     <Member Name="PlainExcel" Description="Einfaches Excel" />
   </Type>
   <Type Name="ExcelReportEntity" Description="Excel Bericht" PluralDescription="Excel Berichte" Gender="m">
@@ -1288,7 +1295,6 @@
   </Type>
   <Type Name="FilePathEmbedded" Description="Eingebettete Datei-Pfad">
     <Member Name="BinaryFile" Description="Binärdatei" />
-    <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
     <Member Name="EntityId" Description="EntityId" />
     <Member Name="FileLength" Description="Dateilänge" />
     <Member Name="FileLengthString" Description="Dateigröße string" />
@@ -1302,7 +1308,6 @@
   </Type>
   <Type Name="FilePathEntity" Description="Dateipfad" PluralDescription="Dateipfade" Gender="m">
     <Member Name="BinaryFile" Description="Binärdatei" />
-    <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="FileLength" Description="Dateilänge" />
     <Member Name="FileLengthString" Description="Dateigröße" />
@@ -1437,6 +1442,43 @@
     <Member Name="ClickActionURL" Description="Aktions-URL" />
     <Member Name="ImageSrcContent" Description="Bild src Inhalt" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
+  <Type Name="ImportExcelMode" Description="Excel-Modus importieren">
+    <Member Name="Insert" Description="Insert" />
+    <Member Name="InsertOrUpdate" Description="Insert or update" />
+    <Member Name="Update" Description="Update" />
+  </Type>
+  <Type Name="ImportExcelModel" Description="Excel importieren">
+    <Member Name="ExcelFile" Description="Excel-Datei" />
+    <Member Name="IdentityInsert" Description="Identity insert" />
+    <Member Name="MatchByColumn" Description="Nach Spalte abgleichen" />
+    <Member Name="Mode" Description="Modus" />
+    <Member Name="OperationKey" Description="Operation-Key" />
+    <Member Name="Transactional" Description="Transaktionale" />
+    <Member Name="TypeName" Description="Typname" />
+  </Type>
+  <Type Name="ImportFromExcelMessage">
+    <Member Name="_01CanAlsoBeUsed" Description="{0}.[{1}] kann auch verwendet werden" />
+    <Member Name="_01CannotBeAssignedDirectly" Description="{0} ({1}) kann nicht direkt zugeordnet werden. Jedes verschachtelte Feld sollte unabhängig zugewiesen werden." />
+    <Member Name="_01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently" Description="{0} ({1}) kann nicht direkt zugeordnet werden. Jedes verschachtelte Feld sollte unabhängig zugewiesen werden." />
+    <Member Name="_01IsIncompatible" Description="{0} ({1}) ist inkompatibel" />
+    <Member Name="_01IsNotSupported" Description="{0}/{1} wird nicht unterstützt in: " />
+    <Member Name="_0Errors" Description="{0} Fehler" />
+    <Member Name="_0IsNotSupported" Description="{0} wird nicht unterstützt" />
+    <Member Name="_0IsReadOnly" Description="{0} ist schreibgeschützt" />
+    <Member Name="Columns0AlreadyHaveConstanValuesFromFilters" Description="Spalte(n) {0} haben bereits konstante Werte aus Filtern" />
+    <Member Name="DownloadTemplate" Description="Excel-Vorlage für diese Abfrage herunterladen" />
+    <Member Name="ErrorsIn0Rows_N" Description="Fehler in {0} Zeile(n)" />
+    <Member Name="Import0FromExcel" Description="{0} aus Excel Importieren" />
+    <Member Name="ImportFromExcel" Description="Aus Excel importieren" />
+    <Member Name="Importing0" Description="Importieren {0}" />
+    <Member Name="ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1" Description="Viele Filter versuchen, die gleiche Eigenschaft {0} mit unterschiedlichen Werten {1} zuzuweisen" />
+    <Member Name="No0FoundInThisQueryWith1EqualsTo2" Description="Keine {0} gefunden in dieser Abfrage mit {1} gleich {2}" />
+    <Member Name="Operation0IsNotSupported" Description="Operation {0} wird nicht unterstützt" />
+    <Member Name="SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed" Description="Einfache 'Property = Value' Filter können verwendet werden, um konstante Werte zuzuweisen, alles andere ist nicht erlaubt:" />
+    <Member Name="SomeColumnsAreIncompatibleForImportingFromExcel" Description="Einige Spalten sind für Importinng aus Excel nicht kompatibel:" />
+    <Member Name="SomeFiltersAreIncompatibleForImportingFromExcel" Description="Einige Filter sind für den Import aus Excel nicht kompatibel" />
+    <Member Name="ThisQueryHasMultipleImplementations0" Description="Diese Abfrage hat mehrere Implementierungen {0}" />
   </Type>
   <Type Name="InboxFilterModel" Description="Posteingangs-filter">
     <Member Name="FromDate" Description="Vom Datum" />
@@ -2359,6 +2401,10 @@
     <Member Name="Port" Description="Port" />
     <Member Name="UseDefaultCredentials" Description="Verwenden der Standardanmeldeinformationen" />
     <Member Name="Username" Description="Benutzername" />
+  </Type>
+  <Type Name="SpecificColorEmbedded" Description="Spezifische Farbe">
+    <Member Name="Color" Description="Farbe" />
+    <Member Name="Entity" Description="Entität" />
   </Type>
   <Type Name="SqlMigrationEntity" Description="SQL-Migration">
     <Member Name="Comment" Description="Kommentar" />

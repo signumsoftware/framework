@@ -23,7 +23,7 @@ export interface MarkedRowsDictionary {
 }
 
 export interface MarkedRow {
-  className: string;
+  status: "Error" | "Warning" | "Success" | "Muted";
   message?: string;
 }
 
