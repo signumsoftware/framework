@@ -64,37 +64,37 @@ public class CellBuilder
 
     public Dictionary<DefaultStyle, UInt32Value> DefaultStyles = null!;
 
-    public Cell Cell<T>(T value, bool forImport)
+    public Cell Cell<T>(T value, bool forImport = false)
     {
         DefaultStyle template = GetDefaultStyle(typeof(T));
         return Cell(value, template, forImport);
     }
 
-    public Cell Cell<T>(T value, UInt32Value styleIndex, bool forImport)
+    public Cell Cell<T>(T value, UInt32Value styleIndex, bool forImport = false)
     {
         DefaultStyle template = GetDefaultStyle(typeof(T));
         return Cell(value, template, styleIndex, forImport);
     }
 
-    public Cell Cell(object? value, Type type, bool forImport)
+    public Cell Cell(object? value, Type type, bool forImport = false)
     {
         DefaultStyle template = GetDefaultStyle(type);
         return Cell(value, template, forImport);
     }
 
-    public Cell Cell(object? value, Type type, UInt32Value styleIndex, bool forImport)
+    public Cell Cell(object? value, Type type, UInt32Value styleIndex, bool forImport = false)
     {
         DefaultStyle template = GetDefaultStyle(type);
         return Cell(value, template, styleIndex, forImport);
     }
 
-    public Cell Cell(object? value, DefaultStyle template, bool forImport)
+    public Cell Cell(object? value, DefaultStyle template, bool forImport = false)
     {
         return Cell(value, template, DefaultStyles[template], forImport);
     }
 
 #pragma warning disable CA1822 // Mark members as static
-    public Cell Cell(object? value, DefaultStyle template, UInt32Value styleIndex, bool forImport)
+    public Cell Cell(object? value, DefaultStyle template, UInt32Value styleIndex, bool forImport = false)
     {
         string excelValue = value == null ? "" :
             template == DefaultStyle.DateTime ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
