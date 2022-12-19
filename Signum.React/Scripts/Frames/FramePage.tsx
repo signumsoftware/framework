@@ -37,7 +37,7 @@ interface FramePageState {
 
 export default function FramePage(p: FramePageProps) {
 
-  const [state, setState] = useStateWithPromise<FramePageState | undefined>(undefined);
+  let [state, setState] = useStateWithPromise<FramePageState | undefined>(undefined);
   const stateRef = useUpdatedRef(state);
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component | null>(null);
@@ -48,6 +48,12 @@ export default function FramePage(p: FramePageProps) {
   const ti = getTypeInfo(p.match.params.type);
   const type = ti.name;
   const id = p.match.params.id;
+
+  if (state && state.pack.entity.Type != ti.name)
+    state = undefined;
+
+  if (state && id != null && state.pack.entity.id != id)
+    state = undefined;
 
   useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
 
