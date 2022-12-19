@@ -212,29 +212,30 @@ export default function FramePage(p: FramePageProps) {
 
   const entity = state.pack.entity;
 
+  const s = state;
 
   const frame: EntityFrame = {
     tabs: undefined,
     frameComponent: { forceUpdate, type: FramePage as any },
     entityComponent: entityComponent.current,
     pack: state.pack,
-    isExecuting: () => state.executing == true,
+    isExecuting: () => s.executing == true,
     execute: async action => {
-      if (state.executing)
+      if (s.executing)
         return;
 
-      state.executing = true;
+      s.executing = true;
       forceUpdate();
       try {
         await action();
       } finally {
-        state.executing = undefined;
+        s.executing = undefined;
         forceUpdate();
       }
     },
     onReload: (pack, reloadComponent, callback) => {
 
-      var packEntity = (pack ?? state.pack) as EntityPack<Entity>;
+      var packEntity = (pack ?? s.pack) as EntityPack<Entity>;
 
       const replaceRoute = !packEntity.entity.isNew && entity.isNew;
 
@@ -250,7 +251,7 @@ export default function FramePage(p: FramePageProps) {
               setState({
                 pack: packEntity,
                 getComponent: gc,
-                refreshCount: state.refreshCount + 1,
+                refreshCount: s.refreshCount + 1,
 
               }).then(() => {
                 if (newRoute) {
@@ -268,8 +269,8 @@ export default function FramePage(p: FramePageProps) {
       else {
         setState({
           pack: packEntity,
-          getComponent: state.getComponent,
-          refreshCount: state.refreshCount + 1,
+          getComponent: s.getComponent,
+          refreshCount: s.refreshCount + 1,
         }).then(() => {
           if (newRoute) {
             if (replaceRoute)
@@ -309,7 +310,7 @@ export default function FramePage(p: FramePageProps) {
 
   return (
     <div className="normal-control" style={{ opacity: outdated ? .5 : undefined }}>
-      <Prompt when={!(state.pack.entity.isNew && id != null)} message={() => hasChanges(state) ? JavascriptMessage.loseCurrentChanges.niceToString() : true} />
+      <Prompt when={!(state.pack.entity.isNew && id != null)} message={() => hasChanges(s) ? JavascriptMessage.loseCurrentChanges.niceToString() : true} />
       {renderTitle()}
       <div style={state.executing == true ? { opacity: ".7" } : undefined}>
         <div className="sf-button-widget-container">
