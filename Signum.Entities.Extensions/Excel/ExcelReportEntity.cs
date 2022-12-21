@@ -88,6 +88,9 @@ public enum ImportFromExcelMessage
     [Description("{0} is not supported")]
     _0IsNotSupported,
 
+    [Description("{0} is not supported in:")]
+    _0IsNotSupportedIn,
+
 
     [Description("{0} ({1}) can not be assigned directly. Each nested field should be assigned independently.")]
     _01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently,
@@ -105,7 +108,13 @@ public enum ImportFromExcelMessage
     ErrorsIn0Rows_N,
 
     [Description("No {0} found in this query with {1} equals to {2}")]
-    No0FoundInThisQueryWith1EqualsTo2
+    No0FoundInThisQueryWith1EqualsTo2,
+
+    [Description("Unable to assign more than one unrelated collection: {0}")]
+    UnableToAssignMoreThanOneUnrelatedCollections0,
+
+    [Description("Duplicate non-consecutive {0} found: {1}")]
+    DuplicatedNonConsecutive0Found1
 }
 
 

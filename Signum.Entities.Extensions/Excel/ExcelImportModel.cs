@@ -27,6 +27,9 @@ public class ImportExcelModel : ModelEntity
 
     public string? MatchByColumn { get; set; }
 
+    [NoRepeatValidator]
+    public MList<CollectionElementEmbedded> Collections { get; set; } = new MList<CollectionElementEmbedded>();
+
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if (pi.Name == nameof(MatchByColumn) && MatchByColumn == null && (Mode == ImportExcelMode.InsertOrUpdate || Mode == ImportExcelMode.Update))
@@ -34,6 +37,13 @@ public class ImportExcelModel : ModelEntity
 
         return base.PropertyValidation(pi);
     }
+}
+
+public class CollectionElementEmbedded : EmbeddedEntity
+{
+    public string CollectionElement { get; set; }
+
+    public string MatchByColumn { get; set; }
 }
 
 public enum ImportExcelMode

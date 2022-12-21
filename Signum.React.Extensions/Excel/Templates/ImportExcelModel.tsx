@@ -1,33 +1,38 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, OptionItem } from '@framework/Lines'
+import { ValueLine, EntityLine, OptionItem, EntityTable, FormGroup, FormControlReadonly } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { FileLine } from '../../Files/FileLine'
-import { ImportExcelMode, ImportExcelModel, ImportFromExcelMessage } from '../Signum.Entities.Excel'
+import { CollectionElementEmbedded, ImportExcelMode, ImportExcelModel, ImportFromExcelMessage } from '../Signum.Entities.Excel'
 import * as Finder from '@framework/Finder'
 import { getTypeInfo, getTypeInfos, PseudoType } from '@framework/Reflection'
 import { SearchControl, SearchControlLoaded } from '@framework/Search'
 import * as Navigator from '@framework/Navigator'
 import * as ExcelClient from '../ExcelClient'
 import { Dic, softCast } from '@framework/Globals'
-import { QueryRequest } from '@framework/FindOptions'
+import { FilterOperation, FilterOptionParsed, FindOptionsParsed, getTokenParents, hasElement, QueryRequest, QueryToken } from '@framework/FindOptions'
 import ErrorModal from '@framework/Modals/ErrorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import a from 'bpmn-js/lib/features/search'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { MarkedRow } from '@framework/SearchControl/ContextualItems'
-import { JavascriptMessage, liteKey } from '@framework/Signum.Entities'
+import { JavascriptMessage, liteKey, newMListElement } from '@framework/Signum.Entities'
 import { useForceUpdate } from '@framework/Hooks'
 import { selectPagination } from '../ExcelMenu'
 import { RetryFilter } from '@framework/Services'
 
-export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, searchControl: SearchControlLoaded, queryRequest: QueryRequest }) {
+export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, searchControl: SearchControlLoaded, fop: FindOptionsParsed, topElementToken: QueryToken | null }) {
   const ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });
   const forceUpdate = useForceUpdate();
+
+  var parentTokens = getTokenParents(p.topElementToken).toObject(a => a.fullKey);
 
   function handlePlainExcelForImport() {
     selectPagination(p.searchControl).then(req => req && ExcelClient.API.generatePlainExcel(req, undefined, true));
   }
 
+  function potentialKeys(elementToken: string) {
+    return p.fop.columnOptions.filter(a => a.token && a.token.fullKey.startsWith(elementToken) && !a.token.fullKey.after(elementToken).split(".").contains("Element"));
+  }
 
   return (
     <div>
@@ -41,10 +46,10 @@ export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, sea
         </div>
         <div className="col-sm-4">
           <ValueLine ctx={ctx.subCtx(f => f.mode)} onChange={() => {
-            if (ctx.value.mode == "Insert")
+            if (ctx.value.mode == "Insert" && ctx.value.matchByColumn?.length == 0)
               ctx.value.matchByColumn = null;
             else
-              ctx.value.matchByColumn = (ctx.value.matchByColumn ?? p.queryRequest.columns.firstOrNull(a => a.token == "Id" || a.token == "Entity.Id")?.token) ?? null;
+              ctx.value.matchByColumn = (ctx.value.matchByColumn ?? p.fop.columnOptions.firstOrNull(a => a.token?.fullKey == "Id" || a.token?.fullKey == "Entity.Id")?.token?.fullKey) ?? null;
 
             var operations = getSaveOperations(p.ctx.value.typeName, ctx.value.mode);
             if (!operations.some(o => o.key == ctx.value.operationKey))
@@ -58,13 +63,36 @@ export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, sea
           {(ctx.value.mode == "Insert" || ctx.value.mode == "InsertOrUpdate") && <ValueLine ctx={ctx.subCtx(f => f.identityInsert)} inlineCheckbox="block" />}
         </div>
         <div className="col-sm-4">
-          {(ctx.value.mode == "Update" || ctx.value.mode == "InsertOrUpdate") &&
+          {(ctx.value.mode == "Update" || ctx.value.mode == "InsertOrUpdate" || ctx.value.collections.length > 0) &&
             <ValueLine ctx={ctx.subCtx(f => f.matchByColumn)} valueLineType="DropDownList" mandatory
-              optionItems={p.queryRequest.columns.map(c => softCast<OptionItem>({ value: c.token, label: c.displayName }))}
+              optionItems={p.fop.columnOptions.filter(a => a.token && !hasElement(a.token)).map(c => softCast<OptionItem>({ value: c.token!.fullKey, label: c.displayName ?? c.token!.niceName! }))}
             />
           }
         </div>
       </div>
+
+      {(ctx.value.mode && ctx.value.collections.length > ( ctx.value.mode == "Insert" ? 1 : 0)) &&
+        <div className="row mt-2">
+          <div className="col-sm-4">
+          </div>
+          <div className="col-sm-8">
+            <EntityTable ctx={ctx.subCtx(a => a.collections)} filterRows={ctxs => ctx.value.mode == "Insert" ? ctxs.filter((a, i) => i < ctxs.length - 1) : ctxs} avoidEmptyTable avoidFieldSet create={false} remove={false}
+              columns={EntityTable.typedColumns<CollectionElementEmbedded>([
+                {
+                  property: a => a.collectionElement, template: ctx => <FormGroup ctx={ctx}>
+                    <FormControlReadonly ctx={ctx}>{parentTokens[ctx.value.collectionElement].niceName}</FormControlReadonly>
+                  </FormGroup>
+                },
+                {
+                  property: a => a.matchByColumn, template: ctx => <ValueLine ctx={ctx.subCtx(a => a.matchByColumn)} valueLineType="DropDownList" mandatory
+                    optionItems={potentialKeys(ctx.value.collectionElement).map(c => softCast<OptionItem>({ value: c.token!.fullKey, label: c.displayName ?? c.token!.niceName! }))}
+                  />
+                },
+              ])}
+            />
+          </div>
+        </div>
+      }
 
       <br/>
 
@@ -89,7 +117,7 @@ export async function onImportFromExcel(sc: SearchControlLoaded) {
   var qr = sc.getQueryRequest();
   qr.pagination = { mode: "All" };
 
-  await ExcelClient.API.validateForImport(qr);
+  var topToken = await ExcelClient.API.validateForImport(qr);
 
   var qd = await Finder.getQueryDescription(qr.queryKey);
 
@@ -99,11 +127,14 @@ export async function onImportFromExcel(sc: SearchControlLoaded) {
     typeName: ti.name,
     mode: null!,
     operationKey: getSaveOperations(ti, null).onlyOrNull()?.key,
+    collections: getTokenParents(topToken)
+      .filter(t => t.queryTokenType == "Element")
+      .map(m => newMListElement(CollectionElementEmbedded.New({ collectionElement: m.fullKey }))), 
   });
 
 
   model = (await Navigator.view(model, {
-    extraProps: { searchControl: sc, queryRequest: qr },
+    extraProps: { searchControl: sc, fop: sc.state.resultFindOptions, topElementToken: topToken },
     title: ImportFromExcelMessage.Import0FromExcel.niceToString(ti.nicePluralName)
   }))!;
 

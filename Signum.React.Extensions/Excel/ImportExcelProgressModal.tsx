@@ -14,6 +14,7 @@ import { TypeInfo } from '@framework/Reflection';
 
 interface ImportExcelProgressModalProps extends IModalProps<ImportFromExcelReport> {
   typeInfo: TypeInfo;
+
   makeRequest: () => Promise<Response>;
   abortController: AbortController;
 }

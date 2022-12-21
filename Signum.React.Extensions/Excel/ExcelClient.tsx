@@ -4,7 +4,7 @@ import { ajaxPostRaw, ajaxGet, saveFile, ajaxPost } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { QueryRequest } from '@framework/FindOptions'
+import { QueryRequest, QueryToken } from '@framework/FindOptions'
 import { Entity, Lite } from '@framework/Signum.Entities'
 import { ExcelReportEntity, ExcelMessage, ExcelPermission, ImportExcelModel } from './Signum.Entities.Excel'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -77,7 +77,7 @@ export namespace API {
       .then(response => saveFile(response));
   }
 
-  export function validateForImport(queryRequest: QueryRequest) : Promise<void> {
+  export function validateForImport(queryRequest: QueryRequest): Promise<QueryToken | undefined> {
     return ajaxPost({ url: "~/api/excel/validateForImport" }, queryRequest);
   }
 
