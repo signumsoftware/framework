@@ -78,15 +78,14 @@ export module ImportFromExcelMessage {
   export const DownloadTemplate = new MessageKey("ImportFromExcelMessage", "DownloadTemplate");
   export const Columns0AlreadyHaveConstanValuesFromFilters = new MessageKey("ImportFromExcelMessage", "Columns0AlreadyHaveConstanValuesFromFilters");
   export const ThisQueryHasMultipleImplementations0 = new MessageKey("ImportFromExcelMessage", "ThisQueryHasMultipleImplementations0");
-  export const SomeColumnsAreIncompatibleForImportingFromExcel = new MessageKey("ImportFromExcelMessage", "SomeColumnsAreIncompatibleForImportingFromExcel");
+  export const SomeColumnsAreIncompatibleWithImportingFromExcel = new MessageKey("ImportFromExcelMessage", "SomeColumnsAreIncompatibleWithImportingFromExcel");
   export const Operation0IsNotSupported = new MessageKey("ImportFromExcelMessage", "Operation0IsNotSupported");
   export const _01IsNotSupported = new MessageKey("ImportFromExcelMessage", "_01IsNotSupported");
-  export const SomeFiltersAreIncompatibleForImportingFromExcel = new MessageKey("ImportFromExcelMessage", "SomeFiltersAreIncompatibleForImportingFromExcel");
+  export const SomeFiltersAreIncompatibleWithImportingFromExcel = new MessageKey("ImportFromExcelMessage", "SomeFiltersAreIncompatibleWithImportingFromExcel");
   export const SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed = new MessageKey("ImportFromExcelMessage", "SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed");
   export const ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1 = new MessageKey("ImportFromExcelMessage", "ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1");
   export const _0IsNotSupported = new MessageKey("ImportFromExcelMessage", "_0IsNotSupported");
   export const _01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently = new MessageKey("ImportFromExcelMessage", "_01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently");
-  export const _01CannotBeAssignedDirectly = new MessageKey("ImportFromExcelMessage", "_01CannotBeAssignedDirectly");
   export const _01CanAlsoBeUsed = new MessageKey("ImportFromExcelMessage", "_01CanAlsoBeUsed");
   export const _0IsReadOnly = new MessageKey("ImportFromExcelMessage", "_0IsReadOnly");
   export const _01IsIncompatible = new MessageKey("ImportFromExcelMessage", "_01IsIncompatible");

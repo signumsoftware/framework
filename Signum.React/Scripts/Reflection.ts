@@ -61,6 +61,8 @@ export interface MemberInfo {
   avoidDuplicates?: boolean;
   notVisible?: boolean;
   id?: any; //symbols
+  isPhone?: boolean;
+  isMail?: boolean;
 }
 
 export interface OperationInfo {

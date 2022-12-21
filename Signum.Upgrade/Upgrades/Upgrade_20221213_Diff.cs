@@ -12,7 +12,7 @@ class Upgrade_20221213_Diff : CodeUpgradeBase
     {
         uctx.ChangeCodeFile("Southwind.React/package.json", file =>
         {
-            file.InsertBeforeFirstLine(a => a.Contains("\"d3\": \"7.6.1\","), """
+            file.InsertBeforeFirstLine(a => a.Contains("\"d3\""), """
                 "@types/diff" : "5.0.2",
                 "diff": "5.1.0",
                 """);

@@ -1,4 +1,5 @@
 using DeepL;
+using DeepL.Model;
 
 namespace Signum.Engine.Translation;
 
@@ -15,7 +16,7 @@ public class DeepLTranslator : ITranslator
         this.DeepLApiKey = deepLKey;
     }
 
-    List<SupportedLanguage>? supportedLanguages;
+    List<GlossaryLanguagePair>? supportedLanguages;
 
     public async Task<List<string?>?> TranslateBatchAsync(List<string> list, string from, string to)
     {
@@ -26,17 +27,22 @@ public class DeepLTranslator : ITranslator
             return null;
         }
 
-        using (DeepLClient client = new DeepLClient(apiKey))
+        using (Translator translator = new Translator(apiKey))
         {
             if (supportedLanguages == null)
-                supportedLanguages = (await client.GetSupportedLanguagesAsync()).ToList();
+                supportedLanguages = (await translator.GetGlossaryLanguagesAsync()).ToList();
 
-            if (!supportedLanguages.Any(a => a.LanguageCode == to.ToUpper()))
+            if (!supportedLanguages.Any(a => a.TargetLanguageCode == to.ToLower()))
             {
                 return null;
             }
 
-            var translation = await client.TranslateAsync(list, sourceLanguageCode: from.ToUpper(), targetLanguageCode: to.ToUpper());
+            if (!supportedLanguages.Any(a => a.SourceLanguageCode == from.ToLower()))
+            {
+                return null;
+            }
+
+            var translation = await translator.TranslateTextAsync(list, sourceLanguageCode: from.ToLower(), targetLanguageCode: to.ToLower());
 
             return translation.Select(a => (string?)a.Text).ToList();
         }
