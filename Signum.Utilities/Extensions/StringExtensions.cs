@@ -569,7 +569,12 @@ public static class StringExtensions
     public static string Etc(this string str, int max, string etcString)
     {
         if (str.HasText() && (str.Length > max))
-            return str.Start(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
+        {
+            if(etcString.Length <= max)
+                return str.Substring(0, max);
+
+            return str.Start(max - etcString.Length) + etcString;
+        }
         return str;
     }
 

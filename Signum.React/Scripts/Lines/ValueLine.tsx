@@ -230,7 +230,7 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
 
   const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
-    vl.setValue(input.checked);
+    vl.setValue(input.checked, e);
   };
 
   if (s.inlineCheckbox) {
@@ -340,9 +340,6 @@ function internalDropDownList(vl: ValueLineController) {
   }
 
   if (vl.props.onRenderDropDownListItem) {
-    const handleOptionItem = (e: OptionItem) => {
-      vl.setValue(e.value);
-    };
 
     var oi = optionItems.singleOrNull(a => a.value == s.ctx.value) ?? {
       value: s.ctx.value,
@@ -352,7 +349,9 @@ function internalDropDownList(vl: ValueLineController) {
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
-          <DropdownList<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems} onChange={handleOptionItem} value={oi}
+          <DropdownList<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass, "p-0"))} data={optionItems}
+            onChange={(oe, md) => vl.setValue(oe.value, md.originalEvent)}
+            value={oi}
             filter={false}
             autoComplete="off"
             dataKey="value"
@@ -369,7 +368,7 @@ function internalDropDownList(vl: ValueLineController) {
     const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
       const option = optionItems.filter(a => toStr(a.value) == input.value).single();
-      vl.setValue(option.value);
+      vl.setValue(option.value, e);
     };
 
     return (
@@ -421,16 +420,15 @@ function internalComboBoxText(vl: ValueLineController) {
     );
   }
 
-  const handleOptionItem = (e: string | OptionItem) => {
-    vl.setValue(e == null ? null : typeof e == "string" ? e : e.value);
-  };
 
   var renderItem = vl.props.onRenderDropDownListItem ? (a: any) => vl.props.onRenderDropDownListItem!(a.item) : undefined;
 
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <Combobox<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={handleOptionItem} value={s.ctx.value}
+        <Combobox<OptionItem> className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} data={optionItems} onChange={(e: string | OptionItem, md) => {
+          vl.setValue(e == null ? null : typeof e == "string" ? e : e.value, md.originalEvent);
+        }} value={s.ctx.value}
           dataKey="value"
           textField="label"
           focusFirstItem
@@ -468,7 +466,7 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
 
   const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
-    vl.setValue(input.value);
+    vl.setValue(input.value, e);
   };
 
   let handleBlur: ((e: React.FocusEvent<any>) => void) | undefined = undefined;
@@ -477,7 +475,7 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
       const input = e.currentTarget as HTMLInputElement;
       var fixed = ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true);
       if (fixed != input.value)
-        vl.setValue(fixed);
+        vl.setValue(fixed, e);
 
       if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
@@ -524,7 +522,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
 
   const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
-    vl.setValue(input.value);
+    vl.setValue(input.value, e);
   };
 
   let handleBlur: ((e: React.FocusEvent<any>) => void) | undefined = undefined;
@@ -533,7 +531,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
       const input = e.currentTarget as HTMLInputElement;
       var fixed = ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false);
       if (fixed != input.value)
-        vl.setValue(fixed);
+        vl.setValue(fixed, e);
 
       if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
@@ -585,10 +583,10 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
   const handleKeyDown = (e: React.KeyboardEvent<any>) => {
     if (e.keyCode == KeyCodes.down) {
       e.preventDefault();
-      vl.setValue((s.ctx.value ?? 0) - incNumber);
+      vl.setValue((s.ctx.value ?? 0) - incNumber, e);
     } else if (e.keyCode == KeyCodes.up) {
       e.preventDefault();
-      vl.setValue((s.ctx.value ?? 0) + incNumber);
+      vl.setValue((s.ctx.value ?? 0) + incNumber, e);
     }
   }
 
@@ -1137,7 +1135,7 @@ function internalRadioGroup(vl: ValueLineController) {
   const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
     const option = optionItems.filter(a => a.value == input.value).single();
-    vl.setValue(option.value);
+    vl.setValue(option.value, e);
   };
 
   return (

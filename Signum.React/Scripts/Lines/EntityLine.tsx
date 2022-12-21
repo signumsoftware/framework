@@ -88,11 +88,11 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
     }
   }
 
-  setValue(val: any) {
+  setValue(val: any, event?: React.SyntheticEvent) {
     if (val != null)
       this.focusNext.current = true;
 
-    super.setValue(val);
+    super.setValue(val, event);
 
     if (val == null) {
       setTimeout(() => {
@@ -113,7 +113,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
             return this.props.autocomplete!.getItemFromEntity(entity) //newItem could be different to item on create new case
               .then(newItem => {
                 this.setCurrentItem({ entity: entity, item: newItem });
-                this.setValue(entity);
+                this.setValue(entity, event);
               });
           }));
 
