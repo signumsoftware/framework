@@ -366,7 +366,7 @@ public class ExtensionInfo
             {
                 result.PropertyRoute = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Only()).Distinct().Only();
                 var metaImps = dirtyMeta.CleanMetas.Select(cm => cm.Implementations).Distinct().Only();
-                if (metaImps.HasValue && (!metaImps.Value.IsByAll) && metaImps.Value.Types.All(t => t.IsAssignableFrom(Type)))
+                if (metaImps.HasValue && !metaImps.Value.IsByAll && metaImps.Value.Types.All(t => t.IsAssignableFrom(Type)))
                 {
                     result.Implementations = metaImps;
                 }
