@@ -56,7 +56,7 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
       return element as Lite<Entity> | Entity;
   }
 
-  handleOnChange = (event: React.ChangeEvent, lite: Lite<Entity>) => {
+  handleOnChange = (event: React.SyntheticEvent, lite: Lite<Entity>) => {
     const list = this.props.ctx.value!;
     const toRemove = list.filter(mle => is(this.getKeyEntity(mle.element), lite))
 

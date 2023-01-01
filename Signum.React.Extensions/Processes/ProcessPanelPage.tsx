@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { withClassName } from '../Dynamic/View/HtmlAttributesExpression'
 import { classes } from '../../Signum.React/Scripts/Globals'
 import { ProcessProgressBar } from './Templates/Process'
+import { getToString } from '@framework/Signum.Entities'
 
 
 export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
@@ -108,7 +109,7 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
           orderOptions: [{ token: ProcessEntity.token(e => e.creationDate), orderType: "Descending" }],
           pagination: { elementsPerPage: 10, mode: "Firsts" }
         }}
-          deps={[tick]}
+          deps={[state?.executing.map(a => a.process.id!.toString()).join(",")]}
         />
       </div>
     </div>
