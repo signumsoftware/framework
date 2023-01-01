@@ -107,6 +107,15 @@ public class ImporterFromExcel
 
             var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
 
+
+            var headerRow = data.Descendants<Row>().ElementAt(1);
+            var excelColumns = headerRow.Descendants<Cell>().ToList().Select((c, i) => document.GetCellValue(c)).ToString(", ");
+            var queryColumns = request.Columns.ToString(a => a.DisplayName, ", ");
+
+            if (excelColumns != queryColumns)
+                throw new ApplicationException(ImportFromExcelMessage.ColumnsDoNotMatchExcelColumns0QueryColumns1.NiceToString(excelColumns, queryColumns));
+
+
             var allRows = data.Descendants<Row>().Skip(2).ToList();
 
             bool hasErros = false;
@@ -252,6 +261,12 @@ public class ImporterFromExcel
                             else
                             {
                                 object? value = ParseExcelValue(token, strValue, firstRow, colIndex);
+
+                                if (pq.SimpleFilters.TryGetValue(token, out var filterValue))
+                                {
+                                    if(!object.Equals(value, filterValue))
+                                        throw new InvalidOperationException($"Value of column {token} ({value ?? "null"}) does not match the filter value ({filterValue ?? "null"}). Cell Reference = {CellReference(firstRow, colIndex)}");
+                                }
 
                                 var parent = getSet.ParentGetter != null ? getSet.ParentGetter(entity) : entity;
                                 getSet.Setter!(parent, value);
@@ -486,10 +501,10 @@ public class ImporterFromExcel
 
         var columns = GetSimpleColumns(request.Columns, qd, entityType);
 
-        var repeatedColumns = columns.Where(token => simpleFilters.ContainsKey(token)).ToList();
+        //var repeatedColumns = columns.Where(token => simpleFilters.ContainsKey(token)).ToList();
 
-        if (repeatedColumns.Any())
-            throw new ApplicationException(ImportFromExcelMessage.Columns0AlreadyHaveConstanValuesFromFilters.NiceToString(repeatedColumns.CommaAnd()));
+        //if (repeatedColumns.Any())
+        //    throw new ApplicationException(ImportFromExcelMessage.Columns0AlreadyHaveConstanValuesFromFilters.NiceToString(repeatedColumns.CommaAnd()));
 
         var authErrors = simpleFilters.Keys.Concat(columns).Distinct().Select(a =>
         {

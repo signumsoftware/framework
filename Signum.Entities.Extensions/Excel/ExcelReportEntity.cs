@@ -114,7 +114,10 @@ public enum ImportFromExcelMessage
     UnableToAssignMoreThanOneUnrelatedCollections0,
 
     [Description("Duplicate non-consecutive {0} found: {1}")]
-    DuplicatedNonConsecutive0Found1
+    DuplicatedNonConsecutive0Found1,
+
+    [Description("Columns do not match.\nExcel columns: {0}\nQuery columns: {1}")]
+    ColumnsDoNotMatchExcelColumns0QueryColumns1
 }
 
 

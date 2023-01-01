@@ -108,6 +108,7 @@ export type ImportAction = "Updated" | "Inserted" | "NoChanges";
 
 export interface ImportFromExcelReport {
   results: ImportResult[];
+  error?: any;
 }
 
 declare module '@framework/SearchControl/SearchControlLoaded' {

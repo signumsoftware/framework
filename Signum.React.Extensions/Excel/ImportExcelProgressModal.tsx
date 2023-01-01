@@ -24,6 +24,7 @@ export function ImportExcelProgressModal(p: ImportExcelProgressModalProps) {
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
   const importResultsRef = React.useRef([] as ImportResult[]);
+  const errorRef = React.useRef(null as any);
 
 
   const [requestStarted, setRequestStarted] = React.useState<boolean>(false)
@@ -42,7 +43,11 @@ export function ImportExcelProgressModal(p: ImportExcelProgressModalProps) {
   }
 
   React.useEffect(() => {
-    consumeReader().finally(() => {
+    consumeReader()
+      .catch(error => {
+        errorRef.current = error;
+      })
+      .finally(() => {
       setShow(false);
     })
   }, [])
@@ -52,7 +57,7 @@ export function ImportExcelProgressModal(p: ImportExcelProgressModalProps) {
   }
 
   function handleOnExited() {
-    p.onExited!({ results: importResultsRef.current.map(a=>a) });
+    p.onExited!({ results: importResultsRef.current.map(a => a), error: errorRef.current });
   }
 
   var errors = importResultsRef.current.filter(a => a.error != null);

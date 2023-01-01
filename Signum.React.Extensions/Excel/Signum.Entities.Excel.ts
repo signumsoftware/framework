@@ -15,7 +15,7 @@ export const CollectionElementEmbedded = new Type<CollectionElementEmbedded>("Co
 export interface CollectionElementEmbedded extends Entities.EmbeddedEntity {
   Type: "CollectionElementEmbedded";
   collectionElement: string;
-  matchByColumn: string;
+  matchByColumn: string | null;
 }
 
 export const ExcelAttachmentEntity = new Type<ExcelAttachmentEntity>("ExcelAttachment");
@@ -102,6 +102,7 @@ export module ImportFromExcelMessage {
   export const No0FoundInThisQueryWith1EqualsTo2 = new MessageKey("ImportFromExcelMessage", "No0FoundInThisQueryWith1EqualsTo2");
   export const UnableToAssignMoreThanOneUnrelatedCollections0 = new MessageKey("ImportFromExcelMessage", "UnableToAssignMoreThanOneUnrelatedCollections0");
   export const DuplicatedNonConsecutive0Found1 = new MessageKey("ImportFromExcelMessage", "DuplicatedNonConsecutive0Found1");
+  export const ColumnsDoNotMatchExcelColumns0QueryColumns1 = new MessageKey("ImportFromExcelMessage", "ColumnsDoNotMatchExcelColumns0QueryColumns1");
 }
 
 

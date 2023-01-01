@@ -11,6 +11,11 @@ namespace Signum.Entities.Excel;
 
 public class ImportExcelModel : ModelEntity
 {
+    public ImportExcelModel() 
+    {
+        this.BindParent();
+    }
+
     [StringLengthValidator(Max = 100)]
     public string TypeName { get; set; }
 
@@ -27,12 +32,12 @@ public class ImportExcelModel : ModelEntity
 
     public string? MatchByColumn { get; set; }
 
-    [NoRepeatValidator]
+    [NoRepeatValidator, BindParent]
     public MList<CollectionElementEmbedded> Collections { get; set; } = new MList<CollectionElementEmbedded>();
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(MatchByColumn) && MatchByColumn == null && (Mode == ImportExcelMode.InsertOrUpdate || Mode == ImportExcelMode.Update))
+        if (pi.Name == nameof(MatchByColumn) && MatchByColumn == null && (Mode == ImportExcelMode.Update || Mode == ImportExcelMode.InsertOrUpdate || Mode == ImportExcelMode.Insert && Collections.Count > 0))
             return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Mode), Mode.NiceToString());
 
         return base.PropertyValidation(pi);
@@ -43,7 +48,17 @@ public class CollectionElementEmbedded : EmbeddedEntity
 {
     public string CollectionElement { get; set; }
 
-    public string MatchByColumn { get; set; }
+    public string? MatchByColumn { get; set; }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        var p = this.GetParentEntity<ImportExcelModel>();
+
+        if (pi.Name == nameof(MatchByColumn) && MatchByColumn == null && (p.Mode == ImportExcelMode.Update || p.Mode == ImportExcelMode.InsertOrUpdate || p.Mode == ImportExcelMode.Insert && this != p.Collections.Last()))
+            return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => p.Mode), p.Mode.NiceToString());
+
+        return base.PropertyValidation(pi);
+    }
 }
 
 public enum ImportExcelMode

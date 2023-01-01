@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, OptionItem, EntityTable, FormGroup, FormControlReadonly } from '@framework/Lines'
-import { TypeContext } from '@framework/TypeContext'
+import { mlistItemContext, TypeContext } from '@framework/TypeContext'
 import { FileLine } from '../../Files/FileLine'
 import { CollectionElementEmbedded, ImportExcelMode, ImportExcelModel, ImportFromExcelMessage } from '../Signum.Entities.Excel'
 import * as Finder from '@framework/Finder'
@@ -19,6 +19,7 @@ import { JavascriptMessage, liteKey, newMListElement } from '@framework/Signum.E
 import { useForceUpdate } from '@framework/Hooks'
 import { selectPagination } from '../ExcelMenu'
 import { RetryFilter } from '@framework/Services'
+import { resultRenderers } from '../../MachineLearning/PredictorClient'
 
 export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, searchControl: SearchControlLoaded, fop: FindOptionsParsed, topElementToken: QueryToken | null }) {
   const ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });
@@ -68,31 +69,16 @@ export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, sea
               optionItems={p.fop.columnOptions.filter(a => a.token && !hasElement(a.token)).map(c => softCast<OptionItem>({ value: c.token!.fullKey, label: c.displayName ?? c.token!.niceName! }))}
             />
           }
+          {
+            mlistItemContext(ctx.subCtx(a => a.collections))
+              .filter((ctxe, i, arr) => ctx.value.mode == "Update" || ctx.value.mode == "InsertOrUpdate" || ctx.value.mode == "Insert" && i < arr.length - 1)
+              .map(ctxe => <ValueLine ctx={ctxe.subCtx(a => a.matchByColumn)} valueLineType="DropDownList"
+                label={ctxe.niceName(a => a.matchByColumn) + ": " + parentTokens[ctxe.value.collectionElement].niceName}
+                optionItems={potentialKeys(ctxe.value.collectionElement).map(c => softCast<OptionItem>({ value: c.token!.fullKey, label: c.displayName ?? c.token!.niceName! }))}
+            />)
+          }
         </div>
       </div>
-
-      {(ctx.value.mode && ctx.value.collections.length > ( ctx.value.mode == "Insert" ? 1 : 0)) &&
-        <div className="row mt-2">
-          <div className="col-sm-4">
-          </div>
-          <div className="col-sm-8">
-            <EntityTable ctx={ctx.subCtx(a => a.collections)} filterRows={ctxs => ctx.value.mode == "Insert" ? ctxs.filter((a, i) => i < ctxs.length - 1) : ctxs} avoidEmptyTable avoidFieldSet create={false} remove={false}
-              columns={EntityTable.typedColumns<CollectionElementEmbedded>([
-                {
-                  property: a => a.collectionElement, template: ctx => <FormGroup ctx={ctx}>
-                    <FormControlReadonly ctx={ctx}>{parentTokens[ctx.value.collectionElement].niceName}</FormControlReadonly>
-                  </FormGroup>
-                },
-                {
-                  property: a => a.matchByColumn, template: ctx => <ValueLine ctx={ctx.subCtx(a => a.matchByColumn)} valueLineType="DropDownList" mandatory
-                    optionItems={potentialKeys(ctx.value.collectionElement).map(c => softCast<OptionItem>({ value: c.token!.fullKey, label: c.displayName ?? c.token!.niceName! }))}
-                  />
-                },
-              ])}
-            />
-          </div>
-        </div>
-      }
 
       <br/>
 
@@ -111,6 +97,7 @@ function getSaveOperations(type: PseudoType, mode: ImportExcelMode | null) {
 
   return ops.filter(a => a.operationType == "Execute" && a.canBeModified && (mode == "Update" || a.canBeNew));
 }
+
 
 export async function onImportFromExcel(sc: SearchControlLoaded) {
 
@@ -132,70 +119,89 @@ export async function onImportFromExcel(sc: SearchControlLoaded) {
       .map(m => newMListElement(CollectionElementEmbedded.New({ collectionElement: m.fullKey }))), 
   });
 
+  await onImportFromExcelRetry();
 
-  model = (await Navigator.view(model, {
-    extraProps: { searchControl: sc, fop: sc.state.resultFindOptions, topElementToken: topToken },
-    title: ImportFromExcelMessage.Import0FromExcel.niceToString(ti.nicePluralName)
-  }))!;
+  async function onImportFromExcelRetry() {
 
-  if (model == null)
-    return;
+    debugger;
 
-  var resport = await ExcelClient.API.importFromExcel(qr, model, ti);
+    model = (await Navigator.view(model, {
+      extraProps: { searchControl: sc, fop: sc.state.resultFindOptions, topElementToken: topToken },
+      title: ImportFromExcelMessage.Import0FromExcel.niceToString(ti.nicePluralName)
+    }))!;
 
-  if (model.transactional) {
+    if (model == null)
+      return;
 
-    var errors = resport.results.filter(a => a.error != null);
+    var r = await ExcelClient.API.importFromExcel(qr, model, ti);
 
-    if (errors.length) {
-      await MessageModal.showError(
-        <ul>
-          {errors.map((e, i) => <li key={i}><strong>{e.rowIndex}</strong> {e.error}</li>)}
-        </ul>,
-        ImportFromExcelMessage.ErrorsIn0Rows_N.niceToString().forGenderAndNumber(errors.length).formatWith(errors.length));
+    if (r.error) {
+
+      await ErrorModal.showErrorModal(r.error);
+      await onImportFromExcelRetry();
+
+    } else {
+
+      if (model.transactional) {
+
+        var errors = r.results.filter(a => a.error != null);
+
+        if (errors.length) {
+          await MessageModal.showError(
+            <ul>
+              {errors.map((e, i) => <li key={i}><strong>{e.rowIndex}</strong> {e.error}</li>)}
+            </ul>,
+            ImportFromExcelMessage.ErrorsIn0Rows_N.niceToString().forGenderAndNumber(errors.length).formatWith(errors.length));
+
+          await onImportFromExcelRetry();
+
+          return;
+        }
+
+      } else {
+
+        var errors = r.results.filter(a => a.error != null && a.entity == null);
+
+        if (errors.length) {
+          await MessageModal.show({
+            buttons: "ok",
+            icon: "error",
+            style: "error",
+            size: "xl",
+            title: ImportFromExcelMessage.ErrorsIn0Rows_N.niceToString().forGenderAndNumber(errors.length).formatWith(errors.length),
+            message: <ul>
+              {errors.map((e, i) => <li key={i}><strong>Row {e.rowIndex}:</strong> {e.error}</li>)}
+            </ul>
+          });
+
+          if (errors.length == r.results.length) {
+            await onImportFromExcelRetry();
+
+            return;
+          }
+        }
+      }
+
+      var state = r.results.filter(a => a.entity != null).toObject(a => liteKey(a.entity!), a => {
+
+        if (a.error)
+          return softCast<MarkedRow>({ message: `Error in Row ${a.rowIndex}: ${a.error}`, status: "Error" });
+
+        if (a.action == "Updated")
+          return softCast<MarkedRow>({ message: `Updated from Row ${a.rowIndex}`, status: "Warning" });
+
+        if (a.action == "Inserted")
+          return softCast<MarkedRow>({ message: `Inserted from Row ${a.rowIndex}`, status: "Success" });
+
+        if (a.action == "NoChanges")
+          return softCast<MarkedRow>({ message: `No changes in row Row ${a.rowIndex}`, status: "Muted" });
+
+        throw new Error("Unexpected value " + a.action);
+      });
+
+      sc.markRows(state);
 
       return;
     }
-
-  } else {
-    var errors = resport.results.filter(a => a.error != null && a.entity == null);
-
-    if (errors.length)
-      await MessageModal.show({
-        buttons: "ok",
-        icon: "error",
-        style: "error",
-        size: "xl",
-        title: ImportFromExcelMessage.ErrorsIn0Rows_N.niceToString().forGenderAndNumber(errors.length).formatWith(errors.length),
-        message: <ul>
-          {errors.map((e, i) => <li key={i}><strong>Row {e.rowIndex}:</strong> {e.error}</li>)}
-        </ul>
-      });
   }
-
-  var state = resport.results.filter(a => a.entity != null).toObject(a => liteKey(a.entity!), a => {
-
-    if (a.error) {
-      return softCast<MarkedRow>({ message: `Error in Row ${a.rowIndex}: ${a.error}`, status: "Error" });
-    }
-
-    if (a.action == "Updated") {
-      return softCast<MarkedRow>({ message: `Updated from Row ${a.rowIndex}`, status: "Warning" });
-    }
-
-    if (a.action == "Inserted") {
-      return softCast<MarkedRow>({ message: `Inserted from Row ${a.rowIndex}`, status: "Success" });
-    }
-
-    if (a.action == "NoChanges") {
-      return softCast<MarkedRow>({ message: `No changes in row Row ${a.rowIndex}`, status: "Muted" });
-    }
-
-    throw new Error("Unexpected value " + a.action);
-  });
-
-  sc.markRows(state);
-
-  return;
-
 }
