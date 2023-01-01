@@ -44,7 +44,7 @@ public class ImporterFromExcel
             if (matchByIndex == null)
                 return row.RowIndex!.ToString()!;
 
-            var cell = row.Descendants<Cell>().SingleEx(a => (a.GetExcelColumnIndex()!.Value - 1) == matchByIndex);
+            var cell = row.Descendants<Cell>().SingleOrDefaultEx(a => (a.GetExcelColumnIndex()!.Value - 1) == matchByIndex);
 
             var valueStr =  cell == null ? null : document.GetCellValue(cell);
 
