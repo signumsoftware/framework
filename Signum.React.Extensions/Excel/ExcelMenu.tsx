@@ -76,7 +76,7 @@ export default function ExcelMenu(p: ExcelMenuProps) {
       {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>
-        {addDropdownDividers([
+        {...addDropdownDividers([
           p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>,
           p.importFromExcel && <Dropdown.Item onClick={handleImportFromExcel} ><span><FontAwesomeIcon icon={["fas", "file-excel"]} />&nbsp; {ImportFromExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
           p.excelReport && addDropdownDividers([
