@@ -28,13 +28,13 @@ export default function ExcelMenu(p: ExcelMenuProps) {
   const [excelReports, setExcelReports] = React.useState<Lite<ExcelReportEntity>[] | undefined>(undefined);
 
   function handleSelectedToggle() {
-    if (isOpen == false && excelReports == undefined)
-      reloadList();
+    if (isOpen == false && excelReports == undefined && p.excelReport)
+      reloadExcelReports();
 
     setIsOpen(!isOpen);
   }
 
-  function reloadList(): Promise<void> {
+  function reloadExcelReports(): Promise<void> {
     return ExcelClient.API.forQuery(p.searchControl.props.findOptions.queryKey)
       .then(list => setExcelReports(list));
   }
@@ -57,15 +57,15 @@ export default function ExcelMenu(p: ExcelMenuProps) {
     Finder.API.fetchQueryEntity(p.searchControl.props.findOptions.queryKey)
       .then(qe => ExcelReportEntity.New({ query: qe }))
       .then(er => Navigator.view(er))
-      .then(() => reloadList());
+      .then(() => reloadExcelReports());
   }
 
   function handleAdmnister() {
     Finder.explore({ queryName: ExcelReportEntity, filterOptions: [{ token: ExcelReportEntity.token(a => a.query!.key), value: p.searchControl.props.findOptions.queryKey }]})
-      .then(() => reloadList());
+      .then(() => reloadExcelReports());
   }
 
-  const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
+  const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />{p.searchControl.props.largeToolbarButtons == true ? <span className="d-none d-sm-inline">{" " + ExcelMessage.ExcelReport.niceToString()}</span> : undefined}</span>;
 
   if (p.plainExcel && !p.excelReport && !p.importFromExcel)
     return <button className={"sf-query-button sf-search btn btn-light"} title={ExcelMessage.ExcelReport.niceToString() } onClick={handlePlainExcel}>{label} </button>;
@@ -109,14 +109,16 @@ function addDropdownDividers(elements: (React.ReactElement | React.ReactElement[
       continue;
     }
 
+    if (result.length > 0) {
+      result.push(<Dropdown.Divider />);
+    }
+
     if (Array.isArray(elem))
       result.push(...elem);
     else
       result.push(elem);
 
-    if (i < elements.length - 1) {
-      result.push(<Dropdown.Divider />);
-    }
+   
   }
 
   return result;

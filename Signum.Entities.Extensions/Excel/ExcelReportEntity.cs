@@ -50,6 +50,7 @@ public enum ExcelMessage
 
 public enum ImportFromExcelMessage
 {
+    [Description("Import from Excel")]
     ImportFromExcel,
     [Description("{0} errors")]
     _0Errors,
@@ -66,8 +67,8 @@ public enum ImportFromExcelMessage
     ThisQueryHasMultipleImplementations0,
 
 
-    [Description("Some Columns are incompatible for importinng from Excel:")]
-    SomeColumnsAreIncompatibleForImportingFromExcel,
+    [Description("Some Columns are incompatible with importing from Excel:")]
+    SomeColumnsAreIncompatibleWithImportingFromExcel,
 
     [Description("Operation {0} is no supported")]
     Operation0IsNotSupported,
@@ -75,8 +76,8 @@ public enum ImportFromExcelMessage
     [Description("{0}/{1} is not supported in: ")]
     _01IsNotSupported,
 
-    [Description("Some Filters are incompatible for Importing from Excel")]
-    SomeFiltersAreIncompatibleForImportingFromExcel,
+    [Description("Some Filters are incompatible with Importing from Excel")]
+    SomeFiltersAreIncompatibleWithImportingFromExcel,
 
     [Description("Simple 'Property = Value' filters can be used to assign constant values, anything else is not allowed:")]
     SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed,
@@ -87,12 +88,12 @@ public enum ImportFromExcelMessage
     [Description("{0} is not supported")]
     _0IsNotSupported,
 
+    [Description("{0} is not supported in:")]
+    _0IsNotSupportedIn,
+
 
     [Description("{0} ({1}) can not be assigned directly. Each nested field should be assigned independently.")]
     _01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently,
-
-    [Description("{0} ({1}) can not be assigned directly. Each nested field should be assigned independently.")]
-    _01CannotBeAssignedDirectly,
 
     [Description("{0}.[{1}] can also be used")]
     _01CanAlsoBeUsed,
@@ -107,7 +108,16 @@ public enum ImportFromExcelMessage
     ErrorsIn0Rows_N,
 
     [Description("No {0} found in this query with {1} equals to {2}")]
-    No0FoundInThisQueryWith1EqualsTo2
+    No0FoundInThisQueryWith1EqualsTo2,
+
+    [Description("Unable to assign more than one unrelated collection: {0}")]
+    UnableToAssignMoreThanOneUnrelatedCollections0,
+
+    [Description("Duplicate non-consecutive {0} found: {1}")]
+    DuplicatedNonConsecutive0Found1,
+
+    [Description("Columns do not match.\nExcel columns: {0}\nQuery columns: {1}")]
+    ColumnsDoNotMatchExcelColumns0QueryColumns1
 }
 
 

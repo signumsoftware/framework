@@ -59,12 +59,12 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
     return promise;
   }
 
-  handleOnChange = (lite: Lite<Entity> | null) => {
+  handleOnChange = (e: React.SyntheticEvent | undefined, lite: Lite<Entity> | null) => {
     if (lite == null)
       this.setValue(lite);
     else
       this.convert(lite)
-        .then(v => this.setValue(v));
+        .then(v => this.setValue(v, e));
   }
 }
 
@@ -143,7 +143,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
 
 export interface EntityComboSelectProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
-  onChange: (lite: Lite<Entity> | null) => void;
+  onChange: (e: React.SyntheticEvent | undefined, lite: Lite<Entity> | null) => void;
   type: TypeReference;
   findOptions?: FindOptions;
   data?: Lite<Entity>[];
@@ -235,7 +235,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     return (
       <DropdownList
         className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionRows()}
-        onChange={row => p.onChange(row?.entity ?? null)}
+        onChange={(row, e) => p.onChange(e.originalEvent, row?.entity ?? null)}
         value={getResultRow(lite)}
         title={getToString(lite)}
         filter={(e, query) => {
@@ -264,11 +264,11 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
 
     if (current.value != (lite ? liteKey(lite) : undefined)) {
       if (!current.value) {
-        p.onChange(null);
+        p.onChange(event, null);
       } else {
         const liteFromData = Array.isArray(data) ? data!.single(a => liteKey(a) == current.value) :
           data?.rows.single(a => liteKey(a.entity!) == current.value).entity!;
-        p.onChange(liteFromData);
+        p.onChange(event, liteFromData);
       }
     }
   }
