@@ -47,7 +47,7 @@ export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, sea
         </div>
         <div className="col-sm-4">
           <ValueLine ctx={ctx.subCtx(f => f.mode)} onChange={() => {
-            if (ctx.value.mode == "Insert" && ctx.value.matchByColumn?.length == 0)
+            if (ctx.value.mode == "Insert" && ctx.value.collections.length == 0)
               ctx.value.matchByColumn = null;
             else
               ctx.value.matchByColumn = (ctx.value.matchByColumn ?? p.fop.columnOptions.firstOrNull(a => a.token?.fullKey == "Id" || a.token?.fullKey == "Entity.Id")?.token?.fullKey) ?? null;

@@ -73,23 +73,11 @@ public enum ImportFromExcelMessage
     [Description("Operation {0} is no supported")]
     Operation0IsNotSupported,
 
-    [Description("{0}/{1} is not supported in: ")]
-    _01IsNotSupported,
-
-    [Description("Some Filters are incompatible with Importing from Excel")]
-    SomeFiltersAreIncompatibleWithImportingFromExcel,
-
-    [Description("Simple 'Property = Value' filters can be used to assign constant values, anything else is not allowed:")]
-    SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed,
-
     [Description("Many filters try to assign the same property {0} with different values {1}")]
     ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1,
 
     [Description("{0} is not supported")]
     _0IsNotSupported,
-
-    [Description("{0} is not supported in:")]
-    _0IsNotSupportedIn,
 
 
     [Description("{0} ({1}) can not be assigned directly. Each nested field should be assigned independently.")]

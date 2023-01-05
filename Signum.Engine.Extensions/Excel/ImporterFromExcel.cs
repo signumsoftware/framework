@@ -83,9 +83,10 @@ public class ImporterFromExcel
                     return null;
 
                 var index = pq.Columns.FindIndex(a => a.FullKey() == col.MatchByColumn);
-                var token = pq.Columns[index];
-                var keyGetter = GetMListElementKeyGetter(token);
-                return new { MatchByIndex = index, MatchBy = token, Getter = keyGetter };
+                var keyToken = pq.Columns[index];
+                var elementToken = elementTokens.SingleEx(a => a.FullKey() == col.CollectionElement);
+                var keyGetter = GetMListElementKeyGetter(keyToken, elementToken);
+                return new { MatchByIndex = index, MatchBy = keyToken, Getter = keyGetter };
             });
 
         var table = Signum.Engine.Maps.Schema.Current.Table(pq.MainType);
@@ -218,7 +219,9 @@ public class ImporterFromExcel
 
                             if (!getSet.IsId)
                             {
-                                getSet.Setter!(parent, kvp.Value);
+                                var value = getSet.EntityFinder != null ? getSet.EntityFinder(kvp.Value) : kvp.Value; 
+
+                                getSet.Setter!(parent, value);
                             }
                         }
 
@@ -397,10 +400,73 @@ public class ImporterFromExcel
         return pr.GetLambdaExpression<ModifiableEntity, IMListPrivate>(false).Compile();
     }
 
-    static Func<object, object> GetMListElementKeyGetter(QueryToken token)
+    static bool IsNavigatingLite(QueryToken t)
     {
-        var pr = token.GetPropertyRoute()!;
-        return pr.GetLambdaExpression<object, object>(false, pr.GetMListItemsRoute()).Compile();
+        if (t.Parent is EntityPropertyToken ept)
+            return ept.PropertyInfo.PropertyType.IsLite();
+
+        if (t.Parent is CollectionElementToken ce && ce.Parent is EntityPropertyToken eptc)
+            return eptc.PropertyInfo.PropertyType.ElementType()!.IsLite();
+
+        return false;
+    }
+
+    static Func<object, object> GetMListElementKeyGetter(QueryToken keyToken, QueryToken elementToken)
+    {
+        var extraTokens = keyToken.Follow(a => a.Parent).TakeWhile(t => !t.Equals(elementToken)).Reverse().ToList();
+
+        var localExtraTokens = extraTokens.TakeWhile(t => !IsNavigatingLite(t)).ToList();
+
+        if (localExtraTokens.Count == extraTokens.Count)
+        {
+            var pr = keyToken.GetPropertyRoute()!;
+            return pr.GetLambdaExpression<object, object>(false, pr.GetMListItemsRoute()).Compile();
+        }
+        else
+        {
+            var lastLocal = localExtraTokens.Last();
+            var pr = lastLocal.GetPropertyRoute()!;
+            var func = pr.GetLambdaExpression<object, object>(false, pr.GetMListItemsRoute()).Compile();
+
+            var type = pr.Type.CleanType();
+
+            var qd = QueryLogic.Queries.QueryDescription(type);
+            var entityToken = QueryUtils.Parse("Entity", qd, 0);
+            var columnToken = QueryUtils.Parse("Entity" + keyToken.FullKey().After(lastLocal.FullKey()), qd, 0);
+
+            return elem =>
+            {
+                var lite = func(elem);
+                if (lite == null)
+                    throw new ApplicationException($"{pr} returned null");
+
+                var result =  InDBToken((Lite<Entity>)lite, entityToken, columnToken);
+                if (result == null)
+                    throw new ApplicationException($"{columnToken} returned null");
+
+                return result;
+            };
+        }
+    }
+
+    static object? InDBToken(Lite<Entity> lite, QueryToken entityToken, QueryToken columnToken)
+    {
+        var rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+        {
+            QueryName = lite.EntityType,
+            Filters = new List<Filter>
+            {
+                new FilterCondition(entityToken, FilterOperation.EqualTo, lite),
+            },
+            Columns = new List<Column>
+            {
+                new Column(columnToken, null),
+            },
+            Orders = new List<Order>(),
+            Pagination = new Pagination.Firsts(1),
+        });
+
+        return rt.Rows[0][0];
     }
 
     static bool IsMainTypeOrPart(QueryToken token, Type mainType)
@@ -498,6 +564,16 @@ public class ImporterFromExcel
                             return lite!.Retrieve();
 
                         throw new UnexpectedValueException(pr.Type);
+                    };
+                }
+                else if(pr.Type.IsEntity())
+                {
+                    entityFinder = v =>
+                    {
+                        if (v == null)
+                            return null;
+
+                        return ((Lite<Entity>)v).Retrieve();
                     };
                 }
 
@@ -626,20 +702,9 @@ public class ImporterFromExcel
 
     static Dictionary<QueryToken, object?> GetSimpleFilters(List<Filter> filters, QueryDescription qd, Type mainType)
     {
-        var errors = filters.Select(f =>
-        f is FilterGroup fg ? ImportFromExcelMessage._01IsNotSupported.NiceToString(FilterGroupOperation.And.NiceToString(), FilterGroupOperation.Or.NiceToString()) + fg.ToString() :
-        f is FilterCondition fc ? (fc.Operation != FilterOperation.EqualTo ? $"Operation {fc.Operation.NiceToString()} is not supported: " + fc.Token.NiceName() : 
-        IsSimpleProperty(fc.Token, mainType) ?? (fc.Token.HasElement() ? ImportFromExcelMessage._0IsNotSupportedIn.NiceToString(fc.Token) + fc.ToString() : null)) :
-        throw new UnexpectedValueException(f))
-        .NotNull().ToList();
-
-        if (errors.Any())
-            throw new ApplicationException(
-                ImportFromExcelMessage.SomeFiltersAreIncompatibleWithImportingFromExcel.NiceToString() + "\n" +
-                ImportFromExcelMessage.SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed.NiceToString() + "\n" +
-                errors.ToString("\n"));
-
-        return filters.Cast<FilterCondition>().AgGroupToDictionary(a => Normalize(a.Token, qd, mainType), gr =>
+        return filters.OfType<FilterCondition>()
+            .Where(fc => IsSimpleProperty(fc.Token, mainType) == null && !fc.Token.HasElement())
+            .AgGroupToDictionary(a => Normalize(a.Token, qd, mainType), gr =>
         {
             var values = gr.Select(a => a.Value).Distinct();
             if (values.Count() > 1)
