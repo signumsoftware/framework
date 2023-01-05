@@ -1,5 +1,6 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Engine.Authorization;
 using Signum.Entities.Excel;
 using Signum.Entities.Reflection;
@@ -28,12 +29,7 @@ public enum ImportAction
     NoChanges,
 }
 
-internal class TokenGettersAndSetters
-{
-    public required bool IsId { get; set; }
-    public required Func<ModifiableEntity, ModifiableEntity>? ParentGetter { get; set; }
-    public required Action<ModifiableEntity, object?>? Setter { get; set; }
-}
+
 
 public class ImporterFromExcel
 {
@@ -72,11 +68,11 @@ public class ImporterFromExcel
 
         var mlistGetters = elementTokens.ToDictionary(a => a, a => GetMListGetter(a));
 
-        var columnGetterSetter = GetColumnGettersAndSetters(pq.Columns);
-        var filtersGetterSetter = GetColumnGettersAndSetters(pq.SimpleFilters.Keys.ToList());
+        var columnGetterSetter = GetColumnGettersAndSetters(pq.Columns, pq.MainType);
+        var filtersGetterSetter = GetColumnGettersAndSetters(pq.SimpleFilters.Keys.ToList(), pq.MainType);
 
         var qd = QueryLogic.Queries.QueryDescription(request.QueryName);
-        var matchBy = model.Mode == ImportExcelMode.InsertOrUpdate || model.Mode == ImportExcelMode.Update ? QueryUtils.Parse(model.MatchByColumn!, qd, 0) : null;
+        var matchBy = !model.MatchByColumn.HasText() ? null : QueryUtils.Parse(model.MatchByColumn!, qd, 0);
         var matchByIndex = matchBy == null ? (int?)null : pq.Columns.IndexOf(Normalize(matchBy, qd, pq.MainType));
 
         var keyByElementToken = model.Collections.ToDictionary(
@@ -138,8 +134,8 @@ public class ImporterFromExcel
 
                         var getSet = columnGetterSetter.GetOrThrow(c.Value);
 
+                        value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
                         var parent = getSet.ParentGetter != null ? getSet.ParentGetter(me) : me;
-
                         getSet.Setter!(parent, value);
                     }
                     return me;
@@ -152,6 +148,8 @@ public class ImporterFromExcel
                     var cell = cells.TryGetC(colIndex);
                     var strValue = cell == null ? null : document.GetCellValue(cell);
                     object? value = ParseExcelValue(c.Value, strValue, row, colIndex);
+                    var getSet = columnGetterSetter.GetOrThrow(c.Value);
+                    value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
                     return value;
                 }
             }
@@ -192,16 +190,16 @@ public class ImporterFromExcel
                         }
                         else
                         {
-                            if (model.Mode == ImportExcelMode.InsertOrUpdate)
+                            if (model.Mode == ImportExcelMode.InsertOrUpdate || model.Mode == ImportExcelMode.Insert)
                             {
                                 entity = (Entity)Activator.CreateInstance(pq.MainType)!;
                                 res.Action = ImportAction.Inserted;
                             }
                             else
                             {
-                                res.Action = ImportAction.Inserted;
+                                res.Action = ImportAction.Updated;
                                 res.Error = ImportFromExcelMessage.No0FoundInThisQueryWith1EqualsTo2.NiceToString(pq.MainType.NiceName(), matchBy, rg.Key ?? "null");
-                                continue;
+                                goto exit;
                             }
                         }
                     }
@@ -268,6 +266,7 @@ public class ImporterFromExcel
                                         throw new InvalidOperationException($"Value of column {token} ({value ?? "null"}) does not match the filter value ({filterValue ?? "null"}). Cell Reference = {CellReference(firstRow, colIndex)}");
                                 }
 
+                                value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
                                 var parent = getSet.ParentGetter != null ? getSet.ParentGetter(entity) : entity;
                                 getSet.Setter!(parent, value);
                             }
@@ -345,7 +344,7 @@ public class ImporterFromExcel
                     hasErros = true;
                     res.Error = e.Message;
                 }
-
+            exit:
                 if (model.Transactional)
                     transactionalResults.Add(res);
                 else
@@ -404,45 +403,46 @@ public class ImporterFromExcel
         return pr.GetLambdaExpression<object, object>(false, pr.GetMListItemsRoute()).Compile();
     }
 
-    private static Dictionary<QueryToken, TokenGettersAndSetters> GetColumnGettersAndSetters(List<QueryToken> columns)
+    static bool IsMainTypeOrPart(QueryToken token, Type mainType)
     {
-        var columnParentGetter = columns.Select(c =>
+        var pr = token.GetPropertyRoute();
+
+        if (pr == null)
+            return false;
+
+        if (pr.RootType == mainType)
+            return true;
+
+        if (EntityKindCache.GetAttribute(pr.RootType).EntityKind != EntityKind.Part)
+            return false;
+
+        return token.Parent != null && IsMainTypeOrPart(token.Parent, mainType);
+    }
+
+    private static Dictionary<QueryToken, TokenGettersAndSetters> GetColumnGettersAndSetters(List<QueryToken> columns, Type mainType)
+    {
+        return columns.ToDictionary<QueryToken, QueryToken, TokenGettersAndSetters>(c => c, c =>
         {
             if (c is HasValueToken)
             {
                 var pr = c.Parent!.GetPropertyRoute()!;
 
-                if (pr.Parent!.PropertyRouteType != PropertyRouteType.Root)
-                    return pr.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, pr.Parent.GetMListItemsRoute());
+                if (!IsMainTypeOrPart(c, mainType))
+                    throw new InvalidOperationException("Invalid token " + c);
 
-                return null;
-            }
-            else
-            {
-                var pr = c.GetPropertyRoute()!;
+                var parentGetter = pr.Parent!.PropertyRouteType != PropertyRouteType.Root ?
+                    pr.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, pr.Parent.GetMListItemsRoute()) : null;
 
-                if (pr.Parent!.PropertyRouteType != PropertyRouteType.Root)
-                    return pr.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, pr.Parent.GetMListItemsRoute());
-
-                return null;
-            }
-        }).ToList();
-
-        var columnSetter = columns.Select(c =>
-        {
-            if (c is HasValueToken)
-            {
-                var pr = c.Parent!.GetPropertyRoute()!;
                 var pi = pr.PropertyInfo!;
 
                 if (!pi.PropertyType.IsEmbeddedEntity())
                     throw new InvalidOperationException("HasValue only supported for embedded entities");
-                
+
                 var p = Expression.Parameter(typeof(ModifiableEntity));
                 var obj = Expression.Parameter(typeof(object));
 
                 var prop = Expression.Property(Expression.Convert(p, pi.DeclaringType!), pi);
-                
+
                 var value = Expression.Condition(Expression.Convert(obj, typeof(bool)),
                      Expression.Coalesce(prop, Expression.New(pi.PropertyType!)), //Prevent unnecessary new 
                      Expression.Constant(null, pi.PropertyType));
@@ -450,15 +450,69 @@ public class ImporterFromExcel
 
                 var lambda = Expression.Lambda<Action<ModifiableEntity, object?>>(Expression.Assign(prop, value), p, obj);
 
-                return lambda;
+                return new TokenGettersAndSetters
+                {
+                    ParentGetter = parentGetter?.Compile(),
+                    Setter = lambda.Compile()
+                };
             }
             else
             {
                 var pr = c.GetPropertyRoute()!;
+
+                Func<object?, object?>? entityFinder = null;
+                if (!IsMainTypeOrPart(c, mainType))
+                {
+                    var first = c.Follow(a => a.Parent).First(t => IsMainTypeOrPart(t, mainType));
+
+                    pr = first.GetPropertyRoute()!;
+
+                    var queryName = first.Type.CleanType();
+                    var qd = QueryLogic.Queries.QueryDescription(queryName);
+                    var tokenFullKey = "Entity." + c.FullKey().After(first.FullKey() + ".");
+                    var token = QueryUtils.Parse(tokenFullKey, qd,  0);
+
+                    entityFinder = a =>
+                    {
+                        if (a == null)
+                            return null;
+
+                        var lite = QueryLogic.Queries.ExecuteUniqueEntity(new UniqueEntityRequest
+                        {
+                            QueryName = queryName,
+                            UniqueType = UniqueType.SingleOrDefault,
+                            Orders = new List<Order>(),
+                            Filters = new List<Filter>
+                            {
+                                new FilterCondition(token, FilterOperation.EqualTo, a)
+                            }
+                        });
+
+                        if (lite == null)
+                            throw new InvalidOperationException($"No {queryName} found with {token} equals to '{a}'");
+
+                        if (pr.Type.IsLite())
+                            return lite!;
+
+                        if (pr.Type.IsEntity())
+                            return lite!.Retrieve();
+
+                        throw new UnexpectedValueException(pr.Type);
+                    };
+                }
+
+                var parentGetter = pr.Parent!.PropertyRouteType != PropertyRouteType.Root ?
+                    pr.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, pr.Parent.GetMListItemsRoute()) : null;
+
                 var prop = pr.PropertyInfo!;
 
                 if (ReflectionTools.PropertyEquals(prop, piId))
-                    return null;
+                    return new TokenGettersAndSetters
+                    {
+                        IsId = true,
+                        ParentGetter = parentGetter?.Compile(),
+                        Setter = null!
+                    };
 
                 var p = Expression.Parameter(typeof(ModifiableEntity));
                 var obj = Expression.Parameter(typeof(object));
@@ -469,18 +523,23 @@ public class ImporterFromExcel
 
                 var lambda = Expression.Lambda<Action<ModifiableEntity, object?>>(body, p, obj);
 
-                return lambda;
+                return new TokenGettersAndSetters 
+                {
+                    ParentGetter = parentGetter?.Compile(),
+                    Setter = lambda.Compile(),
+                    EntityFinder = entityFinder,
+                };
             }
-        }).ToList();
+        });
 
-        var columnGetterSetter = columns.Select((c, i) => KeyValuePair.Create(c, new TokenGettersAndSetters
-        {
-            IsId = ReflectionTools.PropertyEquals(c.GetPropertyRoute()?.PropertyInfo, piId),
-            ParentGetter = columnParentGetter[i]?.Compile(),
-            Setter = columnSetter[i]?.Compile(),
-        })).ToList();
+    }
 
-        return columnGetterSetter.ToDictionaryEx();
+    internal class TokenGettersAndSetters
+    {
+        public bool IsId { get; set; }
+        public required Func<ModifiableEntity, ModifiableEntity>? ParentGetter { get; set; }
+        public required Action<ModifiableEntity, object?>? Setter { get; set; }
+        public Func<object?, object?>? EntityFinder { get; set; }
     }
 
     public class ParsedQueryForImport
