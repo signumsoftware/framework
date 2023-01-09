@@ -529,9 +529,13 @@ public class ImporterFromExcel
                 Func<object?, object?>? entityFinder = null;
                 if (!IsMainTypeOrPart(c, mainType))
                 {
-                    var first = c.Follow(a => a.Parent).First(t => IsMainTypeOrPart(t, mainType));
+                    var parents = c.Follow(a => a.Parent).Reverse().ToList();
 
-                    pr = first.GetPropertyRoute()!;
+                    var index = parents.FindIndex(t => !IsMainTypeOrPart(t, mainType));
+
+                    pr = parents[index - 1].GetPropertyRoute()!;
+
+                    var first = parents[index] is AsTypeToken ? parents[index] : parents[index - 1];
 
                     var queryName = first.Type.CleanType();
                     var qd = QueryLogic.Queries.QueryDescription(queryName);
@@ -745,7 +749,8 @@ public class ImporterFromExcel
         .Select(t =>
             t is ColumnToken c && c.GetPropertyRoute() is { } pr && pr.RootType == mainType ? null :
             t is EntityPropertyToken ep ? null :
-            t is CollectionElementToken ce ? null :
+            t is CollectionElementToken ce ? null : 
+            t is AsTypeToken at ? null :
             t is HasValueToken hv && hv.Parent!.Type.IsEmbeddedEntity() ? null :
             ImportFromExcelMessage._01IsIncompatible.NiceToString(t, t.GetType().Name)
         ).NotNull().FirstOrDefault();
