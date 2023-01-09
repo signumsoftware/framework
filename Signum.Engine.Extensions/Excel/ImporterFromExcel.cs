@@ -106,14 +106,14 @@ public class ImporterFromExcel
 
 
             var headerRow = data.Descendants<Row>().ElementAt(1);
-            var excelColumns = headerRow.Descendants<Cell>().ToList().Select((c, i) => document.GetCellValue(c)).ToString(", ");
+            var excelColumns = headerRow.Descendants<Cell>().ToList().Select((c, i) => document.GetCellValue(c)).TakeWhile(a => a.HasText()).ToString(", ");
             var queryColumns = request.Columns.ToString(a => a.DisplayName, ", ");
 
             if (excelColumns != queryColumns)
                 throw new ApplicationException(ImportFromExcelMessage.ColumnsDoNotMatchExcelColumns0QueryColumns1.NiceToString(excelColumns, queryColumns));
 
 
-            var allRows = data.Descendants<Row>().Skip(2).ToList();
+            var allRows = data.Descendants<Row>().Skip(2).TakeWhile(a => a.Descendants<Cell>().Any(c => document.GetCellValue(c).HasText())).ToList();
 
             bool hasErros = false;
 
