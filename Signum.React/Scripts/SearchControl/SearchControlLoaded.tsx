@@ -1020,29 +1020,48 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
-  handleGroupByThisColumn = () => {
+  handleGroupByThisColumn = async () => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
+
     const col = fo.columnOptions[cm.columnIndex!];
 
-    Finder.API.parseTokens(fo.queryKey, [{ token: "Count", options: SubTokensOptions.CanAggregate }])
-      .then(tokens => {
+    fo.columnOptions.clear();
 
-        var count = tokens[0];
-        fo.columnOptions.clear();
-        fo.columnOptions.push({ token: count, displayName: count.niceName });
-        fo.columnOptions.push(col);
-        fo.groupResults = true;
-        fo.orderOptions.clear();
-        fo.orderOptions.push({ token: count, orderType: "Descending" })
+    var defAggregate = this.props.querySettings?.defaultAggregates;
 
-        this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+    var parsedTokens: QueryToken[] = [];
+    if (defAggregate) {
+      parsedTokens = await Finder.API.parseTokens(fo.queryKey, [
+        ...defAggregate.map(a => ({ token: a.token.toString(), options: SubTokensOptions.CanAggregate })),
+        ...defAggregate.filter(a => a.summaryToken != null).map(a => ({ token: a.summaryToken!.toString(), options: SubTokensOptions.CanAggregate }))
+      ].distinctBy(a => a.token));
 
-        if (this.props.searchOnLoad)
-          this.doSearchPage1();
+      var ptDic = parsedTokens.toObject(a => a.fullKey);
 
-      });
-  
+      fo.columnOptions.push(...defAggregate.map(t => ({
+        token: ptDic[t.token.toString()],
+        summaryToken: t.summaryToken != null ? ptDic[t.summaryToken!.toString()] : undefined,
+        displayName: (typeof t.displayName == "function" ? t.displayName() : t.displayName) ?? ptDic[t.token.toString()].niceName,
+        hiddenColumn: t.hiddenColumn,
+      })));
+    }
+    else {
+      parsedTokens = await Finder.API.parseTokens(fo.queryKey, [
+        { token: "Count", options: SubTokensOptions.CanAggregate }
+      ]);
+      fo.columnOptions.push({ token: parsedTokens[0], displayName: parsedTokens[0].niceName });
+    }
+
+    fo.columnOptions.push(col);
+    fo.groupResults = true;
+    fo.orderOptions.clear();
+    fo.orderOptions.push(...parsedTokens.map(t => softCast<OrderOptionParsed>({ token: t, orderType: "Descending" })));
+
+    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+
+    if (this.props.searchOnLoad)
+      this.doSearchPage1();
   }
 
   handleRestoreDefaultColumn = () => {
@@ -1391,6 +1410,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             onDragOver={e => this.handlerHeaderDragOver(e, i)}
             onDragEnter={e => this.handlerHeaderDragOver(e, i)}
             onDrop={this.handleHeaderDrop}>
+            {getSummary(co.summaryToken)}
             <div className="d-flex" style={{ alignItems: "center" }}>
               {this.orderIcon(co)}
               {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
@@ -1399,7 +1419,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                   title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
               {co.displayName}
             </div>
-            {getSummary(co.summaryToken)}
           </th>
         )}
         {allSmall && <th></th>}

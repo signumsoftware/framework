@@ -1873,6 +1873,7 @@ export interface QuerySettings {
   allowSystemTime?: boolean;
   defaultOrders?: OrderOption[];
   defaultFilters?: FilterOption[];
+  defaultAggregates?: ColumnOption[];
   hiddenColumns?: ColumnOption[];
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
