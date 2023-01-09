@@ -52,6 +52,7 @@ public class MicrosoftGraphSender : BaseEmailSender
                     AttachmentItem attachmentItem = new AttachmentItem
                     {
                         AttachmentType = AttachmentType.File,
+                        IsInline = a.Type == EmailAttachmentType.LinkedResource,
                         Name = a.File.FileName,
                         Size = a.File.FileLength,
                         ContentType = MimeMapping.GetMimeType(a.File.FileName)
@@ -118,14 +119,15 @@ public class MicrosoftGraphSender : BaseEmailSender
         
         foreach (var a in attachments)
         {
-            if(a.File.FileLength <= MicrosoftGraphFileSizeLimit)
-            result.Add(new FileAttachment
-            {
-                ContentId = a.ContentId,
-                Name = a.File.FileName,
-                ContentType = MimeMapping.GetMimeType(a.File.FileName),
-                ContentBytes = a.File.GetByteArray(),
-            });
+            if (a.File.FileLength <= MicrosoftGraphFileSizeLimit)
+                result.Add(new FileAttachment
+                {
+                    ContentId = a.ContentId,
+                    Name = a.File.FileName,
+                    IsInline = a.Type == EmailAttachmentType.LinkedResource,
+                    ContentType = MimeMapping.GetMimeType(a.File.FileName),
+                    ContentBytes = a.File.GetByteArray(),
+                });
         }
         return result;
     }
