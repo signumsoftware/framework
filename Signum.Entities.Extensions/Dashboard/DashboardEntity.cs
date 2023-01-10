@@ -115,7 +115,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
             {
                 var description = getDescription(t.Query);
                 if (description != null)
-                    t.Token.ParseData(this, description, SubTokensOptions.CanElement);
+                    t.Token.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
             }
         }
     }
