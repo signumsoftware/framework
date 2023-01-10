@@ -32,14 +32,14 @@ export function ColorTypeaheadLine(p: {
     <FormGroup ctx={ctx} label={ctx.niceName()} >
       {
         <ColorTypeahead color={ctx.value}
-          inputAttrs={{ ...p.inputAttrs, style: { paddingLeft: "30px", ...p.inputAttrs?.style } }}
+          inputAttrs={{ ...p.inputAttrs, style: { paddingLeft: "22px", ...p.inputAttrs?.style } }}
           formControlClass={ctx.formControlClass}
           onChange={handleOnChange}
           placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined}
-          renderInput={p.extraButtons == null ? undefined : (input => <div className={p.ctx.inputGroupClass}>
+          renderInput={(input => <div className={p.ctx.inputGroupClass}>
             {input}
             <span style={{
-              backgroundColor: ctx.value ?? undefined, height: "20px", width: "20px",
+              backgroundColor: ctx.value ?? undefined, height: "15px", width: "15px",
               position: "absolute",
               marginTop: "5px",
               marginLeft: "5px",

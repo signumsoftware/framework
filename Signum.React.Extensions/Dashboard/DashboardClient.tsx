@@ -71,6 +71,7 @@ export function start(options: { routes: JSX.Element[] }) {
   Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
   Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
+  Navigator.addSettings(new EntitySettings(PanelPartEmbedded, e => import('./Admin/PanelPart'), { modalSize: "xs" }));
   Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
   Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => import('./Admin/ValueUserQueryListPart')));
