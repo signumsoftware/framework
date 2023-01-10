@@ -539,7 +539,12 @@ public class Graph<T>
 
                 string? error = OnCanExecute((T)entity);
                 if (error != null)
-                    throw new ApplicationException(error);
+                {
+                    var ex= new ApplicationException(error);
+                    OperationLogic.OnOperationExceptionHandlerArgs(Symbol.Symbol, entity,ex, args);
+                    throw ex;
+
+                }
 
                 OperationLogEntity log = new OperationLogEntity
                 {
@@ -585,7 +590,11 @@ public class Graph<T>
                     OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
 
                     if (Transaction.InTestTransaction)
+                    {
+                        OperationLogic.OnOperationExceptionHandlerArgs(Symbol.Symbol, entity, ex, args);
                         throw;
+                    }
+                        
 
                     var exLog = ex.LogException();
 
@@ -604,6 +613,8 @@ public class Graph<T>
 
                         tr2.Commit();
                     }
+
+                    OperationLogic.OnOperationExceptionHandlerArgs(Symbol.Symbol, entity, ex, args);
 
                     throw;
                 }
