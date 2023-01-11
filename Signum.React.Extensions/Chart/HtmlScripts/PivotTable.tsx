@@ -18,6 +18,8 @@ import { EntityBaseController } from '@framework/Lines';
 import { isBooleanOrFunctionOrNull } from '../../Dynamic/View/NodeUtils';
 import { MultiValueLineController } from '../../../Signum.React/Scripts/Lines/MultiValueLine';
 import { BigValueSearchCounter } from '../../Dashboard/View/UserQueryPart';
+import { QueryString } from '../../../Signum.React/Scripts/QueryString';
+import { QueryTokenMessage } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };
@@ -54,7 +56,10 @@ class RowGroup {
       return this.column.title + " = " +
         (this.value == true ? BooleanEnum.niceToString("True") :
           this.value == false ? BooleanEnum.niceToString("False") :
-            "null");
+            "-" + QueryTokenMessage.Null.niceToString() + "-");
+
+    if (this.value == null)
+      return "-" + QueryTokenMessage.Null.niceToString() + "-";
 
     return this.column.getNiceName(this.value);
   }
@@ -87,7 +92,7 @@ function getMultiAggregator(columns: ChartColumn<number>[]): (values: MultiNum[]
     if (token.queryTokenType != "Aggregate")
       return (vals, selector) => vals.sum(selector as (mn: MultiNum) => number);
 
-    if (token.key == "Count")
+    if (token.key.startsWith("Count"))
       return (vals, selector) => vals.sum(selector as (mn: MultiNum) => number);
 
     if (token.key == "Sum")
@@ -99,14 +104,18 @@ function getMultiAggregator(columns: ChartColumn<number>[]): (values: MultiNum[]
     if (token.key == "Max")
       return (vals, selector) => vals.max(selector as (mn: MultiNum) => number)!;
 
-    if (token.key == "Avg")
-      return (vals, selector, sumSelector) => vals.sum(a => selector!(a as number[]) * sumSelector!(a as number[])) / vals.sum(a => sumSelector!(a as number[]))!;
+    if (token.key == "Average")
+      return (vals, selector, countSelector) => {
+        var sel = selector as (mn: MultiNum) => number;
+        var cnt = countSelector as (mn: MultiNum) => number;
+        return vals.sum(mn => sel(mn) * cnt(mn)) / vals.sum(cnt)!
+      }
 
     throw new Error('getSingleAggregator not implemented for ' + token.key);
   }
 
-  function getCountNNSelectors(c: ChartColumn<number>){
-    if (c.token!.queryTokenType == "Aggregate" && c.token!.key == "Avg") {
+  function getCountNNSelectors(c: ChartColumn<number>) {
+    if (c.token!.queryTokenType == "Aggregate" && c.token!.key == "Average") {
       const countNNColumn = columns.firstOrNull(s => s.token?.queryTokenType == "Aggregate" && s.token!.key == "CountNotNull" && s.token?.parent?.fullKey == c.token?.parent?.fullKey);
 
       if (countNNColumn == null)
@@ -119,8 +128,10 @@ function getMultiAggregator(columns: ChartColumn<number>[]): (values: MultiNum[]
     return undefined;
   };
 
-  if (columns.length == 1)
+  if (columns.length == 1) {
+    const count0 = getCountNNSelectors(columns[0]); //Just for the error
     return getSingleAggregator(columns[0].token!) as (values: MultiNum[]) => MultiNum;
+  }
 
   if (columns.length == 2) {
     const ag0 = getSingleAggregator(columns[0].token!); const count0 = getCountNNSelectors(columns[0]);
@@ -303,7 +314,11 @@ export default function renderPivotTable({ data, width, height, parameters, load
   const horizontalDic = multiDictionary(data.rows, horCols);
   const verticalDic = multiDictionary(data.rows, vertCols);
 
-  var aggregate = getMultiAggregator(valueColumns);
+  var aggregate = (
+    horColsWitParams.some(a => a.params.aggegrateValues == "Yes") ||
+    vertColsWitParams.some(a => a.params.aggegrateValues == "Yes")
+  ) ? getMultiAggregator(valueColumns) : null;
+
   var selector = getMultiSelector(valueColumns);
 
   var firstValue: (array: MultiNum) => number =
@@ -315,15 +330,19 @@ export default function renderPivotTable({ data, width, height, parameters, load
     if (dor == undefined)
       return 0;
 
-    if (Array.isArray(dor))
-      return aggregate(dor.map(row => selector(row)));
+    if (Array.isArray(dor)) {
+      if (dor.length == 1)
+        return selector(dor[0]);
+
+      return aggregate!(dor.map(row => selector(row)));
+    }
 
     if (dor instanceof RowGroup)
-      return dor.subGroups ? aggregate(dor.subGroups.map(a => sumValue(a))) :
+      return dor.subGroups ? aggregate!(dor.subGroups.map(a => sumValue(a))) :
         dor.rows ? sumValue(dor.rows) :
           0;
 
-    return aggregate(Dic.getValues(dor).map(group2 => sumValue(group2.dicOrRows)));
+    return aggregate!(Dic.getValues(dor).map(group2 => sumValue(group2.dicOrRows)));
   }
 
   function getLevelValues(dor: RowDictionary, level: number): MultiNum[] {
@@ -333,16 +352,16 @@ export default function renderPivotTable({ data, width, height, parameters, load
       return Dic.getValues(dor).flatMap(a => getLevelValues(a.dicOrRows as RowDictionary, level - 1));
   }
 
-  function getCellStyle(values: number[], params: DimParameters, column?: ChartColumn<unknown>): CellStyle {
+  function getCellStyle(values: ()=> number[], params: DimParameters, column?: ChartColumn<unknown>): CellStyle {
 
     let background: ((key: unknown, num: number) => string | undefined) | undefined = undefined;
     if (params.gradient == "EntityPalette" && column != null) {
       background = (key: unknown, num: number) => column.getColor(key) ?? undefined;
     }
     else if (params.scale && params.gradient != "None") {
-      const scaleFunc = ChartUtils.scaleFor(valueColumns[0], values, 0, 1, params.scale);
+      const scaleFunc = ChartUtils.scaleFor(valueColumns[0], values(), 0, 1, params.scale);
       const gradient = ChartUtils.getColorInterpolation(params.gradient)!;
-      background = (key: unknown, num: number) => gradient(scaleFunc(num)!);
+      background = (key: unknown, num: number) => num == null ? "white" : gradient(scaleFunc(num)!);
     }
 
     return ({
@@ -414,15 +433,15 @@ export default function renderPivotTable({ data, width, height, parameters, load
     });
   }
 
-  const horStyles = horColsWitParams.map((cp, i) => getCellStyle(getLevelValues(horizontalDic as RowDictionary, i).map(firstValue), cp.params, cp.col));
-  const vertStyles = vertColsWitParams.map((cp, i) => getCellStyle(getLevelValues(verticalDic as RowDictionary, i).map(firstValue), cp.params, cp.col));
+  const horStyles = horColsWitParams.map((cp, i) => getCellStyle(() => getLevelValues(horizontalDic as RowDictionary, i).map(firstValue), cp.params, cp.col));
+  const vertStyles = vertColsWitParams.map((cp, i) => getCellStyle(() => getLevelValues(verticalDic as RowDictionary, i).map(firstValue), cp.params, cp.col));
 
 
   const baseFilters = chartRequest.filterOptions.filter(fo => !isFilterGroupOptionParsed(fo)) as FilterConditionOptionParsed[];
   const horizontalGroups = getRowGroups(horizontalDic, horStyles, 0, []);
   const verticalGroups = getRowGroups(verticalDic, vertStyles, 0, []);
 
-  const valueStyle = getCellStyle(data.rows.map(row => firstValue(selector(row))), getDimParameters("Value"));
+  const valueStyle = getCellStyle(() => data.rows.map(row => firstValue(selector(row))), getDimParameters("Value"));
 
   const cellFormatter = getCellFormatter(multiValueFormat, valueColumns);
 
@@ -467,16 +486,16 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
     var lite = gr && isLite(gr.value) ? gr.value : undefined;
 
-    const multiVal = sumValue(p.gor);
+    let multiVal: MultiNum |undefined ;
 
-    const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <a href="#" onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal)}</a>;
+    const link = (p.gor == null || style == null || style.showAggregateValues == false) ? null : <a href="#" onClick={e => handleNumberClick(e)}>{cellFormatter(multiVal ??= sumValue(p.gor))}</a>;
 
     var color =
       p.isSummary == 4 ? "rgb(228, 228, 228)" :
         p.isSummary == 3 ? "rgb(236, 236, 236)" :
           p.isSummary == 2 ? "rgb(241, 241, 241)" :
             p.isSummary == 1 ? "#f8f8f8" :
-              style && style.background && style.background(gr?.value, firstValue(multiVal));
+              style && style.background && style.background(gr?.value, firstValue(multiVal ??= sumValue(p.gor)));
 
     
 
@@ -526,7 +545,6 @@ export default function renderPivotTable({ data, width, height, parameters, load
     }
 
     var title = p.title ?? (p.gor instanceof RowGroup ? p.gor.getNiceName() : undefined);
-
     if (title == null) {
       if (style?.cssStyleDiv)
         return (
@@ -745,51 +763,48 @@ function getCellFormatter(multiValueFormat: string, valueColumns: ChartColumn<nu
 
   var fmtWith = compileFormatter(multiValueFormat);
 
-  var numberFormats = valueColumns.map(vc => toNumberFormat(vc.token?.format));
-
-  if (numberFormats.length == 1) {
-    const f0 = numberFormats[0];
-    return n => fmtWith(f0.format(n as number));
+  if (valueColumns.length == 1) {
+    const f0 = valueColumns[0];
+    return n => fmtWith(f0.getNiceName(n as number));
   }
 
-  if (numberFormats.length == 2) {
-    const f0 = numberFormats[0];
-    const f1 = numberFormats[1];
+  if (valueColumns.length == 2) {
+    const f0 = valueColumns[0];
+    const f1 = valueColumns[1];
     return n => fmtWith(
-      f0.format((n as number[])[0]),
-      f1.format((n as number[])[1]),
+      f0.getNiceName((n as number[])[0]),
+      f1.getNiceName((n as number[])[1]),
     );
   }
 
-  if (numberFormats.length == 3) {
-    const f0 = numberFormats[0];
-    const f1 = numberFormats[1];
-    const f2 = numberFormats[2];
+  if (valueColumns.length == 3) {
+    const f0 = valueColumns[0];
+    const f1 = valueColumns[1];
+    const f2 = valueColumns[2];
     return n => fmtWith(
-      f0.format((n as number[])[0]),
-      f1.format((n as number[])[1]),
-      f2.format((n as number[])[2]),
+      f0.getNiceName((n as number[])[0]),
+      f1.getNiceName((n as number[])[1]),
+      f2.getNiceName((n as number[])[2]),
     );
   }
 
-  if (numberFormats.length == 4) {
-    const f0 = numberFormats[0];
-    const f1 = numberFormats[1];
-    const f2 = numberFormats[2];
-    const f3 = numberFormats[3];
+  if (valueColumns.length == 4) {
+    const f0 = valueColumns[0];
+    const f1 = valueColumns[1];
+    const f2 = valueColumns[2];
+    const f3 = valueColumns[3];
     return n => fmtWith(
-      f0.format((n as number[])[0]),
-      f1.format((n as number[])[1]),
-      f2.format((n as number[])[2]),
-      f3.format((n as number[])[3]),
+      f0.getNiceName((n as number[])[0]),
+      f1.getNiceName((n as number[])[1]),
+      f2.getNiceName((n as number[])[2]),
+      f3.getNiceName((n as number[])[3]),
     );
   }
 
-  throw new Error("Unexpected " + numberFormats.length);
+  throw new Error("Unexpected " + valueColumns.length);
 }
 
 function compileFormatter(format: string): (...args: string[]) => string {
-  debugger;
   var matches = [...format.matchAll(/\{(?<num>\d)\}/g)];
 
   if (matches.length == 0)

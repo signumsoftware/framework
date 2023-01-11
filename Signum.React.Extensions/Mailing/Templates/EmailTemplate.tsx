@@ -22,7 +22,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
 
   function renderQueryPart() {
     const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
-    const ecXs = ec.subCtx({ formSize: "ExtraSmall" });
+    const ecXs = ec.subCtx({ formSize: "xs" });
     var canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
     return (
       <div>
@@ -262,7 +262,7 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
         </a>}
-        {showPreview && <IFrameRenderer style={{ width: "100%" }} html={ec.value.text} />}
+        {showPreview && <IFrameRenderer style={{ width: "100%", minHeight: "800px" }} html={ec.value.text} />}
       </div>
     </div>
   );

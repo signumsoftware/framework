@@ -9,7 +9,7 @@ public class LineChartScript : ChartScript
         this.Icon = ChartScriptLogic.LoadIcon("lines.png");
         this.Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
+            new ChartScriptColumn("Horizontal Axis", ChartColumnType.Any),
             new ChartScriptColumn("Height", ChartColumnType.Positionable) 
         };
         this.ParameterGroups = new List<ChartScriptParameterGroup>
@@ -17,7 +17,8 @@ public class LineChartScript : ChartScript
             new ChartScriptParameterGroup()
             {
                 new ChartScriptParameter("CompleteValues", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
-                new ChartScriptParameter("Scale", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
+                new ChartScriptParameter("HorizontalScale", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Bands|ZeroMax (M)|MinMax (P)|Log (M)") },
+                new ChartScriptParameter("VerticalScale", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
             },
             new ChartScriptParameterGroup("Margins")
             {

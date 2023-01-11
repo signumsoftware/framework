@@ -6,9 +6,9 @@ namespace Signum.Entities.DynamicQuery;
 
 public abstract class BaseQueryRequest
 {
-    public object QueryName { get; set; }
+    public required object QueryName { get; set; }
 
-    public List<Filter> Filters { get; set; }
+    public required List<Filter> Filters { get; set; }
 
     public string? QueryUrl { get; set; }
 
@@ -22,11 +22,11 @@ public class QueryRequest : BaseQueryRequest
 {
     public bool GroupResults { get; set; }
 
-    public List<Column> Columns { get; set; }
+    public required List<Column> Columns { get; set; }
 
-    public List<Order> Orders { get; set; }
+    public required List<Order> Orders { get; set; }
 
-    public Pagination Pagination { get; set; }
+    public required Pagination Pagination { get; set; }
 
     public SystemTime? SystemTime { get; set; }
 

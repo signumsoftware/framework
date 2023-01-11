@@ -12,6 +12,7 @@ using Signum.Entities.UserAssets;
 using Microsoft.AspNetCore.Html;
 using System.Text.RegularExpressions;
 using Signum.Entities.Scheduler;
+using Signum.Utilities;
 
 namespace Signum.Engine.Alerts;
 
@@ -398,8 +399,11 @@ public static class AlertLogic
         {
             Database.Query<AlertEntity>()
                 .Where(a => a.Target.Is(target) && a.AlertType.Is(alertType) && a.State == AlertState.Saved)
-                .ToList()
-                .ForEach(a => a.Execute(AlertOperation.Attend));
+                .UnsafeUpdate()
+                .Set(a => a.State, a => AlertState.Attended)
+                .Set(a => a.AttendedDate, a => Clock.Now)
+                .Set(a => a.AttendedBy, a => UserHolder.Current.User)
+                .Execute();
         }
     }
 
@@ -409,8 +413,11 @@ public static class AlertLogic
         {
             alerts
                  .Where(a => a.State == AlertState.Saved)
-                .ToList()
-                .ForEach(a => a.Execute(AlertOperation.Attend));
+                .UnsafeUpdate()
+                .Set(a => a.State, a => AlertState.Attended)
+                .Set(a => a.AttendedDate, a => Clock.Now)
+                .Set(a => a.AttendedBy, a => UserHolder.Current.User)
+                .Execute();
         }
     }
 

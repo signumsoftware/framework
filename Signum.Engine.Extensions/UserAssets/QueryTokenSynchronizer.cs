@@ -357,11 +357,11 @@ public static class QueryTokenSynchronizer
                     return FixTokenResult.DeleteEntity;
                 case UserAssetTokenAction.ReGenerateEntity:
                     if (!allowReGenerate)
-                        throw new InvalidOperationException("Unexpected ReGenerate");
+                        throw new InvalidOperationException("Unexpected Regenerate");
 
-                    SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Entity Re-Generated");
+                    SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Entity Regenerated");
                     token = null;
-                    return FixTokenResult.ReGenerateEntity;
+                    return FixTokenResult.RegenerateEntity;
                 case UserAssetTokenAction.RemoveToken:
                     if (!allowRemoveToken)
                         throw new InvalidOperationException("Unexpected RemoveToken");
@@ -529,5 +529,5 @@ public enum FixTokenResult
     RemoveToken,
     DeleteEntity,
     SkipEntity,
-    ReGenerateEntity,
+    RegenerateEntity,
 }

@@ -16,6 +16,7 @@ using Signum.Entities.Workflow;
 using Signum.Engine.Workflow;
 using Signum.Entities.Word;
 using Signum.Engine.Word;
+using Signum.Utilities;
 
 namespace Signum.Engine.UserAssets;
 
@@ -123,15 +124,18 @@ public static class UserAssetsImporter
 
                 entity.FromXml(element, this);
 
+                var action = entity.IsNew ? EntityAction.New :
+                             customResolutionModel.ContainsKey(entity.Guid) ? EntityAction.Different :
+                             GraphExplorer.FromRootVirtual((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
+                             EntityAction.Identical;
+
                 previews.Add(guid, new UserAssetPreviewLineEmbedded
                 {
                     Text = entity.ToString()!,
                     Type = entity.GetType().ToTypeEntity(),
                     Guid = guid,
-                    Action = entity.IsNew ? EntityAction.New :
-                             customResolutionModel.ContainsKey(entity.Guid) ? EntityAction.Different :
-                             GraphExplorer.FromRootVirtual((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
-                             EntityAction.Identical,
+                    Action = action,
+                    OverrideEntity = action == EntityAction.Different,
 
                     LiteConflicts = liteConflicts.TryGetC(guid).EmptyIfNull().Select(kvp => new LiteConflictEmbedded
                     {
@@ -322,7 +326,7 @@ public static class UserAssetsImporter
 
                 var entity = giRetrieveOrCreate.GetInvoker(type)(guid);
 
-                if (entity.IsNew || overrideEntity.ContainsKey(guid))
+                if (entity.IsNew || overrideEntity.TryGet(guid, false))
                 {
                     entity.FromXml(element, this);
 
@@ -429,9 +433,7 @@ public static class UserAssetsImporter
             {
                 case EntityAction.New: SafeConsole.WriteLineColor(ConsoleColor.Green, $"Create {item.Type} {item.Guid} {item.Text}"); break;
                 case EntityAction.Identical: SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {item.Type} {item.Guid} {item.Text}"); break;
-                case EntityAction.Different: SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Override {item.Type} {item.Guid} {item.Text}");
-                    item.OverrideEntity = true;
-                    break;
+                case EntityAction.Different: SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Override {item.Type} {item.Guid} {item.Text}"); break;
             }
         }
 

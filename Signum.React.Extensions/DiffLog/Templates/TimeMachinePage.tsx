@@ -1,25 +1,24 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import { RouteComponentProps } from 'react-router'
-import { StyleContext, RenderEntity, TypeContext } from '@framework/Lines'
+import { RenderEntity, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import EntityLink from '@framework/SearchControl/EntityLink'
-import { SearchControl, ColumnOption } from '@framework/Search'
-import { QueryDescription, ResultTable } from '@framework/FindOptions'
+import { SearchControl } from '@framework/Search'
 import { Entity, getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TimeMachineMessage } from '../Signum.Entities.DiffLog'
 import { Lite } from '@framework/Signum.Entities'
 import { newLite, QueryTokenString, toFormatWithFixes, toLuxonFormat } from '@framework/Reflection'
-import { EngineMessage } from '@framework/Signum.Entities'
-import { Dic } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
 import { Tabs, Tab, Modal } from 'react-bootstrap'
+import { DiffDocument, LineOrWordsChange } from './DiffDocument'
 import * as DiffLogClient from '../DiffLogClient'
-import { DiffDocument } from './DiffDocument'
 import { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { IModalProps, openModal } from '@framework/Modals'
+import { EntityDump } from '../DiffLogClient'
+
 
 export default function TimeMachinePage(p: RouteComponentProps<{ type: string; id: string }>) {
 
@@ -82,61 +81,71 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
 }
 
 interface RenderEntityVersionProps {
-  lite: Lite<Entity>;
-  asOf: string;
-}
-
-interface RenderEntityVersionState {
-  entity?: Entity;
+  current: ()=> Promise<EntityDump>;
+  previous: (() => Promise<EntityDump>) | undefined;
+  next: (() => Promise<EntityDump>) | undefined;
 }
 
 export function RenderEntityVersion(p: RenderEntityVersionProps) {
+  var current = useAPI(signal => p.current(), [p.current]);
+  var previous = useAPI(signal => p.previous == null ? Promise.resolve(null) : p.previous(), [p.previous]);
+  var next = useAPI(signal => p.next == null ? Promise.resolve(null) : p.next(), [p.next]);
 
-  const entity = useAPI(signal => DiffLogClient.API.retrieveVersion(p.lite, p.asOf), [p.lite, p.asOf]);
-
-  if (!entity)
+  if (!current || previous === undefined || next === undefined)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
   return (
     <div>
-      <RenderEntity ctx={TypeContext.root(entity, { readOnly: true })} />
+      <RenderEntity ctx={TypeContext.root(current.entity, { readOnly: true })} />
     </div>
   );
 }
 
 interface DiffEntityVersionProps {
-  lite: Lite<Entity>;
-  validFrom: string;
-  validTo: string;
+  first: () => Promise<EntityDump>;
+  second: () => Promise<EntityDump>;
 }
 
 export function DiffEntityVersion(p: DiffEntityVersionProps) {
 
-  const diffBlock = useAPI(() => DiffLogClient.API.diffVersions(p.lite, p.validFrom, p.validTo), [p.lite, p.validFrom, p.validTo]);
+  var first = useAPI(signal => p.first(), [p.first]);
 
-  if (!diffBlock)
+  var second = useAPI(signal => p.second(), [p.second]);
+
+  if (first == undefined || second  == undefined)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
   return (
-    <div>
-      <DiffDocument diff={diffBlock} />
-    </div>
+    <DiffDocument first={first.dump} second={second.dump} />
   );
 }
 
-
 export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string[] }) {
 
+  function memoized(dateUtc: string): () => Promise<EntityDump> {
+
+    var memo: Promise<EntityDump>;
+
+    return () => (memo ??= DiffLogClient.API.getEntityDump(p.lite, dateUtc));
+  }
+
   var luxonFormat = toLuxonFormat("o", "DateTime");
+
+  var refs = React.useRef<{ [versionDateUTC: string]: () => Promise<EntityDump> }>({});
+
+  refs.current = p.versionDatesUTC.toObject(a => a, a => refs.current[a] ?? memoized(a));
 
   return (
     <Tabs id="timeMachineTabs">
       {p.versionDatesUTC.orderBy(a => a).flatMap((d, i, dates) => [
         <Tab title={toFormatWithFixes(DateTime.fromISO(d), luxonFormat)} key={d} eventKey={d}>
-          <RenderEntityVersion lite={p.lite} asOf={d} />
+          <RenderEntityVersion
+            previous={i == 0 ? undefined : refs.current[dates[i - 1]]}
+            current={refs.current[d]}
+            next={i == dates.length - 1 ? undefined : refs.current[dates[i + 1]]} />
         </Tab>,
         (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i + 1]}>
-          <DiffEntityVersion lite={p.lite} validFrom={d} validTo={dates[i + 1]} />
+          <DiffEntityVersion first={refs.current[d]} second={refs.current[dates[i+1]]} />
         </Tab>
       ])}
     </Tabs>

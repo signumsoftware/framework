@@ -54,8 +54,8 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     super.overrideProps(p, overridenProps);
   }
 
-  setValue(list: MList<Lite<Entity> | ModifiableEntity>) {
-    super.setValue(list as any);
+  setValue(list: MList<Lite<Entity> | ModifiableEntity>, event?: React.SyntheticEvent) {
+    super.setValue(list as any, event);
   }
 
   getMListItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {

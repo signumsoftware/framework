@@ -517,7 +517,7 @@ public class Transaction : IDisposableException
         }
     }
 
-    public static DbTransaction? CurrentTransaccion
+    public static DbTransaction? CurrentTransaction
     {
         get
         {

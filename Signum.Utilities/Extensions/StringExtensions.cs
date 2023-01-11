@@ -524,16 +524,22 @@ public static class StringExtensions
         return result;
     }
 
-    public static string PadChopRight(this string str, int length, char paddingChar = ' ')
+    public static string PadTruncateRight(this string str, int length, char paddingChar = ' ')
     {
         str = str ?? "";
         return str.Length > length ? str.Substring(0, length) : str.PadRight(length, paddingChar);
     }
 
-    public static string PadChopLeft(this string str, int length, char paddingChar = ' ')
+    public static string PadTruncateLeft(this string str, int length, char paddingChar = ' ')
     {
         str = str ?? "";
         return str.Length > length ? str.Substring(str.Length - length, length) : str.PadLeft(length, paddingChar);
+    }
+
+    public static string Truncate(this string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+        return value.Length <= maxLength ? value : value.Substring(0, maxLength);
     }
 
     public static string? FirstNonEmptyLine(this string? str)
@@ -563,7 +569,12 @@ public static class StringExtensions
     public static string Etc(this string str, int max, string etcString)
     {
         if (str.HasText() && (str.Length > max))
-            return str.Start(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
+        {
+            if(etcString.Length <= max)
+                return str.Substring(0, max);
+
+            return str.Start(max - etcString.Length) + etcString;
+        }
         return str;
     }
 

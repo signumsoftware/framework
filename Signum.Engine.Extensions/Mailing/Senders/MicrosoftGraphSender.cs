@@ -8,20 +8,28 @@ using Signum.Entities.Authorization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Entity = Signum.Entities.Entity;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Engine.Mailing.Senders;
 
 //https://jatindersingh81.medium.com/c-code-to-to-send-emails-using-microsoft-graph-api-2a90da6d648a
 //https://www.jeancloud.dev/2020/06/05/using-microsoft-graph-as-smtp-server.html
-public partial class EmailSenderManager : IEmailSenderManager
+public class MicrosoftGraphSender : BaseEmailSender
 {
     public static long MicrosoftGraphFileSizeLimit = 3 * 1024 * 1024;
-    protected virtual void SendMicrosoftGraph(EmailMessageEntity email, MicrosoftGraphEmbedded microsoftGraph)
+    MicrosoftGraphEmailServiceEntity microsoftGraph;
+
+    public MicrosoftGraphSender(EmailSenderConfigurationEntity senderConfig, MicrosoftGraphEmailServiceEntity service) : base(senderConfig)
+    {
+        microsoftGraph = service;
+    }
+
+    protected override void SendInternal(EmailMessageEntity email)
     {
         try
         {
             var authProvider = microsoftGraph.GetAuthProvider();
-            GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
 
 
             var bigAttachments = email.Attachments.Where(a => a.File.FileLength > MicrosoftGraphFileSizeLimit).ToList();
@@ -44,6 +52,7 @@ public partial class EmailSenderManager : IEmailSenderManager
                     AttachmentItem attachmentItem = new AttachmentItem
                     {
                         AttachmentType = AttachmentType.File,
+                        IsInline = a.Type == EmailAttachmentType.LinkedResource,
                         Name = a.File.FileName,
                         Size = a.File.FileLength,
                         ContentType = MimeMapping.GetMimeType(a.File.FileName)
@@ -59,13 +68,13 @@ public partial class EmailSenderManager : IEmailSenderManager
 
                     if (!fileUploadTask.UploadSucceeded)
                         throw new InvalidOperationException("Upload of big files to Microsoft Graph didn't succeed");
-                }
+    }
 
                 user.MailFolders["Drafts"].Messages[newMessage.Id].Send().Request().PostAsync().Wait();
             }
         }
         catch(AggregateException e)
-        {
+    {
             var only = e.InnerExceptions.Only();
             if(only != null)
             {
@@ -110,11 +119,12 @@ public partial class EmailSenderManager : IEmailSenderManager
         
         foreach (var a in attachments)
         {
-            if(a.File.FileLength <= MicrosoftGraphFileSizeLimit)
+            if (a.File.FileLength <= MicrosoftGraphFileSizeLimit)
                 result.Add(new FileAttachment
                 {
                     ContentId = a.ContentId,
                     Name = a.File.FileName,
+                    IsInline = a.Type == EmailAttachmentType.LinkedResource,
                     ContentType = MimeMapping.GetMimeType(a.File.FileName),
                     ContentBytes = a.File.GetByteArray(),
                 });
@@ -162,7 +172,7 @@ public static class MicrosoftGraphExtensions
         return new Disposable(() => AuthenticationProvider.Value = old);
     }
 
-    public static IAuthenticationProvider GetAuthProvider(this MicrosoftGraphEmbedded microsoftGraph, string[]? scopes = null)
+    public static IAuthenticationProvider GetAuthProvider(this MicrosoftGraphEmailServiceEntity microsoftGraph, string[]? scopes = null)
     {
         if (AuthenticationProvider.Value is var ap && ap != null)
             return ap;

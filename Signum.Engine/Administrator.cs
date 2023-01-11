@@ -337,7 +337,7 @@ public static class Administrator
 
     public static bool IsIdentityBehaviourDisabled(ITable table)
     {
-        return identityBehaviourDisabled.Value?.Contains(table) == true;
+        return identityBehaviourDisabled.Value == table;
     }
 
     [DebuggerStepThrough]
@@ -346,22 +346,22 @@ public static class Administrator
         return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>(), disableAssertAllowed: true);
     }
 
-    static AsyncThreadVariable<ImmutableStack<ITable>?> identityBehaviourDisabled = Statics.ThreadVariable<ImmutableStack<ITable>?>("identityBehaviourOverride");
+    static AsyncThreadVariable<ITable?> identityBehaviourDisabled = Statics.ThreadVariable<ITable?>("identityBehaviourOverride");
     public static IDisposable DisableIdentity(ITable table, bool behaviourOnly = false)
     {
         if (!table.IdentityBehaviour)
             throw new InvalidOperationException("Identity is false already");
 
         var sqlBuilder = Connector.Current.SqlBuilder;
-        var oldValue = identityBehaviourDisabled.Value ?? ImmutableStack<ITable>.Empty;
+        var oldTable = identityBehaviourDisabled.Value;
 
-        identityBehaviourDisabled.Value = oldValue.Push(table);
+        identityBehaviourDisabled.Value = table;
         if (table.PrimaryKey.Default == null && !sqlBuilder.IsPostgres && !behaviourOnly)
             sqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
 
         return new Disposable(() =>
         {
-            identityBehaviourDisabled.Value = oldValue.IsEmpty ? null : oldValue;
+            identityBehaviourDisabled.Value = oldTable;
 
             if (table.PrimaryKey.Default == null && !sqlBuilder.IsPostgres && !behaviourOnly)
                 sqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();

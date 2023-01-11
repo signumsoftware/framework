@@ -43,7 +43,14 @@ public static class CaseFlowLogic
                 if (from is WorkflowActivityEntity wa)
                 {
                     var conns = wa.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer)
-                    .SelectMany(e => gr.GetAllConnections(e, to, path => path.All(a => a.Type == ConnectionType.Normal)));
+                    .SelectMany(e => gr.GetAllConnections(e, to, path =>
+                    {
+                        if (prev.DoneDecision != null)
+                            return IsValidPath(DoneType.Timeout, prev.DoneDecision, path);
+
+                        return path.All(a => a.Type == ConnectionType.Normal);
+                    }));
+
                     if (conns.Any())
                         return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
                 }
@@ -192,10 +199,10 @@ public static class CaseFlowLogic
             case DoneType.Next: 
             case DoneType.ScriptSuccess:
             case DoneType.Recompose:
+            case DoneType.Timeout:
                 return path.All(a => a.Type == ConnectionType.Normal || doneDecision != null && (a.DoneDecision() == doneDecision));
             case DoneType.Jump: return path.All(a => a.Is(path.FirstEx()) ? a.Type == ConnectionType.Jump : a.Type == ConnectionType.Normal);
             case DoneType.ScriptFailure: return path.All(a => a.Is(path.FirstEx()) ? a.Type == ConnectionType.ScriptException : a.Type == ConnectionType.Normal);
-            case DoneType.Timeout:
             default:
                 throw new InvalidOperationException();
         }
@@ -227,28 +234,26 @@ public static class CaseFlowLogic
     }
 }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class CaseActivityStats
 {
-    public Lite<CaseActivityEntity> CaseActivity;
-    public Lite<CaseActivityEntity>? PreviousActivity;
-    public Lite<IWorkflowNodeEntity> WorkflowActivity;
-    public WorkflowActivityType? WorkflowActivityType;
-    public WorkflowEventType? WorkflowEventType;
-    public Lite<WorkflowEntity>? SubWorkflow;
-    public int Notifications;
-    public DateTime StartDate;
-    public DateTime? DoneDate;
-    public DoneType? DoneType;
-    public string? DoneDecision;
-    public Lite<IUserEntity>? DoneBy;
-    public double? Duration;
-    public double? AverageDuration;
-    public double? EstimatedDuration;
+    public required Lite<CaseActivityEntity> CaseActivity;
+    public required Lite<CaseActivityEntity>? PreviousActivity;
+    public required Lite<IWorkflowNodeEntity> WorkflowActivity;
+    public required WorkflowActivityType? WorkflowActivityType;
+    public required WorkflowEventType? WorkflowEventType;
+    public required Lite<WorkflowEntity>? SubWorkflow;
+    public required int Notifications;
+    public required DateTime StartDate;
+    public required DateTime? DoneDate;
+    public required DoneType? DoneType;
+    public required string? DoneDecision;
+    public required Lite<IUserEntity>? DoneBy;
+    public required double? Duration;
+    public required double? AverageDuration;
+    public required double? EstimatedDuration;
 
-    public string BpmnElementId { get; internal set; }
+    public required string BpmnElementId;
 }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
 public class CaseConnectionStats
 {

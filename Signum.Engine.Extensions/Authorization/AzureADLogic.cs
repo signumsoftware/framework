@@ -1,6 +1,6 @@
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
-using Signum.Engine.Mailing;
+using Signum.Engine.Mailing.Senders;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Authorization;
 using Signum.Utilities.Reflection;
@@ -546,13 +546,10 @@ public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
     public string? SID => null;
 }
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 public class ActiveDirectoryUser
 {
-    public string DisplayName;
-    public string UPN;
-    public Guid ObjectID;
-
-    public string JobTitle;
+    public required string DisplayName;
+    public required string UPN;
+    public required Guid ObjectID;
+    public required string JobTitle;
 }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

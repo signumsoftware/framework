@@ -8,6 +8,8 @@ using Signum.Engine.Files;
 using Microsoft.AspNetCore.StaticFiles;
 using Signum.Entities.Basics;
 using Signum.Entities.Files;
+using Signum.Engine.Mailing.Senders;
+using Signum.Utilities;
 
 namespace Signum.Engine.Mailing;
 
@@ -23,7 +25,15 @@ public static class EmailLogic
         get { return getConfiguration(); }
     }
 
-    public static IEmailSenderManager SenderManager = null!;
+    static Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration = null!;
+
+    public static Polymorphic<Func<EmailServiceEntity, EmailSenderConfigurationEntity, BaseEmailSender>> EmailSenders = new ();       
+    public static BaseEmailSender GetEmailSender(EmailMessageEntity email)
+    {
+        var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
+        var config = getEmailSenderConfiguration(template, email.Target, email);
+        return EmailSenders.Invoke(config.Service, config);
+    }
 
     internal static void AssertStarted(SchemaBuilder sb)
     {
@@ -59,12 +69,17 @@ public static class EmailLogic
                     e.Sent,
                     e.Target,
                     e.Package,
+                    e.SentBy,
                     e.Exception,
                 });
 
             PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
 
-            SenderManager = new EmailSenderManager(getEmailSenderConfiguration);
+            EmailLogic.getEmailSenderConfiguration = getEmailSenderConfiguration;
+
+            EmailSenders.Register((SmtpEmailServiceEntity s, EmailSenderConfigurationEntity c) => new SmtpSender(c, s));
+            EmailSenders.Register((MicrosoftGraphEmailServiceEntity s, EmailSenderConfigurationEntity c) => new MicrosoftGraphSender(c, s));
+            EmailSenders.Register((ExchangeWebServiceEmailServiceEntity s, EmailSenderConfigurationEntity c) => new ExchangeWebServiceSender(c, s));
 
             EmailGraph.Register();
 
@@ -133,18 +148,19 @@ public static class EmailLogic
     public static void SendMail(this IEmailModel model)
     {
         foreach (var email in model.CreateEmailMessage())
-            SenderManager.Send(email);
+            GetEmailSender(email).Send(email);
     }
 
     public static void SendMail(this Lite<EmailTemplateEntity> template, ModifiableEntity entity)
     {
         foreach (var email in template.CreateEmailMessage(entity))
-            SenderManager.Send(email);
+            GetEmailSender(email).Send(email);
     }
 
     public static void SendMail(this EmailMessageEntity email)
     {
-        SenderManager.Send(email);
+        var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
+        GetEmailSender(email).Send(email);
     }
 
     public static void SendMailAsync(this IEmailModel model)
@@ -278,7 +294,7 @@ public static class EmailLogic
                 CanBeModified = true,
                 FromStates = { EmailMessageState.Created, EmailMessageState.Draft, EmailMessageState.ReadyToSend, EmailMessageState.Outdated },
                 ToStates = { EmailMessageState.Sent },
-                Execute = (m, _) => EmailLogic.SenderManager.Send(m)
+                Execute = (m, _) => EmailLogic.GetEmailSender(m).Send(m)
             }.Register();
 
 
@@ -311,12 +327,6 @@ public static class EmailLogic
         }
     }
 }
-
-public interface IEmailSenderManager
-{
-    void Send(EmailMessageEntity email);
-}
-
 
 public static class MimeMapping
 {

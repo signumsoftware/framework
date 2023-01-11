@@ -8,7 +8,6 @@ import { ImportRoute } from "@framework/AsyncImport";
 import { QueryString } from '@framework/QueryString';
 import { Lite, Entity, ModifiableEntity } from '@framework/Signum.Entities';
 import * as CultureClient from './CultureClient'
-import { DiffBlock } from '../DiffLog/DiffLogClient';
 import { AutomaticTranslation } from './TranslationClient';
 import { Binding, tasks } from '@framework/Lines';
 import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
@@ -161,7 +160,6 @@ export interface PropertyChange {
 export interface PropertyRouteConflic {
   oldOriginal?: string;
   oldTranslation?: string;
-  diff?: DiffBlock;
   original: string;
   automaticTranslations: AutomaticTranslation[];
 }
@@ -183,6 +181,6 @@ export interface TranslatedInstanceView {
 
 export interface TranslatedPairView {
   translatedText: string;
+  newText: string;
   originalText: string;
-  diff?: DiffBlock;
 }

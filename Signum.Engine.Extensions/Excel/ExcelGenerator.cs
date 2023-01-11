@@ -62,11 +62,11 @@ public static class ExcelGenerator
             sheetData.Append(new Sequence<Row>()
             {
                 (from columnData in columnEquivalences
-                    select cb.Cell(columnData.Column.Column.DisplayName, headerStyleIndex)).ToRow(),
+                    select cb.Cell(columnData.Column.Column.DisplayName, headerStyleIndex, forImport: false)).ToRow(),
 
                 from r in results.Rows
                     select (from columnData in columnEquivalences
-                            select cb.Cell(r[columnData.Column], cb.GetDefaultStyle(columnData.Column.Column.Type), columnData.StyleIndex)).ToRow()
+                            select cb.Cell(r[columnData.Column], cb.GetDefaultStyle(columnData.Column.Column.Type), columnData.StyleIndex, forImport: false)).ToRow()
             }.Cast<OpenXmlElement>());
 
             var pivotTableParts = workbookPart.PivotTableCacheDefinitionParts

@@ -337,7 +337,7 @@ public class CodeFile
             var indent = GetIndent(lines[pos]);
             lines.RemoveRange(pos, 1);
 
-            var comma = lines[pos].Trim().StartsWith("}") ? "" : ", ";
+            var comma = lines[pos].Trim().StartsWith("}") ? "" : ",";
             lines.Insert(pos, IndentAndReplace(@$"""{packageName}"": ""{version}""" + comma, indent));
             return true;
         });
@@ -368,6 +368,14 @@ public class CodeFile
 
             return true;
         });
+    }
+
+    public void UpdateNugetReferences(string xmlSnippets)
+    {
+        foreach (var line in xmlSnippets.Lines().Where(a=>a.HasText()))
+        {
+            UpdateNugetReference(line.Between("Include=\"", "\""), line.Between("Version=\"", "\""));
+        }
     }
 
     public void UpdateNugetReference(string packageName, string version)

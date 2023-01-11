@@ -56,13 +56,13 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
       return element as Lite<Entity> | Entity;
   }
 
-  handleOnChange = (lite: Lite<Entity>) => {
+  handleOnChange = (event: React.SyntheticEvent, lite: Lite<Entity>) => {
     const list = this.props.ctx.value!;
     const toRemove = list.filter(mle => is(this.getKeyEntity(mle.element), lite))
 
     if (toRemove.length) {
       toRemove.forEach(mle => list.remove(mle));
-      this.setValue(list);
+      this.setValue(list, event);
     }
     else {
       (this.props.createElementFromLite ? this.props.createElementFromLite(lite) : this.convert(lite)).then(e => {
@@ -227,7 +227,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
             checked={ectx != null}
             disabled={p.ctx.readOnly}
             name={liteKey(row.entity!)}
-            onChange={e => c.handleOnChange(row.entity!)} />
+            onChange={e => c.handleOnChange(e, row.entity!)} />
           &nbsp;
           {p.onRenderItem ? p.onRenderItem(ric) : <span>{renderLite(row.entity!)}</span>}
         </label>

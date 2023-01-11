@@ -8,7 +8,6 @@ import { QueryEntity } from '@framework/Signum.Entities.Basics'
 import { IconColor, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { SearchValue, FindOptions } from '@framework/Search';
 import * as Navigator from '@framework/Navigator';
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI, useDocumentEvent, useInterval, useUpdatedRef } from '@framework/Hooks'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
 import a from 'bpmn-js/lib/features/search'

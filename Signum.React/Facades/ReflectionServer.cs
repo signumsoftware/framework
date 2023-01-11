@@ -7,6 +7,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;
 using Signum.Engine.Json;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.React.Facades;
 
@@ -215,6 +216,8 @@ public static class ReflectionServer
                                     MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                     PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
                                     AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
+                                    IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
+                                    IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
                                 };
 
                                 return KeyValuePair.Create(p.PropertyString(), OnPropertyRouteExtension(mi, p)!);
@@ -400,6 +403,8 @@ public class MemberInfoTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool PreserveOrder { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool AvoidDuplicates { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public object? Id { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsPhone { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsMail { get; set; }
 
     [JsonExtensionData]
     public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -432,12 +437,11 @@ public class TypeReferenceTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsLite { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsNotNullable { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsEmbedded { get; set; }
-    public string Name { get; set; }
+    public required string Name { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? TypeNiceName { get; set; }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public TypeReferenceTS() { }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
+    [SetsRequiredMembers]
     public TypeReferenceTS(Type type, Implementations? implementations)
     {
         this.IsCollection = type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;

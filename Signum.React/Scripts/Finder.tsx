@@ -27,7 +27,7 @@ import {
 
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
-import SearchControlLoaded from './SearchControl/SearchControlLoaded';
+import SearchControlLoaded, { SearchControlMobileOptions } from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
 import { ButtonBarElement } from "./TypeContext";
@@ -38,6 +38,8 @@ import { QueryString } from "./QueryString";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
 import { Search } from "history";
+import { parse } from "@fortawesome/fontawesome-svg-core";
+import { faUnderline } from "@fortawesome/free-solid-svg-icons";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -804,14 +806,14 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
   });
 }
 
-export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings): QueryRequest {
+export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings, avoidHiddenColumns?: boolean): QueryRequest {
 
   return {
     queryKey: fo.queryKey,
     groupResults: fo.groupResults,
     filters: toFilterRequests(fo.filterOptions),
     columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-      .concat((!fo.groupResults && qs?.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
+      .concat((!fo.groupResults && !avoidHiddenColumns && qs?.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
     orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
     pagination: fo.pagination,
     systemTime: fo.systemTime,
@@ -1871,6 +1873,7 @@ export interface QuerySettings {
   allowSystemTime?: boolean;
   defaultOrders?: OrderOption[];
   defaultFilters?: FilterOption[];
+  defaultAggregates?: ColumnOption[];
   hiddenColumns?: ColumnOption[];
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
@@ -1887,6 +1890,7 @@ export interface QuerySettings {
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   customGetPropsFromFilter?: (filters: FilterOptionParsed[]) => Promise<any>;
+  mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
 }
 
 
@@ -1954,6 +1958,13 @@ export function registerPropertyFormatter(pr: PropertyRoute | string/*For expres
   registeredPropertyFormatters[pr.toString()] = formater;
 }
 
+export function isMultiline(pr?: PropertyRoute) {
+  if (pr == null || pr.member == null)
+    return false;
+
+  return pr.member.isMultiline || pr.member.maxLength != null && pr.member.maxLength > 150;
+}
+
 export const formatRules: FormatRule[] = initFormatRules();
 
 function initFormatRules(): FormatRule[] {
@@ -1973,26 +1984,26 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => {
         if (qt.type.name == "string" && qt.propertyRoute != null) {
           var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
-          if (pr != null && pr.member != null && (pr.member.isMultiline || pr.member.maxLength != null && pr.member.maxLength > 150))
+          if (pr != null && pr.member != null && !pr.member.isPhone && !pr.member.isMail && isMultiline(pr))
             return true;
         }
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, true)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{cell.toString()}</span> : undefined, true)
     },
     {
       name: "SmallText",
       isApplicable: qt => {
         if (qt.type.name == "string" && qt.propertyRoute != null) {
           var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
-          if (pr != null && pr.member != null && (!pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength < 20))
+          if (pr != null && pr.member != null && !pr.member.isPhone && !pr.member.isMail && (!pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength < 20))
             return true;
         }
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{isLite(cell) ? getToString(cell) : cell?.toString()}</span> : undefined, false)
+      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell.toString()}</span> : undefined, false)
     },
     {
       name: "Password",
@@ -2075,7 +2086,7 @@ function initFormatRules(): FormatRule[] {
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>; 
+          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
@@ -2099,6 +2110,54 @@ function initFormatRules(): FormatRule[] {
       name: "Bool",
       isApplicable: qt => qt.filterType == "Boolean",
       formatter: col => new CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, false, "centered-cell")
+    },
+    {
+      name: "Phone",
+      isApplicable: qt => {
+        if (qt.type.name == "string" && qt.propertyRoute != null) {
+          var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+          if (pr != null && pr.member != null && pr.member.isPhone == true)
+            return true;
+        }
+
+        return false;
+      },
+      formatter: qt => new CellFormatter((cell: string | undefined) => {
+        if (cell == undefined)
+          return undefined;
+
+        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : undefined;
+
+        return (
+          <span className={multiLineClass}>
+            {cell.split(",").map((t, i) => <a key={i} href={`tel:${t.trim()}`}>{t.trim()}</a>).joinCommaHtml(",")}
+          </span>
+        );
+      }, false, "telephone-link-cell")
+    },
+    {
+      name: "Email",
+      isApplicable: qt => {
+        if (qt.type.name == "string" && qt.propertyRoute != null) {
+          var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+          if (pr != null && pr.member != null && pr.member.isMail == true)
+            return true;
+        }
+
+        return false;
+      },
+      formatter: qt => new CellFormatter((cell: string | undefined) => {
+        if (cell == undefined)
+          return undefined;
+
+        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : undefined;
+
+        return (
+          <span className={multiLineClass}>
+            <a href={`mailto:${cell}`}>{cell}</a>
+          </span>
+        );
+      }, false, "email-link-cell")
     },
   ];
 }
@@ -2129,9 +2188,10 @@ function initEntityFormatRules(): EntityFormatRule[] {
           onNavigated={sc?.handleOnNavigated}
           getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
           inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
-          <span title={EntityControlMessage.View.niceToString()}>
-            {EntityBaseController.viewIcon}
-          </span>
+          {sc?.state.isMobile == true && sc?.state.viewMode == "Mobile" ? undefined :
+            <span title={EntityControlMessage.View.niceToString()}>
+              {EntityBaseController.viewIcon}
+            </span>}
         </EntityLink>, "centered-cell")
     },
     {

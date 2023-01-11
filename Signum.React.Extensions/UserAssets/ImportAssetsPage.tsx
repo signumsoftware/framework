@@ -18,13 +18,6 @@ interface ImportAssetsPageProps extends RouteComponentProps<{}> {
 
 }
 
-interface ImportAssetsPageState {
-  file?: API.FileUpload;
-  model?: UserAssetPreviewModel;
-  success?: boolean;
-  fileVer: number;
-}
-
 export default function ImportAssetsPage(p: ImportAssetsPageProps) {
 
   const [file, setFile] = React.useState<API.FileUpload | undefined>(undefined);
@@ -101,7 +94,7 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
       }
     }
 
-    const tc = TypeContext.root(model!, { formSize: "ExtraSmall" });
+    const tc = TypeContext.root(model!, { formSize: "xs" });
 
     return (
       <div>
@@ -118,12 +111,12 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
 
           <tbody>
             {
-              mlistItemContext(tc.subCtx(a => a.lines))!.map(mlec => {
+              mlistItemContext(tc.subCtx(a => a.lines))!.map((mlec, i) => {
 
                 var ea = mlec.value;
 
                 return (
-                  <>
+                  <React.Fragment key={i}>
                     <tr key={ea.type!.cleanName}>
                       <td> {getTypeInfo(ea.type!.cleanName).niceName} </td>
                       <td> {ea.text}</td>
@@ -166,9 +159,8 @@ export default function ImportAssetsPage(p: ImportAssetsPageProps) {
                         />
                       </td>
                     </tr>}
-                  </>
+                  </React.Fragment>
                 );
-
               }
               )
             }

@@ -198,7 +198,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       columns: (fo.columnOptions ?? []).notNull().map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
-        summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }) : null,
+        summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.summaryToken.toString(), token: parsedTokens[c.summaryToken.toString()] }) : null,
         hiddenColumn: c.hiddenColumn
       }))),
       columnsMode: fo.columnOptionsMode,
@@ -238,9 +238,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       <FontAwesomeIcon icon={["far", "rectangle-list"]} />
       {p.searchControl.props.largeToolbarButtons == true && <>
         &nbsp;
-        {UserQueryEntity.nicePluralName()}
-        {currentUserQueryToStr && " - "}
-        {currentUserQueryToStr && <strong>{currentUserQueryToStr.etc(50)}</strong>}
+        <span className="d-none d-sm-inline">
+          {UserQueryEntity.nicePluralName()}
+          {currentUserQueryToStr && " - "}
+          {currentUserQueryToStr && <strong>{currentUserQueryToStr.etc(50)}</strong>}
+        </span>
+        <span className="d-inline d-sm-none">
+          {currentUserQueryToStr && <span>{currentUserQueryToStr.etc(20)}</span>}
+        </span>
       </>
       }
     </span>

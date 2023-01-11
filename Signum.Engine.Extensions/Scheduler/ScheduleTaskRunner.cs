@@ -268,9 +268,9 @@ public static class ScheduleTaskRunner
                 }
             }
 
+            var ctx = new ScheduledTaskContext(stl);
             try
             {
-                var ctx = new ScheduledTaskContext(stl);
                 RunningTasks.TryAdd(stl, ctx);
 
                 using (UserHolder.UserSession(user))
@@ -303,6 +303,7 @@ public static class ScheduleTaskRunner
                     {
                         stl.Exception = exLog;
                         stl.EndTime = Clock.Now;
+                        stl.Remarks = ctx.StringBuilder.ToString();
                         stl.Save();
 
                         tr.Commit();
@@ -313,7 +314,7 @@ public static class ScheduleTaskRunner
             }
             finally
             {
-                RunningTasks.TryRemove(stl, out var ctx);
+                RunningTasks.TryRemove(stl, out ctx);
                 SchedulerLogic.OnFinally?.Invoke(stl);
             }
 
@@ -346,34 +347,32 @@ public class ScheduledTaskPair
 
 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class SchedulerState
 {
-    public bool Running;
-    public int? InitialDelayMilliseconds;
-    public TimeSpan SchedulerMargin;
-    public DateTime? NextExecution;
-    public List<SchedulerItemState> Queue;
-    public string MachineName;
-    public string ApplicationName;
+    public required bool Running;
+    public required int? InitialDelayMilliseconds;
+    public required TimeSpan SchedulerMargin;
+    public required DateTime? NextExecution;
+    public required List<SchedulerItemState> Queue;
+    public required string MachineName;
+    public required string ApplicationName;
 
-    public List<SchedulerRunningTaskState> RunningTask;
+    public required List<SchedulerRunningTaskState> RunningTask;
 }
 
 public class SchedulerItemState
 {
-    public Lite<ScheduledTaskEntity> ScheduledTask;
-    public string Rule;
-    public DateTime NextDate;
+    public required Lite<ScheduledTaskEntity> ScheduledTask;
+    public required string Rule;
+    public required DateTime NextDate;
 }
 
 public class SchedulerRunningTaskState
 {
-    public Lite<ScheduledTaskLogEntity> SchedulerTaskLog;
-    public DateTime StartTime;
-    public string Remarks;
+    public required Lite<ScheduledTaskLogEntity> SchedulerTaskLog;
+    public required DateTime StartTime;
+    public required string Remarks;
 }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
 public class ScheduledTaskContext
 {

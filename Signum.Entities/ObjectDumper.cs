@@ -29,7 +29,7 @@ public static class ObjectDumper
 {
     public static HashSet<Type> IgnoreTypes = new HashSet<Type> { typeof(ExceptionEntity) };
 
-    public static string Dump(this object o, ShowIgnoredFields showIgnoredFields = ShowIgnoredFields.OnlyQueryables, bool showByteArrays = false)
+    public static string Dump(object o, ShowIgnoredFields showIgnoredFields = ShowIgnoredFields.OnlyQueryables, bool showByteArrays = false)
     {
         using (HeavyProfiler.LogNoStackTrace("Dump"))
         {

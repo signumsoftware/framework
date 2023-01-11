@@ -280,6 +280,12 @@ public enum WorkflowValidationMessage
     DecisionOption0IsDeclaredButNeverUsedInAConnection,
     [Description("Decision option name '{0}' is not declared in any activity")]
     DecisionOptionName0IsNotDeclaredInAnyActivity,
+    [Description("Boundary timer '{0}' of activity '{1}' can not have {2} because activity is not {3}")]
+    BoundaryTimer0OfActivity1CanNotHave2BecauseActivityIsNot3,
+    [Description("Boundary timer '{0}' of activity '{1}' should have {2} because activity is {3}")]
+    BoundaryTimer0OfActivity1ShouldHave2BecauseActivityIs3,
+    [Description("Boundary timer '{0}' of activity '{1}' has invalid {2}: '{3}'")]
+    BoundaryTimer0OfActivity1HasInvalid23,
 }
 
 public enum WorkflowActivityMonitorMessage

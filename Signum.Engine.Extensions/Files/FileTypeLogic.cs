@@ -61,7 +61,6 @@ public static class SuffixGenerators
     public static class UNSAFE
     {
         public static readonly Func<IFilePath, string> FileName = (IFilePath fp) => Path.GetFileName(fp.FileName)!;
-        public static readonly Func<IFilePath, string> CalculatedDirectory_FileName = (IFilePath fp) => Path.Combine(fp.CalculatedDirectory!, Path.GetFileName(fp.FileName)!);
 
         public static readonly Func<IFilePath, string> Year_FileName = (IFilePath fp) => Path.Combine(Clock.Now.Year.ToString(), Path.GetFileName(fp.FileName)!);
         public static readonly Func<IFilePath, string> Year_Month_FileName = (IFilePath fp) => Path.Combine(Clock.Now.Year.ToString(), Clock.Now.Month.ToString(), Path.GetFileName(fp.FileName)!);

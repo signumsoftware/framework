@@ -11,11 +11,6 @@ public static class ReflectionTools
 {
     public static bool? IsNullable(this FieldInfo fi)
     {
-        if (fi.Name.Contains("Resource"))
-        {
-
-        }
-
         var info = new NullabilityInfoContext().Create(fi);
 
         if (info.ReadState == NullabilityState.Unknown)
@@ -26,11 +21,6 @@ public static class ReflectionTools
 
     public static bool? IsNullable(this PropertyInfo pi)
     {
-        if (pi.Name.Contains("Resource"))
-        {
-
-        }
-
         var info = new NullabilityInfoContext().Create(pi);
 
         if (info.ReadState == NullabilityState.Unknown)
@@ -394,10 +384,10 @@ public static class ReflectionTools
         }
     }
 
-    public static T Parse<T>(string value)
+    public static T Parse<T>(string? value)
     {
         if (typeof(T) == typeof(string))
-            return (T)(object)value;
+            return (T)(object)value!;
 
         if (value == null || value == "")
             return (T)(object?)null!;
@@ -415,10 +405,10 @@ public static class ReflectionTools
         return (T)Convert.ChangeType(value, utype)!;
     }
 
-    public static object? Parse(string value, Type type)
+    public static object? Parse(string? value, Type type)
     {
         if (type == typeof(string))
-            return (object)value;
+            return (object?)value;
 
         if (value == null || value == "" || value == " ")
             return (object?)null;
@@ -904,5 +894,10 @@ public static class ReflectionTools
         DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         DateTime dateTimeUTC = dt.AddSeconds(secondsSince1970);
         return dateTimeUTC;
+    }
+
+    public static bool IsBackingField(this FieldInfo f)
+    {
+        return f.Name.StartsWith("<") && f.Name.EndsWith(">k__BackingField");
     }
 }

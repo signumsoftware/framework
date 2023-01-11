@@ -156,7 +156,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
   if (ctx.value.state != "Draft")
     ctx = ctx.subCtx({ readOnly: true });
 
-  const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
+  const ctxxs = ctx.subCtx({ formSize: "xs" });
   const ctxxs4 = ctx.subCtx({ labelColumns: 4 });
   const ctxmq = ctxxs.subCtx(a => a.mainQuery);
   const entity = ctx.value;

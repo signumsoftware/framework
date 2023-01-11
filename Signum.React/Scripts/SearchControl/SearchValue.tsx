@@ -112,7 +112,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     if (valueToken === undefined)
       return Promise.resolve(undefined);
 
-    if (p.initialValue != undefined) {
+    if (p.initialValue !== undefined) {
       if (Hooks.areEqual(deps ?? [], initialDeps.current ?? [])) {
         controller.value = p.initialValue;
         p.onInitialValueLoaded?.();
@@ -217,7 +217,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
   function bg(color: BsColor) {
 
     if (p.isLink)
-      return "btn-" + color + (color == "light" ? " text-dark" : "");
+      return "bg-" + color + (color == "light" ? " text-dark" : "");
     
     return "bg-" + color;
   }

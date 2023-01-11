@@ -23,7 +23,7 @@ import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation, CaseActivityMessage, CaseMessage, WorkflowScriptRetryStrategyEntity
+  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation, CaseActivityMessage, CaseMessage, WorkflowScriptRetryStrategyEntity, WorkflowEventType
 } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -457,8 +457,8 @@ export function workflowActivityMonitorUrl
   return `~/workflow/activityMonitor/${workflow.id}`;
 }
 
-export function workflowStartUrl(lite: Lite<WorkflowEntity>, entity?: Lite<Entity>) {
-  return "~/workflow/new/" + lite.id + "/CreateNew";
+export function workflowStartUrl(lite: Lite<WorkflowEntity>, strategy?: WorkflowMainEntityStrategy) {
+  return "~/workflow/new/" + lite.id + (strategy == null ? "" : ("/" + strategy));
 }
 
 function registerCustomContexts() {
@@ -664,9 +664,9 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
 
 }
 
-export const newCaseFindOptions: { [typeName: string]: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => FindOptions | null } = {};
-export function registerNewCaseFindOptions(typeName: string, getFindOptions: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => FindOptions | null) {
-  newCaseFindOptions[typeName] = getFindOptions; 
+export const customSelectByUser: { [typeName: string]: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => Promise<Lite<Entity> | undefined> } = {};
+export function registerCustomSelectByUser<T extends Entity>(type: Type<T>, selectEntity: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => Promise<Lite<T> | undefined>) {
+  customSelectByUser[type.typeName] = selectEntity; 
 }
 
 export function createNewCase(workflowId: number | string, mainEntityStrategy: WorkflowMainEntityStrategy): Promise<CaseEntityPack | undefined> {
@@ -682,8 +682,8 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
       }
 
       const typeName = wf.mainEntityType!.cleanName;
-      const fo = newCaseFindOptions[typeName]?.(toLite(wf), mainEntityStrategy) ?? { queryName: typeName };
-      return Finder.find(fo)
+      const promise = customSelectByUser[typeName]?.(toLite(wf), mainEntityStrategy) ?? Finder.find({ queryName: typeName });
+      return promise
         .then(lite => {
           if (!lite)
             return Promise.resolve(undefined);
@@ -910,8 +910,9 @@ export interface CaseActivityStats {
   caseActivity: Lite<CaseActivityEntity>;
   previousActivity: Lite<CaseActivityEntity>;
   workflowActivity: Lite<WorkflowActivityEntity>;
-  workflowActivityType: WorkflowActivityType;
-  subWorkflow: Lite<WorkflowEntity>;
+  workflowActivityType?: WorkflowActivityType;
+  workflowEventType?: WorkflowEventType;
+  subWorkflow?: Lite<WorkflowEntity>;
   notifications: number;
   startDate: string;
   doneDate?: string;
