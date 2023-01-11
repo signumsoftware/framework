@@ -968,10 +968,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const rt = this.state.resultTable;
 
+    let value = cm.rowIndex == undefined || rt == null || token == null ? (op == "IsIn" ? [] : undefined) : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)]
+
+    if (token?.filterType == "Embedded" && value != null) {
+      value = null;
+      op = "DistinctTo";
+    }
+
     fo.filterOptions.push({
       token: newToken!,
       operation: op,
-      value: cm.rowIndex == undefined || rt == null || token == null ? (op == "IsIn" ? [] : undefined) : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
+      value: value,
       frozen: false
     });
 
@@ -1090,7 +1097,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fo = this.props.findOptions;
     function isColumnFilterable(columnIndex: number) {
       var token = fo.columnOptions[columnIndex].token;
-      return token && token.filterType != "Embedded" && token.filterType != undefined && token.format != "Password";
+      return token && token.filterType != undefined && token.format != "Password";
     }
 
     function isColumnGroupable(columnIndex: number) {
