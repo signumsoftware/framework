@@ -4,7 +4,7 @@ import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo, EnumType } from './Reflection';
-import { TypeContext } from './TypeContext';
+import { EntityFrame, TypeContext } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
@@ -725,6 +725,16 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
     return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
   return API.fetchEntityPackEntity(entity as Entity).then(ep => ({ ...ep, entity: cloneEntity(entity)}));
+}
+
+export async function reloadFrameIfNecessary(frame: EntityFrame) {
+
+  var entity = frame.pack.entity;
+  if (isEntity(entity) && entity.id && entity.ticks != null) {
+    var newPack = await API.fetchEntityPack(toLite(entity));
+    if (newPack.entity.ticks != entity.ticks)
+      frame.onReload(newPack);
+  }
 }
 
 function cloneEntity(obj: any) {
