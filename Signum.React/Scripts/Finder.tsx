@@ -1420,7 +1420,7 @@ export function inDBList<R>(entity: Entity | Lite<Entity>, token: QueryTokenStri
   var fo: FindOptions = {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
-    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    pagination: { mode: "All" },
     columnOptions: [{ token: token }],
     columnOptionsMode: "ReplaceAll",
   };
