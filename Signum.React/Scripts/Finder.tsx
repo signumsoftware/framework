@@ -806,14 +806,14 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
   });
 }
 
-export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings): QueryRequest {
+export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings, avoidHiddenColumns?: boolean): QueryRequest {
 
   return {
     queryKey: fo.queryKey,
     groupResults: fo.groupResults,
     filters: toFilterRequests(fo.filterOptions),
     columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-      .concat((!fo.groupResults && qs?.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
+      .concat((!fo.groupResults && !avoidHiddenColumns && qs?.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
     orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
     pagination: fo.pagination,
     systemTime: fo.systemTime,
@@ -1420,7 +1420,7 @@ export function inDBList<R>(entity: Entity | Lite<Entity>, token: QueryTokenStri
   var fo: FindOptions = {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
-    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    pagination: { mode: "All" },
     columnOptions: [{ token: token }],
     columnOptionsMode: "ReplaceAll",
   };
@@ -1873,6 +1873,7 @@ export interface QuerySettings {
   allowSystemTime?: boolean;
   defaultOrders?: OrderOption[];
   defaultFilters?: FilterOption[];
+  defaultAggregates?: ColumnOption[];
   hiddenColumns?: ColumnOption[];
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;

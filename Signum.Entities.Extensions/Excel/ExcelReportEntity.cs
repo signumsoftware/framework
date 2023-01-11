@@ -73,15 +73,6 @@ public enum ImportFromExcelMessage
     [Description("Operation {0} is no supported")]
     Operation0IsNotSupported,
 
-    [Description("{0}/{1} is not supported in: ")]
-    _01IsNotSupported,
-
-    [Description("Some Filters are incompatible with Importing from Excel")]
-    SomeFiltersAreIncompatibleWithImportingFromExcel,
-
-    [Description("Simple 'Property = Value' filters can be used to assign constant values, anything else is not allowed:")]
-    SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed,
-
     [Description("Many filters try to assign the same property {0} with different values {1}")]
     ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1,
 
@@ -105,7 +96,16 @@ public enum ImportFromExcelMessage
     ErrorsIn0Rows_N,
 
     [Description("No {0} found in this query with {1} equals to {2}")]
-    No0FoundInThisQueryWith1EqualsTo2
+    No0FoundInThisQueryWith1EqualsTo2,
+
+    [Description("Unable to assign more than one unrelated collection: {0}")]
+    UnableToAssignMoreThanOneUnrelatedCollections0,
+
+    [Description("Duplicate non-consecutive {0} found: {1}")]
+    DuplicatedNonConsecutive0Found1,
+
+    [Description("Columns do not match.\nExcel columns: {0}\nQuery columns: {1}")]
+    ColumnsDoNotMatchExcelColumns0QueryColumns1
 }
 
 

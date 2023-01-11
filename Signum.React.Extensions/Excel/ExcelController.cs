@@ -55,11 +55,13 @@ public class ExcelController : ControllerBase
     }
 
     [HttpPost("api/excel/validateForImport")]
-    public void ValidateForImport([Required, FromBody] QueryRequestTS queryRequest)
+    public QueryTokenTS? ValidateForImport([Required, FromBody] QueryRequestTS queryRequest)
     {
         ExcelPermission.ImportFromExcel.AssertAuthorized();
 
-        ImporterFromExcel.ParseQueryRequest(queryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
+        var result = ImporterFromExcel.ParseQueryRequest(queryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
+
+        return result.ElementTopToken == null ? null : new QueryTokenTS(result.ElementTopToken, true);
     }
 
     [HttpPost("api/excel/import")]

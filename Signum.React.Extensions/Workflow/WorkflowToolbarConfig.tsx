@@ -32,8 +32,6 @@ export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity>
     if (strategy == null)
       return null;
 
-    debugger;
-
     return WorkflowClient.workflowStartUrl(element.content!, strategy);
   }
 

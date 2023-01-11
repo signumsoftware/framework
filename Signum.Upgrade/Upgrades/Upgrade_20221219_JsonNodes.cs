@@ -21,10 +21,10 @@ class Upgrade_20221219_JsonNodes : CodeUpgradeBase
             file.InsertAfterFirstLine(a => a.Contains("@{"),
                 "   string GetWebpackPath(string jsonContent, string moduleName)\n"
               + "   {\n"
-              + "       var jsonObj = (JsonObject)JsonNode.Parse(jsonContent);\n"
-              + "       var mainObj = (JsonObject)jsonObj[moduleName];\n"
-              + "       ((JsonValue)mainObj[\"js\"]).TryGetValue<string>(out var result);\n"
-              + "       return result;\n"
+              + "       var jsonObj = (JsonObject)JsonNode.Parse(jsonContent)!;\n"
+              + "       var mainObj = (JsonObject)jsonObj[moduleName]!;\n"
+              + "       ((JsonValue)mainObj[\"js\"]!).TryGetValue<string>(out var result);\n"
+              + "       return result!;\n"
               + "   }\n"
               );
             file.Replace("var main = (string)JObject.Parse(json).Property(\"main\")!.Value[\"js\"]!;", "string main = GetWebpackPath(json, \"main\");");

@@ -160,13 +160,20 @@ public static class WordTemplateLogic
 
     private static void WordTemplateLogic_Retrieved(WordTemplateEntity template, PostRetrievingContext ctx)
     {
+        ParseData(template);
+    }
+
+    public static WordTemplateEntity ParseData(this WordTemplateEntity template)
+    {
         object? queryName = template.Query.ToQueryNameCatch();
-        if (queryName == null)
-            return;
+        if (queryName != null)
+        {
+            QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 
-        QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
+            template.ParseData(description);
+        }
 
-        template.ParseData(description);
+        return template;
     }
 
     public static Dictionary<Type, WordTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, WordTemplateVisibleOn>()

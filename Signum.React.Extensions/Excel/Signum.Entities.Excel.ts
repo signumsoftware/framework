@@ -11,6 +11,13 @@ import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const CollectionElementEmbedded = new Type<CollectionElementEmbedded>("CollectionElementEmbedded");
+export interface CollectionElementEmbedded extends Entities.EmbeddedEntity {
+  Type: "CollectionElementEmbedded";
+  collectionElement: string;
+  matchByColumn: string | null;
+}
+
 export const ExcelAttachmentEntity = new Type<ExcelAttachmentEntity>("ExcelAttachment");
 export interface ExcelAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
   Type: "ExcelAttachment";
@@ -68,6 +75,7 @@ export interface ImportExcelModel extends Entities.ModelEntity {
   identityInsert: boolean;
   mode: ImportExcelMode;
   matchByColumn: string | null;
+  collections: Entities.MList<CollectionElementEmbedded>;
 }
 
 export module ImportFromExcelMessage {
@@ -80,9 +88,6 @@ export module ImportFromExcelMessage {
   export const ThisQueryHasMultipleImplementations0 = new MessageKey("ImportFromExcelMessage", "ThisQueryHasMultipleImplementations0");
   export const SomeColumnsAreIncompatibleWithImportingFromExcel = new MessageKey("ImportFromExcelMessage", "SomeColumnsAreIncompatibleWithImportingFromExcel");
   export const Operation0IsNotSupported = new MessageKey("ImportFromExcelMessage", "Operation0IsNotSupported");
-  export const _01IsNotSupported = new MessageKey("ImportFromExcelMessage", "_01IsNotSupported");
-  export const SomeFiltersAreIncompatibleWithImportingFromExcel = new MessageKey("ImportFromExcelMessage", "SomeFiltersAreIncompatibleWithImportingFromExcel");
-  export const SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed = new MessageKey("ImportFromExcelMessage", "SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed");
   export const ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1 = new MessageKey("ImportFromExcelMessage", "ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1");
   export const _0IsNotSupported = new MessageKey("ImportFromExcelMessage", "_0IsNotSupported");
   export const _01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently = new MessageKey("ImportFromExcelMessage", "_01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently");
@@ -91,6 +96,9 @@ export module ImportFromExcelMessage {
   export const _01IsIncompatible = new MessageKey("ImportFromExcelMessage", "_01IsIncompatible");
   export const ErrorsIn0Rows_N = new MessageKey("ImportFromExcelMessage", "ErrorsIn0Rows_N");
   export const No0FoundInThisQueryWith1EqualsTo2 = new MessageKey("ImportFromExcelMessage", "No0FoundInThisQueryWith1EqualsTo2");
+  export const UnableToAssignMoreThanOneUnrelatedCollections0 = new MessageKey("ImportFromExcelMessage", "UnableToAssignMoreThanOneUnrelatedCollections0");
+  export const DuplicatedNonConsecutive0Found1 = new MessageKey("ImportFromExcelMessage", "DuplicatedNonConsecutive0Found1");
+  export const ColumnsDoNotMatchExcelColumns0QueryColumns1 = new MessageKey("ImportFromExcelMessage", "ColumnsDoNotMatchExcelColumns0QueryColumns1");
 }
 
 
