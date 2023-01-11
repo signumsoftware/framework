@@ -37,7 +37,7 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
     );
   };
 
-  let ctx = p.ctx.subCtx({ formGroupStyle: "Basic", readOnly: p.ctx.value.state != "Created" ? true : undefined });
+  let ctx = p.ctx.subCtx({ formGroupStyle: "Basic", readOnly: p.ctx.value.state == "Created" || p.ctx.value.state == "Draft" ? undefined  : true });
 
   return (
     <Tabs id="emailTabs">
@@ -63,11 +63,9 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
               <EntityLine ctx={ctx.subCtx(f => f.exception)} hideIfNull />
             </div>
  
-            <div className="col-sm-2">
+            <div className="col-sm-4">
               <EntityLine ctx={ctx.subCtx(f => f.target, { labelColumns: 2 })} />
               <EntityLine ctx={ctx.subCtx(f => f.template)} />
-            </div>
-            <div className="col-sm-2">
               <EntityLine ctx={ctx.subCtx(f => f.package)} hideIfNull />
             </div>
           </div>

@@ -494,6 +494,9 @@ public static class DashboardLogic
 
     public static void RegisterPartsTypeCondition(TypeConditionSymbol typeCondition)
     {
+        TypeConditionLogic.Register<TokenEquivalenceGroupEntity>(typeCondition,
+            teg => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.TokenEquivalencesGroups.Contains(teg)));
+
         TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
              cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(cscp)));
 
@@ -504,16 +507,16 @@ public static class DashboardLogic
              ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
 
         TypeConditionLogic.Register<CombinedUserChartPartEntity>(typeCondition,
-       ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
+            ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
 
         TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
             uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
 
         TypeConditionLogic.Register<ImagePartEntity>(typeCondition,
-         uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
 
         TypeConditionLogic.Register<SeparatorPartEntity>(typeCondition,
-         uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
     }
 
     public static List<CachedQueryDefinition> GetCachedQueryDefinitions(DashboardEntity db)

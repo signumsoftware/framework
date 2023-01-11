@@ -101,7 +101,7 @@ function getSaveOperations(type: PseudoType, mode: ImportExcelMode | null) {
 
 export async function onImportFromExcel(sc: SearchControlLoaded) {
 
-  var qr = sc.getQueryRequest();
+  var qr = sc.getQueryRequest(true);
   qr.pagination = { mode: "All" };
 
   var topToken = await ExcelClient.API.validateForImport(qr);

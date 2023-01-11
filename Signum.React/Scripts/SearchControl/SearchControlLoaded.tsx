@@ -231,11 +231,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return p.showHeader == true && (p.showFilterButton || p.showFilters);
   }
 
-  getQueryRequest(): QueryRequest {
+  getQueryRequest(avoidHiddenColumns?: boolean): QueryRequest {
     const fo = this.props.findOptions;
     const qs = this.props.querySettings;
 
-    return Finder.getQueryRequest(fo, qs);
+    return Finder.getQueryRequest(fo, qs, avoidHiddenColumns);
   }
 
   getSummaryQueryRequest(): QueryRequest | null {
