@@ -283,11 +283,11 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
     return Finder.getQueryDescription(fo.queryName)
       .then(qd => Finder.parseFindOptions({
-        ...fo,
         orderOptions: [
           { token: "Entity.ToString.Length", orderType: "Ascending" },
           { token: "Entity.ToString", orderType: "Ascending" },
         ],
+        ...fo,
         filterOptions: FindOptionsAutocompleteConfig.filtersWithSubStr(fo, qd, qs, subStr),
       }, qd, true))
       .then(fop => this.abortableRequest.getData(Finder.getQueryRequest(fop)))
