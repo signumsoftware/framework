@@ -3,15 +3,11 @@ using Signum.Entities.Authorization;
 using Signum.Engine.Files;
 using Signum.Engine.Mailing;
 using Signum.Engine.Authorization;
-using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Entities.WhatsNew;
 using Signum.Engine.WhatsNew;
 using Signum.React.Filters;
-using Signum.Entities.Files;
 using System.ComponentModel.DataAnnotations;
-using Signum.React.Facades;
-using Signum.Entities;
 
 namespace Signum.React.WhatsNew;
 
@@ -22,7 +18,7 @@ public class WhatsNewController : ControllerBase
     {
         return new MyNewsCountResult
         {
-            NumWhatsNews = Database.Query<WhatsNewEntity>().Count(w => !w.IsRead())
+            NumWhatsNews = WhatsNewLogic.GetWhatNews().Count(t => !t.isRead)
         };
     }
 
@@ -34,11 +30,11 @@ public class WhatsNewController : ControllerBase
     [HttpGet("api/whatsnew/myNews")]
     public List<WhatsNewShort> MyNews()
     {
-        return Database.Query<WhatsNewEntity>()
-            .Where(w => !w.IsRead())
-            .ToList()
-            .Select(wn =>
+        return WhatsNewLogic.GetWhatNews()
+            .Where(t => !t.isRead)
+            .Select(t =>
             {
+                var wn = t.wn;
                 var cm = wn.GetCurrentMessage();
                 return new WhatsNewShort
                 {
@@ -65,10 +61,10 @@ public class WhatsNewController : ControllerBase
     [HttpGet("api/whatsnew/all")]
     public List<WhatsNewFull> GetAllNews()
     {
-        return Database.Query<WhatsNewEntity>()
-        .ToList()
-        .Select(wn =>
+        return WhatsNewLogic.GetWhatNews()
+        .Select(t =>
         {
+            var wn = t.wn;
             var cm = wn.GetCurrentMessage();
             return new WhatsNewFull
             {
@@ -79,7 +75,7 @@ public class WhatsNewController : ControllerBase
                 Attachments = wn.Attachment.Count(),
                 PreviewPicture = (wn.PreviewPicture != null) ? true : false,
                 Status = wn.Status.ToString(),
-                Read = wn.IsRead(),
+                Read = t.isRead,
             };
         })
         .ToList();
@@ -117,7 +113,10 @@ public class WhatsNewController : ControllerBase
     [HttpGet("api/whatsnew/{id}")]
     public WhatsNewFull SpecificNews(int id)
     {
-        var wne = Database.Retrieve<WhatsNewEntity>(id);
+        var wne = WhatsNewLogic.GetWhatNew(id);
+        if (wne == null)
+            throw new ApplicationException(WhatsNewMessage.ThisNewIsNoLongerAvailable.NiceToString());
+
         if (!wne.IsRead())
         {
             new WhatsNewLogEntity()
