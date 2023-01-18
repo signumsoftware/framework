@@ -40,6 +40,7 @@ export interface ValueLineProps extends LineBaseProps {
   calendarProps?: Partial<CalendarProps>;
   calendarAlignEnd?: boolean;
   initiallyShowOnly?: "Date" | "Time";
+  valueRef?: React.Ref<HTMLElement>;
 }
 
 export interface OptionItem {
@@ -85,6 +86,16 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
       }
 
     }, []);
+  }
+
+  setRefs = (node: HTMLElement | null) => {
+    if (this.props?.valueRef) {
+      if (typeof this.props.valueRef == "function")
+        this.props.valueRef(node);
+      else
+        (this.props.valueRef as React.MutableRefObject<HTMLElement | null>).current = node;
+    }
+    (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
   }
 
   static autoFixString(str: string, autoTrim: boolean): string {
@@ -325,7 +336,7 @@ function internalDropDownList(vl: ValueLineController) {
           <FormControlReadonly htmlAttributes={{
             ...vl.props.valueHtmlAttributes,
             ...({ 'data-value': s.ctx.value } as any) /*Testing*/
-          }} ctx={s.ctx} innerRef={vl.inputElement}>
+          }} ctx={s.ctx} innerRef={vl.setRefs}>
             {label}
           </FormControlReadonly>)}
       </FormGroup>
@@ -413,7 +424,7 @@ function internalComboBoxText(vl: ValueLineController) {
           <FormControlReadonly htmlAttributes={{
             ...vl.props.valueHtmlAttributes,
             ...({ 'data-value': s.ctx.value } as any) /*Testing*/
-          }} ctx={s.ctx} innerRef={vl.inputElement}>
+          }} ctx={s.ctx} innerRef={vl.setRefs}>
             {label}
           </FormControlReadonly>)}
       </FormGroup>
@@ -458,7 +469,7 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {vl.withItemGroup(<FormControlReadonly htmlAttributes={htmlAtts} ctx={s.ctx} innerRef={vl.inputElement}>
+        {vl.withItemGroup(<FormControlReadonly htmlAttributes={htmlAtts} ctx={s.ctx} innerRef={vl.setRefs}>
           {s.ctx.value}
         </FormControlReadonly>)}
       </FormGroup>
@@ -494,7 +505,7 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
           onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
           placeholder={vl.getPlaceholder()}
           list={s.datalist ? s.ctx.getUniqueId("dataList") : undefined}
-          ref={vl.inputElement as React.RefObject<HTMLInputElement>} />)
+          ref={vl.setRefs} />)
       }
       {s.datalist &&
         <datalist id={s.ctx.getUniqueId("dataList")}>
@@ -538,14 +549,26 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
     };
   }
 
+  const handleOnFocus = (e: React.FocusEvent<any>) => {
+    console.log("onFocus handler called");
+    if (htmlAtts?.onFocus) {
+        console.log("passed onFocus called");
+
+        htmlAtts?.onFocus(e);
+    }
+  }
+    
+
+
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           onChange={handleTextOnChange}
           onBlur={handleBlur ?? htmlAtts?.onBlur}
+          onFocus={handleOnFocus}
           placeholder={vl.getPlaceholder()}
-          innerRef={vl.inputElement as any} />
+          innerRef={vl.setRefs} />
       )}
     </FormGroup>
   );
@@ -568,7 +591,7 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
-          <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={vl.inputElement}>
+          <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={vl.setRefs}>
             {s.ctx.value == null ? "" : numberFormat.format(s.ctx.value)}
           </FormControlReadonly>)}
       </FormGroup>
@@ -606,7 +629,7 @@ function numericTextBox(vl: ValueLineController, validateKey: (e: React.Keyboard
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
           validateKey={validateKey}
           format={numberFormat}
-          innerRef={vl.inputElement as React.RefObject<HTMLInputElement>}
+          innerRef={vl.setRefs}
         />
       )}
     </FormGroup>
@@ -741,7 +764,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
+        {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.setRefs}>
           {m && toFormatWithFixes(m, luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
@@ -827,7 +850,7 @@ ValueLineRenderers.renderers.set("DateTimeSplitted", (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.inputElement}>
+        {vl.withItemGroup(<FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} className={addClass(vl.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={vl.setRefs}>
           {dt && toFormatWithFixes(dt, luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
@@ -998,7 +1021,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {vl.withItemGroup(
-          <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.props.valueHtmlAttributes, "numeric")} innerRef={vl.inputElement}>
+          <FormControlReadonly htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.props.valueHtmlAttributes, "numeric")} innerRef={vl.setRefs}>
             {timeToString(s.ctx.value, s.format)}
           </FormControlReadonly>
         )}
@@ -1029,7 +1052,7 @@ function timeTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEve
           validateKey={validateKey}
           formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
           durationFormat={durationFormat}
-          innerRef={vl.inputElement as React.RefObject<HTMLInputElement>} />
+          innerRef={vl.setRefs} />
       )}
     </FormGroup>
   );
@@ -1042,7 +1065,7 @@ export interface TimeTextBoxProps {
   formControlClass?: string;
   durationFormat?: string;
   htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
-  innerRef?: React.RefObject<HTMLInputElement>;
+  innerRef?: React.Ref<HTMLInputElement>;
 }
 
 export function TimeTextBox(p: TimeTextBoxProps) {

@@ -26,6 +26,7 @@ export interface EntityComboProps extends EntityBaseProps {
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
+  overrideSelectedLite?: () => Lite<Entity> | null;
 }
 
 export class EntityComboController extends EntityBaseController<EntityComboProps> {
@@ -133,6 +134,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
             liteToString={p.liteToString}
             nullPlaceHolder={p.nullPlaceHolder}
             onRenderItem={p.onRenderItem}
+            overrideSelectedLite={p.overrideSelectedLite}
           />
           {EntityBaseController.hasChildrens(buttons) ? buttons : undefined}
         </div>
@@ -156,6 +158,7 @@ export interface EntityComboSelectProps {
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
+  overrideSelectedLite?: () => Lite<Entity> | null
 }
 
 
@@ -289,8 +292,12 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
 
   function getLite() {
     const v = p.ctx.value;
-    if (v == undefined)
+    if (v == undefined) {
+      if (p.overrideSelectedLite) {
+        return (p.overrideSelectedLite() ?? undefined);
+      }
       return undefined;
+    }
 
     if (isEntity(v))
       return toLite(v, v.isNew, p.liteToString && p.liteToString(v));

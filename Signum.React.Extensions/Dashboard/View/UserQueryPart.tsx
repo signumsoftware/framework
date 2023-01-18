@@ -128,7 +128,7 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
         searchOnLoad={part.userQuery.refreshMode == "Auto"}
         customRequest={cachedQuery && ((req, fop) => cachedQuery!.then(cq => executeQueryCached(req, fop, cq)))}
         onSearch={(fo, dataChange) => dataChange && onDataChanged()}
-        
+        maxResultsHeight={part.allowMaxHeight ? "none" : undefined}        
       />
     </FullscreenComponent>
   );
