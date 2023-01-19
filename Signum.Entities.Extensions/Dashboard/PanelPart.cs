@@ -156,6 +156,8 @@ public class UserQueryPartEntity : Entity, IPartEntity
     public bool ShowFooter { get; set; }
 
     public bool CreateNew { get; set; } = false;
+    
+    public bool AllowMaxHeight { get; set; } = false;
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => UserQuery + "");
@@ -175,7 +177,7 @@ public class UserQueryPartEntity : Entity, IPartEntity
             ShowFooter = this.ShowFooter,
             CreateNew = this.CreateNew,
             IsQueryCached = this.IsQueryCached,
-
+            AllowMaxHeight = this.AllowMaxHeight,
         };
     }
 
@@ -188,7 +190,8 @@ public class UserQueryPartEntity : Entity, IPartEntity
             AggregateFromSummaryHeader ? new XAttribute(nameof(AggregateFromSummaryHeader), AggregateFromSummaryHeader) : null,
             ShowFooter ? new XAttribute(nameof(ShowFooter), ShowFooter) : null,
             CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null,
-            IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null
+            IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null,
+            AllowMaxHeight ? new XAttribute(nameof(AllowMaxHeight), AllowMaxHeight) : null
             );
     }
 
@@ -201,6 +204,7 @@ public class UserQueryPartEntity : Entity, IPartEntity
         AggregateFromSummaryHeader = element.Attribute(nameof(AggregateFromSummaryHeader))?.Value.ToBool() ?? false;
         CreateNew = element.Attribute(nameof(CreateNew))?.Value.ToBool() ?? false;
         IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
+        AllowMaxHeight = element.Attribute(nameof(AllowMaxHeight))?.Value.ToBool() ?? false;
     }
 }
 
