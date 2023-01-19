@@ -22,8 +22,8 @@ export default function LoginDropdown(p: {
 
   if (!user)
     return (
-      <LinkContainer to="~/auth/login" className="sf-login">
-        <Nav.Link>{LoginAuthMessage.Login.niceToString()}</Nav.Link>
+      <LinkContainer to="~/auth/login" className="sf-login">        
+        <Nav.Link><i className="sf-login-custom-icon"></i><span>{LoginAuthMessage.Login.niceToString()}</span></Nav.Link>
       </LinkContainer>
     );
 
@@ -43,7 +43,7 @@ export default function LoginDropdown(p: {
   var extraButtons = p.extraMenuItems && p.extraMenuItems(user);
 
   return (
-    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center"><SmallProfilePhoto user={toLite(user)} /> &nbsp;{p.renderName ? p.renderName(user) : user.userName!}</span>} align="end">
+    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center"><i className="sf-login-custom-icon"></i><SmallProfilePhoto user={toLite(user)} /> &nbsp;{p.renderName ? p.renderName(user) : user.userName!}</span>} align="end">
       {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-edit" fixedWidth className="me-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
       {cpv && <LinkContainer to="~/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth className="me-2" /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
