@@ -2,33 +2,33 @@
 # yarn lockfile v1
 
 
-"@azure/msal-browser@2.29.0":
-  version "2.29.0"
-  resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.29.0.tgz#07c8a549d67d53d69ca5b5e1b3f42c4ddbf6c0f6"
-  integrity sha512-ezrB0qL1WsJSNgvLmAN5vKr/4pH28UYLe8JUZeHzB6Z408JU8qYXXGnHAhDPzpDg0g91eG05IdIVrLwxk/i15g==
+"@azure/msal-browser@2.32.2":
+  version "2.32.2"
+  resolved "https://registry.yarnpkg.com/@azure/msal-browser/-/msal-browser-2.32.2.tgz#b2284773c95656ed52710e82aedd7fe3e86fa38d"
+  integrity sha512-1YqGzXtPG3QrZPFBKaMWr2WQdukDj+PelqUCv351+p+hlw/AhdRrb8haY73/iqkhT6Cdrbnh7sL4gikVsF4O1g==
   dependencies:
-    "@azure/msal-common" "^7.5.0"
+    "@azure/msal-common" "^9.0.2"
 
-"@azure/msal-common@^7.5.0":
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-7.6.0.tgz#b52e97ef540275f72611cff57937dfa0b34cdcca"
-  integrity sha512-XqfbglUTVLdkHQ8F9UQJtKseRr3sSnr9ysboxtoswvaMVaEfvyLtMoHv9XdKUfOc0qKGzNgRFd9yRjIWVepl6Q==
+"@azure/msal-common@^9.0.2":
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-9.1.1.tgz#906d27905c956fe91bd8f31855fc624359098d83"
+  integrity sha512-we9xR8lvu47fF0h+J8KyXoRy9+G/fPzm3QEa2TrdR3jaVS3LKAyE2qyMuUkNdbVkvzl8Zr9f7l+IUSP22HeqXw==
 
-"@microsoft/signalr@6.0.9":
-  version "6.0.9"
-  resolved "https://registry.yarnpkg.com/@microsoft/signalr/-/signalr-6.0.9.tgz#50f0960e2858e2c8b1656dd0810af12639302fa9"
-  integrity sha512-DGVYe3ycT2PfRU7m3xCbv1HjhvClKl2VB1HyFlvf8SqBGXz3Cx+oalNWGYrGIgADA6Q2xaB4GaDmDdprTa2U0Q==
+"@microsoft/signalr@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@microsoft/signalr/-/signalr-7.0.2.tgz#00cd9444de903602ddbea1f9f629995a1fda31ae"
+  integrity sha512-U+o33K2m6nnMojZzBrjrApKgYfiQ0A0t4I2F5oFJObgfzRSDS9v0YoYgkmva5nbPftUp3YcR5XmH0S/1+BZT6Q==
   dependencies:
     abort-controller "^3.0.0"
-    eventsource "^1.0.7"
-    fetch-cookie "^0.11.0"
+    eventsource "^2.0.2"
+    fetch-cookie "^2.0.3"
     node-fetch "^2.6.7"
     ws "^7.4.5"
 
-"@types/codemirror@5.60.5":
-  version "5.60.5"
-  resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-5.60.5.tgz#5b989a3b4bbe657458cf372c92b6bfda6061a2b7"
-  integrity sha512-TiECZmm8St5YxjFUp64LK0c8WU5bxMDt9YaAek1UqUb9swrSCoJhh92fWu1p3mTEqlHjhB5sY7OFBhWroJXZVg==
+"@types/codemirror@5.60.6":
+  version "5.60.6"
+  resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-5.60.6.tgz#0511ed51d087ad2a2eedb6111fc74e739c4549f6"
+  integrity sha512-JIDPSvkYRlcv/2F0erqD+de2ni/Mz6FJMEGb0vwF6ByQOcHIKfiEfwrO4d6dSRwYeHyNUMpGjev0PyjX2M0XWw==
   dependencies:
     "@types/tern" "*"
 
@@ -37,10 +37,10 @@
   resolved "https://registry.yarnpkg.com/@types/diff/-/diff-5.0.2.tgz#dd565e0086ccf8bc6522c6ebafd8a3125c91c12b"
   integrity sha512-uw8eYMIReOwstQ0QKF0sICefSy8cNO/v7gOTiIy9SbwuHyEecJUm7qlgueOO5S1udZ5I/irVydHVwMchgzbKTg==
 
-"@types/draft-js@0.11.9":
-  version "0.11.9"
-  resolved "https://registry.yarnpkg.com/@types/draft-js/-/draft-js-0.11.9.tgz#b7535fb2511e8b8c8e33ffac2199a5f2988f4fd5"
-  integrity sha512-cQJBZjjIlGaPA1tOY+wGz2KhlPtAAZOIXpUvGPxPRw5uzZ2tcj8m6Yu1QDV9YgP36+cqE3cUvgkARBzgUiuI/Q==
+"@types/draft-js@0.11.10":
+  version "0.11.10"
+  resolved "https://registry.yarnpkg.com/@types/draft-js/-/draft-js-0.11.10.tgz#46cf41e142b4b572467f7a78269a630a77e1f19c"
+  integrity sha512-o/DST8x0wNerwhRiaE577UHFIXb6HCywaZOZfj9TF2vU3CONvsCGoQmdOsKqERdXp+3ZNlSvFUH0B8lEEYOT4A==
   dependencies:
     "@types/react" "*"
     immutable "~3.7.4"
@@ -61,7 +61,7 @@
   integrity sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==
 
 "@types/react@*", "@types/react@file:../Signum.React/node_modules/@types/react":
-  version "18.0.21"
+  version "18.0.27"
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -132,10 +132,10 @@ event-target-shim@^5.0.0:
   resolved "https://registry.yarnpkg.com/event-target-shim/-/event-target-shim-5.0.1.tgz#5d4d3ebdf9583d63a5333ce2deb7480ab2b05789"
   integrity sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==
 
-eventsource@^1.0.7:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/eventsource/-/eventsource-1.1.2.tgz#bc75ae1c60209e7cb1541231980460343eaea7c2"
-  integrity sha512-xAH3zWhgO2/3KIniEKYPr8plNSzlGINOUqYj0m0u7AB81iRw8b/3E73W6AuU+6klLbaSFmZnaETQ2lXPfAydrA==
+eventsource@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/eventsource/-/eventsource-2.0.2.tgz#76dfcc02930fb2ff339520b6d290da573a9e8508"
+  integrity sha512-IzUmBGPR3+oUG9dUeXynyNmf91/3zUSJg1lCktzKw47OXuhco54U3r9B7O4XX+Rb1Itm9OZ2b0RkTs10bICOxA==
 
 fbjs-css-vars@^1.0.0:
   version "1.0.2"
@@ -156,12 +156,13 @@ fbjs@^2.0.0:
     setimmediate "^1.0.5"
     ua-parser-js "^0.7.18"
 
-fetch-cookie@^0.11.0:
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/fetch-cookie/-/fetch-cookie-0.11.0.tgz#e046d2abadd0ded5804ce7e2cae06d4331c15407"
-  integrity sha512-BQm7iZLFhMWFy5CZ/162sAGjBfdNWb7a8LEqqnzsHFhxT/X/SVj/z2t2nu3aJvjlbQkrAlTUApplPRjWyH4mhA==
+fetch-cookie@^2.0.3:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/fetch-cookie/-/fetch-cookie-2.1.0.tgz#6e127909912f9e527533b045aab555c06b33801b"
+  integrity sha512-39+cZRbWfbibmj22R2Jy6dmTbAWC+oqun1f1FzQaNurkPDUP4C38jpeZbiXCR88RKRVDp8UcDrbFXkNhN+NjYg==
   dependencies:
-    tough-cookie "^2.3.3 || ^3.0.1 || ^4.0.0"
+    set-cookie-parser "^2.4.8"
+    tough-cookie "^4.0.0"
 
 html-to-draftjs@1.5.0:
   version "1.5.0"
@@ -251,12 +252,17 @@ scheduler@^0.23.0:
   dependencies:
     loose-envify "^1.1.0"
 
+set-cookie-parser@^2.4.8:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/set-cookie-parser/-/set-cookie-parser-2.5.1.tgz#ddd3e9a566b0e8e0862aca974a6ac0e01349430b"
+  integrity sha512-1jeBGaKNGdEq4FgIrORu/N570dwoPYio8lSoYLWmX7sQ//0JY08Xh9o5pBcgmHQ/MbsYp/aZnOe1s1lIsbLprQ==
+
 setimmediate@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/setimmediate/-/setimmediate-1.0.5.tgz#290cbb232e306942d7d7ea9b83732ab7856f8285"
   integrity sha512-MATJdZp8sLqDl/68LfQmbP8zKPLQNV6BIZoIgrscFDQ+RsvK/BxeDQOgyxKKoh0y/8h3BqVFnCqQ/gd+reiIXA==
 
-"tough-cookie@^2.3.3 || ^3.0.1 || ^4.0.0":
+tough-cookie@^4.0.0:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-4.1.2.tgz#e53e84b85f24e0b65dd526f46628db6c85f6b874"
   integrity sha512-G9fqXWoYFZgTc2z8Q5zaHy/vJMjm+WV0AkAeHxVCQiEB1b+dGvWzFW6QV07cY5jQ5gRkeid2qIkzkxUnmoQZUQ==
