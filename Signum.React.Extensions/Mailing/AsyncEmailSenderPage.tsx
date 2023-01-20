@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { API, AsyncEmailSenderState } from './MailingClient'
@@ -10,7 +10,7 @@ import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 
-export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
+export default function AsyncEmailSenderPage() {
 
   useTitle("AsyncEmailSender state");
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Link, RouteComponentProps } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { Dic, classes } from '@framework/Globals'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { API, TranslatedTypeSummary } from '../TranslatedInstanceClient'
@@ -10,7 +10,7 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { getTypeInfo } from '@framework/Reflection'
 import { notifySuccess } from '@framework/Operations'
 
-export default function TranslationCodeStatus(p: RouteComponentProps<{}>) {
+export default function TranslationCodeStatus() {
 
   const [result, reload] = useAPIWithReload(() => API.status(), []);
   const [file, setFile] = React.useState<API.FileUpload | undefined>(undefined);

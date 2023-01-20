@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RouteComponentProps, Link } from 'react-router-dom'
+import { useLocation, useParams, Link } from 'react-router-dom'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
@@ -17,9 +17,10 @@ import { classes } from '@framework/Globals';
 import { useTitle } from '@framework/AppContext'
 
 
-export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: string | undefined }>) {
+export default function AppendixHelpHelp() {
+  const params = useParams() as { uniqueName: string | undefined };
 
-  var [appendix, reloadAppendix] = useAPIWithReload(() => API.appendix(p.match.params.uniqueName), []);
+  var [appendix, reloadAppendix] = useAPIWithReload(() => API.appendix(params.uniqueName), []);
   useTitle(HelpMessage.Help.niceToString() + (appendix && (" > " + appendix.title)));
   var forceUpdate = useForceUpdate();
   if (appendix == null)

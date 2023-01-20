@@ -7,7 +7,7 @@ import * as Navigator from '@framework/Navigator'
 import { API, WorkflowActivityMonitor, WorkflowActivityMonitorRequest } from '../WorkflowClient'
 import WorkflowActivityMonitorViewerComponent from '../Bpmn/WorkflowActivityMonitorViewerComponent'
 import { ColumnOptionParsed, FilterOptionParsed, SubTokensOptions, QueryDescription, ColumnRequest } from '@framework/FindOptions';
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { newLite } from '@framework/Reflection';
 import FilterBuilder from '@framework/SearchControl/FilterBuilder';
 import ColumnBuilder from '@framework/SearchControl/ColumnBuilder';
@@ -25,12 +25,13 @@ interface WorkflowActivityMonitorPageState {
   workflowActivityMonitor: WorkflowActivityMonitor;
 }
 
-export default function WorkflowActivityMonitorPage(p: RouteComponentProps<{ workflowId: string }>) {
+export default function WorkflowActivityMonitorPage() {
+  const params = useParams() as { workflowId: string };
 
   var workflow = useAPI(() => {
-    const lite = newLite(WorkflowEntity, p.match.params.workflowId);
+    const lite = newLite(WorkflowEntity, params.workflowId);
     return Navigator.API.fillLiteModels(lite).then(() => lite);
-  }, [p.match.params.workflowId]);
+  }, [params.workflowId]);
 
   const config = React.useMemo(() => workflow == null ? undefined : ({
     workflow: workflow,

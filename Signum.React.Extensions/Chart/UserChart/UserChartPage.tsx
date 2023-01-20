@@ -6,17 +6,16 @@ import * as AppContext from '@framework/AppContext'
 import { UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import * as UserChartClient from './UserChartClient'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { useForceUpdate } from '@framework/Hooks'
 
-interface UserChartPageProps extends RouteComponentProps<{ userChartId: string; entity?: string }> {
 
-}
 
-export default function UserChartPage(p : UserChartPageProps){
+export default function UserChartPage() {
+  const params = useParams() as { userChartId: string; entity?: string };
 
   React.useEffect(() => {
-    const { userChartId, entity } = p.match.params;
+    const { userChartId, entity } = params;
 
     const lite = entity == undefined ? undefined : parseLite(entity);
 

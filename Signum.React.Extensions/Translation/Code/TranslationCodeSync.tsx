@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { Dic } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations'
 import { getToString, Lite } from '@framework/Signum.Entities'
@@ -14,11 +14,12 @@ import { decodeDots, encodeDots } from './TranslationCodeStatus'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 
-export default function TranslationCodeSync(p: RouteComponentProps<{ culture: string; assembly: string; namespace?: string; }>) {
+export default function TranslationCodeSync() {
+  const params = useParams() as { culture: string; assembly: string; namespace?: string; };
   const cultures = useAPI(() => CultureClient.getCultures(null), []);
-  const assembly = decodeDots(p.match.params.assembly);
-  const culture = p.match.params.culture;
-  const namespace = p.match.params.namespace && decodeDots(p.match.params.namespace);
+  const assembly = decodeDots(params.assembly);
+  const culture = params.culture;
+  const namespace = params.namespace && decodeDots(params.namespace);
 
   const [result, reloadResult] = useAPIWithReload(() => API.sync(assembly, culture, namespace), [assembly, culture, namespace]);  
 

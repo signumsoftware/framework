@@ -5,33 +5,33 @@ import * as AppContext from '@framework/AppContext'
 import { ChartRequestModel, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { useStateWithPromise } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { getQueryNiceName } from '@framework/Reflection'
 
-interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string; }> {
-
-}
 
 
-export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
+
+export default function ChartRequestPage() {
+  const params = useParams() as { queryName: string; };
+  const location = useLocation();
   const [pair, setPair] = useStateWithPromise<{ chartRequest: ChartRequestModel; userChart?: Lite<UserChartEntity>; } | undefined>(undefined);
 
   React.useEffect(() => {
-    var newPath = p.location.pathname + p.location.search;
+    var newPath = location.pathname + location.search;
     var oldPathPromise: Promise<string | undefined> = pair ? ChartClient.Encoder.chartPathPromise(pair.chartRequest, pair.userChart) : Promise.resolve(undefined);
     oldPathPromise.then(oldPath => {
       if (oldPath != newPath) {
-        var query = QueryString.parse(p.location.search);
+        var query = QueryString.parse(location.search);
         var uc = query.userChart == null ? undefined : (parseLite(query.userChart) as Lite<UserChartEntity>);
-        ChartClient.Decoder.parseChartRequest(p.match.params.queryName, query)
+        ChartClient.Decoder.parseChartRequest(params.queryName, query)
           .then(cr => setPair({ chartRequest: cr, userChart: uc }));
       }
     });
-  }, [p.location.pathname, p.location.search, p.match.params.queryName])
+  }, [location.pathname, location.search, params.queryName])
 
-  AppContext.useTitle(getQueryNiceName(p.match.params.queryName));
+  AppContext.useTitle(getQueryNiceName(params.queryName));
 
   function handleOnChange(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
     if (pair!.userChart != uc)
@@ -64,7 +64,7 @@ export default React.memo(function ChartRequestPage(p: ChartRequestPageProps) {
       }
     </div>
   );
-}, (prev, next) => (prev.location.pathname + prev.location.search) == (next.location.pathname + next.location.search));
+}
 
 
 

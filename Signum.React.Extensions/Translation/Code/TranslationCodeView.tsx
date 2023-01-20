@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Link, RouteComponentProps } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations'
@@ -15,14 +15,16 @@ import { useAPI } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 
-export default function TranslationCodeView(p: RouteComponentProps<{ culture: string; assembly: string }>) {
+export default function TranslationCodeView() {
+  const params = useParams() as { culture: string; assembly: string };
+  const location = useLocation();
 
-  const assembly = decodeDots(p.match.params.assembly);
-  const culture = p.match.params.culture;
+  const assembly = decodeDots(params.assembly);
+  const culture = params.culture;
 
   const cultures = useAPI(() => CultureClient.getCultures(null), []);
 
-  const [filter, setFilter] = React.useState(() => QueryString.parse(p.location.search).filter);
+  const [filter, setFilter] = React.useState(() => QueryString.parse(location.search).filter);
 
   const result = useAPI(() => filter == "" ? Promise.resolve(undefined) : API.retrieve(assembly, culture ?? "", filter), [assembly, culture, filter]);
 
@@ -35,7 +37,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
 
     return (
       <div>
-        {Dic.getValues(result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={p.match.params.culture} />)}
+        {Dic.getValues(result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={params.culture} />)}
         <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary" onClick={handleSave} />
       </div>
     );
@@ -43,7 +45,7 @@ export default function TranslationCodeView(p: RouteComponentProps<{ culture: st
 
   function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
-    const params = p.match.params;
+    const params = params;
     API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => notifySuccess());
   }
 

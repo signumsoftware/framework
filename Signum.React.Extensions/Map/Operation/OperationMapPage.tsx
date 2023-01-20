@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Location } from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { JavascriptMessage } from '@framework/Signum.Entities'
@@ -54,17 +54,19 @@ function getParsedQuery(loc: Location): ParsedQueryString {
   return result;
 }
 
-export default function OperationMapPage(p: RouteComponentProps<{ type: string }>) {
+export default function OperationMapPage() {
+  const params = useParams() as { type: string };
+  const location = useLocation();
 
   useExpand();
 
   const [color, setColor] = React.useState<string>("");
   const [nodes, setNodes] = React.useState<Nodes | undefined>(undefined);
 
-  const operationMapInfo = useAPI(() => MapClient.API.operations(p.match.params.type), [p.match.params.type]);
+  const operationMapInfo = useAPI(() => MapClient.API.operations(params.type), [params.type]);
 
   React.useEffect(() => {
-    const parsedQuery = getParsedQuery(p.location);
+    const parsedQuery = getParsedQuery(location);
 
     setNodes(parsedQuery.nodes);
     setColor(parsedQuery.color ?? "");
@@ -83,7 +85,7 @@ export default function OperationMapPage(p: RouteComponentProps<{ type: string }
     var query = { ...tables, color: color };
 
     const url = AppContext.history.createHref({
-      pathname: "~/map/" + p.match.params.type,
+      pathname: "~/map/" + params.type,
       search: QueryString.stringify(query)
     });
 
@@ -132,7 +134,7 @@ export default function OperationMapPage(p: RouteComponentProps<{ type: string }
               color={color!}
               height={size.height}
               width={size.width}
-              queryName={p.match.params.type}
+              queryName={params.type}
             />
           }
         </div>

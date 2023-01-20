@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Link, RouteComponentProps } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { Dic } from '@framework/Globals'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { API, TranslationFileStatus } from '../TranslationClient'
@@ -7,7 +7,7 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 import "../Translation.css"
 import { useAPI } from '@framework/Hooks'
 
-export default function TranslationCodeStatus(p: RouteComponentProps<{}>) {
+export default function TranslationCodeStatus() {
 
   const result = useAPI(() => API.status(), []);
 

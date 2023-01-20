@@ -2,18 +2,16 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import * as Navigator from '@framework/Navigator'
 import { API, TimeTrackerEntry } from '../ProfilerClient'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 
 import "./Times.css"
 import { Tab, Tabs } from 'react-bootstrap';
 import { useAPI, useAPIWithReload } from '@framework/Hooks';
 import { useTitle } from '@framework/AppContext';
 
-interface TimesPageProps extends RouteComponentProps<{}> {
 
-}
 
-export default function TimesPage(p: TimesPageProps) {
+export default function TimesPage() {
 
   const [times, reloadTimes] = useAPIWithReload(() => API.Times.fetchInfo(), []);
   useTitle("Times state");

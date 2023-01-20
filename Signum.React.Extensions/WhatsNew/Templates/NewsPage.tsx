@@ -9,20 +9,21 @@ import { FilePathEmbedded } from '../../../../Framework/Signum.React.Extensions/
 import { downloadFile } from '../../../../Framework/Signum.React.Extensions/Files/FileDownloader';
 import * as Services from '@framework/Services'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { RouteComponentProps } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import WhatsNewHtmlEditor, { HtmlViewer } from './WhatsNewHtmlEditor';
 import { Binding } from '../../../Signum.React/Scripts/Lines';
 import { Link } from 'react-router-dom';
 import * as Navigator from '@framework/Navigator'
 import EntityLink from '../../../Signum.React/Scripts/SearchControl/EntityLink';
 
-export default function NewsPage(p: RouteComponentProps<{ newsId: string }>) {
+export default function NewsPage() {
+  const params = useParams() as { newsId: string };
 
   const [refreshValue, setRefreshValue] = React.useState<number>(0);
-  const whatsnew = useAPI(() => API.newsPage(p.match.params.newsId).then(w => {
+  const whatsnew = useAPI(() => API.newsPage(params.newsId).then(w => {
     Navigator.raiseEntityChanged(WhatsNewLogEntity);
     return w;
-  }), [p.match.params.newsId, refreshValue]);
+  }), [params.newsId, refreshValue]);
 
   if (whatsnew == undefined)
     return <div>{JavascriptMessage.loading.niceToString()}</div>;

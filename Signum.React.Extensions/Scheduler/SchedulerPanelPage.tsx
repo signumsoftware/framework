@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { DateTime } from 'luxon'
 import * as Navigator from '@framework/Navigator'
 import { SearchControl, SearchValueLine } from '@framework/Search'
@@ -15,11 +15,9 @@ import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
 import { classes } from '../../Signum.React/Scripts/Globals'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-interface SchedulerPanelProps extends RouteComponentProps<{}> {
 
-}
 
-export default function SchedulerPanelPage(p: SchedulerPanelProps) {
+export default function SchedulerPanelPage() {
 
   const [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
 
