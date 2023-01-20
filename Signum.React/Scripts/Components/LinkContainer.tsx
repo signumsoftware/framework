@@ -1,8 +1,9 @@
 import * as React from 'react'
 import * as PropTypes from 'prop-types'
 import * as H from 'history';
-import { Route, match, __RouterContext as RouterContext, matchPath, RouteComponentProps } from 'react-router';
+import { useHref, useLocation, useMatch, useNavigate, NavLink } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { PathMatch } from 'react-router';
 
 const isModifiedEvent = (event: React.MouseEvent<any>) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
@@ -12,70 +13,86 @@ interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
   replace?: boolean;
   onClick?: (e: React.MouseEvent<any>) => void;
   innerRef?: (e: any) => void;
+  activeClassName?: string;
+  activeStyle?: React.CSSProperties;
   strict?: boolean;
   exact?: boolean;
-  isActive?: (m: match<any> | null, l: H.Location<any>) => boolean;
+  state?: any;
+  isActive?: boolean | ((m: PathMatch | null, l: H.Location<any>) => boolean);
 }
 
-export function LinkContainer(p: LinkContainerProps) {
+export function LinkContainer({
+  children,
+  onClick,
+  replace, // eslint-disable-line no-unused-vars
+  to,
+  activeClassName,
+  className,
+  activeStyle,
+  style,
+  isActive: getIsActive,
+  state,
+  // eslint-disable-next-line comma-dangle
+  ...props
+}: LinkContainerProps) {
 
+  const path = typeof to === 'object' ? to.pathname || '' : to;
+  const navigate = useNavigate();
+  const href = useHref(typeof to === 'string' ? { pathname: to } : to);
+  const match = useMatch(path);
+  const location = useLocation();
+  const child = React.Children.only(children) as React.ReactElement;
 
-  function handleClick(event: React.MouseEvent<any>, context: RouteComponentProps) {
-    if (p.onClick)
-      p.onClick(event)
+  const isActive = !!(getIsActive
+    ? typeof getIsActive === 'function'
+      ? getIsActive(match, location)
+      : getIsActive
+    : match);
+
+  const handleClick = (event: React.MouseEvent) => {
+    if (child?.props.onClick) {
+      child.props.onClick(event);
+    }
+
+    if (onClick) {
+      onClick(event);
+    }
 
     if (
       !event.defaultPrevented && // onClick prevented default
-      event.button === 0 && // ignore everything but left clicks
-      !p.target && // let browser handle "target=_blank" etc.
+      event.button === 0 && // ignore right clicks
       !isModifiedEvent(event) // ignore clicks with modifier keys
     ) {
-      event.preventDefault()
+      event.preventDefault();
 
-      const history = context.history
-      const { replace, to } = p
-
-      if (replace) {
-        history.replace(to as string)
-      } else {
-        history.push(to as string)
-      }
+      navigate(to, {
+        replace,
+        state,
+      });
     }
-  }
+  };
 
-
-  const { exact, strict, isActive: getIsActive, children, replace, to, innerRef, ...props } = p;// eslint-disable-line no-unused-vars
-
-  return (
-    <RouterContext.Consumer>
-      {context => {
-        if (!context)
-          throw new Error('You should not use <LinkContainer> outside a <Router>');
-
-        const child = React.Children.only(children) as React.ReactElement<any>;
-
-        if (!child)
-          throw new Error("LinkContainer should contain a child");
-
-        const href = context.history.createHref(
-          typeof to === 'string' ? { pathname: to } : to
-        )
-
-        var path = typeof to === 'object' ? to.pathname : to;
-
-        const match = path ? matchPath(path, { exact, strict }) : null;
-        const isActive = !!(getIsActive ? getIsActive(match, context.location) : match);
-
-        return React.cloneElement(
-          child,
-          {
-            ...props,
-            active: isActive,
-            href,
-            onClick: (e: React.MouseEvent<any>) => handleClick(e, context),
-          }
-        );
-      }}
-    </RouterContext.Consumer>
-  );
+  return React.cloneElement(child, {
+    ...props,
+    className: [
+      className,
+      child.props.className,
+      isActive ? activeClassName : null,
+    ]
+      .join(' ')
+      .trim(),
+    style: isActive ? { ...style, ...activeStyle } : style,
+    href,
+    onClick: handleClick,
+  });
 }
+
+LinkContainer.defaultProps = {
+  replace: false,
+  activeClassName: 'active',
+  onClick: null,
+  className: null,
+  style: null,
+  activeStyle: null,
+  isActive: null,
+};

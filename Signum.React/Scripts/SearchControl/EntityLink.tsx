@@ -27,7 +27,7 @@ export default function EntityLink(p: EntityLinkProps) {
 
   return (
     <Link
-      innerRef={p.innerRef as any}
+      ref={p.innerRef as any}
       to={Navigator.navigateRoute(lite)}
       title={StyleContext.default.titleLabels ? p.title ?? getToString(lite) : undefined}
       data-entity={liteKey(lite)}

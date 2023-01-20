@@ -1,12 +1,11 @@
 import * as React from 'react'
-import { RouteComponentProps } from 'react-router'
 import * as AppContext from '../AppContext'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
-import { Prompt } from "react-router-dom"
+import { useLocation, useParams, unstable_useBlocker } from "react-router-dom"
 import * as Finder from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
-import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo, SelectorMessage, is } from '../Signum.Entities'
+import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo, SelectorMessage, is, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets,  WidgetContext } from './Widgets'
@@ -22,10 +21,6 @@ import { FunctionalAdapter } from '../Modals'
 import { QueryString } from '../QueryString'
 import { classes } from '../Globals'
 
-interface FramePageProps extends RouteComponentProps<{ type: string; id?: string }> {
-
-}
-
 interface FramePageState {
   pack: EntityPack<Entity>;
   lastEntity?: string;
@@ -35,7 +30,31 @@ interface FramePageState {
   executing?: boolean;
 }
 
-export default function FramePage(p: FramePageProps) {
+function useLooseChanges(entity?: ModifiableEntity) {
+
+  //var str = React.useMemo(() => JSON.stringify(p.entity), [p.entity]);
+
+  //let blocker = unstable_useBlocker(p.entity != null);
+
+  //React.useEffect(() => {
+  //  if (blocker.state === "blocked" && !when) {
+  //    blocker.reset();
+  //  }
+  //}, [blocker, when]);
+
+  //React.useEffect(() => {
+  //  if (blocker.state === "blocked") {
+  //    let proceed = window.confirm(JavascriptMessage.loseCurrentChanges.niceToString());
+  //    if (proceed) {
+  //      setTimeout(blocker.proceed, 0);
+  //    } else {
+  //      blocker.reset();
+  //    }
+  //  }
+  //}, [blocker]);
+}
+
+export default function FramePage() {
 
   let [state, setState] = useStateWithPromise<FramePageState | undefined>(undefined);
   const stateRef = useUpdatedRef(state);
@@ -44,10 +63,12 @@ export default function FramePage(p: FramePageProps) {
   const validationErrors = React.useRef<React.Component>(null);
   const mounted = useMounted();
   const forceUpdate = useForceUpdate();
+  const params = useParams<{ type: string; id?: string }>();
+  const location = useLocation();
 
-  const ti = getTypeInfo(p.match.params.type);
+  const ti = getTypeInfo(params.type!);
   const type = ti.name;
-  const id = p.match.params.id;
+  const id = params.id;
 
   if (state && state.pack.entity.Type != ti.name)
     state = undefined;
@@ -56,6 +77,8 @@ export default function FramePage(p: FramePageProps) {
     state = undefined;
 
   useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
+
+  useLooseChanges(state?.pack.entity);
 
   React.useEffect(() => {
 
@@ -89,7 +112,7 @@ export default function FramePage(p: FramePageProps) {
           });
         }
       });
-  }, [type, id, p.location.search]);
+  }, [type, id, location.search]);
 
 
   useWindowEvent("beforeunload", e => {
@@ -107,14 +130,14 @@ export default function FramePage(p: FramePageProps) {
   }
 
   function loadComponent(pack: EntityPack<Entity>): Promise<(ctx: TypeContext<Entity>) => React.ReactElement<any>> {
-    const viewName = QueryString.parse(p.location.search).viewName ?? undefined;
+    const viewName = QueryString.parse(location.search).viewName ?? undefined;
     return Navigator.getViewPromise(pack.entity, viewName).promise;
   }
 
 
   function loadEntity(): Promise<undefined | { pack: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
 
-    const queryString = QueryString.parse(p.location.search);
+    const queryString = QueryString.parse(location.search);
 
     if (queryString.waitOpenerData) {
       if (window.opener!.dataForChildWindow == undefined) {
@@ -189,8 +212,8 @@ export default function FramePage(p: FramePageProps) {
   }
 
   function onClose() {
-    if (Finder.isFindable(p.match.params.type, true))
-      AppContext.history.push(Finder.findOptionsPath({ queryName: p.match.params.type }));
+    if (Finder.isFindable(params.type!, true))
+      AppContext.history.push(Finder.findOptionsPath({ queryName: params.type! }));
     else
       AppContext.history.push("~/");
   }
@@ -310,7 +333,6 @@ export default function FramePage(p: FramePageProps) {
 
   return (
     <div className="normal-control" style={{ opacity: outdated ? .5 : undefined }}>
-      <Prompt when={!(state.pack.entity.isNew && id != null)} message={() => hasChanges(s) ? JavascriptMessage.loseCurrentChanges.niceToString() : true} />
       {renderTitle()}
       <div style={state.executing == true ? { opacity: ".7" } : undefined}>
         <div className="sf-button-widget-container">

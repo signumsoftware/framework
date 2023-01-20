@@ -1,8 +1,7 @@
 import * as React from "react";
-import { Route, RouteProps, match } from "react-router-dom";
+import { PathRouteProps, Route } from "react-router-dom";
 import * as H from "history";
 import * as PropTypes from "prop-types";
-import { RouteChildrenProps } from "react-router";
 import { useAPI } from "./Hooks";
 
 export interface ComponentModule {
@@ -23,23 +22,14 @@ export function ImportComponent({ onImportModule, componentProps }: ImportCompon
   return React.createElement(module.default, componentProps);
 }
 
-interface ImportRouteProps {
-  path?: string | string[];
-  exact?: boolean;
-  sensitive?: boolean;
-  strict?: boolean;
-  location?: H.Location<any>;
-
+interface ImportRouteProps extends PathRouteProps {
+  
   onImportModule: () => Promise<ComponentModule>;
-
-  computedMatch?: match<any>; //For Switch component
 }
 
 export function ImportRoute({ onImportModule, ...rest }: ImportRouteProps) {
   return (
-    <Route {...rest}>
-      {(props: RouteChildrenProps<any>) => <ImportComponent onImportModule={onImportModule} componentProps={props} />}
-    </Route>
+    <Route {...rest} element={<ImportComponent onImportModule={onImportModule} />}/>
   );
 }
  
