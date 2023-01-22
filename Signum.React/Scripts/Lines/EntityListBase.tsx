@@ -195,8 +195,14 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     }
 
     return this.chooseType(ti => Finder.isFindable(ti, false))
-      .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(qn => qn == undefined ? undefined :
-        Finder.findMany({ queryName: qn } as FindOptions, { searchControlProps: { create: this.props.createOnFind } }));
+      .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(typeName => {
+        if (typeName == null)
+          return undefined;
+
+        var fo: FindOptions = (this.props.findOptionsDictionary && this.props.findOptionsDictionary[typeName]) ?? Navigator.defaultFindOptions({ name: typeName }) ?? { queryName: typeName };
+
+        return Finder.findMany(fo, { searchControlProps: { create: this.props.createOnFind } });
+      });
   }
 
   addElement(entityOrLite: Lite<Entity> | ModifiableEntity) {

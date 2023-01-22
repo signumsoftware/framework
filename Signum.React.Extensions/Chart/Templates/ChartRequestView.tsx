@@ -24,6 +24,8 @@ import { ChartScript, cleanedChartRequest } from '../ChartClient';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
+import { EntityStrip } from '../../../Signum.React/Scripts/Lines';
+import { UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries';
 
 
 interface ChartRequestViewProps {
@@ -189,19 +191,32 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
         }
       </div>
       <div className="sf-control-container">
-        {showChartSettings && <ChartBuilder queryKey={cr.queryKey} ctx={tc}
-          maxRowsReached={maxRowsReached}
-          onInvalidate={handleInvalidate}
-          onRedraw={handleOnRedraw}
-          onTokenChange={handleTokenChange}
-          onOrderChanged={() => {
-            if (result)
-              handleOnDrawClick();
-            else
-              forceUpdate();
-          }}
-        />}
-      </div >
+        {showChartSettings && <>
+          <ChartBuilder queryKey={cr.queryKey} ctx={tc}
+            maxRowsReached={maxRowsReached}
+            onInvalidate={handleInvalidate}
+            onRedraw={handleOnRedraw}
+            onTokenChange={handleTokenChange}
+            onOrderChanged={() => {
+              if (result)
+                handleOnDrawClick();
+              else
+                forceUpdate();
+            }}
+          />
+          <EntityStrip ctx={tc.subCtx(e => e.drilldowns)}
+            findOptions={{
+              queryName: UserQueryEntity,
+              filterOptions: [
+                { token: UserQueryEntity.token(e => e.query.key), value: tc.value.queryKey, frozen: true },
+                { token: UserQueryEntity.token(e => e.entity.appendFilters), value: true, frozen: true },
+              ]
+            }}
+            avoidDuplicates={true}
+            vertical={true}
+            iconStart={true} />
+        </>}
+      </div>
       <div className="sf-query-button-bar btn-toolbar mb-2">
         <button
           className={classes("sf-query-button btn", showChartSettings && "active", "btn-light")}

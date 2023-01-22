@@ -618,6 +618,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
 export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | undefined, ctx: TypeContext<any>, create: boolean, showType: boolean) {
 
   var s = getSettings(type);
+  showType ??= type.name.contains(",");
 
   if (s?.autocomplete != null) {
     var acc = s.autocomplete(findOptions, showType);
@@ -631,7 +632,8 @@ export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | 
   if (findOptions)
     return new FindOptionsAutocompleteConfig(findOptions, {
       itemsDelay: s?.autocompleteDelay,
-      getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
+      getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[],
+      showType: showType,
     });
 
   return new LiteAutocompleteConfig((signal, subStr: string) => {
@@ -647,7 +649,7 @@ export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | 
       ]);
   },
     {
-      showType: showType ?? type.name.contains(","),
+      showType: showType,
       itemsDelay: s?.autocompleteDelay,
     });
 }

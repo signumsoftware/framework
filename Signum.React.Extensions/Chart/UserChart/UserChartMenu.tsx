@@ -85,6 +85,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       Finder.toFilterOptions(crmNew.filterOptions ?? []), 0, sd);
     ucOld.columns = UserChartMerger.mergeColumns(ucOld.columns, ucNew.columns);
     ucOld.parameters = ucNew.parameters;
+    ucOld.drilldowns = ucNew.drilldowns;
 
     return ucOld;
   }
@@ -152,6 +153,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       columns: cr.columns.map(a => newMListElement(JSON.parse(JSON.stringify(a.element)))),
       parameters: cr.parameters.map(p => newMListElement(JSON.parse(JSON.stringify(p.element)))),
+      drilldowns: cr.drilldowns.map(p => newMListElement(JSON.parse(JSON.stringify(p.element)))),
     });
 
     return uc;

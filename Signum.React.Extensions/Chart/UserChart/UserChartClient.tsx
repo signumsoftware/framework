@@ -69,15 +69,16 @@ export function start(options: { routes: JSX.Element[] }) {
 export module Converter {
 
 
-  export function applyUserChart(cr: ChartRequestModel, uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
-    cr.chartScript = uq.chartScript;
-    cr.maxRows = uq.maxRows;
+  export function applyUserChart(cr: ChartRequestModel, uc: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
+    cr.chartScript = uc.chartScript;
+    cr.maxRows = uc.maxRows;
+    cr.drilldowns = uc.drilldowns;
 
     const promise = UserAssetsClient.API.parseFilters({
-      queryKey: uq.query.key,
+      queryKey: uc.query.key,
       canAggregate: true,
       entity: entity,
-      filters: uq.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
+      filters: uc.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
     });
 
     return promise.then(filters => {
@@ -86,7 +87,7 @@ export module Converter {
 
       cr.filterOptions.push(...filters.map(f => UserAssetsClient.Converter.toFilterOptionParsed(f)));
 
-      cr.parameters = uq.parameters.map(mle => ({
+      cr.parameters = uc.parameters.map(mle => ({
         rowId: null,
         element: ChartParameterEmbedded.New({
           name: mle.element.name,
@@ -94,7 +95,7 @@ export module Converter {
         })
       }));
 
-      cr.columns = uq.columns.map(mle => {
+      cr.columns = uc.columns.map(mle => {
         var t = mle.element.token;
 
         return ({

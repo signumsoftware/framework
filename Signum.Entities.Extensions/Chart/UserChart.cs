@@ -3,6 +3,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Signum.Entities.Chart;
 
@@ -72,6 +73,9 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     [NotifyChildProperty, NotifyCollectionChanged, PreserveOrder]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
+    [NoRepeatValidator, PreserveOrder] 
+    public MList<Lite<UserQueryEntity>> Drilldowns { get; set; } = new MList<Lite<UserQueryEntity>>();
+
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
@@ -124,7 +128,8 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             MaxRows == null ? null! : new XAttribute("MaxRows", MaxRows.Value),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
-            Parameters.IsNullOrEmpty() ? null! : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
+            Parameters.IsNullOrEmpty() ? null! : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()),
+            Drilldowns.IsNullOrEmpty() ? null! : new XElement("Drilldowns", Drilldowns.Select(f => new XElement("Drilldown", new XAttribute("Item", ctx.Include(f)))).ToList()));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -146,6 +151,14 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             if (pxml != null)
                 p.FromXml(pxml, ctx);
         });
+
+        var drilldowns = element.Element("Drilldowns")?.Elements().ToList();
+        if (drilldowns.HasItems())
+        {
+            var items = drilldowns.Select(x => (Lite<UserQueryEntity>)ctx.GetEntity(Guid.Parse(x.Attribute("Item")!.Value)).ToLite());
+            Drilldowns.AddRange(items);
+        }
+
         ParseData(ctx.GetQueryDescription(Query));
     }
 

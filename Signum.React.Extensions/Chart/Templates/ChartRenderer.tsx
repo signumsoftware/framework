@@ -13,9 +13,12 @@ import { ErrorBoundary } from '@framework/Components';
 
 import ReactChart from '../D3Scripts/Components/ReactChart';
 import { useAPI } from '@framework/Hooks'
-import { TypeInfo } from '@framework/Reflection'
 import { FullscreenComponent } from './FullscreenComponent'
 import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
+import SelectorModal from '../../../Signum.React/Scripts/SelectorModal'
+import { UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries'
+import * as UserQueryClient from '../../UserQueries/UserQueryClient'
+import { DynamicTypeConditionSymbolEntity } from '../../Dynamic/Signum.Entities.Dynamic'
 
 
 export interface ChartRendererProps {
@@ -77,58 +80,93 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
       window.open(Navigator.navigateRoute(r.entity));
     else
       Navigator.view(r.entity)
-        .then(() => onReload && onReload());
+        .then(() => onReload?.());
   } else {
-    const filters = cr.filterOptions.map(f => {
-      let f2 = withoutPinned(f);
-      if (f2 == null)
-        return null;
-      return withoutAggregate(f2);
-    }).notNull();
+    debugger;
+    const fo = extractFindOptions(cr, r);
+    if (cr.drilldowns.length == 0) {
+      if (newWindow)
+        window.open(Finder.findOptionsPath(fo));
+      else
+        Finder.explore(fo)
+          .then(() => onReload && onReload());
+    }
+    else {
+      SelectorModal.chooseLite(UserQueryEntity, cr.drilldowns.map(mle => mle.element))
+        .then(lite => {
+          if (!lite)
+            return;
 
-    const columns: ColumnOption[] = [];
-
-    cr.columns.map((a, i) => {
-
-      const qte = a.element.token;
-
-      if (qte?.token && !hasAggregate(qte!.token!) && r.hasOwnProperty("c" + i)) {
-        filters.push({
-          token: qte!.token!,
-          operation: "EqualTo",
-          value: (r as any)["c" + i],
-          frozen: false
-        } as FilterOptionParsed);
-      }
-
-      if (qte?.token && qte.token.parent != undefined) //Avoid Count and simple Columns that are already added
-      {
-        var t = qte.token;
-        if (t.queryTokenType == "Aggregate") {
-          columns.push({
-            token: t.parent!.fullKey,
-            summaryToken: t.fullKey
-          });
-        } else {
-          columns.push({
-            token: t.fullKey,
-          });
-        }
-      }
-    });
-
-    var fo: FindOptions = {
-      queryName: cr.queryKey,
-      filterOptions: toFilterOptions(filters),
-      includeDefaultFilters: false,
-      columnOptions: columns,
-      columnOptionsMode: "ReplaceOrAdd",
-    };
-
-    if (newWindow)
-      window.open(Finder.findOptionsPath(fo));
-    else
-      Finder.explore(fo)
-        .then(() => onReload && onReload());
+          Navigator.API.fetch(lite)
+            .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
+            .then(dfo => ({
+              ...fo,
+              filterOptions: (fo?.filterOptions ?? []).concat(dfo.filterOptions),
+              columnOptions: (dfo.columnOptions ?? []).concat(fo?.columnOptions),
+              includeDefaultFilters: dfo.includeDefaultFilters ?? false,
+              columnOptionsMode: "ReplaceAll",
+            }) as FindOptions)
+            .then(nfo => {
+              if (newWindow)
+                //window.open(Finder.findOptionsPath(nfo, { userQuery: lite }));
+                window.open(Finder.findOptionsPath(nfo));
+              else
+                //Finder.explore(nfo, { searchControlProps: { extraOptions: { userQuery: lite } } })
+                Finder.explore(nfo)
+                  .then(() => onReload && onReload());
+            });
+        });
+    }
   }
+}
+
+function extractFindOptions(cr: ChartRequestModel, r: ChartRow) {
+
+  const filters = cr.filterOptions.map(f => {
+    let f2 = withoutPinned(f);
+    if (f2 == null)
+      return null;
+    return withoutAggregate(f2);
+  }).notNull();
+
+  const columns: ColumnOption[] = [];
+
+  cr.columns.map((a, i) => {
+
+    const qte = a.element.token;
+
+    if (qte?.token && !hasAggregate(qte!.token!) && r.hasOwnProperty("c" + i)) {
+      filters.push({
+        token: qte!.token!,
+        operation: "EqualTo",
+        value: (r as any)["c" + i],
+        frozen: false
+      } as FilterOptionParsed);
+    }
+
+    if (qte?.token && qte.token.parent != undefined) //Avoid Count and simple Columns that are already added
+    {
+      var t = qte.token;
+      if (t.queryTokenType == "Aggregate") {
+        columns.push({
+          token: t.parent!.fullKey,
+          summaryToken: t.fullKey
+        });
+      } else {
+        columns.push({
+          token: t.fullKey,
+        });
+      }
+    }
+  });
+
+  var fo: FindOptions = {
+    queryName: cr.queryKey,
+    filterOptions: toFilterOptions(filters),
+    includeDefaultFilters: false,
+    columnOptions: columns,
+    columnOptionsMode: "ReplaceOrAdd",
+  };
+
+  return fo;
 }

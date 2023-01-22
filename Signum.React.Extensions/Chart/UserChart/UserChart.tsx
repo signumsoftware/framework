@@ -1,13 +1,12 @@
 import * as React from 'react'
-import { UserQueryMessage, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import { UserQueryMessage, QueryOrderEmbedded, UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
 import { UserChartEntity } from '../Signum.Entities.Chart'
-import { FormGroup, ValueLine, EntityLine, EntityTable } from '@framework/Lines'
+import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
-import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import "../Chart.css"
 import { useForceUpdate } from '@framework/Hooks'
@@ -46,10 +45,21 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
         showPinnedFilterOptions={true}
       />
       <ChartBuilder queryKey={queryKey} ctx={p.ctx}
-          onInvalidate={() => forceUpdate()} 
-          onTokenChange={() =>  forceUpdate()} 
-          onRedraw={() => forceUpdate()} 
-          onOrderChanged={() => forceUpdate()} />
+        onInvalidate={() => forceUpdate()}
+        onTokenChange={() => forceUpdate()}
+        onRedraw={() => forceUpdate()}
+        onOrderChanged={() => forceUpdate()} />
+      <EntityStrip ctx={ctx.subCtx(e => e.drilldowns)}
+        findOptions={{
+          queryName: UserQueryEntity,
+          filterOptions: [
+            { token: UserQueryEntity.token(e => e.query.key), value: queryKey, frozen: true },
+            { token: UserQueryEntity.token(e => e.entity.appendFilters), value: true, frozen: true },
+          ]
+        }}
+        avoidDuplicates={true}
+        vertical={true}
+        iconStart={true} />
     </div>
   );
 }
