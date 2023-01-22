@@ -854,7 +854,7 @@ internal class QueryBinder : ExpressionVisitor
             var result = new AggregateRequestsExpression(info.GroupAlias,
                 new AggregateExpression(
                     aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
-                    aggregateFunction,
+                    distinct ? AggregateSqlFunction.CountDistinct : aggregateFunction,
                    new Expression[] { nominated! })
                 );
 
