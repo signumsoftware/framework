@@ -527,6 +527,10 @@
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
+  <Type Name="CollectionElementEmbedded" Description="Collection-Element">
+    <Member Name="CollectionElement" Description="Collection-Element" />
+    <Member Name="MatchByColumn" Description="Übereinstimmung nach Spalte" />
+  </Type>
   <Type Name="ColorPaletteEntity" Description="Farbpalette">
     <Member Name="CategoryName" Description="Name der Kategorie" />
     <Member Name="Seed" Description="Seed" />
@@ -1449,6 +1453,7 @@
     <Member Name="Update" Description="Update" />
   </Type>
   <Type Name="ImportExcelModel" Description="Excel importieren">
+    <Member Name="Collections" Description="Collection" />
     <Member Name="ExcelFile" Description="Excel-Datei" />
     <Member Name="IdentityInsert" Description="Identity insert" />
     <Member Name="MatchByColumn" Description="Nach Spalte abgleichen" />
@@ -1459,15 +1464,15 @@
   </Type>
   <Type Name="ImportFromExcelMessage">
     <Member Name="_01CanAlsoBeUsed" Description="{0}.[{1}] kann auch verwendet werden" />
-    <Member Name="_01CannotBeAssignedDirectly" Description="{0} ({1}) kann nicht direkt zugeordnet werden. Jedes verschachtelte Feld sollte unabhängig zugewiesen werden." />
     <Member Name="_01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently" Description="{0} ({1}) kann nicht direkt zugeordnet werden. Jedes verschachtelte Feld sollte unabhängig zugewiesen werden." />
     <Member Name="_01IsIncompatible" Description="{0} ({1}) ist inkompatibel" />
-    <Member Name="_01IsNotSupported" Description="{0}/{1} wird nicht unterstützt in: " />
     <Member Name="_0Errors" Description="{0} Fehler" />
     <Member Name="_0IsNotSupported" Description="{0} wird nicht unterstützt" />
     <Member Name="_0IsReadOnly" Description="{0} ist schreibgeschützt" />
     <Member Name="Columns0AlreadyHaveConstanValuesFromFilters" Description="Spalte(n) {0} haben bereits konstante Werte aus Filtern" />
+    <Member Name="ColumnsDoNotMatchExcelColumns0QueryColumns1" Description="Die Spalten stimmen nicht überein. Excel-Spalten: {0} Abfragespalten: {1}" />
     <Member Name="DownloadTemplate" Description="Excel-Vorlage für diese Abfrage herunterladen" />
+    <Member Name="DuplicatedNonConsecutive0Found1" Description="Duplikate nicht aufeinanderfolgender {0} gefunden: {1}" />
     <Member Name="ErrorsIn0Rows_N" Description="Fehler in {0} Zeile(n)" />
     <Member Name="Import0FromExcel" Description="{0} aus Excel Importieren" />
     <Member Name="ImportFromExcel" Description="Aus Excel importieren" />
@@ -1475,10 +1480,9 @@
     <Member Name="ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1" Description="Viele Filter versuchen, die gleiche Eigenschaft {0} mit unterschiedlichen Werten {1} zuzuweisen" />
     <Member Name="No0FoundInThisQueryWith1EqualsTo2" Description="Keine {0} gefunden in dieser Abfrage mit {1} gleich {2}" />
     <Member Name="Operation0IsNotSupported" Description="Operation {0} wird nicht unterstützt" />
-    <Member Name="SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed" Description="Einfache 'Property = Value' Filter können verwendet werden, um konstante Werte zuzuweisen, alles andere ist nicht erlaubt:" />
-    <Member Name="SomeColumnsAreIncompatibleForImportingFromExcel" Description="Einige Spalten sind für Importinng aus Excel nicht kompatibel:" />
-    <Member Name="SomeFiltersAreIncompatibleForImportingFromExcel" Description="Einige Filter sind für den Import aus Excel nicht kompatibel" />
+    <Member Name="SomeColumnsAreIncompatibleWithImportingFromExcel" Description="Einige Spalten sind für den Import aus Excel nicht kompatibel:" />
     <Member Name="ThisQueryHasMultipleImplementations0" Description="Diese Abfrage hat mehrere Implementierungen {0}" />
+    <Member Name="UnableToAssignMoreThanOneUnrelatedCollections0" Description="Es kann nicht mehr als eine unverbundene Sammlung zugewiesen werden: {0}" />
   </Type>
   <Type Name="InboxFilterModel" Description="Posteingangs-filter">
     <Member Name="FromDate" Description="Vom Datum" />
@@ -2797,6 +2801,7 @@
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
     <Member Name="AggregateFromSummaryHeader" Description="Aggregieren aus Zusammenfassungskopfzeile" />
+    <Member Name="AllowMaxHeight" Description="Maximale Höhe zulassen" />
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
     <Member Name="AutoUpdate" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
