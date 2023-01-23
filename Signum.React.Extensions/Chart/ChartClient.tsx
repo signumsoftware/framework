@@ -389,11 +389,6 @@ export interface ChartParameterOption {
   value: string;
 }
 
-export interface ChartDrilldownOption {
-  liteKey: string;
-  toStr: string;
-}
-
 export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isShift: boolean) {
 
   var newOrder = col.orderByType == "Ascending" ? "Descending" : "Ascending" as OrderType;
