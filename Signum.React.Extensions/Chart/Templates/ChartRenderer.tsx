@@ -19,6 +19,7 @@ import SelectorModal from '../../../Signum.React/Scripts/SelectorModal'
 import { UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { DynamicTypeConditionSymbolEntity } from '../../Dynamic/Signum.Entities.Dynamic'
+import { liteKey } from '@framework/Signum.Entities'
 
 
 export interface ChartRendererProps {
@@ -82,41 +83,34 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
       Navigator.view(r.entity)
         .then(() => onReload?.());
   } else {
-    debugger;
     const fo = extractFindOptions(cr, r);
-    if (cr.drilldowns.length == 0) {
-      if (newWindow)
-        window.open(Finder.findOptionsPath(fo));
-      else
-        Finder.explore(fo)
-          .then(() => onReload && onReload());
-    }
-    else {
+    const promise = cr.drilldowns.length == 0 ? Promise.resolve({ fo: fo, uq: undefined }) :
       SelectorModal.chooseLite(UserQueryEntity, cr.drilldowns.map(mle => mle.element))
         .then(lite => {
           if (!lite)
             return;
 
-          Navigator.API.fetch(lite)
+          return Navigator.API.fetch(lite)
             .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-            .then(dfo => ({
-              ...fo,
-              filterOptions: (fo?.filterOptions ?? []).concat(dfo.filterOptions),
-              columnOptions: (dfo.columnOptions ?? []).concat(fo?.columnOptions),
-              includeDefaultFilters: dfo.includeDefaultFilters ?? false,
-              columnOptionsMode: "ReplaceAll",
-            }) as FindOptions)
-            .then(nfo => {
-              if (newWindow)
-                //window.open(Finder.findOptionsPath(nfo, { userQuery: lite }));
-                window.open(Finder.findOptionsPath(nfo));
-              else
-                //Finder.explore(nfo, { searchControlProps: { extraOptions: { userQuery: lite } } })
-                Finder.explore(nfo)
-                  .then(() => onReload && onReload());
+            .then(dfo => {
+              dfo.filterOptions = (dfo.filterOptions ?? []).concat(fo.filterOptions);
+              dfo.columnOptions = (dfo.columnOptions ?? []).concat(fo.columnOptions);
+              dfo.columnOptionsMode = "ReplaceAll";
+
+              return ({ fo: dfo, uq: lite });
             });
         });
-    }
+
+    promise.then(val => {
+      if (!val)
+        return;
+
+      if (newWindow)
+        window.open(Finder.findOptionsPath(val.fo, val.uq && { userQuery: liteKey(val.uq) }));
+      else
+        Finder.explore(val.fo, val.uq && { searchControlProps: { extraOptions: { userQuery: val.uq } } })
+          .then(() => onReload && onReload());
+    });
   }
 }
 
