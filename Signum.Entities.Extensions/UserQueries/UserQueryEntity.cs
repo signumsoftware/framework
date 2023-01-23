@@ -60,6 +60,9 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 1)]
     public int? ElementsPerPage { get; set; }
 
+    [PreserveOrder, NoRepeatValidator]
+    public MList<Lite<UserQueryEntity>> Drilldowns { get; set; } = new MList<Lite<UserQueryEntity>>();
+
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
@@ -118,7 +121,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
             new XAttribute("ColumnsMode", ColumnsMode),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             Columns.IsNullOrEmpty() ? null! : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
-            Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()));
+            Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
+            Drilldowns.IsNullOrEmpty() ? null! : new XElement("Drilldowns", Drilldowns.Select(d => new XElement("Drilldown", ctx.Include(d))).ToList()));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -138,6 +142,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
+        Drilldowns.Synchronize((element.Element("Drilldowns")?.Elements("Drilldown")).EmptyIfNull().Select(x => (Lite<UserQueryEntity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLite()).NotNull().ToMList());
+
         ParseData(ctx.GetQueryDescription(Query));
     }
 

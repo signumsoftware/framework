@@ -4,6 +4,7 @@ using Signum.Entities.UserQueries;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Signum.Entities.Chart;
 
@@ -129,7 +130,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
             Parameters.IsNullOrEmpty() ? null! : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()),
-            Drilldowns.IsNullOrEmpty() ? null! : new XElement("Drilldowns", Drilldowns.Select(f => new XElement("Drilldown", new XAttribute("Item", ctx.Include(f)))).ToList()));
+            Drilldowns.IsNullOrEmpty() ? null! : new XElement("Drilldowns", Drilldowns.Select(d => new XElement("Drilldown", ctx.Include(d))).ToList()));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -144,6 +145,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
+        Drilldowns.Synchronize((element.Element("Drilldowns")?.Elements("Drilldown")).EmptyIfNull().Select(x => (Lite<UserQueryEntity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLite()).NotNull().ToMList());
         var paramsXml = (element.Element("Parameters")?.Elements()).EmptyIfNull().ToDictionary(a => a.Attribute("Name")!.Value);
         Parameters.ForEach(p =>
         {
@@ -151,13 +153,6 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             if (pxml != null)
                 p.FromXml(pxml, ctx);
         });
-
-        var drilldowns = element.Element("Drilldowns")?.Elements().ToList();
-        if (drilldowns.HasItems())
-        {
-            var items = drilldowns.Select(x => (Lite<UserQueryEntity>)ctx.GetEntity(Guid.Parse(x.Attribute("Item")!.Value)).ToLite());
-            Drilldowns.AddRange(items);
-        }
 
         ParseData(ctx.GetQueryDescription(Query));
     }

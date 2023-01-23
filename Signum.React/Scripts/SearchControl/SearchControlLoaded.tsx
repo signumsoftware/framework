@@ -155,9 +155,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   static maxToArrayElements = 100;
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
+  static onDrilldown: ((options: Lite<Entity>[], openInNewTab: boolean, lite?: Lite<Entity>, onReload?: () => void) => void) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
+  drillDowns: Lite<Entity>[] = []; /* Lite<UserQueryEntity> */
 
   getMobileOptions(fop: FindOptionsParsed) {
     const fo = this.props.findOptions;
@@ -1543,21 +1545,24 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const isWindowsOpen = e.button == 1 || e.ctrlKey;
 
-      if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
-        var vp = getViewPromise && getViewPromise(null);
-        var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
-        if (this.props.view == "InPlace" && !isWindowsOpen)
-          AppContext.history.push(url);
-        else
-          window.open(url);
+      if (this.drillDowns.length == 0 || !SearchControlLoaded.onDrilldown) {
+        if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
+          var vp = getViewPromise && getViewPromise(null);
+          var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
+          if (this.props.view == "InPlace" && !isWindowsOpen)
+            AppContext.history.push(url);
+          else
+            window.open(url);
+        }
+        else {
+          Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
+            .then(() => {
+              this.handleOnNavigated(lite);
+            });
+        }
       }
-      else {
-        Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
-          .then(() => {
-            this.handleOnNavigated(lite);
-          });
-
-      }
+      else
+        SearchControlLoaded.onDrilldown(this.drillDowns, isWindowsOpen, lite, () => this.doSearch({}));
     }
   }
 

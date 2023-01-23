@@ -6,7 +6,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Entity, getToString, Lite, liteKey } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'
 import { translated  } from '../Translation/TranslatedInstanceTools'
@@ -23,6 +23,9 @@ import { ImportRoute } from "@framework/AsyncImport";
 import ContextMenu from '@framework/SearchControl/ContextMenu';
 import { ContextualItemsContext, MenuItemBlock, onContextualItems } from '@framework/SearchControl/ContextualItems';
 import { SearchControlLoaded } from '@framework/Search';
+import SelectorModal from '@framework/SelectorModal';
+import { DynamicTypeConditionSymbolEntity } from '../Dynamic/Signum.Entities.Dynamic';
+import { Dic } from '@framework/Globals';
 
 export function start(options: { routes: JSX.Element[] }) {
   UserAssetsClient.start({ routes: options.routes });
@@ -77,6 +80,8 @@ export function start(options: { routes: JSX.Element[] }) {
   Constructor.registerConstructor<QueryColumnEmbedded>(QueryColumnEmbedded, () => QueryColumnEmbedded.New({ token: QueryTokenEmbedded.New() }));
 
   Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
+
+  SearchControlLoaded.onDrilldown = (options, openInNewTab, lite, onReload) => handleDrilldowns(toMList(options) as any, openInNewTab, undefined, lite, onReload);
 }
 
 export function userQueryUrl(uq: Lite<UserQueryEntity>): any {
@@ -130,6 +135,42 @@ function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParse
         return Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: uq } } })
           .then(() => cic.markRows({}));
       }));
+}
+
+export function handleDrilldowns(drilldowns: MList<Lite<UserQueryEntity>>, openInNewTab: boolean, fo?: FindOptions, entity?: Lite<Entity>, onReload?: () => void) {
+  SelectorModal.chooseLite(UserQueryEntity, drilldowns.map(mle => mle.element))
+    .then(lite => {
+      if (!lite)
+        return;
+
+      return Navigator.API.fetch(lite)
+        .then(uq =>
+          Converter.toFindOptions(uq, undefined)
+            .then(dfo => {
+              dfo.filterOptions = (dfo.filterOptions ?? []).concat(fo?.filterOptions);
+              dfo.columnOptions = (dfo.columnOptions ?? []).concat(fo?.columnOptions);
+
+              if (entity)
+                dfo.filterOptions.push({ token: "Entity", value: entity });
+
+              return ({ fo: dfo, uq: uq });
+            }));
+    })
+    .then(val => {
+      if (!val)
+        return;
+
+      if (openInNewTab) {
+        var extra: any = {};
+        extra.userQuery = liteKey(toLite(val.uq));
+        Encoder.encodeDrilldowns(extra, val.uq.drilldowns);
+
+        window.open(Finder.findOptionsPath(val.fo, extra));
+      }
+      else
+        Finder.explore(val.fo, { searchControlProps: { extraOptions: { userQuery: val.uq, drilldowns: val.uq.drilldowns } } })
+          .then(() => onReload?.());
+    });
 }
 
 export module Converter {
@@ -191,6 +232,40 @@ export module Converter {
         fop.pagination = fop2.pagination;
         return fop;
       });
+  }
+}
+
+const scapeTilde = Finder.Encoder.scapeTilde;
+
+export module Encoder {
+  export function encodeDrilldowns(query: any, drilldowns: MList<Lite<UserQueryEntity>> | null | undefined) {
+    if (drilldowns && drilldowns.length > 0)
+      drilldowns.map((d, i) => query["drilldown" + i] = liteKey(d.element) + "~" + scapeTilde(getToString(d.element)));
+    else {
+      const keys = Dic.getKeys(query);
+      keys.filter(k => k.startsWith("drilldown")).forEach(k => delete query[k]);
+    }
+  }
+}
+
+export module Decoder {
+  export function decodeDrilldowns(query: any): MList<Lite<UserQueryEntity>> {
+    return Finder.Decoder.valuesInOrder(query, "drilldown").map(d => {
+      var parts = d.value.split("~");
+
+      let liteKey: string;
+      let toStr: string;
+
+      [liteKey, toStr] = parts;
+
+      var lite = (parseLite(liteKey) as Lite<UserQueryEntity>);
+      lite.model = toStr;
+
+      return ({
+        rowId: null,
+        element: lite,
+      })
+    });
   }
 }
 

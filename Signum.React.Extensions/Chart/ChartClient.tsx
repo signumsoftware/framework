@@ -29,6 +29,7 @@ import { MemoRepository } from './D3Scripts/Components/ReactChart';
 import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
 import { softCast } from '../../Signum.React/Scripts/Globals';
 import { UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';
+import * as UserQueryClient from '../UserQueries/UserQueryClient'
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
 
@@ -372,7 +373,7 @@ export interface ChartOptions {
   orderOptions?: (OrderOption | null | undefined)[];
   columnOptions?: (ChartColumnOption | null | undefined)[];
   parameters?: (ChartParameterOption | null | undefined)[];
-  drilldowns?: (ChartDrilldownOption | null | undefined)[];
+  drilldowns?: MList<Lite<UserQueryEntity>> | null | undefined;
 }
 
 export interface ChartColumnOption {
@@ -446,7 +447,7 @@ export module Encoder {
           return p.element.value != defaultParameterValue(scriptParam, c?.token && c.token.token);
         })
         .map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption),
-      drilldowns: cr.drilldowns.map(mle => mle.element).map(lite => ({ liteKey: liteKey(lite), toStr: getToString(lite) }) as ChartDrilldownOption),
+      drilldowns: cr.drilldowns,
     };
   }
 
@@ -471,7 +472,7 @@ export module Encoder {
     encodeParameters(query, co.parameters?.notNull());
 
     encodeColumn(query, co.columnOptions?.notNull());
-    encodeDrilldowns(query, co.drilldowns?.notNull());
+    UserQueryClient.Encoder.encodeDrilldowns(query, co.drilldowns?.notNull());
 
     return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
 
@@ -486,11 +487,6 @@ export module Encoder {
         (co.token ?? "") +
         (co.displayName || co.format ? ("~" + (co.displayName == null ? "" : scapeTilde(co.displayName))) : "") +
         (co.format ? "~" + scapeTilde(co.format) : ""));
-  }
-
-  export function encodeDrilldowns(query: any, drilldowns: ChartDrilldownOption[] | undefined) {
-    if (drilldowns)
-      drilldowns.map((d, i) => query["drilldown" + i] = d.liteKey + "~" + scapeTilde(d.toStr));
   }
 
   export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined) {
@@ -535,7 +531,7 @@ export module Decoder {
             filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
             columns: cols,
             parameters: Decoder.decodeParameters(query),
-            drilldowns: Decoder.decodeDrilldowns(query),
+            drilldowns: UserQueryClient.Decoder.decodeDrilldowns(query),
           });
 
           synchronizeColumns(chartRequest, cr);
@@ -589,25 +585,6 @@ export module Decoder {
         value: unscapeTildes(p.value.after("~")),
       })
     }));
-  }
-
-  export function decodeDrilldowns(query: any): MList<Lite<UserQueryEntity>> {
-    return valuesInOrder(query, "drilldown").map(d => {
-      var parts = d.value.split("~");
-
-      let liteKey: string;
-      let toStr: string;
-
-      [liteKey, toStr] = parts;
-
-      var lite = (parseLite(liteKey) as Lite<UserQueryEntity>);
-      lite.model = toStr;
-
-      return ({
-        rowId: null,
-        element: lite,
-      })
-    });
   }
 }
 

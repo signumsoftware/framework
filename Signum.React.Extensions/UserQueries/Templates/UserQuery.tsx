@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { UserQueryEntity, UserQueryMessage, QueryOrderEmbedded, QueryColumnEmbedded } from '../Signum.Entities.UserQueries'
-import { FormGroup, ValueLine, EntityLine, EntityTable } from '@framework/Lines'
+import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
@@ -51,22 +51,22 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                 {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<pre style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></pre>)}
               </div>
             </div>
-        }
-         
+          }
 
 
-        <div className="row">
-          <div className="col-sm-6">
-            <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} />
-            <ValueLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
-              helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
 
+          <div className="row">
+            <div className="col-sm-6">
+              <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} />
+              <ValueLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+                helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
+
+            </div>
+            <div className="col-sm-6">
+              <ValueLine ctx={ctx4.subCtx(e => e.refreshMode)} />
+              <ValueLine ctx={ctx4.subCtx(e => e.includeDefaultFilters)} />
+            </div>
           </div>
-          <div className="col-sm-6">
-            <ValueLine ctx={ctx4.subCtx(e => e.refreshMode)} />
-            <ValueLine ctx={ctx4.subCtx(e => e.includeDefaultFilters)} />
-          </div>
-        </div>
 
           <div>
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
@@ -108,7 +108,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                 property: a => a.displayName,
                 template: (ctx, row) => <ValueLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
                   helpText={<ValueLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; row.forceUpdate(); }} />}
-                  />
+                />
               },
             ])} />
             <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
@@ -130,6 +130,18 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               <ValueLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} />
             </div>
           </div>
+          <EntityStrip ctx={ctx.subCtx(e => e.drilldowns)}
+            findOptions={{
+              queryName: UserQueryEntity,
+              filterOptions: [
+                { token: UserQueryEntity.token(e => e.query.key), value: query.key, frozen: true },
+                { token: UserQueryEntity.token(e => e.entity.appendFilters), value: true, frozen: true },
+                ctx.value.isNew ? undefined : { token: UserQueryEntity.token(e => e.entity), operation: "DistinctTo", value: ctx.value, frozen: true },
+              ]
+            }}
+            avoidDuplicates={true}
+            vertical={true}
+            iconStart={true} />
         </div>)
       }
     </div>

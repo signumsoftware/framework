@@ -15,11 +15,8 @@ import ReactChart from '../D3Scripts/Components/ReactChart';
 import { useAPI } from '@framework/Hooks'
 import { FullscreenComponent } from './FullscreenComponent'
 import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
-import SelectorModal from '../../../Signum.React/Scripts/SelectorModal'
-import { UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { DynamicTypeConditionSymbolEntity } from '../../Dynamic/Signum.Entities.Dynamic'
-import { liteKey } from '@framework/Signum.Entities'
 
 
 export interface ChartRendererProps {
@@ -84,33 +81,15 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
         .then(() => onReload?.());
   } else {
     const fo = extractFindOptions(cr, r);
-    const promise = cr.drilldowns.length == 0 ? Promise.resolve({ fo: fo, uq: undefined }) :
-      SelectorModal.chooseLite(UserQueryEntity, cr.drilldowns.map(mle => mle.element))
-        .then(lite => {
-          if (!lite)
-            return;
-
-          return Navigator.API.fetch(lite)
-            .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-            .then(dfo => {
-              dfo.filterOptions = (dfo.filterOptions ?? []).concat(fo.filterOptions);
-              dfo.columnOptions = (dfo.columnOptions ?? []).concat(fo.columnOptions);
-              dfo.columnOptionsMode = "ReplaceAll";
-
-              return ({ fo: dfo, uq: lite });
-            });
-        });
-
-    promise.then(val => {
-      if (!val)
-        return;
-
+    if (cr.drilldowns.length == 0) {
       if (newWindow)
-        window.open(Finder.findOptionsPath(val.fo, val.uq && { userQuery: liteKey(val.uq) }));
+        window.open(Finder.findOptionsPath(fo));
       else
-        Finder.explore(val.fo, val.uq && { searchControlProps: { extraOptions: { userQuery: val.uq } } })
-          .then(() => onReload && onReload());
-    });
+        Finder.explore(fo)
+          .then(() => onReload?.());
+    }
+    else
+      UserQueryClient.handleDrilldowns(cr.drilldowns, newWindow, fo, undefined, onReload);
   }
 }
 

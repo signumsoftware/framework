@@ -35,6 +35,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [currentDrilldowns, setCurrentDrilldownsInternal] = React.useState<MList<Lite<UserQueryEntity>> | undefined>();
   const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
     let uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl() : p.searchControl.props.extraOptions?.userQuery;
     return uq;
@@ -47,10 +48,22 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     p.searchControl.props.onPageTitleChanged?.();
   }
 
+  function setCurrentDrilldowns(value: MList<Lite<UserQueryEntity>> | undefined) {
+    p.searchControl.drillDowns = value?.map(mle => mle.element) ?? [];
+    UserQueryClient.Encoder.encodeDrilldowns(p.searchControl.extraUrlParams, value);
+    setCurrentDrilldownsInternal(value);
+  }
+
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
   
   React.useEffect(() => {
     p.searchControl.extraUrlParams.userQuery = currentUserQuery && liteKey(currentUserQuery);
+
+    const drilldowns = p.searchControl.props.tag == "SearchPage" ?
+      UserQueryClient.Decoder.decodeDrilldowns(QueryString.parse(window.location.search)) :
+      p.searchControl.props.extraOptions?.drilldowns as (MList<Lite<UserQueryEntity>> | undefined);
+
+    setCurrentDrilldowns(drilldowns);
   }, []);
 
   React.useEffect(() => {
@@ -102,6 +115,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           sc.setState({ showFilters: false });
         sc.setState({ refreshMode: sc.props.defaultRefreshMode });
         setCurrentUserQuery(undefined);
+        setCurrentDrilldowns(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
         }
@@ -119,6 +133,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
             sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
           setCurrentUserQuery(uq);
+          setCurrentDrilldowns(userQuery.drilldowns);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
@@ -134,7 +149,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     Navigator.API.fetch(currentUserQuery!)
       .then(userQuery => Navigator.view(userQuery))
       .then(() => reloadList())
-      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!));
+      .then(list => {
+        if (!list.some(a => is(a, currentUserQuery))) {
+          setCurrentUserQuery(undefined);
+          setCurrentDrilldowns(undefined);
+        }
+        else
+          applyUserQuery(currentUserQuery!)
+      });
   }
 
   async function applyChanges(): Promise<UserQueryEntity> {
@@ -156,6 +178,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     uqOld.orders = uqNew.orders;
     uqOld.paginationMode = uqNew.paginationMode;
     uqOld.elementsPerPage = uqNew.elementsPerPage;
+    uqOld.drilldowns = uqNew.drilldowns;
 
     return uqOld;
   }
@@ -164,7 +187,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     applyChanges()
       .then(uqOld => Navigator.view(uqOld))
       .then(() => reloadList())
-      .then(list => !list.some(a => is(a, currentUserQuery)) ? setCurrentUserQuery(undefined) : applyUserQuery(currentUserQuery!));
+      .then(list => {
+        if (!list.some(a => is(a, currentUserQuery))) {
+          setCurrentUserQuery(undefined);
+          setCurrentDrilldowns(undefined);
+        }
+        else
+          applyUserQuery(currentUserQuery!);
+      });
   }
 
   async function createUserQuery(): Promise<UserQueryEntity> {
@@ -212,6 +242,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
       refreshMode: p.searchControl.state.refreshMode ?? "Auto",
+      drilldowns: currentDrilldowns ?? [],
     });
   }
 
@@ -222,7 +253,6 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(uq => {
         if (uq?.id) {
           reloadList().then(() => {
-            setCurrentUserQuery(toLite(uq));
             applyUserQuery(toLite(uq));
           });
         }
