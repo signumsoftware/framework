@@ -89,7 +89,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
           .then(() => onReload?.());
     }
     else
-      UserQueryClient.handleDrilldowns(cr.drilldowns, newWindow, fo, undefined, onReload);
+      UserQueryClient.handleDrilldowns(cr.drilldowns, newWindow, undefined, fo, undefined, onReload);
   }
 }
 

@@ -155,7 +155,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   static maxToArrayElements = 100;
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
-  static onDrilldown: ((options: Lite<Entity>[], openInNewTab: boolean, lite?: Lite<Entity>, onReload?: () => void) => void) | null = null;
+  static onDrilldown: ((options: Lite<Entity>[], openInNewTab?: boolean, showInPlace?: boolean, lite?: Lite<Entity>, onReload?: () => void) => void) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
@@ -1562,7 +1562,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }
       }
       else
-        SearchControlLoaded.onDrilldown(this.drillDowns, isWindowsOpen, lite, () => this.doSearch({}));
+        SearchControlLoaded.onDrilldown(this.drillDowns, isWindowsOpen || s?.avoidPopup, this.props.view == "InPlace", lite, () => this.doSearch({}));
     }
   }
 

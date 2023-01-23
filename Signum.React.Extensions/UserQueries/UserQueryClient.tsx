@@ -81,7 +81,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
 
-  SearchControlLoaded.onDrilldown = (options, openInNewTab, lite, onReload) => handleDrilldowns(toMList(options) as any, openInNewTab, undefined, lite, onReload);
+  SearchControlLoaded.onDrilldown = (options, openInNewTab, showInPlace, lite, onReload) => handleDrilldowns(toMList(options) as any, openInNewTab, showInPlace, undefined, lite, onReload);
 }
 
 export function userQueryUrl(uq: Lite<UserQueryEntity>): any {
@@ -137,7 +137,7 @@ function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParse
       }));
 }
 
-export function handleDrilldowns(drilldowns: MList<Lite<UserQueryEntity>>, openInNewTab: boolean, fo?: FindOptions, entity?: Lite<Entity>, onReload?: () => void) {
+export function handleDrilldowns(drilldowns: MList<Lite<UserQueryEntity>>, openInNewTab?: boolean, showInPlace?: boolean, fo?: FindOptions, entity?: Lite<Entity>, onReload?: () => void) {
   SelectorModal.chooseLite(UserQueryEntity, drilldowns.map(mle => mle.element))
     .then(lite => {
       if (!lite)
@@ -160,12 +160,16 @@ export function handleDrilldowns(drilldowns: MList<Lite<UserQueryEntity>>, openI
       if (!val)
         return;
 
-      if (openInNewTab) {
+      if (openInNewTab || showInPlace) {
         var extra: any = {};
         extra.userQuery = liteKey(toLite(val.uq));
         Encoder.encodeDrilldowns(extra, val.uq.drilldowns);
+        const url = Finder.findOptionsPath(val.fo, extra);
 
-        window.open(Finder.findOptionsPath(val.fo, extra));
+        if (showInPlace && !openInNewTab)
+          AppContext.history.push(url);
+        else
+          window.open(url);
       }
       else
         Finder.explore(val.fo, { searchControlProps: { extraOptions: { userQuery: val.uq, drilldowns: val.uq.drilldowns } } })
