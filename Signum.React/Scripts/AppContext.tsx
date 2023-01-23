@@ -1,7 +1,5 @@
 import * as React from "react";
-import { Route /*Switch*/ } from "react-router"
-import * as H from "history"
-//import * as AppRelativeRoutes from "./AppRelativeRoutes";
+import * as H from 'history';
 import { IUserEntity, TypeEntity } from "./Signum.Entities.Basics";
 import { Dic, classes, } from './Globals';
 import { ImportRoute } from "./AsyncImport";
@@ -38,15 +36,15 @@ export function useTitle(title: string, deps?: readonly any[]) {
   }, deps);
 }
 
-//export function createAppRelativeHistory(): H.History {
-//  var h = H.createBrowserHistory({});
-//  AppRelativeRoutes.useAppRelativeBasename(h);
-//  AppRelativeRoutes.useAppRelativeComputeMatch(Route);
-//  AppRelativeRoutes.useAppRelativeComputeMatch(ImportRoute as any);
-//  AppRelativeRoutes.useAppRelativeSwitch(Switch);
-//  setCurrentHistory(h);
-//  return h;
-//}
+export function createAppRelativeHistory(): H.History {
+  var h = H.createBrowserHistory({});
+  //AppRelativeRoutes.useAppRelativeBasename(h);
+  //AppRelativeRoutes.useAppRelativeComputeMatch(Route);
+  //AppRelativeRoutes.useAppRelativeComputeMatch(ImportRoute as any);
+  //AppRelativeRoutes.useAppRelativeSwitch(Switch);
+  setCurrentHistory(h);
+  return h;
+}
 
 let rtl = false;
 export function isRtl() {

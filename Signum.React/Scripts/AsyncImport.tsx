@@ -1,6 +1,6 @@
 import * as React from "react";
 import { PathRouteProps, Route } from "react-router-dom";
-import * as H from "history";
+import * as H from 'history';
 import * as PropTypes from "prop-types";
 import { useAPI } from "./Hooks";
 
@@ -9,12 +9,12 @@ export interface ComponentModule {
 }
 
 interface ImportComponentProps {
-  onImportModule: () => Promise<ComponentModule>;
+  onImport: () => Promise<ComponentModule>;
   componentProps?: any;
 }
 
-export function ImportComponent({ onImportModule, componentProps }: ImportComponentProps) {
-  const module = useAPI(() => onImportModule(), [onImportModule.toString()]);
+export function ImportComponent({ onImport, componentProps }: ImportComponentProps) {
+  const module = useAPI(() => onImport(), [onImport.toString()]);
 
   if (!module)
     return null;
@@ -22,14 +22,14 @@ export function ImportComponent({ onImportModule, componentProps }: ImportCompon
   return React.createElement(module.default, componentProps);
 }
 
-interface ImportRouteProps extends PathRouteProps {
+//interface ImportRouteProps extends PathRouteProps {
   
-  onImportModule: () => Promise<ComponentModule>;
-}
+//  onImportModule: () => Promise<ComponentModule>;
+//}
 
-export function ImportRoute({ onImportModule, ...rest }: ImportRouteProps) {
-  return (
-    <Route {...rest} element={<ImportComponent onImportModule={onImportModule} />}/>
-  );
-}
+//export function GetImportRoute({ onImportModule, ...rest }: ImportRouteProps) {
+//  return (
+//    <Route {...rest} element={<ImportComponent onImportModule={onImportModule} />}/>
+//  );
+//}
  

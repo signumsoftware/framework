@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
@@ -13,7 +13,7 @@ import { useAPIWithReload, useInterval } from '@framework/Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 
-export default function WorkflowPanelPage(p: RouteComponentProps<{}>, {}){
+export default function WorkflowPanelPage(){
 
   return (
     <div>

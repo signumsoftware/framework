@@ -56,7 +56,6 @@ export default function TranslationInstanceView() {
 
   function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
-    const params = params;
     const records = result!.instances.flatMap(ins => Dic.getKeys(ins.translations).flatMap(k => {
       const pr = k.tryBefore(";") ?? k;
       const rowId = k.tryAfter(";");

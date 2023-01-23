@@ -9,7 +9,7 @@ const isModifiedEvent = (event: React.MouseEvent<any>) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
 
 interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  to: H.LocationDescriptor<any>;
+  to: H.To;
   replace?: boolean;
   onClick?: (e: React.MouseEvent<any>) => void;
   innerRef?: (e: any) => void;
@@ -18,7 +18,7 @@ interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
   strict?: boolean;
   exact?: boolean;
   state?: any;
-  isActive?: boolean | ((m: PathMatch | null, l: H.Location<any>) => boolean);
+  isActive?: boolean | ((m: PathMatch | null, l: H.Location) => boolean);
 }
 
 export function LinkContainer({

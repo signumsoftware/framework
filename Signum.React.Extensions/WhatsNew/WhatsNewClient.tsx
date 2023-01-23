@@ -20,8 +20,8 @@ import { FilePathEmbedded } from '../Files/Signum.Entities.Files'
 
 export function start(options: { routes: JSX.Element[] }) {
 
-  options.routes.push(<ImportRoute path="~/newspage/:newsId" onImportModule={() => import("./Templates/NewsPage")} />);
-  options.routes.push(<ImportRoute path="~/news" onImportModule={() => import("./Templates/AllNewsPage")} />);
+  options.routes.push(<Route path="/newspage/:newsId" element={<ImportComponent onImport={() => import("./Templates/NewsPage")} />} />);
+  options.routes.push(<Route path="/news" element={<ImportComponent onImport={() => import("./Templates/AllNewsPage")} />} />);
 
   Navigator.addSettings(new EntitySettings(WhatsNewEntity, t => import('./Templates/WhatsNew'), { modalSize: "xl" }));
 

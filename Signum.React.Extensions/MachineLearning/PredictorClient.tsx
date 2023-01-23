@@ -101,7 +101,7 @@ export function start(options: { routes: JSX.Element[] }) {
   }));
 
   registerResultRenderer(PredictorSimpleResultSaver.Full, ctx =>
-    <ImportComponent onImportModule={() => import("./Templates/SimpleResultButton")} componentProps={{ ctx: ctx }} />
+    <ImportComponent onImport={() => import("./Templates/SimpleResultButton")} componentProps={{ ctx: ctx }} />
   );
 }
 

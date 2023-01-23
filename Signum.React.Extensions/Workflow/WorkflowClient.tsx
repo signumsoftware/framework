@@ -660,7 +660,7 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
 
 export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, options?: Navigator.ViewOptions): Promise<CaseActivityEntity | undefined> {
   return import("./Case/CaseFrameModal")
-    .then(NP => NP.default.openView(entityOrPack, options));
+    .then(NP => NP.CaseFrameModalManager.openView(entityOrPack, options));
 
 }
 

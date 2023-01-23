@@ -1,10 +1,6 @@
-import * as React from 'react'
-import * as History from 'history'
-import { FindOptions, ResultTable } from './Search';
-import * as Finder from './Finder';
+import * as React from 'react';
+import * as History from "history";
 import * as AppContext from './AppContext';
-import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
-import { Type, QueryTokenString, newLite } from './Reflection';
 
 export function useForceUpdate(): () => void {
   const [count, setCount] = React.useState(0);
@@ -299,8 +295,8 @@ export function useLock<T>(): [/*isLocked:*/boolean, /*lock:*/(makeCall: () => P
   return [isLocked, lock];
 }
 
-export function useHistoryListen(locationChanged: (location: History.Location, action: History.Action) => void, enabled: boolean = true, extraDeps?: ReadonlyArray<any>) {
-  const unregisterCallback = React.useRef<History.UnregisterCallback | undefined>(undefined);
+export function useHistoryListen(locationChanged: (update: History.Update) => void, enabled: boolean = true, extraDeps?: ReadonlyArray<any>) {
+  const unregisterCallback = React.useRef<(() => void) | undefined>(undefined);
   React.useEffect(() => {
     if (!enabled)
       return;

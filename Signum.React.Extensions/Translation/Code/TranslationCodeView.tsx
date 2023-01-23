@@ -45,7 +45,6 @@ export default function TranslationCodeView() {
 
   function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
-    const params = params;
     API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => notifySuccess());
   }
 

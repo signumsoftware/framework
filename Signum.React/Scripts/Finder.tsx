@@ -25,11 +25,9 @@ import {
   Anonymous, toLuxonDurationFormat, timeToString, toFormatWithFixes
 } from './Reflection';
 
-import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded, { SearchControlMobileOptions } from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
-import { SearchControl } from "./Search";
 import { ButtonBarElement } from "./TypeContext";
 import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
@@ -37,9 +35,6 @@ import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
-import { Search } from "history";
-import { parse } from "@fortawesome/fontawesome-svg-core";
-import { faUnderline } from "@fortawesome/free-solid-svg-icons";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};

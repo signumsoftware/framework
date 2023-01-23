@@ -23,8 +23,6 @@ import { EntityDump } from '../DiffLogClient'
 export default function TimeMachinePage() {
   const params = useParams() as { type: string; id: string };
 
-  var params = params;
-
   const lite = useAPI(() => {
     var lite = newLite(params.type, params.id!);
 

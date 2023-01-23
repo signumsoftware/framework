@@ -23,35 +23,11 @@ import { classes } from '../Globals'
 
 interface FramePageState {
   pack: EntityPack<Entity>;
-  lastEntity?: string;
+  lastEntity: string;
   getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
   refreshCount: number;
   createNew?: () => Promise<EntityPack<Entity> | undefined>;
   executing?: boolean;
-}
-
-function useLooseChanges(entity?: ModifiableEntity) {
-
-  //var str = React.useMemo(() => JSON.stringify(p.entity), [p.entity]);
-
-  //let blocker = unstable_useBlocker(p.entity != null);
-
-  //React.useEffect(() => {
-  //  if (blocker.state === "blocked" && !when) {
-  //    blocker.reset();
-  //  }
-  //}, [blocker, when]);
-
-  //React.useEffect(() => {
-  //  if (blocker.state === "blocked") {
-  //    let proceed = window.confirm(JavascriptMessage.loseCurrentChanges.niceToString());
-  //    if (proceed) {
-  //      setTimeout(blocker.proceed, 0);
-  //    } else {
-  //      blocker.reset();
-  //    }
-  //  }
-  //}, [blocker]);
 }
 
 export default function FramePage() {
@@ -78,7 +54,18 @@ export default function FramePage() {
 
   useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
 
-  useLooseChanges(state?.pack.entity);
+  useLooseChanges(state && ({ entity: state.pack.entity, lastEntity: state.lastEntity }));
+
+
+  function setPack(pack: EntityPack<Entity>, getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>, createNew?: () => Promise<EntityPack<Entity> | undefined>) {
+    return setState({
+      pack,
+      lastEntity: JSON.stringify(pack.entity),
+      getComponent,
+      createNew: createNew,
+      refreshCount: state ? state.refreshCount + 1 : 0
+    });
+  }
 
   React.useEffect(() => {
 
@@ -98,13 +85,7 @@ export default function FramePage() {
             if (!mounted.current)
               return undefined;
 
-            return setState({
-              pack: a.pack!,
-              lastEntity: JSON.stringify(a.pack!.entity),
-              createNew: a.createNew,
-              getComponent: getComponent,
-              refreshCount: state ? state.refreshCount + 1 : 0
-            }).then(() => {
+            return setPack(a.pack!, getComponent, a.createNew).then(() => {
               if (id == null && a.pack!.entity.id != null) { //Constructor returns saved entity
                 AppContext.history.replace(Navigator.navigateRoute(a.pack!.entity));
               }
@@ -271,12 +252,7 @@ export default function FramePage() {
           .then(() => loadComponent(packEntity))
           .then(gc => {
             if (mounted.current) {
-              setState({
-                pack: packEntity,
-                getComponent: gc,
-                refreshCount: s.refreshCount + 1,
-
-              }).then(() => {
+              setPack(packEntity, gc).then(() => {
                 if (newRoute) {
                   if (replaceRoute)
                     AppContext.history.replace(newRoute);
@@ -290,11 +266,7 @@ export default function FramePage() {
           });
       }
       else {
-        setState({
-          pack: packEntity,
-          getComponent: s.getComponent,
-          refreshCount: s.refreshCount + 1,
-        }).then(() => {
+        setPack(packEntity, s.getComponent).then(() => {
           if (newRoute) {
             if (replaceRoute)
               AppContext.history.replace(newRoute);
@@ -394,3 +366,18 @@ function hasChanges(state: FramePageState) {
 
 
 
+export function useLooseChanges(pair?: { entity: ModifiableEntity, lastEntity: string }) {
+
+  let blocker = unstable_useBlocker(() => pair != null && JSON.stringify(pair.entity) != pair.lastEntity);
+
+  React.useEffect(() => {
+    if (blocker.state === "blocked") {
+      let proceed = window.confirm(JavascriptMessage.loseCurrentChanges.niceToString());
+      if (proceed) {
+        setTimeout(blocker.proceed, 0);
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker]);
+}

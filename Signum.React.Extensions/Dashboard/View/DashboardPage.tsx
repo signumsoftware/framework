@@ -14,20 +14,15 @@ import { translated } from '../../Translation/TranslatedInstanceTools'
 import * as DashboardClient from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 
-
-
-function getQueryEntity(props: DashboardPageProps): string {
-  return QueryString.parse(props.location.search).entity as string;
-}
-
 export default function DashboardPage() {
+  const location = useLocation();
   const params = useParams() as { dashboardId: string };
 
   const [dashboardWithQueries, reloadDashboard] = useAPIWithReload(signal => DashboardClient.API.get(newLite(DashboardEntity, params.dashboardId)), [params.dashboardId]);
 
   const dashboard = dashboardWithQueries?.dashboard;
 
-  var entityKey = getQueryEntity(p);
+  var entityKey = QueryString.parse(location.search).entity as string;
 
   const entity = useAPI(signal => entityKey ? Navigator.API.fetch(parseLite(entityKey)) : Promise.resolve(null), [entityKey]);
 

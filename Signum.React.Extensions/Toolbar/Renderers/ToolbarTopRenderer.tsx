@@ -37,8 +37,8 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
     }
   }
 
-  useHistoryListen((location: History.Location, action: History.Action) => {
-    changeActive(location);
+  useHistoryListen(update => {
+    changeActive(update.location);
   }, response != null);
 
   React.useEffect(() => changeActive(AppContext.history.location), [response]);
