@@ -43,7 +43,7 @@ export default function LoginDropdown(p: {
   var extraButtons = p.extraMenuItems && p.extraMenuItems(user);
 
   return (
-    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center"><i className="sf-login-custom-icon"></i><SmallProfilePhoto user={toLite(user)} /> &nbsp;{p.renderName ? p.renderName(user) : user.userName!}</span>} align="end">
+    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center">{LoginDropdown.customLoginIcon(user)} &nbsp;{p.renderName ? p.renderName(user) : user.userName!}</span>} align="end">
       {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-pen" fixedWidth className="me-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
       {cpv && <LinkContainer to="~/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth className="me-2" /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
@@ -55,6 +55,8 @@ export default function LoginDropdown(p: {
     </NavDropdown>
   );
 }
+
+LoginDropdown.customLoginIcon = (user: UserEntity) => <SmallProfilePhoto user={toLite(user)} />;
 
 
 

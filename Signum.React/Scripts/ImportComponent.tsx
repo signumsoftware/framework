@@ -4,12 +4,8 @@ import * as H from 'history';
 import * as PropTypes from "prop-types";
 import { useAPI } from "./Hooks";
 
-export interface ComponentModule {
-  default: React.ComponentType<any>;
-}
-
 interface ImportComponentProps {
-  onImport: () => Promise<ComponentModule>;
+  onImport: () => Promise<{ default: React.ComponentType<any>; }>;
   componentProps?: any;
 }
 
@@ -21,15 +17,3 @@ export function ImportComponent({ onImport, componentProps }: ImportComponentPro
 
   return React.createElement(module.default, componentProps);
 }
-
-//interface ImportRouteProps extends PathRouteProps {
-  
-//  onImportModule: () => Promise<ComponentModule>;
-//}
-
-//export function GetImportRoute({ onImportModule, ...rest }: ImportRouteProps) {
-//  return (
-//    <Route {...rest} element={<ImportComponent onImportModule={onImportModule} />}/>
-//  );
-//}
- 

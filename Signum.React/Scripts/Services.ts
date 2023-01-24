@@ -19,10 +19,9 @@ export interface AjaxOptions {
 }
 
 export function baseUrl(options: AjaxOptions): string {
-  const baseUrl = window.__baseUrl;
 
-  if (options.url.startsWith("~/"))
-    return baseUrl + options.url.after("~/");
+  if (options.url.startsWith("/"))
+    return window.__baseName + options.url;
 
   return options.url;
 }

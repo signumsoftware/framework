@@ -2,10 +2,10 @@ import * as React from "react";
 import * as H from 'history';
 import { IUserEntity, TypeEntity } from "./Signum.Entities.Basics";
 import { Dic, classes, } from './Globals';
-import { ImportRoute } from "./AsyncImport";
 import { clearContextHeaders, ajaxGet, ajaxPost } from "./Services";
 import { PseudoType, Type, getTypeName } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
+import { Router } from "@remix-run/router/dist/router";
 
 Dic.skipClasses.push(React.Component);
 
@@ -19,9 +19,9 @@ export function setCurrentUser(user: IUserEntity | undefined) {
   currentUser = user;
 }
 
-export let history: H.History;
-export function setCurrentHistory(h: H.History) {
-  history = h;
+export let router: Router;
+export function setRouter(r: Router) {
+  router = r;
 }
 
 export let setTitle: (pageTitle?: string) => void;
@@ -34,16 +34,6 @@ export function useTitle(title: string, deps?: readonly any[]) {
     setTitle(title);
     return () => setTitle();
   }, deps);
-}
-
-export function createAppRelativeHistory(): H.History {
-  var h = H.createBrowserHistory({});
-  //AppRelativeRoutes.useAppRelativeBasename(h);
-  //AppRelativeRoutes.useAppRelativeComputeMatch(Route);
-  //AppRelativeRoutes.useAppRelativeComputeMatch(ImportRoute as any);
-  //AppRelativeRoutes.useAppRelativeSwitch(Switch);
-  setCurrentHistory(h);
-  return h;
 }
 
 let rtl = false;
@@ -105,15 +95,19 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
 }
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {
+  if (appRelativeUrl?.startsWith("/") && window.__baseName != "")
+    if (!appRelativeUrl.startsWith(window.__baseName))
+      return window.__baseName + appRelativeUrl;
+
   if (appRelativeUrl?.startsWith("~/"))
-    return window.__baseUrl + appRelativeUrl.after("~/");
+    return window.__baseName + appRelativeUrl.after("~"); //For backwards compatibility
 
-  var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "/~/"; //In Link render ~/ is considered a relative url
-  if (appRelativeUrl?.startsWith(relativeCrappyUrl))
-    return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
+  //var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "//"; //In Link render / is considered a relative url
+  //if (appRelativeUrl?.startsWith(relativeCrappyUrl))
+  //  return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
 
-  if (appRelativeUrl?.startsWith(window.__baseUrl) || appRelativeUrl?.startsWith("http"))
-    return appRelativeUrl;
+  //if (appRelativeUrl?.startsWith(window.__baseUrl) || appRelativeUrl?.startsWith("http"))
+  //  return appRelativeUrl;
 
   return appRelativeUrl;
 }
