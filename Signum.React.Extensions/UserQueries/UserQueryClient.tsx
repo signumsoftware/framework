@@ -81,8 +81,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
   Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
 
-  SearchControlLoaded.onCustomDrilldown = (options, openInNewTab, showInPlace, entity, onReload) =>
-    handleCustomDrilldowns(toMList(options) as any, { openInNewTab, showInPlace, entity, onReload });
+  SearchControlLoaded.onCustomDrilldown = (items, options?: any) => handleCustomDrilldowns(toMList(items) as any, options);
 }
 
 export function userQueryUrl(uq: Lite<UserQueryEntity>): any {
@@ -145,19 +144,19 @@ export function handleCustomDrilldowns(items: MList<Lite<UserQueryEntity>>, opti
   const showInPlace = options?.showInPlace;
   const onReload = options?.onReload;
 
-  SelectorModal.chooseLite(UserQueryEntity, items.map(mle => mle.element))
+  return SelectorModal.chooseLite(UserQueryEntity, items.map(mle => mle.element))
     .then(lite => {
       if (!lite)
         return;
 
       return Navigator.API.fetch(lite)
         .then(uq =>
-          Converter.toFindOptions(uq, undefined)
+          Converter.toFindOptions(uq, (uq.entityType && entity) ?? undefined)
             .then(dfo => {
               dfo.filterOptions = (dfo.filterOptions ?? []).concat(fo?.filterOptions);
-              dfo.columnOptions = (dfo.columnOptions ?? []).concat(fo?.columnOptions);
+              dfo.systemTime = fo?.systemTime ?? dfo.systemTime;
 
-              if (entity)
+              if (uq.appendFilters && entity)
                 dfo.filterOptions.push({ token: "Entity", value: entity });
 
               return ({ fo: dfo, uq: uq });

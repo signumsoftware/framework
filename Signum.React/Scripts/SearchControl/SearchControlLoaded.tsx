@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, FindOptions
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -155,7 +155,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   static maxToArrayElements = 100;
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
-  static onCustomDrilldown: ((options: Lite<Entity>[], openInNewTab?: boolean, showInPlace?: boolean, lite?: Lite<Entity>, onReload?: () => void) => void) | null = null;
+  static onCustomDrilldown: ((items: Lite<Entity>[], options?: { openInNewTab?: boolean, showInPlace?: boolean, fo?: FindOptions, entity?: Lite<Entity>, onReload?: () => void }) => Promise<void>) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
@@ -1491,14 +1491,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var filters = SearchControlLoaded.getGroupFilters(row, resFo);
 
-    return Finder.explore({
+    const fo = ({
       queryName: resFo.queryKey,
       filterOptions: filters,
       columnOptions: extraColumns,
       columnOptionsMode: "ReplaceOrAdd",
       systemTime: resFo.systemTime && { ...resFo.systemTime },
       includeDefaultFilters: false,
-    }).then(() => {
+    } as FindOptions);
+
+    if (this.customDrilldowns.length > 0 && SearchControlLoaded.onCustomDrilldown)
+      return SearchControlLoaded.onCustomDrilldown(this.customDrilldowns, { fo, onReload: () => this.dataChanged() });
+
+    return Finder.explore(fo).then(() => {
       this.dataChanged();
     });
   }
@@ -1545,24 +1550,23 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const isWindowsOpen = e.button == 1 || e.ctrlKey;
 
-      if (this.customDrilldowns.length == 0 || !SearchControlLoaded.onCustomDrilldown) {
-        if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
-          var vp = getViewPromise && getViewPromise(null);
-          var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
-          if (this.props.view == "InPlace" && !isWindowsOpen)
-            AppContext.history.push(url);
-          else
-            window.open(url);
-        }
-        else {
-          Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
-            .then(() => {
-              this.handleOnNavigated(lite);
-            });
-        }
+      if (this.customDrilldowns.length >= 0 && SearchControlLoaded.onCustomDrilldown)
+        return SearchControlLoaded.onCustomDrilldown(this.customDrilldowns, { openInNewTab: isWindowsOpen || s?.avoidPopup, showInPlace: this.props.view == "InPlace", entity: lite, onReload: () => this.doSearch({}) });
+
+      if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
+        var vp = getViewPromise && getViewPromise(null);
+        var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
+        if (this.props.view == "InPlace" && !isWindowsOpen)
+          AppContext.history.push(url);
+        else
+          window.open(url);
       }
-      else
-        SearchControlLoaded.onCustomDrilldown(this.customDrilldowns, isWindowsOpen || s?.avoidPopup, this.props.view == "InPlace", lite, () => this.doSearch({}));
+      else {
+        Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
+          .then(() => {
+            this.handleOnNavigated(lite);
+          });
+      }
     }
   }
 
