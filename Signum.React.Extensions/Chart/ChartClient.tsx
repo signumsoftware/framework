@@ -373,7 +373,7 @@ export interface ChartOptions {
   orderOptions?: (OrderOption | null | undefined)[];
   columnOptions?: (ChartColumnOption | null | undefined)[];
   parameters?: (ChartParameterOption | null | undefined)[];
-  drilldowns?: MList<Lite<UserQueryEntity>> | null | undefined;
+  customDrilldowns?: MList<Lite<UserQueryEntity>> | null | undefined;
 }
 
 export interface ChartColumnOption {
@@ -442,7 +442,7 @@ export module Encoder {
           return p.element.value != defaultParameterValue(scriptParam, c?.token && c.token.token);
         })
         .map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption),
-      drilldowns: cr.drilldowns,
+      customDrilldowns: cr.customDrilldowns,
     };
   }
 
@@ -467,7 +467,7 @@ export module Encoder {
     encodeParameters(query, co.parameters?.notNull());
 
     encodeColumn(query, co.columnOptions?.notNull());
-    UserQueryClient.Encoder.encodeDrilldowns(query, co.drilldowns?.notNull());
+    UserQueryClient.Encoder.encodeCustomDrilldowns(query, co.customDrilldowns?.notNull());
 
     return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
 
@@ -526,7 +526,7 @@ export module Decoder {
             filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
             columns: cols,
             parameters: Decoder.decodeParameters(query),
-            drilldowns: UserQueryClient.Decoder.decodeDrilldowns(query),
+            customDrilldowns: UserQueryClient.Decoder.decodeCustomDrilldowns(query),
           });
 
           synchronizeColumns(chartRequest, cr);

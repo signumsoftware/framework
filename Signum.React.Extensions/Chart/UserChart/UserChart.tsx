@@ -49,7 +49,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
         onTokenChange={() => forceUpdate()}
         onRedraw={() => forceUpdate()}
         onOrderChanged={() => forceUpdate()} />
-      <EntityStrip ctx={ctx.subCtx(e => e.drilldowns)}
+      <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}
         findOptions={{
           queryName: UserQueryEntity,
           filterOptions: [

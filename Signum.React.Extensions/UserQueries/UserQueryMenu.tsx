@@ -35,7 +35,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const [currentDrilldowns, setCurrentDrilldownsInternal] = React.useState<MList<Lite<UserQueryEntity>> | undefined>();
+  const [currentCustomDrilldowns, setCurrentDrilldownsInternal] = React.useState<MList<Lite<UserQueryEntity>> | undefined>();
   const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
     let uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl() : p.searchControl.props.extraOptions?.userQuery;
     return uq;
@@ -48,9 +48,9 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     p.searchControl.props.onPageTitleChanged?.();
   }
 
-  function setCurrentDrilldowns(value: MList<Lite<UserQueryEntity>> | undefined) {
-    p.searchControl.drillDowns = value?.map(mle => mle.element) ?? [];
-    UserQueryClient.Encoder.encodeDrilldowns(p.searchControl.extraUrlParams, value);
+  function setCurrentCustomDrilldowns(value: MList<Lite<UserQueryEntity>> | undefined) {
+    p.searchControl.customDrilldowns = value?.map(mle => mle.element) ?? [];
+    UserQueryClient.Encoder.encodeCustomDrilldowns(p.searchControl.extraUrlParams, value);
     setCurrentDrilldownsInternal(value);
   }
 
@@ -59,11 +59,11 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   React.useEffect(() => {
     p.searchControl.extraUrlParams.userQuery = currentUserQuery && liteKey(currentUserQuery);
 
-    const drilldowns = p.searchControl.props.tag == "SearchPage" ?
-      UserQueryClient.Decoder.decodeDrilldowns(QueryString.parse(window.location.search)) :
-      p.searchControl.props.extraOptions?.drilldowns as (MList<Lite<UserQueryEntity>> | undefined);
+    const cds = p.searchControl.props.tag == "SearchPage" ?
+      UserQueryClient.Decoder.decodeCustomDrilldowns(QueryString.parse(window.location.search)) :
+      p.searchControl.props.extraOptions?.customDrilldowns as (MList<Lite<UserQueryEntity>> | undefined);
 
-    setCurrentDrilldowns(drilldowns);
+    setCurrentCustomDrilldowns(cds);
   }, []);
 
   React.useEffect(() => {
@@ -115,7 +115,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           sc.setState({ showFilters: false });
         sc.setState({ refreshMode: sc.props.defaultRefreshMode });
         setCurrentUserQuery(undefined);
-        setCurrentDrilldowns(undefined);
+        setCurrentCustomDrilldowns(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
         }
@@ -133,7 +133,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
             sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
           setCurrentUserQuery(uq);
-          setCurrentDrilldowns(userQuery.drilldowns);
+          setCurrentCustomDrilldowns(userQuery.customDrilldowns);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
@@ -152,7 +152,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(list => {
         if (!list.some(a => is(a, currentUserQuery))) {
           setCurrentUserQuery(undefined);
-          setCurrentDrilldowns(undefined);
+          setCurrentCustomDrilldowns(undefined);
         }
         else
           applyUserQuery(currentUserQuery!)
@@ -178,7 +178,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     uqOld.orders = uqNew.orders;
     uqOld.paginationMode = uqNew.paginationMode;
     uqOld.elementsPerPage = uqNew.elementsPerPage;
-    uqOld.drilldowns = uqNew.drilldowns;
+    uqOld.customDrilldowns = uqNew.customDrilldowns;
 
     return uqOld;
   }
@@ -190,7 +190,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(list => {
         if (!list.some(a => is(a, currentUserQuery))) {
           setCurrentUserQuery(undefined);
-          setCurrentDrilldowns(undefined);
+          setCurrentCustomDrilldowns(undefined);
         }
         else
           applyUserQuery(currentUserQuery!);
@@ -242,7 +242,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
       refreshMode: p.searchControl.state.refreshMode ?? "Auto",
-      drilldowns: currentDrilldowns ?? [],
+      customDrilldowns: currentCustomDrilldowns ?? [],
     });
   }
 

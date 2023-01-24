@@ -11,7 +11,7 @@ public interface IChartBase
     
     MList<ChartColumnEmbedded> Columns { get; }
     MList<ChartParameterEmbedded> Parameters { get; }
-    MList<Lite<UserQueryEntity>> Drilldowns { get; }
+    MList<Lite<UserQueryEntity>> CustomDrilldowns { get; }
 
     void FixParameters(ChartColumnEmbedded chartColumnEntity);
 }
@@ -62,7 +62,7 @@ public class ChartRequestModel : ModelEntity, IChartBase
     public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
     [NoRepeatValidator]
-    public MList<Lite<UserQueryEntity>> Drilldowns { get; set; } = new MList<Lite<UserQueryEntity>>();
+    public MList<Lite<UserQueryEntity>> CustomDrilldowns { get; set; } = new MList<Lite<UserQueryEntity>>();
 
     public int? MaxRows { get; set; }
 

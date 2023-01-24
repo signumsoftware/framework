@@ -130,7 +130,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               <ValueLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} />
             </div>
           </div>
-          <EntityStrip ctx={ctx.subCtx(e => e.drilldowns)}
+          <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}
             findOptions={{
               queryName: UserQueryEntity,
               filterOptions: [

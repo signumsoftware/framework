@@ -81,7 +81,8 @@ export function start(options: { routes: JSX.Element[] }) {
 
   Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
 
-  SearchControlLoaded.onDrilldown = (options, openInNewTab, showInPlace, lite, onReload) => handleDrilldowns(toMList(options) as any, openInNewTab, showInPlace, undefined, lite, onReload);
+  SearchControlLoaded.onCustomDrilldown = (options, openInNewTab, showInPlace, entity, onReload) =>
+    handleCustomDrilldowns(toMList(options) as any, { openInNewTab, showInPlace, entity, onReload });
 }
 
 export function userQueryUrl(uq: Lite<UserQueryEntity>): any {
@@ -137,8 +138,14 @@ function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParse
       }));
 }
 
-export function handleDrilldowns(drilldowns: MList<Lite<UserQueryEntity>>, openInNewTab?: boolean, showInPlace?: boolean, fo?: FindOptions, entity?: Lite<Entity>, onReload?: () => void) {
-  SelectorModal.chooseLite(UserQueryEntity, drilldowns.map(mle => mle.element))
+export function handleCustomDrilldowns(items: MList<Lite<UserQueryEntity>>, options?: { openInNewTab?: boolean, showInPlace?: boolean, fo?: FindOptions, entity?: Lite<Entity>, onReload?: () => void }) {
+  const fo = options?.fo;
+  const entity = options?.entity;
+  const openInNewTab = options?.openInNewTab;
+  const showInPlace = options?.showInPlace;
+  const onReload = options?.onReload;
+
+  SelectorModal.chooseLite(UserQueryEntity, items.map(mle => mle.element))
     .then(lite => {
       if (!lite)
         return;
@@ -163,7 +170,7 @@ export function handleDrilldowns(drilldowns: MList<Lite<UserQueryEntity>>, openI
       if (openInNewTab || showInPlace) {
         var extra: any = {};
         extra.userQuery = liteKey(toLite(val.uq));
-        Encoder.encodeDrilldowns(extra, val.uq.drilldowns);
+        Encoder.encodeCustomDrilldowns(extra, val.uq.customDrilldowns);
         const url = Finder.findOptionsPath(val.fo, extra);
 
         if (showInPlace && !openInNewTab)
@@ -172,7 +179,7 @@ export function handleDrilldowns(drilldowns: MList<Lite<UserQueryEntity>>, openI
           window.open(url);
       }
       else
-        Finder.explore(val.fo, { searchControlProps: { extraOptions: { userQuery: val.uq, drilldowns: val.uq.drilldowns } } })
+        Finder.explore(val.fo, { searchControlProps: { extraOptions: { userQuery: val.uq, customDrilldowns: val.uq.customDrilldowns } } })
           .then(() => onReload?.());
     });
 }
@@ -242,19 +249,19 @@ export module Converter {
 const scapeTilde = Finder.Encoder.scapeTilde;
 
 export module Encoder {
-  export function encodeDrilldowns(query: any, drilldowns: MList<Lite<UserQueryEntity>> | null | undefined) {
+  export function encodeCustomDrilldowns(query: any, drilldowns: MList<Lite<UserQueryEntity>> | null | undefined) {
     if (drilldowns && drilldowns.length > 0)
-      drilldowns.map((d, i) => query["drilldown" + i] = liteKey(d.element) + "~" + scapeTilde(getToString(d.element)));
+      drilldowns.map((d, i) => query["customDrilldown" + i] = liteKey(d.element) + "~" + scapeTilde(getToString(d.element)));
     else {
       const keys = Dic.getKeys(query);
-      keys.filter(k => k.startsWith("drilldown")).forEach(k => delete query[k]);
+      keys.filter(k => k.startsWith("customDrilldown")).forEach(k => delete query[k]);
     }
   }
 }
 
 export module Decoder {
-  export function decodeDrilldowns(query: any): MList<Lite<UserQueryEntity>> {
-    return Finder.Decoder.valuesInOrder(query, "drilldown").map(d => {
+  export function decodeCustomDrilldowns(query: any): MList<Lite<UserQueryEntity>> {
+    return Finder.Decoder.valuesInOrder(query, "customDrilldown").map(d => {
       var parts = d.value.split("~");
 
       let liteKey: string;

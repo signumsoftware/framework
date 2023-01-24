@@ -132,7 +132,7 @@ export interface ChartRequestModel extends Entities.ModelEntity {
   chartScript: ChartScriptSymbol;
   columns: Entities.MList<ChartColumnEmbedded>;
   parameters: Entities.MList<ChartParameterEmbedded>;
-  drilldowns: Entities.MList<Entities.Lite<UserQueries.UserQueryEntity>>;
+  customDrilldowns: Entities.MList<Entities.Lite<UserQueries.UserQueryEntity>>;
   maxRows: number | null;
 }
 
@@ -188,7 +188,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   parameters: Entities.MList<ChartParameterEmbedded>;
   columns: Entities.MList<ChartColumnEmbedded>;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-  drilldowns: Entities.MList<Entities.Lite<UserQueries.UserQueryEntity>>;
+  customDrilldowns: Entities.MList<Entities.Lite<UserQueries.UserQueryEntity>>;
   guid: string /*Guid*/;
 }
 

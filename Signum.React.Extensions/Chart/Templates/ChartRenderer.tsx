@@ -81,7 +81,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
         .then(() => onReload?.());
   } else {
     const fo = extractFindOptions(cr, r);
-    if (cr.drilldowns.length == 0) {
+    if (cr.customDrilldowns.length == 0) {
       if (newWindow)
         window.open(Finder.findOptionsPath(fo));
       else
@@ -89,7 +89,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
           .then(() => onReload?.());
     }
     else
-      UserQueryClient.handleDrilldowns(cr.drilldowns, newWindow, undefined, fo, undefined, onReload);
+      UserQueryClient.handleCustomDrilldowns(cr.customDrilldowns, { openInNewTab: newWindow, fo, onReload });
   }
 }
 

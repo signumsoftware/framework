@@ -155,11 +155,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   static maxToArrayElements = 100;
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
-  static onDrilldown: ((options: Lite<Entity>[], openInNewTab?: boolean, showInPlace?: boolean, lite?: Lite<Entity>, onReload?: () => void) => void) | null = null;
+  static onCustomDrilldown: ((options: Lite<Entity>[], openInNewTab?: boolean, showInPlace?: boolean, lite?: Lite<Entity>, onReload?: () => void) => void) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
-  drillDowns: Lite<Entity>[] = []; /* Lite<UserQueryEntity> */
+  customDrilldowns: Lite<Entity>[] = [];
 
   getMobileOptions(fop: FindOptionsParsed) {
     const fo = this.props.findOptions;
@@ -1545,7 +1545,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const isWindowsOpen = e.button == 1 || e.ctrlKey;
 
-      if (this.drillDowns.length == 0 || !SearchControlLoaded.onDrilldown) {
+      if (this.customDrilldowns.length == 0 || !SearchControlLoaded.onCustomDrilldown) {
         if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
           var vp = getViewPromise && getViewPromise(null);
           var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
@@ -1562,7 +1562,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }
       }
       else
-        SearchControlLoaded.onDrilldown(this.drillDowns, isWindowsOpen || s?.avoidPopup, this.props.view == "InPlace", lite, () => this.doSearch({}));
+        SearchControlLoaded.onCustomDrilldown(this.customDrilldowns, isWindowsOpen || s?.avoidPopup, this.props.view == "InPlace", lite, () => this.doSearch({}));
     }
   }
 

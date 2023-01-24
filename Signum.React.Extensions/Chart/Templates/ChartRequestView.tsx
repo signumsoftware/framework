@@ -204,7 +204,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
                 forceUpdate();
             }}
           />
-          <EntityStrip ctx={tc.subCtx(e => e.drilldowns)}
+          <EntityStrip ctx={tc.subCtx(e => e.customDrilldowns)}
             findOptions={{
               queryName: UserQueryEntity,
               filterOptions: [
