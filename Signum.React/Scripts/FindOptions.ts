@@ -16,6 +16,10 @@ export interface ValueFindOptionsParsed {
   filterOptions: FilterOptionParsed;
 }
 
+export interface ModalFindOptionsMany extends ModalFindOptions{
+  allowNoSelection?: boolean;
+}
+
 export interface ModalFindOptions {
   title?: React.ReactNode;
   message?: React.ReactNode;

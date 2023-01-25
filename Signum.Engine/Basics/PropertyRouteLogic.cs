@@ -1,5 +1,6 @@
 using Signum.Entities.Basics;
 using Signum.Engine.Maps;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.Basics;
 
@@ -16,7 +17,14 @@ public static class PropertyRouteLogic
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             sb.Include<PropertyRouteEntity>()
-                .WithUniqueIndex(p => new { p.Path, p.RootType });
+                .WithUniqueIndex(p => new { p.Path, p.RootType })
+                .WithQuery(() => p => new
+                {
+                    Entity = p,
+                    p.Id,
+                    p.Path,
+                    p.RootType
+                });
 
             sb.Schema.Synchronizing += SynchronizeProperties;
 
