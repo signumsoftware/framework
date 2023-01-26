@@ -9,7 +9,6 @@ import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scrip
 import { Binding, EntityCombo, EntityLine, EntityTabRepeater, TypeContext, ValueLine } from '../../../Signum.React/Scripts/Lines';
 import { FileLine } from '../../Files/FileLine';
 import WhatsNewHtmlEditor from './WhatsNewHtmlEditor';
-import "./WhatsNew.css";
 import SelectorModal from '../../../Signum.React/Scripts/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
