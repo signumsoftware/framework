@@ -9,12 +9,14 @@ import * as Operations from '@framework/Operations'
 import SelectorModal from '@framework/SelectorModal'
 import ValueLineModal from '@framework/ValueLineModal'
 import * as QuickLinks from '@framework/QuickLinks'
-import { andClose } from '@framework/Operations/EntityOperations';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { andClose } from '@framework/Operations/EntityOperations'
 import { ajaxGet, ajaxPost } from '@framework/Services'
 import * as Finder from '@framework/Finder'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { Entity, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'
 import { EntityLink } from '@framework/Search'
-import { ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
+import { ISymbol, PropertyRoute, symbolNiceName, Type } from '@framework/Reflection'
 import { WhatsNewMessageEmbedded, WhatsNewEntity, WhatsNewOperation, WhatsNewMessage } from './Signum.Entities.WhatsNew'
 import { ImportComponent } from '@framework/ImportComponent'
 import { FilePathEmbedded } from '../Files/Signum.Entities.Files'
@@ -111,3 +113,32 @@ export interface WhatsNewFull
   status: string,
   read: boolean,
 };
+
+
+
+export interface IconColor {
+  icon: IconProp;
+  iconColor: string;
+}
+
+export abstract class WhatsNewConfig<T extends Entity> {
+  type: Type<T>;
+  constructor(type: Type<T>) {
+    this.type = type;
+  }
+
+  abstract getDefaultIcon(): IconColor;
+
+  static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactChild | null {
+    if (!icon)
+      return null;
+
+    return <FontAwesomeIcon icon={icon} className={"icon"} color={color} />;
+  }
+}
+
+export const configs: { [type: string]: WhatsNewConfig<any>[] } = {};
+
+export function registerConfig<T extends Entity>(config: WhatsNewConfig<T>) {
+  (configs[config.type.typeName] ??= []).push(config);
+}
