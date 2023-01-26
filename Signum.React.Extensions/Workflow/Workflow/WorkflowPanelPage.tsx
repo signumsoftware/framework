@@ -24,7 +24,7 @@ export default function WorkflowPanelPage(){
           <WorkflowScriptRunnerTab />
         </Tab>
         <Tab title="Timers" eventKey="timers">
-          <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(AppContext.toAbsoluteUrl("~/scheduler/view")); }}>Open Scheduler Panel</a>
+          <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(AppContext.toAbsoluteUrl("/scheduler/view")); }}>Open Scheduler Panel</a>
         </Tab>
       </Tabs>
     </div>
@@ -75,7 +75,7 @@ export function WorkflowScriptRunnerTab(p: {}) {
           {state.running ?
             <span style={{ color: "green" }}> RUNNING </span> :
             <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
-          }</strong> <a className="ms-2" href={AppContext.toAbsoluteUrl("~/api/workflow/scriptRunner/simpleStatus")} target="_blank">SimpleStatus</a>
+          }</strong> <a className="ms-2" href={AppContext.toAbsoluteUrl("/api/workflow/scriptRunner/simpleStatus")} target="_blank">SimpleStatus</a>
         <br />
         InitialDelayMilliseconds: {state.initialDelayMilliseconds}
         <br />

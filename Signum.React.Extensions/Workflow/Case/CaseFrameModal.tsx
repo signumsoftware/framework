@@ -171,7 +171,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
   }
 
   function handlePopupFullScreen(e: React.MouseEvent<any>) {
-    AppContext.pushOrOpenInTab("~/workflow/activity/" + state?.pack!.activity.id, e);
+    AppContext.pushOrOpenInTab("/workflow/activity/" + state?.pack!.activity.id, e);
   }
 
 

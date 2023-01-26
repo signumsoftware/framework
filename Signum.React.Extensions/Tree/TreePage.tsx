@@ -18,13 +18,12 @@ export default function TreePage() {
 
   const treeViewRef = React.useRef<TreeViewer>(null);
 
+
   function changeUrl() {
     var newPath = treeViewRef.current!.getCurrentUrl();
 
-    var currentLocation = AppContext.history.location;
-
-    if (currentLocation.pathname + currentLocation.search != newPath)
-      AppContext.history.replace(newPath);
+    if (location.pathname + location.search != newPath)
+      AppContext.navigate(newPath, { replace : true });
   }
 
   var ti = getTypeInfo(params.typeName);

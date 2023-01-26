@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { DateTime } from 'luxon'
 import { ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
@@ -19,7 +20,7 @@ import ChartButton from './ChartButton'
 import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
 import * as ColorPaletteClient from './ColorPalette/ColorPaletteClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { ColumnRequest } from '@framework/FindOptions';
 import { toLuxonFormat } from '@framework/Reflection';
 import { toNumberFormat } from '@framework/Reflection';
@@ -31,9 +32,9 @@ import { Dic, softCast } from '../../Signum.React/Scripts/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 
-export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
+export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }) {
   
-  options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
+  options.routes.push({ path: "/chart/:queryName", element: <ImportComponent onImport={() => import("./Templates/ChartRequestPage")} /> });
 
   AppContext.clearSettingsActions.push(ButtonBarChart.clearOnButtonBarElements);
  
@@ -489,7 +490,7 @@ export module Encoder {
 
     encodeColumn(query, co.columnOptions?.notNull());
 
-    return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
+    return `/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query);
 
   }
 
@@ -861,7 +862,7 @@ export module API {
 
   export function fetchScripts(): Promise<ChartScript[]> {
     return ajaxGet({
-      url: "~/api/chart/scripts"
+      url: "/api/chart/scripts"
     });
   }
 }

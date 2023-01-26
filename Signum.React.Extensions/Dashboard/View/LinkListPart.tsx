@@ -22,7 +22,7 @@ export default function LinkListPart(p: PanelPartContentProps<LinkListPartEntity
               <li key={i} >
                 <a href={AppContext.toAbsoluteUrl(link)}
                   target={le.opensInNewTab ? "_blank" : undefined}
-                  onClick={le.link!.startsWith("~") ? (e => { e.preventDefault(); AppContext.history.push(link) }) : undefined}
+                  onClick={le.link!.startsWith("~") ? (e => { e.preventDefault(); AppContext.navigate(link) }) : undefined}
                   title={le.label!}>
                   {le.label}
                 </a>

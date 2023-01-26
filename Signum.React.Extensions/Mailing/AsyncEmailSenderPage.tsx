@@ -51,7 +51,7 @@ export default function AsyncEmailSenderPage() {
             <span style={{ color: "green" }}> RUNNING </span> :
             <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
-        <a className="ms-2" href={toAbsoluteUrl("~/api/asyncEmailSender/simpleStatus")} target="_blank">SimpleStatus</a>
+        <a className="ms-2" href={toAbsoluteUrl("/api/asyncEmailSender/simpleStatus")} target="_blank">SimpleStatus</a>
         <br />
         InitialDelayMilliseconds: {state.initialDelayMilliseconds}
         <br/>

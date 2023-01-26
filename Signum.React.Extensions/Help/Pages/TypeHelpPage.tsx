@@ -18,8 +18,6 @@ import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTitle } from '@framework/AppContext'
 
-(window as any).myHistory = AppContext.history;
-
 export default function TypeHelpPage() {
   const params = useParams() as { cleanName: string };
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as History from 'history'
+import { useLocation, Location } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
@@ -7,7 +7,7 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useHistoryListen } from '@framework/Hooks'
+import { useAPI, useUpdatedRef } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { SidebarMode  } from '../SidebarContainer'
@@ -25,7 +25,7 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
   const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
   const activeRef = useUpdatedRef(active);
 
-  function changeActive(location: History.Location) {
+  function changeActive(location: Location) {
     var query = QueryString.parse(location.search);
     if (responseRef.current) {
       if (activeRef.current && isCompatibleWithUrl(activeRef.current, location, query)) {
@@ -36,12 +36,11 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
       setActive(newActive?.response ?? null);
     }
   }
-
-  useHistoryListen(update => {
-    changeActive(update.location);
-  }, response != null);
-
-  React.useEffect(() => changeActive(AppContext.history.location), [response]);
+  const location = useLocation();
+  React.useEffect(() => {
+    if (response != null)
+      changeActive(location);
+  }, [response, location]);
 
   function handleRefresh() {
     return setTimeout(() => setRefresh(!refresh), 500)

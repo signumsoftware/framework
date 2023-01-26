@@ -29,12 +29,12 @@ export default function HeavyEntry() {
   useTitle("Heavy Profiler > Entry " + index);
 
   if (entries == undefined)
-    return <h3 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index} (loading...) </h3>;
+    return <h3 className="display-6"><Link to="/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index} (loading...) </h3>;
 
   let current = entries.filter(a => a.fullIndex == params.selectedIndex).single();
   return (
     <div>
-      <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index}</h2>
+      <h2 className="display-6"><Link to="/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index}</h2>
       <label><input type="checkbox" className="form-check-input" checked={asyncDepth} onChange={a => setAsyncDepth(a.currentTarget.checked)} />Async Stack</label>
       <br />
       {entries && <HeavyProfilerDetailsD3 entries={entries} selected={current} asyncDepth={asyncDepth} />}
@@ -216,13 +216,13 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
 
       }
       else {
-        let url = "~/profiler/heavy/entry/" + d.fullIndex;
+        let url = "/profiler/heavy/entry/" + d.fullIndex;
 
         if (e.ctrlKey) {
           window.open(AppContext.toAbsoluteUrl(url));
         }
         else {
-          AppContext.history.push(url);
+          AppContext.navigate(url);
         }
       }
     }

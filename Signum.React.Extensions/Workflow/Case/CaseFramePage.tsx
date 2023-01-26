@@ -63,7 +63,7 @@ export default function CaseFramePage() {
           WorkflowClient.getViewPromiseCompoment(pack.activity)
             .then(c => setPack(pack, c));
         } else {
-          AppContext.history.go(-1);
+          AppContext.navigate(-1);
         }
       });
 
@@ -83,7 +83,7 @@ export default function CaseFramePage() {
   AppContext.useTitle(state == null ? "" : getToString(state.pack.activity.case));
 
   function onClose() {
-    AppContext.history.push(WorkflowClient.getDefaultInboxUrl());
+    AppContext.navigate(WorkflowClient.getDefaultInboxUrl());
   }
 
   function setComponent(c: React.Component<any, any> | null) {
@@ -129,7 +129,7 @@ export default function CaseFramePage() {
       if (newPack) {
         let newActivity = newPack.entity as CaseActivityEntity;
         if (pack.activity.isNew && !newActivity.isNew) {
-          AppContext.history.push("~/workflow/activity/" + newActivity.id);
+          AppContext.navigate("/workflow/activity/" + newActivity.id);
           return;
         }
         else {

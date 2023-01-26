@@ -1,6 +1,5 @@
 import * as React from "react";
 import { PathRouteProps, Route } from "react-router-dom";
-import * as H from 'history';
 import * as PropTypes from "prop-types";
 import { useAPI } from "./Hooks";
 

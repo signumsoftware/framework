@@ -31,13 +31,13 @@ export default function NewsPage() {
   return (
     <div key={whatsnew.whatsNew.id} style={{ position: "relative", margin: "10px", }}>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Link to={"~/news/"} style={{ textDecoration: "none" }}> <FontAwesomeIcon icon={"angles-left"} /> {WhatsNewMessage.BackToOverview.niceToString()}</Link>
+        <Link to={"/news/"} style={{ textDecoration: "none" }}> <FontAwesomeIcon icon={"angles-left"} /> {WhatsNewMessage.BackToOverview.niceToString()}</Link>
         {!Navigator.isReadOnly(WhatsNewEntity) && <small className="ms-2 lead"><EntityLink lite={whatsnew.whatsNew} onNavigated={() => setRefreshValue(a => a + 1)}><FontAwesomeIcon icon="pen-to-square" /></EntityLink></small>}
       </div>
 
 
       <div className={"whatsnewbody"} key={whatsnew.whatsNew.id}>
-        {whatsnew.previewPicture != undefined && <img src={AppContext.toAbsoluteUrl("~/api/whatsnew/previewPicture/" + whatsnew.whatsNew.id)} className={"headerpicture headerpicture-shadow"} />}
+        {whatsnew.previewPicture != undefined && <img src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + whatsnew.whatsNew.id)} className={"headerpicture headerpicture-shadow"} />}
         <div className={"news pt-2"}>
           <h3 className={"news-title"}>{whatsnew.title} {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "#d50a30" }}>{(whatsnew.status == "Draft") ? whatsnew.status : undefined}</small>}</h3>
             <HtmlViewer text={whatsnew.description} />

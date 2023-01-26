@@ -1,7 +1,6 @@
 import * as React from 'react'
-import { Location } from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useLocation, useParams } from 'react-router'
+import { useLocation, useParams, Location } from 'react-router'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { JavascriptMessage } from '@framework/Signum.Entities'
@@ -84,12 +83,9 @@ export default function OperationMapPage() {
 
     var query = { ...tables, color: color };
 
-    const url = AppContext.history.createHref({
-      pathname: "~/map/" + params.type,
-      search: QueryString.stringify(query)
-    });
+    const url = "/map/" + params.type + "?" + QueryString.stringify(query);
 
-    window.open(url);
+    window.open(AppContext.toAbsoluteUrl(url));
   }
 
   function renderFilter() {

@@ -1,6 +1,10 @@
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.IO;
+using System.Linq;
+using System.Reflection.Metadata;
 
 namespace Signum.Upgrade.Upgrades;
 
@@ -63,6 +67,113 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
 
                 file.Content = content;
             }
+        });
+
+        var regexImportRoute = new Regex("""<ImportRoute +(exact +)?path *= *"~(?<path>[^"]+)" +(exact +)?onImportModule={ *\(\) *=> *(?<import>[^}]+)} *\/>""");
+        var regexAsyncImport = new Regex("""import *{ *ImportRoute *} *from +['"][^"']*/AsyncImport['"] *;? *""");
+        var historyPush = new Regex("""AppContext\.history\.push\((?<exp>::EXPR::)\)""").WithMacros();
+        var historyReplace = new Regex("""AppContext\.history\.replace\((?<exp>::EXPR::)\)""").WithMacros();
+
+        uctx.ForeachCodeFile("*.tsx", file =>
+        {
+            file.Replace(regexImportRoute, m => $$"""{ path: "{{m.Groups["path"]}}", element: <ImportComponent onImport={() => {{m.Groups["import"]}}} /> }""");
+            file.Replace(regexAsyncImport, """import { ImportComponent } from '@framework/ImportComponent'""");
+
+            file.Replace("~/", "/");
+            file.Replace(historyPush, m => "AppContext.navigate(" + m.Groups["exp"].Value + ")");
+            file.Replace(historyReplace, m => "AppContext.navigate(" + m.Groups["exp"].Value + ", { replace : true })");
+            file.Replace("AppContext.history.location", "AppContext.location");
+            file.Replace("AppContext.history", "AppContext.router");
+
+            if (file.Content.Contains("routes: JSX.Element[]"))
+            {
+                file.Replace("routes: JSX.Element[]", "routes: RouteObject[]");
+                file.InsertAfterFirstLine(a => a.Contains("from 'react'") || a.Contains("from \"react\""), "import { RouteObject } from 'react-router'");
+            }
+
+            file.RemoveAllLines(a => a.Contains("from 'history'"));
+            file.RemoveAllLines(a => a.Contains("from \"history\""));
+
+            file.Replace("window.open(Finder.findOptionsPath", "window.open(toAbsoluteUrl(Finder.findOptionsPath");
+            file.Replace("window.open(Finder.findOptionsPath", "window.open(toAbsoluteUrl(Finder.findOptionsPath");
+        });
+
+        uctx.ChangeCodeFile("Southwind.React/Views/Home/Index.cshtml", file =>
+        {
+            file.Replace(
+                """var __baseUrl = "@Url.Content("~/")";""",
+                """var __baseName = "@Url.Content("~")";""");
+        });
+
+        uctx.ChangeCodeFile("Southwind.React/App/Layout.tsx", file =>
+        {
+            file.Replace(
+                """import { Link } from 'react-router-dom'""",
+                """import { Link, Outlet } from 'react-router-dom'""");
+
+            file.Replace(
+                """{Layout.switch}""",
+                """<Outlet/>""");
+
+            file.RemoveAllLines(a => a.Contains("Layout.switch ="));
+
+            file.InsertAfterFirstLine(l => l.Contains("const itemStorageKey = \"SIDEBAR_MODE\";"), "\nAppContext.useGlobalReactRouter();");
+        });
+
+        uctx.ChangeCodeFile("Southwind.React/App/NotFound.tsx", file =>
+        {
+            file.ReplaceLine(a => a.Contains("""AppContext.history.replace("~/auth/login", { back: AppContext.history.location });"""),
+                """AppContext.navigate("/auth/login", { state: { back: AppContext.location }, replace: true });""");
+
+
+            file.InsertAfterFirstLine(l => l.Contains("const itemStorageKey = \"SIDEBAR_MODE\";"), "\nAppContext.useGlobalReactRouter();");
+        });
+
+        uctx.ChangeCodeFile("Southwind.React/App/MainPublic.tsx", file =>
+        {
+            file.RemoveAllLines(a => a.Contains("import { Switch } from \"react-router\""));
+            file.ReplaceLine(a => a.Contains("from \"react-router-dom\""), "import { createBrowserRouter, RouterProvider, RouteObject, Location } from \"react-router-dom\"");
+            file.ReplaceLine(a => a.Contains("""__webpack_public_path__ = window.__baseUrl + "dist/";"""), """__webpack_public_path__ = window.__baseName + "/dist/";""");
+            file.RemoveAllLines(a => a.Contains("routes.push(<Route component={NotFound} />);"));
+            file.RemoveAllLines(a => a.Contains("Layout.switch = React.createElement(Switch, undefined, ...routes);"));
+            file.ReplaceLine(a => a.Contains("const h = AppContext.createAppRelativeHistory();"), """       
+        const mainRoute: RouteObject = {
+          path: "/",
+          element: < Layout />,
+          children: [
+            {
+            index: true,
+              element: < Home />
+            },
+            ...routes,
+            {
+            path: "*",
+              element: < NotFound />
+            },
+          ]
+        };
+
+        const router = createBrowserRouter([mainRoute], { basename: window.__baseName });
+        """);
+
+
+            file.ReplaceBetween(
+                fromLine: a => a.Contains("<Router history={h}>"), 0,
+                toLine: a => a.Contains("</Router>"), 0, 
+                "<RouterProvider router={router}/>");
+
+            file.Replace("History.Location", "Location");
+        });
+
+        uctx.ChangeCodeFile("Southwind.React/package.json", file =>
+        {
+            file.UpdateNpmPackages("""
+                "react-router": "6.7.0",
+                "react-router-dom": "6.7.0",
+                "luxon": "3.2.1",
+                """);
+
+            file.RemoveNpmPackage("history");
         });
     }
 }

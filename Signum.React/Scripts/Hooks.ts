@@ -295,16 +295,6 @@ export function useLock<T>(): [/*isLocked:*/boolean, /*lock:*/(makeCall: () => P
   return [isLocked, lock];
 }
 
-export function useHistoryListen(locationChanged: (update: History.Update) => void, enabled: boolean = true, extraDeps?: ReadonlyArray<any>) {
-  const unregisterCallback = React.useRef<(() => void) | undefined>(undefined);
-  React.useEffect(() => {
-    if (!enabled)
-      return;
-
-    unregisterCallback.current = AppContext.history.listen(locationChanged);
-    return () => { unregisterCallback.current!(); }
-  }, [enabled, ...(extraDeps || [])]);
-}
 
 export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: React.MouseEventHandler, options?: { timeout?: number }) => {
   options = {

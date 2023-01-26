@@ -84,7 +84,7 @@ export default function TranslationInstanceView() {
   return (
     <div>
       <div className="mb-2">
-        <h2><Link to="~/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
+        <h2><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
         <TranslateSearchBox setFilter={setFilter} filter={filter ?? ""} />
         {culture == null && <label style={{ float: 'right' }}>
           <input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> Only neutral cultures

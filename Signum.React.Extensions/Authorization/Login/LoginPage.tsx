@@ -157,7 +157,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
             <span>
               &nbsp;
               &nbsp;
-              <Link to="~/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+              <Link to="/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
             </span>
           }
         </div>

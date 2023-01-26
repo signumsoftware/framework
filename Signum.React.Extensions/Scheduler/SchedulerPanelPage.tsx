@@ -61,7 +61,7 @@ export default function SchedulerPanelPage() {
             <span style={{ color: "green" }}> RUNNING </span> :
             <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
-        <a className="ms-2" href={toAbsoluteUrl("~/api/scheduler/simpleStatus")} target="_blank">SimpleStatus</a>
+        <a className="ms-2" href={toAbsoluteUrl("/api/scheduler/simpleStatus")} target="_blank">SimpleStatus</a>
         <br />
         InitialDelayMilliseconds: {s.initialDelayMilliseconds}
         <br />

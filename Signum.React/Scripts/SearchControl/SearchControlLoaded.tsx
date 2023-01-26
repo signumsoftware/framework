@@ -830,9 +830,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const path = Finder.findOptionsPath(findOptions, this.extraUrlParams);
 
     if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
-      window.open(path);
+      window.open(AppContext.toAbsoluteUrl(path));
     else
-      AppContext.history.push(path);
+      AppContext.navigate(path);
   };
 
   handleViewModeClick = (ev: React.MouseEvent<any>) => {
@@ -1584,9 +1584,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var vp = getViewPromise && getViewPromise(null);
         var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
         if (this.props.view == "InPlace" && !isWindowsOpen)
-          AppContext.history.push(url);
+          AppContext.navigate(url);
         else
-          window.open(url);
+          window.open(AppContext.toAbsoluteUrl(url));
       }
       else {
         Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })

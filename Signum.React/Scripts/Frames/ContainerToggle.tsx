@@ -5,6 +5,7 @@ import * as Navigator from '../Navigator'
 import { ErrorBoundary } from "../Components/ErrorBoundary";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useUpdatedRef } from '../Hooks';
+import { useLocation } from 'react-router';
 
 export default function ContainerToggleComponent(p: { children: React.ReactNode }) {
 
@@ -18,9 +19,7 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
 
   const forceUpdate = useForceUpdate();
 
-  React.useEffect(() => {
-    return AppContext.history.listen(forceUpdate);
-  }, [])
+  const location = useLocation();
 
   function handleExpandToggle(e: React.MouseEvent<any>){
     e.preventDefault();
@@ -33,7 +32,7 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
       <a className="expand-window d-none d-md-block" onClick={handleExpandToggle} href="#" >
         <FontAwesomeIcon icon={fluid ? "compress" : "expand"} />
       </a>
-      <ErrorBoundary deps={[AppContext.history.location.pathname + AppContext.history.location.search]}>
+      <ErrorBoundary deps={[location.pathname + location.search]}>
         {React.Children.map(p.children, c => c && React.cloneElement(c as React.ReactElement))}
       </ErrorBoundary>
     </div>

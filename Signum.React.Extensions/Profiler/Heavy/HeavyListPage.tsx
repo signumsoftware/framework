@@ -136,12 +136,12 @@ function EntrieListPath({ width, entries }: { width: number, entries: HeavyProfi
   let entryHeight = y(1);
 
   function handleOnClick(e: React.MouseEvent, v: HeavyProfilerEntry) {
-    let url = "~/profiler/heavy/entry/" + v.fullIndex;
+    let url = "/profiler/heavy/entry/" + v.fullIndex;
 
     if (e.ctrlKey) {
       window.open(AppContext.toAbsoluteUrl(url));
     } else {
-      AppContext.history.push(url);
+      AppContext.navigate(url);
     }
   }
 

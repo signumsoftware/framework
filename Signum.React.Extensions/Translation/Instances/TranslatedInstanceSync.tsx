@@ -85,7 +85,7 @@ export default function TranslatedInstanceSync() {
           <h2> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h2>
         </div>
         {deletedTranslations}
-        {result && result.totalInstances == 0 && <Link to={`~/translatedInstance/status`}>
+        {result && result.totalInstances == 0 && <Link to={`/translatedInstance/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
         </Link>}
         
@@ -96,7 +96,7 @@ export default function TranslatedInstanceSync() {
   return (
     <div>
       <div className="mb-2">
-        <h2><Link to="~/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
+        <h2><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
       </div>
       {deletedTranslations}
       {result && result.totalInstances > 0 && renderTable()}

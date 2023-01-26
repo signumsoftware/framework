@@ -41,7 +41,7 @@ export default function ResetPassword() {
 
           setSuccess(true);
           //Navigator.resetUI();
-          AppContext.history.push("~/auth/ResetPassword?code=OK");
+          AppContext.navigate("/auth/ResetPassword?code=OK");
         })
         .catch((e: ValidationError) => {
           if (e.modelState)

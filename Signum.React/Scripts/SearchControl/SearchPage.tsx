@@ -41,7 +41,7 @@ function SearchPage() {
 
   const searchControl = React.useRef<SearchControlHandler>(null);
 
-  var subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
+  const subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
 
   useTitle(getQueryNiceName(params.queryName!) + (subTitle ? (" - " + subTitle) : ""));
 
@@ -49,10 +49,9 @@ function SearchPage() {
     const scl = searchControl.current!.searchControlLoaded!;
     const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, true);
     const newPath = Finder.findOptionsPath(findOptions, scl.extraUrlParams);
-    const currentLocation = AppContext.history.location;
 
-    if (currentLocation.pathname + currentLocation.search != newPath)
-      AppContext.history.replace(newPath);
+    if (location.pathname + location.search != newPath)
+      AppContext.navigate(newPath, { replace : true });
   }
 
   if (!Finder.isFindable(fo.queryName, true))

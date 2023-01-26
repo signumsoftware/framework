@@ -57,7 +57,7 @@ export default function TranslationCodeView() {
 
   return (
     <div>
-      <h2><Link to="~/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
+      <h2><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
       <TranslateSearchBox setFilter={setFilter} filter={filter} />
       <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
       <br />

@@ -37,10 +37,10 @@ export default function TranslationCodeSync() {
 
   return (
     <div>
-      <h2><Link to="~/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
+      <h2><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {message}</h2>
       <br />
       {result && result.totalTypes > 0 && <SyncTable result={result} onSave={handleSave} currentCulture={culture} />}
-      {result && result.totalTypes == 0 && <Link to={`~/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`}>
+      {result && result.totalTypes == 0 && <Link to={`/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`}>
         {TranslationMessage.BackToSyncAssembly0.niceToString(assembly)}
       </Link>}
     </div>

@@ -77,11 +77,11 @@ modules.Entities.is(entityOrLite1, entityOrLite2);`;
   modules["WorkflowClient"] = "";
   modules["Constructor"] = `modules.Constructor.construct("${p.cleanName}").then(entity => { // do something here });
 modules.Constructor.constructPack("${p.cleanName}").then(pack => // do something here);`;
-  modules["Services"] = `modules.Services.ajaxGet({ url: '~/api/dynamic/getData/{param1}/{param2}/...' })
+  modules["Services"] = `modules.Services.ajaxGet({ url: '/api/dynamic/getData/{param1}/{param2}/...' })
   .then(result => /* do something here */)
   .then(() => locals.forceUpdate());
 
-modules.Services.ajaxPost({ url: '~/api/dynamic/getData' }, data: null)
+modules.Services.ajaxPost({ url: '/api/dynamic/getData' }, data: null)
   .then(result => /* do something here */)
   .then(() => locals.forceUpdate());
 `;

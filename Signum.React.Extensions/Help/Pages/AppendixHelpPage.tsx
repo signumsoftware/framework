@@ -38,7 +38,7 @@ export default function AppendixHelpHelp() {
       <EditableComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar")}>
-        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? AppContext.history.push(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
+        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? AppContext.navigate(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
         <DeleteButton ctx={ctx} />
       </div>
     </div>
@@ -80,7 +80,7 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
 
         Operations.API.deleteLite(toLite(ctx.value), AppendixHelpOperation.Delete.key)
           .then((() => {
-            AppContext.history.push(Urls.indexUrl());
+            AppContext.navigate(Urls.indexUrl());
             notifySuccess();
           }));
       }

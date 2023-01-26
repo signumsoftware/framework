@@ -39,7 +39,7 @@ export default function DynamicPanelPage() {
 
 
   function handleSelect(key: any /*string*/) {
-    AppContext.history.push("~/dynamic/panel?step=" + key);
+    AppContext.navigate("/dynamic/panel?step=" + key);
   }
 
   function handleErrorClick(e: React.MouseEvent<any>) {

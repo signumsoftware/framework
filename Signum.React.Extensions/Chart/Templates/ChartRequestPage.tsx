@@ -42,7 +42,7 @@ export default function ChartRequestPage() {
 
   function changeUrl(cr: ChartRequestModel, uc?: Lite<UserChartEntity>) {
     ChartClient.Encoder.chartPathPromise(cr, uc)
-      .then(path => AppContext.history.replace(path));
+      .then(path => AppContext.navigate(path, { replace : true }));
   }
 
   if (pair == null)

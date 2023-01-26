@@ -31,7 +31,7 @@ export default function TranslationCodeSyncNamespaces() {
         <tbody>
           <tr key={"All"}>
             <th>
-              <Link to={`~/translation/sync/${encodeDots(assembly)}/${culture}`}>
+              <Link to={`/translation/sync/${encodeDots(assembly)}/${culture}`}>
                 {TranslationMessage.All.niceToString()}
               </Link>
             </th>
@@ -42,7 +42,7 @@ export default function TranslationCodeSyncNamespaces() {
           {result.map(stats =>
             <tr key={stats.namespace}>
               <td>
-                <Link to={`~/translation/sync/${encodeDots(assembly)}/${culture}/${encodeDots(stats.namespace)}`}>
+                <Link to={`/translation/sync/${encodeDots(assembly)}/${culture}/${encodeDots(stats.namespace)}`}>
                   {stats.namespace}
                 </Link>
               </td>
@@ -58,7 +58,7 @@ export default function TranslationCodeSyncNamespaces() {
     return (
       <div>
         <h2>{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h2>
-        <Link to={`~/translation/status`}>
+        <Link to={`/translation/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
         </Link>
       </div>
@@ -68,7 +68,7 @@ export default function TranslationCodeSyncNamespaces() {
 
   return (
     <div>
-      <h2><Link to="~/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
+      <h2><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
       {renderTable()}
     </div>
   );

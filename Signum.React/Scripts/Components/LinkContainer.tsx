@@ -1,7 +1,7 @@
 import * as React from 'react'
+import { To } from 'react-router'
 import * as PropTypes from 'prop-types'
-import * as H from 'history';
-import { useHref, useLocation, useMatch, useNavigate, NavLink } from 'react-router-dom';
+import { useHref, useLocation, useMatch, useNavigate, Location } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { PathMatch } from 'react-router';
 
@@ -9,7 +9,7 @@ const isModifiedEvent = (event: React.MouseEvent<any>) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
 
 interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  to: H.To;
+  to: To;
   replace?: boolean;
   onClick?: (e: React.MouseEvent<any>) => void;
   innerRef?: (e: any) => void;
@@ -18,7 +18,7 @@ interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
   strict?: boolean;
   exact?: boolean;
   state?: any;
-  isActive?: boolean | ((m: PathMatch | null, l: H.Location) => boolean);
+  isActive?: boolean | ((m: PathMatch | null, l: Location) => boolean);
 }
 
 export function LinkContainer({

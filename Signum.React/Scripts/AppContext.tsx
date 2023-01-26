@@ -1,11 +1,11 @@
 import * as React from "react";
-import * as H from 'history';
+import { NavigateFunction, Location, useNavigate, useLocation, To, NavigateOptions } from "react-router";
 import { IUserEntity, TypeEntity } from "./Signum.Entities.Basics";
 import { Dic, classes, } from './Globals';
 import { clearContextHeaders, ajaxGet, ajaxPost } from "./Services";
 import { PseudoType, Type, getTypeName } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
-import { Router } from "@remix-run/router/dist/router";
+import { navigateRoute } from "./Navigator";
 
 Dic.skipClasses.push(React.Component);
 
@@ -19,10 +19,53 @@ export function setCurrentUser(user: IUserEntity | undefined) {
   currentUser = user;
 }
 
-export let router: Router;
-export function setRouter(r: Router) {
-  router = r;
+
+/*
+ * Global react-router navigate, but aware of removing ~ or baseName prefixes
+ */
+export let navigate: { 
+  (to: To, options?: NavigateOptions): void;
+  (delta: number): void;
+};
+export let location: Location;
+
+
+export function useGlobalReactRouter() {
+
+  function toRelativeUrl(url: string) {
+    if (window.__baseName && url.startsWith(window.__baseName))
+      return url.after(window.__baseName);
+
+    if (url.startsWith("~"))
+      return url.after("~");
+
+    return url;
+  }
+
+  var nav = useNavigate();
+  React.useEffect(() => {
+    navigate = (to: To | number, options?: NavigateOptions) => {
+      if (typeof to == "number")
+        nav(to);
+      else if (typeof to == "string") {
+        nav(toRelativeUrl(to));
+      } else if (typeof to == "object") {
+        nav({ ...to, pathname: to.pathname && toRelativeUrl(to.pathname) }, options);
+      }
+      else
+        throw new Error("Unexpected argument type: to");
+    };
+    return () => navigate = undefined!;
+  }, []);
+
+  var loc = useLocation();
+  React.useEffect(() => {
+    location = loc;;
+    return () => location = undefined!;
+  }, [loc]);
+
 }
+
 
 export let setTitle: (pageTitle?: string) => void;
 export function setTitleFunction(titleFunction: (pageTitle?: string) => void) {
@@ -91,7 +134,7 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
   else if (path.startsWith("http"))
     window.location.href = path;
   else
-    history.push(path);
+    navigate(path);
 }
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {

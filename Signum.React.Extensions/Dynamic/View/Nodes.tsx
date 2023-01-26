@@ -306,7 +306,7 @@ NodeUtils.register<ImageNode>({
   kind: "Image",
   group: "Container",
   order: 5,
-  initialize: dn => { dn.src = "~/images/logo.png"; },
+  initialize: dn => { dn.src = "/images/logo.png"; },
   renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.src ? (typeof dn.node.src == "string" ? dn.node.src : (dn.node.src.__code__ ?? "")).etc(20) : ""}</strong></span>,
   renderCode: (node, cc) => cc.elementCode("img", node.htmlAttributes && { src: node.src }),
   render: (dn, ctx) => <img {...toHtmlAttributes(dn, ctx, dn.node.htmlAttributes)} src={AppContext.toAbsoluteUrl(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.src, NodeUtils.isString) as string)} />,

@@ -46,15 +46,15 @@ export function getCultures(isNeutral: boolean | null): Promise<{ [name: string]
 
 export module API {
   export function fetchCultures(): Promise<CultureInfoEntity[]> {
-    return ajaxGet({ url: "~/api/culture/cultures" });
+    return ajaxGet({ url: "/api/culture/cultures" });
   }
 
   export function fetchCurrentCulture(): Promise<CultureInfoEntity> {
-    return ajaxGet({ url: "~/api/culture/currentCulture" });
+    return ajaxGet({ url: "/api/culture/currentCulture" });
   }
 
   export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<string> {
-    return ajaxPost({ url: "~/api/culture/setCurrentCulture" }, culture);
+    return ajaxPost({ url: "/api/culture/setCurrentCulture" }, culture);
   }
 }
 

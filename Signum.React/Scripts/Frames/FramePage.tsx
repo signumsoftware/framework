@@ -87,7 +87,7 @@ export default function FramePage() {
 
             return setPack(a.pack!, getComponent, a.createNew).then(() => {
               if (id == null && a.pack!.entity.id != null) { //Constructor returns saved entity
-                AppContext.history.replace(Navigator.navigateRoute(a.pack!.entity));
+                AppContext.navigate(Navigator.navigateRoute(a.pack!.entity), { replace : true });
               }
             })
           });
@@ -194,9 +194,9 @@ export default function FramePage() {
 
   function onClose() {
     if (Finder.isFindable(params.type!, true))
-      AppContext.history.push(Finder.findOptionsPath({ queryName: params.type! }));
+      AppContext.navigate(Finder.findOptionsPath({ queryName: params.type! }));
     else
-      AppContext.history.push("~/");
+      AppContext.navigate("/");
   }
 
   function setComponent(c: React.Component | null) {
@@ -255,9 +255,9 @@ export default function FramePage() {
               setPack(packEntity, gc).then(() => {
                 if (newRoute) {
                   if (replaceRoute)
-                    AppContext.history.replace(newRoute);
+                    AppContext.navigate(newRoute, { replace : true });
                   else
-                    AppContext.history.push(newRoute);
+                    AppContext.navigate(newRoute);
                 }
 
                 callback && callback();
@@ -269,9 +269,9 @@ export default function FramePage() {
         setPack(packEntity, s.getComponent).then(() => {
           if (newRoute) {
             if (replaceRoute)
-              AppContext.history.replace(newRoute);
+              AppContext.navigate(newRoute, { replace : true });
             else
-              AppContext.history.push(newRoute);
+              AppContext.navigate(newRoute);
           }
 
           callback && callback();

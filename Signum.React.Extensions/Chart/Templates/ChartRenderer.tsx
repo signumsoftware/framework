@@ -16,6 +16,7 @@ import { useAPI } from '@framework/Hooks'
 import { TypeInfo } from '@framework/Reflection'
 import { FullscreenComponent } from './FullscreenComponent'
 import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
+import { toAbsoluteUrl } from '@framework/AppContext'
 
 
 export interface ChartRendererProps {
@@ -74,7 +75,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
 
   if (r.entity) {
     if (newWindow)
-      window.open(Navigator.navigateRoute(r.entity));
+      window.open(toAbsoluteUrl(Navigator.navigateRoute(r.entity)));
     else
       Navigator.view(r.entity)
         .then(() => onReload && onReload());
@@ -126,7 +127,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
     };
 
     if (newWindow)
-      window.open(Finder.findOptionsPath(fo));
+      window.open(toAbsoluteUrl(Finder.findOptionsPath(fo)));
     else
       Finder.explore(fo)
         .then(() => onReload && onReload());

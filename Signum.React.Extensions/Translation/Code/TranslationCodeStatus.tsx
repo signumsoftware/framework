@@ -48,15 +48,15 @@ function TranslationTable({ result }: { result: TranslationFileStatus[] }) {
           <tr key={assembly}>
             <th> {assembly}</th>
             <td>
-              <Link to={`~/translation/view/${encodeDots(assembly)}`}>{TranslationMessage.View.niceToString()}</Link>
+              <Link to={`/translation/view/${encodeDots(assembly)}`}>{TranslationMessage.View.niceToString()}</Link>
             </td>
             {cultures.map(culture =>
               <td key={culture}>
-                <Link to={`~/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
+                <Link to={`/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
                 <br />
                 {
                   !tree[assembly][culture].isDefault &&
-                  <Link to={`~/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`} className={"status-" + tree[assembly][culture].status}>
+                  <Link to={`/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`} className={"status-" + tree[assembly][culture].status}>
                     {TranslationMessage.Sync.niceToString()}
                   </Link>
                 }

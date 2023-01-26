@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { DateTime, Duration, DurationUnit } from 'luxon';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
@@ -43,7 +44,7 @@ import {
 import InboxFilter from './Case/InboxFilter'
 import Workflow, { WorkflowHandle } from './Workflow/Workflow'
 import * as AuthClient from '../Authorization/AuthClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { FilterRequest, ColumnRequest, FindOptions } from '@framework/FindOptions';
 import { BsColor } from '@framework/Components/Basic';
 import { GraphExplorer } from '@framework/Reflection';
@@ -60,16 +61,16 @@ import { SearchControl } from '../../Signum.React/Scripts/Search';
 import SearchModal from '../../Signum.React/Scripts/SearchControl/SearchModal';
 import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal';
 
-export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
+export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }) {
 
   UserAssetsClient.start({ routes: options.routes });
   UserAssetsClient.registerExportAssertLink(WorkflowEntity);
 
   options.routes.push(
-    <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => import("./Case/CaseFramePage")} />,
-    <ImportRoute path="~/workflow/new/:workflowId/:mainEntityStrategy" onImportModule={() => import("./Case/CaseFramePage")} />,
-    <ImportRoute path="~/workflow/panel" onImportModule={() => import("./Workflow/WorkflowPanelPage")} />,
-    <ImportRoute path="~/workflow/activityMonitor/:workflowId" onImportModule={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} />,
+    { path: "/workflow/activity/:caseActivityId", element: <ImportComponent onImport={() => import("./Case/CaseFramePage")} /> },
+    { path: "/workflow/new/:workflowId/:mainEntityStrategy", element: <ImportComponent onImport={() => import("./Case/CaseFramePage")} /> },
+    { path: "/workflow/panel", element: <ImportComponent onImport={() => import("./Workflow/WorkflowPanelPage")} /> },
+    { path: "/workflow/activityMonitor/:workflowId", element: <ImportComponent onImport={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} /> },
   );
 
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: WorkflowLaneEntity.token(e => e.entity.actorsEval), operation: "DistinctTo", value: null }] });
@@ -145,7 +146,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
     key: "WorkflowPanel",
-    onClick: () => Promise.resolve("~/workflow/panel")
+    onClick: () => Promise.resolve("/workflow/panel")
   });
 
   Finder.addSettings({
@@ -190,7 +191,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   Navigator.addSettings(new EntitySettings(CaseTagsModel, w => import('./Case/CaseTagsModel')));
 
   Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
-    onNavigateRoute: (typeName, id) => AppContext.toAbsoluteUrl("~/workflow/activity/" + id),
+    onNavigateRoute: (typeName, id) => "/workflow/activity/" + id,
     onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options),
   }));
 
@@ -454,11 +455,11 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
 export function workflowActivityMonitorUrl
   (workflow: Lite<WorkflowEntity>) {
-  return `~/workflow/activityMonitor/${workflow.id}`;
+  return `/workflow/activityMonitor/${workflow.id}`;
 }
 
 export function workflowStartUrl(lite: Lite<WorkflowEntity>, strategy?: WorkflowMainEntityStrategy) {
-  return "~/workflow/new/" + lite.id + (strategy == null ? "" : ("/" + strategy));
+  return "/workflow/new/" + lite.id + (strategy == null ? "" : ("/" + strategy));
 }
 
 function registerCustomContexts() {
@@ -775,23 +776,23 @@ export function formatDuration(d: Duration) {
 
 export namespace API {
   export function fetchActivityForViewing(caseActivity: Lite<CaseActivityEntity>): Promise<CaseEntityPack> {
-    return ajaxGet({ url: `~/api/workflow/fetchForViewing/${caseActivity.id}` });
+    return ajaxGet({ url: `/api/workflow/fetchForViewing/${caseActivity.id}` });
   }
 
   export function fetchCaseFlowPack(caseActivity: Lite<CaseActivityEntity>): Promise<CaseFlowEntityPack> {
-    return ajaxGet({ url: `~/api/workflow/caseFlowPack/${caseActivity.id}` });
+    return ajaxGet({ url: `/api/workflow/caseFlowPack/${caseActivity.id}` });
   }
 
   export function fetchCaseTags(caseLite: Lite<CaseEntity>): Promise<CaseTagTypeEntity[]> {
-    return ajaxGet({ url: `~/api/workflow/tags/${caseLite.id}` });
+    return ajaxGet({ url: `/api/workflow/tags/${caseLite.id}` });
   }
 
   export function starts(): Promise<Array<WorkflowEntity>> {
-    return ajaxGet({ url: `~/api/workflow/starts` });
+    return ajaxGet({ url: `/api/workflow/starts` });
   }
 
   export function getWorkflowModel(workflow: Lite<WorkflowEntity>): Promise<WorkflowModelAndIssues> {
-    return ajaxGet({ url: `~/api/workflow/workflowModel/${workflow.id}` });
+    return ajaxGet({ url: `/api/workflow/workflowModel/${workflow.id}` });
   }
 
   interface WorkflowModelAndIssues {
@@ -800,12 +801,12 @@ export namespace API {
   }
 
   export function previewChanges(workflow: Lite<WorkflowEntity>, model: WorkflowModel): Promise<WorkflowReplacementModel> {
-    return ajaxPost({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
+    return ajaxPost({ url: `/api/workflow/previewChanges/${workflow.id} ` }, model);
   }
 
   export function saveWorkflow(entity: WorkflowEntity, model: WorkflowModel, replacementModel: WorkflowReplacementModel | undefined): Promise<EntityPackWithIssues> {
     GraphExplorer.propagateAll(entity, model, replacementModel);
-    return ajaxPost({ url: "~/api/workflow/save" }, { entity: entity, operationKey: WorkflowOperation.Save.key, args: [model, replacementModel] } as Operations.API.EntityOperationRequest);
+    return ajaxPost({ url: "/api/workflow/save" }, { entity: entity, operationKey: WorkflowOperation.Save.key, args: [model, replacementModel] } as Operations.API.EntityOperationRequest);
   }
 
   interface EntityPackWithIssues {
@@ -821,41 +822,41 @@ export namespace API {
 
   export function findMainEntityType(request: { subString: string, count: number }, signal?: AbortSignal): Promise<Lite<TypeEntity>[]> {
     return ajaxGet({
-      url: "~/api/workflow/findMainEntityType?" + QueryString.stringify(request),
+      url: "/api/workflow/findMainEntityType?" + QueryString.stringify(request),
       signal
     });
   }
 
   export function findNode(request: WorkflowFindNodeRequest, signal?: AbortSignal): Promise<Lite<IWorkflowNodeEntity>[]> {
-    return ajaxPost({ url: "~/api/workflow/findNode", signal }, request);
+    return ajaxPost({ url: "/api/workflow/findNode", signal }, request);
   }
 
   export function conditionTest(request: WorkflowConditionTestRequest): Promise<WorkflowConditionTestResponse> {
-    return ajaxPost({ url: `~/api/workflow/condition/test` }, request);
+    return ajaxPost({ url: `/api/workflow/condition/test` }, request);
   }
 
   export function view(): Promise<WorkflowScriptRunnerState> {
-    return ajaxGet({ url: "~/api/workflow/scriptRunner/view" });
+    return ajaxGet({ url: "/api/workflow/scriptRunner/view" });
   }
 
   export function start(): Promise<void> {
-    return ajaxPost({ url: "~/api/workflow/scriptRunner/start" }, undefined);
+    return ajaxPost({ url: "/api/workflow/scriptRunner/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost({ url: "~/api/workflow/scriptRunner/stop" }, undefined);
+    return ajaxPost({ url: "/api/workflow/scriptRunner/stop" }, undefined);
   }
 
   export function caseFlow(c: Lite<CaseEntity>): Promise<CaseFlow> {
-    return ajaxGet({ url: `~/api/workflow/caseFlow/${c.id}` });
+    return ajaxGet({ url: `/api/workflow/caseFlow/${c.id}` });
   }
 
   export function workflowActivityMonitor(request: WorkflowActivityMonitorRequest): Promise<WorkflowActivityMonitor> {
-    return ajaxPost({ url: "~/api/workflow/activityMonitor" }, request);
+    return ajaxPost({ url: "/api/workflow/activityMonitor" }, request);
   }
 
   export function nextConnections(request: NextConnectionsRequest): Promise<Array<Lite<IWorkflowNodeEntity>>> {
-    return ajaxPost({ url: "~/api/workflow/nextConnections" }, request);
+    return ajaxPost({ url: "/api/workflow/nextConnections" }, request);
   }
 }
 
