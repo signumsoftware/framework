@@ -81,15 +81,14 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
         .then(() => onReload?.());
   } else {
     const fo = extractFindOptions(cr, r);
-    if (cr.customDrilldowns.length == 0) {
-      if (newWindow)
-        window.open(Finder.findOptionsPath(fo));
-      else
-        Finder.explore(fo)
-          .then(() => onReload?.());
-    }
+    if (cr.customDrilldowns.length > 0)
+      return UserQueryClient.handleCustomDrilldowns(cr.customDrilldowns, { openInNewTab: newWindow, fo, onReload });
+
+    if (newWindow)
+      window.open(Finder.findOptionsPath(fo));
     else
-      UserQueryClient.handleCustomDrilldowns(cr.customDrilldowns, { openInNewTab: newWindow, fo, onReload });
+      Finder.explore(fo)
+        .then(() => onReload?.());
   }
 }
 

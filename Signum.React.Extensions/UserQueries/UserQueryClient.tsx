@@ -132,7 +132,7 @@ function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParse
 
         fo.filterOptions = [...filters, ...fo.filterOptions ?? []];
 
-        return Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: uq } } })
+        return Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: uq, customDrilldowns: uqe.customDrilldowns } } })
           .then(() => cic.markRows({}));
       }));
 }
@@ -144,23 +144,38 @@ export function handleCustomDrilldowns(items: MList<Lite<UserQueryEntity>>, opti
   const showInPlace = options?.showInPlace;
   const onReload = options?.onReload;
 
-  return SelectorModal.chooseLite(UserQueryEntity, items.map(mle => mle.element))
-    .then(lite => {
-      if (!lite)
-        return;
+  const candidates = !fo ? Promise.resolve(items.map(mle => mle.element)) :
+    Promise.all(items.map(i =>
+      Finder.inDB(i.element, UserQueryEntity.token(a => a.query))
+        .then(query => {
+          if (fo.queryName == getToString(query))
+            return i.element;
+        })));
 
-      return Navigator.API.fetch(lite)
-        .then(uq =>
-          Converter.toFindOptions(uq, (uq.entityType && entity) ?? undefined)
-            .then(dfo => {
-              dfo.filterOptions = (dfo.filterOptions ?? []).concat(fo?.filterOptions);
-              dfo.systemTime = fo?.systemTime ?? dfo.systemTime;
+  return candidates
+    .then(c => c.notNull())
+    .then(c => {
+      if (c.length == 0)
+        return { fo: fo!, uq: null! };
 
-              if (uq.appendFilters && entity)
-                dfo.filterOptions.push({ token: "Entity", value: entity });
+      return SelectorModal.chooseLite(UserQueryEntity, c)
+        .then(lite => {
+          if (!lite)
+            return;
 
-              return ({ fo: dfo, uq: uq });
-            }));
+          return Navigator.API.fetch(lite)
+            .then(uq =>
+              Converter.toFindOptions(uq, (uq.entityType && entity) ?? undefined)
+                .then(dfo => {
+                  dfo.filterOptions = (dfo.filterOptions ?? []).concat(fo?.filterOptions);
+                  dfo.systemTime = fo?.systemTime ?? dfo.systemTime;
+
+                  if (uq.appendFilters && entity)
+                    dfo.filterOptions.push({ token: "Entity", value: entity });
+
+                  return ({ fo: dfo, uq: uq });
+                }));
+        });
     })
     .then(val => {
       if (!val)
@@ -168,8 +183,11 @@ export function handleCustomDrilldowns(items: MList<Lite<UserQueryEntity>>, opti
 
       if (openInNewTab || showInPlace) {
         var extra: any = {};
-        extra.userQuery = liteKey(toLite(val.uq));
-        Encoder.encodeCustomDrilldowns(extra, val.uq.customDrilldowns);
+        if (val.uq) {
+          extra.userQuery = liteKey(toLite(val.uq));
+          Encoder.encodeCustomDrilldowns(extra, val.uq.customDrilldowns);
+        }
+
         const url = Finder.findOptionsPath(val.fo, extra);
 
         if (showInPlace && !openInNewTab)
@@ -178,7 +196,7 @@ export function handleCustomDrilldowns(items: MList<Lite<UserQueryEntity>>, opti
           window.open(url);
       }
       else
-        Finder.explore(val.fo, { searchControlProps: { extraOptions: { userQuery: val.uq, customDrilldowns: val.uq.customDrilldowns } } })
+        Finder.explore(val.fo, val.uq && { searchControlProps: { extraOptions: { userQuery: val.uq, customDrilldowns: val.uq.customDrilldowns } } })
           .then(() => onReload?.());
     });
 }

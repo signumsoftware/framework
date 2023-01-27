@@ -81,7 +81,7 @@ export default function UserQueryPage(p: UserQueryPageProps) {
         largeToolbarButtons={true}
         showFilters={false /*consider adding uq.showFilters*/}
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
-        extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId) }}
+        extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId), customDrilldowns: currentUserQuery.customDrilldowns }}
         defaultRefreshMode={currentUserQuery.refreshMode}
         searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         onHeighChanged={onResize}

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { UserQueryEntity, UserQueryMessage, QueryOrderEmbedded, QueryColumnEmbedded } from '../Signum.Entities.UserQueries'
 import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
-import { SubTokensOptions } from '@framework/FindOptions'
+import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
@@ -10,6 +10,7 @@ import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbed
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import { SearchMessage, getToString } from '@framework/Signum.Entities'
+import { formGroupStyle } from '../../Dynamic/View/StyleOptionsExpression'
 
 const CurrentEntityKey = "[CurrentEntity]";
 
@@ -23,6 +24,22 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
   const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
 
   const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
+
+  const groupsResultRef = React.useRef<boolean>(ctx.value.groupResults);
+
+  React.useEffect(() => {
+    if (ctx.value.groupResults == groupsResultRef.current)
+      return;
+
+    groupsResultRef.current = ctx.value.groupResults;
+    ctx.value.customDrilldowns = [];
+    ctx.value.modified = true;
+    forceUpdate();
+  }, [ctx.value.groupResults]);
+
+  const qd = useAPI(() => Finder.getQueryDescription(query.key), [query.key]);
+  if (!qd)
+    return null;
 
   return (
     <div>
@@ -56,8 +73,8 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
 
 
           <div className="row">
-            <div className="col-sm-6">
-              <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} />
+          <div className="col-sm-6">
+            <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={() => forceUpdate()} />
               <ValueLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
                 helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
 
@@ -131,14 +148,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
             </div>
           </div>
           <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}
-            findOptions={{
-              queryName: UserQueryEntity,
-              filterOptions: [
-                { token: UserQueryEntity.token(e => e.query.key), value: query.key, frozen: true },
-                { token: UserQueryEntity.token(e => e.entity.appendFilters), value: true, frozen: true },
-                ctx.value.isNew ? undefined : { token: UserQueryEntity.token(e => e.entity), operation: "DistinctTo", value: ctx.value, frozen: true },
-              ]
-            }}
+            findOptions={getCustomDrilldownsFindOptions()}
             avoidDuplicates={true}
             vertical={true}
             iconStart={true} />
@@ -146,6 +156,28 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
       }
     </div>
   );
+
+  function getCustomDrilldownsFindOptions() {
+    var fos: FilterConditionOption[] = [];
+
+    if (ctx.value.groupResults)
+      fos.push(...[
+        { token: UserQueryEntity.token(e => e.query.key), value: query.key },
+        { token: UserQueryEntity.token(e => e.entity.appendFilters), value: true }
+      ]);
+    else
+      fos.push({ token: UserQueryEntity.token(e => e.entityType?.entity?.cleanName), value: qd!.columns["Entity"].type.name });
+
+    if (!ctx.value.isNew)
+      fos.push({ token: UserQueryEntity.token(e => e.entity), operation: "DistinctTo", value: ctx.value });
+
+    const result = {
+      queryName: UserQueryEntity,
+      filterOptions: fos.map(fo => { fo.frozen = true; return fo; }),
+    } as FindOptions;
+
+    return result;
+  }
 }
 
 

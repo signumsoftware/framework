@@ -1550,7 +1550,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const isWindowsOpen = e.button == 1 || e.ctrlKey;
 
-      if (this.customDrilldowns.length >= 0 && SearchControlLoaded.onCustomDrilldown)
+      if (this.customDrilldowns.length > 0 && SearchControlLoaded.onCustomDrilldown)
         return SearchControlLoaded.onCustomDrilldown(this.customDrilldowns, { openInNewTab: isWindowsOpen || s?.avoidPopup, showInPlace: this.props.view == "InPlace", entity: lite, onReload: () => this.doSearch({}) });
 
       if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {

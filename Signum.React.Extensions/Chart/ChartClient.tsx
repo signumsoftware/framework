@@ -7,7 +7,7 @@ import * as Finder from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, MList, parseLite } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
+  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions
 } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import {
@@ -109,6 +109,25 @@ export function getRegisteredChartScriptComponent(symbol: ChartScriptSymbol): ()
   var result = registeredChartScriptComponents[symbol.key];
   if (!result)
     throw new Error("No chartScriptComponent registered in ChartClient for " + symbol.key);
+
+  return result;
+}
+
+export function getCustomDrilldownsFindOptions(queryKey: string, qd: QueryDescription, groupResults: boolean) {
+  var fos: FilterConditionOption[] = [];
+
+  if (groupResults)
+    fos.push(...[
+      { token: UserQueryEntity.token(e => e.query.key), value: queryKey },
+      { token: UserQueryEntity.token(e => e.entity.appendFilters), value: true }
+    ]);
+  else
+    fos.push({ token: UserQueryEntity.token(e => e.entityType?.entity?.cleanName), value: qd!.columns["Entity"].type.name });
+
+  const result = {
+    queryName: UserQueryEntity,
+    filterOptions: fos.map(fo => { fo.frozen = true; return fo; }),
+  } as FindOptions;
 
   return result;
 }

@@ -4,12 +4,13 @@ import ChartBuilder from '../Templates/ChartBuilder'
 import { UserChartEntity } from '../Signum.Entities.Chart'
 import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
-import { SubTokensOptions } from '@framework/FindOptions'
+import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import "../Chart.css"
-import { useForceUpdate } from '@framework/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
+import { getCustomDrilldownsFindOptions, hasAggregates } from '../ChartClient'
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
@@ -17,6 +18,23 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
   const ctx = p.ctx;
   const entity = ctx.value;
   const queryKey = entity.query!.key;
+
+  const hasAggregatesRef = React.useRef<boolean>(hasAggregates(ctx.value));
+
+  React.useEffect(() => {
+    const ha = hasAggregates(ctx.value);
+    if (ha == hasAggregatesRef.current)
+      return;
+
+    hasAggregatesRef.current = ha;
+    ctx.value.customDrilldowns = [];
+    ctx.value.modified = true;
+    forceUpdate();
+  });
+
+  const qd = useAPI(() => Finder.getQueryDescription(queryKey), [queryKey]);
+  if (!qd)
+    return null;
 
   return (
     <div>
@@ -50,13 +68,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
         onRedraw={() => forceUpdate()}
         onOrderChanged={() => forceUpdate()} />
       <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}
-        findOptions={{
-          queryName: UserQueryEntity,
-          filterOptions: [
-            { token: UserQueryEntity.token(e => e.query.key), value: queryKey, frozen: true },
-            { token: UserQueryEntity.token(e => e.entity.appendFilters), value: true, frozen: true },
-          ]
-        }}
+        findOptions={getCustomDrilldownsFindOptions(queryKey, qd, hasAggregatesRef.current)}
         avoidDuplicates={true}
         vertical={true}
         iconStart={true} />

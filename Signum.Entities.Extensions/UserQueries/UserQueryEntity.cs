@@ -61,7 +61,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     public int? ElementsPerPage { get; set; }
 
     [PreserveOrder, NoRepeatValidator]
-    public MList<Lite<UserQueryEntity>> CustomDrilldowns { get; set; } = new MList<Lite<UserQueryEntity>>();
+    [ImplementedBy(typeof(UserQueryEntity))]
+    public MList<Lite<Entity>> CustomDrilldowns { get; set; } = new MList<Lite<Entity>>();
 
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
@@ -122,7 +123,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             Columns.IsNullOrEmpty() ? null! : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
             Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
-            CustomDrilldowns.IsNullOrEmpty() ? null! : new XElement("CustomDrilldowns", CustomDrilldowns.Select(d => new XElement("CustomDrilldown", ctx.Include(d))).ToList()));
+            CustomDrilldowns.IsNullOrEmpty() ? null! : new XElement("CustomDrilldowns", CustomDrilldowns.Select(d => new XElement("CustomDrilldown", ctx.Include((Lite<IUserAssetEntity>)d))).ToList()));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -142,7 +143,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
-        CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<UserQueryEntity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLite()).NotNull().ToMList());
+        CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLite()).NotNull().ToMList());
 
         ParseData(ctx.GetQueryDescription(Query));
     }
