@@ -5,6 +5,7 @@ using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.Upgrade.Upgrades;
 
@@ -57,7 +58,7 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
                     return match.Value;
                 });
 
-                if(p != null)
+                if (p != null)
                 {
                     content = content.Replace(p + ".match.params", "params");
                     content = content.Replace(p + ".location", "location");
@@ -124,17 +125,16 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
 
         uctx.ChangeCodeFile("Southwind.React/App/NotFound.tsx", file =>
         {
-            file.ReplaceLine(a => a.Contains("""AppContext.history.replace("~/auth/login", { back: AppContext.history.location });"""),
+            file.ReplaceLine(a => a.Contains("""AppContext.navigate("/auth/login", { back: AppContext.location }, { replace : true });"""),
                 """AppContext.navigate("/auth/login", { state: { back: AppContext.location }, replace: true });""");
-
-
-            file.InsertAfterFirstLine(l => l.Contains("const itemStorageKey = \"SIDEBAR_MODE\";"), "\nAppContext.useGlobalReactRouter();");
         });
 
-        uctx.ChangeCodeFile("Southwind.React/App/MainPublic.tsx", async file =>
+        var regexIsFull = new Regex(@"return isFull;\s*\n\s*}\);\s*\n\s*}\);");
+
+        uctx.ChangeCodeFile("Southwind.React/App/MainPublic.tsx", file =>
         {
             file.RemoveAllLines(a => a.Contains("import { Switch } from \"react-router\""));
-            file.ReplaceLine(a => a.Contains("from \"react-router-dom\""), "import { createBrowserRouter, RouterProvider, RouteObject, Location } from \"react-router-dom\"");
+            file.ReplaceLine(a => a.Contains("from \"react-router-dom\""), "import { createBrowserRouter, RouterProvider, Location } from \"react-router-dom\"");
             file.ReplaceLine(a => a.Contains("""__webpack_public_path__ = window.__baseUrl + "dist/";"""), """__webpack_public_path__ = window.__baseName + "/dist/";""");
             file.ReplaceBetweenIncluded(a => a.Contains("function reload() {"),
                 a => a.Contains(".then(() => {"), """
@@ -150,21 +150,22 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
      (await import("./MainAdmin")).startFull(routes);
   """);
 
+            file.RemoveAllLines(a => a.Contains("""routes.push(<Route exact path="/" component={Home} />);"""));
             file.RemoveAllLines(a => a.Contains("routes.push(<Route component={NotFound} />);"));
             file.RemoveAllLines(a => a.Contains("Layout.switch = React.createElement(Switch, undefined, ...routes);"));
             file.ReplaceLine(a => a.Contains("const h = AppContext.createAppRelativeHistory();"), """       
         const mainRoute: RouteObject = {
           path: "/",
-          element: < Layout />,
+          element: <Layout />,
           children: [
             {
-            index: true,
-              element: < Home />
+              index: true,
+              element: <Home />
             },
             ...routes,
             {
-            path: "*",
-              element: < NotFound />
+              path: "*",
+              element: <NotFound />
             },
           ]
         };
@@ -176,24 +177,39 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
 
             file.ReplaceBetween(
                 fromLine: a => a.Contains("<Router history={h}>"), 0,
-                toLine: a => a.Contains("</Router>"), 0, 
+                toLine: a => a.Contains("</Router>"), 0,
                 "<RouterProvider router={router}/>");
 
-            file.InsertBeforeFirstLine(a => a.Contains("return isFull;"), "await AppContext.waitLoaded();");
+            file.Replace(regexIsFull, """
+await AppContext.waitLoaded();
+return true;
+""");
 
-            file.Replace("History.Location", "Location");
+            file.ReplaceBetweenIncluded(a => a.Contains("const loc = AppContext.location;"), a => a.Contains("const back: History.Location ="), """    
+            const back: Location = AppContext.location.state?.back; 
+            """);
+
+            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Please format the code in MainPublic.tsx after the changes");
         });
 
-        uctx.ChangeCodeFile("Southwind.React/package.json", file =>
+        uctx.ChangeCodeFile("Southwind.React/App/MainPublic.tsx", file =>
         {
-            file.UpdateNpmPackages("""
+            file.InsertBeforeFirstLine(a => a.StartsWith("import"), """
+                    import { RouteObject } from "react-router"
+                    """);
+        });
+
+
+        uctx.ChangeCodeFile("Southwind.React/package.json", file =>
+          {
+              file.UpdateNpmPackages("""
                 "react-router": "6.7.0",
                 "react-router-dom": "6.7.0",
                 "luxon": "3.2.1",
                 """);
 
-            file.RemoveNpmPackage("history");
-        });
+              file.RemoveNpmPackage("history");
+          });
     }
 }
 

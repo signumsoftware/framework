@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as History from "history";
 import * as AppContext from './AppContext';
 
 export function useForceUpdate(): () => void {
