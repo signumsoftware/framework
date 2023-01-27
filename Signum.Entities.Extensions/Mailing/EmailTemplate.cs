@@ -264,8 +264,16 @@ public enum EmailMessageFormat
 {
     [Description("Plain Text")]
     PlainText,
+
+    /// <summary>
+    /// Uses CodeMirror Editor, allows any HTML Element type
+    /// </summary>
     [Description("HTML (Complex)")]
     HtmlComplex,
+
+    /// <summary>
+    /// Uses draft.js WYSIWYG HTML Editor (only bold, italic, and a few more)
+    /// </summary>
     [Description("HTML (Simple)")]
     HtmlSimple
 }
