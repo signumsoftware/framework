@@ -29,6 +29,15 @@ export let navigate: {
 };
 export let location: Location;
 
+const waitingQueue: ((val: undefined) => void)[] = [];
+export function waitLoaded() {
+  if (navigate != null)
+    return Promise.resolve();
+
+  return new Promise<undefined>(resolve => {
+    waitingQueue.push(resolve);
+  });
+}
 
 export function useGlobalReactRouter() {
 
@@ -55,7 +64,12 @@ export function useGlobalReactRouter() {
       else
         throw new Error("Unexpected argument type: to");
     };
-    return () => navigate = undefined!;
+
+    waitingQueue.forEach(f => f(undefined));
+    waitingQueue.clear();
+    return () => {
+      navigate = undefined!;
+    };
   }, []);
 
   var loc = useLocation();

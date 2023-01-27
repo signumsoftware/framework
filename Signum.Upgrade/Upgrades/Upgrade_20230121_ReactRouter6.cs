@@ -73,6 +73,8 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
         var regexAsyncImport = new Regex("""import *{ *ImportRoute *} *from +['"][^"']*/AsyncImport['"] *;? *""");
         var historyPush = new Regex("""AppContext\.history\.push\((?<exp>::EXPR::)\)""").WithMacros();
         var historyReplace = new Regex("""AppContext\.history\.replace\((?<exp>::EXPR::)\)""").WithMacros();
+        var windoOpenFindOptionsPath = new Regex("""window\.open\(Finder\.findOptionsPath\((?<exp>::EXPR::)\)\)""").WithMacros();
+        var windoOpenNavigateRoute = new Regex("""window\.open\(Navigator\.navigateRoute\((?<exp>::EXPR::)\)\)""").WithMacros();
 
         uctx.ForeachCodeFile("*.tsx", file =>
         {
@@ -94,8 +96,8 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
             file.RemoveAllLines(a => a.Contains("from 'history'"));
             file.RemoveAllLines(a => a.Contains("from \"history\""));
 
-            file.Replace("window.open(Finder.findOptionsPath", "window.open(toAbsoluteUrl(Finder.findOptionsPath");
-            file.Replace("window.open(Finder.findOptionsPath", "window.open(toAbsoluteUrl(Finder.findOptionsPath");
+            file.Replace(windoOpenFindOptionsPath, m => "window.open(toAbsoluteUrl(Finder.findOptionsPath(" + m.Groups["exp"].Value + ")))");
+            file.Replace(windoOpenFindOptionsPath, m => "window.open(toAbsoluteUrl(Navigator.navigateRoute(" + m.Groups["exp"].Value + ")))");
         });
 
         uctx.ChangeCodeFile("Southwind.React/Views/Home/Index.cshtml", file =>
@@ -129,11 +131,25 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
             file.InsertAfterFirstLine(l => l.Contains("const itemStorageKey = \"SIDEBAR_MODE\";"), "\nAppContext.useGlobalReactRouter();");
         });
 
-        uctx.ChangeCodeFile("Southwind.React/App/MainPublic.tsx", file =>
+        uctx.ChangeCodeFile("Southwind.React/App/MainPublic.tsx", async file =>
         {
             file.RemoveAllLines(a => a.Contains("import { Switch } from \"react-router\""));
             file.ReplaceLine(a => a.Contains("from \"react-router-dom\""), "import { createBrowserRouter, RouterProvider, RouteObject, Location } from \"react-router-dom\"");
             file.ReplaceLine(a => a.Contains("""__webpack_public_path__ = window.__baseUrl + "dist/";"""), """__webpack_public_path__ = window.__baseName + "/dist/";""");
+            file.ReplaceBetweenIncluded(a => a.Contains("function reload() {"),
+                a => a.Contains(".then(() => {"), """
+  async function reload() {
+      await AuthClient.autoLogin()
+      await reloadTypes()
+      await CultureClient.loadCurrentCulture()
+  """);
+
+            file.ReplaceBetweenIncluded(a => a.Contains("const promise"),
+               a => a.Contains("return promise.then"), """
+  if (isFull)
+     (await import("./MainAdmin")).startFull(routes);
+  """);
+
             file.RemoveAllLines(a => a.Contains("routes.push(<Route component={NotFound} />);"));
             file.RemoveAllLines(a => a.Contains("Layout.switch = React.createElement(Switch, undefined, ...routes);"));
             file.ReplaceLine(a => a.Contains("const h = AppContext.createAppRelativeHistory();"), """       
@@ -154,13 +170,16 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
         };
 
         const router = createBrowserRouter([mainRoute], { basename: window.__baseName });
-        """);
 
+        const messages = ConfigureReactWidgets.getMessages();
+        """);
 
             file.ReplaceBetween(
                 fromLine: a => a.Contains("<Router history={h}>"), 0,
                 toLine: a => a.Contains("</Router>"), 0, 
                 "<RouterProvider router={router}/>");
+
+            file.InsertBeforeFirstLine(a => a.Contains("return isFull;"), "await AppContext.waitLoaded();");
 
             file.Replace("History.Location", "Location");
         });

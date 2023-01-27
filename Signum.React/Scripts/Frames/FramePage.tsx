@@ -54,8 +54,7 @@ export default function FramePage() {
 
   useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
 
-  useLooseChanges(state && ({ entity: state.pack.entity, lastEntity: state.lastEntity }));
-
+  useLooseChanges(state && !state.executing ? ({ entity: state.pack.entity, lastEntity: state.lastEntity }) : undefined);
 
   function setPack(pack: EntityPack<Entity>, getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>, createNew?: () => Promise<EntityPack<Entity> | undefined>) {
     return setState({
