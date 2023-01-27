@@ -4,7 +4,7 @@ import { ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import { Entity, getToString, Lite, liteKey, MList, parseLite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, parseLite, toMList } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions
@@ -29,7 +29,7 @@ import { MemoRepository } from './D3Scripts/Components/ReactChart';
 import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
 import { softCast } from '../../Signum.React/Scripts/Globals';
 import { UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';
-import * as UserQueryClient from '../UserQueries/UserQueryClient'
+import * as UserAssetClient from '../UserAssets/UserAssetClient'
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
 
@@ -392,7 +392,7 @@ export interface ChartOptions {
   orderOptions?: (OrderOption | null | undefined)[];
   columnOptions?: (ChartColumnOption | null | undefined)[];
   parameters?: (ChartParameterOption | null | undefined)[];
-  customDrilldowns?: MList<Lite<UserQueryEntity>> | null | undefined;
+  customDrilldowns?: Lite<Entity>[];
 }
 
 export interface ChartColumnOption {
@@ -461,7 +461,7 @@ export module Encoder {
           return p.element.value != defaultParameterValue(scriptParam, c?.token && c.token.token);
         })
         .map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption),
-      customDrilldowns: cr.customDrilldowns,
+      customDrilldowns: cr.customDrilldowns.map(mle => mle.element),
     };
   }
 
@@ -486,7 +486,7 @@ export module Encoder {
     encodeParameters(query, co.parameters?.notNull());
 
     encodeColumn(query, co.columnOptions?.notNull());
-    UserQueryClient.Encoder.encodeCustomDrilldowns(query, co.customDrilldowns?.notNull());
+    UserAssetClient.Encoder.encodeCustomDrilldowns(query, co.customDrilldowns);
 
     return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
 
@@ -545,7 +545,7 @@ export module Decoder {
             filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
             columns: cols,
             parameters: Decoder.decodeParameters(query),
-            customDrilldowns: UserQueryClient.Decoder.decodeCustomDrilldowns(query),
+            customDrilldowns: toMList(UserAssetClient.Decoder.decodeCustomDrilldowns(query)),
           });
 
           synchronizeColumns(chartRequest, cr);

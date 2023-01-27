@@ -137,70 +137,6 @@ function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParse
       }));
 }
 
-export function handleCustomDrilldowns(items: MList<Lite<UserQueryEntity>>, options?: { openInNewTab?: boolean, showInPlace?: boolean, fo?: FindOptions, entity?: Lite<Entity>, onReload?: () => void }) {
-  const fo = options?.fo;
-  const entity = options?.entity;
-  const openInNewTab = options?.openInNewTab;
-  const showInPlace = options?.showInPlace;
-  const onReload = options?.onReload;
-
-  const candidates = !fo ? Promise.resolve(items.map(mle => mle.element)) :
-    Promise.all(items.map(i =>
-      Finder.inDB(i.element, UserQueryEntity.token(a => a.query))
-        .then(query => {
-          if (fo.queryName == getToString(query))
-            return i.element;
-        })));
-
-  return candidates
-    .then(c => c.notNull())
-    .then(c => {
-      if (c.length == 0)
-        return { fo: fo!, uq: null! };
-
-      return SelectorModal.chooseLite(UserQueryEntity, c)
-        .then(lite => {
-          if (!lite)
-            return;
-
-          return Navigator.API.fetch(lite)
-            .then(uq =>
-              Converter.toFindOptions(uq, (uq.entityType && entity) ?? undefined)
-                .then(dfo => {
-                  dfo.filterOptions = (dfo.filterOptions ?? []).concat(fo?.filterOptions);
-                  dfo.systemTime = fo?.systemTime ?? dfo.systemTime;
-
-                  if (uq.appendFilters && entity)
-                    dfo.filterOptions.push({ token: "Entity", value: entity });
-
-                  return ({ fo: dfo, uq: uq });
-                }));
-        });
-    })
-    .then(val => {
-      if (!val)
-        return;
-
-      if (openInNewTab || showInPlace) {
-        var extra: any = {};
-        if (val.uq) {
-          extra.userQuery = liteKey(toLite(val.uq));
-          Encoder.encodeCustomDrilldowns(extra, val.uq.customDrilldowns);
-        }
-
-        const url = Finder.findOptionsPath(val.fo, extra);
-
-        if (showInPlace && !openInNewTab)
-          AppContext.history.push(url);
-        else
-          window.open(url);
-      }
-      else
-        Finder.explore(val.fo, val.uq && { searchControlProps: { extraOptions: { userQuery: val.uq, customDrilldowns: val.uq.customDrilldowns } } })
-          .then(() => onReload?.());
-    });
-}
-
 export module Converter {
 
   export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
@@ -260,40 +196,6 @@ export module Converter {
         fop.pagination = fop2.pagination;
         return fop;
       });
-  }
-}
-
-const scapeTilde = Finder.Encoder.scapeTilde;
-
-export module Encoder {
-  export function encodeCustomDrilldowns(query: any, drilldowns: MList<Lite<UserQueryEntity>> | null | undefined) {
-    if (drilldowns && drilldowns.length > 0)
-      drilldowns.map((d, i) => query["customDrilldown" + i] = liteKey(d.element) + "~" + scapeTilde(getToString(d.element)));
-    else {
-      const keys = Dic.getKeys(query);
-      keys.filter(k => k.startsWith("customDrilldown")).forEach(k => delete query[k]);
-    }
-  }
-}
-
-export module Decoder {
-  export function decodeCustomDrilldowns(query: any): MList<Lite<UserQueryEntity>> {
-    return Finder.Decoder.valuesInOrder(query, "customDrilldown").map(d => {
-      var parts = d.value.split("~");
-
-      let liteKey: string;
-      let toStr: string;
-
-      [liteKey, toStr] = parts;
-
-      var lite = (parseLite(liteKey) as Lite<UserQueryEntity>);
-      lite.model = toStr;
-
-      return ({
-        rowId: null,
-        element: lite,
-      })
-    });
   }
 }
 

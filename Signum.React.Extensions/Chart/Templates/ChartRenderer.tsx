@@ -17,6 +17,7 @@ import { FullscreenComponent } from './FullscreenComponent'
 import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { DynamicTypeConditionSymbolEntity } from '../../Dynamic/Signum.Entities.Dynamic'
+import { handleCustomDrilldowns } from '../../UserAssets/UserAssetClient'
 
 
 export interface ChartRendererProps {
@@ -72,8 +73,12 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
 
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;
+  const customDrilldowns = cr.customDrilldowns.map(mle => mle.element);
 
   if (r.entity) {
+    if (customDrilldowns.length > 0)
+      return handleCustomDrilldowns(customDrilldowns, { openInNewTab: newWindow, entity: r.entity, onReload });
+
     if (newWindow)
       window.open(Navigator.navigateRoute(r.entity));
     else
@@ -81,8 +86,8 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
         .then(() => onReload?.());
   } else {
     const fo = extractFindOptions(cr, r);
-    if (cr.customDrilldowns.length > 0)
-      return UserQueryClient.handleCustomDrilldowns(cr.customDrilldowns, { openInNewTab: newWindow, fo, onReload });
+    if (customDrilldowns.length > 0)
+      return handleCustomDrilldowns(customDrilldowns, { openInNewTab: newWindow, fo, onReload });
 
     if (newWindow)
       window.open(Finder.findOptionsPath(fo));
