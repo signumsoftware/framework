@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, softCast } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
-import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString } from '@framework/Signum.Entities'
+import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
@@ -35,7 +35,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const [currentCustomDrilldowns, setCurrentDrilldownsInternal] = React.useState<MList<Lite<UserQueryEntity>> | undefined>();
+  const [currentCustomDrilldowns, setCurrentCustomDrilldownsInternal] = React.useState<MList<Lite<Entity>> | undefined>();
   const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
     let uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl() : p.searchControl.props.extraOptions?.userQuery;
     return uq;
@@ -48,10 +48,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     p.searchControl.props.onPageTitleChanged?.();
   }
 
-  function setCurrentCustomDrilldowns(value: MList<Lite<UserQueryEntity>> | undefined) {
+  function setCurrentCustomDrilldowns(value: MList<Lite<Entity>> | undefined) {
     p.searchControl.customDrilldowns = value?.map(mle => mle.element) ?? [];
-    UserQueryClient.Encoder.encodeCustomDrilldowns(p.searchControl.extraUrlParams, value);
-    setCurrentDrilldownsInternal(value);
+    UserAssetClient.Encoder.encodeCustomDrilldowns(p.searchControl.extraUrlParams, value);
+    setCurrentCustomDrilldownsInternal(value);
   }
 
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
@@ -60,8 +60,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     p.searchControl.extraUrlParams.userQuery = currentUserQuery && liteKey(currentUserQuery);
 
     const cds = p.searchControl.props.tag == "SearchPage" ?
-      UserQueryClient.Decoder.decodeCustomDrilldowns(QueryString.parse(window.location.search)) :
-      p.searchControl.props.extraOptions?.customDrilldowns as (MList<Lite<UserQueryEntity>> | undefined);
+      UserAssetClient.Decoder.decodeCustomDrilldowns(QueryString.parse(window.location.search)) :
+      p.searchControl.props.extraOptions?.customDrilldowns as (MList<Lite<Entity>> | undefined);
 
     setCurrentCustomDrilldowns(cds);
   }, []);

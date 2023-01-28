@@ -190,7 +190,7 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.preventDefault();
         ev.persist();
         const handler = cdRef.current as UserQueryPartHandler;
-        AppContext.pushOrOpenInTab(Finder.findOptionsPath(handler.findOptions, { userQuery: liteKey(toLite(c.userQuery!)) }), ev);
+        AppContext.pushOrOpenInTab(Finder.findOptionsPath(handler.findOptions, { userQuery: liteKey(toLite(c.userQuery!)), customDrilldowns: c.userQuery.customDrilldowns }), ev);
       },
     customTitleButtons: (c, entity, cdRef) => {
       if (!c.createNew)
@@ -227,7 +227,7 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.preventDefault();
         ev.persist();
         UserQueryClient.Converter.toFindOptions(c.userQuery!, e)
-          .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(c.userQuery!)) }), ev))
+          .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(c.userQuery!)), customDrilldowns: c.userQuery!.customDrilldowns }), ev))
       }
   });
   registerRenderer(ImagePartEntity, {

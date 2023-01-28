@@ -392,7 +392,7 @@ export interface ChartOptions {
   orderOptions?: (OrderOption | null | undefined)[];
   columnOptions?: (ChartColumnOption | null | undefined)[];
   parameters?: (ChartParameterOption | null | undefined)[];
-  customDrilldowns?: Lite<Entity>[];
+  customDrilldowns?: MList<Lite<Entity>>;
 }
 
 export interface ChartColumnOption {
@@ -461,7 +461,7 @@ export module Encoder {
           return p.element.value != defaultParameterValue(scriptParam, c?.token && c.token.token);
         })
         .map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption),
-      customDrilldowns: cr.customDrilldowns.map(mle => mle.element),
+      customDrilldowns: cr.customDrilldowns,
     };
   }
 
@@ -545,7 +545,7 @@ export module Decoder {
             filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
             columns: cols,
             parameters: Decoder.decodeParameters(query),
-            customDrilldowns: toMList(UserAssetClient.Decoder.decodeCustomDrilldowns(query)),
+            customDrilldowns: UserAssetClient.Decoder.decodeCustomDrilldowns(query),
           });
 
           synchronizeColumns(chartRequest, cr);

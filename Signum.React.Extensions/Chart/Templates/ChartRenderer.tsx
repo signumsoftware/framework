@@ -74,18 +74,18 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;
   const customDrilldowns = cr.customDrilldowns.map(mle => mle.element);
-
-  if (r.entity) {
+  const fo = extractFindOptions(cr, r);
+  const entity = r.entity ?? (ChartClient.hasAggregates(cr) ? undefined : fo.filterOptions?.singleOrNull(f => f?.token == "Entity")?.value);
+  if (entity) {
     if (customDrilldowns.length > 0)
-      return handleCustomDrilldowns(customDrilldowns, { openInNewTab: newWindow, entity: r.entity, onReload });
+      return handleCustomDrilldowns(customDrilldowns, { openInNewTab: newWindow, entity, onReload });
 
     if (newWindow)
-      window.open(Navigator.navigateRoute(r.entity));
+      window.open(Navigator.navigateRoute(entity));
     else
-      Navigator.view(r.entity)
+      Navigator.view(entity)
         .then(() => onReload?.());
   } else {
-    const fo = extractFindOptions(cr, r);
     if (customDrilldowns.length > 0)
       return handleCustomDrilldowns(customDrilldowns, { openInNewTab: newWindow, fo, onReload });
 

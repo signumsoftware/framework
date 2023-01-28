@@ -53,6 +53,14 @@ export interface SearchControlMobileOptions {
 
 export interface ShowBarExtensionOption { }
 
+export interface CustomDrilldownOptions {
+  openInNewTab?: boolean;
+  showInPlace?: boolean;
+  fo?: FindOptions;
+  entity?: Lite<Entity>;
+  onReload?: () => void;
+}
+
 export interface SearchControlLoadedProps {
   findOptions: FindOptionsParsed;
   queryDescription: QueryDescription;
@@ -155,7 +163,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   static maxToArrayElements = 100;
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
-  static onCustomDrilldown: ((items: Lite<Entity>[], options?: { openInNewTab?: boolean, showInPlace?: boolean, fo?: FindOptions, entity?: Lite<Entity>, onReload?: () => void }) => Promise<void>) | null = null;
+  static onCustomDrilldown: ((items: Lite<Entity>[], options?: CustomDrilldownOptions) => Promise<void>) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
@@ -636,6 +644,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           this.doSearchPage1();
         });
       }
+
+      this.customDrilldowns = [];
     });
   }
 

@@ -80,8 +80,6 @@ export function start(options: { routes: JSX.Element[] }) {
   Constructor.registerConstructor<QueryColumnEmbedded>(QueryColumnEmbedded, () => QueryColumnEmbedded.New({ token: QueryTokenEmbedded.New() }));
 
   Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
-
-  SearchControlLoaded.onCustomDrilldown = (items, options?: any) => handleCustomDrilldowns(toMList(items) as any, options);
 }
 
 export function userQueryUrl(uq: Lite<UserQueryEntity>): any {

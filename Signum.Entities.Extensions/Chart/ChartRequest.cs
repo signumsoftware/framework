@@ -61,7 +61,7 @@ public class ChartRequestModel : ModelEntity, IChartBase
     [NoRepeatValidator]
     public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
-    [NoRepeatValidator]
+    [NoRepeatValidator, ImplementedBy(typeof(UserQueryEntity))]
     public MList<Lite<Entity>> CustomDrilldowns { get; set; } = new MList<Lite<Entity>>();
 
     public int? MaxRows { get; set; }

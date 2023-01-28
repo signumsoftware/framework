@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
-import { Entity, getToString, Lite, liteKey, parseLite, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed, FindOptions, FindOptionsParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -18,6 +18,8 @@ import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import SelectorModal from '@framework/SelectorModal';
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
+import { SearchControlLoaded } from '../../Signum.React/Scripts/Search';
+import { CustomDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
 
 let started = false;
 export function start(options: { routes: JSX.Element[] }) {
@@ -32,6 +34,9 @@ export function start(options: { routes: JSX.Element[] }) {
   });
 
   AppContext.clearSettingsActions.push(() => started = false);
+
+  SearchControlLoaded.onCustomDrilldown = (items, options?: CustomDrilldownOptions) => handleCustomDrilldowns(items, options);
+
   started = true;
 }
 
@@ -259,9 +264,9 @@ export module API {
 const scapeTilde = Finder.Encoder.scapeTilde;
 
 export module Encoder {
-  export function encodeCustomDrilldowns(query: any, drilldowns: Lite<Entity>[] | undefined) {
+  export function encodeCustomDrilldowns(query: any, drilldowns: MList<Lite<Entity>> | undefined) {
     if (drilldowns && drilldowns.length > 0)
-      drilldowns.map((d, i) => query["customDrilldown" + i] = liteKey(d) + "~" + scapeTilde(getToString(d)));
+      drilldowns.map(mle => mle.element).map((d, i) => query["customDrilldown" + i] = liteKey(d) + "~" + scapeTilde(getToString(d)));
     else {
       const keys = Dic.getKeys(query);
       keys.filter(k => k.startsWith("customDrilldown")).forEach(k => delete query[k]);
@@ -270,7 +275,7 @@ export module Encoder {
 }
 
 export module Decoder {
-  export function decodeCustomDrilldowns(query: any): Lite<Entity>[] {
+  export function decodeCustomDrilldowns(query: any): MList<Lite<Entity>> {
     return Finder.Decoder.valuesInOrder(query, "customDrilldown").map(d => {
       var parts = d.value.split("~");
 
@@ -282,17 +287,12 @@ export module Decoder {
       var lite = parseLite(liteKey);
       lite.model = toStr;
 
-      return lite;
+      return ({
+        rowId: null,
+        element: lite
+      });
     });
   }
-}
-
-export interface CustomDrilldownOptions {
-  openInNewTab?: boolean;
-  showInPlace?: boolean;
-  fo?: FindOptions;
-  entity?: Lite<Entity>;
-  onReload?: () => void;
 }
 
 export function handleCustomDrilldowns(items: Lite<Entity>[], options?: CustomDrilldownOptions) {
@@ -311,10 +311,10 @@ export function handleCustomDrilldowns(items: Lite<Entity>[], options?: CustomDr
         .then(uq => {
           if (fo)
             return Finder.getQueryDescription(fo.queryName)
-              .then(qd => Finder.parseFindOptions(fo, qd, fo.includeDefaultFilters ?? false)
-                .then(fop => UserQueryClient.Converter.applyUserQuery(fop, uq, entity, false)
-                .then(fop2 => Finder.toFindOptions(fop2, qd, false))
-                .then(dfo => ({ fo: dfo, uq: uq }))));
+              .then(qd => Finder.parseFindOptions(fo, qd, false)
+                .then(fop => UserQueryClient.Converter.applyUserQuery(fop, uq, entity, fo.includeDefaultFilters ?? false)
+                  .then(fop2 => Finder.toFindOptions(fop2, qd, uq.includeDefaultFilters ?? fo.includeDefaultFilters ?? false))
+                  .then(dfo => ({ fo: dfo, uq: uq }))));
 
           return UserQueryClient.Converter.toFindOptions(uq, entity)
             .then(dfo => ({ fo: dfo, uq: uq }));
@@ -324,11 +324,10 @@ export function handleCustomDrilldowns(items: Lite<Entity>[], options?: CustomDr
       if (!val)
         return;
 
-      const customDrilldowns = val.uq.customDrilldowns.map(mle => mle.element);
       if (openInNewTab || showInPlace) {
         var extra: any = {};
         extra.userQuery = liteKey(toLite(val.uq));
-        Encoder.encodeCustomDrilldowns(extra, customDrilldowns);
+        Encoder.encodeCustomDrilldowns(extra, val.uq.customDrilldowns);
 
         const url = Finder.findOptionsPath(val.fo, extra);
 
@@ -338,7 +337,7 @@ export function handleCustomDrilldowns(items: Lite<Entity>[], options?: CustomDr
           window.open(url);
       }
       else
-        Finder.explore(val.fo, { searchControlProps: { extraOptions: { userQuery: val.uq, customDrilldowns: customDrilldowns } } })
+        Finder.explore(val.fo, { searchControlProps: { extraOptions: { userQuery: toLite(val.uq), customDrilldowns: val.uq.customDrilldowns } } })
           .then(() => onReload?.());
     });
 }
