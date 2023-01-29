@@ -1355,12 +1355,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <span className="text-muted me-1">{prefix}</span>
 
           {formatter.formatter(val, {
-          columns: rt.columns,
-          row: rt.rows[0],
-          rowIndex: 0,
-          refresh: () => scl.dataChanged(),
-          systemTime: scl.props.findOptions.systemTime
-        }, summaryToken)}</div>
+            columns: rt.columns,
+            row: rt.rows[0],
+            rowIndex: 0,
+            refresh: () => scl.dataChanged(),
+            systemTime: scl.props.findOptions.systemTime,
+            searchControl: scl,
+          }, summaryToken)}
+        </div>
       );
     }
 
@@ -1899,28 +1901,28 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
   }
 
-  getRowValue<T = unknown>(row: ResultRow, token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
+  getRowValue<T = unknown>(ctx: Finder.CellFormatterContext, token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
 
-    var result = this.tryGetSelectedValue(token, automaticEntityPrefix, true);
+    var result = this.tryGetRowValue(ctx, token, automaticEntityPrefix, true);
 
     return result!.value;
   }
 
-  tryGetRowValue<T = unknown>(row: ResultRow, token: QueryTokenString<T> | string, automaticEntityPrefix = true, throwError = false): { value: Finder.AddToLite<T> | undefined } | undefined {
+  tryGetRowValue<T = unknown>(ctx: Finder.CellFormatterContext, token: QueryTokenString<T> | string, automaticEntityPrefix = true, throwError = false): { value: Finder.AddToLite<T> | undefined } | undefined {
 
     const tokenName = token.toString();
 
     const sc = this;
-    const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
+    const colIndex = ctx.columns.indexOf(tokenName);
     if (colIndex != -1)
-      return { value: row.columns[colIndex] };
+      return { value: ctx.row.columns[colIndex] };
 
     var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
     if (filter != null)
       return { value: filter?.value };
 
     if (automaticEntityPrefix) {
-      var result = this.tryGetRowValue(row, tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false, false);
+      var result = this.tryGetRowValue(ctx, tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false, false);
       if (result != null)
         return result as any;
     }

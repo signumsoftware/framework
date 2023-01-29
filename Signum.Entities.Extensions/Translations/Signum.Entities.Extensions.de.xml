@@ -2868,6 +2868,7 @@
     <Member Name="Messages" Description="Nachrichten" />
     <Member Name="Name" Description="Name" />
     <Member Name="PreviewPicture" Description="Vorschaubild" />
+    <Member Name="Related" Description="Verwandt" />
     <Member Name="Status" Description="Status" />
   </Type>
   <Type Name="WhatsNewFileType">
@@ -2888,6 +2889,7 @@
     <Member Name="BackToOverview" Description="Zurück zur Übersicht" />
     <Member Name="CloseAll" Description="Alle schließen" />
     <Member Name="Downloads" Description="Downloads" />
+    <Member Name="IsRead" Description="Ist gelesen" />
     <Member Name="Language" Description="Sprache" />
     <Member Name="MyActiveNews" Description="Meine aktiven News" />
     <Member Name="NewNews" Description="Neuigkeiten" />
