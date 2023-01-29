@@ -50,7 +50,7 @@ public static class MailingServer
         };
 
 
-        if (Schema.Current.Tables.ContainsKey(typeof(EmailSenderConfigurationEntity)))
+        if (Schema.Current.Tables.ContainsKey(typeof(SmtpEmailServiceEntity)))
         {
             var piPassword = ReflectionTools.GetPropertyInfo((SmtpNetworkDeliveryEmbedded e) => e.Password);
             var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(SmtpNetworkDeliveryEmbedded));
@@ -70,10 +70,10 @@ public static class MailingServer
             });
         }
 
-        if (Schema.Current.Tables.ContainsKey(typeof(EmailSenderConfigurationEntity)))
+        if (Schema.Current.Tables.ContainsKey(typeof(ExchangeWebServiceEmailServiceEntity)))
         {
-            var piPassword = ReflectionTools.GetPropertyInfo((ExchangeWebServiceEmbedded e) => e.Password);
-            var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(ExchangeWebServiceEmbedded));
+            var piPassword = ReflectionTools.GetPropertyInfo((ExchangeWebServiceEmailServiceEntity e) => e.Password);
+            var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(ExchangeWebServiceEmailServiceEntity));
             pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
             pcs.Add("newPassword", new PropertyConverter
             {
@@ -85,7 +85,7 @@ public static class MailingServer
 
                     var password = reader.GetString()!;
 
-                    ((ExchangeWebServiceEmbedded)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
+                    ((ExchangeWebServiceEmailServiceEntity)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
                 }
             });
         }

@@ -2,37 +2,52 @@ using Signum.Engine.DiffLog;
 using Signum.Entities.Basics;
 using Signum.Entities.DiffLog;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Amqp.Framing;
+using Signum.Engine.Operations;
 
 namespace Signum.React.DiffLog;
 
 public class DiffLogController : ControllerBase
 {
-    [HttpGet("api/diffLog/{id}")]
-    public DiffLogResult GetOperationDiffLog(string id, bool simplify)
+
+    [HttpGet("api/diffLog/previous/{id}")]
+    public PreviousLog? GetPreviousOperationLog(string id)
     {
-        var operationLog = Database.Retrieve<OperationLogEntity>(PrimaryKey.Parse(id, typeof(OperationLogEntity)));
+        var log = Lite.ParsePrimaryKey<OperationLogEntity>(id).InDB(a => new { a.Target, a.Start });
+        var prev = Database.Query<OperationLogEntity>().Where(a => a.Exception == null && a.Target.Is(log.Target))
+            .Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault();
 
-        var logs = DiffLogLogic.OperationLogNextPrev(operationLog);
+        if (prev == null)
+            return null;
+        
+        string prevFinal = prev.Mixin<DiffLogMixin>().FinalState.Text!;
 
-        StringDistance sd = new StringDistance();
-
-        var prevFinal = DiffLogLogic.SimplifyDump(logs.Min?.Mixin<DiffLogMixin>().FinalState.Text, simplify);
-
-        string? nextInitial = logs.Max != null ? DiffLogLogic.SimplifyDump(logs.Max.Mixin<DiffLogMixin>().InitialState.Text, simplify) :
-            operationLog.Target!.Exists() ? GetDump(operationLog.Target!) : null;
-
-        string? initial = DiffLogLogic.SimplifyDump(operationLog.Mixin<DiffLogMixin>().InitialState.Text, simplify);
-        string? final = DiffLogLogic.SimplifyDump(operationLog.Mixin<DiffLogMixin>().FinalState.Text, simplify);
-
-        return new DiffLogResult
+        return new PreviousLog
         {
-            prev = logs.Min?.ToLite(),
-            diffPrev = prevFinal == null || initial == null ? null : sd.DiffText(prevFinal, initial),
-            initial = initial,
-            diff = sd.DiffText(initial, final),
-            final = final,
-            diffNext = final == null || nextInitial == null ? null : sd.DiffText(final, nextInitial),
-            next = logs.Max?.ToLite(),
+            OperationLog = prev.ToLite(),
+            Dump = prevFinal
+        };
+    }
+
+    [HttpGet("api/diffLog/next/{id}")]
+    public NextLog GetNextOperationLog(string id)
+    {
+        var log = Lite.ParsePrimaryKey<OperationLogEntity>(id).InDB(a => new { a.Target, a.End });
+        var next = Database.Query<OperationLogEntity>().Where(a => a.Exception == null && a.Target.Is(log.Target))
+          .Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault();
+
+        if (next == null)
+        {
+            return new NextLog
+            {
+                Dump = !log.Target!.Exists() ? null : GetDump(log.Target!)
+            };
+        }
+        
+        return new NextLog
+        {
+            OperationLog = next.ToLite(),
+            Dump = next.Mixin<DiffLogMixin>().InitialState.Text!
         };
     }
 
@@ -41,19 +56,19 @@ public class DiffLogController : ControllerBase
         var entity = target.Retrieve();
 
         using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
-            return entity.Dump();
+            return ObjectDumper.Dump(entity);
     }
 }
 
-#pragma warning disable IDE1006 // Naming Styles
-public class DiffLogResult
+public class PreviousLog
 {
-    public Lite<OperationLogEntity>? prev { get; internal set; }
-    public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? diffPrev { get; internal set; }
-    public string? initial { get; internal set; }
-    public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? diff { get; internal set; }
-    public string? final { get; internal set; }
-    public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>>? diffNext { get; internal set; }
-    public Lite<OperationLogEntity>? next { get; internal set; }
+    public Lite<OperationLogEntity> OperationLog { get; internal set; }
+    public string Dump { get; internal set; }
 }
-#pragma warning restore IDE1006 // Naming Styles
+
+public class NextLog
+{
+    public Lite<OperationLogEntity>? OperationLog { get; internal set; }
+    public string? Dump { get; internal set; }
+}
+

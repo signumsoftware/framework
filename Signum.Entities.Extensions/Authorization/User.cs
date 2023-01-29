@@ -73,6 +73,7 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
         CultureInfo = CultureInfo,
         DisplayName = UserName,
         Email = Email,
+        AzureUserId = MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)) ? this.Mixin<UserADMixin>().OID : null
     });
 
     [AutoExpressionField]

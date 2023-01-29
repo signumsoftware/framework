@@ -69,7 +69,7 @@ export function StyleOptionsLine(p : StyleOptionsLineProps){
         {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
           onClick={handleRemove}
           title={EntityControlMessage.Remove.niceToString()}>
-          <FontAwesomeIcon icon="times" />
+          <FontAwesomeIcon icon="xmark" />
         </a>}
       </label>
       <div>

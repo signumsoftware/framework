@@ -16,7 +16,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
 {
     public DashboardEntity()
     {
-        RebindEvents();
+        BindParent();
     }
 
     Lite<TypeEntity>? entityType;
@@ -48,7 +48,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
 
     public CacheQueryConfigurationEmbedded? CacheQueryConfiguration { get; set; }
 
-    [NotifyCollectionChanged, NotifyChildProperty]
+    [BindParent]
     [NoRepeatValidator]
     public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 
@@ -115,7 +115,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
             {
                 var description = getDescription(t.Query);
                 if (description != null)
-                    t.Token.ParseData(this, description, SubTokensOptions.CanElement);
+                    t.Token.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
             }
         }
     }
@@ -161,7 +161,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
         return new XElement("Dashboard",
             new XAttribute("Guid", Guid),
             new XAttribute("DisplayName", DisplayName),
-            EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+            EntityType == null ? null! : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             HideDisplayName == false ? null! : new XAttribute("HideDisplayName", HideDisplayName.ToString()),
             DashboardPriority == null ? null! : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
@@ -288,7 +288,10 @@ public enum DashboardMessage
     ForPerformanceReasonsThisDashboardMayShowOutdatedInformation,
 
     [Description("Last update was on {0}")]
-    LasUpdateWasOn0
+    LasUpdateWasOn0,
+
+    [Description("The User Query '{0}' has no column with summary header")]
+    TheUserQuery0HasNoColumnWithSummaryHeader
 }
 
 public enum DashboardEmbedededInEntity

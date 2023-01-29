@@ -102,7 +102,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
     return null;
 
   return (
-    <FormGroup ctx={p.ctx} labelText={p.labelText}
+    <FormGroup ctx={p.ctx} label={p.label}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
@@ -116,7 +116,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                     <a href="#" title={EntityControlMessage.Remove.niceToString()}
                       className="sf-line-button sf-remove"
                       onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
-                      <FontAwesomeIcon icon="times" />
+                      <FontAwesomeIcon icon="xmark" />
                     </a>}
                 </td>
                 <td style={{ width: "100%" }}>

@@ -9,6 +9,8 @@ import * as Dashboard from '../../Dashboard/Admin/Dashboard'
 import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
 import { getToString } from '@framework/Signum.Entities'
 import { useForceUpdate } from '@framework/Hooks'
+import { classes } from '../../../Signum.React/Scripts/Globals'
+import { ToolbarCount } from '../QueryToolbarConfig'
 
 export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbedded> }) {
   const forceUpdate = useForceUpdate();
@@ -51,11 +53,16 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
       {ctx4.value.type != "Divider" &&
         <div className="row">
           <div className="col-sm-5">
-            <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => forceUpdate()} extraIcons={["none"].concat(content && (content.EntityType == "UserQuery" || content.EntityType == "Query") ? ["count"] : [] as string[])} />
+            <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => forceUpdate()} extraIcons={["none"]} />
             <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
+            {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") && <ValueLine ctx={ctx4.subCtx(a => a.showCount)} onChange={() => forceUpdate()} />}
           </div>
           <div className="col-sm-1">
-            {icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
+            {icon && <div style={{ marginTop: "17px" }}>
+              <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px",  }} />
+              {ctx.value.showCount && <ToolbarCount num={ctx.value.showCount == "Always" ? 0 : 1} />}
+            </div>
+            }
           </div>
           <div className="col-sm-5">
           <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: getToString(content) || undefined }} />

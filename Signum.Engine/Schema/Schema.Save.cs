@@ -668,27 +668,40 @@ SELECT {id} FROM rows;";
         bool isGuid = this.PrimaryKey.DbType.IsGuid();
         var isPostgres = Schema.Current.Settings.IsPostgres;
 
+        var virtualMLists = VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type);
+
         var identityBehaviour = IdentityBehaviour && !Administrator.IsIdentityBehaviourDisabled(this);
 
-        string? parentId = includeCollections && identityBehaviour ? (forceParentId ?? Table.Var(isPostgres, "parentId")) : null;
-        string? newIds = includeCollections && identityBehaviour && (!isPostgres && isGuid) ? Table.Var(isPostgres, "newIDs") : null;
+        if (!includeCollections || (saveCollections.Value == null && virtualMLists == null))
+        {
+            SqlPreCommandSimple simpleInsert = identityBehaviour ?
+                 new SqlPreCommandSimple(
+                     inserterIdentity.Value.SqlInsertPattern(new[] { suffix }, null),
+                     new List<DbParameter>().Do(dbParams => inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment) :
+                 new SqlPreCommandSimple(
+                     inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
+                     new List<DbParameter>().Do(dbParams => inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment);
 
-        SqlPreCommand? collections = !includeCollections ? null : saveCollections.Value?.InsertCollectionsSync(ident, suffix, parentId!);
+            return simpleInsert;
+        }
 
-        SqlPreCommand? virtualMList = !includeCollections ? null : VirtualMList.RegisteredVirtualMLists.TryGetC(this.Type)?.Values
+        string? parentId = identityBehaviour ? (forceParentId ?? Table.Var(isPostgres, "parentId")) : null;
+        string? newIds = identityBehaviour && (!isPostgres && isGuid) ? Table.Var(isPostgres, "newIDs") : null;
+
+        SqlPreCommandSimple insert = identityBehaviour ?
+             new SqlPreCommandSimple(
+                 inserterIdentity.Value.SqlInsertPattern(new[] { suffix }, newIds ?? (isPostgres ? parentId : null)),
+                 new List<DbParameter>().Do(dbParams => inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment) :
+             new SqlPreCommandSimple(
+                 inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
+                 new List<DbParameter>().Do(dbParams => inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment);
+
+        SqlPreCommand? collections = saveCollections.Value?.InsertCollectionsSync(ident, suffix, parentId!);
+
+        SqlPreCommand? virtualMList = virtualMLists?.Values
             .Select(vmi => giInsertVirtualMListSync.GetInvoker(this.Type, vmi.BackReferenceRoute.RootType)(ident, vmi, parentId!))
             .Combine(Spacing.Double);
 
-        SqlPreCommandSimple insert = identityBehaviour ?
-            new SqlPreCommandSimple(
-                inserterIdentity.Value.SqlInsertPattern(new[] { suffix }, newIds ?? (isPostgres ? parentId : null)),
-                new List<DbParameter>().Do(dbParams => inserterIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment) :
-            new SqlPreCommandSimple(
-                inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
-                new List<DbParameter>().Do(dbParams => inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment);
-
-        if (collections == null && virtualMList == null)
-            return insert;
 
         if (!identityBehaviour)
         {
@@ -1229,12 +1242,12 @@ public partial class TableMList
             table = this,
             Getter = entity => (MList<T>)Getter(entity),
 
-            sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
+            sqlDelete = suffix => "DELETE FROM {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
             DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), ident.Id, this.BackReference.ReferenceTable.PrimaryKey),
 
             sqlDeleteExcept = num =>
             {
-                var sql = "DELETE {0} WHERE {1} = {2}"
+                var sql = "DELETE FROM {0} WHERE {1} = {2}"
                     .FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name));
 
                 sql += " AND {0} NOT IN ({1})"

@@ -82,8 +82,9 @@
     <Member Name="CurrentState" Description="Aktueller Status" />
     <Member Name="EmailNotificationsSent" Description="E-Mail-Benachrichtigungen gesendet" />
     <Member Name="Future" Description="Zukünftige" />
+    <Member Name="GroupTarget" Description="Gruppe-Ziel" />
+    <Member Name="LinkTarget" Description="Link-Ziel" />
     <Member Name="NotAttended" Description="Nicht erledigte" />
-    <Member Name="ParentTarget" Description="Übergeordnetes Ziel" />
     <Member Name="Recipient" Description="Empfänger" />
     <Member Name="State" Description="Status" />
     <Member Name="Target" Description="Ziel" />
@@ -105,15 +106,20 @@
     <Member Name="AllMyAlerts" Description="Alle meine Benachrichtigungen" />
     <Member Name="CheckedAlerts" Description="Erledigte" />
     <Member Name="CloseAll" Description="Alle schließen" />
+    <Member Name="Collapse" Description="Einklappen" />
     <Member Name="CreateAlert" Description="Benachrichtigung erstellen" />
     <Member Name="CustomDelay" Description="Benutzerdefinierte Verzögerung" />
     <Member Name="DelayDuration" Description="Dauer der Verzögerung" />
+    <Member Name="Expand" Description="Ausklappen" />
     <Member Name="FutureAlerts" Description="Zukünftige" />
     <Member Name="Hi0" Description="Hallo {0}," />
     <Member Name="MyActiveAlerts" Description="Meine aktiven Benachrichtigungen" />
     <Member Name="NewAlert" Description="Neue Benachrichtigungen" />
     <Member Name="NewUnreadNotifications" Description="Neue ungelesene Benachrichtigungen" />
+    <Member Name="OtherNotifications" Description="Andere Benachrichtigungen" />
     <Member Name="PleaseVisit0" Description="Bitte besuchen Sie {0}" />
+    <Member Name="Show0AlertsMore" Description="Weitere {0} Benachrichtigungen anzeigen" />
+    <Member Name="Show0GroupsMore1Remaining" Description="Weitere {0} Gruppen anzeigen ({1} verbleibend)" />
     <Member Name="Text" Description="Text" />
     <Member Name="Title" Description="Titel" />
     <Member Name="ViewMore" Description="Mehr sehen" />
@@ -176,7 +182,7 @@
     <Member Name="ConflictMergingTypeConditions" Description="Konflikt durch Verschmelzung von Typbedingungen" />
     <Member Name="DefaultAuthorization" Description="Standardautorisierung: " />
     <Member Name="Deny" Description="Verweigern" />
-    <Member Name="Everithing" Description="Alles" />
+    <Member Name="Everything" Description="Alles" />
     <Member Name="Filter" Description="Filter" />
     <Member Name="IncludeTrivialMerges" Description="Einschließen trivialer Zusammenführungen" />
     <Member Name="MaximumOfThe0" Description="Maximum der {0}" />
@@ -373,7 +379,7 @@
   <Type Name="CaseActivityTask">
     <Member Name="Timeout" Description="Timeout" />
   </Type>
-  <Type Name="CaseEntity" Description="Fall" PluralDescription="Etuis" Gender="m">
+  <Type Name="CaseEntity" Description="Fall" PluralDescription="Fälle" Gender="m">
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="FinishDate" Description="Fertigstellungsdatum" />
     <Member Name="MainEntity" Description="Hauptentität" />
@@ -435,10 +441,6 @@
     <Member Name="CertFile" Description="Zertiikationsdatei" />
     <Member Name="SignedFile" Description="Signierte Datei" />
   </Type>
-  <Type Name="ChartColorEntity" Description="Diagrammfarbe">
-    <Member Name="Color" Description="Farbe" />
-    <Member Name="Related" Description="In Beziehung mit" />
-  </Type>
   <Type Name="ChartColumnEmbedded" Description="Diagrammspalte">
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="Format" Description="Format" />
@@ -447,6 +449,7 @@
     <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="ChartColumnType">
+    <Member Name="Any" Description="Any" />
     <Member Name="DateOnly" Description="Datum" />
     <Member Name="DateTime" Description="Datum Uhrzeit" />
     <Member Name="Enum" Description="Enum" />
@@ -502,10 +505,6 @@
     <Member Name="TypeNotFound" Description="Typ nicht gefunden" />
     <Member Name="ViewPalette" Description="Palette anzeigen" />
   </Type>
-  <Type Name="ChartPaletteModel" Description="Diagrammpalette">
-    <Member Name="Colors" Description="Farben" />
-    <Member Name="TypeName" Description="Typname" />
-  </Type>
   <Type Name="ChartParameterEmbedded" Description="Diagramm-parameter">
     <Member Name="Name" Description="Name" />
     <Member Name="ScriptParameter" Description="Skriptparameter" />
@@ -527,6 +526,20 @@
   <Type Name="ClientCertificationFileEmbedded" Description="Client-Zertifikat-Datei">
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
+  </Type>
+  <Type Name="ColorPaletteEntity" Description="Farbpalette">
+    <Member Name="CategoryName" Description="Name der Kategorie" />
+    <Member Name="Seed" Description="Seed" />
+    <Member Name="SpecificColors" Description="Spezifische Farben" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="ColorPaletteMessage">
+    <Member Name="FillAutomatically" Description="Automatisch ausfüllen" />
+    <Member Name="Select0OnlyIfYouWantToOverrideTheAutomaticColor" Description="Wählen Sie {0} nur aus, wenn Sie die automatische Farbe überschreiben möchten" />
+  </Type>
+  <Type Name="ColorPaletteOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="CombinedUserChartElementEmbedded" Description="Kombiniertes Benutzerdiagrammelement">
     <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
@@ -630,6 +643,7 @@
     <Member Name="Part0OverlapsWith1" Description="Teil {0} überschneidet sich mit {1}" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="RowsSelected" Description="Zeile(n) ausgewählt" />
+    <Member Name="TheUserQuery0HasNoColumnWithSummaryHeader" Description="Die Benutzerabfrage '{0}' hat keine Spalte mit Zusammenfassungskopfzeile" />
   </Type>
   <Type Name="DashboardOperation">
     <Member Name="Clone" Description="Klonen" />
@@ -1024,6 +1038,7 @@
     <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
   </Type>
   <Type Name="EmailMasterTemplateEntity" Description="Master E-Mail-Vorlage">
+    <Member Name="Attachments" Description="Anhänge" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="IsDefault" Description="Ist Standard" />
     <Member Name="Messages" Description="Nachrichten" />
@@ -1052,11 +1067,17 @@
     <Member Name="Recipients" Description="Empfänger" />
     <Member Name="SendRetries" Description="Sendungswiederholungen" />
     <Member Name="Sent" Description="Gesendet" />
+    <Member Name="SentBy" Description="Gesendet von" />
     <Member Name="State" Description="Status" />
     <Member Name="Subject" Description="Betreff" />
     <Member Name="Target" Description="Ziel" />
     <Member Name="Template" Description="Vorlage" />
     <Member Name="UniqueIdentifier" Description="Einzigartiger Identifikator" />
+  </Type>
+  <Type Name="EmailMessageFormat" Description="Format der E-Mail-Nachricht">
+    <Member Name="HtmlComplex" Description="HTML (Komplex)" />
+    <Member Name="HtmlSimple" Description="HTML (Simpel)" />
+    <Member Name="PlainText" Description="Plain Text" />
   </Type>
   <Type Name="EmailMessageMessage">
     <Member Name="_01requiresExtraParameters" Description="{0} {1} erfordert zusätzliche Parameter" />
@@ -1126,14 +1147,14 @@
   <Type Name="EmailSenderConfigurationEntity" Description="Konfiguration E-Mail-Absender" PluralDescription="Konfigurationen E-Mail-Absender" Gender="m">
     <Member Name="AdditionalRecipients" Description="Zusätzliche Empfänger" />
     <Member Name="DefaultFrom" Description="Standard von" />
-    <Member Name="Exchange" Description="Exchange" />
-    <Member Name="MicrosoftGraph" Description="Microsoft Graph" />
     <Member Name="Name" Description="Name" />
-    <Member Name="SMTP" Description="SMTP" />
+    <Member Name="Service" Description="Dienst" />
   </Type>
   <Type Name="EmailSenderConfigurationOperation">
+    <Member Name="Clone" Description="Klonen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="EmailServiceEntity" Description="E-Mail-Dienst" PluralDescription="E-Mail-Dienste" Gender="m" />
   <Type Name="EmailTemplateAddressEmbedded" Description="E-Mail-Vorlagenadresse">
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
@@ -1148,8 +1169,8 @@
     <Member Name="From" Description="Von" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren " />
     <Member Name="Guid" Description="Guid" />
-    <Member Name="IsBodyHtml" Description="Ist Körper html" />
     <Member Name="MasterTemplate" Description="Hauptvorlage" />
+    <Member Name="MessageFormat" Description="Nachrichtenformat" />
     <Member Name="Messages" Description="Nachrichten" />
     <Member Name="Model" Description="Modell" />
     <Member Name="Name" Description="Name" />
@@ -1225,6 +1246,7 @@
     <Member Name="ThereAreNoResultsToWrite" Description="Es gibt keine Ergebnisse für den Bericht zu exportieren" />
   </Type>
   <Type Name="ExcelPermission">
+    <Member Name="ImportFromExcel" Description="Import aus Excel" />
     <Member Name="PlainExcel" Description="Einfaches Excel" />
   </Type>
   <Type Name="ExcelReportEntity" Description="Excel Bericht" PluralDescription="Excel Berichte" Gender="m">
@@ -1236,8 +1258,8 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="ExchangeWebServiceEmbedded" Description="Exchange web service">
-    <Member Name="ExchangeVersion" Description="Exchange version" />
+  <Type Name="ExchangeWebServiceEmailServiceEntity" Description="Exchange-Webdienstes-E-Mail-Dienst " Gender="m">
+    <Member Name="ExchangeVersion" Description="Exchange-Version" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="Url" Description="URL" />
     <Member Name="UseDefaultCredentials" Description="Use default credentials" />
@@ -1273,7 +1295,6 @@
   </Type>
   <Type Name="FilePathEmbedded" Description="Eingebettete Datei-Pfad">
     <Member Name="BinaryFile" Description="Binärdatei" />
-    <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
     <Member Name="EntityId" Description="EntityId" />
     <Member Name="FileLength" Description="Dateilänge" />
     <Member Name="FileLengthString" Description="Dateigröße string" />
@@ -1287,7 +1308,6 @@
   </Type>
   <Type Name="FilePathEntity" Description="Dateipfad" PluralDescription="Dateipfade" Gender="m">
     <Member Name="BinaryFile" Description="Binärdatei" />
-    <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="FileLength" Description="Dateilänge" />
     <Member Name="FileLengthString" Description="Dateigröße" />
@@ -1422,6 +1442,43 @@
     <Member Name="ClickActionURL" Description="Aktions-URL" />
     <Member Name="ImageSrcContent" Description="Bild src Inhalt" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
+  <Type Name="ImportExcelMode" Description="Excel-Modus importieren">
+    <Member Name="Insert" Description="Insert" />
+    <Member Name="InsertOrUpdate" Description="Insert or update" />
+    <Member Name="Update" Description="Update" />
+  </Type>
+  <Type Name="ImportExcelModel" Description="Excel importieren">
+    <Member Name="ExcelFile" Description="Excel-Datei" />
+    <Member Name="IdentityInsert" Description="Identity insert" />
+    <Member Name="MatchByColumn" Description="Nach Spalte abgleichen" />
+    <Member Name="Mode" Description="Modus" />
+    <Member Name="OperationKey" Description="Operation-Key" />
+    <Member Name="Transactional" Description="Transaktionale" />
+    <Member Name="TypeName" Description="Typname" />
+  </Type>
+  <Type Name="ImportFromExcelMessage">
+    <Member Name="_01CanAlsoBeUsed" Description="{0}.[{1}] kann auch verwendet werden" />
+    <Member Name="_01CannotBeAssignedDirectly" Description="{0} ({1}) kann nicht direkt zugeordnet werden. Jedes verschachtelte Feld sollte unabhängig zugewiesen werden." />
+    <Member Name="_01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently" Description="{0} ({1}) kann nicht direkt zugeordnet werden. Jedes verschachtelte Feld sollte unabhängig zugewiesen werden." />
+    <Member Name="_01IsIncompatible" Description="{0} ({1}) ist inkompatibel" />
+    <Member Name="_01IsNotSupported" Description="{0}/{1} wird nicht unterstützt in: " />
+    <Member Name="_0Errors" Description="{0} Fehler" />
+    <Member Name="_0IsNotSupported" Description="{0} wird nicht unterstützt" />
+    <Member Name="_0IsReadOnly" Description="{0} ist schreibgeschützt" />
+    <Member Name="Columns0AlreadyHaveConstanValuesFromFilters" Description="Spalte(n) {0} haben bereits konstante Werte aus Filtern" />
+    <Member Name="DownloadTemplate" Description="Excel-Vorlage für diese Abfrage herunterladen" />
+    <Member Name="ErrorsIn0Rows_N" Description="Fehler in {0} Zeile(n)" />
+    <Member Name="Import0FromExcel" Description="{0} aus Excel Importieren" />
+    <Member Name="ImportFromExcel" Description="Aus Excel importieren" />
+    <Member Name="Importing0" Description="Importieren {0}" />
+    <Member Name="ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1" Description="Viele Filter versuchen, die gleiche Eigenschaft {0} mit unterschiedlichen Werten {1} zuzuweisen" />
+    <Member Name="No0FoundInThisQueryWith1EqualsTo2" Description="Keine {0} gefunden in dieser Abfrage mit {1} gleich {2}" />
+    <Member Name="Operation0IsNotSupported" Description="Operation {0} wird nicht unterstützt" />
+    <Member Name="SimplePropertyEqualsValueFiltersCanBeUsedToAssignConstantValuesAnythingElseIsNoAllowed" Description="Einfache 'Property = Value' Filter können verwendet werden, um konstante Werte zuzuweisen, alles andere ist nicht erlaubt:" />
+    <Member Name="SomeColumnsAreIncompatibleForImportingFromExcel" Description="Einige Spalten sind für Importinng aus Excel nicht kompatibel:" />
+    <Member Name="SomeFiltersAreIncompatibleForImportingFromExcel" Description="Einige Filter sind für den Import aus Excel nicht kompatibel" />
+    <Member Name="ThisQueryHasMultipleImplementations0" Description="Diese Abfrage hat mehrere Implementierungen {0}" />
   </Type>
   <Type Name="InboxFilterModel" Description="Posteingangs-filter">
     <Member Name="FromDate" Description="Vom Datum" />
@@ -1606,7 +1663,7 @@
     <Member Name="NotAllowed" Description="Nicht erlaubt" />
     <Member Name="TextPruning" Description="Text beschneiden" />
   </Type>
-  <Type Name="MicrosoftGraphEmbedded" Description="Microsoft Graph">
+  <Type Name="MicrosoftGraphEmailServiceEntity" Description="Microsoft Graph-E-Mail-Dienst" PluralDescription="Microsoft Graph-E-Mail-Dienste" Gender="m">
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
     <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
@@ -2093,7 +2150,7 @@
   <Type Name="RuleTypeConditionEntity" Description="Regeltypbedingung" PluralDescription="Bedingungen für Regeltypen">
     <Member Name="Allowed" Description="Erlaubt" />
     <Member Name="Conditions" Description="Bedingungen" />
-    <Member Name="Order" Description="Bestellung" />
+    <Member Name="Order" Description="Reihenfolge" />
     <Member Name="RuleType" Description="Typregel" />
   </Type>
   <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln" Gender="m">
@@ -2230,6 +2287,10 @@
   <Type Name="SessionLogPermission">
     <Member Name="TrackSession" Description="Sitzungskontrolle" />
   </Type>
+  <Type Name="ShowCount" Description="Anzahl anzeigen">
+    <Member Name="Always" Description="Immer" />
+    <Member Name="MoreThan0" Description="Mehr als 0" />
+  </Type>
   <Type Name="SimpleTaskSymbol" Description="Einfache Task" PluralDescription="Einfache Tasks" Gender="f" />
   <Type Name="SMSCharactersMessage">
     <Member Name="Insert" Description="Einfügen" />
@@ -2326,10 +2387,10 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="SMSUpdatePackageEntity" Description="SMS-Updatepaket" PluralDescription="SMS-Updatepakete" Gender="n" />
-  <Type Name="SmtpEmbedded" Description="Smtp">
+  <Type Name="SmtpEmailServiceEntity" Description="SMTP-E-Mail-Dienst" PluralDescription="SMTP-E-Mail-Dienste" Gender="m">
     <Member Name="DeliveryFormat" Description="Delivery format" />
     <Member Name="DeliveryMethod" Description="Delivery method" />
-    <Member Name="Network" Description="Network" />
+    <Member Name="Network" Description="Netzwerk" />
     <Member Name="PickupDirectoryLocation" Description="Pickup directory location" />
   </Type>
   <Type Name="SmtpNetworkDeliveryEmbedded" Description="SMTP-Netzwerk-Zustellung">
@@ -2340,6 +2401,10 @@
     <Member Name="Port" Description="Port" />
     <Member Name="UseDefaultCredentials" Description="Verwenden der Standardanmeldeinformationen" />
     <Member Name="Username" Description="Benutzername" />
+  </Type>
+  <Type Name="SpecificColorEmbedded" Description="Spezifische Farbe">
+    <Member Name="Color" Description="Farbe" />
+    <Member Name="Entity" Description="Entität" />
   </Type>
   <Type Name="SqlMigrationEntity" Description="SQL-Migration">
     <Member Name="Comment" Description="Kommentar" />
@@ -2401,6 +2466,7 @@
     <Member Name="IconName" Description="Symbolname" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="OpenInPopup" Description="Im Popup öffnen" />
+    <Member Name="ShowCount" Description="Anzahl anzeigen" />
     <Member Name="Type" Description="Typ" />
     <Member Name="Url" Description="URL" />
   </Type>
@@ -2645,7 +2711,7 @@
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="Guid" Description="Guid" />
-    <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="MaxRows" Description="Max. Zeilen" />
     <Member Name="Owner" Description="Eigentümer" />
@@ -2704,7 +2770,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
     <Member Name="Guid" Description="Guid" />
-    <Member Name="HideQuickLink" Description="Verstecke quick Link" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Owner" Description="Eigentümer" />
@@ -2718,18 +2784,19 @@
     <Member Name="BackToDefault" Description="Zurück zum Standard" />
     <Member Name="CreateNew" Description="Erstellen" />
     <Member Name="Edit" Description="Bearbeiten" />
-    <Member Name="MakesTheUserQueryAvailableAsAQuickLinkOf0" Description="Stellt die Benutzerabfrage als Quicklink von {0} zur Verfügung" />
-    <Member Name="MakesTheUserQueryAvailableInContextualMenuWhenGrouping0" Description="Macht die Benutzerabfrage im Kontextmenü beim Gruppieren verfügbar {0}" />
+    <Member Name="MakesThe0AvailableAsAQuickLinkOf1" Description="Stellt die {0} als Quick Link of {1} zur Verfügung" />
+    <Member Name="MakesThe0AvailableInContextualMenuWhenGrouping0" Description="Stellt die {0} im Kontextmenü zur Verfügung, wenn {1} gruppiert wird" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Der Filtervorgang {0} ist nicht kompatibel mit {1}" />
     <Member Name="TheSelected0" Description="die ausgewählte {0}" />
-    <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um aktuelle Entität Filtern" />
+    <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um nach der aktuellen Entität zu filtern" />
   </Type>
   <Type Name="UserQueryOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
+    <Member Name="AggregateFromSummaryHeader" Description="Aggregieren aus Zusammenfassungskopfzeile" />
     <Member Name="AllowSelection" Description="Auswahl zulassen" />
     <Member Name="AutoUpdate" Description="Automatische Aktualisierung" />
     <Member Name="CreateNew" Description="Neue erstellen" />
@@ -2790,6 +2857,60 @@
     <Member Name="Expression" Description="Ausdruck" />
     <Member Name="Name" Description="Name" />
   </Type>
+  <Type Name="WhatsNewEntity" Description="Was ist neu" Gender="f">
+    <Member Name="Attachment" Description="Anhang" />
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Messages" Description="Nachrichten" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="PreviewPicture" Description="Vorschaubild" />
+    <Member Name="Status" Description="Status" />
+  </Type>
+  <Type Name="WhatsNewFileType">
+    <Member Name="WhatsNewAttachmentFileType" Description="Was ist neu Anhang dateityp" />
+    <Member Name="WhatsNewPreviewFileType" Description="Was ist neu Vorschau dateityp" />
+  </Type>
+  <Type Name="WhatsNewLogEntity" Description="Was ist neu" Gender="n">
+    <Member Name="ReadOn" Description="Gelesen am" />
+    <Member Name="User" Description="Benutzer" />
+    <Member Name="WhatsNew" Description="Was ist neu?" />
+  </Type>
+  <Type Name="WhatsNewLogOperation">
+    <Member Name="Delete" Description="Löschen" />
+  </Type>
+  <Type Name="WhatsNewMessage">
+    <Member Name="_0ContiansNoVersionForCulture1" Description="{0} enthält keine Version für Kultur '{1}'" />
+    <Member Name="AllMyNews" Description="Alle meine Neuigkeiten" />
+    <Member Name="BackToOverview" Description="Zurück zur Übersicht" />
+    <Member Name="CloseAll" Description="Alle schließen" />
+    <Member Name="Downloads" Description="Downloads" />
+    <Member Name="Language" Description="Sprache" />
+    <Member Name="MyActiveNews" Description="Meine aktiven News" />
+    <Member Name="NewNews" Description="Neuigkeiten" />
+    <Member Name="News" Description="Nachrichten" />
+    <Member Name="NewsPage" Description="News-Seite" />
+    <Member Name="NewUnreadNews" Description="Neue ungelesene Nachrichten" />
+    <Member Name="Preview" Description="Vorschau" />
+    <Member Name="ReadFurther" Description="Weiterlesen" />
+    <Member Name="ThisNewIsNoLongerAvailable" Description="Diese Neuigkeit ist nicht mehr verfügbar" />
+    <Member Name="ViewMore" Description="Mehr anzeigen" />
+    <Member Name="YouDoNotHaveAnyUnreadNews" Description="Sie haben keine ungelesenen Nachrichten" />
+    <Member Name="YourNews" Description="Ihre Neuigkeiten" />
+  </Type>
+  <Type Name="WhatsNewMessageEmbedded" Description="Was ist die neue Nachricht?">
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Title" Description="Titel" />
+  </Type>
+  <Type Name="WhatsNewOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Publish" Description="Veröffentlichen" />
+    <Member Name="Save" Description="Speichern" />
+    <Member Name="Unpublish" Description="Unveröffentlichen" />
+  </Type>
+  <Type Name="WhatsNewState" Description="Neuigkeiten Status">
+    <Member Name="Draft" Description="Entwurf " />
+    <Member Name="Publish" Description="Veröffentlichen" />
+  </Type>
   <Type Name="WhenManyFromBehaviour" Description="Verhalten Wenn viele Von ">
     <Member Name="FistResult" Description="Erstes Ergebnis" />
     <Member Name="SplitMessages" Description="Geteilte Nachrichten" />
@@ -2825,6 +2946,7 @@
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Model" Description="modell" />
     <Member Name="Name" Description="Name" />
     <Member Name="Orders" Description="Reihenfolge" />
@@ -2938,14 +3060,14 @@
     <Member Name="Condition" Description="Bedingung" />
     <Member Name="From" Description="Von" />
     <Member Name="Name" Description="Name" />
-    <Member Name="Order" Description="Bestellung" />
+    <Member Name="Order" Description="Reihenfolge" />
     <Member Name="To" Description="An" />
     <Member Name="Xml" Description="XML" />
   </Type>
   <Type Name="WorkflowConnectionModel" Description="Workflow-Verbindung">
     <Member Name="Condition" Description="Bedingung" />
     <Member Name="Name" Description="Name" />
-    <Member Name="Order" Description="Bestellung" />
+    <Member Name="Order" Description="Reihenfolge" />
   </Type>
   <Type Name="WorkflowConnectionOperation">
     <Member Name="Delete" Description="Löschen" />

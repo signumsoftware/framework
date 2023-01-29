@@ -74,6 +74,10 @@ export class Rule<T extends string> {
     return this.sizes[name];
   }
 
+  has(name: T) {
+    return this.sizes[name] > 0;
+  }
+
   start(name: T) {
     return this.starts[name];
   }

@@ -13,3 +13,16 @@
 .nav.navbar-nav .nav-link .nav-item-float {
     display: none;
 }
+
+.sf-toolbar-count-container {
+    position: absolute;
+    display: inline;
+}
+
+.sf-toolbar-count {
+    padding: 1px 2px;
+    position: relative;
+    top: -8px;
+    left: -5px;
+    border-radius: 10px !important;
+}

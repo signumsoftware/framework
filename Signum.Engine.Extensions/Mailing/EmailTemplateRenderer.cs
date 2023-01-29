@@ -58,21 +58,22 @@ class EmailMessageBuilder
                 recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault()?.ToCultureInfo() ??
                 EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
 
+            var context = new EmailTemplateLogic.GenerateAttachmentContext(this.qd, template, dicTokenColumn, currentRows, ci)
+            {
+                ModelType = template.Model?.ToType(),
+                Model = model,
+                Entity = entity,
+            };
+
             email = new EmailMessageEntity
             {
                 Target = entity?.ToLite() ?? (this.model!.UntypedEntity as Entity)?.ToLite(),
                 Recipients = recipients.Select(r => new EmailRecipientEmbedded(r.OwnerData) { Kind = r.Kind }).ToMList(),
                 From = from,
-                IsBodyHtml = template.IsBodyHtml,
+                IsBodyHtml = template.MessageFormat == EmailMessageFormat.HtmlComplex || template.MessageFormat == EmailMessageFormat.HtmlSimple,
                 EditableMessage = template.EditableMessage,
                 Template = template.ToLite(),
-                Attachments = template.Attachments.SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g,
-                new EmailTemplateLogic.GenerateAttachmentContext(this.qd, template, dicTokenColumn, currentRows, ci)
-                {
-                    ModelType = template.Model?.ToType(),
-                    Model = model,
-                    Entity = entity,
-                })).ToMList()
+                Attachments = template.Attachments.Concat((template.MasterTemplate?.RetrieveAndRemember().Attachments).EmptyIfNull()).SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g, context)).ToMList()
             };
 
             EmailTemplateMessageEmbedded? message = 
@@ -96,7 +97,7 @@ class EmailMessageBuilder
                 email.Body = new BigStringEmbedded(TextNode(message).Print(
                     new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
                     {
-                        IsHtml = template.IsBodyHtml,
+                        IsHtml = template.MessageFormat == EmailMessageFormat.HtmlComplex || template.MessageFormat == EmailMessageFormat.HtmlSimple,
                         Model = model,
                     }));
             }
@@ -206,6 +207,16 @@ class EmailMessageBuilder
                 };
             }
         }
+        else if(this.model?.GetFrom() is var from && from != null)
+        {
+            yield return new EmailFromEmbedded
+            {
+                EmailOwner = from.Owner,
+                EmailAddress = from.Email!,
+                DisplayName = from.DisplayName,
+                AzureUserId = from.AzureUserId,
+            };
+        }
         else
         {
             if (smtpConfig != null && smtpConfig.DefaultFrom != null)
@@ -258,8 +269,8 @@ class EmailMessageBuilder
 
             var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]!).ToList();
 
-            var groupsWithEmail = groups.Where(a => a.Key.Email.HasText()).ToList();
-
+            var groupsWithEmail = groups.Where(a => a.Key !=null && a.Key.Email.HasText()).ToList();
+            
             if (groupsWithEmail.IsEmpty())
             {
                 switch (tr.WhenNone)

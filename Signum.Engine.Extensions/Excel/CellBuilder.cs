@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 
 namespace Signum.Engine.Excel;
 
@@ -63,51 +64,58 @@ public class CellBuilder
 
     public Dictionary<DefaultStyle, UInt32Value> DefaultStyles = null!;
 
-    public Cell Cell<T>(T value)
+    public Cell Cell<T>(T value, bool forImport = false)
     {
         DefaultStyle template = GetDefaultStyle(typeof(T));
-        return Cell(value, template);
+        return Cell(value, template, forImport);
     }
 
-    public Cell Cell<T>(T value, UInt32Value styleIndex)
+    public Cell Cell<T>(T value, UInt32Value styleIndex, bool forImport = false)
     {
         DefaultStyle template = GetDefaultStyle(typeof(T));
-        return Cell(value, template, styleIndex);
+        return Cell(value, template, styleIndex, forImport);
     }
 
-    public Cell Cell(object? value, Type type)
+    public Cell Cell(object? value, Type type, bool forImport = false)
     {
         DefaultStyle template = GetDefaultStyle(type);
-        return Cell(value, template);
+        return Cell(value, template, forImport);
     }
 
-    public Cell Cell(object? value, DefaultStyle template)
+    public Cell Cell(object? value, Type type, UInt32Value styleIndex, bool forImport = false)
     {
-        return Cell(value, template, DefaultStyles[template]);
+        DefaultStyle template = GetDefaultStyle(type);
+        return Cell(value, template, styleIndex, forImport);
+    }
+
+    public Cell Cell(object? value, DefaultStyle template, bool forImport = false)
+    {
+        return Cell(value, template, DefaultStyles[template], forImport);
     }
 
 #pragma warning disable CA1822 // Mark members as static
-    public Cell Cell(object? value, DefaultStyle template, UInt32Value styleIndex)
-#pragma warning restore CA1822 // Mark members as static
+    public Cell Cell(object? value, DefaultStyle template, UInt32Value styleIndex, bool forImport = false)
     {
         string excelValue = value == null ? "" :
             template == DefaultStyle.DateTime ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
             template == DefaultStyle.Date ? value is DateTime dt ? ExcelExtensions.ToExcelDate(dt) : ExcelExtensions.ToExcelDate(((DateOnly)value).ToDateTime()) :
             template == DefaultStyle.Time ? ExcelExtensions.ToExcelTime((TimeOnly)value) :
             template == DefaultStyle.Decimal ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
-            template == DefaultStyle.Boolean ? ToYesNo((bool)value) :
+            template == DefaultStyle.Boolean ? ExcelExtensions.ToExcelNumber((bool)value ? 1 : 0) :
+            forImport && template == DefaultStyle.Enum ? value.ToString()! :
             template == DefaultStyle.Enum ? ((Enum)value).NiceToString() :
+            forImport && value is Lite<Entity> lite ? lite.KeyLong() :
             value.ToString()!;
 
-        Cell cell = IsInlineString(template)? 
-            new Cell(new InlineString(new Text { Text = excelValue })) { DataType = CellValues.InlineString } : 
-            new Cell { CellValue = new CellValue(excelValue), DataType = null };
+        Cell cell = 
+            IsInlineString(template) ? new Cell(new InlineString(new Text { Text = excelValue })) { DataType = CellValues.InlineString } :
+            new Cell { CellValue = new CellValue(excelValue), DataType = template == DefaultStyle.Boolean ? CellValues.Boolean : null  };
 
         cell.StyleIndex = styleIndex;
 
         return cell;
     }
-
+#pragma warning restore CA1822 // Mark members as static
 
     private static bool IsInlineString(DefaultStyle template)
     {
@@ -117,9 +125,9 @@ public class CellBuilder
             DefaultStyle.Header or 
             DefaultStyle.Text or
             DefaultStyle.General or 
-            DefaultStyle.Boolean or 
             DefaultStyle.Enum => true,
 
+            DefaultStyle.Boolean or 
             DefaultStyle.Date or 
             DefaultStyle.DateTime or 
             DefaultStyle.Time or 
@@ -138,7 +146,7 @@ public class CellBuilder
 
         if (ReflectionTools.IsNumber(c.Column.Type))
         {
-            if (c.Column.Unit.HasText() || c.Column.Format != Reflector.FormatString(c.Column.Type))
+            if (c.Column.Unit.HasText() || c.Column.Format != null && c.Column.Format != Reflector.FormatString(c.Column.Type))
             {
                 string formatExpression = GetCustomFormatExpression(c.Column.Unit, c.Column.Format);
                 var styleIndex = CustomDecimalStyles.GetOrCreate(formatExpression, () => CellFormatCount++);
@@ -193,16 +201,5 @@ public class CellBuilder
             : f.StartsWith("E") ? "0" + DecimalPlaces(f.After("E").ToInt() ?? 2)
             : f.StartsWith("P") ? "0" + DecimalPlaces(f.After("P").ToInt() ?? 2) + "%"
             : columnFormat;
-    }
-
-    private static string ToYesNo(bool value)
-    {
-        return value ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString();
-    }
-
-    public Cell Cell(Type type, object value, UInt32Value styleIndex)
-    {
-        DefaultStyle template = GetDefaultStyle(type);
-        return Cell(value, template, styleIndex);
     }
 }

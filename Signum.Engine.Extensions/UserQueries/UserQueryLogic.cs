@@ -6,6 +6,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Workflow;
 
 namespace Signum.Engine.UserQueries;
 
@@ -44,6 +45,8 @@ public static class UserQueryLogic
                     uq.Owner,
                 });
 
+            AuthLogic.HasRuleOverridesEvent += role => Database.Query<UserQueryEntity>().Any(a => a.Owner.Is(role));
+
             sb.Schema.EntityEvents<UserQueryEntity>().Retrieved += UserQueryLogic_Retrieved;
 
             UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryEntity>().ToDictionary(a => a.ToLite()),
@@ -59,17 +62,15 @@ public static class UserQueryLogic
 
     public static QueryRequest ToQueryRequest(this UserQueryEntity userQuery, bool ignoreHidden = false)
     {
-        var qr = new QueryRequest()
+        var qr = new QueryRequest
         {
             QueryName = userQuery.Query.ToQueryName(),
             GroupResults = userQuery.GroupResults,
+            Filters = userQuery.Filters.ToFilterList(),
+            Columns = MergeColumns(userQuery, ignoreHidden),
+            Orders = userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
+            Pagination = userQuery.GetPagination() ?? new Pagination.All()
         };
-
-        qr.Filters = userQuery.Filters.ToFilterList();
-        qr.Columns = MergeColumns(userQuery, ignoreHidden);
-        qr.Orders = userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList();
-
-        qr.Pagination = userQuery.GetPagination() ?? new Pagination.All();
 
         return qr;
     }
@@ -84,17 +85,16 @@ public static class UserQueryLogic
             valueToken = QueryUtils.Parse("Count", qd, SubTokensOptions.CanAggregate);
         }
 
-        var qr = new QueryRequest()
+        var qr = new QueryRequest
         {
             QueryName = qn,
             GroupResults = userQuery.GroupResults || valueToken is AggregateToken,
+            Filters = userQuery.Filters.ToFilterList(),
+            Columns = new List<Column> { new Column(valueToken, null) },
+            Orders = valueToken is AggregateToken ? new List<Order>() : userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
+
+            Pagination = userQuery.GetPagination() ?? new Pagination.All()
         };
-
-        qr.Filters = userQuery.Filters.ToFilterList();
-        qr.Columns = new List<Column> { new Column(valueToken, null) };
-        qr.Orders = valueToken is AggregateToken ? new List<Order>() : userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList();
-
-        qr.Pagination = userQuery.GetPagination() ?? new Pagination.All();
 
         return qr;
     }

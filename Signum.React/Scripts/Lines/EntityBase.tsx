@@ -42,8 +42,8 @@ export interface EntityBaseProps extends LineBaseProps {
 export class EntityBaseController<P extends EntityBaseProps> extends LineBaseController<P>{
 
   static createIcon = <FontAwesomeIcon icon="plus" />;
-  static findIcon = <FontAwesomeIcon icon="search" />;
-  static removeIcon = <FontAwesomeIcon icon="times" />;
+  static findIcon = <FontAwesomeIcon icon="magnifying-glass" />;
+  static removeIcon = <FontAwesomeIcon icon="xmark" />;
   static viewIcon = <FontAwesomeIcon icon="arrow-right" />;
   static moveIcon = <FontAwesomeIcon icon="bars" />;
   static pasteIcon = <FontAwesomeIcon icon="clipboard" />;
@@ -182,7 +182,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         //Modifying the sub entity, saving and coming back should change the entity in the UI (ToString, or EntityDetails), 
         //the parent entity is not really modified, but I'm not sure it his is a real problem in practice, till then the line is commented out
         //if (e.modified || !is(e, entity)) 
-        this.convert(e).then(m => this.setValue(m));
+        this.convert(e).then(m => this.setValue(m, event));
       });
     }
   }
@@ -263,7 +263,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       if (!e)
         return;
 
-      this.convert(e).then(m => this.setValue(m));
+      this.convert(e).then(m => this.setValue(m, event));
     });
   };
 
@@ -375,7 +375,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       if (!entity)
         return;
 
-      this.convert(entity).then(e => this.setValue(e));
+      this.convert(entity).then(e => this.setValue(e, event));
     });
   };
 
@@ -401,7 +401,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
         if (result == false)
           return;
 
-        this.setValue(null);
+        this.setValue(null, event);
       });
   };
 

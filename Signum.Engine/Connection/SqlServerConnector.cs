@@ -127,7 +127,7 @@ public class SqlServerConnector : Connector
         else
         {
             cmd.Connection = (SqlConnection)Transaction.CurrentConnection!;
-            cmd.Transaction = (SqlTransaction)Transaction.CurrentTransaccion!;
+            cmd.Transaction = (SqlTransaction)Transaction.CurrentTransaction!;
         }
 
         cmd.CommandText = preCommand.Sql;
@@ -375,7 +375,7 @@ public class SqlServerConnector : Connector
             using (var bulkCopy = new SqlBulkCopy(
                 options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
                 options,
-                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion!))
+                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaction!))
             using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
             {
                 bulkCopy.BulkCopyTimeout = timeout ?? Connector.ScopeTimeout ?? this.CommandTimeout ?? bulkCopy.BulkCopyTimeout;
@@ -463,6 +463,8 @@ public class SqlServerConnector : Connector
     }
 
     public override bool RequiresRetry => this.Version == SqlServerVersion.AzureSQL;
+
+    public override bool SupportsDateDifBig => this.Version >= SqlServerVersion.SqlServer2016;
 
     public static List<string> ComplexWhereKeywords = new() { "OR" };
 

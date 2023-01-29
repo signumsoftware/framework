@@ -117,7 +117,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
       <input type="text" className="form-control"
         placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} onKeyDown={handleKeyDown} />
       <button className="btn btn-outline-secondary" type="submit" title={TranslationMessage.Search.niceToString()}>
-        <FontAwesomeIcon icon="search" />
+        <FontAwesomeIcon icon="magnifying-glass" />
       </button>
     </form>
   );
@@ -180,7 +180,11 @@ export function TranslatedInstance(p: { ins: TranslatedInstanceView, cultures: s
                       if (!trans)
                         trans = ins.translations[entry] = {};
 
-                      trans[c] = { originalText: ins.master[entry], translatedText: e.currentTarget.value };
+                      trans[c] = {
+                        originalText: ins.master[entry],
+                        newText: ins.master[entry],
+                        translatedText: e.currentTarget.value
+                      };
                     } else {
                       pair.translatedText = e.currentTarget.value;
                     }
@@ -189,10 +193,11 @@ export function TranslatedInstance(p: { ins: TranslatedInstanceView, cultures: s
 
                   return (
                     <React.Fragment key={c}>
-                      {pair?.diff && <tr>
+                      {pair != null && pair.originalText != null && pair.newText != null &&
+                        pair.originalText != pair.newText && <tr>
                         <td className="leftCell">{c} Diff</td>
-                        <td className="monospaceCell">
-                          <pre><DiffDocumentSimple diff={pair.diff} /></pre>
+                          <td className="monospaceCell">
+                            <pre><DiffDocumentSimple first={pair.originalText} second={pair.newText} /></pre>
                         </td>
                       </tr>
                       }

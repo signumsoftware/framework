@@ -90,7 +90,7 @@ export function HtmlAttributesLine(p: HtmlAttributesLineProps) {
         {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
           onClick={handleRemove}
           title={EntityControlMessage.Remove.niceToString()}>
-          <FontAwesomeIcon icon="times" />
+          <FontAwesomeIcon icon="xmark" />
         </a>}
       </label>
       <div>
@@ -188,7 +188,7 @@ export function ExpressionOrValueStrip(p: ExpressionOrValueStripProps) {
             <a href="#" className="sf-line-button sf-remove"
               onClick={e => handleOnRemove(e, key)}
               title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon icon="times" />
+              <FontAwesomeIcon icon="xmark" />
             </a>
             <ExpressionOrValueComponent dn={p.dn} refreshView={() => forceUpdate()}
               binding={new Binding(p.object, key)} type="string" defaultValue={null} avoidDelete={true} />

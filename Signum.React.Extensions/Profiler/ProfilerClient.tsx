@@ -49,8 +49,8 @@ export module API {
       return ajaxPost({ url: "~/api/profilerHeavy/clear" }, undefined);
     }
 
-    export function entries(): Promise<HeavyProfilerEntry[]> {
-      return ajaxGet({ url: "~/api/profilerHeavy/entries" });
+    export function entries(ignoreProfilerHeavyEntries: boolean): Promise<HeavyProfilerEntry[]> {
+      return ajaxGet({ url: "~/api/profilerHeavy/entries?ignoreProfilerHeavyEntries=" + ignoreProfilerHeavyEntries });
     }
 
     export function details(key: string): Promise<HeavyProfilerEntry[]> {

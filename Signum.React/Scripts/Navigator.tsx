@@ -1,10 +1,10 @@
 import * as React from "react"
 import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
-import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo } from './Reflection';
-import { TypeContext } from './TypeContext';
+import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo, EnumType } from './Reflection';
+import { EntityFrame, TypeContext } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
@@ -23,6 +23,8 @@ import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessage
 import CopyLiteButton from "./Components/CopyLiteButton";
 import { Typeahead } from "./Components";
 import { TypeaheadOptions } from "./Components/Typeahead";
+import CopyLinkButton from "./Components/CopyLinkButton";
+import { object } from "prop-types";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || getToString(currentUser) == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -54,17 +56,45 @@ export namespace NavigatorManager {
   }
 }
 
-export const entityChanged: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> = [];
+export const entityChanged: { [typeName: string]: Array<(cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void> } = {};
 
-function cleanEntityChanged() {
-  entityChanged.clear();
+export function registerEntityChanged<T extends Entity>(type: Type<T>, callback: (cleanName: string, entity: T | undefined, isRedirect: boolean) => void) {
+  var cleanName = type.typeName;
+  (entityChanged[cleanName] ??= []).push(callback as any);
 }
 
-export function raiseEntityChanged(cleanNameOrEntity: string | Entity, isRedirect = false) {
-  var cleanName = isEntity(cleanNameOrEntity) ? cleanNameOrEntity.Type : cleanNameOrEntity;
-  var entity = isEntity(cleanNameOrEntity) ? cleanNameOrEntity : undefined;
+export function useEntityChanged<T extends Entity>(type: Type<T>, callback: (cleanName: string, entity: T | undefined, isRedirect: boolean) => void, deps: any[]) : void;
+export function useEntityChanged(types: string[], callback: (cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void, deps: any[]): void;
+export function useEntityChanged<T extends Entity>(typeOrTypes: Type<any> | string | string[], callback: (cleanName: string, entity: Entity | undefined, isRedirect: boolean) => void, deps: any[]): void {
 
-  entityChanged.forEach(a => a(cleanName, entity, isRedirect));
+  var types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes.toString()];
+
+  React.useEffect(() => {
+
+    types.forEach(cleanName => {
+      (entityChanged[cleanName] ??= []).push(callback);
+    });
+
+    return () => {
+      types.forEach(cleanName => {
+        entityChanged[cleanName]?.remove(callback);
+
+        if (entityChanged[cleanName]?.length == 0)
+          delete entityChanged[cleanName];
+      });
+    }
+  }, [types.join(","), ...deps]);
+}
+
+function cleanEntityChanged() {
+  Dic.clear(entityChanged);
+}
+
+export function raiseEntityChanged(typeOrEntity: Type<any> | string | Entity, isRedirect = false) {
+  var cleanName = isEntity(typeOrEntity) ? typeOrEntity.Type : typeOrEntity.toString();
+  var entity = isEntity(typeOrEntity) ? typeOrEntity : undefined;
+
+  entityChanged[cleanName]?.forEach(func => func(cleanName, entity, isRedirect));
 }
 
 export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
@@ -94,6 +124,7 @@ let renderId = (entity: Entity): React.ReactChild => {
         {entity.id}
       </span>
       <CopyLiteButton className={"sf-hide-id"} entity={entity} />
+      <CopyLinkButton className={"sf-hide-id"} entity={entity} />
     </>
   );
 }
@@ -442,27 +473,27 @@ export function typeRequiresSaveOperation(typeName: string): boolean {
 }
 
 export interface IsFindableOptions {
-    isSearch?: boolean;
-    isEmbedded?: boolean;
+    fullScreenSearch?: boolean;
+    isEmbeddedEntity?: boolean;
 }
 
 export function isFindable(type: PseudoType, options?: IsFindableOptions) {
 
   const typeName = getTypeName(type);
 
-  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbedded);
+  const baseIsReadOnly = typeIsFindable(typeName, options?.isEmbeddedEntity);
 
-  return baseIsReadOnly && Finder.isFindable(typeName, true);
+  return baseIsReadOnly && Finder.isFindable(typeName, options?.fullScreenSearch ?? true);
 }
 
-function typeIsFindable(typeName: string, isEmbedded: boolean | undefined) {
+function typeIsFindable(typeName: string, isEmbeddedEntity: boolean | undefined) {
 
   const es = entitySettings[typeName];
 
   if (es != undefined && es.isFindable != undefined)
     return es.isFindable;
 
-  if (isEmbedded)
+  if (isEmbeddedEntity)
     return false;
 
   const typeInfo = tryGetTypeInfo(typeName);
@@ -576,38 +607,16 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (type.isEmbedded || type.name == IsByAll)
     return null;
 
-  const types = tryGetTypeInfos(type).notNull();
+  let types = tryGetTypeInfos(type).notNull();
   showType ??= types.length > 1;
+
+  types = types.filter(t => isFindable(t, { fullScreenSearch: false }));
 
   if (types.length == 0)
     return null;
 
   if (types.length == 1)
     return getAutoCompleteBasic(types[0]!, findOptions, ctx, create, showType);
-
-  if (findOptionsDictionary == null && types.every(t => {
-    var s = getSettings(t!);
-    return s?.autocomplete == null && s?.defaultFindOptions == null;
-  })) {
-
-    var maxDelay = types.map(t => getSettings(t!)?.autocompleteDelay).notNull().max() ?? undefined;
-
-    return new LiteAutocompleteConfig((signal, subStr: string) => {
-      return Finder.API.findLiteLike({
-        types: type.name,
-        subString: subStr,
-        count: 5
-      }, signal)
-        .then(lites => [
-          ...lites,
-          ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
-        ]);
-    },
-      {
-        showType: showType,
-        itemsDelay: maxDelay,
-      });
-  }
 
   return new MultiAutoCompleteConfig(types.toObject(t => t!.name,
     t => getAutoCompleteBasic(t!, (findOptionsDictionary && findOptionsDictionary[t!.name]), ctx, create, showType!)
@@ -627,31 +636,13 @@ export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | 
       return acc;
   }
 
-  findOptions ??= s?.defaultFindOptions;
+  var fo = findOptions ?? s?.defaultFindOptions ?? { queryName: type.name };
 
-  if (findOptions)
-    return new FindOptionsAutocompleteConfig(findOptions, {
-      itemsDelay: s?.autocompleteDelay,
-      getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[],
-      showType: showType,
-    });
-
-  return new LiteAutocompleteConfig((signal, subStr: string) => {
-
-    return Finder.API.findLiteLike({
-      types: type.name,
-      subString: subStr,
-      count: 5
-    }, signal)
-      .then(lites => [
-        ...lites,
-        ...(getAutocompleteConstructors(type, subStr, { ctx, foundLites: lites, create: create }) as AutocompleteConstructor<Entity>[])
-      ]);
-  },
-    {
-      showType: showType,
-      itemsDelay: s?.autocompleteDelay,
-    });
+  return new FindOptionsAutocompleteConfig(fo, {
+    showType: showType,
+    itemsDelay: s?.autocompleteDelay,
+    getAutocompleteConstructor: (subStr, rows) => getAutocompleteConstructors(type, subStr, { ctx, foundLites: rows.map(a => a.entity!), findOptions, create: create }) as AutocompleteConstructor<Entity>[]
+  });
 }
 
 export interface ViewOptions {
@@ -735,6 +726,16 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
     return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
   return API.fetchEntityPackEntity(entity as Entity).then(ep => ({ ...ep, entity: cloneEntity(entity)}));
+}
+
+export async function reloadFrameIfNecessary(frame: EntityFrame) {
+
+  var entity = frame.pack.entity;
+  if (isEntity(entity) && entity.id && entity.ticks != null) {
+    var newPack = await API.fetchEntityPack(toLite(entity));
+    if (newPack.entity.ticks != entity.ticks)
+      frame.onReload(newPack);
+  }
 }
 
 function cloneEntity(obj: any) {
@@ -895,6 +896,24 @@ export module API {
 
     return ajaxGet({ url: `~/api/reflection/typeEntity/${typeName}` });
   }
+
+  export function getEnumEntities<T extends string>(type: EnumType<T>): Promise<EnumConverter<T>>;
+  export function getEnumEntities(typeName: string): Promise<EnumConverter<string>>;
+  export function getEnumEntities(type: string | EnumType<string>): Promise<EnumConverter<string>> {
+
+    var typeName = typeof type == "string" ? type : type.type;
+
+    return ajaxGet<{ [enumValue: string]: Entity }>({ url: `~/api/reflection/enumEntities/${typeName}` })
+      .then(enumToEntity => softCast<EnumConverter<string>>({
+        enumToEntity: enumToEntity,
+        idToEnum: Object.entries(enumToEntity).toObject(a => a[1].id!.toString(), a => a[0])
+      }));
+  }
+}
+
+export interface EnumConverter<T> {
+  enumToEntity: { [enumValue: string]: EnumEntity<T> };
+  idToEnum: { [id: string]: T };
 }
 
 

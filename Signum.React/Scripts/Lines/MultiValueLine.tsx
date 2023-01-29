@@ -71,7 +71,7 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
     return null;
 
   return (
-    <FormGroup ctx={p.ctx} labelText={p.labelText}
+    <FormGroup ctx={p.ctx} label={p.label}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
@@ -123,7 +123,7 @@ export function MultiValueLineElement(props: MultiValueLineElementProps) {
         <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
           className="sf-line-button sf-remove"
           onClick={props.onRemove}>
-          <FontAwesomeIcon icon="times" />
+          <FontAwesomeIcon icon="xmark" />
         </a>
       }
       {renderItem(ctx)}

@@ -12,13 +12,13 @@ import {
 import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
-  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SvgMapsChartScript
+  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SvgMapsChartScript, SpecialParameterType
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
-import * as ChartPaletteClient from './ChartPalette/ChartPaletteClient'
+import * as ColorPaletteClient from './ColorPalette/ColorPaletteClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
 import { toLuxonFormat } from '@framework/Reflection';
@@ -27,12 +27,14 @@ import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 import { MemoRepository } from './D3Scripts/Components/ReactChart';
 import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
-import { softCast } from '../../Signum.React/Scripts/Globals';
+import { Dic, softCast } from '../../Signum.React/Scripts/Globals';
+import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
+import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 import { UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 
 export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
-
+  
   options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
 
   AppContext.clearSettingsActions.push(ButtonBarChart.clearOnButtonBarElements);
@@ -47,7 +49,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   });
 
   UserChartClient.start({ routes: options.routes });
-  ChartPaletteClient.start({ routes: options.routes });
+  ColorPaletteClient.start({ routes: options.routes });
 
   registerChartScriptComponent(D3ChartScript.Bars, () => import("./D3Scripts/Bars"));
   registerChartScriptComponent(D3ChartScript.BubblePack, () => import("./D3Scripts/BubblePack"));
@@ -172,13 +174,17 @@ export interface ChartScriptParameter {
   name: string;
   columnIndex?: number;
   type: ChartParameterType;
-  valueDefinition: NumberInterval | EnumValueList | StringValue | null;
+  valueDefinition: NumberInterval | EnumValueList | StringValue | SpecialParameter | null;
 }
 
 export interface NumberInterval {
   defaultValue: number;
   minValue: number | null;
   maxValue: number | null;
+}
+
+export interface SpecialParameter {
+  specialParameterType: SpecialParameterType; 
 }
 
 export interface EnumValueList extends Array<EnumValue> {
@@ -270,12 +276,14 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
       "DateOnly",
       "String",
       "Lite",
-      "Enum"].contains(type);
+      "Enum"
+    ].contains(type);
 
     case "Magnitude": return [
       "Integer",
       "Real",
-      "RealGroupable"].contains(type);
+      "RealGroupable"
+    ].contains(type);
 
     case "Positionable": return [
       "Integer",
@@ -283,9 +291,9 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
       "RealGroupable",
       "DateOnly",
       "DateTime",
-      "Time"].contains(type);
+      "Time"
+    ].contains(type);
   }
-
 
   return false;
 }
@@ -352,12 +360,21 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
 
 }
 
-function isValidParameterValue(value: string | null | undefined, scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
+function isValidParameterValue(value: string | null | undefined, scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) : boolean{
 
   switch (scriptParameter.type) {
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).some(a => a.name == value);
     case "Number": return !isNaN(parseFloat(value!));
     case "String": return true;
+    case "Special": {
+      const specialParameterType = (scriptParameter.valueDefinition as SpecialParameter).specialParameterType;
+      switch (specialParameterType) {
+        case "ColorCategory": return value != null && colorSchemes[value] != null;
+        case "ColorInterpolate": return value != null && getColorInterpolation(value) != null;
+        default: throw new Error("Unexpected parameter type " + specialParameterType);
+      }
+
+    }
     default: throw new Error("Unexpected parameter type");
   }
 
@@ -368,6 +385,14 @@ export function defaultParameterValue(scriptParameter: ChartScriptParameter, rel
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
     case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue?.toString();
     case "String": return (scriptParameter.valueDefinition as StringValue).defaultValue?.toString();
+    case "Special": {
+      const specialParameterType = (scriptParameter.valueDefinition as SpecialParameter).specialParameterType;
+      switch (specialParameterType) {
+        case "ColorCategory": return Dic.getKeys(colorSchemes)[0];
+        case "ColorInterpolate": return Dic.getKeys(colorInterpolators)[0];
+        default: throw new Error("Unexpected parameter type " + specialParameterType);
+      }
+    }
     default: throw new Error("Unexpected parameter type");
   }
 
@@ -640,7 +665,7 @@ export module API {
     return v => String(v);
   }
 
-  export function getColor(token: QueryToken, palettes: { [type: string] : ChartPaletteClient.ColorPalette | null }): ((val: unknown) => string | null) {
+  export function getColor(token: QueryToken, palettes: { [type: string]: ColorPaletteClient.ColorPalette | null }): ((val: unknown) => string | null) {
 
     var tis = tryGetTypeInfos(token.type);
 
@@ -651,7 +676,7 @@ export module API {
           return "#555";
 
         var cp = palettes[typeName];
-        return cp && cp[v as string] || null;
+        return cp && cp.getColor(v as string) || null;
       }
     }
 
@@ -660,8 +685,10 @@ export module API {
         if (v == null)
           return "#555";
 
-        var cp = palettes[(v as Lite<Entity>).EntityType];
-        return cp && cp[(v as Lite<Entity>).id!] || null;
+        var lite = (v as Lite<Entity>);
+
+        var cp = palettes[lite.EntityType];
+        return cp && cp.getColor(lite.id!.toString()) || null;
       };
     }
 
@@ -730,7 +757,7 @@ export module API {
     return request.parameters.toObject(a => a.element.name!, a => a.element.value ?? defaultValues[a.element.name!])
   }
 
-  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript, palettes: { [type: string]: ChartPaletteClient.ColorPalette | null }): ExecuteChartResult {
+  export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript, palettes: { [type: string]: ColorPaletteClient.ColorPalette | null }): ExecuteChartResult {
 
     var cols = request.columns.map((mle, i) => {
       const token = mle.element.token && mle.element.token.token;
@@ -836,7 +863,7 @@ export module API {
       .then(rt => palettesPromise.then(palettes => toChartResult(request, rt, chartScript, palettes)));
   }
 
-  export function getPalletes(request: ChartRequestModel): Promise<{ [type: string]: ChartPaletteClient.ColorPalette | null }> {
+  export function getPalletes(request: ChartRequestModel): Promise<{ [type: string]: ColorPaletteClient.ColorPalette | null }> {
     var allTypes = request.columns
       .map(c => c.element.token)
       .notNull()
@@ -846,7 +873,7 @@ export module API {
       .notNull()
       .distinctBy(a => a.name);
 
-    var palettesPromise = Promise.all(allTypes.map(ti => ChartPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
+    var palettesPromise = Promise.all(allTypes.map(ti => ColorPaletteClient.getColorPalette(ti).then(cp => ({ type: ti.name, palette: cp }))))
       .then(list => list.toObject(a => a.type, a => a.palette));
 
     return palettesPromise;
@@ -877,6 +904,9 @@ export interface ChartTable {
     c6?: ChartColumn<unknown>;
     c7?: ChartColumn<unknown>;
     c8?: ChartColumn<unknown>;
+    c9?: ChartColumn<unknown>;
+    c10?: ChartColumn<unknown>;
+    c11?: ChartColumn<unknown>;
   },
   rows: ChartRow[]
 }
@@ -892,6 +922,9 @@ export interface ChartRow {
   c6?: unknown;
   c7?: unknown;
   c8?: unknown;
+  c9?: unknown;
+  c10?: unknown;
+  c11?: unknown;
 }
 
 

@@ -160,14 +160,14 @@ export default function UserChartMenu(p: UserChartMenuProps) {
   }
 
   const crView = p.chartRequestView;
-  const labelText = !crView.userChart ? UserChartEntity.nicePluralName() : getToString(crView.userChart)
+  const label = !crView.userChart ? UserChartEntity.nicePluralName() : getToString(crView.userChart)
 
   var canSave = tryGetOperationInfo(UserChartOperation.Save, UserChartEntity) != null;
 
   return (
     <Dropdown onToggle={() => setIsOpen(!isOpen)} show={isOpen}>
       <Dropdown.Toggle id="userQueriesDropDown" className="sf-userquery-dropdown" variant="light">
-        <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {labelText}</span>
+        <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {label}</span>
       </Dropdown.Toggle>
       <Dropdown.Menu>
         {userCharts && userCharts.length > 10 &&
@@ -195,8 +195,8 @@ export default function UserChartMenu(p: UserChartMenuProps) {
           })}
         </div>
         {Boolean(userCharts?.length) && <Dropdown.Divider />}
-        {crView.userChart && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={["fas", "share-square"]} className="me-2" />{ChartMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
-        {crView.userChart && canSave && <Dropdown.Item onClick={handleEdit}><FontAwesomeIcon icon={["fas", "edit"]} className="me-2" />{ChartMessage.Edit.niceToString()}</Dropdown.Item>}
+        {crView.userChart && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={["fas", "share-from-square"]} className="me-2" />{ChartMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
+        {crView.userChart && canSave && <Dropdown.Item onClick={handleEdit}><FontAwesomeIcon icon={["fas", "pen-to-square"]} className="me-2" />{ChartMessage.Edit.niceToString()}</Dropdown.Item>}
         {canSave && <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{ChartMessage.CreateNew.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>
     </Dropdown>

@@ -9,7 +9,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Signum.Engine.Processes;
 
-public static class ProcessRunnerLogic
+public static class ProcessRunner
 {
     public static Action<ExecutingProcess>? OnFinally;
 
@@ -25,7 +25,7 @@ public static class ProcessRunnerLogic
 
     static bool running = false;
 
-    static int initialDelayMiliseconds;
+    static int? initialDelayMilliseconds;
 
     static CancellationTokenSource CancelNewProcesses = null!;
 
@@ -36,7 +36,7 @@ public static class ProcessRunnerLogic
         return new ProcessLogicState
         {
             Running = running,
-            InitialDelayMiliseconds = initialDelayMiliseconds,
+            InitialDelayMilliseconds = initialDelayMilliseconds,
             MaxDegreeOfParallelism = MaxDegreeOfParallelism,
             NextPlannedExecution = nextPlannedExecution,
             JustMyProcesses = ProcessLogic.JustMyProcesses,
@@ -54,13 +54,20 @@ public static class ProcessRunnerLogic
         };
     }
 
-    public static void StartRunningProcesses(int delayMilliseconds)
+    public static SimpleStatus GetSimpleStatus()
     {
-        initialDelayMiliseconds = delayMilliseconds;
+        return running ? SimpleStatus.Ok :
+            initialDelayMilliseconds == null ? SimpleStatus.Disabled :
+            SimpleStatus.Error;
+    }
 
-        Task.Factory.StartNew(() =>
+    public static void StartRunningProcessesAfter(int delayMilliseconds)
+    {
+        initialDelayMilliseconds = delayMilliseconds;
+
+        Task.Run(() =>
         {
-            Thread.Sleep(initialDelayMiliseconds);
+            Thread.Sleep(delayMilliseconds);
             StartRunningProcesses();
         });
     }
@@ -95,6 +102,11 @@ public static class ProcessRunnerLogic
         process.ExceptionDate = null;
         process.MachineName = ProcessLogic.JustMyProcesses ? Schema.Current.MachineName : ProcessEntity.None;
         process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
+    }
+
+    internal static void WakeupExecuteInThisMachine(Dictionary<string, object> dic)
+    {
+        ProcessRunner.WakeUp("Execute in this machine", null);
     }
 
     [AutoExpressionField]
@@ -494,7 +506,7 @@ public sealed class ExecutingProcess
                 }
                 finally
                 {
-                    ProcessRunnerLogic.OnFinally?.Invoke(this);
+                    ProcessRunner.OnFinally?.Invoke(this);
                 }
             }
         }
@@ -510,26 +522,27 @@ public sealed class ExecutingProcess
 
 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class ProcessLogicState
 {
-    public int MaxDegreeOfParallelism;
-    public int InitialDelayMiliseconds;
-    public string MachineName;
-    public string ApplicationName;
-    public bool Running;
-    public bool JustMyProcesses;
-    public DateTime? NextPlannedExecution;
-    public List<ExecutionState> Executing;
+    public required int MaxDegreeOfParallelism;
+    public required int? InitialDelayMilliseconds;
+    public required string MachineName;
+    public required string ApplicationName;
+    public required bool Running;
+    public required bool JustMyProcesses;
+    public required DateTime? NextPlannedExecution;
+    public required List<ExecutionState> Executing;
 }
 
 public class ExecutionState
 {
-    public Lite<ProcessEntity> Process;
-    public ProcessState State;
-    public bool IsCancellationRequested;
-    public decimal? Progress;
-    public string MachineName;
-    public string ApplicationName; 
+    public required Lite<ProcessEntity> Process;
+    public required ProcessState State;
+    public required bool IsCancellationRequested;
+    public required decimal? Progress;
+    public required string MachineName;
+    public required string ApplicationName; 
 }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
+
+
+

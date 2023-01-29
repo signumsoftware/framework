@@ -559,7 +559,9 @@ internal class DbExpressionNominator : DbExpressionVisitor
         {
             SqlFunctionExpression DateDiff(SqlEnums unit)
             {
-                return new SqlFunctionExpression(typeof(double), null, SqlFunction.DATEDIFF.ToString(), new Expression[]
+                var functionName = Connector.Current.SupportsDateDifBig ? SqlFunction.DATEDIFF_BIG.ToString() : SqlFunction.DATEDIFF.ToString();
+
+                return new SqlFunctionExpression(typeof(double), null, functionName, new Expression[]
                 {
                     new SqlLiteralExpression(unit),
                     right,
@@ -731,9 +733,11 @@ internal class DbExpressionNominator : DbExpressionVisitor
         if (innerProjection || !Has(exprStart) || !Has(exprEnd))
             return null;
 
+        var dateType = new[] { start.Type.UnNullify(), end.Type.UnNullify() }.Distinct().SingleEx(); 
+
         if (isPostgres)
         {
-            var age = new SqlFunctionExpression(typeof(DateSpan), null, PostgresFunction.age.ToString(), new[] { exprStart, exprEnd });
+            var age = new SqlFunctionExpression(dateType, null, PostgresFunction.age.ToString(), new[] { exprStart, exprEnd });
 
             static SqlFunctionExpression Extract( SqlEnums part, Expression period)
             {
@@ -754,7 +758,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             var diff = new SqlFunctionExpression(typeof(int), null, SqlFunction.DATEDIFF.ToString(),
                 new[] { datePart, exprStart, exprEnd });
 
-            var add = new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.DATEADD.ToString(),
+            var add = new SqlFunctionExpression(dateType, null, SqlFunction.DATEADD.ToString(),
                 new[] { datePart, diff, exprStart });
 
             return Add(new CaseExpression(new[]{
@@ -1611,6 +1615,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "DateTimeExtensions.SecondStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.second);
             case "DateTimeExtensions.YearsTo": return TryDatePartTo(SqlEnums.year, m.GetArgument("start"), m.GetArgument("end"));
             case "DateTimeExtensions.MonthsTo": return TryDatePartTo(SqlEnums.month, m.GetArgument("start"), m.GetArgument("end"));
+            case "DateTimeExtensions.DaysTo": return TryDatePartTo(SqlEnums.day, m.GetArgument("start"), m.GetArgument("end"));
 
             case "DateTimeExtensions.Quarter": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.quarter), m.Arguments.Single());
             case "DateTimeExtensions.WeekNumber": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.week), m.Arguments.Single());

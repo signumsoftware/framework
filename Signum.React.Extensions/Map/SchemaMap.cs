@@ -1,7 +1,7 @@
-using Newtonsoft.Json;
 using Signum.Engine.PostgresCatalog;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities.Basics;
+using System.Text.Json.Serialization;
 
 namespace Signum.React.Maps;
 
@@ -214,7 +214,7 @@ public class RelationInfo
     public string toTable;
     public bool nullable;
     public bool lite;
-    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool isVirtualMListBackReference;
 }
 

@@ -137,7 +137,7 @@ public class SendEmailProcessAlgorithm : IProcessAlgorithm
                     {
                         using (var tr = Transaction.ForceNew())
                         {
-                            EmailLogic.SenderManager.Send(m);
+                            EmailLogic.SendMail(m);
                             tr.Commit();
                         }
                         executingProcess.ProgressChanged(counter, emails.Count);

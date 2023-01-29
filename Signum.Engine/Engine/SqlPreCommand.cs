@@ -122,7 +122,12 @@ public static class SqlPreCommandExtensions
             if (answer == "retry")
                 goto retry;
             if (answer == "open")
+            {
+                Thread.Sleep(1000);
                 Open(fileName);
+                if (SafeConsole.Ask("run now?"))
+                    ExecuteRetry(fileName);
+            }
         }
     }
 

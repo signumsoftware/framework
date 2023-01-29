@@ -210,7 +210,8 @@ public class CodeFile
             }
             var indent = GetIndent(lines[from]);
             lines.RemoveRange(from + fromDelta, (to + toDelta) - (from + fromDelta) + 1);
-            lines.InsertRange(from + fromDelta, text.Lines().Select(a => IndentAndReplace(a, indent)));
+            if (text.HasText())
+                lines.InsertRange(from + fromDelta, text.Lines().Select(a => IndentAndReplace(a, indent)));
             return true;
         });
     }
@@ -336,10 +337,45 @@ public class CodeFile
             var indent = GetIndent(lines[pos]);
             lines.RemoveRange(pos, 1);
 
-            var comma = lines[pos].Trim().StartsWith("}") ? "" : ", ";
+            var comma = lines[pos].Trim().StartsWith("}") ? "" : ",";
             lines.Insert(pos, IndentAndReplace(@$"""{packageName}"": ""{version}""" + comma, indent));
             return true;
         });
+    }
+
+    public void RemoveNpmPackage(string packageName)
+    {
+        AssertExtension(".json");
+
+        ProcessLines(lines =>
+        {
+            var pos = lines.FindIndex(a => a.Contains(@$"""{packageName}"""));
+            if (pos == -1)
+            {
+                Warning(@$"Unable to find a line with ""{packageName}"" to remove it");
+                return false;
+            }
+            var indent = GetIndent(lines[pos]);
+            lines.RemoveRange(pos, 1);
+
+            if(lines[pos].Trim().StartsWith("}"))
+            {
+                if (!lines[pos - 1].Trim().EndsWith("{") && lines[pos - 1].Trim().EndsWith(","))
+                {
+                    lines[pos - 1] = lines[pos - 1].Replace(",", "");
+                }
+            }
+
+            return true;
+        });
+    }
+
+    public void UpdateNugetReferences(string xmlSnippets)
+    {
+        foreach (var line in xmlSnippets.Lines().Where(a=>a.HasText()))
+        {
+            UpdateNugetReference(line.Between("Include=\"", "\""), line.Between("Version=\"", "\""));
+        }
     }
 
     public void UpdateNugetReference(string packageName, string version)

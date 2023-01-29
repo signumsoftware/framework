@@ -11,6 +11,8 @@ public static class TemplatingServer
 {
     public static void Start(IApplicationBuilder app)
     {
+        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
         ReflectionServer.RegisterLike(typeof(TemplateTokenMessage), () =>
             TypeAuthLogic.GetAllowed(typeof(EmailTemplateEntity)).MaxUI() > Entities.Authorization.TypeAllowedBasic.None ||
             TypeAuthLogic.GetAllowed(typeof(WordTemplateEntity)).MaxUI() > Entities.Authorization.TypeAllowedBasic.None);

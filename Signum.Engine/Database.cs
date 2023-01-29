@@ -1,3 +1,4 @@
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
@@ -178,7 +179,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
     }
 
-    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>> giRetrieveAsync = new((id, token) => RetrieveAsync<Entity>(id, token));
+    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task>> giRetrieveAsync = new((id, token) => RetrieveAsync<Entity>(id, token));
     public static async Task<T> RetrieveAsync<T>(PrimaryKey id, CancellationToken token) where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
@@ -253,7 +254,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
     public static Task<Entity> RetrieveAsync(Type type, PrimaryKey id, CancellationToken token)
     {
-        return giRetrieveAsync.GetInvoker(type)(id, token);
+        return giRetrieveAsync.GetInvoker(type)(id, token).CastTask<Entity>();
     }
 
     public static Lite<Entity>? TryRetrieveLite(Type type, PrimaryKey id, Type? modelType = null)
@@ -268,7 +269,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
     public static Task<Lite<Entity>> RetrieveLiteAsync(Type type, PrimaryKey id, CancellationToken token, Type? modelType = null)
     {
-        return giRetrieveLiteAsync.GetInvoker(type)(id, token, modelType);
+        return giRetrieveLiteAsync.GetInvoker(type)(id, token, modelType).CastTask<Lite<Entity>>();
     }
 
     static readonly GenericInvoker<Func<PrimaryKey, Type?, Lite<Entity>?>> giTryRetrieveLite = new((id, modelType) => TryRetrieveLite<Entity>(id, modelType));
@@ -351,7 +352,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
     }
 
-    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Type?, Task<Lite<Entity>>>> giRetrieveLiteAsync =
+    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Type?, Task>> giRetrieveLiteAsync =
         new((id, token, modelType) => RetrieveLiteAsync<Entity>(id, token, modelType));
     public static async Task<Lite<T>> RetrieveLiteAsync<T>(PrimaryKey id, CancellationToken token, Type? modelType = null)
         where T : Entity
@@ -1518,7 +1519,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     public static int UnsafeUpdate<E, X>(this IQueryable<E> query, Expression<Func<E, X>> propertyExpression, Expression<Func<E, X>> valueExpression, string? message = null)
         where E : Entity
     {
-        return new Updateable<E>(query, null).Set(propertyExpression, valueExpression).Execute(message);
+        return query.UnsafeUpdate().Set(propertyExpression, valueExpression).Execute(message);
     }
 
     public static IUpdateable<MListElement<E, V>> UnsafeUpdateMList<E, V>(this IQueryable<MListElement<E, V>> query)
@@ -1530,7 +1531,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     public static int UnsafeUpdateMList<E, V, X>(this IQueryable<MListElement<E, V>> query, Expression<Func<MListElement<E, V>, X>> propertyExpression, Expression<Func<MListElement<E, V>, X>> valueExpression, string? message = null)
          where E : Entity
     {
-        return new Updateable<MListElement<E, V>>(query, null).Set(propertyExpression, valueExpression).Execute(message);
+        return query.UnsafeUpdateMList().Set(propertyExpression, valueExpression).Execute(message);
     }
 
     public static IUpdateable<V> UnsafeUpdateView<V>(this IQueryable<V> query)

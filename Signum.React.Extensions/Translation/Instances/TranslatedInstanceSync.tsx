@@ -124,7 +124,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
       <input type="text" className="form-control"
         placeholder={TranslationMessage.Search.niceToString()} value={tmpFilter} onChange={e => setTmpFilter(e.currentTarget.value)} onKeyDown={handleKeyDown} />
       <button className="btn btn-outline-secondary" type="submit" title={TranslationMessage.Search.niceToString()}>
-        <FontAwesomeIcon icon="search" />
+        <FontAwesomeIcon icon="magnifying-glass" />
       </button>
     </form>
   );
@@ -165,7 +165,10 @@ export function TranslatedInstances(p: { data: TypeInstancesChanges, cultures: {
                         <tr key={c}>
                           <td className="leftCell">{c}</td>
                           <td className="monospaceCell">
-                            {rc.diff ? <DiffDocumentSimple diff={rc.diff} /> : <pre className="mb-0">{rc.original}</pre>}
+                            {rc.oldOriginal == null || rc.original == null || rc.oldOriginal == rc.original ?
+                              <pre className="mb-0">{rc.original}</pre> :
+                              <DiffDocumentSimple first={rc.oldOriginal} second={rc.original} />
+                            }
                           </td>
                         </tr>
                       );

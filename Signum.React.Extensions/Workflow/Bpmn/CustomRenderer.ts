@@ -69,6 +69,14 @@ export class CustomRenderer extends BpmnRenderer {
     else if (element.type == "bpmn:TextAnnotation" || element.type == "bpmn:DataObjectReference" || element.type == "bpmn:DataStoreReference") {
       strokeColor = "#666666";
       fillColor = "#F0F0F0";
+    }
+    else if (element.type == "bpmn:Lane") {
+      strokeColor = "#CCCCCC";
+      fillColor = "#FFFFFF";
+    }
+    else if (element.type == "bpmn:Participant") {
+      strokeColor = "#CCCCCC";
+      fillColor = "#FFFFFF";
     };
 
     if (strokeColor.length > 0)

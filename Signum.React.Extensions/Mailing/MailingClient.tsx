@@ -5,11 +5,11 @@ import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
-import { Lite, Entity, registerToString, JavascriptMessage, getToString } from '@framework/Signum.Entities'
+import { Lite, Entity, newMListElement, registerToString, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName, isTypeEntity } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity, EmailFromEmbedded, MicrosoftGraphEmbedded } from './Signum.Entities.Mailing'
+import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity, EmailFromEmbedded, ExchangeWebServiceEmailServiceEntity, MicrosoftGraphEmailServiceEntity, SmtpEmailServiceEntity } from './Signum.Entities.Mailing'
 import { EmailSenderConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
 import { SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
@@ -26,6 +26,8 @@ import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import { Dropdown } from 'react-bootstrap';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import "./Mailing.css";
+import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics';
+import { currentCulture } from '../Translation/CultureClient';
 
 
 export var allTypes: string[] = [];
@@ -58,7 +60,15 @@ export function start(options: {
   Navigator.addSettings(new EntitySettings(EmailRecipientEmbedded, e => import('./Templates/EmailRecipient')));
   Navigator.addSettings(new EntitySettings(EmailFromEmbedded, e => import('./Templates/EmailFrom')));
   Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => import('./Templates/EmailConfiguration')));
-  Navigator.addSettings(new EntitySettings(MicrosoftGraphEmbedded, e => import('./Templates/MicrosoftGraph')));
+  Navigator.addSettings(new EntitySettings(SmtpEmailServiceEntity, e => import('./Templates/SenderServices/SmtpEmailService')));
+  Navigator.addSettings(new EntitySettings(ExchangeWebServiceEmailServiceEntity, e => import('./Templates/SenderServices/ExchangeWebServiceEmailService')));
+  Navigator.addSettings(new EntitySettings(MicrosoftGraphEmailServiceEntity, e => import('./Templates/SenderServices/MicrosoftGraphEmailService')));
+
+  Constructor.registerConstructor(EmailTemplateEntity, props => API.getDefaultCulture()
+    .then(culture => culture && EmailTemplateEntity.New({
+      messageFormat: 'HtmlSimple',
+      messages: [newMListElement(EmailTemplateMessageEmbedded.New({ cultureInfo: culture }))]
+    })));
 
   Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateEmailFromTemplate, {
     onClick: (ctx) => {
@@ -229,12 +239,17 @@ export module API {
   export function getAllTypes(signal?: AbortSignal): Promise<string[]> {
     return ajaxGet({ url: "~/api/email/getAllTypes", signal });
   }
+
+  export function getDefaultCulture(signal?: AbortSignal): Promise<CultureInfoEntity> {
+    return ajaxGet({ url: "~/api/email/getDefaultCulture", signal });
+  }
 }
 
 
 export interface AsyncEmailSenderState {
   asyncSenderPeriod: number;
   running: boolean;
+  initialDelayMilliseconds: number | null;
   machineName: string;
   isCancelationRequested: boolean;
   nextPlannedExecution: string;

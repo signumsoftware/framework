@@ -153,7 +153,7 @@ ${childrenString}
 
     var result: any /*EntityBaseProps*/ = {
       ctx: this.subCtxCode(node.field, node.styleOptions),
-      labelText: node.labelText,
+      label: node.label,
       labelHtmlAttributes: node.labelHtmlAttributes,
       formGroupHtmlAttributes: node.formGroupHtmlAttributes,
       visible: node.visible,
@@ -743,7 +743,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
 
   var result: EntityBaseProps = {
     ctx: parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions)),
-    labelText: evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, isStringOrNull),
+    label: evaluateAndValidate(dn, parentCtx, dn.node, n => n.label, isStringOrNull),
     labelHtmlAttributes: toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes),
     formGroupHtmlAttributes: toHtmlAttributes(dn, parentCtx, dn.node.formGroupHtmlAttributes),
     ...(options.isEntityLine ?
@@ -805,7 +805,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { sh
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       {options.isEntityLine && <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).itemHtmlAttributes)} />}

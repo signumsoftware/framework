@@ -270,7 +270,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
           {<a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteSetter}>
-            <FontAwesomeIcon icon="times" />
+            <FontAwesomeIcon icon="xmark" />
           </a>}
         </td>
         <td>
@@ -322,7 +322,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
 
   function renderValue() {
 
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", formSize: "ExtraSmall" }, pr!, Binding.create(p.setter, a => a.value));
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", formSize: "xs" }, pr!, Binding.create(p.setter, a => a.value));
 
     return createSetterValueControl(ctx, handleValueChange);
   }

@@ -39,19 +39,24 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
       if (dashboardPinnedFilters.length) {
         Finder.getQueryDescription(fo.queryName)
           .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd))
-          .then(fops => p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops)));
+          .then(fops => {
+            p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops));
+            p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
+          });
+      } else {
+        p.dashboardController.clearPinnesFilter(p.partEmbedded);
+        p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
       }
     }
-  }, [fo]);
-
-  React.useEffect(() => {
-    p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
-  }, [p.partEmbedded])
+  }, [fo, p.partEmbedded]);
 
   const cachedQuery = p.cachedQueries[liteKey(toLite(p.content.userQuery))];
 
   if (!fo)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
+
+  if (p.dashboardController.isLoading)
+    return <span>{JavascriptMessage.loading.niceToString()}...</span>;
 
   const foExpanded = p.dashboardController.applyToFindOptions(p.partEmbedded, fo);
 
@@ -63,6 +68,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
   if (p.content.renderMode == "BigValue") {
     return <BigValueSearchCounter
       findOptions={foExpanded}
+      aggregateFromSummaryHeader={p.content.aggregateFromSummaryHeader}
       text={translated(p.partEmbedded, a => a.title) || translated(p.content.userQuery, a => a.displayName)}
       iconName={p.partEmbedded.iconName ?? undefined}
       iconColor={p.partEmbedded.iconColor ?? undefined}
@@ -122,7 +128,7 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
         searchOnLoad={part.userQuery.refreshMode == "Auto"}
         customRequest={cachedQuery && ((req, fop) => cachedQuery!.then(cq => executeQueryCached(req, fop, cq)))}
         onSearch={(fo, dataChange) => dataChange && onDataChanged()}
-        
+        maxResultsHeight={part.allowMaxHeight ? "none" : undefined}        
       />
     </FullscreenComponent>
   );
@@ -130,6 +136,7 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
 
 interface BigValueBadgeProps {
   findOptions: FindOptions;
+  aggregateFromSummaryHeader: boolean;
   text?: string;
   iconName?: string;
   iconColor?: string;
@@ -144,12 +151,15 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
   const vsc = React.useRef<SearchValueController>(null);
 
   return (
-    <div className={classes(
-      "card",
-      !p.customColor && ("bg-ligth"),
-      "o-hidden"
-    )} style={{ backgroundColor: p.customColor ?? undefined, color: p.customColor != null ? getColorContrasColorBWByHex(p.customColor) : "black" }}>
-      <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{ cursor: "pointer", color: p.sameColor ? p.iconColor : (p.customColor != null ? getColorContrasColorBWByHex(p.customColor) : "black") }}>
+    <div className={classes("card", !p.customColor && "bg-ligth", "o-hidden")}
+      style={{
+      backgroundColor: p.customColor ?? undefined,
+      color: Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black"
+    }}>
+      <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{
+        cursor: "pointer",
+        color: p.sameColor ? p.iconColor : (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
+      }}>
         <div className="row">
           <div className="col-3">
             {p.iconName &&
@@ -158,6 +168,7 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
           <div className={classes("col-9 flip", "text-end")}>
             <h1>
               <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
+                valueToken={!p.aggregateFromSummaryHeader ? undefined : p.findOptions.columnOptions!.first(a => a?.summaryToken != null)?.summaryToken}
                 customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}
               />
             </h1>

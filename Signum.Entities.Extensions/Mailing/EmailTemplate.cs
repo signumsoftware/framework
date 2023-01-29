@@ -13,7 +13,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 {
     public EmailTemplateEntity()
     {
-        RebindEvents();
+        BindParent();
     }
 
     [UniqueIndex]
@@ -53,17 +53,17 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
     public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
     [PreserveOrder]
-    [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
+    [NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), BindParent]
     public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
     public Lite<EmailMasterTemplateEntity>? MasterTemplate { get; set; }
 
-    public bool IsBodyHtml { get; set; } = true;
+    public EmailMessageFormat MessageFormat { get; set; }
 
-    [NotifyCollectionChanged, NotifyChildProperty]
+    [BindParent]
     public MList<EmailTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailTemplateMessageEmbedded>();
 
-    [NotifyChildProperty]
+    [BindParent]
     public TemplateApplicableEval? Applicable { get; set; }
 
 
@@ -118,11 +118,6 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        if(this.Attachments != null && this.Attachments.Count() > 0)
-        {
-            throw new NotImplementedException("Attachments are not yet exportable");
-        }
-
         return new XElement("EmailTemplate",
             new XAttribute("Name", Name),
             new XAttribute("Guid", Guid),
@@ -134,7 +129,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
             new XAttribute("GroupResults", GroupResults),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
-            new XAttribute("IsBodyHtml", IsBodyHtml),
+            new XAttribute("MessageFormat", MessageFormat),
             From == null ? null! : new XElement("From",
                 From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null!,
                 From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null!,
@@ -152,6 +147,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
                      new XAttribute("WhenNone", rec.WhenNone)
                 )
             )),
+            Attachments.Any() ?  new XElement("Attachments", Attachments.Select(x => x.ToXml(ctx))) : null,
             new XElement("Messages", Messages.Select(x =>
                 new XElement("Message",
                     new XAttribute("CultureInfo", x.CultureInfo.Name),
@@ -162,7 +158,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
             this.Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script)))!
         );
     }
-
+       
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         Guid = Guid.Parse(element.Attribute("Guid")!.Value);
@@ -173,39 +169,42 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
         EditableMessage = bool.Parse(element.Attribute("EditableMessage")!.Value);
         Model = element.Attribute("Model")?.Let(at => ctx.GetEmailModel(at.Value));
 
-        MasterTemplate = element.Attribute("MasterTemplate")?.Let(a=>(Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLite());
+        MasterTemplate = element.Attribute("MasterTemplate")?.Let(a => (Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLiteFat());
 
         GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
-        IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml")!.Value);
+        MessageFormat = element.Attribute("MessageFormat")?.Value.ToEnum<EmailMessageFormat>() ??
+            (element.Attribute("IsBodyHtml")?.Value.ToBool() == true ? EmailMessageFormat.HtmlComplex : EmailMessageFormat.PlainText);
 
-        From = element.Element("From")?.Let(from => new EmailTemplateFromEmbedded
+        From = From.CreateOrAssignEmbedded(element.Element("From"), (etf, xml) => 
         {
-            DisplayName = from.Attribute("DisplayName")?.Value,
-            EmailAddress = from.Attribute("EmailAddress")?.Value,
-            Token = from.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value)),
-            WhenMany = from.Attribute("WhenMany")?.Value.ToEnum<WhenManyFromBehaviour>() ?? WhenManyFromBehaviour.FistResult,
-            WhenNone = from.Attribute("WhenNone")?.Value.ToEnum<WhenNoneFromBehaviour>() ?? WhenNoneFromBehaviour.NoMessage,
+            etf.DisplayName = xml.Attribute("DisplayName")?.Value;
+            etf.EmailAddress = xml.Attribute("EmailAddress")?.Value;
+            etf.Token = xml.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
+            etf.WhenMany = xml.Attribute("WhenMany")?.Value.ToEnum<WhenManyFromBehaviour>() ?? WhenManyFromBehaviour.FistResult;
+            etf.WhenNone = xml.Attribute("WhenNone")?.Value.ToEnum<WhenNoneFromBehaviour>() ?? WhenNoneFromBehaviour.NoMessage;
         });
 
-        Recipients = element.Element("Recipients")!.Elements("Recipient").Select(rep => new EmailTemplateRecipientEmbedded
+        Recipients.Synchronize(element.Element("Recipients")!.Elements("Recipient").ToList(), (rep, xml) => 
         {
-            DisplayName = rep.Attribute("DisplayName")?.Value,
-            EmailAddress = rep.Attribute("EmailAddress")?.Value,
-            Kind = rep.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>(),
-            Token = rep.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value)),
-            WhenMany = rep.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipiensBehaviour>() ?? WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients,
-            WhenNone = rep.Attribute("WhenNone")?.Value?.ToEnum<WhenNoneRecipientsBehaviour>() ?? WhenNoneRecipientsBehaviour.ThrowException,
-        }).ToMList();
+            rep.DisplayName = xml.Attribute("DisplayName")?.Value;
+            rep.EmailAddress = xml.Attribute("EmailAddress")?.Value;
+            rep.Kind = xml.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>();
+            rep.Token = xml.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value));
+            rep.WhenMany = xml.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipiensBehaviour>() ?? WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients;
+            rep.WhenNone = xml.Attribute("WhenNone")?.Value?.ToEnum<WhenNoneRecipientsBehaviour>() ?? WhenNoneRecipientsBehaviour.ThrowException;
+        });
 
-        Messages = element.Element("Messages")!.Elements("Message").Select(elem => new EmailTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo")!.Value))
+        Messages.Synchronize(element.Element("Messages")!.Elements("Message").ToList(), (et, xml) =>
         {
-            Subject = elem.Attribute("Subject")!.Value,
-            Text = elem.Value
-        }).ToMList();
+            et.CultureInfo = ctx.GetCultureInfoEntity(xml.Attribute("CultureInfo")!.Value);
+            et.Subject = xml.Attribute("Subject")!.Value;
+            et.Text = xml.Value;
+        });
 
+        Attachments.SynchronizeAttachments(element.Element("Attachments")?.Elements().ToList(), ctx, this);
 
         Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script =  app.Value});
         ParseData(ctx.GetQueryDescription(Query));
@@ -261,6 +260,15 @@ public class EmailTemplateRecipientEmbedded : EmailTemplateAddressEmbedded
     }
 }
 
+public enum EmailMessageFormat
+{
+    [Description("Plain Text")]
+    PlainText,
+    [Description("HTML (Complex)")]
+    HtmlComplex,
+    [Description("HTML (Simple)")]
+    HtmlSimple
+}
 
 public enum WhenNoneRecipientsBehaviour
 {
@@ -300,7 +308,7 @@ public enum WhenManyFromBehaviour
 
 public class EmailTemplateMessageEmbedded : EmbeddedEntity
 {
-    private EmailTemplateMessageEmbedded() { }
+    public EmailTemplateMessageEmbedded() { }
 
     public EmailTemplateMessageEmbedded(CultureInfoEntity culture)
     {
@@ -347,9 +355,47 @@ public class EmailTemplateMessageEmbedded : EmbeddedEntity
     }
  }
 
+public static class AttachmentFromXmlExtensions
+{
+    public static Dictionary<string, Type> TypeMapping = new Dictionary<string, Type>();
+    public static void SynchronizeAttachments(this MList<IAttachmentGeneratorEntity> entities, List<XElement>? xElements, IFromXmlContext ctx, IUserAssetEntity userAsset)
+    {
+        if (xElements == null)
+            xElements = new List<XElement>();
+
+        for (int i = 0; i < xElements.Count; i++)
+        {
+            IAttachmentGeneratorEntity entity;
+            var type = TypeMapping.GetOrThrow<string, Type>(xElements[i].Name.LocalName);
+
+            if (entities.Count == i)
+            {
+                entity = (IAttachmentGeneratorEntity)Activator.CreateInstance(type)!;
+                entities.Add(entity);
+            }
+            else if(entities[i].GetType() != type)
+            {
+                entity = entities[i] = (IAttachmentGeneratorEntity)Activator.CreateInstance(type)!;
+            }
+            else
+                entity = entities[i];
+
+            entity.FromXml(xElements[i], ctx, userAsset);
+        }
+
+        if (entities.Count > xElements.Count)
+        {
+            entities.RemoveRange(xElements.Count, entities.Count - xElements.Count);
+        }
+    }
+}
+
 
 public interface IAttachmentGeneratorEntity : IEntity
 {
+    XElement ToXml(IToXmlContext ctx);
+
+    void FromXml(XElement element, IFromXmlContext ctx, IUserAssetEntity userAsset);
 }
 
 [AutoInit]

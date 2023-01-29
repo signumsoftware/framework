@@ -29,7 +29,7 @@ export function start(options: { routes: JSX.Element[] }) {
   };
 
   Operations.addSettings(new Operations.EntityOperationSettings(ITaskOperation.ExecuteAsync, {
-    icon: "hourglass-half",
+    icon: "hourglass",
     iconColor: "#5499C7",
     group: group
   }));
@@ -75,6 +75,7 @@ export module API {
 
 export interface SchedulerState {
   running: boolean;
+  initialDelayMilliseconds: number | null;
   schedulerMargin: string;
   nextExecution: string;
   machineName: string;

@@ -51,25 +51,23 @@ public static class WorkflowActivityMonitorLogic
     }
 }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
 public class WorkflowActivityMonitorRequest
 {
-    public Lite<WorkflowEntity> Workflow;
-    public List<Filter> Filters; // Case
-    public List<Column> Columns; // CaseActivity
+    public required Lite<WorkflowEntity> Workflow;
+    public required List<Filter> Filters; // Case
+    public required List<Column> Columns; // CaseActivity
 }
 
 public class WorkflowActivityStats
 {
-    public Lite<IWorkflowNodeEntity> WorkflowActivity;
-    public int CaseActivityCount;
-    public object?[] CustomValues;
+    public required Lite<IWorkflowNodeEntity> WorkflowActivity;
+    public required int CaseActivityCount;
+    public required object?[] CustomValues;
 }
 
 public class WorkflowActivityMonitor
 {
-    public Lite<WorkflowEntity> Workflow;
-    public List<string> CustomColumns;
-    public List<WorkflowActivityStats> Activities;
+    public required Lite<WorkflowEntity> Workflow;
+    public required List<string> CustomColumns;
+    public required List<WorkflowActivityStats> Activities;
 }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.

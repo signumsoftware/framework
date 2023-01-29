@@ -5,13 +5,13 @@ import { TypeContext, StyleContext } from '@framework/TypeContext'
 import { tryGetTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { ValueLine, FormGroup } from '@framework/Lines'
-import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartColorEntity, ChartColumnType, ChartParameterEmbedded } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartColumnType, ChartParameterEmbedded, ColorPaletteEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScriptColumn, ChartScript } from '../ChartClient'
-import * as ChartPaletteClient from '../ChartPalette/ChartPaletteClient'
+import * as ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
-import { External } from '@framework/Signum.Entities';
-import { useForceUpdate } from '@framework/Hooks'
+import { External, JavascriptMessage, toLite } from '@framework/Signum.Entities';
+import { useAPI, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Parameters } from './ChartBuilder'
 
 export interface ChartColumnProps {
@@ -21,7 +21,6 @@ export interface ChartColumnProps {
   chartScript: ChartScript;
   chartBase: IChartBase;
   queryKey: string;
-  colorPalettes: string[];
   onRedraw: () => void;
   parameterDic: { [name: string]: TypeContext<ChartParameterEmbedded> },
   onOrderChanged: (chartColumn: ChartColumnEmbedded, e: React.MouseEvent<any>) => void;
@@ -93,7 +92,7 @@ export function ChartColumn(p: ChartColumnProps) {
 
     const t = token?.token!.type;
 
-    if (t == undefined || Navigator.isReadOnly(ChartColorEntity, { ignoreTypeIsReadonly: true }))
+    if (t == undefined || Navigator.isReadOnly(ColorPaletteEntity))
       return [];
 
     if (!t.isLite && !isTypeEnum(t.name))
@@ -115,7 +114,7 @@ export function ChartColumn(p: ChartColumnProps) {
 
   const ctx = p.ctx;
 
-  const ctxBasic = ctx.subCtx({ formSize: "ExtraSmall", formGroupStyle: "Basic" });
+  const ctxBasic = ctx.subCtx({ formSize: "xs", formGroupStyle: "Basic" });
 
   var numParameters = p.chartScript.parameterGroups.flatMap(a => a.parameters).filter(a => a.columnIndex == p.columnIndex).length
 
@@ -165,7 +164,7 @@ export function ChartColumn(p: ChartColumnProps) {
               </div>
               {getColorPalettes().map((t, i) =>
                 <div className="col-sm-3" key={i}>
-                  {t && <ChartPaletteLink ctx={ctxBasic} type={t} currentPalettes={p.colorPalettes} refresh={forceUpdate} />}
+                  {t && <ChartPaletteLink ctx={ctxBasic} type={t} refresh={forceUpdate} />}
                 </div>)
               }
             </div>
@@ -189,22 +188,40 @@ function getTitle(ct: ChartColumnType): ChartColumnType[] {
 
 export interface ChartPaletteLinkProps {
   type: TypeInfo;
-  currentPalettes: string[];
   refresh: () => void;
   ctx: StyleContext;
 }
 
-export const ChartPaletteLink = (props: ChartPaletteLinkProps) =>
-  <FormGroup ctx={props.ctx}
-    labelText={ChartMessage.ColorsFor0.niceToString(props.type.niceName)}>
-    <a href="#" className={props.ctx.formControlPlainTextClass} onClick={e => {
-      e.preventDefault();
-      ChartPaletteClient.navigatePalette(props.type)
-        .then(() => props.refresh());
-    }}>
-      {props.currentPalettes.contains(props.type.name) ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()}
-    </a>
-  </FormGroup>;
+export function ChartPaletteLink(p: ChartPaletteLinkProps) {
+
+  const [palette, reload] = useAPIWithReload(() => ColorPaletteClient.getColorPalette(p.type.name), [p.type.name]);
+
+  return (
+    <FormGroup ctx={p.ctx}
+      label={ChartMessage.ColorsFor0.niceToString(p.type.niceName)}>
+      {palette === undefined ?
+        <span className={p.ctx.formControlPlainTextClass}>
+          {JavascriptMessage.loading.niceToString()}
+        </span> :
+        <a href="#" className={p.ctx.formControlPlainTextClass} onClick={async e => {
+          e.preventDefault();
+          if (palette)
+            await Navigator.view(palette.lite);
+          else {
+            var t = await Navigator.API.getType(p.type.name)
+            await Navigator.view(ColorPaletteEntity.New({
+              type: t!
+            }));
+          }
+
+          reload();
+        }}>
+          {palette ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()}
+        </a>
+      }
+    </FormGroup>
+  );
+}
 
 
 

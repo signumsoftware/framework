@@ -54,8 +54,8 @@ public class DiscoveryEntity : Entity, IUserAssetEntity
            new XAttribute("Name", Name),
            new XAttribute("Type", Type),
            Related == null ? null! : new XAttribute("Related",
-           Related is Lite<QueryEntity> query ? ctx.QueryToName(query) :
-           Related is Lite<PermissionSymbol> per ? ctx.PermissionToName(per) :
+           Related is Lite<QueryEntity> query ? ctx.RetrieveLite(query).Key :
+           Related is Lite<PermissionSymbol> per ? ctx.RetrieveLite(per).Key :
            (object)ctx.Include((Lite<IUserAssetEntity>)Related)),
             new XElement("Messages", Messages.Select(x =>
                 new XElement("Message",

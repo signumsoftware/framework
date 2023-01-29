@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using System.Globalization;
+using System;
 
 namespace Signum.Engine.Excel;
 
@@ -12,15 +13,23 @@ public static class ExcelExtensions
         return datetime.ToUserInterface().ToOADate().ToString(CultureInfo.InvariantCulture); //Convert to Julean Format
     }
 
+    public static DateTime FromExcelDate(string datetime)
+    {
+        return DateTime.FromOADate(double.Parse(datetime, CultureInfo.InvariantCulture)).FromUserInterface(); //Convert to Julean Format
+    }
+
     public static string ToExcelTime(TimeOnly timeOnly)
     {
         return timeOnly.ToTimeSpan().TotalDays.ToString(CultureInfo.InvariantCulture);
     }
 
-    public static DateTime FromExcelDate(string datetime)
+    public static TimeOnly FromExcelTime(string time)
     {
-        return DateTime.FromOADate(double.Parse(datetime, CultureInfo.InvariantCulture)).FromUserInterface(); //Convert to Julean Format
+        var value = double.Parse(time, CultureInfo.InvariantCulture);
+
+        return TimeSpan.FromDays(value).ToTimeOnly();
     }
+
 
     public static string ToExcelNumber(decimal number)
     {
@@ -32,9 +41,48 @@ public static class ExcelExtensions
         return decimal.Parse(number, CultureInfo.InvariantCulture);
     }
 
-    public static SheetData ToSheetData(this IEnumerable<Row> rows)
+    public static SheetData ToSheetDataWithIndexes(this IEnumerable<Row> rows)
     {
-        return new SheetData(rows.Cast<OpenXmlElement>());
+        var rowsList = rows.ToList();
+
+        uint rowIndex = 1;
+        foreach (var r in rowsList)
+        {
+            r.RowIndex = rowIndex++;
+
+            uint colIndex = 1;
+            foreach (Cell c in r.ChildElements)
+            {
+                c.CellReference = GetExcelColumnName(colIndex++) + r.RowIndex;
+            }
+        }
+
+        return new SheetData(rowsList);
+    }
+
+    public static string GetExcelColumnName(uint columnNumber)
+    {
+        string result = "";
+
+        while (columnNumber > 0)
+        {
+            uint mod = (columnNumber - 1) % 26;
+            result = Convert.ToChar('A' + mod) + result;
+            columnNumber = (columnNumber - mod) / 26;
+        }
+
+        return result;
+    }
+
+
+    public static int? GetExcelColumnIndex(this CellType cell) => cell.CellReference == null ? null : GetExcelColumnIndex(cell.CellReference!);
+    public static int GetExcelColumnIndex(string reference)
+    {
+        int ci = 0;
+        reference = reference.ToUpper();
+        for (int ix = 0; ix < reference.Length && reference[ix] >= 'A'; ix++)
+            ci = (ci * 26) + ((int)reference[ix] - 64);
+        return ci;
     }
 
     public static Row ToRow(this IEnumerable<Cell> rows)
@@ -167,6 +215,7 @@ public static class ExcelExtensions
         {
             string excelValue = value == null ? "" :
                         type.UnNullify() == typeof(DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
+                        type.UnNullify() == typeof(DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
                         type.UnNullify() == typeof(bool) ? (((bool)value) ? "TRUE": "FALSE") :
                         IsNumber(type.UnNullify()) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
                         value.ToString()!;
@@ -175,7 +224,7 @@ public static class ExcelExtensions
         }
     }
 
-    private static bool IsNumber(Type type)
+    public static bool IsNumber(Type type)
     {
         switch (Type.GetTypeCode(type))
         {
@@ -194,6 +243,11 @@ public static class ExcelExtensions
             default:
                 return false;
         }
+    }
+
+    public static bool IsDate(Type type)
+    {
+        return type == typeof(DateTime) || type == typeof(DateOnly) || type == typeof(DateTimeOffset);
     }
 
     public static WorksheetPart GetWorksheetPartById(this SpreadsheetDocument document, string sheetId)
@@ -228,4 +282,6 @@ public static class ExcelExtensions
         WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(sheet.Id!));
         return wsPart;
     }
+
+    
 }

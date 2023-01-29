@@ -98,6 +98,7 @@ export module DashboardMessage {
   export const RowsSelected = new MessageKey("DashboardMessage", "RowsSelected");
   export const ForPerformanceReasonsThisDashboardMayShowOutdatedInformation = new MessageKey("DashboardMessage", "ForPerformanceReasonsThisDashboardMayShowOutdatedInformation");
   export const LasUpdateWasOn0 = new MessageKey("DashboardMessage", "LasUpdateWasOn0");
+  export const TheUserQuery0HasNoColumnWithSummaryHeader = new MessageKey("DashboardMessage", "TheUserQuery0HasNoColumnWithSummaryHeader");
 }
 
 export module DashboardOperation {
@@ -205,10 +206,12 @@ export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
   userQuery: UserQueries.UserQueryEntity;
   isQueryCached: boolean;
   renderMode: UserQueryPartRenderMode;
+  aggregateFromSummaryHeader: boolean;
   autoUpdate: AutoUpdate;
   allowSelection: boolean;
   showFooter: boolean;
   createNew: boolean;
+  allowMaxHeight: boolean;
   requiresTitle: boolean;
 }
 

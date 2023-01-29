@@ -2,6 +2,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.Reflection;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Signum.Engine.Basics;
 
@@ -98,29 +99,17 @@ public static class TypeLogic
         var currentList = Administrator.TryRetrieveAll<TypeEntity>(replacements);
 
         { //External entities are nt asked in SchemaSynchronizer
+
+            Func<string, bool> isExternal = tableName => /*true*/ schema.IsExternalDatabase(ObjectName.Parse(tableName, isPostgres).Schema.Database);
+
             replacements.AskForReplacements(
-                currentList.Where(t => schema.IsExternalDatabase(ObjectName.Parse(t.TableName, isPostgres).Schema.Database)).Select(a => a.TableName).ToHashSet(),
-                should.Values.Where(t => schema.IsExternalDatabase(ObjectName.Parse(t.TableName, isPostgres).Schema.Database)).Select(a => a.TableName).ToHashSet(),
+                currentList.Where(t => isExternal(t.TableName)).Select(a => a.TableName).ToHashSet(),
+                should.Values.Where(t => isExternal(t.TableName)).Select(a => a.TableName).ToHashSet(),
                 Replacements.KeyTables);
         }
 
         Dictionary<string, TypeEntity> current = ApplyReplacementsToOld(replacements,
             currentList.ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
-
-        { //Temporal solution until applications are updated
-            var repeated =
-                should.Keys.Select(k => ObjectName.Parse(k, isPostgres)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key).Concat(
-                current.Keys.Select(k => ObjectName.Parse(k, isPostgres)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key)).ToList();
-
-            string simplify(string tn)
-            {
-                ObjectName name = ObjectName.Parse(tn, isPostgres);
-                return repeated.Contains(name.Name) ? name.ToString() : name.Name;
-            }
-
-            should = should.SelectDictionary(simplify, v => v);
-            current = current.SelectDictionary(simplify, v => v);
-        }
 
         Table table = schema.Table<TypeEntity>();
 

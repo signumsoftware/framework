@@ -1,10 +1,11 @@
 import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
 import { Dic } from './Globals';
 import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, OperationSymbol, ModelEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
-import { ajaxGet } from './Services';
+import { ajaxGet, ThrowErrorFilter } from './Services';
 import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
 import { QueryString } from './QueryString';
+import { func } from 'prop-types';
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -118,6 +119,48 @@ export function toLuxonFormat(netFormat: string | undefined, type: "DateOnly" | 
       return result;
     }
   }
+}
+
+export function splitLuxonFormat(luxonFormat: string) : [dateFormat: string, durationFormat: string | null] {
+
+  switch (luxonFormat) {
+    case "D": return ["D", null];
+    case "DD": return ["DD", null];
+    case "DDD": return ["DDD", null];
+    case "DDDD": return ["DDDD", null];
+    case "F": return ["D", "hh:mm:ss"];
+    case "FF": return ["DD", "hh:mm:ss"];
+    case "FFF": return ["DDD", "hh:mm:ss"];
+    case "FFFF": return ["DDDD", "hh:mm:ss"];
+    case "f": return ["D", "hh:mm"];
+    case "ff": return ["DD", "hh:mm"];
+    case "fff": return ["DDD", "hh:mm"];
+    case "ffff": return ["DDDD", "hh:mm"];
+  }
+
+  if (luxonFormat.contains("'T'"))
+    return [luxonFormat.before("'T'"), luxonFormat.after("'T'").replaceAll("H", "h")];
+
+  if (luxonFormat.contains(" ") && !luxonFormat.after(" ").contains(" "))
+    return [luxonFormat.before(" "), luxonFormat.after(" ").replaceAll("H", "h")];
+
+  throw new Error("Unable to split " + luxonFormat);
+}
+
+export function dateTimePlaceholder(luxonFormat: string) {
+  var result = DateTime.expandFormat(luxonFormat);
+
+  return result
+    .replace(/\bd\b/, "dd")
+    .replace(/\bMM?\b/, "mm")
+    .replace(/\bh\b/, "hh")
+    .replace(/\bHH?\b/, "hh")
+    .replace(/\bm\b/, "mm");
+
+}
+
+export function timePlaceholder(durationFormat: string) {
+  return durationFormat;
 }
 
 const oneDigitCulture = new Set([
@@ -373,7 +416,7 @@ export function timeToString(val: any, netFormat?: string) {
     return "";
 
   var duration = Duration.fromISOTime(val);
-  return duration.toFormat(toLuxonDurationFormat(netFormat) ?? "hh:mm:ss");
+  return duration.toFormat(toLuxonDurationFormat(netFormat) ?? "HH:mm:ss");
 }
 
 
@@ -1200,7 +1243,15 @@ export class Type<T extends ModifiableEntity> implements IType {
     public typeName: string) { }
 
   tryTypeInfo(): TypeInfo | undefined {
-    return tryGetTypeInfo(this.typeName);
+    var result = tryGetTypeInfo(this.typeName);
+
+    if (result == null && this.typeName.endsWith("Embedded")) 
+      throw new Error(`Type ${this.typeName} has no TypeInfo because is an EmbeddedEntity. 
+Start from the main Entity Type containing the embedded entity, like: MyEntity.propertyRoute(m => m.myEmbedded.someProperty).
+In case of a collection of embedded entities, use something like: MyEntity.propertyRoute(m => m.myCollection[0].element.someProperty)`);
+
+    return result;
+
   }
 
   typeInfo(): TypeInfo {
@@ -1208,7 +1259,7 @@ export class Type<T extends ModifiableEntity> implements IType {
     const result = this.tryTypeInfo();
 
     if (!result)
-      throw new Error(`Type ${this.typeName} has no TypeInfo. \nNote: If is an EmbeddedEntity, start from some main Entity Type containing it to get metadata for the embedded properties (example: MyEntity.propertyRoute(m => m.myEmbedded.someProperty)`);
+      throw new Error(`Type ${this.typeName} has no TypeInfo.`);
 
     return result;
   }
@@ -1336,6 +1387,10 @@ export class Type<T extends ModifiableEntity> implements IType {
     else
       return new QueryTokenString(tokenSequence(lambdaToColumn, true));
   }
+
+  toString() {
+    return this.typeName;
+  }
 }
 
 /*  Some examples being in ExceptionEntity:
@@ -1385,7 +1440,8 @@ export class QueryTokenString<T> {
    * @param lambdaToProperty for a typed lambda like a => a.name will append "Name" to the QueryTokenString
    */
   append<S>(lambdaToProperty: (v: T) => S): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + tokenSequence(lambdaToProperty, !this.token));
+    var seq = tokenSequence(lambdaToProperty, !this.token);
+    return new QueryTokenString<S>(this.token + (this.token && seq ? "." : "") + seq);
   }
 
   mixin<M extends MixinEntity>(t: Type<M>): QueryTokenString<M> {
@@ -1411,6 +1467,23 @@ export class QueryTokenString<T> {
   anyNo<S = ArrayElement<T>>(): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + ".AnyNo");
   }
+
+  separatedByComma<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByComma");
+  }
+
+  separatedByCommaDistinct<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByCommaDistinct");
+  }
+
+  separatedByNewLine<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByNewLine");
+  }
+
+  separatedByNewLineDistinct<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".SeparatedByNewLineDistinct");
+  }
+  
 
   noOne<S = ArrayElement<T>>(): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + ".NoOne");
@@ -1958,7 +2031,7 @@ export class PropertyRoute {
             return {};
 
           const ti = tryGetTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
-          if (ti && isTypeEntity(ti))
+          if (ti && (isTypeEntity(ti) || isTypeModel(ti)))
             return simpleMembersAfter(ti, "");
           else
             return simpleMembersAfter(this.findRootType(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));

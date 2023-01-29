@@ -14,7 +14,7 @@ public static class ChartLogic
 
             PermissionAuthLogic.RegisterTypes(typeof(ChartPermission));
 
-            ChartColorLogic.Start(sb);
+            ColorPaletteLogic.Start(sb);
             ChartScriptLogic.Start(sb, googleMapsChartScripts, svgMapUrls);
             UserChartLogic.Start(sb);
         }

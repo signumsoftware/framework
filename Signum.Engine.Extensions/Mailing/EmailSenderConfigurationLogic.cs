@@ -14,6 +14,10 @@ public static class EmailSenderConfigurationLogic
 
     public static void Start(SchemaBuilder sb, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
     {
+        sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(SmtpEmailServiceEntity));
+        sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(ExchangeWebServiceEmailServiceEntity));
+        sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(MicrosoftGraphEmailServiceEntity));
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             if (encryptPassword != null)
@@ -23,16 +27,13 @@ public static class EmailSenderConfigurationLogic
                 DecryptPassword = decryptPassword;
 
             sb.Include<EmailSenderConfigurationEntity>()
+                .WithDeletePart(a => a.Service, handleOnSaving: esc => true)
                 .WithQuery(() => s => new
                 {
                     Entity = s,
                     s.Id,
                     s.Name,
-                    s.SMTP!.DeliveryMethod,
-                    s.SMTP!.Network!.Host,
-                    s.SMTP!.PickupDirectoryLocation,
-                    s.Exchange!.ExchangeVersion,
-                    s.Exchange!.Url,
+                    s.Service
                 });
             
             SmtpConfigCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToDictionary(a => a.ToLite()),
@@ -44,12 +45,19 @@ public static class EmailSenderConfigurationLogic
                 CanBeModified = true,
                 Execute = (sc, _) => { },
             }.Register();
+
+            new Graph<EmailSenderConfigurationEntity>.ConstructFrom<EmailSenderConfigurationEntity>(EmailSenderConfigurationOperation.Clone)
+            { 
+                Construct = (sc, _) => sc.Clone()
+            
+            }.Register();
+
         }
     }
 
     public static SmtpClient GenerateSmtpClient(this Lite<EmailSenderConfigurationEntity> config)
     {
-        return config.RetrieveFromCache().SMTP.ThrowIfNull("No SMTP config").GenerateSmtpClient();
+        return (config.RetrieveFromCache().Service as SmtpEmailServiceEntity).ThrowIfNull("No SMTP config").GenerateSmtpClient();
     }
 
     public static EmailSenderConfigurationEntity RetrieveFromCache(this Lite<EmailSenderConfigurationEntity> config)
@@ -57,7 +65,7 @@ public static class EmailSenderConfigurationLogic
         return SmtpConfigCache.Value.GetOrThrow(config);
     }
 
-    public static SmtpClient GenerateSmtpClient(this SmtpEmbedded config)
+    public static SmtpClient GenerateSmtpClient(this SmtpEmailServiceEntity config)
     {
         if (config.DeliveryMethod != SmtpDeliveryMethod.Network)
         {

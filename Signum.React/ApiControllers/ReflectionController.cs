@@ -32,6 +32,14 @@ public class ReflectionController : ControllerBase
         return TypeLogic.TryGetType(typeName)?.ToTypeEntity();
     }
 
+    [HttpGet("api/reflection/enumEntities/{typeName}")]
+    public Dictionary<string, Entity> GetEnumEntities(string typeName)
+    {
+        var type = EnumEntity.Extract(TypeLogic.GetType(typeName))!;
+
+        return EnumEntity.GetValues(type).ToDictionary(a => a.ToString(), a => EnumEntity.FromEnumUntyped(a));
+    }
+
 
     [HttpPost("api/registerClientError"), ValidateModelFilter, SignumAllowAnonymous]
     public void ClientError([Required, FromBody] ClientErrorModel error)
@@ -51,7 +59,7 @@ public class ReflectionController : ControllerBase
 
             Version = Schema.Current.Version.ToString(),
             ApplicationName = Schema.Current.ApplicationName,
-            User = UserHolder.Current.User,
+            User = UserHolder.Current?.User,
         };
 
         using (ExecutionMode.Global())

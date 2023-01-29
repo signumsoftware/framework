@@ -468,7 +468,7 @@ function autoCompleteType(query: string): string[] {
 }
 
 export interface LineBaseNode extends BaseNode {
-  labelText?: ExpressionOrValue<string>;
+  label?: ExpressionOrValue<string>;
   field: string;
   styleOptions?: StyleOptionsExpression;
   readOnly?: ExpressionOrValue<boolean>;
@@ -481,8 +481,8 @@ export interface LineBaseNode extends BaseNode {
 export interface ValueLineNode extends LineBaseNode {
   kind: "ValueLine",
   textArea?: ExpressionOrValue<string>;
-  unitText?: ExpressionOrValue<string>;
-  formatText?: ExpressionOrValue<string>;
+  unit?: ExpressionOrValue<string>;
+  format?: ExpressionOrValue<string>;
   autoTrim?: ExpressionOrValue<boolean>;
   inlineCheckbox?: ExpressionOrValue<boolean>;
   valueHtmlAttributes?: HtmlAttributesExpression;
@@ -498,12 +498,12 @@ NodeUtils.register<ValueLineNode>({
   renderCode: (node, cc) => cc.elementCode("ValueLine", {
     ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
-    labelText: node.labelText,
+    label: node.label,
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
     valueHtmlAttributes: node.valueHtmlAttributes,
-    unitText: node.unitText,
-    formatText: node.formatText,
+    unit: node.unit,
+    format: node.format,
     readOnly: node.readOnly,
     mandatory: node.mandatory,
     inlineCheckbox: node.inlineCheckbox,
@@ -515,12 +515,12 @@ NodeUtils.register<ValueLineNode>({
   render: (dn, ctx) => (<ValueLine
     //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
-    labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+    label={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
     formGroupHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.formGroupHtmlAttributes)}
     valueHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.valueHtmlAttributes)}
-    unitText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.unitText, NodeUtils.isStringOrNull)}
-    formatText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.formatText, NodeUtils.isStringOrNull)}
+    unit={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.unit, NodeUtils.isStringOrNull)}
+    format={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.format, NodeUtils.isStringOrNull)}
     readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
     mandatory={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.mandatory, NodeUtils.isBooleanOrNull)}
     inlineCheckbox={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
@@ -535,12 +535,12 @@ NodeUtils.register<ValueLineNode>({
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.valueHtmlAttributes)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unitText)} type="string" defaultValue={m?.unit ?? ""} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.formatText)} type="string" defaultValue={m?.format ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unit)} type="string" defaultValue={m?.unit ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.format)} type="string" defaultValue={m?.format ?? ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
@@ -573,7 +573,7 @@ NodeUtils.register<MultiValueLineNode>({
     onRenderItem: node.onRenderItem,
     onCreate: node.onCreate,
     addValueText: node.addValueText,
-    labelText: node.labelText,
+    label: node.label,
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
     readOnly: node.readOnly,
@@ -586,7 +586,7 @@ NodeUtils.register<MultiValueLineNode>({
       onRenderItem={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onRenderItem, NodeUtils.isFunctionOrNull)}
       onCreate={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onCreate, NodeUtils.isFunctionOrNull)}
       addValueText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.addValueText, NodeUtils.isStringOrNull)}
-      labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+      label={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
       labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
       formGroupHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.formGroupHtmlAttributes)}
       readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
@@ -602,7 +602,7 @@ NodeUtils.register<MultiValueLineNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRenderItem)} type={null} defaultValue={null} exampleExpression={"mctx => modules.React.createElement(ValueLine, {ctx: mctx})"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(null)"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.addValueText)} type="string" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
@@ -717,7 +717,7 @@ NodeUtils.register<FileLineNode>({
   renderCode: (node, cc) => cc.elementCode("FileLine", {
     ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
-    labelText: node.labelText,
+    label: node.label,
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
     visible: node.visible,
@@ -734,7 +734,7 @@ NodeUtils.register<FileLineNode>({
   render: (dn, parentCtx) => (<FileLine
     //ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions))}
-    labelText={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+    label={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes)}
     formGroupHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.formGroupHtmlAttributes)}
     visible={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.visible, NodeUtils.isBooleanOrNull)}
@@ -755,7 +755,7 @@ NodeUtils.register<FileLineNode>({
         {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
@@ -793,7 +793,7 @@ NodeUtils.register<FileImageLineNode>({
   renderCode: (node, cc) => cc.elementCode("FileImageLine", {
     ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
-    labelText: node.labelText,
+    label: node.label,
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
     visible: node.visible,
@@ -809,7 +809,7 @@ NodeUtils.register<FileImageLineNode>({
   render: (dn, parentCtx) => (<FileImageLine
     //ref={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions))}
-    labelText={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+    label={NodeUtils.evaluateAndValidate(dn, parentCtx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes)}
     formGroupHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.formGroupHtmlAttributes)}
     imageHtmlAttributes={toHtmlAttributes(dn, parentCtx, dn.node.imageHtmlAttributes)}
@@ -830,7 +830,7 @@ NodeUtils.register<FileImageLineNode>({
         {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.imageHtmlAttributes)} />
@@ -868,7 +868,7 @@ NodeUtils.register<MultiFileLineNode>({
   renderCode: (node, cc) => cc.elementCode("MultiFileLine", {
     ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
-    labelText: node.labelText,
+    label: node.label,
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
     readOnly: node.readOnly,
@@ -884,7 +884,7 @@ NodeUtils.register<MultiFileLineNode>({
     <MultiFileLine
       //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
       ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
-      labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+      label={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
       labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
       formGroupHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.formGroupHtmlAttributes)}
       readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
@@ -903,7 +903,7 @@ NodeUtils.register<MultiFileLineNode>({
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
@@ -948,7 +948,7 @@ NodeUtils.register<EnumCheckboxListNode>({
   renderCode: (node, cc) => cc.elementCode("EnumCheckboxList", {
     ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
-    labelText: node.labelText,
+    label: node.label,
     avoidFieldSet: node.avoidFieldSet,
     readOnly: node.readOnly,
     columnCount: node.columnCount,
@@ -958,7 +958,7 @@ NodeUtils.register<EnumCheckboxListNode>({
   render: (dn, ctx) => (<EnumCheckboxList
     //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
-    labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+    label={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
     readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
     columnCount={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
@@ -970,7 +970,7 @@ NodeUtils.register<EnumCheckboxListNode>({
     return (<div>
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m?.niceName ?? ""} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
@@ -1311,7 +1311,7 @@ NodeUtils.register<SearchControlNode>({
   { 
     order: -1.1,
     button: modules.React.createElement("button", { className: "btn btn-light", title: "Setting", onClick: e => alert(e) },
-                                          modules.React.createElement(modules.FontAwesomeIcon, { icon: "cog", color: "green" }), " ", "Setting")
+                                          modules.React.createElement(modules.FontAwesomeIcon, { icon: "gear", color: "green" }), " ", "Setting")
   },
 ]`} />
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showHeader)} type="boolean" defaultValue={null} />
@@ -1351,7 +1351,7 @@ export interface SearchValueLineNode extends BaseNode {
   kind: "SearchValueLine",
   findOptions?: FindOptionsExpr;
   valueToken?: string;
-  labelText?: ExpressionOrValue<string>;
+  label?: ExpressionOrValue<string>;
   labelHtmlAttributes?: HtmlAttributesExpression;
   isBadge?: ExpressionOrValue<boolean>;
   isLink?: ExpressionOrValue<boolean>;
@@ -1395,7 +1395,7 @@ NodeUtils.register<SearchValueLineNode>({
     ctx: cc.subCtxCode(),
     findOptions: node.findOptions,
     valueToken: node.valueToken,
-    labelText: node.labelText,
+    label: node.label,
     isBadge: node.isBadge,
     isLink: node.isLink,
     isFormControl: node.isFormControl,
@@ -1409,7 +1409,7 @@ NodeUtils.register<SearchValueLineNode>({
     ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     findOptions={dn.node.findOptions && toFindOptions(dn, ctx, dn.node.findOptions!)}
     valueToken={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.valueToken, NodeUtils.isStringOrNull)}
-    labelText={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+    label={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
     isBadge={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.isBadge, NodeUtils.isBooleanOrNull)}
     isLink={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.isLink, NodeUtils.isBooleanOrNull)}
     isFormControl={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.isFormControl, NodeUtils.isBooleanOrNull)}
@@ -1427,7 +1427,7 @@ NodeUtils.register<SearchValueLineNode>({
         subTokenOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanElement} />
       <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} onQueryChanged={() => dn.node.valueToken = undefined} />
       <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={null} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.isBadge)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.isLink)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.isFormControl)} type="boolean" defaultValue={null} />

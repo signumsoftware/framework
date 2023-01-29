@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType, tryGetTypeInfo, MemberInfo } from './Reflection'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType, tryGetTypeInfo, MemberInfo, TypeInfo, getTypeInfos, getTypeInfo } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity, ModelEntity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
@@ -15,10 +15,10 @@ export type FormGroupStyle =
   "FloatingLabel"; /// (default) Label on the left, value on the right (exept RTL). Affected by labelColumns / valueColumns
 
 export type FormSize =
-  "ExtraSmall" |
-  "Small" |
-  "Normal" |
-  "Large";
+  "xs" |
+  "sm" |
+  "md" |
+  "lg";
 
 
 export class StyleContext {
@@ -36,7 +36,7 @@ export class StyleContext {
   static default: StyleContext = new StyleContext(undefined,
     {
       formGroupStyle: "LabelColumns",
-      formSize: "Small",
+      formSize: "sm",
       labelColumns: { sm: 2 },
       readOnly: false,
       placeholderLabels: false,
@@ -55,90 +55,90 @@ export class StyleContext {
 
   get formGroupClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "form-group form-group-xs";
-      case "Small": return "form-group form-group-sm";
-      case "Normal": return "form-group";
-      case "Large": return "form-group form-group-lg";
+      case "xs": return "form-group form-group-xs";
+      case "sm": return "form-group form-group-sm";
+      case "md": return "form-group";
+      case "lg": return "form-group form-group-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
 
   get colFormLabelClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "col-form-label col-form-label-xs";
-      case "Small": return "col-form-label col-form-label-sm";
-      case "Normal": return "col-form-label";
-      case "Large": return "col-form-label col-form-label-lg";
+      case "xs": return "col-form-label col-form-label-xs";
+      case "sm": return "col-form-label col-form-label-sm";
+      case "md": return "col-form-label";
+      case "lg": return "col-form-label col-form-label-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
 
   get labelClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "label-xs";
-      case "Small": return "label-sm";
-      case "Normal": return undefined;
-      case "Large": return undefined;
+      case "xs": return "label-xs";
+      case "sm": return "label-sm";
+      case "md": return undefined;
+      case "lg": return undefined;
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
 
   get rwWidgetClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "rw-widget-xs";
-      case "Small": return "rw-widget-sm";
-      case "Normal": return "";
-      case "Large": return "rw-widget-lg";
+      case "xs": return "rw-widget-xs";
+      case "sm": return "rw-widget-sm";
+      case "md": return "";
+      case "lg": return "rw-widget-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
 
   get inputGroupClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "input-group input-group-xs";
-      case "Small": return "input-group input-group-sm";
-      case "Normal": return "input-group";
-      case "Large": return "input-group input-group-lg";
+      case "xs": return "input-group input-group-xs";
+      case "sm": return "input-group input-group-sm";
+      case "md": return "input-group";
+      case "lg": return "input-group input-group-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
 
   get formControlClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "form-control form-control-xs";
-      case "Small": return "form-control form-control-sm";
-      case "Normal": return "form-control";
-      case "Large": return "form-control form-control-lg";
+      case "xs": return "form-control form-control-xs";
+      case "sm": return "form-control form-control-sm";
+      case "md": return "form-control";
+      case "lg": return "form-control form-control-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
 
   get formSelectClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "form-select form-select-xs";
-      case "Small": return "form-select form-select-sm";
-      case "Normal": return "form-select";
-      case "Large": return "form-select form-select-lg";
+      case "xs": return "form-select form-select-xs";
+      case "sm": return "form-select form-select-sm";
+      case "md": return "form-select";
+      case "lg": return "form-select form-select-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
 
   get formControlPlainTextClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "form-control-plaintext form-control-xs";
-      case "Small": return "form-control-plaintext form-control-sm";
-      case "Normal": return "form-control-plaintext";
-      case "Large": return "form-control-plaintext form-control-lg";
+      case "xs": return "form-control-plaintext form-control-xs";
+      case "sm": return "form-control-plaintext form-control-sm";
+      case "md": return "form-control-plaintext";
+      case "lg": return "form-control-plaintext form-control-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
 
   get buttonClass(): string | undefined {
     switch (this.formSize) {
-      case "ExtraSmall": return "btn-xs";
-      case "Small": return "btn-sm";
-      case "Normal": return undefined;
-      case "Large": return "btn-lg";
+      case "xs": return "btn-xs";
+      case "sm": return "btn-sm";
+      case "md": return undefined;
+      case "lg": return "btn-lg";
       default: throw new Error("Unexpected formSize " + this.formSize);
     }
   }
@@ -268,7 +268,8 @@ export class TypeContext<T> extends StyleContext {
   }
 
   get index(): number | undefined {
-    return this.binding && (this.binding as MListElementBinding<any>).index;
+    return (this.binding as MListElementBinding<any>)?.index ??
+      (this.parent as TypeContext<any>)?.index;
   }
 
   static root<T extends ModifiableEntity>(value: T, styleOptions?: StyleOptions, parent?: StyleContext): TypeContext<T> {
@@ -305,14 +306,17 @@ export class TypeContext<T> extends StyleContext {
     return result;
   }
 
-  cast<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R> {
-
+  cast<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R>;
+  cast(): TypeContext<any>;
+  cast(type?: Type<any>): TypeContext<any> 
+  {
     const entity = this.value as any as Entity;
 
-    if (type.typeName != entity.Type)
-      throw new Error(`Impossible to cast ${entity.Type} into ${type.typeName}`);
+    const typeName = type?.typeName ?? entity.Type;
+    if (typeName != entity.Type)
+      throw new Error(`Impossible to cast ${entity.Type} into ${typeName}`);
 
-    var newPr = this.propertyRoute == null ? undefined : this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
+    var newPr = this.propertyRoute == null ? undefined : this.propertyRoute.typeReference().name == typeName ? this.propertyRoute : PropertyRoute.root(typeName);
 
     const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, ""));
 

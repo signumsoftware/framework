@@ -3,13 +3,23 @@ import * as React from 'react'
 import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
-import { TypeContext } from '../TypeContext'
+import { mlistItemContext, TypeContext } from '../TypeContext'
 import { TypeReference } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString, MListElement } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { useController } from './LineBase'
 import { normalizeEmptyArray } from './EntityCombo'
 import { ResultTable } from '../Search'
+import { renderLite } from '../Navigator'
+
+export interface RenderCheckboxItemContext<T> {
+  row: ResultRow;
+  index: number;
+  checked: boolean;
+  controller: EntityCheckboxListController;
+  resultTable?: ResultTable;
+  ectx: TypeContext<T> | null;
+}
 
 export interface EntityCheckboxListProps extends EntityListBaseProps {
   data?: Lite<Entity>[];
@@ -17,8 +27,11 @@ export interface EntityCheckboxListProps extends EntityListBaseProps {
   columnWidth?: number;
   avoidFieldSet?: boolean;
   deps?: React.DependencyList;
-  onRenderCheckbox?: (row: ResultRow, index: number, checked: boolean, controller: EntityCheckboxListController, resultTable?: ResultTable) => React.ReactElement;
-  onRenderItem?: (row: ResultRow, index: number, checked: boolean, controller: EntityCheckboxListController, resultTable?: ResultTable) => React.ReactElement;
+  onRenderCheckbox?: (ric: RenderCheckboxItemContext<any>) => React.ReactElement;
+  onRenderItem?: (ric: RenderCheckboxItemContext<any>) => React.ReactElement;
+
+  getLiteFromElement?: (e: any /*ModifiableEntity*/) => Entity | Lite<Entity>;
+  createElementFromLite?: (file: Lite<any>) => Promise<ModifiableEntity>;
 }
 
 export class EntityCheckboxListController extends EntityListBaseController<EntityCheckboxListProps> {
@@ -36,16 +49,23 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
     state.columnWidth = 200;
   }
 
-  handleOnChange = (lite: Lite<Entity>) => {
+  getKeyEntity(element: Lite<Entity> | ModifiableEntity): Lite<Entity> | Entity {
+    if (this.props.getLiteFromElement)
+      return this.props.getLiteFromElement(element);
+    else
+      return element as Lite<Entity> | Entity;
+  }
+
+  handleOnChange = (event: React.SyntheticEvent, lite: Lite<Entity>) => {
     const list = this.props.ctx.value!;
-    const toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
+    const toRemove = list.filter(mle => is(this.getKeyEntity(mle.element), lite))
 
     if (toRemove.length) {
       toRemove.forEach(mle => list.remove(mle));
-      this.setValue(list);
+      this.setValue(list, event);
     }
     else {
-      this.convert(lite).then(e => {
+      (this.props.createElementFromLite ? this.props.createElementFromLite(lite) : this.convert(lite)).then(e => {
         this.addElement(e);
       });
     }
@@ -72,7 +92,7 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
     <fieldset className={classes("sf-checkbox-list", p.ctx.errorClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           {renderButtons()}
         </div>
       </legend>
@@ -122,9 +142,12 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
           .then(data => setData(data));
       }
-      else
-        Finder.API.fetchAllLites({ types: p.type!.name })
+      else {
+
+        var type = p.getLiteFromElement ? p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getLiteFromElement).typeReference() : p.type;
+        Finder.API.fetchAllLites({ types: type!.name })
           .then(data => setData(data.orderBy(a => getToString(a))));
+      } 
     }
   }, [normalizeEmptyArray(p.data), p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
@@ -173,28 +196,40 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
     const list = p.ctx.value!;
 
     list.forEach(mle => {
-      if (!fixedData.some(d => is(d.entity, mle.element as Entity | Lite<Entity>)))
-        fixedData.insertAt(0, { entity: maybeToLite(mle.element as Entity | Lite<Entity>) } as ResultRow)
+      var lite = c.getKeyEntity(mle.element);
+      if (!fixedData.some(d => is(d.entity, lite)))
+        fixedData.insertAt(0, { entity: maybeToLite(lite) } as ResultRow)
     });
 
     const resultTable = Array.isArray(data) ? undefined : data;
 
+    var listCtx = mlistItemContext(p.ctx);
+
     return fixedData.map((row, i) => {
-      var checked = list.some(mle => is(mle.element as Entity | Lite<Entity>, row.entity));
+      var ectx = listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.value), row.entity));
+
+      var ric: RenderCheckboxItemContext<any> = {
+        row,
+        index: i,
+        checked: ectx != null,
+        controller: c,
+        resultTable: resultTable,
+        ectx: ectx
+      };
 
       if (p.onRenderCheckbox)
-        return p.onRenderCheckbox(row, i, checked, c, resultTable);
+        return p.onRenderCheckbox(ric);
 
       return (
         <label className="sf-checkbox-element" key={i}>
           <input type="checkbox"
             className="form-check-input"
-            checked={checked}
+            checked={ectx != null}
             disabled={p.ctx.readOnly}
             name={liteKey(row.entity!)}
-            onChange={e => c.handleOnChange(row.entity!)} />
+            onChange={e => c.handleOnChange(e, row.entity!)} />
           &nbsp;
-          {p.onRenderItem ? p.onRenderItem(row, i, checked, c, resultTable) : <span>{getToString(row.entity)}</span>}
+          {p.onRenderItem ? p.onRenderItem(ric) : <span>{renderLite(row.entity!)}</span>}
         </label>
       );
     }

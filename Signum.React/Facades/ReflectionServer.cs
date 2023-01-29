@@ -7,6 +7,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;
 using Signum.Engine.Json;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.React.Facades;
 
@@ -436,12 +437,11 @@ public class TypeReferenceTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsLite { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsNotNullable { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsEmbedded { get; set; }
-    public string Name { get; set; }
+    public required string Name { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? TypeNiceName { get; set; }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public TypeReferenceTS() { }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
+    [SetsRequiredMembers]
     public TypeReferenceTS(Type type, Implementations? implementations)
     {
         this.IsCollection = type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;

@@ -69,23 +69,24 @@ export function start(options: { routes: JSX.Element[] }) {
 export module Converter {
 
 
-  export function applyUserChart(cr: ChartRequestModel, uc: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
+  export async function applyUserChart(cr: ChartRequestModel, uc: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
     cr.chartScript = uc.chartScript;
     cr.maxRows = uc.maxRows;
     cr.customDrilldowns = uc.customDrilldowns;
 
-    const promise = UserAssetsClient.API.parseFilters({
+    const filters = await UserAssetsClient.API.parseFilters({
       queryKey: uc.query.key,
       canAggregate: true,
       entity: entity,
       filters: uc.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
     });
 
-    return promise.then(filters => {
 
-      cr.filterOptions = (cr.filterOptions ?? []).filter(f => f.frozen);
+    cr.filterOptions = (cr.filterOptions ?? []).filter(f => f.frozen);
 
-      cr.filterOptions.push(...filters.map(f => UserAssetsClient.Converter.toFilterOptionParsed(f)));
+    cr.filterOptions.push(...filters.map(f => UserAssetsClient.Converter.toFilterOptionParsed(f)));
+
+    await Finder.parseFilterValues(cr.filterOptions);
 
       cr.parameters = uc.parameters.map(mle => ({
         rowId: null,
@@ -98,29 +99,28 @@ export module Converter {
       cr.columns = uc.columns.map(mle => {
         var t = mle.element.token;
 
-        return ({
-          rowId: null,
-          element: ChartColumnEmbedded.New({
-            displayName: mle.element.displayName,
-            format: mle.element.format,
+      return ({
+        rowId: null,
+        element: ChartColumnEmbedded.New({
+          displayName: mle.element.displayName,
+          format: mle.element.format,
 
-            token: t && QueryTokenEmbedded.New({
-              token: UserAssetsClient.getToken(t),
-              tokenString: t.tokenString
-            }),
+          token: t && QueryTokenEmbedded.New({
+            token: UserAssetsClient.getToken(t),
+            tokenString: t.tokenString
+          }),
 
-            orderByIndex: mle.element.orderByIndex,
-            orderByType: mle.element.orderByType,
-          })
+          orderByIndex: mle.element.orderByIndex,
+          orderByType: mle.element.orderByType,
         })
-      });
-
-      return ChartClient.getChartScript(cr.chartScript)
-        .then(cs => {
-          ChartClient.synchronizeColumns(cr, cs);
-          return cr;
-        });
+      })
     });
+
+    return ChartClient.getChartScript(cr.chartScript)
+      .then(cs => {
+        ChartClient.synchronizeColumns(cr, cs);
+        return cr;
+      });
   }
 
   export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {

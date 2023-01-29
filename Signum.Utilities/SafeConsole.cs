@@ -17,7 +17,7 @@ public static class SafeConsole
     public static void WriteSameLine(string? str)
     {
         if (needToClear)
-            str = str?.PadChopRight(Console.BufferWidth - 1);
+            str = str?.PadTruncateRight(Console.BufferWidth - 1);
         else
             str = str?.TryStart(Console.BufferWidth - 1)!;
 

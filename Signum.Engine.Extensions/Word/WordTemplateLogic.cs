@@ -13,6 +13,9 @@ using Signum.Entities.Reflection;
 using Signum.Entities.Templating;
 using Signum.Engine.Authorization;
 using Signum.Entities.Basics;
+using Signum.Entities.Workflow;
+using Signum.Entities.Mailing;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Engine.Word;
 
@@ -80,6 +83,7 @@ public static class WordTemplateLogic
 
             sb.Schema.EntityEvents<WordTemplateEntity>().Retrieved += WordTemplateLogic_Retrieved;
 
+            UserAssetsImporter.Register<WordTemplateEntity>("WordTemplate", WordTemplateOperation.Save);
             PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
             WordModelLogic.Start(sb);
@@ -88,11 +92,11 @@ public static class WordTemplateLogic
             SymbolLogic<WordConverterSymbol>.Start(sb, () => Converters.Keys.ToHashSet());
 
             sb.Include<WordTransformerSymbol>()
-            .WithQuery(() => f => new
-            {
-                Entity = f,
-                f.Key
-            });
+                .WithQuery(() => f => new
+                {
+                    Entity = f,
+                    f.Key
+                });
 
             sb.Include<WordConverterSymbol>()
                 .WithQuery(() => f => new
@@ -150,18 +154,26 @@ public static class WordTemplateLogic
             Schema.Current.Synchronizing += Schema_Synchronize_Tokens;
 
             Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
+            Validator.PropertyValidator((WordTemplateEntity e) => e.FileName).StaticPropertyValidation += ValidateFileName;
         }
     }
 
     private static void WordTemplateLogic_Retrieved(WordTemplateEntity template, PostRetrievingContext ctx)
     {
+        ParseData(template);
+    }
+
+    public static WordTemplateEntity ParseData(this WordTemplateEntity template)
+    {
         object? queryName = template.Query.ToQueryNameCatch();
-        if (queryName == null)
-            return;
+        if (queryName != null)
+        {
+            QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 
-        QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
+            template.ParseData(description);
+        }
 
-        template.ParseData(description);
+        return template;
     }
 
     public static Dictionary<Type, WordTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, WordTemplateVisibleOn>()
@@ -254,6 +266,21 @@ public static class WordTemplateLogic
             });
 
             return error;
+        }
+    }
+
+    static string? ValidateFileName(WordTemplateEntity template, PropertyInfo pi)
+    {
+        if (template.FileName == null)
+            return null;
+
+        using (template.DisableAuthorization ? ExecutionMode.Global() : null)
+        {
+            QueryDescription qd = QueryLogic.Queries.QueryDescription(template.Query.ToQueryName());
+
+            TextTemplateParser.TryParse(template.FileName, qd, template.Model?.ToType(), out var errors);
+
+            return errors.DefaultToNull();
         }
     }
 
@@ -418,39 +445,80 @@ public static class WordTemplateLogic
 
         StringDistance sd = new StringDistance();
 
-        var emailTemplates = Database.Query<WordTemplateEntity>().ToList();
+        var wordTemplates = Database.Query<WordTemplateEntity>().ToList();
+        var table = Schema.Current.Table(typeof(WordTemplateEntity));
 
-        SqlPreCommand? cmd = emailTemplates.Select(uq => SynchronizeWordTemplate(replacements, uq, sd)).Combine(Spacing.Double);
+        SqlPreCommand? cmd = wordTemplates.Select(wt => SynchronizeWordTemplateFile(replacements, wt, sd, table)).Combine(Spacing.Double);
 
         return cmd;
     }
 
-    internal static SqlPreCommand? SynchronizeWordTemplate(Replacements replacements, WordTemplateEntity template, StringDistance sd)
+
+    internal static SqlPreCommand? SynchronizeWordTemplateFile(Replacements replacements, WordTemplateEntity wt, StringDistance sd, Table table)
     {
+        if (!replacements.Interactive)
+            return null;
+
         Console.Write(".");
+
         try
         {
-            if (template.Template == null || !replacements.Interactive)
-                return null;
-
-            var queryName = QueryLogic.ToQueryName(template.Query.Key);
+            var queryName = QueryLogic.ToQueryName(wt.Query.Key);
 
             QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
+            var file = wt.Template.RetrieveAndRemember();
 
-            using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + template.Name)))
-            using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + template.Query.Key)))
+            SqlPreCommand DeleteWorkTemplateAndFile()
             {
-                var file = template.Template.RetrieveAndRemember();
+                return SqlPreCommand.Combine(Spacing.Simple,
+                    Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(wt, wt => wt.Name == wt.Name),
+                    Schema.Current.Table<FileEntity>().DeleteSqlSync(file, f => f.Hash == file.Hash)
+                )!;
+            }
+
+            SqlPreCommand? RegenerateTemplateAndFile()
+            {
+                var newTemplate = wt.Model == null ? null : WordModelLogic.CreateDefaultTemplate(wt.Model);
+                if (newTemplate == null)
+                    return null;
+
+                newTemplate.SetId(wt.IdOrNull);
+                newTemplate.SetIsNew(false);
+                newTemplate.Ticks = wt.Ticks;
+                newTemplate.Template = wt.Template;
+
+                using (file.AllowChanges())
+                {
+                    file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
+                    file.FileName = newTemplate.Template.Entity.FileName;
+
+                    using (replacements?.WithReplacedDatabaseName())
+                    {
+                        return SqlPreCommand.Combine(Spacing.Simple,
+                            Schema.Current.Table<WordTemplateEntity>().UpdateSqlSync(newTemplate, f => f.Name == wt.Name, comment: "WordTemplate File Regenerated: " + wt.Name),
+                            Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate File Regenerated: " + wt.Name)
+                        );
+                    }
+
+                }
+            }
+
+            SqlPreCommand? wordTemplateSync;
+            using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + wt.Name)))
+            using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + wt.Query.Key)))
+            {
+                SqlPreCommand? fileSync;
+
                 var oldHash = file.Hash;
                 try
                 {
-                    var sc = new TemplateSynchronizationContext(replacements, sd, qd, template.Model?.ToType());
+                    var sc = new TemplateSynchronizationContext(replacements, sd, qd, wt.Model?.ToType());
 
-                    var bytes = template.ProcessOpenXmlPackage(document =>
+                    var bytes = wt.ProcessOpenXmlPackage(document =>
                     {
                         Dump(document, "0.Original.txt");
 
-                        var parser = new WordTemplateParser(document, qd, template.Model?.ToType(), template);
+                        var parser = new WordTemplateParser(document, qd, wt.Model?.ToType(), wt);
                         parser.ParseDocument(); Dump(document, "1.Match.txt");
                         parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                         parser.AssertClean();
@@ -480,13 +548,15 @@ public static class WordTemplateLogic
                     });
 
                     if (!sc.HasChanges)
-                        return null;
+                        fileSync = null;
+                    else
+                    {
+                        file.AllowChange = true;
+                        file.BinaryFile = bytes;
 
-                    file.AllowChange = true;
-                    file.BinaryFile = bytes;
-
-                    using (replacements.WithReplacedDatabaseName())
-                        return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == oldHash, comment: "WordTemplate: " + template.Name);
+                        using (replacements.WithReplacedDatabaseName())
+                            fileSync = Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == oldHash, comment: "WordTemplate: " + wt.Name);
+                    }
                 }
                 catch (TemplateSyncException ex)
                 {
@@ -494,26 +564,95 @@ public static class WordTemplateLogic
                         return null;
 
                     if (ex.Result == FixTokenResult.DeleteEntity)
-                        return SqlPreCommandConcat.Combine(Spacing.Simple,
-                            Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(template, wt => wt.Name == template.Name),
-                            Schema.Current.Table<FileEntity>().DeleteSqlSync(file, f => f.Hash == file.Hash));
+                        return DeleteWorkTemplateAndFile();
 
-                    if (ex.Result == FixTokenResult.ReGenerateEntity)
-                        return Regenerate(template, replacements);
+                    if (ex.Result == FixTokenResult.RegenerateEntity)
+                        return RegenerateTemplateAndFile();
 
                     throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
                 }
+
+                if (wt.Filters.Any())
+                {
+                    using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
+                    {
+                        foreach (var item in wt.Filters.ToList())
+                        {
+                            QueryTokenEmbedded token = item.Token!;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Filters", allowRemoveToken: false, allowReCreate: wt.Model != null))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return DeleteWorkTemplateAndFile();
+                                case FixTokenResult.RemoveToken: wt.Filters.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                case FixTokenResult.RegenerateEntity: return RegenerateTemplateAndFile();
+                                default: break;
+                            }
+                        }
+                    }
+                }
+
+                if (wt.Orders.Any())
+                {
+                    using (DelayedConsole.Delay(() => Console.WriteLine(" Orders:")))
+                    {
+                        foreach (var item in wt.Orders.ToList())
+                        {
+                            QueryTokenEmbedded token = item.Token!;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Orders", allowRemoveToken: false, allowReCreate: wt.Model != null))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return DeleteWorkTemplateAndFile();
+                                case FixTokenResult.RemoveToken: wt.Orders.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                case FixTokenResult.RegenerateEntity: return RegenerateTemplateAndFile();
+                                default: break;
+                            }
+                        }
+                    }
+                }
+
+
+                try
+                {
+
+                    var sc = new TemplateSynchronizationContext(replacements, sd, qd, wt.Model?.ToType());
+
+                    wt.FileName = TextTemplateParser.Synchronize(wt.FileName, sc);
+
+                    using (replacements.WithReplacedDatabaseName())
+
+                        wordTemplateSync = table.UpdateSqlSync(wt, e => e.Name == wt.Name, includeCollections: true, comment: "WordTempalte: " + wt.Name);
+                }
+                catch (TemplateSyncException ex)
+                {
+                    if (ex.Result == FixTokenResult.SkipEntity)
+                        return null;
+
+                    if (ex.Result == FixTokenResult.DeleteEntity)
+                        return DeleteWorkTemplateAndFile();
+
+                    if (ex.Result == FixTokenResult.RegenerateEntity)
+                        return RegenerateTemplateAndFile();
+
+                    throw new UnexpectedValueException(ex.Result);
+                }
+
+            
+                return SqlPreCommand.Combine(Spacing.Simple, wordTemplateSync, fileSync);
             }
         }
         catch (Exception e)
         {
-            return new SqlPreCommandSimple("-- Exception on {0}\r\n{1}".FormatWith(template.BaseToString(), e.Message.Indent(2, '-')));
+            return new SqlPreCommandSimple("-- Exception on {0}\r\n{1}".FormatWith(wt.BaseToString(), e.Message.Indent(2, '-')));
         }
     }
 
     public static byte[] ProcessOpenXmlPackage(this WordTemplateEntity template, Action<OpenXmlPackage> processPackage)
     {
-        var file = template.Template!.RetrieveAndRemember();
+        var file = template.Template.RetrieveAndRemember();
 
         using (var memory = new MemoryStream())
         {
@@ -536,31 +675,31 @@ public static class WordTemplateLogic
         }
     }
     
-    public static bool Regenerate(WordTemplateEntity template)
+    public static bool Regenerate(WordTemplateEntity wt)
     {
-        var result = Regenerate(template, null);
-        if (result == null)
-            return false;
-        
-        result.ExecuteLeaves();
-        return true;
-    }
-
-    private static SqlPreCommand? Regenerate(WordTemplateEntity template, Replacements? replacements)
-    {
-        var newTemplate = template.Model == null ? null : WordModelLogic.CreateDefaultTemplate(template.Model);
+        var newTemplate = wt.Model == null ? null : WordModelLogic.CreateDefaultTemplate(wt.Model);
         if (newTemplate == null)
-            return null;
+            return false;
 
-        var file = template.Template!.RetrieveAndRemember();
+        var file = wt.Template.RetrieveAndRemember();
+
+        newTemplate.SetId(wt.IdOrNull);
+        newTemplate.SetIsNew(false);
+        newTemplate.Ticks = wt.Ticks;
+        newTemplate.Template = wt.Template;
 
         using (file.AllowChanges())
         {
-            file.BinaryFile = newTemplate.Template!.Entity.BinaryFile;
-            file.FileName = newTemplate.Template!.Entity.FileName;
-
-            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate Regenerated: " + template.Name);
+            file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
+            file.FileName = newTemplate.Template.Entity.FileName;
         }
+
+        if (GraphExplorer.IsGraphModified(newTemplate))
+        {
+            newTemplate.Save();
+            return true;
+        }
+        return false;
     }
 
     public static IEnumerable<OpenXmlPartRootElement> AllRootElements(this OpenXmlPartContainer document)

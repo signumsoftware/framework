@@ -40,16 +40,16 @@ public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
     [StringLengthValidator(Min = 3, Max = 255)]
     public string? ViewName { get; set; }
 
-    [PreserveOrder, NoRepeatValidator, NotifyChildProperty]
+    [PreserveOrder, NoRepeatValidator, BindParent]
     public MList<ViewNamePropEmbedded> ViewNameProps { get; set; } = new MList<ViewNamePropEmbedded>();
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowScriptPartEmbedded? Script { get; set; }
 
     [AvoidDump]
     public WorkflowXmlEmbedded Xml { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public SubWorkflowEmbedded? SubWorkflow { get; set; }
 
     [StringLengthValidator(MultiLine = true)]
@@ -125,6 +125,8 @@ public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
             Name = we.Name,
             MainEntityType = we.Lane.Pool.Workflow.MainEntityType,
             Type = we.Type,
+            RunRepeatedly = we.RunRepeatedly,
+            DecisionOptionName = we.DecisionOptionName,
             Timer = we.Timer,
             BpmnElementId = we.BpmnElementId
         }).ToMList());
@@ -232,6 +234,7 @@ public class WorkflowActivityInfo
     public WorkflowActivityEntity? WorkflowActivity => CaseActivity?.WorkflowActivity as WorkflowActivityEntity;
     public CaseActivityEntity? CaseActivity { get; internal set; }
     public WorkflowConnectionEntity? Connection { get; internal set; }
+    public string? Decision { get; set; }
 
     public bool Is(string workflowName, string activityName)
     {
@@ -275,7 +278,7 @@ public class SubWorkflowEmbedded : EmbeddedEntity
 {   
     public WorkflowEntity Workflow { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public SubEntitiesEval SubEntitiesEval { get; set; }
 
     public SubWorkflowEmbedded Clone()

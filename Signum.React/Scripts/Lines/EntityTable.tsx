@@ -4,7 +4,7 @@ import { TypeContext } from '../TypeContext'
 import * as Navigator from '../Navigator'
 import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite, is } from '../Signum.Entities'
 import { EntityBaseController } from './EntityBase'
-import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
+import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from './DynamicComponent'
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -38,6 +38,8 @@ export interface EntityTableColumn<T, RS = undefined> {
   cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRowHandle, rowState: RS) => React.TdHTMLAttributes<any> | null | undefined;
   template?: (ctx: TypeContext<T>, row: EntityTableRowHandle, rowState: RS) => React.ReactChild | null | undefined | false;
   mergeCells?: (boolean | ((a: T) => any) | string);
+  footer?: React.ReactNode | null;
+  footerHtmlAttributes?: React.ThHTMLAttributes<any>;
 }
 
 export class EntityTableController extends EntityListBaseController<EntityTableProps> {
@@ -212,7 +214,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
       <fieldset className={classes("sf-table-field sf-control-container", ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
         <legend>
           <div>
-            <span>{p.labelText}</span>
+            <span>{p.label}</span>
             {renderButtons()}
           </div>
         </legend>
@@ -242,11 +244,14 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
       var isEmpty = p.avoidEmptyTable && elementCtxs.length == 0;
       var firstColumnVisible = !(p.readOnly || p.remove == false && p.move == false && p.view == false);
 
+      var showCreateRow = p.createAsLink && p.create && !readOnly;
+      var hasFooters = p.columns!.some(a => a.footer != null);
+
       return (
         <div ref={c.containerDiv}
           className={classes(p.scrollable ? "sf-scroll-table-container" : undefined, p.responsive  && "table-responsive")}
           style={{ maxHeight: p.scrollable ? p.maxResultsHeight : undefined }}>
-          <table className={classes("table table-sm sf-table", p.tableClasses)} >
+          <table className={classes("table table-sm sf-table", p.tableClasses, c.mandatoryClass)} >
             {
               !isEmpty &&
               <thead ref={c.thead}>
@@ -271,8 +276,9 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
                     onRowHtmlAttributes={p.onRowHtmlAttributes}
                     rowHooks={p.rowHooks}
                     onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
-                    onView={c.canView(mlec.value) && !readOnly ? e => c.handleViewElement(e, mlec.index!) : undefined}
-                    draggable={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
+                    onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
+                    move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
+                    drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
                     columns={p.columns!}
                     onBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleBlur : undefined}
                     onKeyDown={p.createOnBlurLastRow && p.create && !readOnly ? c.handleKeyDown : undefined}
@@ -281,18 +287,27 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
               }
             </tbody>
             {
-              p.createAsLink && p.create && !readOnly &&
+              (showCreateRow || hasFooters) &&
               <tfoot ref={c.tfoot}>
-                <tr>
-                  <td colSpan={1 + p.columns!.length} className={isEmpty ? "border-0" : undefined}>
-                    {typeof p.createAsLink == "function" ? p.createAsLink(c) :
-                      <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
-                        className="sf-line-button sf-create"
-                        onClick={c.handleCreateClick}>
-                        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
-                      </a>}
-                  </td>
-                </tr>
+                  {
+                    showCreateRow && <tr>
+                      <td colSpan={1 + p.columns!.length} className={isEmpty ? "border-0" : undefined}>
+                        {typeof p.createAsLink == "function" ? p.createAsLink(c) :
+                          <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
+                            className="sf-line-button sf-create"
+                            onClick={c.handleCreateClick}>
+                            <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
+                          </a>}
+                      </td>
+                    </tr>
+                  }
+                  {
+                    hasFooters && <tr>
+                      {firstColumnVisible && <td></td>}
+                      {p.columns!.map((c, i) =>
+                        <td key={i} {...c.footerHtmlAttributes}>{c.footer}</td>)}
+                    </tr>
+                  }
               </tfoot>
             }
           </table>
@@ -318,7 +333,8 @@ export interface EntityTableRowProps {
   columns: EntityTableColumn<ModifiableEntity, any>[],
   onRemove?: (event: React.MouseEvent<any>) => void;
   onView?: (event: React.MouseEvent<any>) => void;
-  draggable?: DragConfig;
+  drag?: DragConfig;
+  move?: MoveConfig;
   rowHooks?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRowHandle) => Promise<any>;
   onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRowHandle, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   onBlur?: (sender: EntityTableRowHandle, e: React.FocusEvent<HTMLTableRowElement>) => void;
@@ -340,7 +356,7 @@ export function EntityTableRow(p: EntityTableRowProps) {
 
   var ctx = p.ctx;
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
-  const drag = p.draggable;
+  const drag = p.drag;
   return (
     <tr {...rowAtts}
       onDragEnter={drag?.onDragOver}
@@ -358,8 +374,7 @@ export function EntityTableRow(p: EntityTableRowProps) {
             {EntityBaseController.removeIcon}
           </a>}
           &nbsp;
-          {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
-            onClick={e => e.preventDefault()}
+          {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
             draggable={true}
             onKeyDown={drag.onKeyDown}
             onDragStart={drag.onDragStart}
@@ -367,6 +382,8 @@ export function EntityTableRow(p: EntityTableRowProps) {
             title={drag.title}>
             {EntityBaseController.moveIcon}
           </a>}
+          {p.move?.renderMoveUp()}
+          {p.move?.renderMoveDown()}
           {p.onView && <a href="#" className={classes("sf-line-button", "sf-view")}
             onClick={p.onView}
             title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>

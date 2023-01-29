@@ -16,15 +16,12 @@ export interface EntityTabRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTabRepeaterController) => React.ReactElement<any>);
   createMessage?: string;
   avoidFieldSet?: boolean;
-  selectedIndex?: number;
   getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
   extraTabs?: (c: EntityTabRepeaterController) => React.ReactNode;
+  selectedIndex?: number;
   onSelectTab?: (newIndex: number) => void;
 }
 
-export interface EntityTabRepeaterState extends EntityTabRepeaterProps {
-  selectedIndex?: number;
-}
 
 function isControlled(p: EntityTabRepeaterProps) {
 
@@ -107,7 +104,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
       {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           {renderButtons()}
         </div>
       </legend>
@@ -143,7 +140,8 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
       <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"} transition={false} mountOnEnter unmountOnExit>
         {
           c.getMListItemContext(ctx).map(mlec => {
-            const drag = c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, "h") : undefined;
+            const drag = c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "h") : undefined;
+            const move = c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "h") : undefined;
 
             return (
               <Tab eventKey={mlec.index!.toString()} key={c.keyGenerator.getKey(mlec.value)}
@@ -163,7 +161,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                         {EntityBaseController.removeIcon}
                       </span>
                     }
-                    {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")}
+                    {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                       draggable={true}
                       onDragStart={drag.onDragStart}
                       onKeyDown={drag.onKeyDown}
@@ -171,9 +169,11 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                       title={drag.title}>
                       {EntityBaseController.moveIcon}
                     </span>}
+                    {move?.renderMoveUp()}
+                    {move?.renderMoveDown()}
                   </div> as any
                 }>
-                <RenderEntity ctx={mlec} getComponent={p.getComponent} getViewPromise={p.getViewPromise} extraProps={{ onChangeTitle: c.forceUpdate }} />
+                <RenderEntity ctx={mlec} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onRefresh={c.forceUpdate} />
               </Tab>
             );
           })

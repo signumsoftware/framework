@@ -194,7 +194,8 @@ public static class ProcessLogic
 
                     p.SetAsQueued();
 
-                    ProcessRunnerLogic.WakeUp("Execute in this machine", null);
+                    Transaction.PostRealCommit -= ProcessRunner.WakeupExecuteInThisMachine;
+                    Transaction.PostRealCommit += ProcessRunner.WakeupExecuteInThisMachine;
                 }
             }.Register();
 

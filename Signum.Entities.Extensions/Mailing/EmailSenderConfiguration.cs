@@ -12,57 +12,44 @@ public class EmailSenderConfigurationEntity : Entity
         DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryFormat), m => m.Name);
         DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryMethod), m => m.Name);
         DescriptionManager.ExternalEnums.Add(typeof(ExchangeVersion), m => m.Name);
+
     }
 
     [UniqueIndex]
     [StringLengthValidator(Min = 1, Max = 100)]
     public string Name { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public EmailFromEmbedded? DefaultFrom { get; set; }
 
     [NoRepeatValidator]
     public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
-    public SmtpEmbedded? SMTP { get; set; }
-
-    public ExchangeWebServiceEmbedded? Exchange { get; set; }
-
-    public MicrosoftGraphEmbedded? MicrosoftGraph { get; set; }
+    [ImplementedBy(typeof(SmtpEmailServiceEntity), typeof(ExchangeWebServiceEmailServiceEntity), typeof(MicrosoftGraphEmailServiceEntity))]
+    public EmailServiceEntity Service { get; set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
-
-    protected override string? PropertyValidation(PropertyInfo pi)
-    {
-        if (pi.Name == nameof(SMTP) || pi.Name == nameof(Exchange) || pi.Name == nameof(MicrosoftGraph))
-        {
-            var count = new[] { SMTP != null, Exchange != null, MicrosoftGraph != null }.Count(a => a);
-
-            if (count == 0)
-                return ValidationMessage._0Or1ShouldBeSet.NiceToString(
-                    NicePropertyName(() => SMTP) + ", " + NicePropertyName(() => Exchange),
-                    NicePropertyName(() => MicrosoftGraph));
-
-
-            if (count > 1)
-                return ValidationMessage._0And1CanNotBeSetAtTheSameTime.NiceToString(
-                    NicePropertyName(() => SMTP) + ", " + NicePropertyName(() => Exchange),
-                    NicePropertyName(() => MicrosoftGraph));
-        }
-
-        return base.PropertyValidation(pi);
-    }
 
     protected override string? ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
     {
         if (sender == DefaultFrom && pi.Name == nameof(DefaultFrom.AzureUserId))
         {
-            if (DefaultFrom.AzureUserId == null && MicrosoftGraph != null)
-                return ValidationMessage._0IsMandatoryWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => MicrosoftGraph));
+            if (DefaultFrom.AzureUserId == null && Service is MicrosoftGraphEmailServiceEntity microsoftGraph)
+                return ValidationMessage._0IsMandatoryWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => microsoftGraph));
         }
 
         return base.ChildPropertyValidation(sender, pi);
+    }
+
+    public EmailSenderConfigurationEntity Clone()
+    {
+        return new EmailSenderConfigurationEntity
+        {
+            DefaultFrom = DefaultFrom?.Clone(),
+            AdditionalRecipients = AdditionalRecipients.ToMList(),
+            Service = Service
+        };
     }
 }
 
@@ -70,11 +57,20 @@ public class EmailSenderConfigurationEntity : Entity
 [AutoInit]
 public static class EmailSenderConfigurationOperation
 {
-    public static ExecuteSymbol<EmailSenderConfigurationEntity> Save;
+    public static readonly ExecuteSymbol<EmailSenderConfigurationEntity> Save;
+    public static readonly ConstructSymbol<EmailSenderConfigurationEntity>.From<EmailSenderConfigurationEntity> Clone;
 }
 
-public class SmtpEmbedded : EmbeddedEntity
+public abstract class EmailServiceEntity : Entity
 {
+    public abstract EmailServiceEntity Clone();
+}
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class SmtpEmailServiceEntity : EmailServiceEntity
+{
+
+
     public SmtpDeliveryFormat DeliveryFormat { get; set; }
 
     public SmtpDeliveryMethod DeliveryMethod { get; set; }
@@ -84,7 +80,7 @@ public class SmtpEmbedded : EmbeddedEntity
     [StringLengthValidator(Min = 3, Max = 300), FileNameValidator]
     public string? PickupDirectoryLocation { get; set; }
 
-    static StateValidator<SmtpEmbedded, SmtpDeliveryMethod> stateValidator = new StateValidator<SmtpEmbedded, SmtpDeliveryMethod>(
+    static StateValidator<SmtpEmailServiceEntity, SmtpDeliveryMethod> stateValidator = new StateValidator<SmtpEmailServiceEntity, SmtpDeliveryMethod>(
        a => a.DeliveryMethod, a => a.Network, a => a.PickupDirectoryLocation)
         {
             {SmtpDeliveryMethod.Network,        true, null },
@@ -95,6 +91,17 @@ public class SmtpEmbedded : EmbeddedEntity
     protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
     {
         return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
+    }
+
+    public override SmtpEmailServiceEntity Clone()
+    {
+        return new SmtpEmailServiceEntity 
+        { 
+            DeliveryFormat = DeliveryFormat,
+            DeliveryMethod = DeliveryMethod,
+            Network = Network?.Clone(),
+            PickupDirectoryLocation = PickupDirectoryLocation
+        };
     }
 }
 
@@ -117,6 +124,20 @@ public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
 
     
     public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
+
+    public SmtpNetworkDeliveryEmbedded Clone()
+    {
+        return new SmtpNetworkDeliveryEmbedded
+        {
+            Host = Host,
+            Port = Port,
+            Username = Username,
+            Password = Password,
+            UseDefaultCredentials = UseDefaultCredentials,
+            EnableSSL = EnableSSL
+        };
+    }
+
 }
 
 public class ClientCertificationFileEmbedded : EmbeddedEntity
@@ -136,13 +157,15 @@ public enum CertFileType
     SignedFile
 }
 
-public class ExchangeWebServiceEmbedded : EmbeddedEntity
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class ExchangeWebServiceEmailServiceEntity : EmailServiceEntity
 {
+
+
     public ExchangeVersion ExchangeVersion { get; set; }
 
     [StringLengthValidator(Max = 300)]
     public string? Url { get; set; }
-
 
     [StringLengthValidator(Max = 100)]
     public string? Username { get; set; }
@@ -151,9 +174,23 @@ public class ExchangeWebServiceEmbedded : EmbeddedEntity
     public string? Password { get; set; }
 
     public bool UseDefaultCredentials { get; set; } = true;
+
+    public override ExchangeWebServiceEmailServiceEntity Clone()
+    {
+        return new ExchangeWebServiceEmailServiceEntity
+        {
+            ExchangeVersion = ExchangeVersion,
+            Url = Url,
+            Username = Username,
+            Password = Password,
+            UseDefaultCredentials = UseDefaultCredentials,
+        };
+
+    }
 }
 
-public class MicrosoftGraphEmbedded : EmbeddedEntity
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class MicrosoftGraphEmailServiceEntity : EmailServiceEntity
 {
     public bool UseActiveDirectoryConfiguration { get; set; }
 
@@ -182,4 +219,15 @@ public class MicrosoftGraphEmbedded : EmbeddedEntity
 
         return base.PropertyValidation(pi);
     }
+    public override MicrosoftGraphEmailServiceEntity Clone()
+    {
+        return new MicrosoftGraphEmailServiceEntity
+        {
+            UseActiveDirectoryConfiguration = UseActiveDirectoryConfiguration,
+            Azure_ApplicationID = Azure_ApplicationID,
+            Azure_DirectoryID = Azure_DirectoryID,
+            Azure_ClientSecret = Azure_ClientSecret,
+        };
+    }
+
 }

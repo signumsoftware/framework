@@ -161,6 +161,10 @@ export async function getLitesWithSubStr(fo: FindOptions, subStr: string, signal
 
   const fop = await Finder.parseFindOptions({
     ...fo,
+    orderOptions: [
+      { token: "Entity.ToString.Length", orderType: "Ascending" },
+      { token: "Entity.ToString", orderType: "Ascending" },
+    ],
     filterOptions: FindOptionsAutocompleteConfig.filtersWithSubStr(fo, qd, qs, subStr),
     includeDefaultFilters: false,
   }, qd, true);
@@ -279,9 +283,12 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
     return Finder.getQueryDescription(fo.queryName)
       .then(qd => Finder.parseFindOptions({
+        orderOptions: [
+          { token: "Entity.ToString.Length", orderType: "Ascending" },
+          { token: "Entity.ToString", orderType: "Ascending" },
+        ],
         ...fo,
         filterOptions: FindOptionsAutocompleteConfig.filtersWithSubStr(fo, qd, qs, subStr),
-        includeDefaultFilters: false,
       }, qd, true))
       .then(fop => this.abortableRequest.getData(Finder.getQueryRequest(fop)))
       .then(rt => {
@@ -427,6 +434,9 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
         return acc.renderItem(item, subStr);
     }
 
+    if (isLite(item))
+      return Navigator.renderLite(item, subStr);
+
     throw new Error("Unexpected " + JSON.stringify(item));
   }
   getEntityFromItem(item: unknown): Promise<ModifiableEntity | Lite<Entity> | undefined> {
@@ -435,6 +445,9 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
       if (acc.isCompatible(item, type))
         return acc.getEntityFromItem(item);
     }
+
+    if (isLite(item))
+      return Promise.resolve(item);
 
     throw new Error("Unexpected " + JSON.stringify(item));
   }
@@ -445,6 +458,9 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
         return acc.getDataKeyFromItem(item);
     }
 
+    if (isLite(item))
+      return liteKey(item);
+
     throw new Error("Unexpected " + JSON.stringify(item));
   }
   getItemFromEntity(entity: ModifiableEntity | Lite<Entity>): Promise<unknown> {
@@ -452,10 +468,16 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
     var type = isLite(entity) ? entity.EntityType : entity.Type;
 
     var acc = this.implementations[type];
-    if (acc == null)
-      throw new Error("Unexpected " + type);
+    if (acc != null)
+      return acc.getItemFromEntity(entity);
 
-    return acc.getItemFromEntity(entity);
+    if (isLite(entity))
+      return Promise.resolve(entity);
+
+    if (isEntity(entity))
+      return Promise.resolve(toLite(entity, entity.isNew));
+
+    throw new Error("Unexpected " + type);
   }
 
   abort(): void {

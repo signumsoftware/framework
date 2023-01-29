@@ -603,9 +603,10 @@ public class Schema : IImplementationsFinder
         Generating += Assets.Schema_Generating;
 
         Synchronizing += SchemaSynchronizer.SnapshotIsolation;
+        Synchronizing += Assets.Schema_SynchronizingDrop;
         Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
-        Synchronizing += TypeLogic.Schema_Synchronizing;
         Synchronizing += Assets.Schema_Synchronizing;
+        Synchronizing += TypeLogic.Schema_Synchronizing;
 
         InvalidateCache += GlobalLazy.ResetAll;
 

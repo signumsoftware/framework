@@ -1,4 +1,5 @@
 using DeepL;
+using DeepL.Model;
 
 namespace Signum.Engine.Translation;
 
@@ -15,10 +16,14 @@ public class DeepLTranslator : ITranslator
         this.DeepLApiKey = deepLKey;
     }
 
-    List<SupportedLanguage>? supportedLanguages;
+    List<SourceLanguage>? sourceLanguages;
+    List<TargetLanguage>? targetLanguage;
 
     public async Task<List<string?>?> TranslateBatchAsync(List<string> list, string from, string to)
     {
+        from = NormalizeLanguage(from);
+        to = NormalizeLanguage(to);
+
         var apiKey = DeepLApiKey();
 
         if(string.IsNullOrEmpty(apiKey))
@@ -26,20 +31,35 @@ public class DeepLTranslator : ITranslator
             return null;
         }
 
-        using (DeepLClient client = new DeepLClient(apiKey))
+        using (Translator translator = new Translator(apiKey))
         {
-            if (supportedLanguages == null)
-                supportedLanguages = (await client.GetSupportedLanguagesAsync()).ToList();
+            if (sourceLanguages == null)
+                sourceLanguages = (await translator.GetSourceLanguagesAsync()).ToList();
 
-            if (!supportedLanguages.Any(a => a.LanguageCode == to.ToUpper()))
-            {
+            if (targetLanguage == null)
+                targetLanguage = (await translator.GetTargetLanguagesAsync()).ToList();
+
+            if (!sourceLanguages.Any(a => a.Code == from))
                 return null;
-            }
 
-            var translation = await client.TranslateAsync(list, sourceLanguageCode: from.ToUpper(), targetLanguageCode: to.ToUpper());
+            if (!targetLanguage.Any(a => a.Code == to))
+                return null;
+
+            var translation = await translator.TranslateTextAsync(list, sourceLanguageCode: from, targetLanguageCode: to);
 
             return translation.Select(a => (string?)a.Text).ToList();
         }
+    }
+
+    private string NormalizeLanguage(string langCode)
+    {
+        if (langCode.Length == 2)
+            langCode = langCode.ToLower();
+
+        if (langCode == "en")
+            langCode = "en-GB";
+
+        return langCode;
     }
 
     public bool AutoSelect() => true;

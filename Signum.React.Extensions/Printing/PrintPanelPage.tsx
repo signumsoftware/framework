@@ -41,7 +41,7 @@ export default function PrintPanelPage(p: {}) {
           {stats == null ? JavascriptMessage.loading.niceToString() :
             stats.map((s, i) =>
             <SearchValueLine ctx={ctx} key={i} initialValue={s.count}
-              labelText={getToString(s.fileType).after(".")}
+              label={getToString(s.fileType).after(".")}
               extraButtons={vsc => renderStateButton(vsc, s.fileType)}
               findOptions={{
                 queryName: PrintLineEntity,

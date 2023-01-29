@@ -49,7 +49,7 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
 
   function renderCount(ctx: StyleContext, p: PredictorEntity, usage: PredictorColumnUsage) {
     return (
-      <FormGroup ctx={ctx} labelText={PredictorColumnUsage.niceToString(usage) + " columns"}>
+      <FormGroup ctx={ctx} label={PredictorColumnUsage.niceToString(usage) + " columns"}>
         {p.state != "Trained" ? <FormControlReadonly ctx={ctx}>?</FormControlReadonly> : <SearchValue isBadge={true} isLink={true} findOptions={{
           queryName: PredictorCodificationEntity,
           filterOptions: [
@@ -124,7 +124,7 @@ function withHelp(element: React.ReactElement<LineBaseProps>, text: React.ReactN
 
   var label = <LabelWithHelp ctx={ctx} text={text} />;
 
-  return React.cloneElement(element, { labelText: label } as LineBaseProps);
+  return React.cloneElement(element, { label: label } as LineBaseProps);
 }
 
 interface LabelWithHelpProps {
@@ -141,7 +141,7 @@ export function LabelWithHelp(p: LabelWithHelpProps) {
           <div className="popover-body">{p.text}</div>
         </Popover>}>
         <span key="s">
-          {p.ctx.niceName()} <FontAwesomeIcon icon="question-circle" />
+          {p.ctx.niceName()} <FontAwesomeIcon icon="circle-question" />
         </span>
       </OverlayTrigger>
     );

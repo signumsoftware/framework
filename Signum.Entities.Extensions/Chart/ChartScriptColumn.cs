@@ -43,6 +43,8 @@ public enum ChartColumnType
     Magnitude = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable,
     [Code("P")]
     Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | DateOnly | DateTime | Time,
+    [Code("A")]
+    Any = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | DateOnly | DateTime | Time | String | Lite | Enum,
 }
 
 

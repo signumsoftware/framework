@@ -3,6 +3,7 @@ using Signum.Entities.DiffLog;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Authorization;
 using System.Text.RegularExpressions;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.DiffLog;
 
@@ -25,44 +26,9 @@ public static class DiffLogLogic
         }
     }
 
-    static Regex LiteImpRegex = new Regex(@"^(?<space> *)(?<prop>\w[\w\d_]+) = new LiteImp<");
+    
 
-    public static string? SimplifyDump(string? text, bool simplify)
-    {
-        if (text == null)
-            return null;
-
-        if (!simplify)
-            return text;
-
-        var lines = text.Lines().ToList();
-
-        for (int i = 0; i < lines.Count; i++)
-        {
-            var current = lines[i];
-            if(current.Contains("= new LiteImp<") && !current.EndsWith(","))
-            {
-                var match = LiteImpRegex.Match(current);
-                if (match.Success)
-                {
-                    var spaces = match.Groups["space"].Value;
-                    if (lines[i + 1] == spaces + "{")
-                    {
-                        var lastIndex = lines.IndexOf(spaces + "},", i + 1);
-
-                        if(lastIndex != -1)
-                        {
-                            lines.RemoveRange(i + 1, lastIndex - (i + 1) + 1);
-                        }
-
-                        lines[i] = current + " { Entity = /* Loaded */ },";
-                    }
-                }
-            }
-        }
-
-        return lines.ToString("\r\n");
-    }
+   
 
     public static void RegisterShouldLog<T>(Func<IEntity, IOperation, bool> func) where T : Entity
     {
@@ -73,12 +39,12 @@ public static class DiffLogLogic
     {
         if (entity != null && ShouldLog.Invoke(entity, operation))
         {
-            if (operation.OperationType == OperationType.Execute && !entity.IsNew && ((IEntityOperation)operation).CanBeModified)
+            if (operation.OperationType == OperationType.Execute && !entity.IsNew && ((IEntityOperation)operation).CanBeModified && GraphExplorer.IsGraphModified(entity))
                 entity = RetrieveFresh(entity);
 
             using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
             {
-                log.Mixin<DiffLogMixin>().InitialState = new BigStringEmbedded(entity.Dump());
+                log.Mixin<DiffLogMixin>().InitialState = new BigStringEmbedded(ObjectDumper.Dump(entity));
             }
         }
         else
@@ -94,7 +60,7 @@ public static class DiffLogLogic
             {
                 using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
                 {
-                    log.Mixin<DiffLogMixin>().FinalState = new BigStringEmbedded(target.Dump());
+                    log.Mixin<DiffLogMixin>().FinalState = new BigStringEmbedded(ObjectDumper.Dump(target));
                 }
             }
             else
@@ -108,14 +74,5 @@ public static class DiffLogLogic
     {
         using (new EntityCache(EntityCacheType.ForceNew))
             return entity.ToLite().RetrieveAndRemember();
-    }
-
-    public static MinMax<OperationLogEntity?> OperationLogNextPrev(OperationLogEntity log)
-    {
-        var logs = Database.Query<OperationLogEntity>().Where(a => a.Exception == null && a.Target.Is(log.Target));
-
-        return new MinMax<OperationLogEntity?>(
-             log.Mixin<DiffLogMixin>().InitialState.Text == null ? null : logs.Where(a => a.End < log.Start).OrderByDescending(a => a.End).FirstOrDefault(),
-             log.Mixin<DiffLogMixin>().FinalState.Text == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
     }
 }

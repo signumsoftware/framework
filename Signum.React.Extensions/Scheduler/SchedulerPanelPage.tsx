@@ -10,8 +10,10 @@ import { API, SchedulerState, SchedulerItemState, SchedulerRunningTaskState } fr
 import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation } from './Signum.Entities.Scheduler'
 import { Lite } from "@framework/Signum.Entities";
 import { StyleContext } from "@framework/Lines";
-import { useAPIWithReload } from '@framework/Hooks'
-import { useTitle } from '@framework/AppContext'
+import { useAPIWithReload, useInterval } from '@framework/Hooks'
+import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
+import { classes } from '../../Signum.React/Scripts/Globals'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface SchedulerPanelProps extends RouteComponentProps<{}> {
 
@@ -19,14 +21,16 @@ interface SchedulerPanelProps extends RouteComponentProps<{}> {
 
 export default function SchedulerPanelPage(p: SchedulerPanelProps) {
 
-  const [state, reloadState] = useAPIWithReload(() => API.view(), []);
+  const [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
+
+  const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
+
+  React.useEffect(() => {
+    reloadState();
+  }, [tick]);
 
   useTitle("SchedulerLogic state");
  
-  function handleUpdate(e: React.MouseEvent<any>) {
-    e.preventDefault();
-    reloadState();
-  }
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
@@ -48,19 +52,20 @@ export default function SchedulerPanelPage(p: SchedulerPanelProps) {
 
   return (
     <div>
-      <h2 className="display-6">SchedulerLogic state</h2>
+      <h2 className="display-6"><FontAwesomeIcon icon={["far", "clock"]} /> Scheduler Panel</h2>
       <div className="btn-toolbar">
-        {s.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={handleStop}>Stop</a>}
-        {!s.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={handleStart}>Start</a>}
-        <a href="#" className="sf-button btn btn-light" onClick={handleUpdate}>Update</a>
+        <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
+        <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" :  "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
       </div >
       <div id="processMainDiv">
-        <br />
         State: <strong>
           {s.running ?
-            <span style={{ color: "Green" }}> RUNNING </span> :
-            <span style={{ color: "Red" }}> STOPPED </span>
+            <span style={{ color: "green" }}> RUNNING </span> :
+            <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
+        <a className="ms-2" href={toAbsoluteUrl("~/api/scheduler/simpleStatus")} target="_blank">SimpleStatus</a>
+        <br />
+        InitialDelayMilliseconds: {s.initialDelayMilliseconds}
         <br />
         SchedulerMargin: {s.schedulerMargin}
         <br />

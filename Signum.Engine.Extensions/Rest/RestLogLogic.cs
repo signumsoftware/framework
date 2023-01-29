@@ -49,10 +49,8 @@ public class RestLogLogic
         Remove(parameters.GetDateLimitDeleteWithExceptions(typeof(RestLogEntity).ToTypeEntity()), withExceptions: true);
     }
 
-    public static async Task<RestDiffResult> GetRestDiffResult(HttpMethod httpMethod, string url, string apiKey, string? oldRequestBody, string? oldResponseBody)
+    public static async Task<string> GetRestDiffResult(HttpMethod httpMethod, string url, string apiKey, string? oldRequestBody)
     {
-        var result = new RestDiffResult { previous = oldResponseBody };
-
         //create the new Request
         var restClient = new HttpClient
         {
@@ -72,26 +70,13 @@ public class RestLogLogic
         if (!string.IsNullOrWhiteSpace(oldRequestBody))
         {
             var response = await restClient.PostAsync("", new StringContent(oldRequestBody, Encoding.UTF8, "application/json"));
-            result.current = await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync();
         }
         else
         {  
-            result.current = await restClient.SendAsync(request).Result.Content.ReadAsStringAsync();
+            return await restClient.SendAsync(request).Result.Content.ReadAsStringAsync();
         }
-
-        return RestDiffLog(result);
     }
 
-    public static RestDiffResult RestDiffLog(RestDiffResult result)
-    {
-        StringDistance sd = new StringDistance();
-        long? size = (long?)result.current?.Length * result.previous?.Length;
-        if (size != null && size<=int.MaxValue)
-        {
-            var diff = sd.DiffText(result.previous, result.current);
-            result.diff = diff;
-        }
 
-        return result;
-    }
 }

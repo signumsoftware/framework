@@ -634,7 +634,7 @@ public static class EnumerableExtensions
 
         int[] lengths = 0.To(width).Select(i => Math.Max(3, start.To(height).Max(j => table[i, j].Length))).ToArray();
 
-        return 0.To(height).Select(j => 0.To(width).ToString(i => table[i, j].PadChopRight(lengths[i]), separator)).ToString("\r\n");
+        return 0.To(height).Select(j => 0.To(width).ToString(i => table[i, j].PadTruncateRight(lengths[i]), separator)).ToString("\r\n");
     }
 
     public static void WriteFormattedStringTable<T>(this IEnumerable<T> collection, TextWriter textWriter, string? title, bool longHeaders)
@@ -1170,14 +1170,19 @@ Consider Synchronize.");
         if (extra.Count != 0)
         {
             if (missing.Count != 0)
-                return $" Extra: {extra.ToString(", ")}\r\n Missing: {missing.ToString(", ")}";
+                return @$" Extra:
+{extra.ToString(",\n").Indent(2)}
+Missing:
+{missing.ToString(",\n").Indent(2)}";
             else
-                return $" Extra: {extra.ToString(", ")}";
+                return @$" Extra: 
+{extra.ToString(",\n")}";
         }
         else
         {
             if (missing.Count != 0)
-                return $" Missing: {missing.ToString(", ")}";
+                return @$" Missing:
+{missing.ToString(",\n")}";
             else
                 return null;
         }

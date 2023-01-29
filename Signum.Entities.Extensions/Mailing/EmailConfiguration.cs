@@ -7,6 +7,7 @@ public class EmailConfigurationEmbedded : EmbeddedEntity
     
     public CultureInfoEntity DefaultCulture { get; set; }
 
+    [URLValidator]
     public string UrlLeft { get; set; }
 
     public bool SendEmails { get; set; }
@@ -25,4 +26,12 @@ public class EmailConfigurationEmbedded : EmbeddedEntity
 
     [Unit("sec")]
     public int AsyncSenderPeriod { get; set; } = 5 * 60; //5 minutes
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(UrlLeft) && UrlLeft != null && UrlLeft.EndsWith("/"))
+            return "{0} should not have a final /";
+
+        return base.PropertyValidation(pi);
+    }
 }

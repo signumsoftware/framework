@@ -5,12 +5,17 @@ using System.ComponentModel;
 using Signum.Entities.Templating;
 using Signum.Entities.UserQueries;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserAssets;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Word;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class WordTemplateEntity : Entity
+public class WordTemplateEntity : Entity, IUserAssetEntity
 {
+    [UniqueIndex]
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
     [UniqueIndex]
     [StringLengthValidator(Min = 3, Max = 200)]
     public string Name { get; set; }
@@ -29,12 +34,12 @@ public class WordTemplateEntity : Entity
     [PreserveOrder]
     public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
-    [NotifyChildProperty]
+    [BindParent]
     public TemplateApplicableEval? Applicable { get; set; }
 
     public bool DisableAuthorization { get; set; }
 
-    public Lite<FileEntity>? Template { get; set; }
+    public Lite<FileEntity> Template { get; set; }
 
     [StringLengthValidator(Min = 3, Max = 200), FileNameValidator]
     public string FileName { get; set; }
@@ -70,6 +75,70 @@ public class WordTemplateEntity : Entity
 
         foreach (var o in Orders)
             o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
+    }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("WordTemplate",
+            new XAttribute("Name", Name),
+            new XAttribute("Guid", Guid),
+            new XAttribute("DisableAuthorization", DisableAuthorization),
+            new XAttribute("Query", Query.Key),
+            Model?.Let(m => new XAttribute("Model", m.FullClassName)),
+            new XAttribute("Culture", Culture.Name),
+            new XAttribute("FileName", FileName),
+            WordTransformer?.Let(wt => new XAttribute("WordTransformer", wt.Key)),
+            WordConverter?.Let(wc => new XAttribute("WordConverter", wc.Key)),
+            new XAttribute("GroupResults", GroupResults),
+            Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+            Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
+            Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script))),
+            ctx.RetrieveLite(Template).Let(t => new XElement("Template",
+                new XAttribute("FileName", t.FileName),
+                new XCData(Convert.ToBase64String(t.BinaryFile))
+            ))
+        );
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        Guid = Guid.Parse(element.Attribute("Guid")!.Value);
+        Name = element.Attribute("Name")!.Value;
+        DisableAuthorization = element.Attribute("DisableAuthorization")?.Let(a => bool.Parse(a.Value)) ?? false;
+
+        Query = ctx.GetQuery(element.Attribute("Query")!.Value);
+        Model = element.Attribute("Model")?.Let(at => ctx.GetWordModel(at.Value));
+        Culture = ctx.GetCultureInfoEntity(element.Attribute("Culture")!.Value);
+
+        FileName = element.Attribute("FileName")!.Value;
+
+        WordTransformer = element.Attribute("WordTransformer")?.Let(at => ctx.GetSymbol<WordTransformerSymbol>(at.Value));
+        WordConverter = element.Attribute("WordConverter")?.Let(at => ctx.GetSymbol<WordConverterSymbol>(at.Value));
+
+        GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
+        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
+        Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
+
+        Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });
+        ParseData(ctx.GetQueryDescription(Query));
+
+        Template = SyncFile(Template == null ? null : ctx.RetrieveLite(Template), element.Element("Template")!);
+    }
+
+    private Lite<FileEntity> SyncFile(FileEntity? fileEntity, XElement xElement)
+    {
+        var fileName = xElement.Attribute("FileName")!.Value!;
+        var bytes = Convert.FromBase64String(xElement.Value);
+
+        if (fileEntity != null && fileName == fileEntity.FileName &&
+            MemoryExtensions.SequenceEqual<byte>(bytes, fileEntity.BinaryFile))
+            return fileEntity.ToLite();
+
+        return new FileEntity
+        {
+            FileName = fileName,
+            BinaryFile = bytes,
+        }.ToLiteFat();
     }
 }
 

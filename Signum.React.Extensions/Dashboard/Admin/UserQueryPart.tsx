@@ -6,7 +6,7 @@ import { useForceUpdate } from '@framework/Hooks';
 import { IsQueryCachedLine } from './Dashboard';
 
 export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity> }) {
-  const ctx = p.ctx.subCtx({ formGroupStyle: p.ctx.value.renderMode == "BigValue" ? "Basic" : undefined });
+  const ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });
   const forceUpdate = useForceUpdate();
   return (
     <div >
@@ -19,10 +19,17 @@ export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity>
             <ValueLine ctx={ctx.subCtx(p => p.allowSelection)} inlineCheckbox="block" />
             <ValueLine ctx={ctx.subCtx(p => p.showFooter)} inlineCheckbox="block" />
             <ValueLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
+            <ValueLine ctx={ctx.subCtx(p => p.allowMaxHeight)} inlineCheckbox="block" />
           </div>
-            <div className="col-sm-7">
-              <ValueLine ctx={ctx.subCtx(p => p.autoUpdate)} labelColumns={4} />
+          <div className="col-sm-7">
+            <ValueLine ctx={ctx.subCtx(p => p.autoUpdate)} />
           </div>
+        </div>
+      }
+      {
+        ctx.value.renderMode == "BigValue" &&
+        <div>
+          <ValueLine ctx={ctx.subCtx(p => p.aggregateFromSummaryHeader)} inlineCheckbox="block" />
         </div>
       }
       {ctx.findParentCtx(DashboardEntity).value.cacheQueryConfiguration && <IsQueryCachedLine ctx={ctx.subCtx(p => p.isQueryCached)} />}

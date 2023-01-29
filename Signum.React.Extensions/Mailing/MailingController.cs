@@ -6,6 +6,7 @@ using System.Threading;
 using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
 using Signum.React.Filters;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Mailing;
 
@@ -17,7 +18,7 @@ public class MailingController : ControllerBase
     {
         AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
 
-        AsyncEmailSenderState state = AsyncEmailSenderLogic.ExecutionState();
+        AsyncEmailSenderState state = AsyncEmailSender.ExecutionState();
 
         return state;
     }
@@ -27,7 +28,7 @@ public class MailingController : ControllerBase
     {
         AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
 
-        AsyncEmailSenderLogic.StartRunningEmailSenderAsync(0);
+        AsyncEmailSender.StartAsyncEmailSender();
 
         Thread.Sleep(1000);
     }
@@ -37,9 +38,15 @@ public class MailingController : ControllerBase
     {
         AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
 
-        AsyncEmailSenderLogic.Stop();
+        AsyncEmailSender.Stop();
 
         Thread.Sleep(1000);
+    }
+
+    [HttpGet("api/asyncEmailSender/simpleStatus"), SignumAllowAnonymous]
+    public SimpleStatus SimpleStatus()
+    {
+        return AsyncEmailSender.GetSimpleStatus();
     }
 
 
@@ -75,6 +82,13 @@ public class MailingController : ControllerBase
     public List<string> GetAllTypes()
     {
         return EmailLogic.GetAllTypes().Select(t => TypeLogic.TypeToEntity.GetOrThrow(t).CleanName).ToList();
+    }
+
+    [HttpGet("api/email/getDefaultCulture")]
+    public CultureInfoEntity GetDefaultCulture()
+    {
+        using (AuthLogic.Disable())
+            return EmailLogic.Configuration.DefaultCulture;
     }
 
     public class GetEmailTemplatesRequest

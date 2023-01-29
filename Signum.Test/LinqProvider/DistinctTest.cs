@@ -1,4 +1,4 @@
-﻿
+
 namespace Signum.Test.LinqProvider;
 
 /// <summary>
@@ -69,5 +69,15 @@ public class DistinctTest
                       g.Count
                   }).Take(2).ToList();
 
+    }
+
+    [Fact]
+    public void DistinctWithCheapNullPropagation()
+    {
+        var nullableList = Database.Query<ArtistEntity>().Select(a => a == null ? (Sex?)null : a.Sex).Distinct().ToList();
+        var notNullableList = Database.Query<ArtistEntity>().Select(a => a.Sex).Distinct().ToList();
+
+        Assert.Equal(nullableList.Count, notNullableList.Count);
+    
     }
 }

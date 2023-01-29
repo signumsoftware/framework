@@ -85,7 +85,6 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
       t = DateTime.fromFormat(value, "ddMMyy")
       if (t.isValid) {
         if (value.length == 6) {
-          var twoDigitYear = parseInt(value.substr(4, 2));
           t = t.set({ year: t.year > maxTwoDigitYearDefault ? t.year - 100 : t.year });
         }
         return t.toJSDate();

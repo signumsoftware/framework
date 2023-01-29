@@ -199,7 +199,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
       {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
         <div>
           {ctx.value.mainEntityType ? <>
-            <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
+            <FormGroup ctx={ctx.subCtx(d => d.viewName)} label={ctx.niceName(d => d.viewName)}>
               {
                 <div className="row">
                   <div className="col-sm-6">
