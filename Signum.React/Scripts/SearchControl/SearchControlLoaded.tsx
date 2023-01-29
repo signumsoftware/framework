@@ -1679,6 +1679,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       columns: resultColumns,
       row: row,
       rowIndex: rowIndex,
+      searchControl: this,
     };
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
@@ -1896,6 +1897,38 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     else {
       return m;
     }
+  }
+
+  getRowValue<T = unknown>(row: ResultRow, token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
+
+    var result = this.tryGetSelectedValue(token, automaticEntityPrefix, true);
+
+    return result!.value;
+  }
+
+  tryGetRowValue<T = unknown>(row: ResultRow, token: QueryTokenString<T> | string, automaticEntityPrefix = true, throwError = false): { value: Finder.AddToLite<T> | undefined } | undefined {
+
+    const tokenName = token.toString();
+
+    const sc = this;
+    const colIndex = sc.state.resultTable!.columns.indexOf(tokenName);
+    if (colIndex != -1)
+      return { value: row.columns[colIndex] };
+
+    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
+    if (filter != null)
+      return { value: filter?.value };
+
+    if (automaticEntityPrefix) {
+      var result = this.tryGetRowValue(row, tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false, false);
+      if (result != null)
+        return result as any;
+    }
+
+    if (throwError)
+      throw new Error(`No column '${token}' found`);
+
+    return undefined;
   }
 
   getSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
