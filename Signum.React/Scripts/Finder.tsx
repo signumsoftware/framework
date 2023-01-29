@@ -1916,6 +1916,7 @@ export interface CellFormatterContext {
   columns: string[];
   row: ResultRow;
   rowIndex: number;
+  searchControl?: SearchControlLoaded
 }
 
 
