@@ -41,6 +41,8 @@ export function waitLoaded() {
 
 export function useGlobalReactRouter() {
 
+  const [isLoaded, setIsLoaded] = React.useState<boolean>();
+
   function toRelativeUrl(url: string) {
     if (window.__baseName && url.startsWith(window.__baseName))
       return url.after(window.__baseName);
@@ -67,6 +69,9 @@ export function useGlobalReactRouter() {
 
     waitingQueue.forEach(f => f(undefined));
     waitingQueue.clear();
+
+    setIsLoaded(true);
+
     return () => {
       navigate = undefined!;
     };
@@ -77,6 +82,8 @@ export function useGlobalReactRouter() {
     location = loc;;
     return () => location = undefined!;
   }, [loc]);
+
+  return isLoaded;
 
 }
 

@@ -116,11 +116,11 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
 
             file.Replace(
                 """{Layout.switch}""",
-                """<Outlet/>""");
+                """{isLoaded && <Outlet />}""");
 
             file.RemoveAllLines(a => a.Contains("Layout.switch ="));
 
-            file.InsertAfterFirstLine(l => l.Contains("const itemStorageKey = \"SIDEBAR_MODE\";"), "\nAppContext.useGlobalReactRouter();");
+            file.InsertAfterFirstLine(l => l.Contains("const itemStorageKey = \"SIDEBAR_MODE\";"), "\nconst isLoaded = AppContext.useGlobalReactRouter();");
         });
 
         uctx.ChangeCodeFile("Southwind.React/App/NotFound.tsx", file =>
@@ -192,7 +192,7 @@ return true;
             SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Please format the code in MainPublic.tsx after the changes");
         });
 
-        uctx.ChangeCodeFile("Southwind.React/App/MainPublic.tsx", file =>
+        uctx.ChangeCodeFile("Southwind.React/App/MainAdmin.tsx", file =>
         {
             file.InsertBeforeFirstLine(a => a.StartsWith("import"), """
                     import { RouteObject } from "react-router"

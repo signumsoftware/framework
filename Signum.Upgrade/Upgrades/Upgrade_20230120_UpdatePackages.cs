@@ -17,7 +17,6 @@ class Upgrade_20230120_UpdatePackages : CodeUpgradeBase
                 "@fortawesome/free-regular-svg-icons": "6.2.1",
                 "@fortawesome/free-solid-svg-icons": "6.2.1",
                 "@types/draft-js": "0.11.10",
-                "@types/codemirror": "5.60.6",
                 "@microsoft/signalr": "7.0.2",
                 "@azure/msal-browser": "2.32.2",
                 "codemirror": "6.65.7",
