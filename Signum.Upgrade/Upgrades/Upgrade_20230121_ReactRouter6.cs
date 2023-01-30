@@ -148,9 +148,9 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
             file.ReplaceBetweenIncluded(a => a.Contains("function reload() {"),
                 a => a.Contains(".then(() => {"), """
   async function reload() {
-      await AuthClient.autoLogin()
-      await reloadTypes()
-      await CultureClient.loadCurrentCulture()
+      await AuthClient.autoLogin();
+      await reloadTypes();
+      await CultureClient.loadCurrentCulture();
   """);
 
             file.ReplaceBetweenIncluded(a => a.Contains("const promise"),
