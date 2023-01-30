@@ -208,14 +208,9 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       setData(p.data);
     } else if (loadData) {
       requestStarted.current = true;
-      const fo = p.findOptions;
-      if (fo) {
+      const fo = p.findOptions ?? { queryName: p.type!.name };
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
           .then(data => setData(data));
-      }
-      else
-        Finder.API.fetchAllLites({ types: p.type!.name })
-          .then(data => setData(data.orderBy(a => a)));
     }
   }, [normalizeEmptyArray(p.data), p.type.name, p.deps, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 
