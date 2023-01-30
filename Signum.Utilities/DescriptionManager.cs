@@ -298,11 +298,11 @@ public static class DescriptionManager
         return null;
     }
 
-    public static LocalizedAssembly? GetLocalizedAssembly(Assembly assembly, CultureInfo cultureInfo)
+    public static LocalizedAssembly? GetLocalizedAssembly(Assembly assembly, CultureInfo cultureInfo, bool forceCreate= false)
     {
         return localizations
             .GetOrAdd(cultureInfo, ci => new ConcurrentDictionary<Assembly, LocalizedAssembly?>())
-            .GetOrAdd(assembly, (Assembly a) => LocalizedAssembly.ImportXml(assembly, cultureInfo, forceCreate: false));
+            .GetOrAdd(assembly, (Assembly a) => LocalizedAssembly.ImportXml(assembly, cultureInfo, forceCreate: forceCreate));
     }
 
     internal static DescriptionOptions? OnDefaultDescriptionOptions(Type type)
