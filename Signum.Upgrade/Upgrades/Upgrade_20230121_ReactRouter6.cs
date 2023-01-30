@@ -123,8 +123,19 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
 
         uctx.ChangeCodeFile("Southwind.React/App/NotFound.tsx", file =>
         {
+            file.Replace("export default class NotFound extends React.Component {", "export default function NotFound() {");
+
+            file.Replace("componentWillMount() {", "React.useEffect(() => {");
+
+            file.Replace(new Regex(@"</div>\s*\n\s*\);\s*\n\s*}\s*\n\s*}"), "</div>\n);\n}");
+            file.Replace(new Regex(@"}\s*\n\s*}"), "}\n},[]);");
+
+            file.RemoveAllLines(a => a.Contains("render() {"));
+
+            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Please format the code in NotFound.tsx after the changes");
+
             file.ReplaceLine(a => a.Contains("""AppContext.navigate("/auth/login", { back: AppContext.location }, { replace : true });"""),
-                """AppContext.navigate("/auth/login", { state: { back: AppContext.location }, replace: true });""");
+                """AppContext.navigate("/auth/login", { state: { back: AppContext.location() }, replace: true });""");
         });
 
         var regexIsFull = new Regex(@"return isFull;\s*\n\s*}\);\s*\n\s*}\);");
@@ -196,20 +207,6 @@ return true;
             file.InsertBeforeFirstLine(a => a.StartsWith("import"), """
                     import { RouteObject } from "react-router"
                     """);
-        });
-
-        uctx.ChangeCodeFile("Southwind.React/App/NotFound.tsx", file =>
-
-        {
-            file.Replace("export default class NotFound extends React.Component {", "export default function NotFound() {");
-
-            file.Replace("componentWillMount() {", "React.useEffect(() => {");
-
-            file.Replace(new Regex(@"}\s*\n\s*}"), "},[]);");
-
-            file.RemoveAllLines(a => a.Contains("render() {"));
-
-            file.Replace(new Regex(@"}\s*\n\s*}"), "}");
         });
 
         uctx.ChangeCodeFile("Southwind.React/package.json", file =>
