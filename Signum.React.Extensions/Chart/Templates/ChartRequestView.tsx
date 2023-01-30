@@ -135,7 +135,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
   function handleOnFullScreen(e: React.MouseEvent<any>) {
     e.preventDefault();
     ChartClient.Encoder.chartPathPromise(p.chartRequest)
-      .then(path => AppContext.history.push(path));
+      .then(path => AppContext.navigate(path));
   }
 
   function handleExplore(e: React.MouseEvent<any>) {

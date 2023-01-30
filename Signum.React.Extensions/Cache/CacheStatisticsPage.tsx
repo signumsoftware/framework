@@ -1,13 +1,13 @@
 
 import * as React from 'react'
-import { RouteComponentProps } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { Tab, Tabs } from 'react-bootstrap'
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { SearchControl } from '../../Signum.React/Scripts/Search'
 import { ExceptionEntity } from '../../Signum.React/Scripts/Signum.Entities.Basics'
 
-export default function CacheStatisticsPage(p: RouteComponentProps<{}>) {
+export default function CacheStatisticsPage() {
 
   var [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
 

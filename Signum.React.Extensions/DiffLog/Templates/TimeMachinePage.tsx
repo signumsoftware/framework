@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { RenderEntity, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import EntityLink from '@framework/SearchControl/EntityLink'
@@ -20,9 +20,8 @@ import { IModalProps, openModal } from '@framework/Modals'
 import { EntityDump } from '../DiffLogClient'
 
 
-export default function TimeMachinePage(p: RouteComponentProps<{ type: string; id: string }>) {
-
-  var params = p.match.params;
+export default function TimeMachinePage() {
+  const params = useParams() as { type: string; id: string };
 
   const lite = useAPI(() => {
     var lite = newLite(params.type, params.id!);

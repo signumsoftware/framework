@@ -1,13 +1,11 @@
 import * as React from "react";
-import { Route, Switch } from "react-router"
-import * as H from "history"
-import * as AppRelativeRoutes from "./AppRelativeRoutes";
+import { NavigateFunction, Location, useNavigate, useLocation, To, NavigateOptions } from "react-router";
 import { IUserEntity, TypeEntity } from "./Signum.Entities.Basics";
 import { Dic, classes, } from './Globals';
-import { ImportRoute } from "./AsyncImport";
 import { clearContextHeaders, ajaxGet, ajaxPost } from "./Services";
 import { PseudoType, Type, getTypeName } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
+import { navigateRoute } from "./Navigator";
 
 Dic.skipClasses.push(React.Component);
 
@@ -21,10 +19,67 @@ export function setCurrentUser(user: IUserEntity | undefined) {
   currentUser = user;
 }
 
-export let history: H.History;
-export function setCurrentHistory(h: H.History) {
-  history = h;
+
+/*
+ * Global react-router navigate, but aware of removing ~ or baseName prefixes
+ */
+export let navigate: { 
+  (to: To, options?: NavigateOptions): void;
+  (delta: number): void;
+};
+export let location: Location;
+
+const waitingQueue: ((val: undefined) => void)[] = [];
+export function waitLoaded() {
+  if (navigate != null)
+    return Promise.resolve();
+
+  return new Promise<undefined>(resolve => {
+    waitingQueue.push(resolve);
+  });
 }
+
+export function useGlobalReactRouter() {
+
+  function toRelativeUrl(url: string) {
+    if (window.__baseName && url.startsWith(window.__baseName))
+      return url.after(window.__baseName);
+
+    if (url.startsWith("~"))
+      return url.after("~");
+
+    return url;
+  }
+
+  var nav = useNavigate();
+  React.useEffect(() => {
+    navigate = (to: To | number, options?: NavigateOptions) => {
+      if (typeof to == "number")
+        nav(to);
+      else if (typeof to == "string") {
+        nav(toRelativeUrl(to));
+      } else if (typeof to == "object") {
+        nav({ ...to, pathname: to.pathname && toRelativeUrl(to.pathname) }, options);
+      }
+      else
+        throw new Error("Unexpected argument type: to");
+    };
+
+    waitingQueue.forEach(f => f(undefined));
+    waitingQueue.clear();
+    return () => {
+      navigate = undefined!;
+    };
+  }, []);
+
+  var loc = useLocation();
+  React.useEffect(() => {
+    location = loc;;
+    return () => location = undefined!;
+  }, [loc]);
+
+}
+
 
 export let setTitle: (pageTitle?: string) => void;
 export function setTitleFunction(titleFunction: (pageTitle?: string) => void) {
@@ -36,16 +91,6 @@ export function useTitle(title: string, deps?: readonly any[]) {
     setTitle(title);
     return () => setTitle();
   }, deps);
-}
-
-export function createAppRelativeHistory(): H.History {
-  var h = H.createBrowserHistory({});
-  AppRelativeRoutes.useAppRelativeBasename(h);
-  AppRelativeRoutes.useAppRelativeComputeMatch(Route);
-  AppRelativeRoutes.useAppRelativeComputeMatch(ImportRoute as any);
-  AppRelativeRoutes.useAppRelativeSwitch(Switch);
-  setCurrentHistory(h);
-  return h;
 }
 
 let rtl = false;
@@ -103,19 +148,23 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
   else if (path.startsWith("http"))
     window.location.href = path;
   else
-    history.push(path);
+    navigate(path);
 }
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {
+  if (appRelativeUrl?.startsWith("/") && window.__baseName != "")
+    if (!appRelativeUrl.startsWith(window.__baseName))
+      return window.__baseName + appRelativeUrl;
+
   if (appRelativeUrl?.startsWith("~/"))
-    return window.__baseUrl + appRelativeUrl.after("~/");
+    return window.__baseName + appRelativeUrl.after("~"); //For backwards compatibility
 
-  var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "/~/"; //In Link render ~/ is considered a relative url
-  if (appRelativeUrl?.startsWith(relativeCrappyUrl))
-    return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
+  //var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "//"; //In Link render / is considered a relative url
+  //if (appRelativeUrl?.startsWith(relativeCrappyUrl))
+  //  return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
 
-  if (appRelativeUrl?.startsWith(window.__baseUrl) || appRelativeUrl?.startsWith("http"))
-    return appRelativeUrl;
+  //if (appRelativeUrl?.startsWith(window.__baseUrl) || appRelativeUrl?.startsWith("http"))
+  //  return appRelativeUrl;
 
   return appRelativeUrl;
 }

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { Link } from 'react-router-dom'
 import { DateTime } from 'luxon'
 import { EntitySettings } from '@framework/Navigator'
@@ -17,12 +18,13 @@ import { Entity, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entiti
 import { EntityLink } from '@framework/Search'
 import { ISymbol, PropertyRoute, symbolNiceName, Type } from '@framework/Reflection'
 import { WhatsNewMessageEmbedded, WhatsNewEntity, WhatsNewOperation, WhatsNewMessage } from './Signum.Entities.WhatsNew'
-import { ImportRoute } from '../../../Framework/Signum.React/Scripts/AsyncImport'
+import { ImportComponent } from '@framework/ImportComponent'
+import { FilePathEmbedded } from '../Files/Signum.Entities.Files'
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
-  options.routes.push(<ImportRoute path="~/newspage/:newsId" onImportModule={() => import("./Templates/NewsPage")} />);
-  options.routes.push(<ImportRoute path="~/news" onImportModule={() => import("./Templates/AllNewsPage")} />);
+  options.routes.push({ path: "/newspage/:newsId", element: <ImportComponent onImport={() => import("./Templates/NewsPage")} /> });
+  options.routes.push({ path: "/news", element: <ImportComponent onImport={() => import("./Templates/AllNewsPage")} /> });
 
   Navigator.addSettings(new EntitySettings(WhatsNewEntity, t => import('./Templates/WhatsNew'), { modalSize: "xl" }));
 
@@ -32,7 +34,7 @@ export function start(options: { routes: JSX.Element[] }) {
   //}));
 
   QuickLinks.registerQuickLink(WhatsNewEntity, ctx => new QuickLinks.QuickLinkLink("Preview",
-    () => WhatsNewMessage.Preview.niceToString(), "~/newspage/" + ctx.lite.id, {
+    () => WhatsNewMessage.Preview.niceToString(), "/newspage/" + ctx.lite.id, {
     icon: "newspaper",
     iconColor: "purple",
   }));
@@ -66,23 +68,23 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
   export function myNews(): Promise<WhatsNewShort[]> {
-    return ajaxGet({ url: "~/api/whatsnew/myNews", avoidNotifyPendingRequests: true });
+    return ajaxGet({ url: "/api/whatsnew/myNews", avoidNotifyPendingRequests: true });
   }
 
   export function myNewsCount(): Promise<NumWhatsNews> {
-    return ajaxGet({ url: "~/api/whatsnew/myNewsCount", avoidNotifyPendingRequests: true });
+    return ajaxGet({ url: "/api/whatsnew/myNewsCount", avoidNotifyPendingRequests: true });
   }
 
   export function getAllNews(): Promise<WhatsNewFull[]> {
-    return ajaxGet({ url: "~/api/whatsnew/all" });
+    return ajaxGet({ url: "/api/whatsnew/all" });
   }
 
   export function newsPage(id: number | string): Promise<WhatsNewFull> {
-    return ajaxGet({ url: "~/api/whatsnew/" + id });
+    return ajaxGet({ url: "/api/whatsnew/" + id });
   }
 
   export function setNewsLogRead(lites: Lite<WhatsNewEntity>[]): Promise<void> {
-    return ajaxPost({ url: "~/api/whatsnew/setNewsLog" }, lites);
+    return ajaxPost({ url: "/api/whatsnew/setNewsLog" }, lites);
   }
 }
 

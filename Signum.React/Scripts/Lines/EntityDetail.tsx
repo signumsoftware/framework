@@ -103,7 +103,6 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
       onChange={e => {
         e.preventDefault();
         e.stopPropagation();
-        e.persist();
         setTimeout(() => {
           if (!p.readOnly) {
             if (hasValue)

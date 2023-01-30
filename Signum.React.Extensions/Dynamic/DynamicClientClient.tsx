@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { SearchValueLine } from '@framework/Search'
 import { EntitySettings } from '@framework/Navigator'
@@ -10,7 +11,7 @@ import * as DynamicClientOptions from './DynamicClientOptions'
 import { globalModules } from './View/GlobalModules'
 import { DynamicClientEntity } from './Signum.Entities.Dynamic'
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicClientEntity, w => import('./Client/DynamicClientComponent')));
 
 
@@ -44,6 +45,6 @@ ${c.code}
 
 export namespace API {
   export function getClients(): Promise<DynamicClientEntity[]> {
-    return ajaxGet({ url: `~/api/dynamic/clients` });
+    return ajaxGet({ url: `/api/dynamic/clients` });
   }
 }

@@ -44,7 +44,7 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewFull}) {
   const whatsnew = p.news;
 
   function handleClickPreviewPicture() {
-    AppContext.history.push("~/newspage/" + p.news.whatsNew.id);
+    AppContext.navigate("/newspage/" + p.news.whatsNew.id);
   }
 
 
@@ -69,13 +69,13 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewFull}) {
   return (
     <div key={whatsnew.whatsNew.id} style={{ position: "relative", cursor: "pointer", margin: "10px", }}>
       <div className={"card news-shadow"} style={{ width: "500px" }} key={whatsnew.whatsNew.id}>
-        {whatsnew.previewPicture != undefined && <div className="preview-picture-card-box"><img onClick={() => { handleClickPreviewPicture() }} src={AppContext.toAbsoluteUrl("~/api/whatsnew/previewPicture/" + whatsnew.whatsNew.id)} style={{ width: "100%", height: "auto" }} /></div>}
+        {whatsnew.previewPicture != undefined && <div className="preview-picture-card-box"><img onClick={() => { handleClickPreviewPicture() }} src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + whatsnew.whatsNew.id)} style={{ width: "100%", height: "auto" }} /></div>}
         <div className={"card-body pt-2"}>
           <h5 className={"card-title"}>{whatsnew.title}</h5>
           <small><HtmlViewer text={HTMLSubstring(whatsnew.description)} /></small>
           <br />
           <div style={{ display: "flex", justifyContent: "space-between"}}>
-            <Link to={"~/newspage/" + p.news.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
+            <Link to={"/newspage/" + p.news.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
             {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "#d50a30" }}> {(p.news.status == "Draft") ? p.news.status : undefined}</small>}
           </div>
           {(whatsnew.attachments > 0) && <Attachments news={whatsnew} />

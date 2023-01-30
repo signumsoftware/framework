@@ -1,5 +1,5 @@
-import { Location } from 'history'
 import * as React from 'react'
+import { Location } from 'react-router'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
@@ -63,7 +63,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
 
   isCompatibleWithUrlPrio(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any): number {
     return query["userQuery"] == liteKey(res.content!) ||
-      location.pathname == AppContext.toAbsoluteUrl(UserQueryClient.userQueryUrl(res.content!)) ? 2 : 0;
+      location.pathname == UserQueryClient.userQueryUrl(res.content!) ? 2 : 0;
   }
 }
 

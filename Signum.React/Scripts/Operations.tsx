@@ -848,64 +848,64 @@ export function isEntityOperation(operationType: OperationType) {
 export namespace API {
 
   export function construct<T extends Entity>(type: string | Type<T>, operationKey: string | ConstructSymbol_Simple<T>, ...args: any[]): Promise<EntityPack<T> | undefined> {
-    return ajaxPost({ url: "~/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type: getTypeName(type) });
+    return ajaxPost({ url: "/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type: getTypeName(type) });
   }
 
   export function constructFromEntity<T extends Entity, F extends Entity>(entity: F, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T> | undefined> {
     GraphExplorer.propagateAll(entity, args);
-    return ajaxPost({ url: "~/api/operation/constructFromEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
+    return ajaxPost({ url: "/api/operation/constructFromEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
   }
 
   export function constructFromLite<T extends Entity, F extends Entity>(lite: Lite<F>, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T> | undefined> {
     GraphExplorer.propagateAll(lite, args);
-    return ajaxPost({ url: "~/api/operation/constructFromLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
+    return ajaxPost({ url: "/api/operation/constructFromLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
   export function constructFromMultiple<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, options: MultiOperationOptions, ...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
     var abortController = options.abortController ?? new AbortController();
     return OperationProgressModal.show(lites, operationKey, options.progressModal, abortController,
-      () => ajaxPostRaw({ url: "~/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest));;
+      () => ajaxPostRaw({ url: "/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest));;
   }
 
   export function constructFromMany<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_FromMany<T, F>, ...args: any[]): Promise<EntityPack<T> | undefined> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost({ url: "~/api/operation/constructFromMany" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
+    return ajaxPost({ url: "/api/operation/constructFromMany" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
   }
 
   export function executeEntity<T extends Entity>(entity: T, operationKey: string | ExecuteSymbol<T>, ...args: any[]): Promise<EntityPack<T>> {
     GraphExplorer.propagateAll(entity, args);
-    return ajaxPost({ url: "~/api/operation/executeEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
+    return ajaxPost({ url: "/api/operation/executeEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
   }
 
   export function executeLite<T extends Entity>(lite: Lite<T>, operationKey: string | ExecuteSymbol<T>, ...args: any[]): Promise<EntityPack<T>> {
     GraphExplorer.propagateAll(lite, args);
-    return ajaxPost({ url: "~/api/operation/executeLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
+    return ajaxPost({ url: "/api/operation/executeLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
   export function executeMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T>, options: MultiOperationOptions, ...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
     var abortController = options.abortController ?? new AbortController();
     return OperationProgressModal.show(lites, operationKey, options.progressModal, abortController,
-      () => ajaxPostRaw({ url: "~/api/operation/executeMultiple", signal: abortController.signal }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest)
+      () => ajaxPostRaw({ url: "/api/operation/executeMultiple", signal: abortController.signal }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest)
     );
   }
 
   export function deleteEntity<T extends Entity>(entity: T, operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<void> {
     GraphExplorer.propagateAll(entity, args);
-    return ajaxPost({ url: "~/api/operation/deleteEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
+    return ajaxPost({ url: "/api/operation/deleteEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
   }
 
   export function deleteLite<T extends Entity>(lite: Lite<T>, operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<void> {
     GraphExplorer.propagateAll(lite, args);
-    return ajaxPost({ url: "~/api/operation/deleteLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
+    return ajaxPost({ url: "/api/operation/deleteLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
   }
 
   export function deleteMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | DeleteSymbol<T>, options: MultiOperationOptions,...args: any[]): Promise<ErrorReport> {
     GraphExplorer.propagateAll(lites, args);
     var abortController = options.abortController ?? new AbortController();
     return OperationProgressModal.show(lites, operationKey, options.progressModal, abortController,
-      () => ajaxPostRaw({ url: "~/api/operation/deleteMultiple", signal: abortController.signal }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest)
+      () => ajaxPostRaw({ url: "/api/operation/deleteMultiple", signal: abortController.signal }, { lites: lites, operationKey: getOperationKey(operationKey), setters: options.setters, args: args } as MultiOperationRequest)
     );
   }
 
@@ -969,7 +969,7 @@ export namespace API {
 
 
   export function stateCanExecutes<T extends Entity>(lites: Lite<T>[], operationKeys: string[]): Promise<CanExecutesResponse> {
-    return ajaxPost({ url: "~/api/operation/stateCanExecutes" }, { lites, operationKeys });
+    return ajaxPost({ url: "/api/operation/stateCanExecutes" }, { lites, operationKeys });
   }
 
   export interface CanExecutesResponse {

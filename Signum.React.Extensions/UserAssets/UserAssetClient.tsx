@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
 import { Entity, Lite } from '@framework/Signum.Entities'
@@ -7,7 +8,7 @@ import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionPar
 import * as AuthClient from '../Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded } from './Signum.Entities.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { QueryToken } from '@framework/FindOptions';
 import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../UserQueries/Signum.Entities.UserQueries';
@@ -16,15 +17,15 @@ import * as AppContext from '@framework/AppContext';
 import { translated } from '../Translation/TranslatedInstanceTools'
 
 let started = false;
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
   if (started)
     return;
 
-  options.routes.push(<ImportRoute path="~/userAssets/import" onImportModule={() => import("./ImportAssetsPage")} />);
+  options.routes.push({ path: "/userAssets/import", element: <ImportComponent onImport={() => import("./ImportAssetsPage")} /> });
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
     key: "ImportUserAssets",
-    onClick: () => Promise.resolve("~/userAssets/import")
+    onClick: () => Promise.resolve("/userAssets/import")
   });
 
   AppContext.clearSettingsActions.push(() => started = false);
@@ -182,7 +183,7 @@ export module Converter {
 export module API {
 
   export function parseFilters(request: ParseFiltersRequest): Promise<FilterNode[]> {
-    return ajaxPost({ url: "~/api/userAssets/parseFilters/" }, request);
+    return ajaxPost({ url: "/api/userAssets/parseFilters/" }, request);
   }
 
   export interface ParseFiltersRequest {
@@ -194,7 +195,7 @@ export module API {
 
 
   export function stringifyFilters(request: StringifyFiltersRequest): Promise<QueryFilterItem[]> {
-    return ajaxPost({ url: "~/api/userAssets/stringifyFilters/" }, request);
+    return ajaxPost({ url: "/api/userAssets/stringifyFilters/" }, request);
   }
   
   export interface StringifyFiltersRequest {
@@ -228,13 +229,13 @@ export module API {
 
 
   export function exportAsset(entity: Lite<IUserAssetEntity>[]) {
-    ajaxPostRaw({ url: "~/api/userAssets/export" }, entity)
+    ajaxPostRaw({ url: "/api/userAssets/export" }, entity)
       .then(resp => saveFile(resp));
   }
 
 
   export function importPreview(request: FileUpload): Promise<UserAssetPreviewModel> {
-    return ajaxPost({ url: "~/api/userAssets/importPreview/" }, request);
+    return ajaxPost({ url: "/api/userAssets/importPreview/" }, request);
   }
 
   export interface FileUpload {
@@ -243,7 +244,7 @@ export module API {
   }
 
   export function importAssets(request: FileUploadWithModel): Promise<void> {
-    return ajaxPost({ url: "~/api/userAssets/import" }, request);
+    return ajaxPost({ url: "/api/userAssets/import" }, request);
   }
 
   export interface FileUploadWithModel {

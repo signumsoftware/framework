@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import * as Finder from '../Finder'
 import { FindOptions, FilterOption, isFilterGroupOption, QueryDescription } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
@@ -12,13 +12,12 @@ import { useTitle } from '../AppContext'
 import { QueryString } from '../QueryString'
 import { useAPI, useForceUpdate, useUpdatedRef } from '../Hooks'
 
-interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 
-}
+function SearchPage() {
 
-function SearchPage(p: SearchPageProps) {
-
-  const fo = Finder.parseFindOptionsPath(p.match.params.queryName, QueryString.parse(p.location.search));
+  const params = useParams<{ queryName: string }>();
+  const location = useLocation();
+  const fo = Finder.parseFindOptionsPath(params.queryName!, QueryString.parse(location.search));
   const qd = useAPI(() => Finder.getQueryDescription(fo.queryName), [fo.queryName]);
   const forceUpdate = useForceUpdate();
   
@@ -42,18 +41,17 @@ function SearchPage(p: SearchPageProps) {
 
   const searchControl = React.useRef<SearchControlHandler>(null);
 
-  var subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
+  const subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
 
-  useTitle(getQueryNiceName(p.match.params.queryName) + (subTitle ? (" - " + subTitle) : ""));
+  useTitle(getQueryNiceName(params.queryName!) + (subTitle ? (" - " + subTitle) : ""));
 
   function changeUrl() {
     const scl = searchControl.current!.searchControlLoaded!;
     const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, true);
     const newPath = Finder.findOptionsPath(findOptions, scl.extraUrlParams);
-    const currentLocation = AppContext.history.location;
 
-    if (currentLocation.pathname + currentLocation.search != newPath)
-      AppContext.history.replace(newPath);
+    if (location.pathname + location.search != newPath)
+      AppContext.navigate(newPath, { replace : true });
   }
 
   if (!Finder.isFindable(fo.queryName, true))

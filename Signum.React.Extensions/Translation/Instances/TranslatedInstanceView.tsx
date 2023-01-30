@@ -5,7 +5,7 @@ import { notifySuccess } from '@framework/Operations'
 import * as CultureClient from '../CultureClient'
 import { API, TranslatedInstanceView, TranslatedInstanceViewType, TranslatedTypeSummary, TranslationRecord } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Entities.Translation'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { Link} from "react-router-dom";
 import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
@@ -17,10 +17,12 @@ import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 import { getToString } from '@framework/Signum.Entities'
 
-export default function TranslationInstanceView(p: RouteComponentProps<{ type: string; culture?: string; }>) {
+export default function TranslationInstanceView() {
+  const params = useParams() as { type: string; culture?: string; };
+  const location = useLocation();
 
-  const type = p.match.params.type;
-  const culture = p.match.params.culture;
+  const type = params.type;
+  const culture = params.culture;
 
   const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const [isLocked, lock] = useLock();
@@ -28,7 +30,7 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
 
   const [onlyNeutral, setOnlyNeutral] = React.useState<boolean>(true);
 
-  const [filter, setFilter] = React.useState<string | undefined>(() => QueryString.parse(p.location.search).filter);
+  const [filter, setFilter] = React.useState<string | undefined>(() => QueryString.parse(location.search).filter);
 
   const [result, reloadResult] = useAPIWithReload(() => filter == undefined ? Promise.resolve(undefined) : API.viewTranslatedInstanceData(type, culture, filter), [type, culture, filter]);
 
@@ -46,7 +48,7 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
 
     return (
       <div>
-        <TranslatedInstances data={result} currentCulture={p.match.params.culture} cultures={culture ? [culture] : otherCultures} />
+        <TranslatedInstances data={result} currentCulture={params.culture} cultures={culture ? [culture] : otherCultures} />
         {result.instances.length > 0 && <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary mt-2" onClick={handleSave} disabled={isLocked} />}
       </div>
     );
@@ -54,7 +56,6 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
 
   function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
-    const params = p.match.params;
     const records = result!.instances.flatMap(ins => Dic.getKeys(ins.translations).flatMap(k => {
       const pr = k.tryBefore(";") ?? k;
       const rowId = k.tryAfter(";");
@@ -83,7 +84,7 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
   return (
     <div>
       <div className="mb-2">
-        <h2><Link to="~/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
+        <h2><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
         <TranslateSearchBox setFilter={setFilter} filter={filter ?? ""} />
         {culture == null && <label style={{ float: 'right' }}>
           <input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> Only neutral cultures

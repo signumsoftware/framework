@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { API, AsyncEmailSenderState } from './MailingClient'
@@ -10,7 +10,7 @@ import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 
-export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
+export default function AsyncEmailSenderPage() {
 
   useTitle("AsyncEmailSender state");
 
@@ -51,7 +51,7 @@ export default function AsyncEmailSenderPage(p: RouteComponentProps<{}>) {
             <span style={{ color: "green" }}> RUNNING </span> :
             <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
-        <a className="ms-2" href={toAbsoluteUrl("~/api/asyncEmailSender/simpleStatus")} target="_blank">SimpleStatus</a>
+        <a className="ms-2" href={toAbsoluteUrl("/api/asyncEmailSender/simpleStatus")} target="_blank">SimpleStatus</a>
         <br />
         InitialDelayMilliseconds: {state.initialDelayMilliseconds}
         <br/>

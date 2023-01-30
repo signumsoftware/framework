@@ -1,4 +1,5 @@
 import * as React from "react";
+import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
@@ -25,11 +26,9 @@ import {
   Anonymous, toLuxonDurationFormat, timeToString, toFormatWithFixes
 } from './Reflection';
 
-import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded, { SearchControlMobileOptions } from './SearchControl/SearchControlLoaded';
-import { ImportRoute } from "./AsyncImport";
-import { SearchControl } from "./Search";
+import { ImportComponent } from './ImportComponent'
 import { ButtonBarElement } from "./TypeContext";
 import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
@@ -37,9 +36,6 @@ import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
-import { Search } from "history";
-import { parse } from "@fortawesome/fontawesome-svg-core";
-import { faUnderline } from "@fortawesome/free-solid-svg-icons";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -48,8 +44,8 @@ export function clearQuerySettings() {
   Dic.clear(querySettings);
 }
 
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => Options.getSearchPage()} />);
+export function start(options: { routes: RouteObject[] }) {
+  options.routes.push({ path: "/find/:queryName", element: <ImportComponent onImport={() => Options.getSearchPage()} /> });
   AppContext.clearSettingsActions.push(clearContextualItems);
   AppContext.clearSettingsActions.push(clearQuerySettings);
   AppContext.clearSettingsActions.push(clearQueryDescriptionCache);
@@ -224,7 +220,7 @@ export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptionsMan
 export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
   e.preventDefault();
   if (e.ctrlKey || e.button == 1)
-    window.open(findOptionsPath(findOptions));
+    window.open(AppContext.toAbsoluteUrl(findOptionsPath(findOptions)));
   else
     explore(findOptions);
 }
@@ -242,8 +238,7 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
 export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
   const query = findOptionsPathQuery(fo, extra);
-
-  return AppContext.history.createHref({ pathname: "~/find/" + getQueryKey(fo.queryName), search: QueryString.stringify(query) });
+  return "/find/" + getQueryKey(fo.queryName) + "?" + QueryString.stringify(query);
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
@@ -1576,46 +1571,46 @@ export function decompress(rt: ResultTable): ResultTable {
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
-    return ajaxGet({ url: "~/api/query/description/" + queryKey });
+    return ajaxGet({ url: "/api/query/description/" + queryKey });
   }
 
   export function fetchQueryEntity(queryKey: string): Promise<QueryEntity> {
-    return ajaxGet({ url: "~/api/query/queryEntity/" + queryKey });
+    return ajaxGet({ url: "/api/query/queryEntity/" + queryKey });
   }
 
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
   
-    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, request)
+    return ajaxPost<ResultTable>({ url: "/api/query/executeQuery", signal }, request)
       .then(rt => decompress(rt));
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
-    return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
+    return ajaxPost({ url: "/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
   export function fetchLites(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost({ url: "~/api/query/lites" }, request);
+    return ajaxPost({ url: "/api/query/lites" }, request);
   }
 
   export function fetchEntities(request: QueryEntitiesRequest): Promise<Entity[]>{
-    return ajaxPost({ url: "~/api/query/entities" }, request);
+    return ajaxPost({ url: "/api/query/entities" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
     return ajaxGet({
-      url: "~/api/query/allLites?" + QueryString.stringify(request)
+      url: "/api/query/allLites?" + QueryString.stringify(request)
     });
   }
 
   export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
     return ajaxGet({
-      url: "~/api/query/findTypeLike?" + QueryString.stringify(request)
+      url: "/api/query/findTypeLike?" + QueryString.stringify(request)
     });
   }
 
   export function findLiteLike(request: AutocompleteRequest, signal?: AbortSignal): Promise<Lite<Entity>[]> {
-    return ajaxGet({ url: "~/api/query/findLiteLike?" + QueryString.stringify({ ...request }), signal });
+    return ajaxGet({ url: "/api/query/findLiteLike?" + QueryString.stringify({ ...request }), signal });
   }
 
   export interface AutocompleteRequest {
@@ -1625,11 +1620,11 @@ export module API {
   }
 
   export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
-    return ajaxPost({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
+    return ajaxPost({ url: "/api/query/parseTokens" }, { queryKey, tokens });
   }
 
   export function getSubTokens(queryKey: string, token: QueryToken | undefined, options: SubTokensOptions): Promise<QueryToken[]> {
-    return ajaxPost<QueryToken[]>({ url: "~/api/query/subTokens" }, { queryKey, token: token == undefined ? undefined : token.fullKey, options }).then(list => {
+    return ajaxPost<QueryToken[]>({ url: "/api/query/subTokens" }, { queryKey, token: token == undefined ? undefined : token.fullKey, options }).then(list => {
 
       if (token == undefined) {
         const entity = list.filter(a => a.key == "Entity").single();
@@ -1921,6 +1916,7 @@ export interface CellFormatterContext {
   columns: string[];
   row: ResultRow;
   rowIndex: number;
+  searchControl?: SearchControlLoaded
 }
 
 

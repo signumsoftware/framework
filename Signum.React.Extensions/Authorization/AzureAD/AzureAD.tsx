@@ -23,8 +23,8 @@ var msalConfig: msal.Configuration = {
   auth: {
     clientId: window.__azureApplicationId!, //This is your client ID
     authority: "https://login.microsoftonline.com/" + window.__azureTenantId!, //This is your tenant info
-    redirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
-    postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
+    redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
+    postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
   },
   cache: {
     cacheLocation: "localStorage",
@@ -167,4 +167,4 @@ export function MicrosoftSignIn({ ctx }: { ctx: LoginContext }) {
   );
 }
 
-MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("~/signin_light.svg");
+MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("/signin_light.svg");

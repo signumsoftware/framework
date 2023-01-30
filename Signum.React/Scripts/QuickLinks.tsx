@@ -315,7 +315,6 @@ export class QuickLinkAction extends QuickLink {
   }
 
   handleClick = (e: React.MouseEvent<any>) => {
-    e.persist();
     this.action(e);
   }
 }
@@ -329,23 +328,13 @@ export class QuickLinkLink extends QuickLink {
     this.url = url;
   }
 
-  handleClick = (e: React.MouseEvent<any>) => {
-    if (typeof this.url === "string") {
-      if (this.openInAnotherTab)
-        window.open(this.url);
-      else
-        AppContext.pushOrOpenInTab(this.url, e);
-    }
-    else {
-      e.persist();
-      this.url()
-        .then(url => {
-          if (this.openInAnotherTab)
-            window.open(url);
-          else
-            AppContext.pushOrOpenInTab(url, e)
-        });
-    }
+  handleClick = async (e: React.MouseEvent<any>) => {
+    var url = typeof this.url === "string" ? this.url : await this.url(); 
+
+    if (this.openInAnotherTab)
+      window.open(AppContext.toAbsoluteUrl(url));
+    else
+      AppContext.pushOrOpenInTab(url, e);
   }
 }
 
@@ -367,7 +356,7 @@ export class QuickLinkExplore extends QuickLink {
       return;
 
     if (e.ctrlKey || e.button == 1)
-      window.open(Finder.findOptionsPath(this.findOptions));
+      window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(this.findOptions)));
     else
       Finder.explore(this.findOptions);
   }
@@ -390,11 +379,10 @@ export class QuickLinkExplorePromise extends QuickLink {
     if (e.button == 2)
       return;
 
-    e.persist();
 
     this.findOptionsPromise.then(fo => {
       if (e.ctrlKey || e.button == 1)
-        window.open(Finder.findOptionsPath(fo));
+        window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(fo)));
       else
         Finder.explore(fo);
     });
@@ -425,7 +413,7 @@ export class QuickLinkNavigate extends QuickLink {
 
     const es = Navigator.getSettings(this.lite.EntityType);
     if (e.ctrlKey || e.button == 1 || es?.avoidPopup)
-      window.open(Navigator.navigateRoute(this.lite, this.viewName));
+      window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(this.lite, this.viewName)));
     else
       Navigator.view(this.lite, { buttons: "close", getViewPromise: this.viewName ? (e => this.viewName) : undefined });
   }

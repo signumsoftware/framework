@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { Link } from 'react-router-dom'
 import { DateTime } from 'luxon'
 import { EntitySettings } from '@framework/Navigator'
@@ -18,7 +19,7 @@ import { EntityLink } from '@framework/Search'
 import Alert from './Templates/Alert'
 import { ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
 
-export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
+export function start(options: { routes: RouteObject[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
   Navigator.addSettings(new EntitySettings(AlertTypeSymbol, e => import('./Templates/AlertType')));
   Navigator.addSettings(new EntitySettings(SendNotificationEmailTaskEntity, e => import('./Templates/SendNotificationEmailTask')));
@@ -203,11 +204,11 @@ function getPropertyValue(str: string, object: Partial<AlertEntity>): any {
 export module API {
 
   export function myAlerts(): Promise<AlertEntity[]> {
-    return ajaxGet({ url: "~/api/alerts/myAlerts", avoidNotifyPendingRequests: true });
+    return ajaxGet({ url: "/api/alerts/myAlerts", avoidNotifyPendingRequests: true });
   }
 
   export function myAlertsCount(): Promise<NumAlerts> {
-    return ajaxGet({ url: "~/api/alerts/myAlertsCount", avoidNotifyPendingRequests: true });
+    return ajaxGet({ url: "/api/alerts/myAlertsCount", avoidNotifyPendingRequests: true });
   }
 }
 
