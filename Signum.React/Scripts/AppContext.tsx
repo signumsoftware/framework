@@ -1,8 +1,9 @@
 import * as React from "react";
-import { NavigateFunction, Location, useNavigate, useLocation, To, NavigateOptions } from "react-router";
+import { To, NavigateOptions } from "react-router";
+import type { Router } from "@remix-run/router";
 import { IUserEntity, TypeEntity } from "./Signum.Entities.Basics";
 import { Dic, classes, } from './Globals';
-import { clearContextHeaders, ajaxGet, ajaxPost } from "./Services";
+import { clearContextHeaders, ajaxGet, ajaxPost, RetryFilter } from "./Services";
 import { PseudoType, Type, getTypeName } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
 import { navigateRoute } from "./Navigator";
@@ -19,73 +20,43 @@ export function setCurrentUser(user: IUserEntity | undefined) {
   currentUser = user;
 }
 
+export let _internalRouter: Router;
+export function setRouter(r: Router) {
+  _internalRouter = r
+}
 
-/*
- * Global react-router navigate, but aware of removing ~ or baseName prefixes
- */
-export let navigate: { 
-  (to: To, options?: NavigateOptions): void;
-  (delta: number): void;
+function toRelativeUrl(url: string) {
+  if (window.__baseName && url.startsWith(window.__baseName))
+    return url.after(window.__baseName);
+
+  if (url.startsWith("~"))
+    return url.after("~");
+
+  return url;
+}
+
+export function location(): typeof _internalRouter.state.location {
+  var loc = _internalRouter.state.location;
+
+  return {
+    ...loc,
+    pathname: toRelativeUrl(loc.pathname)
+  };
+}
+
+export function navigate(to: To | number, options?: NavigateOptions): void
+export function navigate(to: To | number, options?: NavigateOptions): void
+export function navigate(to: To | number, options?: NavigateOptions): void {
+  if (typeof to == "number")
+    _internalRouter.navigate(to);
+  else if (typeof to == "string")
+    _internalRouter.navigate(toAbsoluteUrl(to), options);
+  else if (typeof to == "object")
+    _internalRouter.navigate({ ...to, pathname: to.pathname && toAbsoluteUrl(to.pathname) }, options);
+  else
+    throw new Error("Unexpected argument type: to");
 };
-export let location: Location;
 
-const waitingQueue: ((val: undefined) => void)[] = [];
-export function waitLoaded() {
-  if (navigate != null)
-    return Promise.resolve();
-
-  return new Promise<undefined>(resolve => {
-    waitingQueue.push(resolve);
-  });
-}
-
-export function useGlobalReactRouter() {
-
-  const [isLoaded, setIsLoaded] = React.useState<boolean>();
-
-  function toRelativeUrl(url: string) {
-    if (window.__baseName && url.startsWith(window.__baseName))
-      return url.after(window.__baseName);
-
-    if (url.startsWith("~"))
-      return url.after("~");
-
-    return url;
-  }
-
-  var nav = useNavigate();
-  React.useEffect(() => {
-    navigate = (to: To | number, options?: NavigateOptions) => {
-      if (typeof to == "number")
-        nav(to);
-      else if (typeof to == "string") {
-        nav(toRelativeUrl(to));
-      } else if (typeof to == "object") {
-        nav({ ...to, pathname: to.pathname && toRelativeUrl(to.pathname) }, options);
-      }
-      else
-        throw new Error("Unexpected argument type: to");
-    };
-
-    waitingQueue.forEach(f => f(undefined));
-    waitingQueue.clear();
-
-    setIsLoaded(true);
-
-    return () => {
-      navigate = undefined!;
-    };
-  }, []);
-
-  var loc = useLocation();
-  React.useEffect(() => {
-    location = loc;;
-    return () => location = undefined!;
-  }, [loc]);
-
-  return isLoaded;
-
-}
 
 
 export let setTitle: (pageTitle?: string) => void;
@@ -224,3 +195,4 @@ Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
 
   return React.createElement("span", undefined, ...result);
 }
+

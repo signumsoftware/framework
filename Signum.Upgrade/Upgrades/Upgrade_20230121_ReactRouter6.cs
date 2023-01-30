@@ -116,11 +116,9 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
 
             file.Replace(
                 """{Layout.switch}""",
-                """{isLoaded && <Outlet />}""");
+                """<Outlet />""");
 
             file.RemoveAllLines(a => a.Contains("Layout.switch ="));
-
-            file.InsertAfterFirstLine(l => l.Contains("const itemStorageKey = \"SIDEBAR_MODE\";"), "\nconst isLoaded = AppContext.useGlobalReactRouter();");
         });
 
         uctx.ChangeCodeFile("Southwind.React/App/NotFound.tsx", file =>
@@ -172,6 +170,8 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
 
         const router = createBrowserRouter([mainRoute], { basename: window.__baseName });
 
+        AppContext.setRouter(router);
+
         const messages = ConfigureReactWidgets.getMessages();
         """);
 
@@ -181,12 +181,11 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
                 "<RouterProvider router={router}/>");
 
             file.Replace(regexIsFull, """
-await AppContext.waitLoaded();
 return true;
 """);
 
             file.ReplaceBetweenIncluded(a => a.Contains("const loc = AppContext.location;"), a => a.Contains("const back: History.Location ="), """    
-            const back: Location = AppContext.location.state?.back; 
+            const back: Location = AppContext.location().state?.back; 
             """);
 
             SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Please format the code in MainPublic.tsx after the changes");
@@ -199,17 +198,32 @@ return true;
                     """);
         });
 
+        uctx.ChangeCodeFile("Southwind.React/App/NotFound.tsx", file =>
+
+        {
+            file.Replace("export default class NotFound extends React.Component {", "export default function NotFound() {");
+
+            file.Replace("componentWillMount() {", "React.useEffect(() => {");
+
+            file.Replace(new Regex(@"}\s*\n\s*}"), "},[]);");
+
+            file.RemoveAllLines(a => a.Contains("render() {"));
+
+            file.Replace(new Regex(@"}\s*\n\s*}"), "}");
+        });
 
         uctx.ChangeCodeFile("Southwind.React/package.json", file =>
-          {
-              file.UpdateNpmPackages("""
+        {
+            file.UpdateNpmPackages("""
                 "react-router": "6.7.0",
                 "react-router-dom": "6.7.0",
                 "luxon": "3.2.1",
                 """);
 
-              file.RemoveNpmPackage("history");
-          });
+            file.RemoveNpmPackage("history");
+
+            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Probably you need to kill yarn.lock and execute yarn install again");
+        });
     }
 }
 
