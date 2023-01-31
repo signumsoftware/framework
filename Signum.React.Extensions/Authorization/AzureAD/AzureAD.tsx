@@ -9,8 +9,7 @@ import { LoginAuthMessage } from "../Signum.Entities.Authorization";
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_ApplicationID);
        var __azureTenantId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_DirectoryID);
-       var __tenantLogo = @Json.Serialize(TenantLogic.GetCurrentTenant()!.Logo.BinaryFile);
- * */
+*/
 
 declare global {
   interface Window {
