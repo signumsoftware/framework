@@ -5,11 +5,12 @@ import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { useStateWithPromise } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 
-export default function ResetPassword(p: RouteComponentProps<{}>) {
+export default function ResetPassword() {
+  const location = useLocation();
 
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
 
@@ -17,7 +18,7 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
 
   const newPassword = React.useRef<HTMLInputElement>(null);
   const newPassword2 = React.useRef<HTMLInputElement>(null);
-  const code = String(QueryString.parse(p.location.search).code!);
+  const code = String(QueryString.parse(location.search).code!);
 
   function handleSubmit(e: React.FormEvent<any>) {
 
@@ -40,7 +41,7 @@ export default function ResetPassword(p: RouteComponentProps<{}>) {
 
           setSuccess(true);
           //Navigator.resetUI();
-          AppContext.history.push("~/auth/ResetPassword?code=OK");
+          AppContext.navigate("/auth/ResetPassword?code=OK");
         })
         .catch((e: ValidationError) => {
           if (e.modelState)

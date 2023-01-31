@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, ajaxGetRaw } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -16,14 +17,14 @@ import ProfilePhoto, { urlProviders } from './Templates/ProfilePhoto';
 import * as AppContext from "@framework/AppContext"
 import { TypeaheadOptions } from '../../Signum.React/Scripts/Components/Typeahead';
 
-export function start(options: { routes: JSX.Element[], adGroups: boolean }) {
+export function start(options: { routes: RouteObject[], adGroups: boolean }) {
   if (window.__azureApplicationId) {
     urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
       var oid =
         (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
         tryGetMixin(u, UserADMixin)?.oID;
 
-      return oid == null ? null : AppContext.toAbsoluteUrl("~/api/azureUserPhoto/" + size + "/" + oid);
+      return oid == null ? null : AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
     })
   }
 
@@ -35,9 +36,9 @@ export function start(options: { routes: JSX.Element[], adGroups: boolean }) {
       return null;
     var url = "";
     if (UserEntity.isLite(u))
-      url = AppContext.toAbsoluteUrl("~/api/adThumbnailphoto/" + ((u as Lite<UserEntity>).model as UserLiteModel)?.userName);
+      url = AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + ((u as Lite<UserEntity>).model as UserLiteModel)?.userName);
     else
-      url = AppContext.toAbsoluteUrl("~/api/adThumbnailphoto/" + (u as UserEntity).userName);
+      url = AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
     return url;
   });
 
@@ -220,15 +221,15 @@ export function importADUser(text: string): Promise<Lite<UserEntity> | undefined
 export module API {
 
   export function findADUsers(request: Finder.API.AutocompleteRequest, signal?: AbortSignal): Promise<ActiveDirectoryUser[]> {
-    return ajaxGet({ url: "~/api/findADUsers?" + QueryString.stringify({ ...request }), signal });
+    return ajaxGet({ url: "/api/findADUsers?" + QueryString.stringify({ ...request }), signal });
   }
 
   export function createADUser(model: ActiveDirectoryUser): Promise<Lite<UserEntity>> {
-    return ajaxPost({ url: `~/api/createADUser` }, model);
+    return ajaxPost({ url: `/api/createADUser` }, model);
   }
 
   export function createADGroup(request: ADGroupRequest): Promise<Lite<ADGroupEntity>> {
-    return ajaxPost({ url: `~/api/createADGroup` }, request);
+    return ajaxPost({ url: `/api/createADGroup` }, request);
   }
 }
 

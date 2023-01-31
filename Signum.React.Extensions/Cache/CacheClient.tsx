@@ -1,18 +1,19 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { CachePermission } from './Signum.Entities.Cache'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 
 
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/cache/statistics" onImportModule={() => import("./CacheStatisticsPage")} />);
+export function start(options: { routes: RouteObject[] }) {
+  options.routes.push({ path: "/cache/statistics", element: <ImportComponent onImport={() => import("./CacheStatisticsPage")} /> });
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(CachePermission.InvalidateCache),
     key: "ViewCache",
-    onClick: () => Promise.resolve("~/cache/statistics")
+    onClick: () => Promise.resolve("/cache/statistics")
   });
 }
 
@@ -20,19 +21,19 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
   export function enable(): Promise<void> {
-    return ajaxPost({ url: "~/api/cache/enable" }, undefined);
+    return ajaxPost({ url: "/api/cache/enable" }, undefined);
   }
 
   export function disable(): Promise<void> {
-    return ajaxPost({ url: "~/api/cache/disable" }, undefined);
+    return ajaxPost({ url: "/api/cache/disable" }, undefined);
   }
 
   export function clear(): Promise<void> {
-    return ajaxPost({ url: "~/api/cache/clear" }, undefined);
+    return ajaxPost({ url: "/api/cache/clear" }, undefined);
   }
 
   export function view(): Promise<CacheState> {
-    return ajaxGet({ url: "~/api/cache/view" });
+    return ajaxGet({ url: "/api/cache/view" });
   }
 }
 

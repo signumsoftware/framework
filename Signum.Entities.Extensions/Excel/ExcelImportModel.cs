@@ -37,8 +37,8 @@ public class ImportExcelModel : ModelEntity
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(MatchByColumn) && MatchByColumn == null && (Mode == ImportExcelMode.Update || Mode == ImportExcelMode.InsertOrUpdate || Mode == ImportExcelMode.Insert && Collections.Count > 0))
-            return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Mode), Mode.NiceToString());
+        if (pi.Name == nameof(MatchByColumn))
+            return (pi, MatchByColumn).IsSetOnlyWhen(Mode == ImportExcelMode.Update || Mode == ImportExcelMode.InsertOrUpdate || Mode == ImportExcelMode.Insert && Collections.Count > 0);
 
         return base.PropertyValidation(pi);
     }
@@ -54,8 +54,8 @@ public class CollectionElementEmbedded : EmbeddedEntity
     {
         var p = this.GetParentEntity<ImportExcelModel>();
 
-        if (pi.Name == nameof(MatchByColumn) && MatchByColumn == null && (p.Mode == ImportExcelMode.Update || p.Mode == ImportExcelMode.InsertOrUpdate || p.Mode == ImportExcelMode.Insert && this != p.Collections.Last()))
-            return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => p.Mode), p.Mode.NiceToString());
+        if (pi.Name == nameof(MatchByColumn))
+            return (pi, MatchByColumn).IsSetOnlyWhen(p.Mode == ImportExcelMode.Update || p.Mode == ImportExcelMode.InsertOrUpdate || p.Mode == ImportExcelMode.Insert && this != p.Collections.Last());
 
         return base.PropertyValidation(pi);
     }

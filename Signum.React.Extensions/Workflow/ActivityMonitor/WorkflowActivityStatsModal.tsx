@@ -13,6 +13,7 @@ import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';
 import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { toFilterOptions, isAggregate } from '@framework/Finder';
+import { toAbsoluteUrl } from '@framework/AppContext';
 
 interface WorkflowActivityStatsModalProps extends IModalProps<undefined> {
   stats: WorkflowActivityStats;
@@ -72,7 +73,7 @@ const [show, setShow] = React.useState<boolean>(true);
     e.preventDefault();
 
     Navigator.API.fetch(p.stats.workflowActivity)
-      .then(wa => window.open(WorkflowClient.workflowActivityMonitorUrl(toLite(wa.subWorkflow!.workflow!))));
+      .then(wa => window.open(toAbsoluteUrl(WorkflowClient.workflowActivityMonitorUrl(toLite(wa.subWorkflow!.workflow!)))));
   }
 
   var ctx = new StyleContext(undefined, { labelColumns: 3 });

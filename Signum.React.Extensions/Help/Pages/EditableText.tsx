@@ -38,10 +38,10 @@ export function MarkdownText({ text, className }: { text: string | null | undefi
     var a = e.target as HTMLAnchorElement;
     if (a?.nodeName == "A" && !e.ctrlKey && e.button == 0) {
       var href = a.getAttribute("href");
-      if (href != null && href.startsWith(AppContext.toAbsoluteUrl("~/"))) {
+      if (href != null && href.startsWith(AppContext.toAbsoluteUrl("/"))) {
         e.preventDefault();
         e.stopPropagation();
-        AppContext.history.push(href);
+        AppContext.navigate(href);
       }
     }
   }

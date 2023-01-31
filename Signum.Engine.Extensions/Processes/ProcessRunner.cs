@@ -132,7 +132,7 @@ public static class ProcessRunner
 
         using (ExecutionContext.SuppressFlow())
             Task.Factory.StartNew(() =>
-            {
+            {  
                 var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database;
 
                 SystemEventLogLogic.Log("Start ProcessRunner");
@@ -309,6 +309,16 @@ public static class ProcessRunner
                         running = false;
                     }
                 }
+
+                if (exception != null)
+                {
+                    Task.Run(() =>
+                    {
+                        Thread.Sleep(1 * 60 * 1000);
+                        StartRunningProcesses();
+                    });
+                }
+
             }, TaskCreationOptions.LongRunning);
     }
 

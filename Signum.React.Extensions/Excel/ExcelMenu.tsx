@@ -126,7 +126,7 @@ function addDropdownDividers(elements: (React.ReactElement | React.ReactElement[
 
 
 export async function selectPagination(sc: SearchControlLoaded): Promise<QueryRequest | undefined> {
-  var request = sc.getQueryRequest();
+  var request = sc.getQueryRequest(true);
 
   const rt = sc.state.resultTable;
 

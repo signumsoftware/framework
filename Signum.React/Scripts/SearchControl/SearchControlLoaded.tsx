@@ -231,11 +231,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return p.showHeader == true && (p.showFilterButton || p.showFilters);
   }
 
-  getQueryRequest(): QueryRequest {
+  getQueryRequest(avoidHiddenColumns?: boolean): QueryRequest {
     const fo = this.props.findOptions;
     const qs = this.props.querySettings;
 
-    return Finder.getQueryRequest(fo, qs);
+    return Finder.getQueryRequest(fo, qs, avoidHiddenColumns);
   }
 
   getSummaryQueryRequest(): QueryRequest | null {
@@ -830,9 +830,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const path = Finder.findOptionsPath(findOptions, this.extraUrlParams);
 
     if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
-      window.open(path);
+      window.open(AppContext.toAbsoluteUrl(path));
     else
-      AppContext.history.push(path);
+      AppContext.navigate(path);
   };
 
   handleViewModeClick = (ev: React.MouseEvent<any>) => {
@@ -968,10 +968,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const rt = this.state.resultTable;
 
+    let value = cm.rowIndex == undefined || rt == null || token == null ? (op == "IsIn" ? [] : undefined) : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)]
+
+    if (token?.filterType == "Embedded" && value != null) {
+      value = null;
+      op = "DistinctTo";
+    }
+
     fo.filterOptions.push({
       token: newToken!,
       operation: op,
-      value: cm.rowIndex == undefined || rt == null || token == null ? (op == "IsIn" ? [] : undefined) : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
+      value: value,
       frozen: false
     });
 
@@ -1020,29 +1027,48 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
-  handleGroupByThisColumn = () => {
+  handleGroupByThisColumn = async () => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
+
     const col = fo.columnOptions[cm.columnIndex!];
 
-    Finder.API.parseTokens(fo.queryKey, [{ token: "Count", options: SubTokensOptions.CanAggregate }])
-      .then(tokens => {
+    fo.columnOptions.clear();
 
-        var count = tokens[0];
-        fo.columnOptions.clear();
-        fo.columnOptions.push({ token: count, displayName: count.niceName });
-        fo.columnOptions.push(col);
-        fo.groupResults = true;
-        fo.orderOptions.clear();
-        fo.orderOptions.push({ token: count, orderType: "Descending" })
+    var defAggregate = this.props.querySettings?.defaultAggregates;
 
-        this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+    var parsedTokens: QueryToken[] = [];
+    if (defAggregate) {
+      parsedTokens = await Finder.API.parseTokens(fo.queryKey, [
+        ...defAggregate.map(a => ({ token: a.token.toString(), options: SubTokensOptions.CanAggregate })),
+        ...defAggregate.filter(a => a.summaryToken != null).map(a => ({ token: a.summaryToken!.toString(), options: SubTokensOptions.CanAggregate }))
+      ].distinctBy(a => a.token));
 
-        if (this.props.searchOnLoad)
-          this.doSearchPage1();
+      var ptDic = parsedTokens.toObject(a => a.fullKey);
 
-      });
-  
+      fo.columnOptions.push(...defAggregate.map(t => ({
+        token: ptDic[t.token.toString()],
+        summaryToken: t.summaryToken != null ? ptDic[t.summaryToken!.toString()] : undefined,
+        displayName: (typeof t.displayName == "function" ? t.displayName() : t.displayName) ?? ptDic[t.token.toString()].niceName,
+        hiddenColumn: t.hiddenColumn,
+      })));
+    }
+    else {
+      parsedTokens = await Finder.API.parseTokens(fo.queryKey, [
+        { token: "Count", options: SubTokensOptions.CanAggregate }
+      ]);
+      fo.columnOptions.push({ token: parsedTokens[0], displayName: parsedTokens[0].niceName });
+    }
+
+    fo.columnOptions.push(col);
+    fo.groupResults = true;
+    fo.orderOptions.clear();
+    fo.orderOptions.push(...parsedTokens.map(t => softCast<OrderOptionParsed>({ token: t, orderType: "Descending" })));
+
+    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+
+    if (this.props.searchOnLoad)
+      this.doSearchPage1();
   }
 
   handleRestoreDefaultColumn = () => {
@@ -1071,7 +1097,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fo = this.props.findOptions;
     function isColumnFilterable(columnIndex: number) {
       var token = fo.columnOptions[columnIndex].token;
-      return token && token.filterType != "Embedded" && token.filterType != undefined && token.format != "Password";
+      return token && token.filterType != undefined && token.format != "Password";
     }
 
     function isColumnGroupable(columnIndex: number) {
@@ -1329,12 +1355,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <span className="text-muted me-1">{prefix}</span>
 
           {formatter.formatter(val, {
-          columns: rt.columns,
-          row: rt.rows[0],
-          rowIndex: 0,
-          refresh: () => scl.dataChanged(),
-          systemTime: scl.props.findOptions.systemTime
-        }, summaryToken)}</div>
+            columns: rt.columns,
+            row: rt.rows[0],
+            rowIndex: 0,
+            refresh: () => scl.dataChanged(),
+            systemTime: scl.props.findOptions.systemTime,
+            searchControl: scl,
+          }, summaryToken)}
+        </div>
       );
     }
 
@@ -1391,6 +1419,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             onDragOver={e => this.handlerHeaderDragOver(e, i)}
             onDragEnter={e => this.handlerHeaderDragOver(e, i)}
             onDrop={this.handleHeaderDrop}>
+            {getSummary(co.summaryToken)}
             <div className="d-flex" style={{ alignItems: "center" }}>
               {this.orderIcon(co)}
               {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
@@ -1399,7 +1428,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                   title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
               {co.displayName}
             </div>
-            {getSummary(co.summaryToken)}
           </th>
         )}
         {allSmall && <th></th>}
@@ -1558,9 +1586,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var vp = getViewPromise && getViewPromise(null);
         var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
         if (this.props.view == "InPlace" && !isWindowsOpen)
-          AppContext.history.push(url);
+          AppContext.navigate(url);
         else
-          window.open(url);
+          window.open(AppContext.toAbsoluteUrl(url));
       }
       else {
         Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
@@ -1653,6 +1681,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       columns: resultColumns,
       row: row,
       rowIndex: rowIndex,
+      searchControl: this,
     };
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
@@ -1870,6 +1899,38 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     else {
       return m;
     }
+  }
+
+  getRowValue<T = unknown>(ctx: Finder.CellFormatterContext, token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
+
+    var result = this.tryGetRowValue(ctx, token, automaticEntityPrefix, true);
+
+    return result!.value;
+  }
+
+  tryGetRowValue<T = unknown>(ctx: Finder.CellFormatterContext, token: QueryTokenString<T> | string, automaticEntityPrefix = true, throwError = false): { value: Finder.AddToLite<T> | undefined } | undefined {
+
+    const tokenName = token.toString();
+
+    const sc = this;
+    const colIndex = ctx.columns.indexOf(tokenName);
+    if (colIndex != -1)
+      return { value: ctx.row.columns[colIndex] };
+
+    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
+    if (filter != null)
+      return { value: filter?.value };
+
+    if (automaticEntityPrefix) {
+      var result = this.tryGetRowValue(ctx, tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false, false);
+      if (result != null)
+        return result as any;
+    }
+
+    if (throwError)
+      throw new Error(`No column '${token}' found`);
+
+    return undefined;
   }
 
   getSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {

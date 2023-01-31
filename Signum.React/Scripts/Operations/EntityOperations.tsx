@@ -270,7 +270,6 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
 
   function handleOnClick(event: React.MouseEvent<any>) {
     eoc.event = event;
-    event.persist();
     if (onOperationClick)
       onOperationClick(eoc, event);
     else

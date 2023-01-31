@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as History from 'history'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
@@ -7,7 +6,7 @@ import { JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { SchemaMapInfo, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams, Location } from "react-router";
 import "./schemaMap.css"
 import { useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
@@ -28,7 +27,7 @@ interface Tables {
   [tableName: string]: { x: number; y: number }
 }
 
-function getParsedQuery(location: History.Location): ParsedQueryString {
+function getParsedQuery(location: Location): ParsedQueryString {
 
   const result: ParsedQueryString = { tables: {} };
 
@@ -54,7 +53,8 @@ function getParsedQuery(location: History.Location): ParsedQueryString {
 }
 
 
-export default function SchemaMapPage(p: RouteComponentProps<{}>) {
+export default function SchemaMapPage() {
+  const location = useLocation();
 
   const [filter, setFilter] = React.useState<string>("");
   const [color, setColor] = React.useState<string>("");
@@ -66,7 +66,7 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
   React.useEffect(() => {
     MapClient.API.types()
       .then(smi => {
-        const parsedQuery = getParsedQuery(p.location);
+        const parsedQuery = getParsedQuery(location);
         MapClient.getAllProviders(smi).then(providers => {
 
           const missingProviders = smi.providers.filter(p => !providers.some(p2 => p2.name == p.name));
@@ -109,9 +109,9 @@ export default function SchemaMapPage(p: RouteComponentProps<{}>) {
       ...tables, filter: filter, color: color
     };
 
-    const url = AppContext.history.createHref({ pathname: "~/map", search: QueryString.stringify(query) });
+    const url = "/map?" + QueryString.stringify(query);
 
-    window.open(url);
+    window.open(AppContext.toAbsoluteUrl(url));
   }
 
   function renderFilter() {

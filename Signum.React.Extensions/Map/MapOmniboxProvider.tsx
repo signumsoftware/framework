@@ -31,7 +31,7 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
     if (result.keywordMatch == undefined)
       return undefined;
 
-    return Promise.resolve("~/Map" + (result.typeName ? "/" + result.typeName : ""));
+    return Promise.resolve("/Map" + (result.typeName ? "/" + result.typeName : ""));
   }
 
   toString(result: MapOmniboxResult) {

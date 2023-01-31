@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { Dropdown } from 'react-bootstrap'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -19,16 +20,16 @@ import {
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import ContextMenu from '@framework/SearchControl/ContextMenu';
 import { ContextualItemsContext, MenuItemBlock, onContextualItems } from '@framework/SearchControl/ContextualItems';
 import { SearchControlLoaded } from '@framework/Search';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
   UserAssetsClient.start({ routes: options.routes });
   UserAssetsClient.registerExportAssertLink(UserQueryEntity);
 
-  options.routes.push(<ImportRoute path="~/userQuery/:userQueryId/:entity?" onImportModule={() => import("./Templates/UserQueryPage")} />);
+  options.routes.push({ path: "/userQuery/:userQueryId/:entity?", element: <ImportComponent onImport={() => import("./Templates/UserQueryPage")} /> });
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
     if (!ctx.searchControl.props.showBarExtension ||
@@ -49,7 +50,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     return promise.then(uqs =>
       uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
-        window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
+        window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
       }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue" })));
   });
 
@@ -57,7 +58,7 @@ export function start(options: { routes: JSX.Element[] }) {
     e => {
       Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
         if (uq.entityType == undefined)
-          window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}`));
+          window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}`));
         else
           Navigator.API.fetch(uq.entityType)
             .then(t => Finder.find({ queryName: t.cleanName }))
@@ -65,7 +66,7 @@ export function start(options: { routes: JSX.Element[] }) {
               if (!lite)
                 return;
 
-              window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
+              window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(lite)}`));
             });
       });
     }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info" }));
@@ -80,7 +81,7 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export function userQueryUrl(uq: Lite<UserQueryEntity>): any {
-  return AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}`)
+  return `/userQuery/${uq.id}`;
 }
 
 
@@ -197,15 +198,15 @@ export module Converter {
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
-    return ajaxGet({ url: "~/api/userQueries/forEntityType/" + type });
+    return ajaxGet({ url: "/api/userQueries/forEntityType/" + type });
   }
 
   export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
-    return ajaxGet({ url: "~/api/userQueries/forQuery/" + queryKey });
+    return ajaxGet({ url: "/api/userQueries/forQuery/" + queryKey });
   }
 
   export function forQueryAppendFilters(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
-    return ajaxGet({ url: "~/api/userQueries/forQueryAppendFilters/" + queryKey });
+    return ajaxGet({ url: "/api/userQueries/forQueryAppendFilters/" + queryKey });
   }
 }
 

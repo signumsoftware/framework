@@ -1,4 +1,5 @@
 import * as React from "react";
+import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
@@ -10,7 +11,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
@@ -25,11 +26,9 @@ import {
   Anonymous, toLuxonDurationFormat, timeToString, toFormatWithFixes
 } from './Reflection';
 
-import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded, { SearchControlMobileOptions } from './SearchControl/SearchControlLoaded';
-import { ImportRoute } from "./AsyncImport";
-import { SearchControl } from "./Search";
+import { ImportComponent } from './ImportComponent'
 import { ButtonBarElement } from "./TypeContext";
 import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
@@ -37,9 +36,6 @@ import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
-import { Search } from "history";
-import { parse } from "@fortawesome/fontawesome-svg-core";
-import { faUnderline } from "@fortawesome/free-solid-svg-icons";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -48,8 +44,8 @@ export function clearQuerySettings() {
   Dic.clear(querySettings);
 }
 
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => Options.getSearchPage()} />);
+export function start(options: { routes: RouteObject[] }) {
+  options.routes.push({ path: "/find/:queryName", element: <ImportComponent onImport={() => Options.getSearchPage()} /> });
   AppContext.clearSettingsActions.push(clearContextualItems);
   AppContext.clearSettingsActions.push(clearQuerySettings);
   AppContext.clearSettingsActions.push(clearQueryDescriptionCache);
@@ -168,9 +164,9 @@ export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promi
 }
 
 
-export function findMany<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T>[] | undefined>;
-export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T>[] | undefined>;
-export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
+export function findMany<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
+export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
+export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptionsMany): Promise<Lite<Entity>[] | undefined> {
 
   const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
     { queryName: findOptions as Type<any> } as FindOptions;
@@ -183,7 +179,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
   return defaultFindMany(fo, modalOptions);
 }
 
-export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
+export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<Entity>[] | undefined> {
   let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => Options.getSearchModal()
     .then(SearchModal => SearchModal.default.openMany(fo, modalOptions))
     .then(pair => {
@@ -213,7 +209,7 @@ export function defaultFindMany(fo: FindOptions, modalOptions?: ModalFindOptions
   return getPromiseSearchModal();
 }
 
-export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
+export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
 
   var qs = getSettings(fo.queryName);
 
@@ -224,7 +220,7 @@ export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): 
 export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
   e.preventDefault();
   if (e.ctrlKey || e.button == 1)
-    window.open(findOptionsPath(findOptions));
+    window.open(AppContext.toAbsoluteUrl(findOptionsPath(findOptions)));
   else
     explore(findOptions);
 }
@@ -242,8 +238,7 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
 export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
   const query = findOptionsPathQuery(fo, extra);
-
-  return AppContext.history.createHref({ pathname: "~/find/" + getQueryKey(fo.queryName), search: QueryString.stringify(query) });
+  return "/find/" + getQueryKey(fo.queryName) + "?" + QueryString.stringify(query);
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
@@ -806,14 +801,14 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
   });
 }
 
-export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings): QueryRequest {
+export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings, avoidHiddenColumns?: boolean): QueryRequest {
 
   return {
     queryKey: fo.queryKey,
     groupResults: fo.groupResults,
     filters: toFilterRequests(fo.filterOptions),
     columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-      .concat((!fo.groupResults && qs?.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
+      .concat((!fo.groupResults && !avoidHiddenColumns && qs?.hiddenColumns || []).map(co => ({ token: co.token.toString(), displayName: "" }))),
     orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
     pagination: fo.pagination,
     systemTime: fo.systemTime,
@@ -1420,7 +1415,7 @@ export function inDBList<R>(entity: Entity | Lite<Entity>, token: QueryTokenStri
   var fo: FindOptions = {
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
-    pagination: { mode: "Firsts", elementsPerPage: 1 },
+    pagination: { mode: "All" },
     columnOptions: [{ token: token }],
     columnOptionsMode: "ReplaceAll",
   };
@@ -1576,46 +1571,46 @@ export function decompress(rt: ResultTable): ResultTable {
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
-    return ajaxGet({ url: "~/api/query/description/" + queryKey });
+    return ajaxGet({ url: "/api/query/description/" + queryKey });
   }
 
   export function fetchQueryEntity(queryKey: string): Promise<QueryEntity> {
-    return ajaxGet({ url: "~/api/query/queryEntity/" + queryKey });
+    return ajaxGet({ url: "/api/query/queryEntity/" + queryKey });
   }
 
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
   
-    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, request)
+    return ajaxPost<ResultTable>({ url: "/api/query/executeQuery", signal }, request)
       .then(rt => decompress(rt));
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
-    return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
+    return ajaxPost({ url: "/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
   export function fetchLites(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost({ url: "~/api/query/lites" }, request);
+    return ajaxPost({ url: "/api/query/lites" }, request);
   }
 
   export function fetchEntities(request: QueryEntitiesRequest): Promise<Entity[]>{
-    return ajaxPost({ url: "~/api/query/entities" }, request);
+    return ajaxPost({ url: "/api/query/entities" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
     return ajaxGet({
-      url: "~/api/query/allLites?" + QueryString.stringify(request)
+      url: "/api/query/allLites?" + QueryString.stringify(request)
     });
   }
 
   export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
     return ajaxGet({
-      url: "~/api/query/findTypeLike?" + QueryString.stringify(request)
+      url: "/api/query/findTypeLike?" + QueryString.stringify(request)
     });
   }
 
   export function findLiteLike(request: AutocompleteRequest, signal?: AbortSignal): Promise<Lite<Entity>[]> {
-    return ajaxGet({ url: "~/api/query/findLiteLike?" + QueryString.stringify({ ...request }), signal });
+    return ajaxGet({ url: "/api/query/findLiteLike?" + QueryString.stringify({ ...request }), signal });
   }
 
   export interface AutocompleteRequest {
@@ -1625,11 +1620,11 @@ export module API {
   }
 
   export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
-    return ajaxPost({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
+    return ajaxPost({ url: "/api/query/parseTokens" }, { queryKey, tokens });
   }
 
   export function getSubTokens(queryKey: string, token: QueryToken | undefined, options: SubTokensOptions): Promise<QueryToken[]> {
-    return ajaxPost<QueryToken[]>({ url: "~/api/query/subTokens" }, { queryKey, token: token == undefined ? undefined : token.fullKey, options }).then(list => {
+    return ajaxPost<QueryToken[]>({ url: "/api/query/subTokens" }, { queryKey, token: token == undefined ? undefined : token.fullKey, options }).then(list => {
 
       if (token == undefined) {
         const entity = list.filter(a => a.key == "Entity").single();
@@ -1873,6 +1868,7 @@ export interface QuerySettings {
   allowSystemTime?: boolean;
   defaultOrders?: OrderOption[];
   defaultFilters?: FilterOption[];
+  defaultAggregates?: ColumnOption[];
   hiddenColumns?: ColumnOption[];
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
@@ -1920,6 +1916,7 @@ export interface CellFormatterContext {
   columns: string[];
   row: ResultRow;
   rowIndex: number;
+  searchControl?: SearchControlLoaded
 }
 
 

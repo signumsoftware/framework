@@ -4,38 +4,37 @@ import * as d3 from 'd3'
 import { } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { API, HeavyProfilerEntry, StackTraceTS } from '../ProfilerClient'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 import "./Profiler.css"
 import { useAPI, useSize, useAPIWithReload } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 
-interface HeavyEntryProps extends RouteComponentProps<{ selectedIndex: string }> {
 
-}
 
-export default function HeavyEntry(p: HeavyEntryProps) {
+export default function HeavyEntry() {
+  const params = useParams() as { selectedIndex: string };
 
-  const selectedIndex = p.match.params.selectedIndex;
+  const selectedIndex = params.selectedIndex;
   const rootIndex = selectedIndex.tryBefore("-") ?? selectedIndex;
   const [entries, reloadEntries] = useAPIWithReload(() => API.Heavy.details(rootIndex), [rootIndex]);
   const stackTrace = useAPI(() => API.Heavy.stackTrace(selectedIndex), [selectedIndex]);
   const [asyncDepth, setAsyncDepth] = React.useState<boolean>(false);
 
   function handleDownload() {
-    let selectedIndex = p.match.params.selectedIndex;
+    let selectedIndex = params.selectedIndex;
     API.Heavy.download(selectedIndex.tryBefore("-") ?? selectedIndex);
   }
 
-  const index = p.match.params.selectedIndex;
+  const index = params.selectedIndex;
   useTitle("Heavy Profiler > Entry " + index);
 
   if (entries == undefined)
-    return <h3 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index} (loading...) </h3>;
+    return <h3 className="display-6"><Link to="/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index} (loading...) </h3>;
 
-  let current = entries.filter(a => a.fullIndex == p.match.params.selectedIndex).single();
+  let current = entries.filter(a => a.fullIndex == params.selectedIndex).single();
   return (
     <div>
-      <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index}</h2>
+      <h2 className="display-6"><Link to="/profiler/heavy">Heavy Profiler</Link> {">"} Entry {index}</h2>
       <label><input type="checkbox" className="form-check-input" checked={asyncDepth} onChange={a => setAsyncDepth(a.currentTarget.checked)} />Async Stack</label>
       <br />
       {entries && <HeavyProfilerDetailsD3 entries={entries} selected={current} asyncDepth={asyncDepth} />}
@@ -217,13 +216,13 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
 
       }
       else {
-        let url = "~/profiler/heavy/entry/" + d.fullIndex;
+        let url = "/profiler/heavy/entry/" + d.fullIndex;
 
         if (e.ctrlKey) {
           window.open(AppContext.toAbsoluteUrl(url));
         }
         else {
-          AppContext.history.push(url);
+          AppContext.navigate(url);
         }
       }
     }

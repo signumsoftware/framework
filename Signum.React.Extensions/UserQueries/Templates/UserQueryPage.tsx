@@ -9,22 +9,21 @@ import { getQueryNiceName, newLite } from '@framework/Reflection'
 import SearchControl, { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { UserQueryEntity } from '../Signum.Entities.UserQueries'
 import * as UserQueryClient from '../UserQueryClient'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { useState } from 'react'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import SearchPage from '@framework/SearchControl/SearchPage'
 import { useTitle } from '../../../Signum.React/Scripts/AppContext'
 
-interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; entity?: string }> {
 
-}
 
-export default function UserQueryPage(p: UserQueryPageProps) {
+export default function UserQueryPage() {
+  const params = useParams() as { userQueryId: string; entity?: string };
 
   const [currentUserQuery, setCurrentUserQuery] = useState<UserQueryEntity | null>(null);
 
-  const { userQueryId, entity } = p.match.params;
+  const { userQueryId, entity } = params;
 
   const forceUpdate = useForceUpdate();
   

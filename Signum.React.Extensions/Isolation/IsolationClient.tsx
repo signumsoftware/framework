@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import { IsolationEntity, IsolationMessage } from './Signum.Entities.Isolation'
 import { Lite, liteKey, ModifiableEntity } from '@framework/Signum.Entities'
@@ -7,7 +8,7 @@ import { onWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { IsolationWidget } from './IsolationWidget'
 
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   onWidgets.push(getIsolationWidget);
 
@@ -59,6 +60,6 @@ export function getIsolationWidget(ctx: WidgetContext<ModifiableEntity>): React.
 
 export module API {
   export function isolations(): Promise<Lite<IsolationEntity>[]> {
-    return ajaxGet({ url: "~/api/isolations" });
+    return ajaxGet({ url: "/api/isolations" });
   }
 }

@@ -16,6 +16,7 @@ class Upgrade_20221012_UpdateNugets2 : CodeUpgradeBase
             file.UpdateNugetReference("Microsoft.TypeScript.MSBuild", "4.8.4");
             file.UpdateNugetReference("Microsoft.NET.Test.Sdk", "17.3.2");
             file.UpdateNugetReference("Selenium.WebDriver", "4.5.0");
+            file.UpdateNugetReference("DocumentFormat.OpenXml", "2.18.0");
         });
     }
 }

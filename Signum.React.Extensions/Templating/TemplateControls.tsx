@@ -184,7 +184,7 @@ function GlobalVariables(p: { onTokenChange: (newToken: GlobalVariable | undefin
 }
 
 function getGlobalVariables(): Promise<Array<GlobalVariable>> {
-  return ajaxGet({ url: `~/api/templating/getGlobalVariables` });
+  return ajaxGet({ url: `/api/templating/getGlobalVariables` });
 }
 
 interface GlobalVariable {

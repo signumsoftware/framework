@@ -1,9 +1,10 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxGet } from '@framework/Services';
 import { SchemaMapInfo, ClientColorProvider } from './Schema/SchemaMap'
 import { OperationMapInfo } from './Operation/OperationMap'
 import { } from './Signum.Entities.Map'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import * as Navigator from "@framework/Navigator";
 import * as AppContext from "@framework/AppContext";
 
@@ -13,11 +14,11 @@ export function getAllProviders(info: SchemaMapInfo): Promise<ClientColorProvide
   return Promise.all(getProviders.map(func => func(info))).then(result => result.filter(ps => !!ps).flatMap(ps => ps).filter(p => !!p));
 }
 
-export function start(options: { routes: JSX.Element[], auth: boolean; cache: boolean; disconnected: boolean; isolation: boolean }) {
+export function start(options: { routes: RouteObject[], auth: boolean; cache: boolean; disconnected: boolean; isolation: boolean }) {
 
   options.routes.push(
-    <ImportRoute path="~/map" exact onImportModule={() => import("./Schema/SchemaMapPage")} />,
-    <ImportRoute path="~/map/:type" onImportModule={() => import("./Operation/OperationMapPage")} />
+    { path: "/map", element: <ImportComponent onImport={() => import("./Schema/SchemaMapPage")} /> },
+    { path: "/map/:type", element: <ImportComponent onImport={() => import("./Operation/OperationMapPage")} /> }
   );
 
   AppContext.clearSettingsActions.push(clearProviders);
@@ -39,10 +40,10 @@ export function clearProviders() {
 
 export namespace API {
   export function types(): Promise<SchemaMapInfo> {
-    return ajaxGet({ url: "~/api/map/types" });
+    return ajaxGet({ url: "/api/map/types" });
   }
 
   export function operations(typeName: string): Promise<OperationMapInfo> {
-    return ajaxGet({ url: "~/api/map/operations/" + typeName });
+    return ajaxGet({ url: "/api/map/operations/" + typeName });
   }
 }

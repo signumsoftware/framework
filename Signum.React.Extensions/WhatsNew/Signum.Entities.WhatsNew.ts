@@ -18,6 +18,7 @@ export interface WhatsNewEntity extends Entities.Entity {
   attachment: Entities.MList<Files.FilePathEmbedded>;
   creationDate: string /*DateTime*/;
   status: WhatsNewState;
+  related: Entities.Lite<Entities.Entity> | null;
 }
 
 export module WhatsNewFileType {
@@ -55,6 +56,7 @@ export module WhatsNewMessage {
   export const BackToOverview = new MessageKey("WhatsNewMessage", "BackToOverview");
   export const NewsPage = new MessageKey("WhatsNewMessage", "NewsPage");
   export const Preview = new MessageKey("WhatsNewMessage", "Preview");
+  export const IsRead = new MessageKey("WhatsNewMessage", "IsRead");
 }
 
 export const WhatsNewMessageEmbedded = new Type<WhatsNewMessageEmbedded>("WhatsNewMessageEmbedded");

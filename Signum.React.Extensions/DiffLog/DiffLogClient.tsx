@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { Link } from 'react-router-dom';
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -9,7 +10,7 @@ import { Lite, Entity, getToString } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import * as QuickLinks from '@framework/QuickLinks'
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.Entities.DiffLog';
-import { ImportRoute } from '@framework/AsyncImport';
+import { ImportComponent } from '@framework/ImportComponent'
 import { getTypeInfo, getTypeInfos, QueryTokenString } from '@framework/Reflection';
 import { EntityLink, SearchControl, SearchControlLoaded } from '@framework/Search';
 import { liteKey } from '@framework/Signum.Entities';
@@ -22,7 +23,7 @@ import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
 import { TimeMachineModal } from './Templates/TimeMachinePage';
 import { QueryString } from '@framework/QueryString';
 
-export function start(options: { routes: JSX.Element[], timeMachine: boolean }) {
+export function start(options: { routes: RouteObject[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
 
   if (options.timeMachine) {
@@ -69,7 +70,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
 
     SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 
-    options.routes.push(<ImportRoute path="~/timeMachine/:type/:id" onImportModule={() => import("./Templates/TimeMachinePage")} />);
+    options.routes.push({ path: "/timeMachine/:type/:id", element: <ImportComponent onImport={() => import("./Templates/TimeMachinePage")} /> });
 
     Finder.entityFormatRules.push({
       name: "ViewHistory",
@@ -104,21 +105,21 @@ function isSystemVersioned(tr?: TypeReference) {
 }
 
 export function timeMachineRoute(lite: Lite<Entity>) {
-  return AppContext.toAbsoluteUrl("~/timeMachine/" + lite.EntityType + "/" + lite.id);
+  return "/timeMachine/" + lite.EntityType + "/" + lite.id;
 }
 
 export namespace API {
 
   export function getPreviousOperationLog(id: string | number): Promise<PreviousLog> {
-    return ajaxGet({ url: "~/api/diffLog/previous/" + id });
+    return ajaxGet({ url: "/api/diffLog/previous/" + id });
   }
 
   export function getNextOperationLog(id: string | number): Promise<NextLog> {
-    return ajaxGet({ url: "~/api/diffLog/next/" + id });
+    return ajaxGet({ url: "/api/diffLog/next/" + id });
   }
 
   export function getEntityDump(lite: Lite<Entity>, asOf: string,): Promise<EntityDump> {
-    return ajaxGet({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?` + QueryString.stringify({asOf}) });
+    return ajaxGet({ url: `/api/retrieveVersion/${lite.EntityType}/${lite.id}?` + QueryString.stringify({asOf}) });
   }
 }
 
@@ -149,7 +150,7 @@ export default function TimeMachineLink(p : TimeMachineLinkProps){
 
     event.preventDefault();
 
-    window.open(timeMachineRoute(lite));
+    window.open(AppContext.toAbsoluteUrl(timeMachineRoute(lite)));
   }
   const { lite, inSearch, children, ...htmlAtts } = p;
 

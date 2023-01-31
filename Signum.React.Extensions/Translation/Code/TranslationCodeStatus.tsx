@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Link, RouteComponentProps } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { Dic } from '@framework/Globals'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { API, TranslationFileStatus } from '../TranslationClient'
@@ -7,7 +7,7 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 import "../Translation.css"
 import { useAPI } from '@framework/Hooks'
 
-export default function TranslationCodeStatus(p: RouteComponentProps<{}>) {
+export default function TranslationCodeStatus() {
 
   const result = useAPI(() => API.status(), []);
 
@@ -48,15 +48,15 @@ function TranslationTable({ result }: { result: TranslationFileStatus[] }) {
           <tr key={assembly}>
             <th> {assembly}</th>
             <td>
-              <Link to={`~/translation/view/${encodeDots(assembly)}`}>{TranslationMessage.View.niceToString()}</Link>
+              <Link to={`/translation/view/${encodeDots(assembly)}`}>{TranslationMessage.View.niceToString()}</Link>
             </td>
             {cultures.map(culture =>
               <td key={culture}>
-                <Link to={`~/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
+                <Link to={`/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
                 <br />
                 {
                   !tree[assembly][culture].isDefault &&
-                  <Link to={`~/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`} className={"status-" + tree[assembly][culture].status}>
+                  <Link to={`/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`} className={"status-" + tree[assembly][culture].status}>
                     {TranslationMessage.Sync.niceToString()}
                   </Link>
                 }

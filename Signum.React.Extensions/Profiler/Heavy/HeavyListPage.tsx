@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as d3 from 'd3'
 import * as AppContext from '@framework/AppContext'
@@ -10,11 +10,9 @@ import { useTitle } from '@framework/AppContext'
 import { classes } from '@framework/Globals'
 import a from 'bpmn-js/lib/features/search'
 
-interface HeavyListProps extends RouteComponentProps<{}> {
 
-}
 
-export default function HeavyList(p: HeavyListProps) {
+export default function HeavyList() {
 
     const[ignoreProfilerHeavyEntries, setIgnoreProfilerHeavyEntries] = React.useState<boolean>(true)
 
@@ -138,12 +136,12 @@ function EntrieListPath({ width, entries }: { width: number, entries: HeavyProfi
   let entryHeight = y(1);
 
   function handleOnClick(e: React.MouseEvent, v: HeavyProfilerEntry) {
-    let url = "~/profiler/heavy/entry/" + v.fullIndex;
+    let url = "/profiler/heavy/entry/" + v.fullIndex;
 
     if (e.ctrlKey) {
       window.open(AppContext.toAbsoluteUrl(url));
     } else {
-      AppContext.history.push(url);
+      AppContext.navigate(url);
     }
   }
 

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite, getToString, EntityControlMessage } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
@@ -31,7 +32,7 @@ export let operations: boolean;
 export let queries: boolean;
 export let permissions: boolean;
 
-export function start(options: { routes: JSX.Element[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }) {
+export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }) {
 
   types = options.types;
   properties = options.properties;
@@ -232,60 +233,60 @@ export function navigatorIsCreable(typeName: PseudoType, options?: Navigator.IsC
 export module API {
 
   export function fetchPermissionRulePack(roleId: number | string): Promise<PermissionRulePack> {
-    return ajaxGet({ url: "~/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });
   }
 
   export function savePermissionRulePack(rules: PermissionRulePack): Promise<void> {
-    return ajaxPost({ url: "~/api/authAdmin/permissionRules" }, rules);
+    return ajaxPost({ url: "/api/authAdmin/permissionRules" }, rules);
   }
 
 
   export function fetchTypeRulePack(roleId: number | string): Promise<TypeRulePack> {
-    return ajaxGet({ url: "~/api/authAdmin/typeRules/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "/api/authAdmin/typeRules/" + roleId, cache: "no-cache" });
   }
 
   export function saveTypeRulePack(rules: TypeRulePack): Promise<void> {
-    return ajaxPost({ url: "~/api/authAdmin/typeRules" }, rules);
+    return ajaxPost({ url: "/api/authAdmin/typeRules" }, rules);
   }
 
 
   export function fetchPropertyRulePack(typeName: string, roleId: number | string): Promise<PropertyRulePack> {
-    return ajaxGet({ url: "~/api/authAdmin/propertyRules/" + typeName + "/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "/api/authAdmin/propertyRules/" + typeName + "/" + roleId, cache: "no-cache" });
   }
 
   export function savePropertyRulePack(rules: PropertyRulePack): Promise<void> {
-    return ajaxPost({ url: "~/api/authAdmin/propertyRules" }, rules);
+    return ajaxPost({ url: "/api/authAdmin/propertyRules" }, rules);
   }
 
 
 
   export function fetchOperationRulePack(typeName: string, roleId: number | string): Promise<OperationRulePack> {
-    return ajaxGet({ url: "~/api/authAdmin/operationRules/" + typeName + "/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "/api/authAdmin/operationRules/" + typeName + "/" + roleId, cache: "no-cache" });
   }
 
   export function saveOperationRulePack(rules: OperationRulePack): Promise<void> {
-    return ajaxPost({ url: "~/api/authAdmin/operationRules" }, rules);
+    return ajaxPost({ url: "/api/authAdmin/operationRules" }, rules);
   }
 
 
 
   export function fetchQueryRulePack(typeName: string, roleId: number | string): Promise<QueryRulePack> {
-    return ajaxGet({ url: "~/api/authAdmin/queryRules/" + typeName + "/" + roleId, cache: "no-cache" });
+    return ajaxGet({ url: "/api/authAdmin/queryRules/" + typeName + "/" + roleId, cache: "no-cache" });
   }
 
   export function saveQueryRulePack(rules: QueryRulePack): Promise<void> {
-    return ajaxPost({ url: "~/api/authAdmin/queryRules" }, rules);
+    return ajaxPost({ url: "/api/authAdmin/queryRules" }, rules);
   }
 
 
 
   export function downloadAuthRules(): void {
-    ajaxGetRaw({ url: "~/api/authAdmin/downloadAuthRules" })
+    ajaxGetRaw({ url: "/api/authAdmin/downloadAuthRules" })
       .then(response => saveFile(response));
   }
 
   export function trivialMergeRole(rule: Lite<RoleEntity>[]): Promise<Lite<RoleEntity>> {
-    return ajaxPost({ url: "~/api/authAdmin/trivialMergeRole" }, rule);
+    return ajaxPost({ url: "/api/authAdmin/trivialMergeRole" }, rule);
   }
 }
 

@@ -1,6 +1,7 @@
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as React from 'react';
+import { RouteObject } from 'react-router'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import { ChartMessage, ColorPaletteEntity } from '../Signum.Entities.Chart'
@@ -13,7 +14,7 @@ import { Dic } from '@framework/Globals';
 import { TypeEntity } from '@framework/Signum.Entities.Basics';
 import { getColorInterpolation } from './ColorUtils';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(ColorPaletteEntity, e => import('./ColorPalette')));
 
   Finder.registerPropertyFormatter(ColorPaletteEntity.tryPropertyRoute(a => a.categoryName),
@@ -99,7 +100,7 @@ function hashCode(s: string): number {
 export module API {
 
   export function colorPalette(typeName: string): Promise<ColorPalette> {
-    return ajaxGet({ url: `~/api/colorPalette/${typeName}`, });
+    return ajaxGet({ url: `/api/colorPalette/${typeName}`, });
   }
 }
 

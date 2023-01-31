@@ -1,13 +1,12 @@
 import * as React from "react";
-import { Route, Switch } from "react-router"
-import * as H from "history"
-import * as AppRelativeRoutes from "./AppRelativeRoutes";
+import { To, NavigateOptions } from "react-router";
+import type { Router } from "@remix-run/router";
 import { IUserEntity, TypeEntity } from "./Signum.Entities.Basics";
 import { Dic, classes, } from './Globals';
-import { ImportRoute } from "./AsyncImport";
-import { clearContextHeaders, ajaxGet, ajaxPost } from "./Services";
+import { clearContextHeaders, ajaxGet, ajaxPost, RetryFilter } from "./Services";
 import { PseudoType, Type, getTypeName } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
+import { navigateRoute } from "./Navigator";
 
 Dic.skipClasses.push(React.Component);
 
@@ -21,10 +20,44 @@ export function setCurrentUser(user: IUserEntity | undefined) {
   currentUser = user;
 }
 
-export let history: H.History;
-export function setCurrentHistory(h: H.History) {
-  history = h;
+export let _internalRouter: Router;
+export function setRouter(r: Router) {
+  _internalRouter = r
 }
+
+function toRelativeUrl(url: string) {
+  if (window.__baseName && url.startsWith(window.__baseName))
+    return url.after(window.__baseName);
+
+  if (url.startsWith("~"))
+    return url.after("~");
+
+  return url;
+}
+
+export function location(): typeof _internalRouter.state.location {
+  var loc = _internalRouter.state.location;
+
+  return {
+    ...loc,
+    pathname: toRelativeUrl(loc.pathname)
+  };
+}
+
+export function navigate(to: To | number, options?: NavigateOptions): void
+export function navigate(to: To | number, options?: NavigateOptions): void
+export function navigate(to: To | number, options?: NavigateOptions): void {
+  if (typeof to == "number")
+    _internalRouter.navigate(to);
+  else if (typeof to == "string")
+    _internalRouter.navigate(toAbsoluteUrl(to), options);
+  else if (typeof to == "object")
+    _internalRouter.navigate({ ...to, pathname: to.pathname && toAbsoluteUrl(to.pathname) }, options);
+  else
+    throw new Error("Unexpected argument type: to");
+};
+
+
 
 export let setTitle: (pageTitle?: string) => void;
 export function setTitleFunction(titleFunction: (pageTitle?: string) => void) {
@@ -36,16 +69,6 @@ export function useTitle(title: string, deps?: readonly any[]) {
     setTitle(title);
     return () => setTitle();
   }, deps);
-}
-
-export function createAppRelativeHistory(): H.History {
-  var h = H.createBrowserHistory({});
-  AppRelativeRoutes.useAppRelativeBasename(h);
-  AppRelativeRoutes.useAppRelativeComputeMatch(Route);
-  AppRelativeRoutes.useAppRelativeComputeMatch(ImportRoute as any);
-  AppRelativeRoutes.useAppRelativeSwitch(Switch);
-  setCurrentHistory(h);
-  return h;
 }
 
 let rtl = false;
@@ -103,19 +126,23 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
   else if (path.startsWith("http"))
     window.location.href = path;
   else
-    history.push(path);
+    navigate(path);
 }
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {
+  if (appRelativeUrl?.startsWith("/") && window.__baseName != "")
+    if (!appRelativeUrl.startsWith(window.__baseName))
+      return window.__baseName + appRelativeUrl;
+
   if (appRelativeUrl?.startsWith("~/"))
-    return window.__baseUrl + appRelativeUrl.after("~/");
+    return window.__baseName + appRelativeUrl.after("~"); //For backwards compatibility
 
-  var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "/~/"; //In Link render ~/ is considered a relative url
-  if (appRelativeUrl?.startsWith(relativeCrappyUrl))
-    return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
+  //var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "//"; //In Link render / is considered a relative url
+  //if (appRelativeUrl?.startsWith(relativeCrappyUrl))
+  //  return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
 
-  if (appRelativeUrl?.startsWith(window.__baseUrl) || appRelativeUrl?.startsWith("http"))
-    return appRelativeUrl;
+  //if (appRelativeUrl?.startsWith(window.__baseUrl) || appRelativeUrl?.startsWith("http"))
+  //  return appRelativeUrl;
 
   return appRelativeUrl;
 }
@@ -168,3 +195,4 @@ Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
 
   return React.createElement("span", undefined, ...result);
 }
+
