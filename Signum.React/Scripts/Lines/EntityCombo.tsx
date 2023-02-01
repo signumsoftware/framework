@@ -211,7 +211,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     } else if (loadData) {
       requestStarted.current = true;
 
-      if (p.type.name.contains(",")) {
+      if (p.type.name.contains(",") && !p.findOptions) {
         Promise.all(getTypeInfos(p.type.name).map(t => {
           var fo = p.findOptionsDictionary?.[t.name] ?? { queryName: t!.name };
           return Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
