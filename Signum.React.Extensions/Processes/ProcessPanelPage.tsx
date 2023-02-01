@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RouteComponentProps } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, ProcessLogicState } from './ProcessClient'
@@ -16,7 +16,7 @@ import { ProcessProgressBar } from './Templates/Process'
 import { getToString } from '@framework/Signum.Entities'
 
 
-export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
+export default function ProcessPanelPage() {
 
   
   const [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
@@ -58,7 +58,7 @@ export default function ProcessPanelPage(p: RouteComponentProps<{}>) {
             <span style={{ color: "green" }}> RUNNING </span> :
             <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
-          <a className="ms-2" href={AppContext.toAbsoluteUrl("~/api/processes/simpleStatus")} target="_blank">SimpleStatus</a>
+          <a className="ms-2" href={AppContext.toAbsoluteUrl("/api/processes/simpleStatus")} target="_blank">SimpleStatus</a>
         <br />
         JustMyProcesses: {s.justMyProcesses.toString()}
         <br />

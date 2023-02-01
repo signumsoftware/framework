@@ -1,10 +1,11 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '@framework/Services';
 import * as AppContext from '@framework/AppContext';
 import { TranslationPermission, TranslatedSummaryState, TranslateableRouteType, TranslationMessage } from './Signum.Entities.Translation'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { QueryString } from '@framework/QueryString';
 import { Lite, Entity, ModifiableEntity } from '@framework/Signum.Entities';
 import * as CultureClient from './CultureClient'
@@ -16,20 +17,20 @@ import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getLambdaMembers } from '@framework/Reflection';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(TranslationPermission.TranslateInstances),
     key: "TranslateInstances",
-    onClick: () => Promise.resolve("~/translatedInstance/status")
+    onClick: () => Promise.resolve("/translatedInstance/status")
   });
 
   tasks.push(taskSetTranslatableIcon)
 
   options.routes.push(
-    <ImportRoute path="~/translatedInstance/status" onImportModule={() => import("./Instances/TranslatedInstanceStatus")} />,
-    <ImportRoute path="~/translatedInstance/view/:type/:culture?" onImportModule={() => import("./Instances/TranslatedInstanceView")} />,
-    <ImportRoute path="~/translatedInstance/sync/:type/:culture" onImportModule={() => import("./Instances/TranslatedInstanceSync")} />,
+    { path: "/translatedInstance/status", element: <ImportComponent onImport={() => import("./Instances/TranslatedInstanceStatus")} /> },
+    { path: "/translatedInstance/view/:type/:culture?", element: <ImportComponent onImport={() => import("./Instances/TranslatedInstanceView")} /> },
+    { path: "/translatedInstance/sync/:type/:culture", element: <ImportComponent onImport={() => import("./Instances/TranslatedInstanceSync")} /> },
   );
 }
 
@@ -64,9 +65,9 @@ function TranslateButton(p: { controller: ValueLineController }) {
         e.preventDefault();
 
         const url =
-          ctx == null ? `~/translatedInstance/status/` :
-          (ctx.value as Entity).id == null ? `~/translatedInstance/view/${ctx.value.Type}/` :
-            `~/translatedInstance/view/${ctx.value.Type}/?filter=${ctx.value.Type};${(ctx.value as Entity).id}`;
+          ctx == null ? `/translatedInstance/status/` :
+          (ctx.value as Entity).id == null ? `/translatedInstance/view/${ctx.value.Type}/` :
+            `/translatedInstance/view/${ctx.value.Type}/?filter=${ctx.value.Type};${(ctx.value as Entity).id}`;
 
         window.open(AppContext.toAbsoluteUrl(url));
       }}
@@ -86,21 +87,21 @@ declare module '@framework/Reflection' {
 export module API {
 
   export function status(): Promise<TranslatedTypeSummary[]> {
-    return ajaxGet({ url: "~/api/translatedInstance" });
+    return ajaxGet({ url: "/api/translatedInstance" });
   }
 
   export function downloadView(type: string, culture: string | undefined) {
-    ajaxGetRaw({ url: `~/api/translatedInstance/viewFile/${type}?${QueryString.stringify({ culture })}` })
+    ajaxGetRaw({ url: `/api/translatedInstance/viewFile/${type}?${QueryString.stringify({ culture })}` })
       .then(response => saveFile(response));
   }
 
   export function downloadSync(type: string, culture: string | undefined) {
-    ajaxGetRaw({ url: `~/api/translatedInstance/syncFile/${type}?${QueryString.stringify({ culture })}` })
+    ajaxGetRaw({ url: `/api/translatedInstance/syncFile/${type}?${QueryString.stringify({ culture })}` })
       .then(response => saveFile(response));
   }
 
   export function uploadFile(request: FileUpload): Promise<void> {
-    return ajaxPost({ url: "~/api/translatedInstance/uploadFile/" }, request);
+    return ajaxPost({ url: "/api/translatedInstance/uploadFile/" }, request);
   }
 
   export interface FileUpload {
@@ -109,15 +110,15 @@ export module API {
   }
 
   export function viewTranslatedInstanceData(type: string, culture: string | undefined, filter: string | undefined): Promise<TranslatedInstanceViewType> {
-    return ajaxGet({ url: `~/api/translatedInstance/view/${type}?${QueryString.stringify({ culture, filter })}` });
+    return ajaxGet({ url: `/api/translatedInstance/view/${type}?${QueryString.stringify({ culture, filter })}` });
   }
 
   export function syncTranslatedInstance(type: string, culture: string): Promise<TypeInstancesChanges> {
-    return ajaxGet({ url: `~/api/translatedInstance/sync/${type}?${QueryString.stringify({ culture })}` });
+    return ajaxGet({ url: `/api/translatedInstance/sync/${type}?${QueryString.stringify({ culture })}` });
   }
 
   export function saveTranslatedInstanceData(records: TranslationRecord[], type: string, isSync: boolean, culture?: string | undefined): Promise<void> {
-    return ajaxPost({ url: `~/api/translatedInstance/save/${type}?${QueryString.stringify({ isSync, culture })}` }, records);
+    return ajaxPost({ url: `/api/translatedInstance/save/${type}?${QueryString.stringify({ isSync, culture })}` }, records);
   }
 
 }

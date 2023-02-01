@@ -35,7 +35,7 @@ export default function ChangePasswordPage() {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);
           AppContext.resetUI();
-          AppContext.history.push(AppContext.toAbsoluteUrl("~/auth/changePasswordSuccess"));
+          AppContext.navigate("/auth/changePasswordSuccess");
         })
         .catch(ifError(ValidationError, e => {
           if (e.modelState)

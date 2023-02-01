@@ -6,7 +6,7 @@ declare global {
 
   interface Window {
     __allowNavigatorWithoutUser?: boolean;
-    __baseUrl: string;
+    __baseName: string;
     dataForChildWindow?: any;
     dataForCurrentWindow?: any;
     exploreGraphDebugMode: boolean;

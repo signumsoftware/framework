@@ -1,5 +1,6 @@
 
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { OverlayTrigger, Tooltip, Dropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '@framework/Globals';
@@ -15,10 +16,10 @@ import * as ContextualOperations from '@framework/Operations/ContextualOperation
 import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity, ProcessOperation, ProcessMessage } from './Signum.Entities.Processes'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import "./Processes.css"
 
-export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
+export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }) {
   Navigator.addSettings(new EntitySettings(ProcessEntity, e => import('./Templates/Process'), { isCreable: "Never" }));
 
   if (options.packages || options.packageOperations) {
@@ -33,12 +34,12 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
     Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => import('./Templates/PackageOperation'), { isCreable: "Never" }));
   }
 
-  options.routes.push(<ImportRoute path="~/processes/view" onImportModule={() => import("./ProcessPanelPage")} />);
+  options.routes.push({ path: "/processes/view", element: <ImportComponent onImport={() => import("./ProcessPanelPage")} /> });
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
     key: "ProcessPanel",
-    onClick: () => Promise.resolve("~/processes/view")
+    onClick: () => Promise.resolve("/processes/view")
   });
 
   monkeyPatchCreateContextualMenuItem();
@@ -119,7 +120,6 @@ function monkeyPatchCreateContextualMenuItem() {
 function defaultConstructProcessFromMany(coc: Operations.ContextualOperationContext<Entity>, ...args: any[]) {
   var event = coc.event!;
 
-  event.persist();
   event!.preventDefault();
   event.stopPropagation();
 
@@ -134,7 +134,7 @@ function defaultConstructProcessFromMany(coc: Operations.ContextualOperationCont
 
       const es = Navigator.getSettings(pack.entity.Type);
       if (es?.avoidPopup || event.ctrlKey || event.button == 1) {
-        AppContext.history.push('~/create/', pack);
+        AppContext.navigate('/create/', { state: pack });
         return;
       }
       else {
@@ -148,19 +148,19 @@ export module API {
 
   export function processFromMany<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, args?: any[]): Promise<EntityPack<ProcessEntity>> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost({ url: "~/api/processes/constructFromMany" }, { lites: lites, operationKey: Operations.API.getOperationKey(operationKey), args: args } as Operations.API.MultiOperationRequest);
+    return ajaxPost({ url: "/api/processes/constructFromMany" }, { lites: lites, operationKey: Operations.API.getOperationKey(operationKey), args: args } as Operations.API.MultiOperationRequest);
   }
 
   export function start(): Promise<void> {
-    return ajaxPost({ url: "~/api/processes/start" }, undefined);
+    return ajaxPost({ url: "/api/processes/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost({ url: "~/api/processes/stop" }, undefined);
+    return ajaxPost({ url: "/api/processes/stop" }, undefined);
   }
 
   export function view(): Promise<ProcessLogicState> {
-    return ajaxGet({ url: "~/api/processes/view" });
+    return ajaxGet({ url: "/api/processes/view" });
   }
 }
 

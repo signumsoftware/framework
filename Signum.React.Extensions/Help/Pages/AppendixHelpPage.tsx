@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RouteComponentProps, Link } from 'react-router-dom'
+import { useLocation, useParams, Link } from 'react-router-dom'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
@@ -17,9 +17,10 @@ import { classes } from '@framework/Globals';
 import { useTitle } from '@framework/AppContext'
 
 
-export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: string | undefined }>) {
+export default function AppendixHelpHelp() {
+  const params = useParams() as { uniqueName: string | undefined };
 
-  var [appendix, reloadAppendix] = useAPIWithReload(() => API.appendix(p.match.params.uniqueName), []);
+  var [appendix, reloadAppendix] = useAPIWithReload(() => API.appendix(params.uniqueName), []);
   useTitle(HelpMessage.Help.niceToString() + (appendix && (" > " + appendix.title)));
   var forceUpdate = useForceUpdate();
   if (appendix == null)
@@ -37,7 +38,7 @@ export default function AppendixHelpHelp(p: RouteComponentProps<{ uniqueName: st
       <EditableComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar")}>
-        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? AppContext.history.push(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
+        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? AppContext.navigate(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
         <DeleteButton ctx={ctx} />
       </div>
     </div>
@@ -79,7 +80,7 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
 
         Operations.API.deleteLite(toLite(ctx.value), AppendixHelpOperation.Delete.key)
           .then((() => {
-            AppContext.history.push(Urls.indexUrl());
+            AppContext.navigate(Urls.indexUrl());
             notifySuccess();
           }));
       }

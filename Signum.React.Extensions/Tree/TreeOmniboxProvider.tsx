@@ -24,7 +24,7 @@ export default class TreeOmniboxProvider extends OmniboxProvider<TreeOmniboxResu
   }
 
   navigateTo(result: TreeOmniboxResult) {
-    return Promise.resolve("~/tree/" + result.type);
+    return Promise.resolve("/tree/" + result.type);
   }
 
   toString(result: TreeOmniboxResult) {

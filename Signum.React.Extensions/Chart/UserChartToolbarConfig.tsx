@@ -1,6 +1,6 @@
-import * as Navigator from '@framework/Navigator'
-import { Location } from 'history'
 import * as React from 'react'
+import { Location } from 'react-router'
+import * as Navigator from '@framework/Navigator'
 import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartClient from './ChartClient'

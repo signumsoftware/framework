@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -12,7 +13,7 @@ import { SMSTemplateMessageEmbedded, SMSMessageEntity, SMSTemplateEntity, SMSSen
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '@framework/QuickLinks'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { ModifiableEntity } from "@framework/Signum.Entities";
 import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
 import { ModelEntity } from "@framework/Signum.Entities";
@@ -24,7 +25,7 @@ import { TypeEntity } from '@framework/Signum.Entities.Basics';
 
 export var allTypes: string[] = [];
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   registerToString(SMSTemplateMessageEmbedded, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
 
@@ -60,10 +61,10 @@ function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {
 export module API {
  
   export function getRemainingCharacters(message: string, removeNoSMSCharacters: boolean,): Promise<number> {
-    return ajaxPost({ url: `~/api/sms/remainingCharacters` }, { message, removeNoSMSCharacters});
+    return ajaxPost({ url: `/api/sms/remainingCharacters` }, { message, removeNoSMSCharacters});
   }
 
   export function getAllTypes(signal?: AbortSignal): Promise<string[]> {
-    return ajaxGet({ url: "~/api/sms/getAllTypes", signal });
+    return ajaxGet({ url: "/api/sms/getAllTypes", signal });
   }
 }

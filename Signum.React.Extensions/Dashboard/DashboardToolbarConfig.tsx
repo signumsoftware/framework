@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Location } from 'history'
+import { Location } from 'react-router'
 import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Entities.Dashboard'
@@ -25,6 +25,6 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
   } 
 
   isCompatibleWithUrlPrio(res: ToolbarResponse<DashboardEntity>, location: Location, query: any): number {
-    return location.pathname == AppContext.toAbsoluteUrl(DashboardClient.dashboardUrl(res.content!)) ? 2 : 0;
+    return location.pathname == DashboardClient.dashboardUrl(res.content!) ? 2 : 0;
   }
 }

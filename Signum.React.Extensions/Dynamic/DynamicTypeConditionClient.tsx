@@ -1,5 +1,6 @@
 
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost } from '@framework/Services';
 import { SearchValueLine } from '@framework/Search'
 import { EntitySettings } from '@framework/Navigator'
@@ -11,7 +12,7 @@ import * as Constructor from '@framework/Constructor'
 import * as DynamicClientOptions from './DynamicClientOptions'
 import { DynamicTypeConditionEntity, DynamicTypeConditionEval, DynamicTypeConditionOperation } from './Signum.Entities.Dynamic'
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   Navigator.addSettings(new EntitySettings(DynamicTypeConditionEntity, w => import('./TypeCondition/DynamicTypeCondition')));
 
@@ -34,7 +35,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export namespace API {
   export function typeConditionTest(request: DynamicTypeConditionTestRequest): Promise<DynamicTypeConditionTestResponse> {
-    return ajaxPost({ url: `~/api/dynamic/typeCondition/test` }, request);
+    return ajaxPost({ url: `/api/dynamic/typeCondition/test` }, request);
   }
 }
 

@@ -27,7 +27,6 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
 
   function handlePreviewSubQuery(e: React.MouseEvent<any>) {
     e.preventDefault();
-    e.persist();
 
     var sq = p.ctx.value;
 

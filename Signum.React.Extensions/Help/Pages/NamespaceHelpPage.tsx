@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RouteComponentProps, Link } from 'react-router-dom'
+import { useLocation, useParams, Link } from 'react-router-dom'
 import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
 import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
@@ -13,10 +13,11 @@ import { notifySuccess } from '@framework/Operations';
 import { useTitle } from '@framework/AppContext';
 
 
-export default function NamespaceHelpPage(p: RouteComponentProps<{ namespace: string }>) {
+export default function NamespaceHelpPage() {
+  const params = useParams() as { namespace: string };
 
   var [count, setCount] = React.useState(0);
-  var [namespace, reloadNamespace] = useAPIWithReload(() => API.namespace(p.match.params.namespace), [count]);
+  var [namespace, reloadNamespace] = useAPIWithReload(() => API.namespace(params.namespace), [count]);
   useTitle(HelpMessage.Help.niceToString() + (namespace && (" > " + namespace.title)));
   var forceUpdate = useForceUpdate();
   if (namespace == null)

@@ -21,7 +21,6 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
     if (e.button == 2)
       return;
 
-    e.persist();
 
     const sc = this.props.searchControl;
 
@@ -35,7 +34,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
         filterOptions: fo.filterOptions
       })
 
-      if (sc.props.avoidChangeUrl || e.ctrlKey || e.button == 1)
+      if (sc.props.avoidChangeUrl)
         window.open(AppContext.toAbsoluteUrl(path));
       else
         AppContext.pushOrOpenInTab(path, e);

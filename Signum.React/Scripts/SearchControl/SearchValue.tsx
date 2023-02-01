@@ -13,6 +13,7 @@ import { PropertyRoute } from '../Lines'
 import { useAPI, usePrevious } from '../Hooks'
 import * as Hooks from '../Hooks'
 import { TypeBadge } from '../Lines/AutoCompleteConfig'
+import { toAbsoluteUrl } from '../AppContext'
 
 export interface SearchValueProps {
   valueToken?: string | QueryTokenString<any>;
@@ -266,7 +267,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     const avoidPopup = s != undefined && s.avoidPopup;
 
     if (e.ctrlKey || e.button == 1 || avoidPopup) {
-      window.open(Navigator.navigateRoute(lite));
+      window.open(toAbsoluteUrl(Navigator.navigateRoute(lite)));
       return;
     }
 
@@ -341,7 +342,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       fo = p.findOptions;
 
     if (e.ctrlKey || e.button == 1)
-      window.open(Finder.findOptionsPath(fo));
+      window.open(toAbsoluteUrl(Finder.findOptionsPath(fo)));
     else
       Finder.explore(fo, { searchControlProps: p.searchControlProps, modalSize: p.modalSize }).then(() => {
         if (!p.avoidAutoRefresh)

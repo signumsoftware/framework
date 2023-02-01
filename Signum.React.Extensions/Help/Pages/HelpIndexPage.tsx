@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RouteComponentProps, Link } from 'react-router-dom'
+import { useLocation, useParams, Link } from 'react-router-dom'
 import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, Urls } from '../HelpClient'
@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTitle } from '@framework/AppContext'
 
 
-export default function HelpIndexPage(p: RouteComponentProps<{}>) {
+export default function HelpIndexPage() {
 
   useTitle(HelpMessage.Help.niceToString());
 

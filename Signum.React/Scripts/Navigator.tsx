@@ -1,4 +1,5 @@
 import * as React from "react"
+import { RouteObject } from 'react-router'
 import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity } from './Signum.Entities';
@@ -12,7 +13,7 @@ import * as Constructor from './Constructor';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, getLitesWithSubStr, LiteAutocompleteConfig, MultiAutoCompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
-import { ImportRoute } from "./AsyncImport";
+import { ImportComponent } from './ImportComponent'
 import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
@@ -29,9 +30,9 @@ import { object } from "prop-types";
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || getToString(currentUser) == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
 
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => NavigatorManager.getFramePage() } />);
-  options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => NavigatorManager.getFramePage()} />);
+export function start(options: { routes: RouteObject[] }) {
+  options.routes.push({ path: "/view/:type/:id", element: <ImportComponent onImport={() => NavigatorManager.getFramePage() } /> });
+  options.routes.push({ path: "/create/:type", element: <ImportComponent onImport={() => NavigatorManager.getFramePage()} /> });
 
   AppContext.clearSettingsActions.push(clearEntitySettings);
   AppContext.clearSettingsActions.push(clearWidgets)
@@ -52,7 +53,7 @@ export namespace NavigatorManager {
   }
 
   export function onFramePageCreationCancelled() {
-    AppContext.history.replace("~/");
+    AppContext.navigate("/", { replace : true });
   }
 }
 
@@ -171,12 +172,12 @@ export function navigateRoute(entityOrLite: Entity | Lite<Entity>, viewName?: st
 }
 
 export function navigateRouteDefault(typeName: string, id: number | string, viewName?: string) {
-  return toAbsoluteUrl("~/view/" + typeName.firstLower() + "/" + id + (viewName ? "?viewName=" + viewName : ""));
+  return "/view/" + typeName.firstLower() + "/" + id + (viewName ? "?viewName=" + viewName : "");
 
 }
 
 export function createRoute(type: PseudoType, viewName?: string) {
-  return toAbsoluteUrl("~/create/" + getTypeName(type) + (viewName ? "?viewName=" + viewName : ""));
+  return "/create/" + getTypeName(type) + (viewName ? "?viewName=" + viewName : "");
 }
 
 
@@ -615,7 +616,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (types.length == 0)
     return null;
 
-  if (types.length == 1)
+  if (types.length == 1 || findOptions != null)
     return getAutoCompleteBasic(types[0]!, findOptions, ctx, create, showType);
 
   return new MultiAutoCompleteConfig(types.toObject(t => t!.name,
@@ -685,13 +686,13 @@ export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | Enti
 export function createInNewTab(pack: EntityPack<ModifiableEntity>, viewName?: string) {
   var url = createRoute(pack.entity.Type, viewName) + "?waitOpenerData=true";
   window.dataForChildWindow = pack;
-  var win = window.open(url);
+  var win = window.open(toAbsoluteUrl(url));
 }
 
 export function createInCurrentTab(pack: EntityPack<ModifiableEntity>, viewName?: string) {
   var url = createRoute(pack.entity.Type, viewName) + "?waitCurrentData=true";
   window.dataForCurrentWindow = pack;
-  AppContext.history.push(url);
+  AppContext.navigate(url);
 }
 
 export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event: React.MouseEvent<any>): Promise<void> {
@@ -812,13 +813,13 @@ export module API {
     if (!realLites.length)
       return Promise.resolve();
 
-    return ajaxPost<unknown[]>({ url: "~/api/liteModels" }, realLites).then(models => {
+    return ajaxPost<unknown[]>({ url: "/api/liteModels" }, realLites).then(models => {
       realLites.forEach((l, i) => l.model = models[i]);
     });
   }
 
   export function fetchAll<T extends Entity>(type: Type<T>): Promise<Array<T>> {
-    return ajaxGet({ url: "~/api/fetchAll/" + type.typeName });
+    return ajaxGet({ url: "/api/fetchAll/" + type.typeName });
   }
 
 
@@ -847,7 +848,7 @@ export module API {
     const typeName = getTypeName(type);
     let idVal = id;
 
-    return ajaxGet({ url: "~/api/entity/" + typeName + "/" + id });
+    return ajaxGet({ url: "/api/entity/" + typeName + "/" + id });
   }
 
   export function exists<T extends Entity>(lite: Lite<T>): Promise<boolean>;
@@ -868,7 +869,7 @@ export module API {
     if (id == null)
       throw new Error("No id found");
 
-    return ajaxGet({ url: "~/api/exists/" + typeName + "/" + id });
+    return ajaxGet({ url: "/api/exists/" + typeName + "/" + id });
   }
 
 
@@ -880,20 +881,20 @@ export module API {
     const typeName = (typeOrLite as Lite<any>).EntityType ?? getTypeName(typeOrLite as PseudoType);
     let idVal = (typeOrLite as Lite<any>).id != null ? (typeOrLite as Lite<any>).id : id;
 
-    return ajaxGet({ url: "~/api/entityPack/" + typeName + "/" + idVal });
+    return ajaxGet({ url: "/api/entityPack/" + typeName + "/" + idVal });
   }
 
   export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
-    return ajaxPost({ url: "~/api/entityPackEntity" }, entity);
+    return ajaxPost({ url: "/api/entityPackEntity" }, entity);
   }
 
   export function validateEntity(entity: ModifiableEntity): Promise<void> {
-    return ajaxPost({ url: "~/api/validateEntity" }, entity);
+    return ajaxPost({ url: "/api/validateEntity" }, entity);
   }
 
   export function getType(typeName: string): Promise<TypeEntity | null> {
 
-    return ajaxGet({ url: `~/api/reflection/typeEntity/${typeName}` });
+    return ajaxGet({ url: `/api/reflection/typeEntity/${typeName}` });
   }
 
   export function getEnumEntities<T extends string>(type: EnumType<T>): Promise<EnumConverter<T>>;
@@ -902,7 +903,7 @@ export module API {
 
     var typeName = typeof type == "string" ? type : type.type;
 
-    return ajaxGet<{ [enumValue: string]: Entity }>({ url: `~/api/reflection/enumEntities/${typeName}` })
+    return ajaxGet<{ [enumValue: string]: Entity }>({ url: `/api/reflection/enumEntities/${typeName}` })
       .then(enumToEntity => softCast<EnumConverter<string>>({
         enumToEntity: enumToEntity,
         idToEnum: Object.entries(enumToEntity).toObject(a => a[1].id!.toString(), a => a[0])

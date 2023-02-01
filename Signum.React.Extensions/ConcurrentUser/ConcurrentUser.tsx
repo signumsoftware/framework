@@ -20,7 +20,7 @@ import { SmallProfilePhoto } from '../Authorization/Templates/ProfilePhoto'
 
 export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }) {
   
-  const conn = useSignalRConnection("~/api/concurrentUserHub");
+  const conn = useSignalRConnection("/api/concurrentUserHub");
 
   const entityKey = liteKey(toLite(p.entity));
   const userKey = liteKey(toLite(AppContext.currentUser! as UserEntity))

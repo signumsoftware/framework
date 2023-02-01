@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines/EntityBase'
 import SelectorModal from '../SelectorModal'
 import { useForceUpdate } from '../Hooks'
+import { toAbsoluteUrl } from '../AppContext'
 
 export interface SearchValueLineProps {
   ctx: StyleContext;
@@ -232,7 +233,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           if (isWindowsOpen || (s != null && s.avoidPopup)) {
             var vp = getViewPromise && getViewPromise(null)
 
-            window.open(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
+            window.open(toAbsoluteUrl(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined)));
           } else {
             Finder.parseFilterOptions(fo.filterOptions || [], false, qd)
               .then(fos => Finder.getPropsFromFilters(tn, fos)

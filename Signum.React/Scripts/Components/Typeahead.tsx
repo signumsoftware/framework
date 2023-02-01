@@ -204,7 +204,6 @@ export class TypeaheadController {
 
   handleMenuMouseUp = (e: React.MouseEvent<any>, index: number) => {
     e.preventDefault();
-    e.persist();
     this.setSelectedIndex(index).then(() => {
       if (this.select(e))
         this.input!.focus()

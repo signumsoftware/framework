@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { Type, PropertyRoute } from '@framework/Reflection'
@@ -15,7 +16,7 @@ import { FileImage } from './FileImage';
 import { ImageModal } from './ImageModal';
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   registerAutoFileLine(FileEntity);
   registerAutoFileLine(FileEmbedded);

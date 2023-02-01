@@ -11,7 +11,7 @@ import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 import { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutoCompleteConfig'
 import { tryGetTypeInfos } from '../Reflection'
 import { KeyCodes } from '../Components'
-import { isRtl } from '../AppContext'
+import { isRtl, toAbsoluteUrl } from '../AppContext'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -126,7 +126,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
     if (openWindow) {
       event.preventDefault();
       const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
-      window.open(route);
+      window.open(toAbsoluteUrl(route));
     }
     else {
       const pr = ctx.propertyRoute!.addLambda(a => a[0]);

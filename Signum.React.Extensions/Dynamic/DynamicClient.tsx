@@ -1,28 +1,29 @@
 
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, WebApiHttpError } from '@framework/Services'
 import { Entity, Lite } from '@framework/Signum.Entities'
 import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import { ImportRoute } from '@framework/AsyncImport'
+import { ImportComponent } from '@framework/ImportComponent'
 import { QueryEntitiesRequest } from '@framework/FindOptions'
 
 
 
-export function start(options: { routes: JSX.Element[], withCodeGen: boolean }) {
+export function start(options: { routes: RouteObject[], withCodeGen: boolean }) {
 
   if (options.withCodeGen)
-    options.routes.push(<ImportRoute path="~/dynamic/panel" onImportModule={() => import("./DynamicPanelCodeGenPage")} />);
+    options.routes.push({ path: "/dynamic/panel", element: <ImportComponent onImport={() => import("./DynamicPanelCodeGenPage")} /> });
   else
-    options.routes.push(<ImportRoute path="~/dynamic/panel" onImportModule={() => import("./DynamicPanelSimplePage")} />);
+    options.routes.push({ path: "/dynamic/panel", element: <ImportComponent onImport={() => import("./DynamicPanelSimplePage")} /> });
 
   Options.withCodeGen = options.withCodeGen;
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
     key: "DynamicPanel",
-    onClick: () => Promise.resolve("~/dynamic/panel")
+    onClick: () => Promise.resolve("/dynamic/panel")
   });
 }
 
@@ -41,27 +42,27 @@ export interface CompilationError {
 
 export namespace API {
   export function compile(): Promise<CompilationError[]> {
-    return ajaxPost({ url: `~/api/dynamic/compile?inMemory=false` }, null);
+    return ajaxPost({ url: `/api/dynamic/compile?inMemory=false` }, null);
   }
 
   export function getCompilationErrors(): Promise<CompilationError[]> {
-    return ajaxPost({ url: `~/api/dynamic/compile?inMemory=true` }, null);
+    return ajaxPost({ url: `/api/dynamic/compile?inMemory=true` }, null);
   }
 
   export function restartServer(): Promise<void> {
-    return ajaxPost({ url: `~/api/dynamic/restartServer` }, null);
+    return ajaxPost({ url: `/api/dynamic/restartServer` }, null);
   }
 
   export function getStartErrors(): Promise<WebApiHttpError[]> {
-    return ajaxGet({ url: `~/api/dynamic/startErrors` });
+    return ajaxGet({ url: `/api/dynamic/startErrors` });
   }
 
   export function getEvalErrors(request: QueryEntitiesRequest): Promise<EvalEntityError[]> {
-    return ajaxPost({ url: `~/api/dynamic/evalErrors` }, request);
+    return ajaxPost({ url: `/api/dynamic/evalErrors` }, request);
   }
 
   export function getPanelInformation(): Promise<DynamicPanelInformation> {
-    return ajaxPost({ url: `~/api/dynamic/getPanelInformation` }, null);
+    return ajaxPost({ url: `/api/dynamic/getPanelInformation` }, null);
   }
 }
 

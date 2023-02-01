@@ -1,5 +1,6 @@
 import { ModelState, isEntity, ModelEntity } from './Signum.Entities'
 import { GraphExplorer } from './Reflection'
+import { toAbsoluteUrl } from './AppContext';
 
 export interface AjaxOptions {
   url: string;
@@ -16,15 +17,6 @@ export interface AjaxOptions {
   credentials?: RequestCredentials;
   cache?: string;
   signal?: AbortSignal;
-}
-
-export function baseUrl(options: AjaxOptions): string {
-  const baseUrl = window.__baseUrl;
-
-  if (options.url.startsWith("~/"))
-    return baseUrl + options.url.after("~/");
-
-  return options.url;
 }
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
@@ -49,7 +41,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
       ...options.headers
     } as any;
 
-    return fetch(baseUrl(options), {
+    return fetch(toAbsoluteUrl(options.url), {
       method: "GET",
       headers: headers,
       mode: options.mode,
@@ -80,7 +72,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
       ...options.headers
     } as any;
 
-    return fetch(baseUrl(options), {
+    return fetch(toAbsoluteUrl(options.url), {
       method: "POST",
       credentials: options.credentials || "same-origin",
       headers: headers,

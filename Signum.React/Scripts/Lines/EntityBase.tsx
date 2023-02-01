@@ -13,6 +13,7 @@ import { TypeEntity } from "../Signum.Entities.Basics";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FindOptionsAutocompleteConfig } from './AutoCompleteConfig'
 import { FilterOption } from '../Search'
+import { toAbsoluteUrl } from '../AppContext'
 
 export interface EntityBaseProps extends LineBaseProps {
   view?: boolean | ((item: any/*T*/) => boolean);
@@ -167,7 +168,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
     if (openWindow) {
       event.preventDefault();
       const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
-      window.open(route);
+      window.open(toAbsoluteUrl(route));
     }
     else {
       const promise = this.doView(entity);

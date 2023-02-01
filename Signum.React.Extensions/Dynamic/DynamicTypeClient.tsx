@@ -1,5 +1,6 @@
 
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { SearchControl, SearchValueLine } from '@framework/Search'
@@ -19,7 +20,7 @@ import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import { Tab } from 'react-bootstrap';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => import('./Type/DynamicType')));
   Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => import('./Type/DynamicMixinConnection')));
   Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => import('./Type/DynamicSqlMigration')));
@@ -44,7 +45,7 @@ export function start(options: { routes: JSX.Element[] }) {
               icon: "success"
             }).then(result => {
               if (result == "yes") 
-                window.open(AppContext.toAbsoluteUrl("~/dynamic/panel"));
+                window.open(AppContext.toAbsoluteUrl("/dynamic/panel"));
               return;
             });
           }
@@ -55,7 +56,7 @@ export function start(options: { routes: JSX.Element[] }) {
   }));
 
   QuickLinks.registerQuickLink(DynamicTypeEntity, ctx => new QuickLinks.QuickLinkLink("ViewDynamicPanel",
-    () => symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "~/dynamic/panel", {
+    () => symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "/dynamic/panel", {
       isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
       icon: "up-down-left-right",
       iconColor: "purple",
@@ -96,11 +97,11 @@ export function start(options: { routes: JSX.Element[] }) {
 export namespace API {
 
   export function getPropertyType(property: DynamicProperty): Promise<string> {
-    return ajaxPost({ url: `~/api/dynamic/type/propertyType` }, property);
+    return ajaxPost({ url: `/api/dynamic/type/propertyType` }, property);
   }
 
   export function expressionNames(typeName: string): Promise<Array<string>> {
-    return ajaxGet({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
+    return ajaxGet({ url: `/api/dynamic/type/expressionNames/${typeName}` });
   }
 }
 

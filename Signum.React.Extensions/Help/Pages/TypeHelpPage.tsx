@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { RouteComponentProps, Link } from 'react-router-dom'
+import { useLocation, useParams, Link } from 'react-router-dom'
 import { Collapse } from 'react-bootstrap'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
@@ -18,11 +18,10 @@ import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTitle } from '@framework/AppContext'
 
-(window as any).myHistory = AppContext.history;
+export default function TypeHelpPage() {
+  const params = useParams() as { cleanName: string };
 
-export default function TypeHelpPage(p: RouteComponentProps<{ cleanName: string }>) {
-
-  var cleanName = p.match.params.cleanName;
+  var cleanName = params.cleanName;
   var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => API.type(cleanName), [cleanName]);
   var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace), [typeHelp]);
   var forceUpdate = useForceUpdate();

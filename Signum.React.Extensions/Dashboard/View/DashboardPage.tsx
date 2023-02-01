@@ -6,7 +6,7 @@ import { Entity, parseLite, getToString, JavascriptMessage, EntityPack } from '@
 import * as Navigator from '@framework/Navigator'
 import { DashboardEntity, DashboardMessage } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 import "../Dashboard.css"
 import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
@@ -14,21 +14,15 @@ import { translated } from '../../Translation/TranslatedInstanceTools'
 import * as DashboardClient from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 
-interface DashboardPageProps extends RouteComponentProps<{ dashboardId: string }> {
+export default function DashboardPage() {
+  const location = useLocation();
+  const params = useParams() as { dashboardId: string };
 
-}
-
-function getQueryEntity(props: DashboardPageProps): string {
-  return QueryString.parse(props.location.search).entity as string;
-}
-
-export default function DashboardPage(p: DashboardPageProps) {
-
-  const [dashboardWithQueries, reloadDashboard] = useAPIWithReload(signal => DashboardClient.API.get(newLite(DashboardEntity, p.match.params.dashboardId)), [p.match.params.dashboardId]);
+  const [dashboardWithQueries, reloadDashboard] = useAPIWithReload(signal => DashboardClient.API.get(newLite(DashboardEntity, params.dashboardId)), [params.dashboardId]);
 
   const dashboard = dashboardWithQueries?.dashboard;
 
-  var entityKey = getQueryEntity(p);
+  var entityKey = QueryString.parse(location.search).entity as string;
 
   const entity = useAPI(signal => entityKey ? Navigator.API.fetch(parseLite(entityKey)) : Promise.resolve(null), [entityKey]);
 

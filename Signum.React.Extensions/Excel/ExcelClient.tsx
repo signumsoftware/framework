@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPostRaw, ajaxGet, saveFile, ajaxPost } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -16,7 +17,7 @@ import { TypeInfo } from '@framework/Reflection';
 import { softCast } from '@framework/Globals';
 import { QueryString } from '@framework/QueryString';
 
-export function start(options: { routes: JSX.Element[], plainExcel: boolean, importFromExcel: boolean, excelReport: boolean }) {
+export function start(options: { routes: RouteObject[], plainExcel: boolean, importFromExcel: boolean, excelReport: boolean }) {
 
   if (options.excelReport) {
     Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => import('./Templates/ExcelReport')));
@@ -63,28 +64,28 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, imp
 export namespace API {
 
   export function generatePlainExcel(request: QueryRequest, overrideFileName?: string, forImport?: boolean): void {
-    ajaxPostRaw({ url: "~/api/excel/plain?" + QueryString.stringify({ forImport }) }, request)
+    ajaxPostRaw({ url: "/api/excel/plain?" + QueryString.stringify({ forImport }) }, request)
       .then(response => saveFile(response, overrideFileName));
   }
 
   export function forQuery(queryKey: string): Promise<Lite<ExcelReportEntity>[]> {
-    return ajaxGet({ url: "~/api/excel/reportsFor/" + queryKey });
+    return ajaxGet({ url: "/api/excel/reportsFor/" + queryKey });
   }
 
 
   export function generateExcelReport(queryRequest: QueryRequest, excelReport: Lite<ExcelReportEntity>): void {
-    ajaxPostRaw({ url: "~/api/excel/excelReport" }, { queryRequest, excelReport })
+    ajaxPostRaw({ url: "/api/excel/excelReport" }, { queryRequest, excelReport })
       .then(response => saveFile(response));
   }
 
   export function validateForImport(queryRequest: QueryRequest): Promise<QueryToken | undefined> {
-    return ajaxPost({ url: "~/api/excel/validateForImport" }, queryRequest);
+    return ajaxPost({ url: "/api/excel/validateForImport" }, queryRequest);
   }
 
   export function importFromExcel(qr: QueryRequest, model: ImportExcelModel, type: TypeInfo): Promise<ImportFromExcelReport> {
     var abortController = new AbortController();
     return ImportExcelProgressModal.show(abortController, type,
-      () => ajaxPostRaw({ url: "~/api/excel/import", signal: abortController.signal }, softCast<ImportFromExcelRequest>({ importModel: model, queryRequest : qr }))
+      () => ajaxPostRaw({ url: "/api/excel/import", signal: abortController.signal }, softCast<ImportFromExcelRequest>({ importModel: model, queryRequest : qr }))
     );
   }
 }

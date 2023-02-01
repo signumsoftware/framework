@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ConcurrentUserEntity } from './Signum.Entities.ConcurrentUser'
 import { Entity, isEntity, Lite, toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
@@ -7,7 +8,7 @@ import ConcurrentUser from './ConcurrentUser'
 import { ajaxGet } from '@framework/Services'
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
   Widgets.onWidgets.push(ctx => {
 
     var me = ctx.ctx.value;
@@ -25,7 +26,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export module API {
   export function getUsers(key: string): Promise<ConcurrentUserResponse[]> {
-    return ajaxGet({ url: "~/api/concurrentUser/getUsers/" + key});
+    return ajaxGet({ url: "/api/concurrentUser/getUsers/" + key});
   }
 }
 

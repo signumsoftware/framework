@@ -1,5 +1,6 @@
 
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
@@ -11,11 +12,11 @@ import {
 } from './Signum.Entities.Scheduler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { SearchValueLine } from '@framework/Search';
 
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/scheduler/view" onImportModule={() => import("./SchedulerPanelPage")} />);
+export function start(options: { routes: RouteObject[] }) {
+  options.routes.push({ path: "/scheduler/view", element: <ImportComponent onImport={() => import("./SchedulerPanelPage")} /> });
 
   Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => import('./Templates/ScheduledTask')));
   Navigator.addSettings(new EntitySettings(ScheduleRuleMinutelyEntity, e => import('./Templates/ScheduleRuleMinutely')));
@@ -43,7 +44,7 @@ export function start(options: { routes: JSX.Element[] }) {
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),
     key: "SchedulerPanel",
-    onClick: () => Promise.resolve("~/scheduler/view")
+    onClick: () => Promise.resolve("/scheduler/view")
   });
 
   var es = new EntitySettings(ScheduledTaskLogEntity, undefined);
@@ -60,15 +61,15 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
   export function start(): Promise<void> {
-    return ajaxPost({ url: "~/api/scheduler/start" }, undefined);
+    return ajaxPost({ url: "/api/scheduler/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost({ url: "~/api/scheduler/stop" }, undefined);
+    return ajaxPost({ url: "/api/scheduler/stop" }, undefined);
   }
 
   export function view(): Promise<SchedulerState> {
-    return ajaxGet({ url: "~/api/scheduler/view" });
+    return ajaxGet({ url: "/api/scheduler/view" });
   }
 }
 

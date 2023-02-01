@@ -132,7 +132,6 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
 
   function handlePreviewMainQuery(e: React.MouseEvent<any>) {
     e.preventDefault();
-    e.persist();
     var mq = p.mainQuery;
 
     var canAggregate = mq.groupResults ? SubTokensOptions.CanAggregate : 0;

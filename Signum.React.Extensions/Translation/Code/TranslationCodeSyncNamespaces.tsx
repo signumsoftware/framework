@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Link, RouteComponentProps } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { API, NamespaceSyncStats } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Entities.Translation'
@@ -7,9 +7,10 @@ import "../Translation.css"
 import { encodeDots, decodeDots } from './TranslationCodeStatus'
 import { useAPI } from '@framework/Hooks'
 
-export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ culture: string; assembly: string; }>) {
-  const assembly = decodeDots(p.match.params.assembly);
-  const culture = p.match.params.culture;
+export default function TranslationCodeSyncNamespaces() {
+  const params = useParams() as { culture: string; assembly: string; };
+  const assembly = decodeDots(params.assembly);
+  const culture = params.culture;
 
   const result = useAPI(() => API.namespaceStatus(assembly, culture), [assembly, culture]);
   
@@ -30,7 +31,7 @@ export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ c
         <tbody>
           <tr key={"All"}>
             <th>
-              <Link to={`~/translation/sync/${encodeDots(assembly)}/${culture}`}>
+              <Link to={`/translation/sync/${encodeDots(assembly)}/${culture}`}>
                 {TranslationMessage.All.niceToString()}
               </Link>
             </th>
@@ -41,7 +42,7 @@ export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ c
           {result.map(stats =>
             <tr key={stats.namespace}>
               <td>
-                <Link to={`~/translation/sync/${encodeDots(assembly)}/${culture}/${encodeDots(stats.namespace)}`}>
+                <Link to={`/translation/sync/${encodeDots(assembly)}/${culture}/${encodeDots(stats.namespace)}`}>
                   {stats.namespace}
                 </Link>
               </td>
@@ -57,7 +58,7 @@ export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ c
     return (
       <div>
         <h2>{TranslationMessage._0AlreadySynchronized.niceToString(assembly)}</h2>
-        <Link to={`~/translation/status`}>
+        <Link to={`/translation/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
         </Link>
       </div>
@@ -67,7 +68,7 @@ export default function TranslationCodeSyncNamespaces(p: RouteComponentProps<{ c
 
   return (
     <div>
-      <h2><Link to="~/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
+      <h2><Link to="/translation/status">{TranslationMessage.CodeTranslations.niceToString()}</Link> {">"} {TranslationMessage.Synchronize0In1.niceToString(assembly, culture)}</h2>
       {renderTable()}
     </div>
   );

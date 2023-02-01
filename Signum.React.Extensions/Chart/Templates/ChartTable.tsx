@@ -9,6 +9,7 @@ import { ChartRow } from '../ChartClient';
 import { ChartColumn } from './ChartColumn';
 import { TypeInfo } from '@framework/Reflection'
 import { FullscreenComponent } from './FullscreenComponent'
+import { toAbsoluteUrl } from '@framework/AppContext'
 
 interface ChartTableProps {
   resultTable: ResultTable;
@@ -35,7 +36,7 @@ export default function ChartTableComponent(p: ChartTableProps) {
 
     if (row.entity) {
 
-      window.open(Navigator.navigateRoute(row.entity!));
+      window.open(toAbsoluteUrl(Navigator.navigateRoute(row.entity!)));
 
     } else {
 
@@ -70,12 +71,12 @@ export default function ChartTableComponent(p: ChartTableProps) {
         }
       });
 
-      window.open(Finder.findOptionsPath({
+      window.open(toAbsoluteUrl(Finder.findOptionsPath({
         queryName: lcr.queryKey,
         filterOptions: toFilterOptions(filters),
         columnOptions: columns,
         columnOptionsMode: "ReplaceOrAdd"
-      }));
+      })));
     }
   }
 

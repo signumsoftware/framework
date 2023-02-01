@@ -128,6 +128,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
             type={p.type!}
             data={p.data}
             findOptions={p.findOptions}
+            findOptionsDictionary={p.findOptionsDictionary}
             onDataLoaded={p.labelTextWithData == null ? undefined : () => c.forceUpdate()}
             mandatoryClass={c.mandatoryClass}
             deps={p.deps}
@@ -151,6 +152,7 @@ export interface EntityComboSelectProps {
   onChange: (e: React.SyntheticEvent | undefined, lite: Lite<Entity> | null) => void;
   type: TypeReference;
   findOptions?: FindOptions;
+  findOptionsDictionary?: { [typeName: string]: FindOptions };
   data?: Lite<Entity>[];
   mandatoryClass: string | null;
   onDataLoaded?: (data: Lite<Entity>[] | ResultTable | undefined) => void;
@@ -211,14 +213,17 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
       setData(p.data);
     } else if (loadData) {
       requestStarted.current = true;
-      const fo = p.findOptions;
-      if (fo) {
+
+      if (p.type.name.contains(",") && !p.findOptions) {
+        Promise.all(getTypeInfos(p.type.name).map(t => {
+          var fo = p.findOptionsDictionary?.[t.name] ?? { queryName: t!.name };
+          return Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
+        })).then(array => setData(array.flatMap(a => a.rows.map(a => a.entity!))));
+      } else {
+        const fo = p.findOptions ?? { queryName: p.type!.name };;
         Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))
           .then(data => setData(data));
       }
-      else
-        Finder.API.fetchAllLites({ types: p.type!.name })
-          .then(data => setData(data.orderBy(a => a)));
     }
   }, [normalizeEmptyArray(p.data), p.type.name, p.deps, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
 

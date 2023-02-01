@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
@@ -11,7 +12,7 @@ import { getToString, Lite } from '@framework/Signum.Entities'
 import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
 import { FilterRequest, FilterOption } from "@framework/FindOptions";
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { getAllTypes, getTypeInfo } from "@framework/Reflection";
 import { TypeInfo } from "@framework/Reflection";
 import TreeButton from './TreeButton'
@@ -21,8 +22,8 @@ import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
 import { LiteAutocompleteConfig } from '@framework/Lines';
 import { QueryString } from '@framework/QueryString';
 
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);
+export function start(options: { routes: RouteObject[] }) {
+  options.routes.push({ path: "/tree/:typeName", element: <ImportComponent onImport={() => import("./TreePage")} /> });
 
   Navigator.addSettings(new EntitySettings(MoveTreeModel, e => import('./Templates/MoveTreeModel')));
 
@@ -97,7 +98,7 @@ export function treePath(typeName: string, filterOptions?: (FilterOption | null 
   if (filterOptions)
     Finder.Encoder.encodeFilters(query, filterOptions.notNull());
 
-  return AppContext.history.createHref({ pathname: "~/tree/" + typeName, search: QueryString.stringify(query) });
+  return "/tree/" + typeName + "?" + QueryString.stringify(query);
 }
 
 export function hideSiblingsAndIsDisabled(ti: TypeInfo) {
@@ -226,11 +227,11 @@ function fixNodes(nodes: Array<TreeNode>) {
 
 export namespace API {
   export function findTreeLiteLikeByName(typeName: string, subString: string, count: number, abortSignal?: AbortSignal): Promise<Array<Lite<TreeEntity>>> {
-    return ajaxGet({ url: `~/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
+    return ajaxGet({ url: `/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
   }
 
   export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {
-    return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
+    return ajaxPost<Array<TreeNode>>({ url: `/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
   }
 
   export interface FindNodesRequest {

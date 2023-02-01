@@ -514,7 +514,7 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
       }
       {s.datalist &&
         <datalist id={s.ctx.getUniqueId("dataList")}>
-          {s.datalist.map(item => <option value={item} />)}
+          {s.datalist.map((item, i) => <option key={i} value={item} />)}
         </datalist>
       }
     </FormGroup>

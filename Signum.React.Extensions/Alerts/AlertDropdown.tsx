@@ -48,7 +48,7 @@ interface AlertWithSize{
 
 function AlertDropdownImp(props: { keepRingingFor: number }) {
 
-  const conn = useSignalRConnection("~/api/alertshub");
+  const conn = useSignalRConnection("/api/alertshub");
 
   useSignalRGroup(conn, {
     enterGroup: c => c.invoke("Login", AuthClient.getAuthToken()),

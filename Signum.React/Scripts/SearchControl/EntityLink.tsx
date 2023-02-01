@@ -27,7 +27,7 @@ export default function EntityLink(p: EntityLinkProps) {
 
   return (
     <Link
-      innerRef={p.innerRef as any}
+      ref={p.innerRef as any}
       to={Navigator.navigateRoute(lite)}
       title={StyleContext.default.titleLabels ? p.title ?? getToString(lite) : undefined}
       data-entity={liteKey(lite)}
@@ -50,13 +50,13 @@ export default function EntityLink(p: EntityLinkProps) {
 
     if (event.ctrlKey || event.button == 1 || avoidPopup && !p.inPlaceNavigation) {
       var vp = p.getViewPromise && p.getViewPromise(null);
-      window.open(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+      window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined)));
       return;
     }
 
     if (p.inPlaceNavigation) {
       var vp = p.getViewPromise && p.getViewPromise(null);
-      AppContext.history.push(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+      AppContext.navigate(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
     } else {
       Navigator.view(lite, { getViewPromise: p.getViewPromise, buttons: "close", extraProps: p.extraProps }).then(() => {
         p.onNavigated && p.onNavigated(lite);

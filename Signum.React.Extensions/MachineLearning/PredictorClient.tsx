@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import * as Constructor from '@framework/Constructor';
 import { ajaxPost, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -17,12 +18,12 @@ import {
 } from './Signum.Entities.MachineLearning'
 import * as QuickLinks from '@framework/QuickLinks'
 import { QueryToken } from '@framework/FindOptions';
-import { ImportComponent } from '@framework/AsyncImport';
+import { ImportComponent } from '@framework/ImportComponent';
 import { TypeContext } from '@framework/Lines';
 import SelectorModal from '@framework/SelectorModal';
 import { CellFormatter } from '@framework/Finder';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
   Navigator.addSettings(new EntitySettings(PredictorSubQueryEntity, e => import('./Templates/PredictorSubQuery')));
   Navigator.addSettings(new EntitySettings(NeuralNetworkSettingsEntity, e => import('./Templates/NeuralNetworkSettings')));
@@ -101,7 +102,7 @@ export function start(options: { routes: JSX.Element[] }) {
   }));
 
   registerResultRenderer(PredictorSimpleResultSaver.Full, ctx =>
-    <ImportComponent onImportModule={() => import("./Templates/SimpleResultButton")} componentProps={{ ctx: ctx }} />
+    <ImportComponent onImport={() => import("./Templates/SimpleResultButton")} componentProps={{ ctx: ctx }} />
   );
 }
 
@@ -139,22 +140,22 @@ export function getResultRendered(ctx: TypeContext<PredictorEntity>): React.Reac
 export namespace API {
 
   export function downloadCsvById(lite: Lite<PredictorEntity>): void {
-    ajaxGetRaw({ url: `~/api/predictor/csv/${lite.id}` })
+    ajaxGetRaw({ url: `/api/predictor/csv/${lite.id}` })
       .then(response => saveFile(response));
   }
 
   export function downloadTsvById(lite: Lite<PredictorEntity>): void {
-    ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}` })
+    ajaxGetRaw({ url: `/api/predictor/tsv/${lite.id}` })
       .then(response => saveFile(response));
   }
 
   export function downloadTsvMetadataById(lite: Lite<PredictorEntity>): void {
-    ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}/metadata` })
+    ajaxGetRaw({ url: `/api/predictor/tsv/${lite.id}/metadata` })
       .then(response => saveFile(response));
   }
 
   export function getTrainingState(lite: Lite<PredictorEntity>): Promise<TrainingProgress> {
-    return ajaxGet<TrainingProgress>({ url: `~/api/predictor/trainingProgress/${lite.id}` }).then(tp => {
+    return ajaxGet<TrainingProgress>({ url: `/api/predictor/trainingProgress/${lite.id}` }).then(tp => {
       if (tp.epochProgresses)
         tp.epochProgressesParsed = tp.epochProgresses.map(p => fromObjectArray(p));
       return tp;
@@ -162,19 +163,19 @@ export namespace API {
   }
 
   export function getEpochLosses(lite: Lite<PredictorEntity>): Promise<Array<EpochProgress>> {
-    return ajaxGet<Array<(number | undefined)[]>>({ url: `~/api/predictor/epochProgress/${lite.id}` }).then(ps => ps.map(p => fromObjectArray(p)));
+    return ajaxGet<Array<(number | undefined)[]>>({ url: `/api/predictor/epochProgress/${lite.id}` }).then(ps => ps.map(p => fromObjectArray(p)));
   }
 
   export function getPredict(predictor: Lite<PredictorEntity>, mainKeys: { [queryToken: string]: any } | undefined): Promise<PredictRequest> {
-    return ajaxPost({ url: `~/api/predict/get/${predictor.id}` }, mainKeys);
+    return ajaxPost({ url: `/api/predict/get/${predictor.id}` }, mainKeys);
   }
 
   export function updatePredict(predict: PredictRequest): Promise<PredictRequest> {
-    return ajaxPost({ url: `~/api/predict/update/` }, predict);
+    return ajaxPost({ url: `/api/predict/update/` }, predict);
   }
 
   export function publications(queryKey: string): Promise<PredictorPublicationSymbol[]> {
-    return ajaxGet({ url: `~/api/predict/publications/${queryKey}` });
+    return ajaxGet({ url: `/api/predict/publications/${queryKey}` });
   }
 }
 

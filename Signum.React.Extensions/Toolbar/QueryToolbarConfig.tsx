@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Location } from 'history'
+import { Location } from 'react-router'
 import { getQueryKey, getQueryNiceName, getTypeInfos, IsByAll } from '@framework/Reflection'
 import { getToString } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
@@ -53,7 +53,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   }
 
   isCompatibleWithUrlPrio(res: ToolbarResponse<QueryEntity>, location: Location, query: any): number {
-    return location.pathname == AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: getToString(res.content)! })) ? 1 : 0;
+    return location.pathname == Finder.findOptionsPath({ queryName: getToString(res.content)! }) ? 1 : 0;
   }
 }
 

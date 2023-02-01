@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
@@ -13,14 +14,14 @@ import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   UserAssetsClient.start({ routes: options.routes });
   UserAssetsClient.registerExportAssertLink(UserChartEntity);
 
-  options.routes.push(<ImportRoute path="~/userChart/:userChartId/:entity?" onImportModule={() => import("./UserChartPage")} />);
+  options.routes.push({ path: "/userChart/:userChartId/:entity?", element: <ImportComponent onImport={() => import("./UserChartPage")} /> });
 
 
   ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
@@ -40,7 +41,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     return promise.then(uqs =>
       uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), () => getToString(uc) ?? "", e => {
-        window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
+        window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.id}/${liteKey(ctx.lite)}`));
       }, { icon: "chart-bar", iconColor: "darkviolet" })));
   });
 
@@ -48,7 +49,7 @@ export function start(options: { routes: JSX.Element[] }) {
     e => {
       Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
         if (uc.entityType == undefined)
-          window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}`));
+          window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.id}`));
         else
           Navigator.API.fetch(uc.entityType)
             .then(t => Finder.find({ queryName: t.cleanName }))
@@ -56,7 +57,7 @@ export function start(options: { routes: JSX.Element[] }) {
               if (!lite)
                 return;
 
-              window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(lite)}`));
+              window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.id}/${liteKey(lite)}`));
             });
       });
     }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting), group: null, icon: "eye", iconColor: "blue", color: "info" }));
@@ -131,11 +132,11 @@ export module Converter {
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<UserChartEntity>[]> {
-    return ajaxGet({ url: "~/api/userChart/forEntityType/" + type });
+    return ajaxGet({ url: "/api/userChart/forEntityType/" + type });
   }
 
   export function forQuery(queryKey: string): Promise<Lite<UserChartEntity>[]> {
-    return ajaxGet({ url: "~/api/userChart/forQuery/" + queryKey });
+    return ajaxGet({ url: "/api/userChart/forQuery/" + queryKey });
   }
 }
 

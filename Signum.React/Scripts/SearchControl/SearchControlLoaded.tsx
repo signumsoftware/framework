@@ -830,9 +830,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const path = Finder.findOptionsPath(findOptions, this.extraUrlParams);
 
     if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
-      window.open(path);
+      window.open(AppContext.toAbsoluteUrl(path));
     else
-      AppContext.history.push(path);
+      AppContext.navigate(path);
   };
 
   handleViewModeClick = (ev: React.MouseEvent<any>) => {
@@ -1355,12 +1355,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <span className="text-muted me-1">{prefix}</span>
 
           {formatter.formatter(val, {
-          columns: rt.columns,
-          row: rt.rows[0],
-          rowIndex: 0,
-          refresh: () => scl.dataChanged(),
-          systemTime: scl.props.findOptions.systemTime
-        }, summaryToken)}</div>
+            columns: rt.columns,
+            row: rt.rows[0],
+            rowIndex: 0,
+            refresh: () => scl.dataChanged(),
+            systemTime: scl.props.findOptions.systemTime,
+            searchControl: scl,
+          }, summaryToken)}
+        </div>
       );
     }
 
@@ -1584,9 +1586,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var vp = getViewPromise && getViewPromise(null);
         var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
         if (this.props.view == "InPlace" && !isWindowsOpen)
-          AppContext.history.push(url);
+          AppContext.navigate(url);
         else
-          window.open(url);
+          window.open(AppContext.toAbsoluteUrl(url));
       }
       else {
         Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
@@ -1679,6 +1681,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       columns: resultColumns,
       row: row,
       rowIndex: rowIndex,
+      searchControl: this,
     };
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
@@ -1896,6 +1899,38 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     else {
       return m;
     }
+  }
+
+  getRowValue<T = unknown>(ctx: Finder.CellFormatterContext, token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
+
+    var result = this.tryGetRowValue(ctx, token, automaticEntityPrefix, true);
+
+    return result!.value;
+  }
+
+  tryGetRowValue<T = unknown>(ctx: Finder.CellFormatterContext, token: QueryTokenString<T> | string, automaticEntityPrefix = true, throwError = false): { value: Finder.AddToLite<T> | undefined } | undefined {
+
+    const tokenName = token.toString();
+
+    const sc = this;
+    const colIndex = ctx.columns.indexOf(tokenName);
+    if (colIndex != -1)
+      return { value: ctx.row.columns[colIndex] };
+
+    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
+    if (filter != null)
+      return { value: filter?.value };
+
+    if (automaticEntityPrefix) {
+      var result = this.tryGetRowValue(ctx, tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false, false);
+      if (result != null)
+        return result as any;
+    }
+
+    if (throwError)
+      throw new Error(`No column '${token}' found`);
+
+    return undefined;
   }
 
   getSelectedValue<T = unknown>(token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {

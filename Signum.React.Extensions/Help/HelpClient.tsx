@@ -1,20 +1,21 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxGet, ajaxPost } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
 import { OperationSymbol } from '@framework/Signum.Entities'
 import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo} from '@framework/Reflection'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import "./Help.css"
 import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity } from './Signum.Entities.Help';
 import { QueryString } from '@framework/QueryString';
 
-export function start(options: { routes: JSX.Element[], markdownToHtml: (txt: string) => string }) {
+export function start(options: { routes: RouteObject[], markdownToHtml: (txt: string) => string }) {
 
   Options.markdownToHml = options.markdownToHtml;
-  options.routes.push(<ImportRoute exact path="~/help" onImportModule={() => import("./Pages/HelpIndexPage")} />);
-  options.routes.push(<ImportRoute exact path="~/help/namespace/:namespace*" onImportModule={() => import("./Pages/NamespaceHelpPage")} />);
-  options.routes.push(<ImportRoute exact path="~/help/type/:cleanName" onImportModule={() => import("./Pages/TypeHelpPage")} />);
-  options.routes.push(<ImportRoute exact path="~/help/appendix/:uniqueName?" onImportModule={() => import("./Pages/AppendixHelpPage")} />);
+  options.routes.push({ path: "/help", element: <ImportComponent onImport={() => import("./Pages/HelpIndexPage")} /> });
+  options.routes.push({ path: "/help/namespace/:namespace*", element: <ImportComponent onImport={() => import("./Pages/NamespaceHelpPage")} /> });
+  options.routes.push({ path: "/help/type/:cleanName", element: <ImportComponent onImport={() => import("./Pages/TypeHelpPage")} /> });
+  options.routes.push({ path: "/help/appendix/:uniqueName?", element: <ImportComponent onImport={() => import("./Pages/AppendixHelpPage")} /> });
 }
 
 export namespace Options {
@@ -22,7 +23,7 @@ export namespace Options {
 }
 
 var helpLinkRegex = /\[(?<letter>[tpqona]+):(?<link>[.a-z0-9_|]*)\]/gi;
-var helpAppRelativeUrl = /\(~/;
+var helpAppRelativeUrl = /\(/;
 
 export function toHtml(txt: string  | null) {
   if (txt == null)
@@ -69,27 +70,27 @@ export function toHtml(txt: string  | null) {
 export module API {
 
   export function index(): Promise<HelpIndexTS> {
-    return ajaxGet({ url: "~/api/help/index" });
+    return ajaxGet({ url: "/api/help/index" });
   }
 
   export function namespace(namespace: string): Promise<NamespaceHelp> {
-    return ajaxGet({ url: "~/api/help/namespace/" + namespace });
+    return ajaxGet({ url: "/api/help/namespace/" + namespace });
   }
 
   export function saveNamespace(typeHelp: NamespaceHelpEntity): Promise<void> {
-    return ajaxPost({ url: "~/api/help/saveNamespace" }, typeHelp);
+    return ajaxPost({ url: "/api/help/saveNamespace" }, typeHelp);
   }
 
   export function type(cleanName: string): Promise<TypeHelpEntity> {
-    return ajaxGet({ url: "~/api/help/type/" + cleanName });
+    return ajaxGet({ url: "/api/help/type/" + cleanName });
   }
 
   export function saveType(typeHelp: TypeHelpEntity): Promise<void> {
-    return ajaxPost({ url: "~/api/help/saveType" }, typeHelp);
+    return ajaxPost({ url: "/api/help/saveType" }, typeHelp);
   }
 
   export function appendix(uniqueName: string | undefined): Promise<AppendixHelpEntity> {
-    return ajaxGet({ url: "~/api/help/appendix/" + (uniqueName ?? "") });
+    return ajaxGet({ url: "/api/help/appendix/" + (uniqueName ?? "") });
   }
 }
 
@@ -127,23 +128,23 @@ export interface NamespaceHelp {
 
 export module Urls {
   export function indexUrl() {
-    return AppContext.toAbsoluteUrl("~/help");
+    return "/help";
   }
 
   export function searchUrl(query: PseudoType) {
-    return AppContext.toAbsoluteUrl("~/help/search?" + QueryString.stringify({ q: getQueryKey(query) }));
+    return "/help/search?" + QueryString.stringify({ q: getQueryKey(query) });
   }
 
   export function typeUrl(typeName: PseudoType) {
-    return AppContext.toAbsoluteUrl("~/help/type/" + getTypeName(typeName));
+    return "/help/type/" + getTypeName(typeName);
   }
 
   export function namespaceUrl(namespace: string) {
-    return AppContext.toAbsoluteUrl("~/help/namespace/" + namespace.replaceAll(".", "_"));
+    return "/help/namespace/" + namespace.replaceAll(".", "_");
   }
 
   export function appendixUrl(uniqueName: string | null) {
-    return AppContext.toAbsoluteUrl("~/help/appendix/" + (uniqueName ?? ""));
+    return "/help/appendix/" + (uniqueName ?? "");
   }
 
   export function operationUrl(typeName: PseudoType, operation: OperationSymbol | string) {

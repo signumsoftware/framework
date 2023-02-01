@@ -18,7 +18,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
   constructor(props: { ctx: TypeContext<RestLogEntity> }) {
     super(props);
-    const prefix = AppContext.toAbsoluteUrl("~/api");
+    const prefix = AppContext.toAbsoluteUrl("/api");
     const suffix = props.ctx.subCtx(f => f.url).value.after("/api");
     const queryParams = props.ctx.value.queryString.map(mle => `${mle.element.key}=${mle.element.value}`).join("&");
     this.state = {
