@@ -15,7 +15,6 @@ import { useState } from 'react'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import SearchPage from '@framework/SearchControl/SearchPage'
 import { useTitle } from '../../../Signum.React/Scripts/AppContext'
-import { currentUser } from '../../Authorization/AuthClient'
 
 interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; entity?: string }> {
 
@@ -28,7 +27,7 @@ export default function UserQueryPage(p: UserQueryPageProps) {
   const { userQueryId, entity } = p.match.params;
 
   const forceUpdate = useForceUpdate();
-  
+
   const fo = useAPI(() => {
     return Navigator.API.fetchEntity(UserQueryEntity, userQueryId)
       .then(uq => {
@@ -80,10 +79,10 @@ export default function UserQueryPage(p: UserQueryPageProps) {
 
       {currentUserQuery && <SearchControl ref={sc => {
         searchControl.current = sc;
-        var scl = sc && sc.searchControlLoaded;
+        var scl = sc?.searchControlLoaded;
         if (scl)
           scl.getCurrentUserQuery = () => toLite(currentUserQuery);
-        }}
+      }}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}
         tag="UserQueryPage"
