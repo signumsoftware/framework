@@ -448,6 +448,8 @@ public static class WordTemplateLogic
         var wordTemplates = Database.Query<WordTemplateEntity>().ToList();
         var table = Schema.Current.Table(typeof(WordTemplateEntity));
 
+        WordModelLogic.WordModelTypeToEntity.Load(); //To avoid N exceptions
+
         SqlPreCommand? cmd = wordTemplates.Select(wt => SynchronizeWordTemplateFile(replacements, wt, sd, table)).Combine(Spacing.Double);
 
         return cmd;
