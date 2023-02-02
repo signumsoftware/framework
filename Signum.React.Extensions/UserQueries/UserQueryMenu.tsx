@@ -1,12 +1,11 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { classes, softCast } from '@framework/Globals'
+import { classes, Dic, softCast } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
-import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation, QueryFilterEmbedded, PinnedQueryFilterEmbedded } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
@@ -15,12 +14,13 @@ import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
 import { FilterOption, FilterOptionParsed } from '@framework/Search'
-import { isFilterGroupOption, isFilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
+import { FindOptionsParsed, isFilterGroupOption, isFilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyCodes } from '@framework/Components'
 import type StringDistance from './StringDistance'
 import { translated } from '../Translation/TranslatedInstanceTools'
+import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -36,40 +36,34 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [currentCustomDrilldowns, setCurrentCustomDrilldownsInternal] = React.useState<MList<Lite<Entity>> | undefined>();
-  const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>(() => {
-    let uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl() : p.searchControl.props.extraOptions?.userQuery;
-    return uq;
-  });
+  const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>();
+  const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
 
-  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined) {
+  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined, drilldowns: MList<Lite<Entity>> | undefined) {
     p.searchControl.extraUrlParams.userQuery = uq && liteKey(uq);
+
+    if (uq?.entity && !Dic.equals(uq.entity.customDrilldowns, drilldowns, true))
+      uq.entity = undefined;
+
+    setCurrentCustomDrilldownsInternal(drilldowns);
+    p.searchControl.getCurrentUserQuery = () => uq;
     p.searchControl.pageSubTitle = getToString(uq);
     setCurrentUserQueryInternal(uq);
     p.searchControl.props.onPageTitleChanged?.();
   }
-
-  function setCurrentCustomDrilldowns(value: MList<Lite<Entity>> | undefined) {
-    p.searchControl.customDrilldowns = value?.map(mle => mle.element) ?? [];
-    UserAssetClient.Encoder.encodeCustomDrilldowns(p.searchControl.extraUrlParams, value);
-    setCurrentCustomDrilldownsInternal(value);
-  }
-
-  const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
   
   React.useEffect(() => {
-    p.searchControl.extraUrlParams.userQuery = currentUserQuery && liteKey(currentUserQuery);
-
-    const cds = p.searchControl.props.tag == "SearchPage" ?
-      UserAssetClient.Decoder.decodeCustomDrilldowns(QueryString.parse(window.location.search)) :
-      p.searchControl.props.extraOptions?.customDrilldowns as (MList<Lite<Entity>> | undefined);
-
-    setCurrentCustomDrilldowns(cds);
-  }, []);
-
-  React.useEffect(() => {
-    if (currentUserQuery)
-      reloadList();
-  }, []);
+    const uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl() : p.searchControl.props.extraOptions?.userQuery;
+    if (uq && UserQueryEntity.isLite(uq)) {
+      Navigator.API.fetchAndRemember(uq)
+        .then(entity => {
+          uq.model = getToString(entity);
+          setCurrentUserQuery(uq, entity.customDrilldowns);
+        });
+    }
+    else
+      setCurrentUserQuery(undefined, undefined);
+  }, [window.location.search, p.searchControl.props.extraOptions?.userQuery && liteKey(p.searchControl.props.extraOptions.userQuery)]);
 
   function handleSelectedToggle(isOpen: boolean) {
     if (isOpen && userQueries == undefined)
@@ -82,16 +76,6 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     return UserQueryClient.API.forQuery(p.searchControl.props.findOptions.queryKey)
       .then(list => {
         setUserQueries(list);
-        if (currentUserQuery && currentUserQuery.model == null) {
-          const similar = list.firstOrNull(l => is(l, currentUserQuery));
-          if (similar != null) {
-            currentUserQuery.model = similar.model;
-            setCurrentUserQuery(currentUserQuery);
-          } else {
-            Navigator.API.fillLiteModels(currentUserQuery)
-              .then(() => setCurrentUserQuery(currentUserQuery));
-          }
-        }
         return list;
       });
   }
@@ -114,8 +98,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
           sc.setState({ showFilters: false });
         sc.setState({ refreshMode: sc.props.defaultRefreshMode });
-        setCurrentUserQuery(undefined);
-        setCurrentCustomDrilldowns(undefined);
+        setCurrentUserQuery(undefined, undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
         }
@@ -125,15 +108,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   function applyUserQuery(uq: Lite<UserQueryEntity>) {
     Navigator.API.fetch(uq).then(userQuery => {
-      const sc = p.searchControl
+      const sc = p.searchControl;
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
             sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
-          setCurrentUserQuery(uq);
-          setCurrentCustomDrilldowns(userQuery.customDrilldowns);
+          setCurrentUserQuery(uq, userQuery.customDrilldowns);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
@@ -150,10 +132,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(userQuery => Navigator.view(userQuery))
       .then(() => reloadList())
       .then(list => {
-        if (!list.some(a => is(a, currentUserQuery))) {
-          setCurrentUserQuery(undefined);
-          setCurrentCustomDrilldowns(undefined);
-        }
+        if (!list.some(a => is(a, currentUserQuery)))
+          setCurrentUserQuery(undefined, undefined);
         else
           applyUserQuery(currentUserQuery!)
       });
@@ -189,10 +169,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(uqOld => Navigator.view(uqOld))
       .then(() => reloadList())
       .then(list => {
-        if (!list.some(a => is(a, currentUserQuery))) {
-          setCurrentUserQuery(undefined);
-          setCurrentCustomDrilldowns(undefined);
-        }
+        if (!list.some(a => is(a, currentUserQuery))) 
+          setCurrentUserQuery(undefined, undefined);
         else
           applyUserQuery(currentUserQuery!);
       });

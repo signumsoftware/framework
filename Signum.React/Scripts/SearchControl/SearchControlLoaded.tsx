@@ -53,11 +53,9 @@ export interface SearchControlMobileOptions {
 
 export interface ShowBarExtensionOption { }
 
-export interface CustomDrilldownOptions {
+export interface OnDrilldownOptions {
   openInNewTab?: boolean;
   showInPlace?: boolean;
-  fo?: FindOptions;
-  entity?: Lite<Entity>;
   onReload?: () => void;
 }
 
@@ -119,6 +117,7 @@ export interface SearchControlLoadedProps {
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
+  onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
 }
 
 export interface SearchControlLoadedState {
@@ -151,7 +150,7 @@ export interface SearchControlLoadedState {
   viewMode?: SearchControlViewMode;
 }
 
-export default class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
+export class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
 
   constructor(props: SearchControlLoadedProps) {
     super(props);
@@ -164,11 +163,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   static maxToArrayElements = 100;
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
-  static onCustomDrilldown: ((items: Lite<Entity>[], options?: CustomDrilldownOptions) => Promise<void>) | null = null;
+  static onDrilldown: ((scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
-  customDrilldowns: Lite<Entity>[] = [];
 
   getMobileOptions(fop: FindOptionsParsed) {
     const fo = this.props.findOptions;
@@ -645,8 +643,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           this.doSearchPage1();
         });
       }
-
-      this.customDrilldowns = [];
     });
   }
 
@@ -1547,11 +1543,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       includeDefaultFilters: false,
     } as FindOptions);
 
-    if (this.customDrilldowns.length > 0 && SearchControlLoaded.onCustomDrilldown)
-      return SearchControlLoaded.onCustomDrilldown(this.customDrilldowns, { fo, onReload: () => this.dataChanged() });
-
-    return Finder.explore(fo).then(() => {
-      this.dataChanged();
+    const onDrilldown = this.props.onDrilldown ?? SearchControlLoaded.onDrilldown;
+    const promise = onDrilldown ? onDrilldown(this, row, { onReload: () => this.dataChanged() }) : Promise.resolve(false);
+    promise.then(done => {
+      if (done == false)
+        return Finder.explore(fo).then(() => {
+          this.dataChanged();
+        });
     });
   }
 
@@ -1597,23 +1595,26 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const isWindowsOpen = e.button == 1 || e.ctrlKey;
 
-      if (this.customDrilldowns.length > 0 && SearchControlLoaded.onCustomDrilldown)
-        return SearchControlLoaded.onCustomDrilldown(this.customDrilldowns, { openInNewTab: isWindowsOpen || s?.avoidPopup, showInPlace: this.props.view == "InPlace", entity: lite, onReload: () => this.doSearch({}) });
-
-      if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
-        var vp = getViewPromise && getViewPromise(null);
-        var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
-        if (this.props.view == "InPlace" && !isWindowsOpen)
-          AppContext.history.push(url);
-        else
-          window.open(url);
-      }
-      else {
-        Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
-          .then(() => {
-            this.handleOnNavigated(lite);
-          });
-      }
+      const onDrilldown = this.props.onDrilldown ?? SearchControlLoaded.onDrilldown;
+      const promise = onDrilldown ? onDrilldown(this, row, { openInNewTab: isWindowsOpen || s?.avoidPopup, showInPlace: this.props.view == "InPlace", onReload: () => this.handleOnNavigated(lite) }) : Promise.resolve(false);
+      promise.then(done => {
+        if (done == false) {
+          if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
+            var vp = getViewPromise && getViewPromise(null);
+            var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
+            if (this.props.view == "InPlace" && !isWindowsOpen)
+              AppContext.history.push(url);
+            else
+              window.open(url);
+          }
+          else {
+            Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
+              .then(() => {
+                this.handleOnNavigated(lite);
+              });
+          }
+        }
+      });
     }
   }
 
@@ -2056,3 +2057,5 @@ function dominates(root: QueryToken, big: QueryToken) {
   return big.fullKey.startsWith(root.fullKey + ".")
 
 }
+
+export default SearchControlLoaded;

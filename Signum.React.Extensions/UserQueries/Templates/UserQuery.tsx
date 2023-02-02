@@ -25,18 +25,6 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
 
   const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
 
-  const groupsResultRef = React.useRef<boolean>(ctx.value.groupResults);
-
-  React.useEffect(() => {
-    if (ctx.value.groupResults == groupsResultRef.current)
-      return;
-
-    groupsResultRef.current = ctx.value.groupResults;
-    ctx.value.customDrilldowns = [];
-    ctx.value.modified = true;
-    forceUpdate();
-  }, [ctx.value.groupResults]);
-
   const qd = useAPI(() => Finder.getQueryDescription(query.key), [query.key]);
   if (!qd)
     return null;
@@ -71,7 +59,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
 
           <div className="row">
           <div className="col-sm-6">
-            <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} />
+            <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} />
             <ValueLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
               helpText={UserQueryMessage.MakesThe0AvailableInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
 
@@ -153,6 +141,12 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
       }
     </div>
   );
+
+  function handleOnGroupResultsChange() {
+    ctx.value.customDrilldowns = [];
+    ctx.value.modified = true;
+    forceUpdate();
+  }
 
   function getCustomDrilldownsFindOptions() {
     var fos: FilterConditionOption[] = [];

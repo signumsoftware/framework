@@ -4,7 +4,7 @@ import { Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite } from '@framework/Signum.Entities'
+import { SearchMessage, JavascriptMessage, parseLite, toLite } from '@framework/Signum.Entities'
 import { getQueryNiceName, newLite } from '@framework/Reflection'
 import SearchControl, { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { UserQueryEntity } from '../Signum.Entities.UserQueries'
@@ -15,6 +15,7 @@ import { useState } from 'react'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import SearchPage from '@framework/SearchControl/SearchPage'
 import { useTitle } from '../../../Signum.React/Scripts/AppContext'
+import { currentUser } from '../../Authorization/AuthClient'
 
 interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; entity?: string }> {
 
@@ -38,7 +39,7 @@ export default function UserQueryPage(p: UserQueryPageProps) {
       })
   }, [userQueryId, entity]);
 
-  const searchControl = React.useRef<SearchControlHandler>(null);
+  var searchControl = React.useRef<SearchControlHandler | null>(null);
 
   var subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
 
@@ -77,7 +78,12 @@ export default function UserQueryPage(p: UserQueryPageProps) {
         }
       </h3>
 
-      {currentUserQuery && <SearchControl ref={searchControl}
+      {currentUserQuery && <SearchControl ref={sc => {
+        searchControl.current = sc;
+        var scl = sc && sc.searchControlLoaded;
+        if (scl)
+          scl.getCurrentUserQuery = () => toLite(currentUserQuery);
+        }}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}
         tag="UserQueryPage"
@@ -91,7 +97,7 @@ export default function UserQueryPage(p: UserQueryPageProps) {
         showSystemTimeButton={true}
         showFooter={true}
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
-        extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId), customDrilldowns: currentUserQuery.customDrilldowns }}
+        extraOptions={{ userQuery: newLite(UserQueryEntity, userQueryId) }}
         defaultRefreshMode={currentUserQuery.refreshMode}
         searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         onHeighChanged={onResize}

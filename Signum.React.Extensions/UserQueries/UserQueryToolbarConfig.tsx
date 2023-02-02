@@ -46,7 +46,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     else {
       Navigator.API.fetch(res.content!)
         .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined)
-          .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content, customDrilldowns: uq.customDrilldowns } } })));
+          .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content } } })));
     }
   }
 
@@ -57,7 +57,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
           return Promise.resolve(UserQueryClient.userQueryUrl(res.content!));
 
         return UserQueryClient.Converter.toFindOptions(uq, undefined)
-          .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.content!), customDrilldowns: uq.customDrilldowns }));
+          .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.content!) }));
       });
   }
 

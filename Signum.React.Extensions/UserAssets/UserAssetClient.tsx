@@ -19,7 +19,6 @@ import * as Navigator from '@framework/Navigator'
 import SelectorModal from '@framework/SelectorModal';
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
 import { SearchControlLoaded } from '../../Signum.React/Scripts/Search';
-import { CustomDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
 
 let started = false;
 export function start(options: { routes: JSX.Element[] }) {
@@ -34,9 +33,6 @@ export function start(options: { routes: JSX.Element[] }) {
   });
 
   AppContext.clearSettingsActions.push(() => started = false);
-
-  SearchControlLoaded.onCustomDrilldown = (items, options?: CustomDrilldownOptions) => handleCustomDrilldowns(items, options);
-
   started = true;
 }
 
@@ -293,51 +289,4 @@ export module Decoder {
       });
     });
   }
-}
-
-export function handleCustomDrilldowns(items: Lite<Entity>[], options?: CustomDrilldownOptions) {
-  const fo = options?.fo;
-  const entity = options?.entity;
-  const openInNewTab = options?.openInNewTab;
-  const showInPlace = options?.showInPlace;
-  const onReload = options?.onReload;
-
-  return SelectorModal.chooseElement(items, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
-    .then(lite => {
-      if (!lite || !UserQueryEntity.isLite(lite))
-        return;
-
-      return Navigator.API.fetch(lite)
-        .then(uq => {
-          if (fo)
-            return Finder.getQueryDescription(fo.queryName)
-              .then(qd => Finder.parseFindOptions(fo, qd, false)
-                .then(fop => UserQueryClient.Converter.applyUserQuery(fop, uq, entity, fo.includeDefaultFilters ?? false)
-                  .then(fop2 => Finder.toFindOptions(fop2, qd, uq.includeDefaultFilters ?? fo.includeDefaultFilters ?? false))
-                  .then(dfo => ({ fo: dfo, uq: uq }))));
-
-          return UserQueryClient.Converter.toFindOptions(uq, entity)
-            .then(dfo => ({ fo: dfo, uq: uq }));
-        });
-    })
-    .then(val => {
-      if (!val)
-        return;
-
-      if (openInNewTab || showInPlace) {
-        var extra: any = {};
-        extra.userQuery = liteKey(toLite(val.uq));
-        Encoder.encodeCustomDrilldowns(extra, val.uq.customDrilldowns);
-
-        const url = Finder.findOptionsPath(val.fo, extra);
-
-        if (showInPlace && !openInNewTab)
-          AppContext.history.push(url);
-        else
-          window.open(url);
-      }
-      else
-        Finder.explore(val.fo, { searchControlProps: { extraOptions: { userQuery: toLite(val.uq), customDrilldowns: val.uq.customDrilldowns } } })
-          .then(() => onReload?.());
-    });
 }
