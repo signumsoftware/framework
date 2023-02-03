@@ -146,7 +146,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
-        CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLite()).NotNull().ToMList());
+        CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLiteFat()).NotNull().ToMList());
         var paramsXml = (element.Element("Parameters")?.Elements()).EmptyIfNull().ToDictionary(a => a.Attribute("Name")!.Value);
         Parameters.ForEach(p =>
         {
