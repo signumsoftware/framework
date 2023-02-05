@@ -120,7 +120,6 @@ export interface ChartRequestModel extends Entities.ModelEntity {
   chartScript: ChartScriptSymbol;
   columns: Entities.MList<ChartColumnEmbedded>;
   parameters: Entities.MList<ChartParameterEmbedded>;
-  customDrilldowns: Entities.MList<Entities.Lite<Entities.Entity>>;
   maxRows: number | null;
 }
 
