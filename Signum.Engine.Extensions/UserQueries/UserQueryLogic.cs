@@ -52,7 +52,7 @@ public static class UserQueryLogic
             UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryEntity>().ToDictionary(a => a.ToLite()),
                 new InvalidateWith(typeof(UserQueryEntity)));
 
-            UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null && !a.AppendFilters).SelectCatch(uq => KeyValuePair.Create(uq.Query.ToQueryName(), uq.ToLite())).GroupToDictionary(),
+            UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).SelectCatch(uq => KeyValuePair.Create(uq.Query.ToQueryName(), uq.ToLite())).GroupToDictionary(),
                 new InvalidateWith(typeof(UserQueryEntity)));
 
             UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).SelectCatch(uq => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType!.Id), uq.ToLite())).GroupToDictionary(),
@@ -158,13 +158,13 @@ public static class UserQueryLogic
         userQuery.ParseData(description);
     }
 
-    public static List<Lite<UserQueryEntity>> GetUserQueries(object queryName, bool appendFilterOnly = false)
+    public static List<Lite<UserQueryEntity>> GetUserQueries(object queryName, bool appendFilters)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
         return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
             .Select(lite => UserQueries.Value.GetOrThrow(lite))
-            .Where(uq => isAllowed(uq) && (!appendFilterOnly || uq.AppendFilters))
+            .Where(uq => isAllowed(uq) && (uq.AppendFilters == appendFilters))
             .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
             .ToList();
     }
