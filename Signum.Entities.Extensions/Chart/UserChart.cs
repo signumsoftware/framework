@@ -3,9 +3,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
-using DocumentFormat.OpenXml.Wordprocessing;
-using DocumentFormat.OpenXml.Spreadsheet;
-
 namespace Signum.Entities.Chart;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
