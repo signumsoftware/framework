@@ -511,7 +511,6 @@ export module Encoder {
     encodeParameters(query, co.parameters?.notNull());
 
     encodeColumn(query, co.columnOptions?.notNull());
-    UserAssetClient.Encoder.encodeCustomDrilldowns(query, co.customDrilldowns);
 
     return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
 
@@ -570,7 +569,6 @@ export module Decoder {
             filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
             columns: cols,
             parameters: Decoder.decodeParameters(query),
-            customDrilldowns: UserAssetClient.Decoder.decodeCustomDrilldowns(query),
           });
 
           synchronizeColumns(chartRequest, cr);
