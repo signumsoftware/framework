@@ -144,22 +144,23 @@ function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParse
 export async function onDrilldownSearchControl(scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions): Promise<boolean | undefined> {
   var uq = scl.getCurrentUserQuery?.();
   if (uq == null)
-    return Promise.resolve(false);
+    return false;
 
   await Navigator.API.fetchAndRemember(uq);
 
   if (uq.entity!.customDrilldowns.length == 0 || scl.state.resultFindOptions?.groupResults != uq.entity!.groupResults)
-    return Promise.resolve(false);
+    return false;
 
   const filters = scl.state.resultFindOptions && SearchControlLoaded.getGroupFilters(row, scl.state.resultTable!, scl.state.resultFindOptions);
-  const promise = row.entity ? onDrilldownEntity(uq.entity!.customDrilldowns, row.entity) : onDrilldownGroup(uq.entity!.customDrilldowns, filters);
-  return promise
-    .then(val => {
-      if (!val)
-        return undefined;
 
-      return drilldownToUserQuery(val.fo, val.uq, options);
-    });
+  const val = row.entity ?
+    await onDrilldownEntity(uq.entity!.customDrilldowns, row.entity) :
+    await onDrilldownGroup(uq.entity!.customDrilldowns, filters);
+
+  if (!val)
+    return undefined;
+
+  return drilldownToUserQuery(val.fo, val.uq, options);
 }
 
 export function onDrilldownUserChart(cr: ChartRequestModel, row: ChartRow, options?: OnDrilldownOptions): Promise<boolean | undefined> {
