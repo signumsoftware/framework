@@ -486,7 +486,6 @@ export module Encoder {
           return p.element.value != defaultParameterValue(scriptParam, c?.token && c.token.token);
         })
         .map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption),
-      customDrilldowns: cr.customDrilldowns,
     };
   }
 

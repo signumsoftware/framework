@@ -24,7 +24,6 @@ import { ChartScript, cleanedChartRequest, getCustomDrilldownsFindOptions, hasAg
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
-import { EntityStrip } from '../../../Signum.React/Scripts/Lines';
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;
@@ -57,19 +56,6 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
     } | undefined,
     loading: boolean;
   } | undefined>(undefined);
-
-  const hasAggregatesRef = React.useRef<boolean>(hasAggregates(p.chartRequest));
-
-  React.useEffect(() => {
-    const ha = hasAggregates(p.chartRequest);
-    if (ha == hasAggregatesRef.current)
-      return;
-
-    hasAggregatesRef.current = ha;
-    p.chartRequest.customDrilldowns = [];
-    p.chartRequest.modified = true;
-    forceUpdate();
-  });
 
   const queryDescription = useAPI(signal => p.chartRequest ? Finder.getQueryDescription(p.chartRequest.queryKey) : Promise.resolve(undefined),
     [p.chartRequest.queryKey]);
@@ -215,11 +201,6 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
                 forceUpdate();
             }}
           />
-          <EntityStrip ctx={tc.subCtx(e => e.customDrilldowns)}
-            findOptions={getCustomDrilldownsFindOptions(p.chartRequest.queryKey, qd, hasAggregatesRef.current)}
-            avoidDuplicates={true}
-            vertical={true}
-            iconStart={true} />
         </>}
       </div>
       <div className="sf-query-button-bar btn-toolbar mb-2">
@@ -239,7 +220,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       <div className="sf-chart-tab-container">
         <Tabs id="chartResultTabs" key={showChartSettings + ""}>
           <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
-            <ChartRenderer chartRequest={cr} loading={loading == true} autoRefresh={false} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} minHeight={null} />
+            <ChartRenderer userChart={p.userChart} chartRequest={cr} loading={loading == true} autoRefresh={false} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} minHeight={null} />
           </Tab>
           {result &&
             <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} (

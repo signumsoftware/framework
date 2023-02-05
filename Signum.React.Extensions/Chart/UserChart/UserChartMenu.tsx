@@ -153,7 +153,6 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       columns: cr.columns.map(a => newMListElement(JSON.parse(JSON.stringify(a.element)))),
       parameters: cr.parameters.map(p => newMListElement(JSON.parse(JSON.stringify(p.element)))),
-      customDrilldowns: cr.customDrilldowns.map(p => newMListElement(JSON.parse(JSON.stringify(p.element)))),
     });
 
     return uc;

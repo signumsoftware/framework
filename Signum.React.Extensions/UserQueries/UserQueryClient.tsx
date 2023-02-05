@@ -26,7 +26,7 @@ import SearchControlLoaded, { OnDrilldownOptions } from '@framework/SearchContro
 import SelectorModal from '@framework/SelectorModal';
 import { DynamicTypeConditionSymbolEntity } from '../Dynamic/Signum.Entities.Dynamic';
 import { Dic } from '@framework/Globals';
-import { ChartRequestModel } from '../Chart/Signum.Entities.Chart';
+import { ChartRequestModel, UserChartEntity } from '../Chart/Signum.Entities.Chart';
 import { ChartRow, hasAggregates } from '../Chart/ChartClient';
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -163,22 +163,28 @@ export async function onDrilldownSearchControl(scl: SearchControlLoaded, row: Re
   return drilldownToUserQuery(val.fo, val.uq, options);
 }
 
-export function onDrilldownUserChart(cr: ChartRequestModel, row: ChartRow, options?: OnDrilldownOptions): Promise<boolean | undefined> {
-  if (cr.customDrilldowns.length == 0)
-    return Promise.resolve(false);
+export async function onDrilldownUserChart(cr: ChartRequestModel, row: ChartRow, uc?: Lite<UserChartEntity>, options?: OnDrilldownOptions): Promise<boolean | undefined> {
+  if (uc == null)
+    return false;
 
+  await Navigator.API.fetchAndRemember(uc);
+
+  if (uc.entity!.customDrilldowns.length == 0 || hasAggregates(uc.entity!) != hasAggregates(cr))
+    return false;
+
+  debugger;
   const fo = extractFindOptions(cr, row);
   const entity = row.entity ?? (hasAggregates(cr) ? undefined : fo.filterOptions?.singleOrNull(f => f?.token == "Entity")?.value);
-
   const filters = fo.filterOptions?.notNull();
-  const promise = entity ? onDrilldownEntity(cr.customDrilldowns, entity) : onDrilldownGroup(cr.customDrilldowns, filters);
-  return promise
-    .then(val => {
-      if (!val)
-        return undefined;
 
-      return drilldownToUserQuery(val.fo, val.uq, options);
-    });
+  const val = entity ?
+    await onDrilldownEntity(uc.entity!.customDrilldowns, entity) :
+    await onDrilldownGroup(uc.entity!.customDrilldowns, filters);
+
+  if (!val)
+    return undefined;
+
+  return drilldownToUserQuery(val.fo, val.uq, options);
 }
 
 export function onDrilldownEntity(items: MList<Lite<Entity>>, entity: Lite<Entity>) {
