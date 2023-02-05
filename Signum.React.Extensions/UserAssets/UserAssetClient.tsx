@@ -257,37 +257,3 @@ export module API {
     model: UserAssetPreviewModel;
   }
 }
-
-const scapeTilde = Finder.Encoder.scapeTilde;
-
-export module Encoder {
-  export function encodeCustomDrilldowns(query: any, drilldowns: MList<Lite<Entity>> | undefined) {
-    if (drilldowns && drilldowns.length > 0)
-      drilldowns.map(mle => mle.element).map((d, i) => query["customDrilldown" + i] = liteKey(d) + "~" + scapeTilde(getToString(d)));
-    else {
-      const keys = Dic.getKeys(query);
-      keys.filter(k => k.startsWith("customDrilldown")).forEach(k => delete query[k]);
-    }
-  }
-}
-
-export module Decoder {
-  export function decodeCustomDrilldowns(query: any): MList<Lite<Entity>> {
-    return Finder.Decoder.valuesInOrder(query, "customDrilldown").map(d => {
-      var parts = d.value.split("~");
-
-      let liteKey: string;
-      let toStr: string;
-
-      [liteKey, toStr] = parts;
-
-      var lite = parseLite(liteKey);
-      lite.model = toStr;
-
-      return ({
-        rowId: null,
-        element: lite
-      });
-    });
-  }
-}
