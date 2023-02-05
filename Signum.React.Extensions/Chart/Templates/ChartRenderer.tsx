@@ -13,11 +13,12 @@ import { ErrorBoundary } from '@framework/Components';
 
 import ReactChart from '../D3Scripts/Components/ReactChart';
 import { useAPI } from '@framework/Hooks'
-import { TypeInfo } from '@framework/Reflection'
 import { FullscreenComponent } from './FullscreenComponent'
 import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
 import { toAbsoluteUrl } from '@framework/AppContext'
-
+import * as UserQueryClient from '../../UserQueries/UserQueryClient'
+import { DynamicTypeConditionSymbolEntity } from '../../Dynamic/Signum.Entities.Dynamic'
+import { extractFindOptions } from '../../UserQueries/UserQueryClient'
 
 export interface ChartRendererProps {
   chartRequest: ChartRequestModel;
@@ -73,63 +74,23 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;
 
+  UserQueryClient.onDrilldownUserChart(cr, r, { openInNewTab: newWindow, onReload })
+    .then(done => {
+      if (done == false) {
   if (r.entity) {
     if (newWindow)
       window.open(toAbsoluteUrl(Navigator.navigateRoute(r.entity)));
     else
       Navigator.view(r.entity)
-        .then(() => onReload && onReload());
+              .then(() => onReload?.());
   } else {
-    const filters = cr.filterOptions.map(f => {
-      let f2 = withoutPinned(f);
-      if (f2 == null)
-        return null;
-      return withoutAggregate(f2);
-    }).notNull();
-
-    const columns: ColumnOption[] = [];
-
-    cr.columns.map((a, i) => {
-
-      const qte = a.element.token;
-
-      if (qte?.token && !hasAggregate(qte!.token!) && r.hasOwnProperty("c" + i)) {
-        filters.push({
-          token: qte!.token!,
-          operation: "EqualTo",
-          value: (r as any)["c" + i],
-          frozen: false
-        } as FilterOptionParsed);
-      }
-
-      if (qte?.token && qte.token.parent != undefined) //Avoid Count and simple Columns that are already added
-      {
-        var t = qte.token;
-        if (t.queryTokenType == "Aggregate") {
-          columns.push({
-            token: t.parent!.fullKey,
-            summaryToken: t.fullKey
-          });
-        } else {
-          columns.push({
-            token: t.fullKey,
-          });
-        }
-      }
-    });
-
-    var fo: FindOptions = {
-      queryName: cr.queryKey,
-      filterOptions: toFilterOptions(filters),
-      includeDefaultFilters: false,
-      columnOptions: columns,
-      columnOptionsMode: "ReplaceOrAdd",
-    };
-
+          const fo = extractFindOptions(cr, r);
     if (newWindow)
       window.open(toAbsoluteUrl(Finder.findOptionsPath(fo)));
     else
       Finder.explore(fo)
-        .then(() => onReload && onReload());
+              .then(() => onReload?.());
+        }
   }
+    });
 }

@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
 import { Lite } from '@framework/Signum.Entities'
-import { QueryDescription, SubTokensOptions, QueryToken, FilterOptionParsed } from '@framework/FindOptions'
+import { QueryDescription, SubTokensOptions, QueryToken, FilterOptionParsed, FilterConditionOption, FindOptions } from '@framework/FindOptions'
 import { StyleContext, TypeContext } from '@framework/TypeContext'
 import { SearchMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer } from '@framework/Reflection'
@@ -20,11 +20,11 @@ import ChartTableComponent from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 import "@framework/SearchControl/Search.css"
 import "../Chart.css"
-import { ChartScript, cleanedChartRequest } from '../ChartClient';
+import { ChartScript, cleanedChartRequest, getCustomDrilldownsFindOptions, hasAggregates } from '../ChartClient';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
-
+import { EntityStrip } from '../../../Signum.React/Scripts/Lines';
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;
@@ -57,6 +57,19 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
     } | undefined,
     loading: boolean;
   } | undefined>(undefined);
+
+  const hasAggregatesRef = React.useRef<boolean>(hasAggregates(p.chartRequest));
+
+  React.useEffect(() => {
+    const ha = hasAggregates(p.chartRequest);
+    if (ha == hasAggregatesRef.current)
+      return;
+
+    hasAggregatesRef.current = ha;
+    p.chartRequest.customDrilldowns = [];
+    p.chartRequest.modified = true;
+    forceUpdate();
+  });
 
   const queryDescription = useAPI(signal => p.chartRequest ? Finder.getQueryDescription(p.chartRequest.queryKey) : Promise.resolve(undefined),
     [p.chartRequest.queryKey]);
@@ -189,19 +202,26 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
         }
       </div>
       <div className="sf-control-container">
-        {showChartSettings && <ChartBuilder queryKey={cr.queryKey} ctx={tc}
-          maxRowsReached={maxRowsReached}
-          onInvalidate={handleInvalidate}
-          onRedraw={handleOnRedraw}
-          onTokenChange={handleTokenChange}
-          onOrderChanged={() => {
-            if (result)
-              handleOnDrawClick();
-            else
-              forceUpdate();
-          }}
-        />}
-      </div >
+        {showChartSettings && <>
+          <ChartBuilder queryKey={cr.queryKey} ctx={tc}
+            maxRowsReached={maxRowsReached}
+            onInvalidate={handleInvalidate}
+            onRedraw={handleOnRedraw}
+            onTokenChange={() => { handleTokenChange(); forceUpdate(); }}
+            onOrderChanged={() => {
+              if (result)
+                handleOnDrawClick();
+              else
+                forceUpdate();
+            }}
+          />
+          <EntityStrip ctx={tc.subCtx(e => e.customDrilldowns)}
+            findOptions={getCustomDrilldownsFindOptions(p.chartRequest.queryKey, qd, hasAggregatesRef.current)}
+            avoidDuplicates={true}
+            vertical={true}
+            iconStart={true} />
+        </>}
+      </div>
       <div className="sf-query-button-bar btn-toolbar mb-2">
         <button
           className={classes("sf-query-button btn", showChartSettings && "active", "btn-light")}

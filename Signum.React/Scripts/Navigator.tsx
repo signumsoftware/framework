@@ -628,6 +628,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
 export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | undefined, ctx: TypeContext<any>, create: boolean, showType: boolean) {
 
   var s = getSettings(type);
+  showType ??= type.name.contains(",");
 
   if (s?.autocomplete != null) {
     var acc = s.autocomplete(findOptions, showType);

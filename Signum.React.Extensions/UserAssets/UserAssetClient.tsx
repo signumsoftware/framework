@@ -2,19 +2,24 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
-import { Entity, Lite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed } from '@framework/FindOptions'
+import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed, FindOptions, FindOptionsParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded } from './Signum.Entities.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { QueryToken } from '@framework/FindOptions';
 import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
-import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../UserQueries/Signum.Entities.UserQueries';
-import { softCast } from '@framework/Globals';
+import { QueryFilterEmbedded, PinnedQueryFilterEmbedded, UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';
+import { Dic, softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
 import { translated } from '../Translation/TranslatedInstanceTools'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import SelectorModal from '@framework/SelectorModal';
+import * as UserQueryClient from '../UserQueries/UserQueryClient'
+import { SearchControlLoaded } from '../../Signum.React/Scripts/Search';
 
 let started = false;
 export function start(options: { routes: RouteObject[] }) {
@@ -250,5 +255,39 @@ export module API {
   export interface FileUploadWithModel {
     file: FileUpload;
     model: UserAssetPreviewModel;
+  }
+}
+
+const scapeTilde = Finder.Encoder.scapeTilde;
+
+export module Encoder {
+  export function encodeCustomDrilldowns(query: any, drilldowns: MList<Lite<Entity>> | undefined) {
+    if (drilldowns && drilldowns.length > 0)
+      drilldowns.map(mle => mle.element).map((d, i) => query["customDrilldown" + i] = liteKey(d) + "~" + scapeTilde(getToString(d)));
+    else {
+      const keys = Dic.getKeys(query);
+      keys.filter(k => k.startsWith("customDrilldown")).forEach(k => delete query[k]);
+    }
+  }
+}
+
+export module Decoder {
+  export function decodeCustomDrilldowns(query: any): MList<Lite<Entity>> {
+    return Finder.Decoder.valuesInOrder(query, "customDrilldown").map(d => {
+      var parts = d.value.split("~");
+
+      let liteKey: string;
+      let toStr: string;
+
+      [liteKey, toStr] = parts;
+
+      var lite = parseLite(liteKey);
+      lite.model = toStr;
+
+      return ({
+        rowId: null,
+        element: lite
+      });
+    });
   }
 }

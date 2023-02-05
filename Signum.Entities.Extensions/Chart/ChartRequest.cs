@@ -1,4 +1,5 @@
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart;
 
@@ -10,6 +11,7 @@ public interface IChartBase
     
     MList<ChartColumnEmbedded> Columns { get; }
     MList<ChartParameterEmbedded> Parameters { get; }
+    MList<Lite<Entity>> CustomDrilldowns { get; }
 
     void FixParameters(ChartColumnEmbedded chartColumnEntity);
 }
@@ -58,6 +60,9 @@ public class ChartRequestModel : ModelEntity, IChartBase
 
     [NoRepeatValidator]
     public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
+
+    [NoRepeatValidator, ImplementedBy(typeof(UserQueryEntity))]
+    public MList<Lite<Entity>> CustomDrilldowns { get; set; } = new MList<Lite<Entity>>();
 
     public int? MaxRows { get; set; }
 
