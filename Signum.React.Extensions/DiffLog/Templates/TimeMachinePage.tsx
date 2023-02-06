@@ -92,10 +92,14 @@ export function RenderEntityVersion(p: RenderEntityVersionProps) {
 
   if (!current || previous === undefined || next === undefined)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+  var ctx = TypeContext.root(current.entity, { readOnly: true });
+
+  if (previous)
+    ctx.previousVersion = { value: previous?.entity };
 
   return (
     <div>
-      <RenderEntity ctx={TypeContext.root(current.entity, { readOnly: true })} />
+      <RenderEntity ctx={ctx} />
     </div>
   );
 }

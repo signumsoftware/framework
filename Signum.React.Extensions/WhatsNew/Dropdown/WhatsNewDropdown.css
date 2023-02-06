@@ -48,21 +48,3 @@
 .sf-bell.active.open {
     color: #9C640C
 }
-
-.sf-html-editor {
-    box-sizing: unset !important;
-    border: none !important;
-    padding: 0px !important;
-    border-radius: 0px !important;
-    margin-bottom: 0em !important;
-    box-shadow: none !important;
-}
-
-.sf-html-editor .public-DraftEditor-content {
-    min-height: unset !important;
-    height: unset !important;
-}
-
-.DraftEditor-root {
-    height: unset !important;
-}

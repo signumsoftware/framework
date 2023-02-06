@@ -3,7 +3,7 @@ import { DomUtils, Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { FilterOptionParsed, ColumnOption, hasAggregate, withoutAggregate, FilterOption, FindOptions, withoutPinned } from '@framework/FindOptions'
-import { ChartRequestModel, ChartMessage } from '../Signum.Entities.Chart'
+import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { toFilterOptions } from '@framework/Finder';
 
@@ -17,6 +17,7 @@ import { TypeInfo } from '@framework/Reflection'
 import { FullscreenComponent } from './FullscreenComponent'
 import { handleDrillDown } from './ChartRenderer'
 import { ReactChartCombined } from '../D3Scripts/Components/ReactChartCombined'
+import { Lite } from '@framework/Signum.Entities'
 
 
 
@@ -28,6 +29,7 @@ export interface ChartRendererCombinedProps {
 }
 
 export interface ChartRendererCombinedInfo {
+  userChart: Lite<UserChartEntity>;
   chartRequest: ChartRequestModel;
   chartScript: ChartScript;
   data?: ChartClient.ChartTable;
@@ -41,7 +43,7 @@ export default function ChartRendererCombined(p: ChartRendererCombinedProps) {
       <ErrorBoundary deps={p.infos.map(a => a.data)}>
         <ReactChartCombined useSameScale={p.useSameScale} minHeigh={p.minHeigh} infos={p.infos.map(info => ({
           chartRequest: info.chartRequest,
-          onDrillDown: (r, e) => handleDrillDown(r, e, info.chartRequest),
+          onDrillDown: (r, e) => handleDrillDown(r, e, info.chartRequest, info.userChart),
           parameters: ChartClient.API.getParameterWithDefault(info.chartRequest, info.chartScript),
           data: info.data,
           memo: info.memo

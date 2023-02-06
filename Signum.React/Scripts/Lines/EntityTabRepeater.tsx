@@ -11,6 +11,7 @@ import { EntityBaseController } from '../Lines';
 import { EntityTableProps } from './EntityTable'
 import { Tabs, Tab } from 'react-bootstrap'
 import { useController } from './LineBase'
+import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTabRepeaterController) => React.ReactElement<any>);
@@ -135,16 +136,25 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
   function renderTabs() {
     const ctx = p.ctx!;
     const readOnly = ctx.readOnly;
-
     return (
       <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"} transition={false} mountOnEnter unmountOnExit>
         {
-          c.getMListItemContext(ctx).map(mlec => {
+          c.getMListItemContext(ctx).map((mlec, i) => {
+
+            if (mlec.binding == null && mlec.previousVersion) {
+              return (
+                <Tab eventKey={i} key={i} style={{ minWidth:150 }}
+                  className="sf-repeater-element"
+                  title={<div className="item-group" > {getTimeMachineIcon({ ctx: mlec, transferX: "-115%", transferY: "-65%" })} </div>}>
+                </Tab>
+              );
+            }
+
             const drag = c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "h") : undefined;
             const move = c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "h") : undefined;
 
             return (
-              <Tab eventKey={mlec.index!.toString()} key={c.keyGenerator.getKey(mlec.value)}
+              <Tab eventKey={i} key={c.keyGenerator.getKey(mlec.value)}
                 {...EntityListBaseController.entityHtmlAttributes(mlec.value)}
                 className="sf-repeater-element"
                 title={
@@ -153,6 +163,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                     onDragEnter={drag?.onDragOver}
                     onDragOver={drag?.onDragOver}
                     onDrop={drag?.onDrop}>
+                    {getTimeMachineIcon({ ctx: mlec, transferX: "-115%", transferY:"-65%"  })}
                     {p.getTitle ? p.getTitle(mlec) : getToString(mlec.value)}
                     {c.canRemove(mlec.value) && !readOnly &&
                       <span className={classes("sf-line-button", "sf-remove", "ms-2")}

@@ -570,7 +570,7 @@ public static class StringExtensions
     {
         if (str.HasText() && (str.Length > max))
         {
-            if(etcString.Length <= max)
+            if (max <= etcString.Length)
                 return str.Substring(0, max);
 
             return str.Start(max - etcString.Length) + etcString;
