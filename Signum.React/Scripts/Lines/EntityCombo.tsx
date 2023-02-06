@@ -13,6 +13,8 @@ import { useController } from './LineBase'
 import { useMounted } from '../Hooks'
 import { DropdownList } from 'react-widgets'
 import { ResultTable } from '../Search'
+import { getTimeMachineIcon } from './TimeMachineIcon'
+
 
 
 export interface EntityComboProps extends EntityBaseProps {
@@ -118,6 +120,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
       labelHtmlAttributes={p.labelHtmlAttributes} >
       <div className="sf-entity-combo">
         <div className={EntityBaseController.hasChildrens(buttons) ? p.ctx.inputGroupClass : undefined}>
+          {getTimeMachineIcon({ ctx: p.ctx})}
           <EntityComboSelect
             ref={comboRef}
             ctx={p.ctx}
@@ -211,7 +214,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     } else if (loadData) {
       requestStarted.current = true;
 
-      if (p.type.name.contains(",")) {
+      if (p.type.name.contains(",") && !p.findOptions) {
         Promise.all(getTypeInfos(p.type.name).map(t => {
           var fo = p.findOptionsDictionary?.[t.name] ?? { queryName: t!.name };
           return Finder.getResultTable(Finder.defaultNoColumnsAllRows(fo, undefined))

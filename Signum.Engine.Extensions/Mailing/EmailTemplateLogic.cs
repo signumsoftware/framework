@@ -6,6 +6,7 @@ using Signum.Entities.Templating;
 using Signum.Entities.Reflection;
 using Signum.Engine.UserAssets;
 using Signum.Entities.UserAssets;
+using System.Net.Http.Headers;
 
 namespace Signum.Engine.Mailing;
 
@@ -108,9 +109,6 @@ public static class EmailTemplateLogic
             
             sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
             sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
-            sb.Schema.Table<EmailModelEntity>().PreDeleteSqlSync += e =>
-                Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>()
-                    .Where(a => a.Model.Is(e)));
 
             Validator.OverridePropertyValidator((EmailTemplateMessageEmbedded m) => m.Text).StaticPropertyValidation +=
                 EmailTemplateMessageText_StaticPropertyValidation;
@@ -144,10 +142,36 @@ public static class EmailTemplateLogic
     static SqlPreCommand? EmailTemplateLogic_PreDeleteSqlSync(Entity arg)
     {
         EmailModelEntity emailModel = (EmailModelEntity)arg;
+    retry:
+        var result = new ConsoleSwitch<string, Func<SqlPreCommand>>($"EmailModel {arg} has been removed... What you want to do?")
+        {
+            { 
+                "mt",
+                () => SqlPreCommand.Combine(Spacing.Simple,
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template.Entity.Model.Is(emailModel))),
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)))
+                )!,
+                "Delete Messages and Templates"
+            },
+            { "t",
+                () => SqlPreCommand.Combine(Spacing.Simple,
+                    Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template.Entity.Model.Is(emailModel)).UnsafeUpdate().Set(em  => em.Template, em => null)),
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)))
+                )!,
+                "Delete Templates only, Update Messages"
 
-        var emailTemplates = Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)));
+            },
+            { 
+                "n",
+                () => Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)).UnsafeUpdate().Set(a => a.Model, a => null)),
+                "Nothing, just Update Templates"
+            },
+        }.Choose();
 
-        return emailTemplates;
+        if (result != null)
+            return result();
+
+        goto retry;
     }
 
     public static EmailTemplateEntity ParseData(this EmailTemplateEntity emailTemplate)
@@ -323,6 +347,8 @@ public static class EmailTemplateLogic
         var emailTemplates = Database.Query<EmailTemplateEntity>().ToList();
 
         var table = Schema.Current.Table(typeof(EmailTemplateEntity));
+
+        EmailModelLogic.EntityToType.Load(); //To avoid N exceptions
 
         SqlPreCommand? cmd = emailTemplates.Select(uq => ProcessEmailTemplate(replacements, table, uq, sd)).Combine(Spacing.Double);
 

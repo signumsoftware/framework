@@ -121,6 +121,12 @@ public enum EntityControlMessage
     [Description("Add…")]
     Add,
     Paste,
+    [Description("Previous value was: {0}")]
+    PreviousValueWas0,
+    Moved,
+    [Description("Removed {0}")]
+    Removed0,
+    Added
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

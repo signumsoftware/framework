@@ -98,10 +98,12 @@
   </Type>
   <Type Name="EntityControlMessage">
     <Member Name="Add" Description="hinzufügen..." />
+    <Member Name="Added" Description="Hinzugefügt" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Detail" Description="Detail" />
     <Member Name="Find" Description="Finden" />
     <Member Name="Move" Description="Bewegen" />
+    <Member Name="Moved" Description="Bewegt" />
     <Member Name="MoveDown" Description="Nach unten" />
     <Member Name="MoveLeft" Description="Nach links" />
     <Member Name="MoveRight" Description="Nach rechts" />
@@ -110,7 +112,9 @@
     <Member Name="MoveWithDragAndDropOrCtrlUpDown" Description="Verschieben mit Drag &amp; Drop oder Strg + Auf / Ab" />
     <Member Name="Navigate" Description="Navigieren" />
     <Member Name="Paste" Description="Einfügen" />
+    <Member Name="PreviousValueWas0" Description="Der vorherige Wert war: {0}" />
     <Member Name="Remove" Description="Entfernen" />
+    <Member Name="Removed0" Description="Entfernt {0}" />
     <Member Name="View" Description="Ansehen" />
   </Type>
   <Type Name="EnumEntity`1" />

@@ -616,7 +616,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
   if (types.length == 0)
     return null;
 
-  if (types.length == 1)
+  if (types.length == 1 || findOptions != null)
     return getAutoCompleteBasic(types[0]!, findOptions, ctx, create, showType);
 
   return new MultiAutoCompleteConfig(types.toObject(t => t!.name,

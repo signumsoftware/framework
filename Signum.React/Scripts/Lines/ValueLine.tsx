@@ -1,19 +1,16 @@
 import * as React from 'react'
-import { DateTime, Duration, DurationObjectUnits } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
-import { Dic, addClass, classes, softCast } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes, Type, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
+import { Dic, addClass, classes } from '../Globals'
+import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import { KeyCodes } from '../Components/Basic';
-import { format, html } from 'd3';
-import { isPrefix, QueryToken } from '../FindOptions'
-import { useState } from 'react'
-import { validateNewEntities } from '../Finder'
+import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface ValueLineProps extends LineBaseProps {
   valueLineType?: ValueLineType;
@@ -153,11 +150,17 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
   }
 
   withItemGroup(input: JSX.Element): JSX.Element {
-    if (!this.props.unit && !this.props.extraButtons)
-      return input;
+    if (!this.props.unit && !this.props.extraButtons) {
+      return <>
+        {getTimeMachineIcon({ ctx: this.props.ctx })}
+        {input}
+      </>
+
+    }
 
     return (
       <div className={this.props.ctx.inputGroupClass}>
+        {getTimeMachineIcon({ ctx: this.props.ctx })}
         {input}
         {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
         {this.props.extraButtons && this.props.extraButtons(this)}
@@ -249,6 +252,7 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
     var atts = { ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes, ...s.labelHtmlAttributes };
     return (
       <label style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...atts} className={classes(s.ctx.labelClass, vl.props.ctx.errorClass, atts.className)}>
+        {getTimeMachineIcon({ ctx: s.ctx })}
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
           className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))}
         />
@@ -260,6 +264,7 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
   else {
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
+        {getTimeMachineIcon({ ctx: s.ctx })}
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
           className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))} disabled={s.ctx.readOnly} />
       </FormGroup>
@@ -509,7 +514,7 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
       }
       {s.datalist &&
         <datalist id={s.ctx.getUniqueId("dataList")}>
-          {s.datalist.map(item => <option value={item} />)}
+          {s.datalist.map((item, i) => <option key={i} value={item} />)}
         </datalist>
       }
     </FormGroup>
@@ -526,6 +531,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {getTimeMachineIcon({ ctx: s.ctx })}
         <TextArea {...htmlAtts} autoResize={autoResize} className={addClass(htmlAtts, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           disabled />
       </FormGroup>
@@ -557,8 +563,6 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
         htmlAtts?.onFocus(e);
     }
   }
-    
-
 
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -1163,6 +1167,7 @@ function internalRadioGroup(vl: ValueLineController) {
 
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      {getTimeMachineIcon({ ctx: s.ctx })}
       <div style={getColumnStyle()}>
         {optionItems.map((oi, i) =>
           <label {...vl.props.valueHtmlAttributes} className={classes("sf-radio-element", vl.props.ctx.errorClass)}>

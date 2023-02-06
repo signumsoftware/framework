@@ -105,7 +105,7 @@ li.sf-strip-element {
     }
 
     .sf-line-button:hover {
-        color: gray;
+        color: dimgray;
     }
 
     .sf-line-button:not(.input-group-text) {
