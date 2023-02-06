@@ -73,7 +73,6 @@ export module Converter {
   export async function applyUserChart(cr: ChartRequestModel, uc: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
     cr.chartScript = uc.chartScript;
     cr.maxRows = uc.maxRows;
-    cr.customDrilldowns = uc.customDrilldowns;
 
     const filters = await UserAssetsClient.API.parseFilters({
       queryKey: uc.query.key,

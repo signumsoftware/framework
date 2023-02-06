@@ -3,7 +3,7 @@ import { DomUtils, Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { FilterOptionParsed, ColumnOption, hasAggregate, withoutAggregate, FilterOption, FindOptions, withoutPinned } from '@framework/FindOptions'
-import { ChartRequestModel, ChartMessage } from '../Signum.Entities.Chart'
+import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { toFilterOptions } from '@framework/Finder';
 
@@ -19,8 +19,10 @@ import { toAbsoluteUrl } from '@framework/AppContext'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { DynamicTypeConditionSymbolEntity } from '../../Dynamic/Signum.Entities.Dynamic'
 import { extractFindOptions } from '../../UserQueries/UserQueryClient'
+import { Lite } from '@framework/Signum.Entities'
 
 export interface ChartRendererProps {
+  userChart?: Lite<UserChartEntity>;
   chartRequest: ChartRequestModel;
   loading: boolean;
 
@@ -56,7 +58,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
           data={p.data}
           dashboardFilter={p.dashboardFilter}
           loading={p.loading}
-          onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined))}
+          onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.userChart, p.autoRefresh ? p.onReload : undefined))}
           onBackgroundClick={p.onBackgroundClick}
           parameters={parameters}
           onReload={p.onReload}
@@ -69,12 +71,12 @@ export default function ChartRenderer(p: ChartRendererProps) {
   );
 }
 
-export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, onReload?: () => void) {
+export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, uc?: Lite<UserChartEntity>, onReload?: () => void) {
 
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;
 
-  UserQueryClient.onDrilldownUserChart(cr, r, { openInNewTab: newWindow, onReload })
+  UserQueryClient.onDrilldownUserChart(cr, r, uc, { openInNewTab: newWindow, onReload })
     .then(done => {
       if (done == false) {
   if (r.entity) {
