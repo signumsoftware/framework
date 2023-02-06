@@ -161,11 +161,11 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
         color: p.sameColor ? p.iconColor : (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
       }}>
         <div className="row">
-          <div className="col-3">
+          <div className="col-lg-3">
             {p.iconName &&
               <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="4x" />}
           </div>
-          <div className={classes("col-9 flip", "text-end")}>
+          <div className={classes("col-lg-9 flip", "text-end")}>
             <h1>
               <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
                 valueToken={!p.aggregateFromSummaryHeader ? undefined : p.findOptions.columnOptions!.first(a => a?.summaryToken != null)?.summaryToken}
