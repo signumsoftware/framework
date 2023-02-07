@@ -70,7 +70,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
 
       const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
 
-      return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible }] };
+      return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }] };
       }
   }
 

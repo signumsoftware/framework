@@ -98,7 +98,7 @@ public static class SchemaSynchronizer
 
         Func<ObjectName, ObjectName> ChangeName = (ObjectName objectName) =>
         {
-            string name = replacements.Apply(Replacements.KeyTables, objectName.ToString());
+            string name = replacements.Apply(Replacements.KeyTables, replacements.ConcretizeObjectName(objectName));
 
             return modelTables.TryGetC(name)?.Name ?? objectName;
         };
@@ -190,7 +190,7 @@ public static class SchemaSynchronizer
                      createNew: null,
                      removeOld: (cn, colDb) => colDb.ForeignKey != null ? sqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeignKey.Name) : null,
                      mergeBoth: (cn, colModel, colDb) => colDb.ForeignKey == null ? null :
-                         colModel.ReferenceTable == null || colModel.AvoidForeignKey || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeignKey.TargetTable)) || DifferentDatabase(tab.Name, colModel.ReferenceTable.Name) || !colDb.DbType.Equals(colModel.DbType) ?
+                         colModel.ReferenceTable == null || colModel.AvoidForeignKey || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeignKey.TargetTable)) || DifferentDatabase(tab.Name, colModel.ReferenceTable.Name) || DifferentDatabase(tab.Name, dif.Name) || !colDb.DbType.Equals(colModel.DbType) ?
                          sqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeignKey.Name) :
                          null),
                     dif.MultiForeignKeys.Select(fk => sqlBuilder.AlterTableDropConstraint(dif.Name, fk.Name)).Combine(Spacing.Simple))
@@ -213,13 +213,13 @@ public static class SchemaSynchronizer
                     removeOld: (tn, dif) => sqlBuilder.DropTable(dif),
                     mergeBoth: (tn, tab, dif) =>
                     {
-                        var rename = !object.Equals(dif.Name, tab.Name) ? sqlBuilder.RenameOrMove(dif, tab, tab.Name) : null;
+                        var rename = !object.Equals(dif.Name, tab.Name) ? sqlBuilder.RenameOrMove(dif, tab, tab.Name, forHistoryTable: false) : null;
 
                         bool disableEnableSystemVersioning = false;
 
                         var disableSystemVersioning = !sqlBuilder.IsPostgres && dif.TemporalType != SysTableTemporalType.None &&
                         (tab.SystemVersioned == null ||
-                        !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString()) ||
+                        !object.Equals(replacements.Apply(Replacements.KeyTables, dif.TemporalTableName!.ToString()), tab.SystemVersioned.TableName.ToString()) && !DifferentDatabase(tab.Name, dif.Name) ||
                         (disableEnableSystemVersioning = StrongColumnChanges(tab, dif))) ?
                         sqlBuilder.AlterTableDisableSystemVersioning(tab.Name).Do(a => a.GoAfter = true) :
                         null;
@@ -296,7 +296,7 @@ public static class SchemaSynchronizer
 
                                             difCol.Name == tabCol.Name ? null : sqlBuilder.RenameColumn(tab.Name, difCol.Name, tabCol.Name),
 
-                                            difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: true) ?
+                                            difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: true) /* && !(tabCol.GetGeneratedAlwaysType() != GeneratedAlwaysType.None && DifferentDatabase(tab.Name, dif.Name))*/ ?
                                                 null :
                                                 SqlPreCommand.Combine(Spacing.Simple,
                                                     tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? sqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
@@ -341,8 +341,8 @@ public static class SchemaSynchronizer
 
                         var columnsHistory = columns != null && disableEnableSystemVersioning ? ForHistoryTable(columns, tab).Replace(new Regex(" IDENTITY "), m => " ") : null;/*HACK*/
 
-                        var addPeriod = (!sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
-                            (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
+                        var addPeriod = !sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
+                            (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned) || DifferentDatabase(tab.Name, dif.Name)) ?
                             (SqlPreCommandSimple)sqlBuilder.AlterTableAddPeriod(tab) : null;
 
                         var addSystemVersioning = (!sqlBuilder.IsPostgres && tab.SystemVersioned != null &&
@@ -387,7 +387,7 @@ public static class SchemaSynchronizer
             SqlPreCommand? historyTables = Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
                 createNew: null,
                 removeOld: (tn, dif) => sqlBuilder.DropTable(dif.Name),
-                mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned!.TableName) ? sqlBuilder.RenameOrMove(dif, tab, tab.SystemVersioned!.TableName) : null);
+                mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned!.TableName) ? sqlBuilder.RenameOrMove(dif, tab, tab.SystemVersioned!.TableName, forHistoryTable: true) : null);
 
             SqlPreCommand? syncEnums = SynchronizeEnumsScript(replacements);
 
@@ -414,7 +414,7 @@ public static class SchemaSynchronizer
                          if (tabCol.ReferenceTable == null || tabCol.AvoidForeignKey || DifferentDatabase(tab.Name, tabCol.ReferenceTable.Name))
                              return null;
 
-                         if (difCol.ForeignKey == null || !tabCol.ReferenceTable.Name.Equals(ChangeName(difCol.ForeignKey.TargetTable)) || !difCol.DbType.Equals(tabCol.DbType))
+                         if (difCol.ForeignKey == null || !tabCol.ReferenceTable.Name.Equals(ChangeName(difCol.ForeignKey.TargetTable)) || !difCol.DbType.Equals(tabCol.DbType) || DifferentDatabase(tab.Name, dif.Name))
                              return sqlBuilder.AlterTableAddConstraintForeignKey(tab, tabCol.Name, tabCol.ReferenceTable);
 
                          var name = sqlBuilder.ForeignKeyName(tab.Name.Name, tabCol.Name);

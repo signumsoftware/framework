@@ -233,7 +233,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   if (packComponent) {
     frame = {
       tabs: undefined,
-      frameComponent: { forceUpdate, type: FrameModal as any },
+      frameComponent: { forceUpdate, type: FrameModalEx },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
         const newPack = pack || packComponent!.pack;
@@ -326,6 +326,8 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     }
   }
 });
+
+const FrameModalEx = FrameModal;
 
 function getTypeName(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>) {
   return (entityOrPack as Lite<Entity>).EntityType ??

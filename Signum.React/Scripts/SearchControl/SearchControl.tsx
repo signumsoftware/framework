@@ -5,7 +5,7 @@ import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionPar
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
-import SearchControlLoaded, { SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
+import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
 import { Property } from 'csstype';
 import "./Search.css"
@@ -72,6 +72,7 @@ export interface SearchControlProps {
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>;
   onPageSubTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
+  onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
 }
 
 export interface SearchControlState {
@@ -235,6 +236,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         selectionFormatter={p.selectionFromatter}
 
         mobileOptions={p.mobileOptions}
+        onDrilldown={p.onDrilldown}
       />
     </ErrorBoundary>
   );

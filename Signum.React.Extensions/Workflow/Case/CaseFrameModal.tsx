@@ -194,7 +194,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 
   var frameComponent: FunctionalFrameComponent & IHasCaseActivity = {
     forceUpdate,
-    type: CaseFrameModal,
+    type: CaseFrameModalExt,
     getCaseActivity(): CaseActivityEntity | undefined {
       return state?.pack?.activity;
     }
@@ -329,6 +329,8 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
     </Modal>
   );
 });
+
+const CaseFrameModalExt = CaseFrameModal;
 
 export namespace CaseFrameModalManager {
   export function openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, options?: Navigator.ViewOptions): Promise<CaseActivityEntity | undefined> {

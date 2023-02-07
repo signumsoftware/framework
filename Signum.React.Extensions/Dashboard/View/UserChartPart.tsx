@@ -148,12 +148,13 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     );
   }
 
-  const result = resultOrError?.result;
-
   function handleReload(e?: React.MouseEvent<any>) {
     e?.preventDefault();
     reloadQuery();
   }
+
+  const result = resultOrError?.result;
+  const userChart = toLite(p.content.userChart, true);
 
   return (
     <div className="d-flex flex-column flex-grow-1">
@@ -175,6 +176,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
             onReload={handleReload}
           />) :
         <ChartRenderer
+          userChart={userChart}
           chartRequest={chartRequest}
           lastChartRequest={chartRequest}
           data={result?.chartTable}
@@ -189,7 +191,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
           onDrillDown={(row, e) => {
             e.stopPropagation();
             if (e.altKey || p.partEmbedded.interactionGroup == null)
-              handleDrillDown(row, e, chartRequest, handleReload);
+              handleDrillDown(row, e, chartRequest, userChart, handleReload);
             else {
               const dashboardFilter = p.dashboardController.filters.get(p.partEmbedded);
               const filterRow = toDashboardFilterRow(row, chartRequest);

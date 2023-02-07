@@ -44,16 +44,16 @@ public class SqlBuilder
     }
 
     #region Create Tables
-    public SqlPreCommand CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false)
+    public SqlPreCommand CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false, bool forHistoryTable = false)
     {
         var primaryKeyConstraint = t.PrimaryKey == null || t.SystemVersioned != null && tableName != null && t.SystemVersioned.TableName.Equals(tableName) ? null :
             isPostgres ?
             "CONSTRAINT {0} PRIMARY KEY ({1})".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres)) :
             "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres));
 
-        var systemPeriod = t.SystemVersioned == null || IsPostgres || avoidSystemVersioning ? null : Period(t.SystemVersioned);
+        var systemPeriod = t.SystemVersioned == null || IsPostgres || forHistoryTable || avoidSystemVersioning ? null : Period(t.SystemVersioned);
 
-        var columns = t.Columns.Values.Select(c => this.ColumnLine(c, GetDefaultConstaint(t, c), isChange: false, forHistoryTable: avoidSystemVersioning))
+        var columns = t.Columns.Values.Select(c => this.ColumnLine(c, GetDefaultConstaint(t, c), isChange: false,  avoidSystemVersion: avoidSystemVersioning, forHistoryTable: forHistoryTable))
             .And(primaryKeyConstraint)
             .And(systemPeriod)
             .NotNull()
@@ -166,11 +166,11 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
              new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, this.ColumnLine(column, null, isChange: true))) :
              new[]
              {
-                     !diffColumn.DbType.Equals(column.DbType) || diffColumn.Collation != column.Collation || !diffColumn.ScaleEquals(column) || !diffColumn.SizeEquals(column) ?
-                        new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, column.Name.SqlEscape(isPostgres),  GetColumnType(column) + (column.Collation != null ? " COLLATE " + column.Collation : null))) : null,
-                     diffColumn.Nullable &&  !column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
-                     !diffColumn.Nullable && column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
-             }.Combine(Spacing.Simple) ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, column.Name.SqlEscape(isPostgres)));
+                 !diffColumn.DbType.Equals(column.DbType) || diffColumn.Collation != column.Collation || !diffColumn.ScaleEquals(column) || !diffColumn.SizeEquals(column) ?
+                 new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} TYPE {2};".FormatWith(tableName, column.Name.SqlEscape(isPostgres),  GetColumnType(column) + (column.Collation != null ? " COLLATE " + column.Collation : null))) : null,
+                 diffColumn.Nullable &&  !column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} SET NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+                 !diffColumn.Nullable && column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
+             }.Combine(Spacing.Simple)  ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, column.Name.SqlEscape(isPostgres)));
 
         if (column.Default == null)
             return alterColumn;
@@ -227,11 +227,11 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             );
     }
 
-    public string ColumnLine(IColumn c, DefaultConstraint? constraint, bool isChange, bool forHistoryTable = false)
+    public string ColumnLine(IColumn c, DefaultConstraint? constraint, bool isChange, bool avoidSystemVersion = false, bool forHistoryTable = false)
     {
         string fullType = GetColumnType(c);
 
-        var generatedAlways = c is SystemVersionedInfo.SqlServerPeriodColumn svc && !forHistoryTable ?
+        var generatedAlways = c is SystemVersionedInfo.SqlServerPeriodColumn svc && !forHistoryTable && !avoidSystemVersion?
             $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" :
             null;
 
@@ -542,18 +542,18 @@ WHERE {primaryKey.Name} NOT IN
             oldNewSchema.Equals(newTableName) ? null : RenameTable(oldNewSchema, newTableName.Name))!;
     }
 
-    public SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable, ObjectName newTableName)
+    public SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable, ObjectName newTableName, bool forHistoryTable)
     {
         if (object.Equals(oldTable.Name.Schema.Database, newTableName.Schema.Database))
             return RenameOrChangeSchema(oldTable.Name, newTableName);
 
         return SqlPreCommand.Combine(Spacing.Simple,
-          CreateTableSql(newTable, newTableName, avoidSystemVersioning: true),
-          MoveRows(oldTable.Name, newTableName, newTable.Columns.Keys, avoidIdentityInsert: newTable.SystemVersioned != null && newTable.SystemVersioned.Equals(newTable)),
+          CreateTableSql(newTable, newTableName, avoidSystemVersioning: true, forHistoryTable: forHistoryTable),
+          MoveRows(oldTable.Name, newTableName, newTable.Columns.Keys, identityInsert: newTable.Columns.Values.Any(c => c.PrimaryKey && c.Identity) && !forHistoryTable),
           DropTable(oldTable))!;
     }
 
-    public SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames, bool avoidIdentityInsert = false)
+    public SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames, bool identityInsert = false)
     {
         SqlPreCommandSimple command = new SqlPreCommandSimple(
 @"INSERT INTO {0} ({2})
@@ -564,7 +564,7 @@ FROM {1} as [table];".FormatWith(
                columnNames.ToString(a => a.SqlEscape(isPostgres), ", "),
                columnNames.ToString(a => "[table]." + a.SqlEscape(isPostgres), ", ")));
 
-        if (avoidIdentityInsert)
+        if (!identityInsert)
             return command;
 
         return SqlPreCommand.Combine(Spacing.Simple,

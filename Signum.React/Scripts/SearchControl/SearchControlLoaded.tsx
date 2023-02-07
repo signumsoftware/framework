@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -52,6 +52,12 @@ export interface SearchControlMobileOptions {
 }
 
 export interface ShowBarExtensionOption { }
+
+export interface OnDrilldownOptions {
+  openInNewTab?: boolean;
+  showInPlace?: boolean;
+  onReload?: () => void;
+}
 
 export interface SearchControlLoadedProps {
   findOptions: FindOptionsParsed;
@@ -112,6 +118,7 @@ export interface SearchControlLoadedProps {
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
+  onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
 }
 
 export interface SearchControlLoadedState {
@@ -144,7 +151,7 @@ export interface SearchControlLoadedState {
   viewMode?: SearchControlViewMode;
 }
 
-export default class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
+export class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
 
   constructor(props: SearchControlLoadedProps) {
     super(props);
@@ -157,6 +164,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   static maxToArrayElements = 100;
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
+  static onDrilldown: ((scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
@@ -789,8 +797,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
 
-        if (isWindowsOpen || s?.avoidPopup  || this.props.view == "InPlace")
-        {
+        if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
           Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
             .then(props => Constructor.constructPack(tn, props))
             .then(pack => {
@@ -1358,10 +1365,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <span className="text-muted me-1">{prefix}</span>
 
           {formatter.formatter(val, {
-            columns: rt.columns,
-            row: rt.rows[0],
-            rowIndex: 0,
-            refresh: () => scl.dataChanged(),
+          columns: rt.columns,
+          row: rt.rows[0],
+          rowIndex: 0,
+          refresh: () => scl.dataChanged(),
             systemTime: scl.props.findOptions.systemTime,
             searchControl: scl,
           }, summaryToken)}
@@ -1529,15 +1536,22 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var filters = SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFo);
 
-    return Finder.explore({
+    const fo = ({
       queryName: resFo.queryKey,
       filterOptions: filters,
       columnOptions: extraColumns,
       columnOptionsMode: "ReplaceOrAdd",
       systemTime: resFo.systemTime && { ...resFo.systemTime },
       includeDefaultFilters: false,
-    }).then(() => {
-      this.dataChanged();
+    } as FindOptions);
+
+    const onDrilldown = this.props.onDrilldown ?? SearchControlLoaded.onDrilldown;
+    const promise = onDrilldown ? onDrilldown(this, row, { onReload: () => this.dataChanged() }) : Promise.resolve(false);
+    promise.then(done => {
+      if (done == false)
+        return Finder.explore(fo).then(() => {
+          this.dataChanged();
+        });
     });
   }
 
@@ -1583,21 +1597,26 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const isWindowsOpen = e.button == 1 || e.ctrlKey;
 
-      if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
-        var vp = getViewPromise && getViewPromise(null);
-        var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
-        if (this.props.view == "InPlace" && !isWindowsOpen)
-          AppContext.navigate(url);
-        else
-          window.open(AppContext.toAbsoluteUrl(url));
-      }
-      else {
-        Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
-          .then(() => {
-            this.handleOnNavigated(lite);
-          });
-
-      }
+      const onDrilldown = this.props.onDrilldown ?? SearchControlLoaded.onDrilldown;
+      const promise = onDrilldown ? onDrilldown(this, row, { openInNewTab: isWindowsOpen || s?.avoidPopup, showInPlace: this.props.view == "InPlace", onReload: () => this.handleOnNavigated(lite) }) : Promise.resolve(false);
+      promise.then(done => {
+        if (done == false) {
+          if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
+            var vp = getViewPromise && getViewPromise(null);
+            var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
+            if (this.props.view == "InPlace" && !isWindowsOpen)
+              AppContext.navigate(url);
+            else
+              window.open(AppContext.toAbsoluteUrl(url));
+          }
+          else {
+            Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
+              .then(() => {
+                this.handleOnNavigated(lite);
+              });
+          }
+        }
+      });
     }
   }
 
@@ -2075,3 +2094,5 @@ function dominates(root: QueryToken, big: QueryToken) {
   return big.fullKey.startsWith(root.fullKey + ".")
 
 }
+
+export default SearchControlLoaded;
