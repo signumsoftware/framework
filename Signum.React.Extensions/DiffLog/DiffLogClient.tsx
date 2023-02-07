@@ -6,7 +6,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Lite, Entity, getToString } from '@framework/Signum.Entities'
+import { Lite, Entity, getToString, isEntity } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import * as QuickLinks from '@framework/QuickLinks'
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.Entities.DiffLog';
@@ -22,17 +22,26 @@ import { isPermissionAuthorized } from '../Authorization/AuthClient';
 import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
 import { TimeMachineModal } from './Templates/TimeMachinePage';
 import { QueryString } from '@framework/QueryString';
+import * as Widgets from '@framework/Frames/Widgets';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export function start(options: { routes: RouteObject[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
 
   if (options.timeMachine) {
+
     QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
-      new QuickLinks.QuickLinkLink("TimeMachine",
+      new QuickLinks.QuickLinkAction(TimeMachineMessage.TimeMachine.niceToString(),
         () => TimeMachineMessage.TimeMachine.niceToString(),
-        timeMachineRoute(ctx.lite), {
+        e => {
+          if (e.ctrlKey)
+            window.open(AppContext.toAbsoluteUrl(timeMachineRoute(ctx.lite)));
+          else
+            TimeMachineModal.show(ctx.lite);
+        }, {
           icon: "clock-rotate-left",
-          iconColor: "blue",
+          color: "info",
+          group: null,
       }) : undefined);
 
     QuickLinks.registerGlobalQuickLink(ctx => {
@@ -58,11 +67,11 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
         return undefined;
 
       var lite = sc.state.selectedRows[0].entity!;
-      var versions = sc.state.selectedRows.map(r => r.columns[index] as string);
+      //var versions = sc.state.selectedRows.map(r => r.columns[index] as string);
 
       return new QuickLinks.QuickLinkAction("CompareTimeMachine",
         () => TimeMachineMessage.CompareVersions.niceToString(),
-        e => TimeMachineModal.show(lite, versions), {
+        e => TimeMachineModal.show(lite), {
         icon: "not-equal",
         iconColor: "blue",
       });
