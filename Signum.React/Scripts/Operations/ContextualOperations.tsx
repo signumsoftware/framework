@@ -14,9 +14,13 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiPropertySetter";
 import { BsColor } from "../Components";
+import SearchControlLoaded from "../SearchControl/SearchControlLoaded";
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
+    return undefined;
+
+  if (ctx.container instanceof SearchControlLoaded && ctx.container.state.resultFindOptions?.systemTime)
     return undefined;
 
   const types = ctx.lites.groupBy(lite => lite.EntityType);
@@ -52,6 +56,9 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
 
 export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
+    return undefined;
+
+  if (ctx.container instanceof SearchControlLoaded && ctx.container.state.resultFindOptions?.systemTime)
     return undefined;
 
   const types = ctx.lites.groupBy(coc => coc.EntityType);
