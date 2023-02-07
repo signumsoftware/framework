@@ -697,6 +697,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         order: -3.5,
         button: < button
           className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
+          style={{  color: "var(--bs-alert-color)", backgroundColor: "var(--bs-alert-bg)" }}
           onClick={this.handleSystemTimeClick}
           title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
           <FontAwesomeIcon icon="clock-rotate-left" />
