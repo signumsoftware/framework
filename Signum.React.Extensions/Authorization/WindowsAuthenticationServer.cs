@@ -59,7 +59,9 @@ public class WindowsAuthenticationServer
                     if (user == null)
                     {
                         if (!config.AutoCreateUsers)
-                            return null;
+                        {
+                            return new InvalidOperationException("AutoCreateUsers is false");
+                        }
 
                         using (PrincipalContext pc = GetPrincipalContext(domainName, config))
                         {
@@ -67,8 +69,7 @@ public class WindowsAuthenticationServer
 
                             if (user == null)
                             {
-                                if (ada.GetConfig().AutoCreateUsers)
-                                    user = ada.OnCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                                user = ada.OnCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
                             }
                         }
                     }
@@ -91,21 +92,13 @@ public class WindowsAuthenticationServer
                     throw;
                 }
 
-                if (user == null)
-                {
-                    if (user == null)
-                        return new InvalidOperationException("AutoCreateUsers is false");
-                }
-
-
                 AuthServer.OnUserPreLogin(ac, user);
                 AuthServer.AddUserSession(ac, user);
                 return null;
             }
             catch (Exception e)
             {
-                e.LogException();
-                return e;
+                return e.LogException();
             }
         }
     }
