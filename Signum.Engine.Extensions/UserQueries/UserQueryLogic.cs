@@ -158,13 +158,13 @@ public static class UserQueryLogic
         userQuery.ParseData(description);
     }
 
-    public static List<Lite<UserQueryEntity>> GetUserQueries(object queryName, bool appendFilterOnly = false)
+    public static List<Lite<UserQueryEntity>> GetUserQueries(object queryName, bool appendFilters)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
         return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
             .Select(lite => UserQueries.Value.GetOrThrow(lite))
-            .Where(uq => isAllowed(uq) && (!appendFilterOnly || uq.AppendFilters))
+            .Where(uq => isAllowed(uq) && (uq.AppendFilters == appendFilters))
             .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
             .ToList();
     }

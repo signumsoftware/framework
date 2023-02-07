@@ -83,7 +83,7 @@ export function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, locat
 
 export function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: Location, query: any): { prio: number, response: ToolbarClient.ToolbarResponse<any> } | null {
   if (r.elements)
-    return r.elements.map(e => inferActive(e, location, query)).notNull().withMax(a => a.prio) ?? null;
+    return r.elements.map(e => inferActive(e, location, query)).notNull().maxBy(a => a.prio) ?? null;
 
   var prio = isCompatibleWithUrl(r, location, query);
 

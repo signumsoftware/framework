@@ -89,6 +89,8 @@ export function RenderEntity(p: RenderEntityProps) {
 
 
   const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
+  if (ctx.previousVersion && ctx.previousVersion.value)
+    newCtx.previousVersion = { value: ctx.previousVersion.value as any };
 
   var element = componentBox == "useGetComponent" ? p.getComponent!(newCtx) : componentBox.func(newCtx);
 

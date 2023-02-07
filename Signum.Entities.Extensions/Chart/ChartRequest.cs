@@ -1,4 +1,5 @@
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart;
 

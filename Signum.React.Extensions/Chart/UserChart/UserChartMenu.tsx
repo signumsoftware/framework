@@ -85,6 +85,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
       Finder.toFilterOptions(crmNew.filterOptions ?? []), 0, sd);
     ucOld.columns = UserChartMerger.mergeColumns(ucOld.columns, ucNew.columns);
     ucOld.parameters = ucNew.parameters;
+    ucOld.customDrilldowns = ucNew.customDrilldowns;
 
     return ucOld;
   }

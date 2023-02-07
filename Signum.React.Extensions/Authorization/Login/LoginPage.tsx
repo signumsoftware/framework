@@ -152,7 +152,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
             &nbsp;
             {p.ctx.loading == "password" ? JavascriptMessage.loading.niceToString() : AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}
           </button>
-          {error("login") && <span className="help-block text-danger" style={{ color: "red" }}>{error("login")}</span>}
+          {error("login") && <span className="help-block text-danger ms-2" style={{ color: "red" }}>{error("login")}</span>}
           {AuthClient.Options.resetPassword && !p.ctx.loading &&
             <span>
               &nbsp;

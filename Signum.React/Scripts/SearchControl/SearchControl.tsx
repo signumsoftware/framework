@@ -5,7 +5,7 @@ import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionPar
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
-import SearchControlLoaded, { SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
+import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
 import { Property } from 'csstype';
 import "./Search.css"
@@ -22,6 +22,8 @@ export interface SearchControlProps {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
+  selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement<any> | undefined;
+
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
@@ -39,6 +41,7 @@ export interface SearchControlProps {
   showFilters?: boolean;
   showSimpleFilterBuilder?: boolean;
   showFilterButton?: boolean;
+  showSelectedButton?: boolean;
   showSystemTimeButton?: boolean;
   showGroupButton?: boolean;
   showFooter?: boolean;
@@ -69,6 +72,7 @@ export interface SearchControlProps {
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>;
   onPageSubTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
+  onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
 }
 
 export interface SearchControlState {
@@ -191,7 +195,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
         showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton ?? false) && (qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true))}
         showGroupButton={SearchControlOptions.showGroupButton(handler) && (p.showGroupButton ?? false)}
-        showSelectedButton={SearchControlOptions.showSelectedButton(handler)}
+        showSelectedButton={SearchControlOptions.showSelectedButton(handler) && (p.showSelectedButton ?? true)}
         showFooter={p.showFooter}
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
@@ -229,7 +233,10 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         customRequest={p.customRequest}
         onPageTitleChanged={p.onPageSubTitleChanged}
 
+        selectionFormatter={p.selectionFromatter}
+
         mobileOptions={p.mobileOptions}
+        onDrilldown={p.onDrilldown}
       />
     </ErrorBoundary>
   );

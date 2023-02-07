@@ -111,7 +111,28 @@ public static class ProcessLogic
             PropertyAuthLogic.SetMaxAutomaticUpgrade(PropertyRoute.Construct((ProcessEntity p) => p.User), PropertyAllowed.Read);
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+            sb.Schema.Table<ProcessAlgorithmSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
+
         }
+    }
+
+    private static SqlPreCommand? SimpleTaskLogic_PreDeleteSqlSync(Entity arg)
+    {
+        var algo = (ProcessAlgorithmSymbol)arg;
+        var deleteExceptionLines = Administrator.UnsafeDeletePreCommand(Database.Query<ProcessExceptionLineEntity>().Where(pl => pl.Process.Entity.Algorithm.Is(algo)));
+        var deleteProcesses = Administrator.DeleteWhereScript((ProcessEntity p) => p.Algorithm, algo);
+
+        //if (Schema.Current.Tables.ContainsKey(typeof(PackageEntity)))
+        //{
+        //    var deletePackageLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => Database.Query<ProcessEntity>().Any(pr => ((PackageEntity)pr.Data!).Is(pl.Package) && pr.Algorithm.Is(algo))));
+        //    var deletePackages = Administrator.UnsafeDeletePreCommand(Database.Query<PackageEntity>().Where(p => Database.Query<ProcessEntity>().Any(pr => pr.Data.Is(p) && pr.Algorithm.Is(algo))));
+
+        //    return SqlPreCommand.Combine(Spacing.Double, deleteExceptionLines, deletePackageLines, deletePackages, deleteProcesses);
+        //}
+
+        return SqlPreCommand.Combine(Spacing.Double, deleteExceptionLines, deleteProcesses);
+
     }
 
     public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)

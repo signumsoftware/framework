@@ -11,6 +11,9 @@ import { AutocompleteConfig } from './AutoCompleteConfig'
 import { TypeaheadController } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
 import { useController } from './LineBase'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { getTimeMachineIcon } from './TimeMachineIcon'
+
 
 export interface EntityLineProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
@@ -148,6 +151,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       <div className="sf-entity-line">
+        {getTimeMachineIcon({ ctx: p.ctx })}
         {
           !EntityBaseController.hasChildrens(buttons) ?
             (hasValue ? renderLink() : renderAutoComplete()) :
@@ -161,7 +165,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
                 {buttons}
               </div>)
             )
-        }
+          }
       </div>
     </FormGroup>
   );
