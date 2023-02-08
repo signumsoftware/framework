@@ -183,8 +183,12 @@ public static class BulkInserter
     private static Type ConvertType(Type type)
     {
         var result = type.UnNullify();
+
         if (result == typeof(DateOnly))
-            return typeof(DateTime);
+            return typeof(DateTime); 
+
+        if (result == typeof(TimeOnly))
+            return typeof(TimeSpan); 
 
         return result;
     }

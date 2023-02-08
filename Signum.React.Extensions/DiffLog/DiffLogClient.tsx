@@ -6,7 +6,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Lite, Entity, getToString } from '@framework/Signum.Entities'
+import { Lite, Entity, getToString, isEntity } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import * as QuickLinks from '@framework/QuickLinks'
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.Entities.DiffLog';
@@ -20,19 +20,29 @@ import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
 import { isPermissionAuthorized } from '../Authorization/AuthClient';
 import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
-import { TimeMachineModal } from './Templates/TimeMachinePage';
+import { TimeMachineCompareModal, TimeMachineModal } from './Templates/TimeMachinePage';
 import { QueryString } from '@framework/QueryString';
+import * as Widgets from '@framework/Frames/Widgets';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export function start(options: { routes: RouteObject[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
 
   if (options.timeMachine) {
+
     QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
-      new QuickLinks.QuickLinkLink("TimeMachine",
+      new QuickLinks.QuickLinkAction(TimeMachineMessage.TimeMachine.niceToString(),
         () => TimeMachineMessage.TimeMachine.niceToString(),
-        timeMachineRoute(ctx.lite), {
+        e => {
+          if (e.ctrlKey)
+            window.open(AppContext.toAbsoluteUrl(timeMachineRoute(ctx.lite)));
+          else
+            TimeMachineModal.show(ctx.lite);
+        }, {
           icon: "clock-rotate-left",
+          color: "info",
           iconColor: "blue",
+          group: null,
       }) : undefined);
 
     QuickLinks.registerGlobalQuickLink(ctx => {
@@ -45,7 +55,7 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
       var sc = ctx.contextualContext?.container;
       if (sc.props.findOptions.systemTime == null ||
         sc.state.selectedRows == null ||
-        sc.state.selectedRows.length <= 1 ||
+        sc.state.selectedRows.length != 2 ||
         sc.state.selectedRows.some(a => a.entity == null) ||
         sc.state.selectedRows.distinctBy(a => a.entity!.id!.toString()).length > 1)
         return undefined;
@@ -62,11 +72,11 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
 
       return new QuickLinks.QuickLinkAction("CompareTimeMachine",
         () => TimeMachineMessage.CompareVersions.niceToString(),
-        e => TimeMachineModal.show(lite, versions), {
+        e => TimeMachineCompareModal.show(lite, versions), {
         icon: "not-equal",
         iconColor: "blue",
       });
-    }, { allowsMultiple : true });
+    }, { allowsMultiple: true });
 
     SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 

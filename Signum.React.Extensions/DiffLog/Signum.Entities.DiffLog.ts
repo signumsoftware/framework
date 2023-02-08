@@ -35,6 +35,14 @@ export module TimeMachineMessage {
   export const TimeMachine = new MessageKey("TimeMachineMessage", "TimeMachine");
   export const EntityDeleted = new MessageKey("TimeMachineMessage", "EntityDeleted");
   export const CompareVersions = new MessageKey("TimeMachineMessage", "CompareVersions");
+  export const AllVersions = new MessageKey("TimeMachineMessage", "AllVersions");
+  export const SelectedVersions = new MessageKey("TimeMachineMessage", "SelectedVersions");
+  export const UIDifferences = new MessageKey("TimeMachineMessage", "UIDifferences");
+  export const DataDifferences = new MessageKey("TimeMachineMessage", "DataDifferences");
+  export const UISnapshot = new MessageKey("TimeMachineMessage", "UISnapshot");
+  export const DataSnapshot = new MessageKey("TimeMachineMessage", "DataSnapshot");
+  export const ShowDiffs = new MessageKey("TimeMachineMessage", "ShowDiffs");
+  export const YouCanNotSelectMoreThanTwoVersionToCompare = new MessageKey("TimeMachineMessage", "YouCanNotSelectMoreThanTwoVersionToCompare");
 }
 
 export module TimeMachinePermission {

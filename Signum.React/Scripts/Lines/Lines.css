@@ -5,6 +5,10 @@ input[type=radio] {
     height: 16px;
 }
 
+.form-check-input[type=radio] {
+    border-radius: 50% !important;
+}
+
 label > input[type=checkbox],
 label > input[type=radio] {
     margin: 0;

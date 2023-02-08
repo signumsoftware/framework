@@ -9,6 +9,14 @@ public enum TimeMachineMessage
     [Description("[Entity deleted]")]
     EntityDeleted,
     CompareVersions,
+    AllVersions,
+    SelectedVersions,
+    UIDifferences,
+    DataDifferences,
+    UISnapshot,
+    DataSnapshot,
+    ShowDiffs,
+    YouCanNotSelectMoreThanTwoVersionToCompare
 }
 
 [AutoInit]
