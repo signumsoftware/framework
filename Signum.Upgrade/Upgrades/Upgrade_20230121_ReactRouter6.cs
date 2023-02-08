@@ -196,7 +196,7 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
 return true;
 """);
 
-            file.ReplaceBetweenIncluded(a => a.Contains("const loc = AppContext.location;"), a => a.Contains("const back: History.Location ="), """    
+            file.ReplaceBetweenIncluded(a => a.Contains("const loc = AppContext.location;"), a => a.Contains("const back"), """    
             const back: Location = AppContext.location().state?.back; 
             """);
 

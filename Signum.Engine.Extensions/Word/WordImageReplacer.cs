@@ -88,15 +88,29 @@ public static class WordImageReplacer
         blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
     }
 
-    public static void RemoveImage(this WordprocessingDocument doc, string title, bool removeFullDrawing)
+    public static void RemoveImage(this WordprocessingDocument doc, string title, bool removeFullDrawing, bool inHeader = false)
     {
-        Blip blip = FindBlip(doc, title);
+        Blip blip = FindBlip(doc, title, inHeader);
         doc.MainDocumentPart!.DeletePart(blip.Embed!);
 
         if (removeFullDrawing)
             ((OpenXmlElement)blip).Follow(a => a.Parent).OfType<Drawing>().FirstEx().Remove();
         else
             blip.Remove();
+    }
+
+    public static void RemoveMultipleImage(this WordprocessingDocument doc, string title, bool removeFullDrawing, bool inHeader = false)
+    {
+        Blip[] blips = FindAllBlips(doc, d => d.Title == title || d.Description == title, inHeader);
+        foreach (var blip in blips)
+        {
+            doc.MainDocumentPart!.DeletePart(blip.Embed!);
+
+            if (removeFullDrawing)
+                ((OpenXmlElement)blip).Follow(a => a.Parent).OfType<Drawing>().FirstEx().Remove();
+            else
+                blip.Remove();
+        }
     }
 
     static ImagePart CreateImagePart<TImage>(this WordprocessingDocument doc, TImage image, IImageConverter<TImage> converter, string id, ImagePartType imagePartType = ImagePartType.Png)
@@ -113,9 +127,11 @@ public static class WordImageReplacer
     }
 
 
-    public static Blip FindBlip(this WordprocessingDocument doc, string titleOrDescription)
+    public static Blip FindBlip(this WordprocessingDocument doc, string titleOrDescription, bool inHeader = false)
     {
-        var drawing = doc.MainDocumentPart!.Document.Descendants().OfType<Drawing>().Single(r =>
+        var query = inHeader ? doc.MainDocumentPart!.HeaderParts.SelectMany(hp => hp.Header.Descendants().OfType<Drawing>()) :
+            doc.MainDocumentPart!.Document.Descendants().OfType<Drawing>();
+        var drawing = query.Single(r =>
         {
             var prop = r.Descendants<DocProperties>().SingleOrDefault();
             var match = prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
@@ -126,9 +142,11 @@ public static class WordImageReplacer
         return drawing.Descendants<Blip>().SingleEx();
     }
 
-    public static Blip[] FindAllBlips(this WordprocessingDocument doc, Func<DocProperties, bool> predicate)
+    public static Blip[] FindAllBlips(this WordprocessingDocument doc, Func<DocProperties, bool> predicate, bool inHeader = false)
     {
-        var drawing = doc.MainDocumentPart!.Document.Descendants().OfType<Drawing>().Where(r =>
+        var query = inHeader ? doc.MainDocumentPart!.HeaderParts.SelectMany(hp => hp.Header.Descendants().OfType<Drawing>()) :
+            doc.MainDocumentPart!.Document.Descendants().OfType<Drawing>();
+        var drawing = query.Where(r =>
         {
             var prop = r.Descendants<DocProperties>().SingleOrDefault();
             var match = prop != null && predicate(prop);
