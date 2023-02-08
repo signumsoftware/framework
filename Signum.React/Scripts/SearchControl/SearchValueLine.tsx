@@ -111,8 +111,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       </div>
     );
   }
-
-
+  
   var token = svRef.current?.valueToken;
 
   const isQuery = p.valueToken == undefined || token?.queryTokenType == "Aggregate";
@@ -123,6 +122,8 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
   const unit = isFormControl && (p.unit ?? token?.unit) && <span className="input-group-text">{p.unit ?? token?.unit}</span>;
 
   const ctx = p.ctx;
+  if (fo.systemTime == undefined && ctx.validFrom)
+    fo.systemTime = {mode: 'AsOf', startDate: ctx.validFrom};
 
   const value = svRef.current?.value;
   const find = value != undefined && (p.findButton ?? isQuery) &&
@@ -132,7 +133,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       {EntityBaseController.findIcon}
     </a>;
   
-  const create = ((p.create == "ifNull" && value === null) || (p.create ?? false)) &&
+  const create = !p.ctx.validFrom && ((p.create == "ifNull" && value === null) || (p.create ?? false)) &&
     <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
@@ -161,6 +162,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
     >
       <div className={isFormControl ? ((unit || view || extra || find || create) ? p.ctx.inputGroupClass : undefined) : p.ctx.formControlPlainTextClass}>
         <SearchValue
+          ctx={p.ctx}
           ref={handleSearchValueLoaded}
           findOptions={fo}
           format={p.format}

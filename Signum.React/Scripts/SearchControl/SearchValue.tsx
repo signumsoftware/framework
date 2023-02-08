@@ -9,13 +9,14 @@ import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenStri
 import { SearchControlProps } from "./SearchControl";
 import { BsColor, BsSize } from '../Components';
 import { toFilterRequests } from '../Finder';
-import { PropertyRoute } from '../Lines'
+import { PropertyRoute, StyleContext } from '../Lines'
 import { useAPI, usePrevious } from '../Hooks'
 import * as Hooks from '../Hooks'
 import { TypeBadge } from '../Lines/AutoCompleteConfig'
 import { toAbsoluteUrl } from '../AppContext'
 
 export interface SearchValueProps {
+  ctx?: StyleContext;
   valueToken?: string | QueryTokenString<any>;
   findOptions: FindOptions;
   multipleValues?: { vertical?: boolean, showType?: boolean };
@@ -96,6 +97,10 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       return Finder.getQueryDescription(p.findOptions.queryName)
         .then(qd => Finder.parseFindOptions(p.findOptions, qd, false))
         .then(fop => {
+
+          if (fop.systemTime == undefined && p.ctx?.validFrom)
+            fop.systemTime = { mode: 'AsOf', startDate: p.ctx.validFrom };
+
           const req = getQueryRequestValue(fop, valueToken?.fullKey, Boolean(p.multipleValues));
           if (p.customRequest)
             return p.customRequest(req, fop, valueToken ?? null, signal);
