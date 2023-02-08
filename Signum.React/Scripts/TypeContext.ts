@@ -180,7 +180,7 @@ export class StyleContext {
   }
 
   set readOnly(value: boolean) {
-    this.styleOptions.readOnly = value;
+    this.styleOptions.readOnly = this.parent.readOnly || value;
   }
 
   get frame(): EntityFrame | undefined {
