@@ -29,6 +29,7 @@ import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import "./Mailing.css";
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics';
 import { currentCulture } from '../Translation/CultureClient';
+import { SearchControlLoaded } from '@framework/Search';
 
 
 export var allTypes: string[] = [];
@@ -160,6 +161,9 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
     return undefined;
 
   if (EmailTemplateEntity.tryTypeInfo() == null)
+    return undefined;
+
+  if (ctx.container instanceof SearchControlLoaded && ctx.container.state.resultFindOptions?.systemTime)
     return undefined;
 
   return API.getEmailTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single", { lite: (ctx.lites.length == 1 ? ctx.lites[0] : null) })

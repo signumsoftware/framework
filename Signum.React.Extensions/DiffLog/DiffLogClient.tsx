@@ -20,7 +20,7 @@ import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
 import { isPermissionAuthorized } from '../Authorization/AuthClient';
 import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
-import { TimeMachineModal } from './Templates/TimeMachinePage';
+import { TimeMachineCompareModal, TimeMachineModal } from './Templates/TimeMachinePage';
 import { QueryString } from '@framework/QueryString';
 import * as Widgets from '@framework/Frames/Widgets';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -41,6 +41,7 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
         }, {
           icon: "clock-rotate-left",
           color: "info",
+          iconColor: "blue",
           group: null,
       }) : undefined);
 
@@ -54,7 +55,7 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
       var sc = ctx.contextualContext?.container;
       if (sc.props.findOptions.systemTime == null ||
         sc.state.selectedRows == null ||
-        sc.state.selectedRows.length <= 1 ||
+        sc.state.selectedRows.length != 2 ||
         sc.state.selectedRows.some(a => a.entity == null) ||
         sc.state.selectedRows.distinctBy(a => a.entity!.id!.toString()).length > 1)
         return undefined;
@@ -67,15 +68,15 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
         return undefined;
 
       var lite = sc.state.selectedRows[0].entity!;
-      //var versions = sc.state.selectedRows.map(r => r.columns[index] as string);
+      var versions = sc.state.selectedRows.map(r => r.columns[index] as string);
 
       return new QuickLinks.QuickLinkAction("CompareTimeMachine",
         () => TimeMachineMessage.CompareVersions.niceToString(),
-        e => TimeMachineModal.show(lite), {
+        e => TimeMachineCompareModal.show(lite, versions), {
         icon: "not-equal",
         iconColor: "blue",
       });
-    }, { allowsMultiple : true });
+    }, { allowsMultiple: true });
 
     SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 
