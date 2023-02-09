@@ -22,6 +22,8 @@ export interface SearchControlProps {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
+  selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement<any> | undefined;
+
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
@@ -39,6 +41,7 @@ export interface SearchControlProps {
   showFilters?: boolean;
   showSimpleFilterBuilder?: boolean;
   showFilterButton?: boolean;
+  showSelectedButton?: boolean;
   showSystemTimeButton?: boolean;
   showGroupButton?: boolean;
   showFooter?: boolean;
@@ -192,7 +195,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
         showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton ?? false) && (qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true))}
         showGroupButton={SearchControlOptions.showGroupButton(handler) && (p.showGroupButton ?? false)}
-        showSelectedButton={SearchControlOptions.showSelectedButton(handler)}
+        showSelectedButton={SearchControlOptions.showSelectedButton(handler) && (p.showSelectedButton ?? true)}
         showFooter={p.showFooter}
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
@@ -229,6 +232,8 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         styleContext={p.styleContext}
         customRequest={p.customRequest}
         onPageTitleChanged={p.onPageSubTitleChanged}
+
+        selectionFormatter={p.selectionFromatter}
 
         mobileOptions={p.mobileOptions}
         onDrilldown={p.onDrilldown}

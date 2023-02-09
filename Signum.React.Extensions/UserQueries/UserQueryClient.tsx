@@ -97,6 +97,9 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
   if (!(cic.container instanceof SearchControlLoaded))
     return undefined;
 
+  if (cic.container.state.resultFindOptions?.systemTime)
+    return undefined;
+
   if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
     return undefined;
 

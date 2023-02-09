@@ -151,10 +151,10 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
 
   withItemGroup(input: JSX.Element): JSX.Element {
     if (!this.props.unit && !this.props.extraButtons) {
-      return <>
+      return <div>
         {getTimeMachineIcon({ ctx: this.props.ctx })}
         {input}
-      </>
+      </div>
 
     }
 

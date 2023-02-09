@@ -22,6 +22,7 @@ import WordEntityMenu from "./WordEntityMenu";
 import { ButtonsContext, ButtonBarElement } from "@framework/TypeContext";
 import { Dropdown } from 'react-bootstrap';
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
+import { SearchControlLoaded } from '@framework/Search';
 
 export function start(options: { routes: RouteObject[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
 
@@ -123,6 +124,9 @@ export function register<T extends ModifiableEntity>(type: Type<T>, setting: Wor
 }
 
 export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
+
+  if (ctx.container instanceof SearchControlLoaded && ctx.container.state.resultFindOptions?.systemTime)
+    return undefined;
 
   if (!Navigator.isViewable(WordTemplateEntity) || ctx.lites.length == 0)
     return undefined;

@@ -67,6 +67,7 @@ export interface SearchControlLoadedProps {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
+  selectionFormatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement<any> | undefined;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
@@ -534,7 +535,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
-        {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
+        {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()}  />}
         {this.state.isMobile == true && this.state.viewMode == "Mobile" ? this.renderMobile() :
           <>
             {
@@ -696,6 +697,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         order: -3.5,
         button: < button
           className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
+          style={{  color: "var(--bs-alert-color)", backgroundColor: "var(--bs-alert-bg)" }}
           onClick={this.handleSystemTimeClick}
           title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
           <FontAwesomeIcon icon="clock-rotate-left" />
@@ -1098,6 +1100,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   renderContextualMenu() {
 
+    var showCM = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
+
     const cm = this.state.contextualMenu!;
     const p = this.props;
 
@@ -1176,7 +1180,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
     }
 
-    if (cm.rowIndex != undefined) {
+    if (cm.rowIndex != undefined && showCM != "Basic") {
 
       menuItems.push(<Dropdown.Item className="sf-paste-menu-item" onClick={() => this.handleCopyClick()}>
         <FontAwesomeIcon icon="copy" className="icon" color="#21618C" />&nbsp;{SearchMessage.Copy.niceToString()}
@@ -1482,11 +1486,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   //ROWS
 
-  handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleChecked = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
 
     const cb = event.currentTarget;
-
-    const index = parseInt(cb.getAttribute("data-index")!);
 
     const row = this.state.resultTable!.rows[index];
 
@@ -1747,7 +1749,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           className={classes(markClassName, ra?.className)}>
           {this.props.allowSelection &&
             <td className="centered-cell">
-              <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
+              {this.props.selectionFormatter ? this.props.selectionFormatter(this, row, i) :
+                <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={e=>this.handleChecked(e, i)} data-index={i} />}
             </td>
           }
 
@@ -1842,7 +1845,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             <div className="row-data row-header">
               {this.props.allowSelection &&
                 <span className="row-selection">
-                  <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
+                  {this.props.selectionFormatter ? this.props.selectionFormatter(this, row, i) :
+                    <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={e=>this.handleChecked(e, i)} data-index={i} />}
                 </span>
               }
 

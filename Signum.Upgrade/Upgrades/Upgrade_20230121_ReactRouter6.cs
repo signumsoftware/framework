@@ -148,7 +148,7 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
             file.ReplaceBetweenIncluded(a => a.Contains("function reload() {"),
                 a => a.Contains(".then(() => {"), """
   async function reload() {
-      AppContext.clearAllSettings();
+
       await AuthClient.autoLogin();
       await reloadTypes();
       await CultureClient.loadCurrentCulture();
@@ -196,7 +196,7 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
 return true;
 """);
 
-            file.ReplaceBetweenIncluded(a => a.Contains("const loc = AppContext.location;"), a => a.Contains("const back: History.Location ="), """    
+            file.ReplaceBetweenIncluded(a => a.Contains("const loc = AppContext.location;"), a => a.Contains("const back"), """    
             const back: Location = AppContext.location().state?.back; 
             """);
 

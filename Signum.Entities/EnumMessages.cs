@@ -126,7 +126,9 @@ public enum EntityControlMessage
     Moved,
     [Description("Removed {0}")]
     Removed0,
-    Added
+    Added,
+    RemovedAndSelectedAgain,
+    Selected,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
