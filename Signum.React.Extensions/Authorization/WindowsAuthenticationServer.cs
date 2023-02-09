@@ -22,22 +22,25 @@ public class WindowsAuthenticationServer
         return new PrincipalContext(ContextType.Domain, domainName); //Uses current user
     }
 
-    public static Exception? LoginWindowsAuthentication(ActionContext ac)
+    public static bool LoginWindowsAuthentication(ActionContext ac, bool throwError)
     {
         using (AuthLogic.Disable())
         {
             try
             {
                 if (!(ac.HttpContext.User is WindowsPrincipal wp))
-                    return new InvalidOperationException($"User is not a WindowsPrincipal ({ac.HttpContext.User.GetType().Name})");
+                    return throwError ? throw new InvalidOperationException($"User is not a WindowsPrincipal ({ac.HttpContext.User.GetType().Name})")
+                        : false;
 
                 if (AuthLogic.Authorizer is not ActiveDirectoryAuthorizer ada)
-                    return new InvalidOperationException("No AuthLogic.Authorizer set");
+                    return throwError ? throw new InvalidOperationException("No AuthLogic.Authorizer set") 
+                        : false;
 
                 var config = ada.GetConfig();
 
                 if (!config.LoginWithWindowsAuthenticator)
-                    return new Exception($"{ReflectionTools.GetPropertyInfo(() => ada.GetConfig().LoginWithWindowsAuthenticator)} is set to false");
+                    return throwError ? throw new Exception($"{ReflectionTools.GetPropertyInfo(() => ada.GetConfig().LoginWithWindowsAuthenticator)} is set to false")
+                        : false;
 
                 var userName = wp.Identity.Name!;
                 var domainName = config.DomainName.DefaultToNull() ?? userName.TryAfterLast('@') ?? userName.TryBefore('\\')!;
@@ -60,7 +63,8 @@ public class WindowsAuthenticationServer
                     {
                         if (!config.AutoCreateUsers)
                         {
-                            return new InvalidOperationException("AutoCreateUsers is false");
+                            return throwError ? throw new InvalidOperationException("AutoCreateUsers is false") 
+                                : false;
                         }
 
                         using (PrincipalContext pc = GetPrincipalContext(domainName, config))
@@ -89,16 +93,22 @@ public class WindowsAuthenticationServer
                     e.Data["Identity.Name"] = wp.Identity.Name;
                     e.Data["domainName"] = domainName;
                     e.Data["localName"] = localName;
+
                     throw;
                 }
 
                 AuthServer.OnUserPreLogin(ac, user);
                 AuthServer.AddUserSession(ac, user);
-                return null;
+                return true;
             }
             catch (Exception e)
             {
-                return e.LogException();
+                e.LogException();
+
+                if (throwError)
+                    throw;
+
+                return false;
             }
         }
     }
