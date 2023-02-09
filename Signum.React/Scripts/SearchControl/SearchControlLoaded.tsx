@@ -363,9 +363,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const fo = this.props.findOptions;
     const qd = this.props.queryDescription;
 
-    if (fo.systemTime == undefined && this.props.ctx?.validFrom)
-      fo.systemTime = { mode: 'AsOf', startDate: this.props.ctx.validFrom };
-
     if (this.simpleFilterBuilderInstance == undefined)
       return Promise.resolve(fo);
 
@@ -716,7 +713,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       this.props.showContextMenu(this.props.findOptions) != false && this.props.showSelectedButton && this.renderSelectedButton(),
 
-      p.create && !this.props.ctx?.validFrom && {
+      p.create && !this.props.ctx?.frame?.currentDate && {
         order: -2,
         button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
           <FontAwesomeIcon icon="plus" className="sf-create" /><span className="d-none d-sm-inline">&nbsp;{SearchMessage.Create.niceToString()}</span>

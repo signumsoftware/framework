@@ -98,8 +98,8 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
         .then(qd => Finder.parseFindOptions(p.findOptions, qd, false))
         .then(fop => {
 
-          if (fop.systemTime == undefined && p.ctx?.validFrom)
-            fop.systemTime = { mode: 'AsOf', startDate: p.ctx.validFrom };
+          if (fop.systemTime == undefined && p.ctx?.frame?.currentDate)
+            fop.systemTime = { mode: 'AsOf', startDate: p.ctx.frame.currentDate };
 
           const req = getQueryRequestValue(fop, valueToken?.fullKey, Boolean(p.multipleValues));
           if (p.customRequest)

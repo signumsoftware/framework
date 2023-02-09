@@ -144,6 +144,10 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
           setState({ queryDescription: qd, message: message });
         else
           Finder.parseFindOptions(fo, qd, p.defaultIncludeDefaultFilters!).then(fop => {
+
+            if (fop.systemTime == undefined && p.ctx?.frame?.currentDate)
+              fop.systemTime = { mode: 'AsOf', startDate: p.ctx.frame.currentDate };
+
             setState({ findOptions: fop, queryDescription: qd });
           });
       });

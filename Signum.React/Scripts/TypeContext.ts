@@ -24,7 +24,6 @@ export type FormSize =
 export class StyleContext {
   styleOptions: StyleOptions;
   parent: StyleContext;
-  validFrom?: string;
 
   constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined) {
     this.parent = parent || StyleContext.default;
@@ -294,7 +293,7 @@ export class TypeContext<T> extends StyleContext {
     if (typeof arg == "object" && !isType(arg)) {
       var nc = new TypeContext<T>(this, arg, this.propertyRoute, this.binding, this.prefix);
       nc.previousVersion = this.previousVersion;
-      nc.validFrom = this.validFrom;
+
       return nc;
     }
 
@@ -312,8 +311,6 @@ export class TypeContext<T> extends StyleContext {
     if (this.previousVersion && this.previousVersion.value) {
       result.previousVersion = { value: createBinding(this.previousVersion.value, lambdaMembers).getValue() }; 
     }
-
-    result.validFrom = this.validFrom;
 
     return result;
   }
@@ -524,6 +521,9 @@ export interface EntityFrame {
 
   createNew?: (oldPack: EntityPack<ModifiableEntity>) => (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
   prefix: string;
+
+  currentDate?: string;
+  previousDate?: string;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {

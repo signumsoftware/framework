@@ -143,6 +143,7 @@ interface RenderEntityVersionProps {
   current: ()=> Promise<EntityDump>;
   previous: (() => Promise<EntityDump>) | undefined;
   currentDate?: string;
+  previousDate?: string;
 }
 
 export function RenderEntityVersion(p: RenderEntityVersionProps) {
@@ -157,14 +158,12 @@ export function RenderEntityVersion(p: RenderEntityVersionProps) {
 
   var ctx = TypeContext.root(pair.curr.entity, { readOnly: true });
 
-  ctx.validFrom = p.currentDate;
-
   if (pair.prev)
     ctx.previousVersion = { value: pair.prev?.entity };
 
   return (
     <div>
-      <RenderEntity ctx={ctx} />
+      <RenderEntity ctx={ctx} currentDate={p.currentDate} previousDate={p.previousDate} />
     </div>
   );
 }
@@ -226,6 +225,7 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
           previous={previous}
           current={current}
           currentDate={hasPrevious ? dates[1] : dates[0]}
+          previousDate={hasPrevious ? dates[0] : undefined}
         />
         </Tab>
       <Tab title={hasPrevious ?
