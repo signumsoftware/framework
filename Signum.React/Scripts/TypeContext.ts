@@ -174,12 +174,12 @@ export class StyleContext {
   }
 
   get readOnly(): boolean {
-    return this.styleOptions.readOnly != undefined ? this.styleOptions.readOnly :
+    return this.styleOptions.readOnly ? this.styleOptions.readOnly :
       this.parent ? this.parent.readOnly : false;
   }
 
   set readOnly(value: boolean) {
-    this.styleOptions.readOnly = this.parent.readOnly || value;
+    this.styleOptions.readOnly = value;
   }
 
   get frame(): EntityFrame | undefined {
