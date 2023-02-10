@@ -14,13 +14,14 @@ import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
 import { FilterOption, FilterOptionParsed } from '@framework/Search'
-import { FindOptionsParsed, isFilterGroupOption, isFilterGroupOptionParsed, PinnedFilter } from '@framework/FindOptions'
+import { FindOptionsParsed, isFilterGroupOption, isFilterGroupOptionParsed, PinnedFilter, SubTokensOptions } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyCodes } from '@framework/Components'
 import type StringDistance from './StringDistance'
 import { translated } from '../Translation/TranslatedInstanceTools'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
+import { TokenCompleter } from '@framework/Finder'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -178,6 +179,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   async function createUserQuery(): Promise<UserQueryEntity> {
 
+    debugger;
     const sc = p.searchControl;
 
     const fo = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription, sc.props.defaultIncudeDefaultFilters);
@@ -188,13 +190,16 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       filters: (fo.filterOptions ?? []).notNull().map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });
 
-    const parsedTokens =
-      [
-        ...sc.props.findOptions.columnOptions.map(a => a.token),
-        ...sc.props.findOptions.columnOptions.map(a => a.summaryToken),
-        ...sc.props.findOptions.orderOptions.map(a => a.token),
-      ].notNull()
-        .toObjectDistinct(a => a.fullKey);
+
+
+    var parser = new TokenCompleter(sc.props.queryDescription);
+    [
+      ...fo.columnOptions?.map(a => a?.token) ?? [],
+      ...fo.columnOptions?.map(a => a?.summaryToken) ?? [],
+      ...fo.orderOptions?.map(a => a?.token) ?? [],
+    ].notNull().forEach(a => parser.request(a.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanToArray));
+
+    await parser.finished();
 
     const qe = await Finder.API.fetchQueryEntity(getQueryKey(fo.queryName));
 
@@ -205,9 +210,9 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,
       columns: (fo.columnOptions ?? []).notNull().map(c => newMListElement(QueryColumnEmbedded.New({
-        token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parsedTokens[c.token.toString()] }),
+        token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parser.get(c.token.toString()) }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
-        summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.summaryToken.toString(), token: parsedTokens[c.summaryToken.toString()] }) : null,
+        summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.summaryToken.toString(), token: parser.get(c.summaryToken.toString()) }) : null,
         hiddenColumn: c.hiddenColumn
       }))),
       columnsMode: fo.columnOptionsMode,
@@ -215,7 +220,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         orderType: c.orderType,
         token: QueryTokenEmbedded.New({
           tokenString: c.token.toString(),
-          token: parsedTokens[c.token.toString()]
+          token: parser.get(c.token.toString())
         })
       }))),
       paginationMode: fo.pagination && fo.pagination.mode,

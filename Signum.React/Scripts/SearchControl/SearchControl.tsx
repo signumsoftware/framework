@@ -68,7 +68,7 @@ export interface SearchControlProps {
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
   onCreate?: (scl: SearchControlLoaded) => Promise<undefined | void | EntityPack<any> | ModifiableEntity | "no_change">;
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
-  styleContext?: StyleContext;
+  ctx?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>;
   onPageSubTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
@@ -144,6 +144,10 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
           setState({ queryDescription: qd, message: message });
         else
           Finder.parseFindOptions(fo, qd, p.defaultIncludeDefaultFilters!).then(fop => {
+
+            if (fop.systemTime == undefined && p.ctx?.frame?.currentDate)
+              fop.systemTime = { mode: 'AsOf', startDate: p.ctx.frame.currentDate };
+
             setState({ findOptions: fop, queryDescription: qd });
           });
       });
@@ -229,7 +233,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         onHeighChanged={p.onHeighChanged}
         onResult={p.onResult}
 
-        styleContext={p.styleContext}
+        ctx={p.ctx}
         customRequest={p.customRequest}
         onPageTitleChanged={p.onPageSubTitleChanged}
 

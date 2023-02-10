@@ -142,45 +142,52 @@ export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
 interface RenderEntityVersionProps {
   current: ()=> Promise<EntityDump>;
   previous: (() => Promise<EntityDump>) | undefined;
-  next: (() => Promise<EntityDump>) | undefined;
+  currentDate?: string;
+  previousDate?: string;
 }
 
 export function RenderEntityVersion(p: RenderEntityVersionProps) {
-  var current = useAPI(signal => p.current(), [p.current]);
-  var previous = useAPI(signal => p.previous == null ? Promise.resolve(null) : p.previous(), [p.previous]);
-  var next = useAPI(signal => p.next == null ? Promise.resolve(null) : p.next(), [p.next]);
+  var pair = useAPI(async signal => {
+    var curr = p.current();
+    var prev = p.previous == null ? Promise.resolve(null) : p.previous();
+    return ({ curr: await curr, prev: await prev });
+  }, [p.current, p.previous], { avoidReset: true });
 
-  if (!current || previous === undefined || next === undefined)
+  if (pair === undefined)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
-  var ctx = TypeContext.root(current.entity, { readOnly: true });
 
-  if (previous)
-    ctx.previousVersion = { value: previous?.entity };
+  var ctx = TypeContext.root(pair.curr.entity, { readOnly: true });
+
+  if (pair.prev)
+    ctx.previousVersion = { value: pair.prev?.entity };
 
   return (
     <div>
-      <RenderEntity ctx={ctx} />
+      <RenderEntity ctx={ctx} currentDate={p.currentDate} previousDate={p.previousDate} />
     </div>
   );
 }
 
 interface DiffEntityVersionProps {
-  first?: () => Promise<EntityDump>;
-  second: () => Promise<EntityDump>;
+  previous?: () => Promise<EntityDump>;
+  current: () => Promise<EntityDump>;
 }
 
 export function DiffEntityVersion(p: DiffEntityVersionProps) {
 
-  var first = useAPI(signal => p.first == null ? Promise.resolve(null) : p.first!(), [p.first]);
+  var pair = useAPI(async signal => {
+    var curr = p.current();
+    var prev = p.previous == null ? Promise.resolve(null) : p.previous();
+    return ({ curr: await curr, prev: await prev });
+  }, [p.current, p.previous], { avoidReset: true });
 
-  var second = useAPI(signal => p.second(), [p.second]);
-
-  if (first === undefined || second  === undefined)
+  if (pair === undefined)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
-  return (first ? <DiffDocument first={first.dump} second={second.dump} /> :
-    <pre>{second.dump}</pre> 
-  );
+  if (pair.prev == null)
+    return <pre>{pair.curr.dump}</pre>;
+
+  return <DiffDocument first={pair.prev.dump} second={pair.curr.dump} />;
 }
 
 export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string[] }) {
@@ -198,7 +205,7 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
   var hasPrevious = p.versionDatesUTC.length > 1;
 
   var refs = React.useRef<{ [versionDateUTC: string]: () => Promise<EntityDump> }>({});
-  debugger;
+
   refs.current = p.versionDatesUTC.toObject(a => a, a => refs.current[a] ?? memoized(a));
   var dates = p.versionDatesUTC.orderBy(a => a);
   var current = hasPrevious ? refs.current[dates[1]] : refs.current[dates[0]];
@@ -217,7 +224,9 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
         <RenderEntityVersion
           previous={previous}
           current={current}
-          next={undefined} />
+          currentDate={hasPrevious ? dates[1] : dates[0]}
+          previousDate={hasPrevious ? dates[0] : undefined}
+        />
         </Tab>
       <Tab title={hasPrevious ?
         <span>{TimeMachineMessage.DataDifferences.niceToString()}
@@ -227,7 +236,7 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
           <FontAwesomeIcon className="ms-2" icon="align-left" color="lightblue" />
         </span>}
         key={"data"} eventKey={"data"}>
-        <DiffEntityVersion first={previous} second={current} />
+        <DiffEntityVersion previous={previous} current={current} />
       </Tab>      
     </Tabs>
   );
@@ -275,3 +284,39 @@ TimeMachineModal.show = (lite: Lite<Entity>): Promise<boolean | undefined> => {
 };
 
 
+
+
+interface TimeMachineModalCompareProps extends IModalProps<boolean | undefined> {
+  lite: Lite<Entity>;
+  versionDatesUTC: string[];
+}
+
+export function TimeMachineCompareModal(p: TimeMachineModalCompareProps) {
+
+  const [show, setShow] = React.useState(true);
+  const answerRef = React.useRef<boolean | undefined>(undefined);
+
+  function handleCloseClicked() {
+    setShow(false);
+  }
+
+  function handleOnExited() {
+    p.onExited!(answerRef.current);
+  }
+
+  return (
+    <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
+      <div className="modal-header">
+        <h5 className="modal-title">{TimeMachineMessage.CompareVersions.niceToString()}</h5>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked} />
+      </div>
+      <div className="modal-body">
+        <TimeMachineTabs lite={p.lite} versionDatesUTC={p.versionDatesUTC} />
+      </div>
+    </Modal>
+  );
+}
+
+TimeMachineCompareModal.show = (lite: Lite<Entity>, versionDatesUTC: string[]): Promise<boolean | undefined> => {
+  return openModal<boolean | undefined>(<TimeMachineCompareModal lite={lite} versionDatesUTC={versionDatesUTC} />);
+};

@@ -114,7 +114,7 @@ export interface SearchControlLoadedProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
   onResult?: (table: ResultTable, dataChange: boolean, sc: SearchControlLoaded) => void;
-  styleContext?: StyleContext;
+  ctx?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
@@ -697,6 +697,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         order: -3.5,
         button: < button
           className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
+          style={{  color: "var(--bs-alert-color)", backgroundColor: "var(--bs-alert-bg)" }}
           onClick={this.handleSystemTimeClick}
           title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
           <FontAwesomeIcon icon="clock-rotate-left" />
@@ -712,7 +713,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       this.props.showContextMenu(this.props.findOptions) != false && this.props.showSelectedButton && this.renderSelectedButton(),
 
-      p.create && {
+      p.create && !this.props.ctx?.frame?.currentDate && {
         order: -2,
         button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
           <FontAwesomeIcon icon="plus" className="sf-create" /><span className="d-none d-sm-inline">&nbsp;{SearchMessage.Create.niceToString()}</span>
@@ -905,7 +906,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           queryDescription: this.props.queryDescription,
           markRows: this.markRows,
           container: this,
-          styleContext: this.props.styleContext,
+          styleContext: this.props.ctx,
         }))
         .then(menuItems => this.setState({ currentMenuItems: menuItems }));
     }
