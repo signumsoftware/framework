@@ -277,28 +277,28 @@ Consider the following options:
     #region Events
 
     public static event SurroundOperationHandler? SurroundOperation;
-    public static event OperationHandlerArgs? OperationBeforeExecute;
-    public static event OperationHandlerArgs? OperationExecuted;
+    //public static event OperationHandlerArgs? OperationBeforeExecute;
+    //public static event OperationHandlerArgs? OperationExecuted;
     public static event AllowOperationHandler? AllowOperation;
-    public static event ErrorOperationHandler? OperationException;
+    //public static event ErrorOperationHandler? OperationException;
 
-    internal static void OnOperationExceptionHandlerArgs(OperationSymbol operation, IEntity entity, Exception exc,  object?[]? args)
-    {
-        if (OperationException != null)
-            OperationException(operation, entity, exc, args);
-    }
+    //internal static void OnOperationExceptionHandlerArgs(OperationSymbol operation, IEntity entity, Exception exc,  object?[]? args)
+    //{
+    //    if (OperationException != null)
+    //        OperationException(operation, entity, exc, args);
+    //}
 
-    internal static void OnOperationBeforeExecuteHandlerArgs(OperationSymbol operation, IEntity entity, object?[]? args)
-    {
-        if (OperationBeforeExecute != null)
-            OperationBeforeExecute(operation, entity, args);
-    }
+    //internal static void OnOperationBeforeExecuteHandlerArgs(OperationSymbol operation, IEntity entity, object?[]? args)
+    //{
+    //    if (OperationBeforeExecute != null)
+    //        OperationBeforeExecute(operation, entity, args);
+    //}
 
-    internal static void OnOperationExecutedHandlerArgs(OperationSymbol operation, IEntity entity, object?[]? args)
-    {
-        if (OperationExecuted != null)
-            OperationExecuted(operation, entity, args);
-    }
+    //internal static void OnOperationExecutedHandlerArgs(OperationSymbol operation, IEntity entity, object?[]? args)
+    //{
+    //    if (OperationExecuted != null)
+    //        OperationExecuted(operation, entity, args);
+    //}
 
 
     internal static IDisposable? OnSuroundOperation(IOperation operation, OperationLogEntity log, IEntity? entity, object?[]? args)
