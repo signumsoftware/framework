@@ -15,6 +15,8 @@ export interface RenderEntityProps {
   onRefresh?: () => void;
   onEntityLoaded?: () => void;
   extraProps?: any;
+  currentDate?: string;
+  previousDate?: string;
 }
 
 interface FuncBox {
@@ -77,7 +79,9 @@ export function RenderEntity(p: RenderEntityProps) {
     allowExchangeEntity: false,
     prefix: prefix,
     isExecuting: () => false,
-    execute: () => { throw new Error("Not implemented Exception"); }
+    execute: () => { throw new Error("Not implemented Exception"); },
+    currentDate: p.currentDate,
+    previousDate: p.previousDate,
   };
 
   function setComponent(c: React.Component<any, any> | null) {
@@ -91,7 +95,6 @@ export function RenderEntity(p: RenderEntityProps) {
   const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
   if (ctx.previousVersion && ctx.previousVersion.value)
     newCtx.previousVersion = { value: ctx.previousVersion.value as any };
-
   var element = componentBox == "useGetComponent" ? p.getComponent!(newCtx) : componentBox.func(newCtx);
 
   if (p.extraProps)

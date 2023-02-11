@@ -86,21 +86,21 @@ export default function ChangePasswordPage() {
             <div className={classes("form-group form-group-sm", error("oldPassword") && "has-error")}>
               <label className="col-form-label col-form-label-sm">{LoginAuthMessage.CurrentPassword.niceToString()}</label>
               <div>
-                <input type="password" className="form-control form-control-sm" id="currentPassword" ref={oldPassword} onBlur={handleOldPasswordBlur} />
+                <input type="password" className="form-control form-control-sm" id="currentPassword" ref={oldPassword} onBlur={handleOldPasswordBlur} autoComplete="old-password" />
                 {error("oldPassword") && <span className="help-block">{error("oldPassword")}</span>}
               </div>
             </div>
             <div className={classes("form-group form-group-sm", error("newPassword") && "has-error")}>
               <label className="col-form-label col-form-label-sm">{LoginAuthMessage.EnterTheNewPassword.niceToString()}</label>
               <div>
-                <input type="password" className="form-control form-control-sm" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} />
+                <input type="password" className="form-control form-control-sm" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} autoComplete="new-password"/>
                 {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
               </div>
             </div>
             <div className={classes("form-group form-group-sm", error("newPassword") && "has-error")}>
               <label className="col-form-label col-form-label-sm">{LoginAuthMessage.ConfirmNewPassword.niceToString()}</label>
               <div>
-                <input type="password" className="form-control form-control-sm" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} />
+                <input type="password" className="form-control form-control-sm" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} autoComplete="new-password" />
                 {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
               </div>
             </div>

@@ -142,6 +142,8 @@ export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
 interface RenderEntityVersionProps {
   current: ()=> Promise<EntityDump>;
   previous: (() => Promise<EntityDump>) | undefined;
+  currentDate?: string;
+  previousDate?: string;
 }
 
 export function RenderEntityVersion(p: RenderEntityVersionProps) {
@@ -161,7 +163,7 @@ export function RenderEntityVersion(p: RenderEntityVersionProps) {
 
   return (
     <div>
-      <RenderEntity ctx={ctx} />
+      <RenderEntity ctx={ctx} currentDate={p.currentDate} previousDate={p.previousDate} />
     </div>
   );
 }
@@ -203,7 +205,7 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
   var hasPrevious = p.versionDatesUTC.length > 1;
 
   var refs = React.useRef<{ [versionDateUTC: string]: () => Promise<EntityDump> }>({});
-  debugger;
+
   refs.current = p.versionDatesUTC.toObject(a => a, a => refs.current[a] ?? memoized(a));
   var dates = p.versionDatesUTC.orderBy(a => a);
   var current = hasPrevious ? refs.current[dates[1]] : refs.current[dates[0]];
@@ -221,7 +223,10 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
         key={"ui"} eventKey={"ui"}>
         <RenderEntityVersion
           previous={previous}
-          current={current}/>
+          current={current}
+          currentDate={hasPrevious ? dates[1] : dates[0]}
+          previousDate={hasPrevious ? dates[0] : undefined}
+        />
         </Tab>
       <Tab title={hasPrevious ?
         <span>{TimeMachineMessage.DataDifferences.niceToString()}
