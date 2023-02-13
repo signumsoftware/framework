@@ -230,10 +230,6 @@ public class Graph<T>
             {
                 OperationLogic.AssertOperationAllowed(operationSymbol, origin.GetType(), inUserInterface: false);
 
-                string? error = OnCanConstruct(origin);
-                if (error != null)
-                    throw new ApplicationException(error);
-
                 OperationLogEntity? log = new OperationLogEntity
                 {
                     Operation = operationSymbol,
@@ -251,6 +247,10 @@ public class Graph<T>
                         using (OperationLogic.AllowSave<T>())
                             OperationLogic.OnSuroundOperation(this, log, origin, args).EndUsing(_ =>
                             {
+                                string? error = OnCanConstruct(origin);
+                                if (error != null)
+                                    throw new ApplicationException(error);
+
                                 result = Construct((F)origin, args);
 
                                 if (result != null)
@@ -585,10 +585,7 @@ public class Graph<T>
                     OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
 
                     if (Transaction.InTestTransaction)
-                    {
                         throw;
-                    }
-                        
 
                     var exLog = ex.LogException();
 
@@ -608,7 +605,6 @@ public class Graph<T>
 
                         tr2.Commit();
                     }
-
 
                     throw;
                 }
@@ -703,10 +699,6 @@ public class Graph<T>
             {
                 OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
 
-                string? error = OnCanDelete((T)entity);
-                if (error != null)
-                    throw new ApplicationException(error);
-
                 OperationLogEntity log = new OperationLogEntity
                 {
                     Operation = Symbol.Symbol,
@@ -721,6 +713,10 @@ public class Graph<T>
                         {
                             using (var tr = new Transaction())
                             {
+                                string? error = OnCanDelete((T)entity);
+                                if (error != null)
+                                    throw new ApplicationException(error);
+
                                 OnDelete((T)entity, args);
 
                                 log.SetTarget(entity);
