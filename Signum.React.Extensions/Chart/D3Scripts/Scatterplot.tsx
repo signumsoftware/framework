@@ -48,11 +48,13 @@ export default function renderScatterplot({ data, width, height, parameters, loa
     );
 
 
-  var colorKeyColumn = data.columns.c0!;
+  var keyColumn = data.columns.c0!;
   var horizontalColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
   var verticalColumn = data.columns.c2! as ChartClient.ChartColumn<number>;
   var horizontalColumn2 = data.columns.c3 as ChartClient.ChartColumn<number> | undefined;
   var verticalColumn2 = data.columns.c4 as ChartClient.ChartColumn<number> | undefined;
+  var colorScaleColumn = data.columns.c5 as ChartClient.ChartColumn<number> | undefined;
+  var colorSchemeColumn = data.columns.c6;
 
   if (horizontalColumn2 && horizontalColumn2.type != horizontalColumn.type)
     throw new Error(`The type of Horizontal Column (2) ${horizontalColumn2.token} (${horizontalColumn2.type}) doesn't match the one from Horizontal Column ${horizontalColumn.token} (${horizontalColumn.type})`);
@@ -66,20 +68,23 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 
   var pointSize = parseInt(parameters["PointSize"]);
 
-  var color: (val: ChartRow) => string;
-  if (parameters["ColorScale"] == "Ordinal" || (colorKeyColumn.type != "Integer" && colorKeyColumn.type != "Real")) {
-    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(colorKeyColumn.getValueKey), memo);
-    color = r => colorKeyColumn.getValueColor(r) ?? categoryColor(colorKeyColumn.getValueKey(r));
-
-  } else {
-    var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(colorKeyColumn.getValue) as number[], 0, 1, parameters["ColorScale"]);
-    var colorInterpolate = parameters["ColorInterpolate"];
-    var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate);
-    color = r => colorInterpolation!(scaleFunc(colorKeyColumn.getValue(r) as number)!);
+  var color: (r: ChartRow) => string | undefined;
+  if (colorScaleColumn) {
+    var scaleFunc = scaleFor(colorScaleColumn, data.rows.map(r => colorScaleColumn!.getValue(r)), 0, 1, parameters["ColorScale"]);
+    var colorInterpolator = ChartUtils.getColorInterpolation(parameters["ColorInterpolate"]);
+    color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r))!);
+  }
+  else if (colorSchemeColumn) {
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)), memo, "colorSchemeColumn");
+    color = r => colorSchemeColumn!.getColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
+  }
+  else {
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)), memo, "colorCategory");
+    color = r => keyColumn.getValueColor(r) ?? categoryColor(keyColumn.getValueKey(r));
   }
 
   var keyColumns: ChartClient.ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
-    [colorKeyColumn, horizontalColumn, verticalColumn].filter(a => a.token && a.token.queryTokenType != "Aggregate")
+    [keyColumn, horizontalColumn, verticalColumn].filter(a => a.token && a.token.queryTokenType != "Aggregate")
 
   return (
     <>
@@ -96,7 +101,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
             verticalColumn={verticalColumn}
             horizontalColumn2={horizontalColumn2}
             verticalColumn2={verticalColumn2}
-            colorKeyColumn={colorKeyColumn}
+            colorKeyColumn={keyColumn}
             color={color}
             pointSize={pointSize} 
             chartRequest={chartRequest}
@@ -114,7 +119,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
       {parameters["DrawingMode"] != "Svg" &&
         <CanvasScatterplot
           color={color}
-          colorKeyColumn={colorKeyColumn}
+          colorKeyColumn={keyColumn}
           horizontalColumn={horizontalColumn}
           verticalColumn={verticalColumn}
           horizontalColumn2={horizontalColumn2}
@@ -147,7 +152,7 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
     verticalColumn: ChartClient.ChartColumn<number>,
     verticalColumn2?: ChartClient.ChartColumn<number>,
     colorKeyColumn: ChartClient.ChartColumn<unknown>,
-    color: (val: ChartRow) => string,
+    color: (val: ChartRow) => string | undefined,
     pointSize: number,
     dashboardFilter?: DashboardFilter,
     chartRequest: ChartRequestModel,
@@ -243,7 +248,7 @@ function CanvasScatterplot(p: {
   pointSize: number,
   data: ChartClient.ChartTable,
   onDrillDown: (r: ChartRow, e: MouseEvent) => void,
-  color: (val: ChartRow) => string,
+  color: (val: ChartRow) => string | undefined,
   x: d3.ScaleContinuousNumeric<number, number>,
   y: d3.ScaleContinuousNumeric<number, number>,
 }) {
@@ -269,8 +274,8 @@ function CanvasScatterplot(p: {
 
       var c = colorKeyColumn.getValueColor(r) ?? color(r);
 
-      ctx.fillStyle = c;
-      ctx.strokeStyle = c;
+      ctx.fillStyle = c ?? "black";
+      ctx.strokeStyle = c ?? "black";
       var vColor = getVirtualColor(i);
       vctx.fillStyle = vColor;
       vctx.strokeStyle = vColor;

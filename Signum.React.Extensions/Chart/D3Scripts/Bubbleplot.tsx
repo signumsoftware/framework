@@ -49,27 +49,33 @@ export default function renderBubbleplot({ data, width, height, parameters, load
       </svg>
     );
 
-  var colorKeyColumn = data.columns.c0!;
+  var keyColumn = data.columns.c0!;
   var horizontalColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
   var verticalColumn = data.columns.c2 as ChartClient.ChartColumn<number>;
   var sizeColumn = data.columns.c3 as ChartClient.ChartColumn<number>;
+  var colorScaleColumn = data.columns.c4 as ChartClient.ChartColumn<number> | undefined;
+  var colorSchemeColumn = data.columns.c5;
 
   var x = scaleFor(horizontalColumn, data.rows.map(r => horizontalColumn.getValue(r)), 0, xRule.size('content'), parameters["HorizontalScale"]);
 
   var y = scaleFor(verticalColumn, data.rows.map(r => verticalColumn.getValue(r)), 0, yRule.size('content'), parameters["VerticalScale"]);
 
-
-  var orderRows = data.rows.orderBy(r => colorKeyColumn.getValueKey(r));
-  var color: (r: ChartRow) => string;
-  if (parameters["ColorScale"] == "Ordinal") {
-    var categoryColor = ChartUtils.colorCategory(parameters, []/*orderRows.map(r => colorKeyColumn.getValueKey(r))*/, memo);
-    color = r => colorKeyColumn.getValueColor(r) ?? categoryColor(colorKeyColumn.getValueKey(r));
-  } else {
-    var scaleFunc = scaleFor(colorKeyColumn, data.rows.map(r => colorKeyColumn.getValue(r) as number), 0, 1, parameters["ColorScale"]);
-    var colorInterpolate = parameters["ColorInterpolate"];
-    var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate)!;
-    color = r => colorInterpolation(scaleFunc(colorKeyColumn.getValue(r) as number)!)
+  var orderRows = data.rows.orderBy(r => keyColumn.getValueKey(r));
+  var color: (r: ChartRow) => string | undefined;
+  if (colorScaleColumn) {
+    var scaleFunc = scaleFor(colorScaleColumn, data.rows.map(r => colorScaleColumn!.getValue(r)), 0, 1, parameters["ColorScale"]);
+    var colorInterpolator = ChartUtils.getColorInterpolation(parameters["ColorInterpolate"]);
+    color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r))!);
   }
+  else if (colorSchemeColumn) {
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => colorSchemeColumn!.getValueKey(r)), memo, "colorSchemeColumn");
+    color = r => colorSchemeColumn!.getColor(r) ?? categoryColor(colorSchemeColumn!.getValueKey(r));
+  }
+  else {
+    var categoryColor = ChartUtils.colorCategory(parameters, data.rows.map(r => keyColumn.getValueKey(r)), memo, "colorCategory");
+    color = r => keyColumn.getValueColor(r) ?? categoryColor(keyColumn.getValueKey(r));
+  }
+
   var sizeList = data.rows.map(r => sizeColumn.getValue(r));
 
   var sizeTemp = scaleFor(sizeColumn, sizeList, 0, 1, parameters["SizeScale"]);
@@ -79,7 +85,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
   var sizeScale = scaleFor(sizeColumn, sizeList, 0, (xRule.size('content') * yRule.size('content')) / (totalSizeTemp * 3), parameters["SizeScale"]);
 
   var keyColumns: ChartClient.ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
-    [colorKeyColumn, horizontalColumn, verticalColumn].filter(a => a.token && a.token.queryTokenType != "Aggregate")
+    [keyColumn, horizontalColumn, verticalColumn].filter(a => a.token && a.token.queryTokenType != "Aggregate")
 
   var detector = dashboardFilter?.getActiveDetector(chartRequest);
 
@@ -102,8 +108,8 @@ export default function renderBubbleplot({ data, width, height, parameters, load
               onClick={e => onDrillDown(r, e)}
             >
               <circle className="shape sf-transition hover-target"
-                stroke={active == true ? "black" : colorKeyColumn.getValueColor(r) ?? color(r)}
-                strokeWidth={3} fill={colorKeyColumn.getValueColor(r) ?? color(r)}
+                stroke={active == true ? "black" : keyColumn.getValueColor(r) ?? color(r)}
+                strokeWidth={3} fill={keyColumn.getValueColor(r) ?? color(r)}
                 fillOpacity={parseFloat(parameters["FillOpacity"])}
                 shapeRendering="initial"
                 r={Math.sqrt(sizeScale(sizeColumn.getValue(r))! / Math.PI)} />
@@ -113,7 +119,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
                 <TextEllipsis maxWidth={Math.sqrt(sizeScale(sizeColumn.getValue(r))! / Math.PI) * 2}
                   padding={0} etcText=""
                   className="number-label"
-                  fill={parameters["LabelColor"] ?? colorKeyColumn.getValueColor(r) ?? color(r)}
+                  fill={parameters["LabelColor"] ?? keyColumn.getValueColor(r) ?? color(r)}
                   dominantBaseline="middle"
                   textAnchor="middle"
                   fontWeight="bold">
@@ -122,7 +128,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
               }
 
               <title>
-                {colorKeyColumn.getValueNiceName(r) +
+                {keyColumn.getValueNiceName(r) +
                   ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +
                   ("\n" + verticalColumn.title + ": " + verticalColumn.getValueNiceName(r)) +
                   ("\n" + sizeColumn.title + ": " + sizeColumn.getValueNiceName(r))}
