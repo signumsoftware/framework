@@ -23,7 +23,7 @@ export default function LoginDropdown(p: {
   if (!user)
     return (
       <LinkContainer to="/auth/login" className="sf-login">
-        <Nav.Link><i className="sf-login-custom-icon"></i><span>{LoginAuthMessage.Login.niceToString()}</span></Nav.Link>
+        <Nav.Link>{LoginDropdown.customLoginIcon(user)}<span>{LoginAuthMessage.Login.niceToString()}</span></Nav.Link>
       </LinkContainer>
     );
 

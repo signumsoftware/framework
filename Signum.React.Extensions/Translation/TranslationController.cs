@@ -152,7 +152,7 @@ public class TranslationController : ControllerBase
 
         var cultures = TranslationLogic.CurrentCultureInfos(defaultCulture);
         Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in cultures
-                                                                let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
+                                                                let la = DescriptionManager.GetLocalizedAssembly(ass, ci,true)
                                                                 where la != null || ci == defaultCulture || ci == targetCulture
                                                                 select KeyValuePair.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: ci == defaultCulture || ci == targetCulture))).ToDictionary();
 

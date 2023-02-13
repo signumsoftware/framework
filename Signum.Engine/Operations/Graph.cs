@@ -1,5 +1,6 @@
 using Signum.Engine.Basics;
 using Signum.Engine.Operations.Internal;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using System.Collections;
 
@@ -536,9 +537,6 @@ public class Graph<T>
             {
                 OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
 
-                string? error = OnCanExecute((T)entity);
-                if (error != null)
-                    throw new ApplicationException(error);
 
                 OperationLogEntity log = new OperationLogEntity
                 {
@@ -556,6 +554,14 @@ public class Graph<T>
                             var assertEnd = AssertEntity((T)entity);
                             OperationLogic.OnSuroundOperation(this, log, entity, args).EndUsing(_ =>
                             {
+
+                                string? error = OnCanExecute((T)entity);
+                                if (error != null)
+                                {
+                                    var ex = new ApplicationException(error);
+                                    throw ex;
+                                }
+
                                 Execute((T)entity, args);
 
                                 assertEnd?.Invoke();
@@ -572,13 +578,17 @@ public class Graph<T>
 
                         tr.Commit();
                     }
+
                 }
                 catch (Exception ex)
                 {
                     OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
 
                     if (Transaction.InTestTransaction)
+                    {
                         throw;
+                    }
+                        
 
                     var exLog = ex.LogException();
 
@@ -598,6 +608,7 @@ public class Graph<T>
 
                         tr2.Commit();
                     }
+
 
                     throw;
                 }
