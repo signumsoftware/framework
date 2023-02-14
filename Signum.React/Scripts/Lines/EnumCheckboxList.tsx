@@ -5,7 +5,7 @@ import { getTypeInfo } from '../Reflection'
 import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { MList, newMListElement } from '../Signum.Entities'
 import { EntityCheckboxList } from './EntityCheckboxList'
-import { getTimeMachineIcon } from './TimeMachineIcon'
+import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface EnumCheckboxListProps extends LineBaseProps {
   data?: string[];
@@ -89,11 +89,11 @@ export const EnumCheckboxList = React.forwardRef(function EnumCheckboxList(props
       <div className="sf-checkbox-elements" style={getColumnStyle()}>
         {data.map((val, i) => {
           var ectx = listCtx.firstOrNull(ec => ec.value == val);
-          var oldValue = p.ctx.previousVersion == null || p.ctx.previousVersion.value == null ? null :
-            p.ctx.previousVersion.value.firstOrNull(el => el.element == val);
+          var oldCtx = p.ctx.previousVersion == null || p.ctx.previousVersion.value == null ? null :
+            listCtx.firstOrNull(el => el.previousVersion?.value == val);
 
           return (<label className="sf-checkbox-element" key={val}>
-            {getTimeMachineIcon({ ctx: ectx!, oldElement: oldValue })}
+            {getTimeMachineCheckboxIcon({ newCtx: ectx, oldCtx: oldCtx, type: ti })}
             <input type="checkbox"
               className="form-check-input"
               checked={p.ctx.value.some(mle => mle.element == val)}

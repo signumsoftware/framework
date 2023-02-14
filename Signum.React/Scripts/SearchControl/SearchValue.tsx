@@ -3,8 +3,8 @@ import { DateTime, Duration } from 'luxon'
 import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Finder from '../Finder'
-import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest } from '../FindOptions'
-import { Lite, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
+import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest, QueryDescription } from '../FindOptions'
+import { Lite, Entity, getToString, EmbeddedEntity, EntityControlMessage } from '../Signum.Entities'
 import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toLuxonDurationFormat, timeToString, toFormatWithFixes } from '../Reflection'
 import { SearchControlProps } from "./SearchControl";
 import { BsColor, BsSize } from '../Components';
@@ -14,6 +14,8 @@ import { useAPI, usePrevious } from '../Hooks'
 import * as Hooks from '../Hooks'
 import { TypeBadge } from '../Lines/AutoCompleteConfig'
 import { toAbsoluteUrl } from '../AppContext'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { TimeMachineColors } from '../Lines/TimeMachineIcon'
 
 export interface SearchValueProps {
   ctx?: StyleContext;
@@ -42,12 +44,15 @@ export interface SearchValueProps {
   onRender?: (value: any | undefined, vsc: SearchValueController) => React.ReactElement | null | undefined | false;
   htmlAttributes?: React.HTMLAttributes<HTMLElement>,
   customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, signal: AbortSignal) => Promise<any>,
+  avoidRenderTimeMachineIcon?: boolean;
 }
 
 export interface SearchValueController {
   props: SearchValueProps;
   valueToken: QueryToken | null | undefined;
   value: unknown | undefined;
+  queryDescription: QueryDescription | undefined;
+  hasHistoryChanges: boolean | undefined;
   renderValue(): React.ReactChild | null;
   refreshValue: () => void;
   handleClick: (e: React.MouseEvent<any>) => void;
@@ -87,32 +92,65 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 
   const value = useAPI(signal => {
 
-    function makeRequest() {
+    async function makeRequest() {
 
       if (!Finder.isFindable(fo.queryName, false)) {
         if (p.throwIfNotFindable)
           throw Error(`Query ${getQueryKey(fo.queryName)} not allowed`);
       }
 
-      return Finder.getQueryDescription(p.findOptions.queryName)
-        .then(qd => Finder.parseFindOptions(p.findOptions, qd, false))
-        .then(fop => {
+      var qd = await Finder.getQueryDescription(p.findOptions.queryName);
+      controller.queryDescription = qd;
 
-          if (fop.systemTime == undefined && p.ctx?.frame?.currentDate)
-            fop.systemTime = { mode: 'AsOf', startDate: p.ctx.frame.currentDate };
+      var fop = await Finder.parseFindOptions(p.findOptions, qd, false);
 
-          const req = getQueryRequestValue(fop, valueToken?.fullKey, Boolean(p.multipleValues));
-          if (p.customRequest)
-            return p.customRequest(req, fop, valueToken ?? null, signal);
-          else
-            return Finder.API.queryValue(req, p.avoidNotifyPendingRequest, signal);
-        })
-        .then(val => {
-          const fixedValue = val === undefined ? null : val;
-          controller.value = fixedValue;
-          p.onValueChange && p.onValueChange(fixedValue);
-          return fixedValue;
-        });
+      const systemVersioned = p.findOptions.systemTime == undefined && p.ctx?.frame?.currentDate && Finder.isSystemVersioned(qd.columns["Entity"].type);
+      if (systemVersioned)
+        fop.systemTime = { mode: 'AsOf', startDate: p.ctx?.frame!.currentDate };
+
+      const req = getQueryRequestValue(fop, valueToken?.fullKey, Boolean(p.multipleValues));
+      const valPromise = p.customRequest ?
+        p.customRequest(req, fop, valueToken ?? null, signal) :
+        Finder.API.queryValue(req, p.avoidNotifyPendingRequest, signal);
+
+      if (systemVersioned && p.ctx?.frame?.previousDate) {
+        var sv = new QueryTokenString("Entity");
+
+        controller.hasHistoryChanges = await Finder.API.queryValue({
+          queryKey: qd.queryKey,
+          systemTime: { mode: "Between", startDate: p.ctx?.frame?.previousDate, endDate: p.ctx?.frame?.currentDate, joinMode: "FirstCompatible" },
+          filters: [{
+            groupOperation: "Or",
+            filters: [
+              {
+                groupOperation: "And",
+                filters: [
+                  { token: sv.systemValidFrom().token, operation: "GreaterThanOrEqual", value: p.ctx?.frame?.previousDate },
+                  { token: sv.systemValidFrom().token, operation: "LessThanOrEqual", value: p.ctx?.frame?.currentDate },
+                ]
+              },
+              {
+                groupOperation: "And",
+                filters: [
+                  { token: sv.systemValidTo().token, operation: "GreaterThanOrEqual", value: p.ctx?.frame?.previousDate },
+                  { token: sv.systemValidTo().token, operation: "LessThanOrEqual", value: p.ctx?.frame?.currentDate },
+                ]
+              }
+            ]
+          }],
+          valueToken: "Count"
+        }) > 0;
+      } else {
+        controller.hasHistoryChanges = undefined;
+      }
+
+      const val = await valPromise;
+
+      const fixedValue = val === undefined ? null : val;
+      controller.value = fixedValue;
+      p.onValueChange && p.onValueChange(fixedValue);
+      return fixedValue;
+
     }
 
     if (valueToken === undefined)
@@ -121,6 +159,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     if (p.initialValue !== undefined) {
       if (Hooks.areEqual(deps ?? [], initialDeps.current ?? [])) {
         controller.value = p.initialValue;
+        controller.hasHistoryChanges = false;
         p.onInitialValueLoaded?.();
         return Promise.resolve(p.initialValue);
       }
@@ -130,11 +169,13 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       return makeRequest();
     }
 
-  }, [p.initialValue, valueToken, Finder.findOptionsPath(p.findOptions), ...(deps || [])], { avoidReset: true });
+  }, [p.initialValue, valueToken, Finder.findOptionsPath(p.findOptions), p.ctx?.frame?.currentDate, p.ctx?.frame?.previousDate, ...(deps || [])], { avoidReset: true });
 
   function refreshValue() {
     setReloadTicks(a => a + 1);
   }
+
+
 
   var controller = React.useMemo(() => ({} as any as SearchValueController), []);
   controller.props = p;
@@ -189,6 +230,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       var showType = p.multipleValues.showType ?? token.type.name.contains(",");
       return (
         <div className="sf-entity-strip sf-control-container">
+          {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
           <ul className={classes("sf-strip", p.multipleValues.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.customClass && typeof p.customClass == "function" ? p.customClass(value) : p.customClass)}>
             {(value as Lite<Entity>[]).map((lite, i) => {
               const toStr = getToString(lite);
@@ -249,6 +291,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
   if (p.formControlClass) {
     return (
       <div className={className} style={p.customStyle} {...p.htmlAttributes}>
+        {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
         {renderValue()}
       </div>
     );
@@ -258,12 +301,16 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
   if (p.isLink) {
     return (
       <a className={className} onClick={handleClick} href="#" style={p.customStyle} {...p.htmlAttributes}>
+        {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
         {renderValue()}
       </a>
     );
   }
 
-  return <span className={className} style={p.customStyle} {...p.htmlAttributes}>{renderValue()}</span>
+  return <span className={className} style={p.customStyle} {...p.htmlAttributes}>
+    {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
+    {renderValue()}
+  </span>
 
 
   function onClickLite(e: React.MouseEvent<any>, lite: Lite<Entity>) {
@@ -344,7 +391,32 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
         columnOptionsMode: "ReplaceOrAdd",
       }
     else
-      fo = p.findOptions;
+      fo = { ...p.findOptions };
+
+    if (fo.systemTime == null && p.ctx?.frame?.currentDate && Finder.isSystemVersioned(controller.queryDescription!.columns["Entity"].type)) {
+      if (p.ctx?.frame?.currentDate)
+        fo.systemTime = { mode: 'Between', startDate: p.ctx?.frame!.previousDate, endDate: p.ctx?.frame!.currentDate, joinMode: "FirstCompatible" };
+      else
+        fo.systemTime = { mode: 'AsOf', startDate: p.ctx?.frame!.currentDate };
+
+      if (fo.columnOptionsMode == null)
+        fo.columnOptionsMode = "Add";
+
+      if (fo.columnOptionsMode != "Remove") {
+        if (fo.columnOptions == null)
+          fo.columnOptions = [];
+
+        fo.columnOptions.push(...[
+          { token: QueryTokenString.entity().systemValidFrom(), hiddenColumn: true },
+          { token: QueryTokenString.entity().systemValidTo(), hiddenColumn: true }
+        ]);
+
+        if (fo.orderOptions == null)
+          fo.orderOptions = [];
+
+        fo.orderOptions.push({ token: QueryTokenString.entity().systemValidFrom(), orderType: "Descending" });
+      }
+    }
 
     if (e.ctrlKey || e.button == 1)
       window.open(toAbsoluteUrl(Finder.findOptionsPath(fo)));
@@ -366,3 +438,22 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 } as Partial<SearchValueProps>;
 
 export default SearchValue;
+
+export function renderTimeMachineIcon(hasHistoryChanges: boolean | undefined, transform: string) {
+
+  if (hasHistoryChanges === undefined)
+    return null;
+
+  return <FontAwesomeIcon icon="circle"
+    title={hasHistoryChanges ? EntityControlMessage.Changed.niceToString() : EntityControlMessage.NoChanges.niceToString() }
+    fontSize={14}
+    style={{
+      position: 'absolute',
+      zIndex: 2,
+      minWidth: "14px",
+      minHeight: "14px",
+      transform: transform,
+      color: hasHistoryChanges ? TimeMachineColors.changed : TimeMachineColors.noChange,
+    }}
+  />;
+}

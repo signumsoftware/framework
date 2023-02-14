@@ -1919,6 +1919,10 @@ export interface CellFormatterContext {
   searchControl?: SearchControlLoaded
 }
 
+export function isSystemVersioned(tr?: TypeReference) {
+  return tr != null && getTypeInfos(tr).some(ti => ti.isSystemVersioned == true)
+}
+
 
 export function getCellFormatter(qs: QuerySettings | undefined, qt: QueryToken, sc: SearchControlLoaded | undefined): CellFormatter {
 
@@ -2057,6 +2061,7 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidFrom",
       formatter: qt => {
         return new CellFormatter((cell: string | undefined, ctx) => {
+
           if (cell == undefined || cell == "")
             return "";
 
@@ -2065,7 +2070,10 @@ function initFormatRules(): FormatRule[] {
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat).replace("T", " ")}</bdi>;
+          return (
+            <bdi className={classes("date", "try-no-wrap", className)}>
+              {toFormatWithFixes(DateTime.fromISO(cell), luxonFormat).replace("T", " ")}
+            </bdi>);
         }, false, "date-cell"); //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
