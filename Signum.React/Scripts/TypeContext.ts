@@ -174,7 +174,7 @@ export class StyleContext {
   }
 
   get readOnly(): boolean {
-    return this.styleOptions.readOnly ? this.styleOptions.readOnly :
+    return this.styleOptions.readOnly != undefined ? this.styleOptions.readOnly :
       this.parent ? this.parent.readOnly : false;
   }
 

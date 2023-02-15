@@ -869,8 +869,6 @@ public interface IEntityOperation : IOperation
 
 
 public delegate IDisposable? SurroundOperationHandler(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args);
-public delegate void OperationHandler(IOperation operation, Entity entity);
-public delegate void ErrorOperationHandler(IOperation operation, Entity entity, Exception ex);
 public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, Type entityType, bool inUserInterface);
 
 
