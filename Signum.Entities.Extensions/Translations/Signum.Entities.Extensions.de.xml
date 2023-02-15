@@ -2441,9 +2441,17 @@
   <Type Name="TensorFlowOptimizer" />
   <Type Name="TensorFlowPredictorAlgorithm" />
   <Type Name="TimeMachineMessage">
+    <Member Name="AllVersions" Description="Alle Versionen" />
     <Member Name="CompareVersions" Description="Versionen vergleichen" />
+    <Member Name="DataDifferences" Description="Data-Unterschiede" />
+    <Member Name="DataSnapshot" Description="Daten-Snapshot" />
     <Member Name="EntityDeleted" Description="[Entität gelöscht]" />
+    <Member Name="SelectedVersions" Description="Ausgewählte Versionen" />
+    <Member Name="ShowDiffs" Description="Unterschiede anzeigen" />
     <Member Name="TimeMachine" Description="Zeitmaschine" />
+    <Member Name="UIDifferences" Description="UI-Unterschiede" />
+    <Member Name="UISnapshot" Description="UI-Snapshot" />
+    <Member Name="YouCanNotSelectMoreThanTwoVersionToCompare" Description="Sie können nicht mehr als zwei Versionen zum Vergleich auswählen" />
   </Type>
   <Type Name="TimeMachinePermission">
     <Member Name="ShowTimeMachine" Description="Zeitmaschine anzeigen" />
@@ -2711,6 +2719,7 @@
   <Type Name="UserChartEntity" Description="Benutzerdiagramm" PluralDescription="Benutzerdiagramme" Gender="f">
     <Member Name="ChartScript" Description="Diagrammskript" />
     <Member Name="Columns" Description="Spalten" />
+    <Member Name="CustomDrilldowns" Description="Benutzerdefinierte Drilldowns" />
     <Member Name="DisplayName" Description="Angezeigter Name" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Filters" Description="Filter" />
@@ -2768,6 +2777,7 @@
     <Member Name="AppendFilters" Description="Filters anfügen" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="ColumnsMode" Description="Spalten-Modus" />
+    <Member Name="CustomDrilldowns" Description="Benutzerdefinierte Drilldowns" />
     <Member Name="DisplayName" Description="Angezeigter Name" />
     <Member Name="ElementsPerPage" Description="Elemente pro Seite" />
     <Member Name="EntityType" Description="Entitätstyp" />
@@ -2789,7 +2799,7 @@
     <Member Name="CreateNew" Description="Erstellen" />
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="MakesThe0AvailableAsAQuickLinkOf1" Description="Stellt die {0} als Quick Link of {1} zur Verfügung" />
-    <Member Name="MakesThe0AvailableInContextualMenuWhenGrouping0" Description="Stellt die {0} im Kontextmenü zur Verfügung, wenn {1} gruppiert wird" />
+    <Member Name="MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0" Description="Macht die {0} für benutzerdefinierte Drilldowns und im Kontextmenü beim Gruppieren verfügbar {1}" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Der Filtervorgang {0} ist nicht kompatibel mit {1}" />
     <Member Name="TheSelected0" Description="die ausgewählte {0}" />
