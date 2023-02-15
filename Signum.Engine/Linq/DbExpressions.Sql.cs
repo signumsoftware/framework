@@ -641,6 +641,7 @@ internal enum SqlFunction
     STUFF,
     COLLATE,
     CONCAT,
+    SwitchOffset,
 }
 
 internal enum PostgresFunction

@@ -1378,28 +1378,57 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
     public Expression? HardCodedMembers(MemberExpression m)
     {
-        
 
         switch (m.Member.DeclaringType!.TypeName() + "." + m.Member.Name)
         {
             case "string.Length": return TrySqlFunction(null, isPostgres ? PostgresFunction.length.ToString() : SqlFunction.LEN.ToString(), m.Type, m.Expression!);
             case "Math.PI": return TrySqlFunction(null, SqlFunction.PI, m.Type);
+            case "DateTimeOffset.Year":
             case "DateOnly.Year":
             case "DateTime.Year": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.year), m.Expression!);
+            
+            case "DateTimeOffset.Month":
             case "DateOnly.Month":
             case "DateTime.Month": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.month), m.Expression!);
+           
+            case "DateTimeOffset.Day":
             case "DateOnly.Day":
             case "DateTime.Day": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.day), m.Expression!);
+            
+            case "DateTimeOffset.DayOfYear":
             case "DateOnly.DayOfYear":
             case "DateTime.DayOfYear": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(isPostgres? SqlEnums.doy: SqlEnums.dayofyear), m.Expression!);
+           
+            case "DateTimeOffset.DayOfWeek":
             case "DateOnly.DayOfWeek":
             case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression!);
+
+            case "DateTimeOffset.Hour":
             case "DateTime.Hour": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.hour), m.Expression!);
+            
+            case "DateTimeOffset.Minute":
             case "DateTime.Minute": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.minute), m.Expression!);
+            
+            case "DateTimeOffset.Second":
             case "DateTime.Second": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.second), m.Expression!);
+            
+            case "DateTimeOffset.Millisecond":
             case "DateTime.Millisecond": return TrySqlFunction(null, GetDatePart(), m.Type, new SqlLiteralExpression(SqlEnums.millisecond), m.Expression!);
+
+            case "DateTimeOffset.Date":
             case "DateTime.Date": return TrySqlDate(m.Expression!);
+
+            case "DateTimeOffset.TimeOfDay":
             case "DateTime.TimeOfDay": return TrySqlTime(m.Expression!);
+
+            case "DateTimeOffset.UtcDateTime":
+                {
+                    var utc = TrySqlFunction(null, SqlFunction.SwitchOffset, typeof(DateTimeOffset), m.Expression!, Expression.Constant("+00:00"));
+                    if (utc == null)
+                        return null;
+                    return TrySqlCast(typeof(DateTime), utc);
+                }
+            case "DateTimeOffset.DateTime": return TrySqlCast(typeof(DateTime), m.Expression!);
 
             case "TimeSpan.Days":
                 {
@@ -1485,6 +1514,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
     private Expression? HardCodedMethods(MethodCallExpression m)
     {
+
         if (m.Method.Name == "ToString" && m.Method.DeclaringType != typeof(EnumerableExtensions))
             return TrySqlToString(m);
 
@@ -1580,7 +1610,9 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 return TryCollate(m.GetArgument("str"), m.GetArgument("collation"));
 
             case "DateTime.Add":
+            case "DateTimeOffset.Add":
             case "DateTime.Subtract":
+            case "DateTimeOffset.Subtract":
                 {
                     var val = m.GetArgument("value");
                     if (val.Type.UnNullify() != typeof(TimeSpan))
@@ -1588,22 +1620,30 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
                     return TryAddSubtractDateTimeTimeSpan(m.Object!, val, m.Method.Name == "Add");
                 }
-            case "DateTime.AddYears": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.year);
-            case "DateTime.AddMonths": return TryDateAdd(m.Type, m.Object!, m.GetArgument("months"), SqlEnums.month);
-            case "DateTime.AddDays": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.day);
+
             case "DateOnly.AddYears": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.year);
             case "DateOnly.AddMonths": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.month);
             case "DateOnly.AddDays": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.day);
-            case "DateTime.AddHours": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.hour); 
-            case "DateTime.AddMinutes": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.minute); 
-            case "DateTime.AddSeconds": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.second); 
-            case "DateTime.AddMilliseconds": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.millisecond); 
-            case "DateOnly.ToShortDateString": return GetDateTimeToStringSqlFunction(m, "d");
+            case "DateTimeOffset.AddYears":
+            case "DateTime.AddYears": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.year);
+            case "DateTimeOffset.AddMonths":
+            case "DateTime.AddMonths": return TryDateAdd(m.Type, m.Object!, m.GetArgument("months"), SqlEnums.month);
+            case "DateTimeOffset.AddDays":
+            case "DateTime.AddDays": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.day);
+            case "DateTimeOffset.AddHours":
+            case "DateTime.AddHours": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.hour);
+            case "DateTimeOffset.AddMinutes":
+            case "DateTime.AddMinutes": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.minute);
+            case "DateTimeOffset.AddSeconds":
+            case "DateTime.AddSeconds": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.second);
+            case "DateTimeOffset.AddMilliseconds":
+            case "DateTime.AddMilliseconds": return TryDateAdd(m.Type, m.Object!, m.GetArgument("value"), SqlEnums.millisecond);
             case "DateTime.ToShortDateString": return GetDateTimeToStringSqlFunction(m, "d");
+            case "DateOnly.ToShortDateString": return GetDateTimeToStringSqlFunction(m, "d");
             case "DateTime.ToShortTimeString": return GetDateTimeToStringSqlFunction(m, "t");
+            case "DateTime.ToLongTimeString": return GetDateTimeToStringSqlFunction(m, "T");
             case "DateOnly.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
             case "DateTime.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
-            case "DateTime.ToLongTimeString": return GetDateTimeToStringSqlFunction(m, "T");
 
             //dateadd(month, datediff(month, 0, SomeDate),0);
             case "DateTimeExtensions.YearStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.year);
