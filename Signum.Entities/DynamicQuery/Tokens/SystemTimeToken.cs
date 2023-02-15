@@ -42,7 +42,7 @@ public class SystemTimeToken : QueryToken
 
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
     {
-        return SubTokensBase(typeof(DateTime), options, GetImplementations());
+        return SubTokensBase(typeof(DateTimeOffset), options, GetImplementations());
     }
 
     public override Implementations? GetImplementations()
