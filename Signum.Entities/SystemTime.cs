@@ -91,12 +91,12 @@ public enum JoinBehaviour
 
 public static class SystemTimeExtensions
 {
-    public static NullableInterval<DateTimeOffset> SystemPeriod(this Entity entity)
+    public static NullableInterval<DateTime> SystemPeriod(this Entity entity)
     {
         throw new InvalidOperationException("Only for queries");
     }
 
-    public static NullableInterval<DateTimeOffset> SystemPeriod<E, T>(this MListElement<E, T> mlistElement)
+    public static NullableInterval<DateTime> SystemPeriod<E, T>(this MListElement<E, T> mlistElement)
         where E : Entity
     {
         throw new InvalidOperationException("Only for queries");

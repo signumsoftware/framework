@@ -94,8 +94,8 @@ MOVE '{4}' TO '{5}'{6}".FormatWith(databaseName, backupFile,
 
         object? obj = Executor.ExecuteScalar("SELECT MAX(Id) FROM {0} WHERE @min <= Id AND Id < @max".FormatWith(table.Name), new List<DbParameter>
         {
-            pb.CreateParameter("@min", seedMin, type),
-            pb.CreateParameter("@max", seedMax, type)
+            pb.CreateParameter("@min", seedMin, type, default),
+            pb.CreateParameter("@max", seedMax, type, default)
         });
 
         if (obj == null)
@@ -162,7 +162,7 @@ MOVE '{4}' TO '{5}'{6}".FormatWith(databaseName, backupFile,
 
         return new SqlPreCommandSimple("DBCC CHECKIDENT ('{0}', RESEED, @seed)".FormatWith(table.Name), new List<DbParameter>
         {
-            pb.CreateParameter("@seed", nextId,  table.PrimaryKey.Type)
+            pb.CreateParameter("@seed", nextId,  table.PrimaryKey.Type, default)
         });
     }
 

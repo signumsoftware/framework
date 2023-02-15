@@ -69,12 +69,13 @@ public class SystemVersionedInfo
                 };
     }
 
+
     internal IntervalExpression? IntervalExpression(Alias tableAlias)
     {
-        return new IntervalExpression(typeof(NullableInterval<DateTimeOffset>),
-            StartColumnName == null ? null : new SqlCastLazyExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, StartColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
-            EndColumnName == null ? null : new SqlCastLazyExpression(typeof(DateTimeOffset?), new ColumnExpression(typeof(DateTime?), tableAlias, EndColumnName), new AbstractDbType(System.Data.SqlDbType.DateTimeOffset)),
-            PostgreeSysPeriodColumnName == null ? null : new ColumnExpression(typeof(NpgsqlRange<DateTimeOffset>), tableAlias, PostgreeSysPeriodColumnName)
+        return new IntervalExpression(typeof(NullableInterval<DateTime>),
+            StartColumnName == null ? null : new ColumnExpression(typeof(DateTime?), tableAlias, StartColumnName).SetMetadata(ExpressionMetadata.UTC),
+            EndColumnName == null ? null : new ColumnExpression(typeof(DateTime?), tableAlias, EndColumnName).SetMetadata(ExpressionMetadata.UTC),
+            PostgreeSysPeriodColumnName == null ? null : new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, PostgreeSysPeriodColumnName).SetMetadata(ExpressionMetadata.UTC)
         );
     }
 
@@ -96,6 +97,7 @@ public class SystemVersionedInfo
         public ColumnType SystemVersionColumnType { get; private set; }
 
         public IsNullable Nullable => IsNullable.No;
+        
         public AbstractDbType DbType => new AbstractDbType(SqlDbType.DateTime2);
         public Type Type => typeof(DateTime);
         public string? UserDefinedTypeName => null;
@@ -109,6 +111,8 @@ public class SystemVersionedInfo
         public string? Collation => null;
         public Table? ReferenceTable => null;
         public bool AvoidForeignKey => false;
+
+        public DateTimeKind DateTimeKind => DateTimeKind.Utc;
     }
 
     public class PostgreePeriodColumn : IColumn
@@ -134,6 +138,8 @@ public class SystemVersionedInfo
         public string? Collation => null;
         public Table? ReferenceTable => null;
         public bool AvoidForeignKey => false;
+
+        public DateTimeKind DateTimeKind => DateTimeKind.Utc;
     }
 
 }
@@ -455,6 +461,7 @@ public partial interface IColumn
     string Name { get; }
     IsNullable Nullable { get; }
     AbstractDbType DbType { get; }
+    DateTimeKind DateTimeKind { get; }
     Type Type { get; }
     string? UserDefinedTypeName { get; }
     bool PrimaryKey { get; }
@@ -524,6 +531,8 @@ public partial class FieldPrimaryKey : Field, IColumn
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
 
+    public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
+
     Table table;
     public FieldPrimaryKey(PropertyRoute route, Table table, string name, Type type)
         : base(route)
@@ -578,6 +587,7 @@ public partial class FieldValue : Field, IColumn
     Table? IColumn.ReferenceTable => null;
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
+    public DateTimeKind DateTimeKind { get; set; }
 
     public FieldValue(PropertyRoute route, Type? fieldType, string name)
         : base(route, fieldType)
@@ -644,6 +654,7 @@ public partial class FieldEmbedded : Field, IFieldFinder
         Type IColumn.Type => typeof(bool);
         public bool AvoidForeignKey => false;
         public string? Default { get; set; }
+        public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
         public EmbeddedHasValueColumn(string name)
         {
@@ -921,6 +932,7 @@ public partial class FieldReference : Field, IColumn, IFieldReference
 
     public bool AvoidExpandOnRetrieving { get; set; }
     public string? Default { get; set; }
+    public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
     public FieldReference(PropertyRoute route, Type? fieldType, string name, Table referenceTable) : base(route, fieldType)
     {
@@ -1177,6 +1189,7 @@ public partial class ImplementationColumn : IColumn
     public bool AvoidForeignKey { get; set; }
     public string? Default { get; set; }
     public Type? CustomLiteModelType { get; internal set; }
+    public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
     public ImplementationColumn(string name, Table referenceTable)
     {
@@ -1207,6 +1220,7 @@ public partial class ImplementedByAllIdColumn : IColumn
     public Type Type { get; private set;  }
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
+    public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
     public ImplementedByAllIdColumn(string name, Type type, AbstractDbType dbType)
     {
@@ -1307,6 +1321,7 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         public Type Type { get; set; }
         public bool AvoidForeignKey => false;
         public string? Default { get; set; }
+        public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
         public PrimaryKeyColumn(Type type, string name)
         {

@@ -525,12 +525,12 @@ public class SqlServerConnector : Connector
 
 public class SqlParameterBuilder : ParameterBuilder
 {
-    public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value)
+    public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, DateTimeKind dateTimeKind, object? value)
     {
         if (dbType.IsDate())
         {
             if (value is DateTime dt)
-                AssertDateTime(dt);
+                AssertDateTime(dt, dateTimeKind);
             else if (value is DateOnly d)
                 value = d.ToDateTime();
         }
@@ -552,12 +552,12 @@ public class SqlParameterBuilder : ParameterBuilder
         return result;
     }
 
-    public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, Expression value)
+    public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, DateTimeKind dateTimeKind, Expression value)
     {
         var uType = value.Type.UnNullify();
 
         var exp =
-            uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
+            uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
             //https://github.com/dotnet/SqlClient/issues/1009
             uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
             uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :

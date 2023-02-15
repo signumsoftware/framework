@@ -302,17 +302,6 @@ internal class DbExpressionNominator : DbExpressionVisitor
         return Add(castExpr);
     }
 
-    protected internal override Expression VisitSqlCastLazy(SqlCastLazyExpression castExpr)
-    {
-        var expression = Visit(castExpr.Expression);
-        if(isFullNominate)
-            return Add(new SqlCastExpression(castExpr.Type, expression!, castExpr.DbType));
-
-        if (expression != castExpr.Expression)
-            castExpr = new SqlCastLazyExpression(castExpr.Type, expression!, castExpr.DbType);
-        return castExpr;
-    }
-
     protected internal override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
     {
         if (!innerProjection)
@@ -1426,10 +1415,14 @@ internal class DbExpressionNominator : DbExpressionVisitor
                     var utc = TrySqlFunction(null, SqlFunction.SwitchOffset, typeof(DateTimeOffset), m.Expression!, Expression.Constant("+00:00"));
                     if (utc == null)
                         return null;
-                    return TrySqlCast(typeof(DateTime), utc);
-                }
-            case "DateTimeOffset.DateTime": return TrySqlCast(typeof(DateTime), m.Expression!);
 
+
+                    return TrySqlCast(typeof(DateTime), utc)?.SetMetadata(ExpressionMetadata.UTC);
+                }
+            case "DateTimeOffset.DateTime":
+                {
+                    return TrySqlCast(typeof(DateTime), m.Expression!)?.SetMetadata(ExpressionMetadata.Local);
+                }
             case "TimeSpan.Days":
                 {
                     var diff = TrySqlDifference(SqlEnums.day, m.Type, m.Expression!);
@@ -1505,11 +1498,11 @@ internal class DbExpressionNominator : DbExpressionVisitor
             if (!Has(v))
                 return null;
 
-            return Add(Expression.Add(date, Expression.Multiply(value, new SqlLiteralExpression(typeof(TimeSpan), $"INTERVAL '1 {unit}'"))));
+            return Add(Expression.Add(date, Expression.Multiply(value, new SqlLiteralExpression(typeof(TimeSpan), $"INTERVAL '1 {unit}'"))).CopyMetadata(date));
         }
 
 
-        return TrySqlFunction(null, SqlFunction.DATEADD, returnType, new SqlLiteralExpression(unit), value, date);
+        return TrySqlFunction(null, SqlFunction.DATEADD, returnType, new SqlLiteralExpression(unit), value, date)?.CopyMetadata(date);
     }
 
     private Expression? HardCodedMethods(MethodCallExpression m)
