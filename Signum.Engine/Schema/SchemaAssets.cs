@@ -112,7 +112,7 @@ public class SchemaAssets
             return Synchronizer.SynchronizeScript(Spacing.Double,
                 Views,
                 oldView,
-                createNew: (name, newView) => newView.CreateView(),
+                createNew: (name, newView) => drop ? null : newView.CreateView(),
                 removeOld: null,
                 mergeBoth: (name, newDef, oldDef) => Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null :
                 drop ? newDef.DropView() : newDef.CreateView()
