@@ -57,7 +57,7 @@ export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
     return (
       <input type="radio" className={classes("form-check-input",
         checked && sc.state.selectedRows!.maxBy(a => a.columns[colIndex!])! != row && "bg-secondary border-secondary"
-      )} checked={checked} onClick={e => {
+      )} checked={checked} onChange={e => { }} onClick={e => {
         if (e.ctrlKey) {
           if (checked) {
             sc.state.selectedRows?.remove(row)
@@ -142,6 +142,8 @@ export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
 interface RenderEntityVersionProps {
   current: ()=> Promise<EntityDump>;
   previous: (() => Promise<EntityDump>) | undefined;
+  currentDate?: string;
+  previousDate?: string;
 }
 
 export function RenderEntityVersion(p: RenderEntityVersionProps) {
@@ -150,6 +152,8 @@ export function RenderEntityVersion(p: RenderEntityVersionProps) {
     var prev = p.previous == null ? Promise.resolve(null) : p.previous();
     return ({ curr: await curr, prev: await prev });
   }, [p.current, p.previous], { avoidReset: true });
+
+  console.log(pair);
 
   if (pair === undefined)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
@@ -161,7 +165,7 @@ export function RenderEntityVersion(p: RenderEntityVersionProps) {
 
   return (
     <div>
-      <RenderEntity ctx={ctx} />
+      <RenderEntity ctx={ctx} currentDate={p.currentDate} previousDate={p.previousDate} />
     </div>
   );
 }
@@ -203,7 +207,7 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
   var hasPrevious = p.versionDatesUTC.length > 1;
 
   var refs = React.useRef<{ [versionDateUTC: string]: () => Promise<EntityDump> }>({});
-  debugger;
+
   refs.current = p.versionDatesUTC.toObject(a => a, a => refs.current[a] ?? memoized(a));
   var dates = p.versionDatesUTC.orderBy(a => a);
   var current = hasPrevious ? refs.current[dates[1]] : refs.current[dates[0]];
@@ -221,7 +225,10 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
         key={"ui"} eventKey={"ui"}>
         <RenderEntityVersion
           previous={previous}
-          current={current}/>
+          current={current}
+          currentDate={hasPrevious ? dates[1] : dates[0]}
+          previousDate={hasPrevious ? dates[0] : undefined}
+        />
         </Tab>
       <Tab title={hasPrevious ?
         <span>{TimeMachineMessage.DataDifferences.niceToString()}

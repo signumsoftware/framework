@@ -91,17 +91,8 @@ public class AuthController : ControllerBase
     [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
     public LoginResponse? LoginWindowsAuthentication(bool throwError)
     {
-        var exception = WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext);
-        if (exception != null)
-        {
-            if (throwError)
-            {
-                exception.PreserveStackTrace();
-                throw exception;
-            }
-
+        if (!WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext, throwError))
             return null;
-        }
 
         var user = UserEntity.Current.Retrieve();
 

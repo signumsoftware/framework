@@ -164,37 +164,51 @@ public abstract class ParameterBuilder
 
     public DbParameter CreateReferenceParameter(string parameterName, PrimaryKey? id, IColumn column)
     {
-        return CreateParameter(parameterName, column.DbType, null, column.Nullable.ToBool(), id == null ? null : id.Value.Object);
+        return CreateParameter(parameterName, column.DbType, null, column.Nullable.ToBool(), default, id?.Object);
     }
 
-    public DbParameter CreateParameter(string parameterName, object? value, Type type)
+    public DbParameter CreateParameter(string parameterName, object? value, Type type, DateTimeKind dateTimeKind)
     {
         var pair = Schema.Current.Settings.GetSqlDbTypePair(type.UnNullify());
 
-        return CreateParameter(parameterName, pair.DbType, pair.UserDefinedTypeName, type == null || type.IsByRef || type.IsNullable(), value);
+        return CreateParameter(parameterName, pair.DbType, pair.UserDefinedTypeName, type == null || type.IsByRef || type.IsNullable(), dateTimeKind, value);
     }
 
-    public abstract DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value);
-    public abstract MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, Expression value);
+    public abstract DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, DateTimeKind dateTimeKind, object? value);
+    public abstract MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, DateTimeKind dateTimeKind, Expression value);
 
-    protected static MethodInfo miAsserDateTime = ReflectionTools.GetMethodInfo(() => AssertDateTime(null));
+    protected static MethodInfo miAsserDateTime = ReflectionTools.GetMethodInfo(() => AssertDateTime(null, DateTimeKind.Unspecified));
     protected static MethodInfo miToDateTimeKind = ReflectionTools.GetMethodInfo(() => DateOnly.MinValue.ToDateTime(DateTimeKind.Utc));
     protected static MethodInfo miToTimeSpan = ReflectionTools.GetMethodInfo(() => TimeOnly.MaxValue.ToTimeSpan());
-    protected static DateTime? AssertDateTime(DateTime? dateTime)
+    protected static DateTime? AssertDateTime(DateTime? dateTime, DateTimeKind kind)
     {
-
         if (dateTime.HasValue)
         {
-            if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc && dateTime.Value.Kind != DateTimeKind.Utc)
-                throw new InvalidOperationException("Attempt to use a non-Utc date in the database");
-
-            //Problematic with Time machine
-            //if (Schema.Current.TimeZoneMode != TimeZoneMode.Utc && dateTime.Value.Kind == DateTimeKind.Utc)
-            //    throw new InvalidOperationException("Attempt to use a Utc date in the database");
+            switch (kind)
+            {
+                case DateTimeKind.Utc:
+                    if (dateTime.Value.Kind != DateTimeKind.Utc)
+                        throw new InvalidDateTimeKindException($"DateTime's kind should be UTC but is {dateTime.Value.Kind}");
+                    break;
+                case DateTimeKind.Local:
+                    if (dateTime.Value.Kind == DateTimeKind.Utc)
+                        throw new InvalidDateTimeKindException($"DateTime's kind should be Local (or Unspecified) but is {dateTime.Value.Kind}");
+                    break;
+                case DateTimeKind.Unspecified:
+                default:
+                    break;
+            }  
         }
 
         return dateTime;
     }
+}
+
+
+[Serializable]
+public class InvalidDateTimeKindException : Exception
+{
+    public InvalidDateTimeKindException(string message) : base(message) { }
 }
 
 public class DbDataReaderWithCommand : IDisposable

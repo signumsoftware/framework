@@ -444,22 +444,3 @@ public class FolderEntity : Entity
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
 }
-
-[EntityKind(EntityKind.Main, EntityData.Transactional)]
-public class AlbumReEditionEntity : Entity
-{
-    public Lite<AlbumEntity> Album { get; set; }
-
-    public DateTime Date { get; set; }
-
-
-    [AutoExpressionField]
-    public override string ToString() => As.Expression(() => $"{Album} {Date}");
-}
-
-[AutoInit]
-public static class AlbumReEditionOperation
-{
-    public static readonly ExecuteSymbol<AlbumReEditionEntity> Save;
-    public static readonly DeleteSymbol<AlbumReEditionEntity> Delete;
-}

@@ -47,9 +47,9 @@ internal class ColumnProjector : DbExpressionVisitor
 
         ColumnProjector cp = new ColumnProjector(candidates, newAlias, selectTrivialColumns);
 
-        Expression e = cp.Visit(newProj);
+        Expression proj = cp.Visit(newProj);
 
-        return new ProjectedColumns(e, cp.generator.Columns.NotNull().ToReadOnly());
+        return new ProjectedColumns(proj, cp.generator.Columns.NotNull().ToReadOnly());
     }
     
     [return: NotNullIfNotNull("expression")]
@@ -57,18 +57,18 @@ internal class ColumnProjector : DbExpressionVisitor
     {
         if (this.candidates.Contains(expression!))
         {
-            if (expression is ColumnExpression column)
+            if (expression is ColumnExpression ce)
             {
                 if (!projectTrivialColumns)
                     return expression;
 
-                if (this.map.TryGetValue(column, out var mapped))
+                if (this.map.TryGetValue(ce, out var mapped))
                 {
                     return mapped;
                 }
 
-                mapped = generator.MapColumn(column).GetReference(newAlias);
-                this.map[column] = mapped;
+                mapped = generator.MapColumn(ce).GetReference(newAlias).CopyMetadata(ce);
+                this.map[ce] = mapped;
                 return mapped;
             }
             else
@@ -81,7 +81,7 @@ internal class ColumnProjector : DbExpressionVisitor
                 }
                 else
                 {
-                    return generator.NewColumn(expression).GetReference(newAlias);
+                    return generator.NewColumn(expression).GetReference(newAlias).CopyMetadata(expression);
                 }
             }
         }

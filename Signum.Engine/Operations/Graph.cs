@@ -1,5 +1,6 @@
 using Signum.Engine.Basics;
 using Signum.Engine.Operations.Internal;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using System.Collections;
 
@@ -229,10 +230,6 @@ public class Graph<T>
             {
                 OperationLogic.AssertOperationAllowed(operationSymbol, origin.GetType(), inUserInterface: false);
 
-                string? error = OnCanConstruct(origin);
-                if (error != null)
-                    throw new ApplicationException(error);
-
                 OperationLogEntity? log = new OperationLogEntity
                 {
                     Operation = operationSymbol,
@@ -250,6 +247,10 @@ public class Graph<T>
                         using (OperationLogic.AllowSave<T>())
                             OperationLogic.OnSuroundOperation(this, log, origin, args).EndUsing(_ =>
                             {
+                                string? error = OnCanConstruct(origin);
+                                if (error != null)
+                                    throw new ApplicationException(error);
+
                                 result = Construct((F)origin, args);
 
                                 if (result != null)
@@ -536,9 +537,6 @@ public class Graph<T>
             {
                 OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
 
-                string? error = OnCanExecute((T)entity);
-                if (error != null)
-                    throw new ApplicationException(error);
 
                 OperationLogEntity log = new OperationLogEntity
                 {
@@ -556,6 +554,14 @@ public class Graph<T>
                             var assertEnd = AssertEntity((T)entity);
                             OperationLogic.OnSuroundOperation(this, log, entity, args).EndUsing(_ =>
                             {
+
+                                string? error = OnCanExecute((T)entity);
+                                if (error != null)
+                                {
+                                    var ex = new ApplicationException(error);
+                                    throw ex;
+                                }
+
                                 Execute((T)entity, args);
 
                                 assertEnd?.Invoke();
@@ -572,6 +578,7 @@ public class Graph<T>
 
                         tr.Commit();
                     }
+
                 }
                 catch (Exception ex)
                 {
@@ -692,10 +699,6 @@ public class Graph<T>
             {
                 OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
 
-                string? error = OnCanDelete((T)entity);
-                if (error != null)
-                    throw new ApplicationException(error);
-
                 OperationLogEntity log = new OperationLogEntity
                 {
                     Operation = Symbol.Symbol,
@@ -710,6 +713,10 @@ public class Graph<T>
                         {
                             using (var tr = new Transaction())
                             {
+                                string? error = OnCanDelete((T)entity);
+                                if (error != null)
+                                    throw new ApplicationException(error);
+
                                 OnDelete((T)entity, args);
 
                                 log.SetTarget(entity);

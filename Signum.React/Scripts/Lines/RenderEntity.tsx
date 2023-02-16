@@ -15,10 +15,13 @@ export interface RenderEntityProps {
   onRefresh?: () => void;
   onEntityLoaded?: () => void;
   extraProps?: any;
+  currentDate?: string;
+  previousDate?: string;
 }
 
 interface FuncBox {
-  func: ((ctx: TypeContext<any /*T*/>) => React.ReactElement<any>)
+  func: ((ctx: TypeContext<any /*T*/>) => React.ReactElement<any>);
+  lastEntity: ModifiableEntity;
 }
 
 export function RenderEntity(p: RenderEntityProps) {
@@ -42,8 +45,8 @@ export function RenderEntity(p: RenderEntityProps) {
 
     var vp = p.getViewPromise && p.getViewPromise(entity);
     var viewPromise = vp == undefined || typeof vp == "string" ? Navigator.getViewPromise(entity, vp) : vp;
-    return viewPromise.promise.then(p => ({ func: p }));
-  }, [entity, p.getComponent == null, p.getViewPromise && entity && toViewName(p.getViewPromise(entity))]);
+    return viewPromise.promise.then(p => ({ func: p, lastEntity : entity! }));
+  }, [entity, p.getComponent == null, p.getViewPromise && entity && toViewName(p.getViewPromise(entity))], { avoidReset: true });
 
   if (p.ctx.propertyRoute == null)
     return null;
@@ -57,6 +60,8 @@ export function RenderEntity(p: RenderEntityProps) {
   if (componentBox == "useGetComponent" && p.getComponent == null)
     return null;
 
+  const lastEntity = typeof componentBox == "object" ? componentBox.lastEntity : entity;
+
   const ti = tryGetTypeInfo(entity.Type);
 
   const ctx = p.ctx;
@@ -68,7 +73,7 @@ export function RenderEntity(p: RenderEntityProps) {
     tabs: undefined,
     frameComponent: { forceUpdate: () => { forceUpdate(); p.onRefresh?.(); }, type: RenderEntity },
     entityComponent: entityComponent.current,
-    pack: { entity, canExecute: {} },
+    pack: { entity: lastEntity, canExecute: {} },
     revalidate: () => p.ctx.frame && p.ctx.frame.revalidate(),
     onClose: () => { throw new Error("Not implemented Exception"); },
     onReload: pack => { throw new Error("Not implemented Exception"); },
@@ -77,7 +82,9 @@ export function RenderEntity(p: RenderEntityProps) {
     allowExchangeEntity: false,
     prefix: prefix,
     isExecuting: () => false,
-    execute: () => { throw new Error("Not implemented Exception"); }
+    execute: () => { throw new Error("Not implemented Exception"); },
+    currentDate: p.currentDate,
+    previousDate: p.previousDate,
   };
 
   function setComponent(c: React.Component<any, any> | null) {
@@ -88,10 +95,9 @@ export function RenderEntity(p: RenderEntityProps) {
   }
 
 
-  const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""), prefix);
+  const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(lastEntity, ""), prefix);
   if (ctx.previousVersion && ctx.previousVersion.value)
     newCtx.previousVersion = { value: ctx.previousVersion.value as any };
-
   var element = componentBox == "useGetComponent" ? p.getComponent!(newCtx) : componentBox.func(newCtx);
 
   if (p.extraProps)

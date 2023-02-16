@@ -293,6 +293,7 @@ export class TypeContext<T> extends StyleContext {
     if (typeof arg == "object" && !isType(arg)) {
       var nc = new TypeContext<T>(this, arg, this.propertyRoute, this.binding, this.prefix);
       nc.previousVersion = this.previousVersion;
+
       return nc;
     }
 
@@ -520,6 +521,9 @@ export interface EntityFrame {
 
   createNew?: (oldPack: EntityPack<ModifiableEntity>) => (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
   prefix: string;
+
+  currentDate?: string;
+  previousDate?: string;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {

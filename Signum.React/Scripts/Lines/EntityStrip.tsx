@@ -219,7 +219,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
     return (
       <li className="sf-strip-element" >
         <div style={{ padding: 0, minHeight: p.vertical ? 10 : 12, minWidth: p.vertical ? undefined : 30, backgroundColor: "#ff000021" }}>
-          {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, transferX: "-90%", transferY: "-10%" }) : getTimeMachineIcon({ ctx: p.ctx, transferX: "-80%", transferY: "-60%" })}
+          {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, translateX: "-90%", translateY: "-10%" }) : getTimeMachineIcon({ ctx: p.ctx, translateX: "-80%", translateY: "-60%" })}
         </div>
       </li>
     );
@@ -287,7 +287,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
       >
-        {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, transferX: "-90%", transferY: "20%" }) : getTimeMachineIcon({ ctx: p.ctx, transferX: "-75%", transferY: "-50%" })}
+        {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, translateX: "-90%", translateY: "20%" }) : getTimeMachineIcon({ ctx: p.ctx, translateX: "-75%", translateY: "-50%" })}
         {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
         {
           p.onView ?
