@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Link } from 'react-router-dom'
 import * as Modals from '../Modals';
 import { Dic } from '../Globals';
 import { ajaxPost, ExternalServiceError, ServiceError, ValidationError } from '../Services';
@@ -75,7 +76,7 @@ export default function ErrorModal(p: ErrorModalProps) {
         <FontAwesomeIcon icon={se.defaultIcon} />&nbsp; <span>{se.httpError.exceptionType}</span>
         {se.httpError.exceptionId && <span>({
           ErrorModalOptions.isExceptionViewable() ?
-            <a href={ErrorModalOptions.getExceptionUrl(se.httpError.exceptionId!)}>{se.httpError.exceptionId}</a> :
+            <Link to={ErrorModalOptions.getExceptionUrl(se.httpError.exceptionId!)!}>{se.httpError.exceptionId}</Link> :
             <strong>{se.httpError.exceptionId}</strong>
         })</span>}
       </span>
