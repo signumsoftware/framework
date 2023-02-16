@@ -5,6 +5,7 @@ using Signum.Entities.Internal;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Basics;
 using System.Collections.ObjectModel;
+using Signum.Engine.Json;
 
 namespace Signum.Engine.Linq;
 
@@ -194,8 +195,8 @@ internal static class TranslatorBuilder
         {
             var col = GetInnerColumn(u);
 
-            if(col != null)
-                return scope.GetColumnExpression(row, col.Alias, col.Name!, u.Type);
+            if (col != null)
+                return scope.GetColumnExpression(row, col.Alias, col.Name!, u.Type, GetDateTimeKind(col));
 
             return base.VisitUnary(u);
         }
@@ -227,9 +228,21 @@ internal static class TranslatorBuilder
             return false;
         }
 
+        DateTimeKind defaultDateTimeKind = Schema.Current.TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
+
         protected internal override Expression VisitColumn(ColumnExpression column)
         {
-            return scope.GetColumnExpression(row, column.Alias, column.Name!, column.Type);
+            DateTimeKind kind = GetDateTimeKind(column);
+
+            return scope.GetColumnExpression(row, column.Alias, column.Name!, column.Type, kind);
+        }
+
+        private DateTimeKind GetDateTimeKind(Expression column)
+        {
+            DateTimeKind kind = DateTimeKind.Unspecified;
+            if (column.Type.UnNullify() == typeof(DateTime))
+                kind = column.GetMetadata()?.DateTimeKind.DefaultToNull() ?? defaultDateTimeKind;
+            return kind;
         }
 
         protected internal override Expression VisitChildProjection(ChildProjectionExpression child)
@@ -677,14 +690,14 @@ internal class Scope
 
     static readonly PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
 
-    public Expression GetColumnExpression(Expression row, Alias alias, string name, Type type)
+    public Expression GetColumnExpression(Expression row, Alias alias, string name, Type type, DateTimeKind kind)
     {
         if (alias != Alias)
             throw new InvalidOperationException("alias '{0}' not found".FormatWith(alias));
 
         int position = Positions.GetOrThrow(name, "column name '{0}' not found in alias '" + alias + "'");
 
-        return FieldReader.GetExpression(Expression.Property(row, miReader), position, type);
+        return FieldReader.GetExpression(Expression.Property(row, miReader), position, type, kind);
     }
 
     static readonly MethodInfo miLookupRequest = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.LookupRequest<int, double>(null!, 0, null!)).GetGenericMethodDefinition();

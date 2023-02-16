@@ -43,6 +43,11 @@ export module TimeMachineMessage {
   export const DataSnapshot = new MessageKey("TimeMachineMessage", "DataSnapshot");
   export const ShowDiffs = new MessageKey("TimeMachineMessage", "ShowDiffs");
   export const YouCanNotSelectMoreThanTwoVersionToCompare = new MessageKey("TimeMachineMessage", "YouCanNotSelectMoreThanTwoVersionToCompare");
+  export const BetweenThisTimeRange = new MessageKey("TimeMachineMessage", "BetweenThisTimeRange");
+  export const ThisVersionWasCreated = new MessageKey("TimeMachineMessage", "ThisVersionWasCreated");
+  export const ThisVersionWasDeleted = new MessageKey("TimeMachineMessage", "ThisVersionWasDeleted");
+  export const ThisVersionWasCreatedAndDeleted = new MessageKey("TimeMachineMessage", "ThisVersionWasCreatedAndDeleted");
+  export const ThisVersionDidNotChange = new MessageKey("TimeMachineMessage", "ThisVersionDidNotChange");
 }
 
 export module TimeMachinePermission {

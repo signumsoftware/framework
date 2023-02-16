@@ -31,17 +31,6 @@ public static class MusicLogic
 
 
 
-            sb.Include<AlbumReEditionEntity>()
-                  .WithSave(AlbumReEditionOperation.Save)
-                  .WithDelete(AlbumReEditionOperation.Delete)
-                  .WithQuery(() => e => new
-                  {
-                      Entity = e,
-                      e.Id,
-                      e.Album,
-                      e.Date,
-                  });
-
             sb.Include<NoteWithDateEntity>()
                 .WithSave(NoteWithDateOperation.Save)
                 .WithQuery(() => a => new

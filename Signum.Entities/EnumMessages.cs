@@ -126,6 +126,8 @@ public enum EntityControlMessage
     Moved,
     [Description("Removed {0}")]
     Removed0,
+    NoChanges,
+    Changed,
     Added,
     RemovedAndSelectedAgain,
     Selected,

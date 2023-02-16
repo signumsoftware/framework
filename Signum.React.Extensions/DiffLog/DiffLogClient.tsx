@@ -24,6 +24,7 @@ import { TimeMachineCompareModal, TimeMachineModal } from './Templates/TimeMachi
 import { QueryString } from '@framework/QueryString';
 import * as Widgets from '@framework/Frames/Widgets';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { getTimeMachineIcon, TimeMachineColors } from '@framework/Lines/TimeMachineIcon';
 
 export function start(options: { routes: RouteObject[], timeMachine: boolean }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
@@ -84,34 +85,64 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
 
     Finder.entityFormatRules.push({
       name: "ViewHistory",
-      isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
-      formatter: new Finder.EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
-        <TimeMachineLink lite={row.entity}
-          inSearch={true}>
-          {EntityControlMessage.View.niceToString()}
-        </TimeMachineLink>
-      )
+      isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && Finder.isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
+      formatter: new Finder.EntityFormatter((row, columns, sc) => {
+        if (!row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }))
+          return undefined;
+
+        var icon: null | React.ReactElement = null;
+
+        const fop = sc?.state.resultFindOptions;
+        let created = false;
+        let deleted = false;
+        if (fop && fop.systemTime) {
+          var validFromIndex = columns.indexOf("Entity.SystemValidFrom");
+          var validToIndex = columns.indexOf("Entity.SystemValidTo");
+          if (validFromIndex != -1 && validToIndex != -1) {
+            var validFrom = row.columns[validFromIndex];
+            var validTo = row.columns[validToIndex];
+
+            created = fop.systemTime.mode == "Between" ? fop.systemTime.startDate! <= validFrom : true;
+            deleted = fop.systemTime.mode == "Between" ? validTo <= fop.systemTime.endDate! : !validTo.startsWith("9999-");
+
+            var title = created && deleted ? TimeMachineMessage.ThisVersionWasCreatedAndDeleted.niceToString() :
+              created ? TimeMachineMessage.ThisVersionWasCreated.niceToString() :
+                deleted ? TimeMachineMessage.ThisVersionWasDeleted.niceToString() :
+                  TimeMachineMessage.ThisVersionDidNotChange.niceToString(); 
+
+            icon = <span className="ms-2" title={title + (fop.systemTime.mode == "Between" ? (" " + TimeMachineMessage.BetweenThisTimeRange.niceToString()) : "")}>
+              {created && <FontAwesomeIcon icon="plus" color={TimeMachineColors.created} />}
+              {deleted && <FontAwesomeIcon icon="minus" color={TimeMachineColors.removed} className={created ? "ms-1" : undefined} />}
+              {!created && !deleted && fop.systemTime.mode == "Between" && <FontAwesomeIcon icon="equals" color={TimeMachineColors.noChange} />}
+            </span>;
+          }
+        }
+
+        return (
+          <TimeMachineLink lite={row.entity} inSearch={true} style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
+            {EntityControlMessage.View.niceToString()}
+            {icon}
+          </TimeMachineLink >
+        );
+
+      })
     });
 
     Finder.formatRules.push({
       name: "Lite_TM",
-      isApplicable: (qt, sc) => qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(qt.type),
+      isApplicable: (qt, sc) => qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && Finder.isSystemVersioned(qt.type),
       formatter: qt => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />, true)
     });
 
     Finder.formatRules.push({
       name: "LiteNoFill_TM",
       isApplicable: (qt, sc) => {
-        return qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && isSystemVersioned(qt.type) &&
+        return qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && Finder.isSystemVersioned(qt.type) &&
           tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
       },
       formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />, false)
     });
   }
-}
-
-function isSystemVersioned(tr?: TypeReference) {
-  return tr != null && getTypeInfos(tr).some(ti => ti.isSystemVersioned == true)
 }
 
 export function timeMachineRoute(lite: Lite<Entity>) {

@@ -35,14 +35,4 @@ internal class SqlCastLazyRemover : DbExpressionVisitor
             this.currentSelect = oldSelect;
         }
     }
-
-    protected internal override Expression VisitSqlCastLazy(SqlCastLazyExpression castExpr)
-    {
-        if(this.cg == null)
-            this.cg = new ColumnGenerator(this.currentSelect!.Columns);
-
-        var cd = cg.NewColumn(new SqlCastExpression(castExpr.Type, castExpr.Expression, castExpr.DbType));
-
-        return new ColumnExpression(cd.Expression.Type, this.currentSelect!.Alias, cd.Name);
-    }
 }

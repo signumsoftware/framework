@@ -57,7 +57,7 @@ export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
     return (
       <input type="radio" className={classes("form-check-input",
         checked && sc.state.selectedRows!.maxBy(a => a.columns[colIndex!])! != row && "bg-secondary border-secondary"
-      )} checked={checked} onClick={e => {
+      )} checked={checked} onChange={e => { }} onClick={e => {
         if (e.ctrlKey) {
           if (checked) {
             sc.state.selectedRows?.remove(row)
@@ -152,6 +152,8 @@ export function RenderEntityVersion(p: RenderEntityVersionProps) {
     var prev = p.previous == null ? Promise.resolve(null) : p.previous();
     return ({ curr: await curr, prev: await prev });
   }, [p.current, p.previous], { avoidReset: true });
+
+  console.log(pair);
 
   if (pair === undefined)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;

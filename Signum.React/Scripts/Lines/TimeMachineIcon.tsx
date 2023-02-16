@@ -1,105 +1,120 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TypeContext } from "../Lines";
-import { EntityControlMessage, getToString, is } from "../Signum.Entities";
+import { EntityControlMessage, EnumEntity, getToString, is } from "../Signum.Entities";
 import { Prev } from "react-bootstrap/esm/PageItem";
+import { EnumType, TypeInfo } from "../Reflection";
 
-export interface TimeMachineProps {
+export interface TimeMachineIconProps {
   ctx: TypeContext<any>;
   isContainer?: boolean;
-  transferX?: string;
-  transferY?: string;
-  oldElement?: any;
+  translateX?: string;
+  translateY?: string;
 }
 
-export function getTimeMachineIcon(p: TimeMachineProps) {
-  if (p.ctx != null && !p.ctx.previousVersion)
+
+export function getTimeMachineIcon(p: TimeMachineIconProps) {
+  if (!p.ctx.previousVersion)
     return null;
 
-  return (p.oldElement === undefined ? <TimeMachineIcon
-    ctx={p.ctx}
-    isContainer={p.isContainer}
-    transferX={p.transferX}
-    transferY={p.transferY}
-  /> : <TimeMachineCheckboxIcon
-    ctx={p.ctx}
-    isContainer={p.isContainer}
-    transferX={p.transferX}
-    transferY={p.transferY}
-    oldElement={p.oldElement}
-  />);
+  return (
+    <TimeMachineIcon ctx={p.ctx} isContainer={p.isContainer} translateX={p.translateX} translateY={p.translateY} />
+  );
 }
 
 
-function TimeMachineIcon(p: TimeMachineProps) {
+function TimeMachineIcon(p: TimeMachineIconProps) {
   if (!p.ctx.previousVersion)
     return null;
 
   var previous = p.ctx.previousVersion.value;
   var current = p.ctx.value;
 
-  var change: ChangeType | null =
+  var change: ChangeType  =
     previous == null && current != null ? "New" :
       previous != null && current == null ? "Removed" :
         p.ctx.previousVersion.isMoved ? "Moved" :
-        previous == current ? null:
-          is(previous, current, false, false) ? null :
-            p.ctx.propertyRoute?.member?.type.isEmbedded && previous != null && current != null ? null :
+          previous == current ? "NoChange" :
+            is(previous, current, false, false) ? "NoChange" :
+              p.ctx.propertyRoute?.member?.type.isEmbedded && previous != null && current != null ? "NoChange" :
               "Changed";
 
   if (change == undefined)
     return null;
 
-  var color = change == "Changed" || change == "Moved" ? "orange" :
-    change == "New" ? "#2ECC71" :
-      change == "Removed" ? "red" :        
-        "lightblue";
+  var color = change == "Changed" || change == "Moved" ? TimeMachineColors.changed :
+    change == "New" ? TimeMachineColors.created :
+      change == "Removed" ? TimeMachineColors.removed :
+        change == "NoChange" ?  TimeMachineColors.noChange : "magenta";
 
   var title = change == "Changed" ? EntityControlMessage.PreviousValueWas0.niceToString(`${previous}`) :
     change == "Moved" ? EntityControlMessage.Moved.niceToString() :
       change == "New" ? EntityControlMessage.Added.niceToString() :
         change == "Removed" ? EntityControlMessage.Removed0.niceToString(p.isContainer ? "" : typeof previous == "object" ? getToString(previous) : `${previous}`) :
-          undefined;
+          EntityControlMessage.NoChanges.niceToString();
+
   return (
-    <FontAwesomeIcon icon="circle" title={title}
+    <FontAwesomeIcon
+      icon="circle"
+      title={title}
       fontSize={14}
       style={{
         position: p.isContainer ? undefined : 'absolute',
         zIndex: p.isContainer ? undefined : 2,
         minWidth: "14px",
         minHeight: "14px",
-        transform: p.isContainer && !(p.transferX || p.transferY) ? undefined : `translate(${p.transferX ?? "-40%"}, ${p.transferY ?? "-40%"})`,
+        transform: p.isContainer && !(p.translateX || p.translateY) ? undefined : `translate(${p.translateX ?? "-40%"}, ${p.translateY ?? "-40%"})`,
         color: color,
       }}
     />
   );
 }
 
-function TimeMachineCheckboxIcon(p: TimeMachineProps) {
-  if (p.oldElement === undefined)
+export const TimeMachineColors = {
+  changed: "orange",
+  created: "#2ECC71",
+  removed: "red",
+  noChange: "#ddd",
+}
+
+
+export function getTimeMachineCheckboxIcon(p: TimeMachineIconCheckboxProps) {
+  if (p.newCtx != null && !p.newCtx.previousVersion)
     return null;
 
-  var previous = p.oldElement;
-  var current = p.ctx?.value;
+  return (
+    <TimeMachineCheckboxIcon newCtx={p.newCtx} oldCtx={p.oldCtx} translateX={p.translateX} translateY={p.translateY} />
+  );
+}
 
-  var change: ChangeType | null =
-    previous == null && current == null ? null :
-      previous == null && current != null ? "New" :
-        previous != null && current == null ? "Removed" :
-          typeof previous.element == "string" ? (previous.element == current ? null : "Changed") : (previous.element === current ? null : "Changed");
 
-  if (change == undefined)
-    return null;
+export interface TimeMachineIconCheckboxProps {
+  newCtx: TypeContext<any> | null;
+  oldCtx: TypeContext<any> | null;
+  translateX?: string;
+  translateY?: string;
+  type?: TypeInfo;
+}
 
-  var color = change == "Changed" ? "orange" :
-    change == "New" ? "#2ECC71" :
-      change == "Removed" ? "red" :
-        "lightblue";
+function TimeMachineCheckboxIcon(p: TimeMachineIconCheckboxProps) {
+
+  var change: ChangeType =
+    p.oldCtx == null && p.newCtx == null ? "NoChange" :
+      p.oldCtx == null && p.newCtx != null ? "New" :
+        p.oldCtx != null && p.newCtx == null ? "Removed" :
+          (p.oldCtx === p.newCtx ? "NoChange" : "Changed");
+
+
+  var color = change == "Changed" ? TimeMachineColors.changed :
+    change == "New" ? TimeMachineColors.created :
+      change == "Removed" ? TimeMachineColors.removed :
+        change == "NoChange" ? TimeMachineColors.noChange :
+        "magenta";
 
   var title = change == "Changed" ? EntityControlMessage.RemovedAndSelectedAgain.niceToString() :
     change == "New" ? EntityControlMessage.Selected.niceToString() :
-      change == "Removed" ? EntityControlMessage.Removed0.niceToString(typeof previous.element == "string" ? previous.element : getToString(previous.element)) :
-          undefined;
+      change == "Removed" ? EntityControlMessage.Removed0.niceToString(typeof p.oldCtx?.value.element == "string" ? p.type!.members[p.oldCtx!.value].niceName : getToString(p.oldCtx?.value.element)) :
+        EntityControlMessage.NoChanges.niceToString();
   return (
     <FontAwesomeIcon icon="circle" title={title}
       fontSize={14}
@@ -108,11 +123,11 @@ function TimeMachineCheckboxIcon(p: TimeMachineProps) {
         zIndex: 2,
         minWidth: "14px",
         minHeight: "14px",
-        transform: `translate(${p.transferX ?? "-70%"}, ${p.transferY ?? "0%"})`,
+        transform: `translate(${p.translateX ?? "-70%"}, ${p.translateY ?? "0%"})`,
         color: color,
       }}
     />
   );
 }
 
-type ChangeType = "New" | "Removed" | "Changed" | "Moved"; 
+type ChangeType = "New" | "Removed" | "Changed" | "Moved" | "NoChange"; 

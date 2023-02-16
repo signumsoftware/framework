@@ -79,7 +79,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
 
   return (
     <>
-      {getTimeMachineIcon({ ctx: p.ctx, transferY:"150%" })}
+      {getTimeMachineIcon({ ctx: p.ctx, translateY:"150%" })}
       <fieldset className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass)}
         {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
         <legend className="lead">
