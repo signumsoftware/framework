@@ -238,7 +238,9 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
 export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
   const query = findOptionsPathQuery(fo, extra);
-  return "/find/" + getQueryKey(fo.queryName) + "?" + QueryString.stringify(query);
+  var strQuery = QueryString.stringify(query);
+
+  return "/find/" + getQueryKey(fo.queryName) + (strQuery ? ("?" + strQuery) : "");
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
