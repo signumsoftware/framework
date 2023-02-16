@@ -260,7 +260,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return DynamicEntityExtensions(parent);
     }
 
-    public static Func<QueryToken, bool> IsLocalDateTime;
+    public static Func<QueryToken, bool> IsLocalDateTime = null!;
 
     public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precision)
     {
