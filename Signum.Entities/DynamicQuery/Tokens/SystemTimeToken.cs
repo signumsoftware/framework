@@ -17,7 +17,7 @@ public class SystemTimeToken : QueryToken
 
     public override Type Type
     {
-        get { return typeof(DateTimeOffset?); }
+        get { return typeof(DateTime?); }
     }
 
     public override string ToString()

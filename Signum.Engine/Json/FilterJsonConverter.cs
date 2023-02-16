@@ -94,9 +94,10 @@ public class FilterConditionTS : FilterTS
              jtok.ToObject(expectedValueType, jsonSerializerOptions) :
              value;
 
-        if (val is DateTime dt)
+
+        if (val is DateTime dt && !QueryToken.IsLocalDateTime(parsedToken))
             val = dt.FromUserInterface();
-        else if (val is ObservableCollection<DateTime?> col)
+        else if (val is ObservableCollection<DateTime?> col && !QueryToken.IsLocalDateTime(parsedToken))
             val = col.Select(dt => dt?.FromUserInterface()).ToObservableCollection();
 
         return new FilterCondition(parsedToken, operation, val);

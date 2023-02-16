@@ -49,12 +49,13 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
 
         using (HeavyProfiler.Log("LINQ", () => expression.ToString()))
         using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
+        using (ExpressionMetadataStore.Scope())
         {
             Expression cleaned = Clean(expression, true, log)!;
             var binder = new QueryBinder(aliasGenerator);
             log.Switch("Bind");
             ProjectionExpression binded = (ProjectionExpression)binder.BindQuery(cleaned);
-            ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, binder,aliasGenerator, log);
+            ProjectionExpression optimized = (ProjectionExpression)Optimize(binded, binder, aliasGenerator, log);
             log.Switch("ChPrjFlatt");
             ProjectionExpression flat = ChildProjectionFlattener.Flatten(optimized, aliasGenerator);
             log.Switch("TB");
@@ -74,7 +75,7 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
         return filtered;
     }
 
-    internal static Expression Optimize(Expression binded, QueryBinder binder, AliasGenerator aliasGenerator, HeavyProfiler.Tracer? log)
+    internal static Expression Optimize(Expression binded, QueryBinder binder, AliasGenerator ag, HeavyProfiler.Tracer? log)
     {
         var isPostgres = Schema.Current.Settings.IsPostgres;
 
@@ -82,11 +83,11 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
         log.Switch("Aggregate");
         Expression rewriten = AggregateRewriter.Rewrite(binded);
         log.Switch("DupHistory");
-        Expression dupHistory = DuplicateHistory.Rewrite(rewriten, aliasGenerator);
+        Expression dupHistory = DuplicateHistory.Rewrite(rewriten, ag);
         log.Switch("EntityCompleter");
         Expression completed = EntityCompleter.Complete(dupHistory, binder);
         log.Switch("AliasReplacer");
-        Expression replaced = AliasProjectionReplacer.Replace(completed, aliasGenerator);
+        Expression replaced = AliasProjectionReplacer.Replace(completed, ag);
         log.Switch("OrderBy");
         Expression orderRewrited = OrderByRewriter.Rewrite(replaced);
         log.Switch("OrderBy");
@@ -111,6 +112,7 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
         SqlPreCommandSimple cr;
         using (HeavyProfiler.Log("LINQ"))
         using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
+        using (ExpressionMetadataStore.Scope())
         {
             Expression cleaned = Clean(query.Expression, true, log)!;
 
@@ -132,6 +134,7 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
         SqlPreCommandSimple cr;
         using (HeavyProfiler.Log("LINQ"))
         using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
+        using (ExpressionMetadataStore.Scope())
         {
             Expression cleaned = Clean(updateable.Query.Expression, true, log)!;
 
@@ -153,6 +156,7 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
         SqlPreCommandSimple cr;
         using (HeavyProfiler.Log("LINQ"))
         using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
+        using (ExpressionMetadataStore.Scope())
         {
             Expression cleaned = Clean(query.Expression, true, log)!;
             var binder = new QueryBinder(aliasGenerator);

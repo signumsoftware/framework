@@ -580,14 +580,14 @@ SELECT {id} FROM rows;";
                 };
 
                 List<Expression> parameters = new List<Expression>
-                    {
-                        pb.ParameterFactory(Trio.Concat(idParamName, paramSuffix), table.PrimaryKey.DbType, null, null, null, null, false,
-                        Expression.Field(Expression.Property(Expression.Field(paramIdent, fiId), "Value"), "Object"))
-                    };
+                {
+                    pb.ParameterFactory(Trio.Concat(idParamName, paramSuffix), table.PrimaryKey.DbType, null, null, null, null, false, default,
+                    Expression.Field(Expression.Property(Expression.Field(paramIdent, fiId), "Value"), "Object"))
+                };
 
                 if (table.Ticks != null)
                 {
-                    parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramSuffix), table.Ticks.DbType, null, null, null, null, false, table.Ticks.ConvertTicks(paramOldTicks)));
+                    parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramSuffix), table.Ticks.DbType, null, null, null, null, false, default, table.Ticks.ConvertTicks(paramOldTicks)));
                 }
 
                 parameters.AddRange(trios.Select(a => (Expression)a.ParameterBuilder));
@@ -888,7 +888,7 @@ END $$;"); ;
             this.ParameterName = Signum.Engine.ParameterBuilder.GetParameterName(column.Name);
             this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(
                 Concat(this.ParameterName, suffix),
-                column.DbType, column.Size, column.Precision, column.Scale, column.UserDefinedTypeName, column.Nullable.ToBool(), value);
+                column.DbType, column.Size, column.Precision, column.Scale, column.UserDefinedTypeName, column.Nullable.ToBool(), column.DateTimeKind, value);
         }
 
         public string SourceColumn;
@@ -1320,9 +1320,9 @@ public partial class TableMList
 
             var parameters = trios.Select(a => a.ParameterBuilder).ToList();
 
-            parameters.Add(pb.ParameterFactory(Table.Trio.Concat(parentId, paramSuffix), this.BackReference.DbType, null, null, null, null, false,
+            parameters.Add(pb.ParameterFactory(Table.Trio.Concat(parentId, paramSuffix), this.BackReference.DbType, null, null, null, null, false, default,
                 Expression.Field(Expression.Property(Expression.Field(paramIdent, Table.fiId), "Value"), "Object")));
-            parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramSuffix), this.PrimaryKey.DbType, null, null, null, null, false,
+            parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramSuffix), this.PrimaryKey.DbType, null, null, null, null, false, default,
                 Expression.Field(paramRowId, "Object")));
 
             var expr = Expression.Lambda<Action<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>>>(

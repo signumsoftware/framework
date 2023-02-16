@@ -145,7 +145,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
               return (
                 <Tab eventKey={i} key={i} style={{ minWidth:150 }}
                   className="sf-repeater-element"
-                  title={<div className="item-group" > {getTimeMachineIcon({ ctx: mlec, transferX: "-115%", transferY: "-65%" })} </div>}>
+                  title={<div className="item-group" > {getTimeMachineIcon({ ctx: mlec, translateX: "-115%", translateY: "-65%" })} </div>}>
                 </Tab>
               );
             }
@@ -163,7 +163,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                     onDragEnter={drag?.onDragOver}
                     onDragOver={drag?.onDragOver}
                     onDrop={drag?.onDrop}>
-                    {getTimeMachineIcon({ ctx: mlec, transferX: "-115%", transferY:"-65%"  })}
+                    {getTimeMachineIcon({ ctx: mlec, translateX: "-115%", translateY:"-65%"  })}
                     {p.getTitle ? p.getTitle(mlec) : getToString(mlec.value)}
                     {c.canRemove(mlec.value) && !readOnly &&
                       <span className={classes("sf-line-button", "sf-remove", "ms-2")}

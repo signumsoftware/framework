@@ -16,7 +16,19 @@ public enum TimeMachineMessage
     UISnapshot,
     DataSnapshot,
     ShowDiffs,
-    YouCanNotSelectMoreThanTwoVersionToCompare
+    YouCanNotSelectMoreThanTwoVersionToCompare,
+
+    [Description("(between this time range)")]
+    BetweenThisTimeRange, 
+
+    [Description("This version was CREATED")]
+    ThisVersionWasCreated,
+    [Description("This version was DELETED")]
+    ThisVersionWasDeleted,
+    [Description("This version was CREATED and DELETED")]
+    ThisVersionWasCreatedAndDeleted,
+    [Description("This version DID NOT CHANGE")]
+    ThisVersionDidNotChange
 }
 
 [AutoInit]

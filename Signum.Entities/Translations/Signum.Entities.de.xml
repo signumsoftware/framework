@@ -115,6 +115,8 @@
     <Member Name="PreviousValueWas0" Description="Der vorherige Wert war: {0}" />
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="Removed0" Description="Entfernt {0}" />
+    <Member Name="RemovedAndSelectedAgain" Description="Entfernt und wieder ausgewählt" />
+    <Member Name="Selected" Description="Ausgewählt" />
     <Member Name="View" Description="Ansehen" />
   </Type>
   <Type Name="EnumEntity`1" />

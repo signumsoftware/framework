@@ -126,7 +126,7 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}>
-      {getTimeMachineIcon({ ctx: ctx, isContainer: true, transferY:"250%" })}
+      {getTimeMachineIcon({ ctx: ctx, isContainer: true, translateY:"250%" })}
       <fieldset className="sf-repeater-element"
         {...EntityListBaseController.entityHtmlAttributes(ctx.value)}>
         <legend>

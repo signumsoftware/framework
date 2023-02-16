@@ -391,6 +391,8 @@ export module EntityControlMessage {
   export const PreviousValueWas0 = new MessageKey("EntityControlMessage", "PreviousValueWas0");
   export const Moved = new MessageKey("EntityControlMessage", "Moved");
   export const Removed0 = new MessageKey("EntityControlMessage", "Removed0");
+  export const NoChanges = new MessageKey("EntityControlMessage", "NoChanges");
+  export const Changed = new MessageKey("EntityControlMessage", "Changed");
   export const Added = new MessageKey("EntityControlMessage", "Added");
   export const RemovedAndSelectedAgain = new MessageKey("EntityControlMessage", "RemovedAndSelectedAgain");
   export const Selected = new MessageKey("EntityControlMessage", "Selected");

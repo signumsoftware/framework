@@ -60,7 +60,7 @@ internal class QueryFormatter : DbExpressionVisitor
 
         var pb = Connector.Current.ParameterBuilder;
 
-        var param = pb.CreateParameter(name, typePair.DbType, typePair.UserDefinedTypeName, nullable, val ?? DBNull.Value);
+        var param = pb.CreateParameter(name, typePair.DbType, typePair.UserDefinedTypeName, nullable, value.GetMetadata()?.DateTimeKind ?? DateTimeKind.Unspecified, val ?? DBNull.Value);
 
         return new DbParameterPair(param, name);
     }
