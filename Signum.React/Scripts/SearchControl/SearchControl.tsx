@@ -78,6 +78,7 @@ export interface SearchControlProps {
 export interface SearchControlState {
   queryDescription: QueryDescription;
   findOptions?: FindOptionsParsed;
+  deps?: React.DependencyList;
   message?: string;
 }
 
@@ -148,11 +149,12 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
             if (fop.systemTime == undefined && p.ctx?.frame?.currentDate)
               fop.systemTime = { mode: 'AsOf', startDate: p.ctx.frame.currentDate };
 
-            setState({ findOptions: fop, queryDescription: qd });
+            setState({ queryDescription: qd, findOptions: fop, deps: p.deps });
           });
       });
     });
-  }, [p.findOptions]);
+
+  }, [p.findOptions, ...(p.deps ?? [])]);
 
   if (state?.message) {
     return (
@@ -217,7 +219,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
         defaultRefreshMode={p.defaultRefreshMode}
         avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
-        deps={p.deps}
+        deps={state.deps}
         extraOptions={p.extraOptions}
 
         enableAutoFocus={p.enableAutoFocus == null ? false : p.enableAutoFocus}
