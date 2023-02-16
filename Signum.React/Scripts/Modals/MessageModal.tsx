@@ -31,6 +31,7 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   customIcon?: IconProp;
   size?: BsSize;
   shouldSelect?: boolean;
+  additionalDialogClassName?: string;
 }
 
 export default function MessageModal(p: MessageModalProps) {
@@ -147,7 +148,7 @@ export default function MessageModal(p: MessageModalProps) {
 
   return (
     <Modal show={show} onExited={handleOnExited} backdrop={p.shouldSelect ? 'static' : undefined}
-      dialogClassName={classes("message-modal", p.size && "modal-" + p.size)}
+      dialogClassName={classes("message-modal", p.size && "modal-" + p.size, p.additionalDialogClassName)}
       onHide={handleCancelClicked} autoFocus={true}>
       <div className={classes("modal-header", dialogHeaderClass(p.style))}>
         {renderTitle()}
@@ -179,6 +180,7 @@ MessageModal.show = (options: MessageModalProps): Promise<MessageModalResult | u
       customIcon={options.customIcon}
       style={options.style}
       shouldSelect={options.shouldSelect}
+      additionalDialogClassName={options.additionalDialogClassName}
     />
   );
 }
