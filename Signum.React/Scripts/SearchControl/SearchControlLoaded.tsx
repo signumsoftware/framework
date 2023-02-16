@@ -7,7 +7,7 @@ import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
   toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions
 } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
@@ -1060,6 +1060,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         summaryToken: t.summaryToken != null ? ptDic[t.summaryToken!.toString()] : undefined,
         displayName: (typeof t.displayName == "function" ? t.displayName() : t.displayName) ?? ptDic[t.token.toString()].niceName,
         hiddenColumn: t.hiddenColumn,
+        combineEquals: t.combineEquals,
       })));
     }
     else {
@@ -1165,8 +1166,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       if (fo.columnOptions.some(a => a.hiddenColumn == true)) {
         menuItems.push(<Dropdown.Divider />);
-
-
 
         if (this.state.showHiddenColumns) {
           menuItems.push(<Dropdown.Item className="sf-hide-hidden-columns" onClick={() => this.setState({ showHiddenColumns : undefined })}>
@@ -1732,6 +1731,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const entityFormatter = this.getEntityFormatter();
     const columns = this.getColumnOptionsParsed();
 
+    var anyCombineEquals = columns.some(a => a.column.combineEquals);
+
     return resultTable.rows.map((row, i) => {
       const mark = this.getRowMarked(row);
       const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
@@ -1741,6 +1742,20 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             undefined;
 
       var ra = this.getRowAttributes(row);
+
+      function equals(a, b) {
+
+        return a === b || is(a, b, false, false);
+      }
+
+      function calculateRowSpan(getVal: (row: ResultRow) => unknown): number | undefined {
+        const value = getVal(row);
+        let rowSpan = 1
+        while (i + rowSpan < resultTable.rows.length && equals(getVal(resultTable.rows[rowSpan + i]), value))
+          rowSpan++;
+
+        return rowSpan == 1 ? undefined : rowSpan;
+      }
 
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
@@ -1755,18 +1770,23 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           }
 
           {this.hasEntityColumn() &&
-            <td className={entityFormatter.cellClass}>
-              {entityFormatter.formatter(row, resultTable.columns, this)}
-            </td>
+            (
+              anyCombineEquals && i != 0 && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
+                <td className={entityFormatter.cellClass} rowSpan={anyCombineEquals ? calculateRowSpan(row => row.entity) : undefined}>
+                  {entityFormatter.formatter(row, resultTable.columns, this)}
+                </td>
+            )
           }
 
           {
             columns.map((c, j) =>
-              <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                {this.getColumnElement(row, i, c)}
-              </td>
+              c.column.combineEquals && i != 0 && equals(resultTable.rows[i - 1].columns[j], row.columns[j]) ? null : 
+                <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
+                  rowSpan={c.column.combineEquals ? calculateRowSpan(row => row.columns[j]) : undefined}>
+                  {this.getColumnElement(row, i, c)}
+                </td>
             )
-          }
+          ]
         </tr>
       );
 

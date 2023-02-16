@@ -42,6 +42,12 @@ export default function ColumnEditor(p: ColumnEditorProps) {
     co.hiddenColumn = co.hiddenColumn ? undefined : true;
     co.displayName = co.token?.niceName;
     co.summaryToken = undefined;
+    co.combineEquals = undefined;
+    p.onChange(undefined);
+  }
+
+  function handleCombineEqualsVertically() {
+    co.combineEquals = !co.combineEquals;
     p.onChange(undefined);
   }
 
@@ -77,6 +83,10 @@ export default function ColumnEditor(p: ColumnEditorProps) {
           <input className="form-control form-control-xs"
             value={co.displayName || ""} disabled={co.hiddenColumn}
             onChange={handleOnChange} />
+          <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
+            <input type="checkbox" disabled={co.hiddenColumn || co.token == null} className="form-check-input me-1" checked={co.combineEquals} onChange={handleCombineEqualsVertically} />
+            {SearchMessage.CombineEqualsCellsVertically.niceToString()}
+          </label>
           <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
             <input type="checkbox" disabled={co.token == null} className="form-check-input me-1" checked={co.hiddenColumn} onChange={handleHiddenColumnClick} />
             {SearchMessage.HiddenColumn.niceToString()}

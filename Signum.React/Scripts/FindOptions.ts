@@ -158,6 +158,7 @@ export interface ColumnOption {
   displayName?: string | (() => string);
   summaryToken?: string | QueryTokenString<any>;
   hiddenColumn?: boolean;
+  combineEquals?: boolean;
 }
 
 export interface ColumnOptionParsed {
@@ -165,6 +166,7 @@ export interface ColumnOptionParsed {
   displayName?: string;
   summaryToken?: QueryToken;
   hiddenColumn?: boolean;
+  combineEquals?: boolean;
 }
 
 export const DefaultPagination: Pagination = {

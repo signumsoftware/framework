@@ -335,6 +335,7 @@ export module Converter {
         displayName: translated(f.element, c => c.displayName),
         summaryToken: f.element.summaryToken?.tokenString,
         hiddenColumn: f.element.hiddenColumn,
+        combineEquals: f.element.combineEquals,
       }) as ColumnOption);
 
       fo.orderOptions = (uq.orders ?? []).map(f => ({
