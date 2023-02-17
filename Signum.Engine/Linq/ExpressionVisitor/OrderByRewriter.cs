@@ -121,6 +121,8 @@ internal class OrderByRewriter : DbExpressionVisitor
 
         if (select.IsAllAggregates)
         {
+            gatheredOrderings = null;
+
             if (gatheredKeys != null)
             {
                 gatheredKeys.AddRange(select.Columns.Select(cd => new ColumnExpression(cd.Expression.Type, select.Alias, cd.Name)));
