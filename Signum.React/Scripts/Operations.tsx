@@ -267,7 +267,7 @@ export class ContextualOperationContext<T extends Entity> {
   color?: BsColor;
   icon?: IconProp;
 
-  showProgressModal?: boolean;
+  progressModalOptions?: API.OperationWithProgressOptions;
   event?: React.MouseEvent<any>;
   onContextualSuccess?: (pack: API.ErrorReport) => void;
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
@@ -525,7 +525,8 @@ export class EntityOperationContext<T extends Entity> {
   settings?: EntityOperationSettings<T>;
   canExecute?: string;
   event?: React.MouseEvent<any>;
-  showProgressModal?: boolean;
+
+  progressModalOptions?: API.OperationWithProgressOptions;
   onExecuteSuccess?: (pack: EntityPack<T>) => Promise<void>;
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => Promise<void>;
   onDeleteSuccess?: () => Promise<void>;
@@ -892,6 +893,7 @@ export namespace API {
     var modalOptions: ProgressModalOptions = {
       title: options.title ?? OperationMessage.Executing0.niceToString(getOperationInfo(operationKey, lite.EntityType).niceName),
       message: options.message ?? getToString(lite),
+      showCloseWarningMessage: options.showCloseWarningMessage,
     }
     return ProgressModal.show(abortController, modalOptions,
       () => ajaxPostRaw({ url: "/api/operation/executeLiteWithProgress", signal: abortController.signal }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest)
@@ -951,6 +953,7 @@ export namespace API {
     abortController?: AbortController;
     title?: React.ReactNode;
     message?: React.ReactNode;
+    showCloseWarningMessage: boolean;
   }
 
   export interface MultiOperationOptions {

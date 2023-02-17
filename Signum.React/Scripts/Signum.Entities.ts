@@ -501,6 +501,9 @@ export module OperationMessage {
   export const Deleting = new MessageKey("OperationMessage", "Deleting");
   export const Executing0 = new MessageKey("OperationMessage", "Executing0");
   export const _0Errors = new MessageKey("OperationMessage", "_0Errors");
+  export const ClosingThisModalOrBrowserTabWillCancelTheOperation = new MessageKey("OperationMessage", "ClosingThisModalOrBrowserTabWillCancelTheOperation");
+  export const CancelOperation = new MessageKey("OperationMessage", "CancelOperation");
+  export const AreYouSureYouWantToCancelTheOperation = new MessageKey("OperationMessage", "AreYouSureYouWantToCancelTheOperation");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");

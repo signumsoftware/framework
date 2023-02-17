@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { softCast } from '../Globals';
 import { jsonObjectStream } from './jsonObjectStream';
 import { ServiceError } from '../Services';
+import MessageModal from '../Modals/MessageModal';
 
 
 interface ProgressModalProps<T> extends IModalProps<API.ProgressStep<T> | undefined> {
@@ -45,7 +46,20 @@ export function ProgressModal<T>(p: ProgressModalProps<T>) {
     })
   }, [])
 
-  function handleCancelClicked() {
+  async function handleCancelClicked() {
+
+    if (p.options.showCloseWarningMessage) {
+      var btn = await MessageModal.show({
+        message: OperationMessage.AreYouSureYouWantToCancelTheOperation.niceToString(),
+        title: OperationMessage.CancelOperation.niceToString(),
+        buttons: "yes_no",
+        style: "warning"
+      });
+
+      if (btn == "no")
+        return;
+    }
+
     p.abortController.abort();
   }
 
@@ -71,13 +85,16 @@ export function ProgressModal<T>(p: ProgressModalProps<T>) {
               `[${step.position}/${step.max}]`}
             key={2} />
         }
-        {step?.currentTask && <p className="text-danger">{step.currentTask}</p>}
+        {step?.currentTask && <p className="text-success">{step.currentTask}</p>}
       </div>
-      <div className="modal-footer">
-        <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
-          {JavascriptMessage.cancel.niceToString()}
-        </button>
-      </div>
+      {p.options.showCloseWarningMessage &&
+        <div className="modal-footer">
+          <small className="text-muted">{OperationMessage.ClosingThisModalOrBrowserTabWillCancelTheOperation.niceToString()}</small>
+          <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
+            {JavascriptMessage.cancel.niceToString()}
+          </button>
+        </div>
+      }
     </Modal>
   );
 }
@@ -112,4 +129,5 @@ ProgressModal.show = <T,>(abortController: AbortController, modalOptions: Progre
 export interface ProgressModalOptions {
   title: React.ReactNode;
   message: React.ReactNode;
+  showCloseWarningMessage: boolean;
 }
