@@ -7,7 +7,6 @@ export async function* jsonObjectStream<T>(reader: ReadableStreamDefaultReader<U
   let isStart = true;
 
   while (true) {
-    debugger;
     var pair = await reader.read();
     if (pair.done)
       return;

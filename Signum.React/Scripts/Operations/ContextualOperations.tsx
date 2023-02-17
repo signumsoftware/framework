@@ -1,8 +1,8 @@
 import * as React from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, External, getToString } from '../Signum.Entities';
+import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, External, getToString, liteKey } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
-import { classes } from '../Globals';
+import { classes, softCast } from '../Globals';
 import * as Navigator from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
@@ -337,13 +337,23 @@ export function defaultContextualOperationClick(coc: ContextualOperationContext<
               })));
         }
       case "Execute":
-        return getSetters(coc)
-          .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
+        if (coc.showProgressModal && coc.context.lites.length == 1) {
+          return API.executeLiteWithProgress(coc.context.lites[0], coc.operationInfo.key, {}, ...args)
+            .then(pack => softCast<API.ErrorReport>({ errors: {} }), error => softCast<API.ErrorReport>({ errors: { [liteKey(coc.context.lites[0])]: (error as Error).message } }))
             .then(coc.onContextualSuccess ?? (report => {
               coc.raiseEntityChanged();
               notifySuccess();
               coc.context.markRows(report.errors);
-            })));
+            }));
+        } else {
+          return getSetters(coc)
+            .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
+              .then(coc.onContextualSuccess ?? (report => {
+                coc.raiseEntityChanged();
+                notifySuccess();
+                coc.context.markRows(report.errors);
+              })));
+        }
       case "Delete":
         return getSetters(coc)
           .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
