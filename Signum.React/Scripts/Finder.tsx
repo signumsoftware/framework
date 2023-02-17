@@ -363,6 +363,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
     token: c.token!.fullKey,
     displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
     summaryToken: c.summaryToken?.fullKey,
+    combineEquals: c.combineEquals,
     hiddenColumn: c.hiddenColumn,
   }) as ColumnOption;
  
@@ -462,6 +463,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
       token: completer.get(co.token.toString()),
       displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
       summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
+      combineEquals: co.combineEquals,
       hiddenColumn: co.hiddenColumn,
     }) as ColumnOptionParsed));
 }
@@ -788,6 +790,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
         displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
         summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
         hiddenColumn: co.hiddenColumn,
+        combineEquals: co.combineEquals,
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions?.notNull() ?? []).map(oo => ({
@@ -1696,7 +1699,7 @@ export module Encoder {
           co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
             undefined;
 
-        query["column" + i] = co.token + (displayName ? ("~" + displayName) : "");
+        query["column" + i] = co.token + (co.combineEquals ? "!" : "")  + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
           query["summary" + i] = co.summaryToken.toString();
       });
@@ -1832,11 +1835,14 @@ export module Decoder {
 
       var displayName = unscapeTildes(p.value.tryAfter("~")); 
 
+      var token = p.value.tryBefore("~") ?? p.value; 
+
       return ({
-        token: p.value.tryBefore("~") ?? p.value,
+        token: token.endsWith("!") ? token.beforeLast("!") : token,
         displayName: displayName == HIDDEN ? undefined : displayName,
         hiddenColumn: displayName == HIDDEN ? true : undefined,
-        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value
+        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value,
+        combineEquals: token.endsWith("!")
       }) as ColumnOption;
     });
   }
