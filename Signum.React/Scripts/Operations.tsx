@@ -412,6 +412,7 @@ export class CellOperationContext<T extends Entity> {
   readonly settings?: CellOperationSettings<T>;
   readonly entityOperationSettings?: EntityOperationSettings<any>;
   event?: React.MouseEvent<any>;
+  progressModalOptions?: API.OperationWithProgressOptions;
 
   color?: BsColor;
   icon?: IconProp;
