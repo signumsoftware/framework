@@ -339,7 +339,7 @@ export function defaultContextualOperationClick(coc: ContextualOperationContext<
       case "Execute":
         if (coc.progressModalOptions && coc.context.lites.length == 1) {
           return API.executeLiteWithProgress(coc.context.lites[0], coc.operationInfo.key, coc.progressModalOptions, ...args)
-            .then(pack => softCast<API.ErrorReport>({ errors: {} }), error => softCast<API.ErrorReport>({ errors: { [liteKey(coc.context.lites[0])]: (error as Error).message } }))
+            .then(pack => softCast<API.ErrorReport>({ errors: {} })/*, error => softCast<API.ErrorReport>({ errors: { [liteKey(coc.context.lites[0])]: (error as Error).message } })*/)
             .then(coc.onContextualSuccess ?? (report => {
               coc.raiseEntityChanged();
               notifySuccess();
