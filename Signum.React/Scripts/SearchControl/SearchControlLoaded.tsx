@@ -1733,7 +1733,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     var anyCombineEquals = columns.some(a => a.column.combineEquals);
 
-    return resultTable.rows.map((row, i) => {
+    return resultTable.rows.map((row, i, rows) => {
       const mark = this.getRowMarked(row);
       const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
         mark?.status == "Warning" ? "table-warning" :
@@ -1743,15 +1743,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       var ra = this.getRowAttributes(row);
 
-      function equals(a, b) {
+      function equals(a: unknown, b: unknown) {
 
-        return a === b || is(a, b, false, false);
+        return a === b || is(a as any, b as any, false, false);
       }
 
       function calculateRowSpan(getVal: (row: ResultRow) => unknown): number | undefined {
         const value = getVal(row);
         let rowSpan = 1
-        while (i + rowSpan < resultTable.rows.length && equals(getVal(resultTable.rows[rowSpan + i]), value))
+        while (i + rowSpan < rows.length && equals(getVal(rows[rowSpan + i]), value))
           rowSpan++;
 
         return rowSpan == 1 ? undefined : rowSpan;
@@ -1780,13 +1780,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
           {
             columns.map((c, j) =>
-              c.column.combineEquals && i != 0 && equals(resultTable.rows[i - 1].columns[j], row.columns[j]) ? null : 
+              c.column.combineEquals && i != 0 && equals(resultTable.rows[i - 1].columns[j], row.columns[j]) ? null :
                 <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
                   rowSpan={c.column.combineEquals ? calculateRowSpan(row => row.columns[j]) : undefined}>
                   {this.getColumnElement(row, i, c)}
                 </td>
             )
-          ]
+          }
         </tr>
       );
 
