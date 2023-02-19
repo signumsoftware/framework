@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
+import { DateTime } from 'luxon'
 import { Link } from 'react-router-dom';
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -99,11 +100,11 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
           var validFromIndex = columns.indexOf("Entity.SystemValidFrom");
           var validToIndex = columns.indexOf("Entity.SystemValidTo");
           if (validFromIndex != -1 && validToIndex != -1) {
-            var validFrom = row.columns[validFromIndex];
-            var validTo = row.columns[validToIndex];
+            var validFrom = DateTime.fromISO(row.columns[validFromIndex]);
+            var validTo = DateTime.fromISO(row.columns[validToIndex]);
 
-            created = fop.systemTime.mode == "Between" ? fop.systemTime.startDate! <= validFrom : true;
-            deleted = fop.systemTime.mode == "Between" ? validTo <= fop.systemTime.endDate! : !validTo.startsWith("9999-");
+            created = fop.systemTime.mode == "Between" ? DateTime.fromISO(fop.systemTime.startDate!) <= validFrom : true;
+            deleted = fop.systemTime.mode == "Between" ? validTo <= DateTime.fromISO(fop.systemTime.endDate!) : validTo.year < 9999;
 
             var title = created && deleted ? TimeMachineMessage.ThisVersionWasCreatedAndDeleted.niceToString() :
               created ? TimeMachineMessage.ThisVersionWasCreated.niceToString() :

@@ -2073,14 +2073,16 @@ function initFormatRules(): FormatRule[] {
           if (cell == undefined || cell == "")
             return "";
 
-          var className = cell.startsWith("0001-") ? "date-start" :
-            ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
+          var c = DateTime.fromISO(cell);
+
+          var className = c.year <= 1 ? "date-start" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && DateTime.fromISO(ctx.systemTime.startDate!) <= c ? "date-created" :
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
           return (
             <bdi className={classes("date", "try-no-wrap", className)}>
-              {toFormatWithFixes(DateTime.fromISO(cell), luxonFormat).replace("T", " ")}
+              {c.toFormat(luxonFormat)}
             </bdi>);
         }, false, "date-cell"); //To avoid flippig hour and date (L LT) in RTL cultures
       }
@@ -2093,12 +2095,14 @@ function initFormatRules(): FormatRule[] {
           if (cell == undefined || cell == "")
             return "";
 
-          var className = cell.startsWith("9999-") ? "date-end" :
-            ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
+          var c = DateTime.fromISO(cell);
+
+          var className = c.year >= 9999 ? "date-end" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && c <= DateTime.fromISO(ctx.systemTime.endDate!) ? "date-removed" :
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat).replace("T", " ")}</bdi>;
+          return <bdi className={classes("date", "try-no-wrap", className)}>{c.toFormat(luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
