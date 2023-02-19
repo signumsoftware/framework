@@ -208,7 +208,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
         summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.summaryToken.toString(), token: parser.get(c.summaryToken.toString()) }) : null,
         hiddenColumn: c.hiddenColumn,
-        combineEquals: c.combineEquals,
+        combineRows: c.combineRows ?? null,
       }))),
       columnsMode: fo.columnOptionsMode,
       orders: (fo.orderOptions ?? []).notNull().map(c => newMListElement(QueryOrderEmbedded.New({
@@ -344,7 +344,7 @@ export namespace UserQueryMerger {
       oldCol.token = newCol.token;
       oldCol.displayName = (newCol.displayName == translated(oldCol, a => a.displayName) ? oldCol.displayName : newCol.displayName) ?? null;
       oldCol.summaryToken = newCol.summaryToken;
-      oldCol.combineEquals = newCol.combineEquals;
+      oldCol.combineRows = newCol.combineRows;
       oldCol.hiddenColumn = newCol.hiddenColumn;
       oldCol.modified = true;
       //preserve rowId
@@ -425,7 +425,7 @@ export namespace UserQueryMerger {
   function distanceColumns(qc1: QueryColumnEmbedded, qc2: QueryColumnEmbedded): number {
     return (qc1.token?.tokenString == qc2.token?.tokenString ? 0 : 3) +
       (qc1.summaryToken?.tokenString == qc2.summaryToken?.tokenString ? 0 : 1) +
-      (qc1.combineEquals == qc2.combineEquals ? 0 : 1) +
+      (qc1.combineRows == qc2.combineRows ? 0 : 1) +
       (qc1.displayName == qc2.displayName ? 0 : 1) +
       (qc1.hiddenColumn == qc2.hiddenColumn ? 0 : 1);
   }

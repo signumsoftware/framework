@@ -14,6 +14,11 @@ export type ColumnOptionsMode =
   "InsertStart" |
   "ReplaceOrAdd";
 
+export const CombineRows = new EnumType<CombineRows>("CombineRows");
+export type CombineRows =
+  "EqualValue" |
+  "EqualEntity";
+
 export const DashboardBehaviour = new EnumType<DashboardBehaviour>("DashboardBehaviour");
 export type DashboardBehaviour =
   "PromoteToDasboardPinnedFilter" |

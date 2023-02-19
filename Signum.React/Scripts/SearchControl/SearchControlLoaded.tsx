@@ -1060,7 +1060,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         summaryToken: t.summaryToken != null ? ptDic[t.summaryToken!.toString()] : undefined,
         displayName: (typeof t.displayName == "function" ? t.displayName() : t.displayName) ?? ptDic[t.token.toString()].niceName,
         hiddenColumn: t.hiddenColumn,
-        combineEquals: t.combineEquals,
+        combineRows: t.combineRows,
       })));
     }
     else {
@@ -1731,7 +1731,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const entityFormatter = this.getEntityFormatter();
     const columns = this.getColumnOptionsParsed();
 
-    var anyCombineEquals = columns.some(a => a.column.combineEquals);
+    var anyCombineEquals = columns.some(a => a.column.combineRows != null);
 
     return resultTable.rows.map((row, i, rows) => {
       const mark = this.getRowMarked(row);
@@ -1780,9 +1780,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
           {
             columns.map((c, j) =>
-              c.column.combineEquals && i != 0 && equals(resultTable.rows[i - 1].columns[j], row.columns[j]) ? null :
+              i != 0 && c.column.combineRows == "EqualValue" && equals(resultTable.rows[i - 1].columns[j], row.columns[j]) ? null :
+                i != 0 && c.column.combineRows == "EqualEntity" && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
                 <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
-                  rowSpan={c.column.combineEquals ? calculateRowSpan(row => row.columns[j]) : undefined}>
+                    rowSpan={
+                      c.column.combineRows == "EqualValue" ? calculateRowSpan(row => row.columns[j]) :
+                      c.column.combineRows == "EqualEntity" ? calculateRowSpan(row => row.entity) :
+                      undefined}>
                   {this.getColumnElement(row, i, c)}
                 </td>
             )

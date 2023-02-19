@@ -637,7 +637,7 @@ export module SearchMessage {
   export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
   export const Copy = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
-  export const CombineEqualsCellsVertically = new MessageKey("SearchMessage", "CombineEqualsCellsVertically");
+  export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
 }
 
 export module SelectorMessage {

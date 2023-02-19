@@ -267,7 +267,7 @@ public enum SearchMessage
 
     [Description("More than one {0} selected")]
     MoreThanOne0Selected,
-    CombineEqualsCellsVertically,
+    CombineRowsWith,
 }
 
 public enum SelectorMessage

@@ -363,7 +363,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
     token: c.token!.fullKey,
     displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
     summaryToken: c.summaryToken?.fullKey,
-    combineEquals: c.combineEquals,
+    combineRows: c.combineRows,
     hiddenColumn: c.hiddenColumn,
   }) as ColumnOption;
  
@@ -463,7 +463,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
       token: completer.get(co.token.toString()),
       displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
       summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
-      combineEquals: co.combineEquals,
+      combineEquals: co.combineRows,
       hiddenColumn: co.hiddenColumn,
     }) as ColumnOptionParsed));
 }
@@ -790,7 +790,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
         displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
         summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
         hiddenColumn: co.hiddenColumn,
-        combineEquals: co.combineEquals,
+        combineRows: co.combineRows,
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions?.notNull() ?? []).map(oo => ({
@@ -1699,7 +1699,7 @@ export module Encoder {
           co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
             undefined;
 
-        query["column" + i] = co.token + (co.combineEquals ? "!" : "")  + (displayName ? ("~" + displayName) : "");
+        query["column" + i] = co.token + (co.combineRows ? "!" : "") + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
           query["summary" + i] = co.summaryToken.toString();
       });

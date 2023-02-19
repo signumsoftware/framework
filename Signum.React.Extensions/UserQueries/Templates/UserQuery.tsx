@@ -111,8 +111,8 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                 template: (ctx, row) => <ValueLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
                   helpText={
                     <div>
-                      <ValueLine ctx={ctx.subCtx(a => a.combineEquals)} inlineCheckbox="block" readOnly={ctx.value.hiddenColumn} />
-                      <ValueLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineEquals = false; row.forceUpdate(); }} />
+                      <ValueLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn} />
+                      <ValueLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
                     </div>
                    }
                 />
