@@ -89,7 +89,7 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
       isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && Finder.isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
       formatter: new Finder.EntityFormatter((row, columns, sc) => {
 
-        var icon: null | React.ReactElement = null;
+        var icon: undefined | React.ReactElement = undefined;
 
         const fop = sc?.state.resultFindOptions;
         let created = false;
