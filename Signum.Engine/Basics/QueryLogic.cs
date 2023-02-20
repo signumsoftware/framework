@@ -21,9 +21,7 @@ public static class QueryLogic
     {
         QueryToken.StaticEntityExtensions = parent => Expressions.GetExtensionsTokens(parent);
         QueryToken.DynamicEntityExtensions = parent => Expressions.GetExtensionsWithParameterTokens(parent);
-        QueryToken.IsLocalDateTime = qt =>
-        qt is NetPropertyToken npt && npt.MemberInfo.Name == nameof(DateTimeOffset.DateTime) && npt.MemberInfo.DeclaringType == typeof(DateTimeOffset) ||
-        qt is EntityPropertyToken ept && Schema.Current.Field(ept.PropertyRoute) is FieldValue fv && fv.DateTimeKind == DateTimeKind.Local;
+        EntityPropertyToken.DateTimeKindField = ept => Schema.Current.Field(ept.PropertyRoute) is FieldValue fv ? fv.DateTimeKind : DateTimeKind.Unspecified;
         ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
         QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;
         QueryToken.IsSystemVersioned = IsSystemVersioned;

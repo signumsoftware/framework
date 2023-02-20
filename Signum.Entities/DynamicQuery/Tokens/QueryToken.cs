@@ -16,6 +16,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public abstract string? Format { get; }
     public abstract string? Unit { get; }
     public abstract Type Type { get; }
+    public virtual DateTimeKind DateTimeKind => System.DateTimeKind.Unspecified;
     public abstract string Key { get; }
 
     public virtual bool IsGroupable
@@ -260,11 +261,12 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return DynamicEntityExtensions(parent);
     }
 
-    public static Func<QueryToken, bool> IsLocalDateTime = null!;
 
     public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precision)
     {
-        string utc = Clock.Mode == TimeZoneMode.Utc && !IsLocalDateTime(parent) ? "Utc - " : "";
+        var kind = parent.DateTimeKind.DefaultToNull() ?? (Clock.Mode == TimeZoneMode.Utc ? System.DateTimeKind.Utc : System.DateTimeKind.Local);
+
+        string utc = kind == System.DateTimeKind.Utc ? "Utc - " : "";
 
         return new List<QueryToken?>
         {
@@ -289,6 +291,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
             precision < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), () => utc + QueryTokenMessage.Millisecond.NiceToString()),
         }.NotNull().ToList();
     }
+
 
     public static List<QueryToken> DateTimeOffsetProperties(QueryToken parent, DateTimePrecision precision)
     {

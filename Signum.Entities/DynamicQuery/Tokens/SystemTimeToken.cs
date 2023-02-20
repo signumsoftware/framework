@@ -20,6 +20,8 @@ public class SystemTimeToken : QueryToken
         get { return typeof(DateTime?); }
     }
 
+    public override DateTimeKind DateTimeKind => DateTimeKind.Utc;
+
     public override string ToString()
     {
         return "[" + this.property.NiceToString() + "]";

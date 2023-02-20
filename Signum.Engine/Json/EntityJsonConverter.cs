@@ -453,7 +453,10 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                         JsonSerializer.Deserialize(ref reader, pi.PropertyType, options);
 
                     if (newValue is DateTime dt)
-                        newValue = dt.FromUserInterface();
+                    {
+                        var kind = (Schema.Current.Field(pr) as IColumn)?.DateTimeKind ?? DateTimeKind.Unspecified;
+                        newValue = dt.ToKind(kind);
+                    }
 
                     if (Factory.Strategy == EntityJsonConverterStrategy.Full)
                     {

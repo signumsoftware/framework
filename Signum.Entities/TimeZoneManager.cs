@@ -65,6 +65,16 @@ public static class Clock
             }
     }
 
+    public static DateTime ToKind(this DateTime uiDateTime, DateTimeKind kind)
+    {
+        return kind switch
+        {
+            DateTimeKind.Local => uiDateTime.ToLocalTime(),
+            DateTimeKind.Utc => uiDateTime.ToUniversalTime(),
+            _ => uiDateTime.FromUserInterface(),
+        };
+    }
+
     public static DateTime FromUserInterface(this DateTime uiDateTime)
     {
         if (Mode == TimeZoneMode.Local || uiDateTime.Kind == DateTimeKind.Utc)
