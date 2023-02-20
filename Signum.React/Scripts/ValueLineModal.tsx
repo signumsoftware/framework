@@ -22,7 +22,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
   const { title, message, initialValue, ...props } = p.options;
   const value = React.useRef<any>(initialValue);
   const selectedValue = React.useRef<any>(undefined);
-  const btnOkRef = React.useRef<HTMLButtonElement>();
+  const btnOkRef = React.useRef<HTMLButtonElement>(null);
   function handleOkClick() {
     selectedValue.current = value.current;
     setShow(false);
@@ -39,7 +39,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
 
   function handleFiltersKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.keyCode == 13) {
-      btnOkRef.current.focus();
+      btnOkRef.current!.focus();
       setTimeout(() => {
         handleOkClick();
       }, 100);
@@ -79,7 +79,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
             formGroupStyle={vlp.label ? "Basic" : "SrOnly"} {...vlp} onChange={forceUpdate} />
         </AutoFocus>
         {p.options.validateValue && <p className="text-danger">
-          { error}
+          {error}
         </p>}
       </div>
       <div className="modal-footer">
