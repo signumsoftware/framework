@@ -22,6 +22,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
   const { title, message, initialValue, ...props } = p.options;
   const value = React.useRef<any>(initialValue);
   const selectedValue = React.useRef<any>(undefined);
+  const btnOkRef = React.useRef<HTMLButtonElement>();
   function handleOkClick() {
     selectedValue.current = value.current;
     setShow(false);
@@ -38,6 +39,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
 
   function handleFiltersKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.keyCode == 13) {
+      btnOkRef.current.focus();
       setTimeout(() => {
         handleOkClick();
       }, 100);
@@ -81,7 +83,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
         </p>}
       </div>
       <div className="modal-footer">
-        <button disabled={disabled || error != null} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick}>
+        <button disabled={disabled || error != null} className="btn btn-primary sf-entity-button sf-ok-button" onClick={handleOkClick} ref={btnOkRef}>
           {JavascriptMessage.ok.niceToString()}
         </button>
         <button className="btn btn-light sf-entity-button sf-close-button" onClick={handleCancelClicked}>
