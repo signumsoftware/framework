@@ -77,23 +77,22 @@ export const TimeMachineColors = {
   noChange: "#ddd",
 }
 
-
-export function getTimeMachineCheckboxIcon(p: TimeMachineIconCheckboxProps) {
-  if (p.newCtx != null && !p.newCtx.previousVersion)
-    return null;
-
-  return (
-    <TimeMachineCheckboxIcon newCtx={p.newCtx} oldCtx={p.oldCtx} translateX={p.translateX} translateY={p.translateY} />
-  );
-}
-
-
 export interface TimeMachineIconCheckboxProps {
   newCtx: TypeContext<any> | null;
   oldCtx: TypeContext<any> | null;
   translateX?: string;
   translateY?: string;
   type?: TypeInfo;
+}
+
+export function getTimeMachineCheckboxIcon(p: TimeMachineIconCheckboxProps) {
+  
+  if ((p.newCtx == null && p.oldCtx == null) || (p.newCtx != null && !p.newCtx.previousVersion))
+    return null;
+
+  return (
+    <TimeMachineCheckboxIcon newCtx={p.newCtx} oldCtx={p.oldCtx} translateX={p.translateX} translateY={p.translateY} />
+  );
 }
 
 function TimeMachineCheckboxIcon(p: TimeMachineIconCheckboxProps) {
