@@ -214,7 +214,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   componentDidUpdate(props: SearchControlLoadedProps) {
-    if (!Hooks.areEqual(this.props.deps ?? [], props.deps ?? [])) {
+    if (!Hooks.areEqualDeps(this.props.deps ?? [], props.deps ?? [])) {
       this.doSearchPage1();
     }
   }
