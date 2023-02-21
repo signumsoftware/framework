@@ -761,7 +761,8 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
       fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
   }
 
-  simplifyPinnedFilters(fo.filterOptions);
+  if (fo.filterOptions)
+    fo.filterOptions = simplifyPinnedFilters(fo.filterOptions.notNull());
 
   const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
   const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
@@ -814,7 +815,8 @@ function simplifyPinnedFilters(fos: FilterOption[]): FilterOption[] {
     var fo2 = fos.firstOrNull(fo2 =>
       fo2.pinned == null && 
       !isFilterGroupOption(fo2) &&
-      similarToken(fo.token, fo2.token) &&
+      !isFilterGroupOption(fo) &&
+      similarToken(fo.token?.toString(), fo2.token?.toString()) &&
       (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
       (fo.pinned?.active == "Always" || fo2.value != null));
 
