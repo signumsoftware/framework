@@ -40,7 +40,7 @@ export function extractFilter<T>(filters: FilterOptionParsed[], token: QueryToke
 export function extractFilter(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined;
 export function extractFilter<T>(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined {
   var f = filters.firstOrNull(f => !isFilterGroupOptionParsed(f) &&
-    f.token!.fullKey == token.toString() &&
+    similarToken(f.token!.fullKey, token.toString()) &&
     (typeof operation == "function" ? operation(f.operation!) : f.operation == operation) &&
     (valueCondition == null || valueCondition(f.value))) as FilterConditionOptionParsed | undefined;
 
@@ -50,4 +50,9 @@ export function extractFilter<T>(filters: FilterOptionParsed[], token: string | 
 
   filters.remove(f);
   return f;
+}
+
+export function similarToken(tokenA: string, tokenB: string) {
+  return (tokenA?.startsWith("Entity.") ? tokenA.after("Entity.") : tokenA) ==
+    (tokenB?.startsWith("Entity.") ? tokenB.after("Entity.") : tokenB);
 }
