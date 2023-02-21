@@ -214,7 +214,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   componentDidUpdate(props: SearchControlLoadedProps) {
-    if (!Hooks.areEqual(this.props.deps ?? [], props.deps ?? [])) {
+    if (!Hooks.areEqualDeps(this.props.deps ?? [], props.deps ?? [])) {
       this.doSearchPage1();
     }
   }
@@ -1782,11 +1782,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
           {
             columns.map((c, j) =>
-              i != 0 && c.column.combineRows == "EqualValue" && equals(resultTable.rows[i - 1].columns[j], row.columns[j]) ? null :
+              i != 0 && c.column.combineRows == "EqualValue" && equals(resultTable.rows[i - 1].columns[c.resultIndex], row.columns[c.resultIndex]) ? null :
                 i != 0 && c.column.combineRows == "EqualEntity" && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
                 <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
                     rowSpan={
-                      c.column.combineRows == "EqualValue" ? calculateRowSpan(row => row.columns[j]) :
+                      c.column.combineRows == "EqualValue" ? calculateRowSpan(row => row.columns[c.resultIndex]) :
                       c.column.combineRows == "EqualEntity" ? calculateRowSpan(row => row.entity) :
                       undefined}>
                   {this.getColumnElement(row, i, c)}

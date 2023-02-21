@@ -34,6 +34,7 @@ import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
+import { similarToken } from "./Search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
 
@@ -760,6 +761,9 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
       fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
   }
 
+  if (fo.filterOptions)
+    fo.filterOptions = simplifyPinnedFilters(fo.filterOptions.notNull());
+
   const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
   const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
 
@@ -804,6 +808,25 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     return parseFilterValues(result.filterOptions)
       .then(() => result)
   });
+}
+
+function simplifyPinnedFilters(fos: FilterOption[]): FilterOption[] {
+  fos.filter(fo => fo.pinned != null && (fo.pinned?.active == "Always" || fo.pinned?.active == "WhenHasValue")).forEach(fo => {
+    var fo2 = fos.firstOrNull(fo2 =>
+      fo2.pinned == null && 
+      !isFilterGroupOption(fo2) &&
+      !isFilterGroupOption(fo) &&
+      similarToken(fo.token?.toString(), fo2.token?.toString()) &&
+      (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
+      (fo.pinned?.active == "Always" || fo2.value != null));
+
+    if (fo2 != null) {
+      fo.value = fo2.value;
+      fos.remove(fo2);
+    }
+  });
+
+  return fos;
 }
 
 export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings, avoidHiddenColumns?: boolean): QueryRequest {
@@ -1699,9 +1722,12 @@ export module Encoder {
           co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
             undefined;
 
-        query["column" + i] = co.token + (co.combineRows ? "!" : "") + (displayName ? ("~" + displayName) : "");
+        query["column" + i] = co.token  + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
           query["summary" + i] = co.summaryToken.toString();
+        if (co.combineRows)
+          query["combine" + i] = co.combineRows == "EqualValue" ? "V" : "E";
+       
       });
     }
   }
@@ -1830,20 +1856,21 @@ export module Decoder {
 
   export function decodeColumns(query: any): ColumnOption[] {
     var summary = valuesInOrder(query, "summary");
+    var combine = valuesInOrder(query, "combine");
 
     return valuesInOrder(query, "column").map(p => {
 
       var displayName = unscapeTildes(p.value.tryAfter("~")); 
 
       var token = p.value.tryBefore("~") ?? p.value; 
-
-      return ({
-        token: token.endsWith("!") ? token.beforeLast("!") : token,
+      var comb = combine.firstOrNull(a => a.index == p.index)?.value;
+      return softCast<ColumnOption>({
+        token: token,
         displayName: displayName == HIDDEN ? undefined : displayName,
         hiddenColumn: displayName == HIDDEN ? true : undefined,
         summaryToken: summary.firstOrNull(a => a.index == p.index)?.value,
-        combineEquals: token.endsWith("!")
-      }) as ColumnOption;
+        combineRows: comb == "V" ? "EqualValue" : comb == "E" ? "EqualEntity" : undefined,
+      });
     });
   }
 }

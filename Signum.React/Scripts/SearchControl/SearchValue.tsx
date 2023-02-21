@@ -160,7 +160,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       return Promise.resolve(undefined);
 
     if (p.initialValue !== undefined) {
-      if (Hooks.areEqual(deps ?? [], initialDeps.current ?? [])) {
+      if (Hooks.areEqualDeps(deps ?? [], initialDeps.current ?? [])) {
         controller.value = p.initialValue;
         controller.hasHistoryChanges = false;
         p.onInitialValueLoaded?.();

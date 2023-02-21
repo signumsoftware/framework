@@ -17,7 +17,6 @@ import { ChartColumnType } from '../Signum.Entities.Chart';
 import { EntityBaseController } from '@framework/Lines';
 import { isBooleanOrFunctionOrNull } from '../../Dynamic/View/NodeUtils';
 import { MultiValueLineController } from '../../../Signum.React/Scripts/Lines/MultiValueLine';
-import { BigValueSearchCounter } from '../../Dashboard/View/UserQueryPart';
 import { QueryString } from '../../../Signum.React/Scripts/QueryString';
 import { QueryTokenMessage } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery';
 
