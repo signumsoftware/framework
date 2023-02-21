@@ -39,7 +39,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>();
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
-
+  
+  Navigator.useFillToString(currentUserQuery);
   const location = useLocation();
 
   function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined) {
