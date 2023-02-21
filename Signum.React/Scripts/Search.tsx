@@ -1,5 +1,5 @@
 import type { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable, FilterConditionOptionParsed } from './FindOptions'
-import { isFilterGroupOption, isFilterGroupOptionParsed } from './FindOptions'
+import { isFilterGroupOption, isFilterGroupOptionParsed, isActive } from './FindOptions'
 export { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable };
 
 import EntityLink from './SearchControl/EntityLink'
@@ -39,7 +39,7 @@ export function extractFilterValue(filters: FilterOptionParsed[], token: string 
 export function extractFilter<T>(filters: FilterOptionParsed[], token: QueryTokenString<T>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<T> | null) => boolean): FilterConditionOptionParsed | undefined;
 export function extractFilter(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined;
 export function extractFilter<T>(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined {
-  var f = filters.firstOrNull(f => !isFilterGroupOptionParsed(f) &&
+  var f = filters.firstOrNull(f => !isFilterGroupOptionParsed(f) && isActive(f) && 
     similarToken(f.token!.fullKey, token.toString()) &&
     (typeof operation == "function" ? operation(f.operation!) : f.operation == operation) &&
     (valueCondition == null || valueCondition(f.value))) as FilterConditionOptionParsed | undefined;
@@ -52,7 +52,7 @@ export function extractFilter<T>(filters: FilterOptionParsed[], token: string | 
   return f;
 }
 
-export function similarToken(tokenA: string, tokenB: string) {
+export function similarToken(tokenA: string | undefined, tokenB: string | undefined) {
   return (tokenA?.startsWith("Entity.") ? tokenA.after("Entity.") : tokenA) ==
     (tokenB?.startsWith("Entity.") ? tokenB.after("Entity.") : tokenB);
 }
