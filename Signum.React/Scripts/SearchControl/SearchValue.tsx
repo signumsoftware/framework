@@ -394,7 +394,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       fo = { ...p.findOptions };
 
     if (fo.systemTime == null && p.ctx?.frame?.currentDate && Finder.isSystemVersioned(controller.queryDescription!.columns["Entity"].type)) {
-      if (p.ctx?.frame?.currentDate)
+      if (p.ctx?.frame?.previousDate)
         fo.systemTime = { mode: 'Between', startDate: p.ctx?.frame!.previousDate, endDate: p.ctx?.frame!.currentDate, joinMode: "FirstCompatible" };
       else
         fo.systemTime = { mode: 'AsOf', startDate: p.ctx?.frame!.currentDate };
