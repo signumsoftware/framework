@@ -2,6 +2,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.Data.Common;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -454,7 +455,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
                     if (newValue is DateTime dt)
                     {
-                        var kind = (Schema.Current.Field(pr) as IColumn)?.DateTimeKind ?? DateTimeKind.Unspecified;
+                        var kind = Schema.Current.Settings.FieldAttribute<DbTypeAttribute>(pr)?.DateTimeKind ?? DateTimeKind.Unspecified;
                         newValue = dt.ToKind(kind);
                     }
 
