@@ -15,7 +15,7 @@ export default function ExchangeWebServiceEmailService(p: { ctx: TypeContext<Exc
       <ValueLine ctx={sc.subCtx(s => s.useDefaultCredentials)} />
       <ValueLine ctx={sc.subCtx(s => s.username)} />
       {!sc.readOnly &&
-        <DoublePassword ctx={new TypeContext<string>(sc, undefined, undefined as any, Binding.create(sc.value, v => v.newPassword))} isNew={sc.value.isNew} mandatory={false} />}
+        <DoublePassword ctx={new TypeContext<string>(sc, undefined, undefined as any, Binding.create(sc.value, v => v.newPassword))} initialOpen={sc.value.isNew ?? false} mandatory={false} />}
     </div>
   );
 }

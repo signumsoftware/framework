@@ -6,9 +6,9 @@ import { TypeContext } from '@framework/TypeContext'
 import { classes } from '../../../Signum.React/Scripts/Globals'
 import { useForceUpdate } from '../../../Signum.React/Scripts/Hooks'
 
-export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean, mandatory: boolean }) {
+export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean }) {
 
-  const [withPassword, setWithPassword] = React.useState(p.isNew);
+  const [isOpen, setIsOpen] = React.useState(p.initialOpen);
   var newPass = React.useRef<HTMLInputElement>(null);
   var newPass2 = React.useRef<HTMLInputElement>(null);
   const forceUpdate = useForceUpdate();
@@ -30,10 +30,10 @@ export function DoublePassword(p: { ctx: TypeContext<string>, isNew: boolean, ma
     ctx.frame!.revalidate();
   }
 
-  if (!withPassword) {
+  if (!isOpen) {
     return (
       <FormGroup label={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx}>
-        <a className="btn btn-light btn-sm" onClick={() => setWithPassword(true)}>
+        <a className="btn btn-light btn-sm" onClick={() => setIsOpen(true)}>
           <FontAwesomeIcon icon="key" /> {LoginAuthMessage.ChangePassword.niceToString()}
         </a>
       </FormGroup>
