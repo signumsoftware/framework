@@ -41,7 +41,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity
 
     public Lite<FileEntity> Template { get; set; }
 
-    [StringLengthValidator(Min = 3, Max = 200), FileNameValidator]
+    [StringLengthValidator(Min = 3, Max = 250), FileNameValidator]
     public string FileName { get; set; }
 
     public WordTransformerSymbol? WordTransformer { get; set; }

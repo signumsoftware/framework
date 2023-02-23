@@ -1,10 +1,11 @@
 
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Signum.Utilities;
 
 public class ProgressProxy
 {
-    const int numUpdates = 10000;
-
     private string? currentTask;
 
     private int min;
@@ -13,10 +14,12 @@ public class ProgressProxy
 
     public event EventHandler<ProgressArgs>? Changed;
 
-    public ProgressProxy()
-    {
-    }
+    public CancellationToken CancellationToken; 
 
+    public ProgressProxy(CancellationToken cancellationToken = default)
+    {
+        this.CancellationToken = cancellationToken;
+    }
 
     public int Min
     {
@@ -36,9 +39,15 @@ public class ProgressProxy
             if (min <= value && value <= max)
             {
                 position = value;
-                    OnChanged(ProgressAction.Position);
+                OnChanged(ProgressAction.Position);
             }
         }
+    }
+
+    //pp?.Posittion++ does not compile, but pp?.IncrementPosition() does
+    public void IncrementPosition() 
+    {
+        Position++;
     }
 
     public string? CurrentTask
@@ -109,20 +118,9 @@ public class ProgressProxy
 
     void OnChanged(ProgressAction pa)
     {
+        this.CancellationToken.ThrowIfCancellationRequested();
         Changed?.Invoke(this, new ProgressArgs(pa));
     }
-
-    static int RoundToPowerOfTwoMinusOne(int n)
-    {
-        n |= n >> 1;
-        n |= n >> 2;
-        n |= n >> 4;
-        n |= n >> 8;
-        n |= n >> 16;
-        return n;
-    }
-
-  
 }
 
 public enum ProgressAction
@@ -138,5 +136,44 @@ public class ProgressArgs : EventArgs
     public ProgressArgs(ProgressAction a)
     {
         Action = a;
+    }
+}
+
+public static class WaitHandleExtension
+{
+    public static async Task<bool> WaitOneAsync(this WaitHandle handle, int millisecondsTimeout, CancellationToken cancellationToken)
+    {
+        RegisteredWaitHandle? registeredHandle = null;
+        CancellationTokenRegistration tokenRegistration = default(CancellationTokenRegistration);
+        try
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            registeredHandle = ThreadPool.RegisterWaitForSingleObject(
+                handle,
+                (state, timedOut) => ((TaskCompletionSource<bool>)state!).TrySetResult(!timedOut),
+                tcs,
+                millisecondsTimeout,
+                true);
+            tokenRegistration = cancellationToken.Register(
+                state => ((TaskCompletionSource<bool>)state!).TrySetCanceled(),
+                tcs);
+            return await tcs.Task;
+        }
+        finally
+        {
+            if (registeredHandle != null)
+                registeredHandle.Unregister(null);
+            tokenRegistration.Dispose();
+        }
+    }
+
+    public static Task<bool> WaitOneAsync(this WaitHandle handle, TimeSpan timeout, CancellationToken cancellationToken)
+    {
+        return handle.WaitOneAsync((int)timeout.TotalMilliseconds, cancellationToken);
+    }
+
+    public static Task<bool> WaitOneAsync(this WaitHandle handle, CancellationToken cancellationToken)
+    {
+        return handle.WaitOneAsync(Timeout.Infinite, cancellationToken);
     }
 }

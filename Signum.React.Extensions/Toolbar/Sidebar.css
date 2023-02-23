@@ -118,7 +118,7 @@
     }
 
     .sidebar-inner .nav-item .nav-link:hover svg {
-        filter: brightness(0.5) !important;
+        filter: brightness(0.5);
     }
 
     .sidebar-inner .nav-item .nav-link:active {

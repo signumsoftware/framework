@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as draftjs from 'draft-js';
 import { IBinding, Binding, PropertyRoute, getSymbol } from '@framework/Reflection';
-import '../../HtmlEditor/HtmlEditor.css';
 import HtmlEditor, { HtmlEditorProps, HtmlEditorController } from '../../HtmlEditor/HtmlEditor';
 import BasicCommandsPlugin from '../../HtmlEditor/Plugins/BasicCommandsPlugin';
 import ImagePlugin, { ImageConverter } from '../../HtmlEditor/Plugins/ImagePlugin';

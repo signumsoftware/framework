@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
 import { useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
+import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
@@ -125,6 +126,7 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}>
+      {getTimeMachineIcon({ ctx: ctx, isContainer: true, translateY:"250%" })}
       <fieldset className="sf-repeater-element"
         {...EntityListBaseController.entityHtmlAttributes(ctx.value)}>
         <legend>

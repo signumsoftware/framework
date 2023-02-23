@@ -14,6 +14,11 @@ export type ColumnOptionsMode =
   "InsertStart" |
   "ReplaceOrAdd";
 
+export const CombineRows = new EnumType<CombineRows>("CombineRows");
+export type CombineRows =
+  "EqualValue" |
+  "EqualEntity";
+
 export const DashboardBehaviour = new EnumType<DashboardBehaviour>("DashboardBehaviour");
 export type DashboardBehaviour =
   "PromoteToDasboardPinnedFilter" |
@@ -134,6 +139,8 @@ export module QueryTokenMessage {
   export const CellOperation = new MessageKey("QueryTokenMessage", "CellOperation");
   export const ContainerOfCellOperations = new MessageKey("QueryTokenMessage", "ContainerOfCellOperations");
   export const EntityType = new MessageKey("QueryTokenMessage", "EntityType");
+  export const UtcDateTime = new MessageKey("QueryTokenMessage", "UtcDateTime");
+  export const DateTimePart = new MessageKey("QueryTokenMessage", "DateTimePart");
 }
 
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");

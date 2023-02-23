@@ -366,7 +366,11 @@ export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext
     if (!conf)
       return;
 
-    return API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+    var promise = eoc.progressModalOptions ?
+      API.executeLiteWithProgress(toLite(eoc.entity), eoc.operationInfo.key, eoc.progressModalOptions, ...args) :
+      API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args);
+
+    return promise
       .then(eoc.onExecuteSuccess ?? (pack => {
         eoc.frame.onReload(pack);
         if (pack?.entity.id != null)

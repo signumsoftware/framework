@@ -23,18 +23,22 @@ internal static class SmartEqualizer
         if (e1 == NewId || e2 == NewId)
             return False;
 
+        ExpressionMetadataStore.ShareMetadata(e1, e2);
+
         if (e1.Type.IsNullable() == e2.Type.IsNullable())
             return Expression.Equal(e1, e2);
 
-        return Expression.Equal(e1.Nullify(), e2.Nullify());
+        return Expression.Equal(e1.NullifyWithMetadata(), e2.NullifyWithMetadata());
     }
 
     public static Expression NotEqualNullable(Expression e1, Expression e2)
     {
+        ExpressionMetadataStore.ShareMetadata(e1, e2);
+
         if (e1.Type.IsNullable() == e2.Type.IsNullable())
             return Expression.NotEqual(e1, e2);
 
-        return Expression.NotEqual(e1.Nullify(), e2.Nullify());
+        return Expression.NotEqual(e1.NullifyWithMetadata(), e2.NullifyWithMetadata());
     }
 
     public static Expression PolymorphicEqual(Expression exp1, Expression exp2)

@@ -62,3 +62,10 @@ public enum ColumnOptionsMode
     InsertStart,
     ReplaceOrAdd,
 }
+
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+public enum CombineRows
+{
+    EqualValue,
+    EqualEntity,
+}

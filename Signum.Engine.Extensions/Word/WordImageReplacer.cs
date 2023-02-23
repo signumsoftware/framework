@@ -99,6 +99,20 @@ public static class WordImageReplacer
             blip.Remove();
     }
 
+    public static void RemoveMultipleImage(this WordprocessingDocument doc, string title, bool removeFullDrawing)
+    {
+        Blip[] blips = FindAllBlips(doc, d => d.Title == title || d.Description == title);
+        foreach (var blip in blips)
+        {
+            doc.MainDocumentPart!.DeletePart(blip.Embed!);
+
+            if (removeFullDrawing)
+                ((OpenXmlElement)blip).Follow(a => a.Parent).OfType<Drawing>().FirstEx().Remove();
+            else
+                blip.Remove();
+        }
+    }
+
     static ImagePart CreateImagePart<TImage>(this WordprocessingDocument doc, TImage image, IImageConverter<TImage> converter, string id, ImagePartType imagePartType = ImagePartType.Png)
     {
         ImagePart img = doc.MainDocumentPart!.AddImagePart(imagePartType, id);
@@ -115,7 +129,9 @@ public static class WordImageReplacer
 
     public static Blip FindBlip(this WordprocessingDocument doc, string titleOrDescription)
     {
-        var drawing = doc.MainDocumentPart!.Document.Descendants().OfType<Drawing>().Single(r =>
+        var query = GetDrawings(doc);
+
+        var drawing = query.Single(r =>
         {
             var prop = r.Descendants<DocProperties>().SingleOrDefault();
             var match = prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
@@ -128,7 +144,9 @@ public static class WordImageReplacer
 
     public static Blip[] FindAllBlips(this WordprocessingDocument doc, Func<DocProperties, bool> predicate)
     {
-        var drawing = doc.MainDocumentPart!.Document.Descendants().OfType<Drawing>().Where(r =>
+        var query = GetDrawings(doc);
+
+        var drawing = query.Where(r =>
         {
             var prop = r.Descendants<DocProperties>().SingleOrDefault();
             var match = prop != null && predicate(prop);
@@ -137,6 +155,13 @@ public static class WordImageReplacer
         });
 
         return drawing.Select(d => d.Descendants<Blip>().SingleEx()).ToArray();
+    }
+
+    static IEnumerable<Drawing> GetDrawings(WordprocessingDocument doc)
+    {
+        return doc.MainDocumentPart!.Document.Descendants<Drawing>()
+                    .Concat(doc.MainDocumentPart!.HeaderParts.SelectMany(hp => hp.Header.Descendants<Drawing>()))
+                    .Concat(doc.MainDocumentPart!.FooterParts.SelectMany(hp => hp.Footer.Descendants<Drawing>()));
     }
 }
 

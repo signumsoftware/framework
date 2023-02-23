@@ -3,14 +3,14 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, QueryRequest } from '../FindOptions'
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
-import { tryGetTypeInfos, getQueryKey, getTypeInfos } from '../Reflection'
+import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString } from '../Reflection'
 import * as Navigator from '../Navigator'
-import SearchControlLoaded, { SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
+import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
 import { Property } from 'csstype';
 import "./Search.css"
 import { ButtonBarElement, StyleContext } from '../TypeContext';
-import { useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
+import { areEqualDeps, useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
 import { RefreshMode } from '../Signum.Entities.DynamicQuery';
 
 export interface SimpleFilterBuilderProps {
@@ -22,6 +22,8 @@ export interface SearchControlProps {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
+  selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement<any> | undefined;
+
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
@@ -39,6 +41,7 @@ export interface SearchControlProps {
   showFilters?: boolean;
   showSimpleFilterBuilder?: boolean;
   showFilterButton?: boolean;
+  showSelectedButton?: boolean;
   showSystemTimeButton?: boolean;
   showGroupButton?: boolean;
   showFooter?: boolean;
@@ -65,15 +68,17 @@ export interface SearchControlProps {
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
   onCreate?: (scl: SearchControlLoaded) => Promise<undefined | void | EntityPack<any> | ModifiableEntity | "no_change">;
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
-  styleContext?: StyleContext;
+  ctx?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>;
   onPageSubTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
+  onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
 }
 
 export interface SearchControlState {
   queryDescription: QueryDescription;
-  findOptions?: FindOptionsParsed;
+  findOptionsParsed?: FindOptionsParsed;
+  deps?: React.DependencyList;
   message?: string;
 }
 
@@ -100,7 +105,9 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
 
   const [state, setState] = useStateWithPromise<SearchControlState | undefined>(undefined);
   const searchControlLoaded = React.useRef<SearchControlLoaded>(null);
-  const lastProps = usePrevious(p);
+  const lastDeps = usePrevious(p.deps);
+  //const lastFO = usePrevious(p.findOptions);
+  //const lastFrame = usePrevious({ currentDate: p.ctx?.frame?.currentDate, previousDateda: p.ctx?.frame?.previousDate });
 
   const handler: SearchControlHandler = {
     findOptions: p.findOptions,
@@ -114,14 +121,13 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
   React.useImperativeHandle(ref, () => handler, [p.findOptions, state, searchControlLoaded.current]);
 
   React.useEffect(() => {
-    const path = Finder.findOptionsPath(p.findOptions);
-    if (path == (lastProps && Finder.findOptionsPath(lastProps.findOptions)))
-      return;
-
-    if (state?.findOptions) {
-      const fo = Finder.toFindOptions(state.findOptions, state.queryDescription, p.defaultIncludeDefaultFilters!);
-      if (path == Finder.findOptionsPath(fo))
+    if (state?.findOptionsParsed) {
+      const fo = Finder.toFindOptions(state.findOptionsParsed, state.queryDescription, p.defaultIncludeDefaultFilters!);
+      if (Finder.findOptionsPath(p.findOptions) == Finder.findOptionsPath(fo)) {
+        if (lastDeps != null && p.deps != null && !areEqualDeps(lastDeps, p.deps))
+          setState({ ...state, deps: p.deps });
         return;
+      }
     }
 
     setState(undefined).then(() => {
@@ -133,18 +139,39 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         return;
       }
 
-      Finder.getQueryDescription(fo.queryName).then(qd => {
+      Finder.getQueryDescription(fo.queryName).then(async qd => {
         const message = Finder.validateNewEntities(fo);
 
         if (message)
           setState({ queryDescription: qd, message: message });
-        else
-          Finder.parseFindOptions(fo, qd, p.defaultIncludeDefaultFilters!).then(fop => {
-            setState({ findOptions: fop, queryDescription: qd });
-          });
+        else {
+          const fop = await Finder.parseFindOptions(fo, qd, p.defaultIncludeDefaultFilters!);
+
+          if (fop.systemTime == undefined && p.ctx?.frame?.currentDate && p.ctx.frame!.previousDate &&
+            Finder.isSystemVersioned(qd.columns["Entity"].type)) {
+
+            fop.systemTime = {
+              mode: 'Between',
+              joinMode: 'FirstCompatible',
+              startDate: p.ctx.frame.previousDate,
+              endDate: p.ctx.frame.currentDate
+            };
+
+            const cops = await Finder.parseColumnOptions([
+              { token: QueryTokenString.entity().systemValidFrom(), hiddenColumn: true },
+              { token: QueryTokenString.entity().systemValidTo(), hiddenColumn: true }
+            ], fop.groupResults, qd);
+
+            fop.columnOptions = [...cops, ...fop.columnOptions];
+
+            fop.orderOptions = [...fop.orderOptions, { token: cops[0].token!, orderType: "Descending" }];
+          }
+
+          setState({ findOptionsParsed: fop, queryDescription: qd, deps: p.deps });
+        }
       });
     });
-  }, [p.findOptions]);
+  }, [Finder.findOptionsPath(p.findOptions), p.ctx?.frame?.currentDate, p.ctx?.frame?.previousDate, ...(p.deps ?? [])]);
 
   if (state?.message) {
     return (
@@ -155,10 +182,10 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
     );
   }
 
-  if (!state || !state.findOptions)
+  if (!state || !state.findOptionsParsed)
     return null;
 
-  const fop = state.findOptions;
+  const fop = state.findOptionsParsed;
   if (!Finder.isFindable(fop.queryKey, false))
     return null;
 
@@ -191,7 +218,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
         showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton ?? false) && (qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true))}
         showGroupButton={SearchControlOptions.showGroupButton(handler) && (p.showGroupButton ?? false)}
-        showSelectedButton={SearchControlOptions.showSelectedButton(handler)}
+        showSelectedButton={SearchControlOptions.showSelectedButton(handler) && (p.showSelectedButton ?? true)}
         showFooter={p.showFooter}
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
@@ -209,7 +236,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
         defaultRefreshMode={p.defaultRefreshMode}
         avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
-        deps={p.deps}
+        deps={state.deps}
         extraOptions={p.extraOptions}
 
         enableAutoFocus={p.enableAutoFocus == null ? false : p.enableAutoFocus}
@@ -225,11 +252,14 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         onHeighChanged={p.onHeighChanged}
         onResult={p.onResult}
 
-        styleContext={p.styleContext}
+        ctx={p.ctx}
         customRequest={p.customRequest}
         onPageTitleChanged={p.onPageSubTitleChanged}
 
+        selectionFormatter={p.selectionFromatter}
+
         mobileOptions={p.mobileOptions}
+        onDrilldown={p.onDrilldown}
       />
     </ErrorBoundary>
   );
@@ -247,5 +277,4 @@ export interface ISimpleFilterBuilder {
   getFilters(): FilterOption[];
   onDataChanged?(): void;
 }
-
 

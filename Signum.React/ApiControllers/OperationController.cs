@@ -5,7 +5,9 @@ using Signum.Entities.Reflection;
 using Signum.React.Facades;
 using Signum.React.Filters;
 using Signum.Utilities.Reflection;
+using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
@@ -79,6 +81,18 @@ public class OperationController : Controller
         var entity = OperationLogic.ServiceExecuteLite(request.lite, op, request.ParseArgs(op));
 
         return SignumServer.GetEntityPack(entity);
+    }
+
+    [HttpPost("api/operation/executeLiteWithProgress"), ProfilerActionSplitter]
+    public IAsyncEnumerable<ProgressStep<EntityPackTS>> ExecuteLiteWithProgress([Required, FromBody] LiteOperationRequest request, CancellationToken cancellationToken)
+    {
+        var op = request.GetOperationSymbol(request.lite.EntityType);
+
+        return WithProgressProxy(pp =>
+        {
+            var entity = OperationLogic.ServiceExecuteLite(request.lite, op, request.ParseArgs(op).EmptyIfNull().And(pp).ToArray());
+            return SignumServer.GetEntityPack(entity);
+        }, ControllerContext, cancellationToken);
     }
 
     [HttpPost("api/operation/deleteEntity"), ProfilerActionSplitter]
@@ -270,6 +284,81 @@ public class OperationController : Controller
             yield return new OperationResult(lite) { Error = error };
         }
     }
+
+    public class ProgressStep<T>
+    {
+        public string? CurrentTask;
+        public int? Min;
+        public int? Max;
+        public int? Position;
+
+
+        public bool IsFinished;
+        public T? Result;
+        public HttpError? Error;
+    }
+
+    async static IAsyncEnumerable<ProgressStep<T>> WithProgressProxy<T>(Func<ProgressProxy, T> action, ActionContext context, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.AutoReset);
+
+        ProgressStep<T>? lastProgress = null;
+
+        var task = Task.Run(() =>
+        {
+            ProgressProxy pp = new ProgressProxy(cancellationToken);
+
+            pp.Changed += (sender, p) =>
+            {
+                lastProgress = new ProgressStep<T>
+                {
+                    CurrentTask = pp.CurrentTask,
+                    Max = pp.Max,
+                    Min = pp.Min,
+                    Position = pp.Position,
+                };
+                handle.Set();
+            };
+
+            try
+            {
+                var result = action(pp);
+                lastProgress = new ProgressStep<T>
+                {
+                    IsFinished = true,
+                    Result = result,
+                };
+                handle.Set();
+            }
+            catch(Exception ex)
+            {
+                SignumExceptionFilterAttribute.LogException(ex, context);
+                var error = SignumExceptionFilterAttribute.CustomHttpErrorFactory(ex);
+                lastProgress = new ProgressStep<T>
+                {
+                    IsFinished = true,
+                    Error = error
+                };
+                handle.Set();
+            }
+        });
+
+        while (await handle.WaitOneAsync(CancellationToken.None))
+        {
+            var lp = lastProgress;
+            if (lp == null) //Exception
+                break;
+            else
+            {
+                yield return lp;
+                if (lp.IsFinished)
+                    break;
+            }
+        }
+
+        //await task; //avoid throwing the exception
+    }
+
 
 
     public class MultiOperationRequest : BaseOperationRequest

@@ -5,6 +5,10 @@ input[type=radio] {
     height: 16px;
 }
 
+.form-check-input[type=radio] {
+    border-radius: 50% !important;
+}
+
 label > input[type=checkbox],
 label > input[type=radio] {
     margin: 0;
@@ -91,6 +95,10 @@ li.sf-strip-element {
     padding: 2px 5px;
 }
 
+.sf-strip-element .sf-strip-link > span {
+    display: initial !important;
+}
+
 /* Buttons */
 /*.btn.btn-default.sf-line-button {
     background: transparent;
@@ -105,7 +113,7 @@ li.sf-strip-element {
     }
 
     .sf-line-button:hover {
-        color: gray;
+        color: dimgray;
     }
 
     .sf-line-button:not(.input-group-text) {

@@ -4,6 +4,7 @@ namespace Signum.Engine.Linq;
 
 public class AliasGenerator
 {
+
     readonly HashSet<string> usedAliases = new HashSet<string>();
     public bool isPostgres = Schema.Current.Settings.IsPostgres;
 
@@ -41,7 +42,7 @@ public class AliasGenerator
     public Alias NextTableAlias(string tableName)
     {
         string? abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
-            tableName.Any(a => a == '_') ? new string(tableName.SplitNoEmpty('_' ).Select(s => s[0]).ToArray()) : null;
+            tableName.Any(a => a == '_') ? new string(tableName.SplitNoEmpty('_').Select(s => s[0]).ToArray()) : null;
 
         if (!abv.HasText())
             abv = tableName.TryStart(3).ToLower();

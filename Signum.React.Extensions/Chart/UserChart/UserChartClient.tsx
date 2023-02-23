@@ -70,15 +70,15 @@ export function start(options: { routes: RouteObject[] }) {
 export module Converter {
 
 
-  export async function applyUserChart(cr: ChartRequestModel, uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
-    cr.chartScript = uq.chartScript;
-    cr.maxRows = uq.maxRows;
+  export async function applyUserChart(cr: ChartRequestModel, uc: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
+    cr.chartScript = uc.chartScript;
+    cr.maxRows = uc.maxRows;
 
     const filters = await UserAssetsClient.API.parseFilters({
-      queryKey: uq.query.key,
+      queryKey: uc.query.key,
       canAggregate: true,
       entity: entity,
-      filters: uq.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
+      filters: uc.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
     });
 
 
@@ -88,16 +88,16 @@ export module Converter {
 
     await Finder.parseFilterValues(cr.filterOptions);
 
-    cr.parameters = uq.parameters.map(mle => ({
-      rowId: null,
-      element: ChartParameterEmbedded.New({
-        name: mle.element.name,
-        value: mle.element.value,
-      })
-    }));
+      cr.parameters = uc.parameters.map(mle => ({
+        rowId: null,
+        element: ChartParameterEmbedded.New({
+          name: mle.element.name,
+          value: mle.element.value,
+        })
+      }));
 
-    cr.columns = uq.columns.map(mle => {
-      var t = mle.element.token;
+      cr.columns = uc.columns.map(mle => {
+        var t = mle.element.token;
 
       return ({
         rowId: null,

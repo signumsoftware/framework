@@ -18,13 +18,19 @@ public class EntityPropertyToken : QueryToken
 
     QueryToken parent;
     public override QueryToken? Parent => parent;
-   
-   internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr)
+
+
+    internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr)
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
         this.PropertyInfo = pi ?? throw new ArgumentNullException(nameof(pi));
         this.PropertyRoute = pr;
     }
+
+
+    internal static Func<EntityPropertyToken, DateTimeKind> DateTimeKindField = null!;
+
+    public override DateTimeKind DateTimeKind => DateTimeKindField(this);
 
     public override Type Type
     {

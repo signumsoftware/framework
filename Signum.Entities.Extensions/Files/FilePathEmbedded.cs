@@ -79,6 +79,7 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
 
     public string? Hash { get; private set; }
 
+    [Format("N0")]
     public int FileLength { get; internal set; }
 
     [AutoExpressionField]

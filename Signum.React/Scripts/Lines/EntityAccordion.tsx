@@ -13,6 +13,7 @@ import { TypeBadge } from './AutoCompleteConfig'
 import { Accordion } from 'react-bootstrap'
 import { useForceUpdate } from '../Hooks'
 import { AccordionEventKey } from 'react-bootstrap/esm/AccordionContext'
+import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface EntityAccordionProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityAccordionController) => React.ReactElement<any>);
@@ -131,7 +132,7 @@ export const EntityAccordion = React.forwardRef(function EntityAccordion(props: 
       <Accordion className="sf-accordion-elements" activeKey={c.selectedIndex?.toString()} onSelect={handleSelectTab}>
         {
           c.getMListItemContext(ctx).map((mlec, i) => (
-            <EntityAccordionElement key={c.keyGenerator.getKey(mlec.value)}
+            <EntityAccordionElement key={i}
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
               move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
@@ -174,6 +175,20 @@ export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRe
 
   const forceUpdate = useForceUpdate();
 
+  if (ctx.binding == null && ctx.previousVersion) {
+    return (
+      <Accordion.Item className={classes(drag?.dropClass, "sf-accordion-element")} eventKey="removed" title={EntityControlMessage.Removed0.niceToString()}>
+        <Accordion.Header>
+          <div className="d-flex align-items-center flex-grow-1" style={{ backgroundColor: "#ff000021" }}>
+            {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
+          </div>
+        </Accordion.Header>
+        <Accordion.Body>
+        </Accordion.Body>
+      </Accordion.Item>
+    );
+  }
+
   return (
     <Accordion.Item className={classes(drag?.dropClass, "sf-accordion-element")} eventKey={ctx.index!.toString()}
       onDragEnter={drag?.onDragOver}
@@ -182,6 +197,7 @@ export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRe
 
       <Accordion.Header {...EntityListBaseController.entityHtmlAttributes(ctx.value)}>
         <div className="d-flex align-items-center flex-grow-1">
+          {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
           {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>

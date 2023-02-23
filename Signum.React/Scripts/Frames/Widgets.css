@@ -8,7 +8,7 @@
     margin-bottom: 0px;
     background: none;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
 }
 
 body.rtl .sf-widgets {
@@ -16,8 +16,6 @@ body.rtl .sf-widgets {
 }
 
 .sf-widgets > * {
-    display: block;
-    position: relative;
     margin-left: 4px;
 }
 

@@ -19,6 +19,7 @@ import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import { CachedQueryJS, executeQueryCached, executeQueryValueCached } from '../CachedQueryExecutor'
 import { DashboardController, DashboardPinnedFilters } from './DashboardFilterController'
+import { UserQueryEntity } from 'UserQueries/Signum.Entities.UserQueries'
 
 export interface UserQueryPartHandler {
   findOptions: FindOptions;
@@ -27,7 +28,7 @@ export interface UserQueryPartHandler {
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
-  let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity]);
+  let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity && liteKey(p.entity)]);
 
   const [refreshKey, setRefreshKey] = React.useState<number>(0);
 
@@ -76,6 +77,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
       cachedQuery={cachedQuery}
       customColor={p.partEmbedded.customColor}
       sameColor={p.partEmbedded.useIconColorForTitle}
+      userQuery={p.content.userQuery}
     />;
   }
 
@@ -128,7 +130,8 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
         searchOnLoad={part.userQuery.refreshMode == "Auto"}
         customRequest={cachedQuery && ((req, fop) => cachedQuery!.then(cq => executeQueryCached(req, fop, cq)))}
         onSearch={(fo, dataChange) => dataChange && onDataChanged()}
-        maxResultsHeight={part.allowMaxHeight ? "none" : undefined}        
+        maxResultsHeight={part.allowMaxHeight ? "none" : undefined}
+        extraOptions={{ userQuery: toLite(part.userQuery) }}
       />
     </FullscreenComponent>
   );
@@ -144,6 +147,7 @@ interface BigValueBadgeProps {
   deps?: React.DependencyList;
   cachedQuery?: Promise<CachedQueryJS>;
   customColor: string | null;
+  userQuery: UserQueryEntity;
 }
 
 export function BigValueSearchCounter(p: BigValueBadgeProps) {
@@ -161,13 +165,14 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
         color: p.sameColor ? p.iconColor : (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
       }}>
         <div className="row">
-          <div className="col-3">
+          <div className="col-lg-3">
             {p.iconName &&
               <FontAwesomeIcon icon={parseIcon(p.iconName)!} color={p.iconColor} size="4x" />}
           </div>
-          <div className={classes("col-9 flip", "text-end")}>
+          <div className={classes("col-lg-9 flip", "text-end")}>
             <h1>
               <SearchValue ref={vsc} findOptions={p.findOptions} isLink={false} isBadge={false} deps={p.deps}
+                searchControlProps={{ extraOptions: { userQuery: toLite(p.userQuery) } }}
                 valueToken={!p.aggregateFromSummaryHeader ? undefined : p.findOptions.columnOptions!.first(a => a?.summaryToken != null)?.summaryToken}
                 customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}
               />

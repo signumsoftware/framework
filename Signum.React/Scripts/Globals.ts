@@ -40,8 +40,8 @@ declare global {
     clear(this: Array<T>): void;
     groupsOf(this: Array<T>, groupSize: number, elementSize?: (item: T) => number): T[][];
 
-    withMin<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
-    withMax<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
+    minBy<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
+    maxBy<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
     max(this: Array<number | null | undefined>): number | null;
     max(this: Array<T>, selector: (element: T, index: number, array: T[]) => number | null | undefined): number | null;
     min(this: Array<number | null | undefined>): number | null;
@@ -263,7 +263,7 @@ Array.prototype.orderByDescending = function (this: any[], keySelector: (element
 };
 
 
-Array.prototype.withMin = function (this: any[], keySelector: (element: any) => any): any {
+Array.prototype.minBy = function (this: any[], keySelector: (element: any) => any): any {
   if (this.length == 0)
     return undefined;
 
@@ -279,7 +279,7 @@ Array.prototype.withMin = function (this: any[], keySelector: (element: any) => 
   return result;
 };
 
-Array.prototype.withMax = function (this: any[], keySelector: (element: any) => any): any {
+Array.prototype.maxBy = function (this: any[], keySelector: (element: any) => any): any {
   if (this.length == 0)
     return undefined;
 

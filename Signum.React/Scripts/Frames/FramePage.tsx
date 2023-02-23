@@ -219,7 +219,7 @@ export default function FramePage() {
 
   const frame: EntityFrame = {
     tabs: undefined,
-    frameComponent: { forceUpdate, type: FramePage as any },
+    frameComponent: { forceUpdate, type: FramePage },
     entityComponent: entityComponent.current,
     pack: state.pack,
     isExecuting: () => s.executing == true,

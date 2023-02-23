@@ -11,6 +11,7 @@ import { useController } from './LineBase'
 import { normalizeEmptyArray } from './EntityCombo'
 import { ResultTable } from '../Search'
 import { renderLite } from '../Navigator'
+import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface RenderCheckboxItemContext<T> {
   row: ResultRow;
@@ -204,9 +205,11 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
     const resultTable = Array.isArray(data) ? undefined : data;
 
     var listCtx = mlistItemContext(p.ctx);
-
+    
     return fixedData.map((row, i) => {
       var ectx = listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.value), row.entity));
+      var oldCtx = p.ctx.previousVersion == null || p.ctx.previousVersion.value == null ? null :
+        listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.previousVersion?.value), row.entity));
 
       var ric: RenderCheckboxItemContext<any> = {
         row,
@@ -222,6 +225,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
 
       return (
         <label className="sf-checkbox-element" key={i}>
+          {getTimeMachineCheckboxIcon({ newCtx: ectx, oldCtx: oldCtx })}
           <input type="checkbox"
             className="form-check-input"
             checked={ectx != null}

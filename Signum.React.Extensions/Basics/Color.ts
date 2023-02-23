@@ -261,8 +261,8 @@ export class Gradient {
   }
 
   getColor(value: number): Color {
-    var prev = this.list.filter(a => a.value <= value).withMax(a => a.value);
-    var next = this.list.filter(a => a.value > value).withMin(a => a.value);
+    var prev = this.list.filter(a => a.value <= value).maxBy(a => a.value);
+    var next = this.list.filter(a => a.value > value).minBy(a => a.value);
 
     if (prev == undefined)
       return next!.color;
