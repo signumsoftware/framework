@@ -6,15 +6,16 @@ import { ErrorBoundary } from '@framework/Components';
 import { getTimeMachineIcon } from '@framework/Lines/TimeMachineIcon';
 
 export interface HtmlEditorLineProps extends Omit<HtmlEditorProps & Partial<draftjs.EditorProps>, "binding"> {
-  ctx: TypeContext<string | null | undefined>
+  ctx: TypeContext<string | null | undefined>;
+  htmlEditorRef?: React.Ref<HtmlEditorController>;
 }
 
-export default function HtmlEditorLine(p: HtmlEditorLineProps) {
+export default function HtmlEditorLine({ ctx, htmlEditorRef, ...p }: HtmlEditorLineProps) {
   return (
     <ErrorBoundary>
       <div style={p.htmlAttributes?.style}>
-        {getTimeMachineIcon({ ctx: p.ctx })}
-        <HtmlEditor binding={p.ctx.binding} {...p} />
+        {getTimeMachineIcon({ ctx: ctx })}
+        <HtmlEditor binding={ctx.binding} ref={htmlEditorRef} {...p} />
       </div>
     </ErrorBoundary>
   );

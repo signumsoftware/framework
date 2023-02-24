@@ -26,6 +26,8 @@ export interface HtmlEditorProps {
   toolbarButtons?: (c: HtmlEditorController) => React.ReactElement | React.ReactFragment | null;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   initiallyFocused?: boolean | number;
+  onEditorFocus?: (e: React.SyntheticEvent, controller: HtmlEditorController) => void;
+  onEditorBlur?: (e: React.SyntheticEvent, controller: HtmlEditorController) => void;
 }
 
 export interface HtmlEditorControllerProps {
@@ -56,6 +58,8 @@ export class HtmlEditorController {
   small?: boolean;
   initialContentState: draftjs.ContentState = null!;
 
+  lastSavedString?: { str: string | null };
+
   createWithContentAndDecorators(contentState: draftjs.ContentState): draftjs.EditorState {
     return draftjs.EditorState.createWithContent(contentState,
       this.decorators.length == 0 ? undefined : new draftjs.CompositeDecorator(this.decorators));
@@ -83,11 +87,17 @@ export class HtmlEditorController {
       }
     }, []);
 
+    var newValue = this.binding.getValue();
     React.useEffect(() => {
-      var contentState = this.converter.textToContentState(this.binding.getValue() ?? "");
+      if (this.lastSavedString && this.lastSavedString.str == newValue) {
+        this.lastSavedString = undefined;
+        return;
+      }
+
+      var contentState = this.converter.textToContentState(newValue ?? "");
       this.initialContentState = contentState;
       this.setEditorState(this.createWithContentAndDecorators(contentState));
-    }, [this.binding.getValue()]);
+    }, [newValue]);
 
     React.useEffect(() => {
       return () => { this.saveHtml() };
@@ -109,6 +119,7 @@ export class HtmlEditorController {
       var newContent = this.editorState.getCurrentContent();
       if (newContent != this.initialContentState) {
         var value = !newContent.hasText() ? null : this.converter.contentStateToText(newContent);
+        this.lastSavedString = { str: value };
         this.binding.setValue(value);
       }
     }
@@ -231,9 +242,17 @@ export default React.forwardRef(function HtmlEditor({
           ref={c.setRefs}
           editorState={c.editorState}
           readOnly={readOnly}
-          onBlur={() => c.saveHtml()}
           onChange={ev => c.setEditorState(ev)}
           {...props}
+          onBlur={(e: React.SyntheticEvent) => {
+            props.onBlur?.(e);
+            props.onEditorBlur?.(e, c);
+            c.saveHtml();
+          }}
+          onFocus={(e: React.SyntheticEvent) => {
+            props.onFocus?.(e);
+            props.onEditorFocus?.(e, c);             
+          }}
         />
       </div>
       {/*<pre style={{ textAlign: "left" }}>
