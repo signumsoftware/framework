@@ -932,6 +932,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   stickyHeader?: boolean;
 
+  onAssignServerChanges?: (local: T, server: T) => void;
+
   autocomplete?: (fo: FindOptions | undefined, showType: boolean) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
   autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
@@ -1004,6 +1006,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   modalSize?: BsSize;
 
   stickyHeader?: boolean;
+
+  onAssignServerChanges?: (local: T, server: T) => void;
 
   autocomplete?: (fo: FindOptions | undefined, showType: boolean) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;

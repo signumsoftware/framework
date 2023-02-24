@@ -7,12 +7,13 @@ import * as Entities from './Signum.Entities'
 
 export interface ModifiableEntity {
   Type: string;
-  toStr: string;
+  toStr?: string;
   modified: boolean;
   isNew?: boolean; //required in embedded to remove and re-create in EntityJsonSerializer
   error?: { [member: string]: string };
   readonlyProperties?: string[];
   mixins?: { [name: string]: MixinEntity }
+  temporalId: string;
 }
 
 export function liteKeyLong(lite: Lite<Entity>) {
