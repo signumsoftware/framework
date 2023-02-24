@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as draftjs from 'draft-js';
-import HtmlEditor, { HtmlEditorProps } from './HtmlEditor';
+import HtmlEditor, { HtmlEditorController, HtmlEditorProps } from './HtmlEditor';
 import { TypeContext } from '@framework/TypeContext';
 import { ErrorBoundary } from '@framework/Components';
 import { getTimeMachineIcon } from '@framework/Lines/TimeMachineIcon';
