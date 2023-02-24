@@ -34,6 +34,7 @@ import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
+import { similarToken } from "./Search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
 
@@ -238,7 +239,9 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
 export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
   const query = findOptionsPathQuery(fo, extra);
-  return "/find/" + getQueryKey(fo.queryName) + "?" + QueryString.stringify(query);
+  var strQuery = QueryString.stringify(query);
+
+  return "/find/" + getQueryKey(fo.queryName) + (strQuery ? ("?" + strQuery) : "");
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
@@ -361,6 +364,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
     token: c.token!.fullKey,
     displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
     summaryToken: c.summaryToken?.fullKey,
+    combineRows: c.combineRows,
     hiddenColumn: c.hiddenColumn,
   }) as ColumnOption;
  
@@ -460,6 +464,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
       token: completer.get(co.token.toString()),
       displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
       summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
+      combineEquals: co.combineRows,
       hiddenColumn: co.hiddenColumn,
     }) as ColumnOptionParsed));
 }
@@ -756,6 +761,9 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
       fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
   }
 
+  if (fo.filterOptions)
+    fo.filterOptions = simplifyPinnedFilters(fo.filterOptions.notNull());
+
   const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
   const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
 
@@ -786,6 +794,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
         displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
         summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
         hiddenColumn: co.hiddenColumn,
+        combineRows: co.combineRows,
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions?.notNull() ?? []).map(oo => ({
@@ -799,6 +808,25 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     return parseFilterValues(result.filterOptions)
       .then(() => result)
   });
+}
+
+function simplifyPinnedFilters(fos: FilterOption[]): FilterOption[] {
+  fos.filter(fo => fo.pinned != null && (fo.pinned?.active == "Always" || fo.pinned?.active == "WhenHasValue")).forEach(fo => {
+    var fo2 = fos.firstOrNull(fo2 =>
+      fo2.pinned == null && 
+      !isFilterGroupOption(fo2) &&
+      !isFilterGroupOption(fo) &&
+      similarToken(fo.token?.toString(), fo2.token?.toString()) &&
+      (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
+      (fo.pinned?.active == "Always" || fo2.value != null));
+
+    if (fo2 != null) {
+      fo.value = fo2.value;
+      fos.remove(fo2);
+    }
+  });
+
+  return fos;
 }
 
 export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings, avoidHiddenColumns?: boolean): QueryRequest {
@@ -1694,9 +1722,12 @@ export module Encoder {
           co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
             undefined;
 
-        query["column" + i] = co.token + (displayName ? ("~" + displayName) : "");
+        query["column" + i] = co.token  + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
           query["summary" + i] = co.summaryToken.toString();
+        if (co.combineRows)
+          query["combine" + i] = co.combineRows == "EqualValue" ? "V" : "E";
+       
       });
     }
   }
@@ -1825,17 +1856,21 @@ export module Decoder {
 
   export function decodeColumns(query: any): ColumnOption[] {
     var summary = valuesInOrder(query, "summary");
+    var combine = valuesInOrder(query, "combine");
 
     return valuesInOrder(query, "column").map(p => {
 
       var displayName = unscapeTildes(p.value.tryAfter("~")); 
 
-      return ({
-        token: p.value.tryBefore("~") ?? p.value,
+      var token = p.value.tryBefore("~") ?? p.value; 
+      var comb = combine.firstOrNull(a => a.index == p.index)?.value;
+      return softCast<ColumnOption>({
+        token: token,
         displayName: displayName == HIDDEN ? undefined : displayName,
         hiddenColumn: displayName == HIDDEN ? true : undefined,
-        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value
-      }) as ColumnOption;
+        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value,
+        combineRows: comb == "V" ? "EqualValue" : comb == "E" ? "EqualEntity" : undefined,
+      });
     });
   }
 }
@@ -2065,14 +2100,16 @@ function initFormatRules(): FormatRule[] {
           if (cell == undefined || cell == "")
             return "";
 
-          var className = cell.startsWith("0001-") ? "date-start" :
-            ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
+          var c = DateTime.fromISO(cell);
+
+          var className = c.year <= 1 ? "date-start" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && DateTime.fromISO(ctx.systemTime.startDate!) <= c ? "date-created" :
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
           return (
             <bdi className={classes("date", "try-no-wrap", className)}>
-              {toFormatWithFixes(DateTime.fromISO(cell), luxonFormat).replace("T", " ")}
+              {c.toFormat(luxonFormat)}
             </bdi>);
         }, false, "date-cell"); //To avoid flippig hour and date (L LT) in RTL cultures
       }
@@ -2085,12 +2122,14 @@ function initFormatRules(): FormatRule[] {
           if (cell == undefined || cell == "")
             return "";
 
-          var className = cell.startsWith("9999-") ? "date-end" :
-            ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
+          var c = DateTime.fromISO(cell);
+
+          var className = c.year >= 9999 ? "date-end" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && c <= DateTime.fromISO(ctx.systemTime.endDate!) ? "date-removed" :
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat).replace("T", " ")}</bdi>;
+          return <bdi className={classes("date", "try-no-wrap", className)}>{c.toFormat(luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },

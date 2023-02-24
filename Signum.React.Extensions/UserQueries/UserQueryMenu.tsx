@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useLocation, Location } from 'react-router'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, Dic, softCast } from '@framework/Globals'
@@ -22,49 +23,51 @@ import type StringDistance from './StringDistance'
 import { translated } from '../Translation/TranslatedInstanceTools'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { TokenCompleter } from '@framework/Finder'
+import { useForceUpdate } from '@framework/Hooks'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
 }
 
-function decodeUserQueryFromUrl() {
-  var userQueryKey = QueryString.parse(window.location.search)["userQuery"];
-  return userQueryKey && parseLite(userQueryKey);
+function decodeUserQueryFromUrl(location: Location) {
+  var userQueryKey = QueryString.parse(location.search)["userQuery"];
+  return userQueryKey ? parseLite(userQueryKey) as Lite<UserQueryEntity> : undefined;
 }
 
 export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const [currentCustomDrilldowns, setCurrentCustomDrilldownsInternal] = React.useState<MList<Lite<Entity>> | undefined>();
   const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>();
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
+  const forceUpdate = useForceUpdate();
+  const location = useLocation();
 
-  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined, drilldowns: MList<Lite<Entity>> | undefined) {
+  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined) {
     p.searchControl.extraUrlParams.userQuery = uq && liteKey(uq);
 
-    if (uq?.entity && !Dic.equals(uq.entity.customDrilldowns, drilldowns, true))
-      uq.entity = undefined;
-
-    setCurrentCustomDrilldownsInternal(drilldowns);
     p.searchControl.getCurrentUserQuery = () => uq;
-    p.searchControl.pageSubTitle = getToString(uq);
     setCurrentUserQueryInternal(uq);
+
+    p.searchControl.pageSubTitle = getToString(uq);
     p.searchControl.props.onPageTitleChanged?.();
+    Navigator.API.fillLiteModels(uq).then(() => {
+      if (p.searchControl.getCurrentUserQuery?.() == uq) {
+        p.searchControl.pageSubTitle = getToString(uq);
+        p.searchControl.props.onPageTitleChanged?.();
+        forceUpdate();
+      }
+    });
   }
   
   React.useEffect(() => {
-    const uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl() : p.searchControl.props.extraOptions?.userQuery;
+    const uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl(location) : p.searchControl.props.extraOptions?.userQuery;
     if (uq && UserQueryEntity.isLite(uq)) {
-      Navigator.API.fetchAndRemember(uq)
-        .then(entity => {
-          uq.model = getToString(entity);
-          setCurrentUserQuery(uq, entity.customDrilldowns);
-        });
+      setCurrentUserQuery(uq);
     }
     else
-      setCurrentUserQuery(undefined, undefined);
-  }, [window.location.search, p.searchControl.props.extraOptions?.userQuery && liteKey(p.searchControl.props.extraOptions.userQuery)]);
+      setCurrentUserQuery(undefined);
+  }, [location, p.searchControl.props.extraOptions?.userQuery && liteKey(p.searchControl.props.extraOptions.userQuery)]);
 
   function handleSelectedToggle(isOpen: boolean) {
     if (isOpen && userQueries == undefined)
@@ -99,7 +102,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
           sc.setState({ showFilters: false });
         sc.setState({ refreshMode: sc.props.defaultRefreshMode });
-        setCurrentUserQuery(undefined, undefined);
+        setCurrentUserQuery(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
         }
@@ -116,7 +119,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           sc.setState({ refreshMode: userQuery.refreshMode });
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
             sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
-          setCurrentUserQuery(uq, userQuery.customDrilldowns);
+          setCurrentUserQuery(uq);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
@@ -134,7 +137,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(() => reloadList())
       .then(list => {
         if (!list.some(a => is(a, currentUserQuery)))
-          setCurrentUserQuery(undefined, undefined);
+          setCurrentUserQuery(undefined);
         else
           applyUserQuery(currentUserQuery!)
       });
@@ -171,7 +174,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(() => reloadList())
       .then(list => {
         if (!list.some(a => is(a, currentUserQuery))) 
-          setCurrentUserQuery(undefined, undefined);
+          setCurrentUserQuery(undefined);
         else
           applyUserQuery(currentUserQuery!);
       });
@@ -213,7 +216,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parser.get(c.token.toString()) }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
         summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.summaryToken.toString(), token: parser.get(c.summaryToken.toString()) }) : null,
-        hiddenColumn: c.hiddenColumn
+        hiddenColumn: c.hiddenColumn,
+        combineRows: c.combineRows ?? null,
       }))),
       columnsMode: fo.columnOptionsMode,
       orders: (fo.orderOptions ?? []).notNull().map(c => newMListElement(QueryOrderEmbedded.New({
@@ -226,7 +230,6 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
       refreshMode: p.searchControl.state.refreshMode ?? "Auto",
-      customDrilldowns: currentCustomDrilldowns ?? [],
     });
   }
 
@@ -350,6 +353,7 @@ export namespace UserQueryMerger {
       oldCol.token = newCol.token;
       oldCol.displayName = (newCol.displayName == translated(oldCol, a => a.displayName) ? oldCol.displayName : newCol.displayName) ?? null;
       oldCol.summaryToken = newCol.summaryToken;
+      oldCol.combineRows = newCol.combineRows;
       oldCol.hiddenColumn = newCol.hiddenColumn;
       oldCol.modified = true;
       //preserve rowId
@@ -430,6 +434,7 @@ export namespace UserQueryMerger {
   function distanceColumns(qc1: QueryColumnEmbedded, qc2: QueryColumnEmbedded): number {
     return (qc1.token?.tokenString == qc2.token?.tokenString ? 0 : 3) +
       (qc1.summaryToken?.tokenString == qc2.summaryToken?.tokenString ? 0 : 1) +
+      (qc1.combineRows == qc2.combineRows ? 0 : 1) +
       (qc1.displayName == qc2.displayName ? 0 : 1) +
       (qc1.hiddenColumn == qc2.hiddenColumn ? 0 : 1);
   }

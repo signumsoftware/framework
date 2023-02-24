@@ -47,6 +47,10 @@
     <Member Name="ReplaceAll" Description="Alle ersetzen" />
     <Member Name="ReplaceOrAdd" Description="Ersetzen oder Hinzufügen" />
   </Type>
+  <Type Name="CombineRows" Description="Zeilen kombinieren">
+    <Member Name="EqualEntity" Description="Gleiche Entität" />
+    <Member Name="EqualValue" Description="Gleicher Wert" />
+  </Type>
   <Type Name="ComparisonType">
     <Member Name="DistinctTo" Description="ungleich" />
     <Member Name="EqualTo" Description="gleich" />
@@ -99,6 +103,7 @@
   <Type Name="EntityControlMessage">
     <Member Name="Add" Description="hinzufügen..." />
     <Member Name="Added" Description="Hinzugefügt" />
+    <Member Name="Changed" Description="Geändert" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Detail" Description="Detail" />
     <Member Name="Find" Description="Finden" />
@@ -111,10 +116,13 @@
     <Member Name="MoveWithDragAndDropOrCtrlLeftRight" Description="Verschieben mit Drag &amp; Drop oder Strg + Links / Rechts" />
     <Member Name="MoveWithDragAndDropOrCtrlUpDown" Description="Verschieben mit Drag &amp; Drop oder Strg + Auf / Ab" />
     <Member Name="Navigate" Description="Navigieren" />
+    <Member Name="NoChanges" Description="Keine Änderungen" />
     <Member Name="Paste" Description="Einfügen" />
     <Member Name="PreviousValueWas0" Description="Der vorherige Wert war: {0}" />
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="Removed0" Description="Entfernt {0}" />
+    <Member Name="RemovedAndSelectedAgain" Description="Entfernt und wieder ausgewählt" />
+    <Member Name="Selected" Description="Ausgewählt" />
     <Member Name="View" Description="Ansehen" />
   </Type>
   <Type Name="EnumEntity`1" />
@@ -264,7 +272,10 @@
     <Member Name="_0AndNew" Description="{0} &amp; Neu" />
     <Member Name="_0Errors" Description="{0} Fehler" />
     <Member Name="AddSetter" Description="Setter hinzufügen" />
+    <Member Name="AreYouSureYouWantToCancelTheOperation" Description="Sind Sie sicher, dass Sie die Operation abbrechen wollen?" />
     <Member Name="BulkModifications" Description="Massenänderungen" />
+    <Member Name="CancelOperation" Description="Operation abbrechen?" />
+    <Member Name="ClosingThisModalOrBrowserTabWillCancelTheOperation" Description="Durch Schließen dieses Modals (oder der Browser-Registerkarte!) wird der Vorgang auf dem Server abgebrochen." />
     <Member Name="Condition" Description="Bedingung" />
     <Member Name="Confirm" Description="Bestätigen" />
     <Member Name="Create" Description="Erstellen..." />
@@ -340,6 +351,7 @@
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
+    <Member Name="DateTimePart" Description="Datum und Uhrzeit Teile " />
     <Member Name="Day" Description="Tag" />
     <Member Name="DayOfWeek" Description="Tag der Woche" />
     <Member Name="DayOfYear" Description="Tag des Jahres" />
@@ -377,6 +389,7 @@
     <Member Name="TotalMilliseconds" Description="Milisekunden insgesamt" />
     <Member Name="TotalMinutes" Description="Minuten insgesamt" />
     <Member Name="TotalSeconds" Description="Sekunden insgesamt" />
+    <Member Name="UtcDateTime" Description="UTC Datum und Uhrzeit" />
     <Member Name="WeekNumber" Description="Kalenderwoche" />
     <Member Name="WeekStart" Description="Wochenstart" />
     <Member Name="Year" Description="Jahr" />
@@ -429,6 +442,7 @@
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
     <Member Name="Column" Description="Spalte" />
+    <Member Name="CombineRowsWith" Description="Kombinieren von Zeilen mit" />
     <Member Name="Copy" Description="Kopieren" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />

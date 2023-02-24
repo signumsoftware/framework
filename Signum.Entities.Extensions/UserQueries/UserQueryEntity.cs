@@ -230,13 +230,16 @@ public class QueryColumnEmbedded : EmbeddedEntity
 
     public bool HiddenColumn { get; set; }
 
+    public CombineRows? CombineRows { get; set; }
+
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("Column",
             new XAttribute("Token", Token.Token.FullKey()),
             SummaryToken != null ? new XAttribute("SummaryToken", SummaryToken.Token.FullKey()) : null!,
             DisplayName.HasText() ? new XAttribute("DisplayName", DisplayName) : null!,
-            HiddenColumn ? new XAttribute("HiddenColumn", HiddenColumn) : null!);
+            HiddenColumn ? new XAttribute("HiddenColumn", HiddenColumn) : null!,
+            CombineRows != null ? new XAttribute("CombineRows", CombineRows.Value.ToString()) : null!);
     }
 
     internal void FromXml(XElement element, IFromXmlContext ctx)
@@ -245,6 +248,7 @@ public class QueryColumnEmbedded : EmbeddedEntity
         SummaryToken = element.Attribute("SummaryToken")?.Value.Let(val => new QueryTokenEmbedded(val));
         DisplayName = element.Attribute("DisplayName")?.Value;
         HiddenColumn = element.Attribute("HiddenColumn")?.Value.ToBool() ?? false;
+        CombineRows = element.Attribute("CombineRows")?.Value.ToEnum<CombineRows>();
     }
 
     public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)

@@ -793,7 +793,9 @@ export function useLiteToString<T extends Entity>(type: Type<T>, id: number | st
 }
 
 export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false): void {
-  useAPI(() => lite == null || (getToString(lite) != null && !force) ? Promise.resolve(null) : API.fillLiteModels(lite), [lite]);
+  useAPI(() => {
+    return lite == null || ((lite.model != null || lite.entity != null) && !force) ? Promise.resolve() : API.fillLiteModels(lite);
+  }, [lite]);
 }
 
 export module API {

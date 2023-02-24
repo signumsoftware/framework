@@ -116,30 +116,33 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       if (systemVersioned && p.ctx?.frame?.previousDate) {
         var sv = new QueryTokenString("Entity");
 
-        controller.hasHistoryChanges = await Finder.API.queryValue({
+        controller.hasHistoryChanges = (await Finder.API.queryValue({
           queryKey: qd.queryKey,
           systemTime: { mode: "Between", startDate: p.ctx?.frame?.previousDate, endDate: p.ctx?.frame?.currentDate, joinMode: "FirstCompatible" },
-          filters: [{
-            groupOperation: "Or",
-            filters: [
-              {
-                groupOperation: "And",
-                filters: [
-                  { token: sv.systemValidFrom().token, operation: "GreaterThanOrEqual", value: p.ctx?.frame?.previousDate },
-                  { token: sv.systemValidFrom().token, operation: "LessThanOrEqual", value: p.ctx?.frame?.currentDate },
-                ]
-              },
-              {
-                groupOperation: "And",
-                filters: [
-                  { token: sv.systemValidTo().token, operation: "GreaterThanOrEqual", value: p.ctx?.frame?.previousDate },
-                  { token: sv.systemValidTo().token, operation: "LessThanOrEqual", value: p.ctx?.frame?.currentDate },
-                ]
-              }
-            ]
-          }],
+          filters: [
+              ...req.filters,
+            {
+              groupOperation: "Or",
+              filters: [
+                {
+                  groupOperation: "And",
+                  filters: [
+                    { token: sv.systemValidFrom().token, operation: "GreaterThanOrEqual", value: p.ctx?.frame?.previousDate },
+                    { token: sv.systemValidFrom().token, operation: "LessThanOrEqual", value: p.ctx?.frame?.currentDate },
+                  ]
+                },
+                {
+                  groupOperation: "And",
+                  filters: [
+                    { token: sv.systemValidTo().token, operation: "GreaterThanOrEqual", value: p.ctx?.frame?.previousDate },
+                    { token: sv.systemValidTo().token, operation: "LessThanOrEqual", value: p.ctx?.frame?.currentDate },
+                  ]
+                }
+              ]
+            }
+          ],
           valueToken: "Count"
-        }) > 0;
+        })) > 0;
       } else {
         controller.hasHistoryChanges = undefined;
       }
@@ -157,9 +160,9 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       return Promise.resolve(undefined);
 
     if (p.initialValue !== undefined) {
-      if (Hooks.areEqual(deps ?? [], initialDeps.current ?? [])) {
+      if (Hooks.areEqualDeps(deps ?? [], initialDeps.current ?? [])) {
         controller.value = p.initialValue;
-        controller.hasHistoryChanges = false;
+        controller.hasHistoryChanges = undefined;
         p.onInitialValueLoaded?.();
         return Promise.resolve(p.initialValue);
       }

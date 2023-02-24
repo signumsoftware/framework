@@ -17,56 +17,34 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 {
     public static Func<Exception, bool> TranslateExceptionMessage = ex => ex is ApplicationException;
 
-    public static Func<Exception, bool> IncludeErrorDetails = ex => true;
-
-    public static readonly List<Type> AvoidLogException = new() { typeof(OperationCanceledException) };
+    public static Func<Exception, bool> ShouldLogException = e => e is not OperationCanceledException;
 
     public static Func<Exception, HttpError> CustomHttpErrorFactory = ex => new HttpError(ex);
 
-    public static Action<ResourceExecutedContext, ExceptionEntity>? ApplyMixins = null;
+    public static Action<ActionContext, ExceptionEntity>? ApplyMixins = null;
 
     public async Task OnResourceExecutionAsync(ResourceExecutingContext precontext, ResourceExecutionDelegate next)
     {
         //Eagerly reading the whole body just in case to avoid "Cannot access a disposed object" 
         //TODO: Make it more eficiently when https://github.com/aspnet/AspNetCore/issues/14396
-        var body = ReadAllBody(precontext.HttpContext);
+        precontext.HttpContext.Request.EnableBuffering();
 
         var context = await next();
 
         if (context.Exception != null)
         {
-            if (!AvoidLogException.Contains(context.Exception.GetType()))
-            {
-                var req = context.HttpContext.Request;
-
-                var connFeature = context.HttpContext.Features.Get<IHttpConnectionFeature>()!;
-
-                var exLog = context.Exception.LogException(e =>
-                {
-                    e.ActionName = Try(100, () => (context.ActionDescriptor as ControllerActionDescriptor)?.ActionName);
-                    e.ControllerName = Try(100, () => (context.ActionDescriptor as ControllerActionDescriptor)?.ControllerName);
-                    e.UserAgent = Try(300, () => req.Headers["User-Agent"].FirstOrDefault());
-                    e.RequestUrl = Try(int.MaxValue, () => req.GetDisplayUrl());
-                    e.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
-                    e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress?.ToString());
-                    e.UserHostName = Try(100, () => connFeature.RemoteIpAddress == null ? null : Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
-                    e.User = UserHolder.Current?.User ?? ((UserWithClaims?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key])?.User ?? e.User;
-                    e.QueryString = new BigStringEmbedded(Try(int.MaxValue, () => req.QueryString.ToString()));
-                    e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
-                    e.Session = new BigStringEmbedded();
-                    ApplyMixins?.Invoke(context, e);
-                });
-            }
-
+            LogException(context.Exception, context);
+            
             if (ExpectsJsonResult(context))
             {
-                var statusCode = GetStatus(context.Exception.GetType());
-                var error = CustomHttpErrorFactory(context.Exception);
-
                 var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
 
                 using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
                 {
+                    var statusCode = GetStatus(context.Exception.GetType());
+
+                    var error = CustomHttpErrorFactory(context.Exception);
+
                     var response = context.HttpContext.Response;
                     response.StatusCode = (int)statusCode;
                     response.ContentType = "application/json";
@@ -80,6 +58,34 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
                     context.ExceptionHandled = true;
                 }
             }
+        }
+    }
+
+    internal static void LogException(Exception exception, ActionContext actionContext)
+    {
+        if (ShouldLogException(exception))
+        {
+            var req = actionContext.HttpContext.Request;
+
+            var connFeature = actionContext.HttpContext.Features.Get<IHttpConnectionFeature>()!;
+
+            var body = ReadAllBody(actionContext.HttpContext);
+
+            var exLog = exception.LogException(e =>
+            {
+                e.ActionName = Try(100, () => (actionContext.ActionDescriptor as ControllerActionDescriptor)?.ActionName);
+                e.ControllerName = Try(100, () => (actionContext.ActionDescriptor as ControllerActionDescriptor)?.ControllerName);
+                e.UserAgent = Try(300, () => req.Headers["User-Agent"].FirstOrDefault());
+                e.RequestUrl = Try(int.MaxValue, () => req.GetDisplayUrl());
+                e.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
+                e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress?.ToString());
+                e.UserHostName = Try(100, () => connFeature.RemoteIpAddress == null ? null : Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
+                e.User = UserHolder.Current?.User ?? ((UserWithClaims?)actionContext.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key])?.User ?? e.User;
+                e.QueryString = new BigStringEmbedded(Try(int.MaxValue, () => req.QueryString.ToString()));
+                e.Form = new BigStringEmbedded(Try(int.MaxValue, () => Encoding.UTF8.GetString(body)));
+                e.Session = new BigStringEmbedded();
+                ApplyMixins?.Invoke(actionContext, e);
+            });
         }
     }
 
@@ -106,11 +112,11 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
         return false;
     };
 
-    public byte[] ReadAllBody(HttpContext httpContext)
+    public static byte[] ReadAllBody(HttpContext httpContext)
     {
-        httpContext.Request.EnableBuffering();
-        var result = httpContext.Request.Body.ReadAllBytes();
+        //httpContext.Request.EnableBuffering();
         httpContext.Request.Body.Seek(0, System.IO.SeekOrigin.Begin);
+        var result = httpContext.Request.Body.ReadAllBytes();
         return result;
     }
 

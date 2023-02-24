@@ -194,11 +194,6 @@ public static class MusicLoader
             Label = mjj
         }.Execute(AlbumOperation.Save); ;
 
-        new AlbumReEditionEntity
-        {
-            Album = bdf.ToLite(),
-            Date = new DateTime(2020, 5, 5)
-        }.Execute(AlbumReEditionOperation.Save);
 
         var ga = (GrammyAwardEntity)new GrammyAwardEntity { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
             .Execute(AwardOperation.Save);

@@ -27,6 +27,7 @@ export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
   displayName: string | null;
   summaryToken: UserAssets.QueryTokenEmbedded | null;
   hiddenColumn: boolean;
+  combineRows: DynamicQuery.CombineRows | null;
 }
 
 export const QueryFilterEmbedded = new Type<QueryFilterEmbedded>("QueryFilterEmbedded");

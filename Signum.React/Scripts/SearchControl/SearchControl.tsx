@@ -10,7 +10,7 @@ import { ErrorBoundary } from '../Components';
 import { Property } from 'csstype';
 import "./Search.css"
 import { ButtonBarElement, StyleContext } from '../TypeContext';
-import { useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
+import { areEqualDeps, useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
 import { RefreshMode } from '../Signum.Entities.DynamicQuery';
 
 export interface SimpleFilterBuilderProps {
@@ -78,6 +78,7 @@ export interface SearchControlProps {
 export interface SearchControlState {
   queryDescription: QueryDescription;
   findOptionsParsed?: FindOptionsParsed;
+  deps?: React.DependencyList;
   message?: string;
 }
 
@@ -104,8 +105,9 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
 
   const [state, setState] = useStateWithPromise<SearchControlState | undefined>(undefined);
   const searchControlLoaded = React.useRef<SearchControlLoaded>(null);
-  const lastFO = usePrevious(p.findOptions);
-  const lastFrame = usePrevious({ currentDate: p.ctx?.frame?.currentDate, previousDateda: p.ctx?.frame?.previousDate });
+  const lastDeps = usePrevious(p.deps);
+  //const lastFO = usePrevious(p.findOptions);
+  //const lastFrame = usePrevious({ currentDate: p.ctx?.frame?.currentDate, previousDateda: p.ctx?.frame?.previousDate });
 
   const handler: SearchControlHandler = {
     findOptions: p.findOptions,
@@ -119,15 +121,13 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
   React.useImperativeHandle(ref, () => handler, [p.findOptions, state, searchControlLoaded.current]);
 
   React.useEffect(() => {
-    var path = Finder.findOptionsPath(p.findOptions);
-    if (lastFO && path == Finder.findOptionsPath(lastFO) &&
-      lastFrame && lastFrame.currentDate == p.ctx?.frame?.currentDate && lastFrame.previousDateda == p.ctx?.frame?.previousDate)
-      return;
-
     if (state?.findOptionsParsed) {
       const fo = Finder.toFindOptions(state.findOptionsParsed, state.queryDescription, p.defaultIncludeDefaultFilters!);
-      if (path == Finder.findOptionsPath(fo))
+      if (Finder.findOptionsPath(p.findOptions) == Finder.findOptionsPath(fo)) {
+        if (lastDeps != null && p.deps != null && !areEqualDeps(lastDeps, p.deps))
+          setState({ ...state, deps: p.deps });
         return;
+      }
     }
 
     setState(undefined).then(() => {
@@ -167,11 +167,11 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
             fop.orderOptions = [...fop.orderOptions, { token: cops[0].token!, orderType: "Descending" }];
           }
 
-          setState({ findOptionsParsed: fop, queryDescription: qd });
+          setState({ findOptionsParsed: fop, queryDescription: qd, deps: p.deps });
         }
       });
     });
-  }, [p.findOptions, p.ctx?.frame?.currentDate, p.ctx?.frame?.previousDate]);
+  }, [Finder.findOptionsPath(p.findOptions), p.ctx?.frame?.currentDate, p.ctx?.frame?.previousDate, ...(p.deps ?? [])]);
 
   if (state?.message) {
     return (
@@ -236,7 +236,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
         defaultRefreshMode={p.defaultRefreshMode}
         avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
-        deps={p.deps}
+        deps={state.deps}
         extraOptions={p.extraOptions}
 
         enableAutoFocus={p.enableAutoFocus == null ? false : p.enableAutoFocus}

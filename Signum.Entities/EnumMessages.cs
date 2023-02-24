@@ -61,6 +61,15 @@ public enum OperationMessage
 
     [Description("{0} error[s]")]
     _0Errors,
+
+    [Description("Closing this modal (or browser tab!) will cancel the operation on the server")]
+    ClosingThisModalOrBrowserTabWillCancelTheOperation,
+
+    [Description("Cancel Operation?")]
+    CancelOperation,
+
+    [Description("Are you sure you want to cancel the operation?")]
+    AreYouSureYouWantToCancelTheOperation,
 }
 
 public enum SynchronizerMessage
@@ -257,7 +266,8 @@ public enum SearchMessage
     Copy,
 
     [Description("More than one {0} selected")]
-    MoreThanOne0Selected
+    MoreThanOne0Selected,
+    CombineRowsWith,
 }
 
 public enum SelectorMessage

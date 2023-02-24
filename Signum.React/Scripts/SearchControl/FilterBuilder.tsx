@@ -17,6 +17,7 @@ import "./FilterBuilder.css"
 import { NumericTextBox } from '../Lines/ValueLine';
 import { useStateWithPromise, useForceUpdate, useForceUpdatePromise } from '../Hooks'
 import { Dropdown } from 'react-bootstrap'
+import { TypeEntity } from '../Signum.Entities.Basics'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -726,6 +727,12 @@ export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToke
 
   switch (token.filterType) {
     case "Lite":
+      if (token.key == "[EntityType]" && token.parent!.type.name != IsByAll)
+        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} findOptions={{
+          queryName: TypeEntity,
+          filterOptions: [{ token: TypeEntity.token(a => a.cleanName), operation: "IsIn", value: token.parent!.type.name.split(", ") }]
+        }} />;
+
       if (tokenType.name == IsByAll || getTypeInfos(tokenType).some(ti => !ti.isLowPopulation))
         return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} />;
       else

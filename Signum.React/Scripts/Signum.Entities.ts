@@ -502,6 +502,9 @@ export module OperationMessage {
   export const Deleting = new MessageKey("OperationMessage", "Deleting");
   export const Executing0 = new MessageKey("OperationMessage", "Executing0");
   export const _0Errors = new MessageKey("OperationMessage", "_0Errors");
+  export const ClosingThisModalOrBrowserTabWillCancelTheOperation = new MessageKey("OperationMessage", "ClosingThisModalOrBrowserTabWillCancelTheOperation");
+  export const CancelOperation = new MessageKey("OperationMessage", "CancelOperation");
+  export const AreYouSureYouWantToCancelTheOperation = new MessageKey("OperationMessage", "AreYouSureYouWantToCancelTheOperation");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
@@ -635,6 +638,7 @@ export module SearchMessage {
   export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
   export const Copy = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
+  export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
 }
 
 export module SelectorMessage {

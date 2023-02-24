@@ -208,14 +208,14 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
   }, deps);
 
   if (!(options && options.avoidReset)) {
-    if (data && !areEqual(data.deps, deps))
+    if (data && !areEqualDeps(data.deps, deps))
       return undefined;
   }
 
   return data && data.result;
 }
 
-export function areEqual(depsA: React.DependencyList, depsB: React.DependencyList) {
+export function areEqualDeps(depsA: React.DependencyList, depsB: React.DependencyList) {
 
   if (depsA.length !== depsB.length)
     return false;

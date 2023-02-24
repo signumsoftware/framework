@@ -116,7 +116,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   searchIfDeps(newProps: TreeViewerProps) {
-    if (Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? [])) {
+    if (Hooks.areEqualDeps(this.props.deps ?? [], newProps.deps ?? [])) {
       this.search(false);
     }
   }

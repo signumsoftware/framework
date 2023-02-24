@@ -1,12 +1,13 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
+import { DateTime } from 'luxon'
 import { Link } from 'react-router-dom';
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Lite, Entity, getToString, isEntity } from '@framework/Signum.Entities'
+import { Lite, Entity, getToString, isEntity, JavascriptMessage } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import * as QuickLinks from '@framework/QuickLinks'
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.Entities.DiffLog';
@@ -87,10 +88,8 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
       name: "ViewHistory",
       isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && Finder.isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
       formatter: new Finder.EntityFormatter((row, columns, sc) => {
-        if (!row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }))
-          return undefined;
 
-        var icon: null | React.ReactElement = null;
+        var icon: undefined | React.ReactElement = undefined;
 
         const fop = sc?.state.resultFindOptions;
         let created = false;
@@ -99,11 +98,11 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
           var validFromIndex = columns.indexOf("Entity.SystemValidFrom");
           var validToIndex = columns.indexOf("Entity.SystemValidTo");
           if (validFromIndex != -1 && validToIndex != -1) {
-            var validFrom = row.columns[validFromIndex];
-            var validTo = row.columns[validToIndex];
+            var validFrom = DateTime.fromISO(row.columns[validFromIndex]);
+            var validTo = DateTime.fromISO(row.columns[validToIndex]);
 
-            created = fop.systemTime.mode == "Between" ? fop.systemTime.startDate! <= validFrom : true;
-            deleted = fop.systemTime.mode == "Between" ? validTo <= fop.systemTime.endDate! : !validTo.startsWith("9999-");
+            created = fop.systemTime.mode == "Between" ? DateTime.fromISO(fop.systemTime.startDate!) <= validFrom : true;
+            deleted = fop.systemTime.mode == "Between" ? validTo <= DateTime.fromISO(fop.systemTime.endDate!) : validTo.year < 9999;
 
             var title = created && deleted ? TimeMachineMessage.ThisVersionWasCreatedAndDeleted.niceToString() :
               created ? TimeMachineMessage.ThisVersionWasCreated.niceToString() :
@@ -117,6 +116,21 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
             </span>;
           }
         }
+
+        if (sc?.state.resultFindOptions?.groupResults) {
+          return (
+            <a href="#" className="sf-line-button sf-view" onClick={e => { e.preventDefault(); sc!.openRowGroup(row); }}
+              style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
+              <span title={JavascriptMessage.ShowGroup.niceToString()}>
+                <FontAwesomeIcon icon="layer-group" />
+              </span>
+              {icon}
+            </a>
+          );
+        }
+
+        if (!row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }))
+          return icon;
 
         return (
           <TimeMachineLink lite={row.entity} inSearch={true} style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >

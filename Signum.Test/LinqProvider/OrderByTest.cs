@@ -117,6 +117,25 @@ public class OrderByTest
 
 
     [Fact]
+    public void RemoveOrderByGroupBy()
+    {
+        var list = Database.Query<AlbumEntity>()
+            .SelectMany(a => a.Songs.OrderBy(a => a.Index))
+            .GroupBy(s => s.Name, (a, songs) => songs.Sum(a => a.Seconds ?? 0))
+            .ToList();
+    }
+
+    [Fact]
+    public void RemoveOrderByGroupByTrivial()
+    {
+        var list = Database.Query<AlbumEntity>()
+            .SelectMany(a => a.Songs.OrderBy(a => a.Index))
+            .GroupBy(s => new object(), (a, songs) => songs.Sum(a => a.Seconds ?? 0))
+            .ToList();
+    }
+
+
+    [Fact]
     public void OrderByIgnore()
     {
         using (AsserNoQueryWith("ORDER"))
