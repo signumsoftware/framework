@@ -257,7 +257,7 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
       disabled={disabled}
       style={{ pointerEvents: "initial" }}
       data-operation={coc.operationInfo.key}
-      className={color ? "text-" + color : undefined}>
+      className={color && !disabled ? "text-" + color : undefined}>
       {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
         color ? <span className={classes("icon", "empty-icon")}></span> : undefined}
       {text}
