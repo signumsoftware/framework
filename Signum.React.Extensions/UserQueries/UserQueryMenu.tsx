@@ -23,6 +23,7 @@ import type StringDistance from './StringDistance'
 import { translated } from '../Translation/TranslatedInstanceTools'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { TokenCompleter } from '@framework/Finder'
+import { useForceUpdate } from '@framework/Hooks'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -39,17 +40,24 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [currentUserQuery, setCurrentUserQueryInternal] = React.useState<Lite<UserQueryEntity> | undefined>();
   const [userQueries, setUserQueries] = React.useState<Lite<UserQueryEntity>[] | undefined>(undefined);
-  
-  Navigator.useFillToString(currentUserQuery);
+  const forceUpdate = useForceUpdate();
   const location = useLocation();
 
   function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined) {
     p.searchControl.extraUrlParams.userQuery = uq && liteKey(uq);
 
     p.searchControl.getCurrentUserQuery = () => uq;
-    p.searchControl.pageSubTitle = getToString(uq);
     setCurrentUserQueryInternal(uq);
+
+    p.searchControl.pageSubTitle = getToString(uq);
     p.searchControl.props.onPageTitleChanged?.();
+    Navigator.API.fillLiteModels(uq).then(() => {
+      if (p.searchControl.getCurrentUserQuery?.() == uq) {
+        p.searchControl.pageSubTitle = getToString(uq);
+        p.searchControl.props.onPageTitleChanged?.();
+        forceUpdate();
+      }
+    });
   }
   
   React.useEffect(() => {

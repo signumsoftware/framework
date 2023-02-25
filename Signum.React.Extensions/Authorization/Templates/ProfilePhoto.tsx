@@ -37,7 +37,7 @@ export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
 }
 
 export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, className?: string }) {
-  const [immageError, setImageError] = useState(false);
+  const [imageError, setImageError] = useState(false);
   var size = p.size ?? 22;
 
   var url = urlProviders.map(f => f(p.user, size!)).notNull().firstOrNull();
@@ -52,8 +52,29 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
 
   return (
     <div className={classes("small-user-profile-photo", p.className)}>
-      {url && !immageError ? <img src={url} style={{ maxWidth: `${size}px`, maxHeight: `${size}px` }} onError={addDefaultSrc} title={getToString(p.user)} /> :
+      {url && !imageError ? <img src={url} style={{ maxWidth: `${size}px`, maxHeight: `${size}px` }} onError={addDefaultSrc} title={getToString(p.user)} /> :
         <UserCircle user={p.user} />}
     </div>
   );
+}
+
+
+export function ProfilePhotoSVG(user: Lite<UserEntity>, x: string, y: string, size?: number, clippath?: string ) {
+  size = size ?? 40;
+  var url = urlProviders.map(f => f(user, size!)).notNull().firstOrNull();
+
+  function addDefaultSrc(ev: any) {
+    picture.setAttribute("display", "none");
+  }
+
+  var picture = document.createElementNS("http://www.w3.org/2000/svg", "image");
+  picture.setAttribute("x", x);
+  picture.setAttribute("y", y);
+  picture.setAttribute("width", size.toString());
+  picture.setAttribute("height", size.toString());
+  picture.setAttribute("clip-path", clippath ?? "");
+  picture.addEventListener("onerror", addDefaultSrc);
+  picture.setAttribute("href", url ?? "");
+
+  return picture;
 }

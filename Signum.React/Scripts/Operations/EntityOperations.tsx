@@ -144,7 +144,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   if (canExecute === undefined)
     canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;
 
-  const disabled = !!canExecute;
+  const disabled = !!canExecute || eoc.frame.isExecuting();
 
   if (hideOnCanExecute && disabled)
     return null;
