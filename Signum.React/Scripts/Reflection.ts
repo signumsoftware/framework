@@ -72,6 +72,7 @@ export interface OperationInfo {
   canBeNew?: boolean;
   canBeModified?: boolean;
   hasCanExecute?: boolean;
+  hasCanExecuteExpression?: boolean;
   hasStates?: boolean;
 }
 
