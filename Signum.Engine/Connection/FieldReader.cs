@@ -630,7 +630,7 @@ public class FieldReader
             {
                 DateTimeKind.Utc => type.IsNullable() ? miGetNullableDateTimeUTC : miGetDateTimeUTC,
                 DateTimeKind.Local => type.IsNullable() ? miGetNullableDateTimeLocal : miGetDateTimeLocal,
-                DateTimeKind.Unspecified => throw new UnexpectedValueException(DateTimeKind.Unspecified)
+                DateTimeKind.Unspecified or _ => throw new UnexpectedValueException(DateTimeKind.Unspecified)
             };
 
             return Expression.Call(reader, mi, Expression.Constant(ordinal));
