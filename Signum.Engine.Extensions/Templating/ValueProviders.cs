@@ -34,7 +34,7 @@ public abstract class ValueProviderBase
 
     public abstract override int GetHashCode();
 
-    public abstract void FillQueryTokens(List<QueryToken> list);
+    public abstract void FillQueryTokens(List<QueryToken> list, bool forForeach);
 
     public string ToStringWithoutBrackets(ScopedDictionary<string, ValueProviderBase> variables)
     {
@@ -238,7 +238,7 @@ public class TokenValueProvider : ValueProviderBase
 
     public override void Foreach(TemplateParameters p, Action forEachElement)
     {
-        var col = p.Columns[ParsedToken.QueryToken!];
+        var col = p.Columns[ParsedToken.QueryTokenOrRowId!];
 
         foreach (var group in p.Rows.GroupByColumn(col))
         {
@@ -252,9 +252,9 @@ public class TokenValueProvider : ValueProviderBase
         get { return ParsedToken.QueryToken!.Format; }
     }
 
-    public override void FillQueryTokens(List<QueryToken> list)
+    public override void FillQueryTokens(List<QueryToken> list, bool forForeach)
     {  
-        list.Add(ParsedToken.QueryToken!);
+        list.Add(forForeach ? ParsedToken.QueryTokenOrRowId!: ParsedToken.QueryToken!);
     }
 
     public override void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
@@ -347,7 +347,7 @@ public class TranslateInstanceValueProvider : ValueProviderBase
         get { return null; }
     }
 
-    public override void FillQueryTokens(List<QueryToken> list)
+    public override void FillQueryTokens(List<QueryToken> list, bool forForeach)
     {
         list.Add(ParsedToken.QueryToken!);
         list.Add(EntityToken!);
@@ -386,15 +386,21 @@ public class ParsedToken
 {
     public string String;
     public QueryToken? QueryToken { get; set; }
+    public QueryDescription QueryDescription { get; private set; }
 
-    public ParsedToken(string @string)
+    public QueryToken? QueryTokenOrRowId => QueryToken == null ? null :
+        QueryToken.Parent != null && MListElementPropertyToken.AsMListEntityProperty(QueryToken.Parent) != null ? QueryToken.SubTokenInternal("RowId", SubTokensOptions.CanElement) :
+        QueryToken;
+
+    public ParsedToken(string @string, QueryDescription queryDescription)
     {
         String = @string;
+        QueryDescription = queryDescription;
     }
 
     public static ParsedToken TryParseToken(string tokenString, SubTokensOptions options, QueryDescription qd, ScopedDictionary<string, ValueProviderBase> variables, Action<bool, string> addError)
     {
-        ParsedToken result = new ParsedToken(tokenString);
+        ParsedToken result = new ParsedToken(tokenString, qd);
 
         if (tokenString.StartsWith("$"))
         {
@@ -539,11 +545,11 @@ public class ModelValueProvider : ValueProviderBase
         get { return Members?.Let(ms => ms.Last().Member.ReturningType().Nullify()); }
     }
 
-    public override void FillQueryTokens(List<QueryToken> list)
+    public override void FillQueryTokens(List<QueryToken> list, bool forForeach)
     {
         foreach (var item in Members.EmptyIfNull().SelectMany(m => m.Arguments.EmptyIfNull()).NotNull())
         {
-            item.FillQueryTokens(list);
+            item.FillQueryTokens(list, false);
         } 
     }
 
@@ -657,11 +663,11 @@ public class GlobalValueProvider : ValueProviderBase
         }
     }
 
-    public override void FillQueryTokens(List<QueryToken> list)
+    public override void FillQueryTokens(List<QueryToken> list, bool forForeach)
     {
         foreach (var item in Members.EmptyIfNull().SelectMany(m => m.Arguments.EmptyIfNull()).NotNull())
         {
-            item.FillQueryTokens(list);
+            item.FillQueryTokens(list, false);
         }
     }
 
@@ -724,7 +730,7 @@ public class DateValueProvider : ValueProviderBase
         return dateTimeExpression == null ? Clock.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), isList: false);
     }
 
-    public override void FillQueryTokens(List<QueryToken> list)
+    public override void FillQueryTokens(List<QueryToken> list, bool forForeach)
     {
     }
 
@@ -799,7 +805,7 @@ public class ConstantValueProvider : ValueProviderBase
         return Value;
     }
 
-    public override void FillQueryTokens(List<QueryToken> list)
+    public override void FillQueryTokens(List<QueryToken> list, bool forForeach)
     {
     }
 
@@ -902,11 +908,11 @@ public class ContinueValueProvider : ValueProviderBase
         get { return Members?.Let(ms => ms.Last().Member.ReturningType().Nullify()); }
     }
 
-    public override void FillQueryTokens(List<QueryToken> list)
+    public override void FillQueryTokens(List<QueryToken> list, bool forForeach)
     {
         foreach (var item in Members.EmptyIfNull().SelectMany(m => m.Arguments.EmptyIfNull()).NotNull())
         {
-            item.FillQueryTokens(list);
+            item.FillQueryTokens(list, false);
         }
     }
 
