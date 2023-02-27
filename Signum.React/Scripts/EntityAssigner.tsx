@@ -11,7 +11,7 @@ export function assignServerChanges<T extends ModifiableEntity>(local: T, server
   if (isEntity(local)) {
     let serverEntity = server as ModifiableEntity as Entity;
 
-    if (local.temporalId != serverEntity.temporalId)
+    if (local.id != serverEntity.id && local.temporalId != serverEntity.temporalId)
       throw new Error("Temporal Id of local and server are not equal.");
 
     local.id = serverEntity.id;
@@ -38,7 +38,7 @@ export function assignServerChanges<T extends ModifiableEntity>(local: T, server
           assignServerChanges(localPropValue, serverPropValue);
       }
       else if (localPropValue instanceof Array) {
-        let serverArray = serverPropValue as Array<any>;
+        let serverArray = [...serverPropValue] as Array<any>;
         for (let i = 0; i < localPropValue.length; i++) {
           let lmle = localPropValue[i];
           if (lmle.hasOwnProperty && lmle.hasOwnProperty("rowId")) {
@@ -53,7 +53,7 @@ export function assignServerChanges<T extends ModifiableEntity>(local: T, server
             }
 
             if (isModifiableEntity(lmle.element)) {
-              smle = serverArray.filter(a => a.element.temporalId == lmle.element.temporalId).firstOrNull();
+              smle = serverArray.filter(a => is(a.element, lmle.element)).firstOrNull();
               if (smle) {
                 lmle.rowId = smle.rowId;
                 assignServerChanges(lmle.element, smle.element);
@@ -61,7 +61,7 @@ export function assignServerChanges<T extends ModifiableEntity>(local: T, server
                 continue;
               }
 
-              smle = serverArray.filter(a => is(a.element, lmle.element)).firstOrNull();
+              smle = serverArray.filter(a => a.element.temporalId == lmle.element.temporalId).firstOrNull();
               if (smle) {
                 lmle.rowId = smle.rowId;
                 assignServerChanges(lmle.element, smle.element);
