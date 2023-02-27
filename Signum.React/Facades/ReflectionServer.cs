@@ -416,6 +416,7 @@ public class OperationInfoTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? CanBeNew;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? CanBeModified;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? HasCanExecute;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? HasCanExecuteExpression;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? HasStates;
 
     [JsonExtensionData]
@@ -426,6 +427,7 @@ public class OperationInfoTS
         this.CanBeNew = oper.CanBeNew;
         this.CanBeModified = oper.CanBeModified;
         this.HasCanExecute = oper.HasCanExecute;
+        this.HasCanExecuteExpression = oper.HasCanExecuteExpression;
         this.HasStates = oper.HasStates;
         this.OperationType = oper.OperationType;
     }
