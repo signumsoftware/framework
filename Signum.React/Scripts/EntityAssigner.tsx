@@ -17,6 +17,8 @@ export function assignServerChanges<T extends ModifiableEntity>(local: T, server
     local.id = serverEntity.id;
     local.ticks = serverEntity.ticks;
     local.toStr = serverEntity.toStr;
+    if (local.isNew && !server.isNew)
+      delete local.isNew;
 
     let es = Navigator.getSettings(local.Type);
     if (es?.onAssignServerChanges)

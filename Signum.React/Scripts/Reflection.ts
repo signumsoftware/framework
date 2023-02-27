@@ -1069,11 +1069,19 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
 
   const ti = tryGetTypeInfo(type);
 
-  const result = softCast<ModifiableEntity>({ Type: getTypeName(type), isNew: true, modified: true, temporalId: newGuid() });
+  const result = softCast<ModifiableEntity>({
+    Type: getTypeName(type),
+    isNew: true,
+    modified: true,
+    temporalId: newGuid(),
+    toStr: undefined
+  });
 
   if (ti) {
 
     var e = result as Entity;
+    e.id = undefined;
+    e.ticks = undefined;
     var pr = PropertyRoute.root(ti);
     initializeMixins(e, pr);
     initializeCollections(e, pr);
@@ -1133,7 +1141,13 @@ function newGuid() {
 export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRoute) {
   const ti = tryGetTypeInfo(original.Type);
 
-  const result = softCast<ModifiableEntity>({ Type: original.Type, isNew: true, modified: true, temporalId: newGuid() });
+  const result = softCast<ModifiableEntity>({
+    Type: original.Type,
+    isNew: true,
+    modified: true,
+    temporalId: newGuid(),
+    toStr: undefined,
+  });
 
   if (ti) {
 
