@@ -238,6 +238,34 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                     return null;
             }
         }
+        else if (ctx.OID != null && this.GetConfig().Azure_ApplicationID.HasValue)
+        {
+            var groups = AzureADLogic.CurrentADGroupsInternal(ctx.OID.Value);
+            var roles = config.RoleMapping.Where(m =>
+            {
+                Guid.TryParse(m.ADNameOrGuid, out var guid);
+                var found = groups.Any(g => g.DisplayName == m.ADNameOrGuid || g.Id == guid);
+
+                return found;
+            }).Select(a => a.Role).Distinct().NotNull().ToList();
+
+            if (roles.Any())
+            {
+                var result = AuthLogic.GetOrCreateTrivialMergeRole(roles);
+
+                return result;
+            }
+            else
+            {
+                if (config.DefaultRole != null)
+                    return config.DefaultRole;
+
+                if (throwIfNull)
+                    throw new InvalidOperationException("No Default Role set and no matching RoleMapping found for any role: \r\n" + groups.ToString(a => a.Id + ": " + a.DisplayName, "\r\n"));
+                else
+                    return null;
+            }
+        }
         else
         {
             if (config.DefaultRole != null)
