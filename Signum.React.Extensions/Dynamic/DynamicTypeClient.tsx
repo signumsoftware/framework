@@ -57,7 +57,7 @@ export function start(options: { routes: JSX.Element[] }) {
   QuickLinks.registerQuickLink(DynamicTypeEntity, ctx => new QuickLinks.QuickLinkLink("ViewDynamicPanel",
     () => symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "~/dynamic/panel", {
       isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
-      icon: "arrows-alt",
+      icon: "up-down-left-right",
       iconColor: "purple",
     }));
 

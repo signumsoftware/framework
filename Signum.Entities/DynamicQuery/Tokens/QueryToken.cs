@@ -192,6 +192,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (ut == typeof(string))
             return StringTokens().AndHasValue(this);
 
+        if (ut == typeof(Guid))
+            return new List<QueryToken>().AndHasValue(this);
+
         Type cleanType = type.CleanType();
         if (cleanType.IsIEntity())
         {
@@ -262,7 +265,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
         return new List<QueryToken?>
         {
-            new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), () => utc + QueryTokenMessage.Year.NiceToString()),
+            new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), () => utc + QueryTokenMessage.Year.NiceToString(), format:"0000"),
             new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((DateTime dt ) => dt.Quarter()), ()=> utc + QueryTokenMessage.Quarter.NiceToString()),
             new DatePartStartToken(parent, QueryTokenMessage.QuarterStart),
             new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month),() => utc + QueryTokenMessage.Month.NiceToString()),

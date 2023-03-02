@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -53,6 +53,12 @@ export interface SearchControlMobileOptions {
 
 export interface ShowBarExtensionOption { }
 
+export interface OnDrilldownOptions {
+  openInNewTab?: boolean;
+  showInPlace?: boolean;
+  onReload?: () => void;
+}
+
 export interface SearchControlLoadedProps {
   findOptions: FindOptionsParsed;
   queryDescription: QueryDescription;
@@ -68,7 +74,7 @@ export interface SearchControlLoadedProps {
 
   defaultIncudeDefaultFilters: boolean;
   searchOnLoad: boolean;
-  allowSelection: boolean;
+  allowSelection: boolean | "single";
   showContextMenu: (fop: FindOptionsParsed) => boolean | "Basic";
   showSelectedButton: boolean;
   hideButtonBar: boolean;
@@ -94,6 +100,7 @@ export interface SearchControlLoadedProps {
   deps?: React.DependencyList;
   extraOptions: any;
 
+
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
   enableAutoFocus: boolean;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
@@ -104,12 +111,13 @@ export interface SearchControlLoadedProps {
   onSelectionChanged?: (rows: ResultRow[]) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
-  onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
-  onResult?: (table: ResultTable, dataChange: boolean) => void;
+  onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
+  onResult?: (table: ResultTable, dataChange: boolean, sc: SearchControlLoaded) => void;
   styleContext?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
+  onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
 }
 
 export interface SearchControlLoadedState {
@@ -142,7 +150,7 @@ export interface SearchControlLoadedState {
   viewMode?: SearchControlViewMode;
 }
 
-export default class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
+export class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
 
   constructor(props: SearchControlLoadedProps) {
     super(props);
@@ -155,6 +163,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   static maxToArrayElements = 100;
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
+  static onDrilldown: ((scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>) | null = null;
 
   pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
@@ -164,10 +173,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     const qs = Finder.getSettings(fo.queryKey);
 
     return this.props.mobileOptions?.(fop) ?? qs?.mobileOptions?.(fop) ?? SearchControlLoaded.mobileOptions?.(fop) ??
-      {
-        showSwitchViewModesButton: true,
-        defaultViewMode: "Mobile"
-      };
+    {
+      showSwitchViewModesButton: true,
+      defaultViewMode: "Mobile"
+    };
   }
 
   onResize = () => {
@@ -230,11 +239,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return p.showHeader == true && (p.showFilterButton || p.showFilters);
   }
 
-  getQueryRequest(): QueryRequest {
+  getQueryRequest(avoidHiddenColumns?: boolean): QueryRequest {
     const fo = this.props.findOptions;
     const qs = this.props.querySettings;
 
-    return Finder.getQueryRequest(fo, qs);
+    return Finder.getQueryRequest(fo, qs, avoidHiddenColumns);
   }
 
   getSummaryQueryRequest(): QueryRequest | null {
@@ -292,11 +301,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return Promise.resolve();
     }
     else {
-      return this.doSearch({dataChanged: true});
+      return this.doSearch({ dataChanged: true });
     }
   }
 
-  doSearch(opts : { dataChanged?: boolean, force?: boolean}): Promise<void> {
+  doSearch(opts: { dataChanged?: boolean, force?: boolean }): Promise<void> {
 
     if (this.isUnmounted || (this.isManualRefreshOrAllPagination() && !opts.force))
       return Promise.resolve();
@@ -305,7 +314,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     return this.getFindOptionsWithSFB().then(fop => {
       if (this.props.onSearch)
-        this.props.onSearch(fop, dataChanged ?? false);
+        this.props.onSearch(fop, dataChanged ?? false, this);
 
       if (this.simpleFilterBuilderInstance && this.simpleFilterBuilderInstance.onDataChanged)
         this.simpleFilterBuilderInstance.onDataChanged();
@@ -319,7 +328,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       const customRequest = this.props.customRequest;
 
       return Promise.all([this.abortableSearch.getData({ request: qr, fop, customRequest }),
-        qrSummary ? this.abortableSearchSummary.getData({ request: qrSummary, fop, customRequest }) : Promise.resolve<ResultTable | undefined>(undefined) 
+      qrSummary ? this.abortableSearchSummary.getData({ request: qrSummary, fop, customRequest }) : Promise.resolve<ResultTable | undefined>(undefined)
       ]).then(([rt, summaryRt]) => {
         this.setState({
           resultTable: rt,
@@ -333,7 +342,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }, () => {
           this.fixScroll();
           if (this.props.onResult)
-            this.props.onResult(rt, dataChanged ?? false);
+            this.props.onResult(rt, dataChanged ?? false, this);
           this.notifySelectedRowsChanged();
         });
       });
@@ -450,7 +459,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     this.handleFiltersChanged();
 
-      this.doSearchPage1();
+    this.doSearchPage1();
   }
 
   handleHeightChanged = () => {
@@ -507,17 +516,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
               this.state.showFilters ? <FilterBuilder
-              queryDescription={qd}
-              filterOptions={fo.filterOptions}
-              lastToken={this.state.lastToken}
-              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-              onTokenChanged={this.handleFilterTokenChanged}
-              onFiltersChanged={this.handleFiltersChanged}
-              onHeightChanged={this.handleHeightChanged}
-              showPinnedFiltersOptions={false}
-              showPinnedFiltersOptionsButton={true}
+                queryDescription={qd}
+                filterOptions={fo.filterOptions}
+                lastToken={this.state.lastToken}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                onTokenChanged={this.handleFilterTokenChanged}
+                onFiltersChanged={this.handleFiltersChanged}
+                onHeightChanged={this.handleHeightChanged}
+                showPinnedFiltersOptions={false}
+                showPinnedFiltersOptionsButton={true}
               /> :
-              sfb && <div className="simple-filter-builder">{sfb}</div>}
+                sfb && <div className="simple-filter-builder">{sfb}</div>}
           </div>
         }
         {p.showHeader == true && !this.state.showFilters && !sfb && this.renderPinnedFilters(true)}
@@ -558,7 +567,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   renderMobile() {
     return (
-      <div ref={d => this.containerDiv = d} 
+      <div ref={d => this.containerDiv = d}
         className="sf-scroll-table-container"
         style={{ maxHeight: this.props.maxResultsHeight }}>
         <div className="sf-search-results mobile">
@@ -676,11 +685,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       p.showGroupButton && {
         order: -4,
         button: < button
-          className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
+          className={"sf-query-button btn " + (p.findOptions.groupResults ? "btn-info active" : "btn-light")}
           onClick={this.handleToggleGroupBy}
           title={titleLabels ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
           Ʃ
-            </button>
+        </button>
       },
 
       p.showSystemTimeButton && {
@@ -689,14 +698,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
           onClick={this.handleSystemTimeClick}
           title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
-          <FontAwesomeIcon icon="history" />
+          <FontAwesomeIcon icon="clock-rotate-left" />
         </button>
       },
 
       {
         order: -3,
         button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
-          <FontAwesomeIcon icon={"search"} /><span className="d-none d-sm-inline">&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}</span>
+          <FontAwesomeIcon icon={"magnifying-glass"} /><span className="d-none d-sm-inline">&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}</span>
         </button>
       },
 
@@ -704,7 +713,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       p.create && {
         order: -2,
-        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
+        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate}>
           <FontAwesomeIcon icon="plus" className="sf-create" /><span className="d-none d-sm-inline">&nbsp;{SearchMessage.Create.niceToString()}</span>
         </button>
       },
@@ -720,7 +729,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
         button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
-          <FontAwesomeIcon icon="external-link-alt" />
+          <FontAwesomeIcon icon="up-right-from-square" />
         </button>
       },
 
@@ -759,7 +768,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       this.dataChanged();
     }
   }
- 
+
   handleCreate = (ev: React.MouseEvent<any>) => {
 
     if (!this.props.create)
@@ -787,8 +796,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var getViewPromise = this.props.getViewPromise ?? qs?.getViewPromise;
 
-        if (isWindowsOpen || s?.avoidPopup  || this.props.view == "InPlace")
-        {
+        if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
           Finder.getPropsFromFilters(tn, this.props.findOptions.filterOptions)
             .then(props => Constructor.constructPack(tn, props))
             .then(pack => {
@@ -815,7 +823,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             }))
             .then(entity => this.handleCreated(entity));
         }
-        
+
       });
     }
   }
@@ -868,7 +876,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       return Promise.resolve([]);
 
     var resFO = this.state.resultFindOptions;
-    var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, resFO));
+    var filters = this.state.selectedRows.map(row => SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFO));
     return Promise.all(filters.map(fs => Finder.fetchLites({ queryName: resFO.queryKey, filterOptions: fs, orderOptions: [], count: null })))
       .then(fss => fss.flatMap(fs => fs));
   }
@@ -904,8 +912,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
   markRows = (dic: MarkedRowsDictionary) => {
     this.dataChanged()
-      .then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary }));
+      .then(() => this.setMarkedRows(dic));
+  }
 
+  setMarkedRows(dic: MarkedRowsDictionary) {
+    this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })
   }
 
   renderSelectedButton(): ButtonBarElement | null {
@@ -964,10 +975,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const rt = this.state.resultTable;
 
+    let value = cm.rowIndex == undefined || rt == null || token == null ? (op == "IsIn" ? [] : undefined) : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)]
+
+    if (token?.filterType == "Embedded" && value != null) {
+      value = null;
+      op = "DistinctTo";
+    }
+
     fo.filterOptions.push({
       token: newToken!,
       operation: op,
-      value: cm.rowIndex == undefined || rt == null || token == null ? (op == "IsIn" ? [] : undefined) : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
+      value: value,
       frozen: false
     });
 
@@ -1016,35 +1034,54 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
-  handleGroupByThisColumn = () => {
+  handleGroupByThisColumn = async () => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
+
     const col = fo.columnOptions[cm.columnIndex!];
 
-    Finder.API.parseTokens(fo.queryKey, [{ token: "Count", options: SubTokensOptions.CanAggregate }])
-      .then(tokens => {
+    fo.columnOptions.clear();
 
-        var count = tokens[0];
-        fo.columnOptions.clear();
-        fo.columnOptions.push({ token: count, displayName: count.niceName });
-        fo.columnOptions.push(col);
-        fo.groupResults = true;
-        fo.orderOptions.clear();
-        fo.orderOptions.push({ token: count, orderType: "Descending" })
+    var defAggregate = this.props.querySettings?.defaultAggregates;
 
-        this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+    var parsedTokens: QueryToken[] = [];
+    if (defAggregate) {
+      parsedTokens = await Finder.API.parseTokens(fo.queryKey, [
+        ...defAggregate.map(a => ({ token: a.token.toString(), options: SubTokensOptions.CanAggregate })),
+        ...defAggregate.filter(a => a.summaryToken != null).map(a => ({ token: a.summaryToken!.toString(), options: SubTokensOptions.CanAggregate }))
+      ].distinctBy(a => a.token));
 
-        if (this.props.searchOnLoad)
-          this.doSearchPage1();
+      var ptDic = parsedTokens.toObject(a => a.fullKey);
 
-      });
-  
+      fo.columnOptions.push(...defAggregate.map(t => ({
+        token: ptDic[t.token.toString()],
+        summaryToken: t.summaryToken != null ? ptDic[t.summaryToken!.toString()] : undefined,
+        displayName: (typeof t.displayName == "function" ? t.displayName() : t.displayName) ?? ptDic[t.token.toString()].niceName,
+        hiddenColumn: t.hiddenColumn,
+      })));
+    }
+    else {
+      parsedTokens = await Finder.API.parseTokens(fo.queryKey, [
+        { token: "Count", options: SubTokensOptions.CanAggregate }
+      ]);
+      fo.columnOptions.push({ token: parsedTokens[0], displayName: parsedTokens[0].niceName });
+    }
+
+    fo.columnOptions.push(col);
+    fo.groupResults = true;
+    fo.orderOptions.clear();
+    fo.orderOptions.push(...parsedTokens.map(t => softCast<OrderOptionParsed>({ token: t, orderType: "Descending" })));
+
+    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+
+    if (this.props.searchOnLoad)
+      this.doSearchPage1();
   }
 
   handleRestoreDefaultColumn = () => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
-    
+
     const col = fo.columnOptions[cm.columnIndex!];
     fo.columnOptions.clear();
     fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));
@@ -1067,7 +1104,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var fo = this.props.findOptions;
     function isColumnFilterable(columnIndex: number) {
       var token = fo.columnOptions[columnIndex].token;
-      return token && token.filterType != "Embedded" && token.filterType != undefined && token.format != "Password";
+      return token && token.filterType != undefined && token.format != "Password";
     }
 
     function isColumnGroupable(columnIndex: number) {
@@ -1089,36 +1126,36 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
           <span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-            <FontAwesomeIcon icon="plus-square" transform="shrink-4 up-8 right-8" color="#008400" />
+            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+            <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
           </span>&nbsp;{JavascriptMessage.insertColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="pen-square" transform="shrink-4 up-8 right-8" color="orange" />
+          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="square-pen" transform="shrink-4 up-8 right-8" color="orange" />
         </span>&nbsp;{JavascriptMessage.editColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="minus-square" transform="shrink-4 up-8 right-9" color="#ca0000" />
+          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="square-minus" transform="shrink-4 up-8 right-9" color="#ca0000" />
         </span>&nbsp;{JavascriptMessage.removeColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Divider />);
 
-        if (isColumnGroupable(cm.columnIndex))
+        if (p.showGroupButton && isColumnGroupable(cm.columnIndex))
           menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
+            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
             <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
           </span>&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
           </Dropdown.Item>);
       }
 
       menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="undo-alt" transform="shrink-4 up-8 right-8" color="black" />
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
       </span>&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
       </Dropdown.Item>);
 
@@ -1128,7 +1165,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
         if (this.state.showHiddenColumns) {
-          menuItems.push(<Dropdown.Item className="sf-hide-hidden-columns" onClick={() => this.setState({ showHiddenColumns : undefined })}>
+          menuItems.push(<Dropdown.Item className="sf-hide-hidden-columns" onClick={() => this.setState({ showHiddenColumns: undefined })}>
             <FontAwesomeIcon icon="eye-slash" color="#21618C" />&nbsp;{SearchMessage.HideHiddenColumns.niceToString()}
           </Dropdown.Item>);
         } else {
@@ -1136,7 +1173,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             <FontAwesomeIcon icon="eye" color="#21618C" />&nbsp;{SearchMessage.ShowHiddenColumns.niceToString()}
           </Dropdown.Item>);
         }
-    }
+      }
     }
 
     if (cm.rowIndex != undefined) {
@@ -1176,7 +1213,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     navigator.clipboard.writeText(text);
   }
-  
+
   //SELECTED ROWS
 
   allSelected() {
@@ -1221,7 +1258,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     this.forceUpdate();
 
-      this.doSearchPage1();
+    this.doSearchPage1();
   }
 
   //HEADER DRAG AND DROP
@@ -1295,14 +1332,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     });
   }
 
-  
+
 
   renderHeaders(): React.ReactNode {
 
     var rt = this.state.summaryResultTable;
     var scl = this;
 
-    function getSummary(summaryToken: QueryToken | undefined ) {
+    function getSummary(summaryToken: QueryToken | undefined) {
 
       if (rt == null || summaryToken == undefined)
         return null;
@@ -1325,10 +1362,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           <span className="text-muted me-1">{prefix}</span>
 
           {formatter.formatter(val, {
-          columns: rt.columns,
-          row: rt.rows[0],
-          rowIndex: 0,
-          refresh: () => scl.dataChanged(),
+            columns: rt.columns,
+            row: rt.rows[0],
+            rowIndex: 0,
+            refresh: () => scl.dataChanged(),
           systemTime: scl.props.findOptions.systemTime
         }, summaryToken)}</div>
       );
@@ -1336,7 +1373,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     var rootKeys = !this.props.findOptions.groupResults ? [] : getRootKeyColumn(this.props.findOptions.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasToArray(co.token)));
 
-    function isDerivedKey(token: QueryToken | undefined) : boolean {
+    function isDerivedKey(token: QueryToken | undefined): boolean {
       if (token == null)
         return false;
 
@@ -1360,7 +1397,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     return (
       <tr>
         {this.props.allowSelection && <th className="sf-small-column sf-th-selection">
-          <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          {this.props.allowSelection == true &&
+            <input type="checkbox" className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          }
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
@@ -1374,7 +1413,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
               co.hiddenColumn && "sf-hidden-column",
               !this.canOrder(co) && "noOrder",
               co.token && co.token.type.isCollection && "error",
-              co.token && this.props.findOptions.groupResults && isNotDerivedToArray(co.token)  && "error", 
+              co.token && this.props.findOptions.groupResults && isNotDerivedToArray(co.token) && "error",
               this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
                 this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
             data-column-name={co.token && co.token.fullKey}
@@ -1385,15 +1424,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             onDragOver={e => this.handlerHeaderDragOver(e, i)}
             onDragEnter={e => this.handlerHeaderDragOver(e, i)}
             onDrop={this.handleHeaderDrop}>
+            {getSummary(co.summaryToken)}
             <div className="d-flex" style={{ alignItems: "center" }}>
               {this.orderIcon(co)}
               {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
                 <FontAwesomeIcon icon="key" className="me-1"
                   color={rootKeys.contains(co) ? "gray" : "lightgray"}
-                  title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
+                  title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()} /></span>}
               {co.displayName}
             </div>
-            {getSummary(co.summaryToken)}
           </th>
         )}
         {allSmall && <th></th>}
@@ -1452,8 +1491,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     var selectedRows = this.state.selectedRows!;
 
     if (cb.checked) {
-      if (!selectedRows.contains(row))
+      if (this.props.allowSelection == "single") {
+        selectedRows.clear();
         selectedRows.push(row);
+      } else {
+        if (!selectedRows.contains(row))
+          selectedRows.push(row);
+      }
     } else {
       selectedRows.remove(row);
     }
@@ -1463,12 +1507,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     this.setState({ currentMenuItems: undefined });
   }
 
-  static getGroupFilters(row: ResultRow, resFo: FindOptionsParsed): FilterOption[] {
+  static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
     var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
 
     var keyFilters = resFo.columnOptions
-      .map((col, i) => ({ col, value: row.columns[i] }))
+      .map(col => ({ col, value: row.columns[resTable.columns.indexOf(col.token!.fullKey)] }))
       .filter(a => rootKeys.contains(a.col))
       .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
 
@@ -1487,17 +1531,24 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
           ({ token: a.token.fullKey }) as ColumnOption)
       .notNull();
 
-    var filters = SearchControlLoaded.getGroupFilters(row, resFo);
+    var filters = SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFo);
 
-    return Finder.explore({
+    const fo = ({
       queryName: resFo.queryKey,
       filterOptions: filters,
       columnOptions: extraColumns,
       columnOptionsMode: "ReplaceOrAdd",
       systemTime: resFo.systemTime && { ...resFo.systemTime },
       includeDefaultFilters: false,
-    }).then(() => {
-      this.dataChanged();
+    } as FindOptions);
+
+    const onDrilldown = this.props.onDrilldown ?? SearchControlLoaded.onDrilldown;
+    const promise = onDrilldown ? onDrilldown(this, row, { onReload: () => this.dataChanged() }) : Promise.resolve(false);
+    promise.then(done => {
+      if (done == false)
+        return Finder.explore(fo).then(() => {
+          this.dataChanged();
+        });
     });
   }
 
@@ -1543,21 +1594,26 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       const isWindowsOpen = e.button == 1 || e.ctrlKey;
 
-      if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
-        var vp = getViewPromise && getViewPromise(null);
-        var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
-        if (this.props.view == "InPlace" && !isWindowsOpen)
-          AppContext.history.push(url);
-        else
-          window.open(url);
-      }
-      else {
-        Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
-          .then(() => {
-            this.handleOnNavigated(lite);
-          });
-
-      }
+      const onDrilldown = this.props.onDrilldown ?? SearchControlLoaded.onDrilldown;
+      const promise = onDrilldown ? onDrilldown(this, row, { openInNewTab: isWindowsOpen || s?.avoidPopup, showInPlace: this.props.view == "InPlace", onReload: () => this.handleOnNavigated(lite) }) : Promise.resolve(false);
+      promise.then(done => {
+        if (done == false) {
+          if (isWindowsOpen || s?.avoidPopup || this.props.view == "InPlace") {
+            var vp = getViewPromise && getViewPromise(null);
+            var url = Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined);
+            if (this.props.view == "InPlace" && !isWindowsOpen)
+              AppContext.history.push(url);
+            else
+              window.open(url);
+          }
+          else {
+            Navigator.view(lite, { getViewPromise: getViewPromise, buttons: "close" })
+              .then(() => {
+                this.handleOnNavigated(lite);
+              });
+          }
+        }
+      });
     }
   }
 
@@ -1665,7 +1721,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     var noResultsElement = this.getNoResultsElement();
-    if (noResultsElement != null) 
+    if (noResultsElement != null)
       return <tr><td colSpan={columnsCount}>{noResultsElement}</td></tr>;
 
     const entityFormatter = this.getEntityFormatter();
@@ -1675,7 +1731,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       const mark = this.getRowMarked(row);
       const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
         mark?.status == "Warning" ? "table-warning" :
-          mark?.status == "Error" ? "table-danger" : undefined;
+          mark?.status == "Error" ? "table-danger" :
+            mark?.status == "Muted" ? "text-muted" :
+              undefined;
 
       var ra = this.getRowAttributes(row);
 
@@ -1712,7 +1770,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
       return (
         <OverlayTrigger
-          overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"}>{message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
+          overlay={<Tooltip placement="bottom" id={"result_row_" + i + "_tooltip"} style={{ "--bs-tooltip-max-width": "100%" } as any}>
+            {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
+          </Tooltip>}>
           {tr}
         </OverlayTrigger>
       );
@@ -1724,12 +1784,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     if (!mark)
       return undefined;
 
-    const markIcon: IconProp = mark.status == "Success" ? "check-circle" :
-      mark.status == "Warning" ? "exclamation-circle" : "times-circle";
+    const markIcon: IconProp =
+      mark.status == "Success" ? "check-circle" :
+        mark.status == "Warning" ? "exclamation-circle" :
+          mark.status == "Error" ? "times-circle" :
+            mark.status == "Muted" ? "xmark" : null!;
 
-    const markIconColor: string = mark.status == "Success" ? "green" :
-      mark.status == "Warning" ? "orange" : "red";
-        
+    const markIconColor: string =
+      mark.status == "Success" ? "green" :
+        mark.status == "Warning" ? "orange" :
+          mark.status == "Error" ? "red" :
+            mark.status == "Muted" ? "gray" : null!;
+
     const icon = <span><FontAwesomeIcon icon={markIcon} color={markIconColor} /></span>;
 
     return (
@@ -1811,18 +1877,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     const fo = this.props.findOptions;
 
-    return <AutoFocus disabled={!this.props.enableAutoFocus}>
-      <PinnedFilterBuilder
-        filterOptions={fo.filterOptions}
-        pinnedFilterVisible={this.props.pinnedFilterVisible}
-        onFiltersChanged={this.handlePinnedFilterChanged}
-        onSearch={() => this.doSearchPage1(true)}
-        showSearchButton={this.state.refreshMode == "Manual" && this.props.showHeader != true}
-        extraSmall={extraSmall}
-      />
-    </AutoFocus>
+    return (
+      <AutoFocus disabled={!this.props.enableAutoFocus}>
+        <PinnedFilterBuilder
+          filterOptions={fo.filterOptions}
+          pinnedFilterVisible={this.props.pinnedFilterVisible}
+          onFiltersChanged={this.handlePinnedFilterChanged}
+          onSearch={() => this.doSearchPage1(true)}
+          showSearchButton={this.state.refreshMode == "Manual" && this.props.showHeader != true}
+          extraSmall={extraSmall}
+        />
+      </AutoFocus>
+    );
   }
-  
+
   handleOnNavigated = (lite: Lite<Entity>) => {
 
     if (this.props.onNavigated)
@@ -1967,5 +2035,26 @@ function canHaveMin(typeName: string): boolean {
 
 
 function getRootKeyColumn(columnOptions: ColumnOptionParsed[]): ColumnOptionParsed[] {
-  return columnOptions.filter(t => t.token != null && !columnOptions.some(t2 => t2.token != null && t.token!.fullKey.startsWith(t2.token.fullKey + ".")));
+  return columnOptions.filter(t => t.token != null && !columnOptions.some(root => root.token != null && dominates(root.token, t.token!)));
 }
+
+
+function dominates(root: QueryToken, big: QueryToken) {
+
+  if (hasElement(big)) {
+
+    if (!hasElement(root))
+      return false;
+
+    var elemBig = getTokenParents(big).last(a => a.queryTokenType == "Element");
+    var elemRoot = getTokenParents(root).last(a => a.queryTokenType == "Element");
+
+    if (elemBig.fullKey != elemRoot.fullKey)
+      return false;
+  }
+
+  return big.fullKey.startsWith(root.fullKey + ".")
+
+}
+
+export default SearchControlLoaded;

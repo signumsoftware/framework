@@ -17,7 +17,7 @@ public class WorkflowTimerConditionEntity : Entity, IUserAssetEntity
 
     public TypeEntity MainEntityType { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowTimerConditionEval Eval { get; set; }
 
     [AutoExpressionField]
@@ -28,7 +28,7 @@ public class WorkflowTimerConditionEntity : Entity, IUserAssetEntity
         return new XElement("WorkflowTimerCondition",
              new XAttribute("Guid", Guid),
              new XAttribute("Name", Name),
-             new XAttribute("MainEntityType", ctx.TypeToName(MainEntityType)),
+             new XAttribute("MainEntityType", MainEntityType.CleanName),
              new XElement("Eval",
                new XElement("Script", new XCData(Eval.Script))
              )

@@ -222,7 +222,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
     <fieldset className={classes("sf-grid-repeater-field sf-control-container", p.ctx.errorClass)} {...p.ctx.errorAttributes()}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           <span className="float-end ms-2">
             {p.extraButtonsBefore && p.extraButtonsBefore(c)}
             {c.renderCreateButton(false)}
@@ -316,7 +316,7 @@ export function EntityGridItem(p : EntityGridItemProps){
         {p.onRemove &&
           <a href="#" className="sf-line-button sf-remove float-end" onClick={p.onRemove}
               title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon icon="times" />
+              <FontAwesomeIcon icon="xmark" />
             </a>
           }
         {p.title}

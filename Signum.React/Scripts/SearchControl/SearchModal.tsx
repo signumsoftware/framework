@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '../Modals';
 import * as Finder from '../Finder';
-import { FindOptions, FindMode, ResultRow, ModalFindOptions, FindOptionsParsed } from '../FindOptions'
+import { FindOptions, FindMode, ResultRow, ModalFindOptions, ModalFindOptionsMany, FindOptionsParsed } from '../FindOptions'
 import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps, SearchControlHandler } from './SearchControl'
 import { AutoFocus } from '../Components/AutoFocus';
@@ -19,6 +19,7 @@ interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchContro
   findOptions: FindOptions;
   findMode: FindMode;
   isMany: boolean;
+  allowNoSelection?: boolean;
   title?: React.ReactNode;
   message?: React.ReactNode;
   size?: BsSize;
@@ -119,7 +120,7 @@ function SearchModal(p: SearchModalProps) {
 
   var qs = Finder.getSettings(p.findOptions.queryName);
 
-  const okEnabled = p.isMany ? selectedRows.current.length > 0 : selectedRows.current.length == 1;
+  const okEnabled = p.isMany ? (p.allowNoSelection || selectedRows.current.length > 0) : selectedRows.current.length == 1;
 
   return (
     <Modal size={(p.size ?? qs?.modalSize ?? "lg") as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf - search - modal">
@@ -129,7 +130,7 @@ function SearchModal(p: SearchModalProps) {
           &nbsp;
           </span>
         <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e)}>
-          <FontAwesomeIcon icon="external-link-alt" />
+          <FontAwesomeIcon icon="up-right-from-square" />
         </a>
         {p.message && <>
           <br />
@@ -186,11 +187,11 @@ namespace SearchModal {
       .then(a => a && { row: a.rows[0], searchControl: a.searchControl });
   }
 
-  export function openMany(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
-
+  export function openMany(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined> {
     return openModal<{ rows: ResultRow[], searchControl: SearchControlLoaded } | undefined>(<SearchModal findOptions={findOptions}
       findMode={"Find"}
       isMany={true}
+      allowNoSelection={modalOptions?.allowNoSelection}
       title={modalOptions?.title ?? getQueryNiceName(findOptions.queryName)}
       message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, true, modalOptions?.forProperty)}
       size={modalOptions?.modalSize}

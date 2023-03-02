@@ -16,6 +16,10 @@ input[type=checkbox].form-control {
     margin-top: 9px;
 }
 
+.checkbox {
+    user-select: none;
+}
+
 .input-group {
     flex-wrap: nowrap;
 }
@@ -74,8 +78,9 @@ span.sf-today {
 }
 
 .sf-strip-dropable {
-    margin: -1px -10px -1px 0px;
-    padding: 1px 10px 1px 0px;
+    display: flex;
+    margin: -1px -12px -1px -12px;
+    padding: 1px 12px 1px 12px;
 }
 
 li.sf-strip-element {
@@ -84,6 +89,10 @@ li.sf-strip-element {
     background-color: #f9f9f9;
     border: 1px solid #ccc;
     padding: 2px 5px;
+}
+
+.sf-strip-element .sf-strip-link > span {
+    display: initial !important;
 }
 
 /* Buttons */
@@ -225,6 +234,24 @@ ul.nav-tabs {
 }
 
 
+/*Accordion*/
+
+.sf-accordion-element.drag-top >h2 >button {
+    box-shadow: inset #AAA 0px 3px 0px 0px !important;
+}
+
+.sf-accordion-element.drag-bottom > h2 > button {
+    box-shadow: inset #AAA 0px -3px 0px 0px !important;
+}
+
+/*.sf-accordion-element {
+    padding-bottom: 3px;
+}
+
+.sf-accordion-element:first-child {
+    padding-top: 3px;
+}*/
+
 /*buton colors*/
 .sf-create:not(.disabled):hover {
     color: #22BA00;
@@ -256,7 +283,6 @@ ul.nav-tabs {
 
 a.sf-move:focus {
     border: 2px solid #656565;
-    border-radius: 4px !important;
 }
 
 .sf-paste:not(.disabled):hover {
@@ -317,7 +343,6 @@ input[type=checkbox].form-control-xs {
     padding: 1px 5px;
     font-size: 0.875rem;
     line-height: 1.5;
-    border-radius: 0.2rem;
     height: 26px;
 }
 
@@ -345,6 +370,15 @@ input[type=checkbox].form-control-xs {
     padding: 0 0 0 0.4em;
 }
 
+.input-group > .form-control.rw-dropdown-list{
+    display: flex;
+    padding: 0;
+}
+
+    .input-group > .form-control.rw-dropdown-list > .rw-widget-input {
+        flex: 1;
+    }
+
 .form-control-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-dropdown-list-input,
 .rw-widget-xs .rw-combobox-input {
@@ -353,6 +387,10 @@ input[type=checkbox].form-control-xs {
 
 .form-control.form-control-sm.rw-combobox.rw-widget {
     padding: 0px;
+}
+
+.rw-widget-xs .rw-input {
+    padding: 0 0.4em;
 }
 
 .form-control-xs .rw-widget-picker,
@@ -368,7 +406,6 @@ input[type=checkbox].form-control-xs {
     padding: 0rem 0.2rem;
     font-size: 0.875rem;
     /*line-height: 1.5;*/
-    border-radius: 0.2rem;
 }
 
 /*form sm (adjustments)*/
@@ -408,7 +445,7 @@ input[type=checkbox].form-control-xs {
 }
 
 .form-control-sm .rw-widget-picker {
-    min-height: 30px;
+    min-height: 31px;
 }
 
 /*.rw-widget-sm .rw-multiselect-input {
@@ -417,7 +454,7 @@ input[type=checkbox].form-control-xs {
 }*/
 
 .rw-widget-sm .rw-widget-picker {
-    min-height: 28px;
+    min-height: 31px;
 }
 
 .input-group > .form-control-plaintext {
@@ -519,6 +556,10 @@ body:not(.rtl) .sf-mandatory-warning,
 body:not(.rtl) .sf-mandatory-warning-widget .rw-input,
 body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     border-left: 2px solid #ffdd00;
+}
+
+.rw-dropdown-list .rw-popup-container{
+    right: unset;
 }
 
 .sf-no-padding {

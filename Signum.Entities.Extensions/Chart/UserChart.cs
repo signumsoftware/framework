@@ -3,7 +3,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
-
 namespace Signum.Entities.Chart;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
@@ -11,7 +10,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
 {
     public UserChartEntity()
     {
-        this.RebindEvents();
+        this.BindParent();
     }
 
     public UserChartEntity(object queryName) : this()
@@ -66,11 +65,15 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     [NoRepeatValidator]
     public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
-    [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
+    [BindParent, PreserveOrder]
     public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
-    [NotifyChildProperty, NotifyCollectionChanged, PreserveOrder]
+    [BindParent, PreserveOrder]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
+
+    [NoRepeatValidator, PreserveOrder]
+    [ImplementedBy(typeof(UserQueryEntity))]
+    public MList<Lite<Entity>> CustomDrilldowns { get; set; } = new MList<Lite<Entity>>();
 
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
@@ -116,7 +119,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             new XAttribute("Guid", Guid),
             new XAttribute("DisplayName", DisplayName),
             new XAttribute("Query", Query.Key),
-            EntityType == null ? null! : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+            EntityType == null ? null! : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             new XAttribute("HideQuickLink", HideQuickLink),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
@@ -124,7 +127,8 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             MaxRows == null ? null! : new XAttribute("MaxRows", MaxRows.Value),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
-            Parameters.IsNullOrEmpty() ? null! : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
+            Parameters.IsNullOrEmpty() ? null! : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()),
+            CustomDrilldowns.IsNullOrEmpty() ? null! : new XElement("CustomDrilldowns", CustomDrilldowns.Select(d => new XElement("CustomDrilldown", ctx.Include((Lite<IUserAssetEntity>)d))).ToList()));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -139,6 +143,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
+        CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLiteFat()).NotNull().ToMList());
         var paramsXml = (element.Element("Parameters")?.Elements()).EmptyIfNull().ToDictionary(a => a.Attribute("Name")!.Value);
         Parameters.ForEach(p =>
         {
@@ -146,6 +151,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             if (pxml != null)
                 p.FromXml(pxml, ctx);
         });
+
         ParseData(ctx.GetQueryDescription(Query));
     }
 

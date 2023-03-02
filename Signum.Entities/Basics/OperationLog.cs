@@ -7,7 +7,7 @@ public class OperationLogEntity : Entity
 {
     public OperationLogEntity()
     {
-        RebindEvents();
+        BindParent();
     }
 
     [ImplementedByAll]

@@ -1,3 +1,4 @@
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
@@ -5,7 +6,10 @@ using Signum.React.Facades;
 using Signum.React.Filters;
 using Signum.Utilities.Reflection;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using static Signum.React.ApiControllers.OperationController;
 
 namespace Signum.React.ApiControllers;
@@ -92,25 +96,24 @@ public class OperationController : Controller
     }
 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class ConstructOperationRequest : BaseOperationRequest
     {
-        public string Type { get; set; }
+        public required string Type { get; set; }
     }
 
     public class EntityOperationRequest : BaseOperationRequest
     {
-        public Entity entity { get; set; }
+        public required Entity entity { get; set; }
     }
 
     public class LiteOperationRequest : BaseOperationRequest
     {
-        public Lite<Entity> lite { get; set; }
+        public required Lite<Entity> lite { get; set; }
     }
 
     public class BaseOperationRequest
     {
-        public string OperationKey { get; set; }
+        public required string OperationKey { get; set; }
 
         public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.OperationKey, entityType);
 
@@ -180,7 +183,6 @@ public class OperationController : Controller
 
         public override string ToString() => OperationKey;
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     [HttpPost("api/operation/constructFromMany"), ProfilerActionSplitter]
     public EntityPackTS? ConstructFromMany([Required, FromBody]MultiOperationRequest request)
@@ -194,129 +196,93 @@ public class OperationController : Controller
     }
 
     [HttpPost("api/operation/constructFromMultiple"), ProfilerActionSplitter]
-    public MultiOperationResponse ConstructFromMultiple([Required, FromBody] MultiOperationRequest request)
+    public IAsyncEnumerable<OperationResult> ConstructFromMultiple([Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
-        if (request.Setters.HasItems())
+        return ForeachMultiple(request.Lites, async lite =>
         {
-            var errors = ForeachMultiple(request.Lites, lite =>
-            {
-                var entity = lite.Retrieve();
-
+            var entity = await lite.RetrieveAsync(cancellationToken);
+            if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
-
-                var op = request.GetOperationSymbol(entity.GetType());
-
-                OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
-            });
-
-            return new MultiOperationResponse(errors);
-        }
-        else
-        {
-            var errors = ForeachMultiple(request.Lites, lite =>
-            {
-                var op = request.GetOperationSymbol(lite.EntityType);
-
-                OperationLogic.ServiceConstructFromLite(lite, op, request.ParseArgs(op));
-            });
-
-            return new MultiOperationResponse(errors);
-        }
+            var op = request.GetOperationSymbol(entity.GetType());
+            OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
+        }, cancellationToken);
     }
 
 
     [HttpPost("api/operation/executeMultiple"), ProfilerActionSplitter]
-    public MultiOperationResponse ExecuteMultiple([Required, FromBody] MultiOperationRequest request)
+    public IAsyncEnumerable<OperationResult> ExecuteMultiple([Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
-        if (request.Setters.HasItems())
+        return ForeachMultiple(request.Lites, async lite =>
         {
-            var errors = ForeachMultiple(request.Lites, lite =>
-            {
-                var entity = lite.Retrieve();
-
+            var entity = await lite.RetrieveAsync(cancellationToken);
+            if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
-                var op = request.GetOperationSymbol(entity.GetType());
-                OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
-            });
-
-            return new MultiOperationResponse(errors);
-        }
-        else
-        {
-            var errors = ForeachMultiple(request.Lites, lite =>
-            {
-                var op = request.GetOperationSymbol(lite.EntityType);
-                OperationLogic.ServiceExecuteLite(lite, op, request.ParseArgs(op));
-            });
-
-            return new MultiOperationResponse(errors);
-        }
+            var op = request.GetOperationSymbol(entity.GetType());
+            OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
+        }, cancellationToken);
     }
 
 
     [HttpPost("api/operation/deleteMultiple"), ProfilerActionSplitter]
-    public MultiOperationResponse DeleteMultiple([Required, FromBody] MultiOperationRequest request)
+    public IAsyncEnumerable<OperationResult> DeleteMultiple([Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
-        if (request.Setters.HasItems())
+        return ForeachMultiple(request.Lites, async lite =>
         {
-            var errors = ForeachMultiple(request.Lites, lite =>
-            {
-                var entity = lite.Retrieve();
-
+            var entity = await lite.RetrieveAsync(cancellationToken);
+            if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 
-                var op = request.GetOperationSymbol(entity.GetType());
-
-                OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
-            });
-
-            return new MultiOperationResponse(errors);
-        }
-        else
-        {
-            var errors = ForeachMultiple(request.Lites, lite =>
-            {
-                var op = request.GetOperationSymbol(lite.EntityType);
-                OperationLogic.ServiceDelete(lite, op, request.ParseArgs(op));
-            });
-
-            return new MultiOperationResponse(errors);
-        }
+            var op = request.GetOperationSymbol(entity.GetType());
+            OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
+        }, cancellationToken);
     }
 
-    static Dictionary<string, string> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Action<Lite<Entity>> action)
+    public class OperationResult
     {
-        Dictionary<string, string> errors = new Dictionary<string, string>();
+        public Lite<Entity> Entity;
+        public string? Error;
+
+        public OperationResult(Lite<Entity> entity)
+        {
+            Entity = entity;
+        }
+
+    }
+
+    async static IAsyncEnumerable<OperationResult> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Func<Lite<Entity>, Task> action, [EnumeratorCancellation]CancellationToken cancellationToken)
+    {
         foreach (var lite in lites.Distinct())
         {
+            if (cancellationToken.IsCancellationRequested)
+                yield break;
+
+            string? error = null;
             try
             {
-                action(lite);
-                errors.Add(lite.Key(), "");
+                await action(lite);
             }
             catch (Exception e)
             {
                 e.Data["lite"] = lite;
                 e.LogException();
-                errors.Add(lite.Key(), e.Message);
+                error = e.Message;
             }
+            yield return new OperationResult(lite) { Error = error };
         }
-        return errors;
     }
 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class MultiOperationRequest : BaseOperationRequest
     {
         public string? Type { get; set; }
-        public Lite<Entity>[] Lites { get; set; }
+        public required Lite<Entity>[] Lites { get; set; }
 
         public List<PropertySetter>? Setters { get; set; }
     }
 
     public class PropertySetter
     {
-        public string Property;
+        public required string Property;
         public PropertyOperation? Operation;
         public FilterOperation? FilterOperation;
         public object? Value;
@@ -325,7 +291,6 @@ public class OperationController : Controller
         public List<PropertySetter>? Setters;
     }
 
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class MultiOperationResponse
     {
@@ -358,13 +323,11 @@ public class OperationController : Controller
 
     public static Func<Lite<Entity>[], bool>? AnyReadonly; 
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
     public class StateCanExecuteRequest
     {
-        public string[] OperationKeys { get; set; }
-        public Lite<Entity>[] Lites { get; set; }
+        public required string[] OperationKeys { get; set; }
+        public required Lite<Entity>[] Lites { get; set; }
     }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public class StateCanExecuteResponse
     {
@@ -393,6 +356,7 @@ internal static class MultiSetter
             if (pr.Type.IsMList())
             {
                 var elementPr = pr.Add("Item");
+
                 var mlist = pr.GetLambdaExpression<ModifiableEntity, IMListPrivate>(false).Compile()(entity);
                 switch (setter.Operation)
                 {
@@ -405,7 +369,9 @@ internal static class MultiSetter
                     case PropertyOperation.AddNewElement:
                         {
                             var item = (ModifiableEntity)Activator.CreateInstance(elementPr.Type)!;
-                            SetSetters(item, setter.Setters!, elementPr);
+                            var normalizedPr = elementPr.Type.IsEntity() ? PropertyRoute.Root(elementPr.Type) : elementPr;
+                                
+                            SetSetters(item, setter.Setters!, normalizedPr);
                             ((IList)mlist).Add(item);
                         }
                         break;
@@ -413,9 +379,10 @@ internal static class MultiSetter
                         {
                             var predicate = GetPredicate(setter.Predicate!, elementPr, options);
                             var toChange = ((IEnumerable<object>)mlist).Where(predicate.Compile()).ToList();
+                            var normalizedPr = elementPr.Type.IsEntity() ? PropertyRoute.Root(elementPr.Type) : elementPr;
                             foreach (var item in toChange)
                             {
-                                SetSetters((ModifiableEntity)item, setter.Setters!, elementPr);
+                                SetSetters((ModifiableEntity)item, setter.Setters!, normalizedPr);
                             }
                         }
                         break;

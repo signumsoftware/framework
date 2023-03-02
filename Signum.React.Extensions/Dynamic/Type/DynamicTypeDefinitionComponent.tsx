@@ -981,7 +981,7 @@ export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps) {
           <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={e => handleOnRemove(e, i)}
             title={EntityControlMessage.Remove.niceToString()}>
-            <FontAwesomeIcon icon="times" />
+            <FontAwesomeIcon icon="xmark" />
           </a>
 
           <a href="#" className={classes("sf-line-button", "move-up")}
@@ -1264,7 +1264,7 @@ export function ComboBoxRepeaterComponent(p: ComboBoxRepeaterComponentProps) {
             <a href="#" className={classes("sf-line-button", "sf-remove")}
               onClick={e => handleOnRemove(e, i)}
               title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon icon="times" />
+              <FontAwesomeIcon icon="xmark" />
             </a>
 
             <a href="#" className={classes("sf-line-button", "move-up")}
@@ -1352,7 +1352,7 @@ export function ValidatorRepeaterComponent(p: ValidatorRepeaterComponentProps) {
           <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={e => handleOnRemove(e, i)}
             title={EntityControlMessage.Remove.niceToString()}>
-            <FontAwesomeIcon icon="times" />
+            <FontAwesomeIcon icon="xmark" />
           </a>
         </span>
         {" "}

@@ -4,7 +4,7 @@ import * as Navigator from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage } from '../Signum.Entities'
 import { EntityBaseController } from './EntityBase'
-import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
+import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
@@ -15,8 +15,7 @@ export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
   avoidFieldSet?: boolean;
   createMessage?: string;
-  getComponentWithIndex?: (ctx: TypeContext<any>, index: number) => React.ReactElement<any>;
-  drag?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
+  getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
   itemExtraButtons?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.ReactElement<any>;
 }
 
@@ -26,7 +25,6 @@ export class EntityRepeaterController extends EntityListBaseController<EntityRep
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.createAsLink = true;
-    p.drag = true;
   }
 }
 
@@ -54,7 +52,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
       {...{ ...c.baseHtmlAttributes(), ...c.props.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
       <legend>
         <div>
-          <span>{p.labelText}</span>
+          <span>{p.label}</span>
           {renderButtons()}
         </div>
       </legend>
@@ -82,16 +80,15 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
     return (
       <div className="sf-repater-elements">
         {
-          c.getMListItemContext(ctx).map((mlec, i) => 
-            (<EntityRepeaterElement key={c.keyGenerator.getKey(mlec.value)}
-              onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
-              ctx={mlec}
-              move={c.canMove(mlec.value) && !p.drag && !readOnly ? { canMove: true, renderMoveUp: () => c.renderMoveUp(false, mlec.index!)!, renderMoveDown: () => c.renderMoveDown(false, mlec.index!) } : undefined}
-              drag={c.canMove(mlec.value) && p.drag && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
-              itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
-              getComponent={p.getComponent}
-              getComponentWithIndex={p.getComponentWithIndex ? (ctx => p.getComponentWithIndex!(ctx, mlec.index!)) : undefined}
-              getViewPromise={p.getViewPromise}
+          c.getMListItemContext(ctx).map((mlec, i) =>
+          (<EntityRepeaterElement key={c.keyGenerator.getKey(mlec.value)}
+            onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
+            ctx={mlec}
+            move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
+            drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
+            itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
+            getComponent={p.getComponent}
+            getViewPromise={p.getViewPromise}
             title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
         }
         {
@@ -112,7 +109,6 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 export interface EntityRepeaterElementProps {
   ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
   getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-  getComponentWithIndex?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   onRemove?: (event: React.MouseEvent<any>) => void;
   move?: MoveConfig;
@@ -121,7 +117,7 @@ export interface EntityRepeaterElementProps {
   itemExtraButtons?: () => React.ReactElement<any>;
 }
 
-export function EntityRepeaterElement({ ctx, getComponent, getComponentWithIndex, getViewPromise, onRemove, move, drag, itemExtraButtons, title }: EntityRepeaterElementProps)
+export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title }: EntityRepeaterElementProps)
 {
 
   return (
@@ -139,9 +135,9 @@ export function EntityRepeaterElement({ ctx, getComponent, getComponentWithIndex
               {EntityListBaseController.removeIcon}
             </a>}
             &nbsp;
-            {(move && move!.canMove && !drag) && move!.renderMoveUp()} 
-            {(move && move!.canMove && !drag) && move!.renderMoveDown()}
-            {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
+            {move?.renderMoveUp()} 
+            {move?.renderMoveDown()}
+            {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
               draggable={true}
               onDragStart={drag.onDragStart}
               onDragEnd={drag.onDragEnd}
@@ -155,15 +151,10 @@ export function EntityRepeaterElement({ ctx, getComponent, getComponentWithIndex
           </div>
         </legend>
         <div className="sf-line-entity">
-          <RenderEntity ctx={ctx} getComponent={getComponentWithIndex ?? getComponent} getViewPromise={getViewPromise} />
+          <RenderEntity ctx={ctx} getComponent={getComponent} getViewPromise={getViewPromise} />
         </div>
       </fieldset>
     </div>
   );
 }
 
-interface MoveConfig {
-  canMove: boolean;
-  renderMoveUp: () => (JSX.Element | undefined);
-  renderMoveDown: () => (JSX.Element | undefined);
-}

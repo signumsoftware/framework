@@ -15,6 +15,7 @@ public class SMSController : ControllerBase
         return SMSCharacters.RemainingLength(message);
     }
 
+
     [HttpGet("api/sms/getAllTypes")]
     public List<string> GetAllTypes()
     {
@@ -22,6 +23,7 @@ public class SMSController : ControllerBase
                   .Select(type => TypeLogic.TypeToEntity.GetOrThrow(type).CleanName)
                   .ToList();
     }
+
 
     public class RemainingCharactersRequest
     {

@@ -43,7 +43,7 @@ public static class OperationMap
                           key = e.ToString(),
                           niceName = e.NiceToString(),
                           isSpecial = t == typeof(DefaultState),
-                          color = Engine.Chart.ChartColorLogic.ColorFor(EnumEntity.FromEnumUntyped(e)),
+                          color = Engine.Chart.ColorPaletteLogic.ColorFor(EnumEntity.FromEnumUntyped(e)),
                           token = tokens.GetOrThrow(e.GetType()),
                       }).ToList(),
 

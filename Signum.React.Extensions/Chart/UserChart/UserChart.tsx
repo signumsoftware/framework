@@ -1,16 +1,17 @@
 import * as React from 'react'
-import { UserQueryMessage, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import { UserQueryMessage, QueryOrderEmbedded, UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
 import { UserChartEntity } from '../Signum.Entities.Chart'
-import { FormGroup, ValueLine, EntityLine, EntityTable } from '@framework/Lines'
+import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
-import { SubTokensOptions } from '@framework/FindOptions'
+import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
-import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import "../Chart.css"
-import { useForceUpdate } from '@framework/Hooks'
+import { useAPI, useForceUpdate } from '@framework/Hooks'
+import { getCustomDrilldownsFindOptions, hasAggregates } from '../ChartClient'
+import { getToString } from '@framework/Signum.Entities'
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
@@ -18,6 +19,23 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
   const ctx = p.ctx;
   const entity = ctx.value;
   const queryKey = entity.query!.key;
+
+  const hasAggregatesRef = React.useRef<boolean>(hasAggregates(ctx.value));
+
+  React.useEffect(() => {
+    const ha = hasAggregates(ctx.value);
+    if (ha == hasAggregatesRef.current)
+      return;
+
+    hasAggregatesRef.current = ha;
+    ctx.value.customDrilldowns = [];
+    ctx.value.modified = true;
+    forceUpdate();
+  });
+
+  const qd = useAPI(() => Finder.getQueryDescription(queryKey), [queryKey]);
+  if (!qd)
+    return null;
 
   return (
     <div>
@@ -30,26 +48,31 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
             <span>{getQueryNiceName(queryKey)}</span>
         }
       </FormGroup>
-      <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => forceUpdate()} />
-      {
-        entity.entityType &&
-        <div>
-          <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} />
-          <p className="messageEntity col-sm-offset-2">
-            {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey)}
-          </p>
-        </div>
-      }
+      <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => forceUpdate()}
+        helpText={
+          <div>
+            {UserQueryMessage.MakesThe0AvailableAsAQuickLinkOf1.niceToString(UserChartEntity.niceName(), ctx.value.entityType ? getToString(ctx.value.entityType) : UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))}
+            {p.ctx.value.entityType && <br />}
+            {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
+            {p.ctx.value.entityType && <br/>}
+            {p.ctx.value.entityType && <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
+          </div>
+        }/>
       <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} />
       <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={p.ctx.value.query.key}
         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
         showPinnedFilterOptions={true}
       />
       <ChartBuilder queryKey={queryKey} ctx={p.ctx}
-          onInvalidate={() => forceUpdate()} 
-          onTokenChange={() =>  forceUpdate()} 
-          onRedraw={() => forceUpdate()} 
-          onOrderChanged={() => forceUpdate()} />
+        onInvalidate={() => forceUpdate()}
+        onTokenChange={() => forceUpdate()}
+        onRedraw={() => forceUpdate()}
+        onOrderChanged={() => forceUpdate()} />
+      <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}
+        findOptions={getCustomDrilldownsFindOptions(queryKey, qd, hasAggregatesRef.current)}
+        avoidDuplicates={true}
+        vertical={true}
+        iconStart={true} />
     </div>
   );
 }

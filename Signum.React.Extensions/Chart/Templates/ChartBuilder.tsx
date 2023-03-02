@@ -5,11 +5,14 @@ import { is } from '@framework/Signum.Entities'
 import { ValueLine, ValueLineProps, OptionItem } from '@framework/Lines'
 import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartParameterEmbedded, ChartRequestModel } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
-import * as ChartPaletteClient from '../ChartPalette/ChartPaletteClient'
 import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
 import { ChartColumn } from './ChartColumn'
+import * as  ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
+import { ColorInterpolate, ColorScheme } from '../ColorPalette/ColorPaletteClient'
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { UserState } from '../../Authorization/Signum.Entities.Authorization'
+import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
+import { Dic } from '@framework/Globals'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/
@@ -24,7 +27,6 @@ export interface ChartBuilderProps {
 export default function ChartBuilder(p: ChartBuilderProps) {
   const forceUpdate = useForceUpdate();
 
-  const colorPalettes = useAPI(signal => ChartPaletteClient.getColorPaletteTypes(), []);
   const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);
 
   function chartTypeImgClass(script: ChartScript): string {
@@ -77,7 +79,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
 
   const chartScript = chartScripts?.single(cs => is(cs.symbol, chart.chartScript));
 
-  var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
+  var parameterDic = mlistItemContext(p.ctx.subCtx(c => c.parameters, { formSize: "xs", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
 
   return (
     <div className="row sf-chart-builder gx-2">
@@ -93,7 +95,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
               </div>)}
           </div>
           <div className="card-body">
-            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="ExtraSmall" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
+            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="xs" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
           </div>
         </div>
       </div >
@@ -115,11 +117,11 @@ export default function ChartBuilder(p: ChartBuilderProps) {
                 </tr>
               </thead>
               <tbody>
-                {chartScript && colorPalettes && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "ExtraSmall" })).map((ctx, i) =>
+                {chartScript && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "xs" })).map((ctx, i) =>
                   <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
                     queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}
                     onRedraw={handleOnRedraw}
-                    onOrderChanged={handleOrderChart} colorPalettes={colorPalettes!} columnIndex={i} parameterDic={parameterDic} />)
+                    onOrderChanged={handleOrderChart} columnIndex={i} parameterDic={parameterDic} />)
                 }
               </tbody>
             </table>
@@ -176,14 +178,51 @@ export function Parameters(props: {
 
 function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }) {
 
-  const forceUpdate = useForceUpdate();
+
+  if (scriptParameter.type == "Special") {
+    var sp = scriptParameter.valueDefinition as ChartClient.SpecialParameter;
+
+    if (sp.specialParameterType == "ColorCategory") {
+      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.name} onChange={onRedraw}
+        valueLineType="DropDownList"
+        optionItems={Dic.getKeys(colorSchemes)}
+        onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+          <ColorScheme colorScheme={oi.value} />
+          {oi.label}
+        </div>} />
+    }
+
+    if (sp.specialParameterType == "ColorInterpolate") {
+      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.name} onChange={onRedraw}
+        valueLineType="DropDownList"
+        optionItems={Dic.getKeys(colorInterpolators).map(a => (ctx.value.value?.startsWith("-") ? "-" : "") + a)}
+        onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+          <ColorInterpolate colorInterpolator={oi.value} />
+          {oi.label}
+        </div>}
+        helpText={<label>
+          <input type="checkbox" className="form-check me-2"
+            checked={ctx.value.value?.startsWith("-")}
+            onChange={e => {
+              if (ctx.value.value)
+                ctx.value.value = e.currentTarget.checked ? ("-" + ctx.value.value) : ctx.value.value.after("-");
+
+              onRedraw?.();
+            }} />
+          Invert
+        </label>}
+      />
+    }
+  }
+
   const token = scriptParameter.columnIndex == undefined ? undefined :
     chart.columns[scriptParameter.columnIndex].element.token?.token;
 
 
+
   const vl: ValueLineProps = {
     ctx: ctx.subCtx(a => a.value),
-    labelText: scriptParameter.name!,
+    label: scriptParameter.name!,
   };
 
   if (scriptParameter.type == "Number" || scriptParameter.type == "String") {

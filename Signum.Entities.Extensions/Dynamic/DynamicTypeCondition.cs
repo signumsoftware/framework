@@ -11,7 +11,7 @@ public class DynamicTypeConditionEntity : Entity
     
     public TypeEntity EntityType { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public DynamicTypeConditionEval Eval { get; set; }
 
     [AutoExpressionField]

@@ -57,7 +57,7 @@ export default function SaveChangesModal(p: SaveChangesModalProps) {
             className="btn btn-secondary sf-close-button sf-no-button"
             onClick={() => handleButtonClicked("loseChanges")}
             name="no">
-            <FontAwesomeIcon icon={"undo"} />&nbsp;{SaveChangesMessage.LoseChanges.niceToString()}
+            <FontAwesomeIcon icon={"arrow-rotate-left"} />&nbsp;{SaveChangesMessage.LoseChanges.niceToString()}
           </button>
           <button
             className="btn btn-secondary sf-close-button sf-cancel-button"

@@ -1,4 +1,5 @@
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart;
 
@@ -53,7 +54,7 @@ public class ChartRequestModel : ModelEntity, IChartBase
         return GetChartScriptFunc(this.ChartScript);
     }
 
-    [NotifyCollectionChanged, NotifyChildProperty]
+    [BindParent]
     public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
     [NoRepeatValidator]

@@ -111,7 +111,7 @@ function monkeyPatchCreateContextualMenuItem() {
 
     return [
       <ContextualOperations.OperationMenuItem coc={this}
-        extraButtons={<span className="process-contextual-icon" onClick={processOnClick}><FontAwesomeIcon icon="cog" /></span>} />
+        extraButtons={<span className="process-contextual-icon" onClick={processOnClick}><FontAwesomeIcon icon="gear" /></span>} />
     ];
   };
 }
@@ -167,7 +167,7 @@ export module API {
 
 export interface ProcessLogicState {
   maxDegreeOfParallelism: number;
-  initialDelayMiliseconds: number;
+  initialDelayMilliseconds: number | null;
   running: boolean;
   machineName: string;
   applicationName: string;

@@ -39,14 +39,24 @@ public class ProfilerHeavyController : ControllerBase
     }
 
     [HttpGet("api/profilerHeavy/entries")]
-    public List<HeavyProfofilerEntryTS> Entries()
+    public List<HeavyProfofilerEntryTS> Entries([FromQuery] bool ignoreProfilerHeavyEntries)
     {
         ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
 
         var now = PerfCounter.Ticks;
 
-        lock (HeavyProfiler.Entries)
-            return HeavyProfiler.Entries.Select(e => new HeavyProfofilerEntryTS(e, false, now)).ToList();
+        var entries = HeavyProfiler.Entries;
+        var result = new List<HeavyProfofilerEntryTS>();
+        for (int i = 0; i < entries.Count; i++)
+        {
+            var e = entries[i];
+            if (ignoreProfilerHeavyEntries && (e.Role == "Web.API GET" && e.AdditionalData != null && e.AdditionalData.Contains("/api/profilerHeavy/")))
+                continue;
+
+            result.Add(new HeavyProfofilerEntryTS(e, false, now));
+        }
+
+        return result;
     }
 
     [HttpGet("api/profilerHeavy/details/{fullIndex}")]

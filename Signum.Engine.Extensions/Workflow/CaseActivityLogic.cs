@@ -83,10 +83,13 @@ public static class CaseActivityLogic
     public static IQueryable<CaseNotificationEntity> Notifications(this CaseActivityEntity e) =>
         As.Expression(() => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.Is(e)));
 
-
     [AutoExpressionField]
     public static IQueryable<CaseActivityExecutedTimerEntity> ExecutedTimers(this CaseActivityEntity e) =>
         As.Expression(() => Database.Query<CaseActivityExecutedTimerEntity>().Where(a => a.CaseActivity.Is(e)));
+
+    [AutoExpressionField]
+    public static CaseActivityExecutedTimerEntity? LastExecutedTimer(this CaseActivityEntity ca, Lite<WorkflowEventEntity> we) =>
+        As.Expression(() => ca.ExecutedTimers().Where(a => a.BoundaryEvent.Is(we)).OrderByDescending(a => a.CreationDate).FirstOrDefault());
 
     public static void Start(SchemaBuilder sb)
     {
@@ -291,10 +294,9 @@ public static class CaseActivityLogic
                  where ca.State == CaseActivityState.Pending
                  from we in ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers
                  where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
-                 we.Type == WorkflowEventType.BoundaryForkTimer ? !ca.ExecutedTimers().Any(t => t.BoundaryEvent.Is(we)) :
+                 we.Type == WorkflowEventType.BoundaryForkTimer ? (we.RunRepeatedly || !ca.ExecutedTimers().Any(t => t.BoundaryEvent.Is(we))) :
                  false
                  select new ActivityEvent(ca, we)).ToList();
-
 
                 var intermediateCandidates =
                 (from ca in Database.Query<CaseActivityEntity>()
@@ -306,16 +308,22 @@ public static class CaseActivityLogic
 
                 var candidates = boundaryCandidates.Concat(intermediateCandidates).Distinct().ToList();
                 var conditions = candidates.Select(a => a.Event.Timer!.Condition).Distinct().ToList();
+                var lastExecutions = boundaryCandidates
+                    .Where(a => a.Event.Type == WorkflowEventType.BoundaryForkTimer && a.Event.RunRepeatedly)
+                    .Select(a => new { ActivityEvent = a, LastExecution = a.Activity.LastExecutedTimer(a.Event.ToLite()) })
+                    .ToList();
 
                 var now = Clock.Now;
                 var activities = conditions.SelectMany(cond =>
                 {
                     if (cond == null)
-                        return candidates.Where(a => a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(a.Activity.StartDate) < now).Select(a => a.Activity.ToLite()).ToList();
+                        return candidates.Where(a =>
+                        {
+                            var startDate = lastExecutions.SingleOrDefaultEx(le => le.ActivityEvent.Is(a))?.LastExecution?.CreationDate ?? a.Activity.StartDate;
+                            return a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(startDate) < now;
+                        }).Select(a => a.Activity.ToLite()).ToList();
 
-                    var condEval = cond.RetrieveFromCache().Eval.Algorithm;
-
-                    return candidates.Where(a => a.Event.Timer!.Condition.Is(cond) && condEval.EvaluateUntyped(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
+                    return candidates.Where(a => a.Event.Timer!.Condition.Is(cond) && cond.Evaluate(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
                 }).Distinct().ToList();
 
                 if (!activities.Any())
@@ -360,7 +368,7 @@ public static class CaseActivityLogic
                 Delete = (e, args) => e.Delete(),
             }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
-            new Graph<CaseNotificationEntity>.ConstructFrom<CaseActivityEntity>(CaseNotificationOperation.CreteCaseNotificationFromCaseActivity)
+            new Graph<CaseNotificationEntity>.ConstructFrom<CaseActivityEntity>(CaseNotificationOperation.CreateCaseNotificationFromCaseActivity)
             {
                 Construct = (e, args) => new CaseNotificationEntity
                 {
@@ -426,6 +434,11 @@ public static class CaseActivityLogic
         {
             Activity = activity;
             Event = @event;
+        }
+
+        public bool Is(ActivityEvent other)
+        {
+            return this.Activity.Is(other.Activity) && this.Event.Is(other.Event);
         }
 
         public CaseActivityEntity Activity { get; set; }
@@ -528,8 +541,7 @@ public static class CaseActivityLogic
 
             if (connection.Action != null)
             {
-                var alg = connection.Action.RetrieveFromCache().Eval.Algorithm;
-                alg.ExecuteUntyped(Case.MainEntity, wctx);
+                connection.Action.Execute(Case.MainEntity, wctx);
             };
 
             this.Connections.Add(connection);
@@ -569,9 +581,7 @@ public static class CaseActivityLogic
 
         if (wc.Condition != null)
         {
-            var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
-            var result = alg.EvaluateUntyped(ctx.Case.MainEntity, ctx.NewTransitionContext(wc));
-
+            var result = wc.Condition.Evaluate(ctx.Case.MainEntity, ctx.NewTransitionContext(wc));
 
             return result;
         }
@@ -840,17 +850,24 @@ public static class CaseActivityLogic
                 {
                     var now = Clock.Now;
 
-                    var alreadyExecuted = ca.ExecutedTimers().Select(a => a.BoundaryEvent).ToHashSet();
-
                     var candidateEvents = ca.WorkflowActivity is WorkflowEventEntity @event ? new WorkflowEventEntity[] { @event } :
                     ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.ToArray();
 
-                    var timer = candidateEvents.Where(e => e.Type == WorkflowEventType.BoundaryInterruptingTimer || !alreadyExecuted.Contains(e.ToLite())).FirstOrDefault(t =>
+                    var lastExecutions = (
+                        from et in ca.ExecutedTimers()
+                        group et by et.BoundaryEvent into g
+                        select new { Event = g.Key, LastExecution = g.OrderByDescending(a => a.CreationDate).FirstOrDefault() }
+                        ).ToDictionary(a => a.Event, a => a.LastExecution);
+
+                    var timer = candidateEvents.Where(e => e.Type == WorkflowEventType.BoundaryInterruptingTimer || e.RunRepeatedly || !lastExecutions.ContainsKey(e.ToLite())).FirstOrDefault(t =>
                     {
                         if (t.Timer!.Duration != null)
-                            return t.Timer!.Duration!.Add(ca.StartDate) < now;
+                        {
+                            var startDate = lastExecutions.GetValueOrDefault(t.ToLite())?.CreationDate ?? ca.StartDate;
+                            return t.Timer!.Duration!.Add(startDate) < now;
+                        }
 
-                        return t.Timer!.Condition!.RetrieveFromCache().Eval.Algorithm.EvaluateUntyped(ca, now);
+                        return t.Timer!.Condition!.Evaluate(ca, now);
                     });
 
                     if (timer == null)
@@ -1003,7 +1020,7 @@ public static class CaseActivityLogic
 
         public static void ExecuteStep(CaseActivityEntity ca, DoneType doneType, string? decision, WorkflowConnectionEntity? firstConnection)
         {
-            using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = firstConnection }))
+            using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = firstConnection, Decision = decision }))
             {
                 SaveEntity(ca.Case.MainEntity);
             }
@@ -1017,8 +1034,7 @@ public static class CaseActivityLogic
                 if (firstConnection.Condition != null)
                 {
                     var jumpCtx = ctx.NewTransitionContext(firstConnection);
-                    var alg = firstConnection.Condition.RetrieveFromCache().Eval.Algorithm;
-                    var result = alg.EvaluateUntyped(ca.Case.MainEntity, jumpCtx);
+                    var result = firstConnection.Condition.Evaluate(ca.Case.MainEntity, jumpCtx);
                     if (!result)
                         throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(firstConnection.To, firstConnection.Condition));
                 }
@@ -1104,7 +1120,7 @@ public static class CaseActivityLogic
                     }.Save();
                     break;
                 case WorkflowEventType.BoundaryInterruptingTimer:
-                    ca.MakeDone(DoneType.Timeout, null);
+                    ca.MakeDone(DoneType.Timeout, boundaryEvent.DecisionOptionName);
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected Boundary Timer Type " + boundaryEvent.Type);
@@ -1139,8 +1155,7 @@ public static class CaseActivityLogic
             if (transition.Condition != null)
             {
                 var jumpCtx = new WorkflowTransitionContext(@case, null, transition);
-                var alg = transition.Condition.RetrieveFromCache().Eval.Algorithm;
-                var result = alg.EvaluateUntyped(@case.MainEntity, jumpCtx);
+                var result = transition.Condition.Evaluate(@case.MainEntity, jumpCtx);
                 if (!result)
                     throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(transition, transition.Condition));
             }
@@ -1183,8 +1198,13 @@ public static class CaseActivityLogic
                 if (decompositionCaseActivity.DoneDate != null)
                     throw new InvalidOperationException("The DecompositionCaseActivity is already finished");
 
-                var lastActivities = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault()).ToList();
-                decompositionCaseActivity.Note = lastActivities.NotNull().Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
+                var lastActivitiesNotes = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault())
+                    .Where(ca => ca != null)
+                    .Select(ca =>  new { ca!.DoneBy, ca!.Note})
+                    .ToList()
+                    .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
+
+                decompositionCaseActivity.Note = lastActivitiesNotes;
                 ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);
             }
         }
@@ -1518,8 +1538,7 @@ public static class CaseActivityLogic
 
                 if (wc.Condition != null)
                 {
-                    var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
-                    var result = alg.EvaluateUntyped(CaseActivity.Case.MainEntity, new WorkflowTransitionContext(CaseActivity.Case, CaseActivity, wc));
+                    var result = wc.Condition.Evaluate(CaseActivity.Case.MainEntity, new WorkflowTransitionContext(CaseActivity.Case, CaseActivity, wc));
 
                     return result;
                 }

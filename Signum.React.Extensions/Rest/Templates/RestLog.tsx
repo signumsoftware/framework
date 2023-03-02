@@ -3,14 +3,14 @@ import { DateTime } from 'luxon'
 import { RestLogEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, EntityLine, EntityRepeater } from "@framework/Lines";
 import { } from "@framework/ConfigureReactWidgets";
-import { RestLogDiff, API } from '../RestClient'
+import { API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
 import * as AppContext from '@framework/AppContext'
 import { Tab, Tabs, Button } from 'react-bootstrap';
 import { FormatJson } from '../../../Signum.React/Scripts/Exceptions/Exception';
 
 export interface RestLogState {
-  diff?: RestLogDiff,
+  replayResult?: string,
   newURL: string
 }
 
@@ -32,10 +32,10 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
     return (
       <div>
-        <ValueLine ctx={ctx.subCtx(f => f.startDate)} unitText={DateTime.fromISO(ctx.value.startDate).toRelative() ?? undefined} />
+        <ValueLine ctx={ctx.subCtx(f => f.startDate)} unit={DateTime.fromISO(ctx.value.startDate).toRelative() ?? undefined} />
         <ValueLine ctx={ctx.subCtx(f => f.endDate)} />
         <EntityLine ctx={ctx.subCtx(f => f.user)} />
-        <ValueLine ctx={ctx.subCtx(f => f.url)} unitText={ctx.value.httpMethod!} />
+        <ValueLine ctx={ctx.subCtx(f => f.url)} unit={ctx.value.httpMethod!} />
         <div className="row">
           <div className="col-sm-6">
             <ValueLine ctx={ctx4.subCtx(f => f.controller)} />
@@ -71,7 +71,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
         <EntityRepeater ctx={ctx.subCtx(f => f.queryString)} />
         {
           ctx.value.allowReplay && <div>
-            <Button variant="info" onClick={() => { API.replayRestLog(ctx.value.id!, encodeURIComponent(this.state.newURL)).then(d => this.setState({ diff: d })) }}>Replay</Button>
+            <Button variant="info" onClick={() => { API.replayRestLog(ctx.value.id!, encodeURIComponent(this.state.newURL)).then(d => this.setState({ replayResult: d })) }}>Replay</Button>
             <input type="text" className="form-control" value={this.state.newURL} onChange={e => this.setState({ newURL: e.currentTarget.value })} />
           </div>
         }
@@ -80,9 +80,9 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
         <fieldset>
           <legend>{ctx.subCtx(f => f.responseBody).niceName()}</legend>
           <Tabs defaultActiveKey="prev" id="restLogs">
-            <Tab title="prev" eventKey="prev" className="linkTab">{this.renderPre(ctx.subCtx(f => f.responseBody).value!)}</Tab>
-            {this.state.diff && <Tab title="diff" eventKey="diff" className="linkTab">{this.state.diff.diff && <DiffDocument diff={this.state.diff.diff} />}</Tab>}
-            {this.state.diff && <Tab title="curr" eventKey="curr" className="linkTab">{this.renderPre(this.state.diff.current)}</Tab>}
+            <Tab title="prev" eventKey="prev" className="linkTab">{this.renderPre(ctx.value.responseBody!)}</Tab>
+            {this.state.replayResult && <Tab title="diff" eventKey="diff" className="linkTab">{<DiffDocument first={ctx.value.responseBody ?? ""} second={this.state.replayResult} />}</Tab>}
+            {this.state.replayResult && <Tab title="curr" eventKey="curr" className="linkTab">{this.renderPre(this.state.replayResult)}</Tab>}
           </Tabs>
         </fieldset>
       </div>

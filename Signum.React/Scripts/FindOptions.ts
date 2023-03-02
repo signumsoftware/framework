@@ -16,6 +16,10 @@ export interface ValueFindOptionsParsed {
   filterOptions: FilterOptionParsed;
 }
 
+export interface ModalFindOptionsMany extends ModalFindOptions{
+  allowNoSelection?: boolean;
+}
+
 export interface ModalFindOptions {
   title?: React.ReactNode;
   message?: React.ReactNode;
@@ -70,7 +74,7 @@ export interface FilterConditionOption {
 export interface FilterGroupOption {
   token?: string | QueryTokenString<any>;
   groupOperation: FilterGroupOperation;
-  filters: FilterOption[];
+  filters: (FilterOption | null | undefined)[];
   pinned?: PinnedFilter;
   dashboardBehaviour?: DashboardBehaviour;
   value?: string; /*For search in multiple columns*/
@@ -315,6 +319,24 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
     ...fop,
     pinned: undefined
   };
+}
+
+export function mapFilterTokens(fo: FilterOption, mapToken : (token: string) => string): FilterOption {
+  
+  if (isFilterGroupOption(fo)) {
+    return {
+      ...fo,
+      groupOperation: fo.groupOperation,
+      filters: fo.filters.map(f => f && mapFilterTokens(f, mapToken)),
+      token: fo.token && mapToken(fo.token.toString())
+    };
+  }
+  else {
+    return {
+      ...fo,
+      token: fo.token && mapToken(fo.token.toString()),
+    }
+  }
 }
 
 export function getTokenParents(token: QueryToken | null | undefined): QueryToken[] {

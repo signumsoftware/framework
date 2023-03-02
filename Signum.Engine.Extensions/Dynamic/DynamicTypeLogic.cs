@@ -467,11 +467,10 @@ public class DynamicTypeCodeGenerator
 
         if (property.NotifyChanges == true)
         {
-            if (property.IsMList != null)
-                atts.Add("NotifyCollectionChanged");
-
-            if (property.Type.EndsWith("Embedded") || property.Type.EndsWith("Entity") && property.IsLite != true)
-                atts.Add("NotifyChildProperty");
+            if (property.IsMList != null || 
+                property.Type.EndsWith("Embedded") || 
+                property.Type.EndsWith("Entity") && property.IsLite != true)
+                atts.Add("BindParent");
         }
 
         if (property.CustomPropertyAttributes.HasText())

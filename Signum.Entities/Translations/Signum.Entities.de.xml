@@ -103,6 +103,8 @@
     <Member Name="Find" Description="Finden" />
     <Member Name="Move" Description="Bewegen" />
     <Member Name="MoveDown" Description="Nach unten" />
+    <Member Name="MoveLeft" Description="Nach links" />
+    <Member Name="MoveRight" Description="Nach rechts" />
     <Member Name="MoveUp" Description="Nach oben" />
     <Member Name="MoveWithDragAndDropOrCtrlLeftRight" Description="Verschieben mit Drag &amp; Drop oder Strg + Links / Rechts" />
     <Member Name="MoveWithDragAndDropOrCtrlUpDown" Description="Verschieben mit Drag &amp; Drop oder Strg + Auf / Ab" />
@@ -238,6 +240,8 @@
   <Type Name="ModelEntity" Description="Modellentität" />
   <Type Name="ModifiableEntity" Description="Veränderbare Entität" />
   <Type Name="NormalControlMessage">
+    <Member Name="CopyEntityTypeAndIdForAutocomplete" Description="Entitätstyp und ID kopieren (für Autovervollständigung)" />
+    <Member Name="CopyEntityUrl" Description="Entitäts-URL kopieren" />
     <Member Name="SaveChangesFirst" Description="Erst Änderungen speichern" />
     <Member Name="ViewForType0IsNotAllowed" Description="Anzeigen des Typs {0} ist nicht zulässig" />
   </Type>
@@ -254,6 +258,7 @@
   <Type Name="OperationMessage">
     <Member Name="_0AndClose" Description="{0} &amp; Schließen" />
     <Member Name="_0AndNew" Description="{0} &amp; Neu" />
+    <Member Name="_0Errors" Description="{0} Fehler" />
     <Member Name="AddSetter" Description="Setter hinzufügen" />
     <Member Name="BulkModifications" Description="Massenänderungen" />
     <Member Name="Condition" Description="Bedingung" />
@@ -261,11 +266,14 @@
     <Member Name="Create" Description="Erstellen..." />
     <Member Name="Create0" Description="{0} erstellen" />
     <Member Name="CreateFromRegex" Description="^(.*) aus .* erstellen$" />
+    <Member Name="Deleting" Description="Löschen" />
+    <Member Name="Executing0" Description="Ausführen {0}" />
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="MultiSetter" Description="Multi-Setter" />
     <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) ist nicht autorisiert." />
     <Member Name="PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12" Description="Bitte bestätigen Sie, dass Sie die obigen Änderungen anwenden und {0} über {1} {2} ausführen möchten" />
+    <Member Name="PleaseConfirmYouWouldLikeTo01" Description="Bitte bestätigen Sie, dass Sie {1} {0} möchten" />
     <Member Name="PleaseConfirmYouWouldLikeToDelete0FromTheSystem" Description="Bitte bestätigen Sie, dass Sie {0} aus dem System löschen möchten" />
     <Member Name="PreviousOperationLog" Description="Vorheriges Operationsprotokoll" />
     <Member Name="Setters" Description="Setters" />
@@ -324,7 +332,7 @@
     <Member Name="Check" Description="Ja/Nein-Wert" />
     <Member Name="Column0NotFound" Description="Die Spalte {0} wurde nicht gefunden" />
     <Member Name="ContainerOfCellOperations" Description="Container für Zellenoperationen" />
-    <Member Name="Count" Description="Num" />
+    <Member Name="Count" Description="Anzahl" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
@@ -334,6 +342,7 @@
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
     <Member Name="Distinct" Description="Unterschiedlich" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
+    <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
     <Member Name="HasValue" Description="Hat einen Wert" />
     <Member Name="Hour" Description="Stunde" />
@@ -348,7 +357,7 @@
     <Member Name="MonthStart" Description="Monatsbeginn " />
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
     <Member Name="Not" Description="Nicht" />
-    <Member Name="Null" Description="Null" />
+    <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />
     <Member Name="Quarter" Description="Quartal" />
     <Member Name="QuarterStart" Description="Quartalsstart" />
@@ -395,8 +404,8 @@
     <Member Name="Manual" Description="Manuell" />
   </Type>
   <Type Name="RoundingType">
-    <Member Name="Ceil" Description="Decke" />
-    <Member Name="Floor" Description="Boden" />
+    <Member Name="Ceil" Description="Übergrenze" />
+    <Member Name="Floor" Description="Untergrenze" />
     <Member Name="Round" Description="Runde" />
     <Member Name="RoundMiddle" Description="Runde Mitte" />
   </Type>
@@ -558,6 +567,7 @@
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
     <Member Name="_0IsNotCompatibleWith1" Description="{0} ist nicht mit {1} kompatibel" />
     <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
+    <Member Name="_0IsNotSetIn1" Description="{0} ist nicht in {1} festgelegt" />
     <Member Name="_0IsRepeated" Description="{0} ist wiederholt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />
     <Member Name="_0Or1ShouldBeSet" Description="{0} oder {1} sollten gesetzt sein" />

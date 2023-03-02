@@ -88,11 +88,11 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
     }
   }
 
-  setValue(val: any) {
+  setValue(val: any, event?: React.SyntheticEvent) {
     if (val != null)
       this.focusNext.current = true;
 
-    super.setValue(val);
+    super.setValue(val, event);
 
     if (val == null) {
       setTimeout(() => {
@@ -113,7 +113,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
             return this.props.autocomplete!.getItemFromEntity(entity) //newItem could be different to item on create new case
               .then(newItem => {
                 this.setCurrentItem({ entity: entity, item: newItem });
-                this.setValue(entity);
+                this.setValue(entity, event);
               });
           }));
 
@@ -144,7 +144,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
   );
 
   return (
-    <FormGroup ctx={p.ctx} labelText={p.labelText} helpText={p.helpText}
+    <FormGroup ctx={p.ctx} label={p.label} helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       <div className="sf-entity-line">

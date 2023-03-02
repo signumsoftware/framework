@@ -3,7 +3,7 @@ import { DomUtils, Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { FilterOptionParsed, ColumnOption, hasAggregate, withoutAggregate, FilterOption, FindOptions, withoutPinned } from '@framework/FindOptions'
-import { ChartRequestModel, ChartMessage } from '../Signum.Entities.Chart'
+import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { toFilterOptions } from '@framework/Finder';
 
@@ -13,12 +13,15 @@ import { ErrorBoundary } from '@framework/Components';
 
 import ReactChart from '../D3Scripts/Components/ReactChart';
 import { useAPI } from '@framework/Hooks'
-import { TypeInfo } from '@framework/Reflection'
 import { FullscreenComponent } from './FullscreenComponent'
 import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
-
+import * as UserQueryClient from '../../UserQueries/UserQueryClient'
+import { DynamicTypeConditionSymbolEntity } from '../../Dynamic/Signum.Entities.Dynamic'
+import { extractFindOptions } from '../../UserQueries/UserQueryClient'
+import { Lite } from '@framework/Signum.Entities'
 
 export interface ChartRendererProps {
+  userChart?: Lite<UserChartEntity>;
   chartRequest: ChartRequestModel;
   loading: boolean;
 
@@ -54,7 +57,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
           data={p.data}
           dashboardFilter={p.dashboardFilter}
           loading={p.loading}
-          onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.autoRefresh ? p.onReload : undefined))}
+          onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.userChart, p.autoRefresh ? p.onReload : undefined))}
           onBackgroundClick={p.onBackgroundClick}
           parameters={parameters}
           onReload={p.onReload}
@@ -67,68 +70,28 @@ export default function ChartRenderer(p: ChartRendererProps) {
   );
 }
 
-export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, onReload?: () => void) {
+export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, uc?: Lite<UserChartEntity>, onReload?: () => void) {
 
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;
 
-  if (r.entity) {
-    if (newWindow)
-      window.open(Navigator.navigateRoute(r.entity));
-    else
-      Navigator.view(r.entity)
-        .then(() => onReload && onReload());
-  } else {
-    const filters = cr.filterOptions.map(f => {
-      let f2 = withoutPinned(f);
-      if (f2 == null)
-        return null;
-      return withoutAggregate(f2);
-    }).notNull();
-
-    const columns: ColumnOption[] = [];
-
-    cr.columns.map((a, i) => {
-
-      const qte = a.element.token;
-
-      if (qte?.token && !hasAggregate(qte!.token!) && r.hasOwnProperty("c" + i)) {
-        filters.push({
-          token: qte!.token!,
-          operation: "EqualTo",
-          value: (r as any)["c" + i],
-          frozen: false
-        } as FilterOptionParsed);
-      }
-
-      if (qte?.token && qte.token.parent != undefined) //Avoid Count and simple Columns that are already added
-      {
-        var t = qte.token;
-        if (t.queryTokenType == "Aggregate") {
-          columns.push({
-            token: t.parent!.fullKey,
-            summaryToken: t.fullKey
-          });
+  UserQueryClient.onDrilldownUserChart(cr, r, uc, { openInNewTab: newWindow, onReload })
+    .then(done => {
+      if (done == false) {
+        if (r.entity) {
+          if (newWindow)
+            window.open(Navigator.navigateRoute(r.entity));
+          else
+            Navigator.view(r.entity)
+              .then(() => onReload?.());
         } else {
-          columns.push({
-            token: t.fullKey,
-          });
+          const fo = extractFindOptions(cr, r);
+          if (newWindow)
+            window.open(Finder.findOptionsPath(fo));
+          else
+            Finder.explore(fo)
+              .then(() => onReload?.());
         }
       }
     });
-
-    var fo: FindOptions = {
-      queryName: cr.queryKey,
-      filterOptions: toFilterOptions(filters),
-      includeDefaultFilters: false,
-      columnOptions: columns,
-      columnOptionsMode: "ReplaceOrAdd",
-    };
-
-    if (newWindow)
-      window.open(Finder.findOptionsPath(fo));
-    else
-      Finder.explore(fo)
-        .then(() => onReload && onReload());
-  }
 }

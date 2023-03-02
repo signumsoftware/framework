@@ -110,7 +110,7 @@ public class Graph<T>
                             using (var tr2 = Transaction.ForceNew())
                             {
                                 log.Exception = exLog.ToLite();
-
+                                log.End = Clock.Now;
                                 log.SaveLog();
 
                                 tr2.Commit();
@@ -289,7 +289,7 @@ public class Graph<T>
                             using (var tr2 = Transaction.ForceNew())
                             {
                                 log.Exception = exLog.ToLite();
-
+                                log.End = Clock.Now;
                                 log.SaveLog();
 
                                 tr2.Commit();
@@ -435,7 +435,7 @@ public class Graph<T>
                             using (var tr2 = Transaction.ForceNew())
                             {
                                 log.Exception = exLog.ToLite();
-
+                                log.End = Clock.Now;
                                 log.SaveLog();
 
                                 tr2.Commit();
@@ -599,6 +599,7 @@ public class Graph<T>
                             Operation = log.Operation,
                             Start = log.Start,
                             User = log.User,
+                            End = Clock.Now,
                             Target = entity.IsNew ? null : entity.ToLite(),
                             Exception = exLog.ToLite(),
                         };
@@ -743,7 +744,7 @@ public class Graph<T>
                             {
                                 log.Target = entity.ToLite();
                                 log.Exception = exLog.ToLite();
-
+                                log.End = Clock.Now;
                                 log.SaveLog();
 
                                 tr2.Commit();

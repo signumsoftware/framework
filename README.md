@@ -54,6 +54,14 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2022.12.16 Responsive SearchControl](https://github.com/signumsoftware/framework/commit/41fc3c0c4732e2ce5750648d65b7030bce08c5e2#comments)
+* [2022.12.14 Client-side Diff](https://github.com/signumsoftware/framework/commit/880c1a7860573310e2cd300c45fe7bb92f1954de#comments)
+* [2022.12.06 ChatGPT 🤖 can program with Signum Framework!](https://github.com/signumsoftware/framework/commit/901e069a5b0ef0fd8b80d0e1632fd66671cb8b8f#commitcomment-92227611)
+* [2022.12.01 Color Palette 🌈](https://github.com/signumsoftware/framework/commit/838eea190ea1bec22c83f845d7aab76e7d989a1d#comments)
+* [2022.11.08 Upgrade to .Net 7](https://github.com/signumsoftware/framework/commit/8377d1b78b12c2572e881f06da6680d27d21fa1b#comments)
+* [2022.10.25 Cleanup in EmailSenderConfigurationEntity](https://github.com/signumsoftware/framework/commit/d9d219a5f68f3b035a8477254c3adc396de98d2c#comments)
+* [2022.08.30 Presenting EntityAccordion](https://github.com/signumsoftware/framework/commit/3ba48fae1456207992abadf74075bb05502507f5#comments)
+* [2022.08.18 Presenting EntityTypeToken](https://github.com/signumsoftware/framework/commit/2ec0dd7c53067c34e01e4570968ae9e14263a65e#comments) 
 * [2022.08.11 Logging Client-Side Errors](https://github.com/signumsoftware/framework/commit/0b422b488458677614383875b4fbc0e499093bb7#comments)
 * [2022.08.09 Presenting SeparatedByNewLine / SeparatedByComma](https://github.com/signumsoftware/framework/commit/94401cd2b1a785b4e69735c80e54d67ca7a9e7d8#comments)
 * [2022.08.05 Remove Promise.done()](https://github.com/signumsoftware/framework/commit/390b34f5206f4467dc517747c351e206ffb89d63#comments)

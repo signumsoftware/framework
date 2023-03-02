@@ -30,6 +30,7 @@ export interface SearchValueProps {
   onInitialValueLoaded?: () => void;
   customClass?: string | ((value: any | undefined) => (string | undefined));
   customStyle?: React.CSSProperties;
+  unit?: string | null;
   format?: string;
   throwIfNotFindable?: boolean;
   avoidNotifyPendingRequest?: boolean;
@@ -111,7 +112,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     if (valueToken === undefined)
       return Promise.resolve(undefined);
 
-    if (p.initialValue != undefined) {
+    if (p.initialValue !== undefined) {
       if (Hooks.areEqual(deps ?? [], initialDeps.current ?? [])) {
         controller.value = p.initialValue;
         p.onInitialValueLoaded?.();
@@ -216,7 +217,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
   function bg(color: BsColor) {
 
     if (p.isLink)
-      return "btn-" + color + (color == "light" ? " text-dark" : "");
+      return "bg-" + color + (color == "light" ? " text-dark" : "");
     
     return "bg-" + color;
   }
@@ -293,7 +294,12 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       case "Decimal":
         {
           const numberFormat = toNumberFormat(p.format ?? token.format);
-          return numberFormat.format(value);
+
+          var unit = p.unit === null ? p.unit : p.unit ?? token.unit;
+          if (unit)
+            return numberFormat.format(value) + " " + unit;
+          else
+            return numberFormat.format(value);
         }
       case "DateTime":
         {

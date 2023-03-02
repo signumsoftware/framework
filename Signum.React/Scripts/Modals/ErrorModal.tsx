@@ -65,7 +65,7 @@ export default function ErrorModal(p: ErrorModalProps) {
 
   function renderTitle(e: any) {
     return (
-      <span><FontAwesomeIcon icon="exclamation-triangle" /> Error </span>
+      <span><FontAwesomeIcon icon="triangle-exclamation" /> Error </span>
     );
   }
 
@@ -95,7 +95,7 @@ export default function ErrorModal(p: ErrorModalProps) {
   function renderValidationTitle(ve: ValidationError) {
     return (
       <span>
-        <FontAwesomeIcon icon="exclamation-triangle" /> {FrameMessage.ThereAreErrors.niceToString()}
+        <FontAwesomeIcon icon="triangle-exclamation" /> {FrameMessage.ThereAreErrors.niceToString()}
       </span>
     );
   }
@@ -110,9 +110,12 @@ function logError(error: Error) {
   if (error instanceof ServiceError || error instanceof ValidationError)
     return; 
 
+  if (error instanceof DOMException && error.name == "AbortError")
+    return;
+
   var errorModel = ClientErrorModel.New({
     errorType: (error as Object).constructor.name,
-    message: error.message ?? error.toString(),
+    message: error.message || error.toString(),
     stack: error.stack ?? null,
     name: error.name,
   });
@@ -134,27 +137,25 @@ function logError(error: Error) {
   lastError = { model: errorModel, date: date };
   ajaxPost({ url: "~/api/registerClientError" }, errorModel)
     .catch(e => {
-      if (Modals.isStarted()) {
-        ErrorModal.showErrorModal(error);
-      }
-      else
-        console.error("Unable to save client-side error:", error);
+      console.error("Unable to save client-side error:", error, e);
     });
 }
 
 ErrorModal.register = () => {
-
   window.onunhandledrejection = p => {
     var error = p.reason;
     logError(error);
     if (Modals.isStarted()) {
       ErrorModal.showErrorModal(error);
     }
-    else
+    else {
+      window.onerror?.("error", undefined, undefined, undefined, error);
       console.error("Unhandled promise rejection:", error);
+    }
   };
 
   var oldOnError = window.onerror;
+
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
 
     if (error != null)
@@ -186,7 +187,7 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
         <div>
           {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
           <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }}>
-            <FontAwesomeIcon icon="sync-alt" />
+            <FontAwesomeIcon icon="rotate" />
           </button>
         </div>,
       buttons: "cancel",
@@ -258,7 +259,7 @@ export function RenderMessageDefault(p: { error: any }) {
   const e = p.error;
   return (
     <div>
-      {textDanger(e.message ? e.message : e)}
+      {textDanger(e.message ? e.message : e.toString())}
     </div>
   );
 }

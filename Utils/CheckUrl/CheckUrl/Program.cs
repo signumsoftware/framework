@@ -29,16 +29,28 @@ class Program
             {
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Write("GET " + url + "...");
-                var response = await client.GetAsync(url);
-
-                Console.ForegroundColor = response.IsSuccessStatusCode ? ConsoleColor.Green : ConsoleColor.Red;
-                Console.Write((int)response.StatusCode + " (" + response.StatusCode + ")");
-
-                if (response.IsSuccessStatusCode == alive)
+                try
                 {
-                    Console.WriteLine();
-                    return;
+                    var response = await client.GetAsync(url);
+
+                    Console.ForegroundColor = response.IsSuccessStatusCode ? ConsoleColor.Green : ConsoleColor.Red;
+                    Console.Write((int)response.StatusCode + " (" + response.StatusCode + ")");
+
+                    if (response.IsSuccessStatusCode == alive)
+                    {
+                        Console.WriteLine();
+                        return;
+                    }
+
+
+
                 }
+                catch(HttpRequestException e)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write(e.Message);
+                }
+
 
                 retry--;
 
@@ -47,7 +59,7 @@ class Program
 
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine(" retrying in 10 sec (" + retry + " left)");
-                await System.Threading.Tasks.Task.Delay(1000 * 10);
+                await Task.Delay(1000 * 10);
             }
         }
         finally

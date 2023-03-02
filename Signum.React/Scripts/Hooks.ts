@@ -68,13 +68,14 @@ export function whenVisible<T extends HTMLElement>(element: T, callback: (visibl
   return observer;
 }
 
-export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout = 0, resizeTimeout = 300, autoResetOnHide = false): { size: Size | undefined, setContainer: (element: T | null) => void } {
+export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout = 0, resizeTimeout = 300, autoResetOnHide = false):
+  { size: Size | undefined, setContainer: (element: T | null) => void, element: T | null } {
   const [size, setSize] = React.useState<Size | undefined>();
   const sizeRef = useUpdatedRef(size);
-  const divElement = React.useRef<T | null>(null);
+  const htmlElement = React.useRef<T | null>(null);
 
   function setNewSize() {
-    const rect = divElement.current!.getBoundingClientRect();
+    const rect = htmlElement.current!.getBoundingClientRect();
     if (size == null || size.width != rect.width || size.height != rect.height)
       setSize({ width: rect.width, height: rect.height });
   }
@@ -90,7 +91,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
     if (visibleObserver.current)
       visibleObserver.current.disconnect();
 
-    if (divElement.current = div) {
+    if (htmlElement.current = div) {
 
       if (div.clientHeight == 0 && div.clientWidth == 0)
         setSize(undefined);
@@ -111,7 +112,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
     }
   }
 
-  const setContainerMemo = React.useCallback(setContainer, [divElement]);
+  const setContainerMemo = React.useCallback(setContainer, [htmlElement]);
 
   const resizeHandle = React.useRef<number | null>(null);
   React.useEffect(() => {
@@ -120,7 +121,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
         clearTimeout(resizeHandle.current);
 
       resizeHandle.current = setTimeout(() => {
-        if (divElement.current) {
+        if (htmlElement.current) {
           setNewSize()
         }
       }, resizeTimeout);
@@ -142,7 +143,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
     };
   }, []);
 
-  return { size, setContainer: setContainerMemo };
+  return { size, setContainer: setContainerMemo, element: htmlElement.current };
 }
 
 export function useDocumentEvent<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, deps: any[]): void;
@@ -240,7 +241,7 @@ export function useMounted() {
   return mounted;
 }
 
-export function useThrottle<T>(value: T, limit: number, options?: { enabled?: boolean }): T {
+export function useThrottle<T>(value: T, timeout: number, options?: { enabled?: boolean }): T {
   const [throttledValue, setThrottledValue] = React.useState(value);
 
   const lastRequested = React.useRef<(undefined | { value: T })>(undefined);
@@ -265,7 +266,7 @@ export function useThrottle<T>(value: T, limit: number, options?: { enabled?: bo
           handleRef.current = setTimeout(function () {
             setThrottledValue(lastRequested.current!.value);
             stop();
-          }, limit);
+          }, timeout);
         }
       }
     },

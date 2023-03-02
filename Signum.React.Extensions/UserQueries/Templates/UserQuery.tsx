@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { UserQueryEntity, UserQueryMessage, QueryOrderEmbedded, QueryColumnEmbedded } from '../Signum.Entities.UserQueries'
-import { FormGroup, ValueLine, EntityLine, EntityTable } from '@framework/Lines'
+import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
-import { SubTokensOptions } from '@framework/FindOptions'
+import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
@@ -10,6 +10,7 @@ import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbed
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import { SearchMessage, getToString } from '@framework/Signum.Entities'
+import { formGroupStyle } from '../../Dynamic/View/StyleOptionsExpression'
 
 const CurrentEntityKey = "[CurrentEntity]";
 
@@ -20,9 +21,13 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
   const query = p.ctx.value.query;
   const ctx = p.ctx;
   const ctx4 = ctx.subCtx({ labelColumns: 4 });
-  const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
+  const ctxxs = ctx.subCtx({ formSize: "xs" });
 
   const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
+
+  const qd = useAPI(() => Finder.getQueryDescription(query.key), [query.key]);
+  if (!qd)
+    return null;
 
   return (
     <div>
@@ -40,40 +45,37 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
       {query &&
         (<div>
           <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters} onChange={() => forceUpdate()}
-            helpText={UserQueryMessage.MakesTheUserQueryAvailableAsAQuickLinkOf0.niceToString(getToString(ctx.value.entityType) ?? UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))} />
-          {
-            p.ctx.value.entityType &&
-            <div className="row">
-              <div className="col-sm-4 offset-sm-2">
-                <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />
-              </div>
-              <div className="col-sm-4">
-                {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<pre style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></pre>)}
-              </div>
+          helpText={
+            <div>
+              {UserQueryMessage.MakesThe0AvailableAsAQuickLinkOf1.niceToString(UserQueryEntity.niceName(), ctx.value.entityType ? getToString(ctx.value.entityType) : UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))}
+              {p.ctx.value.entityType && <br />}
+              {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
+              {p.ctx.value.entityType && <br />}
+              {p.ctx.value.entityType && <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
             </div>
-        }
-         
+          } />
 
 
-        <div className="row">
+
+          <div className="row">
           <div className="col-sm-6">
-            <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} />
+            <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} />
             <ValueLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
-              helpText={UserQueryMessage.MakesTheUserQueryAvailableInContextualMenuWhenGrouping0.niceToString(query?.key)} />
+              helpText={UserQueryMessage.MakesThe0AvailableInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
 
+            </div>
+            <div className="col-sm-6">
+              <ValueLine ctx={ctx4.subCtx(e => e.refreshMode)} />
+              <ValueLine ctx={ctx4.subCtx(e => e.includeDefaultFilters)} />
+            </div>
           </div>
-          <div className="col-sm-6">
-            <ValueLine ctx={ctx4.subCtx(e => e.refreshMode)} />
-            <ValueLine ctx={ctx4.subCtx(e => e.includeDefaultFilters)} />
-          </div>
-        </div>
 
           <div>
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
               queryKey={ctxxs.value.query!.key}
-              showPinnedFilterOptions={true} />
-            <ValueLine ctx={ctxxs.subCtx(e => e.columnsMode)} />
+            showPinnedFilterOptions={true} />
+          <ValueLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
               {
                 property: a => a.token,
@@ -108,7 +110,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                 property: a => a.displayName,
                 template: (ctx, row) => <ValueLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
                   helpText={<ValueLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; row.forceUpdate(); }} />}
-                  />
+                />
               },
             ])} />
             <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
@@ -130,10 +132,43 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               <ValueLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} />
             </div>
           </div>
+          <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}
+            findOptions={getCustomDrilldownsFindOptions()}
+            avoidDuplicates={true}
+            vertical={true}
+            iconStart={true} />
         </div>)
       }
     </div>
   );
+
+  function handleOnGroupResultsChange() {
+    ctx.value.customDrilldowns = [];
+    ctx.value.modified = true;
+    forceUpdate();
+  }
+
+  function getCustomDrilldownsFindOptions() {
+    var fos: FilterConditionOption[] = [];
+
+    if (ctx.value.groupResults)
+      fos.push(...[
+        { token: UserQueryEntity.token(e => e.query.key), value: query.key },
+        { token: UserQueryEntity.token(e => e.entity.appendFilters), value: true }
+      ]);
+    else
+      fos.push({ token: UserQueryEntity.token(e => e.entityType?.entity?.cleanName), value: qd!.columns["Entity"].type.name });
+
+    if (!ctx.value.isNew)
+      fos.push({ token: UserQueryEntity.token(e => e.entity), operation: "DistinctTo", value: ctx.value });
+
+    const result = {
+      queryName: UserQueryEntity,
+      filterOptions: fos.map(fo => { fo.frozen = true; return fo; }),
+    } as FindOptions;
+
+    return result;
+  }
 }
 
 

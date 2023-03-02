@@ -21,7 +21,7 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
 
   getDefaultIcon(): IconColor {
     return ({
-      icon: "random",
+      icon: "shuffle",
       iconColor: "#2471A3",
     });
   }
@@ -95,7 +95,7 @@ function WorkflowDropdownImp() {
               <ToolbarNavItem key={i + "-" + j} title={getToString(val.workflow) + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
                 onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`, e); }}
                 active={false}
-                icon={ToolbarConfig.coloredIcon("plus-square", "seagreen")}
+                icon={ToolbarConfig.coloredIcon("square-plus", "seagreen")}
               />)
             )}
           </div>

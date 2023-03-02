@@ -1,16 +1,17 @@
 import * as React from 'react'
 import { Location } from 'history'
-import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
+import { getQueryKey, getQueryNiceName, getTypeInfos, IsByAll } from '@framework/Reflection'
 import { getToString } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'
-import { IconColor, RefreshCounterEvent, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { SearchValue, FindOptions } from '@framework/Search';
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
-import { useDocumentEvent, useInterval } from '@framework/Hooks'
+import * as Navigator from '@framework/Navigator';
+import { useAPI, useDocumentEvent, useInterval, useUpdatedRef } from '@framework/Hooks'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
 import a from 'bpmn-js/lib/features/search'
+import { classes } from '../../Signum.React/Scripts/Globals'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   constructor() {
@@ -20,15 +21,21 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
 
   getIcon(element: ToolbarResponse<QueryEntity>) {
 
-    if (element.iconName == "count")
-      return <CountIcon findOptions={{ queryName: getToString(element.content)! }} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
+    if (element.showCount != null) {
+      return (
+        <>
+          {super.getIcon(element)}
+          <SearchToolbarCount findOptions={{ queryName: getToString(element.content)! }} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />
+        </>
+      );
+    }
 
-    return super.getIcon(element);
+    return  super.getIcon(element);
   }
 
   getDefaultIcon(): IconColor {
     return ({
-      icon: ["far", "list-alt"],
+      icon: ["far", "rectangle-list"],
       iconColor: "dodgerblue",
     });
   }
@@ -54,29 +61,33 @@ interface CountIconProps {
   color?: string;
   autoRefreshPeriod?: number;
   findOptions: FindOptions;
+  moreThanZero?: boolean;
 }
 
-export function CountIcon(p: CountIconProps) {
+export function SearchToolbarCount(p: CountIconProps) {
 
   const deps = useInterval(p.autoRefreshPeriod == null ? null : p.autoRefreshPeriod! * 1000, 0, a => a + 1);
 
   const [invalidations, setInvalidation] = React.useState<number>(0);
 
-  useDocumentEvent("count-user-query", (e: Event) => {
-    const queryKey = getQueryKey(p.findOptions.queryName);
-    if (e instanceof RefreshCounterEvent) {
-      if (e.queryKey == queryKey || Array.isArray(e.queryKey) && e.queryKey.contains(queryKey)) {
-        setInvalidation(a => a + 1);
-      } 
-    }
-  }, [p.findOptions.queryName]);
+  var qd = useAPI(() => Finder.getQueryDescription(p.findOptions.queryName), [p.findOptions.queryName]);
+
+  var type = qd?.columns["Entity"].type.name;
+  var types = type == null || type == IsByAll ? [] : type.split(",");
+
+  Navigator.useEntityChanged(types, () => setInvalidation(a => a + 1), []);
 
   return <SearchValue deps={[deps, invalidations]}
     findOptions={p.findOptions}
-    customClass="icon"
-    customStyle={{ color: p.color }}
     avoidNotifyPendingRequest={true}
+    onRender={val => val == 0 && p.moreThanZero ? null :
+        <ToolbarCount num={val}/>}
   />;
+}
+
+
+export function ToolbarCount(p: { num: number | null | undefined }) {
+  return <div className="sf-toolbar-count-container"><div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "bg-light text-secondary" : "bg-danger")}>{p.num ?? "…"}</div></div>
 }
 
 

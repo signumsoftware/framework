@@ -41,6 +41,8 @@ export { EntityList } from './Lines/EntityList'
 
 export { EntityRepeater } from './Lines/EntityRepeater'
 
+export { EntityAccordion } from './Lines/EntityAccordion'
+
 export { EntityTabRepeater } from './Lines/EntityTabRepeater'
 
 export { EntityStrip } from './Lines/EntityStrip'

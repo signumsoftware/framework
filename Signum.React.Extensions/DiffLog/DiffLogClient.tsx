@@ -30,7 +30,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
       new QuickLinks.QuickLinkLink("TimeMachine",
         () => TimeMachineMessage.TimeMachine.niceToString(),
         timeMachineRoute(ctx.lite), {
-          icon: "history",
+          icon: "clock-rotate-left",
           iconColor: "blue",
       }) : undefined);
 
@@ -109,34 +109,32 @@ export function timeMachineRoute(lite: Lite<Entity>) {
 
 export namespace API {
 
-  export function diffLog(id: string | number, simplify: boolean): Promise<DiffLogResult> {
-    return ajaxGet({ url: "~/api/diffLog/" + id + "?simplify=" + simplify});
+  export function getPreviousOperationLog(id: string | number): Promise<PreviousLog> {
+    return ajaxGet({ url: "~/api/diffLog/previous/" + id });
   }
 
-  export function retrieveVersion(lite: Lite<Entity>, asOf: string,): Promise<Entity> {
+  export function getNextOperationLog(id: string | number): Promise<NextLog> {
+    return ajaxGet({ url: "~/api/diffLog/next/" + id });
+  }
+
+  export function getEntityDump(lite: Lite<Entity>, asOf: string,): Promise<EntityDump> {
     return ajaxGet({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?` + QueryString.stringify({asOf}) });
   }
-
-  export function diffVersions(lite: Lite<Entity>, from: string, to: string): Promise<DiffBlock> {
-    return ajaxGet({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?` + QueryString.stringify({ from, to }) });
-  }
 }
 
-export interface DiffLogResult {
-  prev: Lite<OperationLogEntity>;
-  diffPrev: DiffBlock;
-  initial: string;
-  diff: DiffBlock;
-  final: string;
-  diffNext: DiffBlock;
-  next: Lite<OperationLogEntity>;
+export interface PreviousLog {
+  operationLog: Lite<OperationLogEntity>;
+  dump: string;
 }
 
-export type DiffBlock = Array<DiffPair<Array<DiffPair<string>>>>;
+export interface NextLog {
+  operationLog?: Lite<OperationLogEntity>;
+  dump: string;
+}
 
-export interface DiffPair<T> {
-  action: "Equal" | "Added" | "Removed";
-  value: T;
+export interface EntityDump {
+  entity: Entity;
+  dump: string;
 }
 
 export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {

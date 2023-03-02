@@ -22,10 +22,10 @@ public class WorkflowEventTaskEntity : Entity, ITaskEntity
 
     public TriggeredOn TriggeredOn { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowEventTaskConditionEval? Condition { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowEventTaskActionEval? Action { get; set; }
 
 
@@ -57,10 +57,10 @@ public class WorkflowEventTaskModel : ModelEntity
 
     public TriggeredOn TriggeredOn { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowEventTaskConditionEval? Condition { get; set; }
 
-    [NotifyChildProperty]
+    [BindParent]
     public WorkflowEventTaskActionEval? Action { get; set; }
 }
 

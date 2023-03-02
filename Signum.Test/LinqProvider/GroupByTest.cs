@@ -247,6 +247,14 @@ public class GroupByTest
     }
 
     [Fact]
+    public void GroupSumWhere()
+    {
+        var songsAlbum = (from a in Database.Query<ArtistEntity>()
+                          group a by a.Sex into g
+                          select new { Sex = g.Key, Sum = g.Where(a=>a.Dead).Sum(a => a.Name.Length) }).ToList();
+    }
+
+    [Fact]
     public void GroupMax()
     {
         var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -430,6 +438,35 @@ public class GroupByTest
     }
 
     [Fact]
+    public void GroupByAllWhereAny()
+    {
+        var artistsBySex =
+            Database.Query<ArtistEntity>()
+            .GroupBy(a => a.Sex)
+            .All(g => g.Where(a => a.Dead).Any());
+    }
+
+    [Fact]
+    public void GroupByAllAny()
+    {
+        var artistsBySex =
+            Database.Query<ArtistEntity>()
+            .GroupBy(a => a.Sex)
+            .All(g => g.Any(a => a.Dead));
+    }
+
+    [Fact]
+    public void GroupByAllContains()
+    {
+        var first = Database.Query<ArtistEntity>().FirstOrDefault();
+
+        var artistsBySex =
+            Database.Query<ArtistEntity>()
+            .GroupBy(a => a.Sex)
+            .All(g => g.Contains(first));
+    }
+
+    [Fact]
     public void JoinGroupPair()
     {
         var list = (from a in Database.Query<AlbumEntity>()
@@ -492,7 +529,7 @@ public class GroupByTest
     [Fact]
     public void SumGroupbySum()
     {
-        var first = Database.Query<ArtistEntity>().GroupBy(a => a.Status).Select(gr => gr.Sum(b => b.Friends.Sum(m => (int)m.Id.Object)));
+        var first = Database.Query<ArtistEntity>().GroupBy(a => a.Status).Select(gr => gr.Sum(b => b.Friends.Sum(m => (int)m.Id.Object))).ToList();
     }
 
 
@@ -506,7 +543,7 @@ public class GroupByTest
     [Fact]
     public void MinGroupByMax()
     {
-        var first = Database.Query<ArtistEntity>().GroupBy(a => a.Status).Select(gr => gr.Min(b => b.Friends.Max(m => m.Id)));
+        var first = Database.Query<ArtistEntity>().GroupBy(a => a.Status).Select(gr => gr.Min(b => b.Friends.Max(m => m.Id))).ToList();
     }
 
     [Fact]
@@ -634,6 +671,15 @@ public class GroupByTest
         query.ToList();
     }
 
+    [Fact]
+    public void GroupByWithCheapNullPropagation()
+    {
+        var nullableList = Database.Query<ArtistEntity>().GroupBy(a => a == null ? (Sex?)null : a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+        var notNullableList = Database.Query<ArtistEntity>().GroupBy(a => a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+
+        Assert.Equal(nullableList.Count, notNullableList.Count);
+
+    }
 
     [Fact]
     public void GroupByCoallesceLabel()

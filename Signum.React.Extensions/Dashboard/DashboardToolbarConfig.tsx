@@ -3,7 +3,6 @@ import { Location } from 'history'
 import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Entities.Dashboard'
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import * as AppContext from '@framework/AppContext'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
 
@@ -16,7 +15,7 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
 
   getDefaultIcon(): IconColor{
     return ({
-      icon: "th-large",
+      icon: "table-cells-large",
       iconColor: "darkslateblue",
     });
   }

@@ -10,7 +10,12 @@ import { useForceUpdate } from '@framework/Hooks'
 import { TypeaheadOptions } from '@framework/Components/Typeahead'
 
 
-export function ColorTypeaheadLine(p: { ctx: TypeContext<string | null | undefined>; onChange?: () => void, inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>; }){
+export function ColorTypeaheadLine(p: {
+  ctx: TypeContext<string | null | undefined>;
+  onChange?: () => void,
+  inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
+  extraButtons?: () => React.ReactNode;
+}) {
 
   const forceUpdate = useForceUpdate();
 
@@ -19,21 +24,36 @@ export function ColorTypeaheadLine(p: { ctx: TypeContext<string | null | undefin
     if (p.onChange)
       p.onChange();
     forceUpdate();
-
   }
 
   var ctx = p.ctx;
 
   return (
-    <FormGroup ctx={ctx} labelText={ctx.niceName()} >
-      <ColorTypeahead color={ctx.value}
-        inputAttrs={p.inputAttrs}
-        formControlClass={ctx.formControlClass}
-        onChange={handleOnChange}
-        placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined} />
+    <FormGroup ctx={ctx} label={ctx.niceName()} >
+      {
+        <ColorTypeahead color={ctx.value}
+          inputAttrs={{ ...p.inputAttrs, style: { paddingLeft: "22px", ...p.inputAttrs?.style } }}
+          formControlClass={ctx.formControlClass}
+          onChange={handleOnChange}
+          placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined}
+          renderInput={(input => <div className={p.ctx.inputGroupClass}>
+            {input}
+            <span style={{
+              backgroundColor: ctx.value ?? undefined, height: "15px", width: "15px",
+              position: "absolute",
+              marginTop: "5px",
+              marginLeft: "5px",
+              marginBottom: "-6px",
+              zIndex: 5,
+            }} className="me-2" />
+            {p.extraButtons && p.extraButtons()}
+          </div>)}
+        />
+      }
     </FormGroup>
   );
 }
+
 
 interface ColorTypeaheadProps {
   color: string | null | undefined;
@@ -41,6 +61,7 @@ interface ColorTypeaheadProps {
   formControlClass: string | undefined;
   placeholder?: string;
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
+  renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>
 }
 
 export function ColorTypeahead(p : ColorTypeaheadProps){
@@ -89,6 +110,7 @@ export function ColorTypeahead(p : ColorTypeaheadProps){
       onChange={handleSelect}
       renderItem={handleRenderItem}
       minLength={0}
+      renderInput={p.renderInput}
     />
   );
 }

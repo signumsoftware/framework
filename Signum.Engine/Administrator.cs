@@ -337,7 +337,7 @@ public static class Administrator
 
     public static bool IsIdentityBehaviourDisabled(ITable table)
     {
-        return identityBehaviourDisabled.Value?.Contains(table) == true;
+        return identityBehaviourDisabled.Value == table;
     }
 
     [DebuggerStepThrough]
@@ -346,22 +346,22 @@ public static class Administrator
         return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>(), disableAssertAllowed: true);
     }
 
-    static AsyncThreadVariable<ImmutableStack<ITable>?> identityBehaviourDisabled = Statics.ThreadVariable<ImmutableStack<ITable>?>("identityBehaviourOverride");
+    static AsyncThreadVariable<ITable?> identityBehaviourDisabled = Statics.ThreadVariable<ITable?>("identityBehaviourOverride");
     public static IDisposable DisableIdentity(ITable table, bool behaviourOnly = false)
     {
         if (!table.IdentityBehaviour)
             throw new InvalidOperationException("Identity is false already");
 
         var sqlBuilder = Connector.Current.SqlBuilder;
-        var oldValue = identityBehaviourDisabled.Value ?? ImmutableStack<ITable>.Empty;
+        var oldTable = identityBehaviourDisabled.Value;
 
-        identityBehaviourDisabled.Value = oldValue.Push(table);
+        identityBehaviourDisabled.Value = table;
         if (table.PrimaryKey.Default == null && !sqlBuilder.IsPostgres && !behaviourOnly)
             sqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
 
         return new Disposable(() =>
         {
-            identityBehaviourDisabled.Value = oldValue.IsEmpty ? null : oldValue;
+            identityBehaviourDisabled.Value = oldTable;
 
             if (table.PrimaryKey.Default == null && !sqlBuilder.IsPostgres && !behaviourOnly)
                 sqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
@@ -585,7 +585,7 @@ public static class Administrator
                 TruncateTableSystemVersioning(mlist);
             });
 
-            using (DropAndCreateIncommingForeignKeys(table))
+            using (DropAndCreateIncomingForeignKeys(table))
                 TruncateTableSystemVersioning(table);
 
             tr.Commit();
@@ -607,7 +607,7 @@ public static class Administrator
         }
     }
 
-    public static IDisposable DropAndCreateIncommingForeignKeys(Table table)
+    public static IDisposable DropAndCreateIncomingForeignKeys(Table table)
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
         var isPostgres = Schema.Current.Settings.IsPostgres;
@@ -615,7 +615,7 @@ public static class Administrator
         var foreignKeys = Administrator.OverrideDatabaseInSysViews(table.Name.Schema.Database).Using(_ =>
         (from targetTable in Database.View<SysTables>()
          where targetTable.name == table.Name.Name && targetTable.Schema().name == table.Name.Schema.Name
-         from ifk in targetTable.IncommingForeignKeys()
+         from ifk in targetTable.IncomingForeignKeys()
          let parentTable = ifk.ParentTable()
          select new
          {

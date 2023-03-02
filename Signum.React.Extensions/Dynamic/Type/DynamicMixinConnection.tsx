@@ -4,7 +4,7 @@ import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { DynamicTypeEntity, DynamicTypeMessage, DynamicMixinConnectionEntity } from '../Signum.Entities.Dynamic'
-import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
+import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, getQueryNiceName } from '@framework/Reflection'
 import * as DynamicTypeClient from '../DynamicTypeClient'
@@ -23,7 +23,7 @@ export default function DynamicMixinConnectionComponent(p : DynamicMixinConnecti
     <div>
       <MixinCombo
         binding={Binding.create(ctx.value, a => a.mixinName)}
-        labelText={ctx.niceName(a => a.mixinName)}
+        label={ctx.niceName(a => a.mixinName)}
         labelColumns={2}
         onChange={() => forceUpdate()} />
       <EntityLine ctx={ctx.subCtx(dt => dt.entityType)} />
@@ -33,7 +33,7 @@ export default function DynamicMixinConnectionComponent(p : DynamicMixinConnecti
 
 export interface MixinComboProps {
   binding: Binding<string | null | undefined>;
-  labelText: string;
+  label: string;
   labelColumns: number;
   onChange?: () => void;
 }
@@ -64,7 +64,7 @@ export function MixinCombo(p : MixinComboProps){
   return (
     <div className="form-group form-group-sm row" >
       <label className={classes("col-form-label col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
-        {p.labelText}
+        {p.label}
       </label>
       <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
         <Typeahead

@@ -1,6 +1,6 @@
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
-using Signum.Engine.Mailing;
+using Signum.Engine.Mailing.Senders;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Authorization;
 using Signum.Utilities.Reflection;
@@ -12,12 +12,12 @@ namespace Signum.Engine.Authorization;
 
 public static class AzureADLogic
 {
-    public static Func<ClientCredentialProvider> GetClientCredentialProvider = () => ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig().GetAuthProvider();
+    public static Func<IAuthenticationProvider> GetClientCredentialProvider = () => ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig().GetAuthProvider();
 
 
     public static async Task<List<ActiveDirectoryUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
     {
-        ClientCredentialProvider authProvider = GetClientCredentialProvider();
+        IAuthenticationProvider authProvider = GetClientCredentialProvider();
         GraphServiceClient graphClient = new GraphServiceClient(authProvider);
 
         subStr = subStr.Replace("'", "''");
@@ -59,7 +59,7 @@ public static class AzureADLogic
     {
         using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
         {
-            ClientCredentialProvider authProvider = AzureADLogic.GetClientCredentialProvider();
+            IAuthenticationProvider authProvider = AzureADLogic.GetClientCredentialProvider();
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
             var result = graphClient.Users[oid.ToString()].TransitiveMemberOf.WithODataCast("microsoft.graph.group").Request().Top(999).Select("id, displayName, ODataType").GetAsync().Result.ToList();
 
@@ -77,7 +77,7 @@ public static class AzureADLogic
                 {
                     var list = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID != null).ToList();
 
-                    ClientCredentialProvider authProvider = GetClientCredentialProvider();
+                    IAuthenticationProvider authProvider = GetClientCredentialProvider();
                     GraphServiceClient graphClient = new GraphServiceClient(authProvider);
                     stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
                     {
@@ -135,7 +135,7 @@ public static class AzureADLogic
                  {
                      using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryUsers"))
                      {
-                         ClientCredentialProvider authProvider = GetClientCredentialProvider();
+                         IAuthenticationProvider authProvider = GetClientCredentialProvider();
                          GraphServiceClient graphClient = new GraphServiceClient(authProvider);
 
                          var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "InGroup" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
@@ -215,7 +215,7 @@ public static class AzureADLogic
                 {
                     using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryGroups"))
                     {
-                        ClientCredentialProvider authProvider = GetClientCredentialProvider();
+                        IAuthenticationProvider authProvider = GetClientCredentialProvider();
                         GraphServiceClient graphClient = new GraphServiceClient(authProvider);
 
                         var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "HasUser" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
@@ -495,7 +495,7 @@ public static class AzureADLogic
 
     private static MicrosoftGraphCreateUserContext GetMicrosoftGraphContext(ActiveDirectoryUser adUser)
     {
-        ClientCredentialProvider authProvider = GetClientCredentialProvider();
+        IAuthenticationProvider authProvider = GetClientCredentialProvider();
         GraphServiceClient graphClient = new GraphServiceClient(authProvider);
         var msGraphUser = graphClient.Users[adUser.ObjectID.ToString()].Request().GetAsync().Result;
 
@@ -505,7 +505,7 @@ public static class AzureADLogic
 
     public static Task<MemoryStream> GetUserPhoto(Guid OId, int size)
     {
-        ClientCredentialProvider authProvider = GetClientCredentialProvider();
+        IAuthenticationProvider authProvider = GetClientCredentialProvider();
         GraphServiceClient graphClient = new GraphServiceClient(authProvider);
         int imageSize = 
             size <= 48 ? 48 : 
@@ -546,13 +546,10 @@ public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
     public string? SID => null;
 }
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 public class ActiveDirectoryUser
 {
-    public string DisplayName;
-    public string UPN;
-    public Guid ObjectID;
-
-    public string JobTitle;
+    public required string DisplayName;
+    public required string UPN;
+    public required Guid ObjectID;
+    public required string JobTitle;
 }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

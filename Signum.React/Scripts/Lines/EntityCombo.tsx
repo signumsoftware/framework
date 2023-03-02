@@ -22,10 +22,11 @@ export interface EntityComboProps extends EntityBaseProps {
   deps?: React.DependencyList;
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem") => React.ReactChild;
+  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactChild;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
+  overrideSelectedLite?: () => Lite<Entity> | null;
 }
 
 export class EntityComboController extends EntityBaseController<EntityComboProps> {
@@ -41,7 +42,7 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
   overrideProps(p: EntityComboProps, overridenProps: EntityComboProps) {
     super.overrideProps(p, overridenProps);
     if (p.onRenderItem === undefined && p.type && tryGetTypeInfos(p.type).some(a => a && Navigator.getSettings(a)?.renderLite)) {
-      p.onRenderItem = row => (row?.entity && Navigator.renderLite(row.entity)) ?? "";
+      p.onRenderItem = (row, role, searchTerm) => (row?.entity && Navigator.renderLite(row.entity, searchTerm)) ?? "";
     }
   }
 
@@ -59,12 +60,12 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
     return promise;
   }
 
-  handleOnChange = (lite: Lite<Entity> | null) => {
+  handleOnChange = (e: React.SyntheticEvent | undefined, lite: Lite<Entity> | null) => {
     if (lite == null)
       this.setValue(lite);
     else
       this.convert(lite)
-        .then(v => this.setValue(v));
+        .then(v => this.setValue(v, e));
   }
 }
 
@@ -102,7 +103,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
   function getLabelText() {
 
     if (p.labelTextWithData == null)
-      return p.labelText;
+      return p.label;
 
     var data = c.props.data || comboRef.current && comboRef.current.getData();
 
@@ -111,7 +112,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
 
   return (
     <FormGroup ctx={c.props.ctx}
-      labelText={getLabelText()}
+      label={getLabelText()}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes} >
@@ -133,6 +134,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
             liteToString={p.liteToString}
             nullPlaceHolder={p.nullPlaceHolder}
             onRenderItem={p.onRenderItem}
+            overrideSelectedLite={p.overrideSelectedLite}
           />
           {EntityBaseController.hasChildrens(buttons) ? buttons : undefined}
         </div>
@@ -143,7 +145,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
 
 export interface EntityComboSelectProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
-  onChange: (lite: Lite<Entity> | null) => void;
+  onChange: (e: React.SyntheticEvent | undefined, lite: Lite<Entity> | null) => void;
   type: TypeReference;
   findOptions?: FindOptions;
   data?: Lite<Entity>[];
@@ -151,11 +153,12 @@ export interface EntityComboSelectProps {
   onDataLoaded?: (data: Lite<Entity>[] | ResultTable | undefined) => void;
   deps?: React.DependencyList;
   selectHtmlAttributes?: React.AllHTMLAttributes<any>;
-  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem") => React.ReactNode;
+  onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactNode;
   liteToString?: (e: Entity) => string;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
+  overrideSelectedLite?: () => Lite<Entity> | null
 }
 
 
@@ -221,13 +224,21 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
   const ctx = p.ctx;
 
   if (ctx.readOnly)
-    return <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>{ctx.value && getToString(lite, p.liteToString)}</FormControlReadonly>;
+    return (
+      <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>
+        {ctx.value &&
+          (p.onRenderItem ? p.onRenderItem({ entity: lite } as ResultRow, "Value", undefined) :
+          p.liteToString ? getToString(lite!, p.liteToString) :
+            Navigator.renderLite(lite!))
+        }
+      </FormControlReadonly>
+    );
 
   if (p.onRenderItem) {
     return (
       <DropdownList
         className={classes(ctx.formControlClass, p.mandatoryClass)} data={getOptionRows()}
-        onChange={row => p.onChange(row?.entity ?? null)}
+        onChange={(row, e) => p.onChange(e.originalEvent, row?.entity ?? null)}
         value={getResultRow(lite)}
         title={getToString(lite)}
         filter={(e, query) => {
@@ -235,7 +246,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
           return query.toLowerCase().split(' ').every(part => toStr.contains(part));
         }}
         renderValue={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "Value")}
-        renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "ListItem")}
+        renderListItem={a => p.onRenderItem!(a.item?.entity == null ? undefined : a.item, "ListItem", a.searchTerm)}
       />
     );
   } else {
@@ -256,11 +267,11 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
 
     if (current.value != (lite ? liteKey(lite) : undefined)) {
       if (!current.value) {
-        p.onChange(null);
+        p.onChange(event, null);
       } else {
         const liteFromData = Array.isArray(data) ? data!.single(a => liteKey(a) == current.value) :
           data?.rows.single(a => liteKey(a.entity!) == current.value).entity!;
-        p.onChange(liteFromData);
+        p.onChange(event, liteFromData);
       }
     }
   }
@@ -281,8 +292,12 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
 
   function getLite() {
     const v = p.ctx.value;
-    if (v == undefined)
+    if (v == undefined) {
+      if (p.overrideSelectedLite) {
+        return (p.overrideSelectedLite() ?? undefined);
+      }
       return undefined;
+    }
 
     if (isEntity(v))
       return toLite(v, v.isNew, p.liteToString && p.liteToString(v));

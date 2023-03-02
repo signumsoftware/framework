@@ -70,7 +70,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   useSignalRCallback(conn, "ConcurrentUsersChanged", () => setRefreshKey(a => a + 1), []);
 
   if (window.__disableSignalR)
-    return <FontAwesomeIcon icon="exclamation-triangle" color={"#ddd"} title={window.__disableSignalR} />;
+    return <FontAwesomeIcon icon="triangle-exclamation" color={"#ddd"} title={window.__disableSignalR} />;
 
   const ticksRef = useUpdatedRef(ticks);
   const entityRef = useUpdatedRef(p.entity);
@@ -123,7 +123,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
             {otherUsers?.map((a, i) =>
               <div key={i} className="d-flex align-items-center" >
                 <SmallProfilePhoto user={a.user} className="me-2"/> {getToString(a.user)} <small className="ms-1 text-muted">({DateTime.fromISO(a.startTime).toRelative()})</small>
-                {a.isModified && <FontAwesomeIcon icon="edit" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
+                {a.isModified && <FontAwesomeIcon icon="pen-to-square" color={"#FFAA44"} title={ConcurrentUserMessage.CurrentlyEditing.niceToString()} style={{ marginLeft: "10px" }} />}
               </div>)}
 
             {isModified.current ?
@@ -154,7 +154,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
         </Popover>
       }>
       <div className={classes("sf-pointer", isModified.current ? "blinking" : undefined)} title={window.__disableSignalR ?? undefined}>
-        <FontAwesomeIcon icon={otherUsers.length == 1 ? "user" : otherUsers.length == 2 ? "user-friends" : "users"}
+        <FontAwesomeIcon icon={otherUsers.length == 1 ? "user" : otherUsers.length == 2 ? "user-group" : "users"}
           color={ticks !== p.entity.ticks ? "#E4032E" : otherUsers.some(u => u.isModified) ? "#FFAA44" : "#6BB700"} />
         <strong className="ms-1 me-3" style={{ userSelect: "none" }}>{UserEntity.niceCount(otherUsers.length)}</strong>
       </div>

@@ -10,7 +10,6 @@ import './Toolbar.css'
 import * as PropTypes from "prop-types";
 import { Collapse, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
 import { useAPI } from '@framework/Hooks';
 import * as Reflection from '@framework/Reflection';
 import * as Finder from '@framework/Finder';

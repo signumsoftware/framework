@@ -25,7 +25,7 @@ export default function WorkflowReplacementComponent(p: { ctx: TypeContext<Workf
               <tr>
                 <td>
                   <SearchValueLine ctx={ectx}
-                    labelText={getToString(ectx.value.oldNode)}
+                    label={getToString(ectx.value.oldNode)}
                     findOptions={{
                       queryName: CaseActivityEntity,
                       filterOptions: [

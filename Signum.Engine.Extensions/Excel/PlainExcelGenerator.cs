@@ -1,4 +1,3 @@
-using spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
@@ -47,7 +46,7 @@ public static class PlainExcelGenerator
                     { DefaultStyle.DateTime, worksheet.FindCell("C3").StyleIndex! },
                     { DefaultStyle.Text, worksheet.FindCell("D3").StyleIndex! },
                     { DefaultStyle.General, worksheet.FindCell("E3").StyleIndex! },
-                    { DefaultStyle.Boolean, worksheet.FindCell("E3").StyleIndex! },
+                    { DefaultStyle.Boolean, worksheet.FindCell("J3").StyleIndex! },
                     { DefaultStyle.Enum, worksheet.FindCell("E3").StyleIndex! },
                     { DefaultStyle.Number, worksheet.FindCell("F3").StyleIndex! },
                     { DefaultStyle.Decimal, worksheet.FindCell("G3").StyleIndex! },
@@ -58,22 +57,22 @@ public static class PlainExcelGenerator
         }
     }
     
-    public static byte[] WritePlainExcel(ResultTable results,string title)
+    public static byte[] WritePlainExcel(ResultTable results, string title, bool forImport = false)
     {
         using (MemoryStream ms = new MemoryStream())
         {
-            WritePlainExcel(results, ms,title);
+            WritePlainExcel(results, ms, title, forImport);
             return ms.ToArray(); 
         }
     }
 
-    public static void WritePlainExcel(ResultTable results, string fileName,string title)
+    public static void WritePlainExcel(ResultTable results, string fileName, string title, bool forImport = false)
     {
         using (FileStream fs = File.Create(fileName))
-            WritePlainExcel(results, fs,title);
+            WritePlainExcel(results, fs,title, forImport);
     }
 
-    static void WritePlainExcel(ResultTable results, Stream stream, string title)
+    static void WritePlainExcel(ResultTable results, Stream stream, string title, bool forImport)
     {
         stream.WriteAllBytes(Template);
 
@@ -88,20 +87,21 @@ public static class PlainExcelGenerator
             WorkbookPart workbookPart = document.WorkbookPart!;
 
             WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
-            
+
             worksheetPart.Worksheet = new Worksheet();
 
-            worksheetPart.Worksheet.Append(new Columns(results.Columns.Select((c, i) => new spreadsheet.Column()
-                {
-                    Min = (uint)i + 1,
-                    Max = (uint)i + 1,
-                    Width = GetColumnWidth(c.Column.Type),
-                    BestFit = true,
-                    CustomWidth = true
-                }).ToArray()));
+            worksheetPart.Worksheet.Append(new Columns(results.Columns.Select((c, i) => new DocumentFormat.OpenXml.Spreadsheet.Column()
+            {
+                Min = (uint)i + 1,
+                Max = (uint)i + 1,
+                Width = GetColumnWidth(c.Column.Type),
+                BestFit = true,
+                CustomWidth = true
+            }).ToArray()));
 
             Dictionary<ResultColumn, (DefaultStyle defaultStyle, UInt32Value styleIndex)> indexes =
                 results.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
+
             var ss = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet;
             {
                 var maxIndex = ss.NumberingFormats!.ChildElements.Cast<NumberingFormat>()
@@ -130,16 +130,16 @@ public static class PlainExcelGenerator
 
             worksheetPart.Worksheet.Append(new Sequence<Row>()
             {
-               new [] { CellBuilder.Cell(title,DefaultStyle.Title) }.ToRow(),
+                new [] { CellBuilder.Cell(title, DefaultStyle.Title, forImport) }.ToRow(),
 
                 (from c in results.Columns
-                select CellBuilder.Cell(c.Column.DisplayName, DefaultStyle.Header)).ToRow(),
+                select CellBuilder.Cell(c.Column.DisplayName, DefaultStyle.Header, forImport)).ToRow(),
 
                 from r in results.Rows
                 select (from c in results.Columns
                         let t = indexes.GetOrThrow(c)
-                        select CellBuilder.Cell(r[c], t.defaultStyle,t.styleIndex)).ToRow()
-            }.ToSheetData());
+                        select CellBuilder.Cell(r[c], t.defaultStyle, t.styleIndex, forImport)).ToRow()
+            }.ToSheetDataWithIndexes());
 
             workbookPart.Workbook.Save();
             document.Close();
@@ -155,13 +155,13 @@ public static class PlainExcelGenerator
         }
     }
 
-    public static void WritePlainExcel<T>(IEnumerable<T> results, string fileName, string? title = null)
+    public static void WritePlainExcel<T>(IEnumerable<T> results, string fileName, string? title = null, bool forImport = false)
     {
         using (FileStream fs = File.Create(fileName))
             WritePlainExcel(results, fs, title);
     }
 
-    public static void WritePlainExcel<T>(IEnumerable<T> results, Stream stream, string? title = null)
+    public static void WritePlainExcel<T>(IEnumerable<T> results, Stream stream, string? title = null, bool forImport = false)
     {
         stream.WriteAllBytes(Template);
 
@@ -182,7 +182,7 @@ public static class PlainExcelGenerator
 
             worksheetPart.Worksheet = new Worksheet();
 
-            worksheetPart.Worksheet.Append(new Columns(members.Select((c, i) => new spreadsheet.Column()
+            worksheetPart.Worksheet.Append(new Columns(members.Select((c, i) => new DocumentFormat.OpenXml.Spreadsheet.Column()
             {
                 Min = (uint)i + 1,
                 Max = (uint)i + 1,
@@ -192,18 +192,18 @@ public static class PlainExcelGenerator
             }).ToArray()));
 
             if (title.HasText())
-                worksheetPart.Worksheet.Append(new[] { CellBuilder.Cell(title, DefaultStyle.Title) }.ToRow());
+                worksheetPart.Worksheet.Append(new[] { CellBuilder.Cell(title, DefaultStyle.Title, forImport) }.ToRow());
 
             worksheetPart.Worksheet.Append(new Sequence<Row>()
             {
                 (from c in members
-                select CellBuilder.Cell(c.Name, DefaultStyle.Header)).ToRow(),
+                select CellBuilder.Cell(c.Name, DefaultStyle.Header, forImport)).ToRow(),
 
                 from r in results
                 select (from c in members
                         let template = formats.TryGetCN(c.Name) == "d" ? DefaultStyle.Date : CellBuilder.GetDefaultStyle(c.MemberInfo.ReturningType())
-                        select CellBuilder.Cell(c.Getter!(r), template)).ToRow()
-            }.ToSheetData());
+                        select CellBuilder.Cell(c.Getter!(r), template, forImport)).ToRow()
+            }.ToSheetDataWithIndexes());
 
             workbookPart.Workbook.Save();
             document.Close();

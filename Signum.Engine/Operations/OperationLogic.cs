@@ -709,19 +709,20 @@ Consider the following options:
         if (!fromStates.Contains(state))
             return OperationMessage.TheStateOf0ShouldBe1InsteadOf2.NiceToString().FormatWith(
                 propName,
-                fromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
-                ((Enum)(object)state).NiceToString());
+                fromStates.CommaOr(v => v.NiceToString()),
+                state.NiceToString());
 
         return null;
     }
 
     public static string? ShouldBe<T>(this T state, string propName, params T[] fromStates)
+         where T : struct, Enum
     {
         if (!fromStates.Contains(state))
             return ValidationMessage._0ShouldBe1InsteadOf2.NiceToString().FormatWith(
                 propName,
-                fromStates.CommaOr(v =>  v is Enum e ? e.NiceToString() : v?.ToString()),
-                state is Enum e ? e.NiceToString() : state?.ToString());
+                fromStates.CommaOr(v =>  v.NiceToString()),
+                state.NiceToString());
 
         return null;
     }

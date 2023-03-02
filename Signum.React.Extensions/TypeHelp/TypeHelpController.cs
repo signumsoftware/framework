@@ -205,9 +205,10 @@ public class TypeMemberHelpTS
             pr.Let(propertyRoute =>
             {
                 var typeName = propertyRoute.Type.TypeName();
-                var nullable = propertyRoute.PropertyInfo?.IsNullable();
+                var typeNullable = propertyRoute.Type.IsNullable();
+                var piNullable = propertyRoute.PropertyInfo?.IsNullable();
 
-                return typeName + (nullable == true ? "?" : "");
+                return typeName + (piNullable == true && !typeNullable ? "?" : "");
             });
 
 

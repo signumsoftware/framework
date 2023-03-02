@@ -1,4 +1,7 @@
 ﻿
+.sf-alerts-toasts .toast {
+    backdrop-filter: blur(5px);
+}
 
 @keyframes ring {
     0% {
@@ -109,14 +112,15 @@
 .sf-bell {
 }
 
-    .sf-bell.open {
-        color: #616A6B
-    }
+.sf-bell.open {
+    color: #616A6B
+}
 
-    .sf-bell.active {
-        color: #D4AC0D
-    }
+.sf-bell.active {
+    color: #D4AC0D
+}
 
-        .sf-bell.active.open {
-            color: #9C640C
-        }
+.sf-bell.active.open {
+    color: #9C640C
+}
+

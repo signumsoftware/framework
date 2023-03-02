@@ -2,10 +2,11 @@ import * as React from 'react'
 import { Location } from 'history'
 import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as WorkflowClient from './WorkflowClient'
-import { WorkflowEntity } from './Signum.Entities.Workflow'
-import { coalesceIcon } from '@framework/Operations/ContextualOperations';
+import { WorkflowEntity, WorkflowMainEntityStrategy } from './Signum.Entities.Workflow'
+import { is } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
+import SelectorModal from '../../Signum.React/Scripts/SelectorModal'
 
 export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity> {
 
@@ -16,16 +17,25 @@ export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity>
 
   getDefaultIcon(): IconColor {
     return ({
-      icon: "random",
+      icon: "shuffle",
       iconColor: "darkslateblue",
     });
   }
 
-  navigateTo(element: ToolbarResponse<WorkflowEntity>): Promise<string> {
-    return Promise.resolve(WorkflowClient.workflowStartUrl(element.content!));
+  async navigateTo(element: ToolbarResponse<WorkflowEntity>): Promise<string | null> {
+    var starts = await WorkflowClient.API.starts();
+
+    var strategies = starts.single(s => is(s, element.content)).mainEntityStrategies.map(a => a.element);
+
+    var strategy = await SelectorModal.chooseEnum(WorkflowMainEntityStrategy, strategies)
+
+    if (strategy == null)
+      return null;
+
+    return WorkflowClient.workflowStartUrl(element.content!, strategy);
   }
 
   isCompatibleWithUrlPrio(res: ToolbarResponse<WorkflowEntity>, location: Location, query: any): number {
-    return location.pathname == AppContext.toAbsoluteUrl(WorkflowClient.workflowStartUrl(res.content!)) ? 2 : 0;
+    return location.pathname.startsWith(AppContext.toAbsoluteUrl(WorkflowClient.workflowStartUrl(res.content!))) ? 2 : 0;
   }
 }

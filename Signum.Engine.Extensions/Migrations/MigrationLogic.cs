@@ -54,7 +54,7 @@ public static class MigrationLogic
                         SafeConsole.WriteColor(ConsoleColor.Yellow, count.ToString());
                         Console.WriteLine(" Sql Migrations!");
 
-                        if (SafeConsole.Ask("Do you want to create a new SQL Migration instead?"))
+                        if (SafeConsole.Ask("Do you want to create a new SQL Migration instead?", "continue", "migrations") == "migrations")
                         {
                             SqlMigrationRunner.SqlMigrations();
                             return true;
@@ -84,7 +84,7 @@ public static class MigrationLogic
 
                     Console.WriteLine("You have an Initial SQL Migration.");
 
-                    if (SafeConsole.Ask("Do you want to run the SQL Migrations instead?"))
+                    if (SafeConsole.Ask("Do you want to run the SQL Migrations instead?", "continue", "migrations") == "migrations")
                     {
                         SqlMigrationRunner.SqlMigrations();
                         return true;

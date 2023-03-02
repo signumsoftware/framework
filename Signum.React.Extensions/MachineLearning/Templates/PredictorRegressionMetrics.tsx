@@ -13,8 +13,8 @@ export default function PredictorRegressionMetrics(p : { ctx: TypeContext<Predic
     return (
       <tr>
         <th>{ctxT.niceName(property)}{unit && " (" + unit + ")"}</th>
-        <td><ValueLine ctx={ctxT.subCtx(property)} unitText="" /></td>
-        <td><ValueLine ctx={ctxV.subCtx(property)} unitText="" /></td>
+        <td><ValueLine ctx={ctxT.subCtx(property)} unit="" /></td>
+        <td><ValueLine ctx={ctxV.subCtx(property)} unit="" /></td>
       </tr>
     );
   }

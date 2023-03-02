@@ -20,14 +20,16 @@
     "@types/codemirror": "5.60.5",
     "@types/draft-js": "0.11.9",
     "@types/googlemaps": "3.43.3",
-    "@microsoft/signalr": "6.0.4",
+    "@types/diff" : "5.0.2",
+    "@microsoft/signalr": "6.0.9",
     "draft-js": "0.11.7",
     "draftjs-to-html": "0.9.1",
     "html-to-draftjs": "1.5.0",
-    "react": "18.0.0",
-    "react-dom": "18.0.0",
-    "@azure/msal-browser": "2.23.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "@azure/msal-browser": "2.29.0",
     "@types/react": "file:../Signum.React/node_modules/@types/react",
-    "immutable": "3.8.2"
+    "immutable": "3.8.2",
+    "diff": "5.1.0"
   }
 }

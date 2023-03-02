@@ -83,6 +83,8 @@ public class ToolbarElementEmbedded : EmbeddedEntity
 
     [StringLengthValidator(Min = 3, Max = 100)]
     public string? IconName { get; set; }
+  
+    public ShowCount? ShowCount { get; set; } 
 
     [StringLengthValidator(Min = 3, Max = 100)]
     public string? IconColor { get; set; }
@@ -106,11 +108,12 @@ public class ToolbarElementEmbedded : EmbeddedEntity
             string.IsNullOrEmpty(Label) ? null! : new XAttribute("Label", Label),
             string.IsNullOrEmpty(IconName) ? null! : new XAttribute("IconName", IconName),
             string.IsNullOrEmpty(IconColor) ? null! :  new XAttribute("IconColor", IconColor),
+            ShowCount != null ? new XAttribute("ShowCount", ShowCount) : null!,
             OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null!,
             AutoRefreshPeriod == null ? null! : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
             Content == null ? null! : new XAttribute("Content",
-            Content is Lite<QueryEntity> query ?  ctx.QueryToName(query) :
-            Content is Lite<PermissionSymbol> perm ?  ctx.PermissionToName(perm) :
+            Content is Lite<QueryEntity> query ?  ctx.RetrieveLite(query).Key :
+            Content is Lite<PermissionSymbol> perm ?  ctx.RetrieveLite(perm).Key :
             (object)ctx.Include((Lite<IUserAssetEntity>)Content)),
             string.IsNullOrEmpty(Url) ? null! : new XAttribute("Url", Url));
     }
@@ -119,6 +122,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
     {
         Type = x.Attribute("Type")!.Value.ToEnum<ToolbarElementType>();
         Label = x.Attribute("Label")?.Value;
+        ShowCount = x.Attribute("ShowCount")?.Value.ToEnum<ShowCount>();
         IconName = x.Attribute("IconName")?.Value;
         IconColor = x.Attribute("IconColor")?.Value;
         OpenInPopup = x.Attribute("OpenInPopup")?.Value.ToBool() ?? false;
@@ -165,6 +169,13 @@ public class ToolbarElementEmbedded : EmbeddedEntity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => $"{Type}: {(Label ?? (Content == null ? "Null" : Content.ToString()))}");
+}
+
+public enum ShowCount
+{
+    [Description("More than 0")]
+    MoreThan0 = 1,
+    Always
 }
 
 public enum ToolbarElementType

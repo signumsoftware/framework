@@ -105,6 +105,6 @@ public class FilesController : ControllerBase
 
     public static FileStreamResult GetFileStreamResult(FileContent file, bool forDownload = true)
     {
-        return GetFileStreamResult(new MemoryStream(file.Bytes), file.FileName);
+        return GetFileStreamResult(new MemoryStream(file.Bytes), file.FileName, forDownload);
     }
 }

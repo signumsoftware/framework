@@ -1,19 +1,24 @@
 import * as React from 'react'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
-import { Entity, Lite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed } from '@framework/FindOptions'
+import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed, FindOptions, FindOptionsParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded } from './Signum.Entities.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { QueryToken } from '@framework/FindOptions';
 import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
-import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../UserQueries/Signum.Entities.UserQueries';
-import { softCast } from '@framework/Globals';
+import { QueryFilterEmbedded, PinnedQueryFilterEmbedded, UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';
+import { Dic, softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
 import { translated } from '../Translation/TranslatedInstanceTools'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import SelectorModal from '@framework/SelectorModal';
+import * as UserQueryClient from '../UserQueries/UserQueryClient'
+import { SearchControlLoaded } from '../../Signum.React/Scripts/Search';
 
 let started = false;
 export function start(options: { routes: JSX.Element[] }) {
@@ -110,7 +115,7 @@ export module Converter {
         tokenString: fr.token && fr.token.toString(),
         value: fr.value,
         pinned: fr.pinned,
-        filters: fr.filters.map(f => toFilterNode(f)),
+        filters: fr.filters.notNull().map(f => toFilterNode(f)),
         dashboardBehaviour: fr.dashboardBehaviour,
       });
 

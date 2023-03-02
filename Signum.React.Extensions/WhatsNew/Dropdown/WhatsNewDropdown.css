@@ -1,77 +1,7 @@
-﻿@keyframes ring {
-    0% {
-        -webkit-transform: rotate(-15deg);
-        -ms-transform: rotate(-15deg);
-        transform: rotate(-15deg)
-    }
-
-    2% {
-        -webkit-transform: rotate(15deg);
-        -ms-transform: rotate(15deg);
-        transform: rotate(15deg)
-    }
-
-    4% {
-        -webkit-transform: rotate(-18deg);
-        -ms-transform: rotate(-18deg);
-        transform: rotate(-18deg)
-    }
-
-    6% {
-        -webkit-transform: rotate(18deg);
-        -ms-transform: rotate(18deg);
-        transform: rotate(18deg)
-    }
-
-    8% {
-        -webkit-transform: rotate(-22deg);
-        -ms-transform: rotate(-22deg);
-        transform: rotate(-22deg)
-    }
-
-    10% {
-        -webkit-transform: rotate(22deg);
-        -ms-transform: rotate(22deg);
-        transform: rotate(22deg)
-    }
-
-    12% {
-        -webkit-transform: rotate(-18deg);
-        -ms-transform: rotate(-18deg);
-        transform: rotate(-18deg)
-    }
-
-    14% {
-        -webkit-transform: rotate(18deg);
-        -ms-transform: rotate(18deg);
-        transform: rotate(18deg)
-    }
-
-    16% {
-        -webkit-transform: rotate(-12deg);
-        -ms-transform: rotate(-12deg);
-        transform: rotate(-12deg)
-    }
-
-    18% {
-        -webkit-transform: rotate(12deg);
-        -ms-transform: rotate(12deg);
-        transform: rotate(12deg)
-    }
-
-    20% {
-        -webkit-transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        transform: rotate(0deg)
-    }
+﻿
+.sf-news-toasts .toast {
+    backdrop-filter: blur(5px);
 }
-
-
-.ringing {
-    animation: ring 4s ease infinite;
-    transform-origin: 50% 10%;
-}
-
 
 .sf-news-badge {
     padding: 1px 2px;
@@ -107,14 +37,32 @@
 .sf-bell {
 }
 
-    .sf-bell.open {
-        color: #616A6B
-    }
+.sf-bell.open {
+    color: #616A6B
+}
 
-    .sf-bell.active {
-        color: #D4AC0D
-    }
+.sf-bell.active {
+    color: #D4AC0D
+}
 
-        .sf-bell.active.open {
-            color: #9C640C
-        }
+.sf-bell.active.open {
+    color: #9C640C
+}
+
+.sf-html-editor {
+    box-sizing: unset !important;
+    border: none !important;
+    padding: 0px !important;
+    border-radius: 0px !important;
+    margin-bottom: 0em !important;
+    box-shadow: none !important;
+}
+
+.sf-html-editor .public-DraftEditor-content {
+    min-height: unset !important;
+    height: unset !important;
+}
+
+.DraftEditor-root {
+    height: unset !important;
+}

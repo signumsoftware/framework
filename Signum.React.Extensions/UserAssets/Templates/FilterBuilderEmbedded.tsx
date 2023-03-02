@@ -99,7 +99,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
 
       const readOnly = fc.readonly || f.frozen;
 
-      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
       return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={"String"} type={{ name: "string" }} />
 
@@ -109,7 +109,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
 
       const readOnly = fc.readonly || f.frozen;
 
-      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+      const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
       if (isList(f.operation!))
         return <MultiLineOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fc, onChange)} onChange={fc.handleValueChange} />;
@@ -265,14 +265,14 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
     return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
       onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
       title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
-      <FontAwesomeIcon icon={[isValue ? "far" : "fas", "edit"]} />
+      <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
     </a>)
   }
 
   if (liteRef.current === undefined)
     return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} />;
 
-  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(liteRef, a => a.current));
+  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(liteRef, a => a.current));
 
   const handleChangeValue = () => {
     p.ctx.value = ctx.value ? liteKey(ctx.value) : null;
@@ -300,8 +300,8 @@ interface ValueLineOrExpressionProps {
   ctx: TypeContext<string | null | undefined>;
   onChange: () => void;
   type: TypeReference;
-  formatText?: string;
-  unitText?: string;
+  format?: string;
+  unit?: string;
   filterType?: FilterType;
 }
 
@@ -330,14 +330,14 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
           foceUpdate();
         }}
         title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
-        <FontAwesomeIcon icon={[isValue ? "far" : "fas", "edit"]} />
+        <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
       </a>
     );
   }
   if (valueRef.current === undefined)
     return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} />;
 
-  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(valueRef, a => a.current));
+  const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(valueRef, a => a.current));
 
   const handleChangeValue = () => {
     p.ctx.value = toStringValue(ctx.value, p.filterType);
@@ -352,9 +352,9 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
     if (!ti)
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-    return <ValueLine ctx={ctx} type={type} formatText={p.formatText} unitText={p.unitText} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} />;
+    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} />;
   } else {
-    return <ValueLine ctx={ctx} type={type} formatText={p.formatText} unitText={p.unitText} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
   }
 }
 

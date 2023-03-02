@@ -15,7 +15,7 @@ public class RoleEntity : Entity
 
     public bool IsTrivialMerge { get; set; }
 
-    [NotifyCollectionChanged, NoRepeatValidator]
+    [BindParent, NoRepeatValidator]
     public MList<Lite<RoleEntity>> InheritsFrom { get; set; } = new MList<Lite<RoleEntity>>();
 
     [StringLengthValidator(MultiLine = true)]

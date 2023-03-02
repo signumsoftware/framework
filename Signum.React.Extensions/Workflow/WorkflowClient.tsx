@@ -23,7 +23,7 @@ import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation, CaseActivityMessage, CaseMessage, WorkflowScriptRetryStrategyEntity
+  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation, CaseActivityMessage, CaseMessage, WorkflowScriptRetryStrategyEntity, WorkflowEventType
 } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -121,7 +121,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     },
       {
         isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
-        icon: "random",
+        icon: "shuffle",
         iconColor: "green"
       })
   ]);
@@ -139,7 +139,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
     new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] },
-      { icon: "tasks", iconColor: "blue" })
+      { icon: "list-check", iconColor: "blue" })
   ]);
 
   OmniboxClient.registerSpecialAction({
@@ -196,7 +196,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
 
   Operations.addSettings(new EntityOperationSettings(CaseNotificationOperation.SetRemarks, { isVisible: v => false }));
 
-  Operations.addSettings(new EntityOperationSettings(CaseNotificationOperation.CreteCaseNotificationFromCaseActivity, {
+  Operations.addSettings(new EntityOperationSettings(CaseNotificationOperation.CreateCaseNotificationFromCaseActivity, {
     onClick: eoc => {
       eoc.onConstructFromSuccess = pack => {
         Operations.notifySuccess(); return Promise.resolve();
@@ -248,6 +248,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       eoc.onExecuteSuccess = pack => {
         Operations.notifySuccess();
         eoc.frame.onClose(pack);
+        Navigator.raiseEntityChanged(pack.entity);
         return Promise.resolve();
       }
       return getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))
@@ -263,7 +264,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     }
   }));
   Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.FreeJump, {
-    icon: "share-square",
+    icon: "share-from-square",
     color: "danger",
     iconColor: "#800080",
     hideOnCanExecute: true,
@@ -271,6 +272,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
       eoc.onExecuteSuccess = async pack => {
         Operations.notifySuccess();
         eoc.frame.onClose(pack);
+        Navigator.raiseEntityChanged(pack.entity);
       }
       return getWorkflowFreeJump(eoc.entity.case.workflow)
         .then(dest => dest && eoc.defaultClick(dest));
@@ -359,13 +361,13 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
   QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
     () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
     workflowActivityMonitorUrl(ctx.lite),
-    { icon: "tachometer-alt", iconColor: "green" }));
+    { icon: "gauge", iconColor: "green" }));
 
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave, alternatives: eoc => [] }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Activate, {
-    contextual: { icon: "heartbeat", iconColor: "red" },
-    contextualFromMany: { icon: "heartbeat", iconColor: "red" },
+    contextual: { icon: "heart-pulse", iconColor: "red" },
+    contextualFromMany: { icon: "heart-pulse", iconColor: "red" },
   }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Deactivate, {
     onClick: eoc => chooseWorkflowExpirationDate([toLite(eoc.entity)]).then(val => !val ? undefined : eoc.defaultClick(val)),
@@ -455,8 +457,8 @@ export function workflowActivityMonitorUrl
   return `~/workflow/activityMonitor/${workflow.id}`;
 }
 
-export function workflowStartUrl(lite: Lite<WorkflowEntity>, entity?: Lite<Entity>) {
-  return "~/workflow/new/" + lite.id + "/CreateNew";
+export function workflowStartUrl(lite: Lite<WorkflowEntity>, strategy?: WorkflowMainEntityStrategy) {
+  return "~/workflow/new/" + lite.id + (strategy == null ? "" : ("/" + strategy));
 }
 
 function registerCustomContexts() {
@@ -646,7 +648,11 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
       return;
 
     return Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
-      .then(pack => { eoc.frame.onClose(); return Operations.notifySuccess(); })
+      .then(pack => {
+        eoc.frame.onClose();
+        Navigator.raiseEntityChanged(pack.entity);
+        return Operations.notifySuccess();
+      })
       .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
   });
 }
@@ -658,9 +664,9 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
 
 }
 
-export const newCaseFindOptions: { [typeName: string]: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => FindOptions | null } = {};
-export function registerNewCaseFindOptions(typeName: string, getFindOptions: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => FindOptions | null) {
-  newCaseFindOptions[typeName] = getFindOptions; 
+export const customSelectByUser: { [typeName: string]: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => Promise<Lite<Entity> | undefined> } = {};
+export function registerCustomSelectByUser<T extends Entity>(type: Type<T>, selectEntity: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => Promise<Lite<T> | undefined>) {
+  customSelectByUser[type.typeName] = selectEntity; 
 }
 
 export function createNewCase(workflowId: number | string, mainEntityStrategy: WorkflowMainEntityStrategy): Promise<CaseEntityPack | undefined> {
@@ -676,8 +682,8 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
       }
 
       const typeName = wf.mainEntityType!.cleanName;
-      const fo = newCaseFindOptions[typeName]?.(toLite(wf), mainEntityStrategy) ?? { queryName: typeName };
-      return Finder.find(fo)
+      const promise = customSelectByUser[typeName]?.(toLite(wf), mainEntityStrategy) ?? Finder.find({ queryName: typeName });
+      return promise
         .then(lite => {
           if (!lite)
             return Promise.resolve(undefined);
@@ -891,8 +897,9 @@ export interface CaseEntityPack {
 }
 
 export interface WorkflowScriptRunnerState {
-  scriptRunnerPeriod: number;
   running: boolean;
+  initialDelayMilliseconds: number | null;
+  scriptRunnerPeriod: number;
   isCancelationRequested: boolean;
   nextPlannedExecution: string;
   queuedItems: number;
@@ -903,8 +910,9 @@ export interface CaseActivityStats {
   caseActivity: Lite<CaseActivityEntity>;
   previousActivity: Lite<CaseActivityEntity>;
   workflowActivity: Lite<WorkflowActivityEntity>;
-  workflowActivityType: WorkflowActivityType;
-  subWorkflow: Lite<WorkflowEntity>;
+  workflowActivityType?: WorkflowActivityType;
+  workflowEventType?: WorkflowEventType;
+  subWorkflow?: Lite<WorkflowEntity>;
   notifications: number;
   startDate: string;
   doneDate?: string;

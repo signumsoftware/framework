@@ -11,7 +11,7 @@
 
 .sidebar {
     border-right: 1px solid #e7e7e7;
-    background-color: white !important;
+    background-color: white;
     z-index: 1;
     overflow: hidden;
     overflow-y: auto;
@@ -81,74 +81,74 @@
         background-color: #dfdfdf;
     }
 
-            .sidebar-inner .nav-item .nav-link.active svg.icon {
-                color: var(--sidebar-accent);
-            }
+    .sidebar-inner .nav-item .nav-link.active svg.icon {
+        filter: brightness(0.7);
+    }
 
-            .sidebar-inner .nav-item .nav-link.active span.icon.count-search {
-                background-color: var(--sidebar-accent);
-            }
+    .sidebar-inner .nav-item .nav-link.active span.icon.count-search {
+        filter: brightness(0.7);
+    }
 
-        .sidebar-inner .nav-item .nav-link span.icon.count-search {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-        }
+    .sidebar-inner .nav-item .nav-link span.icon.count-search {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-        .sidebar-inner .nav-item .nav-link .icon {
-            height: 20px;
-            width: 20px;
-            vertical-align: middle;
-            margin-right: 0px;
-            margin-left: 0;
-        }
+    .sidebar-inner .nav-item .nav-link .icon {
+        height: 20px;
+        width: 20px;
+        vertical-align: middle;
+        margin-right: 0px;
+        margin-left: 0;
+    }
 
-        .sidebar-inner .nav-item .nav-link svg([color='']) {
-            color: var(--sidebar-principal);
-        }
+    .sidebar-inner .nav-item .nav-link svg([color='']) {
+        color: var(--sidebar-principal);
+    }
 
-        .sidebar-inner .nav-item .nav-link:hover {
-            border-color: var(--principal);
-            background-color: #ececec;
-            color: var(--principal);
-        }
+    .sidebar-inner .nav-item .nav-link:hover {
+        border-color: var(--principal);
+        background-color: #ececec;
+        color: var(--principal);
+    }
 
     .sidebar-inner .nav-item-sub-menu .nav-item .nav-link:hover {
         background-color: #c9c9c9;
     }
 
-            .sidebar-inner .nav-item .nav-link:hover svg {
-                color: var(--principal);
-            }
-
-        .sidebar-inner .nav-item .nav-link:active {
-            color: var(--sidebar-accent);
-            border-left-color: var(--sidebar-accent);
-        }
-
-            .sidebar-inner .nav-item .nav-link:active svg {
-                color: var(--sidebar-accent);
-            }
-
-        .sidebar-inner .nav-item .nav-link * {
-            transition: all 200ms;
-        }
-
-        .sidebar-inner .nav-item .nav-link.disabled {
-            opacity: 0.5;
-        }
-
-
-
-    .sidebar-brand-icon, .sidebar-brand-icon img {
-        width: 37px;
-        height: 37px;
-        border-radius: 8px;
-        transition: all 200ms;
-        display: inline-block;
+    .sidebar-inner .nav-item .nav-link:hover svg {
+        filter: brightness(0.5) !important;
     }
 
-.sidebar-nav.wide .nav-item-sub-menu{
+    .sidebar-inner .nav-item .nav-link:active {
+        color: var(--sidebar-accent);
+        border-left-color: var(--sidebar-accent);
+    }
+
+        .sidebar-inner .nav-item .nav-link:active svg {
+            color: var(--sidebar-accent);
+        }
+
+    .sidebar-inner .nav-item .nav-link * {
+        transition: all 200ms;
+    }
+
+    .sidebar-inner .nav-item .nav-link.disabled {
+        opacity: 0.5;
+    }
+
+
+
+.sidebar-brand-icon, .sidebar-brand-icon img {
+    width: 37px;
+    height: 37px;
+    border-radius: 8px;
+    transition: all 200ms;
+    display: inline-block;
+}
+
+.sidebar-nav.wide .nav-item-sub-menu {
     padding-left: 10px;
 }
 
@@ -193,10 +193,10 @@
         flex-direction: row;
     }
 
-    .sidebar-container > .container-fluid.sf-page-container {
-        flex-grow: 1;
-        width: 0; /*Fixes SearchPage scrolling https://gaurav5430.medium.com/css-flex-positioning-gotchas-child-expands-to-more-than-the-width-allowed-by-the-parent-799c37428dd6*/
-    }
+        .sidebar-container > .container-fluid.sf-page-container {
+            flex-grow: 1;
+            width: 0; /*Fixes SearchPage scrolling https://gaurav5430.medium.com/css-flex-positioning-gotchas-child-expands-to-more-than-the-width-allowed-by-the-parent-799c37428dd6*/
+        }
 
     body:not(.rtl) .sidebar {
         border-right: 1px solid #e7e7e7;
@@ -298,15 +298,15 @@
     flex-wrap: nowrap;
 }
 
-.main-toolbar > div > input {
-    border: 0;
-    background-color: transparent;
-    transition: background 200ms
-}
-
-    .main-toolbar > div > input:hover {
-        background: white;
+    .main-toolbar > div > input {
+        border: 0;
+        background-color: transparent;
+        transition: background 200ms
     }
+
+        .main-toolbar > div > input:hover {
+            background: white;
+        }
 
     .main-toolbar .dropdown-menu.show {
         margin-top: 12px;

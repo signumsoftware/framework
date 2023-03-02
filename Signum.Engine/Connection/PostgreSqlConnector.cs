@@ -74,6 +74,8 @@ public class PostgreSqlConnector : Connector
 
     public override bool RequiresRetry => false;
 
+    public override bool SupportsDateDifBig => false;
+
     public override bool AllowsIndexWithWhere(string where) => true;
 
     public override Connector ForDatabase(Maps.DatabaseName? database)
@@ -151,7 +153,7 @@ public class PostgreSqlConnector : Connector
         else
         {
             cmd.Connection = (NpgsqlConnection)Transaction.CurrentConnection!;
-            cmd.Transaction = (NpgsqlTransaction)Transaction.CurrentTransaccion!;
+            cmd.Transaction = (NpgsqlTransaction)Transaction.CurrentTransaction!;
         }
 
         cmd.CommandText = preCommand.Sql;

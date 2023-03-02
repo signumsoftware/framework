@@ -10,19 +10,14 @@ public class NetPropertyToken : QueryToken
     QueryToken parent;
     public override QueryToken? Parent => parent;
 
-
-    internal NetPropertyToken(QueryToken parent, Expression<Func<object>> pi, Func<string> displayName) :
-        this(parent, ReflectionTools.GetPropertyInfo(pi), displayName)
-    {
-
-    }
-
-    internal NetPropertyToken(QueryToken parent, MemberInfo pi, Func<string> displayName)
+    internal NetPropertyToken(QueryToken parent, MemberInfo pi, Func<string> displayName, string? format = null, string ? unit = null)
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
 
         this.DisplayName = displayName ?? throw new ArgumentNullException(nameof(displayName));
         this.MemberInfo = pi ?? throw new ArgumentNullException(nameof(pi));
+        this.Format = format;
+        this.Unit = unit;
     }
 
     public override Type Type
@@ -65,15 +60,10 @@ public class NetPropertyToken : QueryToken
         return SubTokensBase(this.Type, options, GetImplementations());
     }
 
-    public override string? Format
-    {
-        get { return null; }
-    }
 
-    public override string? Unit
-    {
-        get { return null; }
-    }
+    public override string? Format { get; }
+
+    public override string? Unit { get; }
 
     public override Implementations? GetImplementations()
     {

@@ -22,7 +22,7 @@ export default function LoginDropdown(p: {
 
   if (!user)
     return (
-      <LinkContainer to="~/auth/login" className="sf-login">        
+      <LinkContainer to="~/auth/login" className="sf-login">
         <Nav.Link><i className="sf-login-custom-icon"></i><span>{LoginAuthMessage.Login.niceToString()}</span></Nav.Link>
       </LinkContainer>
     );
@@ -44,14 +44,14 @@ export default function LoginDropdown(p: {
 
   return (
     <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center"><i className="sf-login-custom-icon"></i><SmallProfilePhoto user={toLite(user)} /> &nbsp;{p.renderName ? p.renderName(user) : user.userName!}</span>} align="end">
-      {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-edit" fixedWidth className="me-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
+      {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-pen" fixedWidth className="me-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
       {cpv && <LinkContainer to="~/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth className="me-2" /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>
       </LinkContainer>} 
       {extraButtons}
       {(cpv || pv || extraButtons) && <NavDropdown.Divider />}
-      {suv && <LinkContainer to="~/auth/login"><NavDropdown.Item><FontAwesomeIcon icon="user-friends" className="me-2" /> {LoginAuthMessage.SwitchUser.niceToString()}</NavDropdown.Item></LinkContainer>}
-      <NavDropdown.Item id="sf-auth-logout" onClick={() => AuthClient.logout()}><FontAwesomeIcon icon="sign-out-alt" fixedWidth className="me-2"/> {LoginAuthMessage.Logout.niceToString()}</NavDropdown.Item>
+      {suv && <LinkContainer to="~/auth/login"><NavDropdown.Item><FontAwesomeIcon icon="user-group" className="me-2" /> {LoginAuthMessage.SwitchUser.niceToString()}</NavDropdown.Item></LinkContainer>}
+      <NavDropdown.Item id="sf-auth-logout" onClick={() => AuthClient.logout()}><FontAwesomeIcon icon="right-from-bracket" fixedWidth className="me-2"/> {LoginAuthMessage.Logout.niceToString()}</NavDropdown.Item>
     </NavDropdown>
   );
 }

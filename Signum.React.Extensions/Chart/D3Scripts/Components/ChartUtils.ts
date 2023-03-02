@@ -1,6 +1,5 @@
 import { DateTime, DurationUnit, Duration, DateTimeUnit } from "luxon"
 import * as d3 from "d3"
-import * as d3sc from "d3-scale-chromatic";
 import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
@@ -9,6 +8,8 @@ import { tryGetTypeInfo } from "@framework/Reflection";
 import { ChartRequestModel } from "../../Signum.Entities.Chart";
 import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken, FilterConditionOption } from "@framework/FindOptions";
 import { MemoRepository } from "./ReactChart";
+import * as ColorUtils from "../../ColorPalette/ColorUtils"
+import { colorInterpolators } from "../../ColorPalette/ColorUtils"
 
 
 
@@ -187,11 +188,18 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     return date.startOf(unit);
   }
 
+  function withoutEntity(fullKey: string) {
+    if (fullKey.startsWith("Entity."))
+      return fullKey.after("Entity.");
+
+    return fullKey;
+  }
+
   const columnNomalized = normalizeToken(column.token!);  
 
   const matchingFilters = column.token && (completeValues == "FromFilters" || completeValues == "Auto") ?
     (filterOptions.filter(f => !isFilterGroupOptionParsed(f)) as FilterConditionOptionParsed[])
-      .filter(f => f.token && normalizeToken(f.token).normalized.fullKey == columnNomalized.normalized.fullKey) :
+      .filter(f => f.token && withoutEntity(normalizeToken(f.token).normalized.fullKey) == withoutEntity(columnNomalized.normalized.fullKey)) :
     [];
 
   if (completeValues == "FromFilters" && matchingFilters.length == 0)
@@ -419,87 +427,6 @@ export function getCurveByName(curveName: string): d3.CurveFactoryLineOnly | und
   return undefined;
 }
 
-export function getColorInterpolation(interpolationName: string | undefined | null): ((value: number) => string) | undefined {
-  switch (interpolationName) {
-    case "YlGn": return d3sc.interpolateYlGn;
-    case "YlGnBu": return d3sc.interpolateYlGnBu;
-    case "GnBu": return d3sc.interpolateGnBu;
-    case "BuGn": return d3sc.interpolateBuGn;
-    case "PuBuGn": return d3sc.interpolatePuBuGn;
-    case "PuBu": return d3sc.interpolatePuBu;
-    case "BuPu": return d3sc.interpolateBuPu;
-    case "RdPu": return d3sc.interpolateRdPu;
-    case "PuRd": return d3sc.interpolatePuRd;
-    case "OrRd": return d3sc.interpolateOrRd;
-    case "YlOrRd": return d3sc.interpolateYlOrRd;
-    case "YlOrBr": return d3sc.interpolateYlOrBr;
-    case "Purples": return d3sc.interpolatePurples;
-    case "Blues": return d3sc.interpolateBlues;
-    case "Greens": return d3sc.interpolateGreens;
-    case "Oranges": return d3sc.interpolateOranges;
-    case "Reds": return d3sc.interpolateReds;
-    case "Greys": return d3sc.interpolateGreys;
-    case "PuOr": return d3sc.interpolatePuOr;
-    case "BrBG": return d3sc.interpolateBrBG;
-    case "PRGn": return d3sc.interpolatePRGn;
-    case "PiYG": return d3sc.interpolatePiYG;
-    case "RdBu": return d3sc.interpolateRdBu;
-    case "RdGy": return d3sc.interpolateRdGy;
-    case "RdYlBu": return d3sc.interpolateRdYlBu;
-    case "Spectral": return d3sc.interpolateSpectral;
-    case "RdYlGn": return d3sc.interpolateRdYlGn;
-  }
-
-  return undefined;
-}
-
-export function getColorScheme(schemeName: string | null | undefined, k: number | undefined = 11): ReadonlyArray<string> | undefined {
-  switch (schemeName) {
-    case "category10": return d3.schemeCategory10;
-    case "accent": return d3sc.schemeAccent;
-    case "dark2": return d3sc.schemeDark2;
-    case "paired": return d3sc.schemePaired;
-    case "pastel1": return d3sc.schemePastel1;
-    case "pastel2": return d3sc.schemePastel2;
-    case "set1": return d3sc.schemeSet1;
-    case "set2": return d3sc.schemeSet2;
-    case "set3": return d3sc.schemeSet3;
-    case "BrBG[K]": return d3sc.schemeBrBG[k];
-    case "PRGn[K]": return d3sc.schemePRGn[k];
-    case "PiYG[K]": return d3sc.schemePiYG[k];
-    case "PuOr[K]": return d3sc.schemePuOr[k];
-    case "RdBu[K]": return d3sc.schemeRdBu[k];
-    case "RdGy[K]": return d3sc.schemeRdGy[k];
-    case "RdYlBu[K]": return d3sc.schemeRdYlBu[k];
-    case "RdYlGn[K]": return d3sc.schemeRdYlGn[k];
-    case "Spectral[K]": return d3sc.schemeSpectral[k];
-    case "Blues[K]": return d3sc.schemeBlues[k];
-    case "Greys[K]": return d3sc.schemeGreys[k];
-    case "Oranges[K]": return d3sc.schemeOranges[k];
-    case "Purples[K]": return d3sc.schemePurples[k];
-    case "Reds[K]": return d3sc.schemeReds[k];
-    case "BuGn[K]": return d3sc.schemeBuGn[k];
-    case "BuPu[K]": return d3sc.schemeBuPu[k];
-    case "OrRd[K]": return d3sc.schemeOrRd[k];
-    case "PuBuGn[K]": return d3sc.schemePuBuGn[k];
-    case "PuBu[K]": return d3sc.schemePuBu[k];
-    case "PuRd[K]": return d3sc.schemePuRd[k];
-    case "RdPu[K]": return d3sc.schemeRdPu[k];
-    case "YlGnBu[K]": return d3sc.schemeYlGnBu[k];
-    case "YlGn[K]": return d3sc.schemeYlGn[k];
-    case "YlOrBr[K]": return d3sc.schemeYlOrBr[k];
-    case "YlOrRd[K]": return d3sc.schemeYlOrRd[k];
-  }
-
-  return undefined;
-}
-
-interface CachedColorOrdinal {
-  category: string;
-  categorySteps: number;
-  scale: d3.ScaleOrdinal<string, string>;
-}
-
 export function colorCategory(parameters: { [name: string]: string }, domain: string[], memo: MemoRepository, memoKey?: string, deps?: []): d3.ScaleOrdinal<string, string> {
 
   var category = parameters["ColorCategory"];
@@ -507,11 +434,16 @@ export function colorCategory(parameters: { [name: string]: string }, domain: st
 
   return memo.memo<d3.ScaleOrdinal<string, string>>(memoKey ?? "colorCategory", [category, categorySteps, ...(deps ?? [])], () => {
 
-    var scheme = getColorScheme(category, categorySteps);
+    var scheme = ColorUtils.colorSchemes[category];
     var scale = d3.scaleOrdinal(scheme);
     domain.forEach(a => scale(a));
     return scale;
   });
+}
+
+export function getColorInterpolation(interpolationName: string | undefined | null): ((value: number) => string) | undefined {
+
+  return ColorUtils.getColorInterpolation(interpolationName);
 }
 
 

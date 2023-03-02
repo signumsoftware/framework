@@ -12,10 +12,10 @@ public static class SchedulerServer
 
         lifetime.ApplicationStopping.Register(() =>
         {
-            if (SchedulerLogic.Running)
-                SchedulerLogic.StopScheduledTasks();
+            if (ScheduleTaskRunner.Running)
+                ScheduleTaskRunner.StopScheduledTasks();
 
-            SchedulerLogic.StopRunningTasks();
+            ScheduleTaskRunner.StopRunningTasks();
         });
     }
 }

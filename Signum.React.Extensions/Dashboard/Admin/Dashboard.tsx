@@ -13,11 +13,11 @@ import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
-import { SearchValueLine } from '../../../Signum.React/Scripts/Search';
-import { withClassName } from '../../Dynamic/View/HtmlAttributesExpression';
-import { classes } from '../../../Signum.React/Scripts/Globals';
-import { OperationButton } from '../../../Signum.React/Scripts/Operations/EntityOperations';
-import { EntityOperationContext } from '../../../Signum.React/Scripts/Operations';
+import { SearchValueLine } from '@framework/Search';
+import * as Navigator from '@framework/Navigator';
+import { classes } from '@framework/Globals';
+import { OperationButton } from '@framework/Operations/EntityOperations';
+import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';
 
@@ -64,7 +64,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   var colors = ["#DFFF00", "#FFBF00", "#FF7F50", "#DE3163", "#9FE2BF", "#40E0D0", "#6495ED", "#CCCCFF"]
 
   function renderPart(tc: TypeContext<PanelPartEmbedded>) {
-    const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "ExtraSmall", placeholderLabels: true });
+    const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "xs", placeholderLabels: true });
 
     var icon = parseIcon(tc.value.iconName);
 
@@ -79,33 +79,33 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
     const title = (
       <div>
         <div className="d-flex">
-          {icon && <div className="mx-2"><FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px", marginTop: "17px" }} /> </div>}
+          {icon && <div className="mx-2">
+            <FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag}
+              onClick={() => Navigator.view(tc.value, { propertyRoute: tc.propertyRoute }).then(a => {
+                if (a) {
+                  tc.value.iconName = a.iconName;
+                  tc.value.iconColor = a.iconColor;
+                  tc.value.useIconColorForTitle = a.useIconColorForTitle;
+                  tc.value.modified = true;
+                  forceUpdate();
+                }
+              })} />
+          </div>}
           <div style={{ flexGrow: 1 }} className="me-2">
 
+            <ValueLine ctx={tcs.subCtx(pp => pp.title)} label={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag} />
             <div className="row">
-              <div className="col-sm-8">
-                < ValueLine ctx={tcs.subCtx(pp => pp.title)} labelText={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag} />
+              <div className="col-sm-6">
+                <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
+
               </div>
-              <div className="col-sm-4">
+              <div className="col-sm-6">
                 <ValueLine ctx={tcs.subCtx(pp => pp.interactionGroup)} valueHtmlAttributes={avoidDrag}
                   onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
               </div>
             </div>
 
-            <div className="row">
-              <div className="col-sm-3">
-                <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} inputAttrs={avoidDrag} onChange={() => forceUpdate()} />
-                </div>
-              <div className="col-sm-3">
-                <IconTypeaheadLine ctx={tcs.subCtx(t => t.iconName)} inputAttrs={avoidDrag} onChange={() => forceUpdate()} />
-              </div>
-              <div className="col-sm-3">
-                <ColorTypeaheadLine ctx={tcs.subCtx(t => t.iconColor)} inputAttrs={avoidDrag} onChange={() => forceUpdate()} />
-              </div>
-              <div className="col-sm-3">
-                <ValueLine ctx={tcs.subCtx(t => t.useIconColorForTitle)} valueHtmlAttributes={avoidDrag} onChange={() => forceUpdate()} />
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           </div>
         </Tab>
         <Tab title={ctxBasic.niceName(a => a.tokenEquivalencesGroups)} eventKey="equivalences">
-          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "ExtraSmall" })} avoidFieldSet getComponent={(ctxGr: TypeContext<TokenEquivalenceGroupEntity>) => 
+          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "xs" })} avoidFieldSet getComponent={(ctxGr: TypeContext<TokenEquivalenceGroupEntity>) => 
             <div>
               <ValueLine ctx={ctxGr.subCtx(pp => pp.interactionGroup)}
                 onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
@@ -206,5 +206,5 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
 export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }) {
   const forceUpate = useForceUpdate();
-  return <ValueLine ctx={p.ctx} labelText={<span className={classes("fw-bold", p.ctx.value ? "text-success" : "text-danger")}> {p.ctx.niceName()}</span>} inlineCheckbox="block" onChange={forceUpate} />
+  return <ValueLine ctx={p.ctx} label={<span className={classes("fw-bold", p.ctx.value ? "text-success" : "text-danger")}> {p.ctx.niceName()}</span>} inlineCheckbox="block" onChange={forceUpate} />
 }

@@ -109,7 +109,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                 <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
                   className="sf-line-button sf-remove"
                   onClick={handleDeleteAllFilters}>
-                  <FontAwesomeIcon icon="times" />
+                  <FontAwesomeIcon icon="xmark" />
                 </a>}</th>
               <th>{SearchMessage.Field.niceToString()}</th>
               <th>{SearchMessage.Operation.niceToString()}</th>
@@ -281,7 +281,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
           <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
             className="sf-line-button sf-remove"
             onClick={handleDeleteFilter}>
-            <FontAwesomeIcon icon="times" />
+            <FontAwesomeIcon icon="xmark" />
           </a>}
       </td>
       <td colSpan={3 + (p.showPinnedFiltersOptions ? 1 : 0) + (p.showDashboardBehaviour ? 1 : 0)} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
@@ -289,7 +289,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
           <div className="row gx-1">
             <div className="col-auto">
               <a href="#" onClick={handleExpandCollapse} className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
-                <FontAwesomeIcon icon={fg.expanded ? ["far", "minus-square"] : ["far", "plus-square"]} className="me-2" />
+                <FontAwesomeIcon icon={fg.expanded ? ["far", "square-minus"] : ["far", "square-plus"]} className="me-2" />
               </a>
             </div>
             <div className="col-auto">
@@ -412,7 +412,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const readOnly = p.readOnly || f.frozen;
 
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
     return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange()} />
 
@@ -486,16 +486,20 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
         if (f.value) {
           const type = newToken.type.name as "DateOnly" | "DateTime";
+
+          function convertDateToNewFormat(val: string) {
+            var date = DateTime.fromISO(val);
+            if (!date.isValid)
+              return val;
+
+            const trimmed = trimDateToFormat(date, type, newToken!.format);
+            return type == "DateOnly" ? trimmed.toISODate() : trimmed.toISO();
+          }
+
           if (f.operation && isList(f.operation)) {
-
-            f.value = (f.value as string[]).map(v => {
-              const date = trimDateToFormat(DateTime.fromISO(v), type, newToken.format);
-              return type == "DateOnly" ? date.toISODate() : date.toISO();
-            });
-
+            f.value = (f.value as string[]).map(v => convertDateToNewFormat(v));
           } else {
-            const date = trimDateToFormat(DateTime.fromISO(f.value), type, newToken.format);
-            f.value = type == "DateOnly" ? date.toISODate() : date.toISO();
+            f.value = convertDateToNewFormat(f.value);
           }
         }
       }
@@ -537,7 +541,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
             <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
               className="sf-line-button sf-remove"
               onClick={handleDeleteFilter}>
-              <FontAwesomeIcon icon="times" />
+              <FontAwesomeIcon icon="xmark" />
             </a>}
         </td>
         <td>
@@ -600,7 +604,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
     if (isList(f.operation!))
       return <MultiValue values={f.value} onRenderItem={ctx => createFilterValueControl(ctx, f.token!, handleValueChange)} readOnly={readOnly} onChange={handleValueChange} />;
 
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
     return createFilterValueControl(ctx, f.token!, handleValueChange);
   }
@@ -691,7 +695,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
     <Dropdown>
       <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "light"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
         title={StyleContext.default.titleLabels ? "Behaviour of the filter when used inside of a Dashboard" : undefined}>
-        {<FontAwesomeIcon icon="tachometer-alt" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
+        {<FontAwesomeIcon icon="gauge" className={classes("icon", p.filter.dashboardBehaviour ? "text-light" : "text-info")} />}{p.filter.dashboardBehaviour ? " " + DashboardBehaviour.niceToString(p.filter.dashboardBehaviour) : ""}
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
@@ -714,7 +718,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
   );
 }
 
-export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, labelText?: string, forceNullable?: boolean): React.ReactElement<any> {
+export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, label?: string, forceNullable?: boolean): React.ReactElement<any> {
 
   var tokenType = token.type;
   if (forceNullable)
@@ -723,19 +727,19 @@ export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToke
   switch (token.filterType) {
     case "Lite":
       if (tokenType.name == IsByAll || getTypeInfos(tokenType).some(ti => !ti.isLowPopulation))
-        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} labelText={labelText} />;
+        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} />;
       else
-        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} labelText={labelText} />
+        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} />
     case "Embedded":
-      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} labelText={labelText} />;
+      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} label={label} />;
     case "Enum":
       const ti = tryGetTypeInfos(tokenType).single();
       if (!ti)
         throw new Error(`EnumType ${tokenType.name} not found`);
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} type={tokenType} formatText={token.format} unitText={token.unit} optionItems={members} onChange={handleValueChange} labelText={labelText} />;
+      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} optionItems={members} onChange={handleValueChange} label={label} />;
     default:
-      return <ValueLine ctx={ctx} type={tokenType} formatText={token.format} unitText={token.unit} onChange={handleValueChange} labelText={labelText} />;
+      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} onChange={handleValueChange} label={label} />;
   }
 }
 
@@ -775,7 +779,7 @@ export function MultiValue(p: MultiValueProps) {
                   <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
                     className="sf-line-button sf-remove"
                     onClick={e => handleDeleteValue(e, i)}>
-                    <FontAwesomeIcon icon="times" />
+                    <FontAwesomeIcon icon="xmark" />
                   </a>}
               </td>
               <td>
@@ -783,7 +787,7 @@ export function MultiValue(p: MultiValueProps) {
                   p.onRenderItem(new TypeContext<any>(undefined,
                     {
                       formGroupStyle: "None",
-                      formSize: "ExtraSmall",
+                      formSize: "xs",
                       readOnly: p.readOnly
                     }, undefined as any, new Binding<any>(p.values, i)))
                 }

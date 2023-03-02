@@ -26,6 +26,12 @@
     }
 }
 
+@media (min-width: 1480px) {
+    .modal-xl {
+        min-width: 1400px;
+    }
+}
+
 @media (min-width: 1820px) {
     .modal-xl {
         min-width: 1780px;

@@ -8,13 +8,13 @@ namespace Signum.Entities.UserAssets;
 
 public static class FilterValueConverter
 {
-    public static Dictionary<FilterType, List<IFilterValueConverter>> SpecificConverters = new Dictionary<FilterType, List<IFilterValueConverter>>()
-        {
-            { FilterType.DateTime, new List<IFilterValueConverter>{ new CurrentEntityConverter(), new SmartDateTimeFilterValueConverter() } },
-            { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter()} },
-            { FilterType.String, new List<IFilterValueConverter>{ new CurrentEntityConverter(), new StringFilterValueConverter() } },
-
-        };
+    public static List<IFilterValueConverter> SpecificConverters = new List<IFilterValueConverter>()
+    {
+        new CurrentEntityConverter(), 
+        new CurrentUserConverter(), 
+        new SmartDateTimeFilterValueConverter(),
+        new LiteFilterValueConverter(),
+    };
 
     public static string? ToString(object? value, Type type)
     {
@@ -36,18 +36,11 @@ public static class FilterValueConverter
 
     static Result<string?> TryToStringElement(object? value, Type type)
     {
-        FilterType filterType = QueryUtils.GetFilterType(type);
-
-        var converters = SpecificConverters.TryGetC(filterType);
-
-        if (converters != null)
+        foreach (var fvc in SpecificConverters)
         {
-            foreach (var fvc in converters)
-            {
-                var r = fvc.TryGetExpression(value, type);
-                if (r != null)
-                    return r;
-            }
+            var r = fvc.TryGetExpression(value, type);
+            if (r != null)
+                return r;
         }
 
         string? result =
@@ -90,33 +83,25 @@ public static class FilterValueConverter
 
     private static Result<object?> TryParseInternal(string? expression, Type targetType)
     {
-        FilterType filterType = QueryUtils.GetFilterType(targetType);
-
-        List<IFilterValueConverter>? converters = SpecificConverters.TryGetC(filterType);
-
-        if (converters != null)
+        foreach (var fvc in SpecificConverters)
         {
-            foreach (var fvc in converters)
+            var res = fvc.TryParseExpression(expression, targetType);
+            if (res != null)
             {
-                var res = fvc.TryParseExpression(expression, targetType);
-                if (res != null)
+                if (res is Result<object?>.Success s)
                 {
-                    if (res is Result<object?>.Success s)
+                    try
                     {
-                        try
-                        {
-                            var v = ReflectionTools.ChangeType(s.Value, targetType);
-                            return new Result<object?>.Success(v);
-                        }
-                        catch (Exception e)
-                        {
-                            return new Result<object?>.Error(e.Message);
-                        }
+                        var v = ReflectionTools.ChangeType(s.Value, targetType);
+                        return new Result<object?>.Success(v);
                     }
-                    else
-                        return res;
-
+                    catch (Exception e)
+                    {
+                        return new Result<object?>.Error(e.Message);
+                    }
                 }
+                else
+                    return res;
 
             }
         }
@@ -149,31 +134,24 @@ public static class FilterValueConverter
     }
 
     private static Result<Type> IsValidExpression(string? expression, Type targetType, Type? currentEntityType)
-    {
-        FilterType filterType = QueryUtils.GetFilterType(targetType);
-
-        List<IFilterValueConverter>? converters = SpecificConverters.TryGetC(filterType);
-
-        if (converters != null)
+    {   
+        foreach (var fvc in SpecificConverters)
         {
-            foreach (var fvc in converters)
+            var res = fvc.IsValidExpression(expression, targetType, currentEntityType);
+            if (res != null)
             {
-                var res = fvc.IsValidExpression(expression, targetType, currentEntityType);
-                if (res != null)
+                if (res is Result<Type>.Success s)
                 {
-                    if (res is Result<Type>.Success s)
-                    {
-                        var v = ReflectionTools.CanChangeType(s.Value, targetType);
-                        if (v)
-                            return new Result<Type>.Success(s.Value);
-                        else
-                            return new Result<Type>.Error($"Impossible to convert from ${s.Value} to ${targetType}");
-
-                    }
+                    var v = ReflectionTools.CanChangeType(s.Value, targetType);
+                    if (v)
+                        return new Result<Type>.Success(s.Value);
                     else
-                        return res;
+                        return new Result<Type>.Error($"Impossible to convert from ${s.Value} to ${targetType}");
 
                 }
+                else
+                    return res;
+
             }
         }
 

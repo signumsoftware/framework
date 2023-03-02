@@ -12,6 +12,11 @@ import { downloadFile } from '../../../../Framework/Signum.React.Extensions/File
 import * as Services from '@framework/Services'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { WhatsNewEntity, WhatsNewMessage } from '../Signum.Entities.WhatsNew';
+import { HtmlViewer } from './WhatsNewHtmlEditor';
+import { Link } from 'react-router-dom';
+import * as Navigator from '@framework/Navigator';
+import * as WhatsNewClient from '../WhatsNewClient';
+import MessageModal from '@framework/Modals/MessageModal';
 
 export default function AllNews() {
   const news: WhatsNewFull[] | undefined = useAPI(() => API.getAllNews().then(w => w), []);
@@ -21,7 +26,7 @@ export default function AllNews() {
 
   return (
     <div>
-      <h2>{WhatsNewMessage.YourNews.niceToString()} {news && <span className="notify-badge" style={{ marginTop: "6px", marginLeft: "3px", fontSize: "12px" }}>{news.length}</span>}
+      <h2>{WhatsNewMessage.YourNews.niceToString()} {news && <span className="sf-news-notify-badge" style={{ marginTop: "6px", marginLeft: "3px", fontSize: "12px" }}>{news.length}</span>}
       </h2>
         <div className="mt-3">
             <div style={{ display: "flex", flexFlow: "wrap" }}>
@@ -38,8 +43,24 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewFull}) {
 
   const whatsnew = p.news;
 
-  function handleClickNew(news: WhatsNewFull) {
+  function handleClickPreviewPicture() {
     AppContext.history.push("~/newspage/" + p.news.whatsNew.id);
+  }
+
+
+  //ignoring open tags other than img
+  function HTMLSubstring(text: string ) {
+    var substring = text.substring(0, 300);
+    if (substring.contains("<img")) {
+      var fullImageTag = substring.match(/(<img[^>] *)(\/>)/gmi);
+      if (fullImageTag != undefined && fullImageTag.length >= 1) {
+        return substring + "...";
+      }
+      else {
+        return substring.substring(0, substring.indexOf("<img")) + "...";
+      }
+    }
+    return substring + "...";
   }
 
   if (whatsnew == undefined)
@@ -48,12 +69,15 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewFull}) {
   return (
     <div key={whatsnew.whatsNew.id} style={{ position: "relative", cursor: "pointer", margin: "10px", }}>
       <div className={"card news-shadow"} style={{ width: "500px" }} key={whatsnew.whatsNew.id}>
-        {whatsnew.previewPicture != undefined && <img src={AppContext.toAbsoluteUrl("~/api/whatsnew/previewPicture/" + whatsnew.whatsNew.id)} style={{ width: "100%", height: "auto" }} /> }
+        {whatsnew.previewPicture != undefined && <div className="preview-picture-card-box"><img onClick={() => { handleClickPreviewPicture() }} src={AppContext.toAbsoluteUrl("~/api/whatsnew/previewPicture/" + whatsnew.whatsNew.id)} style={{ width: "100%", height: "auto" }} /></div>}
         <div className={"card-body pt-2"}>
           <h5 className={"card-title"}>{whatsnew.title}</h5>
-          <small className={"card-text"}>{whatsnew.description.substring(0, 100)}...</small>
+          <small><HtmlViewer text={HTMLSubstring(whatsnew.description)} /></small>
           <br />
-          <a href="" onClick={() => handleClickNew(whatsnew)}>{WhatsNewMessage.ReadFurther.niceToString()}</a>
+          <div style={{ display: "flex", justifyContent: "space-between"}}>
+            <Link to={"~/newspage/" + p.news.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>
+            {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "#d50a30" }}> {(p.news.status == "Draft") ? p.news.status : undefined}</small>}
+          </div>
           {(whatsnew.attachments > 0) && <Attachments news={whatsnew} />
           }
         </div>
@@ -66,7 +90,7 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewFull}) {
 export function NewsBadge(p: { news: WhatsNewFull }) {
   if (!p.news.read)
     return (
-      <span className="notify-badge" style={{ right: "0", top: "0" }}>NEW</span>
+      <span className="sf-news-notify-badge" style={{ right: "0", top: "0" }}>NEW</span>
     );
   else {
     return (<div></div>);

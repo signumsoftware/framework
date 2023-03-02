@@ -3,6 +3,7 @@ using Signum.Utilities.Reflection;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Engine.Json;
+using Signum.Entities.Dashboard;
 
 namespace Signum.Engine.Processes;
 
@@ -53,6 +54,18 @@ public static class PackageLogic
             
             
             QueryLogic.Expressions.Register((PackageEntity p) => p.Lines(), ProcessMessage.Lines);
+
+            if(packages || packageOperations)
+            {
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += arg =>
+                {
+                    var typeEntity = ((TypeEntity)arg);
+
+                    var targetLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Target.GetType().ToTypeEntity().Is(typeEntity)));
+                    var resultLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Result!.Entity.GetType().ToTypeEntity().Is(typeEntity)));
+                    return SqlPreCommand.Combine(Spacing.Simple, targetLines, resultLines);
+                };
+            }
 
             if (packages)
             {
@@ -113,6 +126,20 @@ public static class PackageLogic
 
                 ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages<PackageOperationEntity>;
+
+                sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += arg =>
+                {
+                    var operation = (OperationSymbol)arg;
+
+                    if (!Administrator.ExistsTable<PackageOperationEntity>() || !Database.Query<PackageOperationEntity>().Any(a => a.Operation.Is(operation)))
+                        return null;
+
+                    var processExceptionLine = Administrator.UnsafeDeletePreCommand(Database.Query<ProcessExceptionLineEntity>().Where(pel => ((PackageOperationEntity)pel.Process.Entity.Data!).Operation.Is(operation)));
+                    var process = Administrator.UnsafeDeletePreCommand(Database.Query<ProcessEntity>().Where(p => ((PackageOperationEntity)p.Data!).Operation.Is(operation)));
+                    var packageLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => ((PackageOperationEntity)pl.Package.Entity).Operation.Is(operation)));
+                    var packageOperation = Administrator.UnsafeDeletePreCommand(Database.Query<PackageOperationEntity>().Where(po => po.Operation.Is(operation)));
+                    return SqlPreCommand.Combine(Spacing.Simple, processExceptionLine, process, packageLines, packageOperation);
+                };
             }
 
         }
@@ -268,24 +295,6 @@ public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IEnt
             line.FinishTime = Clock.Now;
             line.Save();
         });
-    }
-}
-
-public class PackageSave<T> : IProcessAlgorithm where T : class, IEntity
-{
-    public virtual void Execute(ExecutingProcess executingProcess)
-    {
-        PackageEntity package = (PackageEntity)executingProcess.Data!;
-
-        var args = package.GetOperationArgs();
-
-        using (OperationLogic.AllowSave<T>())
-            executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
-            {
-                ((T)(object)line.Target).Save();
-                line.FinishTime = Clock.Now;
-                line.Save();
-            });
     }
 }
    

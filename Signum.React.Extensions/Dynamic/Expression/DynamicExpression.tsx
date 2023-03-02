@@ -112,7 +112,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
-        type={{ name: typeName }} labelText="Example Entity" />
+        type={{ name: typeName }} label="Example Entity" />
     );
   }
 

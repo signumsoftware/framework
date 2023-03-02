@@ -7,13 +7,13 @@ public class DiffLogMixin : MixinEntity
     protected DiffLogMixin(ModifiableEntity mainEntity, MixinEntity next)
         : base(mainEntity, next)
     {
-        this.RebindEvents();
+        this.BindParent();
     }
 
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded InitialState { get; set; } = new BigStringEmbedded();
 
-    [NotifyChildProperty]
+    [BindParent]
     public BigStringEmbedded FinalState { get; set; } = new BigStringEmbedded();
 
     public bool Cleaned { get; set; }

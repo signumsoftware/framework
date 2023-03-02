@@ -6,11 +6,11 @@ import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Entity, getToString, Lite, liteKey } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'
 import { translated  } from '../Translation/TranslatedInstanceTools'
-import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow } from '@framework/FindOptions'
+import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserQueryEntity, UserQueryPermission, UserQueryMessage,
@@ -22,7 +22,12 @@ import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import ContextMenu from '@framework/SearchControl/ContextMenu';
 import { ContextualItemsContext, MenuItemBlock, onContextualItems } from '@framework/SearchControl/ContextualItems';
-import { SearchControlLoaded } from '@framework/Search';
+import SearchControlLoaded, { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
+import SelectorModal from '@framework/SelectorModal';
+import { DynamicTypeConditionSymbolEntity } from '../Dynamic/Signum.Entities.Dynamic';
+import { Dic } from '@framework/Globals';
+import { ChartRequestModel, UserChartEntity } from '../Chart/Signum.Entities.Chart';
+import { ChartRow, hasAggregates } from '../Chart/ChartClient';
 
 export function start(options: { routes: JSX.Element[] }) {
   UserAssetsClient.start({ routes: options.routes });
@@ -50,7 +55,7 @@ export function start(options: { routes: JSX.Element[] }) {
     return promise.then(uqs =>
       uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
         window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
-      }, { icon: ["far", "list-alt"], iconColor: "dodgerblue" })));
+      }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue" })));
   });
 
   QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(),
@@ -77,12 +82,15 @@ export function start(options: { routes: JSX.Element[] }) {
   Constructor.registerConstructor<QueryColumnEmbedded>(QueryColumnEmbedded, () => QueryColumnEmbedded.New({ token: QueryTokenEmbedded.New() }));
 
   Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
+
+  SearchControlLoaded.onDrilldown = async (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => {
+    return onDrilldownSearchControl(scl, row, options);
+  }
 }
 
 export function userQueryUrl(uq: Lite<UserQueryEntity>): any {
   return AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}`)
 }
-
 
 function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
   if (!(cic.container instanceof SearchControlLoaded))
@@ -92,8 +100,9 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
     return undefined;
 
   const resFO = cic.container.state.resultFindOptions;
+  const resTable = cic.container.state.resultTable;
 
-  if (resFO == null)
+  if (resFO == null || resTable == null)
     return undefined;
 
   if (cic.container.state.selectedRows?.length != 1)
@@ -107,8 +116,8 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
       return ({
         header: UserQueryEntity.nicePluralName(),
         menuItems: uqs.map(uq =>
-          <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, cic)}>
-            <FontAwesomeIcon icon={["far", "list-alt"]} className="icon" color="dodgerblue" />
+          <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, resTable, cic)}>
+            <FontAwesomeIcon icon={["far", "rectangle-list"]} className="icon" color="dodgerblue" />
             {getToString(uq)}
           </Dropdown.Item>
         )
@@ -116,20 +125,184 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
     });
 }
 
-function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParsed, cic: ContextualItemsContext<Entity>): void {
+function handleGroupMenuClick(uq: Lite<UserQueryEntity>, resFo: FindOptionsParsed, resTable: ResultTable, cic: ContextualItemsContext<Entity>): void {
   var sc = cic.container as SearchControlLoaded;
 
   Navigator.API.fetch(uq)
     .then(uqe => Converter.toFindOptions(uqe, undefined)
       .then(fo => {
 
-        var filters = SearchControlLoaded.getGroupFilters(sc.state.selectedRows!.single(), resFo);
+        var filters = SearchControlLoaded.getGroupFilters(sc.state.selectedRows!.single(), resTable, resFo);
 
         fo.filterOptions = [...filters, ...fo.filterOptions ?? []];
 
         return Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: uq } } })
           .then(() => cic.markRows({}));
       }));
+}
+
+export async function onDrilldownSearchControl(scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions): Promise<boolean | undefined> {
+  var uq = scl.getCurrentUserQuery?.();
+  if (uq == null)
+    return false;
+
+  await Navigator.API.fetchAndRemember(uq);
+
+  if (uq.entity!.customDrilldowns.length == 0 || scl.state.resultFindOptions?.groupResults != uq.entity!.groupResults)
+    return false;
+
+  const filters = scl.state.resultFindOptions && SearchControlLoaded.getGroupFilters(row, scl.state.resultTable!, scl.state.resultFindOptions);
+
+  const val = row.entity ?
+    await onDrilldownEntity(uq.entity!.customDrilldowns, row.entity) :
+    await onDrilldownGroup(uq.entity!.customDrilldowns, filters);
+
+  if (!val)
+    return undefined;
+
+  return drilldownToUserQuery(val.fo, val.uq, options);
+}
+
+export async function onDrilldownUserChart(cr: ChartRequestModel, row: ChartRow, uc?: Lite<UserChartEntity>, options?: OnDrilldownOptions): Promise<boolean | undefined> {
+  if (uc == null)
+    return false;
+
+  await Navigator.API.fetchAndRemember(uc);
+
+  if (uc.entity!.customDrilldowns.length == 0 || hasAggregates(uc.entity!) != hasAggregates(cr))
+    return false;
+
+  debugger;
+  const fo = extractFindOptions(cr, row);
+  const entity = row.entity ?? (hasAggregates(cr) ? undefined : fo.filterOptions?.singleOrNull(f => f?.token == "Entity")?.value);
+  const filters = fo.filterOptions?.notNull();
+
+  const val = entity ?
+    await onDrilldownEntity(uc.entity!.customDrilldowns, entity) :
+    await onDrilldownGroup(uc.entity!.customDrilldowns, filters);
+
+  if (!val)
+    return undefined;
+
+  return drilldownToUserQuery(val.fo, val.uq, options);
+}
+
+export function onDrilldownEntity(items: MList<Lite<Entity>>, entity: Lite<Entity>) {
+  const elements = items.map(a => a.element);
+  return SelectorModal.chooseElement(elements, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
+    .then(lite => {
+      if (!lite || !UserQueryEntity.isLite(lite))
+        return undefined;
+
+      return Navigator.API.fetch(lite)
+        .then(uq => Converter.toFindOptions(uq, entity)
+          .then(fo => ({ fo, uq })));
+    });
+}
+
+export function onDrilldownGroup(items: MList<Lite<Entity>>, filters?: FilterOption[]) {
+  const elements = items.map(a => a.element);
+  return SelectorModal.chooseElement(elements, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
+    .then(lite => {
+      if (!lite || !UserQueryEntity.isLite(lite))
+        return undefined;
+
+      return Navigator.API.fetch(lite)
+        .then(uq => Converter.toFindOptions(uq, undefined)
+          .then(fo => {
+            if (filters)
+              fo.filterOptions = [...filters, ...fo.filterOptions ?? []];
+
+            return ({ fo, uq });
+          }));
+    });
+}
+
+export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity, options?: OnDrilldownOptions) {
+  const openInNewTab = options?.openInNewTab;
+  const showInPlace = options?.showInPlace;
+  const onReload = options?.onReload;
+
+  const qd = await Finder.getQueryDescription(fo.queryName);
+  const fop = await Finder.parseFilterOptions(fo.filterOptions ?? [], fo.groupResults ?? false, qd);
+
+  const filters = fop.map(f => {
+    let f2 = withoutPinned(f);
+    if (f2 == null)
+      return null;
+
+    return f2;
+  }).notNull();
+
+  fo.filterOptions = Finder.toFilterOptions(filters);
+
+  if (openInNewTab || showInPlace) {
+    const url = Finder.findOptionsPath(fo, { userQuery: liteKey(toLite(uq)) });
+
+    if (showInPlace && !openInNewTab)
+      AppContext.history.push(url);
+    else
+      window.open(url);
+
+    return Promise.resolve(true);
+  }
+
+  return Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: toLite(uq) } } })
+    .then(() => {
+      onReload?.();
+      return true;
+    });
+}
+
+export function extractFindOptions(cr: ChartRequestModel, r: ChartRow) {
+
+  const filters = cr.filterOptions.map(f => {
+    let f2 = withoutPinned(f);
+    if (f2 == null)
+      return null;
+    return withoutAggregate(f2);
+  }).notNull();
+
+  const columns: ColumnOption[] = [];
+
+  cr.columns.map((a, i) => {
+
+    const qte = a.element.token;
+
+    if (qte?.token && !hasAggregate(qte!.token!) && r.hasOwnProperty("c" + i)) {
+      filters.push({
+        token: qte!.token!,
+        operation: "EqualTo",
+        value: (r as any)["c" + i],
+        frozen: false
+      } as FilterOptionParsed);
+    }
+
+    if (qte?.token && qte.token.parent != undefined) //Avoid Count and simple Columns that are already added
+    {
+      var t = qte.token;
+      if (t.queryTokenType == "Aggregate") {
+        columns.push({
+          token: t.parent!.fullKey,
+          summaryToken: t.fullKey
+        });
+      } else {
+        columns.push({
+          token: t.fullKey,
+        });
+      }
+    }
+  });
+
+  var fo: FindOptions = {
+    queryName: cr.queryKey,
+    filterOptions: Finder.toFilterOptions(filters),
+    includeDefaultFilters: false,
+    columnOptions: columns,
+    columnOptionsMode: "ReplaceOrAdd",
+  };
+
+  return fo;
 }
 
 export module Converter {
@@ -219,5 +392,9 @@ declare module '@framework/SearchControl/SearchControlLoaded' {
 
   export interface ShowBarExtensionOption {
     showUserQuery?: boolean;
+  }
+
+  export interface SearchControlLoaded {
+    getCurrentUserQuery?: () => Lite<UserQueryEntity> | undefined;
   }
 }

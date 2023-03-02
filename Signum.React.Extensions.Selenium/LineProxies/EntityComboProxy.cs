@@ -19,6 +19,12 @@ public class EntityComboProxy : EntityBaseProxy
         get { return this.Element.FindElement(By.CssSelector("select")).SelectElement(); }
     }
 
+    public IWebElement DropdownListInput
+    {
+        get { return this.Element.FindElement(By.CssSelector(".rw-dropdown-list-input")); }
+    }
+
+
     public Lite<IEntity>? LiteValue
     {
         get

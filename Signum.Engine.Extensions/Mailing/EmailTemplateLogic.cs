@@ -90,7 +90,8 @@ public static class EmailTemplateLogic
                     Entity = t,
                     t.Id,
                     t.Name,
-                    t.IsBodyHtml
+                    t.Query,
+                    t.Model,
                 });       
 
             EmailTemplatesLazy = sb.GlobalLazy(() => 
@@ -337,6 +338,23 @@ public static class EmailTemplateLogic
 
             QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
+            SqlPreCommand DeleteTemplate()
+            {
+                return table.DeleteSqlSync(et, e => e.Name == et.Name);
+            }
+
+            SqlPreCommand? RegenerateTemplate()
+            {
+                var newTemplate = EmailModelLogic.CreateDefaultTemplateInternal(et.Model!);
+
+                newTemplate.SetId(et.IdOrNull);
+                newTemplate.SetIsNew(false);
+                newTemplate.Ticks = et.Ticks;
+
+                using (replacements.WithReplacedDatabaseName())
+                    return table.UpdateSqlSync(newTemplate, e => e.Name == newTemplate.Name, includeCollections: true, comment: "EmailTemplate Regenerated: " + et.Name);
+            }
+
             using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name)))
             using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + et.Query.Key)))
             {
@@ -346,10 +364,10 @@ public static class EmailTemplateLogic
                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.Model != null))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
+                        case FixTokenResult.DeleteEntity: return DeleteTemplate();
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: et.From.Token = token; break;
-                        case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
+                        case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
                         default: break;
                     }
                 }
@@ -364,11 +382,53 @@ public static class EmailTemplateLogic
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.Model != null))
                             {
                                 case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
+                                case FixTokenResult.DeleteEntity: return DeleteTemplate();
                                 case FixTokenResult.RemoveToken: et.Recipients.Remove(item); break;
                                 case FixTokenResult.SkipEntity: return null;
                                 case FixTokenResult.Fix: item.Token = token; break;
-                                case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
+                                case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
+                                default: break;
+                            }
+                        }
+                    }
+                }
+
+                if (et.Filters.Any())
+                {
+                    using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
+                    {
+                        foreach (var item in et.Filters.ToList())
+                        {
+                            QueryTokenEmbedded token = item.Token!;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Filters", allowRemoveToken: false, allowReCreate: et.Model != null))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return DeleteTemplate();
+                                case FixTokenResult.RemoveToken: et.Filters.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
+                                default: break;
+                            }
+                        }
+                    }
+                }
+
+                if (et.Orders.Any())
+                {
+                    using (DelayedConsole.Delay(() => Console.WriteLine(" Orders:")))
+                    {
+                        foreach (var item in et.Orders.ToList())
+                        {
+                            QueryTokenEmbedded token = item.Token!;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Orders", allowRemoveToken: false, allowReCreate: et.Model != null))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return DeleteTemplate();
+                                case FixTokenResult.RemoveToken: et.Orders.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
                                 default: break;
                             }
                         }
@@ -397,8 +457,8 @@ public static class EmailTemplateLogic
                     if (ex.Result == FixTokenResult.DeleteEntity)
                         return table.DeleteSqlSync(et, e => e.Name == et.Name);
 
-                    if (ex.Result == FixTokenResult.ReGenerateEntity)
-                        return Regenerate(et, replacements, table);
+                    if (ex.Result == FixTokenResult.RegenerateEntity)
+                        return RegenerateTemplate();
 
                     throw new UnexpectedValueException(ex.Result);
                 }
@@ -472,28 +532,17 @@ public static class EmailTemplateLogic
 
     public static bool Regenerate(EmailTemplateEntity et)
     {
-        var leaves = Regenerate(et, null, Schema.Current.Table<EmailTemplateEntity>());
-        
-        if (leaves == null)
-            return false;
-        
-        leaves.ExecuteLeaves();
-        return true;
-    }
-
-
-
-    internal static SqlPreCommand? Regenerate(EmailTemplateEntity et, Replacements? replacements, Table table)
-    {
         var newTemplate = EmailModelLogic.CreateDefaultTemplateInternal(et.Model!);
+        if (newTemplate == null)
+            return false;
 
         newTemplate.SetId(et.IdOrNull);
         newTemplate.SetIsNew(false);
         newTemplate.Ticks = et.Ticks;
-
-        using (replacements?.WithReplacedDatabaseName())
-            return table.UpdateSqlSync(newTemplate, e => e.Name == newTemplate.Name, includeCollections: true, comment: "EmailTemplate Regenerated: " + et.Name);
+        newTemplate.Save();
+        return true;
     }
+
 
     public static Dictionary<Type, EmailTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, EmailTemplateVisibleOn>()
     {

@@ -95,7 +95,7 @@ export function renderCombinedLinesAndColumns({ infos, width, height, initialLoa
       info.data.rows.map(r => (info.data!.columns.c1 as ChartColumn<number>)!.getValue(r))
     ).distinctBy(a => valueColumn.getKey(a));
 
-    var scale = scaleFor(valueColumn, allValues, 0, yRule.size('content'), firstParameters["Scale"]);
+    var scale = scaleFor(valueColumn, allValues, 0, yRule.size('content'), firstParameters["VerticalScale"] ?? firstParameters["Scale"]);
 
     yScales = infos.map(info => info.data == null ? null : scale);
 
@@ -104,7 +104,7 @@ export function renderCombinedLinesAndColumns({ infos, width, height, initialLoa
       if (info.data == null)
         return null;
       const valColumn = info.data!.columns.c1 as ChartColumn<number>;
-      return scaleFor(valColumn, info.data.rows.map(r => valColumn.getValue(r)), 0, yRule.size('content'), info.parameters["Scale"]);
+      return scaleFor(valColumn, info.data.rows.map(r => valColumn.getValue(r)), 0, yRule.size('content'), info.parameters["VerticalScale"] ?? info.parameters["Scale"]);
     });
   }
 
@@ -121,8 +121,8 @@ export function renderCombinedLinesAndColumns({ infos, width, height, initialLoa
         infos.map((info, i) => info.data == null ? null :
           <g key={i}>
             {
-              info.chartRequest.chartScript.key == D3ChartScript.Line.key ? paintLine({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, x: x, y: yScales[i]!, memo: info.memo }) :
-                info.chartRequest.chartScript.key == D3ChartScript.Columns.key ? paintColumns({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, x: x, y: yScales[i]!, colCount, colIndex: colIndex++, memo: info.memo }) :
+              info.chartRequest.chartScript.key == D3ChartScript.Line.key ? paintLine({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, hasHorizontalScale: false, x: x, y: yScales[i]!, memo: info.memo }) :
+                info.chartRequest.chartScript.key == D3ChartScript.Columns.key ? paintColumns({ xRule, yRule, keyValues, data: info.data, initialLoad, onDrillDown: info.onDrillDown, parameters: info.parameters, hasHorizontalScale: false, x: x, y: yScales[i]!, colCount, colIndex: colIndex++, memo: info.memo }) :
                   null
             }
           </g>

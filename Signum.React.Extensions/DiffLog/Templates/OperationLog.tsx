@@ -2,16 +2,17 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Navigator from '@framework/Navigator'
 import { ValueLine, EntityLine } from '@framework/Lines'
-import { Entity, is, JavascriptMessage, Lite } from '@framework/Signum.Entities'
+import { Entity, getMixin, is, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { DiffLogMixin, DiffLogMessage } from '../Signum.Entities.DiffLog'
-import { API, DiffLogResult, DiffPair } from '../DiffLogClient'
+import { API } from '../DiffLogClient'
 import { TypeContext } from '@framework/TypeContext'
 import { DiffDocument } from './DiffDocument'
 import { Tabs, Tab } from 'react-bootstrap';
 import { LinkContainer } from '@framework/Components';
 import "./DiffLog.css"
 import { useAPI } from '@framework/Hooks'
+import { clearSettingsActions } from '@framework/AppContext'
 
 export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> }){
   const ctx = p.ctx;
@@ -43,7 +44,12 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
 
   var [simplify, setSimplify] = React.useState(true);
 
-  const result = useAPI(() => API.diffLog(p.ctx.value.id!, simplify), [p.ctx.value.id, simplify], { avoidReset: true });
+  var log = p.ctx.value;
+  var mixin = getMixin(log, DiffLogMixin);
+
+  const prev = useAPI(() => mixin.initialState.text == null ? Promise.resolve(null) : API.getPreviousOperationLog(log.id!), [log]);  
+
+  const next = useAPI(() => mixin.finalState.text == null ? Promise.resolve(null) : API.getNextOperationLog(log.id!), [log]);  
 
   var mctx = p.ctx.subCtx(DiffLogMixin);
 
@@ -58,7 +64,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
           }
         }}>
           <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString()}>
-             <FontAwesomeIcon icon="arrow-circle-left" />
+             <FontAwesomeIcon icon="circle-arrow-left" />
             &nbsp;
             {DiffLogMessage.PreviousLog.niceToString()}
           </span>
@@ -72,7 +78,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
     return (
       <Tab eventKey="prev" disabled title={
           <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString()}>
-            <FontAwesomeIcon icon="arrow-circle-left" />
+            <FontAwesomeIcon icon="circle-arrow-left" />
             &nbsp;
             {DiffLogMessage.PreviousLog.niceToString()}
           </span>
@@ -83,19 +89,19 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
 
 
 
-  function renderPrevDiff(diffPrev: Array<DiffPair<Array<DiffPair<string>>>>) {
-    const eq = isEqual(diffPrev);
+  function renderPrevDiff(prev: string, current: string) {
+    const eq = prev == current;
 
     const title = (
       <span title={DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
-        <FontAwesomeIcon icon="fast-backward" className={`colorIcon red ${eq ? "mini" : ""}`} />
-        <FontAwesomeIcon icon="step-backward" className={`colorIcon green ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon icon="backward-fast" className={`colorIcon red ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon icon="backward-step" className={`colorIcon green ${eq ? "mini" : ""}`} />
       </span>
     );
 
     return (
       <Tab eventKey="prevDiff" title={title as any}>
-        <DiffDocument diff={diffPrev} />
+        <DiffDocument first={prev} second={current} />
       </Tab>
     );
   }
@@ -104,8 +110,8 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
 
     const title = (
       <span title={DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
-        <FontAwesomeIcon icon="fast-backward" className={`colorIcon gray`} />
-        <FontAwesomeIcon icon="step-backward" className={`colorIcon gray`} />
+        <FontAwesomeIcon icon="backward-fast" className={`colorIcon gray`} />
+        <FontAwesomeIcon icon="backward-step" className={`colorIcon gray`} />
       </span>
     );
 
@@ -115,57 +121,54 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
     );
   }
 
-  function renderInitialState() {
+  function renderInitialState(initialState : string) {
     return (
       <Tab eventKey="initialState" title={mctx.niceName(d => d.initialState)}>
-        <pre><code>{result ? result.initial: mctx.value.initialState.text}</code></pre>
+        <pre><code>{initialState}</code></pre>
       </Tab>
     );
   }
 
-  function renderDiff() {
-    if (!result) {
-      return <Tab eventKey="diff" title={JavascriptMessage.loading.niceToString()} />
-    }
+  function renderDiff(initialState: string, finalState: string) {
 
-    const eq = !result.diff || isEqual(result.diff);
+    const eq = initialState == finalState;
 
     const title = (
       <span title={DiffLogMessage.DifferenceBetweenInitialStateAndFinalState.niceToString()}>
-        <FontAwesomeIcon icon="step-backward" className={`colorIcon red ${eq ? "mini" : ""}`} />
-        <FontAwesomeIcon icon="step-forward" className={`colorIcon green ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon icon="backward-step" className={`colorIcon red ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon icon="forward-step" className={`colorIcon green ${eq ? "mini" : ""}`} />
       </span>
     );
 
     return (
       <Tab eventKey="diff" title={title as any}>
-        {result.diff && <DiffDocument diff={result.diff} />}
+        <DiffDocument first={initialState} second={finalState} />
       </Tab>
     );
   }
 
-  function renderFinalState() {
+  function renderFinalState(finalState: string) {
     return (
       <Tab eventKey="finalState" title={mctx.niceName(d => d.finalState)}>
-        <pre><code>{result ? result.final : mctx.value.finalState.text}</code></pre>
+        <pre><code>{finalState}</code></pre>
       </Tab>
     );
   }
 
-  function renderNextDiff(diffNext: Array<DiffPair<Array<DiffPair<string>>>>) {
-    const eq = isEqual(diffNext);
+  function renderNextDiff(current: string, next: string) {
+    const eq = current == next;
 
     const title = (
       <span title={DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.niceToString()}>
 
-        <FontAwesomeIcon icon="step-forward" className={`colorIcon red ${eq ? "mini" : ""}`} />
-        <FontAwesomeIcon icon="fast-forward" className={`colorIcon green ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon icon="forward-step" className={`colorIcon red ${eq ? "mini" : ""}`} />
+        <FontAwesomeIcon icon="forward-fast" className={`colorIcon green ${eq ? "mini" : ""}`} />
       </span>
     );
 
     return (
       <Tab eventKey="nextDiff" title={title as any}>
-        <DiffDocument diff={diffNext} />
+        <DiffDocument first={current} second={next} />
       </Tab>
     );
   }
@@ -182,7 +185,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
           <span title={DiffLogMessage.NavigatesToTheNextOperationLog.niceToString()}>
             {DiffLogMessage.NextLog.niceToString()}
             &nbsp;
-              <FontAwesomeIcon icon="arrow-circle-right" />
+              <FontAwesomeIcon icon="circle-arrow-right" />
           </span>
         </LinkContainer> as any}>
       </Tab>
@@ -199,33 +202,69 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
           <span title={DiffLogMessage.NavigatesToTheCurrentEntity.niceToString()}>
             {DiffLogMessage.CurrentEntity.niceToString()}
             &nbsp;
-                        <FontAwesomeIcon icon="external-link-alt" />
+            <FontAwesomeIcon icon="up-right-from-square" />
           </span>
         </LinkContainer> as any}>
       </Tab>
     );
   }
   const target = p.ctx.value.target;
+
+  var prevSimple = React.useMemo(() => simplifyDump(prev?.dump, simplify), [prev, simplify]);
+  var initialSimple = React.useMemo(() => simplifyDump(mixin.initialState.text, simplify), [mixin.initialState.text, simplify]);
+  var finalSimple = React.useMemo(() => simplifyDump(mixin.finalState.text, simplify), [mixin.finalState.text, simplify]);
+  var nextSimple = React.useMemo(() => simplifyDump(next?.dump, simplify), [next, simplify]);
+
   return (
     <div>
       <label>
         <input type="checkbox" className="form-check-input" checked={simplify} onChange={e => setSimplify(e.currentTarget.checked)} /> Simplify Changes
       </label>
-      <Tabs id="diffTabs" defaultActiveKey="diff" key={p.ctx.value.id}>
-        {result?.prev ? renderPrev(result.prev) : renderPrevDisabled() }
-        {result?.diffPrev ? renderPrevDiff(result.diffPrev) : renderPrevDiffDisabled()}
-        {renderInitialState()}
-        {renderDiff()}
-        {renderFinalState()}
-        {result?.diffNext && renderNextDiff(result.diffNext)}
-        {result && (result.next ? renderNext(result.next) : target && renderCurrentEntity(target))}
+      <Tabs id="diffTabs" defaultActiveKey="diff" key={p.ctx.value.id} mountOnEnter>
+        {prev ? renderPrev(prev.operationLog) : renderPrevDisabled()}
+        {prevSimple && initialSimple ? renderPrevDiff(prevSimple, initialSimple) : renderPrevDiffDisabled()}
+        {initialSimple && renderInitialState(initialSimple)}
+        {initialSimple && finalSimple && renderDiff(initialSimple, finalSimple)}
+        {finalSimple && renderFinalState(finalSimple)}
+        {finalSimple && nextSimple && renderNextDiff(finalSimple, nextSimple)}
+        {next === undefined ? undefined : (next?.operationLog ? renderNext(next.operationLog) : target && renderCurrentEntity(target))}
       </Tabs>
     </div>
   );
 }
 
-function isEqual(diff: Array<DiffPair<Array<DiffPair<string>>>>) {
-  return diff.every(a => a.action == "Equal" && a.value.every(b => b.action == "Equal"));
-}
 
+const LiteImpRegex = /^(?<space> *)(?<prop>\w[\w\d_]+) = new LiteImp</;
+
+function simplifyDump(text: string | null | undefined, simplifyFatLites: boolean) {
+
+  if (text == null)
+    return null;
+
+  var lines = text.replaceAll("\r", "").split("\n");
+  
+  if (!simplifyFatLites)
+    return lines.join("\n");
+
+  for (var i = 0; i < lines.length; i++) {
+    var current = lines[i];
+    if (current.contains("= new LiteImp<") && !current.endsWith(",")) {
+      var match = LiteImpRegex.exec(current);
+      if (match) {
+        var spaces = match.groups!["space"];
+        if (lines[i + 1] == spaces + "{") {
+          var lastIndex = lines.indexOf(spaces + "},", i + 1);
+
+          if (lastIndex != -1) {
+            lines.splice(i + 1, lastIndex - (i + 1) + 1);
+          }
+
+          lines[i] = current + " { Entity = /* Loaded */ },";
+        }
+      }
+    }
+  }
+
+  return lines.join("\n");
+}
 

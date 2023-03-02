@@ -655,7 +655,11 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
 
         var steps = this.Follow(a => a.Parent).Reverse();
         if (skipBefore != null)
+        {
+            if (!steps.Contains(skipBefore))
+                throw new InvalidOperationException($"{skipBefore} is not a prefix of {this}");
             steps = steps.SkipWhile(a => !a.Equals(skipBefore!));
+        }
 
         foreach (var p in steps)
         {

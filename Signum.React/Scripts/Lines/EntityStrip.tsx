@@ -5,12 +5,12 @@ import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
-import { EntityListBaseController, EntityListBaseProps, DragConfig } from './EntityListBase'
+import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
 import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
-import { getTypeInfo, getTypeInfos, getTypeName, tryGetTypeInfos } from '../Reflection'
+import { getTypeInfo, getTypeInfos, getTypeName, QueryTokenString, tryGetTypeInfos } from '../Reflection'
 import { FilterOperation } from '../Signum.Entities.DynamicQuery'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
@@ -26,6 +26,8 @@ export interface EntityStripProps extends EntityListBaseProps {
   onItemHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   avoidDuplicates?: boolean;
+  groupElementsBy?: (e: any /*T*/) => string;
+  renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
 }
 
 export class EntityStripController extends EntityListBaseController<EntityStripProps> {
@@ -67,7 +69,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
 
       const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
 
-      return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible }] };
+      return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }] };
       }
   }
 
@@ -93,32 +95,42 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
   const readOnly = p.ctx.readOnly;
   return (
     <FormGroup ctx={p.ctx!}
-      labelText={p.labelText}
+      label={p.label}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       <div className="sf-entity-strip sf-control-container">
         <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
           {
-            c.getMListItemContext(p.ctx).map(mlec =>
-              (<EntityStripElement key={c.keyGenerator.getKey(mlec.value)}
-                ctx={mlec}
-                iconStart={p.iconStart}
-                autoComplete={p.autocomplete}
-                onRenderItem={p.onRenderItem}
-                drag={c.canMove(mlec.value) && !readOnly ? c.getDragConfig(mlec.index!, p.vertical ? "v" : "h") : undefined}
-                onItemHtmlAttributes={p.onItemHtmlAttributes}
-                onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
-                onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
-                onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
-                showType={p.showType!}
-              />))
+            p.groupElementsBy == undefined ?
+              c.getMListItemContext(p.ctx).map(mlec => renderElement(mlec)) :
+
+              c.getMListItemContext(p.ctx).groupBy(a => p.groupElementsBy!(a)).map((gr, i) =>
+                <div className={classes("mb-2")} key={i} >
+                  <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
+                  {gr.elements.map(mlec => renderElement(mlec))}
+                </div>)
           }
           {renderLastElement()}
         </ul>
       </div>
     </FormGroup>
   );
+
+  function renderElement(mlec: TypeContext<any>): JSX.Element {
+    return <EntityStripElement key={c.keyGenerator.getKey(mlec.value)}
+      ctx={mlec}
+      iconStart={p.iconStart}
+      autoComplete={p.autocomplete}
+      onRenderItem={p.onRenderItem}
+      move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, p.vertical ? "v" : "h") : undefined}
+      drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, p.vertical ? "v" : "h") : undefined}
+      onItemHtmlAttributes={p.onItemHtmlAttributes}
+      onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
+      onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
+      onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
+      showType={p.showType!} />
+  }
 
   function renderLastElement() {
     
@@ -191,6 +203,7 @@ export interface EntityStripElementProps {
   onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   onItemContainerHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   drag?: DragConfig;
+  move?: MoveConfig;
   showType: boolean;
 }
 
@@ -246,20 +259,20 @@ export function EntityStripElement(p: EntityStripElementProps) {
   var url = isEntity(val) && !val.isNew ? Navigator.navigateRoute(val) :
     isLite(val) && !(val.entity && val.entity.isNew) ? Navigator.navigateRoute(val) : "#";
 
-  var hasIcon = p.onRemove || p.drag;
+  var hasIcon = p.onRemove || p.drag || p.move;
 
   var containerHtmlAttributes = (p.onItemContainerHtmlAttributes && p.onItemContainerHtmlAttributes(p.ctx.value));
 
   return (
-    <li className={classes("sf-strip-element", containerHtmlAttributes?.className)}
+    <li className={classes("sf-strip-element", containerHtmlAttributes?.className, drag?.dropClass)}
       {...EntityListBaseController.entityHtmlAttributes(p.ctx.value)}
       {...containerHtmlAttributes}>
-      <div className={classes(drag && "sf-strip-dropable", drag?.dropClass)}
+      <div className={classes(drag && "sf-strip-dropable")}
         onDragEnter={drag?.onDragOver}
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
       >
-        {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}</span>}
+        {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
         {
           p.onView ?
             <a href={url} className={classes("sf-strip-link", htmlAttributes?.className)} onClick={p.onView} {...htmlAttributes}>
@@ -270,7 +283,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
               {toStr}
             </span>
         }
-        {hasIcon && !p.iconStart && <span>{removeIcon()}&nbsp;{dragIcon()}</span>}
+        {hasIcon && !p.iconStart && <span>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
       </div>
     </li>
   );
@@ -288,7 +301,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
   }
 
   function dragIcon() {
-    return drag && <span className={classes("sf-line-button", "sf-move")}
+    return drag && <span className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
       draggable={true}
       onDragStart={drag.onDragStart}
       onDragEnd={drag.onDragEnd}

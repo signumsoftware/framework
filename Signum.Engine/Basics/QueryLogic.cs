@@ -20,7 +20,7 @@ public static class QueryLogic
     static QueryLogic()
     {
         QueryToken.StaticEntityExtensions = parent => Expressions.GetExtensionsTokens(parent);
-        QueryToken.DynamicEntityExtensions = parent => Expressions.GetDictionaryExtensionsTokens(parent);
+        QueryToken.DynamicEntityExtensions = parent => Expressions.GetExtensionsWithParameterTokens(parent);
         ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
         QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;
         QueryToken.IsSystemVersioned = IsSystemVersioned;

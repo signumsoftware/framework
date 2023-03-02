@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
 import { Lite } from '@framework/Signum.Entities'
-import { QueryDescription, SubTokensOptions, QueryToken, FilterOptionParsed } from '@framework/FindOptions'
+import { QueryDescription, SubTokensOptions, QueryToken, FilterOptionParsed, FilterConditionOption, FindOptions } from '@framework/FindOptions'
 import { StyleContext, TypeContext } from '@framework/TypeContext'
 import { SearchMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer } from '@framework/Reflection'
@@ -20,11 +20,10 @@ import ChartTableComponent from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 import "@framework/SearchControl/Search.css"
 import "../Chart.css"
-import { ChartScript, cleanedChartRequest } from '../ChartClient';
+import { ChartScript, cleanedChartRequest, getCustomDrilldownsFindOptions, hasAggregates } from '../ChartClient';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
-
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;
@@ -171,7 +170,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       <h2>
         <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
         <a className="sf-popup-fullscreen" href="#" onClick={handleOnFullScreen}>
-          <FontAwesomeIcon icon="external-link-alt" />
+          <FontAwesomeIcon icon="up-right-from-square" />
         </a>
       </h2 >
       <ValidationErrors entity={cr} prefix="chartRequest" />
@@ -189,37 +188,39 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
         }
       </div>
       <div className="sf-control-container">
-        {showChartSettings && <ChartBuilder queryKey={cr.queryKey} ctx={tc}
-          maxRowsReached={maxRowsReached}
-          onInvalidate={handleInvalidate}
-          onRedraw={handleOnRedraw}
-          onTokenChange={handleTokenChange}
-          onOrderChanged={() => {
-            if (result)
-              handleOnDrawClick();
-            else
-              forceUpdate();
-          }}
-        />}
-      </div >
+        {showChartSettings && <>
+          <ChartBuilder queryKey={cr.queryKey} ctx={tc}
+            maxRowsReached={maxRowsReached}
+            onInvalidate={handleInvalidate}
+            onRedraw={handleOnRedraw}
+            onTokenChange={() => { handleTokenChange(); forceUpdate(); }}
+            onOrderChanged={() => {
+              if (result)
+                handleOnDrawClick();
+              else
+                forceUpdate();
+            }}
+          />
+        </>}
+      </div>
       <div className="sf-query-button-bar btn-toolbar mb-2">
         <button
           className={classes("sf-query-button btn", showChartSettings && "active", "btn-light")}
           onClick={() => { setShowChartSettings(!showChartSettings); }}
           title={titleLabels ? showChartSettings ? ChartMessage.HideChartSettings.niceToString() : ChartMessage.ShowChartSettings.niceToString() : undefined}>
-          <FontAwesomeIcon icon="sliders-h" />
+          <FontAwesomeIcon icon="sliders" />
         </button>
         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
         {ChartClient.ButtonBarChart.getButtonBarElements({
           chartRequest: cr,
           chartRequestView: { chartRequest: cr, userChart: p.userChart, onChange: p.onChange, hideFiltersAndSettings: handleHideFiltersAndSettings }
         }).map((a, i) => React.cloneElement(a, { key: i }))}
-        <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+        <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
       </div>
       <div className="sf-chart-tab-container">
         <Tabs id="chartResultTabs" key={showChartSettings + ""}>
           <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
-            <ChartRenderer chartRequest={cr} loading={loading == true} autoRefresh={false} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} minHeight={null} />
+            <ChartRenderer userChart={p.userChart} chartRequest={cr} loading={loading == true} autoRefresh={false} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} minHeight={null} />
           </Tab>
           {result &&
             <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} (
