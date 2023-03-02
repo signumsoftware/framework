@@ -148,14 +148,14 @@ public static class EmailTemplateLogic
             { 
                 "mt",
                 () => SqlPreCommand.Combine(Spacing.Simple,
-                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template.Entity.Model.Is(emailModel))),
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(emailModel))),
                     Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)))
                 )!,
                 "Delete Messages and Templates"
             },
             { "t",
                 () => SqlPreCommand.Combine(Spacing.Simple,
-                    Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template.Entity.Model.Is(emailModel)).UnsafeUpdate().Set(em  => em.Template, em => null)),
+                    Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(emailModel)).UnsafeUpdate().Set(em  => em.Template, em => null)),
                     Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)))
                 )!,
                 "Delete Templates only, Update Messages"
