@@ -1,5 +1,6 @@
 using OpenQA.Selenium;
 using Signum.Entities;
+using Signum.Entities.Operations;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using System;

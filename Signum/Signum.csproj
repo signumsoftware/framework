@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<RootNamespace>Signum</RootNamespace>
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Engine\Sync\Scripts\versioning_function.sql" />
+	  <None Remove="Engine\Sync\Scripts\versioning_function_nochecks.sql" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Engine\Sync\Scripts\versioning_function.sql" />
+	  <EmbeddedResource Include="Engine\Sync\Scripts\versioning_function_nochecks.sql" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.0" />
+		<PackageReference Include="Npgsql" Version="7.0.2" />
+		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
+		<!--<PackageReference Include="Signum.MSBuildTask" Version="7.0.0" />-->
+	</ItemGroup>
+	
+
+	<ItemGroup>
+		<ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Translations\*.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Engine\Sync\SqlServer\" />
+	  <Folder Include="Entities\Basics\" />
+	  <Folder Include="API\Facades\" />
+	</ItemGroup>
+</Project>

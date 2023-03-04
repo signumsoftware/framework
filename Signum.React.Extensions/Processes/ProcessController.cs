@@ -7,6 +7,7 @@ using Signum.React.Filters;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Processes;
 

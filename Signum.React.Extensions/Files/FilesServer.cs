@@ -5,6 +5,7 @@ using Signum.Engine.Files;
 using Signum.React.Filters;
 using System.Text.Json;
 using Signum.Engine.Json;
+using Signum.Entities.Symbols;
 
 namespace Signum.React.Files;
 

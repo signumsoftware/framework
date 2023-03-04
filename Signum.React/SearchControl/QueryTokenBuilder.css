@@ -1,0 +1,25 @@
+﻿
+.sf-query-token-builder {
+
+}
+
+.sf-query-token-part {
+    display: inline-block;
+    margin-right: 1px;
+}
+
+    .sf-query-token-part .rw-popup-container {
+        min-width: 400px;
+    }
+
+.has-error .sf-query-token-part .rw-dropdownlist {
+    border: 1px solid #a94442;
+}
+
+.sf-prefix-btn {
+    border: 1px solid #bbb;
+    padding: 3px 5px;
+    vertical-align: super;
+    display: inline;
+    margin-right: 2px;
+}

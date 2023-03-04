@@ -7,6 +7,7 @@ using Signum.Entities.Translation;
 using Signum.Utilities.Reflection;
 using Signum.React.Files;
 using System.IO;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Translation;
 

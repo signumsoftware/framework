@@ -1,6 +1,7 @@
 using Signum.Engine.PostgresCatalog;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities.Basics;
+using Signum.Entities.Symbols;
 using System.Text.Json.Serialization;
 
 namespace Signum.React.Maps;

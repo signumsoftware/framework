@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Dynamic;
-using Signum.Entities.Basics;
 using Microsoft.Extensions.Hosting;
 using Signum.Engine.Authorization;
 using Signum.Engine.Json;
 using Signum.React.Facades;
+using Signum.Entities.Operations;
 
 namespace Signum.React.Dynamic;
 

@@ -1,5 +1,3 @@
-using Signum.Entities.Basics;
-using Signum.Utilities.DataStructures;
 using System.IO;
 using System.Text;
 using Xunit.Abstractions;

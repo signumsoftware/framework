@@ -1,6 +1,7 @@
 using Signum.Engine.Dynamic;
 using Signum.Entities.Dynamic;
 using Microsoft.AspNetCore.Mvc;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Dynamic;
 

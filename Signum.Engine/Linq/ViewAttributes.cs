@@ -1,3 +1,0 @@
-﻿namespace Signum.Engine;
-
-

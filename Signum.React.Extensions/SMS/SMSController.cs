@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
 using Signum.Entities.SMS;
 using Signum.Engine.SMS;
+using Signum.Entities.Basics;
 
 namespace Signum.React.SMS;
 

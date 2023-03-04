@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Signum.Engine.Json;
 using Signum.React.Facades;
+using Signum.Entities.DynamicQuery.Request;
 
 namespace Signum.React.Tree;
 

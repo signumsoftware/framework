@@ -1,6 +1,7 @@
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Microsoft.AspNetCore.Mvc;
+using Signum.Entities.Basics;
 
 namespace Signum.React.UserQueries;
 

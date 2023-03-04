@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.ConcurrentUser;
+using Signum.Entities.Operations;
 
 namespace Signum.React.ConcurrentUser;
 

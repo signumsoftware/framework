@@ -1,0 +1,26 @@
+﻿.version-alert {
+    text-align:center;
+    margin-top:10px;
+    margin-bottom: 0px;
+    font-size: 1.3em;
+    flex-grow: 0 !important;
+}
+
+.blink {
+    animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0.5;
+    }
+}
+
+#tooltip-buildId .tooltip-inner {
+    max-width: initial;
+    white-space: normal;
+}
+
+.sf-version-info {
+    cursor: default;
+}

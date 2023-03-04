@@ -44,5 +44,8 @@
     "react-router": "6.7.0",
     "react-router-dom": "6.7.0",
     "react-widgets": "5.8.4"
+  },
+  "devDependencies": {
+    "typescript": "4.9.5"
   }
 }

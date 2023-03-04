@@ -2,6 +2,7 @@ using Signum.Entities.Chart;
 using Signum.Engine.Chart;
 using Signum.React.Filters;
 using Microsoft.AspNetCore.Mvc;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Chart;
 

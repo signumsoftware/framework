@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations;
 using Signum.Engine.Help;
 using Signum.Entities.Help;
 using System.Globalization;
+using Signum.Entities.Basics;
+using Signum.Entities.Operations;
 
 namespace Signum.React.Help;
 

@@ -1,5 +1,5 @@
 ﻿using OpenQA.Selenium;
-using Signum.Entities.DynamicQuery;
+using Signum.Entities.DynamicQuery.Request;
 
 namespace Signum.React.Selenium;
 

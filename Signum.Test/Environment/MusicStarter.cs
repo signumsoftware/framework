@@ -1,9 +1,8 @@
 using Signum.Engine.Maps;
 using System.IO;
-using Signum.Entities.Basics;
-using Signum.Engine.Basics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SqlServer.Types;
+using Signum.Basics;
 
 namespace Signum.Test.Environment;
 

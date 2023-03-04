@@ -5,6 +5,7 @@ using Signum.React.Filters;
 using Signum.React.Extensions.Isolation;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Entities.Isolation;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Isolation;
 

@@ -2,8 +2,8 @@ using Signum.React.Facades;
 using Signum.Entities.DiffLog;
 using Microsoft.AspNetCore.Builder;
 using Signum.Engine.Authorization;
-using Signum.Entities.Basics;
 using Signum.Entities.Authorization;
+using Signum.Entities.Operations;
 
 namespace Signum.React.DiffLog;
 

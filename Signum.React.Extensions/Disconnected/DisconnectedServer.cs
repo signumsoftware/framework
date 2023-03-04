@@ -1,6 +1,7 @@
 ﻿using Signum.React.Maps;
 using Signum.Engine.Disconnected;
 using Microsoft.AspNetCore.Builder;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Map;
 

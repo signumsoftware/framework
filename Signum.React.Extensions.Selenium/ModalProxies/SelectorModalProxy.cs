@@ -1,6 +1,6 @@
 using System;
 using OpenQA.Selenium;
-using Signum.Engine.Basics;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 
 namespace Signum.React.Selenium;

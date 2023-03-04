@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Signum.Engine.Authorization;
 using Signum.Engine.Cache;
 using Signum.Engine.ConcurrentUser;
+using Signum.Entities.Basics;
 using Signum.Entities.ConcurrentUser;
 using Signum.React.Facades;
 using Signum.Utilities.Reflection;

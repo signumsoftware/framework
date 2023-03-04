@@ -11,6 +11,10 @@ using Signum.React.Filters;
 using Signum.Engine.Authorization;
 using Signum.Engine.Json;
 using Signum.React.Facades;
+using Signum.Entities.DynamicQuery.Request;
+using Signum.Entities.Basics;
+using Signum.Entities.Symbols;
+using Signum.Entities.Operations;
 
 namespace Signum.React.Excel;
 

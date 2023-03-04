@@ -9,6 +9,7 @@ using Signum.React.Filters;
 using System.Collections.ObjectModel;
 using Signum.React.Facades;
 using System.Text.Json;
+using Signum.Entities.DynamicQuery.Request;
 
 namespace Signum.React.UserAssets;
 

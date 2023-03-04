@@ -5,6 +5,7 @@ using Signum.Engine.Word;
 using Signum.React.Files;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Word;
 

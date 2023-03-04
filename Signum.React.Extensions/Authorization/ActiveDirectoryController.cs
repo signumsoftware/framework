@@ -8,6 +8,7 @@ using System.Threading;
 using System.Linq;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using Signum.Entities.Operations;
 
 namespace Signum.React.Authorization;
 
