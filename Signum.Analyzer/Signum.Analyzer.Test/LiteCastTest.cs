@@ -123,7 +123,7 @@ var result = lite is not Signum.Entities.Entity;
 
         TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
 Entity entity = null;
-var result = entity is Lite<Entity> or OperationSymbol;
+var result = entity is Lite<Entity> or Signum.Operations.OperationSymbol;
         ");
     }
 
@@ -133,7 +133,7 @@ var result = entity is Lite<Entity> or OperationSymbol;
 
         TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
 Entity entity = null;
-var result = entity is not (Lite<Entity> or OperationSymbol);
+var result = entity is not (Lite<Entity> or Signum.Operations.OperationSymbol);
         ");
     }
 
@@ -153,7 +153,7 @@ var result = entity is not Lite<Entity>;
     {
         TestDiagnostic("Impossible to convert T to Lite<T>, consider using ToLite or ToLiteFat", @"
 Entity entity = null;
-var result = entity is Lite<Signum.Entities.Basics.OperationLogEntity> { EntityOrNull: Signum.Entities.Basics.OperationLogEntity };
+var result = entity is Lite<Signum.Operations.OperationLogEntity> { EntityOrNull: Signum.Operations.OperationLogEntity };
         ");
     }
 
@@ -162,7 +162,7 @@ var result = entity is Lite<Signum.Entities.Basics.OperationLogEntity> { EntityO
     {
         TestDiagnostic("Impossible to convert Lite<T> to T, consider using Entity or Retrieve", @"
 Entity entity = null;
-var result = entity is Signum.Entities.Basics.OperationLogEntity { Target: Entity };
+var result = entity is Signum.Operations.OperationLogEntity { Target: Entity };
         ");
     }
 
