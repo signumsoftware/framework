@@ -31,11 +31,9 @@ public sealed class InTypeScriptAttribute : Attribute
 public sealed class ImportInTypeScriptAttribute : Attribute
 {
     public Type Type { get; set; }
-    public string ForNamesace { get; set; }
-    public ImportInTypeScriptAttribute(Type type, string forNamespace)
+    public ImportInTypeScriptAttribute(Type type)
     {
         this.Type = type;
-        this.ForNamesace = forNamespace;
     }
 }
 

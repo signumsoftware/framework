@@ -159,7 +159,7 @@ public static class ReflectionServer
                              select pt).ToList();
 
 
-            var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Where(a => kvp.Value.Contains(a.ForNamesace)).Select(a => a.Type);
+            var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Select(a => a.Type);
             return normalTypes.Concat(importedTypes).Concat(usedEnums);
         }).Distinct().ToList();
     }

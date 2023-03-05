@@ -1,9 +1,9 @@
 {
   "profiles": {
-    "Signum.Entities": {
+    "Signum": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\x64\\Debug\\net5\\Signum.Entities.dll\" \"D:\\Signum\\southwind\\Framework\\Signum.Entities\\obj\\SignumReferences.txt\"",
-      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Signum.Entities\\"
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.dll\" \"D:\\Signum\\southwind\\Framework\\Signum\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Signum\\"
     }
   }
 }

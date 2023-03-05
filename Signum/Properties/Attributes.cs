@@ -1,6 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Signum.Engine")]
 [assembly: DefaultAssemblyCulture("en")]
-[assembly: ImportInTypeScript(typeof(DayOfWeek), "Signum.Entities")]
-[assembly: ImportInTypeScript(typeof(CollectionMessage), "Signum.Entities")]
+[assembly: ImportInTypeScript(typeof(DayOfWeek))]
+[assembly: ImportInTypeScript(typeof(CollectionMessage))]
