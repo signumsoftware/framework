@@ -1,8 +1,5 @@
 ﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.74-alpha">
   <PropertyGroup>
     <BuildCommand>yarn run tsc</BuildCommand>
-    <!-- Command to create an optimized build of the project that's ready for publishing -->
-    <ProductionBuildCommand>npm run build</ProductionBuildCommand>
-    <!-- Folder where production build objects will be placed -->
   </PropertyGroup>
 </Project>

@@ -4,13 +4,8 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection'
 import * as Entities from './Signum.Entities'
+import * as Security from './Signum.Security'
 
-
-export const BigStringEmbedded = new Type<BigStringEmbedded>("BigStringEmbedded");
-export interface BigStringEmbedded extends Entities.EmbeddedEntity {
-  Type: "BigStringEmbedded";
-  text: string | null;
-}
 
 export const ClientErrorModel = new Type<ClientErrorModel>("ClientErrorModel");
 export interface ClientErrorModel extends Entities.ModelEntity {
@@ -45,10 +40,10 @@ export interface ExceptionEntity extends Entities.Entity {
   exceptionType: string | null;
   exceptionMessage: string;
   exceptionMessageHash: number;
-  stackTrace: BigStringEmbedded;
+  stackTrace: Entities.BigStringEmbedded;
   stackTraceHash: number;
   threadId: number;
-  user: Entities.Lite<IUserEntity> | null;
+  user: Entities.Lite<Security.IUserEntity> | null;
   environment: string | null;
   version: string | null;
   userAgent: string | null;
@@ -60,10 +55,10 @@ export interface ExceptionEntity extends Entities.Entity {
   applicationName: string | null;
   userHostAddress: string | null;
   userHostName: string | null;
-  form: BigStringEmbedded;
-  queryString: BigStringEmbedded;
-  session: BigStringEmbedded;
-  data: BigStringEmbedded;
+  form: Entities.BigStringEmbedded;
+  queryString: Entities.BigStringEmbedded;
+  session: Entities.BigStringEmbedded;
+  data: Entities.BigStringEmbedded;
   hResult: number;
   referenced: boolean;
   origin: ExceptionOrigin;
@@ -74,21 +69,6 @@ export type ExceptionOrigin =
   "Backend_DotNet" |
   "Frontend_React";
 
-export interface IUserEntity extends Entities.Entity {
-}
-
-export const OperationLogEntity = new Type<OperationLogEntity>("OperationLog");
-export interface OperationLogEntity extends Entities.Entity {
-  Type: "OperationLog";
-  target: Entities.Lite<Entities.Entity> | null;
-  origin: Entities.Lite<Entities.Entity> | null;
-  operation: Entities.OperationSymbol;
-  user: Entities.Lite<IUserEntity>;
-  start: string /*DateTime*/;
-  end: string /*DateTime*/ | null;
-  exception: Entities.Lite<ExceptionEntity> | null;
-}
-
 export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
   Type: "PropertyRoute";
@@ -96,15 +76,13 @@ export interface PropertyRouteEntity extends Entities.Entity {
   rootType: TypeEntity;
 }
 
-export const QueryEntity = new Type<QueryEntity>("Query");
-export interface QueryEntity extends Entities.Entity {
-  Type: "Query";
-  key: string;
-}
-
 export interface SemiSymbol extends Entities.Entity {
   key: string | null;
   name: string;
+}
+
+export interface Symbol extends Entities.Entity {
+  key: string;
 }
 
 export const TypeEntity = new Type<TypeEntity>("Type");
@@ -115,5 +93,4 @@ export interface TypeEntity extends Entities.Entity {
   namespace: string;
   className: string;
 }
-
 

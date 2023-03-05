@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
-using Signum.Engine.Sync.Scripts;
+using Signum.Engine.Sync.SqlServer;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.NaturalLanguage;
 

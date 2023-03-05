@@ -3,7 +3,7 @@ using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
-using Signum.Engine.Sync.Scripts;
+using Signum.Engine.Sync.SqlServer;
 using Signum.Security;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;

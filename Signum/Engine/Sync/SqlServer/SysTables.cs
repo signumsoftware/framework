@@ -1,4 +1,4 @@
-namespace Signum.Engine.Sync.Scripts;
+namespace Signum.Engine.Sync.SqlServer;
 
 #pragma warning disable 649
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.

@@ -4,7 +4,7 @@ using Signum.Engine.Maps;
 using System.Data.SqlTypes;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync;
-using Signum.Engine.Sync.Scripts;
+using Signum.Engine.Sync.SqlServer;
 
 namespace Signum.Engine;
 

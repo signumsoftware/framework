@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Signum.Engine.Maps;
-using Signum.Engine.Sync.Scripts;
+using Signum.Engine.Sync.SqlServer;
 
 namespace Signum.Engine.Sync;
 

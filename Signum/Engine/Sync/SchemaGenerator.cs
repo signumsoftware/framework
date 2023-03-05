@@ -1,5 +1,5 @@
 using Signum.Engine.Maps;
-using Signum.Engine.Sync.Scripts;
+using Signum.Engine.Sync.SqlServer;
 using System.IO;
 
 namespace Signum.Engine.Sync;
@@ -92,7 +92,7 @@ public static class SchemaGenerator
             "versioning_function_nochecks.sql" :
             "versioning_function.sql";
 
-        var text = new StreamReader(typeof(Schema).Assembly.GetManifestResourceStream($"Signum.Engine.Engine.Scripts.{file}")!).Using(a => a.ReadToEnd());
+        var text = new StreamReader(typeof(Schema).Assembly.GetManifestResourceStream($"Signum.Engine.Sync.Postgres.{file}")!).Using(a => a.ReadToEnd());
 
         return new SqlPreCommandSimple(text);
     }

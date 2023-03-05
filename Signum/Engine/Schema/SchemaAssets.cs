@@ -1,6 +1,6 @@
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
-using Signum.Engine.Sync.Scripts;
+using Signum.Engine.Sync.SqlServer;
 
 namespace Signum.Engine.Maps;
 

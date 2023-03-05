@@ -1,7 +1,7 @@
 using Signum.Engine.Maps;
 using System.Data;
 
-namespace Signum.Engine.Sync.Scripts;
+namespace Signum.Engine.Sync.SqlServer;
 
 public static class SysTablesSchema
 {
