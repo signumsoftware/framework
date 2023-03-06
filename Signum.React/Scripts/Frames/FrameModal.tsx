@@ -365,7 +365,7 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
   const entity = pack.entity;
 
   if (title === undefined) {
-    title = getToString(entity);
+    title = getToString(entity) ?? "";
   }
 
   if (subTitle === undefined) {
@@ -374,7 +374,7 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
 
   return (
     <div>
-      {title && <>
+      {title != null && <>
         <span className="sf-entity-title">{title}</span>&nbsp;
         {renderExpandLink(pack.entity)}
       </>
