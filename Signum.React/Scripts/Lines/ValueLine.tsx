@@ -149,13 +149,12 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     return undefined;
   }
 
-  withItemGroup(input: JSX.Element): JSX.Element {
-    if (!this.props.unit && !this.props.extraButtons) {
+  withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
+    if (!this.props.unit && !this.props.extraButtons && !preExtraButton) {
       return <div>
         {getTimeMachineIcon({ ctx: this.props.ctx })}
         {input}
       </div>
-
     }
 
     return (
@@ -163,6 +162,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
         {getTimeMachineIcon({ ctx: this.props.ctx })}
         {input}
         {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
+        {preExtraButton}
         {this.props.extraButtons && this.props.extraButtons(this)}
       </div>
     );
@@ -458,14 +458,18 @@ function internalComboBoxText(vl: ValueLineController) {
 }
 
 ValueLineRenderers.renderers.set("TextBox", (vl) => {
-  return internalTextBox(vl, false);
+  return internalTextBox(vl, "text");
 });
 
 ValueLineRenderers.renderers.set("Password", (vl) => {
-  return internalTextBox(vl, true);
+  return internalTextBox(vl, "password");
 });
 
-function internalTextBox(vl: ValueLineController, password: boolean) {
+ValueLineRenderers.renderers.set("Color", (vl) => {
+  return internalTextBox(vl, "color");
+});
+
+function internalTextBox(vl: ValueLineController, type: "password" | "color" | "text") {
 
   const s = vl.props;
 
@@ -501,16 +505,24 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <input type={password ? "password" : "text"}
+        <input type={type == "color" ? "text" : type}
           autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
           {...vl.props.valueHtmlAttributes}
           className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
           value={s.ctx.value ?? ""}
           onBlur={handleBlur || htmlAtts?.onBlur}
-          onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
+          onChange={handleTextOnChange}
           placeholder={vl.getPlaceholder()}
           list={s.datalist ? s.ctx.getUniqueId("dataList") : undefined}
-          ref={vl.setRefs} />)
+          ref={vl.setRefs} />,
+        type == "color" ? <input type="color"
+          className={classes(s.ctx.formControlClass, "sf-color")}
+          value={s.ctx.value ?? ""}
+          onBlur={handleBlur || htmlAtts?.onBlur}
+          onChange={handleTextOnChange} 
+        /> : undefined
+
+      )
       }
       {s.datalist &&
         <datalist id={s.ctx.getUniqueId("dataList")}>
@@ -684,7 +696,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
     autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
     className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))} value={value}
     onBlur={handleOnBlur}
-    onChange={handleOnChange} //https://github.com/facebook/react/issues/7211
+    onChange={handleOnChange}
     onKeyDown={handleKeyDown}
     onFocus={handleOnFocus} />
 
@@ -1087,7 +1099,7 @@ export function TimeTextBox(p: TimeTextBoxProps) {
     className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))}
     value={value}
     onBlur={handleOnBlur}
-    onChange={handleOnChange} //https://github.com/facebook/react/issues/7211
+    onChange={handleOnChange}
     onKeyDown={handleKeyDown}
     onFocus={handleOnFocus} />
 
@@ -1225,6 +1237,8 @@ export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBase
       vProps.format = state.ctx.propertyRoute.member!.format;
       if (vProps.valueLineType == "TextBox" && state.ctx.propertyRoute.member!.format == "Password")
         vProps.valueLineType = "Password";
+      else if (vProps.valueLineType == "TextBox" && state.ctx.propertyRoute.member!.format == "Color")
+        vProps.valueLineType = "Color";
     }
   }
 }
