@@ -144,7 +144,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   if (canExecute === undefined)
     canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;
 
-  const disabled = !!canExecute;
+  const disabled = !!canExecute || eoc.frame?.isExecuting();
 
   if (hideOnCanExecute && disabled)
     return null;
@@ -270,7 +270,6 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
 
   function handleOnClick(event: React.MouseEvent<any>) {
     eoc.event = event;
-    event.persist();
     if (onOperationClick)
       onOperationClick(eoc, event);
     else
@@ -367,7 +366,11 @@ export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext
     if (!conf)
       return;
 
-    return API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+    var promise = eoc.progressModalOptions ?
+      API.executeLiteWithProgress(toLite(eoc.entity), eoc.operationInfo.key, eoc.progressModalOptions, ...args) :
+      API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args);
+
+    return promise
       .then(eoc.onExecuteSuccess ?? (pack => {
         eoc.frame.onReload(pack);
         if (pack?.entity.id != null)

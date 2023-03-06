@@ -17,13 +17,13 @@ public class UserQueryController : ControllerBase
     [HttpGet("api/userQueries/forQuery/{queryKey}")]
     public IEnumerable<Lite<UserQueryEntity>> FromQuery(string queryKey)
     {
-        return UserQueryLogic.GetUserQueries(QueryLogic.ToQueryName(queryKey));
+        return UserQueryLogic.GetUserQueries(QueryLogic.ToQueryName(queryKey), appendFilters: false);
     }
 
     [HttpGet("api/userQueries/forQueryAppendFilters/{queryKey}")]
     public IEnumerable<Lite<UserQueryEntity>> FromQueryAppendFilters(string queryKey)
     {
-        return UserQueryLogic.GetUserQueries(QueryLogic.ToQueryName(queryKey), appendFilterOnly : true);
+        return UserQueryLogic.GetUserQueries(QueryLogic.ToQueryName(queryKey), appendFilters : true);
     }
 
 }

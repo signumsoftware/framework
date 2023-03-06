@@ -56,7 +56,9 @@ public class ImporterFromExcel
         return rowGroups;
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public static async IAsyncEnumerable<ImportResult> ImportExcel(QueryRequest request, ImportExcelModel model, OperationSymbol saveOperation)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         var transactionalResults = new List<ImportResult>();
 
@@ -379,7 +381,7 @@ public class ImporterFromExcel
                 var t when t.IsLite() => Lite.Parse(strValue),
                 var t when t.IsEntity() => Lite.Parse(strValue).Retrieve(),
                 var t when ExcelExtensions.IsNumber(t) => Convert.ChangeType(ExcelExtensions.FromExcelNumber(strValue), ut),
-                var t when ExcelExtensions.IsDate(t) => ReflectionTools.ChangeType(ExcelExtensions.FromExcelDate(strValue), ut),
+                var t when ExcelExtensions.IsDate(t) => ReflectionTools.ChangeType(ExcelExtensions.FromExcelDate(strValue, token.DateTimeKind), ut),
                 var t when t == typeof(TimeOnly) => ExcelExtensions.FromExcelTime(strValue),
                 var t when t == typeof(bool) => strValue == "TRUE" ? true : strValue == "FALSE" ? false : ExcelExtensions.FromExcelNumber(strValue) == 1,
                 _ => ReflectionTools.TryParse(strValue, token.Type, out value) ? value :

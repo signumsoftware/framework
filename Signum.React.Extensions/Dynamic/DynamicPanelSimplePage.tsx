@@ -15,7 +15,7 @@ import { Options } from './DynamicClientOptions'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
 import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { Tab, Tabs } from 'react-bootstrap';
 import { FormGroup } from '@framework/Lines';
 import { toFilterRequests } from '@framework/Finder';
@@ -27,15 +27,16 @@ import { QueryString } from '@framework/QueryString'
 
 type DynamicPanelTab = "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
 
-export default function DynamicPanelSimplePage(p: RouteComponentProps<{}>) {
+export default function DynamicPanelSimplePage() {
+  const location = useLocation();
 
   function handleSelect(key: any /*string*/) {
-    AppContext.history.push("~/dynamic/panel?step=" + key);
+    AppContext.navigate("/dynamic/panel?step=" + key);
   }
 
   AuthClient.assertPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
 
-  let step = QueryString.parse(p.location.search).step as DynamicPanelTab | undefined;
+  let step = QueryString.parse(location.search).step as DynamicPanelTab | undefined;
 
   return (
     <div>

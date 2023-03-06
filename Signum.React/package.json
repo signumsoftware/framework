@@ -21,31 +21,28 @@
   },
   "homepage": "https://github.com/signumsoftware/framework#readme",
   "resolutions": {
-    "@types/react": "18.0.21",
-    "@types/history": "4.7.11"
+    "@types/react": "18.0.27"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "6.2.0",
-    "@fortawesome/free-brands-svg-icons": "6.2.0",
-    "@fortawesome/free-regular-svg-icons": "6.2.0",
-    "@fortawesome/free-solid-svg-icons": "6.2.0",
+    "@fortawesome/fontawesome-svg-core": "6.2.1",
+    "@fortawesome/free-brands-svg-icons": "6.2.1",
+    "@fortawesome/free-regular-svg-icons": "6.2.1",
+    "@fortawesome/free-solid-svg-icons": "6.2.1",
     "@fortawesome/react-fontawesome": "0.2.0",
-    "@restart/ui": "1.4.0",
     "@types/d3": "7.4.0",
     "@types/d3-scale-chromatic": "3.0.0",
-    "@types/history": "4.7.11",
-    "@types/luxon": "3.0.1",
+    "@types/luxon": "3.2.0",
     "@types/prop-types": "15.7.5",
-    "@types/react": "18.0.21",
+    "@types/react": "18.0.27",
     "@types/react-dom": "18.0.6",
-    "@types/react-router": "5.1.19",
-    "@types/react-router-dom": "5.3.3",
     "@types/react-transition-group": "4.4.5",
-    "luxon": "3.0.4",
+    "luxon": "3.2.1",
     "popper.js": "1.16.1",
     "react": "18.2.0",
     "react-bootstrap": "2.7.0",
     "react-dom": "18.2.0",
+    "react-router": "6.7.0",
+    "react-router-dom": "6.7.0",
     "react-widgets": "5.8.4"
   }
 }

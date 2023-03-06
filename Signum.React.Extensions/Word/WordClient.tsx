@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -21,8 +22,9 @@ import WordEntityMenu from "./WordEntityMenu";
 import { ButtonsContext, ButtonBarElement } from "@framework/TypeContext";
 import { Dropdown } from 'react-bootstrap';
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
+import { SearchControlLoaded } from '@framework/Search';
 
-export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
+export function start(options: { routes: RouteObject[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
 
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WordTemplateEntity });
   register(QueryModel, {
@@ -123,6 +125,9 @@ export function register<T extends ModifiableEntity>(type: Type<T>, setting: Wor
 
 export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
 
+  if (ctx.container instanceof SearchControlLoaded && ctx.container.state.resultFindOptions?.systemTime)
+    return undefined;
+
   if (!Navigator.isViewable(WordTemplateEntity) || ctx.lites.length == 0)
     return undefined;
 
@@ -177,15 +182,15 @@ export namespace API {
   }
 
   export function createAndDownloadReport(request: CreateWordReportRequest): Promise<Response> {
-    return ajaxPostRaw({ url: "~/api/word/createReport" }, request);
+    return ajaxPostRaw({ url: "/api/word/createReport" }, request);
   }
 
   export function getConstructorType(wordModel: WordModelEntity): Promise<string> {
-    return ajaxPost({ url: "~/api/word/constructorType" }, wordModel);
+    return ajaxPost({ url: "/api/word/constructorType" }, wordModel);
   }
 
   export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn, request: GetWordTemplatesRequest): Promise<Lite<WordTemplateEntity>[]> {
-    return ajaxPost({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
+    return ajaxPost({ url: `/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
   }
 }
 

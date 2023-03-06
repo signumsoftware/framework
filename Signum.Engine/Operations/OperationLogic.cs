@@ -105,7 +105,7 @@ public static class OperationLogic
 
             sb.Schema.SchemaCompleted += OperationLogic_Initializing;
             sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
-
+            
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
             OperationsToken.GetEligibleTypeOperations = (entityType) => OperationsToken_GetEligibleTypeOperations(entityType);
@@ -394,6 +394,7 @@ Consider the following options:
             ReturnType = oper.ReturnType,
             HasStates = (oper as IGraphHasStatesOperation)?.HasFromStates,
             HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
+            HasCanExecuteExpression = (oper as IEntityOperation)?.CanExecuteExpression() != null,
             CanBeNew = (oper as IEntityOperation)?.CanBeNew,
             BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType
         };
@@ -738,30 +739,47 @@ Consider the following options:
         {
             foreach (var grLites in lites.GroupBy(a => a.EntityType))
             {
-                var operations = operationSymbols.Select(opKey => FindOperation(grLites.Key, opKey)).ToList();
+                var operations = operationSymbols.Select(opKey => (IEntityOperation)FindOperation(grLites.Key, opKey)).ToList();
 
-                foreach (var grOperations in operations.GroupBy(a => a.GetType().GetGenericArguments().Let(arr => Tuple.Create(arr[0], arr[1]))))
+                foreach (var grOperations in operations.Where(a=>a.StateType != null).GroupBy(a => a.StateType!))
                 {
-                    var dic = giGetContextualGraphCanExecute.GetInvoker(grLites.Key, grOperations.Key.Item1, grOperations.Key.Item2)(grLites, grOperations);
-                    if (result.IsEmpty())
-                        result.AddRange(dic);
-                    else
+                    if (grOperations.Key != null)
                     {
-                        foreach (var kvp in dic)
+                        var dic = giGetContextualGraphCanExecute.GetInvoker(grLites.Key, grLites.Key, grOperations.Key)(grLites, grOperations);
+                        if (result.IsEmpty())
+                            result.AddRange(dic);
+                        else
                         {
-                            result[kvp.Key] = "\r\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
+                            foreach (var kvp in dic)
+                            {
+                                result[kvp.Key] = "\r\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
+                            }
                         }
                     }
                 }
+
+                var operationsWithCanExecute = operations.Where(a => a.CanExecuteExpression() != null && !result.ContainsKey(a.OperationSymbol));
+
+                var dic2 = giGetCanExecuteExpression.GetInvoker(grLites.Key)(grLites, operationsWithCanExecute);
+                if (result.IsEmpty())
+                    result.AddRange(dic2);
+                else
+                {
+                    foreach (var kvp in dic2)
+                    {
+                        result[kvp.Key] = "\r\n".Combine(result.TryGetC(kvp.Key), kvp.Value);
+                    }
+                }
+
             }
         }
 
         return result;
     }
 
-    internal static GenericInvoker<Func<IEnumerable<Lite<IEntity>>, IEnumerable<IOperation>, Dictionary<OperationSymbol, string>>> giGetContextualGraphCanExecute =
+    internal static GenericInvoker<Func<IEnumerable<Lite<IEntity>>, IEnumerable<IEntityOperation>, Dictionary<OperationSymbol, string>>> giGetContextualGraphCanExecute =
         new((lites, operations) => GetContextualGraphCanExecute<Entity, Entity, DayOfWeek>(lites, operations));
-    internal static Dictionary<OperationSymbol, string> GetContextualGraphCanExecute<T, E, S>(IEnumerable<Lite<IEntity>> lites, IEnumerable<IOperation> operations)
+    internal static Dictionary<OperationSymbol, string> GetContextualGraphCanExecute<T, E, S>(IEnumerable<Lite<IEntity>> lites, IEnumerable<IEntityOperation> operations)
         where E : Entity
         //where S : struct (nullable enums)
         where T : E
@@ -772,13 +790,34 @@ Consider the following options:
             Database.Query<T>().Where(e => list.Contains(e.ToLite())).Select(getState).Distinct()).Distinct().ToList();
 
         return (from o in operations.Cast<Graph<E, S>.IGraphFromStatesOperation>()
-                let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
-                where invalid.Any()
-                select KeyValuePair.Create(o.OperationSymbol,
-                    OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
-                    o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
-                    invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();
+                   let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
+                   where invalid.Any()
+                   select KeyValuePair.Create(o.OperationSymbol,
+                       OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
+                       o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
+                       invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();
     }
+
+    internal static GenericInvoker<Func<IEnumerable<Lite<IEntity>>, IEnumerable<IEntityOperation>, Dictionary<OperationSymbol, string>>> giGetCanExecuteExpression =
+        new((lites, operation) => GetCanExecuteExpression<Entity>(lites, operation));
+    internal static Dictionary<OperationSymbol, string> GetCanExecuteExpression<E>(IEnumerable<Lite<IEntity>> lites, IEnumerable<IEntityOperation> operations)
+        where E : Entity
+    {
+        var eParam = Expression.Parameter(typeof(E));
+
+        var arrayInit = Expression.NewArrayInit(typeof(string), operations.Select(o => Expression.Invoke(o.CanExecuteExpression()!, eParam)));
+
+        var canExecutes = Expression.Lambda<Func<E, string[]>>(arrayInit, eParam);
+
+        var states = lites.Chunk(200).SelectMany(list =>
+            Database.Query<E>().Where(e => list.Contains(e.ToLite())).Select(canExecutes).Distinct()).ToList();
+
+        return operations.Select((o, i) => KeyValuePair.Create(o.OperationSymbol, states.Select(s => s[i]).Distinct().NotNull().ToString("\r\n").VerticalEtc(4)))
+            .Where(a => a.Value.HasText())
+            .ToDictionaryEx();
+    }
+
+
 
     public static Func<OperationLogEntity, bool> LogOperation = (request) => true;
 
@@ -869,8 +908,6 @@ public interface IEntityOperation : IOperation
 
 
 public delegate IDisposable? SurroundOperationHandler(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args);
-public delegate void OperationHandler(IOperation operation, Entity entity);
-public delegate void ErrorOperationHandler(IOperation operation, Entity entity, Exception ex);
 public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, Type entityType, bool inUserInterface);
 
 

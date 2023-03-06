@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as History from 'history'
+import { useLocation, Location } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
@@ -7,7 +7,7 @@ import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useAPI, useUpdatedRef, useHistoryListen, useWindowEvent, useAPIWithReload } from '@framework/Hooks'
+import { useAPI, useUpdatedRef, useWindowEvent, useAPIWithReload } from '@framework/Hooks'
 import * as Navigator from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
 import { getToString } from '@framework/Signum.Entities'
@@ -32,7 +32,9 @@ export default function ToolbarRenderer(p: {
   const [refresh, setRefresh] = React.useState(false);
   const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
 
-  function changeActive(location: History.Location) {
+  const location = useLocation();
+
+  function changeActive(location: Location) {
     var query = QueryString.parse(location.search);
     if (responseRef.current) {
 
@@ -41,11 +43,10 @@ export default function ToolbarRenderer(p: {
     }
   }
 
-  useHistoryListen((location: History.Location, action: History.Action) => {
-    changeActive(location);
-  }, response != null);
-
-  React.useEffect(() => changeActive(AppContext.history.location), [response]);
+  React.useEffect(() => {
+    if (response)
+      changeActive(location)
+  }, [location, response]);
 
   function handleRefresh() {
     return setTimeout(() => setRefresh(!refresh), 500)
@@ -66,9 +67,9 @@ export default function ToolbarRenderer(p: {
   );
 }
 
-export function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): number {
+export function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, location: Location, query: any): number {
   if (r.url)
-    return (location.pathname + location.search).startsWith(AppContext.toAbsoluteUrl(r.url)) ? 1 : 0;
+    return AppContext.toAbsoluteUrl(location.pathname + location.search).startsWith(AppContext.toAbsoluteUrl(r.url)) ? 1 : 0;
 
   if (!r.content)
     return 0;
@@ -80,9 +81,9 @@ export function isCompatibleWithUrl(r: ToolbarClient.ToolbarResponse<any>, locat
   return config.isCompatibleWithUrlPrio(r, location, query);
 }
 
-export function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: History.Location, query: any): { prio: number, response: ToolbarClient.ToolbarResponse<any> } | null {
+export function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: Location, query: any): { prio: number, response: ToolbarClient.ToolbarResponse<any> } | null {
   if (r.elements)
-    return r.elements.map(e => inferActive(e, location, query)).notNull().withMax(a => a.prio) ?? null;
+    return r.elements.map(e => inferActive(e, location, query)).notNull().maxBy(a => a.prio) ?? null;
 
   var prio = isCompatibleWithUrl(r, location, query);
 

@@ -13,9 +13,11 @@ public static class ExcelExtensions
         return datetime.ToUserInterface().ToOADate().ToString(CultureInfo.InvariantCulture); //Convert to Julean Format
     }
 
-    public static DateTime FromExcelDate(string datetime)
+    public static DateTime FromExcelDate(string datetime, DateTimeKind kind)
     {
-        return DateTime.FromOADate(double.Parse(datetime, CultureInfo.InvariantCulture)).FromUserInterface(); //Convert to Julean Format
+        var date = DateTime.FromOADate(double.Parse(datetime, CultureInfo.InvariantCulture));
+
+        return date.ToKind(kind);
     }
 
     public static string ToExcelTime(TimeOnly timeOnly)

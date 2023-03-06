@@ -117,7 +117,7 @@ public static partial class TextTemplateParser
 
         public override void FillQueryTokens(List<QueryToken> list)
         {
-            this.ValueProvider!.FillQueryTokens(list);
+            this.ValueProvider!.FillQueryTokens(list, false);
         }
 
         public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
@@ -217,7 +217,7 @@ public static partial class TextTemplateParser
 
         public override void FillQueryTokens(List<QueryToken> list)
         {
-            ValueProvider!.FillQueryTokens(list);
+            ValueProvider!.FillQueryTokens(list, forForeach: true);
             Block.FillQueryTokens(list);
         }
 

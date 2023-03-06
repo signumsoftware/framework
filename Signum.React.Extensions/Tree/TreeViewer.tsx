@@ -116,7 +116,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   searchIfDeps(newProps: TreeViewerProps) {
-    if (Hooks.areEqual(this.props.deps ?? [], newProps.deps ?? [])) {
+    if (Hooks.areEqualDeps(this.props.deps ?? [], newProps.deps ?? [])) {
       this.search(false);
     }
   }
@@ -146,9 +146,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     const path = this.getCurrentUrl();
 
     if (ev.ctrlKey || ev.button == 1)
-      window.open(path);
+      window.open(AppContext.toAbsoluteUrl(path));
     else
-      AppContext.history.push(path);
+      AppContext.navigate(path);
   };
 
   getCurrentUrl() {

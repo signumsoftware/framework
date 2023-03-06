@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { RouteComponentProps } from 'react-router'
 import * as Navigator from '@framework/Navigator'
 import { mlistItemContext, TypeContext } from '@framework/TypeContext'
 import { getTypeInfo } from '@framework/Reflection'
@@ -14,11 +13,7 @@ import { getToString, is, liteKey, liteKeyLong, MList } from '@framework/Signum.
 import SelectorModal from '../../Signum.React/Scripts/SelectorModal'
 import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal'
 
-interface ImportAssetsPageProps extends RouteComponentProps<{}> {
-
-}
-
-export default function ImportAssetsPage(p: ImportAssetsPageProps) {
+export default function ImportAssetsPage() {
 
   const [file, setFile] = React.useState<API.FileUpload | undefined>(undefined);
   const [model, setModel] = React.useState<UserAssetPreviewModel | undefined>(undefined);

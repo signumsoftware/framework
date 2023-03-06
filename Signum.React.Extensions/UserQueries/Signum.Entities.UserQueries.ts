@@ -27,6 +27,7 @@ export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
   displayName: string | null;
   summaryToken: UserAssets.QueryTokenEmbedded | null;
   hiddenColumn: boolean;
+  combineRows: DynamicQuery.CombineRows | null;
 }
 
 export const QueryFilterEmbedded = new Type<QueryFilterEmbedded>("QueryFilterEmbedded");
@@ -67,6 +68,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   columns: Entities.MList<QueryColumnEmbedded>;
   paginationMode: DynamicQuery.PaginationMode | null;
   elementsPerPage: number | null;
+  customDrilldowns: Entities.MList<Entities.Lite<Entities.Entity>>;
   guid: string /*Guid*/;
 }
 
@@ -79,7 +81,7 @@ export module UserQueryMessage {
   export const _0IsNotFilterable = new MessageKey("UserQueryMessage", "_0IsNotFilterable");
   export const Use0ToFilterCurrentEntity = new MessageKey("UserQueryMessage", "Use0ToFilterCurrentEntity");
   export const Preview = new MessageKey("UserQueryMessage", "Preview");
-  export const MakesThe0AvailableInContextualMenuWhenGrouping0 = new MessageKey("UserQueryMessage", "MakesThe0AvailableInContextualMenuWhenGrouping0");
+  export const MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0 = new MessageKey("UserQueryMessage", "MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0");
   export const MakesThe0AvailableAsAQuickLinkOf1 = new MessageKey("UserQueryMessage", "MakesThe0AvailableAsAQuickLinkOf1");
   export const TheSelected0 = new MessageKey("UserQueryMessage", "TheSelected0");
 }

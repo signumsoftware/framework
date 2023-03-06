@@ -21,6 +21,8 @@ public static class QueryLogic
     {
         QueryToken.StaticEntityExtensions = parent => Expressions.GetExtensionsTokens(parent);
         QueryToken.DynamicEntityExtensions = parent => Expressions.GetExtensionsWithParameterTokens(parent);
+        EntityPropertyToken.DateTimeKindField = ept =>
+        Schema.Current.Settings.FieldAttribute<DbTypeAttribute>(ept.PropertyRoute)?.DateTimeKind ?? DateTimeKind.Unspecified;
         ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
         QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;
         QueryToken.IsSystemVersioned = IsSystemVersioned;

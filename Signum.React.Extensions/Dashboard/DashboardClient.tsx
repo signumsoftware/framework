@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet, ajaxPost } from '@framework/Services';
 import * as Constructor from '@framework/Constructor';
@@ -17,7 +18,7 @@ import * as UserChartClient from '../Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, ImagePartEntity, SeparatorPartEntity } from './Signum.Entities.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { useAPI } from '@framework/Hooks';
 import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 import SelectorModal from '@framework/SelectorModal';
@@ -63,7 +64,7 @@ export interface PartRenderer<T extends IPartEntity> {
 
 export const partRenderers: { [typeName: string]: PartRenderer<IPartEntity> } = {};
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(DashboardEntity);
@@ -97,7 +98,7 @@ export function start(options: { routes: JSX.Element[] }) {
     defaultOrders: [{ token: DashboardEntity.token(d => d.dashboardPriority), orderType: "Descending" }]
   });
 
-  options.routes.push(<ImportRoute path="~/dashboard/:dashboardId" onImportModule={() => import("./View/DashboardPage")} />);
+  options.routes.push({ path: "/dashboard/:dashboardId", element: <ImportComponent onImport={() => import("./View/DashboardPage")} /> });
 
   registerRenderer(ValueUserQueryListPartEntity, {
     component: () => import('./View/ValueUserQueryListPart').then(a => a.default),
@@ -303,7 +304,7 @@ export function getQueryNames(part: IPartEntity) {
 }
 
 export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>) {
-  return "~/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity));
+  return "/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity));
 }
 
 export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer: PartRenderer<T>) {
@@ -336,15 +337,15 @@ function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd:
 
 export module API {
   export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
-    return ajaxGet({ url: `~/api/dashboard/forEntityType/${type}` });
+    return ajaxGet({ url: `/api/dashboard/forEntityType/${type}` });
   }
 
   export function home(): Promise<Lite<DashboardEntity> | null> {
-    return ajaxGet({ url: "~/api/dashboard/home" });
+    return ajaxGet({ url: "/api/dashboard/home" });
   }
 
   export function get(dashboard: Lite<DashboardEntity>): Promise<DashboardWithCachedQueries | null> {
-    return ajaxPost({ url: "~/api/dashboard/get" }, dashboard);
+    return ajaxPost({ url: "/api/dashboard/get" }, dashboard);
   }
 }
 

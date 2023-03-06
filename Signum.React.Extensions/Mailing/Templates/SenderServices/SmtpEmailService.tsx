@@ -20,7 +20,7 @@ export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceE
           <ValueLine ctx={net.subCtx(s => s.useDefaultCredentials)} />
           <ValueLine ctx={net.subCtx(s => s.username)} />
           {!sc.readOnly && net.subCtx(a => a.password).propertyRoute?.canModify() &&
-            <DoublePassword ctx={new TypeContext<string>(net, undefined, undefined as any, Binding.create(net.value, v => v.newPassword))} isNew={net.value.isNew} mandatory={false} />}
+            <DoublePassword ctx={new TypeContext<string>(net, undefined, undefined as any, Binding.create(net.value, v => v.newPassword))} initialOpen={Boolean(net.value.isNew)} mandatory={false} />}
           <ValueLine ctx={net.subCtx(s => s.enableSSL)} />
           <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={(cert: TypeContext<ClientCertificationFileEmbedded>) =>
             <div>

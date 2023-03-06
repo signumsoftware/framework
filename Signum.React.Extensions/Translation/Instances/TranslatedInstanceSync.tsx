@@ -6,7 +6,7 @@ import { notifySuccess } from '@framework/Operations'
 import * as CultureClient from '../CultureClient'
 import { API, PropertyRouteConflic, TypeInstancesChanges, TranslationRecord, PropertyChange } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Entities.Translation'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
 import { EntityLink } from '@framework/Search'
@@ -21,10 +21,11 @@ import { getToString, Lite } from '@framework/Signum.Entities'
 
 
 
-export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: string; culture: string; }>) {
+export default function TranslatedInstanceSync() {
+  const params = useParams() as { type: string; culture: string; };
 
-  const type = p.match.params.type;
-  const culture = p.match.params.culture;
+  const type = params.type;
+  const culture = params.culture;
 
   const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const [isLocked, lock] = useLock();
@@ -40,7 +41,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
 
     return (
       <div>
-        <TranslatedInstances data={result} currentCulture={p.match.params.culture} cultures={cultures} />
+        <TranslatedInstances data={result} currentCulture={params.culture} cultures={cultures} />
         <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary mt-2" onClick={handleSave} disabled={isLocked} />
       </div>
     );
@@ -84,7 +85,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
           <h2> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h2>
         </div>
         {deletedTranslations}
-        {result && result.totalInstances == 0 && <Link to={`~/translatedInstance/status`}>
+        {result && result.totalInstances == 0 && <Link to={`/translatedInstance/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
         </Link>}
         
@@ -95,7 +96,7 @@ export default function TranslatedInstanceSync(p: RouteComponentProps<{ type: st
   return (
     <div>
       <div className="mb-2">
-        <h2><Link to="~/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
+        <h2><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h2>
       </div>
       {deletedTranslations}
       {result && result.totalInstances > 0 && renderTable()}

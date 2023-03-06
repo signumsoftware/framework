@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -15,7 +16,7 @@ import { SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Entities.M
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '@framework/QuickLinks'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { ModifiableEntity } from "@framework/Signum.Entities";
 import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
 import { ModelEntity } from "@framework/Signum.Entities";
@@ -28,12 +29,13 @@ import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import "./Mailing.css";
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics';
 import { currentCulture } from '../Translation/CultureClient';
+import { SearchControlLoaded } from '@framework/Search';
 
 
 export var allTypes: string[] = [];
 
 export function start(options: {
-  routes: JSX.Element[],
+  routes: RouteObject[],
   pop3Config: boolean,
   sendEmailTask: boolean,
   contextual: boolean,
@@ -42,12 +44,12 @@ export function start(options: {
 }) {
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
 
-  options.routes.push(<ImportRoute path="~/asyncEmailSender/view" onImportModule={() => import("./AsyncEmailSenderPage")} />);
+  options.routes.push({ path: "/asyncEmailSender/view", element: <ImportComponent onImport={() => import("./AsyncEmailSenderPage")} /> });
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel),
     key: "AsyncEmailSenderPanel",
-    onClick: () => Promise.resolve("~/asyncEmailSender/view")
+    onClick: () => Promise.resolve("/asyncEmailSender/view")
   });
 
   registerToString(EmailTemplateMessageEmbedded, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
@@ -161,6 +163,9 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
   if (EmailTemplateEntity.tryTypeInfo() == null)
     return undefined;
 
+  if (ctx.container instanceof SearchControlLoaded && ctx.container.state.resultFindOptions?.systemTime)
+    return undefined;
+
   return API.getEmailTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single", { lite: (ctx.lites.length == 1 ? ctx.lites[0] : null) })
     .then(wts => {
       if (!wts.length)
@@ -206,15 +211,15 @@ export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args:
 
 export module API {
   export function start(): Promise<void> {
-    return ajaxPost({ url: "~/api/asyncEmailSender/start" }, undefined);
+    return ajaxPost({ url: "/api/asyncEmailSender/start" }, undefined);
   }
 
   export function stop(): Promise<void> {
-    return ajaxPost({ url: "~/api/asyncEmailSender/stop" }, undefined);
+    return ajaxPost({ url: "/api/asyncEmailSender/stop" }, undefined);
   }
 
   export function view(): Promise<AsyncEmailSenderState> {
-    return ajaxGet({ url: "~/api/asyncEmailSender/view" });
+    return ajaxGet({ url: "/api/asyncEmailSender/view" });
   }
 
 
@@ -229,19 +234,19 @@ export module API {
   }
 
   export function getConstructorType(emailModelEntity: EmailModelEntity): Promise<string> {
-    return ajaxPost({ url: "~/api/email/constructorType" }, emailModelEntity);
+    return ajaxPost({ url: "/api/email/constructorType" }, emailModelEntity);
   }
 
   export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn, request: GetEmailTemplatesRequest): Promise<Lite<EmailTemplateEntity>[]> {
-    return ajaxPost({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
+    return ajaxPost({ url: `/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
   }
 
   export function getAllTypes(signal?: AbortSignal): Promise<string[]> {
-    return ajaxGet({ url: "~/api/email/getAllTypes", signal });
+    return ajaxGet({ url: "/api/email/getAllTypes", signal });
   }
 
   export function getDefaultCulture(signal?: AbortSignal): Promise<CultureInfoEntity> {
-    return ajaxGet({ url: "~/api/email/getDefaultCulture", signal });
+    return ajaxGet({ url: "/api/email/getDefaultCulture", signal });
   }
 }
 

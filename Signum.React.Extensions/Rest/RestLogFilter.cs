@@ -20,14 +20,18 @@ public class RestLogFilter : ActionFilterAttribute
     public bool AllowReplay { get; set; }
 
     public bool IgnoreRequestBody { get; set; }
+    public bool IgnoreResponseBody{ get; set; }
 
     public override void OnActionExecuting(ActionExecutingContext context)
     {
         try
         {
             var request = context.HttpContext.Request;
-            context.HttpContext.Items[OriginalResponseStreamKey] = context.HttpContext.Response.Body;
-            context.HttpContext.Response.Body = new MemoryStream();
+            if (!IgnoreResponseBody)
+            {
+                context.HttpContext.Items[OriginalResponseStreamKey] = context.HttpContext.Response.Body;
+                context.HttpContext.Response.Body = new MemoryStream();
+            }
 
             var connection = context.HttpContext.Features.Get<IHttpConnectionFeature>()!;
 
@@ -87,15 +91,17 @@ public class RestLogFilter : ActionFilterAttribute
     {
         if(context.Exception != null)
         {
-            var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
-            var originalStream = (Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey)!;
-            request.EndDate = Clock.Now;
-            request.Exception = context.Exception.LogException()?.ToLite();
+            var restLog = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
+            restLog.EndDate = Clock.Now;
+            restLog.Exception = context.Exception.LogException()?.ToLite();
 
-            RestoreOriginalStream(context);
+            if (!IgnoreResponseBody)
+            {
+                RestoreOriginalStream(context);
+            }
 
             using (ExecutionMode.Global())
-                request.Save();
+                restLog.Save();
         }
 
         base.OnActionExecuted(context);
@@ -105,24 +111,27 @@ public class RestLogFilter : ActionFilterAttribute
     {
         try
         {
-            var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
-            request.EndDate = Clock.Now;
+            var restLog = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
+            restLog.EndDate = Clock.Now;
 
-            Stream memoryStream = RestoreOriginalStream(context);
-
-            if (context.Exception == null)
+            if (!IgnoreResponseBody)
             {
-                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
-                request.ResponseBody = Encoding.UTF8.GetString(memoryStream.ReadAllBytes());
+                Stream memoryStream = RestoreOriginalStream(context);
+
+                if (context.Exception == null)
+                {
+                    memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+                    restLog.ResponseBody = Encoding.UTF8.GetString(memoryStream.ReadAllBytes());
+                }
             }
 
             if (context.Exception != null)
             {
-                request.Exception = context.Exception.LogException()?.ToLite();
+                restLog.Exception = context.Exception.LogException()?.ToLite();
             }
 
             using (ExecutionMode.Global())
-                request.Save();
+                restLog.Save();
         }
         catch (Exception e)
         {

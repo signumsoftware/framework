@@ -1,6 +1,7 @@
 import * as AppContext from './AppContext';
 import * as React from 'react'
-import { useStateWithPromise, useHistoryListen } from './Hooks';
+import { useStateWithPromise} from './Hooks';
+import { useLocation } from 'react-router';
 
 declare global {
   interface KeyboardEvent {
@@ -43,7 +44,9 @@ export function GlobalModalContainer() {
 
   var [modals, setModals] = useStateWithPromise<React.ReactElement<IModalProps<any>>[]>([]);
 
-  useHistoryListen(() => setModals([]), true);
+  const location = useLocation();
+
+  React.useEffect(() => { setModals([]); }, [location]);
 
   React.useEffect(() => {
     current = {
@@ -67,7 +70,7 @@ export function GlobalModalContainer() {
 
   React.useEffect(() => {
     setModals([]);
-  }, [AppContext.history.location.pathname])
+  }, [location.pathname])
 
   return React.createElement("div", { className: "sf-modal-container" }, ...modals);
 }

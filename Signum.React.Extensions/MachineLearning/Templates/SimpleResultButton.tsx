@@ -5,6 +5,7 @@ import * as ChartClient from '../../Chart/ChartClient'
 import { TypeContext } from '@framework/Lines';
 import { is } from '@framework/Signum.Entities';
 import { QueryTokenString } from '@framework/Reflection';
+import { toAbsoluteUrl } from '@framework/AppContext';
 
 interface SimpleResultButtonProps {
   ctx: TypeContext<PredictorEntity>;
@@ -14,7 +15,7 @@ export default function SimpleResultButton(p : SimpleResultButtonProps){
 
   function handleOnClick(e: React.MouseEvent<any>) {
     e.preventDefault();
-    window.open(getChartUrl());
+    window.open(toAbsoluteUrl(getChartUrl()));
   }
 
   function getChartUrl(): string {

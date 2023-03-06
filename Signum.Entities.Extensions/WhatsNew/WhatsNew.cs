@@ -25,6 +25,9 @@ public class WhatsNewEntity : Entity
 
     public WhatsNewState Status { get; set; } = WhatsNewState.Draft;
 
+    [ImplementedBy(typeof(QueryEntity), typeof(PermissionSymbol))]
+    public Lite<Entity>? Related { get; set; }
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
 }
@@ -78,6 +81,7 @@ public enum WhatsNewMessage
     BackToOverview,
     NewsPage,
     Preview,
+    IsRead,
 }
 
 public enum WhatsNewState

@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { RouteComponentProps } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { RenderEntity, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import EntityLink from '@framework/SearchControl/EntityLink'
-import { SearchControl } from '@framework/Search'
-import { Entity, getToString, JavascriptMessage } from '@framework/Signum.Entities'
+import { SearchControl, SearchControlLoaded } from '@framework/Search'
+import { Entity, EntityControlMessage, getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TimeMachineMessage } from '../Signum.Entities.DiffLog'
 import { Lite } from '@framework/Signum.Entities'
@@ -18,11 +18,15 @@ import { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { IModalProps, openModal } from '@framework/Modals'
 import { EntityDump } from '../DiffLogClient'
+import MessageModal from '@framework/Modals/MessageModal'
+import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
+import { ResultRow } from '@framework/FindOptions'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { classes } from '@framework/Globals'
 
 
-export default function TimeMachinePage(p: RouteComponentProps<{ type: string; id: string }>) {
-
-  var params = p.match.params;
+export default function TimeMachinePage() {
+  const params = useParams() as { type: string; id: string };
 
   const lite = useAPI(() => {
     var lite = newLite(params.type, params.id!);
@@ -30,51 +34,106 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
     return Navigator.API.fillLiteModels(lite)
       .then(() => lite)
       .catch(() => { lite.model = TimeMachineMessage.EntityDeleted.niceToString(); lite.ModelType = undefined; return lite });
-  }, [])
+  }, [params.type, params.id])
+
+  if (lite == undefined)
+    return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
+
+  return (<TimeMachine lite={lite} />);
+}
+
+
+export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
 
   const searchControl = React.useRef<SearchControlHandler>(null);
   const forceUpdate = useForceUpdate();
-  const queryDescription = useAPI(() => Finder.getQueryDescription(params.type), [params.type]);
-
-  if (lite == null)
-    return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
+  const queryDescription = useAPI(() => Finder.getQueryDescription(p.lite.EntityType), [p.lite]);
 
   var scl = searchControl.current?.searchControlLoaded ?? undefined;
   var colIndex = scl?.props.findOptions.columnOptions.findIndex(a => a.token != null && a.token.fullKey == "Entity.SystemValidFrom");
 
+  function renderCheckBox(sc: SearchControlLoaded, row: ResultRow, rowIndex: number) {
+    var checked = Boolean(sc.state.selectedRows?.contains(row));
+    return (
+      <input type="radio" className={classes("form-check-input",
+        checked && sc.state.selectedRows!.maxBy(a => a.columns[colIndex!])! != row && "bg-secondary border-secondary"
+      )} checked={checked} onChange={e => { }} onClick={e => {
+        if (e.ctrlKey) {
+          if (checked) {
+            sc.state.selectedRows?.remove(row)
+            sc.notifySelectedRowsChanged()
+          } else {
+            if (sc.state.selectedRows && sc.state.selectedRows.length >= 2)
+              return MessageModal.showError(TimeMachineMessage.YouCanNotSelectMoreThanTwoVersionToCompare.niceToString())
+            sc.state.selectedRows?.push(row);
+            sc.notifySelectedRowsChanged();
+          }
+        }
+        else {
+          sc.state.selectedRows?.clear();
+          var rows = sc.state.resultTable!.rows;
+
+          if (rowIndex + 1 < rows.length) {
+            const nextRow = rows[rowIndex + 1];
+            sc.state.selectedRows?.push(nextRow);
+          }
+          sc.state.selectedRows?.push(row);
+          sc.notifySelectedRowsChanged();
+        }
+      }}
+      />
+    );
+  }
+
+  var prevLogToken = QueryTokenString.entity().expression<OperationLogEntity>("PreviousOperationLog");
+
   return (
     <div>
-      <h4>
+      {!p.isModal && <h4>
         <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
         <br />
         <small className="sf-type-nice-name">
-          <EntityLink lite={lite}>{"{0} {1}".formatWith(getTypeInfo(lite.EntityType).niceName, lite.id)}</EntityLink>
-          &nbsp;<span style={{ color: "#aaa" }}>{getToString(lite)}</span>
+          <EntityLink lite={p.lite}>{"{0} {1}".formatWith(getTypeInfo(p.lite.EntityType).niceName, p.lite.id)}</EntityLink>
+          &nbsp;<span style={{ color: "#aaa" }}>{getToString(p.lite)}</span>
         </small>
-      </h4>
+        <br />
+      </h4>}
 
-      <br />
-      <h5>All Versions</h5>
+      <h5>{TimeMachineMessage.AllVersions.niceToString()}</h5>
       {
         queryDescription && <SearchControl ref={searchControl} findOptions={{
-          queryName: lite.EntityType,
-          filterOptions: [{ token: QueryTokenString.entity(), operation: "EqualTo", value: lite }],
+          queryName: p.lite.EntityType,
+          filterOptions: [{ token: QueryTokenString.entity(), operation: "EqualTo", value: p.lite }],
           columnOptions: [
+            { token: prevLogToken.append(a => a.start) },
+            { token: prevLogToken.append(a => a.user) },
+            { token: prevLogToken.append(a => a.operation) },
             { token: QueryTokenString.entity().expression("SystemValidFrom") },
             { token: QueryTokenString.entity().expression("SystemValidTo") },
           ],
-          columnOptionsMode: "InsertStart",
-          orderOptions: [{ token: QueryTokenString.entity().expression("SystemValidFrom"), orderType: "Ascending" }],
-          systemTime: { mode: "All", joinMode: "FirstCompatible" }
+          columnOptionsMode: "ReplaceAll",
+          orderOptions: [{ token: QueryTokenString.entity().expression("SystemValidFrom"), orderType: "Descending" }],
+          systemTime: { mode: "All", joinMode: "FirstCompatible" },
+          pagination: { mode: "All" },
         }}
           onSelectionChanged={() => forceUpdate()}
+          view={false}
+          showSelectedButton={false}
+          showContextMenu={() => "Basic"}
+          allowSelection="single"
+          selectionFromatter={renderCheckBox}
+          searchOnLoad={true}
+          create={false}
         />
       }
 
       <br />
-      <h5>Selected Versions</h5>
+
       {scl?.state.selectedRows &&
-        <TimeMachineTabs lite={lite} versionDatesUTC={scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => d)} />
+        <TimeMachineTabs
+          lite={p.lite}
+          versionDatesUTC={scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).map(d => d)}
+        />
       }
     </div>
   );
@@ -83,44 +142,60 @@ export default function TimeMachinePage(p: RouteComponentProps<{ type: string; i
 interface RenderEntityVersionProps {
   current: ()=> Promise<EntityDump>;
   previous: (() => Promise<EntityDump>) | undefined;
-  next: (() => Promise<EntityDump>) | undefined;
+  currentDate?: string;
+  previousDate?: string;
 }
 
 export function RenderEntityVersion(p: RenderEntityVersionProps) {
-  var current = useAPI(signal => p.current(), [p.current]);
-  var previous = useAPI(signal => p.previous == null ? Promise.resolve(null) : p.previous(), [p.previous]);
-  var next = useAPI(signal => p.next == null ? Promise.resolve(null) : p.next(), [p.next]);
+  var pair = useAPI(async signal => {
+    var curr = p.current();
+    var prev = p.previous == null ? Promise.resolve(null) : p.previous();
+    return ({ curr: await curr, prev: await prev });
+  }, [p.current, p.previous], { avoidReset: true });
 
-  if (!current || previous === undefined || next === undefined)
+  console.log(pair);
+
+  if (pair === undefined)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+
+  var ctx = TypeContext.root(pair.curr.entity, { readOnly: true });
+
+  if (pair.prev)
+    ctx.previousVersion = { value: pair.prev?.entity };
 
   return (
     <div>
-      <RenderEntity ctx={TypeContext.root(current.entity, { readOnly: true })} />
+      <RenderEntity ctx={ctx} currentDate={p.currentDate} previousDate={p.previousDate} />
     </div>
   );
 }
 
 interface DiffEntityVersionProps {
-  first: () => Promise<EntityDump>;
-  second: () => Promise<EntityDump>;
+  previous?: () => Promise<EntityDump>;
+  current: () => Promise<EntityDump>;
 }
 
 export function DiffEntityVersion(p: DiffEntityVersionProps) {
 
-  var first = useAPI(signal => p.first(), [p.first]);
+  var pair = useAPI(async signal => {
+    var curr = p.current();
+    var prev = p.previous == null ? Promise.resolve(null) : p.previous();
+    return ({ curr: await curr, prev: await prev });
+  }, [p.current, p.previous], { avoidReset: true });
 
-  var second = useAPI(signal => p.second(), [p.second]);
-
-  if (first == undefined || second  == undefined)
+  if (pair === undefined)
     return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
-  return (
-    <DiffDocument first={first.dump} second={second.dump} />
-  );
+  if (pair.prev == null)
+    return <pre>{pair.curr.dump}</pre>;
+
+  return <DiffDocument first={pair.prev.dump} second={pair.curr.dump} />;
 }
 
 export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string[] }) {
+
+  if (p.versionDatesUTC == null || p.versionDatesUTC.length < 1)
+    return null;
 
   function memoized(dateUtc: string): () => Promise<EntityDump> {
 
@@ -129,33 +204,49 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
     return () => (memo ??= DiffLogClient.API.getEntityDump(p.lite, dateUtc));
   }
 
-  var luxonFormat = toLuxonFormat("o", "DateTime");
+  var hasPrevious = p.versionDatesUTC.length > 1;
 
   var refs = React.useRef<{ [versionDateUTC: string]: () => Promise<EntityDump> }>({});
 
   refs.current = p.versionDatesUTC.toObject(a => a, a => refs.current[a] ?? memoized(a));
+  var dates = p.versionDatesUTC.orderBy(a => a);
+  var current = hasPrevious ? refs.current[dates[1]] : refs.current[dates[0]];
+  var previous = hasPrevious ? refs.current[dates[0]] : undefined;
 
   return (
     <Tabs id="timeMachineTabs">
-      {p.versionDatesUTC.orderBy(a => a).flatMap((d, i, dates) => [
-        <Tab title={toFormatWithFixes(DateTime.fromISO(d), luxonFormat)} key={d} eventKey={d}>
-          <RenderEntityVersion
-            previous={i == 0 ? undefined : refs.current[dates[i - 1]]}
-            current={refs.current[d]}
-            next={i == dates.length - 1 ? undefined : refs.current[dates[i + 1]]} />
-        </Tab>,
-        (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i + 1]}>
-          <DiffEntityVersion first={refs.current[d]} second={refs.current[dates[i+1]]} />
+      <Tab title={<span>
+        {hasPrevious ? TimeMachineMessage.UIDifferences.niceToString() : TimeMachineMessage.UISnapshot.niceToString()}
+        <span className="ms-2">
+        <FontAwesomeIcon icon="eye" color="lightblue"/>
+        {hasPrevious && <FontAwesomeIcon icon="circle" transform="shrink-10 left-25 up-5" color="red" />}
+        </span>
+      </span>}
+        key={"ui"} eventKey={"ui"}>
+        <RenderEntityVersion
+          previous={previous}
+          current={current}
+          currentDate={hasPrevious ? dates[1] : dates[0]}
+          previousDate={hasPrevious ? dates[0] : undefined}
+        />
         </Tab>
-      ])}
+      <Tab title={hasPrevious ?
+        <span>{TimeMachineMessage.DataDifferences.niceToString()}
+          <FontAwesomeIcon icon="plus" color="green" transform="up-5 right-7"/>
+          <FontAwesomeIcon icon="minus" color="red" transform="down-5 left-7" />
+        </span> : <span>{TimeMachineMessage.DataSnapshot.niceToString()}
+          <FontAwesomeIcon className="ms-2" icon="align-left" color="lightblue" />
+        </span>}
+        key={"data"} eventKey={"data"}>
+        <DiffEntityVersion previous={previous} current={current} />
+      </Tab>      
     </Tabs>
   );
 }
 
 
 interface TimeMachineModalProps extends IModalProps<boolean | undefined> {
-  lite: Lite<Entity>;
-  versionDatesUTC: string[]
+  lite: Lite<Entity>
 }
 
 export function TimeMachineModal(p: TimeMachineModalProps) {
@@ -174,8 +265,52 @@ export function TimeMachineModal(p: TimeMachineModalProps) {
   return (
     <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
       <div className="modal-header">
-        <h5 className="modal-title">{TimeMachineMessage.CompareVersions.niceToString()}</h5>
+        <h4>
+          <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
+          <br />
+          <small className="sf-type-nice-name">
+            <span style={{ color: "#aaa" }}>{getToString(p.lite)}</span>
+          </small>
+        </h4>
         <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
+      </div>
+      <div className="modal-body">
+        <TimeMachine lite={p.lite} isModal={true} />
+      </div>
+    </Modal>
+  );
+}
+
+TimeMachineModal.show = (lite: Lite<Entity>): Promise<boolean | undefined> => {
+  return openModal<boolean | undefined>(<TimeMachineModal lite={lite} />);
+};
+
+
+
+
+interface TimeMachineModalCompareProps extends IModalProps<boolean | undefined> {
+  lite: Lite<Entity>;
+  versionDatesUTC: string[];
+}
+
+export function TimeMachineCompareModal(p: TimeMachineModalCompareProps) {
+
+  const [show, setShow] = React.useState(true);
+  const answerRef = React.useRef<boolean | undefined>(undefined);
+
+  function handleCloseClicked() {
+    setShow(false);
+  }
+
+  function handleOnExited() {
+    p.onExited!(answerRef.current);
+  }
+
+  return (
+    <Modal onHide={handleCloseClicked} show={show} className="message-modal" onExited={handleOnExited} size="xl">
+      <div className="modal-header">
+        <h5 className="modal-title">{TimeMachineMessage.CompareVersions.niceToString()}</h5>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked} />
       </div>
       <div className="modal-body">
         <TimeMachineTabs lite={p.lite} versionDatesUTC={p.versionDatesUTC} />
@@ -184,8 +319,6 @@ export function TimeMachineModal(p: TimeMachineModalProps) {
   );
 }
 
-TimeMachineModal.show = (lite: Lite<Entity>, versionDatesUTC: string[]): Promise<boolean | undefined> => {
-  return openModal<boolean | undefined>(<TimeMachineModal lite={lite} versionDatesUTC={versionDatesUTC} />);
+TimeMachineCompareModal.show = (lite: Lite<Entity>, versionDatesUTC: string[]): Promise<boolean | undefined> => {
+  return openModal<boolean | undefined>(<TimeMachineCompareModal lite={lite} versionDatesUTC={versionDatesUTC} />);
 };
-
-

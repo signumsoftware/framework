@@ -1,5 +1,5 @@
-import { Location } from 'history'
 import * as React from 'react'
+import { Location } from 'react-router'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
@@ -45,8 +45,8 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
       super.handleNavigateClick(e, res);
     else {
       Navigator.API.fetch(res.content!)
-        .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-        .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content } } }));
+        .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined)
+          .then(fo => Finder.explore(fo, { searchControlProps: { extraOptions: { userQuery: res.content } } })));
     }
   }
 
@@ -63,7 +63,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
 
   isCompatibleWithUrlPrio(res: ToolbarResponse<UserQueryEntity>, location: Location, query: any): number {
     return query["userQuery"] == liteKey(res.content!) ||
-      location.pathname == AppContext.toAbsoluteUrl(UserQueryClient.userQueryUrl(res.content!)) ? 2 : 0;
+      location.pathname == UserQueryClient.userQueryUrl(res.content!) ? 2 : 0;
   }
 }
 

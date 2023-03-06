@@ -4,7 +4,6 @@
     cursor: text;
     padding: 16px;
     border-radius: 2px;
-    margin-bottom: 2em;
     box-shadow: inset 0px 1px 4px -3px #ABABAB;
 }
 
@@ -113,3 +112,15 @@
 .sf-html-editor h3 {
     font-size: 1.5rem;
 }
+
+.html-viewer .sf-html-editor {
+    border: 0px;
+    box-shadow: none;
+    margin-bottom: 0px;
+    padding: 0px;
+}
+
+    .html-viewer .sf-html-editor .public-DraftEditor-content {
+        padding: 0px;
+        min-height: initial;
+    }

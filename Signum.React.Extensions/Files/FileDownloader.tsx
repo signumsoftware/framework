@@ -125,13 +125,13 @@ export interface FileDownloaderConfiguration<T extends IFile> {
 }
 
 registerConfiguration(FileEntity, {
-  fileUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
-  fileLiteUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFile/" + file.id),
+  fileUrl: file => AppContext.toAbsoluteUrl("/api/files/downloadFile/" + file.id),
+  fileLiteUrl: file => AppContext.toAbsoluteUrl("/api/files/downloadFile/" + file.id),
 });
 
 registerConfiguration(FilePathEntity, {
-  fileUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
-  fileLiteUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
+  fileUrl: file => AppContext.toAbsoluteUrl("/api/files/downloadFilePath/" + file.id),
+  fileLiteUrl: file => AppContext.toAbsoluteUrl("/api/files/downloadFilePath/" + file.id),
 });
 
 registerConfiguration(FileEmbedded, {
@@ -140,7 +140,7 @@ registerConfiguration(FileEmbedded, {
 });
 
 registerConfiguration(FilePathEmbedded, {
-  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId })}`)
+  fileUrl: file => AppContext.toAbsoluteUrl(`/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId })}`)
 });
 
 export function downloadFile(file: IFilePath & ModifiableEntity): Promise<Response> {

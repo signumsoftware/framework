@@ -7,7 +7,7 @@ import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.
 import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { StyleContext, TypeContext } from '../TypeContext'
-import SearchValue, { SearchValueController } from './SearchValue'
+import SearchValue, { renderTimeMachineIcon, SearchValueController } from './SearchValue'
 import { FormGroup } from '../Lines/FormGroup'
 import { SearchControlProps } from "./SearchControl";
 import { BsColor, BsSize } from '../Components';
@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines/EntityBase'
 import SelectorModal from '../SelectorModal'
 import { useForceUpdate } from '../Hooks'
+import { toAbsoluteUrl } from '../AppContext'
 
 export interface SearchValueLineProps {
   ctx: StyleContext;
@@ -110,8 +111,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       </div>
     );
   }
-
-
+  
   var token = svRef.current?.valueToken;
 
   const isQuery = p.valueToken == undefined || token?.queryTokenType == "Aggregate";
@@ -131,7 +131,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       {EntityBaseController.findIcon}
     </a>;
   
-  const create = ((p.create == "ifNull" && value === null) || (p.create ?? false)) &&
+  const create = !p.ctx.frame?.currentDate && ((p.create == "ifNull" && value === null) || (p.create ?? false)) &&
     <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
@@ -159,7 +159,9 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       helpText={p.helpText && svRef.current && p.helpText(svRef.current)}
     >
       <div className={isFormControl ? ((unit || view || extra || find || create) ? p.ctx.inputGroupClass : undefined) : p.ctx.formControlPlainTextClass}>
+        {svRef.current && renderTimeMachineIcon(svRef.current.hasHistoryChanges, `translate(-40%, -40%)`)}
         <SearchValue
+          ctx={p.ctx}
           ref={handleSearchValueLoaded}
           findOptions={fo}
           format={p.format}
@@ -182,6 +184,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           deps={p.deps}
           onRender={p.onRender}
           customRequest={p.customRequest}
+          avoidRenderTimeMachineIcon
         />
 
         {unit}
@@ -232,7 +235,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           if (isWindowsOpen || (s != null && s.avoidPopup)) {
             var vp = getViewPromise && getViewPromise(null)
 
-            window.open(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined));
+            window.open(toAbsoluteUrl(Navigator.createRoute(tn, vp && typeof vp == "string" ? vp : undefined)));
           } else {
             Finder.parseFilterOptions(fo.filterOptions || [], false, qd)
               .then(fos => Finder.getPropsFromFilters(tn, fos)

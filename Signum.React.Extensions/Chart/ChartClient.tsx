@@ -1,13 +1,14 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { DateTime } from 'luxon'
 import { ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import { Entity, getToString, Lite, liteKey, MList } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, parseLite, toMList } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate
+  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions
 } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import {
@@ -19,7 +20,7 @@ import ChartButton from './ChartButton'
 import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
 import * as ColorPaletteClient from './ColorPalette/ColorPaletteClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 import { ColumnRequest } from '@framework/FindOptions';
 import { toLuxonFormat } from '@framework/Reflection';
 import { toNumberFormat } from '@framework/Reflection';
@@ -30,10 +31,12 @@ import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
 import { Dic, softCast } from '../../Signum.React/Scripts/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
+import { UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';
+import * as UserAssetClient from '../UserAssets/UserAssetClient'
 
-export function start(options: { routes: JSX.Element[], googleMapsApiKey?: string, svgMap?: boolean }) {
+export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }) {
   
-  options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
+  options.routes.push({ path: "/chart/:queryName", element: <ImportComponent onImport={() => import("./Templates/ChartRequestPage")} /> });
 
   AppContext.clearSettingsActions.push(ButtonBarChart.clearOnButtonBarElements);
  
@@ -109,6 +112,25 @@ export function getRegisteredChartScriptComponent(symbol: ChartScriptSymbol): ()
   var result = registeredChartScriptComponents[symbol.key];
   if (!result)
     throw new Error("No chartScriptComponent registered in ChartClient for " + symbol.key);
+
+  return result;
+}
+
+export function getCustomDrilldownsFindOptions(queryKey: string, qd: QueryDescription, groupResults: boolean) {
+  var fos: FilterConditionOption[] = [];
+
+  if (groupResults)
+    fos.push(...[
+      { token: UserQueryEntity.token(e => e.query.key), value: queryKey },
+      { token: UserQueryEntity.token(e => e.entity.appendFilters), value: true }
+    ]);
+  else
+    fos.push({ token: UserQueryEntity.token(e => e.entityType?.entity?.cleanName), value: qd!.columns["Entity"].type.name });
+
+  const result = {
+    queryName: UserQueryEntity,
+    filterOptions: fos.map(fo => { fo.frozen = true; return fo; }),
+  } as FindOptions;
 
   return result;
 }
@@ -396,6 +418,7 @@ export interface ChartOptions {
   orderOptions?: (OrderOption | null | undefined)[];
   columnOptions?: (ChartColumnOption | null | undefined)[];
   parameters?: (ChartParameterOption | null | undefined)[];
+  customDrilldowns?: MList<Lite<Entity>>;
 }
 
 export interface ChartColumnOption {
@@ -463,7 +486,7 @@ export module Encoder {
 
           return p.element.value != defaultParameterValue(scriptParam, c?.token && c.token.token);
         })
-        .map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption)
+        .map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption),
     };
   }
 
@@ -489,7 +512,7 @@ export module Encoder {
 
     encodeColumn(query, co.columnOptions?.notNull());
 
-    return AppContext.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
+    return `/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query);
 
   }
 
@@ -861,7 +884,7 @@ export module API {
 
   export function fetchScripts(): Promise<ChartScript[]> {
     return ajaxGet({
-      url: "~/api/chart/scripts"
+      url: "/api/chart/scripts"
     });
   }
 }

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Location } from 'history'
+import { Location } from 'react-router'
 import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as WorkflowClient from './WorkflowClient'
 import { WorkflowEntity, WorkflowMainEntityStrategy } from './Signum.Entities.Workflow'
@@ -36,6 +36,6 @@ export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity>
   }
 
   isCompatibleWithUrlPrio(res: ToolbarResponse<WorkflowEntity>, location: Location, query: any): number {
-    return location.pathname.startsWith(AppContext.toAbsoluteUrl(WorkflowClient.workflowStartUrl(res.content!))) ? 2 : 0;
+    return location.pathname.startsWith(WorkflowClient.workflowStartUrl(res.content!)) ? 2 : 0;
   }
 }

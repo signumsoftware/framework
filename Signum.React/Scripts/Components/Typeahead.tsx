@@ -204,7 +204,6 @@ export class TypeaheadController {
 
   handleMenuMouseUp = (e: React.MouseEvent<any>, index: number) => {
     e.preventDefault();
-    e.persist();
     this.setSelectedIndex(index).then(() => {
       if (this.select(e))
         this.input!.focus()
@@ -341,9 +340,9 @@ export namespace TypeaheadOptions {
 
       return (
         <>
-          {splitText(str.substr(0, index), index + 1)}
+          {splitText(str.substr(0, index), partIndex + 1)}
           <strong key={0}>{str.substr(index, part.length)}</strong>
-          {splitText(str.substr(index + part.length), index + 1)}
+          {splitText(str.substr(index + part.length), partIndex + 1)}
         </>
       );
     }

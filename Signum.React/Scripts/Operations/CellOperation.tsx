@@ -66,7 +66,6 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
 
   const handleOnClick = (event: React.MouseEvent<any>) => {
     coc.event = event;
-    event.persist();
     resolvedOnClick(coc);
   }
 
@@ -192,7 +191,9 @@ export function defaultCellOperationClick(coc: CellOperationContext<any>, ...arg
             }));
         };
       case "Execute":
-        return API.executeLite(coc.lite, coc.operationInfo.key, ...args)
+        return (coc.progressModalOptions ?
+          API.executeLiteWithProgress(coc.lite, coc.operationInfo.key, coc.progressModalOptions, ...args) :
+          API.executeLite(coc.lite, coc.operationInfo.key, ...args))
           .then(coc.onExecuteSuccess ?? (pack => {
             coc.cellContext.refresh?.();
             coc.raiseEntityChanged();

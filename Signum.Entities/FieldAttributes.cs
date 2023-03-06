@@ -291,7 +291,10 @@ public class DbTypeAttribute : Attribute
     public const string SqlServer_NewId = "NEWID()";
     public const string SqlServer_NewSequentialId = "NEWSEQUENTIALID()";
     public const string Postgres_UuidGenerateV1 = "uuid_generate_v1()";
+
+    public DateTimeKind DateTimeKind { get; set; }
 }
+
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
 public sealed class PrimaryKeyAttribute : DbTypeAttribute

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import * as Navigator from "./Navigator"
@@ -25,21 +26,17 @@ import {
   Anonymous, toLuxonDurationFormat, timeToString, toFormatWithFixes
 } from './Reflection';
 
-import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded, { SearchControlMobileOptions } from './SearchControl/SearchControlLoaded';
-import { ImportRoute } from "./AsyncImport";
-import { SearchControl } from "./Search";
+import { ImportComponent } from './ImportComponent'
 import { ButtonBarElement } from "./TypeContext";
 import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
+import { similarToken } from "./Search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
-import { Search } from "history";
-import { parse } from "@fortawesome/fontawesome-svg-core";
-import { faUnderline } from "@fortawesome/free-solid-svg-icons";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -48,8 +45,8 @@ export function clearQuerySettings() {
   Dic.clear(querySettings);
 }
 
-export function start(options: { routes: JSX.Element[] }) {
-  options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => Options.getSearchPage()} />);
+export function start(options: { routes: RouteObject[] }) {
+  options.routes.push({ path: "/find/:queryName", element: <ImportComponent onImport={() => Options.getSearchPage()} /> });
   AppContext.clearSettingsActions.push(clearContextualItems);
   AppContext.clearSettingsActions.push(clearQuerySettings);
   AppContext.clearSettingsActions.push(clearQueryDescriptionCache);
@@ -224,7 +221,7 @@ export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptionsMan
 export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
   e.preventDefault();
   if (e.ctrlKey || e.button == 1)
-    window.open(findOptionsPath(findOptions));
+    window.open(AppContext.toAbsoluteUrl(findOptionsPath(findOptions)));
   else
     explore(findOptions);
 }
@@ -242,8 +239,9 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
 export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
   const query = findOptionsPathQuery(fo, extra);
+  var strQuery = QueryString.stringify(query);
 
-  return AppContext.history.createHref({ pathname: "~/find/" + getQueryKey(fo.queryName), search: QueryString.stringify(query) });
+  return "/find/" + getQueryKey(fo.queryName) + (strQuery ? ("?" + strQuery) : "");
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
@@ -366,6 +364,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
     token: c.token!.fullKey,
     displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
     summaryToken: c.summaryToken?.fullKey,
+    combineRows: c.combineRows,
     hiddenColumn: c.hiddenColumn,
   }) as ColumnOption;
  
@@ -465,6 +464,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
       token: completer.get(co.token.toString()),
       displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
       summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
+      combineEquals: co.combineRows,
       hiddenColumn: co.hiddenColumn,
     }) as ColumnOptionParsed));
 }
@@ -761,6 +761,9 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
       fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
   }
 
+  if (fo.filterOptions)
+    fo.filterOptions = simplifyPinnedFilters(fo.filterOptions.notNull());
+
   const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
   const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
 
@@ -791,6 +794,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
         displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
         summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
         hiddenColumn: co.hiddenColumn,
+        combineRows: co.combineRows,
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions?.notNull() ?? []).map(oo => ({
@@ -804,6 +808,33 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     return parseFilterValues(result.filterOptions)
       .then(() => result)
   });
+}
+
+function simplifyPinnedFilters(fos: FilterOption[]): FilterOption[] {
+
+  const toRemove: FilterOption[] = [];
+  const result = fos.map(fo => {
+    if (fo.pinned != null &&
+      (fo.pinned?.active == "Always" || fo.pinned?.active == "WhenHasValue") &&
+      !isFilterGroupOption(fo)) {
+
+      var fo2 = fos.firstOrNull(fo2 =>
+        fo2.pinned == null &&
+        !isFilterGroupOption(fo2) &&
+        similarToken(fo.token?.toString(), fo2.token?.toString()) &&
+        (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
+        (fo.pinned?.active == "Always" || fo2.value != null));
+
+      if (fo2 != null) {
+        toRemove.push(fo2);
+        return { ...fo, value: fo2.value } as FilterConditionOption;
+      }
+    }
+    return fo;
+
+  });
+
+  return result.filter(fo => fo && !toRemove.contains(fo));
 }
 
 export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings, avoidHiddenColumns?: boolean): QueryRequest {
@@ -1576,46 +1607,46 @@ export function decompress(rt: ResultTable): ResultTable {
 export module API {
 
   export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
-    return ajaxGet({ url: "~/api/query/description/" + queryKey });
+    return ajaxGet({ url: "/api/query/description/" + queryKey });
   }
 
   export function fetchQueryEntity(queryKey: string): Promise<QueryEntity> {
-    return ajaxGet({ url: "~/api/query/queryEntity/" + queryKey });
+    return ajaxGet({ url: "/api/query/queryEntity/" + queryKey });
   }
 
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
   
-    return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, request)
+    return ajaxPost<ResultTable>({ url: "/api/query/executeQuery", signal }, request)
       .then(rt => decompress(rt));
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
-    return ajaxPost({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
+    return ajaxPost({ url: "/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
   export function fetchLites(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost({ url: "~/api/query/lites" }, request);
+    return ajaxPost({ url: "/api/query/lites" }, request);
   }
 
   export function fetchEntities(request: QueryEntitiesRequest): Promise<Entity[]>{
-    return ajaxPost({ url: "~/api/query/entities" }, request);
+    return ajaxPost({ url: "/api/query/entities" }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
     return ajaxGet({
-      url: "~/api/query/allLites?" + QueryString.stringify(request)
+      url: "/api/query/allLites?" + QueryString.stringify(request)
     });
   }
 
   export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
     return ajaxGet({
-      url: "~/api/query/findTypeLike?" + QueryString.stringify(request)
+      url: "/api/query/findTypeLike?" + QueryString.stringify(request)
     });
   }
 
   export function findLiteLike(request: AutocompleteRequest, signal?: AbortSignal): Promise<Lite<Entity>[]> {
-    return ajaxGet({ url: "~/api/query/findLiteLike?" + QueryString.stringify({ ...request }), signal });
+    return ajaxGet({ url: "/api/query/findLiteLike?" + QueryString.stringify({ ...request }), signal });
   }
 
   export interface AutocompleteRequest {
@@ -1625,11 +1656,11 @@ export module API {
   }
 
   export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
-    return ajaxPost({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
+    return ajaxPost({ url: "/api/query/parseTokens" }, { queryKey, tokens });
   }
 
   export function getSubTokens(queryKey: string, token: QueryToken | undefined, options: SubTokensOptions): Promise<QueryToken[]> {
-    return ajaxPost<QueryToken[]>({ url: "~/api/query/subTokens" }, { queryKey, token: token == undefined ? undefined : token.fullKey, options }).then(list => {
+    return ajaxPost<QueryToken[]>({ url: "/api/query/subTokens" }, { queryKey, token: token == undefined ? undefined : token.fullKey, options }).then(list => {
 
       if (token == undefined) {
         const entity = list.filter(a => a.key == "Entity").single();
@@ -1699,9 +1730,12 @@ export module Encoder {
           co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
             undefined;
 
-        query["column" + i] = co.token + (displayName ? ("~" + displayName) : "");
+        query["column" + i] = co.token  + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
           query["summary" + i] = co.summaryToken.toString();
+        if (co.combineRows)
+          query["combine" + i] = co.combineRows == "EqualValue" ? "V" : "E";
+       
       });
     }
   }
@@ -1830,17 +1864,21 @@ export module Decoder {
 
   export function decodeColumns(query: any): ColumnOption[] {
     var summary = valuesInOrder(query, "summary");
+    var combine = valuesInOrder(query, "combine");
 
     return valuesInOrder(query, "column").map(p => {
 
       var displayName = unscapeTildes(p.value.tryAfter("~")); 
 
-      return ({
-        token: p.value.tryBefore("~") ?? p.value,
+      var token = p.value.tryBefore("~") ?? p.value; 
+      var comb = combine.firstOrNull(a => a.index == p.index)?.value;
+      return softCast<ColumnOption>({
+        token: token,
         displayName: displayName == HIDDEN ? undefined : displayName,
         hiddenColumn: displayName == HIDDEN ? true : undefined,
-        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value
-      }) as ColumnOption;
+        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value,
+        combineRows: comb == "V" ? "EqualValue" : comb == "E" ? "EqualEntity" : undefined,
+      });
     });
   }
 }
@@ -1921,6 +1959,11 @@ export interface CellFormatterContext {
   columns: string[];
   row: ResultRow;
   rowIndex: number;
+  searchControl?: SearchControlLoaded
+}
+
+export function isSystemVersioned(tr?: TypeReference) {
+  return tr != null && getTypeInfos(tr).some(ti => ti.isSystemVersioned == true)
 }
 
 
@@ -2061,15 +2104,21 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidFrom",
       formatter: qt => {
         return new CellFormatter((cell: string | undefined, ctx) => {
+
           if (cell == undefined || cell == "")
             return "";
 
-          var className = cell.startsWith("0001-") ? "date-start" :
-            ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
+          var c = DateTime.fromISO(cell);
+
+          var className = c.year <= 1 ? "date-start" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && DateTime.fromISO(ctx.systemTime.startDate!) <= c ? "date-created" :
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>;
+          return (
+            <bdi className={classes("date", "try-no-wrap", className)}>
+              {c.toFormat(luxonFormat)}
+            </bdi>);
         }, false, "date-cell"); //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
@@ -2081,12 +2130,14 @@ function initFormatRules(): FormatRule[] {
           if (cell == undefined || cell == "")
             return "";
 
-          var className = cell.startsWith("9999-") ? "date-end" :
-            ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
+          var c = DateTime.fromISO(cell);
+
+          var className = c.year >= 9999 ? "date-end" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && c <= DateTime.fromISO(ctx.systemTime.endDate!) ? "date-removed" :
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>;
+          return <bdi className={classes("date", "try-no-wrap", className)}>{c.toFormat(luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },

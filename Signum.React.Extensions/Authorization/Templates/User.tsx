@@ -30,7 +30,7 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
           <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
           <ValueLine ctx={ctx.subCtx(e => e.userName)} readOnly={User.userNameReadonly(ctx.value) ? true : undefined} />
           {!ctx.readOnly && ctx.subCtx(a => a.passwordHash).propertyRoute?.canModify() && User.changePasswordVisible(ctx.value) &&
-            <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} isNew={entity.isNew} mandatory />}
+            <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} initialOpen={Boolean(entity.isNew)} mandatory />}
 
           <EntityLine ctx={ctx.subCtx(e => e.role)} onFind={() =>
             Finder.findMany(RoleEntity).then(rs => {

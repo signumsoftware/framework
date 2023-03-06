@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost } from '@framework/Services';
 import { SearchValueLine } from '@framework/Search'
 import { EntitySettings } from '@framework/Navigator'
@@ -9,7 +10,7 @@ import * as Constructor from '@framework/Constructor'
 import * as DynamicClientOptions from './DynamicClientOptions'
 import { DynamicValidationEntity, DynamicValidationEval } from './Signum.Entities.Dynamic'
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => import('./Validation/DynamicValidation')));
   Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New({ eval: DynamicValidationEval.New() }));
 
@@ -27,11 +28,11 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export namespace API {
   export function validationTest(request: DynamicValidationTestRequest): Promise<DynamicValidationTestResponse> {
-    return ajaxPost({ url: `~/api/dynamic/validation/test` }, request);
+    return ajaxPost({ url: `/api/dynamic/validation/test` }, request);
   }
 
   export function routeTypeName(request: PropertyRouteEntity): Promise<string> {
-    return ajaxPost({ url: `~/api/dynamic/validation/routeTypeName` }, request);
+    return ajaxPost({ url: `/api/dynamic/validation/routeTypeName` }, request);
   }
 }
 

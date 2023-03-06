@@ -9,7 +9,7 @@ import { DomUtils, classes } from '@framework/Globals';
 import { parseLite, SearchMessage } from '@framework/Signum.Entities';
 import { ChartRow } from '../../ChartClient';
 import { Rectangle } from '../../../Map/Utils';
-import { useThrottle, useSize, useAPI, areEqual } from '@framework/Hooks';
+import { useThrottle, useSize, useAPI, areEqualDeps } from '@framework/Hooks';
 import { ChartRequestModel } from '../../Signum.Entities.Chart';
 import { DashboardFilter } from '../../../Dashboard/View/DashboardFilterController';
 
@@ -66,7 +66,7 @@ export class MemoRepository {
 
   memo<T>(name: string, deps: unknown[], factory: () => T): T {
     var box = this.cache.get(name);
-    if (box == null || !areEqual(box.deps, deps)) {
+    if (box == null || !areEqualDeps(box.deps, deps)) {
       box = {
         val: factory(),
         deps: deps,

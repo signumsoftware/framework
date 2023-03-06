@@ -8,6 +8,8 @@ import { useController } from './LineBase'
 import { getTypeInfos, tryGetTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeBadge } from './AutoCompleteConfig'
+import { getTimeMachineIcon } from './TimeMachineIcon'
+
 
 export interface EntityDetailProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
@@ -56,6 +58,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
     return (
       <div className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass, p.ctx.value && "mb-4")}
         {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
+        {getTimeMachineIcon({ ctx: p.ctx})}
         {showAsCheckBox ?
           <label className="lead">
             {renderCheckBox()}
@@ -75,24 +78,27 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
     );
 
   return (
-    <fieldset className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass)}
-      {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
-      <legend className="lead">
-        {showAsCheckBox ?
-          <label>
-            {renderCheckBox()}
-            {p.label} {renderType()}
-            {p.extraButtonsAfter && p.extraButtonsAfter(c)}
-          </label>
-          :
-          <div>
-            <span>{p.label} {renderType()}</span>
-            {renderButtons()}
-          </div>
-        }
-      </legend>
-      <RenderEntity ctx={p.ctx} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onEntityLoaded={p.onEntityLoaded} />
-    </fieldset>
+    <>
+      {getTimeMachineIcon({ ctx: p.ctx, translateY:"150%" })}
+      <fieldset className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass)}
+        {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
+        <legend className="lead">
+          {showAsCheckBox ?
+            <label>
+              {renderCheckBox()}
+              {p.label} {renderType()}
+              {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+            </label>
+            :
+            <div>
+              <span>{p.label} {renderType()}</span>
+              {renderButtons()}
+            </div>
+          }
+        </legend>
+        <RenderEntity ctx={p.ctx} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onEntityLoaded={p.onEntityLoaded} />
+      </fieldset>
+    </>
   );
 
   function renderCheckBox() {
@@ -103,7 +109,6 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
       onChange={e => {
         e.preventDefault();
         e.stopPropagation();
-        e.persist();
         setTimeout(() => {
           if (!p.readOnly) {
             if (hasValue)

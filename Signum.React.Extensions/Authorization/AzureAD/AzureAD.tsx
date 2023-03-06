@@ -9,8 +9,7 @@ import { LoginAuthMessage } from "../Signum.Entities.Authorization";
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_ApplicationID);
        var __azureTenantId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_DirectoryID);
-       var __tenantLogo = @Json.Serialize(TenantLogic.GetCurrentTenant()!.Logo.BinaryFile);
- * */
+*/
 
 declare global {
   interface Window {
@@ -23,8 +22,8 @@ var msalConfig: msal.Configuration = {
   auth: {
     clientId: window.__azureApplicationId!, //This is your client ID
     authority: "https://login.microsoftonline.com/" + window.__azureTenantId!, //This is your tenant info
-    redirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
-    postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("~/"),
+    redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
+    postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
   },
   cache: {
     cacheLocation: "localStorage",
@@ -167,4 +166,4 @@ export function MicrosoftSignIn({ ctx }: { ctx: LoginContext }) {
   );
 }
 
-MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("~/signin_light.svg");
+MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("/signin_light.svg");

@@ -56,8 +56,6 @@ public class DeepLTranslator : ITranslator
         if (langCode.Length == 2)
             langCode = langCode.ToLower();
 
-        if (langCode == "en")
-            langCode = "en-GB";
 
         return langCode;
     }

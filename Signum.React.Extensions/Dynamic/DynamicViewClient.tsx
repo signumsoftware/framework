@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import * as ReactBootstrap from "react-bootstrap";
 import { globalModules } from './View/GlobalModules'
 import { ajaxGet } from '@framework/Services';
@@ -26,7 +27,7 @@ import * as Components from "@framework/Components";
 import * as Constructor from "@framework/Constructor"
 import { QueryString } from '@framework/QueryString';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => import('./View/DynamicView')));
   Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));
@@ -415,27 +416,27 @@ export function dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromis
 export namespace API {
 
   export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
-    return ajaxGet({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
+    return ajaxGet({ url: `/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
   }
 
   export function getDynamicViewProps(typeName: string, viewName: string): Promise<DynamicViewProps[]> {
-    return ajaxGet({ url: `~/api/dynamic/viewProps/${typeName}?` + QueryString.stringify({ viewName }) });
+    return ajaxGet({ url: `/api/dynamic/viewProps/${typeName}?` + QueryString.stringify({ viewName }) });
   }
 
   export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity | undefined> {
-    return ajaxGet({ url: `~/api/dynamic/selector/${typeName}` });
+    return ajaxGet({ url: `/api/dynamic/selector/${typeName}` });
   }
 
   export function getDynamicViewOverride(typeName: string): Promise<DynamicViewOverrideEntity[]> {
-    return ajaxGet({ url: `~/api/dynamic/override/${typeName}` });
+    return ajaxGet({ url: `/api/dynamic/override/${typeName}` });
   }
 
   export function getDynamicViewNames(typeName: string): Promise<string[]> {
-    return ajaxGet({ url: `~/api/dynamic/viewNames/${typeName}` });
+    return ajaxGet({ url: `/api/dynamic/viewNames/${typeName}` });
   }
 
   export function getSuggestedFindOptions(typeName: string): Promise<SuggestedFindOptions[]> {
-    return ajaxGet({ url: `~/api/dynamic/suggestedFindOptions/${typeName}` });
+    return ajaxGet({ url: `/api/dynamic/suggestedFindOptions/${typeName}` });
   }
 }
 

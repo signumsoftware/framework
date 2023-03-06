@@ -24,7 +24,6 @@ export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
     if (ke.keyCode && ke.keyCode == 9) {
       return OmniboxClient.toString(result);
     }
-    e.persist();
 
     const promise = OmniboxClient.navigateTo(result);
     if (promise) {

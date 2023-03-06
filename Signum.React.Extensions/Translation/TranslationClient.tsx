@@ -1,54 +1,55 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { TranslationPermission, TranslatedSummaryState } from './Signum.Entities.Translation'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import { ImportRoute } from "@framework/AsyncImport";
+import { ImportComponent } from '@framework/ImportComponent'
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(TranslationPermission.TranslateCode),
     key: "TranslateCode",
-    onClick: () => Promise.resolve("~/translation/status")
+    onClick: () => Promise.resolve("/translation/status")
   });
 
   options.routes.push(
-    <ImportRoute path="~/translation/status" onImportModule={() => import("./Code/TranslationCodeStatus")} />,
-    <ImportRoute path="~/translation/view/:assembly/:culture?" onImportModule={() => import("./Code/TranslationCodeView")} />,
-    <ImportRoute path="~/translation/syncNamespaces/:assembly/:culture" onImportModule={() => import("./Code/TranslationCodeSyncNamespaces")} />,
-    <ImportRoute path="~/translation/sync/:assembly/:culture/:namespace?" onImportModule={() => import("./Code/TranslationCodeSync")} />
+    { path: "/translation/status", element: <ImportComponent onImport={() => import("./Code/TranslationCodeStatus")} /> },
+    { path: "/translation/view/:assembly/:culture?", element: <ImportComponent onImport={() => import("./Code/TranslationCodeView")} /> },
+    { path: "/translation/syncNamespaces/:assembly/:culture", element: <ImportComponent onImport={() => import("./Code/TranslationCodeSyncNamespaces")} /> },
+    { path: "/translation/sync/:assembly/:culture/:namespace?", element: <ImportComponent onImport={() => import("./Code/TranslationCodeSync")} /> }
   );
 }
 
 
 export module API {
   export function status(): Promise<TranslationFileStatus[]> {
-    return ajaxGet({ url: "~/api/translation/state" });
+    return ajaxGet({ url: "/api/translation/state" });
   }
 
   export function retrieve(assembly: string, culture: string, filter: string): Promise<AssemblyResult> {
-    return ajaxPost({ url: `~/api/translation/retrieve?assembly=${assembly}&culture=${culture}&filter=${filter}` }, undefined);
+    return ajaxPost({ url: `/api/translation/retrieve?assembly=${assembly}&culture=${culture}&filter=${filter}` }, undefined);
   }
 
   export function namespaceStatus(assembly: string, culture: string): Promise<Array<NamespaceSyncStats>> {
-    return ajaxGet({ url: `~/api/translation/syncStats?assembly=${assembly}&culture=${culture}` });
+    return ajaxGet({ url: `/api/translation/syncStats?assembly=${assembly}&culture=${culture}` });
   }
 
   export function sync(assembly: string, culture: string, namespace?: string): Promise<AssemblyResult> {
-    return ajaxPost({ url: `~/api/translation/sync?assembly=${assembly}&culture=${culture}&namespace=${namespace || ""}` }, undefined);
+    return ajaxPost({ url: `/api/translation/sync?assembly=${assembly}&culture=${culture}&namespace=${namespace || ""}` }, undefined);
   }
 
   export function save(assembly: string, culture: string, result: AssemblyResult): Promise<void> {
-    return ajaxPost({ url: `~/api/translation/save?assembly=${assembly}&culture=${culture}` }, result);
+    return ajaxPost({ url: `/api/translation/save?assembly=${assembly}&culture=${culture}` }, result);
   }
 
   export function pluralize(culture: string, singular: string): Promise<string> {
-    return ajaxPost({ url: `~/api/translation/pluralize?culture=${culture}` }, singular);
+    return ajaxPost({ url: `/api/translation/pluralize?culture=${culture}` }, singular);
   }
 
   export function gender(culture: string, singular: string): Promise<string> {
-    return ajaxPost({ url: `~/api/translation/gender?culture=${culture}` }, singular);
+    return ajaxPost({ url: `/api/translation/gender?culture=${culture}` }, singular);
   }
 }
 

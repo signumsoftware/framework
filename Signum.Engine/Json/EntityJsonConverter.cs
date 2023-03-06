@@ -2,6 +2,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.Data.Common;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -240,6 +241,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                 writer.WritePropertyName("id");
                 JsonSerializer.Serialize(writer, entity.IdOrNull?.Object, entity.IdOrNull?.Object.GetType() ?? typeof(object), options);
 
+
                 if (entity.IsNew)
                 {
                     writer.WriteBoolean("isNew", true);
@@ -254,6 +256,8 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
             {
                 writer.WriteString("Type", mod.GetType().Name);
             }
+            
+            writer.WriteString("temporalId", mod.temporalId);
 
             if (!(mod is MixinEntity))
             {
@@ -453,7 +457,10 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                         JsonSerializer.Deserialize(ref reader, pi.PropertyType, options);
 
                     if (newValue is DateTime dt)
-                        newValue = dt.FromUserInterface();
+                    {
+                        var kind = Schema.Current.Settings.FieldAttribute<DbTypeAttribute>(pr)?.DateTimeKind ?? DateTimeKind.Unspecified;
+                        newValue = dt.ToKind(kind);
+                    }
 
                     if (Factory.Strategy == EntityJsonConverterStrategy.Full)
                     {
@@ -563,6 +570,9 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
             if (identityInfo.Id != null)
                 ((Entity)result).SetId(PrimaryKey.Parse(identityInfo.Id, type));
 
+            if (identityInfo.temporalId != null)
+                result.temporalId = identityInfo.temporalId.Value;
+
             return result;
         }
 
@@ -585,6 +595,9 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                         existingEntity.Ticks = identityInfo.Ticks.Value;
                     }
 
+                    if (identityInfo.temporalId != null)
+                        existingEntity.temporalId = identityInfo.temporalId.Value;
+
                     return existingEntity;
                 }
             }
@@ -599,6 +612,9 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
                     retrievedEntity.Ticks = identityInfo.Ticks.Value;
                 }
+
+                if (identityInfo.temporalId != null)
+                    retrievedEntity.temporalId = identityInfo.temporalId.Value;
 
                 return retrievedEntity;
             }
@@ -619,6 +635,9 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                 if (identityInfo.Ticks != null)
                     result.Ticks = identityInfo.Ticks.Value;
 
+                if (identityInfo.temporalId != null)
+                    result.temporalId = identityInfo.temporalId.Value;
+
                 return result;
             }
 
@@ -628,9 +647,21 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
             var existingMod = (ModifiableEntity?)existingValue;
 
             if (existingMod == null || existingMod.GetType() != type)
-                return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
+            {
+                var newEmbedded = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true)!;
 
-            return existingMod;
+                if (identityInfo.temporalId != null)
+                    newEmbedded.temporalId = identityInfo.temporalId.Value;
+
+                return newEmbedded;
+            }
+            else
+            {
+                if (identityInfo.temporalId != null)
+                    existingMod.temporalId = identityInfo.temporalId.Value;
+
+                return existingMod;
+            }
         }
     }
 
@@ -655,6 +686,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                 case "Type": reader.Read(); info.Type = reader.GetString()!; break;
                 case "ticks": reader.Read(); info.Ticks = long.Parse(reader.GetString()!); break;
                 case "modified": reader.Read(); info.Modified = reader.GetBoolean(); break;
+                case "temporalId": reader.Read(); info.temporalId = Guid.Parse(reader.GetString()!); break;
                 default: goto finish;
             }
 
@@ -668,7 +700,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
         return info;
     }
 
-    static readonly string[] specialProps = new string[] { "toStr", "id", "isNew", "Type", "ticks", "modified" };
+    static readonly string[] specialProps = new string[] { "toStr", "id", "isNew", "Type", "ticks", "modified", "temporalId" };
 
   
 }
@@ -681,6 +713,7 @@ public struct IdentityInfo
     public string Type;
     public string ToStr;
     public long? Ticks;
+    public Guid? temporalId;
 
     public override string ToString()
     {

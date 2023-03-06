@@ -197,15 +197,19 @@ public static class Synchronizer
 
     public static IDisposable? UseOldTableName(Table table, Replacements replacements)
     {
-        string? fullName = replacements.TryGetC(Replacements.KeyTablesInverse)?.TryGetC(table.Name.ToString());
+        var tableName = table.Name.ToString();
+        if (replacements.ReplaceDatabaseName != null)
+            tableName = tableName.Replace(replacements.ReplaceDatabaseName, Connector.Current.DatabaseName());
+
+        string? fullName = replacements.TryGetC(Replacements.KeyTablesInverse)?.TryGetC(tableName);
         if (fullName == null)
             return null;
 
-        ObjectName realName = table.Name;
+        ObjectName originalName = table.Name;
 
         table.Name = ObjectName.Parse(fullName, Schema.Current.Settings.IsPostgres);
 
-        return new Disposable(() => table.Name = realName);
+        return new Disposable(() => table.Name = originalName);
     }
 }
 
@@ -458,6 +462,14 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
 
 
         }
+    }
+
+    public string ConcretizeObjectName(ObjectName objectName)
+    {
+        if (ReplaceDatabaseName != null)
+            return objectName.ToString().Replace(ReplaceDatabaseName, Connector.Current.DatabaseName());
+
+        return objectName.ToString();
     }
 
     public struct Selection

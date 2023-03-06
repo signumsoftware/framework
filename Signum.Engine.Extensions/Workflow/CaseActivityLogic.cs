@@ -770,14 +770,14 @@ public static class CaseActivityLogic
                 ca.Case.CaseActivities().Any(a => !a.Is(ca)) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() :
                 !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
                 Delete = (ca, args) =>
-                    {
-                        var c = ca.Case;
-                        ca.Notifications().UnsafeDelete();
-                        ca.Delete();
-                        c.Delete();
-                        if (args.GetArg<bool>())
-                            c.MainEntity.Delete();
-                    },
+                {
+                    var c = ca.Case;
+                    ca.Notifications().UnsafeDelete();
+                    ca.Delete();
+                    c.Delete();
+                    if (args.GetArg<bool>())
+                        c.MainEntity.Delete();
+                },
             }.Register();
 
 

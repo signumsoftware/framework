@@ -6,17 +6,16 @@ import * as AppContext from '@framework/AppContext'
 import { UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import * as UserChartClient from './UserChartClient'
-import { RouteComponentProps } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { useForceUpdate } from '@framework/Hooks'
 
-interface UserChartPageProps extends RouteComponentProps<{ userChartId: string; entity?: string }> {
 
-}
 
-export default function UserChartPage(p : UserChartPageProps){
+export default function UserChartPage() {
+  const params = useParams() as { userChartId: string; entity?: string };
 
   React.useEffect(() => {
-    const { userChartId, entity } = p.match.params;
+    const { userChartId, entity } = params;
 
     const lite = entity == undefined ? undefined : parseLite(entity);
 
@@ -24,7 +23,7 @@ export default function UserChartPage(p : UserChartPageProps){
       .then(() => Navigator.API.fetchEntity(UserChartEntity, userChartId))
       .then(uc => UserChartClient.Converter.toChartRequest(uc, lite)
         .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc))))
-      .then(path => AppContext.history.replace(path));
+      .then(path => AppContext.navigate(path, { replace : true }));
   }, []);
 
   return <span>{JavascriptMessage.loading.niceToString()}</span>;

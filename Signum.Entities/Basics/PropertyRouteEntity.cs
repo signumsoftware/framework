@@ -2,7 +2,7 @@
 namespace Signum.Entities.Basics;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-[EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
+[EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
 public class PropertyRouteEntity : Entity
 {
     [StringLengthValidator(Min = 1, Max = 100)]

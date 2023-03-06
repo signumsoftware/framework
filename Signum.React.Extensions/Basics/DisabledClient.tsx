@@ -1,3 +1,5 @@
+import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -6,7 +8,7 @@ import * as Operations from '@framework/Operations'
 import { DisableOperation, DisabledMixin } from './Signum.Entities.Basics'
 import { getAllTypes } from "@framework/Reflection";
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[] }) {
 
   Operations.addSettings(new EntityOperationSettings(DisableOperation.Disable, {
     contextual: {

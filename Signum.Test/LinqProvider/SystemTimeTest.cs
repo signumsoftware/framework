@@ -10,6 +10,55 @@ public class SystemTimeTest
         Connector.CurrentLogger = new DebugTextWriter();
     }
 
+
+    [Fact]
+    public void SystemPeriodUTC()
+    {
+        if (!Connector.Current.SupportsTemporalTables)
+            return;
+
+        var list = (from f in Database.Query<NoteWithDateEntity>()
+                    select f.CreationTime).ToList();
+
+
+        Assert.Equal(DateTimeKind.Local, list.Select(a => a.Kind).Distinct().SingleEx());
+
+        using (SystemTime.Override(new SystemTime.All(JoinBehaviour.FirstCompatible)))
+        {
+            var listSP = (from f in Database.Query<FolderEntity>()
+                          select f.SystemPeriod()).ToList();
+
+            Assert.Equal(DateTimeKind.Utc, listSP.Select(a => a.Min!.Value.Kind).Distinct().SingleEx());
+
+
+            var listMin = (from f in Database.Query<FolderEntity>()
+                           select f.SystemPeriod().Min!.Value.InSql()).ToList();
+
+            Assert.Equal(DateTimeKind.Utc, listMin.Select(a => a.Kind).Distinct().SingleEx());
+
+
+            var listMinPlus1 = (from f in Database.Query<FolderEntity>()
+                           select f.SystemPeriod().Min!.Value.AddDays(1).InSql()).ToList();
+
+            Assert.Equal(DateTimeKind.Utc, listMinPlus1.Select(a => a.Kind).Distinct().SingleEx());
+        }
+        
+    }
+
+    [Fact]
+    public void SystemValidParameterValidation()
+    {
+        if (!Connector.Current.SupportsTemporalTables)
+            return;
+
+        Database.Query<NoteWithDateEntity>().Count(a => a.CreationTime > DateTime.Now);
+        Assert.Throws<InvalidDateTimeKindException>(() => Database.Query<NoteWithDateEntity>().Count(a => a.CreationTime > DateTime.UtcNow));
+
+
+        Assert.Throws<InvalidDateTimeKindException>(() => Database.Query<FolderEntity>().Count(f => f.SystemPeriod().Min!.Value > DateTime.Now));
+        Database.Query<FolderEntity>().Count(f => f.SystemPeriod().Min!.Value > DateTime.UtcNow);
+    }
+
     [Fact]
     public void TimePresent()
     {
@@ -53,7 +102,7 @@ public class SystemTimeTest
         if (!Connector.Current.SupportsTemporalTables)
             return;
 
-        NullableInterval<DateTimeOffset> period;
+        NullableInterval<DateTime> period;
         using (SystemTime.Override(new SystemTime.All(JoinBehaviour.AllCompatible)))
         {
             period = Database.Query<FolderEntity>().Where(a => a.Name == "X2").Select(a => a.SystemPeriod()).Single();

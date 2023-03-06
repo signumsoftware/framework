@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { RouteObject } from 'react-router'
 import { ConcurrentUserEntity } from './Signum.Entities.ConcurrentUser'
 import { Entity, isEntity, Lite, toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
@@ -6,13 +7,22 @@ import * as Widgets from '@framework/Frames/Widgets';
 import ConcurrentUser from './ConcurrentUser'
 import { ajaxGet } from '@framework/Services'
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization';
+import { getTypeInfo, TypeInfo } from '@framework/Reflection'
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: RouteObject[], activatedFor?: (e: Entity) => boolean }) {
+
+  //Keep in sync with ConcurrentUserLogic activatedFor!
+  const activatedFor = options.activatedFor ?? (e => {
+    const ti = getTypeInfo(e.Type);
+
+    return !(ti.entityKind == "System" || ti.entityKind == "SystemString");
+  });
+
   Widgets.onWidgets.push(ctx => {
 
     var me = ctx.ctx.value;
 
-    if (isEntity(me) && !me.isNew) {
+    if (isEntity(me) && !me.isNew && activatedFor(me)) {
       const entity = me;
       return <ConcurrentUser entity={entity} onReload={() =>
         Navigator.API.fetchEntityPack(toLite(entity))
@@ -25,7 +35,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export module API {
   export function getUsers(key: string): Promise<ConcurrentUserResponse[]> {
-    return ajaxGet({ url: "~/api/concurrentUser/getUsers/" + key});
+    return ajaxGet({ url: "/api/concurrentUser/getUsers/" + key});
   }
 }
 

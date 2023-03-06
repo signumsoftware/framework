@@ -129,7 +129,7 @@ internal class QueryRebinder : DbExpressionVisitor
     {
         using (NewScope())
         {
-            CurrentScope.AddRange(askedColumns.ToDictionary(c => new ColumnExpression(c.Type, part.Alias, c.Name), c => (ColumnExpression?)null));
+            CurrentScope.AddRange(askedColumns.ToDictionary(c => new ColumnExpression(c.Type, part.Alias, c.Name).CopyMetadata(c), c => (ColumnExpression?)null));
             return (SourceWithAliasExpression)Visit(part);
         }
     }
@@ -246,25 +246,18 @@ internal class QueryRebinder : DbExpressionVisitor
         {
             if (col.Alias == currentAlias)
             {
-                //Expression expr = columns.SingleEx(cd => (cd.Name ?? "-") == col.Name).Expression;
-                //askedColumns[col] = expr is SqlConstantExpression ? expr : col;
+
                 askedColumns[col] = col;
             }
             else
             {
-                ColumnExpression? colExp = CurrentScope[col];
-                //if (expr is ColumnExpression colExp)
-                //{
+                ColumnExpression colExp = CurrentScope[col]!;
+       
                 ColumnDeclaration? cd = cg.Columns.FirstOrDefault(c => c!.Expression.Equals(colExp));
                 if (cd == null)
                     cd = cg.MapColumn(colExp!);
 
-                askedColumns[col] = new ColumnExpression(col.Type, currentAlias, cd.Name);
-                //}
-                //else
-                //{
-                //    askedColumns[col] = expr;
-                //}
+                askedColumns[col] =  new ColumnExpression(col.Type, currentAlias, cd.Name).CopyMetadata(colExp);
             }
         }
 
@@ -296,7 +289,7 @@ internal class QueryRebinder : DbExpressionVisitor
     {
         var column = scalar.Select!.Columns.SingleEx();
 
-        VisitColumn(new ColumnExpression(scalar.Type, scalar.Select.Alias, column.Name ?? "-"));
+        VisitColumn(new ColumnExpression(scalar.Type, scalar.Select.Alias, column.Name ?? "-").CopyMetadata(scalar));
 
         var select = (SelectExpression)this.Visit(scalar.Select);
         if (select != scalar.Select)

@@ -1,10 +1,5 @@
-import * as React from 'react'
-import * as History from 'history'
-import { FindOptions, ResultTable } from './Search';
-import * as Finder from './Finder';
+import * as React from 'react';
 import * as AppContext from './AppContext';
-import { Entity, Lite, liteKey, isEntity } from './Signum.Entities';
-import { Type, QueryTokenString, newLite } from './Reflection';
 
 export function useForceUpdate(): () => void {
   const [count, setCount] = React.useState(0);
@@ -213,14 +208,14 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
   }, deps);
 
   if (!(options && options.avoidReset)) {
-    if (data && !areEqual(data.deps, deps))
+    if (data && !areEqualDeps(data.deps, deps))
       return undefined;
   }
 
   return data && data.result;
 }
 
-export function areEqual(depsA: React.DependencyList, depsB: React.DependencyList) {
+export function areEqualDeps(depsA: React.DependencyList, depsB: React.DependencyList) {
 
   if (depsA.length !== depsB.length)
     return false;
@@ -299,16 +294,6 @@ export function useLock<T>(): [/*isLocked:*/boolean, /*lock:*/(makeCall: () => P
   return [isLocked, lock];
 }
 
-export function useHistoryListen(locationChanged: (location: History.Location, action: History.Action) => void, enabled: boolean = true, extraDeps?: ReadonlyArray<any>) {
-  const unregisterCallback = React.useRef<History.UnregisterCallback | undefined>(undefined);
-  React.useEffect(() => {
-    if (!enabled)
-      return;
-
-    unregisterCallback.current = AppContext.history.listen(locationChanged);
-    return () => { unregisterCallback.current!(); }
-  }, [enabled, ...(extraDeps || [])]);
-}
 
 export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: React.MouseEventHandler, options?: { timeout?: number }) => {
   options = {

@@ -51,9 +51,19 @@ internal class CachedTableConstructor
     {
         ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
 
+        var defaultKind = Schema.Current.TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
+
         var tupleConstructor = TupleReflection.TupleChainConstructor(
-            columns.Select((c, i) => FieldReader.GetExpression(reader, i, GetColumnType(c)))
-            );
+            columns.Select((c, i) =>
+            {
+                DateTimeKind kind = DateTimeKind.Unspecified;
+
+                if (c.Type.UnNullify() == typeof(DateTime))
+                    kind = c.DateTimeKind.DefaultToNull() ?? defaultKind; 
+
+                return FieldReader.GetExpression(reader, i, GetColumnType(c), kind);
+
+            }));
 
         return Expression.Lambda<Func<FieldReader, object>>(tupleConstructor, reader).Compile();
     }

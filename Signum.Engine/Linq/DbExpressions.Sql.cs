@@ -30,7 +30,6 @@ internal enum DbExpressionType
     SqlVariable,
     SqlLiteral,
     SqlCast,
-    SqlCastLazy,
     Case,
     RowNumber,
     Like,
@@ -641,6 +640,7 @@ internal enum SqlFunction
     STUFF,
     COLLATE,
     CONCAT,
+    SwitchOffset,
 }
 
 internal enum PostgresFunction
@@ -750,34 +750,6 @@ internal class ToDayOfWeekExpression : DbExpression
     public static int ToSqlWeekDay(DayOfWeek dayOfWeek, byte dateFirst /*keep parameter here to evaluate now*/)
     {
         return (((int)dayOfWeek - dateFirst + 7) % 7) + 1;
-    }
-}
-
-internal class SqlCastLazyExpression : DbExpression
-{
-    public readonly AbstractDbType DbType;
-    public readonly Expression Expression;
-
-    public SqlCastLazyExpression(Type type, Expression expression)
-        : this(type, expression, Schema.Current.Settings.DefaultSqlType(type.UnNullify()))
-    {
-    }
-
-    public SqlCastLazyExpression(Type type, Expression expression, AbstractDbType dbType)
-        : base(DbExpressionType.SqlCastLazy, type)
-    {
-        this.Expression = expression;
-        this.DbType = dbType;
-    }
-
-    public override string ToString()
-    {
-        return "LazyCast({0} as {1})".FormatWith(Expression.ToString(), DbType.ToString(Schema.Current.Settings.IsPostgres));
-    }
-
-    protected override Expression Accept(DbExpressionVisitor visitor)
-    {
-        return visitor.VisitSqlCastLazy(this);
     }
 }
 
@@ -1075,15 +1047,6 @@ public static class SystemTimeExpressions
         var max1 = interval1.Max!;
         var min2 = interval2.Min!;
         var max2 = interval2.Max!;
-
-        if (min1 is SqlCastLazyExpression min1L &&
-           max1 is SqlCastLazyExpression max1L &&
-           min2 is SqlCastLazyExpression min2L &&
-           max2 is SqlCastLazyExpression max2L)
-            return Expression.And(
-             Expression.GreaterThan(max1L.Expression, min2L.Expression),
-             Expression.GreaterThan(max2L.Expression, min1L.Expression)
-             );
 
         return Expression.And(
              Expression.GreaterThan(max1, min2),

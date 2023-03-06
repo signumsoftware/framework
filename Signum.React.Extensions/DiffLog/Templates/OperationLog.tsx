@@ -12,7 +12,7 @@ import { Tabs, Tab } from 'react-bootstrap';
 import { LinkContainer } from '@framework/Components';
 import "./DiffLog.css"
 import { useAPI } from '@framework/Hooks'
-import { clearSettingsActions } from '@framework/AppContext'
+import { clearSettingsActions, toAbsoluteUrl } from '@framework/AppContext'
 
 export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> }){
   const ctx = p.ctx;
@@ -197,7 +197,7 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
       <Tab eventKey="next" className="linkTab" title={
         <LinkContainer to={Navigator.navigateRoute(target)} onClick={e => {
           e.preventDefault();
-          window.open(Navigator.navigateRoute(target));
+          window.open(toAbsoluteUrl(Navigator.navigateRoute(target)));
         }}>
           <span title={DiffLogMessage.NavigatesToTheCurrentEntity.niceToString()}>
             {DiffLogMessage.CurrentEntity.niceToString()}
