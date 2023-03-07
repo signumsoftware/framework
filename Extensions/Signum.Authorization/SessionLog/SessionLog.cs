@@ -1,10 +1,12 @@
+using Signum.Entities;
+using Signum.Entities.Authorization;
 
-namespace Signum.Entities.Authorization;
+namespace Signum.Authorization.SessionLog;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class SessionLogEntity : Entity
 {
-    
+
     public Lite<UserEntity> User { get; set; }
 
     [DateTimePrecisionValidator(DateTimePrecision.Seconds)]

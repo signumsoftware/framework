@@ -2,6 +2,7 @@ using Signum.Engine.Authorization;
 using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
+using Signum.Authorization.Admin;
 
 namespace Signum.Entities.Authorization;
 

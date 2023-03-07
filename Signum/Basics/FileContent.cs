@@ -1,4 +1,4 @@
-﻿namespace Signum.Entities.Basics;
+namespace Signum.Basics;
 
 public class FileContent
 {

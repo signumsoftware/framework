@@ -1,7 +1,9 @@
+using Signum.Engine;
+using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization.SessionLog;
 
 public static class SessionLogLogic
 {

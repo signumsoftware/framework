@@ -1,4 +1,4 @@
-namespace Signum.Entities.Basics;
+namespace Signum.Basics;
 
 [InTypeScript(true)]
 public enum BootstrapStyle

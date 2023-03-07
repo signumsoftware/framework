@@ -191,13 +191,13 @@ class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
         var properties = Directory.CreateDirectory(Path.Combine(csharpDirectory, "Properties"));
 
         uctx.CreateCodeFile(
-            Path.Combine(properties.FullName, "Attributes.csproj"),
+            Path.Combine(properties.FullName, "Attributes.cs"),
             $"""
             [assembly: DefaultAssemblyCulture("en")]
             """);
 
         uctx.CreateCodeFile(
-            Path.Combine(properties.FullName, "GlobalUsings.csproj"),
+            Path.Combine(properties.FullName, "GlobalUsings.cs"),
             $"""
             global using System;
             global using System.Collections.Generic;

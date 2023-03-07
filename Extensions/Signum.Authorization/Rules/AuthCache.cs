@@ -1,7 +1,9 @@
 using Signum.Engine.Authorization;
+using Signum.Entities;
+using Signum.Entities.Authorization;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Authorization;
+namespace Signum.Authorization.Rules;
 
 public interface IMerger<K, A>
 {
@@ -38,13 +40,13 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
     IMerger<K, A> merger;
     Coercer<A, K> coercer;
 
-    public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, 
+    public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity,
         Expression<Func<R, R, bool>> isEquals, IMerger<K, A> merger, bool invalidateWithTypes, Coercer<A, K>? coercer = null)
     {
-        this.ToKey = toKey;
-        this.ToEntity = toEntity;
+        ToKey = toKey;
+        ToEntity = toEntity;
         this.merger = merger;
-        this.IsEquals = isEquals;
+        IsEquals = isEquals;
         this.coercer = coercer ?? Coercer<A, K>.None;
 
         runtimeRules = sb.GlobalLazy(this.NewCache,
@@ -103,7 +105,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
         readonly K key;
 
-        public ManualResourceCache(K key, R resource, Expression<Func<R, R, bool>> isEquals,  IMerger<K, A> merger, Func<Lite<RoleEntity>, A, A> coercer)
+        public ManualResourceCache(K key, R resource, Expression<Func<R, R, bool>> isEquals, IMerger<K, A> merger, Func<Lite<RoleEntity>, A, A> coercer)
         {
             this.key = key;
 
@@ -283,7 +285,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
         internal DefaultDictionary<K, A> DefaultDictionary()
         {
-            return this.rules;
+            return rules;
         }
     }
 
@@ -292,7 +294,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         var rules = runtimeRules.Value;
 
         return new XElement(rootName,
-            (from r in AuthLogic.RolesInOrder(includeTrivialMerge: false)
+            from r in AuthLogic.RolesInOrder(includeTrivialMerge: false)
              let rac = rules.GetOrThrow(r)
 
              select new XElement("Role",
@@ -306,7 +308,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
                      select new XElement(elementName,
                         new XAttribute("Resource", resource),
                         new XAttribute("Allowed", allowedToString(allowed)))
-            )));
+            ));
     }
 
 
@@ -343,9 +345,9 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
                 var def = list.SingleOrDefaultEx(a => a.Resource == null);
 
                 var shouldResources = (from xr in x.Elements(elementName)
-                           let r = toResource(xr.Attribute("Resource")!.Value)
-                           where r != null
-                           select KeyValuePair.Create(ToKey(r), xr))
+                                       let r = toResource(xr.Attribute("Resource")!.Value)
+                                       where r != null
+                                       select KeyValuePair.Create(ToKey(r), xr))
                            .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                 var currentResources = list.Where(a => a.Resource != null).ToDictionary(a => ToKey(a.Resource));

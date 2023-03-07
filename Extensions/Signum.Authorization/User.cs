@@ -2,6 +2,7 @@ using Signum.Entities.Mailing;
 using Signum.Entities.Basics;
 using System.ComponentModel;
 using System.Globalization;
+using Signum.Authorization.Admin;
 
 namespace Signum.Entities.Authorization;
 

@@ -10,6 +10,7 @@ using Signum.Entities.Mailing;
 using Signum.Engine.Cache;
 using System.Xml;
 using DocumentFormat.OpenXml.Presentation;
+using Signum.Authorization.Admin;
 
 namespace Signum.Engine.Authorization;
 

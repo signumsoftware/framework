@@ -10,6 +10,7 @@ using Signum.React.ApiControllers;
 using System.Text.Json;
 using Signum.Engine.Json;
 using Signum.Entities.Basics;
+using Signum.Authorization.SessionLog;
 
 namespace Signum.React.Authorization;
 

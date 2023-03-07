@@ -24,7 +24,7 @@ public class CultureInfoEntity : Entity
     [StringLengthValidator(Max = 200), NotNullValidator(DisabledInModelBinder = true)]
     public string EnglishName { get; private set; }
 
-    protected override string? PropertyValidation(PropertyInfo pi)
+    protected internal override string? PropertyValidation(PropertyInfo pi)
     {
         if (pi.Name == nameof(Name) && Name.HasText())
         {
@@ -44,7 +44,7 @@ public class CultureInfoEntity : Entity
     [AutoExpressionField]
     public bool IsNeutral => As.Expression(() => !Name.Contains("-"));
 
-    protected override void PreSaving(PreSavingContext ctx)
+    protected internal override void PreSaving(PreSavingContext ctx)
     {
         try
         {

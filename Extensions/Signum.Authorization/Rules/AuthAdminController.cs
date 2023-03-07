@@ -7,8 +7,9 @@ using Signum.Entities.Basics;
 using Signum.React.Files;
 using System.IO;
 using Signum.React.Filters;
+using Signum.API.Filters;
 
-namespace Signum.React.Authorization;
+namespace Signum.Authorization.Rules;
 
 [ValidateModelFilter]
 public class AuthAdminController : ControllerBase
@@ -23,7 +24,7 @@ public class AuthAdminController : ControllerBase
     }
 
     [HttpPost("api/authAdmin/permissionRules")]
-    public void SetPermissionRules([Required, FromBody]PermissionRulePack rules)
+    public void SetPermissionRules([Required, FromBody] PermissionRulePack rules)
     {
         BasicPermission.AdminRules.AssertAuthorized();
         PermissionAuthLogic.SetPermissionRules(rules);
@@ -40,7 +41,7 @@ public class AuthAdminController : ControllerBase
     }
 
     [HttpPost("api/authAdmin/typeRules")]
-    public void SetTypeRules([Required, FromBody]TypeRulePack rules)
+    public void SetTypeRules([Required, FromBody] TypeRulePack rules)
     {
         BasicPermission.AdminRules.AssertAuthorized();
         TypeAuthLogic.SetTypeRules(rules);
@@ -58,7 +59,7 @@ public class AuthAdminController : ControllerBase
     }
 
     [HttpPost("api/authAdmin/operationRules")]
-    public void SetOperationRules([Required, FromBody]OperationRulePack rules)
+    public void SetOperationRules([Required, FromBody] OperationRulePack rules)
     {
         BasicPermission.AdminRules.AssertAuthorized();
         OperationAuthLogic.SetOperationRules(rules);
@@ -77,7 +78,7 @@ public class AuthAdminController : ControllerBase
     }
 
     [HttpPost("api/authAdmin/propertyRules")]
-    public void SetPropertyRule([Required, FromBody]PropertyRulePack rules)
+    public void SetPropertyRule([Required, FromBody] PropertyRulePack rules)
     {
         BasicPermission.AdminRules.AssertAuthorized();
         PropertyAuthLogic.SetPropertyRules(rules);
@@ -96,7 +97,7 @@ public class AuthAdminController : ControllerBase
     }
 
     [HttpPost("api/authAdmin/queryRules")]
-    public void SetQueryRules([Required, FromBody]QueryRulePack rules)
+    public void SetQueryRules([Required, FromBody] QueryRulePack rules)
     {
         BasicPermission.AdminRules.AssertAuthorized();
         QueryAuthLogic.SetQueryRules(rules);
@@ -118,7 +119,7 @@ public class AuthAdminController : ControllerBase
     }
 
     [HttpPost("api/authAdmin/trivialMergeRole")]
-    public Lite<RoleEntity> TrivialMergeRole([FromBody]List<Lite<RoleEntity>> roles)
+    public Lite<RoleEntity> TrivialMergeRole([FromBody] List<Lite<RoleEntity>> roles)
     {
         //BasicPermission.AdminRules.AssertAuthorized();
 
