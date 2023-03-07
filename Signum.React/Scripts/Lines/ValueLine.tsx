@@ -1161,6 +1161,71 @@ TimeTextBox.defaultProps = {
   durationFormat: "hh:mm:ss"
 };
 
+export interface ColorTextBoxProps {
+  value: string | null;
+  onChange: (newValue: string | null) => void;
+  formControlClass?: string;
+  groupClass?: string;
+  textValueHtmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  groupHtmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  innerRef?: React.Ref<HTMLInputElement>;
+}
+
+export function ColorTextBox(p: ColorTextBoxProps) {
+
+  const [text, setText] = React.useState<string | undefined>(undefined);
+
+  const value = text != undefined ? text : p.value != undefined ? p.value : "";
+
+  return (
+    <span {...p.groupHtmlAttributes} className={addClass(p.groupHtmlAttributes, classes(p.groupClass))}>
+      <input type="text"
+        autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
+        {...p.textValueHtmlAttributes}
+        className={addClass(p.textValueHtmlAttributes, classes(p.formControlClass))}
+        value={value}
+        onBlur={handleOnBlur}
+        onChange={handleOnChange}
+        onFocus={handleOnFocus}
+        ref={p.innerRef} />
+      <input type="color"
+        className={classes(p.formControlClass, "sf-color")}
+        value={value}
+        onBlur={handleOnBlur}
+        onChange={handleOnChange}
+      />
+    </span>);
+
+  function handleOnFocus(e: React.FocusEvent<any>) {
+    const input = e.currentTarget as HTMLInputElement;
+
+    input.setSelectionRange(0, input.value != null ? input.value.length : 0);
+
+    if (p.htmlAttributes && p.htmlAttributes.onFocus)
+      p.htmlAttributes.onFocus(e);
+  };
+
+  function handleOnBlur(e: React.FocusEvent<any>) {
+
+    const input = e.currentTarget as HTMLInputElement;
+
+    var result = input.value == undefined || input.value.length == 0 ? null : input.value;
+
+    setText(undefined);
+    if (p.value != result)
+      p.onChange(result);
+    if (p.htmlAttributes && p.htmlAttributes.onBlur)
+      p.htmlAttributes.onBlur(e);
+  }
+
+  function handleOnChange(e: React.SyntheticEvent<any>) {
+    const input = e.currentTarget as HTMLInputElement;
+    setText(input.value);
+    if (p.onChange)
+      p.onChange(input.value);
+  }
+}
+
 ValueLineRenderers.renderers.set("RadioGroup", (vl) => {
   return internalRadioGroup(vl);
 });
