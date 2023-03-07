@@ -16,7 +16,8 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [StringLengthValidator(Min = 3, Max = 100)]
     public string? IconName { get; set; }
 
-    [StringLengthValidator(Min = 3, Max = 100)]
+    [StringLengthValidator(Min = 3, Max = 20)]
+    [Format(FormatAttribute.Color)]
     public string? IconColor { get; set; }
 
     [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
@@ -30,6 +31,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 
     public InteractionGroup? InteractionGroup { get; set; }
 
+    [Format(FormatAttribute.Color)]
     public string? CustomColor { get; set; }
 
     public bool UseIconColorForTitle { get; set; }

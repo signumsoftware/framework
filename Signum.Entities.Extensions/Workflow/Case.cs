@@ -75,6 +75,7 @@ public class CaseTagTypeEntity : Entity
     public string Name { get; set; }
 
     [StringLengthValidator(Min = 3, Max = 12)]
+    [Format(FormatAttribute.Color)]
     public string Color { get; set; }
 
     [AutoExpressionField]

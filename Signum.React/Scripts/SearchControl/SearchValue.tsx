@@ -162,7 +162,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     if (p.initialValue !== undefined) {
       if (Hooks.areEqualDeps(deps ?? [], initialDeps.current ?? [])) {
         controller.value = p.initialValue;
-        controller.hasHistoryChanges = false;
+        controller.hasHistoryChanges = undefined;
         p.onInitialValueLoaded?.();
         return Promise.resolve(p.initialValue);
       }
@@ -397,7 +397,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       fo = { ...p.findOptions };
 
     if (fo.systemTime == null && p.ctx?.frame?.currentDate && Finder.isSystemVersioned(controller.queryDescription!.columns["Entity"].type)) {
-      if (p.ctx?.frame?.currentDate)
+      if (p.ctx?.frame?.previousDate)
         fo.systemTime = { mode: 'Between', startDate: p.ctx?.frame!.previousDate, endDate: p.ctx?.frame!.currentDate, joinMode: "FirstCompatible" };
       else
         fo.systemTime = { mode: 'AsOf', startDate: p.ctx?.frame!.currentDate };

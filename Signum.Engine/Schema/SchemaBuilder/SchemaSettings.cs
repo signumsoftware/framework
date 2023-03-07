@@ -202,11 +202,11 @@ public class SchemaSettings
             if (propertyRoute.PropertyRouteType == PropertyRouteType.Root || propertyRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
                 throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
 
-            return (A?)FieldAttributes(propertyRoute)!.FirstOrDefault(a => a.GetType() == typeof(A));
+            return (A?)FieldAttributes(propertyRoute)?.FirstOrDefault(a => a.GetType() == typeof(A));
         }
     }
 
-    public V? ValidatorAttribute<V>(PropertyRoute propertyRoute) where V : ValidatorAttribute
+    static V? ValidatorAttribute<V>(PropertyRoute propertyRoute) where V : ValidatorAttribute
     {
         if (!typeof(ModifiableEntity).IsAssignableFrom(propertyRoute.RootType))
             return null;

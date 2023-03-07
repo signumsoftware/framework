@@ -1,5 +1,5 @@
 import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
-import { Dic } from './Globals';
+import { Dic, softCast } from './Globals';
 import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, OperationSymbol, ModelEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
 import { ajaxGet, ThrowErrorFilter } from './Services';
 import { MList } from "./Signum.Entities";
@@ -72,6 +72,7 @@ export interface OperationInfo {
   canBeNew?: boolean;
   canBeModified?: boolean;
   hasCanExecute?: boolean;
+  hasCanExecuteExpression?: boolean;
   hasStates?: boolean;
 }
 
@@ -1068,11 +1069,19 @@ export function New(type: PseudoType, props?: any, propertyRoute?: PropertyRoute
 
   const ti = tryGetTypeInfo(type);
 
-  const result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
+  const result = softCast<ModifiableEntity>({
+    Type: getTypeName(type),
+    isNew: true,
+    modified: true,
+    temporalId: newGuid(),
+    toStr: undefined
+  });
 
   if (ti) {
 
     var e = result as Entity;
+    e.id = undefined;
+    e.ticks = undefined;
     var pr = PropertyRoute.root(ti);
     initializeMixins(e, pr);
     initializeCollections(e, pr);
@@ -1122,10 +1131,23 @@ function initializeCollections(mod: ModifiableEntity, pr: PropertyRoute) {
 }
 
 
+// https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
+function newGuid() {
+  return (`${[1e7]}-${1e3}-${4e3}-${8e3}-${1e11}`).replace(/[018]/g, (c : any) =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
+
 export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRoute) {
   const ti = tryGetTypeInfo(original.Type);
 
-  const result = { Type: original.Type, isNew: true, modified: true } as any as ModifiableEntity;
+  const result = softCast<ModifiableEntity>({
+    Type: original.Type,
+    isNew: true,
+    modified: true,
+    temporalId: newGuid(),
+    toStr: undefined,
+  });
 
   if (ti) {
 
@@ -1228,6 +1250,11 @@ export type Anonymous<T extends ModifiableEntity> = T & {
 
 export class Type<T extends ModifiableEntity> implements IType {
 
+
+
+  constructor(
+    public typeName: string) { }
+
   New(props?: Partial<T>, propertyRoute?: PropertyRoute): T {
 
     if (props && props.Type && (propertyRoute || tryGetTypeInfo(props.Type))) {
@@ -1238,9 +1265,6 @@ export class Type<T extends ModifiableEntity> implements IType {
 
     return New(this.typeName, props, propertyRoute) as T;
   }
-
-  constructor(
-    public typeName: string) { }
 
   tryTypeInfo(): TypeInfo | undefined {
     var result = tryGetTypeInfo(this.typeName);
@@ -1631,7 +1655,7 @@ export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>
   }
   else {
     var model = (symbol as Lite<Entity>).model;
-    var toStr = typeof model == "string" ? model : (model as ModelEntity).toStr;
+    var toStr = typeof model == "string" ? model : (model as ModelEntity).toStr!;
 
     var m = getMember(toStr);
     return m && m.niceName || toStr;
@@ -2066,7 +2090,7 @@ function toCSharp(name: string) {
 
 export type PropertyRouteType = "Root" | "Field" | "Mixin" | "LiteEntity" | "MListItem";
 
-export type GraphExplorerMode = "collect" | "set" | "clean";
+export type GraphExplorerMode = "collect" | "set" | "clean" | undefined;
 
 
 export class GraphExplorer {
@@ -2081,6 +2105,15 @@ export class GraphExplorer {
     args.forEach(o => ge.isModified(o, ""));
     return ge;
   }
+
+
+  static propagateAllWithoutCleaning(...args: any[]): GraphExplorer {
+    const ge = new GraphExplorer(undefined, {});
+    args.forEach(o => ge.isModified(o, ""));
+    return ge;
+  }
+
+
 
   static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {
     const ge = new GraphExplorer("set", modelState == undefined ? {} : { ...modelState });
@@ -2148,10 +2181,10 @@ export class GraphExplorer {
     }
   }
 
-  private static specialProperties = ["Type", "id", "isNew", "ticks", "toStr", "modified"];
+  public static specialProperties = ["Type", "id", "isNew", "ticks", "toStr", "modified", "temporalId"];
 
   //The redundant return true / return false are there for debugging
-  private isModifiableObject(obj: any, modelStatePrefix: string) {
+  private isModifiableObject(obj: any, modelStatePrefix: string) : boolean {
 
     if (obj instanceof Date)
       return false;
@@ -2301,4 +2334,3 @@ export class GraphExplorer {
 
   static TypesLazilyCreated: string[] = [];
 }
-

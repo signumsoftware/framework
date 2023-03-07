@@ -718,6 +718,8 @@ public enum QueryTokenMessage
     ContainerOfCellOperations,
     [Description("Entity Type")]
     EntityType,
+    [Description("UTC - DateTime")]
     UtcDateTime,
+    [Description("DateTime part")]
     DateTimePart,
 }

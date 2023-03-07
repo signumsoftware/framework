@@ -44,7 +44,7 @@ interface FrameModalProps extends IModalProps<ModifiableEntity | undefined> {
 
 let modalCount = 0;
 
-interface PackAndComponent {
+interface FrameModalState {
   pack: EntityPack<ModifiableEntity>;
   lastEntity: string;
   refreshCount: number;
@@ -54,7 +54,7 @@ interface PackAndComponent {
 
 export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProps, ref: React.Ref<IHandleKeyboard>) {
 
-  const [packComponent, setPackComponent] = useStateWithPromise<PackAndComponent | undefined>(undefined);
+  const [state, setState] = useStateWithPromise<FrameModalState | undefined>(undefined);
   const [show, setShow] = React.useState(true);
   const prefix = React.useMemo(() => "modal" + (modalCount++), []);
 
@@ -94,11 +94,11 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   }
 
   function setPack(pack: EntityPack<ModifiableEntity>, getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>, callback?: () => void) {
-    setPackComponent({
+    setState({
       pack,
       lastEntity: JSON.stringify(pack.entity),
       getComponent,
-      refreshCount: packComponent ? packComponent.refreshCount + 1 : 0
+      refreshCount: state ? state.refreshCount + 1 : 0
     }).then(callback);
   }
 
@@ -129,7 +129,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   }
 
   function handleOkClicked() {
-    const pack = packComponent?.pack;
+    const pack = state?.pack;
     if (hasChanges() &&
       (p.requiresSaveOperation != undefined ? p.requiresSaveOperation : Navigator.typeRequiresSaveOperation(pack!.entity.Type))) {
       MessageModal.show({
@@ -167,14 +167,14 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     if (hc?.entityHasChanges)
       return hc.entityHasChanges();
 
-    if (packComponent == null)
+    if (state == null)
       return false;
 
-    const entity = packComponent.pack.entity;
+    const entity = state.pack.entity;
 
     const ge = GraphExplorer.propagateAll(entity);
 
-    return entity.modified && JSON.stringify(entity) != packComponent.lastEntity;
+    return entity.modified && JSON.stringify(entity) != state.lastEntity;
   }
 
   function handleCancelClicked() {
@@ -204,12 +204,12 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
   function handleOnExited() {
     if (okClicked.current)
-      p.onExited!(packComponent!.pack.entity);
-    else if (packComponent == null)
+      p.onExited!(state!.pack.entity);
+    else if (state == null)
       p.onExited!(undefined);
     else {
       if (p.buttons == "close") { //Even if you cancel, maybe you have executed an operation 
-        var oldEntity = JSON.parse(packComponent.lastEntity) as ModifiableEntity;
+        var oldEntity = JSON.parse(state.lastEntity) as ModifiableEntity;
         GraphExplorer.propagateAll(oldEntity);
         p.onExited!(oldEntity.modified ? undefined : oldEntity);
       }
@@ -219,7 +219,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
     }
   }
 
-  var settings = packComponent && Navigator.getSettings(packComponent.pack.entity.Type);
+  var settings = state && Navigator.getSettings(state.pack.entity.Type);
 
   let frame: EntityFrame;
   let wc: WidgetContext<ModifiableEntity> | undefined = undefined;
@@ -230,55 +230,55 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   if (!pr)
     throw new Error("propertyRoute is mandatory for embeddedEntities");
 
-  if (packComponent) {
+  if (state) {
     frame = {
       tabs: undefined,
       frameComponent: { forceUpdate, type: FrameModalEx },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
-        const newPack = pack || packComponent!.pack;
+        const newPack = pack || state!.pack;
         if (reloadComponent) {
-          setPackComponent(undefined)
+          setState(undefined)
             .then(() => loadComponent(newPack).promise)
             .then(getComponent => setPack(newPack, getComponent, callback));
         }
         else {
-          setPack(newPack, packComponent!.getComponent, callback);
+          setPack(newPack, state!.getComponent, callback);
         }
       },
-      pack: packComponent.pack,
+      pack: state.pack,
       onClose: (newPack?: EntityPack<ModifiableEntity>) => p.onExited!(newPack?.entity),
       revalidate: () => validationErrors.current && validationErrors.current.forceUpdate(),
       setError: (modelState, initialPrefix = "") => {
-        GraphExplorer.setModelState(packComponent.pack.entity, modelState, initialPrefix!);
+        GraphExplorer.setModelState(state.pack.entity, modelState, initialPrefix!);
         forceUpdate();
       },
-      refreshCount: packComponent.refreshCount,
+      refreshCount: state.refreshCount,
       createNew: p.createNew,
       allowExchangeEntity: p.buttons == "close" && (p.allowExchangeEntity ?? true),
       prefix: prefix,
-      isExecuting: () => packComponent.executing == true,
-      execute: async action => {
-        if (packComponent.executing)
+      isExecuting: () => state.executing == true,
+      execute: async action  => {
+        if (state.executing)
           return;
 
-        packComponent.executing = true;
+        state.executing = true;
         forceUpdate();
         try {
           await action();
 
         } finally {
-          packComponent.executing = undefined;
+          state.executing = undefined;
           forceUpdate();
         }
       }
     };
     styleOptions = {
-      readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(packComponent.pack, { isEmbedded: p.propertyRoute?.typeReference().isEmbedded }),
+      readOnly: p.readOnly != undefined ? p.readOnly : Navigator.isReadOnly(state.pack, { isEmbedded: p.propertyRoute?.typeReference().isEmbedded }),
       frame: frame,
     };
 
-    ctx = new TypeContext(undefined, styleOptions, pr, new ReadonlyBinding(packComponent.pack.entity, ""), prefix!);
+    ctx = new TypeContext(undefined, styleOptions, pr, new ReadonlyBinding(state.pack.entity, ""), prefix!);
 
     wc = { ctx: ctx, frame: frame };
   }
@@ -286,19 +286,19 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   return (
     <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" enforceFocus={settings?.enforceFocusInModal ?? true}>
       <ModalHeaderButtons onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
-        <FrameModalTitle pack={packComponent?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise} widgets={wc && renderWidgets(wc, settings?.stickyHeader)} />
+        <FrameModalTitle pack={state?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise} widgets={wc && renderWidgets(wc, settings?.stickyHeader)} />
       </ModalHeaderButtons>
-      {packComponent && renderBody(packComponent)}
+      {state && renderBody(state)}
       {p.buttons == "ok_cancel" && <ModalFooterButtons
         onOk={handleOkClicked}
         onCancel={handleCancelClicked}
-        okDisabled={!packComponent}>
+        okDisabled={!state}>
       </ModalFooterButtons>
       }
     </Modal>
   );
 
-  function renderBody(pc: PackAndComponent) {
+  function renderBody(pc: FrameModalState) {
 
     frameRef.current = frame;
 

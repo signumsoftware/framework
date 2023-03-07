@@ -95,7 +95,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
         return contexts;
       });
     } else /*if (ctx.lites.length > 1)*/ {
-      contextPromise = API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates).map(a => a.operationInfo.key))
+      contextPromise = API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates || coc.operationInfo.hasCanExecuteExpression).map(a => a.operationInfo.key))
         .then(response => {
           contexts.forEach(coc => {
             coc.canExecute = response.canExecutes[coc.operationInfo.key];
@@ -257,7 +257,7 @@ export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons
       disabled={disabled}
       style={{ pointerEvents: "initial" }}
       data-operation={coc.operationInfo.key}
-      className={color ? "text-" + color : undefined}>
+      className={color && !disabled ? "text-" + color : undefined}>
       {icon ? <FontAwesomeIcon icon={icon} className="icon" color={iconColor} fixedWidth /> :
         color ? <span className={classes("icon", "empty-icon")}></span> : undefined}
       {text}

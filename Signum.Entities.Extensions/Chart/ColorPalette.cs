@@ -33,6 +33,7 @@ public class SpecificColorEmbedded : EmbeddedEntity
     public Lite<Entity> Entity { get; set; }
 
     [StringLengthValidator(Max = 100)]
+    [Format(FormatAttribute.Color)]
     public string Color { get; set; }
 
     protected override string? PropertyValidation(PropertyInfo pi)

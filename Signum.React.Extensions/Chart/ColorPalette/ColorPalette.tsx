@@ -9,7 +9,6 @@ import * as Navigator from '@framework/Navigator';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
-import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead';
 import { getTypeInfo, IBinding, tryGetTypeInfo } from '@framework/Reflection';
 import { Entity, EntityControlMessage, Lite, newMListElement, toLite } from '@framework/Signum.Entities';
 import { UserEntity } from '../../Authorization/Signum.Entities.Authorization';
@@ -150,7 +149,7 @@ function ColorSelector(p: { ctx: TypeContext<string>, colors: string[] | null })
   }, [p.colors])
 
   if (custom || p.colors == null)
-    return <ColorTypeaheadLine ctx={p.ctx} extraButtons={() => getSwitchModelButton()} />
+    return <ValueLine ctx={p.ctx} extraButtons={() => getSwitchModelButton()} valueLineType="Color" />
 
   return <ValueLine ctx={p.ctx}
     valueLineType="DropDownList"

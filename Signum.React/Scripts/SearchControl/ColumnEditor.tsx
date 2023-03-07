@@ -84,7 +84,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
           <input className="form-control form-control-xs"
             value={co.displayName || ""} disabled={co.hiddenColumn}
             onChange={handleOnChange} />
-          <div className="row g-3 align-items-center">
+          <div className="row align-items-center">
             <div className="col-auto">
               <label htmlFor="combineRows" className="col-form-label col-form-label-xs">  {SearchMessage.CombineRowsWith.niceToString()}</label>
             </div>

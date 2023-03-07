@@ -811,22 +811,30 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
 }
 
 function simplifyPinnedFilters(fos: FilterOption[]): FilterOption[] {
-  fos.filter(fo => fo.pinned != null && (fo.pinned?.active == "Always" || fo.pinned?.active == "WhenHasValue")).forEach(fo => {
-    var fo2 = fos.firstOrNull(fo2 =>
-      fo2.pinned == null && 
-      !isFilterGroupOption(fo2) &&
-      !isFilterGroupOption(fo) &&
-      similarToken(fo.token?.toString(), fo2.token?.toString()) &&
-      (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
-      (fo.pinned?.active == "Always" || fo2.value != null));
 
-    if (fo2 != null) {
-      fo.value = fo2.value;
-      fos.remove(fo2);
+  const toRemove: FilterOption[] = [];
+  const result = fos.map(fo => {
+    if (fo.pinned != null &&
+      (fo.pinned?.active == "Always" || fo.pinned?.active == "WhenHasValue") &&
+      !isFilterGroupOption(fo)) {
+
+      var fo2 = fos.firstOrNull(fo2 =>
+        fo2.pinned == null &&
+        !isFilterGroupOption(fo2) &&
+        similarToken(fo.token?.toString(), fo2.token?.toString()) &&
+        (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
+        (fo.pinned?.active == "Always" || fo2.value != null));
+
+      if (fo2 != null) {
+        toRemove.push(fo2);
+        return { ...fo, value: fo2.value } as FilterConditionOption;
+      }
     }
+    return fo;
+
   });
 
-  return fos;
+  return result.filter(fo => fo && !toRemove.contains(fo));
 }
 
 export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings, avoidHiddenColumns?: boolean): QueryRequest {

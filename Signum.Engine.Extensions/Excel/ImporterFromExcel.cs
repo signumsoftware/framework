@@ -56,7 +56,9 @@ public class ImporterFromExcel
         return rowGroups;
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public static async IAsyncEnumerable<ImportResult> ImportExcel(QueryRequest request, ImportExcelModel model, OperationSymbol saveOperation)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         var transactionalResults = new List<ImportResult>();
 
