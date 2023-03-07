@@ -12,6 +12,14 @@ class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
+        foreach (var item in uctx.GetCodeFiles(uctx.AbsolutePath("Framework/Extensions"), new[] { "Attributes.csproj", "GlobalUsings.csproj" }, UpgradeContext.DefaultIgnoreDirectories))
+        {
+            var filePath = uctx.AbsolutePath(item.FilePath);
+
+            File.Move(filePath, Path.ChangeExtension(filePath, ".cs"));
+        }
+
+
         ExtractExtensions(uctx, "Alerts");
         ExtractExtensions(uctx, "Authorization");
         CreateEmptyExtensionsProject(uctx, "ResetPassword");
