@@ -14,6 +14,7 @@ class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
     {
         ExtractExtensions(uctx, "Alerts");
         ExtractExtensions(uctx, "Authorization");
+        CreateEmptyExtensionsProject(uctx, "ResetPassword");
         CreateEmptyExtensionsProject(uctx, "ActiveDirectory");
         ExtractExtensions(uctx, "Cache", projectName: "Signum.Caching");
         ExtractExtensions(uctx, "Calendar");

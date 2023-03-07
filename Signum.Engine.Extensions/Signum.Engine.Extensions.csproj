@@ -49,4 +49,7 @@
 		<ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Basics\" />
+	</ItemGroup>
 </Project>
