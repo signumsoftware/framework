@@ -1,3 +1,4 @@
+using LibGit2Sharp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -70,7 +71,7 @@ class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
         MoveAllFiles(uctx, "Framework/Extensions/" + reactProjectName, "Framework/Signum.React.Extensions/" + folderName, "*.tsx");
         MoveAllFiles(uctx, "Framework/Extensions/" + reactProjectName, "Framework/Signum.React.Extensions/" + folderName, "*.ts");
 
-        ApplicationRenamer.Commit(uctx, "Extract " + projectName);
+        CommitFramework(uctx, "Extract " + projectName);
     }
 
     static void CreateEmptyExtensionsProject(UpgradeContext uctx, string folderName)
@@ -78,11 +79,28 @@ class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
         var projectName = "Signum." + folderName;
         string reactProjectName = "Signum." + folderName + ".React";
 
-
         CreateCsharpProject(uctx, "Framework/Extensions/", projectName);
         CreateReactProject(uctx, "Framework/Extensions/", reactProjectName);
 
-        ApplicationRenamer.Commit(uctx, "CreateEmpty " + projectName);
+        CommitFramework(uctx, "Create empty " + projectName);
+    }
+
+    private static void CommitFramework(UpgradeContext uctx, string message)
+    {
+        using (Repository rep = new Repository(uctx.AbsolutePath("Framework")))
+        {
+            if (rep.RetrieveStatus().IsDirty)
+            {
+                Commands.Stage(rep, "*");
+                var sign = rep.Config.BuildSignature(DateTimeOffset.Now);
+                rep.Commit(message, sign, sign);
+                SafeConsole.WriteLineColor(ConsoleColor.White, "A commit with text message '{0}' has been created".FormatWith(message));
+            }
+            else
+            {
+                Console.WriteLine("Nothing to commit");
+            }
+        }
     }
 
     private static void MoveAllFiles(UpgradeContext uctx, string destination, string source, string searchPattern)

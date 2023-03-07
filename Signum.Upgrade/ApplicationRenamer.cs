@@ -84,7 +84,7 @@ internal class ApplicationRenamer
 
     }
 
-    public static void Commit(UpgradeContext uctx, string message)
+    private static void Commit(UpgradeContext uctx, string message)
     {
         using (Repository rep = new Repository(uctx.RootFolder))
         {
