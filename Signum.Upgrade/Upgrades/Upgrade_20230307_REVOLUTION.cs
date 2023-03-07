@@ -31,6 +31,7 @@ class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
         ExtractExtensions(uctx, "Isolation");
         ExtractExtensions(uctx, "MachineLearning");
         ExtractExtensions(uctx, "Mailing");
+        CreateEmptyExtensionsProject(uctx, "MailPackage");
         ExtractExtensions(uctx, "Map");
         ExtractExtensions(uctx, "Migrations");
         ExtractExtensions(uctx, "Notes");
