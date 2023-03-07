@@ -4,7 +4,7 @@ import * as Modals from '../Modals';
 import { Dic } from '../Globals';
 import { ajaxPost, ExternalServiceError, ServiceError, ValidationError } from '../Services';
 import { JavascriptMessage, FrameMessage, ConnectionMessage } from '../Signum.Entities'
-import { ClientErrorModel, ExceptionEntity } from '../Signum.Entities.Basics'
+import { ClientErrorModel, ExceptionEntity } from '../Signum.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
 import { newLite } from '../Reflection';

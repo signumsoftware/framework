@@ -1,7 +1,7 @@
 import * as React from "react";
 import { To, NavigateOptions } from "react-router";
 import type { Router } from "@remix-run/router";
-import { IUserEntity, TypeEntity } from "./Signum.Entities.Basics";
+import { IUserEntity } from "./Signum.Security";
 import { Dic, classes, } from './Globals';
 import { clearContextHeaders, ajaxGet, ajaxPost, RetryFilter } from "./Services";
 import { PseudoType, Type, getTypeName } from "./Reflection";

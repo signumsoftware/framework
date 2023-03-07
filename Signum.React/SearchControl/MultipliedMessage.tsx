@@ -2,10 +2,11 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
 import { FindOptionsParsed, QueryToken, getTokenParents, isFilterGroupOptionParsed } from '../FindOptions'
-import { ValidationMessage, External } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeReference, getTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FilterOptionParsed } from '../Search';
+import { CollectionMessage } from '../Signum.External';
+import { ValidationMessage } from '../Signum.Entities.Validation';
 
 export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference }) {
   const fops = p.findOptions;
@@ -39,8 +40,8 @@ export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, m
     return null;
 
   const message = ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.niceToString().formatHtml(
-    getTypeInfos(p.mainType).map(a => a.nicePluralName).joinComma(External.CollectionMessage.And.niceToString()),
-    tokens.map(a => <strong>{a.parent!.niceName}</strong>).joinCommaHtml(External.CollectionMessage.And.niceToString()))
+    getTypeInfos(p.mainType).map(a => a.nicePluralName).joinComma(CollectionMessage.And.niceToString()),
+    tokens.map(a => <strong>{a.parent!.niceName}</strong>).joinCommaHtml(CollectionMessage.And.niceToString()))
 
   return (
     <div className="sf-search-message alert alert-warning">

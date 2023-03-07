@@ -1,6 +1,6 @@
 import * as React from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, External, getToString, liteKey } from '../Signum.Entities';
+import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, getToString, liteKey } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
 import { classes, softCast } from '../Globals';
 import * as Navigator from '../Navigator';
@@ -15,6 +15,7 @@ import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiPropertySetter";
 import { BsColor } from "../Components";
 import SearchControlLoaded from "../SearchControl/SearchControlLoaded";
+import { CollectionMessage } from "../Signum.External";
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
   if (ctx.lites.length == 0)
@@ -197,7 +198,7 @@ function getDefaultConfirmMessage(coc: ContextualOperationContext<Entity>) {
     var message = coc.context.lites
       .groupBy(a => a.EntityType)
       .map(gr => gr.elements.length + " " + (gr.elements.length == 1 ? getTypeInfo(gr.key).niceName : getTypeInfo(gr.key).nicePluralName))
-      .joinComma(External.CollectionMessage.And.niceToString());
+      .joinComma(CollectionMessage.And.niceToString());
 
     if (coc.operationInfo.operationType == "Delete")
       return OperationMessage.PleaseConfirmYouWouldLikeToDelete0FromTheSystem.niceToString().formatHtml(<strong>{message}</strong>);

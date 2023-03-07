@@ -14,10 +14,10 @@ import {
   isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany
 } from './FindOptions';
 
-import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, FilterGroupOperation, PinnedFilterActive, QueryEntity } from './Signum.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
-import { TypeEntity, QueryEntity, ExceptionEntity } from './Signum.Entities.Basics';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
+import { TypeEntity, ExceptionEntity } from './Signum.Basics';
 
 import {
   Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
@@ -37,6 +37,8 @@ import { QueryString } from "./QueryString";
 import { similarToken } from "./Search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
+import { CollectionMessage } from "./Signum.External";
+import { QueryTokenMessage } from "./Signum.DynamicQuery.Tokens";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -273,7 +275,7 @@ export function getTypeNiceName(tr: TypeReference) {
   const niceName = tr.typeNiceName ??
     tryGetTypeInfos(tr)
       .map(ti => ti == undefined ? getSimpleTypeNiceName(tr.name) : (ti.niceName ?? ti.name))
-      .joinComma(External.CollectionMessage.Or.niceToString());
+      .joinComma(CollectionMessage.Or.niceToString());
 
   return tr.isCollection ? QueryTokenMessage.ListOf0.niceToString(niceName) : niceName;
 }

@@ -5,7 +5,7 @@ import { ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions } fr
 import { SearchMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { StyleContext } from '../Lines';
-import { CombineRows } from '../Signum.Entities.DynamicQuery';
+import { CombineRows } from '../Signum.DynamicQuery';
 
 interface ColumnEditorProps {
   columnOption: ColumnOptionParsed

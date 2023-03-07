@@ -1,25 +1,3 @@
 ﻿{
-  "compilerOptions": {
-    "target": "ES2017",
-    "sourceMap": false,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react",
-    "incremental": true,
-    "outDir": "./ts_out",
-    "composite": true,
-    //"noEmit": true,
-    "strict": true,
-    "declarationMap": true,
-    "lib": [
-      "ES2020",
-      //"esnext",
-      "dom"
-    ]
-  },
-  "exclude": [
-    "./node_modules",
-    "./ts_out" 
-  ]
+  "extends": "./tsconfig.base"
 }

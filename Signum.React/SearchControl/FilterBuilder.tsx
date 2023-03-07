@@ -12,12 +12,12 @@ import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumbe
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { DashboardBehaviour, FilterGroupOperation, PinnedFilterActive } from '../Signum.Entities.DynamicQuery';
+import { DashboardBehaviour, FilterGroupOperation, PinnedFilterActive } from '../Signum.DynamicQuery';
 import "./FilterBuilder.css"
 import { NumericTextBox } from '../Lines/ValueLine';
 import { useStateWithPromise, useForceUpdate, useForceUpdatePromise } from '../Hooks'
 import { Dropdown } from 'react-bootstrap'
-import { TypeEntity } from '../Signum.Entities.Basics'
+import { TypeEntity } from '../Signum.Basics'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];

@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { Dic, classes, softCast, } from './Globals';
 import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity } from './Signum.Entities';
-import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
+import { TypeEntity, ExceptionEntity } from './Signum.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo, EnumType } from './Reflection';
 import { EntityFrame, TypeContext } from './TypeContext';
 import * as AppContext from './AppContext';

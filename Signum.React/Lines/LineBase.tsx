@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Dic } from '../Globals'
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { TypeReference } from '../Reflection'
-import { ValidationMessage } from '../Signum.Entities'
+import { ValidationMessage } from '../Signum.Entities.Validation'
 import { useForceUpdate } from '../Hooks'
 
 export interface ChangeEvent {

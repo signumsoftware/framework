@@ -9,7 +9,7 @@ import { PropertyRoute, tryGetTypeInfos, TypeInfo, IsByAll, TypeReference, getTy
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLiteFat, is, entityInfo, SelectorMessage, toLite, parseLiteList, getToString } from '../Signum.Entities'
 import { LineBaseController, LineBaseProps } from './LineBase'
 import SelectorModal from '../SelectorModal'
-import { TypeEntity } from "../Signum.Entities.Basics";
+import { TypeEntity } from "../Signum.Basics";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FindOptionsAutocompleteConfig } from './AutoCompleteConfig'
 import { FilterOption } from '../Search'

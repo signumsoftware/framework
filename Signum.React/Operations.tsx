@@ -1,11 +1,8 @@
 import * as React from "react"
 import { Dic } from './Globals'
 import { ajaxGetRaw, ajaxPost, ajaxPostRaw, ServiceError, WebApiHttpError } from './Services'
-import {
-  Lite, Entity, OperationMessage, EntityPack,
-  OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, JavascriptMessage, EngineMessage, getToString, PropertyOperation, toLite
-} from './Signum.Entities';
-import { OperationLogEntity } from './Signum.Entities.Basics';
+import { Lite, Entity, OperationMessage, EntityPack, JavascriptMessage, EngineMessage, getToString, toLite } from './Signum.Entities';
+import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationLogEntity, OperationSymbol, PropertyOperation } from './Signum.Operations';
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName, QueryTokenString } from './Reflection';
 import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible, ButtonBarElement } from './TypeContext';
 import * as AppContext from './AppContext';
@@ -20,7 +17,7 @@ import { ContextualItemsContext, MenuItemBlock } from './SearchControl/Contextua
 import { BsColor, KeyCodes } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Notify from './Frames/Notify';
-import { FilterOperation } from "./Signum.Entities.DynamicQuery";
+import { FilterOperation } from "./Signum.DynamicQuery";
 import { FunctionalAdapter } from "./Modals";
 import { SearchControlLoaded } from "./Search";
 import { isActive, isFilterGroupOption, isFilterGroupOptionParsed } from "./FindOptions";

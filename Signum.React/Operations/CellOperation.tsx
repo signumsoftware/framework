@@ -1,6 +1,6 @@
 import * as React from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, External, getToString } from '../Signum.Entities';
+import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, getToString } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
 import { classes } from '../Globals';
 import * as Navigator from '../Navigator';

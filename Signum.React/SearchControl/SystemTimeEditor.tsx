@@ -3,12 +3,12 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { classes } from '../Globals';
 import { SystemTime, FindOptionsParsed, QueryDescription } from '../FindOptions'
-import { SystemTimeJoinMode, SystemTimeMode } from '../Signum.Entities.DynamicQuery'
+import { SystemTimeJoinMode, SystemTimeMode } from '../Signum.DynamicQuery'
 import { JavascriptMessage } from '../Signum.Entities'
 import { DateTimePicker } from 'react-widgets';
 import { QueryTokenString, toLuxonFormat } from '../Reflection';
 import QueryTokenBuilder from './QueryTokenBuilder';
-import { OperationLogEntity } from '../Signum.Entities.Basics';
+import { OperationLogEntity } from '../Signum.Operations';
 
 interface SystemTimeEditorProps {
   findOptions: FindOptionsParsed;

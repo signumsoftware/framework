@@ -11,7 +11,7 @@ import { Property } from 'csstype';
 import "./Search.css"
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { areEqualDeps, useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
-import { RefreshMode } from '../Signum.Entities.DynamicQuery';
+import { RefreshMode } from '../Signum.DynamicQuery';
 
 export interface SimpleFilterBuilderProps {
   findOptions: FindOptions;

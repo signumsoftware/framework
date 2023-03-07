@@ -2,12 +2,14 @@ import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
 import { API, getOperationInfo } from '../Operations';
 import { Modal, ProgressBar } from 'react-bootstrap';
-import { Entity, External, JavascriptMessage, Lite, liteKey, OperationMessage, OperationSymbol } from '../Signum.Entities';
+import { Entity, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
 import { useForceUpdate, useThrottle } from '../Hooks';
 import { getTypeInfo, OperationInfo } from '../Reflection';
 import { useState } from 'react';
 import { softCast } from '../Globals';
 import { jsonObjectStream } from './jsonObjectStream';
+import { CollectionMessage } from '../Signum.External';
+import { OperationSymbol } from '../Signum.Operations';
 
 
 interface MultiOperationProgressModalProps extends IModalProps<API.ErrorReport> {
@@ -40,7 +42,7 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
   }
 
   var typeNiceName = React.useMemo(() =>
-    p.lites.map(a => a.EntityType).distinctBy(a => a).map(a => p.lites.length == 1 ? getTypeInfo(a).niceName : getTypeInfo(a).nicePluralName).joinComma(External.CollectionMessage.And.niceToString()), [p.lites]);
+    p.lites.map(a => a.EntityType).distinctBy(a => a).map(a => p.lites.length == 1 ? getTypeInfo(a).niceName : getTypeInfo(a).nicePluralName).joinComma(CollectionMessage.And.niceToString()), [p.lites]);
 
   React.useEffect(() => {
     consumeReader().finally(() => {

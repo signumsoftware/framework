@@ -11,7 +11,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from './EntityBase';
 import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
 import { getTypeInfo, getTypeInfos, getTypeName, QueryTokenString, tryGetTypeInfos } from '../Reflection'
-import { FilterOperation } from '../Signum.Entities.DynamicQuery'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
 import { TypeaheadController } from '../Components/Typeahead'

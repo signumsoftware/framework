@@ -24,7 +24,7 @@ import ContextMenu from './ContextMenu'
 import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
-import { FilterOperation, RefreshMode } from '../Signum.Entities.DynamicQuery';
+import { FilterOperation, RefreshMode } from '../Signum.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

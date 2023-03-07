@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { BigStringEmbedded, ExceptionEntity } from '../Signum.Entities.Basics'
+import { ExceptionEntity } from '../Signum.Basics'
+import { BigStringEmbedded } from '../Signum.Entities'
 import { ValueLine, EntityLine, TypeContext } from '../Lines'
 import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

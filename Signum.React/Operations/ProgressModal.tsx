@@ -2,7 +2,7 @@ import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
 import { API, getOperationInfo } from '../Operations';
 import { Modal, ProgressBar } from 'react-bootstrap';
-import { Entity, External, JavascriptMessage, Lite, liteKey, OperationMessage, OperationSymbol } from '../Signum.Entities';
+import { Entity, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
 import { useForceUpdate, useThrottle } from '../Hooks';
 import { getTypeInfo, OperationInfo } from '../Reflection';
 import { useState } from 'react';

@@ -5,6 +5,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection'
 import * as Entities from './Signum.Entities'
 import * as Security from './Signum.Security'
+import * as Operations from './Signum.Operations'
 
 
 export const ClientErrorModel = new Type<ClientErrorModel>("ClientErrorModel");
@@ -14,6 +15,19 @@ export interface ClientErrorModel extends Entities.ModelEntity {
   message: string;
   stack: string | null;
   name: string | null;
+}
+
+export const CultureInfoEntity = new Type<CultureInfoEntity>("CultureInfo");
+export interface CultureInfoEntity extends Entities.Entity {
+  Type: "CultureInfo";
+  name: string;
+  nativeName: string;
+  englishName: string;
+}
+
+export module CultureInfoOperation {
+  export const Save : Operations.ExecuteSymbol<CultureInfoEntity> = registerSymbol("Operation", "CultureInfoOperation.Save");
+  export const Delete : Operations.DeleteSymbol<CultureInfoEntity> = registerSymbol("Operation", "CultureInfoOperation.Delete");
 }
 
 export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
@@ -68,6 +82,9 @@ export const ExceptionOrigin = new EnumType<ExceptionOrigin>("ExceptionOrigin");
 export type ExceptionOrigin =
   "Backend_DotNet" |
   "Frontend_React";
+
+export interface IEmailOwnerEntity extends Entities.Entity {
+}
 
 export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {

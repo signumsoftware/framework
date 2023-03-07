@@ -6,6 +6,7 @@
 		<WarningsAsErrors>nullable</WarningsAsErrors>
 		<RootNamespace>Signum</RootNamespace>
 		<OutputType>Library</OutputType>
+		<NoWarn>8618</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

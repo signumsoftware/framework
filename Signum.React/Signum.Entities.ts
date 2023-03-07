@@ -82,13 +82,6 @@ export interface EntityPack<T extends ModifiableEntity> {
   readonly canExecute: { [key: string]: string };
 }
 
-//The interfaces add no real members, they are there just to force TS structural typing
-
-export interface ExecuteSymbol<T extends Entity> extends OperationSymbol { _execute_: T /*TRICK*/ };
-export interface DeleteSymbol<T extends Entity> extends OperationSymbol { _delete_: T /*TRICK*/ };
-export interface ConstructSymbol_Simple<T extends Entity> extends OperationSymbol { _construct_: T /*TRICK*/ };
-export interface ConstructSymbol_From<T extends Entity, F extends Entity> extends OperationSymbol { _constructFrom_: T, _from_?: F /*TRICK*/ };
-export interface ConstructSymbol_FromMany<T extends Entity, F extends Entity> extends OperationSymbol { _constructFromMany_: T, _from_?: F /*TRICK*/ };
 
 export const toStringDictionary: { [name: string]: ((entity: any) => string) | null } = {};
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Dic, areEqual, classes } from '../Globals'
 import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo } from '../Reflection'
-import { ModifiableEntity, SearchMessage, External, JavascriptMessage, Lite, Entity, OperationMessage, PropertyOperation } from '../Signum.Entities'
+import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute, StyleContext } from '../Lines'
@@ -13,7 +13,7 @@ import { API, Defaults } from '../Operations';
 import { useForceUpdate } from '../Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DropdownList } from 'react-widgets'
-import { QueryTokenMessage } from '../Signum.Entities.DynamicQuery'
+import { QueryTokenMessage } from '../Signum.DynamicQuery.Tokens'
 import { getTypeNiceName } from '../Finder'
 import { openModal, IModalProps } from '../Modals'
 import { Modal } from 'react-bootstrap'
@@ -21,6 +21,8 @@ import { ErrorBoundary } from '../Components'
 import './MultiPropertySetter.css';
 import SelectorModal from '../SelectorModal'
 import { FilterOperation, filterOperations, getFilterType } from '../FindOptions'
+import { PropertyOperation } from '../Signum.Operations'
+import { CollectionMessage } from '../Signum.External'
 
 
 
@@ -552,7 +554,7 @@ export function getNiceTypeName(tr: TypeReference) {
 
         var tis = tryGetTypeInfos(tr.name);
         if (tis[0]) {
-          return tis.map(a => a!.niceName).joinComma(External.CollectionMessage.Or.niceToString());
+          return tis.map(a => a!.niceName).joinComma(CollectionMessage.Or.niceToString());
         }
         else
           return "Unknown";
