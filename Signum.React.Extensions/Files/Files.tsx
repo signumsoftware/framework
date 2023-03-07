@@ -1,6 +1,0 @@
-export { FileUploader } from './FileUploader'
-export { FileDownloader } from './FileDownloader'
-export { FileImageLine } from './FileImageLine'
-export { FileLine } from './FileLine'
-export { MultiFileLine } from './MultiFileLine'
-export { MultiFileImageLine } from './MultiFileImageLine'
