@@ -1201,8 +1201,8 @@ export function ColorTextBox(p: ColorTextBoxProps) {
 
     input.setSelectionRange(0, input.value != null ? input.value.length : 0);
 
-    if (p.htmlAttributes && p.htmlAttributes.onFocus)
-      p.htmlAttributes.onFocus(e);
+    if (p.textValueHtmlAttributes?.onFocus)
+      p.textValueHtmlAttributes.onFocus(e);
   };
 
   function handleOnBlur(e: React.FocusEvent<any>) {
@@ -1214,8 +1214,8 @@ export function ColorTextBox(p: ColorTextBoxProps) {
     setText(undefined);
     if (p.value != result)
       p.onChange(result);
-    if (p.htmlAttributes && p.htmlAttributes.onBlur)
-      p.htmlAttributes.onBlur(e);
+    if (p.textValueHtmlAttributes?.onBlur)
+      p.textValueHtmlAttributes.onBlur(e);
   }
 
   function handleOnChange(e: React.SyntheticEvent<any>) {
