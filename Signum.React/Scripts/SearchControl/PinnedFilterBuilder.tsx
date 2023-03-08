@@ -19,6 +19,7 @@ interface PinnedFilterBuilderProps {
   onSearch?: () => void;
   showSearchButton?: boolean;
   extraSmall?: boolean;
+  colClassName?: string;
 }
 export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
@@ -36,7 +37,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
           allPinned
             .groupBy(fo => (fo.pinned!.column ?? 0).toString())
             .orderBy(gr => parseInt(gr.key))
-            .map(gr => <div className="col-sm-3" key={gr.key}>
+            .map(gr => <div key={gr.key} className={p.colClassName ?? (gr.elements.length > 4 ? "col-sm-2" : "col-sm-3")}>
               {gr.elements.orderBy(a => a.pinned!.row).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
             </div>)
         }
