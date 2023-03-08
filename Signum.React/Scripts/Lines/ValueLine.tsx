@@ -580,6 +580,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
+          minHeight={vl.props.valueHtmlAttributes?.style?.minHeight?.toString()}
           onChange={handleTextOnChange}
           onBlur={handleBlur ?? htmlAtts?.onBlur}
           onFocus={handleOnFocus}
