@@ -3,6 +3,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Mailing;
 using Signum.Services;
 using Signum.Entities.Basics;
+using Signum.Security;
 
 namespace Signum.Engine.Authorization;
 
@@ -24,6 +25,16 @@ public static class ResetPasswordRequestLogic
                 e.User.Email
             });
 
+        AuthLogic.OnDeactivateUser = u =>
+        {
+            var config = EmailLogic.Configuration;
+            var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
+            var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
+
+            var mail = new UserLockedMail(user, url);
+            mail.SendMailAsync();
+        };
+
         EmailLogic.AssertStarted(sb);
 
         EmailModelLogic.RegisterEmailModel<ResetPasswordRequestEmail>(() => new EmailTemplateEntity
@@ -37,6 +48,18 @@ public static class ResetPasswordRequestLogic
                         .NiceToString()) +
                     "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
                 Subject = AuthEmailMessage.ResetPasswordRequestSubject.NiceToString()
+            }).ToMList()
+        });
+
+        EmailModelLogic.RegisterEmailModel<UserLockedMail>(() => new EmailTemplateEntity
+        {
+            Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
+            {
+                Text =
+                    "<p>{0}</p>".FormatWith(AuthEmailMessage.YourAccountHasBeenLockedDueToSeveralFailedLogins.NiceToString()) +
+                    "<p>{0}</p>".FormatWith(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
+                    "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
+                Subject = AuthEmailMessage.YourAccountHasBeenLocked.NiceToString()
             }).ToMList()
         });
 
@@ -154,5 +177,22 @@ public class ResetPasswordRequestEmail : EmailModel<ResetPasswordRequestEntity>
     public override List<EmailOwnerRecipientData> GetRecipients()
     {
         return SendTo(Entity.User.EmailOwnerData);
+    }
+}
+
+public class UserLockedMail : EmailModel<UserEntity>
+{
+    public string Url;
+
+    public UserLockedMail(UserEntity entity) : this(entity, "http://testurl.com") { }
+
+    public UserLockedMail(UserEntity entity, string url) : base(entity)
+    {
+        this.Url = url;
+    }
+
+    public override List<EmailOwnerRecipientData> GetRecipients()
+    {
+        return SendTo(Entity.EmailOwnerData);
     }
 }

@@ -1,10 +1,8 @@
-using Signum.Authorization.Admin;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
 using Signum.Utilities.Reflection;
 using System.Collections.Immutable;
+using Signum.Authorization.Rules;
 
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization;
 
 public static partial class TypeAuthLogic
 {

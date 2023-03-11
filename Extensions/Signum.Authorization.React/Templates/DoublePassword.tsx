@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { UserEntity, UserState, LoginAuthMessage } from '../Signum.Entities.Authorization'
+import { UserEntity, UserState, LoginAuthMessage } from '../Signum.Authorization'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { TypeContext } from '@framework/TypeContext'
-import { classes } from '../../../Signum.React/Scripts/Globals'
-import { useForceUpdate } from '../../../Signum.React/Scripts/Hooks'
+import { classes } from '@framework/Globals'
+import { useForceUpdate } from '@framework/Hooks'
 
 export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean }) {
 

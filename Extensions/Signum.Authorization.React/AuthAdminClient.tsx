@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite, getToString, EntityControlMessage } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, EntityControlMessage } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -12,19 +12,19 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import * as QuickLinks from '@framework/QuickLinks'
 import { EntityOperationSettings } from '@framework/Operations'
-import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
+import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission, LoginAuthMessage, ActiveDirectoryConfigurationEmbedded, UserState, UserLiteModel } from './Signum.Entities.Authorization'
-import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Entities.Authorization'
-import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import { PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission } from './Signum.Authorization.Rules'
+import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed } from './Signum.Authorization.Rules'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isPermissionAuthorized } from './AuthClient';
-import { loginWithAzureAD } from './AzureAD/AzureAD';
 import ProfilePhoto, { SmallProfilePhoto } from './Templates/ProfilePhoto';
-import { TypeaheadOptions } from '../../Signum.React/Scripts/Components/Typeahead';
-import { EntityLink } from '../../Signum.React/Scripts/Search';
+import { TypeaheadOptions } from '@framework/Components/Typeahead';
+import { EntityLink } from '@framework/Search';
 import UserCircle from './Templates/UserCircle';
+import { RoleEntity, UserEntity, UserLiteModel, UserOperation, UserState } from './Signum.Authorization';
 
 export let types: boolean;
 export let properties: boolean;
@@ -56,7 +56,6 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
 
 
   Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
-  Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./AzureAD/ActiveDirectoryConfiguration')));
   Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
 
 
@@ -153,7 +152,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null }));
   }
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => isPermissionAuthorized(BasicPermission.AdminRules),
     key: "DownloadAuthRules",
     onClick: () => { API.downloadAuthRules(); return Promise.resolve(undefined); }

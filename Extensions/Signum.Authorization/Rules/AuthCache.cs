@@ -1,6 +1,3 @@
-using Signum.Engine.Authorization;
-using Signum.Entities;
-using Signum.Entities.Authorization;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;

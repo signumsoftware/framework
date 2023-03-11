@@ -1,5 +1,4 @@
-
-namespace Signum.Entities.Basics;
+namespace Signum.Authorization.Rules;
 
 [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class TypeConditionSymbol : Symbol

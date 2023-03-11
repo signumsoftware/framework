@@ -3,12 +3,13 @@ import { Button } from 'react-bootstrap'
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
-import { getToString, OperationSymbol } from '@framework/Signum.Entities'
+import { getToString } from '@framework/Signum.Entities'
 import { API } from '../AuthAdminClient'
-import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthEmailMessage } from '../Signum.Entities.Authorization'
+import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol } from '../Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks'
+import { OperationSymbol } from '@framework/Signum.Operations'
 
 export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx: TypeContext<OperationRulePack> }, ref: React.Ref<IRenderButtons>) {
 

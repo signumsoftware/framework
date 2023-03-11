@@ -9,7 +9,8 @@ import { is } from '@framework/Signum.Entities';
 import { ifError } from "@framework/Globals";
 import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
-import { PermissionSymbol, UserEntity} from './Signum.Entities.Authorization';
+import { UserEntity} from './Signum.Authorization';
+import { PermissionSymbol } from "./Signum.Authorization.Rules";
 
 export function startPublic(options: { routes: RouteObject[], userTicket: boolean, windowsAuthentication: boolean, resetPassword: boolean, notifyLogout: boolean }) {
   Options.userTicket = options.userTicket;

@@ -1,11 +1,9 @@
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Routing;
 
-namespace Signum.React.Authorization;
+namespace Signum.Authorization.UserTicket;
 
 public class UserTicketServer
 {

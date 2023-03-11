@@ -76,6 +76,8 @@ public static class CacheLogic
             sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
             sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
             sb.Schema.InvalidateCache += CacheLogic.ForceReset;
+
+            GlobalLazy.OnResetAll += CacheLogic.ForceReset;
         }
     }
 

@@ -1,9 +1,10 @@
 import * as React from 'react'
-import { RoleEntity, AuthAdminMessage, UserEntity, MergeStrategy } from '../Signum.Entities.Authorization'
+import { RoleEntity, UserEntity, MergeStrategy } from '../Signum.Authorization'
 import { ValueLine, EntityStrip, TypeContext } from '@framework/Lines'
 import { useForceUpdate } from '@framework/Hooks'
 import { SearchValue, SearchValueLine } from '@framework/Search';
-import { External, getToString } from '@framework/Signum.Entities';
+import { getToString } from '@framework/Signum.Entities';
+import { AuthAdminMessage } from '../Signum.Authorization.Rules';
 
 export default function Role(p: { ctx: TypeContext<RoleEntity> }) {
   const forceUpdate = useForceUpdate();

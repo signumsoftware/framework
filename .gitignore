@@ -44,3 +44,5 @@ Signum.React/node_modules/*.js
 /Signum.React.Extensions/node_modules/**
 /Utils/CheckUrl/.vs/**
 /Sigum.React/node_modules/**
+*/ts_out/**
+**/ts_out/**

@@ -1,8 +1,6 @@
-using Signum.Authorization.Admin;
-using Signum.Entities.Authorization;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization.Rules;
 
 public static class PermissionAuthLogic
 {
@@ -87,7 +85,7 @@ public static class PermissionAuthLogic
 
                 replacements.AskForReplacements(
                     x.Element("Permissions")!.Elements("Role").SelectMany(r => r.Elements("Permission")).Select(p => p.Attribute("Resource")!.Value).ToHashSet(),
-                    SymbolLogic<PermissionSymbol>.Symbols.Select(s=>s.Key).ToHashSet(),
+                    SymbolLogic<PermissionSymbol>.Symbols.Select(s => s.Key).ToHashSet(),
                     replacementKey);
 
                 return cache.ImportXml(x, "Permissions", "Permission", roles,

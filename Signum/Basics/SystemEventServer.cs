@@ -1,8 +1,7 @@
-using Signum.Engine.Scheduler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 
-namespace Signum.React.Scheduler;
+namespace Signum.Basics;
 
 public static class SystemEventServer
 {

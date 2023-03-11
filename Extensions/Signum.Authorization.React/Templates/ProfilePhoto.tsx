@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { UserEntity } from "../Signum.Entities.Authorization";
+import { UserEntity } from "../Signum.Authorization";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './ProfilePhoto.css'
 import { getToString, Lite, toLite } from "@framework/Signum.Entities";

@@ -1,10 +1,6 @@
-using Signum.Engine.Authorization;
 using System.Xml.Linq;
-using Signum.Entities.Basics;
-using Signum.Entities.Reflection;
-using Signum.Authorization.Admin;
 
-namespace Signum.Entities.Authorization;
+namespace Signum.Authorization.Rules;
 
 class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
 {
@@ -73,7 +69,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
     {
         TypeEntity type = (TypeEntity)arg;
 
-        var ruleTypeConditions = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(a =>a.RuleType.Entity.Resource.Is(type)));
+        var ruleTypeConditions = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(a => a.RuleType.Entity.Resource.Is(type)));
         var ruleTypesCommand = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(type)));
 
         return SqlPreCommand.Combine(Spacing.Simple, ruleTypeConditions, ruleTypesCommand);
@@ -329,24 +325,24 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
 
         return new XElement("Types",
             (from r in AuthLogic.RolesInOrder(includeTrivialMerge: false)
-             let rac = rules.GetOrThrow(r)
-             select new XElement("Role",
-                 new XAttribute("Name", r.ToString()!),
-                     from k in allTypes ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()
-                     let allowedBase = rac.GetAllowedBase(k)
-                     let allowed = rac.GetAllowed(k)
-                     where allTypes != null || !allowed.Equals(allowedBase)
-                     let resource = TypeLogic.GetCleanName(k)
-                     orderby resource
-                     select new XElement("Type",
-                        new XAttribute("Resource", resource),
-                        new XAttribute("Allowed", allowed.Fallback.ToString()!),
-                        from c in allowed.ConditionRules
-                        select new XElement("Condition",
-                            new XAttribute("Name", c.TypeConditions.ToString(", ")),
-                            new XAttribute("Allowed", c.Allowed.ToString()))
-                     )
-                 )
+            let rac = rules.GetOrThrow(r)
+            select new XElement("Role",
+                new XAttribute("Name", r.ToString()!),
+                    from k in allTypes ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()
+                    let allowedBase = rac.GetAllowedBase(k)
+                    let allowed = rac.GetAllowed(k)
+                    where allTypes != null || !allowed.Equals(allowedBase)
+                    let resource = TypeLogic.GetCleanName(k)
+                    orderby resource
+                    select new XElement("Type",
+                       new XAttribute("Resource", resource),
+                       new XAttribute("Allowed", allowed.Fallback.ToString()!),
+                       from c in allowed.ConditionRules
+                       select new XElement("Condition",
+                           new XAttribute("Name", c.TypeConditions.ToString(", ")),
+                           new XAttribute("Allowed", c.Allowed.ToString()))
+                    )
+                )
             ));
     }
 
@@ -367,7 +363,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
             TypeLogic.NameToType.Where(a => !a.Value.IsEnumEntity()).Select(a => a.Key).ToHashSet(), typeReplacementKey);
 
         replacements.AskForReplacements(
-            xRoles.SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).SelectMany(x => x.Attribute("Name")!.Value.SplitNoEmpty(",").Select(a=>a.Trim()).ToList()).ToHashSet(),
+            xRoles.SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).SelectMany(x => x.Attribute("Name")!.Value.SplitNoEmpty(",").Select(a => a.Trim()).ToList()).ToHashSet(),
             SymbolLogic<TypeConditionSymbol>.AllUniqueKeys(),
             typeConditionReplacementKey);
 
@@ -422,11 +418,11 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                         var conditions = Conditions(xr, replacements);
 
                         return table.InsertSqlSync(
-                            new RuleTypeEntity { Resource = r, Role = role, Allowed = a, ConditionRules = conditions.ToMList() }, 
-                            includeCollections: true, 
+                            new RuleTypeEntity { Resource = r, Role = role, Allowed = a, ConditionRules = conditions.ToMList() },
+                            includeCollections: true,
                             comment: Comment(role, r, a));
                     },
-                    removeOld: (r, rt) => table.DeleteSqlSync(rt, null,  Comment(role, r, rt.Allowed)),
+                    removeOld: (r, rt) => table.DeleteSqlSync(rt, null, Comment(role, r, rt.Allowed)),
                     mergeBoth: (r, xr, pr) =>
                     {
                         var oldA = pr.Allowed;
@@ -436,7 +432,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                         if (!pr.ConditionRules.SequenceEqual(conditions))
                             pr.ConditionRules = conditions;
 
-                        return table.UpdateSqlSync(pr, null, includeCollections:true, comment: Comment(role, r, oldA, pr.Allowed));
+                        return table.UpdateSqlSync(pr, null, includeCollections: true, comment: Comment(role, r, oldA, pr.Allowed));
                     })?.Do(p => p.GoBefore = true);
 
                 return restSql;
@@ -446,12 +442,12 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
     private static MList<RuleTypeConditionEntity> Conditions(XElement xr, Replacements replacements)
     {
         var conditions = (from xc in xr.Elements("Condition")
-                select new RuleTypeConditionEntity
-                {
-                    Conditions = xc.Attribute("Name")!.Value.SplitNoEmpty(",")
-                        .Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToMList(),
-                    Allowed = xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>()
-                }).ToMList();
+                          select new RuleTypeConditionEntity
+                          {
+                              Conditions = xc.Attribute("Name")!.Value.SplitNoEmpty(",")
+                                  .Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToMList(),
+                              Allowed = xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>()
+                          }).ToMList();
         return conditions;
     }
 

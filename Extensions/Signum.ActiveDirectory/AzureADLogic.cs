@@ -1,5 +1,6 @@
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
+using Signum.ActiveDirectory;
 using Signum.Engine.Mailing.Senders;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Authorization;
@@ -74,6 +75,52 @@ public static class AzureADLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
+            if (MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)))
+            {
+                As.OverrideExpression
+
+                [AutoExpressionField]
+                public EmailOwnerData EmailOwnerData => As.Expression(() => new EmailOwnerData
+                {
+                    Owner = this.ToLite(),
+                    CultureInfo = CultureInfo,
+                    DisplayName = UserName,
+                    Email = Email,
+                    AzureUserId = null MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)) ? this.Mixin<UserADMixin>().OID : null
+                });
+
+                UserWithClaims.FillClaims += (userWithClaims, user) =>
+                {
+                    var mixin = ((UserEntity)user).Mixin<UserADMixin>();
+                    userWithClaims.Claims["OID"] = mixin.OID;
+                    userWithClaims.Claims["SID"] = mixin.SID;
+                };
+
+                var lambda = As.GetExpression((UserEntity u) => u.ToString());
+
+                if (lambda.Body is MemberExpression me && me.Member is PropertyInfo pi && pi.Name == nameof(UserEntity.UserName))
+                {
+                    Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+                    {
+                        UserName = u.UserName,
+                        ToStringValue = null,
+                        OID = u.Mixin<UserADMixin>().OID,
+                        SID = u.Mixin<UserADMixin>().SID,
+                    });
+                }
+                else
+                {
+                    Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+                    {
+                        UserName = u.UserName,
+                        ToStringValue = u.ToString(),
+                        OID = u.Mixin<UserADMixin>().OID,
+                        SID = u.Mixin<UserADMixin>().SID,
+                    });
+                }
+
+            }
+
             if (deactivateUsersTask)
             {
                 SimpleTaskLogic.Register(ActiveDirectoryTask.DeactivateUsers, stc =>

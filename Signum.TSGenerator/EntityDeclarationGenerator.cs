@@ -42,6 +42,8 @@ public class TSType
     public required string Namespace;
     public required TypeDefinition Type;
     public required Func<Dictionary<string, Dictionary<string, NamespaceTSReference>>, string> GetText;
+
+    public override string ToString() => Type.Name;
 }
 
 static class EntityDeclarationGenerator
@@ -182,7 +184,7 @@ static class EntityDeclarationGenerator
         var namespacesReferences = new Dictionary<string, Dictionary<string, NamespaceTSReference>>();
 
         namespacesReferences.GetNamespaceReference(options, Cache.ModifiableEntity);
-
+        
         var texts = types.Select(a => new
         {
             a.Type.Name,
@@ -194,14 +196,14 @@ static class EntityDeclarationGenerator
         sb.AppendLine(@"//Auto-generated. Do NOT modify!//");
         sb.AppendLine(@"//////////////////////////////////");
         sb.AppendLine();
-        var path = namespacesReferences.GetOrThrow("Signum").GetOrThrow("Signum.Entities").Path.Replace("Signum.Entities.ts", "Reflection.ts");
+        var path = namespacesReferences.GetOrThrow("Signum").GetOrThrow("Signum.Entities").FullPath.Replace("Signum.Entities.ts", "Reflection.ts");
         sb.AppendLine($"import {{ MessageKey, QueryKey, Type, EnumType, registerSymbol }} from '{RelativePath(path, templateFileName)}'");
 
         foreach (var assRef in namespacesReferences.Values)
         {
             foreach (var nsRef in assRef.Values)
             {
-                sb.AppendLine($"import * as {nsRef.VariableName} from '{RelativePath(nsRef.Path, templateFileName)}'");
+                sb.AppendLine($"import * as {nsRef.VariableName} from '{RelativePath(nsRef.FullPath, templateFileName)}'");
             }
         }
         sb.AppendLine();
@@ -668,7 +670,7 @@ static class EntityDeclarationGenerator
             .GetOrCreate(type.Namespace, () => new NamespaceTSReference
             {
                 Namespace = type.Namespace,
-                Path = FindDeclarationsFile(assemblyReference, type.Namespace, type),
+                FullPath = FindDeclarationsFile(assemblyReference, type.Namespace, type),
                 VariableName = GetVariableName(references, type.Namespace.Split('.'))
             });
     }
@@ -698,19 +700,19 @@ static class EntityDeclarationGenerator
 
     private static string FindDeclarationsFile(AssemblyReference assemblyReference, string @namespace, TypeDefinition typeForError)
     {
-        var fileTS = @namespace + ".ts";
+        //var fileTS = @namespace + ".ts";
 
-        var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileTS).ToList();
+        //var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileTS).ToList();
 
-        if (result.Count == 1)
-            return result.Single();
+        //if (result.Count == 1)
+        //    return result.Single();
 
-        if (result.Count > 1)
-            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileTS}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
+        //if (result.Count > 1)
+        //    throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileTS}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
 
         var fileT4S = @namespace + ".t4s";
 
-        result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileT4S).ToList();
+        var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileT4S).ToList();
 
         if (result.Count == 1)
             return result.Single().RemoveSuffix(".t4s") + ".ts";
@@ -718,7 +720,7 @@ static class EntityDeclarationGenerator
         if (result.Count > 1)
             throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
 
-        throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileTS}' or '{fileT4S}' found inside '{assemblyReference.ReactDirectory}'");
+        throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileT4S}' found inside '{assemblyReference.ReactDirectory}'");
     }
 
     private static string BaseTypeScriptName(TypeDefinition type)
@@ -813,7 +815,7 @@ public class AssemblyOptions
 public class AssemblyReference
 {
     public string ReactDirectory;
-    public string AssemblyFullPath;
+    //public string AssemblyFullPath;
     public string AssemblyName;
 
     public List<string> AllTypescriptFiles;
@@ -822,8 +824,10 @@ public class AssemblyReference
 public class NamespaceTSReference
 {
     public string Namespace;
-    public string Path;
+    public string FullPath;
     public string VariableName;
+
+    public override string ToString() => $"{Namespace} => {VariableName} {FullPath}";
 }
 
 public static class DictionaryExtensions

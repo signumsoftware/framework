@@ -1,6 +1,4 @@
-using Signum.Entities.Authorization;
-
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization.UserTicket;
 
 public static class UserTicketLogic
 {
@@ -47,7 +45,7 @@ public static class UserTicketLogic
     }
 
     [AutoExpressionField]
-    public static IQueryable<UserTicketEntity> UserTickets(this UserEntity u) => 
+    public static IQueryable<UserTicketEntity> UserTickets(this UserEntity u) =>
         As.Expression(() => Database.Query<UserTicketEntity>().Where(ut => ut.User.Is(u.ToLite())));
 
     public static string NewTicket(string device)

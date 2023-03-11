@@ -1,25 +1,18 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
+using Signum.Authorization.Rules;
+using Signum.Engine.Basics;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
-using System.Xml.Linq;
 using System.IO;
-using Signum.Engine.Mailing;
-using Signum.Engine.Scheduler;
-using Signum.Entities.Mailing;
-using Signum.Engine.Cache;
-using System.Xml;
-using DocumentFormat.OpenXml.Presentation;
-using Signum.Authorization.Admin;
+using System.Xml.Linq;
 
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization;
 
 public static class AuthLogic
 {
     public static event Action<UserEntity>? UserLogingIn;
     public static ICustomAuthorizer? Authorizer;
 
-    
+
 
     /// <summary>
     /// Gets or sets the number of failed login attempts allowed before a user is locked out.
@@ -78,45 +71,13 @@ public static class AuthLogic
 
             RoleEntity.RetrieveFromCache = r => RolesByLite.Value.GetOrThrow(r);
 
-            UserWithClaims.FillClaims += (userWithClaims, user)=>
+            UserWithClaims.FillClaims += (userWithClaims, user) =>
             {
                 userWithClaims.Claims["Role"] = ((UserEntity)user).Role;
                 userWithClaims.Claims["Culture"] = ((UserEntity)user).CultureInfo?.Name;
             };
 
-            if(MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)))
-            {
-                UserWithClaims.FillClaims += (userWithClaims, user) =>
-                {
-                    var mixin = ((UserEntity)user).Mixin<UserADMixin>();
-                    userWithClaims.Claims["OID"] = mixin.OID;
-                    userWithClaims.Claims["SID"] = mixin.SID;
-                };
-
-                var lambda = As.GetExpression((UserEntity u) => u.ToString());
-
-                if (lambda.Body is MemberExpression me && me.Member is PropertyInfo pi && pi.Name == nameof(UserEntity.UserName))
-                {
-                    Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
-                    {
-                        UserName = u.UserName,
-                        ToStringValue = null,
-                        OID = u.Mixin<UserADMixin>().OID,
-                        SID = u.Mixin<UserADMixin>().SID,
-                    });
-                }
-                else
-                {
-                    Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
-                    {
-                        UserName = u.UserName,
-                        ToStringValue = u.ToString(),
-                        OID = u.Mixin<UserADMixin>().OID,
-                        SID = u.Mixin<UserADMixin>().SID,
-                    });
-                }
-             
-            }
+          
 
             CultureInfoLogic.AssertStarted(sb);
 
@@ -145,12 +106,12 @@ public static class AuthLogic
                 });
 
             sb.Schema.Table<RoleEntity>().PreDeleteSqlSync += Role_PreDeleteSqlSync;
-  
+
 
 
             RolesByLite = sb.GlobalLazy(() => Database.Query<RoleEntity>().ToDictionaryEx(a => a.ToLite()), new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
             rolesByName = sb.GlobalLazy(() => RolesByLite.Value.Keys.ToDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
-            rolesGraph = sb.GlobalLazy(()=> CacheRoles(RolesByLite.Value), new InvalidateWith(typeof(RoleEntity)));
+            rolesGraph = sb.GlobalLazy(() => CacheRoles(RolesByLite.Value), new InvalidateWith(typeof(RoleEntity)));
             rolesInverse = sb.GlobalLazy(() => rolesGraph.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
             mergeStrategies = sb.GlobalLazy(() =>
             {
@@ -179,17 +140,7 @@ public static class AuthLogic
 
             UserGraph.Register();
 
-            EmailModelLogic.RegisterEmailModel<UserLockedMail>(() => new EmailTemplateEntity
-            {
-                Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
-                {
-                    Text =
-                        "<p>{0}</p>".FormatWith(AuthEmailMessage.YourAccountHasBeenLockedDueToSeveralFailedLogins.NiceToString()) +
-                        "<p>{0}</p>".FormatWith(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
-                        "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
-                    Subject = AuthEmailMessage.YourAccountHasBeenLocked.NiceToString()
-                }).ToMList()
-            });
+
         }
     }
 
@@ -439,6 +390,8 @@ public static class AuthLogic
         UserLogingIn?.Invoke(user);
     }
 
+    public static Action<UserEntity>? OnDeactivateUser;
+
     public static UserEntity RetrieveUser(string username, byte[] passwordHash)
     {
         using (AuthLogic.Disable())
@@ -460,12 +413,7 @@ public static class AuthLogic
                         user.LoginFailedCounter == MaxFailedLoginAttempts &&
                         user.State == UserState.Active)
                     {
-                        var config = EmailLogic.Configuration;
-                        var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
-                        var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
-
-                        var mail = new UserLockedMail(user, url);
-                        mail.SendMailAsync();
+                        OnDeactivateUser?.Invoke(user);
 
                         user.Execute(UserOperation.Deactivate);
 
@@ -724,7 +672,6 @@ public static class AuthLogic
             }
         }
 
-        CacheLogic.ForceReset();
         GlobalLazy.ResetAll();
 
         {
@@ -803,11 +750,10 @@ public static class AuthLogic
             }
         }
 
-        CacheLogic.ForceReset();
         GlobalLazy.ResetAll();
     }
 
-   
+
     public static void AutomaticImportAuthRules()
     {
         AutomaticImportAuthRules("AuthRules.xml");
@@ -869,7 +815,6 @@ public static class AuthLogic
             else
                 command.OpenSqlFileRetry();
 
-            CacheLogic.ForceReset();
             GlobalLazy.ResetAll();
         }
 
@@ -1022,19 +967,3 @@ public class InvalidRoleGraphException : Exception
         : base(info, context) { }
 }
 
-public class UserLockedMail : EmailModel<UserEntity>
-{
-    public string Url;
-
-    public UserLockedMail(UserEntity entity) : this(entity, "http://testurl.com") { }
-
-    public UserLockedMail(UserEntity entity, string url) : base(entity)
-    {
-        this.Url = url;
-    }
-
-    public override List<EmailOwnerRecipientData> GetRecipients()
-    {
-        return SendTo(Entity.EmailOwnerData);
-    }
-}

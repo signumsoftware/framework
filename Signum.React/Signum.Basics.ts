@@ -80,6 +80,9 @@ export type ExceptionOrigin =
   "Backend_DotNet" |
   "Frontend_React";
 
+export interface IEmailOwnerEntity extends Entities.Entity {
+}
+
 export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
   Type: "PropertyRoute";
@@ -94,6 +97,16 @@ export interface SemiSymbol extends Entities.Entity {
 
 export interface Symbol extends Entities.Entity {
   key: string;
+}
+
+export const SystemEventLogEntity = new Type<SystemEventLogEntity>("SystemEventLog");
+export interface SystemEventLogEntity extends Entities.Entity {
+  Type: "SystemEventLog";
+  machineName: string;
+  date: string /*DateTime*/;
+  user: Entities.Lite<Security.IUserEntity> | null;
+  eventType: string;
+  exception: Entities.Lite<ExceptionEntity> | null;
 }
 
 export const TypeEntity = new Type<TypeEntity>("Type");

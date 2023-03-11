@@ -1,12 +1,10 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { UserEntity, UserState, LoginAuthMessage, UserADMixin, RoleEntity } from '../Signum.Entities.Authorization'
+import { UserEntity, UserState, LoginAuthMessage, RoleEntity } from '../Signum.Authorization'
 import { Binding } from '@framework/Reflection'
 import { ValueLine, EntityLine, EntityCombo, FormGroup, TypeContext } from '@framework/Lines'
 import { DoublePassword } from './DoublePassword'
 import { tryGetMixin } from '@framework/Signum.Entities'
-import * as ActiveDirectoryClient from "../ActiveDirectoryClient";
-import { useAPI } from '../../../Signum.React/Scripts/Hooks'
 import * as AppContext from "@framework/AppContext"
 import { useEffect, useState } from 'react'
 import ProfilePhoto from './ProfilePhoto'
@@ -51,6 +49,6 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
   );
 }
 
-User.changePasswordVisible = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID == null;
-User.userNameReadonly = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null;
-User.emailReadonly = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null;
+User.changePasswordVisible = (user: UserEntity) => true;
+User.userNameReadonly = (user: UserEntity) => false;
+User.emailReadonly = (user: UserEntity) => false;

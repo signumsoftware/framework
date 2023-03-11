@@ -1,6 +1,4 @@
-using Signum.Entities.Authorization;
-
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization;
 
 public class UserGraph : Graph<UserEntity, UserState>
 {

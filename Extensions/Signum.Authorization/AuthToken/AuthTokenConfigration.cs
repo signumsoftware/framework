@@ -1,5 +1,4 @@
-
-namespace Signum.Entities.Authorization;
+namespace Signum.Authorization.AuthToken;
 
 public class AuthTokenConfigurationEmbedded : EmbeddedEntity
 {

@@ -1,18 +1,15 @@
-using Signum.Entities.Authorization;
-using Signum.React.Facades;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Utilities.Reflection;
-using Signum.Services;
-using Signum.Engine.Authorization;
-using Signum.React.Maps;
 using Microsoft.AspNetCore.Builder;
-using Signum.React.ApiControllers;
 using System.Text.Json;
-using Signum.Engine.Json;
-using Signum.Entities.Basics;
 using Signum.Authorization.SessionLog;
+using Signum.Authorization.Rules;
+using Signum.Authorization.AuthToken;
+using Signum.API;
+using Signum.API.Controllers;
+using Signum.API.Json;
 
-namespace Signum.React.Authorization;
+namespace Signum.Authorization;
 
 public static class AuthServer
 {
@@ -214,13 +211,10 @@ public static class AuthServer
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    ((UserEntity)ctx.Entity).PasswordHash = Security.EncodePassword(password);
+                    ((UserEntity)ctx.Entity).PasswordHash = PasswordEncoding.EncodePassword(password);
                 }
             }
         });
-
-        if (TypeAuthLogic.IsStarted)
-            Omnibox.OmniboxServer.IsNavigable += type => TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
 
         if (SessionLogLogic.IsStarted)
             AuthServer.UserLogged +=  (ActionContext ac, UserEntity user) =>
@@ -231,7 +225,7 @@ public static class AuthServer
                     re.Headers["User-Agent"].FirstOrDefault());
             };
 
-        SchemaMap.GetColorProviders += GetMapColors;
+        MapColorProvider.GetColorProviders += GetMapColors;
     }
 
     public static ResetLazy<Dictionary<string, List<Type>>> entitiesByNamespace =

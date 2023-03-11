@@ -1,8 +1,8 @@
-﻿{
+{
   "compilerOptions": {
     "target": "ES2017",
-    "sourceMap": false,
-    "module": "esnext",
+    "sourceMap": true,
+    "module": "ESNext",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
@@ -16,9 +16,5 @@
       "ES2020",
       "dom"
     ]
-  },
-  "exclude": [
-    "./node_modules",
-    "./ts_out"
-  ]
+  }
 }

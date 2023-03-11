@@ -1,11 +1,10 @@
-using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.UserAssets;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Collections.Immutable;
+using Signum.DynamicQuery.Tokens;
 
 namespace Signum.Entities.Omnibox;
 
@@ -421,7 +420,7 @@ public class DynamicQueryOmniboxResult : OmniboxResult
 
 public class OmniboxFilterResult
 {
-    public OmniboxFilterResult(float distance, FilterSyntax? syntax, DynamicQuery.QueryToken queryToken, OmniboxMatch[]? omniboxMatch)
+    public OmniboxFilterResult(float distance, FilterSyntax? syntax, QueryToken queryToken, OmniboxMatch[]? omniboxMatch)
     {
         this.Distance = distance;
         this.Syntax = syntax;

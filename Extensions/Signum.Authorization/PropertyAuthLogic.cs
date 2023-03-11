@@ -1,8 +1,4 @@
-using Signum.Authorization.Admin;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization.Rules;
 
 public static class PropertyAuthLogic
 {
@@ -81,10 +77,10 @@ public static class PropertyAuthLogic
                         return null;
 
                     var property = routes.GetOrCreate(route, () => new PropertyRouteEntity
-                     {
-                         RootType = TypeLogic.TypeToEntity[route.RootType],
-                         Path = route.PropertyString()
-                     }.Save());
+                    {
+                        RootType = TypeLogic.TypeToEntity[route.RootType],
+                        Path = route.PropertyString()
+                    }.Save());
 
                     return property;
 

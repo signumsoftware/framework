@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import "./AuthAdmin.css"
-import { classes } from '../../../Signum.React/Scripts/Globals';
+import { classes } from '@framework/Globals';
 
 interface ColorRadioProps {
   checked: boolean;

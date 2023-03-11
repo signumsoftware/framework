@@ -25,7 +25,6 @@ public static class Program
             string intermediateAssembly = args[0];
             string referencesFile = args[1];
 
-
             currentCsproj = Path.Combine(Directory.GetCurrentDirectory(), Path.GetFileNameWithoutExtension(intermediateAssembly) + ".csproj");
             if (!File.Exists(currentCsproj))
                 throw new InvalidOperationException($"Project file not found in ({currentCsproj})");
@@ -52,8 +51,7 @@ public static class Program
             string[] references = File.ReadAllLines(referencesFile);
             var assemblyLocations = references.ToDictionary(a => Path.GetFileNameWithoutExtension(a));
 
-            if (!assemblyLocations.ContainsKey("Signum") && Path.GetFileName(currentCsproj) == "Signum.csproj")
-                assemblyLocations.Add("Signum", intermediateAssembly);
+            assemblyLocations.Add(Path.GetFileNameWithoutExtension(intermediateAssembly), Path.Combine(Directory.GetCurrentDirectory(), intermediateAssembly));
 
             var projXml = XDocument.Load(currentCsproj);
             var candidates = projXml.Document.Descendants("ProjectReference").Select(a => a.Attribute("Include").Value).Prepend(currentCsproj).ToList();
@@ -64,9 +62,9 @@ public static class Program
                                       select new AssemblyReference
                                       {
                                           AssemblyName = assemblyName,
-                                          AssemblyFullPath = assemblyLocations[assemblyName],
+                                          //AssemblyFullPath = assemblyLocations[assemblyName],
                                           ReactDirectory = reactDirectory,
-                                          AllTypescriptFiles = GetAllT4SFiles(reactDirectory),
+                                          AllTypescriptFiles = GetAllT4SFiles(Path.Combine(Directory.GetCurrentDirectory(), reactDirectory)),
                                       }).ToDictionary(a => a.AssemblyName);
 
 
@@ -156,7 +154,7 @@ public static class Program
             return true;
 
         var projectReferences = XDocument.Load(csprojFilePath).Document.Descendants("ProjectReference").ToList();
-        return projectReferences.Any(p => Path.GetFileName(p.Value) == "Signum.csproj");
+        return projectReferences.Any(p => Path.GetFileName(p.Attribute("Include").Value) == "Signum.csproj");
     }
 
     static string FindReactDirectory(string csproFilePath)

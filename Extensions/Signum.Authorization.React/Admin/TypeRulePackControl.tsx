@@ -12,19 +12,20 @@ import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 
 import { getTypeInfo, Binding, GraphExplorer } from '@framework/Reflection'
-import { OperationSymbol, ModelEntity, newMListElement, NormalControlMessage, getToString, toMList } from '@framework/Signum.Entities'
+import { ModelEntity, newMListElement, NormalControlMessage, getToString, toMList } from '@framework/Signum.Entities'
 import { API, properties, queries, operations } from '../AuthAdminClient'
 import {
   TypeRulePack, AuthAdminMessage, PermissionSymbol, TypeAllowed, TypeAllowedRule,
-  TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleModel, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack, RoleEntity
-} from '../Signum.Entities.Authorization'
+  TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleModel, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack, TypeConditionSymbol
+} from '../Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
-import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
-import { QueryEntity, PropertyRouteEntity, TypeEntity } from '@framework/Signum.Entities.Basics'
+import { PropertyRouteEntity, TypeEntity } from '@framework/Signum.Basics'
 
 import "./AuthAdmin.css"
 import { is } from '@framework/Signum.Entities';
-import { getNiceTypeName } from '../../../Signum.React/Scripts/Operations/MultiPropertySetter'
+import { RoleEntity } from '../Signum.Authorization'
+import { OperationSymbol } from '@framework/Signum.Operations'
+import { QueryEntity } from '@framework/Signum.DynamicQuery'
 
 export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
 

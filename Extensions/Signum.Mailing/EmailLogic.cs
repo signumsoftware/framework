@@ -10,6 +10,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Files;
 using Signum.Engine.Mailing.Senders;
 using Signum.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.Engine.Mailing;
 
@@ -328,14 +329,3 @@ public static class EmailLogic
     }
 }
 
-public static class MimeMapping
-{
-    public static string GetMimeType(string fileName)
-    {
-        var extension = Path.GetExtension(fileName);
-
-        FileExtensionContentTypeProvider mimeConverter = new FileExtensionContentTypeProvider();
-
-        return mimeConverter.Mappings.TryGetValue(extension ?? "", out var result) ? result : "application/octet-stream";
-    }
-}

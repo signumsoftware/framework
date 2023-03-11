@@ -1,13 +1,9 @@
-using Signum.Authorization.Admin;
-using Signum.Entities.Basics;
-using Signum.Utilities.DataStructures;
-
-namespace Signum.Entities.Authorization;
+namespace Signum.Authorization.Rules;
 
 [EntityKind(EntityKind.System, EntityData.Master)]
 public abstract class RuleEntity<R, A> : Entity
     where R : class
-{   
+{
     public Lite<RoleEntity> Role { get; set; }
 
     public R Resource { get; set; }
@@ -43,7 +39,7 @@ public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded, OperationAl
 public class OperationTypeEmbedded : EmbeddedEntity
 {
     public OperationSymbol Operation { get; set; }
-    
+
     public TypeEntity Type { get; set; }
 
     public override string ToString()
@@ -130,14 +126,14 @@ public enum PropertyAllowed
 [DescriptionOptions(DescriptionOptions.Members)]
 public enum TypeAllowed
 {
-    None =             TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,
+    None = TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,
 
-    DBReadUINone =     TypeAllowedBasic.Read << 2 | TypeAllowedBasic.None,
-    Read =             TypeAllowedBasic.Read << 2 | TypeAllowedBasic.Read,
+    DBReadUINone = TypeAllowedBasic.Read << 2 | TypeAllowedBasic.None,
+    Read = TypeAllowedBasic.Read << 2 | TypeAllowedBasic.Read,
 
-    DBWriteUINone =   TypeAllowedBasic.Write << 2 | TypeAllowedBasic.None,
-    DBWriteUIRead =   TypeAllowedBasic.Write << 2 | TypeAllowedBasic.Read,
-    Write =           TypeAllowedBasic.Write << 2 | TypeAllowedBasic.Write
+    DBWriteUINone = TypeAllowedBasic.Write << 2 | TypeAllowedBasic.None,
+    DBWriteUIRead = TypeAllowedBasic.Write << 2 | TypeAllowedBasic.Read,
+    Write = TypeAllowedBasic.Write << 2 | TypeAllowedBasic.Write
 }
 
 public static class TypeAllowedExtensions

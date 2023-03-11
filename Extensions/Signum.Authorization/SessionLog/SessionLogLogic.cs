@@ -1,7 +1,4 @@
-using Signum.Engine;
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
+using Signum.Authorization.Rules;
 
 namespace Signum.Authorization.SessionLog;
 

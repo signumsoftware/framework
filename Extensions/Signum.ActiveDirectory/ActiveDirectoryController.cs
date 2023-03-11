@@ -9,12 +9,41 @@ using System.Linq;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using Signum.Entities.Operations;
+using Microsoft.AspNetCore.Authorization;
+using Signum.API.Filters;
+using Signum.Security;
 
 namespace Signum.React.Authorization;
 
 [ValidateModelFilter]
 public class ActiveDirectoryController : ControllerBase
 {
+    [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
+    public LoginResponse? LoginWindowsAuthentication(bool throwError)
+    {
+        if (!WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext, throwError))
+            return null;
+
+        var user = UserEntity.Current.Retrieve();
+
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "windows" };
+    }
+
+    [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
+    public LoginResponse? LoginWithAzureAD([FromBody, Required] string jwt, [FromQuery] bool throwErrors = true)
+    {
+        if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt, throwErrors))
+            return null;
+
+        var user = UserEntity.Current.Retrieve();
+
+        var token = AuthTokenServer.CreateToken(user);
+
+        return new LoginResponse { userEntity = user, token = token, authenticationType = "azureAD" };
+    }
+
     [HttpGet("api/findADUsers")]
     public Task<List<ActiveDirectoryUser>> FindADUsers(string subString, int count, CancellationToken token)
     {

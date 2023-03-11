@@ -1,7 +1,6 @@
-using Signum.Entities.Scheduler;
-using Signum.Entities.Basics;
+using Signum.Engine.Maps;
 
-namespace Signum.Engine.Scheduler;
+namespace Signum.Basics;
 
 public static class SystemEventLogLogic
 {

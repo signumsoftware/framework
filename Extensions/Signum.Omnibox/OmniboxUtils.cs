@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Signum.Entities.Authorization;
 using System.Text.Json.Serialization;
 
 namespace Signum.Entities.Omnibox;

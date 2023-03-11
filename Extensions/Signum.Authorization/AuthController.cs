@@ -1,14 +1,10 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
+using Signum.Authorization.AuthToken;
+using Signum.Authorization.UserTicket;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Operations;
-using Signum.React.Filters;
-using Signum.Services;
+using Signum.API.Filters;
+using System.ComponentModel.DataAnnotations;
 
-namespace Signum.React.Authorization;
+namespace Signum.Authorization;
 
 [ValidateModelFilter]
 public class AuthController : ControllerBase
@@ -28,7 +24,7 @@ public class AuthController : ControllerBase
         try
         {
             if (AuthLogic.Authorizer == null)
-                user = AuthLogic.Login(data.userName, Security.EncodePassword(data.password), out authenticationType);
+                user = AuthLogic.Login(data.userName, PasswordEncoding.EncodePassword(data.password), out authenticationType);
             else
                 user = AuthLogic.Authorizer.Login(data.userName, data.password, out authenticationType);
         }
@@ -89,31 +85,7 @@ public class AuthController : ControllerBase
         return new LoginResponse { userEntity = user, token = token, authenticationType = "cookie" };
     }
 
-    [HttpPost("api/auth/loginWindowsAuthentication"), Authorize, SignumAllowAnonymous]
-    public LoginResponse? LoginWindowsAuthentication(bool throwError)
-    {
-        if (!WindowsAuthenticationServer.LoginWindowsAuthentication(ControllerContext, throwError))
-            return null;
 
-        var user = UserEntity.Current.Retrieve();
-
-        var token = AuthTokenServer.CreateToken(user);
-
-        return new LoginResponse { userEntity = user, token = token, authenticationType = "windows" };
-    }
-
-    [HttpPost("api/auth/loginWithAzureAD"), SignumAllowAnonymous]
-    public LoginResponse? LoginWithAzureAD([FromBody, Required] string jwt, [FromQuery] bool throwErrors = true)
-    {
-        if (!AzureADAuthenticationServer.LoginAzureADAuthentication(ControllerContext, jwt, throwErrors))
-            return null;
-
-        var user = UserEntity.Current.Retrieve();
-
-        var token = AuthTokenServer.CreateToken(user);
-
-        return new LoginResponse { userEntity = user, token = token, authenticationType = "azureAD" };
-    }
 
     [HttpGet("api/auth/currentUser")]
     public UserEntity? GetCurrentUser()
@@ -141,18 +113,18 @@ public class AuthController : ControllerBase
             return ModelError("newPassword", error);
 
         var user = UserEntity.Current.Retrieve();
-        if(string.IsNullOrEmpty(request.oldPassword))
+        if (string.IsNullOrEmpty(request.oldPassword))
         {
-            if(user.PasswordHash != null)
+            if (user.PasswordHash != null)
                 return ModelError("oldPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
         }
         else
         {
-            if (user.PasswordHash == null || !user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
+            if (user.PasswordHash == null || !user.PasswordHash.SequenceEqual(PasswordEncoding.EncodePassword(request.oldPassword)))
                 return ModelError("oldPassword", LoginAuthMessage.InvalidPassword.NiceToString());
         }
 
-        user.PasswordHash = Security.EncodePassword(request.newPassword);
+        user.PasswordHash = PasswordEncoding.EncodePassword(request.newPassword);
         using (AuthLogic.Disable())
         using (OperationLogic.AllowSave<UserEntity>())
         {
@@ -162,39 +134,6 @@ public class AuthController : ControllerBase
         return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(user), authenticationType = "changePassword" };
     }
 
-
-    [HttpPost("api/auth/forgotPasswordEmail"), SignumAllowAnonymous]
-    public string? ForgotPasswordEmail([Required, FromBody] ForgotPasswordRequest request)
-    {
-        if (string.IsNullOrEmpty(request.eMail))
-            return LoginAuthMessage.EnterYourUserEmail.NiceToString();
-
-        try
-        {
-            ResetPasswordRequestLogic.SendResetPasswordRequestEmail(request.eMail);
-        }
-        catch (Exception ex)
-        {
-            return ex.Message;
-        }
-
-        return null;
-    }
-
-    [HttpPost("api/auth/resetPassword"), SignumAllowAnonymous]
-    public ActionResult<LoginResponse> ResetPassword([Required, FromBody] ResetPasswordRequest request)
-    {
-        if (string.IsNullOrEmpty(request.newPassword))
-            return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
-
-        var error = UserEntity.OnValidatePassword(request.newPassword);
-        if (error != null)
-            return ModelError("newPassword", error);
-
-        var rpr = ResetPasswordRequestLogic.ResetPasswordRequestExecute(request.code, request.newPassword);
-
-        return new LoginResponse { userEntity = rpr.User, token = AuthTokenServer.CreateToken(rpr.User), authenticationType = "resetPassword" };
-    }
 
     private BadRequestObjectResult ModelError(string field, string error)
     {

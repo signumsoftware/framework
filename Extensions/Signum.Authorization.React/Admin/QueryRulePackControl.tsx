@@ -1,15 +1,15 @@
 import * as React from 'react'
-import { QueryEntity } from '@framework/Signum.Entities.Basics';
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { API } from '../AuthAdminClient'
-import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, QueryAllowed } from '../Signum.Entities.Authorization'
+import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, QueryAllowed } from '../Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { Button } from 'react-bootstrap'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks';
 import { getToString } from '@framework/Signum.Entities';
+import { QueryEntity } from '@framework/Signum.DynamicQuery'
 
 export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: TypeContext<QueryRulePack> }, ref: React.Ref<IRenderButtons>) {
 

@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { Button } from 'react-bootstrap';
-import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics';
+import { PropertyRouteEntity } from '@framework/Signum.Basics';
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { API } from '../AuthAdminClient'
-import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage, AuthEmailMessage } from '../Signum.Entities.Authorization'
+import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage } from '../Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks';

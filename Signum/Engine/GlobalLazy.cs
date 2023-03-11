@@ -63,8 +63,10 @@ public static class GlobalLazy
         return result;
     }
 
+    public static Action? OnResetAll; 
     public static void ResetAll()
     {
+        OnResetAll?.Invoke();
         foreach (var lp in registeredLazyList)
             lp.Reset();
     }

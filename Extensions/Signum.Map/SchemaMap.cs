@@ -8,7 +8,7 @@ namespace Signum.React.Maps;
 
 public static class SchemaMap
 {
-    public static Func<MapColorProvider[]> GetColorProviders;
+    
 
     internal static SchemaMapInfo GetMapInfo()
     {

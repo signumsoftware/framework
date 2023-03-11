@@ -6,11 +6,12 @@ import { EntityLine, ValueLine } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 
 import { API } from '../AuthAdminClient'
-import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol, RoleEntity } from '../Signum.Entities.Authorization'
+import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol } from '../Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
 import { GraphExplorer } from '@framework/Reflection'
+import { RoleEntity } from '../Signum.Authorization'
 
 export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack> }, ref: React.Ref<IRenderButtons>) {
 

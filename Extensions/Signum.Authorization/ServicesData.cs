@@ -1,8 +1,4 @@
-using Signum.Authorization.Admin;
-using Signum.Entities.Basics;
-using Signum.Utilities.DataStructures;
-
-namespace Signum.Entities.Authorization;
+namespace Signum.Authorization.Rules;
 
 public class DefaultDictionary<K, A>
     where K : notnull
@@ -69,7 +65,7 @@ public class ConstantFunctionButEnums
 
 public abstract class BaseRulePack<T> : ModelEntity
 {
-    
+
     public Lite<RoleEntity> Role { get; internal set; }
 
     [HiddenProperty]
@@ -88,8 +84,8 @@ public abstract class BaseRulePack<T> : ModelEntity
                 (MergeStrategy == MergeStrategy.Union ? AuthAdminMessage.MaximumOfThe0 : AuthAdminMessage.MinumumOfThe0).NiceToString(typeof(RoleEntity).NiceCount(InheritFrom.Count)));
         }
     }
-    
-    
+
+
     public MList<T> Rules { get; set; } = new MList<T>();
 }
 
@@ -156,7 +152,7 @@ public class TypeAllowedRule : AllowedRule<TypeEntity, TypeAllowedAndConditions>
     public List<TypeConditionSymbol> AvailableConditions { get; set; }
 }
 
-  
+
 
 public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
 {
@@ -202,7 +198,7 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if(pi.Name == nameof(ConditionRules))
+        if (pi.Name == nameof(ConditionRules))
         {
             var errors = NoRepeatValidatorAttribute.ByKey(ConditionRules, a => a.TypeConditions.OrderBy(a => a.ToString()).ToString(" & "));
 
@@ -341,7 +337,7 @@ public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
 
 public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
 {
-    
+
     public TypeEntity Type { get; internal set; }
 
     public override string ToString()
@@ -356,7 +352,7 @@ public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteEntity, Prope
 
 public class QueryRulePack : BaseRulePack<QueryAllowedRule>
 {
-    
+
     public TypeEntity Type { get; internal set; }
 
     public override string ToString()
@@ -369,7 +365,7 @@ public class QueryAllowedRule : AllowedRuleCoerced<QueryEntity, QueryAllowed> { 
 
 public class OperationRulePack : BaseRulePack<OperationAllowedRule>
 {
-    
+
     public TypeEntity Type { get; internal set; }
 
     public override string ToString()

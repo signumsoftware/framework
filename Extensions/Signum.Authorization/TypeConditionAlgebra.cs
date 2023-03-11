@@ -1,13 +1,4 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization.Rules;
 
 
 public abstract class TypeConditionNode
@@ -196,7 +187,7 @@ public static class TypeConditionNodeExtensions
         if (node.ConstantValue == false)
             return Expression.Constant(false);
 
-        if(node is SymbolNode sn)
+        if (node is SymbolNode sn)
         {
             var lambda = TypeConditionLogic.GetCondition(entity.Type, sn.Symbol);
             return Expression.Invoke(lambda, entity);

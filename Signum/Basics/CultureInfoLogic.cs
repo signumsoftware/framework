@@ -13,7 +13,7 @@ public static class CultureInfoLogic
         return EntityToCultureInfo.Value.GetOrThrow(ci);
     }
 
-    internal static void AssertStarted(SchemaBuilder sb)
+    public static void AssertStarted(SchemaBuilder sb)
     {
         sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null!)));
     }

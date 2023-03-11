@@ -1,8 +1,4 @@
-using Signum.Authorization.Admin;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization.Rules;
 
 
 public static class QueryAuthLogic
@@ -44,7 +40,7 @@ public static class QueryAuthLogic
             };
 
             AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetKey, b => b.ToString(),
-                exportAll ? QueryLogic.QueryNames.Values.ToList(): null);
+                exportAll ? QueryLogic.QueryNames.Values.ToList() : null);
             AuthLogic.ImportFromXml += (x, roles, replacements) =>
             {
                 string replacementKey = "AuthRules:" + typeof(QueryEntity).Name;

@@ -1,10 +1,10 @@
 using System.Text.RegularExpressions;
 
-namespace Signum.Entities.Authorization;
+namespace Signum.Authorization.UserTicket;
 
 [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
 public class UserTicketEntity : Entity
-{   
+{
     public Lite<UserEntity> User { get; set; }
 
     [StringLengthValidator(Min = 36, Max = 36)]

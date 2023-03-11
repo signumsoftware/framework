@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { getToString, Lite } from '@framework/Signum.Entities'
-import { UserEntity } from '../Signum.Entities.Authorization'
+import { UserEntity } from '../Signum.Authorization'
 import { classes } from '@framework/Globals';
 import './UserCircle.css'
 

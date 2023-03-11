@@ -1,9 +1,6 @@
-using Signum.Authorization.Admin;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
 using System.Collections.Immutable;
 
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization.Rules;
 
 
 public static class OperationAuthLogic
@@ -38,7 +35,7 @@ public static class OperationAuthLogic
                  isEquals: (o1, o2) => o1.Operation.Is(o2.Operation) && o1.Type.Is(o2.Type),
                  merger: new OperationMerger(),
                  invalidateWithTypes: true,
-                 coercer:  OperationCoercer.Instance);
+                 coercer: OperationCoercer.Instance);
 
             sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
             {
@@ -242,11 +239,11 @@ class OperationMerger : IMerger<(OperationSymbol operation, Type type), Operatio
     public OperationAllowed Merge((OperationSymbol operation, Type type) operationType, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, OperationAllowed>> baseValues)
     {
         OperationAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
-            Max(baseValues.Select(a => a.Value)):
+            Max(baseValues.Select(a => a.Value)) :
             Min(baseValues.Select(a => a.Value));
 
         if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role))
-           return best;
+            return best;
 
         var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(operationType.Item1);
 

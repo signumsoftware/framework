@@ -1,6 +1,5 @@
-﻿using Signum.Entities.Basics;
 
-namespace Signum.Entities.Scheduler;
+namespace Signum.Basics;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class SystemEventLogEntity : Entity

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes, Dic } from '@framework/Globals'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
-import { LoginAuthMessage } from '../Signum.Entities.Authorization'
+import { LoginAuthMessage } from '../Signum.Authorization'
 import * as AuthClient from '../AuthClient'
 import { useStateWithPromise } from '@framework/Hooks'
 

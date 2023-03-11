@@ -1,5 +1,4 @@
-using Signum.Entities;
-using Signum.Entities.Authorization;
+using Signum.Authorization.Rules;
 
 namespace Signum.Authorization.SessionLog;
 

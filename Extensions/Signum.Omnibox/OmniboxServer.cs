@@ -1,16 +1,12 @@
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
 using Signum.Entities.Omnibox;
-using Signum.React.ApiControllers;
-using Signum.React.Facades;
 using Microsoft.AspNetCore.Builder;
+using Signum.API;
+using Signum.API.Controllers;
 
 namespace Signum.React.Omnibox;
 
 public static class OmniboxServer
 {
-    public static Func<Type, bool> IsNavigable;
-
     public static void Start(IApplicationBuilder app, params IOmniboxResultGenerator[] generators)
     {
         SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
@@ -31,7 +27,7 @@ public class ReactOmniboxManager : OmniboxManager
 {
     public override bool AllowedType(Type type)
     {
-        return OmniboxServer.IsNavigable.GetInvocationListTyped().All(f => f(type));
+        return Schema.Current.IsAllowed(type, true) == null;
     }
 
     public override bool AllowedPermission(PermissionSymbol permission)

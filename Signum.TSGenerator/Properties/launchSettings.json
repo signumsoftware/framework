@@ -5,10 +5,10 @@
       "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.dll\" \"D:\\Signum\\southwind\\Framework\\Signum\\obj\\SignumReferences.txt\"",
       "workingDirectory": "D:\\Signum\\southwind\\Framework\\Signum\\"
     },
-    "Extensions": {
+    "Authorization": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\x64\\Debug\\netcoreapp6.0\\Signum.React.Extensions.dll\" \"D:\\Signum\\Southwind\\Framework\\Signum.React.Extensions\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Framework\\Signum.React.Extensions\\obj\\SignumContent.txt\"",
-      "workingDirectory": "D:\\Signum\\Southwind\\Framework\\Signum.React.Extensions\\"
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Authorization.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Authorization\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Authorization\\"
     },
     "Southwind": {
       "commandName": "Project",

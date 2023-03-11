@@ -1,18 +1,15 @@
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
-using Signum.React.Filters;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Signum.Engine.Json;
 using System.Text.Json;
-using Signum.Entities.Basics;
-using Signum.React.ApiControllers;
+using Signum.API.Filters;
+using Signum.API.Json;
+using Signum.API.Controllers;
 
-namespace Signum.React.Authorization;
+namespace Signum.Authorization.AuthToken;
 
 public static class AuthTokenServer
 {
@@ -219,8 +216,8 @@ public static class AuthTokenServer
         using var ms = new MemoryStream();
         ms.Write(provider.IV, 0, provider.IV.Length);
         using var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
-            cs.Write(toEncryptBytes, 0, toEncryptBytes.Length);
-            cs.FlushFinalBlock();
+        cs.Write(toEncryptBytes, 0, toEncryptBytes.Length);
+        cs.FlushFinalBlock();
         return ms.ToArray();
     }
 

@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { Dic } from '@framework/Globals';
-import { Lite, is, getToString } from '@framework/Signum.Entities'
-import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
+import { Dic } from '../Globals';
+import { Lite, is, getToString } from '../Signum.Entities'
+import { CultureInfoEntity } from '../Signum.Entities.Basics'
 import * as CultureClient from './CultureClient'
 import { NavDropdown } from 'react-bootstrap';
-import { useAPI } from '@framework/Hooks';
+import { useAPI } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default function CultureDropdown(p: { fullName?: boolean }) {

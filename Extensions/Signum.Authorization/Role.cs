@@ -1,8 +1,6 @@
 using System.Security.Authentication;
-using System.Collections.Specialized;
-using Signum.Entities.Basics;
 
-namespace Signum.Entities.Authorization;
+namespace Signum.Authorization;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
 public class RoleEntity : Entity

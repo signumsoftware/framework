@@ -12,12 +12,28 @@ class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        foreach (var item in uctx.GetCodeFiles(uctx.AbsolutePath("Framework/Extensions"), new[] { "Attributes.csproj", "GlobalUsings.csproj" }, UpgradeContext.DefaultIgnoreDirectories))
+
+        var signumReactRegex = new Regex(@"(../)+Signum.React/Scripts/");
+
+        uctx.ForeachCodeFile("*.tsx", uctx.AbsolutePath("Framework/Extensions"), cf =>
+        {
+            cf.Replace(signumReactRegex, "@framework/");
+        });
+
+        foreach (var item in uctx.GetCodeFiles(uctx.AbsolutePath("Framework/Extensions"), new[] { "*.ts", ".csproj" }, UpgradeContext.DefaultIgnoreDirectories))
         {
             var filePath = uctx.AbsolutePath(item.FilePath);
 
             File.Move(filePath, Path.ChangeExtension(filePath, ".cs"));
         }
+
+
+        //foreach (var item in uctx.GetCodeFiles(uctx.AbsolutePath("Framework/Extensions"), new[] { "Attributes.csproj", "GlobalUsings.csproj" }, UpgradeContext.DefaultIgnoreDirectories))
+        //{
+        //    var filePath = uctx.AbsolutePath(item.FilePath);
+
+        //    File.Move(filePath, Path.ChangeExtension(filePath, ".cs"));
+        //}
 
 
         ExtractExtensions(uctx, "Alerts");

@@ -1,9 +1,9 @@
-import { ajaxPost, ajaxGet } from '@framework/Services';
-import { Lite } from '@framework/Signum.Entities'
-import * as AppContext from '@framework/AppContext'
-import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
-import { reloadTypes } from '@framework/Reflection'
-import { toLite } from '@framework/Signum.Entities';
+import { ajaxPost, ajaxGet } from '../Services';
+import { Lite } from '../Signum.Entities'
+import * as AppContext from '../AppContext'
+import { CultureInfoEntity } from '../Signum.Entities.Basics'
+import { reloadTypes } from '../Reflection'
+import { toLite } from '../Signum.Entities';
 
 export let currentCulture: CultureInfoEntity;
 

@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, ajaxGetRaw } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery, ActiveDirectoryMessage, ADGroupEntity, UserADMixin, UserLiteModel } from './Signum.Entities.Authorization'
+import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery, ActiveDirectoryMessage, ADGroupEntity, UserADMixin, UserLiteModel } from './Signum.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ValueLineModal from '@framework/ValueLineModal';
 import { FindOptions, FindOptionsParsed, ResultRow } from '@framework/FindOptions';
@@ -18,6 +18,14 @@ import * as AppContext from "@framework/AppContext"
 import { TypeaheadOptions } from '../../Signum.React/Scripts/Components/Typeahead';
 
 export function start(options: { routes: RouteObject[], adGroups: boolean }) {
+
+  Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./AzureAD/ActiveDirectoryConfiguration')));
+
+  User.changePasswordVisible = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID == null;
+  User.userNameReadonly = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null;
+  User.emailReadonly = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null;
+
+
   if (window.__azureApplicationId) {
     urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
       var oid =

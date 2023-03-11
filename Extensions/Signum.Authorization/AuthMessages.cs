@@ -1,6 +1,4 @@
-using System.ComponentModel;
-
-namespace Signum.Entities.Authorization;
+namespace Signum.Authorization;
 
 [AllowUnathenticated]
 public enum LoginAuthMessage

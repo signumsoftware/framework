@@ -1,14 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
-using Signum.Entities.Reflection;
-using Signum.Entities.Basics;
-using Signum.React.Files;
 using System.IO;
-using Signum.React.Filters;
 using Signum.API.Filters;
-
 namespace Signum.Authorization.Rules;
 
 [ValidateModelFilter]
@@ -114,7 +107,7 @@ public class AuthAdminController : ControllerBase
         {
             AuthLogic.ExportRules().Save(ms);
 
-            return FilesController.GetFileStreamResult(new MemoryStream(ms.ToArray()), "AuthRules.xml");
+            return MimeMapping.GetFileStreamResult(new MemoryStream(ms.ToArray()), "AuthRules.xml");
         }
     }
 

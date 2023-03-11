@@ -1,7 +1,6 @@
-using Signum.Entities.Basics;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.Basics;
+namespace Signum.Authorization.Rules;
 
 public class TypeConditionPair
 {
