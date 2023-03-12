@@ -212,7 +212,7 @@ class PropertyMerger : IMerger<PropertyRoute, PropertyAllowed>
             Max(baseValues.Select(a => a.Value)) :
             Min(baseValues.Select(a => a.Value));
 
-        if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
+        if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfProperties, role))
             return best;
 
         var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(key);
@@ -272,7 +272,7 @@ class PropertyMerger : IMerger<PropertyRoute, PropertyAllowed>
             if (AuthLogic.GetDefaultAllowed(role))
                 return PropertyAllowed.Write;
 
-            if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
+            if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfProperties, role))
                 return PropertyAllowed.None;
 
             var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);

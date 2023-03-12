@@ -160,7 +160,7 @@ class QueryMerger : IMerger<object, QueryAllowed>
         if (maxUp.HasValue && maxUp <= best)
             return best;
 
-        if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role))
+        if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfQueries, role))
             return best;
 
         if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
@@ -211,7 +211,7 @@ class QueryMerger : IMerger<object, QueryAllowed>
             if (AuthLogic.GetDefaultAllowed(role))
                 return QueryAllowed.Allow;
 
-            if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role))
+            if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfQueries, role))
                 return QueryAllowed.None;
 
             var maxUp = QueryAuthLogic.MaxAutomaticUpgrade.TryGetS(key);

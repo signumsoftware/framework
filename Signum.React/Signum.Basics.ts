@@ -83,6 +83,11 @@ export type ExceptionOrigin =
 export interface IEmailOwnerEntity extends Entities.Entity {
 }
 
+export const PermissionSymbol = new Type<PermissionSymbol>("Permission");
+export interface PermissionSymbol extends Symbol {
+  Type: "Permission";
+}
+
 export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
   Type: "PropertyRoute";

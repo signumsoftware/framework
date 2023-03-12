@@ -2,42 +2,9 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Authorization.Rules;
 
+
 public static class PermissionAuthLogic
 {
-    static HashSet<PermissionSymbol> permissions = new HashSet<PermissionSymbol>();
-    public static void RegisterPermissions(params PermissionSymbol[] permissions)
-    {
-        foreach (var p in permissions)
-        {
-            if (p == null)
-                throw AutoInitAttribute.ArgumentNullException(typeof(PermissionSymbol), nameof(permissions));
-
-            PermissionAuthLogic.permissions.Add(p);
-        }
-    }
-
-    public static void RegisterTypes(params Type[] types)
-    {
-        foreach (var t in types)
-        {
-            if (!t.IsStaticClass())
-                throw new ArgumentException("{0} is not a static class".FormatWith(t.Name));
-
-            foreach (var p in t.GetFields(BindingFlags.Public | BindingFlags.Static).Select(fi => fi.GetValue(null)).Cast<PermissionSymbol>())
-            {
-                if (p == null)
-                    throw AutoInitAttribute.ArgumentNullException(typeof(PermissionSymbol), nameof(permissions));
-
-                PermissionAuthLogic.permissions.Add(p);
-            }
-        }
-    }
-
-    public static IEnumerable<PermissionSymbol> RegisteredPermission
-    {
-        get { return permissions; }
-    }
-
     static AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool> cache = null!;
 
     public static IManualAuth<PermissionSymbol, bool> Manual { get { return cache; } }
@@ -55,10 +22,6 @@ public static class PermissionAuthLogic
         {
             AuthLogic.AssertStarted(sb);
 
-            sb.Include<PermissionSymbol>();
-
-            SymbolLogic<PermissionSymbol>.Start(sb, () => RegisteredPermission.ToHashSet());
-
             sb.Include<RulePermissionEntity>()
                .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
 
@@ -75,10 +38,10 @@ public static class PermissionAuthLogic
                 return null;
             };
 
-            RegisterTypes(typeof(BasicPermission));
+            PermissionLogic.RegisterTypes(typeof(BasicPermission));
 
             AuthLogic.ExportToXml += exportAll => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString(),
-                exportAll ? PermissionAuthLogic.RegisteredPermission.ToList() : null);
+                exportAll ? PermissionLogic.RegisteredPermission.ToList() : null);
             AuthLogic.ImportFromXml += (x, roles, replacements) =>
             {
                 string replacementKey = "AuthRules:" + typeof(PermissionSymbol).Name;
@@ -92,6 +55,14 @@ public static class PermissionAuthLogic
                     s => SymbolLogic<PermissionSymbol>.TryToSymbol(replacements.Apply(replacementKey, s)), bool.Parse);
             };
 
+            PermissionLogic.IsAuthorizedImplementation = permissionSymbol =>
+            {
+                if (IsAuthorized(permissionSymbol))
+                    return null;
+
+                return "Permission '{0}' is denied".FormatWith(permissionSymbol);
+            };
+
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
 
             sb.Schema.Table<PermissionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
@@ -103,21 +74,7 @@ public static class PermissionAuthLogic
         return Administrator.DeleteWhereScript((RulePermissionEntity rt) => rt.Resource, (PermissionSymbol)arg);
     }
 
-    public static void AssertAuthorized(this PermissionSymbol permissionSymbol)
-    {
-        if (!IsAuthorized(permissionSymbol))
-            throw new UnauthorizedAccessException("Permission '{0}' is denied".FormatWith(permissionSymbol));
-    }
-
-    public static string? IsAuthorizedString(this PermissionSymbol permissionSymbol)
-    {
-        if (!IsAuthorized(permissionSymbol))
-            return "Permission '{0}' is denied".FormatWith(permissionSymbol);
-
-        return null;
-    }
-
-    public static bool IsAuthorized(this PermissionSymbol permissionSymbol)
+    public static bool IsAuthorized(PermissionSymbol permissionSymbol)
     {
         AssertRegistered(permissionSymbol);
 
@@ -127,16 +84,17 @@ public static class PermissionAuthLogic
         return cache.GetAllowed(RoleEntity.Current, permissionSymbol);
     }
 
-    public static bool IsAuthorized(this PermissionSymbol permissionSymbol, Lite<RoleEntity> role)
+    public static bool IsAuthorized(PermissionSymbol permissionSymbol, Lite<RoleEntity> role)
     {
         AssertRegistered(permissionSymbol);
 
         return cache.GetAllowed(role, permissionSymbol);
     }
 
-    private static void AssertRegistered(PermissionSymbol permissionSymbol)
+
+    static void AssertRegistered(PermissionSymbol permissionSymbol)
     {
-        if (!permissions.Contains(permissionSymbol))
+        if (!PermissionLogic.RegisteredPermission.Contains(permissionSymbol))
             throw new InvalidOperationException($"The permission '{permissionSymbol}' has not been registered");
     }
 
@@ -157,7 +115,6 @@ public static class PermissionAuthLogic
         cache.SetRules(rules, r => true);
     }
 }
-
 
 class PermissionMerger : IMerger<PermissionSymbol, bool>
 {

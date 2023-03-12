@@ -5,13 +5,13 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
 import * as Entities from '../../Signum.React/Signum.Entities'
 import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
-import * as Operations from '../../Signum.React/Signum.Operations'
 import * as Basics from '../../Signum.React/Signum.Basics'
+import * as Operations from '../../Signum.React/Signum.Operations'
 import * as Authorization from './Signum.Authorization'
 
 
 export module ActiveDirectoryPermission {
-  export const InviteUsersFromAD : PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
+  export const InviteUsersFromAD : Basics.PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
 }
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
@@ -78,10 +78,10 @@ export interface BaseRulePack<T> extends Entities.ModelEntity {
 }
 
 export module BasicPermission {
-  export const AdminRules : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AdminRules");
-  export const AutomaticUpgradeOfProperties : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfProperties");
-  export const AutomaticUpgradeOfQueries : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfQueries");
-  export const AutomaticUpgradeOfOperations : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfOperations");
+  export const AdminRules : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AdminRules");
+  export const AutomaticUpgradeOfProperties : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfProperties");
+  export const AutomaticUpgradeOfQueries : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfQueries");
+  export const AutomaticUpgradeOfOperations : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfOperations");
 }
 
 export const OperationAllowed = new EnumType<OperationAllowed>("OperationAllowed");
@@ -109,18 +109,13 @@ export interface OperationTypeEmbedded extends Entities.EmbeddedEntity {
 }
 
 export const PermissionAllowedRule = new Type<PermissionAllowedRule>("PermissionAllowedRule");
-export interface PermissionAllowedRule extends AllowedRule<PermissionSymbol, boolean> {
+export interface PermissionAllowedRule extends AllowedRule<Basics.PermissionSymbol, boolean> {
   Type: "PermissionAllowedRule";
 }
 
 export const PermissionRulePack = new Type<PermissionRulePack>("PermissionRulePack");
 export interface PermissionRulePack extends BaseRulePack<PermissionAllowedRule> {
   Type: "PermissionRulePack";
-}
-
-export const PermissionSymbol = new Type<PermissionSymbol>("Permission");
-export interface PermissionSymbol extends Basics.Symbol {
-  Type: "Permission";
 }
 
 export const PropertyAllowed = new EnumType<PropertyAllowed>("PropertyAllowed");
@@ -169,7 +164,7 @@ export interface RuleOperationEntity extends RuleEntity<OperationTypeEmbedded, O
 }
 
 export const RulePermissionEntity = new Type<RulePermissionEntity>("RulePermission");
-export interface RulePermissionEntity extends RuleEntity<PermissionSymbol, boolean> {
+export interface RulePermissionEntity extends RuleEntity<Basics.PermissionSymbol, boolean> {
   Type: "RulePermission";
 }
 

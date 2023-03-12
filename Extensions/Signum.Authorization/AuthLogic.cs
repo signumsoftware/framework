@@ -463,7 +463,7 @@ public static class AuthLogic
 
         if (activeDirectoryIntegration)
         {
-            PermissionAuthLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+            PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
         }
     }
 

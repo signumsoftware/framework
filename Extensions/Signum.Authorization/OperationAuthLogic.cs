@@ -242,7 +242,7 @@ class OperationMerger : IMerger<(OperationSymbol operation, Type type), Operatio
             Max(baseValues.Select(a => a.Value)) :
             Min(baseValues.Select(a => a.Value));
 
-        if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role))
+        if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfOperations, role))
             return best;
 
         var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(operationType.Item1);
@@ -304,7 +304,7 @@ class OperationMerger : IMerger<(OperationSymbol operation, Type type), Operatio
             if (AuthLogic.GetDefaultAllowed(role))
                 return OperationAllowed.Allow;
 
-            if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role))
+            if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfOperations, role))
                 return OperationAllowed.None;
 
             var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);

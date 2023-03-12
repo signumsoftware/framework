@@ -49,4 +49,12 @@ public static class ExecutionMode
     {
         return Disposable.Combine(OnApiRetrieved, f => f(entity, viewAction));
     }
+
+
+    public static event Func<Entity, IDisposable?>? OnSetIsolation;
+    public static IDisposable? SetIsolation(Entity entity)
+    {
+        return Disposable.Combine(OnSetIsolation, f => f(entity));
+    }
+
 }

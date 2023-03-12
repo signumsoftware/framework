@@ -4,8 +4,8 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
 import * as Entities from '../../Signum.React/Signum.Entities'
+import * as Basics from '../../Signum.React/Signum.Basics'
 import * as Authorization from './Signum.Authorization'
-import * as Rules from './Signum.Authorization.Rules'
 
 
 export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
@@ -20,6 +20,6 @@ export interface SessionLogEntity extends Entities.Entity {
 }
 
 export module SessionLogPermission {
-  export const TrackSession : Rules.PermissionSymbol = registerSymbol("Permission", "SessionLogPermission.TrackSession");
+  export const TrackSession : Basics.PermissionSymbol = registerSymbol("Permission", "SessionLogPermission.TrackSession");
 }
 

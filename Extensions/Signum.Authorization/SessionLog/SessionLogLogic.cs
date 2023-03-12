@@ -23,7 +23,7 @@ public static class SessionLogLogic
                     sl.SessionTimeOut
                 });
 
-            PermissionAuthLogic.RegisterPermissions(SessionLogPermission.TrackSession);
+            PermissionLogic.RegisterPermissions(SessionLogPermission.TrackSession);
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
@@ -40,7 +40,7 @@ public static class SessionLogLogic
 
     static bool RoleTracked(Lite<RoleEntity> role)
     {
-        return SessionLogPermission.TrackSession.IsAuthorized(role);
+        return PermissionAuthLogic.IsAuthorized(SessionLogPermission.TrackSession, role);
     }
 
     public static void SessionStart(string userHostAddress, string? userAgent)
