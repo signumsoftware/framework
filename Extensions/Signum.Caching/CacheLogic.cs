@@ -1,20 +1,16 @@
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Cache;
-using Signum.Engine.Authorization;
 using System.Drawing;
-using Signum.Entities.Basics;
 using System.Xml.Linq;
-using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Linq;
 using System.IO;
 using System.Data;
-using Signum.Engine.Scheduler;
 using System.Runtime.InteropServices;
+using Signum.Engine.Sync;
 using Microsoft.Data.SqlClient;
+using Signum.Engine.Sync.SqlServer;
 
-namespace Signum.Engine.Cache;
+namespace Signum.Cache;
 
 public interface IServerBroadcast
 {
@@ -54,7 +50,7 @@ public static class CacheLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-            PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
+            PermissionLogic.RegisterTypes(typeof(CachePermission));
 
             sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 
@@ -484,7 +480,7 @@ public static class CacheLogic
 
         public void BuildCachedTable()
         {
-            cachedTable = new CachedTable<T>(this, new Linq.AliasGenerator(), null, null);
+            cachedTable = new CachedTable<T>(this, new AliasGenerator(), null, null);
         }
 
         private void DisableAndInvalidate(bool withUpdates)

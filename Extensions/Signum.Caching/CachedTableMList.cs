@@ -1,8 +1,8 @@
 using Signum.Engine.Linq;
+using Signum.Engine.Sync;
 using System.Data;
-using Signum.Engine.Connection;
 
-namespace Signum.Engine.Cache;
+namespace Signum.Cache;
 
 class CachedTableMList<T> : CachedTableBase
 {

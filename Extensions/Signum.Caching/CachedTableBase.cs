@@ -1,8 +1,9 @@
-﻿using Signum.Utilities.Reflection;
+using Signum.Utilities.Reflection;
 using System.Data;
+using Signum.Engine.Sync;
 using Microsoft.Data.SqlClient;
 
-namespace Signum.Engine.Cache;
+namespace Signum.Cache;
 
 public abstract class CachedTableBase
 {

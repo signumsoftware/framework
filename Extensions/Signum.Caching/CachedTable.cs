@@ -1,12 +1,9 @@
 using System.Collections.Concurrent;
 using Signum.Engine.Linq;
 using System.Data;
-using Signum.Entities.Reflection;
-using Signum.Engine.Connection;
+using Signum.Engine.Sync;
 
-namespace Signum.Engine.Cache;
-
-
+namespace Signum.Cache;
 
 class CachedTable<T> : CachedTableBase where T : Entity
 {

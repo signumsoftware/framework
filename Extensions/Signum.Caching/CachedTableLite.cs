@@ -2,9 +2,9 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Linq;
 using System.Data;
 using Signum.Entities.Internal;
-using Signum.Engine.Connection;
+using Signum.Engine.Sync;
 
-namespace Signum.Engine.Cache;
+namespace Signum.Cache;
 
 class CachedTableLite<T> : CachedTableBase where T : Entity
 {

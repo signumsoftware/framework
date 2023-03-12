@@ -1,8 +1,9 @@
 using Signum.Engine.Linq;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Internal;
+using Signum.Engine.Sync;
 
-namespace Signum.Engine.Cache;
+namespace Signum.Cache;
 
 internal class CachedTableConstructor
 {

@@ -1,6 +1,5 @@
-﻿using Signum.Entities.Authorization;
 
-namespace Signum.Entities.Cache;
+namespace Signum.Cache;
 
 [AutoInit]
 public static class CachePermission

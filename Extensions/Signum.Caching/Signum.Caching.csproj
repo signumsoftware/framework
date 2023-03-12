@@ -10,19 +10,15 @@
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.12.0" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.0" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0-beta" />
-		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta2" />
+		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta4" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 	</ItemGroup>
-
-    <ItemGroup>
-	    <None Update="Translations\*.xml">
-		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	    </None>
-    </ItemGroup>
 </Project>

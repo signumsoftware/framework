@@ -1,9 +1,8 @@
-using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Signum.Engine.Cache;
+namespace Signum.Cache;
 
 class LiteModelExpressionVisitor : ExpressionVisitor
 {

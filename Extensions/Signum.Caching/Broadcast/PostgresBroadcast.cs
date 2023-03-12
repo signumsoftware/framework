@@ -1,7 +1,7 @@
 using Npgsql;
 using System.Diagnostics;
 
-namespace Signum.Engine.Cache;
+namespace Signum.Cache.Broadcast;
 
 public class PostgresBroadcast : IServerBroadcast
 {

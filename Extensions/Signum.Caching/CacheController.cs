@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Authorization;
-using Signum.Engine.Cache;
-using Signum.Entities.Cache;
-using Signum.Engine.Scheduler;
-using Signum.React.Filters;
+using Signum.API.Filters;
+using Signum.Cache.Broadcast;
 
-namespace Signum.React.Cache;
+namespace Signum.Cache;
 
 public class CacheController : ControllerBase
 {

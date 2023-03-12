@@ -1,11 +1,8 @@
-
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
-using Npgsql;
-using Signum.Engine.Json;
-using System.Diagnostics;
+using Signum.API.Json;
 
-namespace Signum.Engine.Cache;
+namespace Signum.Cache.Broadcast;
 
 //Never Tested, works only in theory
 //https://github.com/briandunnington/SynchronizedCache/blob/master/SynchronizedCache.cs

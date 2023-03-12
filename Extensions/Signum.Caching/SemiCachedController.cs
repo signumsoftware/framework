@@ -1,6 +1,6 @@
-﻿using System.Data;
+using System.Data;
 
-namespace Signum.Engine.Cache;
+namespace Signum.Cache;
 
 public class SemiCachedController<T> where T : Entity
 {

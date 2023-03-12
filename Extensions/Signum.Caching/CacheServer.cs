@@ -1,11 +1,7 @@
-using Signum.React.Maps;
-using Signum.React.Facades;
-using Signum.Engine.Cache;
-using Signum.Entities.Cache;
-using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Signum.API;
 
-namespace Signum.React.Cache;
+namespace Signum.Cache;
 
 public static class CacheServer
 {
@@ -14,7 +10,7 @@ public static class CacheServer
         SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         ReflectionServer.RegisterLike(typeof(CachePermission), () => CachePermission.ViewCache.IsAuthorized());
 
-        SchemaMap.GetColorProviders += GetMapColors;
+        MapColorProvider.GetColorProviders += GetMapColors;
     }
 
     static MapColorProvider[] GetMapColors()
