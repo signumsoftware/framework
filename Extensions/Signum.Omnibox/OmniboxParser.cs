@@ -3,24 +3,15 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Signum.Entities.UserAssets;
 
-namespace Signum.Entities.Omnibox;
+namespace Signum.Omnibox;
 
 public static class OmniboxParser
 {
-    static OmniboxManager manager;
+    static OmniboxManager manager = new OmniboxManager();
 
-    public static OmniboxManager Manager
-    {
-        get
-        {
-            if (manager == null)
-                throw new InvalidOperationException("OmniboxParse.Manager is not set");
-            return manager;
-        }
-
-        set { manager = value; }
-    }
+    public static OmniboxManager Manager => manager;
 
     public static List<IOmniboxResultGenerator> Generators = new List<IOmniboxResultGenerator>();
 
@@ -38,7 +29,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 (?<ident>\[{ident}\])|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
-(?<comparer>({ FilterValueConverter.OperationRegex}))|
+(?<comparer>({FilterValueConverter.OperationRegex}))|
 (?<symbol>{symbol})",
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
@@ -146,43 +137,32 @@ $@"(?<entity>{ident};(\d+|{guid}))|
     }
 }
 
-public abstract class OmniboxManager
+public class OmniboxManager
 {
-    public abstract bool AllowedType(Type type);
-    public abstract bool AllowedPermission(PermissionSymbol permission);
-    public abstract bool AllowedQuery(object queryName);
-
-    public abstract QueryDescription GetDescription(object queryName);
-
-    public abstract Lite<Entity>? RetrieveLite(Type type, PrimaryKey id);
-
-    public List<Lite<Entity>> Autocomplete(Type type, string subString, int count)
-    {
-        return Autocomplete(Implementations.By(type), subString, count);
-    }
-
-    public abstract List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count);
-
-
-    protected abstract IEnumerable<object> GetAllQueryNames();
-
     static ConcurrentDictionary<CultureInfo, Dictionary<string, object>> queries = new ConcurrentDictionary<CultureInfo, Dictionary<string, object>>();
 
     public Dictionary<string, object> GetQueries()
     {
         return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
-             GetAllQueryNames().ToOmniboxPascalDictionary(qn =>
+             QueryLogic.Queries.GetQueryNames().ToOmniboxPascalDictionary(qn =>
               qn is Type t ? (EnumEntity.Extract(t) ?? t).NiceName() : QueryUtils.GetNiceName(qn), qn => qn));
     }
-
-    protected abstract IEnumerable<Type> GetAllTypes();
 
     static ConcurrentDictionary<CultureInfo, Dictionary<string, Type>> types = new ConcurrentDictionary<CultureInfo, Dictionary<string, Type>>();
 
     public Dictionary<string, Type> Types()
     {
         return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
-           GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToOmniboxPascalDictionary(t => t.NiceName(), t => t));
+           Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntityOrSymbol()).ToOmniboxPascalDictionary(t => t.NiceName(), t => t));
+    }
+
+    public List<Lite<Entity>> Autocomplete(Type type, string subString, int count) => Autocomplete(Implementations.By(type), subString, count);
+    public List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count)
+    {
+        if (string.IsNullOrEmpty(subString))
+            return new List<Lite<Entity>>();
+
+        return AutocompleteUtils.FindLiteLike(implementations, subString, 5);
     }
 }
 

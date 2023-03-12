@@ -1,6 +1,6 @@
-using Signum.Entities.Omnibox;
+using Signum.Omnibox;
 
-namespace Signum.React.Omnibox;
+namespace Signum.Omnibox;
 
 
 public class ReactSpecialOmniboxAction : ISpecialOmniboxAction

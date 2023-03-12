@@ -1,6 +1,5 @@
-using Signum.Entities.Omnibox;
 
-namespace Signum.Engine.Omnibox;
+namespace Signum.Omnibox;
 
 public static class OmniboxLogic
 {
@@ -8,7 +7,7 @@ public static class OmniboxLogic
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
-            PermissionAuthLogic.RegisterTypes(typeof(OmniboxPermission));
+            PermissionLogic.RegisterTypes(typeof(OmniboxPermission));
         }
     }
 }

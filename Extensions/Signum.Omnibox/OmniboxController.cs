@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
-using Signum.Entities.Omnibox;
+using Signum.Authorization.Rules;
 
-namespace Signum.React.Omnibox;
+namespace Signum.Omnibox;
 
 [ValidateModelFilter]
 public class OmniboxController : ControllerBase

@@ -1,7 +1,8 @@
+using Signum.Authorization.Rules;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
-namespace Signum.Entities.Omnibox;
+namespace Signum.Omnibox;
 
 public static class OmniboxUtils
 {

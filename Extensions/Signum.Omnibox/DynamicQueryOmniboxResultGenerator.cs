@@ -5,8 +5,9 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Collections.Immutable;
 using Signum.DynamicQuery.Tokens;
+using Signum.Entities.UserAssets;
 
-namespace Signum.Entities.Omnibox;
+namespace Signum.Omnibox;
 
 public class DynamicQueryOmniboxResultGenerator :OmniboxResultGenerator<DynamicQueryOmniboxResult>
 {
@@ -37,7 +38,7 @@ public class DynamicQueryOmniboxResultGenerator :OmniboxResultGenerator<DynamicQ
 
         List<FilterSyntax>? syntaxSequence = null;
 
-        foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.GetQueries(), OmniboxParser.Manager.AllowedQuery, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+        foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.GetQueries(), filter: qn => QueryLogic.Queries.QueryAllowed(qn, true), pattern, isPascalCase).OrderBy(ma => ma.Distance))
         {
             var queryName = match.Value;
 
@@ -46,7 +47,7 @@ public class DynamicQueryOmniboxResultGenerator :OmniboxResultGenerator<DynamicQ
 
             if (syntaxSequence.Any())
             {
-                QueryDescription description = OmniboxParser.Manager.GetDescription(match.Value);
+                QueryDescription description = QueryLogic.Queries.QueryDescription(match.Value);
 
                 IEnumerable<IEnumerable<OmniboxFilterResult>> bruteFilters = syntaxSequence.Select(a => GetFilterQueries(rawQuery, description, a, tokens));
 
@@ -65,7 +66,7 @@ public class DynamicQueryOmniboxResultGenerator :OmniboxResultGenerator<DynamicQ
             {
                 if (match.Text == pattern && tokens.Count == 1 && tokens[0].Next(rawQuery) == ' ')
                 {
-                    QueryDescription description = OmniboxParser.Manager.GetDescription(match.Value);
+                    QueryDescription description = QueryLogic.Queries.QueryDescription(match.Value);
 
                     foreach (var qt in QueryUtils.SubTokens(null, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                     {

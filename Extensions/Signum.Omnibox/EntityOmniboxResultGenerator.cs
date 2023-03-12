@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 
-namespace Signum.Entities.Omnibox;
+namespace Signum.Omnibox;
 
 public class EntityOmniboxResultGenenerator : OmniboxResultGenerator<EntityOmniboxResult>
 {
@@ -22,7 +22,7 @@ public class EntityOmniboxResultGenenerator : OmniboxResultGenerator<EntityOmnib
         bool isPascalCase = OmniboxUtils.IsPascalCasePattern(ident);
 
 
-        var matches = OmniboxUtils.Matches(OmniboxParser.Manager.Types(), OmniboxParser.Manager.AllowedType, ident, isPascalCase);
+        var matches = OmniboxUtils.Matches(OmniboxParser.Manager.Types(), filter: type => Schema.Current.IsAllowed(type, inUserInterface: true) == null, ident, isPascalCase);
 
         if (tokens.Count == 1)
         {
@@ -36,7 +36,7 @@ public class EntityOmniboxResultGenenerator : OmniboxResultGenerator<EntityOmnib
 
                 if (PrimaryKey.TryParse(tokens[1].Value, type, out PrimaryKey id))
                 {
-                    Lite<Entity>? lite = OmniboxParser.Manager.RetrieveLite(type, id);
+                    Lite<Entity>? lite = Database.TryRetrieveLite(type, id);
 
                     yield return new EntityOmniboxResult
                     {
