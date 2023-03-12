@@ -1,8 +1,8 @@
-using Signum.Engine.Scheduler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
+using Signum.API;
 
-namespace Signum.React.Scheduler;
+namespace Signum.Scheduler;
 
 public static class SchedulerServer
 {

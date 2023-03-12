@@ -1,5 +1,5 @@
-﻿
-namespace Signum.Entities.Scheduler;
+
+namespace Signum.Scheduler;
 
 [EntityKind(EntityKind.SystemString, EntityData.Master)]
 public class SimpleTaskSymbol : Symbol, ITaskEntity

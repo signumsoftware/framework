@@ -1,6 +1,6 @@
-using Signum.Entities.Scheduler;
+using Signum.Engine.Sync;
 
-namespace Signum.Engine.Scheduler;
+namespace Signum.Scheduler;
 
 public static class SimpleTaskLogic
 {

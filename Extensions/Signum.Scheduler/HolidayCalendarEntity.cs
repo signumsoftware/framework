@@ -2,7 +2,7 @@ using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 using System.Globalization;
 
-namespace Signum.Entities.Scheduler;
+namespace Signum.Scheduler;
 
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]

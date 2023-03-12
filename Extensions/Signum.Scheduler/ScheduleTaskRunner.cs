@@ -1,16 +1,9 @@
-using Signum.Engine.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Isolation;
-using Signum.Entities.Scheduler;
+using Signum.Authorization;
+using Signum.Engine.Basics;
 using Signum.Utilities.DataStructures;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Signum.Engine.Scheduler;
+namespace Signum.Scheduler;
 
 public static class ScheduleTaskRunner
 {
@@ -241,12 +234,10 @@ public static class ScheduleTaskRunner
             });
     }
 
+
     public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity user)
     {
-        var isolation = !Isolation.IsolationLogic.IsStarted ? null :
-                        user.TryIsolation() ?? (task as IEntity).TryIsolation();
-
-        using (IsolationEntity.Override(isolation))
+        using (ExecutionMode.SetIsolation((Entity)user) ?? ExecutionMode.SetIsolation((Entity)task))
         {
             ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
             {

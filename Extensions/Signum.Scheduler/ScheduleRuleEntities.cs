@@ -3,7 +3,7 @@ using System.ComponentModel;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Scheduler;
+namespace Signum.Scheduler;
 
 public interface IScheduleRuleEntity : IEntity, IUserAssetEntity
 {

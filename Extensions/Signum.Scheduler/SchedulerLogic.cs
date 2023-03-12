@@ -1,16 +1,14 @@
-using Signum.Entities.Scheduler;
 using Signum.Utilities.DataStructures;
-using Signum.Engine.Authorization;
 using Signum.Entities.Basics;
-using Signum.Entities.Isolation;
 using System.Collections.Concurrent;
 using Signum.Engine.UserAssets;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
 
-namespace Signum.Engine.Scheduler;
+namespace Signum.Scheduler;
 
 public static class SchedulerLogic
 {
-
     [AutoExpressionField]
     public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity t) =>
         As.Expression(() => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == t));
@@ -48,7 +46,7 @@ public static class SchedulerLogic
             if (!imp2.Equals(imp2))
                 throw new InvalidOperationException("Implementations of ScheduledTaskEntity.Task should be the same as in ScheduledTaskLogEntity.Task");
 
-            PermissionAuthLogic.RegisterPermissions(SchedulerPermission.ViewSchedulerPanel);
+            PermissionLogic.RegisterPermissions(SchedulerPermission.ViewSchedulerPanel);
 
             ExecuteTask.Register((ITaskEntity t, ScheduledTaskContext ctx) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".FormatWith(t.GetType().Name)); });
 

@@ -1,6 +1,6 @@
 using Signum.Entities.Basics;
 
-namespace Signum.Entities.Scheduler;
+namespace Signum.Scheduler;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class ScheduledTaskLogEntity : Entity

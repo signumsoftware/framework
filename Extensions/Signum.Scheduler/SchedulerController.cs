@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Authorization;
-using System.Threading;
-using Signum.Entities.Scheduler;
-using Signum.Engine.Scheduler;
-using Signum.React.Filters;
+using Signum.Engine.Basics;
+using Signum.API.Filters;
 
-namespace Signum.React.Scheduler;
+namespace Signum.Scheduler;
 
 public class SchedulerController : ControllerBase
 {

@@ -1,8 +1,6 @@
 using Signum.Utilities.Reflection;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
 
-namespace Signum.Entities.Scheduler;
+namespace Signum.Scheduler;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class ScheduledTaskEntity : Entity
