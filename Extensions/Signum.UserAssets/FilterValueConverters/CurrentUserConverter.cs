@@ -1,4 +1,4 @@
-using Signum.Entities.Authorization;
+using Signum.Authorization;
 using Signum.Entities.Basics;
 
 namespace Signum.Entities.UserAssets;

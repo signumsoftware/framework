@@ -1,15 +1,13 @@
 using System.ComponentModel.DataAnnotations;
-using Signum.React.ApiControllers;
 using Signum.Entities.UserAssets;
-using Signum.React.Files;
 using Signum.Engine.UserAssets;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.Filters;
 using System.Collections.ObjectModel;
-using Signum.React.Facades;
 using System.Text.Json;
-using Signum.Entities.DynamicQuery.Request;
+using Signum.API.Controllers;
+using Signum.API;
+using Signum.API.Filters;
 
 namespace Signum.React.UserAssets;
 
@@ -199,7 +197,7 @@ public class UserAssetController : ControllerBase
         string typeName = lites.Select(a => a.EntityType).Distinct().SingleEx().Name;
         var fileName = "{0}{1}.xml".FormatWith(typeName, lites.ToString(a => a.Id.ToString(), "_"));
 
-        return FilesController.GetFileStreamResult(new MemoryStream(bytes), fileName);
+        return MimeMapping.GetFileStreamResult(new MemoryStream(bytes), fileName);
     }
 
     [HttpPost("api/userAssets/importPreview")]

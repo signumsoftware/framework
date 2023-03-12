@@ -1,22 +1,9 @@
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Entities.UserAssets;
+using Signum.Utilities.Reflection;
 using System.IO;
 using System.Xml.Linq;
-using Signum.Engine.Chart;
-using Signum.Entities.Basics;
-using Signum.Entities.Chart;
-using Signum.Entities.Dashboard;
-using Signum.Entities.Reflection;
-using Signum.Utilities.Reflection;
-using Signum.Entities.UserAssets;
-using Signum.Entities.UserQueries;
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
-using Signum.Entities.Mailing;
-using Signum.Engine.Mailing;
-using Signum.Entities.Workflow;
-using Signum.Engine.Workflow;
-using Signum.Entities.Word;
-using Signum.Engine.Word;
-using Signum.Utilities;
 
 namespace Signum.Engine.UserAssets;
 
@@ -37,12 +24,6 @@ public static class UserAssetsExporter
         public Guid Include(Lite<IUserAssetEntity> content)
         {
             return this.Include(content.Retrieve());
-        }
-
-        public XElement GetFullWorkflowElement(WorkflowEntity workflow)
-        {
-            var wie = new WorkflowImportExport(workflow);
-            return wie.ToXml(this);
         }
 
         T IToXmlContext.RetrieveLite<T>(Lite<T> lite)
@@ -156,17 +137,6 @@ public static class UserAssetsImporter
             return TypeLogic.TypeToEntity.GetOrThrow(TypeLogic.GetType(cleanName)).ToLite();
         }
 
-        public IPartEntity GetPart(IPartEntity old, XElement element)
-        {
-            Type type = PartNames.GetOrThrow(element.Name.ToString());
-
-            var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type)!;
-
-            part.FromXml(element, this);
-
-            return part;
-        }
-
         public TypeEntity GetType(string cleanName)
         {
             return TypeLogic.GetType(cleanName).ToTypeEntity();
@@ -177,59 +147,10 @@ public static class UserAssetsImporter
             return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
         }
 
-        public ChartScriptSymbol ChartScript(string chartScriptName)
-        {
-            return ChartScriptLogic.Scripts.Keys.SingleEx(cs => cs.Key == chartScriptName || cs.Key.After(".") == chartScriptName);
-        }
-
         public QueryDescription GetQueryDescription(QueryEntity Query)
         {
             return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
         }
-
-        public PermissionSymbol? TryPermission(string permissionKey)
-        {
-            return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
-        }
-
-        public EmailModelEntity GetEmailModel(string fullClassName)
-        {
-            return EmailModelLogic.GetEmailModelEntity(fullClassName);
-        }
-
-
-        public WordModelEntity GetWordModel(string fullClassName)
-        {
-            return WordModelLogic.GetWordModelEntity(fullClassName);
-        }
-
-        public CultureInfoEntity GetCultureInfoEntity(string cultureName)
-        {
-            return CultureInfoLogic.GetCultureInfoEntity(cultureName);
-        }
-
-        public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element)
-        {
-            var wie = new WorkflowImportExport(workflow);
-            wie.FromXml(element, this);
-
-            if (wie.HasChanges)
-            {
-                if (wie.ReplacementModel != null)
-                {
-                    wie.ReplacementModel.NewTasks = wie.Activities.Select(a => new NewTasksEmbedded
-                    {
-                        BpmnId = a.BpmnElementId,
-                        Name = a.GetName()!,
-                        SubWorkflow = (a as WorkflowActivityEntity)?.SubWorkflow?.Workflow.ToLite(),
-                    }).ToMList();
-                }
-                this.customResolutionModel.Add(Guid.Parse(element.Attribute("Guid")!.Value), wie.ReplacementModel);
-            }
-        }
-
-        
-
 
         public Lite<Entity>? ParseLite(string liteKey, IUserAssetEntity userAsset, PropertyRoute route)
         {
@@ -280,7 +201,7 @@ public static class UserAssetsImporter
         Dictionary<Guid, IUserAssetEntity> entities = new();
         Dictionary<Guid, ModelEntity?> customResolutionModel = new();
         Dictionary<Guid, Dictionary<(Lite<Entity> from, PropertyRoute route), Lite<Entity>?>> liteConflicts = new();
-        public List<IPartEntity> toRemove = new();
+        public List<Entity> toRemove = new();
         public Dictionary<Guid, XElement> elements;
 
         public bool IsPreview => false;
@@ -342,62 +263,15 @@ public static class UserAssetsImporter
             return TypeLogic.TypeToEntity.GetOrThrow(TypeLogic.GetType(cleanName)).ToLite();
         }
 
-        public EmailModelEntity GetEmailModel(string fullClassName)
-        {
-            return EmailModelLogic.GetEmailModelEntity(fullClassName);
-        }
-        public WordModelEntity GetWordModel(string fullClassName)
-        {
-            return WordModelLogic.GetWordModelEntity(fullClassName);
-        }
-
-        public IPartEntity GetPart(IPartEntity old, XElement element)
-        {
-            Type type = PartNames.GetOrThrow(element.Name.ToString());
-
-            var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type)!;
-
-            part.FromXml(element, this);
-
-
-            return part;
-        }
-
         public Lite<TypeEntity> GetTypeLite(string cleanName)
         {
             return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
-        }
-
-        public ChartScriptSymbol ChartScript(string chartScriptName)
-        {
-            return ChartScriptLogic.Scripts.Keys.SingleEx(cs => cs.Key == chartScriptName || cs.Key.After(".") == chartScriptName);
         }
 
         public QueryDescription GetQueryDescription(QueryEntity Query)
         {
             return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
         }
-
-        public PermissionSymbol? TryPermission(string permissionKey)
-        {
-            return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
-        }
-
-        public CultureInfoEntity GetCultureInfoEntity(string cultureName)
-        {
-            return CultureInfoLogic.GetCultureInfoEntity(cultureName);
-        }
-
-        public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element)
-        {
-            var model = (WorkflowReplacementModel?)this.customResolutionModel.TryGetCN(Guid.Parse(element.Attribute("Guid")!.Value));
-            var wie = new WorkflowImportExport(workflow)
-            {
-                ReplacementModel = model
-            };
-            wie.FromXml(element, this);
-        }
-
 
         public Lite<Entity>? ParseLite(string liteKey, IUserAssetEntity userAsset, PropertyRoute route)
         {
@@ -408,8 +282,6 @@ public static class UserAssetsImporter
 
             return lite;
         }
-
-    
 
         T IFromXmlContext.RetrieveLite<T>(Lite<T> lite)
         {
@@ -481,7 +353,7 @@ public static class UserAssetsImporter
     }
 
     static readonly GenericInvoker<Func<Guid, IUserAssetEntity>> giRetrieveOrCreate = new(
-        guid => RetrieveOrCreate<UserQueryEntity>(guid));
+        guid => RetrieveOrCreate<FakeEntity>(guid));
     static T RetrieveOrCreate<T>(Guid guid) where T : Entity, IUserAssetEntity, new()
     {
         var result = Database.Query<T>().SingleOrDefaultEx(a => a.Guid == guid);
@@ -492,13 +364,20 @@ public static class UserAssetsImporter
         return new T { Guid = guid };
     }
 
+    public class FakeEntity : Entity, IUserAssetEntity
+    {
+        public Guid Guid { get; set; }
+
+        public void FromXml(XElement element, IFromXmlContext ctx) => throw new NotImplementedException();
+        public XElement ToXml(IToXmlContext ctx) => throw new NotImplementedException();
+    }
 
     public static void Register<T>(string userAssetName, ExecuteSymbol<T> saveOperation) where T : Entity, IUserAssetEntity =>
         Register<T>(userAssetName, e => e.Execute(saveOperation));
 
     public static void Register<T>(string userAssetName, Action<T> saveEntity) where T : Entity, IUserAssetEntity
     {
-        PermissionAuthLogic.RegisterPermissions(UserAssetPermission.UserAssetsToXML);
+        PermissionLogic.RegisterPermissions(UserAssetPermission.UserAssetsToXML);
         UserAssetNames.Add(userAssetName, typeof(T));
         UserAssetsImporter.SaveEntity.Register(saveEntity);
     }

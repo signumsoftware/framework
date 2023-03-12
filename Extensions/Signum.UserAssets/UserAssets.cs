@@ -1,13 +1,6 @@
+using Signum.Authorization.Rules;
 using System.ComponentModel;
 using System.Xml.Linq;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Chart;
-using Signum.Entities.Dashboard;
-using Signum.Entities.Mailing;
-using Signum.Entities.Word;
-using Signum.Entities.Workflow;
-
 namespace Signum.Entities.UserAssets;
 
 public class UserAssetPreviewModel : ModelEntity
@@ -88,8 +81,6 @@ public interface IToXmlContext
     Guid Include(IUserAssetEntity content);
     Guid Include(Lite<IUserAssetEntity> content);
 
-    public XElement GetFullWorkflowElement(WorkflowEntity workflow);
-
     public T RetrieveLite<T>(Lite<T> lite) where T : class, IEntity;
 }
 
@@ -100,25 +91,14 @@ public interface IFromXmlContext
     QueryEntity? TryGetQuery(string queryKey);
     QueryEntity GetQuery(string queryKey);
 
-    PermissionSymbol? TryPermission(string permissionKey);
-
     Lite<TypeEntity> GetTypeLite(string cleanName);
 
     TypeEntity GetType(string cleanName);
 
-    ChartScriptSymbol ChartScript(string chartScriptName);
-
     IUserAssetEntity GetEntity(Guid guid);
-
-    IPartEntity GetPart(IPartEntity old, XElement element);
 
     DynamicQuery.QueryDescription GetQueryDescription(QueryEntity Query);
 
-    EmailModelEntity GetEmailModel(string fullClassName);
-    WordModelEntity GetWordModel(string fullClassName);
-    CultureInfoEntity GetCultureInfoEntity(string cultureName);
-
-    public void SetFullWorkflowElement(WorkflowEntity workflow, XElement element);
 
     Lite<Entity>? ParseLite(string liteKey, IUserAssetEntity userAsset, PropertyRoute route);
 

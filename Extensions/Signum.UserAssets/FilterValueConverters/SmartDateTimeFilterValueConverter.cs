@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using System.Globalization;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Signum.Entities.UserAssets;
 

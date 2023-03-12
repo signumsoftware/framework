@@ -2,17 +2,10 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Scripts/Reflection'
-import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
-import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
-import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
+import * as Entities from '../../Signum.React/Signum.Entities'
+import * as Basics from '../../Signum.React/Signum.Basics'
 
-import { QueryToken } from '@framework/FindOptions'
-
-export interface QueryTokenEmbedded {
-    token?: QueryToken;
-    parseException?: string;
-}
 
 export const EntityAction = new EnumType<EntityAction>("EntityAction");
 export type EntityAction =
@@ -32,12 +25,6 @@ export interface LiteConflictEmbedded extends Entities.EmbeddedEntity {
   to: Entities.Lite<Entities.Entity> | null;
 }
 
-export const QueryTokenEmbedded = new Type<QueryTokenEmbedded>("QueryTokenEmbedded");
-export interface QueryTokenEmbedded extends Entities.EmbeddedEntity {
-  Type: "QueryTokenEmbedded";
-  tokenString: string;
-}
-
 export module UserAssetMessage {
   export const ExportToXml = new MessageKey("UserAssetMessage", "ExportToXml");
   export const ImportUserAssets = new MessageKey("UserAssetMessage", "ImportUserAssets");
@@ -52,7 +39,7 @@ export module UserAssetMessage {
 }
 
 export module UserAssetPermission {
-  export const UserAssetsToXML : Authorization.PermissionSymbol = registerSymbol("Permission", "UserAssetPermission.UserAssetsToXML");
+  export const UserAssetsToXML : Basics.PermissionSymbol = registerSymbol("Permission", "UserAssetPermission.UserAssetsToXML");
 }
 
 export const UserAssetPreviewLineEmbedded = new Type<UserAssetPreviewLineEmbedded>("UserAssetPreviewLineEmbedded");
@@ -72,5 +59,4 @@ export interface UserAssetPreviewModel extends Entities.ModelEntity {
   Type: "UserAssetPreviewModel";
   lines: Entities.MList<UserAssetPreviewLineEmbedded>;
 }
-
 

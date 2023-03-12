@@ -1,8 +1,10 @@
+using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Sync;
 using Signum.Entities.UserAssets;
 
-namespace Signum.Engine.UserAssets;
+namespace Signum.UserAssets.QueryTokens;
 
-static class DelayedConsole
+public static class DelayedConsole
 {
     static List<Action> ToWrite = new List<Action>();
     public static IDisposable Delay(Action action)
@@ -413,7 +415,7 @@ public static class QueryTokenSynchronizer
             int maxElements = Console.LargestWindowHeight - 11;
 
             subTokens.Skip(startingIndex).Take(maxElements)
-                .Select((s, i) => "- {1,2}: {2} ".FormatWith(i + " ", i + startingIndex, ((isRoot && s.Parent != null) ? "-" : "") + s.Key)).ToConsole();
+                .Select((s, i) => "- {1,2}: {2} ".FormatWith(i + " ", i + startingIndex, (isRoot && s.Parent != null ? "-" : "") + s.Key)).ToConsole();
             Console.WriteLine();
 
             int remaining = subTokens.Count - startingIndex - maxElements;

@@ -1,6 +1,6 @@
-using Signum.Entities.DynamicQuery;
+using Signum.DynamicQuery.Tokens;
 
-namespace Signum.Entities.UserAssets;
+namespace Signum.UserAssets.QueryTokens;
 
 public sealed class QueryTokenEmbedded : EmbeddedEntity, IEquatable<QueryTokenEmbedded>
 {
@@ -21,7 +21,7 @@ public sealed class QueryTokenEmbedded : EmbeddedEntity, IEquatable<QueryTokenEm
         if (string.IsNullOrEmpty(tokenString))
             throw new ArgumentNullException(nameof(tokenString));
 
-        this.TokenString = tokenString;
+        TokenString = tokenString;
     }
 
     [StringLengthValidator(Min = 1, Max = 200), NotNullValidator(DisabledInModelBinder = true)]
@@ -91,23 +91,23 @@ public sealed class QueryTokenEmbedded : EmbeddedEntity, IEquatable<QueryTokenEm
         return TokenString;
     }
 
-    public override bool Equals(object? obj) => obj is QueryTokenEmbedded qte && this.Equals(qte);
+    public override bool Equals(object? obj) => obj is QueryTokenEmbedded qte && Equals(qte);
     public bool Equals(QueryTokenEmbedded? other)
     {
         if (other == null)
             return false;
 
-        return this.GetTokenString() == other.GetTokenString();
+        return GetTokenString() == other.GetTokenString();
     }
 
     public string GetTokenString()
     {
-        return this.token != null ? this.token.FullKey() : this.TokenString;
+        return token != null ? token.FullKey() : TokenString;
     }
 
     public override int GetHashCode()
     {
-        return this.GetTokenString().GetHashCode();
+        return GetTokenString().GetHashCode();
     }
 
     public QueryTokenEmbedded Clone() => new QueryTokenEmbedded
