@@ -6,6 +6,7 @@ using Signum.Engine.Mailing;
 using Signum.Entities.Basics;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Files;
 
@@ -29,7 +30,7 @@ public class FilesController : ControllerBase
     }
 
     [HttpGet("api/files/downloadEmbeddedFilePath/{rootType}/{id}")]
-    public FileStreamResult? DownloadFilePathEmbedded(string rootType, string id, string route, string? rowId)
+    public ActionResult? DownloadFilePathEmbedded(string rootType, string id, string route, string? rowId)
     {
         var type = TypeLogic.GetType(rootType);
 
@@ -51,6 +52,11 @@ public class FilesController : ControllerBase
         var fpe = makeQuery(primaryKey, rowId);
         if (fpe == null)
             return null;
+        
+        Response.Headers.ETag = fpe.Hash;
+
+        if (Request.Headers.IfNoneMatch.HasItems() && fpe.Hash == Request.Headers.IfNoneMatch)
+            return this.StatusCode(StatusCodes.Status304NotModified);
 
         return GetFileStreamResult(fpe.OpenRead(), fpe.FileName);
     }
