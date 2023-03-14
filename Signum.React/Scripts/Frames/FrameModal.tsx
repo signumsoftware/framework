@@ -81,7 +81,14 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
       .then(pack => loadComponent(pack).promise.then(getComponent => setPack(pack, getComponent)));
   }, [p.entityOrPack]);
 
-  function loadComponent(pack: EntityPack<ModifiableEntity>, callback?: () => void) {
+  function loadComponent(pack: EntityPack<ModifiableEntity>, forceViewName?: string | Navigator.ViewPromise<ModifiableEntity>) {
+
+    if (forceViewName) {
+      if (forceViewName instanceof Navigator.ViewPromise)
+        return forceViewName;
+
+      return Navigator.getViewPromise(pack.entity, forceViewName);
+    }
 
     const result = p.getViewPromise && p.getViewPromise(pack.entity);
 
@@ -239,7 +246,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
         const newPack = pack || state!.pack;
         if (reloadComponent) {
           setState(undefined)
-            .then(() => loadComponent(newPack).promise)
+            .then(() => loadComponent(newPack, reloadComponent == true ? undefined : reloadComponent).promise)
             .then(getComponent => setPack(newPack, getComponent, callback));
         }
         else {
