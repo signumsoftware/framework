@@ -1,12 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Isolation;
-using Signum.React.Filters;
+using Signum.API.Filters;
+using Signum.Authorization;
 
-namespace Signum.React.Extensions.Isolation;
+namespace Signum.Isolation;
 
 public class IsolationFilter : SignumDisposableResourceFilter
 {

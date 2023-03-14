@@ -1,7 +1,6 @@
-using Signum.Entities.Basics;
 using System.ComponentModel;
 
-namespace Signum.Entities.Isolation;
+namespace Signum.Isolation;
 
 [EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
 public class IsolationEntity : Entity

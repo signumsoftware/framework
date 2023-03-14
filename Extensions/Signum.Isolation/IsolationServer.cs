@@ -1,13 +1,9 @@
-using Signum.React.Maps;
-using Signum.Engine.Isolation;
 using Microsoft.AspNetCore.Builder;
-using Signum.React.Filters;
-using Signum.React.Extensions.Isolation;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Isolation;
-using Signum.Entities.Basics;
+using Signum.API;
+using Signum.API.Filters;
 
-namespace Signum.React.Isolation;
+namespace Signum.Isolation;
 
 public static class IsolationServer
 {
@@ -15,7 +11,7 @@ public static class IsolationServer
     {
         SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-        SchemaMap.GetColorProviders += GetMapColors;
+        MapColorProvider.GetColorProviders += GetMapColors;
 
         SignumExceptionFilterAttribute.ApplyMixins += (ctx, e) => 
         {

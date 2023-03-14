@@ -1,15 +1,14 @@
-using Signum.Entities.Basics;
-using Signum.Entities.Isolation;
+using Signum.Files;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Processes;
-using Signum.Entities.Processes;
-using Signum.Entities.Authorization;
+using System.IO;
 
-namespace Signum.Engine.Isolation;
+namespace Signum.Isolation;
 
 public static class IsolationLogic
 {
     public static bool IsStarted;
+
+    public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(IsolationEntity.Current?.IdOrNull.ToString() ?? "None", Clock.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName)!);
 
     public static ResetLazy<List<Lite<IsolationEntity>>> Isolations = null!;
 
@@ -19,6 +18,16 @@ public static class IsolationLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
+            ExecutionMode.OnSetIsolation += entity =>
+            {
+                var iso = entity.TryIsolation();
+
+                if (iso == null)
+                    return null;
+
+                return IsolationEntity.Override(iso);
+            };
+
             sb.Include<IsolationEntity>()
                 .WithSave(IsolationOperation.Save)
                 .WithQuery(() => iso => new
@@ -31,7 +40,7 @@ public static class IsolationLogic
 
             UserWithClaims.FillClaims += (userWithClaims, user) =>
             {
-                userWithClaims.Claims["Isolation"] = ((UserEntity)user).TryIsolation();
+                userWithClaims.Claims["Isolation"] = ((Entity)user).TryIsolation();
             };
 
             Schema.Current.AttachToUniqueFilter += entity =>
@@ -50,7 +59,6 @@ public static class IsolationLogic
             Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationEntity>(),
                 new InvalidateWith(typeof(IsolationEntity)));
 
-            ProcessLogic.ApplySession += ProcessLogic_ApplySession;
 
             Validator.OverridePropertyValidator((IsolationMixin m) => m.Isolation).StaticPropertyValidation += (mi, pi) =>
             {
@@ -61,12 +69,6 @@ public static class IsolationLogic
             };
             IsStarted = true;
         }
-    }
-
-
-    static IDisposable? ProcessLogic_ApplySession(ProcessEntity process)
-    {
-        return IsolationEntity.Override(process.Data!.TryIsolation());
     }
 
     static IDisposable? OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity? entity, object?[]? args)

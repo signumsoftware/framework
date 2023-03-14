@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.Filters;
-using Signum.Entities.Isolation;
-using Signum.Engine.Isolation;
-using Signum.Entities.Authorization;
+using Signum.API.Filters;
+using Signum.Authorization;
 
-namespace Signum.React.Isolation;
+namespace Signum.Isolation;
 
 [ValidateModelFilter]
 public class IsolationController : Controller
@@ -12,7 +10,7 @@ public class IsolationController : Controller
     [HttpGet("api/isolations")]
     public List<Lite<IsolationEntity>> Isolations()
     {
-        var current = UserEntity.Current.Retrieve().TryMixin<IsolationMixin>()?.Isolation;
+        var current = (IsolationMixin?)UserHolder.Current.GetClaim("Isolation");
 
         if (current != null)
             throw new UnauthorizedAccessException("User is only allowed to see isolation:" + current);
