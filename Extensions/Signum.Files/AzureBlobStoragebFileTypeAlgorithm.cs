@@ -1,12 +1,10 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Signum.Entities.Files;
-using System.Collections.Concurrent;
 using System.IO;
 
-namespace Signum.Engine.Files;
+namespace Signum.Files.FileTypeAlgorithms;
 
-public enum BlobAction 
+public enum BlobAction
 {
     Open,
     Download
@@ -25,7 +23,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
     //ExistBlob is too slow, consider using CalculateSuffix with a GUID!
     public Func<string, int, string>? RenameAlgorithm { get; set; } = null; // FileTypeAlgorithm.DefaultRenameAlgorithm;
 
-    public Func<IFilePath, BlobAction> BlobAction { get; set; } = (IFilePath ifp) => { return Files.BlobAction.Download; };
+    public Func<IFilePath, BlobAction> GetBlobAction { get; set; } = (IFilePath ifp) => { return BlobAction.Download; };
 
     public AzureBlobStoragebFileTypeAlgorithm(Func<IFilePath, BlobContainerClient> getClient)
     {
@@ -39,7 +37,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
         if (!this.WebDownload())
             return PrefixPair.None();
-        
+
         return PrefixPair.WebOnly($"{client.Uri}");
     }
 
@@ -84,7 +82,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
             try
             {
-                var blobHeaders = GetBlobHttpHeaders(fp, this.BlobAction(fp));
+                var blobHeaders = GetBlobHttpHeaders(fp, this.GetBlobAction(fp));
                 var blobClient = client.GetBlobClient(fp.Suffix);
                 var binaryFile = fp.BinaryFile; //For consistency with async
                 fp.BinaryFile = null!;
@@ -118,12 +116,12 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
             try
             {
-                var headers = GetBlobHttpHeaders(fp, this.BlobAction(fp));
+                var headers = GetBlobHttpHeaders(fp, this.GetBlobAction(fp));
                 var blobClient = client.GetBlobClient(fp.Suffix);
 
                 var binaryFile = fp.BinaryFile;
                 fp.BinaryFile = null!; //So the entity is not modified after await
-                
+
                 return SaveFileInAzureAsync(blobClient, binaryFile, headers, fp.Suffix, cancellationToken);
             }
             catch (Exception ex)
@@ -175,7 +173,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
             int i = 2;
             fp.Suffix = suffix.Replace("\\", "/");
 
-            if (RenameAlgorithm != null) 
+            if (RenameAlgorithm != null)
             {
                 while (HeavyProfiler.LogNoStackTrace("ExistBlob").Using(_ => client.ExistsBlob(fp.Suffix)))
                 {
@@ -190,13 +188,13 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
     private static BlobHttpHeaders GetBlobHttpHeaders(IFilePath fp, BlobAction action)
     {
-        var contentType = action == Files.BlobAction.Download ? "application/octet-stream" :
+        var contentType = action == BlobAction.Download ? "application/octet-stream" :
                 ContentTypesDict.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream");
 
         return new BlobHttpHeaders
         {
             ContentType = contentType,
-            ContentDisposition = action == Files.BlobAction.Download ? "attachment" : "inline"
+            ContentDisposition = action == BlobAction.Download ? "attachment" : "inline"
         };
     }
 

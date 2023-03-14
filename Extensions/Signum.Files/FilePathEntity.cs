@@ -1,7 +1,6 @@
 using System.IO;
-using Signum.Services;
 
-namespace Signum.Entities.Files;
+namespace Signum.Files;
 
 [EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
 public class FilePathEntity : Entity, IFile, IFilePath

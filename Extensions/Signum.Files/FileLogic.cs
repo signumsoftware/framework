@@ -1,6 +1,4 @@
-using Signum.Entities.Files;
-
-namespace Signum.Engine.Files;
+namespace Signum.Files;
 
 public static class FileLogic
 {

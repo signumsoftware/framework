@@ -1,9 +1,6 @@
-using Signum.Engine.Mailing;
-using Signum.Entities.Files;
-using Signum.Entities.Isolation;
 using System.IO;
 
-namespace Signum.Engine.Files;
+namespace Signum.Files;
 
 public static class FileTypeLogic
 {
@@ -74,7 +71,6 @@ public static class SuffixGenerators
         public static readonly Func<IFilePath, string> Year_Month_GuidExtension = (IFilePath fp) => Path.Combine(Clock.Now.Year.ToString(), Clock.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName));
 
         public static readonly Func<IFilePath, string> YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(Clock.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName)!);
-        public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename = (IFilePath fp) => Path.Combine(IsolationEntity.Current?.IdOrNull.ToString() ?? "None", Clock.Now.ToString("yyyy-MM"), Guid.NewGuid().ToString(), Path.GetFileName(fp.FileName)!);
     }
 }
 

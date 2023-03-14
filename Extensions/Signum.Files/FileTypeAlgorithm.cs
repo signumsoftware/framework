@@ -1,7 +1,6 @@
-using Signum.Entities.Files;
 using System.IO;
 
-namespace Signum.Engine.Files;
+namespace Signum.Files.FileTypeAlgorithms;
 
 public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 {
@@ -15,7 +14,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     public FileTypeAlgorithm(Func<IFilePath, PrefixPair> getPrefixPair)
     {
         this.GetPrefixPair = getPrefixPair;
-        
+
         WeakFileReference = false;
         CalculateSuffix = SuffixGenerators.Safe.YearMonth_Guid_Filename;
 
@@ -27,7 +26,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
        Path.Combine(Path.GetDirectoryName(sufix)!,
           "{0}({1}){2}".FormatWith(Path.GetFileNameWithoutExtension(sufix), num, Path.GetExtension(sufix)));
 
-    
+
     public virtual void SaveFile(IFilePath fp)
     {
         using (new EntityCache(EntityCacheType.ForceNew))

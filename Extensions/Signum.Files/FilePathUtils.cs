@@ -1,7 +1,7 @@
 using System.IO;
 using System.Security;
 
-namespace Signum.Entities.Files;
+namespace Signum.Files;
 
 public class FilePathUtils
 {

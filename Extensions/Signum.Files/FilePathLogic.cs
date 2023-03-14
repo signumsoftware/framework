@@ -1,8 +1,7 @@
-using Signum.Entities.Files;
 using System.IO;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.Files;
+namespace Signum.Files;
 
 public static class FilePathLogic
 {

@@ -1,7 +1,6 @@
 using System.IO;
-using Signum.Services;
 
-namespace Signum.Entities.Files;
+namespace Signum.Files;
 
 public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
 {

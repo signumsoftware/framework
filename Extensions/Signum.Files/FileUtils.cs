@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Signum.Entities.Files;
+namespace Signum.Files;
 
 public interface IFilePath : IFile
 {

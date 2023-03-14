@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Files;
+namespace Signum.Files;
 
 
 public class BigStringMixin : MixinEntity

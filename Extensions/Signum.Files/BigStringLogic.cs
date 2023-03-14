@@ -1,8 +1,7 @@
-using Signum.Entities.Files;
-using Signum.Entities.Basics;
+using Signum.Engine.Sync.Postgres;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.Files;
+namespace Signum.Files;
 
 public enum BigStringMode 
 {

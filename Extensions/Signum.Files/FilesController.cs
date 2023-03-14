@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Files;
-using Signum.Engine.Files;
 using System.IO;
-using Signum.Engine.Mailing;
-using Signum.Entities.Basics;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 
-namespace Signum.React.Files;
+namespace Signum.Files;
 
 public class FilesController : ControllerBase
 {
@@ -16,7 +12,7 @@ public class FilesController : ControllerBase
     {
         var file = Database.Retrieve<FileEntity>(PrimaryKey.Parse(fileId, typeof(FileEntity)));
 
-        return GetFileStreamResult(new MemoryStream(file.BinaryFile), file.FileName);
+        return MimeMapping.GetFileStreamResult(new MemoryStream(file.BinaryFile), file.FileName);
 
     }
 
@@ -25,7 +21,7 @@ public class FilesController : ControllerBase
     {
         var filePath = Database.Retrieve<FilePathEntity>(PrimaryKey.Parse(filePathId, typeof(FilePathEntity)));
 
-        return GetFileStreamResult(filePath.OpenRead(), filePath.FileName);
+        return MimeMapping.GetFileStreamResult(filePath.OpenRead(), filePath.FileName);
     }
 
     [HttpGet("api/files/downloadEmbeddedFilePath/{rootType}/{id}")]
@@ -52,7 +48,7 @@ public class FilesController : ControllerBase
         if (fpe == null)
             return null;
 
-        return GetFileStreamResult(fpe.OpenRead(), fpe.FileName);
+        return MimeMapping.GetFileStreamResult(fpe.OpenRead(), fpe.FileName);
     }
 
     static ConcurrentDictionary<PropertyRoute, Func<PrimaryKey, string?, FilePathEmbedded?>> queryBuilderCache = 

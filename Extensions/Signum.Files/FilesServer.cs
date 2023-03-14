@@ -1,13 +1,10 @@
-using Signum.React.Facades;
 using Microsoft.AspNetCore.Builder;
-using Signum.Entities.Files;
-using Signum.Engine.Files;
-using Signum.React.Filters;
+using Signum.API;
+using Signum.API.Filters;
+using Signum.API.Json;
 using System.Text.Json;
-using Signum.Engine.Json;
-using Signum.Entities.Symbols;
 
-namespace Signum.React.Files;
+namespace Signum.Files;
 
 public static class FilesServer
 {

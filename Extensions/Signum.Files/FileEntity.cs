@@ -1,7 +1,6 @@
 using System.IO;
-using Signum.Services;
 
-namespace Signum.Entities.Files;
+namespace Signum.Files;
 
 [EntityKind(EntityKind.SharedPart, EntityData.Transactional), TicksColumn(false)]
 public class FileEntity : ImmutableEntity, IFile

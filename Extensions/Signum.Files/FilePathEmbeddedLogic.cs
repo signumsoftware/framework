@@ -1,10 +1,8 @@
-using Signum.Entities.Basics;
-using Signum.Entities.Files;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.IO;
 
-namespace Signum.Engine.Files;
+namespace Signum.Files;
 
 public static class FilePathEmbeddedLogic
 {

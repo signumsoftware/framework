@@ -1,8 +1,7 @@
-using Signum.Entities.Basics;
 using System.IO;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Files;
+namespace Signum.Files;
 
 public class FileEmbedded : EmbeddedEntity, IFile
 {
