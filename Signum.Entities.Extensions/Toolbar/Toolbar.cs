@@ -86,7 +86,8 @@ public class ToolbarElementEmbedded : EmbeddedEntity
   
     public ShowCount? ShowCount { get; set; } 
 
-    [StringLengthValidator(Min = 3, Max = 100)]
+    [StringLengthValidator(Min = 3, Max = 20)]
+    [Format(FormatAttribute.Color)]
     public string? IconColor { get; set; }
 
     [ImplementedBy(typeof(ToolbarMenuEntity), typeof(ToolbarEntity), typeof(QueryEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]

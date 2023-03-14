@@ -95,7 +95,6 @@ function SearchPage() {
         enableAutoFocus={true}
         onHeighChanged={onResize}
         onSearch={result => changeUrl()}
-        extraButtons={qs?.extraButtons}
         onPageSubTitleChanged={forceUpdate}
       />
       }

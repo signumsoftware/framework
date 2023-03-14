@@ -7,12 +7,12 @@ import UserCircle from "./UserCircle";
 import * as UserCircles from "./UserCircle";
 import { classes } from "@framework/Globals";
 
-export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | null)[] = []; 
+export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | null)[] = [];
 
 export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
   const [imageError, setImageError] = useState(false);
 
-  var url = urlProviders.map(f => f(p.user, p.size)).notNull().firstOrNull(); 
+  var url = urlProviders.map(f => f(p.user, p.size)).notNull().firstOrNull();
 
   useEffect(() => {
     setImageError(false);
@@ -58,8 +58,7 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
   );
 }
 
-
-export function ProfilePhotoSVG(user: Lite<UserEntity>, x: string, y: string, size?: number, clippath?: string ) {
+export function ProfilePhotoSVG(user: Lite<UserEntity>, size?: number, clippath?: string, yOffset: number = 0) {
   size = size ?? 40;
   var url = urlProviders.map(f => f(user, size!)).notNull().firstOrNull();
 
@@ -68,12 +67,12 @@ export function ProfilePhotoSVG(user: Lite<UserEntity>, x: string, y: string, si
   }
 
   var picture = document.createElementNS("http://www.w3.org/2000/svg", "image");
-  picture.setAttribute("x", x);
-  picture.setAttribute("y", y);
+  picture.setAttribute("x", ((size / 2) * -1).toString());
+  picture.setAttribute("y", ((size / 2) * -1 + yOffset).toString());
   picture.setAttribute("width", size.toString());
   picture.setAttribute("height", size.toString());
   picture.setAttribute("clip-path", clippath ?? "");
-  picture.addEventListener("onerror", addDefaultSrc);
+  picture.addEventListener("error", addDefaultSrc);
   picture.setAttribute("href", url ?? "");
 
   return picture;

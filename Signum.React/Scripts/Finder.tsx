@@ -1551,15 +1551,18 @@ export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> |
     columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
-  if (entity == null)
-    return null;
+  return React.useMemo(() => {
 
-  if (resultTable == null)
-    return undefined;
+    if (entity == null)
+      return null;
 
-  var firstRow = resultTable.rows[0]; 
+    if (resultTable == null)
+      return undefined;
 
-  return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+    var firstRow = resultTable.rows[0];
+
+    return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+  }, [entity, resultTable]);
 }
 
 
@@ -1572,13 +1575,17 @@ export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: Quer
     columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
-  if (entity == null)
-    return null;
+  return React.useMemo(() => {
 
-  if (resultTable == null)
-    return undefined;
+    if (entity == null)
+      return null;
 
-  return resultTable.rows.map(r => r.columns[0]).notNull();
+    if (resultTable == null)
+      return undefined;
+
+    return resultTable.rows.map(r => r.columns[0]).notNull();
+
+  }, [entity, resultTable]);
 }
 
 export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {

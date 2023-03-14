@@ -99,7 +99,6 @@ export default function UserQueryPage() {
         defaultRefreshMode={currentUserQuery.refreshMode}
         searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         onHeighChanged={onResize}
-        extraButtons={qs?.extraButtons}
         onPageSubTitleChanged={forceUpdate}
       />
       }
