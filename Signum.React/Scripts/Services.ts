@@ -37,7 +37,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
 
   return wrapRequest(options, () => {
 
-    const cache = options.cache || "no-cache";
+    const cache = options.cache || 'no-store';
     const isIE11 = !!(window as any).MSInputMethodContext && !!(document as any).documentMode;
 
     const headers = {
@@ -54,7 +54,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
       headers: headers,
       mode: options.mode,
       credentials: options.credentials || "same-origin",
-      cache: options.cache || "no-cache",
+      cache: cache,
       signal: options.signal
     } as RequestInit);
   });
