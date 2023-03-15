@@ -18,6 +18,8 @@ export interface AjaxOptions {
   signal?: AbortSignal;
 }
 
+export interface AjaxOptionsOverride extends Omit<AjaxOptions, "url"> { };
+
 export function baseUrl(options: AjaxOptions): string {
   const baseUrl = window.__baseUrl;
 

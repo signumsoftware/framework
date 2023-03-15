@@ -6,8 +6,6 @@ using Signum.Engine.Mailing;
 using Signum.Entities.Basics;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
-using Microsoft.AspNetCore.Http;
-using System.Web;
 
 namespace Signum.React.Files;
 
