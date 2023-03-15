@@ -9,6 +9,7 @@ import { useFetchInState } from '../../Signum.React/Scripts/Navigator';
 interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file?: IFile & ModifiableEntity | Lite<IFile & Entity> | null;
   placeholderSrc?: string
+  ajaxOptions?: Services.AjaxOptionsOverride;
 }
 
 export function FileImage(p: FileImageProps) {
@@ -27,7 +28,7 @@ export function FileImage(p: FileImageProps) {
           configurations[file.EntityType].fileLiteUrl!(file) :
           configurations[file.Type].fileUrl!(file);
 
-      Services.ajaxGetRaw({ url: url })
+      Services.ajaxGetRaw({ url: url, ...p.ajaxOptions ?? { cache: 'default' as RequestCache } })
         .then(resp => resp.blob())
         .then(blob => setObjectUrl(URL.createObjectURL(blob)));
 
