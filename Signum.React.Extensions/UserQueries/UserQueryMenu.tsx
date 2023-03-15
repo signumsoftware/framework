@@ -256,12 +256,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       {p.searchControl.props.largeToolbarButtons == true && <>
         &nbsp;
         <span className="d-none d-sm-inline">
-          {UserQueryEntity.nicePluralName()}
-          {currentUserQueryToStr && " - "}
-          {currentUserQueryToStr && <strong>{currentUserQueryToStr.etc(50)}</strong>}
-        </span>
-        <span className="d-inline d-sm-none">
-          {currentUserQueryToStr && <span>{currentUserQueryToStr.etc(20)}</span>}
+          {currentUserQueryToStr ? <strong>{currentUserQueryToStr.etc(50)}</strong> : UserQueryEntity.nicePluralName()}
         </span>
       </>
       }
