@@ -126,7 +126,7 @@ export function MultiValueLineElement(props: MultiValueLineElementProps) {
           <FontAwesomeIcon icon="xmark" />
         </a>
       }
-      {renderItem(ctx)}
+      {React.cloneElement(renderItem(ctx) as React.ReactElement, { mandatory: true })}
     </div>
   );
 }
