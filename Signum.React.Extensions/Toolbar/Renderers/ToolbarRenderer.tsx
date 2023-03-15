@@ -114,7 +114,7 @@ export function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, active: T
 
       if (res.url) {
         var url = res.url!;
-        var isExternalLink = url.startsWith("http") && !url.startsWith(window.__baseName);
+        var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
         return (
           <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink} onClick={(e: React.MouseEvent<any>) => {
 
