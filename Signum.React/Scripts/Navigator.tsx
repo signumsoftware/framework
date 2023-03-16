@@ -5,7 +5,7 @@ import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo, EnumType } from './Reflection';
-import { EntityFrame, TypeContext } from './TypeContext';
+import { ButtonBarElement, ButtonsContext, EntityFrame, TypeContext } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
@@ -948,6 +948,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild;
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 
   namedViews?: NamedViewSettings<T>[];
@@ -1029,6 +1030,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild; 
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
