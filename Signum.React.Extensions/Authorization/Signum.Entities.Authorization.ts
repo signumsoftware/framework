@@ -217,6 +217,7 @@ export module LoginAuthMessage {
   export const _0HasBeenSucessfullyAssociatedWithUser1InThisDevice = new MessageKey("LoginAuthMessage", "_0HasBeenSucessfullyAssociatedWithUser1InThisDevice");
   export const TryToLogInWithIt = new MessageKey("LoginAuthMessage", "TryToLogInWithIt");
   export const LoginWith0 = new MessageKey("LoginAuthMessage", "LoginWith0");
+  export const SignInWithMicrosoft = new MessageKey("LoginAuthMessage", "SignInWithMicrosoft");
 }
 
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");

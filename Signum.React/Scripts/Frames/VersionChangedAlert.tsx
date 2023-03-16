@@ -48,7 +48,10 @@ export function VersionInfo(p: { extraInformation?: string }) {
             <VersionInfoTooltip extraInformation={p.extraInformation} />
           </Tooltip>
         }>
-        <div><FontAwesomeIcon icon="circle-info" className="sf-version-info" /></div>
+        <div>
+          <FontAwesomeIcon icon="circle-info" className="sf-version-info"/>
+          <span className="sr-only">{ConnectionMessage.VersionInfo.niceToString()}</span>
+        </div>
       </OverlayTrigger>
     </div>
   );

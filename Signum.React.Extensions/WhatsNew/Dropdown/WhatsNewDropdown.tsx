@@ -104,7 +104,10 @@ function WhatsNewDropdownImp() {
   return (
     <>
       <div className="nav-link sf-bell-container" onClick={handleOnToggle}>
-        <FontAwesomeIcon icon="bullhorn" className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")} />
+        <FontAwesomeIcon icon="bullhorn"
+          className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")}
+          title={(countResult ? WhatsNewEntity.niceCount(countResult.numWhatsNews) : WhatsNewEntity.nicePluralName())}
+        />
         {countResult && countResult.numWhatsNews > 0 && <span className="badge bg-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
       </div>
       {isOpen && <div className="sf-news-toasts mt-2" ref={divRef} style={{
