@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
+import * as Navigator from '../Navigator'
 import { IRenderButtons, ButtonsContext, ButtonBarElement } from '../TypeContext'
 import { namespace } from 'd3';
 import { FunctionalAdapter } from '../Modals';
@@ -18,8 +19,11 @@ export const ButtonBar = React.forwardRef(function ButtonBar(p: ButtonBarProps, 
   const ctx: ButtonsContext = p;
   const rb = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IRenderButtons | null;
 
+  const es = Navigator.getSettings(p.pack.entity.Type);
+
   const buttons = ButtonBarManager.onButtonBarRender.flatMap(func => func(p) ?? [])
     .concat(rb?.renderButtons ? rb.renderButtons(ctx) : [])
+    .concat(es?.extraToolbarButtons ? es.extraToolbarButtons(ctx) : [])
     .filter(a => a != null)
     .orderBy(a => a!.order ?? 0);
 
