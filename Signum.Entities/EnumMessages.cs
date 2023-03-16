@@ -304,9 +304,7 @@ public enum SelectorMessage
 [AllowUnathenticated]
 public enum ConnectionMessage
 {
-    AConnectionWithTheServerIsNecessaryToContinue,
-    [Description("Sesion Expired")]
-    SessionExpired,
+    VersionInfo,
     [Description("A new version has just been deployed! Save changes and {0}")]
     ANewVersionHasJustBeenDeployedSaveChangesAnd0,
     OutdatedClientApplication,
