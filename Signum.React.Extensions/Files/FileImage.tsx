@@ -15,7 +15,7 @@ interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 export function FileImage(p: FileImageProps) {
 
   var [objectUrl, setObjectUrl] = React.useState<string | undefined>(undefined);
-  var { file, ...rest } = p;
+  var { file, ajaxOptions, ...rest } = p;
 
   React.useEffect(() => {
     if (file) {
@@ -28,7 +28,7 @@ export function FileImage(p: FileImageProps) {
           configurations[file.EntityType].fileLiteUrl!(file) :
           configurations[file.Type].fileUrl!(file);
 
-      Services.ajaxGetRaw({ url: url, ...p.ajaxOptions ?? { cache: 'default' as RequestCache } })
+      Services.ajaxGetRaw({ url: url, ...ajaxOptions ?? { cache: 'default' as RequestCache } })
         .then(resp => resp.blob())
         .then(blob => setObjectUrl(URL.createObjectURL(blob)));
 
