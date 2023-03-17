@@ -14,7 +14,7 @@ import { getToString } from '@framework/Signum.Entities'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { urlVariables } from '../../Dashboard/UrlVariables';
 import { Dic } from '@framework/Globals';
-import { ToolbarEntity, ToolbarMenuEntity } from '../Signum.Entities.Toolbar';
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage } from '../Signum.Entities.Toolbar';
 
 
 
@@ -57,7 +57,7 @@ export default function ToolbarRenderer(p: {
       {p.appTitle}
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
-        <FontAwesomeIcon icon={"angles-left"} />
+        <FontAwesomeIcon icon={"angles-left"} title={ToolbarMessage.CloseSidebar.niceToString()} />
       </div>
 
       <div>

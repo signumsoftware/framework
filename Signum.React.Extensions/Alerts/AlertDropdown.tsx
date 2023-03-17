@@ -207,7 +207,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
     <>
       <div className="nav-link sf-bell-container" onClick={handleOnToggle} title={window.__disableSignalR ?? undefined}>
         <FontAwesomeIcon icon={window.__disableSignalR ? "bell-slash" : "bell"}
-          title={(countResult ? AlertEntity.niceCount(countResult.numAlerts) : AlertEntity.nicePluralName()) + (ringing ? " " + AlertMessage.ringing.niceToString() : "")}
+          title={(countResult ? AlertEntity.niceCount(countResult.numAlerts) : AlertEntity.nicePluralName()) + (ringing ? " " + AlertMessage.Ringing.niceToString() : "")}
           className={classes("sf-bell", ringing && "ringing", isOpen && "open", countResult && countResult.numAlerts > 0 && "active")} />
         {countResult && countResult.numAlerts > 0 && <span className="badge bg-danger badge-pill sf-alerts-badge">{countResult.numAlerts}</span>}
       </div>

@@ -124,6 +124,10 @@ export module AuthAdminMessage {
   export const Role0InheritsFromTrivialMergeRole1 = new MessageKey("AuthAdminMessage", "Role0InheritsFromTrivialMergeRole1");
   export const IncludeTrivialMerges = new MessageKey("AuthAdminMessage", "IncludeTrivialMerges");
   export const Role0IsTrivialMerge = new MessageKey("AuthAdminMessage", "Role0IsTrivialMerge");
+  export const Check = new MessageKey("AuthAdminMessage", "Check");
+  export const Uncheck = new MessageKey("AuthAdminMessage", "Uncheck");
+  export const AddCondition = new MessageKey("AuthAdminMessage", "AddCondition");
+  export const RemoveCondition = new MessageKey("AuthAdminMessage", "RemoveCondition");
 }
 
 export module AuthEmailMessage {

@@ -10,7 +10,7 @@ import InitialMessage from '../D3Scripts/Components/InitialMessage';
 import { toNumberFormat } from '@framework/Reflection';
 import './PivotTable.css'
 import { Color } from '../../Basics/Color';
-import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
+import { isLite, Lite, Entity, BooleanEnum, EntityControlMessage } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
 import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption, FindOptions } from '@framework/FindOptions';
 import { ChartColumnType } from '../Signum.Entities.Chart';

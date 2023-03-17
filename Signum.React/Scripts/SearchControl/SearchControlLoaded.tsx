@@ -739,8 +739,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       this.state.isMobile == true && this.getMobileOptions(this.props.findOptions).showSwitchViewModesButton && {
         button: <button className="sf-query-button btn btn-light" onClick={this.handleViewModeClick}>
-          {this.state.viewMode == "Mobile" ? <FontAwesomeIcon icon="desktop" /> :
-            <FontAwesomeIcon icon="mobile-alt" />}
+          <FontAwesomeIcon icon={this.state.viewMode == "Mobile" ? "desktop" : "mobile-alt"} title={SearchMessage.SwitchViewMode.niceToString()} /> 
         </button>
       }
     ] as (ButtonBarElement | null | false | undefined)[])

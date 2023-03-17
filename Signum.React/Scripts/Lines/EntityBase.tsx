@@ -42,12 +42,12 @@ export interface EntityBaseProps extends LineBaseProps {
 
 export class EntityBaseController<P extends EntityBaseProps> extends LineBaseController<P>{
 
-  static createIcon = <FontAwesomeIcon icon="plus" />;
-  static findIcon = <FontAwesomeIcon icon="magnifying-glass" />;
-  static removeIcon = <FontAwesomeIcon icon="xmark" />;
-  static viewIcon = <FontAwesomeIcon icon="arrow-right" />;
-  static moveIcon = <FontAwesomeIcon icon="bars" />;
-  static pasteIcon = <FontAwesomeIcon icon="clipboard" />;
+  static createIcon = <FontAwesomeIcon icon="plus" title={EntityControlMessage.Create.niceToString()} />;
+  static findIcon = <FontAwesomeIcon icon="magnifying-glass" title={EntityControlMessage.Find.niceToString()} />;
+  static removeIcon = <FontAwesomeIcon icon="xmark" title={EntityControlMessage.Remove.niceToString()} />;
+  static viewIcon = <FontAwesomeIcon icon="arrow-right" title={EntityControlMessage.View.niceToString()} />;
+  static moveIcon = <FontAwesomeIcon icon="bars" title={EntityControlMessage.Move.niceToString()} />;
+  static pasteIcon = <FontAwesomeIcon icon="clipboard" title={EntityControlMessage.Paste.niceToString()} />;
 
   static hasChildrens(element: React.ReactElement<any>) {
     return element.props.children && React.Children.toArray(element.props.children).length;

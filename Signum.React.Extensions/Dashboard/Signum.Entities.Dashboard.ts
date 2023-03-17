@@ -99,6 +99,7 @@ export module DashboardMessage {
   export const ForPerformanceReasonsThisDashboardMayShowOutdatedInformation = new MessageKey("DashboardMessage", "ForPerformanceReasonsThisDashboardMayShowOutdatedInformation");
   export const LasUpdateWasOn0 = new MessageKey("DashboardMessage", "LasUpdateWasOn0");
   export const TheUserQuery0HasNoColumnWithSummaryHeader = new MessageKey("DashboardMessage", "TheUserQuery0HasNoColumnWithSummaryHeader");
+  export const Edit = new MessageKey("DashboardMessage", "Edit");
 }
 
 export module DashboardOperation {

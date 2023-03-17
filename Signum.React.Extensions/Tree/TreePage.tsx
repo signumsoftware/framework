@@ -7,6 +7,7 @@ import { TreeViewer } from './TreeViewer'
 import { useLocation, useParams } from "react-router";
 import { TreeOperation } from "./Signum.Entities.Tree";
 import { QueryString } from '@framework/QueryString'
+import { FrameMessage } from '@framework/Signum.Entities'
 
 
 export default function TreePage() {
@@ -33,7 +34,7 @@ export default function TreePage() {
       <h2>
         <span className="sf-entity-title">{ti.nicePluralName}</span>
         &nbsp;
-                  <a className="sf-popup-fullscreen" href="#" onClick={e => treeViewRef.current!.handleFullScreenClick(e)}>
+        <a className="sf-popup-fullscreen" href="#" title={FrameMessage.Fullscreen.niceToString()} onClick={e => treeViewRef.current!.handleFullScreenClick(e)}>
           <span className="fa fa-external-link"></span>
         </a>
       </h2>

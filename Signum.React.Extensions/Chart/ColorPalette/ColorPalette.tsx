@@ -164,12 +164,13 @@ function ColorSelector(p: { ctx: TypeContext<string>, colors: string[] | null })
 
   function getSwitchModelButton(): React.ReactElement<any> {
     return (
-      <a href="#" className={classes("sf-line-button", "sf-find", "btn input-group-text")}
+      <a href="#" className={classes("sf-line-button", "sf-find", "btn input-group-text")}        
         onClick={e => {
           e.preventDefault();
           setCustom(!custom);
         }}>
-        <FontAwesomeIcon icon={custom ? "palette" : "list"} />
+        <FontAwesomeIcon icon={custom ? "palette" : "list"}
+        title={custom ? ColorPaletteMessage.ShowPalette.niceToString() : ColorPaletteMessage.ShowList.niceToString()} />
       </a>
     );
   }

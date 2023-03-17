@@ -140,6 +140,12 @@ public enum EntityControlMessage
     Added,
     RemovedAndSelectedAgain,
     Selected,
+    Edit,
+    Reload,
+    Download,
+    Expand,
+    Collapse,
+    ToggleSideBar
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
@@ -268,6 +274,10 @@ public enum SearchMessage
     [Description("More than one {0} selected")]
     MoreThanOne0Selected,
     CombineRowsWith,
+
+    PinnFilter,
+    UnpinnFilter,
+    SwitchViewMode,
 }
 
 public enum SelectorMessage
@@ -494,4 +504,10 @@ public enum VoidEnumMessage
 {
     [Description("-")]
     Instance
+}
+
+public enum ContainerToggleMessage
+{
+    Minimize,
+    Exxpand,
 }

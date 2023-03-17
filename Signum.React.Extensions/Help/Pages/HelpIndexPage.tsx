@@ -46,7 +46,7 @@ export default function HelpIndexPage() {
 
         <h3 className="display-6">
           {HelpMessage.Appendices.niceToString()}
-          {Navigator.isCreable(AppendixHelpEntity, { customComponent: true, isSearch: true }) && <Link to={Urls.appendixUrl(null)} style={{ fontSize: "20px" }}><FontAwesomeIcon icon="plus" className="ms-2" /></Link>}
+          {Navigator.isCreable(AppendixHelpEntity, { customComponent: true, isSearch: true }) && <Link to={Urls.appendixUrl(null)} style={{ fontSize: "20px" }} ><FontAwesomeIcon icon="plus" className="ms-2" title={HelpMessage.Appendices.niceToString()} /></Link>}
         </h3>
         <ul className="responsive-columns">
           {index.appendices.map(ap => <li key={ap.uniqueName}><Link to={Urls.appendixUrl(ap.uniqueName)} >{ap.title}</Link></li>)}

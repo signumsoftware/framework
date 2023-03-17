@@ -6,6 +6,7 @@ import { ErrorBoundary } from "../Components/ErrorBoundary";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useUpdatedRef } from '../Hooks';
 import { useLocation } from 'react-router';
+import { ContainerToggleMessage } from '../Signum.Entities';
 
 export default function ContainerToggleComponent(p: { children: React.ReactNode }) {
 
@@ -30,7 +31,7 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
   return (
     <div className={classes(fluid ? "container-fluid" : "container", "mt-3", "sf-page-container")}>
       <a className="expand-window d-none d-md-block" onClick={handleExpandToggle} href="#" >
-        <FontAwesomeIcon icon={fluid ? "compress" : "expand"} />
+        <FontAwesomeIcon icon={fluid ? "compress" : "expand"} title={(fluid ? ContainerToggleMessage.Minimize : ContainerToggleMessage.Exxpand).niceToString()} />
       </a>
       <ErrorBoundary deps={[location.pathname + location.search]}>
         {React.Children.map(p.children, c => c && React.cloneElement(c as React.ReactElement))}

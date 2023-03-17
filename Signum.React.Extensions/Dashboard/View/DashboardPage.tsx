@@ -48,7 +48,7 @@ export default function DashboardPage() {
                 DashboardMessage.LasUpdateWasOn0.niceToString(DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS))}>
                 <FontAwesomeIcon icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
               </span> : null}
-              <Link className="sf-hide " style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="pen-to-square" />&nbsp;Edit</Link>
+              <Link className="sf-hide " style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="pen-to-square" />&nbsp;{DashboardMessage.Edit.niceToString()}</Link>
             </div>
           }
         </div>}

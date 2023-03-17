@@ -18,3 +18,8 @@ public static class RestApiKeyOperation
     public static ExecuteSymbol<RestApiKeyEntity> Save;
     public static DeleteSymbol<RestApiKeyEntity> Delete;
 }
+
+public enum RestApiKeyMessage
+{
+    GenerateApiKey,
+}
