@@ -57,23 +57,3 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
     </div>
   );
 }
-
-export function ProfilePhotoSVG(user: Lite<UserEntity>, size?: number, clippath?: string, yOffset: number = 0) {
-  size = size ?? 40;
-  var url = urlProviders.map(f => f(user, size!)).notNull().firstOrNull();
-
-  function addDefaultSrc(ev: any) {
-    picture.setAttribute("display", "none");
-  }
-
-  var picture = document.createElementNS("http://www.w3.org/2000/svg", "image");
-  picture.setAttribute("x", ((size / 2) * -1).toString());
-  picture.setAttribute("y", ((size / 2) * -1 + yOffset).toString());
-  picture.setAttribute("width", size.toString());
-  picture.setAttribute("height", size.toString());
-  picture.setAttribute("clip-path", clippath ?? "");
-  picture.addEventListener("error", addDefaultSrc);
-  picture.setAttribute("href", url ?? "");
-
-  return picture;
-}
