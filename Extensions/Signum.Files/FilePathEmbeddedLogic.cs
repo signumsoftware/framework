@@ -17,7 +17,6 @@ public static class FilePathEmbeddedLogic
         {
             FileTypeLogic.Start(sb);
 
-            FilePathEmbedded.CloneFunc = fp => new FilePathEmbedded(fp.FileType, fp.FileName, fp.GetByteArray());
 
             FilePathEmbedded.OnPreSaving += fpe =>
             {

@@ -155,9 +155,5 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
         this.GetPrefixPair();
     }
 
-    public static Func<FilePathEmbedded, FilePathEmbedded> CloneFunc;
-    internal FilePathEmbedded Clone()
-    {
-        return CloneFunc(this);
-    }
+    public FilePathEmbedded Clone() => new FilePathEmbedded(FileType, FileName, this.GetByteArray());
 }
