@@ -87,7 +87,7 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
       <a href="#" className={classes("sf-line-button", "sf-view", btn ? "input-group-text" : undefined)}
         onClick={e => this.handleViewElement(e, index)}
         title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
-        {EntityBaseController.viewIcon}
+        {EntityBaseController.getViewIcon()}
       </a>
     );
 

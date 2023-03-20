@@ -85,7 +85,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
       <div title={EntityControlMessage.View.niceToString()} className="d-inline-flex align-items-center">
         <SmallProfilePhoto user={row.entity as Lite<UserEntity>} className="me-1" />
-        {EntityBaseController.viewIcon}
+        {EntityBaseController.getViewIcon()}
       </div>
     </EntityLink>)
   });

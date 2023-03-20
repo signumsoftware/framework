@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import "./AuthAdmin.css"
 import { classes } from '../../../Signum.React/Scripts/Globals';
-import { AuthAdminMessage } from 'Authorization/Signum.Entities.Authorization';
+import { AuthAdminMessage } from '../Signum.Entities.Authorization';
 
 interface ColorRadioProps {
   checked: boolean;

@@ -561,8 +561,8 @@ public class ImagePartEntity : Entity, IPartEntity
     public string ImageSrcContent { get; set; }
 
     public string? ClickActionURL { get; set; }
-
-    public override string ToString() => "Panel de imágen";
+    
+    public string? AltText { get; set; }
 
     public bool RequiresTitle => false;
 

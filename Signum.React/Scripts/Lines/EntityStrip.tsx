@@ -311,7 +311,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
           onClick={p.onRemove}
           href="#"
           title={p.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-          {EntityBaseController.removeIcon}
+          {EntityBaseController.getRemoveIcon()}
         </a>
       </span>
   }
@@ -323,7 +323,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
       onDragEnd={drag.onDragEnd}
       onKeyDown={drag.onKeyDown}
       title={drag.title}>
-      {EntityBaseController.moveIcon}
+      {EntityBaseController.getMoveIcon()}
     </span>;
   }
 }

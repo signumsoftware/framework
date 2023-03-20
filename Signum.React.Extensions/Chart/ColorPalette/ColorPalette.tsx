@@ -73,7 +73,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
               inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
               <div title={EntityControlMessage.View.niceToString()} className="d-inline-flex align-items-center">
                 <span style={{ backgroundColor: !colors ? undefined : calculateColor(row.entity.id!.toString(), colors, ctx.value.seed ?? 0), height: "20px", width: "20px", display: "inline-block", marginBottom: "-6px" }} className="me-2" />
-                {EntityBaseController.viewIcon}
+                {EntityBaseController.getViewIcon()}
               </div>
             </EntityLink>)
         }

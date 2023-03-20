@@ -8,22 +8,22 @@ import { ajaxGet, ajaxPost } from './Services';
 
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
-  FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
+  FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, 
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
-  ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany
+  ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, 
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany
 } from './FindOptions';
 
-import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
+import { FilterOperation, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
-import { TypeEntity, QueryEntity, ExceptionEntity } from './Signum.Entities.Basics';
+import { Entity, Lite, toLite, liteKey, parseLite, isLite, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
+import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
-  Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-  getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
+  Type, QueryKey, getQueryKey, isQueryDefined, TypeReference,
+  getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, 
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
-  Anonymous, toLuxonDurationFormat, timeToString, toFormatWithFixes
+  Anonymous, toLuxonDurationFormat, toFormatWithFixes
 } from './Reflection';
 
 import EntityLink from './SearchControl/EntityLink';
@@ -2247,8 +2247,8 @@ function initEntityFormatRules(): EntityFormatRule[] {
           getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
           inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
           {sc?.state.isMobile == true && sc?.state.viewMode == "Mobile" ? undefined :
-            <span title={EntityControlMessage.View.niceToString()}>
-              {EntityBaseController.viewIcon}
+            <span title={SearchMessage.View.niceToString()}>
+              {EntityBaseController.getViewIcon()}
             </span>}
         </EntityLink>, "centered-cell")
     },
