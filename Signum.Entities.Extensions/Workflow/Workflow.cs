@@ -132,7 +132,10 @@ public enum WorkflowMessage
     YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0,
 
     [Description("Evaluation order of the contition (if... else)")]
-    EvaluationOrderOfTheConnectionForIfElse
+    EvaluationOrderOfTheConnectionForIfElse,
+
+    [Description("Save as SVG")]
+    SaveAsSVG,
 }
 
 public class WorkflowXmlEmbedded : EmbeddedEntity
@@ -295,7 +298,8 @@ public enum WorkflowActivityMonitorMessage
     ResetZoom,
     Find,
     Filters,
-    Columns
+    Columns,
+    OpenWorkflow
 }
 
 [AutoInit]

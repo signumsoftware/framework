@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { openModal, IModalProps } from '@framework/Modals';
-import { Lite } from '@framework/Signum.Entities'
+import { FrameMessage, Lite } from '@framework/Signum.Entities'
 import { getTypeInfo } from '@framework/Reflection'
 import { TreeEntity } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
@@ -61,7 +61,7 @@ export default function TreeModal(p : TreeModalProps){
       <ModalHeaderButtons onClose={handleCancelClicked}>
         <span className="sf-entity-title"> {p.title ?? getTypeInfo(p.typeName).nicePluralName}</span>
         &nbsp;
-                      <a className="sf-popup-fullscreen" href="#" onClick={(e) => treeViewRef.current
+        <a className="sf-popup-fullscreen" href="#" title={FrameMessage.Fullscreen.niceToString()} onClick={(e) => treeViewRef.current
           && treeViewRef.current.handleFullScreenClick(e)}>
           <span className="fa fa-external-link"></span>
         </a>

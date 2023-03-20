@@ -3,6 +3,7 @@ import { ErrorBoundary } from '@framework/Components';
 import "./Sidebar.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '../../Signum.React/Scripts/Globals';
+import { EntityControlMessage } from '@framework/Signum.Entities';
 
 export type SidebarMode = "Wide" | "Narrow" | "Hidden";   
 
@@ -48,9 +49,9 @@ export function SidebarToggleItem(p: { isMobile: boolean, simpleMode?: boolean, 
       }
     }}>
       <div style={{ display: "flex", height: "100%", alignItems: "center" }}>
-        <FontAwesomeIcon icon={"angles-left"} style={{ transition: "all 400ms", width: p.mode == "Wide" ? "15px" : "0.1px" }} />
-        <FontAwesomeIcon icon={"bars"} style={{ transition: "all 400ms", width: p.mode == "Hidden" ? "15px" : "0.1px" }} />
-        {!p.simpleMode && <FontAwesomeIcon icon={"angles-right"} style={{ transition: "all 400ms", width: p.mode == "Narrow" ? "15px" : "0.1px" }} />}
+        <FontAwesomeIcon icon={"angles-left"} style={{ transition: "all 400ms", width: p.mode == "Wide" ? "15px" : "0.1px" }} title={EntityControlMessage.ToggleSideBar.niceToString()} />
+        <FontAwesomeIcon icon={"bars"} style={{ transition: "all 400ms", width: p.mode == "Hidden" ? "15px" : "0.1px" }} title={EntityControlMessage.ToggleSideBar.niceToString()} />
+        {!p.simpleMode && <FontAwesomeIcon icon={"angles-right"} style={{ transition: "all 400ms", width: p.mode == "Narrow" ? "15px" : "0.1px" }} title={EntityControlMessage.ToggleSideBar.niceToString()} />}
       </div>
     </a>
   );

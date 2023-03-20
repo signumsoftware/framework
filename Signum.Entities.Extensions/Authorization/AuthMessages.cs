@@ -93,6 +93,9 @@ public enum LoginAuthMessage
 
     [Description("Login with {0}")]
     LoginWith0,
+
+    [Description("Sign in with Microsoft")]
+    SignInWithMicrosoft,
 }
 
 public enum AuthMessage
@@ -212,4 +215,10 @@ public enum AuthAdminMessage
 
     [Description("Role {0} is trivial merge")]
     Role0IsTrivialMerge,
+
+    Check,
+    Uncheck,
+
+    AddCondition,
+    RemoveCondition
 }

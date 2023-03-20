@@ -10,7 +10,7 @@ import InitialMessage from '../D3Scripts/Components/InitialMessage';
 import { toNumberFormat } from '@framework/Reflection';
 import './PivotTable.css'
 import { Color } from '../../Basics/Color';
-import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
+import { isLite, Lite, Entity, BooleanEnum, EntityControlMessage } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
 import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption, FindOptions } from '@framework/FindOptions';
 import { ChartColumnType } from '../Signum.Entities.Chart';
@@ -521,7 +521,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       };
     }
 
-    var createLink = p.style?.showCreateButton && isCreable && <a className="sf-create-cell" href="#" onClick={handleCreateClick}>{EntityBaseController.createIcon}</a>;
+    var createLink = p.style?.showCreateButton && isCreable && <a className="sf-create-cell" href="#" onClick={handleCreateClick}>{EntityBaseController.getCreateIcon()}</a>;
 
     function handleCreateClick(e: React.MouseEvent) {
       e.preventDefault()

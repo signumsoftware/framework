@@ -128,21 +128,21 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
     <a href="#" className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
       onClick={svRef.current!.handleClick}
       title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
-      {EntityBaseController.findIcon}
+      {EntityBaseController.getFindIcon()}
     </a>;
   
   const create = !p.ctx.frame?.currentDate && ((p.create == "ifNull" && value === null) || (p.create ?? false)) &&
     <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
-      {EntityBaseController.createIcon}
+      {EntityBaseController.getCreateIcon()}
     </a>;
 
   const view = value != undefined && (p.viewEntityButton ?? (isLite(value) && Navigator.isViewable(value.EntityType))) &&
     <a href="#" className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleViewEntityClick}
       title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
-      {EntityBaseController.viewIcon}
+      {EntityBaseController.getViewIcon()}
     </a>
 
   let extra = svRef.current && p.extraButtons && p.extraButtons(svRef.current);

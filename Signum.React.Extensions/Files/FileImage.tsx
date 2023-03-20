@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { IFile, IFilePath } from "./Signum.Entities.Files";
+import { FileMessage, IFile, IFilePath } from "./Signum.Entities.Files";
 import { configurations } from "./FileDownloader";
 import { Entity, isLite, isModifiableEntity, Lite, ModifiableEntity } from '@framework/Signum.Entities';
 import * as Services from '@framework/Services'
@@ -41,6 +41,6 @@ export function FileImage(p: FileImageProps) {
         objectUrl;
 
   return (
-    <img {...rest} src={src} />
+    <img {...rest} src={src} alt={p.alt ?? FileMessage.FileImage.niceToString()} />
   );
 }

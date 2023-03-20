@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import { JavascriptMessage } from '@framework/Signum.Entities'
+import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { SchemaMapInfo, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
@@ -143,8 +143,8 @@ export default function SchemaMapPage() {
               {MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>)}
             </span>
             &nbsp;
-            <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#">
-              <FontAwesomeIcon icon="up-right-from-square" />
+            <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={handleFullscreenClick} href="#" >
+              <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
             </a>
           </div>
         </div>

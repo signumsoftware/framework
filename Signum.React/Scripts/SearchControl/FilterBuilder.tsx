@@ -5,7 +5,7 @@ import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
   isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox
 } from '../FindOptions'
-import { SearchMessage, Lite } from '../Signum.Entities'
+import { SearchMessage, Lite, EntityControlMessage } from '../Signum.Entities'
 import { isNumber, trimDateToFormat } from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat } from '../Reflection'
@@ -279,18 +279,21 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
     <tr className="sf-filter-group">
       <td style={{ verticalAlign: "top" }}>
         {!readOnly &&
-          <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+          <a href="#" 
             className="sf-line-button sf-remove"
             onClick={handleDeleteFilter}>
-            <FontAwesomeIcon icon="xmark" />
+            <FontAwesomeIcon icon="xmark" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined} />
           </a>}
       </td>
       <td colSpan={3 + (p.showPinnedFiltersOptions ? 1 : 0) + (p.showDashboardBehaviour ? 1 : 0)} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
         <div className="justify-content-between d-flex" >
           <div className="row gx-1">
             <div className="col-auto">
-              <a href="#" onClick={handleExpandCollapse} className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
-                <FontAwesomeIcon icon={fg.expanded ? ["far", "square-minus"] : ["far", "square-plus"]} className="me-2" />
+              <a href="#"
+                onClick={handleExpandCollapse}                
+                className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
+                <FontAwesomeIcon icon={fg.expanded ? ["far", "square-minus"] : ["far", "square-plus"]} className="me-2"
+                  title={(fg.expanded ? EntityControlMessage.Collapse : EntityControlMessage.Expand).niceToString()} />
               </a>
             </div>
             <div className="col-auto">
@@ -326,7 +329,9 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
           }
           <div>
             {p.showPinnedFiltersOptions &&
-              <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")} onClick={e => {
+              <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")}
+                title={SearchMessage.ShowPinnedFiltersOptions.niceToString()}
+                onClick={e => {
                 fg.pinned = fg.pinned ? undefined : {};
                 fixDashboardBehaviour(fg);
                 changeFilter();
@@ -574,8 +579,9 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
               f.pinned = f.pinned ? undefined : {};
               fixDashboardBehaviour(f);
               changeFilter();
-            }} disabled={p.readOnly}>
-              <FontAwesomeIcon color="orange" icon={[f.pinned ? "fas" : "far", "star"]} />
+            }}              
+              disabled={p.readOnly}>
+              <FontAwesomeIcon color="orange" icon={[f.pinned ? "fas" : "far", "star"]} title={(f.pinned ? SearchMessage.PinnFilter : SearchMessage.UnpinnFilter).niceToString()} />
             </button>
             }
           </td>
