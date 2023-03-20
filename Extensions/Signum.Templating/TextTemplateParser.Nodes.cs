@@ -2,8 +2,9 @@ using System.Web;
 using Signum.Utilities.DataStructures;
 using Microsoft.AspNetCore.Html;
 using System.Globalization;
+using Signum.DynamicQuery.Tokens;
 
-namespace Signum.Engine.Templating;
+namespace Signum.Templating;
 
 public static partial class TextTemplateParser
 {

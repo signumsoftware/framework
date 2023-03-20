@@ -1,11 +1,13 @@
-using Signum.Entities.UserAssets;
 using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
-using Signum.Engine.UserAssets;
 using Signum.Utilities.Reflection;
+using Signum.UserAssets.QueryTokens;
+using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Sync;
+using Signum.Entities.UserAssets;
 
-namespace Signum.Engine.Templating;
+namespace Signum.Templating;
 
 public static class TemplateUtils
 {

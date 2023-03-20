@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Templating;
-using Signum.React.Facades;
-using System.Web;
+using Signum.API;
 
-namespace Signum.React.Extensions.Templating;
+namespace Signum.Templating;
 
 public class TemplatingController : ControllerBase
 {

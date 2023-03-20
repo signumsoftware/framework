@@ -1,7 +1,8 @@
 using System.Text.RegularExpressions;
+using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.DataStructures;
 
-namespace Signum.Engine.Templating;
+namespace Signum.Templating;
 
 public static partial class TextTemplateParser
 {

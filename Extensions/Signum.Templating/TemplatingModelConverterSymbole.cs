@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Templating;
+namespace Signum.Templating;
 
 [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class ModelConverterSymbol : Symbol

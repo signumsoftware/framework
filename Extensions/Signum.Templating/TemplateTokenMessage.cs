@@ -1,7 +1,6 @@
-using Signum.Entities.DynamicQuery;
 using System.ComponentModel;
 
-namespace Signum.Entities.Templating;
+namespace Signum.Templating;
 
 public enum TemplateTokenMessage
 {
@@ -15,7 +14,9 @@ public enum TemplateTokenMessage
     [Description("You can only add Foreach blocks with collection fields")]
     YouCanOnlyAddForeachBlocksWithCollectionFields,
     [Description("You cannot add Blocks with All or Any")]
-    YouCannotAddBlocksWithAllOrAny
+    YouCannotAddBlocksWithAllOrAny,
+    [Description("Impossible to access {0} because the template has no {1}")]
+    ImpossibleToAccess0BecauseTheTemplateHAsNo1,
 }
 
 

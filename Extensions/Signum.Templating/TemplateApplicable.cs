@@ -1,9 +1,11 @@
-using Signum.Entities.Basics;
-using Signum.Entities.Dynamic;
-using Signum.Entities.Word;
-using Signum.Entities.Mailing;
+using Signum.Eval;
 
-namespace Signum.Entities.Templating;
+namespace Signum.Templating;
+
+public interface IContainsQuery : IEntity
+{
+    public QueryEntity Query { get; }
+}
 
 public class TemplateApplicableEval : EvalEmbedded<ITemplateApplicable>
 {
@@ -12,15 +14,13 @@ public class TemplateApplicableEval : EvalEmbedded<ITemplateApplicable>
         var script = this.Script.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
         var parentEntity = this.TryGetParentEntity<Entity>()!;
-        var query = 
-            parentEntity is WordTemplateEntity wt ? wt.Query :
-            parentEntity is EmailTemplateEntity et ? et.Query :
+        var query = parentEntity is IContainsQuery wt ? wt.Query :
             throw new UnexpectedValueException(parentEntity);
 
         var entityTypeName = (QueryEntity.GetEntityImplementations(query).Types.Only() ?? typeof(Entity)).Name;
 
-        return Compile(DynamicCode.GetCoreMetadataReferences()
-            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+        return Compile(EvalLogic.GetCoreMetadataReferences()
+            .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Templating
 {

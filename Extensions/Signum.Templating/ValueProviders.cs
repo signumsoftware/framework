@@ -1,14 +1,11 @@
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Signum.Engine.Translation;
-using Signum.Entities.Mailing;
-using Signum.Entities.Reflection;
+using Signum.DynamicQuery.Tokens;
 using Signum.Entities.UserAssets;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Signum.Engine.Templating;
+namespace Signum.Templating;
 
 public interface ITemplateParser
 {
@@ -306,7 +303,7 @@ public class TranslateInstanceValueProvider : ValueProviderBase
         var entity = (Lite<Entity>)p.Rows.DistinctSingle(p.Columns[EntityToken!])!;
         var fallback = (string)p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!])!;
 
-        return entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route!, fallback);
+        return entity == null ? null : PropertyRouteTranslationLogic.TranslatedField(entity, Route!, fallback);
     }
 
     public override void Foreach(TemplateParameters parameters, Action forEachElement)
@@ -336,7 +333,7 @@ public class TranslateInstanceValueProvider : ValueProviderBase
         if (pr == null)
             return false;
 
-        if (TranslatedInstanceLogic.RouteType(pr) == null)
+        if (PropertyRouteTranslationLogic.RouteType(pr) == null)
             return false;
 
         return true;
@@ -489,7 +486,7 @@ public class ModelValueProvider : ValueProviderBase
         this.fieldOrPropertyChain = fieldOrPropertyChain;
         if (modelType == null)
         {
-            tp.AddError(false, EmailTemplateMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrPropertyChain, "Model"));
+            tp.AddError(false, TemplateTokenMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrPropertyChain, "Model"));
             return;
         }
 

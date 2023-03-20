@@ -1,6 +1,4 @@
-using Signum.Entities.Templating;
-
-namespace Signum.Engine.Templating;
+namespace Signum.Templating;
 
 
 public static class TemplatingLogic

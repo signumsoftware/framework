@@ -1,8 +1,9 @@
+using Signum.DynamicQuery.Tokens;
 using Signum.Entities.UserAssets;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 
-namespace Signum.Engine.Templating;
+namespace Signum.Templating;
 
 public abstract class ConditionBase
 {
