@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Runtime.Loader;
 
-namespace Signum.Entities.Dynamic;
+namespace Signum.Eval;
 
 public abstract class EvalEmbedded<T> : EmbeddedEntity
                 where T : class
@@ -57,7 +57,7 @@ public abstract class EvalEmbedded<T> : EmbeddedEntity
 
     static EvalEmbedded()
     {
-        DynamicCode.OnInvalidated += () => resultCache.Clear();
+        EvalLogic.OnInvalidated += () => resultCache.Clear();
     }
 
     public static CompilationResult Compile(IEnumerable<MetadataReference> references, string code)
@@ -93,9 +93,9 @@ public abstract class EvalEmbedded<T> : EmbeddedEntity
                             };
                         }
 
-                        if (DynamicCode.GetCustomErrors != null)
+                        if (EvalLogic.GetCustomErrors != null)
                         {
-                            var allCustomErrors = DynamicCode.GetCustomErrors.GetInvocationListTyped()
+                            var allCustomErrors = EvalLogic.GetCustomErrors.GetInvocationListTyped()
                             .SelectMany((Func<string, List<CustomCompilerError>> a) => a(code) ?? Enumerable.Empty<CustomCompilerError>()).ToList();
 
                             if (allCustomErrors.Any())

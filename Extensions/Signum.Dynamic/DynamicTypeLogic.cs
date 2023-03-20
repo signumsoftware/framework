@@ -7,8 +7,6 @@ namespace Signum.Engine.Dynamic;
 
 public static class DynamicTypeLogic
 {
-    public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities = null!;
-    public static ResetLazy<HashSet<Type>> AvailableModelEntities = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -23,29 +21,7 @@ public static class DynamicTypeLogic
                     e.BaseType,
                 });
 
-            AvailableEmbeddedEntities = sb.GlobalLazy(() =>
-            {
-                var namespaces = DynamicCode.GetNamespaces().ToHashSet();
-                return DynamicCode.AssemblyTypes
-                .Select(t => t.Assembly)
-                .Distinct()
-                .SelectMany(a => a.GetTypes())
-                .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
-                .ToHashSet();
 
-            }, new InvalidateWith(typeof(TypeEntity)));
-
-            AvailableModelEntities = sb.GlobalLazy(() =>
-            {
-                var namespaces = DynamicCode.GetNamespaces().ToHashSet();
-                return DynamicCode.AssemblyTypes
-                .Select(t => t.Assembly)
-                .Distinct()
-                .SelectMany(a => a.GetTypes())
-                .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
-                .ToHashSet();
-
-            }, new InvalidateWith(typeof(TypeEntity)));
 
             DynamicTypeGraph.Register();
             DynamicLogic.GetCodeFiles += GetCodeFiles;

@@ -2,9 +2,9 @@ using System.IO;
 using Microsoft.CodeAnalysis;
 using System.Text.Json.Serialization;
 
-namespace Signum.Entities.Dynamic;
+namespace Signum.Eval;
 
-public static class DynamicCode
+public static class EvalLogic
 {
     public static string AssemblyDirectory = Path.GetDirectoryName(typeof(Entity).Assembly.Location)!;
     public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
@@ -60,9 +60,9 @@ public static class DynamicCode
 
     public static IEnumerable<MetadataReference> GetMetadataReferences(bool needsCodeGenAssembly = true)
     {
-        var result = DynamicCode.AssemblyTypes
+        var result = EvalLogic.AssemblyTypes
             .Select(type => MetadataReference.CreateFromFile(type.Assembly.Location))
-            .And(needsCodeGenAssembly ? DynamicCode.CodeGenAssemblyPath?.Let(s => MetadataReference.CreateFromFile(s)) : null)
+            .And(needsCodeGenAssembly ? EvalLogic.CodeGenAssemblyPath?.Let(s => MetadataReference.CreateFromFile(s)) : null)
             .NotNull().ToList();
 
         return result;
@@ -88,13 +88,13 @@ public static class DynamicCode
 
     public static string GetUsingNamespaces()
     {
-        return DynamicCode.CreateUsings(GetNamespaces());
+        return EvalLogic.CreateUsings(GetNamespaces());
     }
 
     public static IEnumerable<string> GetNamespaces()
     {
-        return DynamicCode.Namespaces
-            .And(DynamicCode.CodeGenAssemblyPath == null ? null : DynamicCode.CodeGenEntitiesNamespace)
+        return EvalLogic.Namespaces
+            .And(EvalLogic.CodeGenAssemblyPath == null ? null : EvalLogic.CodeGenEntitiesNamespace)
             .NotNull();
     }
 
