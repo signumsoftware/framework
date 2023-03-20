@@ -1,19 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
-using Signum.React.Filters;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Linq;
 using System.IO;
 using Microsoft.AspNetCore.Http;
-using Signum.Entities.Operations;
 using Microsoft.AspNetCore.Authorization;
 using Signum.API.Filters;
-using Signum.Security;
+using Signum.Authorization;
+using Signum.Authorization.AuthToken;
+using Signum.Authorization.Rules;
 
-namespace Signum.React.Authorization;
+namespace Signum.ActiveDirectory;
 
 [ValidateModelFilter]
 public class ActiveDirectoryController : ControllerBase

@@ -1,21 +1,19 @@
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
+using Microsoft.Identity.Client;
 using Signum.ActiveDirectory;
-using Signum.Engine.Mailing.Senders;
-using Signum.Engine.Scheduler;
-using Signum.Entities.Authorization;
-using Signum.Utilities.Reflection;
+using Signum.Authorization;
+using Signum.DynamicQuery.Tokens;
+using Signum.Scheduler;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 
-namespace Signum.Engine.Authorization;
+namespace Signum.ActiveDirectory;
 
 public static class AzureADLogic
 {
     public static Func<IAuthenticationProvider> GetClientCredentialProvider = () => ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig().GetAuthProvider();
-
 
     public static async Task<List<ActiveDirectoryUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
     {
@@ -77,17 +75,19 @@ public static class AzureADLogic
         {
             if (MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)))
             {
-                As.OverrideExpression
+                
 
-                [AutoExpressionField]
-                public EmailOwnerData EmailOwnerData => As.Expression(() => new EmailOwnerData
-                {
-                    Owner = this.ToLite(),
-                    CultureInfo = CultureInfo,
-                    DisplayName = UserName,
-                    Email = Email,
-                    AzureUserId = null MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)) ? this.Mixin<UserADMixin>().OID : null
-                });
+                //As.OverrideExpression
+
+                //[AutoExpressionField]
+                //public EmailOwnerData EmailOwnerData => As.Expression(() => new EmailOwnerData
+                //{
+                //    Owner = this.ToLite(),
+                //    CultureInfo = CultureInfo,
+                //    DisplayName = UserName,
+                //    Email = Email,
+                //    AzureUserId = null MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)) ? this.Mixin<UserADMixin>().OID : null
+                //});
 
                 UserWithClaims.FillClaims += (userWithClaims, user) =>
                 {

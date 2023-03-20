@@ -1,12 +1,10 @@
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Principal;
 using System.DirectoryServices.AccountManagement;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Basics;
+using Signum.Authorization;
 
-namespace Signum.React.Authorization;
+namespace Signum.ActiveDirectory;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 

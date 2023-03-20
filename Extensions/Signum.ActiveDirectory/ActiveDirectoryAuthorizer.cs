@@ -1,11 +1,9 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Reflection;
-using Signum.Services;
+using Signum.Authorization;
 using System.DirectoryServices.AccountManagement;
 using System.Security.Claims;
 
 #pragma warning disable CA1416 // Validate platform compatibility
-namespace Signum.Engine.Authorization;
+namespace Signum.ActiveDirectory;
 
 public interface IAutoCreateUserContext
 {
@@ -108,7 +106,7 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
 
     public virtual UserEntity Login(string userName, string password, out string authenticationType)
     {
-        var passwordHash = Security.EncodePassword(password);
+        var passwordHash = PasswordEncoding.EncodePassword(password);
         if (AuthLogic.TryRetrieveUser(userName, passwordHash) != null)
             return AuthLogic.Login(userName, passwordHash, out authenticationType); //Database is faster than Active Directory
 
@@ -119,7 +117,7 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
             return user;
         }
 
-        return AuthLogic.Login(userName, Security.EncodePassword(password), out authenticationType);
+        return AuthLogic.Login(userName, PasswordEncoding.EncodePassword(password), out authenticationType);
     }
 
     public virtual UserEntity? LoginWithActiveDirectoryRegistry(string userName, string password)

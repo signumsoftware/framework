@@ -1,7 +1,8 @@
-using Signum.Entities.Scheduler;
+using Signum.Authorization;
+using Signum.Scheduler;
 using System.ComponentModel;
 
-namespace Signum.Entities.Authorization;
+namespace Signum.ActiveDirectory;
 
 public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
 {

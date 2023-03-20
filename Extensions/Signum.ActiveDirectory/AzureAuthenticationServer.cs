@@ -1,14 +1,12 @@
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Signum.Entities.Basics;
+using Signum.Authorization;
 
-namespace Signum.React.Authorization;
+namespace Signum.ActiveDirectory;
 
 
 public class AzureADAuthenticationServer
