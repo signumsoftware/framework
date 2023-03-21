@@ -381,7 +381,7 @@ export function EntityTableRow(p: EntityTableRowProps) {
           {p.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={p.onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-            {EntityBaseController.removeIcon}
+            {EntityBaseController.getRemoveIcon()}
           </a>}
           &nbsp;
           {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -390,14 +390,14 @@ export function EntityTableRow(p: EntityTableRowProps) {
             onDragStart={drag.onDragStart}
             onDragEnd={drag.onDragEnd}
             title={drag.title}>
-            {EntityBaseController.moveIcon}
+            {EntityBaseController.getMoveIcon()}
           </a>}
           {p.move?.renderMoveUp()}
           {p.move?.renderMoveDown()}
           {p.onView && <a href="#" className={classes("sf-line-button", "sf-view")}
             onClick={p.onView}
             title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
-            {EntityBaseController.viewIcon}
+            {EntityBaseController.getViewIcon()}
           </a>}
         </div>
       </td>}      

@@ -345,12 +345,16 @@ export type ComparisonType =
   "LessThanOrEqualTo";
 
 export module ConnectionMessage {
-  export const AConnectionWithTheServerIsNecessaryToContinue = new MessageKey("ConnectionMessage", "AConnectionWithTheServerIsNecessaryToContinue");
-  export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
+  export const VersionInfo = new MessageKey("ConnectionMessage", "VersionInfo");
   export const ANewVersionHasJustBeenDeployedSaveChangesAnd0 = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
   export const OutdatedClientApplication = new MessageKey("ConnectionMessage", "OutdatedClientApplication");
   export const ANewVersionHasJustBeenDeployedConsiderReload = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedConsiderReload");
   export const Refresh = new MessageKey("ConnectionMessage", "Refresh");
+}
+
+export module ContainerToggleMessage {
+  export const Minimize = new MessageKey("ContainerToggleMessage", "Minimize");
+  export const Exxpand = new MessageKey("ContainerToggleMessage", "Exxpand");
 }
 
 export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
@@ -397,6 +401,12 @@ export module EntityControlMessage {
   export const Added = new MessageKey("EntityControlMessage", "Added");
   export const RemovedAndSelectedAgain = new MessageKey("EntityControlMessage", "RemovedAndSelectedAgain");
   export const Selected = new MessageKey("EntityControlMessage", "Selected");
+  export const Edit = new MessageKey("EntityControlMessage", "Edit");
+  export const Reload = new MessageKey("EntityControlMessage", "Reload");
+  export const Download = new MessageKey("EntityControlMessage", "Download");
+  export const Expand = new MessageKey("EntityControlMessage", "Expand");
+  export const Collapse = new MessageKey("EntityControlMessage", "Collapse");
+  export const ToggleSideBar = new MessageKey("EntityControlMessage", "ToggleSideBar");
 }
 
 export module FrameMessage {
@@ -639,6 +649,9 @@ export module SearchMessage {
   export const Copy = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
   export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
+  export const PinnFilter = new MessageKey("SearchMessage", "PinnFilter");
+  export const UnpinnFilter = new MessageKey("SearchMessage", "UnpinnFilter");
+  export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
 }
 
 export module SelectorMessage {

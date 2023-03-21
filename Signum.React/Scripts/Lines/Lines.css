@@ -434,7 +434,7 @@ input[type=checkbox].form-control-xs {
 
 .rw-widget-sm .rw-widget-input,
 .rw-widget-sm .rw-multiselect-input {
-    /*    padding: 3px 6px;*/
+    padding: 3px 6px;
     min-height: 28px;
 }
 

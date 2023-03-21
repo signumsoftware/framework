@@ -141,7 +141,7 @@ export function runTasks(lineBase: LineBaseController<LineBaseProps>, state: Lin
 
 tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (!state.label &&
+  if (state.label === undefined &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
     state.label = state.ctx.propertyRoute.member!.niceName;

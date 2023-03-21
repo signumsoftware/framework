@@ -140,6 +140,8 @@ export interface ColorPaletteEntity extends Entities.Entity {
 export module ColorPaletteMessage {
   export const FillAutomatically = new MessageKey("ColorPaletteMessage", "FillAutomatically");
   export const Select0OnlyIfYouWantToOverrideTheAutomaticColor = new MessageKey("ColorPaletteMessage", "Select0OnlyIfYouWantToOverrideTheAutomaticColor");
+  export const ShowPalette = new MessageKey("ColorPaletteMessage", "ShowPalette");
+  export const ShowList = new MessageKey("ColorPaletteMessage", "ShowList");
 }
 
 export module ColorPaletteOperation {

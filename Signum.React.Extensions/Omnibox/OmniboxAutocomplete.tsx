@@ -21,7 +21,10 @@ export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
     abortRequest.abort();
 
     const ke = e as React.KeyboardEvent<any>;
-    if (ke.keyCode && ke.keyCode == 9) {
+    if (ke.key == "Tab") {
+      if (result.resultTypeName == "HelpOmniboxResult")
+        return "";
+
       return OmniboxClient.toString(result);
     }
 
@@ -38,7 +41,7 @@ export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
     return null;
   }
 
-  let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...p.inputAttrs };
+  let inputAttr = { placeholder: OmniboxMessage.Search.niceToString(), ...p.inputAttrs };
 
   return (
     <ErrorBoundary>

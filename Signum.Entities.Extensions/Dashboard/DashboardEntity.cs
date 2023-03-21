@@ -291,7 +291,9 @@ public enum DashboardMessage
     LasUpdateWasOn0,
 
     [Description("The User Query '{0}' has no column with summary header")]
-    TheUserQuery0HasNoColumnWithSummaryHeader
+    TheUserQuery0HasNoColumnWithSummaryHeader,
+
+    Edit
 }
 
 public enum DashboardEmbedededInEntity

@@ -85,7 +85,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
       <div title={EntityControlMessage.View.niceToString()} className="d-inline-flex align-items-center">
         <SmallProfilePhoto user={row.entity as Lite<UserEntity>} className="me-1" />
-        {EntityBaseController.viewIcon}
+        {EntityBaseController.getViewIcon()}
       </div>
     </EntityLink>)
   });
@@ -108,7 +108,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       }
     ],
     extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {
-      order: 6,
+      order: -1,
       button: <button className="btn btn-info"
         onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
         <FontAwesomeIcon icon="download" /> Download AuthRules.xml

@@ -5,6 +5,7 @@ import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
 import { classes } from './Globals';
 import { EmbeddedWidget } from './Frames/Widgets';
+import { ViewPromise } from './Navigator';
 
 export type FormGroupStyle =
   "None" |  /// Only the value is rendered.
@@ -509,7 +510,7 @@ export interface EntityFrame {
   tabs: EmbeddedWidget[] | undefined;
   entityComponent: React.Component | null | undefined;
   pack: EntityPack<ModifiableEntity>;
-  onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean, callback?: () => void) => void;
+  onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean | string | ViewPromise<ModifiableEntity>, callback?: () => void) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;
   revalidate: () => void;
   onClose: (pack?: EntityPack<ModifiableEntity>) => void;

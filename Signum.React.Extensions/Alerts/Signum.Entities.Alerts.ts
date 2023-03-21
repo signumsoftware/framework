@@ -72,6 +72,7 @@ export module AlertMessage {
   export const Collapse = new MessageKey("AlertMessage", "Collapse");
   export const Show0AlertsMore = new MessageKey("AlertMessage", "Show0AlertsMore");
   export const Show0GroupsMore1Remaining = new MessageKey("AlertMessage", "Show0GroupsMore1Remaining");
+  export const Ringing = new MessageKey("AlertMessage", "Ringing");
 }
 
 export module AlertOperation {

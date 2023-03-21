@@ -57,7 +57,7 @@
 }
 
 .sidebar-inner {
-     margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
     .sidebar-inner .nav-item-sub-menu {
@@ -233,13 +233,9 @@
     z-index: 10;
 }
 
-.sidebar ul li {
-    border-bottom: 1px solid #e7e7e7;
+.sidebar ul {
+    padding: 0;
 }
-
-    .sidebar ul li a.active {
-        background-color: #eeeeee;
-    }
 
 
 @media (min-width: 768px) {

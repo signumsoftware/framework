@@ -171,6 +171,7 @@ export module CaseMessage {
   export const DeleteMainEntity = new MessageKey("CaseMessage", "DeleteMainEntity");
   export const DoYouWAntToAlsoDeleteTheMainEntity0 = new MessageKey("CaseMessage", "DoYouWAntToAlsoDeleteTheMainEntity0");
   export const DoYouWAntToAlsoDeleteTheMainEntities = new MessageKey("CaseMessage", "DoYouWAntToAlsoDeleteTheMainEntities");
+  export const SetTags = new MessageKey("CaseMessage", "SetTags");
 }
 
 export const CaseNotificationEntity = new Type<CaseNotificationEntity>("CaseNotification");
@@ -407,6 +408,7 @@ export module WorkflowActivityMonitorMessage {
   export const Find = new MessageKey("WorkflowActivityMonitorMessage", "Find");
   export const Filters = new MessageKey("WorkflowActivityMonitorMessage", "Filters");
   export const Columns = new MessageKey("WorkflowActivityMonitorMessage", "Columns");
+  export const OpenWorkflow = new MessageKey("WorkflowActivityMonitorMessage", "OpenWorkflow");
 }
 
 export module WorkflowActivityOperation {
@@ -681,6 +683,7 @@ export module WorkflowMessage {
   export const _0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow = new MessageKey("WorkflowMessage", "_0NotAllowedFor1NoConstructorHasBeenDefinedInWithWorkflow");
   export const YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0 = new MessageKey("WorkflowMessage", "YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0");
   export const EvaluationOrderOfTheConnectionForIfElse = new MessageKey("WorkflowMessage", "EvaluationOrderOfTheConnectionForIfElse");
+  export const SaveAsSVG = new MessageKey("WorkflowMessage", "SaveAsSVG");
 }
 
 export const WorkflowModel = new Type<WorkflowModel>("WorkflowModel");

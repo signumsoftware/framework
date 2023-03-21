@@ -209,14 +209,14 @@ export function DynamicViewNode(p: DynamicViewNodeProps) {
 
     if (isOpened) {
       return (
-        <span onClick={handleIconClick} className="tree-icon">
-          <FontAwesomeIcon icon={["far", "square-minus"]} />
+        <span onClick={handleIconClick} className="tree-icon" >
+          <FontAwesomeIcon icon={["far", "square-minus"]} title="collapse"/>
         </span>);
     }
     else {
       return (
-        <span onClick={handleIconClick} className="tree-icon">
-          <FontAwesomeIcon icon={["far", "square-plus"]} />
+        <span onClick={handleIconClick} className="tree-icon" >
+          <FontAwesomeIcon icon={["far", "square-plus"]} title="expand"/>
         </span>);
     }
   }

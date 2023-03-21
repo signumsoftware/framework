@@ -169,7 +169,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                       <span className={classes("sf-line-button", "sf-remove", "ms-2")}
                         onClick={e => { e.stopPropagation(); c.handleRemoveElementClick(e, mlec.index!) }}
                         title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-                        {EntityBaseController.removeIcon}
+                        {EntityBaseController.getRemoveIcon()}
                       </span>
                     }
                     {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -178,7 +178,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                       onKeyDown={drag.onKeyDown}
                       onDragEnd={drag.onDragEnd}
                       title={drag.title}>
-                      {EntityBaseController.moveIcon}
+                      {EntityBaseController.getMoveIcon()}
                     </span>}
                     {move?.renderMoveUp()}
                     {move?.renderMoveDown()}
@@ -194,7 +194,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
           (typeof p.createAsLink == "function" ? p.createAsLink(c) :
             <Tab eventKey="create-new" title={
               <span className="sf-line-button sf-create" onClick={c.handleCreateClick} title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
-                {EntityBaseController.createIcon}&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
+                {EntityBaseController.getCreateIcon()}&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
               </span>} />)
         }
         {p.extraTabs && p.extraTabs(c)}
