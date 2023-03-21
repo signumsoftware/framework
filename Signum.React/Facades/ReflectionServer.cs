@@ -199,7 +199,7 @@ public static class ReflectionServer
                           ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)!, false),
                           QueryDefined = queries.QueryDefined(type),
                           Members = PropertyRoute.GenerateRoutes(type)
-                            .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeTypes.Contains(pr.Type))
+                            .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeTypes.Contains(pr.Type) && !ReflectionServer.ExcludeTypes.Contains(pr.RootType) && (pr.Type.IsGenericType ? !ReflectionServer.ExcludeTypes.Contains(pr.Type.GenericTypeArguments[0]) : true))
                             .Select(p =>
                             {
                                 var validators = Entities.Validator.TryGetPropertyValidator(p)?.Validators;
