@@ -236,6 +236,4 @@ public enum ToolbarMessage
     RecursionDetected,
     [Description(@"{0} cycles have been found in the Toolbar due to the relationships:")]
     _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships,
-    
-    CloseSidebar
 }

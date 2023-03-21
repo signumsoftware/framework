@@ -70,7 +70,6 @@ export module ToolbarMenuOperation {
 export module ToolbarMessage {
   export const RecursionDetected = new MessageKey("ToolbarMessage", "RecursionDetected");
   export const _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships = new MessageKey("ToolbarMessage", "_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships");
-  export const CloseSidebar = new MessageKey("ToolbarMessage", "CloseSidebar");
 }
 
 export module ToolbarOperation {

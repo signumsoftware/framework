@@ -57,7 +57,7 @@ export default function ToolbarRenderer(p: {
       {p.appTitle}
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
-        <FontAwesomeIcon icon={"angles-left"} title={ToolbarMessage.CloseSidebar.niceToString()} />
+        <FontAwesomeIcon icon={"angles-left"} aria-label="Close" />
       </div>
 
       <ul>
