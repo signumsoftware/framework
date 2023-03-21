@@ -4,7 +4,7 @@ import { classes } from '@framework/Globals'
 import { BsColor } from '@framework/Components/Basic';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { CollapsableCardMessage } from 'Basics/Signum.Entities.Basics';
+import { CollapsableCardMessage } from '../Signum.Entities.Basics';
 
 export interface CollapsableCardProps {
   color?: BsColor;
