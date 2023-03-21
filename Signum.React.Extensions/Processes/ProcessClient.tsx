@@ -112,7 +112,7 @@ function monkeyPatchCreateContextualMenuItem() {
 
     return [
       <ContextualOperations.OperationMenuItem coc={this}
-        extraButtons={<span className="process-contextual-icon" onClick={processOnClick}><FontAwesomeIcon icon="gear" /></span>} />
+        extraButtons={<span className="process-contextual-icon" onClick={processOnClick} ><FontAwesomeIcon icon="gear" title={ProcessMessage.ProcessSettings.niceToString()}/></span>} />
     ];
   };
 }

@@ -241,7 +241,6 @@ function isDuration(e: React.KeyboardEvent<any>): boolean {
 
 ValueLineRenderers.renderers.set("Checkbox", (vl) => {
   const s = vl.props;
-
   const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
     vl.setValue(input.checked, e);
@@ -249,9 +248,9 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
 
   if (s.inlineCheckbox) {
 
-    var atts = { ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes, ...s.labelHtmlAttributes };
+    var { style, className, ...otherAtts } = { ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes, ...s.labelHtmlAttributes };
     return (
-      <label style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...atts} className={classes(s.ctx.labelClass, vl.props.ctx.errorClass, atts.className)}>
+      <label style={{ display: s.inlineCheckbox == "block" ? "block" : undefined, ...style }} {...otherAtts} className={classes(s.ctx.labelClass, vl.props.ctx.errorClass, className)}>
         {getTimeMachineIcon({ ctx: s.ctx })}
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
           className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))}

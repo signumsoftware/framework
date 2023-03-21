@@ -8,6 +8,7 @@ import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import "./TypeHelpComponent.css"
 import { useAPI } from '@framework/Hooks'
+import { HelpMessage } from './Signum.Entities.Help'
 
 interface TypeHelpComponentProps {
   initialType?: string;
@@ -102,13 +103,13 @@ export default function TypeHelpComponent(p: TypeHelpComponentProps) {
           onChange={newValue => setTempQuery(newValue)}
           onSelect={handleSelect}
           renderInput={input => <div className="input-group input-group-sm" style={{ position: "initial" }}>
-            <button className="btn input-group-text" disabled={!canBack()}
+            <button className="btn input-group-text" disabled={!canBack()}              
               onClick={e => handleGoHistory(e, historyIndex - 1)} type="button">
-              <FontAwesomeIcon icon="circle-arrow-left" />
+              <FontAwesomeIcon icon="circle-arrow-left" title={HelpMessage.Previous.niceToString()}/>
             </button>
-            <button className="btn input-group-text" disabled={!canForth()}
+            <button className="btn input-group-text" disabled={!canForth()}              
               onClick={e => handleGoHistory(e, historyIndex + 1)} type="button">
-              <FontAwesomeIcon icon="circle-arrow-right" />
+              <FontAwesomeIcon icon="circle-arrow-right" title={HelpMessage.Next.niceToString()}/>
             </button>
             {input}
             <div className="input-group-text" style={{ color: "white", backgroundColor: p.mode == "CSharp" ? "#007e01" : "#017acc" }}>

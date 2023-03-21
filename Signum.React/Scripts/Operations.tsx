@@ -715,6 +715,7 @@ export interface EntityOperationOptions<T extends Entity> {
   group?: EntityOperationGroup | null;
   order?: number;
   color?: BsColor;
+  outline?: boolean;
   classes?: string;
   icon?: IconProp;
   iconAlign?: "start" | "end";

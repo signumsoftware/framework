@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import * as Modals from '../Modals';
 import { Dic } from '../Globals';
 import { ajaxPost, ExternalServiceError, ServiceError, ValidationError } from '../Services';
-import { JavascriptMessage, FrameMessage, ConnectionMessage } from '../Signum.Entities'
+import { JavascriptMessage, FrameMessage, ConnectionMessage, EntityControlMessage } from '../Signum.Entities'
 import { ClientErrorModel, ExceptionEntity } from '../Signum.Entities.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
@@ -187,8 +187,8 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
       message:
         <div>
           {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
-          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }}>
-            <FontAwesomeIcon icon="rotate" />
+          <button className="btn btn-warning"  onClick={e => { e.preventDefault(); window.location.reload(); }}>
+            <FontAwesomeIcon icon="rotate" title={EntityControlMessage.Reload.niceToString()}/>
           </button>
         </div>,
       buttons: "cancel",

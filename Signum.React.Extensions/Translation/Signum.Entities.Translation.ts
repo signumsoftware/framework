@@ -67,6 +67,8 @@ export module TranslationMessage {
   export const BackToSyncAssembly0 = new MessageKey("TranslationMessage", "BackToSyncAssembly0");
   export const ThisFieldIsTranslatable = new MessageKey("TranslationMessage", "ThisFieldIsTranslatable");
   export const _0OutdatedTranslationsFor1HaveBeenDeleted = new MessageKey("TranslationMessage", "_0OutdatedTranslationsFor1HaveBeenDeleted");
+  export const DownloadView = new MessageKey("TranslationMessage", "DownloadView");
+  export const DownloadSync = new MessageKey("TranslationMessage", "DownloadSync");
 }
 
 export module TranslationPermission {
