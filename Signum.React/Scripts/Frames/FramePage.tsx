@@ -264,9 +264,11 @@ export default function FramePage() {
 
       var forcedViewName = typeof reloadComponent == "string" ? reloadComponent : undefined;
 
-      var newRoute = is(packEntity.entity, entity) && forcedViewName == QueryString.parse(location.search).viewName  ? null :
-        packEntity.entity.isNew ? Navigator.createRoute(packEntity.entity.Type, forcedViewName) :
-          Navigator.navigateRoute(packEntity.entity, forcedViewName);
+      var currentViewName = QueryString.parse(location.search).viewName;
+
+      var newRoute = is(packEntity.entity, entity) && (forcedViewName ?? currentViewName) == currentViewName ? null :
+        packEntity.entity.isNew ? Navigator.createRoute(packEntity.entity.Type, forcedViewName ?? currentViewName) :
+          Navigator.navigateRoute(packEntity.entity, forcedViewName ?? currentViewName);
 
       if (reloadComponent) {
         setState(undefined)
