@@ -25,7 +25,7 @@ export interface FileImageLineProps extends EntityBaseProps {
   configuration?: FileDownloaderConfiguration<IFile>;
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
   maxSizeInBytes?: number;
-  ajaxOptions?: Services.AjaxOptionsOverride;
+  ajaxOptions?: Omit<Services.AjaxOptions, "url">;
 }
 
 

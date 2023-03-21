@@ -146,7 +146,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
 
         var result = this.model?.ToString();
 
-        return result ?? "{0};{1}".FormatWith(this.EntityType, this.Id);
+        return result ?? (this.EntityType.NiceName() + " " + Id);
     }
 
     public override bool Equals(object? obj)

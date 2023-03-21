@@ -11,19 +11,19 @@ public static class Pop3ConfigurationLogic
     public static int MaxReceptionPerTime = 15;
 
     [AutoExpressionField]
-    public static IQueryable<Pop3ReceptionEntity> Receptions(this Pop3ConfigurationEntity c) => 
+    public static IQueryable<Pop3ReceptionEntity> Receptions(this Pop3ConfigurationEntity c) =>
         As.Expression(() => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.Is(c)));
 
     [AutoExpressionField]
-    public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r) => 
+    public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r) =>
         As.Expression(() => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Is(r)));
 
     [AutoExpressionField]
-    public static IQueryable<ExceptionEntity> Exceptions(this Pop3ReceptionEntity e) => 
+    public static IQueryable<ExceptionEntity> Exceptions(this Pop3ReceptionEntity e) =>
         As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.Is(e)).Select(a => a.Exception.Entity));
 
     [AutoExpressionField]
-    public static Pop3ReceptionEntity? Pop3Reception(this ExceptionEntity ex) => 
+    public static Pop3ReceptionEntity? Pop3Reception(this ExceptionEntity ex) =>
         As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.Is(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx());
 
     public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client = null!;
@@ -156,7 +156,7 @@ public static class Pop3ConfigurationLogic
 
     public static event Func<Pop3ConfigurationEntity, IDisposable>? SurroundReceiveEmail;
 
-    public static Pop3ReceptionEntity ReceiveEmails(this Pop3ConfigurationEntity config, bool forceGetLastFromServer=false)
+    public static Pop3ReceptionEntity ReceiveEmails(this Pop3ConfigurationEntity config, bool forceGetLastFromServer = false)
     {
         if (config.FullComparation && !forceGetLastFromServer)
             return ReceiveEmailsFullComparation(config);
@@ -172,7 +172,7 @@ public static class Pop3ConfigurationLogic
         using (HeavyProfiler.Log("ReciveEmails"))
         using (Disposable.Combine(SurroundReceiveEmail, func => func(config)))
         {
-           
+
 
             Pop3ReceptionEntity reception = Transaction.ForceNew().Using(tr => tr.Commit(
                 new Pop3ReceptionEntity { Pop3Configuration = config.ToLite(), StartDate = Clock.Now }.Save()));
@@ -185,7 +185,7 @@ public static class Pop3ConfigurationLogic
 
                     int messageInfosNum = 0;
 
-                    List<MessageUid> messagesToSave = GetMessagesToSave(config, MaxReceptionPerTime, client, forceGetLastFromServer,out messageInfosNum);
+                    List<MessageUid> messagesToSave = GetMessagesToSave(config, MaxReceptionPerTime, client, forceGetLastFromServer, out messageInfosNum);
 
                     using (var tr = Transaction.ForceNew())
                     {
@@ -243,7 +243,7 @@ public static class Pop3ConfigurationLogic
         }
     }
 
-    private static List<MessageUid> GetMessagesToSave(Pop3ConfigurationEntity config, int maxReceptionForTime, IPop3Client client, bool forceGetLast15FromServer , out int messageInfosNum)
+    private static List<MessageUid> GetMessagesToSave(Pop3ConfigurationEntity config, int maxReceptionForTime, IPop3Client client, bool forceGetLast15FromServer, out int messageInfosNum)
     {
         var messageInfos = client.GetMessageInfos().OrderBy(m => m.Number);
         messageInfosNum = messageInfos.Count();
@@ -307,7 +307,7 @@ public static class Pop3ConfigurationLogic
                     {
                         email.Recipients.Add(new EmailRecipientEmbedded
                         {
-                            EmailAddress = config.Username??"",
+                            EmailAddress = config.Username ?? "",
                             Kind = EmailRecipientKind.To,
                         });
                     }
@@ -321,14 +321,14 @@ public static class Pop3ConfigurationLogic
 
                     if (duplicateList.Any(e => e.suid == email.Mixin<EmailReceptionMixin>().ReceptionInfo!.UniqueId))
                     {
-                        // for some reason the account is receiving emails where she is not in the destiantarios and has already been previously received
+                        // for some reason the account is receiving emails where the account is not in the recipients and has already been previously received
                         anomalousReception = true;
                     }
                     else
                     {
                         var duplicate = duplicateList.OrderByDescending(e => e.date).FirstOrDefault();
 
-                        EmailMessageEntity? dup =null;
+                        EmailMessageEntity? dup = null;
                         if (duplicate != null)
                             dup = duplicate.l.Retrieve();
 
@@ -373,7 +373,7 @@ public static class Pop3ConfigurationLogic
 
 
 
-    private static void DeleteSavedEmail( bool delete, Pop3ConfigurationEntity config, DateTime now, IPop3Client client, MessageUid mi, DateTime? sent)
+    private static void DeleteSavedEmail(bool delete, Pop3ConfigurationEntity config, DateTime now, IPop3Client client, MessageUid mi, DateTime? sent)
     {
         if (delete || (config.DeleteMessagesAfter != null && sent != null &&
              sent.Value.Date.AddDays(config.DeleteMessagesAfter.Value) < Clock.Now.Date))
@@ -428,7 +428,7 @@ public static class Pop3ConfigurationLogic
                         if (sent == null)
                             sent = SaveEmail(config, reception, client, mi);
 
-                        DeleteSavedEmail(false,config, now, client, mi, sent);
+                        DeleteSavedEmail(false, config, now, client, mi, sent);
                     }
 
                     using (var tr = Transaction.ForceNew())
