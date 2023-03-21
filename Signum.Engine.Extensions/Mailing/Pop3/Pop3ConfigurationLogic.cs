@@ -182,10 +182,14 @@ public static class Pop3ConfigurationLogic
             {
                 using (var client = GetPop3Client(config))
                 {
-                    List<MessageUid> messagesToSave = GetMessagesToSave(config, MaxReceptionPerTime, client, forceGetLastFromServer);
+
+                    int messageInfosNum = 0;
+
+                    List<MessageUid> messagesToSave = GetMessagesToSave(config, MaxReceptionPerTime, client, forceGetLastFromServer,out messageInfosNum);
 
                     using (var tr = Transaction.ForceNew())
                     {
+                        reception.ServerEmails = messageInfosNum;
                         reception.NewEmails = messagesToSave.Count;
                         reception.Save();
                         tr.Commit();
@@ -200,7 +204,8 @@ public static class Pop3ConfigurationLogic
 
                         var sent = SaveEmail(config, reception, client, mi, ref anomalousReception);
                         lastSuid = mi.Uid;
-                        DeleteSavedEmail(config, now, client, mi, sent);
+                        //DeleteSavedEmail(anomalousReception, config, now, client, mi, sent);
+                        DeleteSavedEmail(false, config, now, client, mi, sent);
                     }
 
                     using (var tr = Transaction.ForceNew())
@@ -238,9 +243,10 @@ public static class Pop3ConfigurationLogic
         }
     }
 
-    private static List<MessageUid> GetMessagesToSave(Pop3ConfigurationEntity config, int maxReceptionForTime, IPop3Client client, bool forceGetLast15FromServer)
+    private static List<MessageUid> GetMessagesToSave(Pop3ConfigurationEntity config, int maxReceptionForTime, IPop3Client client, bool forceGetLast15FromServer , out int messageInfosNum)
     {
         var messageInfos = client.GetMessageInfos().OrderBy(m => m.Number);
+        messageInfosNum = messageInfos.Count();
 
         List<MessageUid>? messagesToSave = null;
 
@@ -367,10 +373,10 @@ public static class Pop3ConfigurationLogic
 
 
 
-    private static void DeleteSavedEmail(Pop3ConfigurationEntity config, DateTime now, IPop3Client client, MessageUid mi, DateTime? sent)
+    private static void DeleteSavedEmail( bool delete, Pop3ConfigurationEntity config, DateTime now, IPop3Client client, MessageUid mi, DateTime? sent)
     {
-        if (config.DeleteMessagesAfter != null && sent != null &&
-             sent.Value.Date.AddDays(config.DeleteMessagesAfter.Value) < Clock.Now.Date)
+        if (delete || (config.DeleteMessagesAfter != null && sent != null &&
+             sent.Value.Date.AddDays(config.DeleteMessagesAfter.Value) < Clock.Now.Date))
         {
             client.DeleteMessage(mi);
 
@@ -422,7 +428,7 @@ public static class Pop3ConfigurationLogic
                         if (sent == null)
                             sent = SaveEmail(config, reception, client, mi);
 
-                        DeleteSavedEmail(config, now, client, mi, sent);
+                        DeleteSavedEmail(false,config, now, client, mi, sent);
                     }
 
                     using (var tr = Transaction.ForceNew())
