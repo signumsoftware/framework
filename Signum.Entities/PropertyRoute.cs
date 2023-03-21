@@ -702,7 +702,10 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
             }
         }
 
-        var selector = Expression.Lambda<Func<T, R>>(exp!, pe);
+        if (exp.Type != typeof(R))
+            exp = Expression.Convert(exp, typeof(R));
+
+        var selector = Expression.Lambda<Func<T, R>>(exp, pe);
         return selector;
 
         static bool IsPotentiallyNull(Expression exp)

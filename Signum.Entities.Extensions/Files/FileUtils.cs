@@ -51,4 +51,6 @@ public enum FileMessage
     File0IsTooBigTheMaximumSizeIs1,
     [Description("The name of the file must not contain '%'")]
     TheNameOfTheFileMustNotContainPercentSymbol,
+
+    FileImage,
 }

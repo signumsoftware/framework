@@ -103,12 +103,6 @@ public class SelectTest
     }
 
     [Fact]
-    public void SelectLiteWithComplicateModel()
-    {
-        var list = Database.Query<AlbumReEditionEntity>().Select(a => a.ToLite()).ToList();
-    }
-
-    [Fact]
     public void SelectBool()
     {
         var list = Database.Query<ArtistEntity>().Select(a => a.Dead).ToList();

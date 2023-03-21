@@ -137,8 +137,8 @@ public static class EmailModelLogic
 
     static ResetLazy<Dictionary<Lite<EmailModelEntity>, List<EmailTemplateEntity>>> EmailModelToTemplates = null!;
     static Dictionary<Type, EmailModelInfo> registeredModels = new Dictionary<Type, EmailModelInfo>();
-    static ResetLazy<Dictionary<Type, EmailModelEntity>> typeToEntity = null!;
-    static ResetLazy<Dictionary<EmailModelEntity, Type>> entityToType = null!;
+    public static ResetLazy<Dictionary<Type, EmailModelEntity>> TypeToEntity = null!;
+    public static ResetLazy<Dictionary<EmailModelEntity, Type>> EntityToType = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -169,7 +169,7 @@ public static class EmailModelLogic
                 .GroupToDictionary(pair => pair.se!.ToLite(), pair => pair.et!), /*CSBUG*/ 
                 new InvalidateWith(typeof(EmailModelEntity), typeof(EmailTemplateEntity)));
 
-            typeToEntity = sb.GlobalLazy(() =>
+            TypeToEntity = sb.GlobalLazy(() =>
             {
                 var dbModels = Database.RetrieveAll<EmailModelEntity>();
                 return EnumerableExtensions.JoinRelaxed(
@@ -183,9 +183,9 @@ public static class EmailModelLogic
             }, new InvalidateWith(typeof(EmailModelEntity)));
 
 
-            sb.Schema.Initializing += () => typeToEntity.Load();
+            sb.Schema.Initializing += () => TypeToEntity.Load();
 
-            entityToType = sb.GlobalLazy(() => typeToEntity.Value.Inverse(),
+            EntityToType = sb.GlobalLazy(() => TypeToEntity.Value.Inverse(),
                 new InvalidateWith(typeof(EmailModelEntity)));
         }
     }
@@ -270,17 +270,17 @@ public static class EmailModelLogic
 
     public static EmailModelEntity GetEmailModelEntity(string fullClassName)
     {
-        return typeToEntity.Value.Where(x => x.Key.FullName == fullClassName).FirstOrDefault().Value;
+        return TypeToEntity.Value.Where(x => x.Key.FullName == fullClassName).FirstOrDefault().Value;
     }
 
     public static EmailModelEntity ToEmailModelEntity(Type emailModelType)
     {
-        return typeToEntity.Value.GetOrThrow(emailModelType, "The EmailModel {0} was not registered");
+        return TypeToEntity.Value.GetOrThrow(emailModelType, "The EmailModel {0} was not registered");
     }
 
     public static Type ToType(this EmailModelEntity modelEntity)
     {
-        return entityToType.Value.GetOrThrow(modelEntity, "The EmailModel {0} was not registered");
+        return EntityToType.Value.GetOrThrow(modelEntity, "The EmailModel {0} was not registered");
     }
 
     public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this IEmailModel emailModel, CultureInfo? cultureInfo = null)
@@ -334,7 +334,7 @@ public static class EmailModelLogic
 
     internal static EmailTemplateEntity CreateDefaultTemplateInternal(EmailModelEntity emailModel)
     {
-        EmailModelInfo info = registeredModels.GetOrThrow(entityToType.Value.GetOrThrow(emailModel));
+        EmailModelInfo info = registeredModels.GetOrThrow(EntityToType.Value.GetOrThrow(emailModel));
 
         if (info.DefaultTemplateConstructor == null)
             throw new InvalidOperationException($"No EmailTemplate for {emailModel} found and DefaultTemplateConstructor = null");
@@ -375,7 +375,7 @@ public static class EmailModelLogic
 
     public static bool RequiresExtraParameters(EmailModelEntity emailModelEntity)
     {
-        return GetEntityConstructor(entityToType.Value.GetOrThrow(emailModelEntity)) == null;
+        return GetEntityConstructor(EntityToType.Value.GetOrThrow(emailModelEntity)) == null;
     }
 
     internal static bool HasDefaultTemplateConstructor(EmailModelEntity emailModelEntity)

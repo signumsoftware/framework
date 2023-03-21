@@ -75,6 +75,8 @@ export module HelpMessage {
   export const In0 = new MessageKey("HelpMessage", "In0");
   export const Entities = new MessageKey("HelpMessage", "Entities");
   export const SearchText = new MessageKey("HelpMessage", "SearchText");
+  export const Previous = new MessageKey("HelpMessage", "Previous");
+  export const Next = new MessageKey("HelpMessage", "Next");
 }
 
 export module HelpPermissions {

@@ -33,7 +33,7 @@ internal class AliasReplacer : DbExpressionVisitor
     protected internal override Expression VisitColumn(ColumnExpression column)
     {
         if(aliasMap.ContainsKey(column.Alias))
-            return new ColumnExpression(column.Type, aliasMap[column.Alias], column.Name);
+            return new ColumnExpression(column.Type, aliasMap[column.Alias], column.Name).CopyMetadata(column);
         return column;
     }
 

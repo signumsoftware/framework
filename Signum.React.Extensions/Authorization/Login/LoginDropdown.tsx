@@ -23,7 +23,7 @@ export default function LoginDropdown(p: {
   if (!user)
     return (
       <LinkContainer to="/auth/login" className="sf-login">
-        <Nav.Link><i className="sf-login-custom-icon"></i><span>{LoginAuthMessage.Login.niceToString()}</span></Nav.Link>
+        <Nav.Link>{LoginDropdown.customLoginIcon(user)}<span> {LoginAuthMessage.Login.niceToString()}</span></Nav.Link>
       </LinkContainer>
     );
 
@@ -56,7 +56,9 @@ export default function LoginDropdown(p: {
   );
 }
 
-LoginDropdown.customLoginIcon = (user: UserEntity) => <SmallProfilePhoto user={toLite(user)} />;
+LoginDropdown.customLoginIcon = (user: UserEntity | null | undefined) =>
+  user ? <SmallProfilePhoto user={toLite(user)} /> :
+    <FontAwesomeIcon icon="user" className="me-1" />;
 
 
 

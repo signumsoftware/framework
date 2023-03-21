@@ -11,6 +11,7 @@ import { EntityBaseController } from '../Lines';
 import { EntityTableProps } from './EntityTable'
 import { Tabs, Tab } from 'react-bootstrap'
 import { useController } from './LineBase'
+import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTabRepeaterController) => React.ReactElement<any>);
@@ -135,16 +136,25 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
   function renderTabs() {
     const ctx = p.ctx!;
     const readOnly = ctx.readOnly;
-
     return (
       <Tabs activeKey={c.selectedIndex || 0} onSelect={handleSelectTab} id={ctx.prefix + "_tab"} transition={false} mountOnEnter unmountOnExit>
         {
-          c.getMListItemContext(ctx).map(mlec => {
+          c.getMListItemContext(ctx).map((mlec, i) => {
+
+            if (mlec.binding == null && mlec.previousVersion) {
+              return (
+                <Tab eventKey={i} key={i} style={{ minWidth:150 }}
+                  className="sf-repeater-element"
+                  title={<div className="item-group" > {getTimeMachineIcon({ ctx: mlec, translateX: "-115%", translateY: "-65%" })} </div>}>
+                </Tab>
+              );
+            }
+
             const drag = c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "h") : undefined;
             const move = c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "h") : undefined;
 
             return (
-              <Tab eventKey={mlec.index!.toString()} key={c.keyGenerator.getKey(mlec.value)}
+              <Tab eventKey={i} key={c.keyGenerator.getKey(mlec.value)}
                 {...EntityListBaseController.entityHtmlAttributes(mlec.value)}
                 className="sf-repeater-element"
                 title={
@@ -153,12 +163,13 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                     onDragEnter={drag?.onDragOver}
                     onDragOver={drag?.onDragOver}
                     onDrop={drag?.onDrop}>
+                    {getTimeMachineIcon({ ctx: mlec, translateX: "-115%", translateY:"-65%"  })}
                     {p.getTitle ? p.getTitle(mlec) : getToString(mlec.value)}
                     {c.canRemove(mlec.value) && !readOnly &&
                       <span className={classes("sf-line-button", "sf-remove", "ms-2")}
                         onClick={e => { e.stopPropagation(); c.handleRemoveElementClick(e, mlec.index!) }}
                         title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-                        {EntityBaseController.removeIcon}
+                        {EntityBaseController.getRemoveIcon()}
                       </span>
                     }
                     {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -167,7 +178,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
                       onKeyDown={drag.onKeyDown}
                       onDragEnd={drag.onDragEnd}
                       title={drag.title}>
-                      {EntityBaseController.moveIcon}
+                      {EntityBaseController.getMoveIcon()}
                     </span>}
                     {move?.renderMoveUp()}
                     {move?.renderMoveDown()}
@@ -183,7 +194,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
           (typeof p.createAsLink == "function" ? p.createAsLink(c) :
             <Tab eventKey="create-new" title={
               <span className="sf-line-button sf-create" onClick={c.handleCreateClick} title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
-                {EntityBaseController.createIcon}&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
+                {EntityBaseController.getCreateIcon()}&nbsp;{p.createMessage || EntityControlMessage.Create.niceToString()}
               </span>} />)
         }
         {p.extraTabs && p.extraTabs(c)}

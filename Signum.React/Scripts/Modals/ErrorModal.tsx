@@ -1,8 +1,9 @@
 import * as React from 'react'
+import { Link } from 'react-router-dom'
 import * as Modals from '../Modals';
 import { Dic } from '../Globals';
 import { ajaxPost, ExternalServiceError, ServiceError, ValidationError } from '../Services';
-import { JavascriptMessage, FrameMessage, ConnectionMessage } from '../Signum.Entities'
+import { JavascriptMessage, FrameMessage, ConnectionMessage, EntityControlMessage } from '../Signum.Entities'
 import { ClientErrorModel, ExceptionEntity } from '../Signum.Entities.Basics'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import "./Modals.css"
@@ -75,7 +76,7 @@ export default function ErrorModal(p: ErrorModalProps) {
         <FontAwesomeIcon icon={se.defaultIcon} />&nbsp; <span>{se.httpError.exceptionType}</span>
         {se.httpError.exceptionId && <span>({
           ErrorModalOptions.isExceptionViewable() ?
-            <a href={ErrorModalOptions.getExceptionUrl(se.httpError.exceptionId!)}>{se.httpError.exceptionId}</a> :
+            <Link to={ErrorModalOptions.getExceptionUrl(se.httpError.exceptionId!)!}>{se.httpError.exceptionId}</Link> :
             <strong>{se.httpError.exceptionId}</strong>
         })</span>}
       </span>
@@ -186,8 +187,8 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
       message:
         <div>
           {ConnectionMessage.ANewVersionHasJustBeenDeployedConsiderReload.niceToString()}&nbsp;
-          <button className="btn btn-warning" onClick={e => { e.preventDefault(); window.location.reload(); }}>
-            <FontAwesomeIcon icon="rotate" />
+          <button className="btn btn-warning"  onClick={e => { e.preventDefault(); window.location.reload(); }}>
+            <FontAwesomeIcon icon="rotate" title={EntityControlMessage.Reload.niceToString()}/>
           </button>
         </div>,
       buttons: "cancel",

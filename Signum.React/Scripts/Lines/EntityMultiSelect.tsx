@@ -14,6 +14,7 @@ import { normalizeEmptyArray } from './EntityCombo';
 import { useMounted } from '../Hooks';
 import { FormGroup } from './FormGroup';
 import { classes } from '../Globals';
+import { getTimeMachineIcon } from './TimeMachineIcon';
 
 export interface EntityMultiSelectProps extends EntityListBaseProps {
   vertical?: boolean;
@@ -107,7 +108,7 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
 
     throw new Error("Unexpected value " + JSON.stringify(e));
   }
-
+  //TODO add TimeMachineIcon
   return (
     <FormGroup ctx={p.ctx!}
       label={p.label}

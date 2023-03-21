@@ -9,7 +9,8 @@ public static class ConcurrentUserLogic
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
-            WatchSaveFor = activatedFor ?? (t => EntityKindCache.GetEntityKind(t) is not (EntityKind.System or EntityKind.SystemString));
+            //Should be in sync with ConcurrentUserCLlient onlyFor!!
+            WatchSaveFor = activatedFor ?? (t => EntityKindCache.GetEntityKind(t) is not (EntityKind.System or EntityKind.SystemString)); 
 
             sb.Include<ConcurrentUserEntity>()
                 .WithIndex(a => new { a.SignalRConnectionID })

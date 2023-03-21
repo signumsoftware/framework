@@ -7,6 +7,8 @@ import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { useController } from './LineBase'
 import { ResultTable } from '../Search'
 import { ResultRow } from '../FindOptions'
+import { getTimeMachineIcon } from './TimeMachineIcon'
+
 
 export interface EntityRadioButtonListProps extends EntityBaseProps {
   data?: Lite<Entity>[];
@@ -54,21 +56,25 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
   if (p.avoidFieldSet == true)
     return (
       <div className={classes("sf-radiobutton-list", p.ctx.errorClassBorder, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+        {getTimeMachineIcon({ ctx: p.ctx})}
         {renderButtons()}
         {renderRadioList()}
       </div>
     );
 
   return (
-    <fieldset className={classes("sf-radiobutton-list", p.ctx.errorClass, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-      <legend>
-        <div>
-          <span>{p.label}</span>
-          {renderButtons()}
-        </div>
-      </legend>
-      {renderRadioList()}
-    </fieldset>
+    <>
+      {getTimeMachineIcon({ ctx: p.ctx, translateY: "100%" })}
+      <fieldset className={classes("sf-radiobutton-list", p.ctx.errorClass, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+        <legend>
+          <div>
+            <span>{p.label}</span>
+            {renderButtons()}
+          </div>
+        </legend>
+        {renderRadioList()}
+      </fieldset>
+    </>
   );
 
   function renderButtons() {
@@ -177,7 +183,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
           onClick={e => c.handleOnChange(row.entity!)}
           disabled={p.ctx.readOnly}/>
         &nbsp;
-        {c.props.onRenderItem ? c.props.onRenderItem(row.entity!) : <span>getToString(lite) ?? p.nullPlaceHolder ?? " - "</span>}
+        {c.props.onRenderItem ? c.props.onRenderItem(row.entity!) : <span>{getToString(row.entity) ?? p.nullPlaceHolder ?? " - "}</span>}
       </label>);
   }
 }

@@ -4,7 +4,7 @@ import { Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite } from '@framework/Signum.Entities'
+import { SearchMessage, JavascriptMessage, parseLite, toLite } from '@framework/Signum.Entities'
 import { getQueryNiceName, newLite } from '@framework/Reflection'
 import SearchControl, { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { UserQueryEntity } from '../Signum.Entities.UserQueries'
@@ -26,7 +26,7 @@ export default function UserQueryPage() {
   const { userQueryId, entity } = params;
 
   const forceUpdate = useForceUpdate();
-  
+
   const fo = useAPI(() => {
     return Navigator.API.fetchEntity(UserQueryEntity, userQueryId)
       .then(uq => {
@@ -37,7 +37,7 @@ export default function UserQueryPage() {
       })
   }, [userQueryId, entity]);
 
-  const searchControl = React.useRef<SearchControlHandler>(null);
+  var searchControl = React.useRef<SearchControlHandler | null>(null);
 
   var subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
 
@@ -76,7 +76,12 @@ export default function UserQueryPage() {
         }
       </h3>
 
-      {currentUserQuery && <SearchControl ref={searchControl}
+      {currentUserQuery && <SearchControl ref={sc => {
+        searchControl.current = sc;
+        var scl = sc?.searchControlLoaded;
+        if (scl)
+          scl.getCurrentUserQuery = () => toLite(currentUserQuery);
+      }}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}
         tag="UserQueryPage"
@@ -94,7 +99,6 @@ export default function UserQueryPage() {
         defaultRefreshMode={currentUserQuery.refreshMode}
         searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         onHeighChanged={onResize}
-        extraButtons={qs?.extraButtons}
         onPageSubTitleChanged={forceUpdate}
       />
       }

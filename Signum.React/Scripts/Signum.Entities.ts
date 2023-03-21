@@ -7,9 +7,10 @@ import * as Entities from './Signum.Entities'
 
 export interface ModifiableEntity {
   Type: string;
-  toStr: string;
+  toStr: string | undefined;
   modified: boolean;
-  isNew: boolean;
+  isNew: boolean | undefined; //required in embedded to remove and re-create in EntityJsonSerializer
+  temporalId: string;
   error?: { [member: string]: string };
   readonlyProperties?: string[];
   mixins?: { [name: string]: MixinEntity }
@@ -21,7 +22,7 @@ export function liteKeyLong(lite: Lite<Entity>) {
 
 export interface Entity extends ModifiableEntity {
   id: number | string | undefined;
-  ticks: string; //max value
+  ticks: string | undefined; //max value
 }
 
 export interface EnumEntity<T> extends Entity {
@@ -344,12 +345,16 @@ export type ComparisonType =
   "LessThanOrEqualTo";
 
 export module ConnectionMessage {
-  export const AConnectionWithTheServerIsNecessaryToContinue = new MessageKey("ConnectionMessage", "AConnectionWithTheServerIsNecessaryToContinue");
-  export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
+  export const VersionInfo = new MessageKey("ConnectionMessage", "VersionInfo");
   export const ANewVersionHasJustBeenDeployedSaveChangesAnd0 = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
   export const OutdatedClientApplication = new MessageKey("ConnectionMessage", "OutdatedClientApplication");
   export const ANewVersionHasJustBeenDeployedConsiderReload = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedConsiderReload");
   export const Refresh = new MessageKey("ConnectionMessage", "Refresh");
+}
+
+export module ContainerToggleMessage {
+  export const Minimize = new MessageKey("ContainerToggleMessage", "Minimize");
+  export const Exxpand = new MessageKey("ContainerToggleMessage", "Exxpand");
 }
 
 export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
@@ -388,6 +393,20 @@ export module EntityControlMessage {
   export const View = new MessageKey("EntityControlMessage", "View");
   export const Add = new MessageKey("EntityControlMessage", "Add");
   export const Paste = new MessageKey("EntityControlMessage", "Paste");
+  export const PreviousValueWas0 = new MessageKey("EntityControlMessage", "PreviousValueWas0");
+  export const Moved = new MessageKey("EntityControlMessage", "Moved");
+  export const Removed0 = new MessageKey("EntityControlMessage", "Removed0");
+  export const NoChanges = new MessageKey("EntityControlMessage", "NoChanges");
+  export const Changed = new MessageKey("EntityControlMessage", "Changed");
+  export const Added = new MessageKey("EntityControlMessage", "Added");
+  export const RemovedAndSelectedAgain = new MessageKey("EntityControlMessage", "RemovedAndSelectedAgain");
+  export const Selected = new MessageKey("EntityControlMessage", "Selected");
+  export const Edit = new MessageKey("EntityControlMessage", "Edit");
+  export const Reload = new MessageKey("EntityControlMessage", "Reload");
+  export const Download = new MessageKey("EntityControlMessage", "Download");
+  export const Expand = new MessageKey("EntityControlMessage", "Expand");
+  export const Collapse = new MessageKey("EntityControlMessage", "Collapse");
+  export const ToggleSideBar = new MessageKey("EntityControlMessage", "ToggleSideBar");
 }
 
 export module FrameMessage {
@@ -493,6 +512,9 @@ export module OperationMessage {
   export const Deleting = new MessageKey("OperationMessage", "Deleting");
   export const Executing0 = new MessageKey("OperationMessage", "Executing0");
   export const _0Errors = new MessageKey("OperationMessage", "_0Errors");
+  export const ClosingThisModalOrBrowserTabWillCancelTheOperation = new MessageKey("OperationMessage", "ClosingThisModalOrBrowserTabWillCancelTheOperation");
+  export const CancelOperation = new MessageKey("OperationMessage", "CancelOperation");
+  export const AreYouSureYouWantToCancelTheOperation = new MessageKey("OperationMessage", "AreYouSureYouWantToCancelTheOperation");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
@@ -626,6 +648,10 @@ export module SearchMessage {
   export const DerivedGroupKey = new MessageKey("SearchMessage", "DerivedGroupKey");
   export const Copy = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
+  export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
+  export const PinnFilter = new MessageKey("SearchMessage", "PinnFilter");
+  export const UnpinnFilter = new MessageKey("SearchMessage", "UnpinnFilter");
+  export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
 }
 
 export module SelectorMessage {

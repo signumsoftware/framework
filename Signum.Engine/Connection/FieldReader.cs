@@ -358,31 +358,61 @@ public class FieldReader
     }
 
 
-    public DateTime GetDateTime(int ordinal)
+    static readonly MethodInfo miGetDateTimeLocal = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetDateTimeLocal(0));
+    static readonly MethodInfo miGetNullableDateTimeLocal = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetNullableDateTimeLocal(0));
+
+    static readonly MethodInfo miGetDateTimeUTC = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetDateTimeUtc(0));
+    static readonly MethodInfo miGetNullableDateTimeUTC = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetNullableDateTimeUtc(0));
+
+
+    public DateTime GetDateTimeLocal(int ordinal)
     {
         LastOrdinal = ordinal;
-        LastMethodName = nameof(GetDateTime);
+        LastMethodName = nameof(GetDateTimeLocal);
         var dt = typeCodes[ordinal] switch
         {
             TypeCode.DateTime => reader.GetDateTime(ordinal),
             _ => ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)),
         };
-        if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc)
-            return new DateTime(dt.Ticks, DateTimeKind.Utc);
 
         return new DateTime(dt.Ticks, DateTimeKind.Local);
     }
 
-
-    public DateTime? GetNullableDateTime(int ordinal)
+    public DateTime GetDateTimeUtc(int ordinal)
     {
         LastOrdinal = ordinal;
-        LastMethodName = nameof(GetNullableDateTime);
+        LastMethodName = nameof(GetDateTimeUtc);
+        var dt = typeCodes[ordinal] switch
+        {
+            TypeCode.DateTime => reader.GetDateTime(ordinal),
+            _ => ReflectionTools.ChangeType<DateTime>(reader.GetValue(ordinal)),
+        };
+        return new DateTime(dt.Ticks, DateTimeKind.Utc);
+    }
+
+        //if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc)
+    
+
+    public DateTime? GetNullableDateTimeLocal(int ordinal)
+    {
+        LastOrdinal = ordinal;
+        LastMethodName = nameof(GetNullableDateTimeLocal);
         if (reader.IsDBNull(ordinal))
         {
             return null;
         }
-        return GetDateTime(ordinal);
+        return GetDateTimeLocal(ordinal);
+    }
+
+    public DateTime? GetNullableDateTimeUtc(int ordinal)
+    {
+        LastOrdinal = ordinal;
+        LastMethodName = nameof(GetNullableDateTimeUtc);
+        if (reader.IsDBNull(ordinal))
+        {
+            return null;
+        }
+        return GetDateTimeUtc(ordinal);
     }
 
     public DateOnly GetDateOnly(int ordinal)
@@ -584,24 +614,34 @@ public class FieldReader
 
     static Dictionary<Type, MethodInfo> methods =
         typeof(FieldReader).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-        .Where(m => m.Name != "GetExpression" && m.Name != "IsNull")
+        .Where(m => m.Name != "GetExpression" && m.Name != "IsNull" && m.ReturnType.UnNullify() != typeof(DateTime))
         .ToDictionary(a => a.ReturnType);
 
 
-    public static Expression GetExpression(Expression reader, int ordinal, Type type)
+    public static Expression GetExpression(Expression reader, int ordinal, Type type, DateTimeKind kind)
     {
         MethodInfo? mi = methods.TryGetC(type);
         if (mi != null)
             return Expression.Call(reader, mi, Expression.Constant(ordinal));
 
+        if (type.UnNullify() == typeof(DateTime))
+        {
+            mi = kind switch
+            {
+                DateTimeKind.Utc => type.IsNullable() ? miGetNullableDateTimeUTC : miGetDateTimeUTC,
+                DateTimeKind.Local => type.IsNullable() ? miGetNullableDateTimeLocal : miGetDateTimeLocal,
+                DateTimeKind.Unspecified or _ => throw new UnexpectedValueException(DateTimeKind.Unspecified)
+            };
 
+            return Expression.Call(reader, mi, Expression.Constant(ordinal));
+        }
 
         if (typeof(IBinarySerialize).IsAssignableFrom(type.UnNullify()))
         {
             if (type.IsNullable())
                 return Expression.Call(reader, miGetNullableUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
             else
-                return Expression.Call(reader, miGetUdt.MakeGenericMethod(type.UnNullify()), Expression.Constant(ordinal));
+                return Expression.Call(reader, miGetUdt.MakeGenericMethod(type), Expression.Constant(ordinal));
         }
 
         if (type.IsArray)

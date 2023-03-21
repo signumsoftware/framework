@@ -79,8 +79,13 @@ export function IconTypeahead(p: IconTypeaheadProps) {
     if (!query)
       return Promise.resolve(([] as string[]).concat(p.extraIcons ?? []).concat(["fa-regular fa-", "fa-solid fa-"]));
 
+    var words = query.toLowerCase().split(" ");
+
     const result = icons
-      .filter(k => k.toLowerCase().contains(query.toLowerCase()))
+      .filter(k => {
+        var lk = k.toLowerCase();
+        return words.every(w => lk.contains(w));
+      })
       .orderBy(a => a.length)
       .filter((k, i) => i < 5);
 
@@ -99,7 +104,7 @@ export function IconTypeahead(p: IconTypeaheadProps) {
     return (
       <span>
         {icon && <FontAwesomeIcon icon={icon} className="icon" style={{ width: "12px", height: "12px" }} />}
-        {TypeaheadOptions.highlightedText(item as string, query)}
+        {TypeaheadOptions.highlightedTextAll(item as string, query)}
       </span>
     );
   }

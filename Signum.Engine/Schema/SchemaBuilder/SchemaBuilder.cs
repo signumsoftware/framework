@@ -625,6 +625,9 @@ public class SchemaBuilder
             Precision = Settings.GetSqlPrecision(att, route, pair.DbType),
             Scale = Settings.GetSqlScale(att, route, pair.DbType),
             Default = att?.GetDefault(Settings.IsPostgres),
+            DateTimeKind = att?.DateTimeKind ?? 
+            (route.Type.UnNullify() != typeof(DateTime) ? DateTimeKind.Unspecified :
+             this.Schema.TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local),
         }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
     }
 

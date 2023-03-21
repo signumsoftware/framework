@@ -10,14 +10,14 @@ import { softCast } from '../Globals';
 import { jsonObjectStream } from './jsonObjectStream';
 
 
-interface OperationProgressModalProps extends IModalProps<API.ErrorReport> {
+interface MultiOperationProgressModalProps extends IModalProps<API.ErrorReport> {
   operation: OperationInfo;
   lites: Lite<Entity>[];
   makeRequest: () => Promise<Response>;
   abortController: AbortController;
 }
 
-export function OperationProgressModal(p: OperationProgressModalProps) {
+export function MultiOperationProgressModal(p: MultiOperationProgressModalProps) {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
@@ -86,11 +86,11 @@ export function OperationProgressModal(p: OperationProgressModalProps) {
   );
 }
 
-OperationProgressModal.show = (lites: Lite<Entity>[], operationKey: string | OperationSymbol, progressModal: boolean | undefined, abortController: AbortController, makeRequest: ()=> Promise<Response>): Promise<API.ErrorReport> => {
+MultiOperationProgressModal.show = (lites: Lite<Entity>[], operationKey: string | OperationSymbol, progressModal: boolean | undefined, abortController: AbortController, makeRequest: ()=> Promise<Response>): Promise<API.ErrorReport> => {
 
   if (progressModal ?? lites.length > 1) {
     var oi = getOperationInfo(operationKey, lites[0].EntityType);
-    return openModal<API.ErrorReport>(<OperationProgressModal operation={oi} lites={lites} makeRequest={makeRequest} abortController={abortController} />);
+    return openModal<API.ErrorReport>(<MultiOperationProgressModal operation={oi} lites={lites} makeRequest={makeRequest} abortController={abortController} />);
   } else {
     return makeRequest().then(r => r.json()).then(obj => {
       var results = obj as API.OperationResult[];

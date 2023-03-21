@@ -95,9 +95,15 @@ public class FilterConditionTS : FilterTS
              value;
 
         if (val is DateTime dt)
-            val = dt.FromUserInterface();
+        {
+            var kind = parsedToken.DateTimeKind;
+            val = dt.ToKind(kind);
+        }
         else if (val is ObservableCollection<DateTime?> col)
-            val = col.Select(dt => dt?.FromUserInterface()).ToObservableCollection();
+        {
+            var kind = parsedToken.DateTimeKind;
+            val = col.Select(dt => dt?.ToKind(kind)).ToObservableCollection();
+        }
 
         return new FilterCondition(parsedToken, operation, val);
     }

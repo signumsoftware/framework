@@ -8,22 +8,22 @@ import { ajaxGet, ajaxPost } from './Services';
 
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
-  FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
+  FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, 
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
-  ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, QueryTokenType, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany
+  ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, 
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany
 } from './FindOptions';
 
-import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
+import { FilterOperation, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
-import { TypeEntity, QueryEntity, ExceptionEntity } from './Signum.Entities.Basics';
+import { Entity, Lite, toLite, liteKey, parseLite, isLite, isEntity, External, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
+import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
-  Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-  getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, EntityData,
+  Type, QueryKey, getQueryKey, isQueryDefined, TypeReference,
+  getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, 
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
-  Anonymous, toLuxonDurationFormat, timeToString, toFormatWithFixes
+  Anonymous, toLuxonDurationFormat, toFormatWithFixes
 } from './Reflection';
 
 import EntityLink from './SearchControl/EntityLink';
@@ -34,6 +34,7 @@ import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
+import { similarToken } from "./Search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
 
@@ -238,7 +239,9 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
 export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
   const query = findOptionsPathQuery(fo, extra);
-  return "/find/" + getQueryKey(fo.queryName) + "?" + QueryString.stringify(query);
+  var strQuery = QueryString.stringify(query);
+
+  return "/find/" + getQueryKey(fo.queryName) + (strQuery ? ("?" + strQuery) : "");
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
@@ -361,6 +364,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
     token: c.token!.fullKey,
     displayName: c.token!.niceName == c.displayName ? undefined : c.displayName,
     summaryToken: c.summaryToken?.fullKey,
+    combineRows: c.combineRows,
     hiddenColumn: c.hiddenColumn,
   }) as ColumnOption;
  
@@ -460,6 +464,7 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
       token: completer.get(co.token.toString()),
       displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
       summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
+      combineEquals: co.combineRows,
       hiddenColumn: co.hiddenColumn,
     }) as ColumnOptionParsed));
 }
@@ -756,6 +761,9 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
       fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
   }
 
+  if (fo.filterOptions)
+    fo.filterOptions = simplifyPinnedFilters(fo.filterOptions.notNull());
+
   const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
   const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
 
@@ -786,6 +794,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
         displayName: (typeof co.displayName == "function" ? co.displayName() : co.displayName) ?? completer.get(co.token.toString()).niceName,
         summaryToken: co.summaryToken && completer.get(co.summaryToken.toString()),
         hiddenColumn: co.hiddenColumn,
+        combineRows: co.combineRows,
       }) as ColumnOptionParsed),
 
       orderOptions: (fo.orderOptions?.notNull() ?? []).map(oo => ({
@@ -799,6 +808,33 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     return parseFilterValues(result.filterOptions)
       .then(() => result)
   });
+}
+
+function simplifyPinnedFilters(fos: FilterOption[]): FilterOption[] {
+
+  const toRemove: FilterOption[] = [];
+  const result = fos.map(fo => {
+    if (fo.pinned != null &&
+      (fo.pinned?.active == "Always" || fo.pinned?.active == "WhenHasValue") &&
+      !isFilterGroupOption(fo)) {
+
+      var fo2 = fos.firstOrNull(fo2 =>
+        fo2.pinned == null &&
+        !isFilterGroupOption(fo2) &&
+        similarToken(fo.token?.toString(), fo2.token?.toString()) &&
+        (fo.operation ?? "EqualsTo") == (fo2.operation ?? "EqualsTo") &&
+        (fo.pinned?.active == "Always" || fo2.value != null));
+
+      if (fo2 != null) {
+        toRemove.push(fo2);
+        return { ...fo, value: fo2.value } as FilterConditionOption;
+      }
+    }
+    return fo;
+
+  });
+
+  return result.filter(fo => fo && !toRemove.contains(fo));
 }
 
 export function getQueryRequest(fo: FindOptionsParsed, qs?: QuerySettings, avoidHiddenColumns?: boolean): QueryRequest {
@@ -1515,15 +1551,18 @@ export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> |
     columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
-  if (entity == null)
-    return null;
+  return React.useMemo(() => {
 
-  if (resultTable == null)
-    return undefined;
+    if (entity == null)
+      return null;
 
-  var firstRow = resultTable.rows[0]; 
+    if (resultTable == null)
+      return undefined;
 
-  return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+    var firstRow = resultTable.rows[0];
+
+    return firstRow && Dic.mapObject(tokensObject, (key, value, index) => firstRow.columns[index]) as ExtractTokensObject<TO>;
+  }, [entity, resultTable]);
 }
 
 
@@ -1536,13 +1575,17 @@ export function useInDBList<R>(entity: Entity | Lite<Entity> | null, token: Quer
     columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
-  if (entity == null)
-    return null;
+  return React.useMemo(() => {
 
-  if (resultTable == null)
-    return undefined;
+    if (entity == null)
+      return null;
 
-  return resultTable.rows.map(r => r.columns[0]).notNull();
+    if (resultTable == null)
+      return undefined;
+
+    return resultTable.rows.map(r => r.columns[0]).notNull();
+
+  }, [entity, resultTable]);
 }
 
 export function useFetchAllLite<T extends Entity>(type: Type<T>, deps?: any[]): Lite<T>[] | undefined {
@@ -1694,9 +1737,12 @@ export module Encoder {
           co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
             undefined;
 
-        query["column" + i] = co.token + (displayName ? ("~" + displayName) : "");
+        query["column" + i] = co.token  + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
           query["summary" + i] = co.summaryToken.toString();
+        if (co.combineRows)
+          query["combine" + i] = co.combineRows == "EqualValue" ? "V" : "E";
+       
       });
     }
   }
@@ -1825,17 +1871,21 @@ export module Decoder {
 
   export function decodeColumns(query: any): ColumnOption[] {
     var summary = valuesInOrder(query, "summary");
+    var combine = valuesInOrder(query, "combine");
 
     return valuesInOrder(query, "column").map(p => {
 
       var displayName = unscapeTildes(p.value.tryAfter("~")); 
 
-      return ({
-        token: p.value.tryBefore("~") ?? p.value,
+      var token = p.value.tryBefore("~") ?? p.value; 
+      var comb = combine.firstOrNull(a => a.index == p.index)?.value;
+      return softCast<ColumnOption>({
+        token: token,
         displayName: displayName == HIDDEN ? undefined : displayName,
         hiddenColumn: displayName == HIDDEN ? true : undefined,
-        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value
-      }) as ColumnOption;
+        summaryToken: summary.firstOrNull(a => a.index == p.index)?.value,
+        combineRows: comb == "V" ? "EqualValue" : comb == "E" ? "EqualEntity" : undefined,
+      });
     });
   }
 }
@@ -1917,6 +1967,10 @@ export interface CellFormatterContext {
   row: ResultRow;
   rowIndex: number;
   searchControl?: SearchControlLoaded
+}
+
+export function isSystemVersioned(tr?: TypeReference) {
+  return tr != null && getTypeInfos(tr).some(ti => ti.isSystemVersioned == true)
 }
 
 
@@ -2057,15 +2111,21 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidFrom",
       formatter: qt => {
         return new CellFormatter((cell: string | undefined, ctx) => {
+
           if (cell == undefined || cell == "")
             return "";
 
-          var className = cell.startsWith("0001-") ? "date-start" :
-            ctx.systemTime && ctx.systemTime.mode == "Between" && ctx.systemTime.startDate! < cell ? "date-created" :
+          var c = DateTime.fromISO(cell);
+
+          var className = c.year <= 1 ? "date-start" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && DateTime.fromISO(ctx.systemTime.startDate!) <= c ? "date-created" :
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>;
+          return (
+            <bdi className={classes("date", "try-no-wrap", className)}>
+              {c.toFormat(luxonFormat)}
+            </bdi>);
         }, false, "date-cell"); //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
@@ -2077,12 +2137,14 @@ function initFormatRules(): FormatRule[] {
           if (cell == undefined || cell == "")
             return "";
 
-          var className = cell.startsWith("9999-") ? "date-end" :
-            ctx.systemTime && ctx.systemTime.mode == "Between" && cell < ctx.systemTime.endDate! ? "date-removed" :
+          var c = DateTime.fromISO(cell);
+
+          var className = c.year >= 9999 ? "date-end" :
+            ctx.systemTime && ctx.systemTime.mode == "Between" && c <= DateTime.fromISO(ctx.systemTime.endDate!) ? "date-removed" :
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{DateTime.fromISO(cell).toFormat(luxonFormat)}</bdi>;
+          return <bdi className={classes("date", "try-no-wrap", className)}>{c.toFormat(luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
@@ -2185,8 +2247,8 @@ function initEntityFormatRules(): EntityFormatRule[] {
           getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
           inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
           {sc?.state.isMobile == true && sc?.state.viewMode == "Mobile" ? undefined :
-            <span title={EntityControlMessage.View.niceToString()}>
-              {EntityBaseController.viewIcon}
+            <span title={SearchMessage.View.niceToString()}>
+              {EntityBaseController.getViewIcon()}
             </span>}
         </EntityLink>, "centered-cell")
     },

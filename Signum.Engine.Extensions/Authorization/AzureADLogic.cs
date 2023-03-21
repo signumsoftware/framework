@@ -6,6 +6,7 @@ using Signum.Entities.Authorization;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 namespace Signum.Engine.Authorization;
@@ -40,13 +41,13 @@ public static class AzureADLogic
 
     public static TimeSpan CacheADGroupsFor = new TimeSpan(0, minutes: 30, 0);
 
-    static ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<Guid> groups)> ADGroupsCache = new ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<Guid> groups)>();
+    static ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<SimpleGroup> groups)> ADGroupsCache = new ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<SimpleGroup> groups)>();
 
-    public static List<Guid> CurrentADGroups()
+    public static List<SimpleGroup> CurrentADGroups()
     {
         var oid = UserADMixin.CurrentOID;
         if (oid == null)
-            return new List<Guid>();
+            return new List<SimpleGroup>();
 
         var tuple = ADGroupsCache.AddOrUpdate(UserEntity.Current,
             addValueFactory: user => (Clock.Now, CurrentADGroupsInternal(oid.Value)),
@@ -55,7 +56,7 @@ public static class AzureADLogic
         return tuple.groups;
     }
 
-    private static List<Guid> CurrentADGroupsInternal(Guid oid)
+    public static List<SimpleGroup> CurrentADGroupsInternal(Guid oid)
     {
         using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
         {
@@ -63,9 +64,10 @@ public static class AzureADLogic
             GraphServiceClient graphClient = new GraphServiceClient(authProvider);
             var result = graphClient.Users[oid.ToString()].TransitiveMemberOf.WithODataCast("microsoft.graph.group").Request().Top(999).Select("id, displayName, ODataType").GetAsync().Result.ToList();
 
-            return result.Select(a => Guid.Parse(a.Id)).ToList();
+            return result.Select(di => new SimpleGroup(Guid.Parse(di.Id), ((JsonElement?)di.AdditionalData["displayName"])?.GetString())).ToList();
         }
     }
+
 
     public static void Start(SchemaBuilder sb, bool adGroups, bool deactivateUsersTask)
     {
@@ -525,6 +527,8 @@ public static class AzureADLogic
         }, TaskContinuationOptions.OnlyOnRanToCompletion);
     }
 }
+
+public record SimpleGroup(Guid Id, string? DisplayName);
 
 public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
 {

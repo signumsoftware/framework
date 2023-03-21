@@ -5,7 +5,7 @@ import { ajaxGet, ajaxPost, clearContextHeaders } from './Services';
 import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite, liteKey, FrameMessage, ModelEntity, getToString, isModifiableEntity, EnumEntity } from './Signum.Entities';
 import { IUserEntity, TypeEntity, ExceptionEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo, EnumType } from './Reflection';
-import { EntityFrame, TypeContext } from './TypeContext';
+import { ButtonBarElement, ButtonsContext, EntityFrame, TypeContext } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
@@ -793,7 +793,9 @@ export function useLiteToString<T extends Entity>(type: Type<T>, id: number | st
 }
 
 export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false): void {
-  useAPI(() => lite == null || (getToString(lite) != null && !force) ? Promise.resolve(null) : API.fillLiteModels(lite), [lite]);
+  useAPI(() => {
+    return lite == null || ((lite.model != null || lite.entity != null) && !force) ? Promise.resolve() : API.fillLiteModels(lite);
+  }, [lite]);
 }
 
 export module API {
@@ -932,6 +934,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   stickyHeader?: boolean;
 
+  onAssignServerChanges?: (local: T, server: T) => void;
+
   autocomplete?: (fo: FindOptions | undefined, showType: boolean) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
   autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
@@ -944,6 +948,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild;
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 
   namedViews?: NamedViewSettings<T>[];
@@ -1005,6 +1010,8 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   stickyHeader?: boolean;
 
+  onAssignServerChanges?: (local: T, server: T) => void;
+
   autocomplete?: (fo: FindOptions | undefined, showType: boolean) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
   autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
@@ -1023,6 +1030,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
   renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild; 
   renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {

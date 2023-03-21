@@ -197,6 +197,16 @@ public partial class FieldValue
     {
         var column = new ColumnExpression(this.Type, tableAlias, this.Name);
 
+        if(this.Type.UnNullify() == typeof(DateTime))
+        {
+            column.SetMetadata(this.DateTimeKind == DateTimeKind.Utc ? ExpressionMetadata.UTC : ExpressionMetadata.Local);
+
+            if (this.Type == this.FieldType)
+                return column;
+
+            return Expression.Convert(column, this.FieldType).CopyMetadata(column);
+        }
+
         if(this.Type == this.FieldType)
             return column;
 

@@ -124,6 +124,10 @@ export module AuthAdminMessage {
   export const Role0InheritsFromTrivialMergeRole1 = new MessageKey("AuthAdminMessage", "Role0InheritsFromTrivialMergeRole1");
   export const IncludeTrivialMerges = new MessageKey("AuthAdminMessage", "IncludeTrivialMerges");
   export const Role0IsTrivialMerge = new MessageKey("AuthAdminMessage", "Role0IsTrivialMerge");
+  export const Check = new MessageKey("AuthAdminMessage", "Check");
+  export const Uncheck = new MessageKey("AuthAdminMessage", "Uncheck");
+  export const AddCondition = new MessageKey("AuthAdminMessage", "AddCondition");
+  export const RemoveCondition = new MessageKey("AuthAdminMessage", "RemoveCondition");
 }
 
 export module AuthEmailMessage {
@@ -217,6 +221,7 @@ export module LoginAuthMessage {
   export const _0HasBeenSucessfullyAssociatedWithUser1InThisDevice = new MessageKey("LoginAuthMessage", "_0HasBeenSucessfullyAssociatedWithUser1InThisDevice");
   export const TryToLogInWithIt = new MessageKey("LoginAuthMessage", "TryToLogInWithIt");
   export const LoginWith0 = new MessageKey("LoginAuthMessage", "LoginWith0");
+  export const SignInWithMicrosoft = new MessageKey("LoginAuthMessage", "SignInWithMicrosoft");
 }
 
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");

@@ -94,6 +94,8 @@ public class FormatAttribute : Attribute
 {
     public const string Password = "Password";
 
+    public const string Color = "Color";
+
     public string Format { get; private set; }
     public FormatAttribute(string format)
     {

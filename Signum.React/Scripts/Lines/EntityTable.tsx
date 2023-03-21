@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { classes, Dic, DomUtils } from '../Globals'
+import { classes, Dic, DomUtils, KeyGenerator } from '../Globals'
 import { TypeContext } from '../TypeContext'
 import * as Navigator from '../Navigator'
 import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite, is } from '../Signum.Entities'
@@ -11,6 +11,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Breakpoints, getBreakpoint, useAPI, useBreakpoint, useForceUpdate } from '../Hooks'
 import { useController } from './LineBase'
 import { KeyCodes } from '../Components'
+import { getTimeMachineIcon } from './TimeMachineIcon'
+
 
 export interface EntityTableProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTableController) => React.ReactElement<any>);
@@ -268,7 +270,7 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
             <tbody>
               {
                 elementCtxs
-                  .map((mlec, i, array) => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
+                  .map((mlec, i, array) => <EntityTableRow key={i}
                     ctx={p.rowSubContext ? p.rowSubContext(mlec) : mlec}
                     array={array}
                     index={i}
@@ -355,6 +357,13 @@ export function EntityTableRow(p: EntityTableRowProps) {
   const rowHandle = { props: p, rowState, forceUpdate } as EntityTableRowHandle;
 
   var ctx = p.ctx;
+  
+  if (ctx.binding == null && ctx.previousVersion) {
+    return (<tr style={{backgroundColor: "#ff000021" }}>
+      <td className="align-items-center p-0 ps-1" >{getTimeMachineIcon({ ctx: ctx, isContainer: true })}</td>
+      {p.columns.map((c, i) => <td key={i} ></td>)}
+    </tr>);
+  }
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
   const drag = p.drag;
   return (
@@ -368,10 +377,11 @@ export function EntityTableRow(p: EntityTableRowProps) {
     >
       {p.firstColumnVisible && <td>
         <div className="item-group">
+          {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
           {p.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={p.onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-            {EntityBaseController.removeIcon}
+            {EntityBaseController.getRemoveIcon()}
           </a>}
           &nbsp;
           {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
@@ -380,17 +390,17 @@ export function EntityTableRow(p: EntityTableRowProps) {
             onDragStart={drag.onDragStart}
             onDragEnd={drag.onDragEnd}
             title={drag.title}>
-            {EntityBaseController.moveIcon}
+            {EntityBaseController.getMoveIcon()}
           </a>}
           {p.move?.renderMoveUp()}
           {p.move?.renderMoveDown()}
           {p.onView && <a href="#" className={classes("sf-line-button", "sf-view")}
             onClick={p.onView}
             title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
-            {EntityBaseController.viewIcon}
+            {EntityBaseController.getViewIcon()}
           </a>}
         </div>
-      </td>}
+      </td>}      
       {p.columns.map((c, i) => {
 
         var td = <td key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, rowHandle, rowState)}>{getTemplate(c)}</td>;

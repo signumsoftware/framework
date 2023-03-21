@@ -1,6 +1,6 @@
 import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
 import { BsSize } from './Components';
 
@@ -158,6 +158,7 @@ export interface ColumnOption {
   displayName?: string | (() => string);
   summaryToken?: string | QueryTokenString<any>;
   hiddenColumn?: boolean;
+  combineRows?: CombineRows;
 }
 
 export interface ColumnOptionParsed {
@@ -165,6 +166,7 @@ export interface ColumnOptionParsed {
   displayName?: string;
   summaryToken?: QueryToken;
   hiddenColumn?: boolean;
+  combineRows?: CombineRows;
 }
 
 export const DefaultPagination: Pagination = {

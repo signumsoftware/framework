@@ -1,19 +1,16 @@
 import * as React from 'react'
-import { DateTime, Duration, DurationObjectUnits } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
-import { Dic, addClass, classes, softCast } from '../Globals'
-import { MemberInfo, getTypeInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, TypeInfo, tryGetTypeInfo, toFormatWithFixes, Type, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
+import { Dic, addClass, classes } from '../Globals'
+import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import { KeyCodes } from '../Components/Basic';
-import { format, html } from 'd3';
-import { isPrefix, QueryToken } from '../FindOptions'
-import { useState } from 'react'
-import { validateNewEntities } from '../Finder'
+import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface ValueLineProps extends LineBaseProps {
   valueLineType?: ValueLineType;
@@ -152,14 +149,20 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     return undefined;
   }
 
-  withItemGroup(input: JSX.Element): JSX.Element {
-    if (!this.props.unit && !this.props.extraButtons)
-      return input;
+  withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
+    if (!this.props.unit && !this.props.extraButtons && !preExtraButton) {
+      return <div>
+        {getTimeMachineIcon({ ctx: this.props.ctx })}
+        {input}
+      </div>
+    }
 
     return (
       <div className={this.props.ctx.inputGroupClass}>
+        {getTimeMachineIcon({ ctx: this.props.ctx })}
         {input}
         {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
+        {preExtraButton}
         {this.props.extraButtons && this.props.extraButtons(this)}
       </div>
     );
@@ -238,7 +241,6 @@ function isDuration(e: React.KeyboardEvent<any>): boolean {
 
 ValueLineRenderers.renderers.set("Checkbox", (vl) => {
   const s = vl.props;
-
   const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
     vl.setValue(input.checked, e);
@@ -246,9 +248,10 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
 
   if (s.inlineCheckbox) {
 
-    var atts = { ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes, ...s.labelHtmlAttributes };
+    var { style, className, ...otherAtts } = { ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes, ...s.labelHtmlAttributes };
     return (
-      <label style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...atts} className={classes(s.ctx.labelClass, vl.props.ctx.errorClass, atts.className)}>
+      <label style={{ display: s.inlineCheckbox == "block" ? "block" : undefined, ...style }} {...otherAtts} className={classes(s.ctx.labelClass, vl.props.ctx.errorClass, className)}>
+        {getTimeMachineIcon({ ctx: s.ctx })}
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
           className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))}
         />
@@ -260,6 +263,7 @@ ValueLineRenderers.renderers.set("Checkbox", (vl) => {
   else {
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
+        {getTimeMachineIcon({ ctx: s.ctx })}
         <input type="checkbox" {...vl.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
           className={addClass(vl.props.valueHtmlAttributes, classes("form-check-input"))} disabled={s.ctx.readOnly} />
       </FormGroup>
@@ -453,14 +457,18 @@ function internalComboBoxText(vl: ValueLineController) {
 }
 
 ValueLineRenderers.renderers.set("TextBox", (vl) => {
-  return internalTextBox(vl, false);
+  return internalTextBox(vl, "text");
 });
 
 ValueLineRenderers.renderers.set("Password", (vl) => {
-  return internalTextBox(vl, true);
+  return internalTextBox(vl, "password");
 });
 
-function internalTextBox(vl: ValueLineController, password: boolean) {
+ValueLineRenderers.renderers.set("Color", (vl) => {
+  return internalTextBox(vl, "color");
+});
+
+function internalTextBox(vl: ValueLineController, type: "password" | "color" | "text") {
 
   const s = vl.props;
 
@@ -496,16 +504,24 @@ function internalTextBox(vl: ValueLineController, password: boolean) {
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
-        <input type={password ? "password" : "text"}
+        <input type={type == "color" ? "text" : type}
           autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
           {...vl.props.valueHtmlAttributes}
           className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
           value={s.ctx.value ?? ""}
           onBlur={handleBlur || htmlAtts?.onBlur}
-          onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
+          onChange={handleTextOnChange}
           placeholder={vl.getPlaceholder()}
           list={s.datalist ? s.ctx.getUniqueId("dataList") : undefined}
-          ref={vl.setRefs} />)
+          ref={vl.setRefs} />,
+        type == "color" ? <input type="color"
+          className={classes(s.ctx.formControlClass, "sf-color")}
+          value={s.ctx.value ?? ""}
+          onBlur={handleBlur || htmlAtts?.onBlur}
+          onChange={handleTextOnChange} 
+        /> : undefined
+
+      )
       }
       {s.datalist &&
         <datalist id={s.ctx.getUniqueId("dataList")}>
@@ -526,6 +542,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {getTimeMachineIcon({ ctx: s.ctx })}
         <TextArea {...htmlAtts} autoResize={autoResize} className={addClass(htmlAtts, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
           disabled />
       </FormGroup>
@@ -557,13 +574,12 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
         htmlAtts?.onFocus(e);
     }
   }
-    
-
 
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {vl.withItemGroup(
         <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
+          minHeight={vl.props.valueHtmlAttributes?.style?.minHeight?.toString()}
           onChange={handleTextOnChange}
           onBlur={handleBlur ?? htmlAtts?.onBlur}
           onFocus={handleOnFocus}
@@ -680,7 +696,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
     autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
     className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))} value={value}
     onBlur={handleOnBlur}
-    onChange={handleOnChange} //https://github.com/facebook/react/issues/7211
+    onChange={handleOnChange}
     onKeyDown={handleKeyDown}
     onFocus={handleOnFocus} />
 
@@ -1083,7 +1099,7 @@ export function TimeTextBox(p: TimeTextBoxProps) {
     className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))}
     value={value}
     onBlur={handleOnBlur}
-    onChange={handleOnChange} //https://github.com/facebook/react/issues/7211
+    onChange={handleOnChange}
     onKeyDown={handleKeyDown}
     onFocus={handleOnFocus} />
 
@@ -1145,6 +1161,71 @@ TimeTextBox.defaultProps = {
   durationFormat: "hh:mm:ss"
 };
 
+export interface ColorTextBoxProps {
+  value: string | null;
+  onChange: (newValue: string | null) => void;
+  formControlClass?: string;
+  groupClass?: string;
+  textValueHtmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  groupHtmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  innerRef?: React.Ref<HTMLInputElement>;
+}
+
+export function ColorTextBox(p: ColorTextBoxProps) {
+
+  const [text, setText] = React.useState<string | undefined>(undefined);
+
+  const value = text != undefined ? text : p.value != undefined ? p.value : "";
+
+  return (
+    <span {...p.groupHtmlAttributes} className={addClass(p.groupHtmlAttributes, classes(p.groupClass))}>
+      <input type="text"
+        autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
+        {...p.textValueHtmlAttributes}
+        className={addClass(p.textValueHtmlAttributes, classes(p.formControlClass))}
+        value={value}
+        onBlur={handleOnBlur}
+        onChange={handleOnChange}
+        onFocus={handleOnFocus}
+        ref={p.innerRef} />
+      <input type="color"
+        className={classes(p.formControlClass, "sf-color")}
+        value={value}
+        onBlur={handleOnBlur}
+        onChange={handleOnChange}
+      />
+    </span>);
+
+  function handleOnFocus(e: React.FocusEvent<any>) {
+    const input = e.currentTarget as HTMLInputElement;
+
+    input.setSelectionRange(0, input.value != null ? input.value.length : 0);
+
+    if (p.textValueHtmlAttributes?.onFocus)
+      p.textValueHtmlAttributes.onFocus(e);
+  };
+
+  function handleOnBlur(e: React.FocusEvent<any>) {
+
+    const input = e.currentTarget as HTMLInputElement;
+
+    var result = input.value == undefined || input.value.length == 0 ? null : input.value;
+
+    setText(undefined);
+    if (p.value != result)
+      p.onChange(result);
+    if (p.textValueHtmlAttributes?.onBlur)
+      p.textValueHtmlAttributes.onBlur(e);
+  }
+
+  function handleOnChange(e: React.SyntheticEvent<any>) {
+    const input = e.currentTarget as HTMLInputElement;
+    setText(input.value);
+    if (p.onChange)
+      p.onChange(input.value);
+  }
+}
+
 ValueLineRenderers.renderers.set("RadioGroup", (vl) => {
   return internalRadioGroup(vl);
 });
@@ -1163,6 +1244,7 @@ function internalRadioGroup(vl: ValueLineController) {
 
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      {getTimeMachineIcon({ ctx: s.ctx })}
       <div style={getColumnStyle()}>
         {optionItems.map((oi, i) =>
           <label {...vl.props.valueHtmlAttributes} className={classes("sf-radio-element", vl.props.ctx.errorClass)}>
@@ -1220,6 +1302,8 @@ export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBase
       vProps.format = state.ctx.propertyRoute.member!.format;
       if (vProps.valueLineType == "TextBox" && state.ctx.propertyRoute.member!.format == "Password")
         vProps.valueLineType = "Password";
+      else if (vProps.valueLineType == "TextBox" && state.ctx.propertyRoute.member!.format == "Color")
+        vProps.valueLineType = "Color";
     }
   }
 }

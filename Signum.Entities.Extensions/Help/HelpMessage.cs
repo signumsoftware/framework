@@ -74,6 +74,8 @@ public enum HelpMessage
     In0,
     Entities,
     SearchText,
+    Previous,
+    Next
 }
 
 public enum HelpKindMessage

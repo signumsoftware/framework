@@ -6,6 +6,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.PostgresCatalog;
 using System.Data;
 using System.Data.Common;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.Engine;
 
@@ -502,12 +503,12 @@ END; $$;");
 
 public class PostgreSqlParameterBuilder : ParameterBuilder
 {
-    public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, object? value)
+    public override DbParameter CreateParameter(string parameterName, AbstractDbType dbType, string? udtTypeName, bool nullable, DateTimeKind datetimeKind, object? value)
     {
         if (dbType.IsDate())
         {
             if (value is DateTime dt)
-                AssertDateTime(dt);
+                AssertDateTime(dt, datetimeKind);
         }
 
         var result = new Npgsql.NpgsqlParameter(parameterName, value ?? DBNull.Value)
@@ -523,13 +524,11 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         return result;
     }
 
-    public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, Expression value)
+    public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, DateTimeKind dateTimeKind, Expression value)
     {
-
         var uType = value.Type.UnNullify();
-
         var exp =
-             uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) :
+             uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
              ////https://github.com/dotnet/SqlClient/issues/1009
              //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
              //uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :

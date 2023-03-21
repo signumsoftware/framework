@@ -98,7 +98,7 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
             <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={c.handleAddValue}>
-              {EntityBaseController.createIcon}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
+              {EntityBaseController.getCreateIcon()}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
             </a>}
        
     </FormGroup>
@@ -126,7 +126,7 @@ export function MultiValueLineElement(props: MultiValueLineElementProps) {
           <FontAwesomeIcon icon="xmark" />
         </a>
       }
-      {renderItem(ctx)}
+      {React.cloneElement(renderItem(ctx) as React.ReactElement, { mandatory: true })}
     </div>
   );
 }

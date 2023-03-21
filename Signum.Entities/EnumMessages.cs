@@ -61,6 +61,15 @@ public enum OperationMessage
 
     [Description("{0} error[s]")]
     _0Errors,
+
+    [Description("Closing this modal (or browser tab!) will cancel the operation on the server")]
+    ClosingThisModalOrBrowserTabWillCancelTheOperation,
+
+    [Description("Cancel Operation?")]
+    CancelOperation,
+
+    [Description("Are you sure you want to cancel the operation?")]
+    AreYouSureYouWantToCancelTheOperation,
 }
 
 public enum SynchronizerMessage
@@ -121,6 +130,22 @@ public enum EntityControlMessage
     [Description("Add…")]
     Add,
     Paste,
+    [Description("Previous value was: {0}")]
+    PreviousValueWas0,
+    Moved,
+    [Description("Removed {0}")]
+    Removed0,
+    NoChanges,
+    Changed,
+    Added,
+    RemovedAndSelectedAgain,
+    Selected,
+    Edit,
+    Reload,
+    Download,
+    Expand,
+    Collapse,
+    ToggleSideBar
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
@@ -247,7 +272,12 @@ public enum SearchMessage
     Copy,
 
     [Description("More than one {0} selected")]
-    MoreThanOne0Selected
+    MoreThanOne0Selected,
+    CombineRowsWith,
+
+    PinnFilter,
+    UnpinnFilter,
+    SwitchViewMode,
 }
 
 public enum SelectorMessage
@@ -284,9 +314,7 @@ public enum SelectorMessage
 [AllowUnathenticated]
 public enum ConnectionMessage
 {
-    AConnectionWithTheServerIsNecessaryToContinue,
-    [Description("Sesion Expired")]
-    SessionExpired,
+    VersionInfo,
     [Description("A new version has just been deployed! Save changes and {0}")]
     ANewVersionHasJustBeenDeployedSaveChangesAnd0,
     OutdatedClientApplication,
@@ -476,4 +504,10 @@ public enum VoidEnumMessage
 {
     [Description("-")]
     Instance
+}
+
+public enum ContainerToggleMessage
+{
+    Minimize,
+    Exxpand,
 }

@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType, tryGetTypeInfo, MemberInfo, TypeInfo, getTypeInfos, getTypeInfo } from './Reflection'
-import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity, ModelEntity } from './Signum.Entities'
+import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity, ModelEntity, BooleanEnum } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
 import { classes } from './Globals';
 import { EmbeddedWidget } from './Frames/Widgets';
+import { ViewPromise } from './Navigator';
 
 export type FormGroupStyle =
   "None" |  /// Only the value is rendered.
@@ -242,14 +243,15 @@ export interface BsColumns {
 export class TypeContext<T> extends StyleContext {
 
   propertyRoute: PropertyRoute | undefined; /*Because of optional TypeInfo*/
-  binding: IBinding<T>;
+  binding: IBinding<T>; //Could be null on removed elements in Time Machine
+  previousVersion?: { value: T, oldIndex?: number, isMoved?: boolean }; //Used for Time Machine
   prefix: string;
 
   get value() {
     if (this.binding == undefined)
       return undefined as any; //React Dev Tools
 
-    return this.binding.getValue();
+      return this.binding.getValue();
   }
 
   set value(val: T) {
@@ -260,7 +262,7 @@ export class TypeContext<T> extends StyleContext {
     if (this.binding == undefined)
       return undefined as any; //React Dev Tools
 
-    return this.binding.getError();
+      return this.binding.getError();
   }
 
   set error(val: string | undefined) {
@@ -281,7 +283,7 @@ export class TypeContext<T> extends StyleContext {
     this.propertyRoute = propertyRoute;
     this.binding = binding;
 
-    this.prefix = prefix || ((parent && (parent as TypeContext<any>).prefix || "") + binding.suffix);
+    this.prefix = prefix || ((parent && (parent as TypeContext<any>).prefix || "") + binding?.suffix);
   }
 
   subCtx(styleOptions: StyleOptions): TypeContext<T>
@@ -289,8 +291,12 @@ export class TypeContext<T> extends StyleContext {
   subCtx<M extends MixinEntity>(mixin: Type<M>, styleOptions?: StyleOptions): TypeContext<M> //Only id T extends Entity!
   subCtx(field: string, styleOptions?: StyleOptions): TypeContext<any>
   subCtx(arg: ((val: T) => any) | IType | string | StyleOptions, styleOptions?: StyleOptions): TypeContext<any> {
-    if (typeof arg == "object" && !isType(arg))
-      return new TypeContext<T>(this, arg, this.propertyRoute, this.binding, this.prefix);
+    if (typeof arg == "object" && !isType(arg)) {
+      var nc = new TypeContext<T>(this, arg, this.propertyRoute, this.binding, this.prefix);
+      nc.previousVersion = this.previousVersion;
+
+      return nc;
+    }
 
     const lambdaMembers =
       typeof arg == "function" ? getLambdaMembers(arg) :
@@ -302,6 +308,10 @@ export class TypeContext<T> extends StyleContext {
     const binding = createBinding(this.value, lambdaMembers);
 
     const result = new TypeContext<any>(this, styleOptions, subRoute, binding);
+
+    if (this.previousVersion && this.previousVersion.value) {
+      result.previousVersion = { value: createBinding(this.previousVersion.value, lambdaMembers).getValue() }; 
+    }
 
     return result;
   }
@@ -500,7 +510,7 @@ export interface EntityFrame {
   tabs: EmbeddedWidget[] | undefined;
   entityComponent: React.Component | null | undefined;
   pack: EntityPack<ModifiableEntity>;
-  onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean, callback?: () => void) => void;
+  onReload: (pack?: EntityPack<ModifiableEntity>, reloadComponent?: boolean | string | ViewPromise<ModifiableEntity>, callback?: () => void) => void;
   setError: (modelState: ModelState, initialPrefix?: string) => void;
   revalidate: () => void;
   onClose: (pack?: EntityPack<ModifiableEntity>) => void;
@@ -512,11 +522,46 @@ export interface EntityFrame {
 
   createNew?: (oldPack: EntityPack<ModifiableEntity>) => (Promise<EntityPack<ModifiableEntity> | undefined>) | undefined;
   prefix: string;
+
+  currentDate?: string;
+  previousDate?: string;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
   const elemPR = ctx.propertyRoute!.addMember("Indexer", "", true);
-  return ctx.value!.map((mle, i) => new TypeContext<T>(ctx, undefined, elemPR,
-    new MListElementBinding<T>(ctx.binding, i),
-  ));
+
+  if (ctx.previousVersion == null)
+    return ctx.value!.map((mle, i) => new TypeContext<T>(ctx, undefined, elemPR,
+      new MListElementBinding<T>(ctx.binding as IBinding<MList<T>>, i),
+    ));
+
+  var list = ctx.value!.map((mle, i) => {
+
+    var eleCtx = new TypeContext<T>(ctx, undefined, elemPR,
+      new MListElementBinding<T>(ctx.binding as IBinding<MList<T>>, i),
+    );
+
+    var index = mle.rowId == null ? undefined : ctx.previousVersion!.value.findIndex(oe => oe.rowId == mle.rowId);
+    eleCtx.previousVersion = {
+      value: index == -1 || index == null ? null! : ctx.previousVersion!.value[index].element,
+      oldIndex: index == -1 ? undefined : index,
+      isMoved: index == -1 ? undefined : index != i,
+    };
+
+    return eleCtx;
+  });
+
+  var currentRowIds = ctx.value.map(mle => mle.rowId).notNull();
+
+  ctx.previousVersion.value.forEach((mle, i) => {
+    if (!currentRowIds.contains(mle.rowId!)) {
+      var newIndex = list.findIndex(a => a.previousVersion && a.previousVersion!.oldIndex && i < a.previousVersion.oldIndex);
+
+      var removedCtx = new TypeContext<T>(ctx, undefined, elemPR, undefined!);
+      removedCtx.previousVersion = { value: mle.element, oldIndex: i };
+      list.insertAt(newIndex == -1 ? list.length : newIndex, removedCtx);
+    }
+  });
+
+  return list;
 }

@@ -25,10 +25,10 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   const entityKey = liteKey(toLite(p.entity));
   const userKey = liteKey(toLite(AppContext.currentUser! as UserEntity))
 
-  const [ticks, setTicks] = React.useState<string>(p.entity.ticks);
+  const [ticks, setTicks] = React.useState<string>(p.entity.ticks!);
   const forceUpdate = useForceUpdate();
   React.useEffect(() => {
-    setTicks(p.entity.ticks);
+    setTicks(p.entity.ticks!);
   }, [entityKey]);
 
   useSignalRGroup(conn, {

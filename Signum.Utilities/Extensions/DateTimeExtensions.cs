@@ -432,6 +432,11 @@ public static class DateTimeExtensions
         return ((dateTime.Month - 1) / 3) + 1;
     }
 
+    public static int Quarter(this DateTimeOffset dateTime)
+    {
+        return ((dateTime.Month - 1) / 3) + 1;
+    }
+
     public static int Quarter(this DateOnly date)
     {
         return ((date.Month - 1) / 3) + 1;
@@ -499,6 +504,13 @@ public static class DateTimeExtensions
         var cc = CultureInfo.CurrentCulture;
 
         return cc.Calendar.GetWeekOfYear(date.ToDateTime(new TimeOnly()), cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
+    }
+
+    public static int WeekNumber(this DateTimeOffset date)
+    {
+        var cc = CultureInfo.CurrentCulture;
+
+        return cc.Calendar.GetWeekOfYear(date.Date, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
     }
 
     /// <summary>

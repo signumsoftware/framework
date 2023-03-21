@@ -15,6 +15,7 @@ import { FilterOperation } from '../Signum.Entities.DynamicQuery'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
 import { TypeaheadController } from '../Components/Typeahead'
+import { getTimeMachineIcon } from './TimeMachineIcon'
 
 
 export interface EntityStripProps extends EntityListBaseProps {
@@ -69,7 +70,7 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
 
       const compatible = p.ctx.value.map(a => a.element).filter(e => isLite(e) ? e.EntityType == typeName : isEntity(e) ? e.Type == typeName : null).notNull();
 
-      return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible }] };
+      return { ...fo, filterOptions: [...fo?.filterOptions ?? [], { token: "Entity", operation: "IsNotIn", value: compatible, frozen: true }] };
       }
   }
 
@@ -103,12 +104,12 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
         <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
           {
             p.groupElementsBy == undefined ?
-              c.getMListItemContext(p.ctx).map(mlec => renderElement(mlec)) :
+              c.getMListItemContext(p.ctx).map((mlec, i) => renderElement(mlec, i)) :
 
-              c.getMListItemContext(p.ctx).groupBy(a => p.groupElementsBy!(a)).map((gr, i) =>
+              c.getMListItemContext(p.ctx).groupBy(a => (a.binding == null && a.previousVersion) ? p.groupElementsBy!(a.previousVersion) : p.groupElementsBy!(a)).map((gr, i) =>
                 <div className={classes("mb-2")} key={i} >
                   <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
-                  {gr.elements.map(mlec => renderElement(mlec))}
+                  {gr.elements.map((mlec, i) => renderElement(mlec, i))}
                 </div>)
           }
           {renderLastElement()}
@@ -117,8 +118,8 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
     </FormGroup>
   );
 
-  function renderElement(mlec: TypeContext<any>): JSX.Element {
-    return <EntityStripElement key={c.keyGenerator.getKey(mlec.value)}
+  function renderElement(mlec: TypeContext<any>, index: number): JSX.Element {
+    return <EntityStripElement key={index}
       ctx={mlec}
       iconStart={p.iconStart}
       autoComplete={p.autocomplete}
@@ -129,7 +130,9 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
       onItemContainerHtmlAttributes={p.onItemContainerHtmlAttributes}
       onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
       onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
-      showType={p.showType!} />
+      showType={p.showType!}
+      vertical={p.vertical}
+    />
   }
 
   function renderLastElement() {
@@ -205,11 +208,23 @@ export interface EntityStripElementProps {
   drag?: DragConfig;
   move?: MoveConfig;
   showType: boolean;
+  vertical?: boolean;
 }
 
 export function EntityStripElement(p: EntityStripElementProps) {
   var currentEntityRef = React.useRef<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
   const forceUpdate = useForceUpdate();
+
+  if (p.ctx.binding == null && p.ctx.previousVersion) {
+    return (
+      <li className="sf-strip-element" >
+        <div style={{ padding: 0, minHeight: p.vertical ? 10 : 12, minWidth: p.vertical ? undefined : 30, backgroundColor: "#ff000021" }}>
+          {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, translateX: "-90%", translateY: "-10%" }) : getTimeMachineIcon({ ctx: p.ctx, translateX: "-80%", translateY: "-60%" })}
+        </div>
+      </li>
+    );
+  }
+    
 
   React.useEffect(() => {
 
@@ -272,6 +287,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
       >
+        {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, translateX: "-90%", translateY: "20%" }) : getTimeMachineIcon({ ctx: p.ctx, translateX: "-75%", translateY: "-50%" })}
         {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
         {
           p.onView ?
@@ -295,7 +311,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
           onClick={p.onRemove}
           href="#"
           title={p.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-          {EntityBaseController.removeIcon}
+          {EntityBaseController.getRemoveIcon()}
         </a>
       </span>
   }
@@ -307,7 +323,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
       onDragEnd={drag.onDragEnd}
       onKeyDown={drag.onKeyDown}
       title={drag.title}>
-      {EntityBaseController.moveIcon}
+      {EntityBaseController.getMoveIcon()}
     </span>;
   }
 }

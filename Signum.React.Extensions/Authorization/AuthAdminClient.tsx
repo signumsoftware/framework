@@ -75,7 +75,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: UserEntity.token(a => a.state),
         value: UserState.value("Active"),
-        pinned: { label: AuthAdminMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_StartChecked" },
+        pinned: { label: () => AuthAdminMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_StartChecked" },
       },
     ],
     entityFormatter: new Finder.EntityFormatter((row, cols, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined : <EntityLink lite={row.entity}
@@ -85,7 +85,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
       <div title={EntityControlMessage.View.niceToString()} className="d-inline-flex align-items-center">
         <SmallProfilePhoto user={row.entity as Lite<UserEntity>} className="me-1" />
-        {EntityBaseController.viewIcon}
+        {EntityBaseController.getViewIcon()}
       </div>
     </EntityLink>)
   });
@@ -104,11 +104,11 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: RoleEntity.token(a => a.entity.isTrivialMerge),
         value: false,
-        pinned: { active: "NotCheckbox_StartUnchecked", label: AuthAdminMessage.IncludeTrivialMerges.niceToString(), column: 2 }
+        pinned: { active: "NotCheckbox_StartUnchecked", label: ()=> AuthAdminMessage.IncludeTrivialMerges.niceToString(), column: 2 }
       }
     ],
     extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {
-      order: 6,
+      order: -1,
       button: <button className="btn btn-info"
         onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
         <FontAwesomeIcon icon="download" /> Download AuthRules.xml

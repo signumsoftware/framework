@@ -20,6 +20,9 @@ public class NetPropertyToken : QueryToken
         this.Unit = unit;
     }
 
+    public override DateTimeKind DateTimeKind => MemberInfo.Name == nameof(DateTimeOffset.DateTime) && MemberInfo.DeclaringType == typeof(DateTimeOffset) ? DateTimeKind.Local : 
+        DateTimeKind.Unspecified;
+
     public override Type Type
     {
         get

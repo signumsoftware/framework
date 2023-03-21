@@ -512,7 +512,7 @@ INNER JOIN {4} as [table] ON [relationalTable].{5} = [table].{6}".FormatWith(
         rt.Name.OnDatabase(newDatabaseName),
         table.Name.OnDatabase(newDatabaseName),
         rt.BackReference.Name.SqlEscape(isPostgres),
-        table.PrimaryKey.Name.SqlEscape(isPostgres)) + GetUpdateWhere(table), new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType()) });
+        table.PrimaryKey.Name.SqlEscape(isPostgres)) + GetUpdateWhere(table), new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType(), default) });
         return insert;
     }
 
@@ -528,7 +528,7 @@ INNER JOIN {1} as [table] ON {0}.{2} = [table].{3}".FormatWith(
             rt.BackReference.Name.SqlEscape(isPostgres),
             table.PrimaryKey.Name.SqlEscape(isPostgres)) + 
             GetUpdateWhere(table),
-            new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType()) });
+            new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType(), default) });
         return delete;
     }
 
@@ -545,7 +545,7 @@ INNER JOIN {1} as [table] ON {0}.{3} = [table].{3}".FormatWith(
  table.Columns.Values.Where(c => !c.PrimaryKey).ToString(c => "   {0} = [table].{0}".FormatWith(c.Name.SqlEscape(isPostgres)), ",\r\n"),
  table.PrimaryKey.Name.SqlEscape(isPostgres))
  + GetUpdateWhere(table),
- new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType()) });
+ new List<DbParameter> { pb.CreateParameter("@machineId", machine.Id.Object, machine.Id.Object.GetType(), default) });
         return command;
     }
 

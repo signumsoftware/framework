@@ -178,7 +178,7 @@ public class ConditionCompare : ConditionBase
 
     public override void FillQueryTokens(List<QueryToken> tokens)
     {
-        this.ValueProvider!.FillQueryTokens(tokens);
+        this.ValueProvider!.FillQueryTokens(tokens, forForeach: false);
     }
 
     public override bool Evaluate(TemplateParameters p)

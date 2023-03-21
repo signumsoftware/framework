@@ -9,7 +9,6 @@ import * as Navigator from '@framework/Navigator';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
-import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead';
 import { getTypeInfo, IBinding, tryGetTypeInfo } from '@framework/Reflection';
 import { Entity, EntityControlMessage, Lite, newMListElement, toLite } from '@framework/Signum.Entities';
 import { UserEntity } from '../../Authorization/Signum.Entities.Authorization';
@@ -74,7 +73,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
               inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
               <div title={EntityControlMessage.View.niceToString()} className="d-inline-flex align-items-center">
                 <span style={{ backgroundColor: !colors ? undefined : calculateColor(row.entity.id!.toString(), colors, ctx.value.seed ?? 0), height: "20px", width: "20px", display: "inline-block", marginBottom: "-6px" }} className="me-2" />
-                {EntityBaseController.viewIcon}
+                {EntityBaseController.getViewIcon()}
               </div>
             </EntityLink>)
         }
@@ -150,7 +149,7 @@ function ColorSelector(p: { ctx: TypeContext<string>, colors: string[] | null })
   }, [p.colors])
 
   if (custom || p.colors == null)
-    return <ColorTypeaheadLine ctx={p.ctx} extraButtons={() => getSwitchModelButton()} />
+    return <ValueLine ctx={p.ctx} extraButtons={() => getSwitchModelButton()} valueLineType="Color" />
 
   return <ValueLine ctx={p.ctx}
     valueLineType="DropDownList"
@@ -165,12 +164,13 @@ function ColorSelector(p: { ctx: TypeContext<string>, colors: string[] | null })
 
   function getSwitchModelButton(): React.ReactElement<any> {
     return (
-      <a href="#" className={classes("sf-line-button", "sf-find", "btn input-group-text")}
+      <a href="#" className={classes("sf-line-button", "sf-find", "btn input-group-text")}        
         onClick={e => {
           e.preventDefault();
           setCustom(!custom);
         }}>
-        <FontAwesomeIcon icon={custom ? "palette" : "list"} />
+        <FontAwesomeIcon icon={custom ? "palette" : "list"}
+        title={custom ? ColorPaletteMessage.ShowPalette.niceToString() : ColorPaletteMessage.ShowList.niceToString()} />
       </a>
     );
   }

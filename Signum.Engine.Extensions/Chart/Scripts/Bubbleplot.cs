@@ -9,10 +9,12 @@ public class BubbleplotChartScript : ChartScript
         this.Icon = ChartScriptLogic.LoadIcon("bubbles.png");
         this.Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn("Color", ChartColumnType.Groupable),
+            new ChartScriptColumn("Bubble", ChartColumnType.Groupable),
             new ChartScriptColumn("Horizontal Axis", ChartColumnType.Positionable) ,
             new ChartScriptColumn("Vertical Axis", ChartColumnType.Positionable) ,
-            new ChartScriptColumn("Size", ChartColumnType.Magnitude) 
+            new ChartScriptColumn("Size", ChartColumnType.Magnitude),
+            new ChartScriptColumn("Color Scale", ChartColumnType.Magnitude) { IsOptional = true },
+            new ChartScriptColumn("Color Category", ChartColumnType.Groupable) { IsOptional = true }
         };
         this.ParameterGroups = new List<ChartScriptParameterGroup>
         {
@@ -36,12 +38,12 @@ public class BubbleplotChartScript : ChartScript
             },
             new ChartScriptParameterGroup("Color Scale")
             {
-                new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Ordinal|ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ColumnIndex = 0, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 4,  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
+                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
             new ChartScriptParameterGroup("Color Category")
             {
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) { ColumnIndex = 0, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) { ColumnIndex = 5, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
     }      

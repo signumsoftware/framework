@@ -7,12 +7,12 @@ import UserCircle from "./UserCircle";
 import * as UserCircles from "./UserCircle";
 import { classes } from "@framework/Globals";
 
-export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | null)[] = []; 
+export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | null)[] = [];
 
 export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
   const [imageError, setImageError] = useState(false);
 
-  var url = urlProviders.map(f => f(p.user, p.size)).notNull().firstOrNull(); 
+  var url = urlProviders.map(f => f(p.user, p.size)).notNull().firstOrNull();
 
   useEffect(() => {
     setImageError(false);
@@ -31,13 +31,13 @@ export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
   return (
     <div className="user-profile-photo align-items-center d-flex justify-content-center" style={{ width: `${p.size}px`, height: `${p.size}px`, borderColor: !url ? color : undefined }}>
       {!url ? <FontAwesomeIcon icon="user" size={iconSize as any} color={color} /> :
-        <img src={url} style={{ maxWidth: `${p.size - 3}px`, maxHeight: `${p.size - 3}px` }} onError={addDefaultSrc} />}
+        <img src={url} style={{ maxWidth: `${p.size - 3}px`, maxHeight: `${p.size - 3}px` }} onError={addDefaultSrc} title={getToString(p.user)} />}
     </div>
   );
 }
 
 export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, className?: string }) {
-  const [immageError, setImageError] = useState(false);
+  const [imageError, setImageError] = useState(false);
   var size = p.size ?? 22;
 
   var url = urlProviders.map(f => f(p.user, size!)).notNull().firstOrNull();
@@ -52,8 +52,28 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
 
   return (
     <div className={classes("small-user-profile-photo", p.className)}>
-      {url && !immageError ? <img src={url} style={{ maxWidth: `${size}px`, maxHeight: `${size}px` }} onError={addDefaultSrc} title={getToString(p.user)} /> :
+      {url && !imageError ? <img src={url} style={{ maxWidth: `${size}px`, maxHeight: `${size}px` }} onError={addDefaultSrc} title={getToString(p.user)} /> :
         <UserCircle user={p.user} />}
     </div>
   );
+}
+
+export function ProfilePhotoSVG(user: Lite<UserEntity>, size?: number, clippath?: string, yOffset: number = 0) {
+  size = size ?? 40;
+  var url = urlProviders.map(f => f(user, size!)).notNull().firstOrNull();
+
+  function addDefaultSrc(ev: any) {
+    picture.setAttribute("display", "none");
+  }
+
+  var picture = document.createElementNS("http://www.w3.org/2000/svg", "image");
+  picture.setAttribute("x", ((size / 2) * -1).toString());
+  picture.setAttribute("y", ((size / 2) * -1 + yOffset).toString());
+  picture.setAttribute("width", size.toString());
+  picture.setAttribute("height", size.toString());
+  picture.setAttribute("clip-path", clippath ?? "");
+  picture.addEventListener("error", addDefaultSrc);
+  picture.setAttribute("href", url ?? "");
+
+  return picture;
 }

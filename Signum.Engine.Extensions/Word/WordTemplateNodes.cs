@@ -343,7 +343,7 @@ public class TokenNode : BaseNode
 
     public override void FillTokens(List<QueryToken> tokens)
     {
-        ValueProvider.FillQueryTokens(tokens);
+        ValueProvider.FillQueryTokens(tokens, forForeach: false);
     }
 
     protected internal override void RenderNode(WordTemplateParameters p)
@@ -683,7 +683,7 @@ public class ForeachNode : BlockContainerNode
 
     public override void FillTokens(List<QueryToken> tokens)
     {
-        ValueProvider.FillQueryTokens(tokens);
+        ValueProvider.FillQueryTokens(tokens, forForeach: true);
 
         this.ForeachBlock!.FillTokens(tokens);
     }

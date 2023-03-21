@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
 import { useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
+import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
@@ -97,7 +98,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
             <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={c.handleCreateClick}>
-              {EntityBaseController.createIcon}&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
+              {EntityBaseController.getCreateIcon()}&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
             </a>)
         }
       </div>
@@ -125,6 +126,7 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}>
+      {getTimeMachineIcon({ ctx: ctx, isContainer: true, translateY:"250%" })}
       <fieldset className="sf-repeater-element"
         {...EntityListBaseController.entityHtmlAttributes(ctx.value)}>
         <legend>
@@ -132,7 +134,7 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
             {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
               onClick={onRemove}
               title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-              {EntityListBaseController.removeIcon}
+              {EntityListBaseController.getRemoveIcon()}
             </a>}
             &nbsp;
             {move?.renderMoveUp()} 
@@ -143,7 +145,7 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
               onDragEnd={drag.onDragEnd}
               onKeyDown={drag.onKeyDown}
               title={drag.title}>
-              {EntityListBaseController.moveIcon}
+              {EntityListBaseController.getMoveIcon()}
             </a>}
             {itemExtraButtons && itemExtraButtons()}
             {title && '\xa0'}

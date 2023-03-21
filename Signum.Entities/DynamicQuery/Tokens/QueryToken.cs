@@ -16,6 +16,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public abstract string? Format { get; }
     public abstract string? Unit { get; }
     public abstract Type Type { get; }
+    public virtual DateTimeKind DateTimeKind => System.DateTimeKind.Unspecified;
     public abstract string Key { get; }
 
     public virtual bool IsGroupable
@@ -177,6 +178,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (ut == typeof(DateTime))
             return DateTimeProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
 
+        if (ut == typeof(DateTimeOffset))
+            return DateTimeOffsetProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
+
         if (ut == typeof(DateOnly))
             return DateOnlyProperties(this).AndHasValue(this);
 
@@ -258,10 +262,11 @@ public abstract class QueryToken : IEquatable<QueryToken>
     }
 
 
-
     public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precision)
     {
-        string utc = Clock.Mode == TimeZoneMode.Utc ? "Utc - " : "";
+        var kind = parent.DateTimeKind.DefaultToNull() ?? (Clock.Mode == TimeZoneMode.Utc ? System.DateTimeKind.Utc : System.DateTimeKind.Local);
+
+        string utc = kind == System.DateTimeKind.Utc ? "Utc - " : "";
 
         return new List<QueryToken?>
         {
@@ -284,6 +289,17 @@ public abstract class QueryToken : IEquatable<QueryToken>
             precision < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), () => utc + QueryTokenMessage.Second.NiceToString()),
             precision < DateTimePrecision.Seconds ? null: new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
             precision < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), () => utc + QueryTokenMessage.Millisecond.NiceToString()),
+        }.NotNull().ToList();
+    }
+
+
+    public static List<QueryToken> DateTimeOffsetProperties(QueryToken parent, DateTimePrecision precision)
+    {
+
+        return new List<QueryToken?>
+        {
+            new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTimeOffset dt)=>dt.UtcDateTime), () => QueryTokenMessage.UtcDateTime.NiceToString()),
+            new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTimeOffset dt)=>dt.DateTime), () => QueryTokenMessage.DateTimePart.NiceToString()),
         }.NotNull().ToList();
     }
 
@@ -701,5 +717,9 @@ public enum QueryTokenMessage
     CellOperation,
     ContainerOfCellOperations,
     [Description("Entity Type")]
-    EntityType
+    EntityType,
+    [Description("UTC - DateTime")]
+    UtcDateTime,
+    [Description("DateTime part")]
+    DateTimePart,
 }

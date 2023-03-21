@@ -54,6 +54,9 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2023.02.18 Time Machine 2.0 🕰️](https://github.com/signumsoftware/framework/commit/68914f6239a9a849a2a07d7e647aeda2d8c9dbf1#commitcomment-101162063)
+* [2023.02.07 Presenting Custom Drilldowns](https://github.com/signumsoftware/framework/commit/75c713fbd8023824344f8a270afc1c24dc5496b7#comments)
+* [2023.01.31 Upgrade to react-router 6.7.0](https://github.com/signumsoftware/framework/commit/76755e743fd32bd787cef5e20a76ccb2155107b4#comments)
 * [2022.12.16 Responsive SearchControl](https://github.com/signumsoftware/framework/commit/41fc3c0c4732e2ce5750648d65b7030bce08c5e2#comments)
 * [2022.12.14 Client-side Diff](https://github.com/signumsoftware/framework/commit/880c1a7860573310e2cd300c45fe7bb92f1954de#comments)
 * [2022.12.06 ChatGPT 🤖 can program with Signum Framework!](https://github.com/signumsoftware/framework/commit/901e069a5b0ef0fd8b80d0e1632fd66671cb8b8f#commitcomment-92227611)

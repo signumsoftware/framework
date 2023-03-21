@@ -98,18 +98,23 @@ public static class TypeLogic
 
         var currentList = Administrator.TryRetrieveAll<TypeEntity>(replacements);
 
-        { //External entities are nt asked in SchemaSynchronizer
+        const string TypeTableName = "TypeTableName";
 
-            Func<string, bool> isExternal = tableName => /*true*/ schema.IsExternalDatabase(ObjectName.Parse(tableName, isPostgres).Schema.Database);
 
-            replacements.AskForReplacements(
-                currentList.Where(t => isExternal(t.TableName)).Select(a => a.TableName).ToHashSet(),
-                should.Values.Where(t => isExternal(t.TableName)).Select(a => a.TableName).ToHashSet(),
-                Replacements.KeyTables);
-        }
+        replacements.Add(TypeTableName, replacements.TryGetC(Replacements.KeyTables)?
+            .ToDictionary(
+                kvp => SimplifyTableName(ObjectName.Parse(kvp.Key, isPostgres)).ToString(),
+                kvp => SimplifyTableName(ObjectName.Parse(kvp.Value, isPostgres)).ToString()            
+            ) ?? 
+            new Dictionary<string, string>());
 
-        Dictionary<string, TypeEntity> current = ApplyReplacementsToOld(replacements,
-            currentList.ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
+        replacements.AskForReplacements(
+            currentList.Select(a => a.TableName).ToHashSet(),
+            should.Values.Select(a => a.TableName).ToHashSet(),
+            TypeTableName);
+
+        Dictionary<string, TypeEntity> current = replacements.ApplyReplacementsToOld(
+            currentList.ToDictionaryEx(c => c.TableName, "tableName in database"), TypeTableName);
 
         Table table = schema.Table<TypeEntity>();
 
@@ -150,15 +155,15 @@ public static class TypeLogic
 
     static string? Suffix(string? name) => name.TryAfterLast("_") ?? name;
 
-    static Dictionary<string, O> ApplyReplacementsToOld<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
-    {
-        if (!replacements.ContainsKey(replacementsKey))
-            return oldDictionary;
+    //static Dictionary<string, O> ApplyReplacementsToOld<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
+    //{
+    //    if (!replacements.ContainsKey(replacementsKey))
+    //        return oldDictionary;
 
-        Dictionary<string, string> dic = replacements[replacementsKey];
+    //    Dictionary<string, string> dic = replacements[replacementsKey];
 
-        return oldDictionary.SelectDictionary(a => dic.TryGetC(a) ?? a, v => v);
-    }
+    //    return oldDictionary.SelectDictionary(a => dic.TryGetC(a) ?? a, v => v);
+    //}
 
     internal static SqlPreCommand Schema_Generating()
     {
@@ -170,13 +175,15 @@ public static class TypeLogic
             .PlainSqlCommand();
     }
 
+    public static Func<ObjectName, ObjectName> SimplifyTableName = tn => tn;
+
     internal static List<TypeEntity> GenerateSchemaTypes()
     {
         var list = (from tab in Schema.Current.Tables.Values
                     let type = EnumEntity.Extract(tab.Type) ?? tab.Type
                     select new TypeEntity
                     {
-                        TableName = tab.Name.ToString(),
+                        TableName = SimplifyTableName(tab.Name).ToString(),
                         CleanName = Reflector.CleanTypeName(type),
                         Namespace = type.Namespace!,
                         ClassName = type.Name,
