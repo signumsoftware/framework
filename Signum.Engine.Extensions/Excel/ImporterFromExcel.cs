@@ -102,7 +102,7 @@ public class ImporterFromExcel
         {
             WorkbookPart workbookPart = document.WorkbookPart!;
 
-            WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
+            WorksheetPart worksheetPart = document.GetWorksheetPartBySheetName("Sheet1");
 
             var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
 
