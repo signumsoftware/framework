@@ -464,7 +464,10 @@ export namespace External {
     "Exchange2010_SP1" |
     "Exchange2010_SP2" |
     "Exchange2013" |
-    "Exchange2013_SP1";
+    "Exchange2013_SP1" |
+    "Exchange2015" |
+    "Exchange2016" |
+    "V2015_10_05";
   
   export const SmtpDeliveryFormat = new EnumType<SmtpDeliveryFormat>("SmtpDeliveryFormat");
   export type SmtpDeliveryFormat =
