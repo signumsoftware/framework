@@ -333,17 +333,20 @@ export class ContextualOperationContext<T extends Entity> {
 
   getEntity(): Promise<T> {
 
-    if (this.pack == null)
-      throw new Error("Pack is not available for Contextual with many selected entities");
+    if (this.pack != null)
+      return Promise.resolve(this.pack.entity);
 
-    return Promise.resolve(this.pack.entity);
+    if (this.context.lites.length == 1)
+      return Navigator.API.fetch(this.context.lites[0]);
+
+    throw new Error("Pack is not available for Contextual with many selected entities");
   }
 
   getLite(): Lite<T> {
-    if (this.pack == null)
-      throw new Error("Pack is not available for Contextual with many selected entities");
+    if (this.context.lites.length == 1)
+      return this.context.lites[0];
 
-    return toLite(this.pack.entity);
+    throw new Error("Pack is not available for Contextual with many selected entities");
   }
 
   createMenuItems(): React.ReactElement[]{
