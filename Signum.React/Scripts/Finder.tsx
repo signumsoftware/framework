@@ -2047,7 +2047,7 @@ function initFormatRules(): FormatRule[] {
       isApplicable: qt => {
         if (qt.type.name == "string" && qt.propertyRoute != null) {
           var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
-          if (pr != null && pr.member != null && !pr.member.isPhone && !pr.member.isMail && (!pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength < 20))
+          if (pr != null && pr.member != null && !pr.member.isPhone && !pr.member.isMail && (!pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength <= 20))
             return true;
         }
 
@@ -2184,7 +2184,7 @@ function initFormatRules(): FormatRule[] {
         if (cell == undefined)
           return undefined;
 
-        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : undefined;
+        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : "try-no-wrap";
 
         return (
           <span className={multiLineClass}>
@@ -2208,7 +2208,7 @@ function initFormatRules(): FormatRule[] {
         if (cell == undefined)
           return undefined;
 
-        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : undefined;
+        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : "try-no-wrap";
 
         return (
           <span className={multiLineClass}>
