@@ -149,7 +149,7 @@ export const EntityAccordion = React.forwardRef(function EntityAccordion(props: 
             <a href="#" title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}
               className="sf-line-button sf-create"
               onClick={c.handleCreateClick}>
-              {EntityBaseController.createIcon}&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
+              {EntityBaseController.getCreateIcon()}&nbsp;{p.createMessage ?? EntityControlMessage.Create.niceToString()}
             </a>)
         }
       </Accordion>
@@ -201,7 +201,7 @@ export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRe
           {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-            {EntityListBaseController.removeIcon}
+            {EntityListBaseController.getRemoveIcon()}
           </a>}
           &nbsp;
           {move?.renderMoveUp()}
@@ -212,7 +212,7 @@ export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRe
             onDragEnd={drag.onDragEnd}
             onKeyDown={drag.onKeyDown}
             title={drag.title}>
-            {EntityListBaseController.moveIcon}
+            {EntityListBaseController.getMoveIcon()}
           </a>}
           {itemExtraButtons && itemExtraButtons()}
           {'\xa0'}

@@ -14,7 +14,7 @@ import { getToString } from '@framework/Signum.Entities'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { urlVariables } from '../../Dashboard/UrlVariables';
 import { Dic } from '@framework/Globals';
-import { ToolbarEntity, ToolbarMenuEntity } from '../Signum.Entities.Toolbar';
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage } from '../Signum.Entities.Toolbar';
 
 
 
@@ -57,12 +57,12 @@ export default function ToolbarRenderer(p: {
       {p.appTitle}
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
-        <FontAwesomeIcon icon={"angles-left"} />
+        <FontAwesomeIcon icon={"angles-left"} aria-label="Close" />
       </div>
 
-      <div>
+      <ul>
         {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => renderNavItem(res, active, i, handleRefresh, p.onAutoClose))}
-      </div>
+      </ul>
     </div>
   );
 }
@@ -183,12 +183,14 @@ function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, ch
 
 export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode }) {
   return (
-    <Nav.Item >
-      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active}>
-        {p.icon}
-        <span className={"nav-item-text"}>{p.title}{p.isExternalLink && <FontAwesomeIcon icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}</span>
+    <li className="nav-item" style={{ listStyleType: 'none' }}>
+      <Nav.Item >
+        <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active}>
+          {p.icon}
+          <span className={"nav-item-text"}>{p.title}{p.isExternalLink && <FontAwesomeIcon icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}</span>
         <div className={"nav-item-float"}>{p.title}</div>
-      </Nav.Link>
-    </Nav.Item >
+        </Nav.Link>
+      </Nav.Item >
+    </li>
   );
 }

@@ -25,6 +25,8 @@ public class FilesController : ControllerBase
     {
         var filePath = Database.Retrieve<FilePathEntity>(PrimaryKey.Parse(filePathId, typeof(FilePathEntity)));
 
+        Response.Headers.CacheControl = $"max-age={FilePathLogic.MaxAge(filePath)}, private";
+
         return GetFileStreamResult(filePath.OpenRead(), filePath.FileName);
     }
 
@@ -51,6 +53,8 @@ public class FilesController : ControllerBase
         var fpe = makeQuery(primaryKey, rowId);
         if (fpe == null)
             return null;
+
+        Response.Headers.CacheControl = $"max-age={FilePathLogic.MaxAge(fpe)}, private";
 
         return GetFileStreamResult(fpe.OpenRead(), fpe.FileName);
     }

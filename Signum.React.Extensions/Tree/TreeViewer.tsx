@@ -603,17 +603,17 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
     const tv = this.props.treeViewer;
     switch (nodeState) {
       case "Collapsed": return (
-        <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon" >
-          <FontAwesomeIcon icon={["far", "square-plus"]} />
+        <span onClick={() => tv.handleNodeIconClick(node)}  className="tree-icon" >
+          <FontAwesomeIcon icon={["far", "square-plus"]} title={EntityControlMessage.Expand.niceToString()}/>
         </span>);
       case "Expanded": return (
-        <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon" >
-          <FontAwesomeIcon icon={["far", "square-minus"]} />
+        <span onClick={() => tv.handleNodeIconClick(node)}  className="tree-icon" >
+          <FontAwesomeIcon icon={["far", "square-minus"]} title={EntityControlMessage.Collapse.niceToString()}/>
         </span>);
       case "Filtered": return (
-        <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon fa-layers fa-fw" >
-          <FontAwesomeIcon icon="square" />
-          <FontAwesomeIcon icon="filter" inverse transform="shrink-2" />
+        <span onClick={() => tv.handleNodeIconClick(node)}  className="tree-icon fa-layers fa-fw" >
+          <FontAwesomeIcon icon="square" title={EntityControlMessage.Expand.niceToString()}/>
+          <FontAwesomeIcon icon="filter" inverse transform="shrink-2" title={EntityControlMessage.Expand.niceToString()} />
         </span>);
       default: return <span className="place-holder" />;
     }

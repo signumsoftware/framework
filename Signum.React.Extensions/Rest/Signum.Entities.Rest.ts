@@ -22,6 +22,10 @@ export interface RestApiKeyEntity extends Entities.Entity {
   apiKey: string;
 }
 
+export module RestApiKeyMessage {
+  export const GenerateApiKey = new MessageKey("RestApiKeyMessage", "GenerateApiKey");
+}
+
 export module RestApiKeyOperation {
   export const Save : Entities.ExecuteSymbol<RestApiKeyEntity> = registerSymbol("Operation", "RestApiKeyOperation.Save");
   export const Delete : Entities.DeleteSymbol<RestApiKeyEntity> = registerSymbol("Operation", "RestApiKeyOperation.Delete");

@@ -91,7 +91,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
           <div className="card-body">
             {chartScripts?.map((cs, i) =>
               <div key={i} className={chartTypeImgClass(cs)} title={cs.symbol.key.after(".")} onClick={() => handleChartScriptOnClick(cs)}>
-                <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} />
+                <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} alt={cs.icon.fileName} />
               </div>)}
           </div>
           <div className="card-body">
