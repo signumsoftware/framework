@@ -27,7 +27,7 @@ export interface UserQueryPartHandler {
 
 export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
 
-  let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity]);
+  let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.content.userQuery, p.entity), [p.content.userQuery, p.entity && liteKey(p.entity)]);
 
   const [refreshKey, setRefreshKey] = React.useState<number>(0);
 
