@@ -1,8 +1,7 @@
-using Signum.Entities.Excel;
+using Signum.Authorization.Rules;
 using System.IO;
-using Signum.Engine.Authorization;
 
-namespace Signum.Engine.Excel;
+namespace Signum.Excel;
 
 public static class ExcelLogic
 {

@@ -1,12 +1,6 @@
-using Signum.Entities.Files;
-using Signum.Entities.UserAssets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Signum.Files;
 
-namespace Signum.Entities.Excel;
+namespace Signum.Excel;
 
 
 public class ImportExcelModel : ModelEntity

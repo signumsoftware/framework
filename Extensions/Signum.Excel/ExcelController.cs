@@ -1,20 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading;
-using Signum.React.ApiControllers;
-using Signum.React.Files;
 using System.IO;
-using Signum.Engine.Excel;
-using Signum.Entities.Excel;
-using System.Threading.Tasks;
-using Signum.React.Filters;
-using Signum.Engine.Authorization;
-using Signum.Engine.Json;
-using Signum.React.Facades;
-using Signum.Entities.DynamicQuery.Request;
-using Signum.Entities.Basics;
-using Signum.Entities.Symbols;
-using Signum.Entities.Operations;
+using Signum.API.Json;
+using Signum.API.Filters;
+using Signum.Excel;
+using Signum.API;
+using Signum.API.Controllers;
 
 namespace Signum.React.Excel;
 
@@ -33,7 +24,7 @@ public class ExcelController : ControllerBase
 
         var fileName = request.queryKey + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
-        return FilesController.GetFileStreamResult(new MemoryStream(binaryFile), fileName);
+        return MimeMapping.GetFileStreamResult(new MemoryStream(binaryFile), fileName);
     }
 
     [HttpGet("api/excel/reportsFor/{queryKey}")]
@@ -49,7 +40,7 @@ public class ExcelController : ControllerBase
 
         var fileName = request.excelReport.ToString() + "-" + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
-        return FilesController.GetFileStreamResult(new MemoryStream(file),  fileName);
+        return MimeMapping.GetFileStreamResult(new MemoryStream(file),  fileName);
     }
 
     public class ExcelReportRequest

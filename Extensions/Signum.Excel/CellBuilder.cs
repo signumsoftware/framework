@@ -1,10 +1,8 @@
-using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
-using Signum.Entities.Reflection;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Utilities.Reflection;
-using DocumentFormat.OpenXml.Drawing.Diagrams;
 
-namespace Signum.Engine.Excel;
+namespace Signum.Excel;
 
 public enum DefaultStyle
 {

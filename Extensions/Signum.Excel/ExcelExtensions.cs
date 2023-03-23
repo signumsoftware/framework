@@ -2,9 +2,8 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using System.Globalization;
-using System;
 
-namespace Signum.Engine.Excel;
+namespace Signum.Excel;
 
 public static class ExcelExtensions
 {

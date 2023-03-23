@@ -1,9 +1,7 @@
-using Signum.Entities.Basics;
-using Signum.Entities.Files;
 using System.ComponentModel;
-using Signum.Entities.Authorization;
+using Signum.Files;
 
-namespace Signum.Entities.Excel;
+namespace Signum.Excel;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class ExcelReportEntity : Entity

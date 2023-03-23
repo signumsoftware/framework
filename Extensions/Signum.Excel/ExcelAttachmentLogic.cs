@@ -1,11 +1,6 @@
-using Signum.Engine.Mailing;
-using Signum.Engine.Templating;
-using Signum.Engine.UserQueries;
-using Signum.Entities.Excel;
-using Signum.Entities.Mailing;
 using Signum.Entities.UserAssets;
 
-namespace Signum.Engine.Excel;
+namespace Signum.Excel;
 
 public class ExcelAttachmentLogic
 {

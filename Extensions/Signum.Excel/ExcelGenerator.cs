@@ -3,9 +3,8 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using System.IO;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Excel;
 
-namespace Signum.Engine.Excel;
+namespace Signum.Excel;
 
 public static class ExcelGenerator
 {

@@ -1,16 +1,15 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Wordprocessing;
-using Signum.Engine.Authorization;
-using Signum.Entities.Excel;
-using Signum.Entities.Reflection;
+using Signum.Authorization.Rules;
+using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Sync;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.IO;
-using Column = Signum.Entities.DynamicQuery.Column;
-using Filter = Signum.Entities.DynamicQuery.Filter;
+using Column = Signum.DynamicQuery.Column;
+using Filter = Signum.DynamicQuery.Filter;
 
-namespace Signum.Engine.Excel;
+namespace Signum.Excel;
 
 
 public class ImportResult
@@ -651,7 +650,7 @@ public class ImporterFromExcel
         {
             var pr = a is HasValueToken ? a.Parent!.GetPropertyRoute() : a.GetPropertyRoute();
 
-            return Signum.Engine.Authorization.PropertyAuthLogic.GetAllowedFor(pr!, Entities.Authorization.PropertyAllowed.Write);
+            return PropertyAuthLogic.GetAllowedFor(pr!, PropertyAllowed.Write);
         }).NotNull().ToList();
 
         if (authErrors.Any())

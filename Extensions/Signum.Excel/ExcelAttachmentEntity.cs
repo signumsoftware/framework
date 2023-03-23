@@ -1,9 +1,9 @@
-using Signum.Entities.UserQueries;
-using Signum.Entities.Mailing;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
+using Signum.Mailing.Templates;
+using Signum.UserQueries;
 
-namespace Signum.Entities.Excel;
+namespace Signum.Excel;
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class ExcelAttachmentEntity : Entity, IAttachmentGeneratorEntity
