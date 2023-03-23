@@ -1,10 +1,9 @@
-using Signum.Entities.Processes;
-using Signum.Engine.Authorization;
-using Signum.Entities.Basics;
+using Signum.Authorization.Rules;
+using Signum.Engine.Sync;
+using Signum.Engine.Sync.Postgres;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Authorization;
 
-namespace Signum.Engine.Processes;
+namespace Signum.Processes;
 
 public static class ProcessLogic
 {
@@ -25,11 +24,11 @@ public static class ProcessLogic
         As.Expression(() => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Process.Is(p)));
 
     [AutoExpressionField]
-    public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this IProcessLineDataEntity pl) => 
+    public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this PackageLineEntity pl) => 
         As.Expression(() => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Line.Is(pl)));
 
     [AutoExpressionField]
-    public static ExceptionEntity? Exception(this IProcessLineDataEntity pl, ProcessEntity p) =>
+    public static ExceptionEntity? Exception(this PackageLineEntity pl, ProcessEntity p) =>
         As.Expression(() => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(pl))!.Exception.Entity);
 
     [AutoExpressionField]
@@ -91,7 +90,7 @@ public static class ProcessLogic
                     p.Exception,
                 });
 
-            PermissionAuthLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
+            PermissionLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
 
             SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
@@ -106,7 +105,7 @@ public static class ProcessLogic
             QueryLogic.Expressions.Register((IProcessDataEntity p) => p.LastProcess(), ProcessMessage.LastProcess);
 
             QueryLogic.Expressions.Register((ProcessEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
-            QueryLogic.Expressions.Register((IProcessLineDataEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
+            QueryLogic.Expressions.Register((PackageLineEntity p) => p.ExceptionLines(), ProcessMessage.ExceptionLines);
 
             PropertyAuthLogic.SetMaxAutomaticUpgrade(PropertyRoute.Construct((ProcessEntity p) => p.User), PropertyAllowed.Read);
 
@@ -303,9 +302,9 @@ public static class ProcessLogic
     }
 
     public static void ForEachLine<T>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action, int groupsOf = 100)
-        where T : Entity, IProcessLineDataEntity, new()
+        where T : Entity, new()
     {
-        var remainingNotExceptionsLines = remainingLines.Where(li => li.Exception(executingProcess.CurrentProcess) == null);
+        var remainingNotExceptionsLines = remainingLines.Where(li => executingProcess.CurrentProcess.ExceptionLines().SingleOrDefault(el => el.Line.Is(li))! == null);
 
         var totalCount = remainingNotExceptionsLines.Count();
         int j = 0;
@@ -384,7 +383,7 @@ public static class ProcessLogic
     {
         if (executingProcess == null)
         {
-            collection.ProgressForeach(elementInfo, action, transactional: false);
+            ProgressExtensions.ProgressForeach(collection, elementInfo, action, transactional: false);
         }
         else
         {

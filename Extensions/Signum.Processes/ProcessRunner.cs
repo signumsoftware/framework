@@ -1,13 +1,9 @@
-using Signum.Engine.Authorization;
-using Signum.Engine.Cache;
-using Signum.Entities.Authorization;
-using Signum.Entities.Processes;
-using Signum.Entities.Basics;
-using Signum.Engine.Scheduler;
-using Signum.Entities.Reflection;
 using Microsoft.Data.SqlClient;
+using Signum.Authorization;
+using Signum.Cache;
+using Signum.Engine.Basics;
 
-namespace Signum.Engine.Processes;
+namespace Signum.Processes;
 
 public static class ProcessRunner
 {
@@ -478,7 +474,8 @@ public sealed class ExecutingProcess
 
         using (UserHolder.UserSession(user))
         {
-            using (ProcessLogic.OnApplySession(CurrentProcess))
+            using (ExecutionMode.SetIsolation(CurrentProcess) ?? 
+                (CurrentProcess.Data != null ? ExecutionMode.SetIsolation(CurrentProcess.Data) : null))
             {
                 if (UserEntity.Current == null)
                     UserHolder.Current = new UserWithClaims(AuthLogic.SystemUser!);

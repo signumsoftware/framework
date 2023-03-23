@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Processes;
+namespace Signum.Processes;
 
 [EntityKind(EntityKind.Part, EntityData.Transactional)]
 public class PackageEntity : Entity, IProcessDataEntity
@@ -35,7 +35,7 @@ public static class PackageOperationProcess
 
 
 [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
-public class PackageLineEntity : Entity, IProcessLineDataEntity
+public class PackageLineEntity : Entity
 {   
     public Lite<PackageEntity> Package { get; set; }
 

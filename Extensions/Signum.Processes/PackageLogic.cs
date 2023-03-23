@@ -1,12 +1,10 @@
-using Signum.Entities.Processes;
+using Signum.API.Json;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Engine.Sync;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Engine.Json;
-using Signum.Entities.Dashboard;
-using Signum.Entities;
 
-namespace Signum.Engine.Processes;
+namespace Signum.Processes;
 
 public static class PackageLogic
 {
@@ -250,7 +248,7 @@ public class PackageOperationAlgorithm : IProcessAlgorithm
 
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
-            OperationType operationType = OperationLogic.OperationType(line.Target.GetType(), operationSymbol);
+            OperationType operationType = OperationLogic.GetOperationInfo(line.Target.GetType(), operationSymbol).OperationType;
 
             switch (operationType)
             {

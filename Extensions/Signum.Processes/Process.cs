@@ -1,8 +1,6 @@
 using System.ComponentModel;
-using Signum.Entities.Basics;
-using Signum.Entities.Authorization;
 
-namespace Signum.Entities.Processes;
+namespace Signum.Processes;
 
 public class ProcessAlgorithmSymbol : Symbol
 {
@@ -147,10 +145,6 @@ public interface IProcessDataEntity : IEntity
 {
 }
 
-public interface IProcessLineDataEntity : IEntity
-{
-
-}
 
 public enum ProcessState
 {
@@ -203,7 +197,7 @@ public class ProcessExceptionLineEntity : Entity
     [DbType(Size = int.MaxValue)]
     public string? ElementInfo { get; set; }
 
-    public Lite<IProcessLineDataEntity>? Line { get; set; }
+    public Lite<IEntity>? Line { get; set; }
     
     public Lite<ProcessEntity> Process { get; set; }
     
