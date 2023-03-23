@@ -1,12 +1,11 @@
-using Signum.Entities.Mailing;
-using Signum.Entities.Isolation;
-using Signum.Entities.Templating;
-using Signum.Engine.UserAssets;
-using Signum.Engine.Authorization;
 using System.Globalization;
-using Signum.Entities.Authorization;
+using Signum.Mailing.Templates;
+using Signum.Engine.Sync;
+using Signum.Templating;
+using Signum.Engine.UserAssets;
+using Signum.Authorization;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Mailing;
 
 public interface IEmailModel
 {
@@ -288,7 +287,7 @@ public static class EmailModelLogic
         if (emailModel.UntypedEntity == null)
             throw new InvalidOperationException("Entity property not set on EmailModel");
 
-        using (IsolationEntity.Override((emailModel.UntypedEntity as Entity)?.TryIsolation()))
+        using (emailModel.UntypedEntity is IEntity mod ? ExecutionMode.SetIsolation(mod) : null)
         {
             var emailModelEntity = ToEmailModelEntity(emailModel.GetType());
             var template = GetCurrentTemplate(emailModelEntity, emailModel.UntypedEntity as Entity);

@@ -1,9 +1,8 @@
-using Signum.Entities.Mailing;
 using System.Net.Mail;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Mailing;
 
 public static class EmailSenderConfigurationLogic
 {
@@ -15,8 +14,6 @@ public static class EmailSenderConfigurationLogic
     public static void Start(SchemaBuilder sb, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
     {
         sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(SmtpEmailServiceEntity));
-        sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(ExchangeWebServiceEmailServiceEntity));
-        sb.Settings.AssertImplementedBy((EmailSenderConfigurationEntity o) => o.Service, typeof(MicrosoftGraphEmailServiceEntity));
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {

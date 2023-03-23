@@ -1,6 +1,6 @@
 using Signum.Entities.Basics;
 
-namespace Signum.Entities.Mailing;
+namespace Signum.Mailing;
 
 public class EmailConfigurationEmbedded : EmbeddedEntity
 {

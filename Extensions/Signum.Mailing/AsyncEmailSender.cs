@@ -1,11 +1,9 @@
-using Signum.Entities.Mailing;
-using Signum.Engine.Authorization;
-using Signum.Engine.Cache;
-using Signum.Engine.Scheduler;
-using Signum.Entities.Basics;
 using Microsoft.Data.SqlClient;
+using Signum.Authorization;
+using Signum.Cache;
+using Signum.Engine.Basics;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Mailing;
 
 public static class AsyncEmailSender
 {

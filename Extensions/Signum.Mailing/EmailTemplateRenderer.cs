@@ -1,10 +1,10 @@
 using System.Globalization;
-using Signum.Engine.Templating;
-using Signum.Entities.Basics;
-using Signum.Entities.Mailing;
-using Signum.Entities.UserQueries;
+using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Basics;
+using Signum.Templating;
+using Signum.UserAssets.Queries;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Mailing.Templates;
 
 class EmailMessageBuilder
 {
@@ -76,9 +76,9 @@ class EmailMessageBuilder
                 Attachments = template.Attachments.Concat((template.MasterTemplate?.RetrieveAndRemember().Attachments).EmptyIfNull()).SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g, context)).ToMList()
             };
 
-            EmailTemplateMessageEmbedded? message = 
+            EmailTemplateMessageEmbedded? message =
                 template.GetCultureMessage(ci) ??
-                template.GetCultureMessage(ci.Parent) ?? 
+                template.GetCultureMessage(ci.Parent) ??
                 template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo()) ??
                 template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo().Parent);
 
@@ -123,7 +123,7 @@ class EmailMessageBuilder
             if (template.MasterTemplate != null)
             {
                 var emt = template.MasterTemplate.RetrieveAndRemember();
-                var emtm = 
+                var emtm =
                     emt.GetCultureMessage(message.CultureInfo.ToCultureInfo()) ??
                     emt.GetCultureMessage(message.CultureInfo.ToCultureInfo().Parent) ??
                     emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo()) ??
@@ -269,8 +269,8 @@ class EmailMessageBuilder
 
             var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]!).ToList();
 
-            var groupsWithEmail = groups.Where(a => a.Key !=null && a.Key.Email.HasText()).ToList();
-            
+            var groupsWithEmail = groups.Where(a => a.Key != null && a.Key.Email.HasText()).ToList();
+
             if (groupsWithEmail.IsEmpty())
             {
                 switch (tr.WhenNone)
@@ -360,8 +360,8 @@ class EmailMessageBuilder
             var filters = model != null ? model.GetFilters(qd) :
                 entity != null ? new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity!.ToLite()) } :
                 throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(model)}' are both null");
-
-            filters.AddRange(template.Filters.ToFilterList());
+            
+            filters.AddRange(QueryFilterUtils.ToFilterList(template.Filters));
 
             var orders = model?.GetOrders(qd) ?? new List<Order>();
             orders.AddRange(template.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList());

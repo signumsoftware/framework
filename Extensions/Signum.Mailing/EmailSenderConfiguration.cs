@@ -1,8 +1,6 @@
 using System.Net.Mail;
-using Microsoft.Exchange.WebServices.Data;
-using System.ComponentModel;
 
-namespace Signum.Entities.Mailing;
+namespace Signum.Mailing;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
 public class EmailSenderConfigurationEntity : Entity
@@ -11,8 +9,6 @@ public class EmailSenderConfigurationEntity : Entity
     {
         DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryFormat), m => m.Name);
         DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryMethod), m => m.Name);
-        DescriptionManager.ExternalEnums.Add(typeof(ExchangeVersion), m => m.Name);
-
     }
 
     [UniqueIndex]
@@ -25,7 +21,7 @@ public class EmailSenderConfigurationEntity : Entity
     [NoRepeatValidator]
     public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
-    [ImplementedBy(typeof(SmtpEmailServiceEntity), typeof(ExchangeWebServiceEmailServiceEntity), typeof(MicrosoftGraphEmailServiceEntity))]
+    [ImplementedBy(typeof(SmtpEmailServiceEntity))]
     public EmailServiceEntity Service { get; set; }
 
     [AutoExpressionField]
@@ -35,8 +31,8 @@ public class EmailSenderConfigurationEntity : Entity
     {
         if (sender == DefaultFrom && pi.Name == nameof(DefaultFrom.AzureUserId))
         {
-            if (DefaultFrom.AzureUserId == null && Service is MicrosoftGraphEmailServiceEntity microsoftGraph)
-                return ValidationMessage._0IsMandatoryWhen1IsSet.NiceToString(pi.NiceName(), NicePropertyName(() => microsoftGraph));
+            if (Service != null )
+                return Service.ValidateFrom(DefaultFrom, pi);
         }
 
         return base.ChildPropertyValidation(sender, pi);
@@ -64,6 +60,8 @@ public static class EmailSenderConfigurationOperation
 public abstract class EmailServiceEntity : Entity
 {
     public abstract EmailServiceEntity Clone();
+
+    public virtual string? ValidateFrom(EmailFromEmbedded from, PropertyInfo pi) => null;
 }
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
@@ -157,77 +155,3 @@ public enum CertFileType
     SignedFile
 }
 
-[EntityKind(EntityKind.Part, EntityData.Master)]
-public class ExchangeWebServiceEmailServiceEntity : EmailServiceEntity
-{
-
-
-    public ExchangeVersion ExchangeVersion { get; set; }
-
-    [StringLengthValidator(Max = 300)]
-    public string? Url { get; set; }
-
-    [StringLengthValidator(Max = 100)]
-    public string? Username { get; set; }
-
-    [StringLengthValidator(Max = 100), Format(FormatAttribute.Password)]
-    public string? Password { get; set; }
-
-    public bool UseDefaultCredentials { get; set; } = true;
-
-    public override ExchangeWebServiceEmailServiceEntity Clone()
-    {
-        return new ExchangeWebServiceEmailServiceEntity
-        {
-            ExchangeVersion = ExchangeVersion,
-            Url = Url,
-            Username = Username,
-            Password = Password,
-            UseDefaultCredentials = UseDefaultCredentials,
-        };
-
-    }
-}
-
-[EntityKind(EntityKind.Part, EntityData.Master)]
-public class MicrosoftGraphEmailServiceEntity : EmailServiceEntity
-{
-    public bool UseActiveDirectoryConfiguration { get; set; }
-
-    [Description("Azure Application (client) ID")]
-    public Guid? Azure_ApplicationID { get; set; }
-
-    [Description("Azure Directory (tenant) ID")]
-    public Guid? Azure_DirectoryID { get; set; }
-
-    [StringLengthValidator(Max = 100), Description("Azure Client Secret Value")]
-    public string? Azure_ClientSecret { get; set; }
-
-    protected override string? PropertyValidation(PropertyInfo pi)
-    {
-        if (!UseActiveDirectoryConfiguration)
-        {
-            if (pi.Name == nameof(Azure_ApplicationID) && Azure_ApplicationID == null)
-                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
-
-            if (pi.Name == nameof(Azure_DirectoryID) && Azure_DirectoryID == null)
-                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
-
-            if (pi.Name == nameof(Azure_ClientSecret) && !Azure_ClientSecret.HasText())
-                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
-        }
-
-        return base.PropertyValidation(pi);
-    }
-    public override MicrosoftGraphEmailServiceEntity Clone()
-    {
-        return new MicrosoftGraphEmailServiceEntity
-        {
-            UseActiveDirectoryConfiguration = UseActiveDirectoryConfiguration,
-            Azure_ApplicationID = Azure_ApplicationID,
-            Azure_DirectoryID = Azure_DirectoryID,
-            Azure_ClientSecret = Azure_ClientSecret,
-        };
-    }
-
-}

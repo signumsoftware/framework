@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Mailing;
+namespace Signum.Mailing;
 
 [EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
 public class EmailModelEntity : Entity

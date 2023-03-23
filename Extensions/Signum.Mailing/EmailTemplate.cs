@@ -1,15 +1,17 @@
 using Signum.Entities.Basics;
-using Signum.Entities.DynamicQuery;
 using System.ComponentModel;
-using Signum.Entities.UserAssets;
-using Signum.Entities.Templating;
 using System.Xml.Linq;
-using Signum.Entities.UserQueries;
+using Signum.Mailing.Templates;
+using Signum.UserAssets.QueryTokens;
+using Signum.Entities.UserAssets;
+using Signum.UserAssets.Queries;
+using Signum.Templating;
+using Signum.Engine.Basics;
 
-namespace Signum.Entities.Mailing;
+namespace Signum.Mailing.Templates;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class EmailTemplateEntity : Entity, IUserAssetEntity
+public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 {
     public EmailTemplateEntity()
     {
@@ -34,7 +36,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
     public bool EditableMessage { get; set; } = true;
 
     public bool DisableAuthorization { get; set; }
-    
+
     public QueryEntity Query { get; set; }
 
     public EmailModelEntity? Model { get; set; }
@@ -67,7 +69,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
     public TemplateApplicableEval? Applicable { get; set; }
 
 
-    protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
+    protected override string? PropertyValidation(PropertyInfo pi)
     {
         if (pi.Name == nameof(Messages))
         {
@@ -139,15 +141,15 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
                      ),
             new XElement("Recipients", Recipients.Select(rec =>
                 new XElement("Recipient",
-                     rec.DisplayName.HasText()? new XAttribute("DisplayName", rec.DisplayName) : null!,
-                     rec.EmailAddress.HasText()? new XAttribute("EmailAddress", rec.EmailAddress) : null!,
+                     rec.DisplayName.HasText() ? new XAttribute("DisplayName", rec.DisplayName) : null!,
+                     rec.EmailAddress.HasText() ? new XAttribute("EmailAddress", rec.EmailAddress) : null!,
                      new XAttribute("Kind", rec.Kind),
                      rec.Token != null ? new XAttribute("Token", rec.Token?.Token.FullKey()!) : null!,
                      new XAttribute("WhenMany", rec.WhenMany),
                      new XAttribute("WhenNone", rec.WhenNone)
                 )
             )),
-            Attachments.Any() ?  new XElement("Attachments", Attachments.Select(x => x.ToXml(ctx))) : null,
+            Attachments.Any() ? new XElement("Attachments", Attachments.Select(x => x.ToXml(ctx))) : null,
             new XElement("Messages", Messages.Select(x =>
                 new XElement("Message",
                     new XAttribute("CultureInfo", x.CultureInfo.Name),
@@ -158,7 +160,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
             this.Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script)))!
         );
     }
-       
+
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
         Guid = Guid.Parse(element.Attribute("Guid")!.Value);
@@ -167,7 +169,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 
         Query = ctx.GetQuery(element.Attribute("Query")!.Value);
         EditableMessage = bool.Parse(element.Attribute("EditableMessage")!.Value);
-        Model = element.Attribute("Model")?.Let(at => ctx.GetEmailModel(at.Value));
+        Model = element.Attribute("Model")?.Let(at =>  EmailModelLogic.GetEmailModelEntity(at.Value));
 
         MasterTemplate = element.Attribute("MasterTemplate")?.Let(a => (Lite<EmailMasterTemplateEntity>)ctx.GetEntity(Guid.Parse(a.Value)).ToLiteFat());
 
@@ -178,7 +180,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
         MessageFormat = element.Attribute("MessageFormat")?.Value.ToEnum<EmailMessageFormat>() ??
             (element.Attribute("IsBodyHtml")?.Value.ToBool() == true ? EmailMessageFormat.HtmlComplex : EmailMessageFormat.PlainText);
 
-        From = From.CreateOrAssignEmbedded(element.Element("From"), (etf, xml) => 
+        From = From.CreateOrAssignEmbedded(element.Element("From"), (etf, xml) =>
         {
             etf.DisplayName = xml.Attribute("DisplayName")?.Value;
             etf.EmailAddress = xml.Attribute("EmailAddress")?.Value;
@@ -187,7 +189,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
             etf.WhenNone = xml.Attribute("WhenNone")?.Value.ToEnum<WhenNoneFromBehaviour>() ?? WhenNoneFromBehaviour.NoMessage;
         });
 
-        Recipients.Synchronize(element.Element("Recipients")!.Elements("Recipient").ToList(), (rep, xml) => 
+        Recipients.Synchronize(element.Element("Recipients")!.Elements("Recipient").ToList(), (rep, xml) =>
         {
             rep.DisplayName = xml.Attribute("DisplayName")?.Value;
             rep.EmailAddress = xml.Attribute("EmailAddress")?.Value;
@@ -199,14 +201,14 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity
 
         Messages.Synchronize(element.Element("Messages")!.Elements("Message").ToList(), (et, xml) =>
         {
-            et.CultureInfo = ctx.GetCultureInfoEntity(xml.Attribute("CultureInfo")!.Value);
+            et.CultureInfo = CultureInfoLogic.GetCultureInfoEntity(xml.Attribute("CultureInfo")!.Value);
             et.Subject = xml.Attribute("Subject")!.Value;
             et.Text = xml.Value;
         });
 
         Attachments.SynchronizeAttachments(element.Element("Attachments")?.Elements().ToList(), ctx, this);
 
-        Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script =  app.Value});
+        Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });
         ParseData(ctx.GetQueryDescription(Query));
     }
 
@@ -323,12 +325,12 @@ public class EmailTemplateMessageEmbedded : EmbeddedEntity
         this.CultureInfo = culture;
     }
 
-    
+
     public CultureInfoEntity CultureInfo { get; set; }
 
     [DbType(Size = int.MaxValue)]
     string text;
-    [StringLengthValidator(MultiLine=true)]
+    [StringLengthValidator(MultiLine = true)]
     public string Text
     {
         get { return text; }
@@ -361,7 +363,7 @@ public class EmailTemplateMessageEmbedded : EmbeddedEntity
     {
         return CultureInfo?.ToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
     }
- }
+}
 
 public static class AttachmentFromXmlExtensions
 {
@@ -374,14 +376,14 @@ public static class AttachmentFromXmlExtensions
         for (int i = 0; i < xElements.Count; i++)
         {
             IAttachmentGeneratorEntity entity;
-            var type = TypeMapping.GetOrThrow<string, Type>(xElements[i].Name.LocalName);
+            var type = TypeMapping.GetOrThrow(xElements[i].Name.LocalName);
 
             if (entities.Count == i)
             {
                 entity = (IAttachmentGeneratorEntity)Activator.CreateInstance(type)!;
                 entities.Add(entity);
             }
-            else if(entities[i].GetType() != type)
+            else if (entities[i].GetType() != type)
             {
                 entity = entities[i] = (IAttachmentGeneratorEntity)Activator.CreateInstance(type)!;
             }
@@ -427,8 +429,7 @@ public enum EmailTemplateMessage
     TheresMoreThanOneMessageForTheSameLanguage,
     [Description("The text must contain {0} indicating replacement point")]
     TheTextMustContain0IndicatingReplacementPoint,
-    [Description("Impossible to access {0} because the template has no {1}")]
-    ImpossibleToAccess0BecauseTheTemplateHAsNo1,
+
     NewCulture,
     TokenOrEmailAddressMustBeSet,
     TokenAndEmailAddressCanNotBeSetAtTheSameTime,

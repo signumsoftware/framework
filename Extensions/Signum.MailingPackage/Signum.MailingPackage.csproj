@@ -18,14 +18,15 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
-		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
-		<ProjectReference Include="..\Signum.Caching\Signum.Caching.csproj" />
-		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
-		<ProjectReference Include="..\Signum.Templating\Signum.Templating.csproj" />
-		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
+		<ProjectReference Include="..\Signum.Mailing\Signum.Mailing.csproj" />
+		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />
+		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
+		<ProjectReference Include="..\Signum.UserQueries\Signum.UserQueries.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Senders\" />
-	</ItemGroup>
+    <ItemGroup>
+	    <None Update="Translations\*.xml">
+		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    </None>
+    </ItemGroup>
 </Project>

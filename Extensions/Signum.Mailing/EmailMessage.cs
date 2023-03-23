@@ -1,15 +1,13 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Processes;
-using Signum.Entities.Basics;
 using System.ComponentModel;
 using System.Net.Mail;
-using Signum.Entities.Files;
 using System.Security.Cryptography;
+using Signum.Files;
+using Signum.Mailing.Templates;
 
-namespace Signum.Entities.Mailing;
+namespace Signum.Mailing;
 
 [EntityKind(EntityKind.Main, EntityData.Transactional)]
-public class EmailMessageEntity : Entity, IProcessLineDataEntity
+public class EmailMessageEntity : Entity
 {
     public EmailMessageEntity()
     {
@@ -81,8 +79,6 @@ public class EmailMessageEntity : Entity, IProcessLineDataEntity
 
     public bool EditableMessage { get; set; } = true;
 
-    public Lite<EmailPackageEntity>? Package { get; set; }
-
     public Guid? ProcessIdentifier { get; set; }
 
     public int SendRetries { get; set; }
@@ -91,17 +87,17 @@ public class EmailMessageEntity : Entity, IProcessLineDataEntity
     public MList<EmailAttachmentEmbedded> Attachments { get; set; } = new MList<EmailAttachmentEmbedded>();
 
     static StateValidator<EmailMessageEntity, EmailMessageState> validator = new StateValidator<EmailMessageEntity, EmailMessageState>(
-        m => m.State, m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
+        m => m.State, m => m.Exception, m => m.Sent, m => m.ReceptionNotified)
         {
-{EmailMessageState.Created,             false,         false,         false,                    null },
-{EmailMessageState.Draft,               false,         false,         false,                    null },
-{EmailMessageState.ReadyToSend,         false,         false,         false,                    null },
-{EmailMessageState.RecruitedForSending, false,         false,         false,                    null },
-{EmailMessageState.Sent,                false,         true,          false,                    null },
-{EmailMessageState.SentException,       true,          null,          false,                    null },
-{EmailMessageState.ReceptionNotified,   true,          true,          true,                     null },
-{EmailMessageState.Received,            false,         false,         false,                    false },
-{EmailMessageState.Outdated,            false,         false,         false,                    null },
+{EmailMessageState.Created,             false,         false,         false  },
+{EmailMessageState.Draft,               false,         false,         false  },
+{EmailMessageState.ReadyToSend,         false,         false,         false  },
+{EmailMessageState.RecruitedForSending, false,         false,         false  },
+{EmailMessageState.Sent,                false,         true,          false  },
+{EmailMessageState.SentException,       true,          null,          false  },
+{EmailMessageState.ReceptionNotified,   true,          true,          true   },
+{EmailMessageState.Received,            false,         false,         false  },
+{EmailMessageState.Outdated,            false,         false,         false  },
         };
 
     [AutoExpressionField]
@@ -121,41 +117,6 @@ public class EmailMessageEntity : Entity, IProcessLineDataEntity
 }
 
 
-public class EmailReceptionMixin : MixinEntity
-{
-    protected EmailReceptionMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
-    {
-        this.BindParent();
-    }
-
-    [BindParent]
-    public EmailReceptionInfoEmbedded? ReceptionInfo { get; set; }
-}
-
-public class EmailReceptionInfoEmbedded : EmbeddedEntity
-{
-    public EmailReceptionInfoEmbedded()
-    {
-        this.BindParent();
-    }
-
-    [UniqueIndex(AllowMultipleNulls = true)]
-    [StringLengthValidator(Min = 1, Max = 100)]
-    public string UniqueId { get; set; }
-
-
-    public Lite<Pop3ReceptionEntity> Reception { get; set; }
-
-    [BindParent]
-    public BigStringEmbedded RawContent { get; set; } = new BigStringEmbedded();
-
-
-    public DateTime SentDate { get; set; }
-
-    public DateTime ReceivedDate { get; set; }
-
-    public DateTime? DeletionDate { get; set; }
-}
 
 public class EmailAttachmentEmbedded : EmbeddedEntity
 {
@@ -343,12 +304,6 @@ public enum EmailMessageState
 
 
 
-[AutoInit]
-public static class EmailMessageProcess
-{
-    public static readonly ProcessAlgorithmSymbol CreateEmailsSendAsync;
-    public static ProcessAlgorithmSymbol SendEmails;
-}
 
 [AutoInit]
 public static class EmailMessageOperation
@@ -357,7 +312,6 @@ public static class EmailMessageOperation
     public static ExecuteSymbol<EmailMessageEntity> ReadyToSend;
     public static ExecuteSymbol<EmailMessageEntity> Send;
     public static ConstructSymbol<EmailMessageEntity>.From<EmailMessageEntity> ReSend;
-    public static ConstructSymbol<ProcessEntity>.FromMany<EmailMessageEntity> ReSendEmails;
     public static ConstructSymbol<EmailMessageEntity>.Simple CreateMail;
     public static ConstructSymbol<EmailMessageEntity>.From<EmailTemplateEntity> CreateEmailFromTemplate;
     public static DeleteSymbol<EmailMessageEntity> Delete;
@@ -376,17 +330,6 @@ public enum EmailMessageMessage
     _01requiresExtraParameters
 }
 
-[EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
-public class EmailPackageEntity : Entity, IProcessDataEntity
-{
-    [StringLengthValidator(Max = 200)]
-    public string? Name { get; set; }
-
-    public override string ToString()
-    {
-        return "EmailPackage {0}".FormatWith(Name);
-    }
-}
 
 [AutoInit]
 public static class EmailFileType

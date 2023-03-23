@@ -1,24 +1,14 @@
 using System.Net.Mail;
-using Signum.Entities.Mailing;
-using Signum.Entities.Processes;
-using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
-using System.IO;
-using Signum.Engine.Files;
-using Microsoft.AspNetCore.StaticFiles;
-using Signum.Entities.Basics;
-using Signum.Entities.Files;
-using Signum.Engine.Mailing.Senders;
-using Signum.Utilities;
-using Microsoft.AspNetCore.Mvc;
+using Signum.Mailing.Templates;
+using Signum.Files;
+using Signum.Engine.Basics;
+using Signum.Mailing;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Mailing;
 
 public static class EmailLogic
 {
-    [AutoExpressionField]
-    public static IQueryable<EmailMessageEntity> EmailMessages(this EmailPackageEntity e) =>
-        As.Expression(() => Database.Query<EmailMessageEntity>().Where(a => a.Package.Is(e)));
 
     static Func<EmailConfigurationEmbedded> getConfiguration = null!;
     public static EmailConfigurationEmbedded Configuration
@@ -28,8 +18,8 @@ public static class EmailLogic
 
     static Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration = null!;
 
-    public static Polymorphic<Func<EmailServiceEntity, EmailSenderConfigurationEntity, BaseEmailSender>> EmailSenders = new ();       
-    public static BaseEmailSender GetEmailSender(EmailMessageEntity email)
+    public static Polymorphic<Func<EmailServiceEntity, EmailSenderConfigurationEntity, EmailSenderBase>> EmailSenders = new ();       
+    public static EmailSenderBase GetEmailSender(EmailMessageEntity email)
     {
         var template = email.Template?.Try(t => EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow(t));
         var config = getEmailSenderConfiguration(template, email.Target, email);
@@ -57,8 +47,6 @@ public static class EmailLogic
             if (attachment != null)
                 FileTypeLogic.Register(EmailFileType.Attachment, attachment);
 
-            Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb));
-
             sb.Include<EmailMessageEntity>()
                 .WithQuery(() => e => new
                 {
@@ -69,33 +57,24 @@ public static class EmailLogic
                     e.Template,
                     e.Sent,
                     e.Target,
-                    e.Package,
                     e.SentBy,
                     e.Exception,
                 });
 
-            PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
+            PermissionLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
 
             EmailLogic.getEmailSenderConfiguration = getEmailSenderConfiguration;
 
             EmailSenders.Register((SmtpEmailServiceEntity s, EmailSenderConfigurationEntity c) => new SmtpSender(c, s));
-            EmailSenders.Register((MicrosoftGraphEmailServiceEntity s, EmailSenderConfigurationEntity c) => new MicrosoftGraphSender(c, s));
-            EmailSenders.Register((ExchangeWebServiceEmailServiceEntity s, EmailSenderConfigurationEntity c) => new ExchangeWebServiceSender(c, s));
 
             EmailGraph.Register();
 
-            QueryLogic.Expressions.Register((EmailPackageEntity a) => a.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
-            ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
         }
     }
 
-    public static void ExceptionLogic_DeletePackages(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
-    {
-        Database.Query<EmailPackageEntity>().Where(pack => !Database.Query<ProcessEntity>().Any(pr => pr.Data == pack) && !pack.EmailMessages().Any())
-            .UnsafeDeleteChunksLog(parameters, sb, token);
-    }
+  
 
     public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
     {

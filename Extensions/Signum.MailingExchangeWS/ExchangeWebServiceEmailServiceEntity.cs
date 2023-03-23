@@ -1,0 +1,39 @@
+using Microsoft.Exchange.WebServices.Data;
+using Signum.Mailing;
+
+namespace Signum.MailingExchangeWS;
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class ExchangeWebServiceEmailServiceEntity : EmailServiceEntity
+{
+    static ExchangeWebServiceEmailServiceEntity()
+    {
+        DescriptionManager.ExternalEnums.Add(typeof(ExchangeVersion), m => m.Name);
+    }
+
+    public ExchangeVersion ExchangeVersion { get; set; }
+
+    [StringLengthValidator(Max = 300)]
+    public string? Url { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string? Username { get; set; }
+
+    [StringLengthValidator(Max = 100), Format(FormatAttribute.Password)]
+    public string? Password { get; set; }
+
+    public bool UseDefaultCredentials { get; set; } = true;
+
+    public override ExchangeWebServiceEmailServiceEntity Clone()
+    {
+        return new ExchangeWebServiceEmailServiceEntity
+        {
+            ExchangeVersion = ExchangeVersion,
+            Url = Url,
+            Username = Username,
+            Password = Password,
+            UseDefaultCredentials = UseDefaultCredentials,
+        };
+
+    }
+}

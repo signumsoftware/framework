@@ -1,14 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Authorization;
-using Signum.React.Facades;
-using System.Threading;
-using Signum.Entities.Mailing;
-using Signum.Engine.Mailing;
-using Signum.React.Filters;
 using Signum.Entities.Basics;
+using Signum.Mailing.Templates;
+using Signum.API.Filters;
+using Signum.Engine.Basics;
+using Signum.API;
+using Signum.Authorization;
 
-namespace Signum.React.Mailing;
+namespace Signum.Mailing;
 
 [ValidateModelFilter]
 public class MailingController : ControllerBase
