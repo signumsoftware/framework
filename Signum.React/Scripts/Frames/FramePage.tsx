@@ -24,6 +24,7 @@ import { classes } from '../Globals'
 interface FramePageState {
   pack: EntityPack<Entity>;
   lastEntity: string;
+  viewName?: string;
   getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
   refreshCount: number;
   createNew?: () => Promise<EntityPack<Entity> | undefined>;
@@ -56,11 +57,12 @@ export default function FramePage() {
 
   useLooseChanges(state && !state.executing ? ({ entity: state.pack.entity, lastEntity: state.lastEntity }) : undefined);
 
-  function setPack(pack: EntityPack<Entity>, getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>, createNew?: () => Promise<EntityPack<Entity> | undefined>) {
+  function setPack(pack: EntityPack<Entity>, view: { viewName?: string, getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any> }, createNew?: () => Promise<EntityPack<Entity> | undefined>) {
     return setState({
       pack,
       lastEntity: JSON.stringify(pack.entity),
-      getComponent,
+      getComponent: view.getComponent,
+      viewName: view.viewName,
       createNew: createNew,
       refreshCount: state ? state.refreshCount + 1 : 0
     });
@@ -70,8 +72,18 @@ export default function FramePage() {
 
     var currentEntity = stateRef.current?.pack.entity;
 
-    if (currentEntity && currentEntity.Type == type && currentEntity.id == id)
-      return;
+    if (currentEntity && currentEntity.Type == type && currentEntity.id == id) {
+      if (stateRef.current?.viewName != QueryString.parse(location.search).viewName) {
+        loadComponent(s.pack!).then(view => {
+          if (!mounted.current)
+            return undefined;
+
+          setPack(s.pack, view);
+        });
+      } else {
+        return;
+      }
+    }
 
     loadEntity()
       .then(a => {
@@ -80,11 +92,11 @@ export default function FramePage() {
         }
         else {
 
-          loadComponent(a.pack!).then(getComponent => {
+          loadComponent(a.pack!).then(view => {
             if (!mounted.current)
               return undefined;
 
-            return setPack(a.pack!, getComponent, a.createNew).then(() => {
+            return setPack(a.pack!, view, a.createNew).then(() => {
               if (id == null && a.pack!.entity.id != null) { //Constructor returns saved entity
                 AppContext.navigate(Navigator.navigateRoute(a.pack!.entity), { replace : true });
               }
@@ -109,42 +121,53 @@ export default function FramePage() {
       buttonBar.current.handleKeyDown(e);
   }
 
-  function loadComponent(pack: EntityPack<Entity>): Promise<(ctx: TypeContext<Entity>) => React.ReactElement<any>> {
-    const viewName = QueryString.parse(location.search).viewName ?? undefined;
-    return Navigator.getViewPromise(pack.entity, viewName).promise;
+  async function loadComponent(pack: EntityPack<Entity>, forceViewName?: string | Navigator.ViewPromise<ModifiableEntity>): Promise<{
+    viewName?: string;
+    getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
+  }> {
+    if (forceViewName instanceof Navigator.ViewPromise) {
+      var getComponent = await forceViewName.promise;
+      return { viewName: undefined, getComponent: getComponent };
+    } else {
+
+      const viewName = forceViewName ?? QueryString.parse(location.search).viewName ?? undefined;
+      const getComponent = await Navigator.getViewPromise(pack.entity, viewName).promise;
+
+      return { viewName, getComponent };
+    }
   }
 
 
-  function loadEntity(): Promise<undefined | { pack: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
+  async function loadEntity(): Promise<undefined | { pack: EntityPack<Entity>, createNew?: () => Promise<EntityPack<Entity> | undefined> }> {
 
     const queryString = QueryString.parse(location.search);
 
     if (queryString.waitOpenerData) {
       if (window.opener!.dataForChildWindow == undefined) {
-        throw new Error("No dataForChildWindow in parent found!")
+        console.error("No dataForChildWindow in parent found!");
+      } else {
+        var pack = window.opener!.dataForChildWindow as EntityPack<Entity>;
+        window.opener!.dataForChildWindow = undefined;
+        var txt = JSON.stringify(pack);
+        return {
+          pack,
+          createNew: () => Promise.resolve(JSON.parse(txt))
+        };
       }
-
-      var pack = window.opener!.dataForChildWindow as EntityPack<Entity>;
-      window.opener!.dataForChildWindow = undefined;
-      var txt = JSON.stringify(pack);
-      return Promise.resolve({
-        pack,
-        createNew: () => Promise.resolve(JSON.parse(txt))
-      });
     }
 
     if (queryString.waitCurrentData) {
       if (window.dataForCurrentWindow == undefined) {
-        throw new Error("No dataForChildWindow in parent found!")
+        console.error("No dataForCurrentWindow in parent found!");
+      } else {
+        var pack = window.dataForCurrentWindow as EntityPack<Entity>;
+        window.dataForCurrentWindow = undefined;
+        var txt = JSON.stringify(pack);
+        return {
+          pack,
+          createNew: () => Promise.resolve(JSON.parse(txt))
+        };
       }
-
-      var pack = window.dataForCurrentWindow as EntityPack<Entity>;
-      window.dataForCurrentWindow = undefined;
-      var txt = JSON.stringify(pack);
-      return Promise.resolve({
-        pack,
-        createNew: () => Promise.resolve(JSON.parse(txt))
-      });
     }
 
     if (id) {
@@ -154,40 +177,37 @@ export default function FramePage() {
         id: parseId(ti, id!),
       };
 
-      return Navigator.API.fetchEntityPack(lite)
-        .then(pack => {
-          return Promise.resolve({
-            pack,
-            createNew: undefined
-          });
-        });
+      const pack = await Navigator.API.fetchEntityPack(lite);
+
+      return {
+        pack,
+        createNew: undefined
+      };
 
     } else {
       const cn = queryString["constructor"];
       if (cn != null && typeof cn == "string") {
         const oi = Operations.operationInfos(ti).single(a => a.operationType == "Constructor" && a.key.toLowerCase().endsWith(cn.toLowerCase()));
-        return Operations.API.construct(ti.name, oi.key)
-          .then(pack => {
-            if (pack == undefined)
-              return undefined;
-            else
-              return ({
-                pack: pack,
-                createNew: () => Operations.API.construct(ti.name, oi.key)
-              });
-          });
-      }
+        const pack = await Operations.API.construct(ti.name, oi.key);
+        if (pack == undefined)
+          return undefined;
 
-      return Constructor.constructPack(ti.name)
-        .then(pack => {
-          if (pack == undefined)
-            return undefined;
-          else
-            return ({
-              pack: pack! as EntityPack<Entity>,
-              createNew: () => Constructor.constructPack(ti.name) as Promise<EntityPack<Entity>>
-            });
+        return {
+          pack: pack,
+          createNew: () => Operations.API.construct(ti.name, oi.key)
+        };
+      }
+      else {
+
+        const pack = await Constructor.constructPack(ti.name);
+        if (pack == undefined)
+          return undefined;
+
+        return ({
+          pack: pack! as EntityPack<Entity>,
+          createNew: () => Constructor.constructPack(ti.name) as Promise<EntityPack<Entity>>
         });
+      }
     }
   }
 
@@ -242,19 +262,23 @@ export default function FramePage() {
 
       const replaceRoute = !packEntity.entity.isNew && entity.isNew;
 
-      var newRoute = is(packEntity.entity, entity) ? null :
-        packEntity.entity.isNew ? Navigator.createRoute(packEntity.entity.Type) :
-        Navigator.navigateRoute(packEntity.entity);
+      var forcedViewName = typeof reloadComponent == "string" ? reloadComponent : undefined;
+
+      var currentViewName = QueryString.parse(location.search).viewName;
+
+      var newRoute = is(packEntity.entity, entity) && (forcedViewName ?? currentViewName) == currentViewName ? null :
+        packEntity.entity.isNew ? Navigator.createRoute(packEntity.entity.Type, forcedViewName ?? currentViewName) :
+          Navigator.navigateRoute(packEntity.entity, forcedViewName ?? currentViewName);
 
       if (reloadComponent) {
         setState(undefined)
-          .then(() => loadComponent(packEntity))
+          .then(() => loadComponent(packEntity, reloadComponent == true ? undefined : reloadComponent))
           .then(gc => {
             if (mounted.current) {
               setPack(packEntity, gc).then(() => {
                 if (newRoute) {
                   if (replaceRoute)
-                    AppContext.navigate(newRoute, { replace : true });
+                    AppContext.navigate(newRoute, { replace: true });
                   else
                     AppContext.navigate(newRoute);
                 }
@@ -265,7 +289,7 @@ export default function FramePage() {
           });
       }
       else {
-        setPack(packEntity, s.getComponent).then(() => {
+        setPack(packEntity, { viewName: s.viewName, getComponent: s.getComponent }).then(() => {
           if (newRoute) {
             if (replaceRoute)
               AppContext.navigate(newRoute, { replace : true });

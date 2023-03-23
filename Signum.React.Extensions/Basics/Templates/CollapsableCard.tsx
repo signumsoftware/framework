@@ -4,6 +4,7 @@ import { classes } from '@framework/Globals'
 import { BsColor } from '@framework/Components/Basic';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { CollapsableCardMessage } from '../Signum.Entities.Basics';
 
 export interface CollapsableCardProps {
   color?: BsColor;
@@ -66,9 +67,10 @@ export default function CollapsableCard(p: CollapsableCardProps) {
         {(p.collapsable == undefined || p.collapsable == true) &&
           <span
             className={"float-end"}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer" }}            
             onClick={() => setIsOpen(!isOpen)}>
-            <FontAwesomeIcon icon={isOpen ? (p.collapseIcon ?? "chevron-up") : (p.expandIcon ?? "chevron-down")} />
+            <FontAwesomeIcon icon={isOpen ? (p.collapseIcon ?? "chevron-up") : (p.expandIcon ?? "chevron-down")}
+              title={isOpen ? CollapsableCardMessage.Collapse.niceToString() : CollapsableCardMessage.Expand.niceToString()} />
           </span>
         }
         {p.header}

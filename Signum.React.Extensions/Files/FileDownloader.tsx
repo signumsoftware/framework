@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as Services from '@framework/Services'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
-import { ModifiableEntity, Lite, Entity, isModifiableEntity, getToString } from '@framework/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, isModifiableEntity, getToString, EntityControlMessage } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFilePath } from './Signum.Entities.Files'
 import { ExtensionInfo, extensionInfo } from './FilesClient'
 import { Type } from '@framework/Reflection';
@@ -90,12 +90,12 @@ export function FileDownloader(p: FileDownloaderProps) {
       </a>
       {p.download == "ViewOrSave" &&
         <a href="#"
-          className="sf-view sf-line-button"
+          className="sf-view sf-line-button"          
           onClick={e => {
             e.preventDefault();
             handleOnClick(e, true);
           }}>
-          <FontAwesomeIcon className="ms-1 sf-pointer" icon={["fas", "download"]} />
+          <FontAwesomeIcon className="ms-1 sf-pointer" icon={["fas", "download"]} title={EntityControlMessage.Download.niceToString()}/>
         </a>
       }
     </div>
@@ -130,7 +130,7 @@ registerConfiguration(FileEntity, {
 });
 
 registerConfiguration(FilePathEntity, {
-  fileUrl: file => AppContext.toAbsoluteUrl("/api/files/downloadFilePath/" + file.id),
+  fileUrl: file => AppContext.toAbsoluteUrl(`/api/files/downloadFilePath/${file.id}?${QueryString.stringify({ hash: file.hash })}`),
   fileLiteUrl: file => AppContext.toAbsoluteUrl("/api/files/downloadFilePath/" + file.id),
 });
 
@@ -140,7 +140,8 @@ registerConfiguration(FileEmbedded, {
 });
 
 registerConfiguration(FilePathEmbedded, {
-  fileUrl: file => AppContext.toAbsoluteUrl(`/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId })}`)
+  fileUrl: file => AppContext.toAbsoluteUrl(
+    `/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId, hash: file.hash })}`)
 });
 
 export function downloadFile(file: IFilePath & ModifiableEntity): Promise<Response> {

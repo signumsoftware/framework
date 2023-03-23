@@ -112,8 +112,8 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps) {
 
   return (<div className="design-main">
       <div className={classes("design-left", isDesignerOpen && "open")}>
-        {!isDesignerOpen ?
-          <span onClick={handleOpen}><FontAwesomeIcon icon={["fas", "pen-to-square"]} className="design-open-icon" /></span> :
+      {!isDesignerOpen ?
+        <span onClick={handleOpen} ><FontAwesomeIcon icon={["fas", "pen-to-square"]} title="Open view designer" className="design-open-icon" /></span> :
           <DynamicViewDesigner
             rootNode={desRootNode}
             dynamicView={dynamicView}

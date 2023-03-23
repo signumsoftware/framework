@@ -62,4 +62,6 @@ public enum ColorPaletteMessage
     FillAutomatically,
     [Description("Select {0} only if you want to override the automatic color")]
     Select0OnlyIfYouWantToOverrideTheAutomaticColor,
+    ShowPalette,
+    ShowList
 }

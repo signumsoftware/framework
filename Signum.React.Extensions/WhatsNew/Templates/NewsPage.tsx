@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { JavascriptMessage, toLite } from '@framework/Signum.Entities';
+import { EntityControlMessage, getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities';
 import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage } from '../Signum.Entities.WhatsNew';
 import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks';
 import { API, WhatsNewFull } from "../WhatsNewClient";
@@ -32,12 +32,12 @@ export default function NewsPage() {
     <div key={whatsnew.whatsNew.id} style={{ position: "relative", margin: "10px", }}>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <Link to={"/news/"} style={{ textDecoration: "none" }}> <FontAwesomeIcon icon={"angles-left"} /> {WhatsNewMessage.BackToOverview.niceToString()}</Link>
-        {!Navigator.isReadOnly(WhatsNewEntity) && <small className="ms-2 lead"><EntityLink lite={whatsnew.whatsNew} onNavigated={() => setRefreshValue(a => a + 1)}><FontAwesomeIcon icon="pen-to-square" /></EntityLink></small>}
+        {!Navigator.isReadOnly(WhatsNewEntity) && <small className="ms-2 lead"><EntityLink lite={whatsnew.whatsNew} onNavigated={() => setRefreshValue(a => a + 1)}><FontAwesomeIcon icon="pen-to-square" title={EntityControlMessage.Edit.niceToString()} /></EntityLink></small>}
       </div>
 
 
       <div className={"whatsnewbody"} key={whatsnew.whatsNew.id}>
-        {whatsnew.previewPicture != undefined && <img src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + whatsnew.whatsNew.id)} className={"headerpicture headerpicture-shadow"} />}
+        {whatsnew.previewPicture != undefined && <img src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + whatsnew.whatsNew.id)} className={"headerpicture headerpicture-shadow"} alt={getToString(whatsnew.whatsNew)} />}
         <div className={"news pt-2"}>
           <h3 className={"news-title"}>{whatsnew.title} {!Navigator.isReadOnly(WhatsNewEntity) && <small style={{ color: "#d50a30" }}>{(whatsnew.status == "Draft") ? whatsnew.status : undefined}</small>}</h3>
             <HtmlViewer text={whatsnew.description} />
