@@ -7,12 +7,12 @@ import UserCircle from "./UserCircle";
 import * as UserCircles from "./UserCircle";
 import { classes } from "@framework/Globals";
 
-export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | null)[] = []; 
+export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | null)[] = [];
 
 export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
   const [imageError, setImageError] = useState(false);
 
-  var url = urlProviders.map(f => f(p.user, p.size)).notNull().firstOrNull(); 
+  var url = urlProviders.map(f => f(p.user, p.size)).notNull().firstOrNull();
 
   useEffect(() => {
     setImageError(false);
@@ -31,7 +31,7 @@ export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
   return (
     <div className="user-profile-photo align-items-center d-flex justify-content-center" style={{ width: `${p.size}px`, height: `${p.size}px`, borderColor: !url ? color : undefined }}>
       {!url ? <FontAwesomeIcon icon="user" size={iconSize as any} color={color} /> :
-        <img src={url} style={{ maxWidth: `${p.size - 3}px`, maxHeight: `${p.size - 3}px` }} onError={addDefaultSrc} />}
+        <img src={url} style={{ maxWidth: `${p.size - 3}px`, maxHeight: `${p.size - 3}px` }} onError={addDefaultSrc} title={getToString(p.user)} />}
     </div>
   );
 }
@@ -56,25 +56,4 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
         <UserCircle user={p.user} />}
     </div>
   );
-}
-
-
-export function ProfilePhotoSVG(user: Lite<UserEntity>, x: string, y: string, size?: number, clippath?: string ) {
-  size = size ?? 40;
-  var url = urlProviders.map(f => f(user, size!)).notNull().firstOrNull();
-
-  function addDefaultSrc(ev: any) {
-    picture.setAttribute("display", "none");
-  }
-
-  var picture = document.createElementNS("http://www.w3.org/2000/svg", "image");
-  picture.setAttribute("x", x);
-  picture.setAttribute("y", y);
-  picture.setAttribute("width", size.toString());
-  picture.setAttribute("height", size.toString());
-  picture.setAttribute("clip-path", clippath ?? "");
-  picture.addEventListener("onerror", addDefaultSrc);
-  picture.setAttribute("href", url ?? "");
-
-  return picture;
 }

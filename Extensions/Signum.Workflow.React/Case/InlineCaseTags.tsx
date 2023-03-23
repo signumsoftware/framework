@@ -4,7 +4,7 @@ import { Dic, classes } from '@framework/Globals'
 import * as Navigator from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
 import { getToString, Lite, newMListElement } from '@framework/Signum.Entities'
-import { CaseTagTypeEntity, CaseEntity, CaseTagsModel, CaseOperation } from '../Signum.Entities.Workflow'
+import { CaseTagTypeEntity, CaseEntity, CaseTagsModel, CaseOperation, CaseMessage } from '../Signum.Entities.Workflow'
 import Tag from './Tag'
 import * as WorkflowClient from '../WorkflowClient'
 
@@ -55,7 +55,7 @@ export default function InlineCaseTags(p: InlineCaseTagsProps) {
   return (
     <a href="#" onClick={handleTagsClick} className={classes("case-icon", tags.length == 0 && !p.avoidHideIcon && "case-icon-ghost")} style={{ flexWrap: p.wrap ? "wrap" : undefined }}>
       {
-        tags.length == 0 ? <FontAwesomeIcon icon={"tags"} /> :
+        tags.length == 0 ? <FontAwesomeIcon icon={"tags"} title={CaseMessage.SetTags.niceToString()}/> :
           tags.map((t, i) => <Tag key={i} tag={t} />)
       }
     </a>

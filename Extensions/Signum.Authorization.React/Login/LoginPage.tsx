@@ -115,7 +115,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
             <label className="sr-only" htmlFor="userName">{LoginPage.usernameLabel()}</label>
             <div className="input-group mb-2 mr-sm-2 mb-sm-0">
               <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }} /></div>
-              <input type="text" className="form-control" id="userName" ref={userName} placeholder={LoginPage.usernameLabel()} disabled={p.ctx.loading != null} />
+              <input type="text" className="form-control" id="userName" autoComplete="username" ref={userName} placeholder={LoginPage.usernameLabel()} disabled={p.ctx.loading != null} />
             </div>
             {error("userName") && <span className="help-block text-danger">{error("userName")}</span>}
           </div>
@@ -127,7 +127,7 @@ export function LoginForm(p: { ctx: LoginContext }) {
             <label className="sr-only" htmlFor="password">{LoginAuthMessage.Password.niceToString()}</label>
             <div className="input-group mb-2 mr-sm-2 mb-sm-0">
               <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }} /></div>
-              <input ref={password} type="password" name="password" className="form-control" id="password" placeholder={LoginAuthMessage.Password.niceToString()} disabled={p.ctx.loading != null} />
+              <input ref={password} type="password" name="password" className="form-control" id="password" autoComplete="current-password" placeholder={LoginAuthMessage.Password.niceToString()} disabled={p.ctx.loading != null} />
             </div>
             {error("password") && <span className="help-block text-danger">{error("password")}</span>}
           </div>

@@ -300,7 +300,7 @@ public class ReactCodeGenerator
     {
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("import * as React from 'react'");
-        sb.AppendLine("import { Route } from 'react-router'");
+        sb.AppendLine("import { Route, RouteObject } from 'react-router'");
         sb.AppendLine("import { ajaxPost, ajaxGet } from '@framework/Services';");
         sb.AppendLine("import { EntitySettings, ViewPromise } from '@framework/Navigator'");
         sb.AppendLine("import * as Navigator from '@framework/Navigator'");
@@ -328,7 +328,7 @@ public class ReactCodeGenerator
     protected virtual string WriteClientStartMethod(Module mod)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine("export function start(options: { routes: JSX.Element[] }) {");
+        sb.AppendLine("export function start(options: { routes: RouteObject[] }) {");
         sb.AppendLine("");
 
         string entitySettings = WritetEntitySettings(mod);

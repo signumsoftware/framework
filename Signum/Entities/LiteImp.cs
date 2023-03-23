@@ -142,7 +142,9 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
         if (this.entityOrNull != null)
             return this.entityOrNull.ToString();
 
-        return this.model?.ToString();
+        var result = this.model?.ToString();
+
+        return result ?? (this.EntityType.NiceName() + " " + Id);
     }
 
     public override bool Equals(object? obj)

@@ -34,7 +34,7 @@ input[type=checkbox].form-control {
     opacity: 1;
 }
 
-.form-control.readonly{
+.form-control.readonly {
     background-color: #e9ecef; /*Not included in bootstrap*/
 }
 
@@ -240,7 +240,7 @@ ul.nav-tabs {
 
 /*Accordion*/
 
-.sf-accordion-element.drag-top >h2 >button {
+.sf-accordion-element.drag-top > h2 > button {
     box-shadow: inset #AAA 0px 3px 0px 0px !important;
 }
 
@@ -281,6 +281,7 @@ ul.nav-tabs {
     color: #9900E0;
     cursor: move;
 }
+
 .sf-move:not(.disabled).sf-move-step:hover {
     cursor: pointer;
 }
@@ -319,15 +320,15 @@ body.rtl .form-group.row > label {
     margin-bottom: 1rem;
 }
 
-.form-group .form-group {
-    margin-bottom: 0px;
-}
-
-    .form-group .form-group label {
-        color: #D8D8D8;
-        font-size: 12px;
+    .form-group .form-group {
         margin-bottom: 0px;
     }
+
+        .form-group .form-group label {
+            color: #D8D8D8;
+            font-size: 12px;
+            margin-bottom: 0px;
+        }
 
 /*form xs*/
 
@@ -374,7 +375,7 @@ input[type=checkbox].form-control-xs {
     padding: 0 0 0 0.4em;
 }
 
-.input-group > .form-control.rw-dropdown-list{
+.input-group > .form-control.rw-dropdown-list {
     display: flex;
     padding: 0;
 }
@@ -419,7 +420,7 @@ input[type=checkbox].form-control-xs {
     margin-bottom: 0px;
 }
 
-.rw-widget-input{
+.rw-widget-input {
     width: inherit;
 }
 
@@ -433,7 +434,7 @@ input[type=checkbox].form-control-xs {
 
 .rw-widget-sm .rw-widget-input,
 .rw-widget-sm .rw-multiselect-input {
-    /*    padding: 3px 6px;*/
+    padding: 3px 6px;
     min-height: 28px;
 }
 
@@ -562,7 +563,7 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     border-left: 2px solid #ffdd00;
 }
 
-.rw-dropdown-list .rw-popup-container{
+.rw-dropdown-list .rw-popup-container {
     right: unset;
 }
 
@@ -577,16 +578,15 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     padding: 0.25rem 0.5rem;
 }
 
-.try-no-wrap{
-
+.try-no-wrap {
 }
 
-.sf-small-column{
+.sf-small-column {
     width: 0%;
     min-width: 36px;
 }
 
-@media (min-width: 768px){
+@media (min-width: 768px) {
     .try-no-wrap {
         white-space: nowrap;
     }
@@ -595,3 +595,32 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
 .table > :not(:first-child) {
     border-top: initial;
 }
+
+
+.sf-color.form-control {
+    flex-grow: 0;
+    padding: 2px;
+    width: 32px;
+    width: 38px;
+    height: 38px;
+    padding: 6px;
+}
+
+.sf-color.form-control.form-control-xs {
+    width: 26px;
+    height: 26px;
+    padding: 4px;
+}
+
+.sf-color.form-control.form-control-sm {
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+}
+
+.sf-color.form-control.form-control-lg {
+    width: 48px;
+    height: 48px;
+    padding: 8px;
+}
+

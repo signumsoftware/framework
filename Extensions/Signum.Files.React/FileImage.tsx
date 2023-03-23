@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { IFile, IFilePath } from "./Signum.Entities.Files";
+import { FileMessage, IFile, IFilePath } from "./Signum.Entities.Files";
 import { configurations } from "./FileDownloader";
 import { Entity, isLite, isModifiableEntity, Lite, ModifiableEntity } from '@framework/Signum.Entities';
 import * as Services from '@framework/Services'
@@ -9,12 +9,13 @@ import { useFetchInState } from '../../Signum.React/Scripts/Navigator';
 interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file?: IFile & ModifiableEntity | Lite<IFile & Entity> | null;
   placeholderSrc?: string
+  ajaxOptions?: Omit<Services.AjaxOptions, "url">;
 }
 
 export function FileImage(p: FileImageProps) {
 
   var [objectUrl, setObjectUrl] = React.useState<string | undefined>(undefined);
-  var { file, ...rest } = p;
+  var { file, ajaxOptions, placeholderSrc, ...rest } = p;
 
   React.useEffect(() => {
     if (file) {
@@ -27,7 +28,7 @@ export function FileImage(p: FileImageProps) {
           configurations[file.EntityType].fileLiteUrl!(file) :
           configurations[file.Type].fileUrl!(file);
 
-      Services.ajaxGetRaw({ url: url })
+      Services.ajaxGetRaw({ url: url, cache: 'default' as RequestCache, ...ajaxOptions })
         .then(resp => resp.blob())
         .then(blob => setObjectUrl(URL.createObjectURL(blob)));
 
@@ -35,12 +36,12 @@ export function FileImage(p: FileImageProps) {
     return () => { objectUrl && URL.revokeObjectURL(objectUrl) };
   }, [p.file]);
 
-  var src = !file ? p.placeholderSrc :
+  var src = !file ? placeholderSrc :
     isModifiableEntity(file) && file.fullWebPath ? file.fullWebPath :
       isModifiableEntity(file) && file.binaryFile ? "data:image/jpeg;base64," + file.binaryFile :
         objectUrl;
 
   return (
-    <img {...rest} src={src} />
+    <img {...rest} src={src} alt={p.alt ?? FileMessage.FileImage.niceToString()} />
   );
 }

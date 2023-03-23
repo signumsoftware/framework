@@ -188,7 +188,8 @@ public enum ProcessMessage
     LastProcess,
     ExceptionLines,
     [Description("Suspend in the safer way of stoping a running process. Cancel anyway?")]
-    SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway
+    SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway,
+    ProcessSettings
 }
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]

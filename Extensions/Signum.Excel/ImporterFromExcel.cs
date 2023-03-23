@@ -101,7 +101,7 @@ public class ImporterFromExcel
         {
             WorkbookPart workbookPart = document.WorkbookPart!;
 
-            WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
+            WorksheetPart worksheetPart = document.GetWorksheetPartBySheetName("Sheet1");
 
             var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
 
@@ -379,6 +379,7 @@ public class ImporterFromExcel
             {
                 var t when t.IsLite() => Lite.Parse(strValue),
                 var t when t.IsEntity() => Lite.Parse(strValue).Retrieve(),
+                var t when t.IsEnum => EnumExtensions.TryParse(strValue, ut, true, out var result) ? result : null,
                 var t when ExcelExtensions.IsNumber(t) => Convert.ChangeType(ExcelExtensions.FromExcelNumber(strValue), ut),
                 var t when ExcelExtensions.IsDate(t) => ReflectionTools.ChangeType(ExcelExtensions.FromExcelDate(strValue, token.DateTimeKind), ut),
                 var t when t == typeof(TimeOnly) => ExcelExtensions.FromExcelTime(strValue),

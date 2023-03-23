@@ -189,6 +189,9 @@ public enum AlertMessage
 
     [Description("Show {0} groups more ({1} remaining)")]
     Show0GroupsMore1Remaining,
+
+    [Description("Ringing!")]
+    Ringing, 
 }
 
 [InTypeScript(true)]

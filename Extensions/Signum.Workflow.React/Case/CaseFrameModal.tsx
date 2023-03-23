@@ -6,7 +6,7 @@ import { TypeInfo, getTypeInfo, GraphExplorer, PropertyRoute, ReadonlyBinding, }
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
-import { Lite, JavascriptMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity, SaveChangesMessage } from '@framework/Signum.Entities'
+import { Lite, JavascriptMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity, SaveChangesMessage, FrameMessage } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
@@ -164,8 +164,8 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
       return null;
 
     return (
-      <a href="#" className="sf-popup-fullscreen" onClick={handlePopupFullScreen}>
-        <FontAwesomeIcon icon="up-right-from-square" />
+      <a href="#" className="sf-popup-fullscreen" onClick={handlePopupFullScreen} > 
+        <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
       </a>
     );
   }

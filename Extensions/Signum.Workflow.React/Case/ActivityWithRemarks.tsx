@@ -88,12 +88,13 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
       &nbsp;
       <a href="#" onClick={handleRemarksClick} className={classes(
         "case-icon",
-        !remarks && "case-icon-ghost")}>
-        <FontAwesomeIcon icon={remarks ? "comment-dots" : ["far", "comment"]} />
+        !remarks && "case-icon-ghost")}        
+      >
+        <FontAwesomeIcon icon={remarks ? "comment-dots" : ["far", "comment"]} title={CaseNotificationEntity.nicePropertyName(a => a.remarks)}/>
       </a>
       {alerts > 0 && " "}
-      {alerts > 0 && <a href="#" onClick={handleAlertsClick} style={{ color: "orange" }}>
-        <FontAwesomeIcon icon={"bell"} />
+      {alerts > 0 && <a href="#" onClick={handleAlertsClick} style={{ color: "orange" }} >
+        <FontAwesomeIcon icon={"bell"} aria-hidden={true} title={AlertEntity.nicePluralName()}/>
       </a>}
       &nbsp;
       <InlineCaseTags case={p.data.case} defaultTags={tags} wrap />

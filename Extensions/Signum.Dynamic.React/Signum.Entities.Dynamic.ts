@@ -104,6 +104,10 @@ export module DynamicMixinConnectionOperation {
   export const Delete : Entities.DeleteSymbol<DynamicMixinConnectionEntity> = registerSymbol("Operation", "DynamicMixinConnectionOperation.Delete");
 }
 
+export module DynamicPanelMessage {
+  export const OpenErrors = new MessageKey("DynamicPanelMessage", "OpenErrors");
+}
+
 export module DynamicPanelPermission {
   export const ViewDynamicPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.ViewDynamicPanel");
   export const RestartApplication : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.RestartApplication");

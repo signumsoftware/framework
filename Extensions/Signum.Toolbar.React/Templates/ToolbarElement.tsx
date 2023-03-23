@@ -2,7 +2,6 @@ import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
-import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
 import { IconTypeaheadLine, parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as Dashboard from '../../Dashboard/Admin/Dashboard'
@@ -54,7 +53,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
         <div className="row">
           <div className="col-sm-5">
             <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => forceUpdate()} extraIcons={["none"]} />
-            <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
+            <ValueLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") && <ValueLine ctx={ctx4.subCtx(a => a.showCount)} onChange={() => forceUpdate()} />}
           </div>
           <div className="col-sm-1">

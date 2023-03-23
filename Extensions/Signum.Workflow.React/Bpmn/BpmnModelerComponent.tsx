@@ -523,8 +523,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     return (
       <div>
         <Button variant="secondary" style={{ marginLeft: "10px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
-        <Button variant="secondary" style={{ marginLeft: "10px" }} onClick={this.handleSaveSvgClick}>
-          <FontAwesomeIcon icon="image" />
+        <Button variant="secondary" style={{ marginLeft: "10px" }} onClick={this.handleSaveSvgClick} >
+          <FontAwesomeIcon icon="image" title={WorkflowMessage.SaveAsSVG.niceToString()}/>
         </Button>
         <div ref={this.setDiv} />
       </div>

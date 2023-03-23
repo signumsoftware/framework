@@ -159,7 +159,7 @@ export function MicrosoftSignIn({ ctx }: { ctx: LoginContext }) {
     <div className="row mt-2">
       <div className="col-md-6 offset-md-3">
         <a href="#" className={ctx.loading != null ? "disabled" : undefined} onClick={e => { e.preventDefault(); signIn(ctx); }}>
-          <img src={MicrosoftSignIn.iconUrl} />
+          <img src={MicrosoftSignIn.iconUrl} alt={LoginAuthMessage.SignInWithMicrosoft.niceToString()} title={LoginAuthMessage.SignInWithMicrosoft.niceToString()} />
         </a>
       </div>
     </div>

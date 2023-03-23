@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import "./AuthAdmin.css"
 import { classes } from '@framework/Globals';
+import { AuthAdminMessage } from '../Signum.Entities.Authorization';
 
 interface ColorRadioProps {
   checked: boolean;
@@ -25,9 +26,10 @@ export function ColorRadio(p : ColorRadioProps){
 
 export function GrayCheckbox(p : { checked: boolean, onUnchecked: () => void, readOnly: boolean }){
   return (
-    <span className={classes("sf-auth-checkbox", p.readOnly && "sf-not-allowed")}
+    <span className={classes("sf-auth-checkbox", p.readOnly && "sf-not-allowed")}      
       onClick={p.checked && !p.readOnly ? p.onUnchecked : undefined}>
-      <FontAwesomeIcon icon={["far", p.checked ? "square-check" : "square"]} />
+      <FontAwesomeIcon icon={["far", p.checked ? "square-check" : "square"]}
+        title={p.checked ? AuthAdminMessage.Uncheck.niceToString() : AuthAdminMessage.Check.niceToString()} />
     </span>
   );
 }

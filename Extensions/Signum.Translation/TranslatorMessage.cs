@@ -71,6 +71,9 @@ public enum TranslationMessage
 
     [Description("{0} outdated translatiosn for {1} have been deleted")]
     _0OutdatedTranslationsFor1HaveBeenDeleted,
+
+    DownloadView,
+    DownloadSync,
 }
 
 public enum TranslationJavascriptMessage

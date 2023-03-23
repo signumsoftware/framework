@@ -67,7 +67,6 @@ public static class AzureADLogic
         }
     }
 
-    public record SimpleGroup(Guid Id, string? DisplayName);
 
     public static void Start(SchemaBuilder sb, bool adGroups, bool deactivateUsersTask)
     {
@@ -575,6 +574,8 @@ public static class AzureADLogic
         }, TaskContinuationOptions.OnlyOnRanToCompletion);
     }
 }
+
+public record SimpleGroup(Guid Id, string? DisplayName);
 
 public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
 {

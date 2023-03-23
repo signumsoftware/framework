@@ -58,7 +58,7 @@ export default function WorkflowActivityMonitorPage() {
       <h3 className="modal-title">
         {!config ? JavascriptMessage.loading.niceToString() : getToString(config.workflow)}
         {config && Navigator.isViewable(WorkflowEntity) &&
-          <small>&nbsp;<a href={Navigator.navigateRoute(config.workflow)} target="blank"><FontAwesomeIcon icon="pencil" /></a></small>}
+          <small>&nbsp;<a href={Navigator.navigateRoute(config.workflow)} target="blank"><FontAwesomeIcon icon="pencil" title={WorkflowActivityMonitorMessage.OpenWorkflow.niceToString()}/></a></small>}
         <br />
         <small>{WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}</small>
       </h3>

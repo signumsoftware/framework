@@ -30,13 +30,12 @@ import { BsColor, BsSize } from '@framework/Components';
 import { Tab, Tabs, Button } from 'react-bootstrap';
 import { FileImageLine } from '../../Files/FileImageLine';
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from '../../Files/Signum.Entities.Files';
-import { ColorTypeahead } from '../../Basics/Templates/ColorTypeahead';
 import { IconTypeahead, parseIcon } from '../../Basics/Templates/IconTypeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
-import { ValueLineController } from '@framework/Lines/ValueLine'
+import { ColorTextBox, ValueLineController } from '@framework/Lines/ValueLine'
 
 export interface BaseNode {
   ref?: Expression<any>;
@@ -300,6 +299,7 @@ export interface ImageNode extends BaseNode {
   kind: "Image",
   htmlAttributes?: HtmlAttributesExpression;
   src?: ExpressionOrValue<string>;
+  alt?: ExpressionOrValue<string>;
 }
 
 NodeUtils.register<ImageNode>({
@@ -309,7 +309,9 @@ NodeUtils.register<ImageNode>({
   initialize: dn => { dn.src = "/images/logo.png"; },
   renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.src ? (typeof dn.node.src == "string" ? dn.node.src : (dn.node.src.__code__ ?? "")).etc(20) : ""}</strong></span>,
   renderCode: (node, cc) => cc.elementCode("img", node.htmlAttributes && { src: node.src }),
-  render: (dn, ctx) => <img {...toHtmlAttributes(dn, ctx, dn.node.htmlAttributes)} src={AppContext.toAbsoluteUrl(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.src, NodeUtils.isString) as string)} />,
+  render: (dn, ctx) => <img {...toHtmlAttributes(dn, ctx, dn.node.htmlAttributes)}
+    src={AppContext.toAbsoluteUrl(NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.src, NodeUtils.isString) as string)} 
+    alt={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.alt, NodeUtils.isString) as string} />,
   renderDesigner: dn => (<div>
     <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.src)} type="string" defaultValue={null} />
     <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
@@ -1541,7 +1543,7 @@ NodeUtils.register<ButtonNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.color)} type="string" defaultValue={null} options={["primary", "secondary", "success", "danger", "warning", "info", "light", "dark"] as BsColor[]} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.size)} type="string" defaultValue={null} options={["lg", "md", "sm", "xs"] as BsSize[]} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.icon)} type="string" defaultValue={null} onRenderValue={(val, e) => <IconTypeahead icon={val as string | null | undefined} formControlClass="form-control form-control-xs" onChange={newIcon => e.updateValue(newIcon)} />} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconColor)} type="string" defaultValue={null} onRenderValue={(val, e) => <ColorTypeahead color={val as string | null | undefined} formControlClass="form-control form-control-xs" onChange={newColor => e.updateValue(newColor)} />} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconColor)} type="string" defaultValue={null} onRenderValue={(val, e) => <ColorTextBox value={val as string | null} formControlClass="form-control form-control-xs" onChange={(newValue: string | null) => e.updateValue(newValue)} />} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.active)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.disabled)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onClick)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n(e) => locals.forceUpdate()"} />

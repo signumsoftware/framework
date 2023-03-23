@@ -9,7 +9,6 @@ import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, Cach
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import * as DashboardClient from "../DashboardClient";
 import { iconToString, IconTypeaheadLine, parseIcon } from "../../Basics/Templates/IconTypeahead";
-import { ColorTypeaheadLine } from "../../Basics/Templates/ColorTypeahead";
 import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
@@ -96,7 +95,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
             <ValueLine ctx={tcs.subCtx(pp => pp.title)} label={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag} />
             <div className="row">
               <div className="col-sm-6">
-                <ColorTypeaheadLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
+                <ValueLine ctx={tcs.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
 
               </div>
               <div className="col-sm-6">

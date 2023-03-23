@@ -42,12 +42,12 @@ export interface EntityBaseProps extends LineBaseProps {
 
 export class EntityBaseController<P extends EntityBaseProps> extends LineBaseController<P>{
 
-  static createIcon = <FontAwesomeIcon icon="plus" />;
-  static findIcon = <FontAwesomeIcon icon="magnifying-glass" />;
-  static removeIcon = <FontAwesomeIcon icon="xmark" />;
-  static viewIcon = <FontAwesomeIcon icon="arrow-right" />;
-  static moveIcon = <FontAwesomeIcon icon="bars" />;
-  static pasteIcon = <FontAwesomeIcon icon="clipboard" />;
+  static getCreateIcon = () => <FontAwesomeIcon icon="plus" title={EntityControlMessage.Create.niceToString()} />;
+  static getFindIcon = () => <FontAwesomeIcon icon="magnifying-glass" title={EntityControlMessage.Find.niceToString()} />;
+  static getRemoveIcon = () => <FontAwesomeIcon icon="xmark" title={EntityControlMessage.Remove.niceToString()} />;
+  static getViewIcon = () => <FontAwesomeIcon icon="arrow-right" title={EntityControlMessage.View.niceToString()} />;
+  static getMoveIcon = () => <FontAwesomeIcon icon="bars" title={EntityControlMessage.Move.niceToString()} />;
+  static getPasteIcon = () => <FontAwesomeIcon icon="clipboard" title={EntityControlMessage.Paste.niceToString()} />;
 
   static hasChildrens(element: React.ReactElement<any>) {
     return element.props.children && React.Children.toArray(element.props.children).length;
@@ -197,7 +197,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       <a href="#" className={classes("sf-line-button", "sf-view", btn ?  "input-group-text" : undefined)}
         onClick={this.handleViewClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
-        {EntityBaseController.viewIcon}
+        {EntityBaseController.getViewIcon()}
       </a>
     );
   }
@@ -321,7 +321,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       <a href="#" className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
         onClick={this.handleCreateClick}
         title={this.props.ctx.titleLabels ? createMessage ?? EntityControlMessage.Create.niceToString() : undefined}>
-        {EntityBaseController.createIcon}
+        {EntityBaseController.getCreateIcon()}
       </a>
     );
   }
@@ -334,7 +334,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       <a href="#" className={classes("sf-line-button", "sf-paste", btn ? "input-group-text" : undefined)}
         onClick={this.handlePasteClick}
         title={EntityControlMessage.Paste.niceToString()}>
-        {EntityBaseController.pasteIcon}
+        {EntityBaseController.getPasteIcon()}
       </a>
     );
   }
@@ -388,7 +388,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       <a href="#" className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
         onClick={this.handleFindClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
-        {EntityBaseController.findIcon}
+        {EntityBaseController.getFindIcon()}
       </a>
     );
   }
@@ -414,7 +414,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
       <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
         title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-        {EntityBaseController.removeIcon}
+        {EntityBaseController.getRemoveIcon()}
       </a>
     );
   }

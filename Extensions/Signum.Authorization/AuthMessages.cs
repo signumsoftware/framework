@@ -91,6 +91,9 @@ public enum LoginAuthMessage
 
     [Description("Login with {0}")]
     LoginWith0,
+
+    [Description("Sign in with Microsoft")]
+    SignInWithMicrosoft,
 }
 
 public enum AuthMessage

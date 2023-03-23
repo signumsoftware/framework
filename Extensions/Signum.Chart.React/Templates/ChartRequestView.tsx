@@ -5,7 +5,7 @@ import { ifError, Dic, classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
-import { Lite } from '@framework/Signum.Entities'
+import { FrameMessage, Lite } from '@framework/Signum.Entities'
 import { QueryDescription, SubTokensOptions, QueryToken, FilterOptionParsed, FilterConditionOption, FindOptions } from '@framework/FindOptions'
 import { StyleContext, TypeContext } from '@framework/TypeContext'
 import { SearchMessage, JavascriptMessage } from '@framework/Signum.Entities'
@@ -169,8 +169,8 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
     <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
       <h2>
         <span className="sf-entity-title">{getQueryNiceName(cr.queryKey)}</span>&nbsp;
-        <a className="sf-popup-fullscreen" href="#" onClick={handleOnFullScreen}>
-          <FontAwesomeIcon icon="up-right-from-square" />
+        <a className="sf-popup-fullscreen" href="#" onClick={handleOnFullScreen} >
+          <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()}/>
         </a>
       </h2 >
       <ValidationErrors entity={cr} prefix="chartRequest" />

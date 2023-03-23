@@ -238,7 +238,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td className={tctx.value.allowed.fallback == null ? "text-danger fw-bold" : undefined} title={AuthAdminMessage.ConflictMergingTypeConditions.niceToString()}>
           {conditions.length > 1 || conditions.length == 1 && tctx.value.allowed.conditionRules.length == 0 ?
-            <span className="sf-condition-icon" onClick={() => handleAddConditionClick(conditions, tctx.value.allowed, tctx.value.resource)}>
+            <span className="sf-condition-icon" title={AuthAdminMessage.AddCondition.niceToString()} onClick={() => handleAddConditionClick(conditions, tctx.value.allowed, tctx.value.resource)}>
               <FontAwesomeIcon icon="circle-plus" />
             </span> :
             <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>}
@@ -288,7 +288,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
         <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")} className="sf-auth-condition" >
           <td>
             {"\u00A0 \u00A0".repeat(i + 1)}
-            <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, cr)}><FontAwesomeIcon icon="circle-minus" /></span>
+            <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, cr)}><FontAwesomeIcon icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} /></span>
             &nbsp;
             {cr.typeConditions.flatMap((tc, j) => [
               <small className="mx-1" key={j}>{getToString(tc.element)}</small>,

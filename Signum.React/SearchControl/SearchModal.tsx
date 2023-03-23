@@ -6,7 +6,7 @@ import { FindOptions, FindMode, ResultRow, ModalFindOptions, ModalFindOptionsMan
 import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps, SearchControlHandler } from './SearchControl'
 import { AutoFocus } from '../Components/AutoFocus';
-import { Entity, EntityPack, getToString, isEntityPack, isLite, Lite, ModifiableEntity, SearchMessage, toLite } from '../Signum.Entities';
+import { Entity, EntityPack, FrameMessage, getToString, isEntityPack, isLite, Lite, ModifiableEntity, SearchMessage, toLite } from '../Signum.Entities';
 import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons';
 import { Modal, Dropdown } from 'react-bootstrap';
 import { useForceUpdate } from '../Hooks';
@@ -130,7 +130,7 @@ function SearchModal(p: SearchModalProps) {
           &nbsp;
           </span>
         <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e)}>
-          <FontAwesomeIcon icon="up-right-from-square" />
+          <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()} />
         </a>
         {p.message && <>
           <br />

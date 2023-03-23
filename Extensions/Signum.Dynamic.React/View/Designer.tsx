@@ -173,7 +173,7 @@ export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
 
   const expr = value instanceof Object && (value as Object).hasOwnProperty("__code__") ? value as Expression<any> : null;
 
-  const expressionIcon = p.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={handleToggleExpression}><FontAwesomeIcon icon="calculator" /></span>;
+  const expressionIcon = p.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={handleToggleExpression}  ><FontAwesomeIcon icon="calculator" title={DynamicViewMessage.UseExpression.niceToString()}/></span>;
 
 
   if (!expr && p.type == "boolean") {

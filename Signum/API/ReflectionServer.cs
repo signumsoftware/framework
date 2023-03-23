@@ -5,6 +5,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
+using System.Linq;
 
 namespace Signum.API;
 
@@ -149,7 +150,7 @@ public static class ReflectionServer
     {
         return EntityAssemblies.SelectMany(kvp =>
         {
-            var normalTypes = kvp.Key.GetTypes().Where(t => kvp.Value.Contains(t.Namespace!));
+            var normalTypes = kvp.Key.GetTypes().Where(t => !ExcludeTypes.Contains(t) && kvp.Value.Contains(t.Namespace!));
 
             var usedEnums = (from type in normalTypes
                              where typeof(ModifiableEntity).IsAssignableFrom(type)
@@ -195,7 +196,7 @@ public static class ReflectionServer
                           ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)!, false),
                           QueryDefined = queries.QueryDefined(type),
                           Members = PropertyRoute.GenerateRoutes(type)
-                            .Where(pr => InTypeScript(pr))
+                            .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeTypes.Contains(pr.Type))
                             .Select(p =>
                             {
                                 var validators = Validator.TryGetPropertyValidator(p)?.Validators;

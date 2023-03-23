@@ -14,13 +14,13 @@ import { API, CompilationError, EvalEntityError, DynamicPanelInformation } from 
 import { Options } from './DynamicClientOptions'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
-import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
+import { DynamicPanelMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import { useLocation, useParams } from "react-router";
 import { Tab, Tabs } from 'react-bootstrap';
 import { FormGroup } from '@framework/Lines';
 import { toFilterRequests } from '@framework/Finder';
 import "./DynamicPanelPage.css"
-import { JavascriptMessage } from '@framework/Signum.Entities';
+import { JavascriptMessage, SearchMessage } from '@framework/Signum.Entities';
 import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 
@@ -149,7 +149,7 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
       {
         state == "loading" ?
           <FontAwesomeIcon icon="arrows-rotate" spin={true} /> :
-          <span onClick={e => { e.preventDefault(); loadData(p); }} style={{ cursor: "pointer" }}><FontAwesomeIcon icon="arrows-rotate" className="sf-line-button" /></span>
+          <span onClick={e => { e.preventDefault(); loadData(p); }} style={{ cursor: "pointer" }} ><FontAwesomeIcon icon="arrows-rotate" className="sf-line-button" title={DynamicPanelMessage.OpenErrors.niceToString()} /></span>
       }
       {
         state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="triangle-exclamation" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
