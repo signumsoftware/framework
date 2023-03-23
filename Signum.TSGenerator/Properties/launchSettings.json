@@ -10,6 +10,16 @@
       "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Authorization.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Authorization\\obj\\SignumReferences.txt\"",
       "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Authorization\\"
     },
+    "Caching": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Caching.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Caching\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Caching\\"
+    },
+    "MailingPackage": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.MailingPackage.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.MailingPackage\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.MailingPackage\\"
+    },
     "Southwind": {
       "commandName": "Project",
       "commandLineArgs": "\"obj\\x64\\Debug\\netcoreapp6.0\\Southwind.React.dll\" \"D:\\Signum\\Southwind\\Southwind.React\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Southwind.React\\obj\\SignumContent.txt\"",

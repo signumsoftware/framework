@@ -52,9 +52,9 @@ public static class ExecutionMode
 
 
     public static event Func<Entity, IDisposable?>? OnSetIsolation;
-    public static IDisposable? SetIsolation(Entity entity)
+    public static IDisposable? SetIsolation(IEntity entity)
     {
-        return Disposable.Combine(OnSetIsolation, f => f(entity));
+        return Disposable.Combine(OnSetIsolation, f => f((Entity)entity));
     }
 
 }

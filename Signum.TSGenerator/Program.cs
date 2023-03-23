@@ -92,8 +92,12 @@ public static class Program
             var extra = currentT4s.Where(kvp => !shouldT4s.ContainsKey(kvp.Key)).ToList();
 
             if (extra.Any())
-                throw new InvalidOperationException($"The following t4s {(extra.Count == 1? "file is" : "files are")} not needed:\r\n" + string.Join("\r\n",  extra.Select(a=>a.Value)));
-
+            {
+                log.WriteLine($"SignumTSGenerator finished with errors ({sw.ElapsedMilliseconds}ms)");
+                foreach (var item in extra)
+                    log.WriteLine($"{item.Value}:error STSG0002:t4s file not needed, Namespace {item.Key} does not export typescript types");
+                return -1;
+            }
 
             var missing = shouldT4s.Where(kvp => !currentT4s.ContainsKey(kvp.Key)).ToList();
             foreach (var m in missing)

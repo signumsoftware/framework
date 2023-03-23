@@ -67,7 +67,12 @@ public enum UserAssetMessage
     [Description("Looks like some entities in {0} do not exist or have a different meanign in this database...")]
     LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase,
     [Description("Same selection for all conflicts of {0}")]
-    SameSelectionForAllConflictsOf0
+    SameSelectionForAllConflictsOf0,
+
+    [Description("{0} is not filterable")]
+    _0IsNotFilterable,
+    [Description("The Filter Operation {0} is not compatible with {1}")]
+    TheFilterOperation0isNotCompatibleWith1,
 }
 
 [AutoInit]

@@ -1,11 +1,8 @@
-using Signum.Entities.UserQueries;
 using Signum.React.UserAssets;
-using Signum.React.Facades;
-using Signum.Engine.UserQueries;
-using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Signum.API;
 
-namespace Signum.React.UserQueries;
+namespace Signum.UserQueries;
 
 public static class UserQueryServer
 {

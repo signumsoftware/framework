@@ -30,7 +30,7 @@ export interface ClientErrorModel extends Entities.ModelEntity {
 export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
 export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
   Type: "DeleteLogParametersEmbedded";
-  deleteLogs: Entities.MList<DeleteLogsTypeOverridesEmbedded>;
+  deleteLogs: Array<DeleteLogsTypeOverridesEmbedded>;
   chunkSize: number;
   maxChunks: number;
   pauseTime: number | null;
@@ -113,6 +113,11 @@ export interface SystemEventLogEntity extends Entities.Entity {
   eventType: string;
   exception: Entities.Lite<ExceptionEntity> | null;
 }
+
+export const TranslateableRouteType = new EnumType<TranslateableRouteType>("TranslateableRouteType");
+export type TranslateableRouteType =
+  "Text" |
+  "Html";
 
 export const TypeEntity = new Type<TypeEntity>("Type");
 export interface TypeEntity extends Entities.Entity {

@@ -2,11 +2,12 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Scripts/Reflection'
-import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
-import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
-import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
-import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
+import * as Entities from '../../Signum.React/Signum.Entities'
+import * as Security from '../../Signum.React/Signum.Security'
+import * as Basics from '../../Signum.React/Signum.Basics'
+import * as Operations from '../../Signum.React/Signum.Operations'
+import * as UserAssets from '../Signum.UserAssets.React/Signum.Entities.UserAssets'
 
 
 export const HolidayCalendarEntity = new Type<HolidayCalendarEntity>("HolidayCalendar");
@@ -18,8 +19,8 @@ export interface HolidayCalendarEntity extends Entities.Entity, UserAssets.IUser
 }
 
 export module HolidayCalendarOperation {
-  export const Save : Entities.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Save");
-  export const Delete : Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Delete");
+  export const Save : Operations.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Save");
+  export const Delete : Operations.DeleteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Delete");
 }
 
 export const HolidayEmbedded = new Type<HolidayEmbedded>("HolidayEmbedded");
@@ -44,8 +45,8 @@ export module ITaskMessage {
 }
 
 export module ITaskOperation {
-  export const ExecuteSync : Entities.ConstructSymbol_From<ScheduledTaskLogEntity, ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteSync");
-  export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteAsync");
+  export const ExecuteSync : Operations.ConstructSymbol_From<ScheduledTaskLogEntity, ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteSync");
+  export const ExecuteAsync : Operations.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteAsync");
 }
 
 export const ScheduledTaskEntity = new Type<ScheduledTaskEntity>("ScheduledTask");
@@ -55,7 +56,7 @@ export interface ScheduledTaskEntity extends Entities.Entity {
   task: ITaskEntity;
   suspended: boolean;
   machineName: string;
-  user: Entities.Lite<Basics.IUserEntity>;
+  user: Entities.Lite<Security.IUserEntity>;
   applicationName: string;
 }
 
@@ -64,7 +65,7 @@ export interface ScheduledTaskLogEntity extends Entities.Entity {
   Type: "ScheduledTaskLog";
   task: ITaskEntity;
   scheduledTask: ScheduledTaskEntity | null;
-  user: Entities.Lite<Basics.IUserEntity>;
+  user: Entities.Lite<Security.IUserEntity>;
   startTime: string /*DateTime*/;
   endTime: string /*DateTime*/ | null;
   machineName: string;
@@ -75,12 +76,12 @@ export interface ScheduledTaskLogEntity extends Entities.Entity {
 }
 
 export module ScheduledTaskLogOperation {
-  export const CancelRunningTask : Entities.ExecuteSymbol<ScheduledTaskLogEntity> = registerSymbol("Operation", "ScheduledTaskLogOperation.CancelRunningTask");
+  export const CancelRunningTask : Operations.ExecuteSymbol<ScheduledTaskLogEntity> = registerSymbol("Operation", "ScheduledTaskLogOperation.CancelRunningTask");
 }
 
 export module ScheduledTaskOperation {
-  export const Save : Entities.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Save");
-  export const Delete : Entities.DeleteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Delete");
+  export const Save : Operations.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Save");
+  export const Delete : Operations.DeleteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Delete");
 }
 
 export module SchedulerMessage {
@@ -100,7 +101,7 @@ export module SchedulerMessage {
 }
 
 export module SchedulerPermission {
-  export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "SchedulerPermission.ViewSchedulerPanel");
+  export const ViewSchedulerPanel : Basics.PermissionSymbol = registerSymbol("Permission", "SchedulerPermission.ViewSchedulerPanel");
 }
 
 export const SchedulerTaskExceptionLineEntity = new Type<SchedulerTaskExceptionLineEntity>("SchedulerTaskExceptionLine");
@@ -156,18 +157,7 @@ export interface ScheduleRuleWeekDaysEntity extends Entities.Entity, IScheduleRu
 }
 
 export const SimpleTaskSymbol = new Type<SimpleTaskSymbol>("SimpleTask");
-export interface SimpleTaskSymbol extends Entities.Symbol, ITaskEntity {
+export interface SimpleTaskSymbol extends Basics.Symbol, ITaskEntity {
   Type: "SimpleTask";
 }
-
-export const SystemEventLogEntity = new Type<SystemEventLogEntity>("SystemEventLog");
-export interface SystemEventLogEntity extends Entities.Entity {
-  Type: "SystemEventLog";
-  machineName: string;
-  date: string /*DateTime*/;
-  user: Entities.Lite<Basics.IUserEntity> | null;
-  eventType: string;
-  exception: Entities.Lite<Basics.ExceptionEntity> | null;
-}
-
 

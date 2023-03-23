@@ -1,6 +1,7 @@
-using Signum.Entities.Omnibox;
+using Signum.Authorization.Rules;
+using Signum.Omnibox;
 
-namespace Signum.Entities.UserQueries;
+namespace Signum.UserQueries;
 
 public class UserQueryOmniboxResultGenerator : OmniboxResultGenerator<UserQueryOmniboxResult>
 {
@@ -14,8 +15,8 @@ public class UserQueryOmniboxResultGenerator : OmniboxResultGenerator<UserQueryO
     public int AutoCompleteLimit = 5;
 
     public override IEnumerable<UserQueryOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
-    {
-        if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedPermission(UserQueryPermission.ViewUserQuery))
+    {   
+        if (tokenPattern != "S" || !UserQueryPermission.ViewUserQuery.IsAuthorized())
             yield break;
 
         string ident = OmniboxUtils.CleanCommas(tokens[0].Value);

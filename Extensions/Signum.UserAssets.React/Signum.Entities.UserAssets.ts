@@ -36,6 +36,8 @@ export module UserAssetMessage {
   export const SwitchToExpression = new MessageKey("UserAssetMessage", "SwitchToExpression");
   export const LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase = new MessageKey("UserAssetMessage", "LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase");
   export const SameSelectionForAllConflictsOf0 = new MessageKey("UserAssetMessage", "SameSelectionForAllConflictsOf0");
+  export const _0IsNotFilterable = new MessageKey("UserAssetMessage", "_0IsNotFilterable");
+  export const TheFilterOperation0isNotCompatibleWith1 = new MessageKey("UserAssetMessage", "TheFilterOperation0isNotCompatibleWith1");
 }
 
 export module UserAssetPermission {

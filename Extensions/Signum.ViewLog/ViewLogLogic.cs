@@ -1,9 +1,8 @@
-using Signum.Entities.Basics;
-using Signum.Entities.ViewLog;
 using System.IO;
-using Signum.Entities.Authorization;
+using Signum.Engine.Sync;
+using Signum.Authorization;
 
-namespace Signum.Engine.ViewLog;
+namespace Signum.ViewLog;
 
 public static class ViewLogLogic
 {

@@ -1,14 +1,9 @@
-using Signum.Entities.UserQueries;
-using Signum.Engine.UserQueries;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Basics;
 
-namespace Signum.React.UserQueries;
+namespace Signum.UserQueries;
 
 public class UserQueryController : ControllerBase
 {
-
-
     [HttpGet("api/userQueries/forEntityType/{typeName}")]
     public IEnumerable<Lite<UserQueryEntity>> FromEntityType(string typeName)
     {
@@ -26,5 +21,4 @@ public class UserQueryController : ControllerBase
     {
         return UserQueryLogic.GetUserQueries(QueryLogic.ToQueryName(queryKey), appendFilters : true);
     }
-
 }

@@ -1,6 +1,6 @@
 using Signum.Entities.Basics;
 
-namespace Signum.Entities.ViewLog;
+namespace Signum.ViewLog;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class ViewLogEntity : Entity

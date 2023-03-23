@@ -551,7 +551,6 @@ public class Graph<T>
                             var assertEnd = AssertEntity((T)entity);
                             OperationLogic.OnSuroundOperation(this, log, entity, args).EndUsing(_ =>
                             {
-
                                 string? error = OnCanExecute((T)entity);
                                 if (error != null)
                                 {

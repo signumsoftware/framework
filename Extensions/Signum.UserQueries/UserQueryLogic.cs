@@ -1,14 +1,14 @@
-using Signum.Engine.Authorization;
-using Signum.Engine.Translation;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Sync;
 using Signum.Engine.UserAssets;
-using Signum.Engine.ViewLog;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
-using Signum.Entities.UserQueries;
-using Signum.Entities.Workflow;
+using Signum.UserAssets.Queries;
+using Signum.UserAssets.QueryTokens;
+using Signum.ViewLog;
 
-namespace Signum.Engine.UserQueries;
+namespace Signum.UserQueries;
 
 public static class UserQueryLogic
 {
@@ -22,7 +22,7 @@ public static class UserQueryLogic
         {
             QueryLogic.Start(sb);
 
-            PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
+            PermissionLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
 
             CurrentUserConverter.GetCurrentUserEntity = () => UserEntity.Current.Retrieve();
 
@@ -165,7 +165,7 @@ public static class UserQueryLogic
         return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
             .Select(lite => UserQueries.Value.GetOrThrow(lite))
             .Where(uq => isAllowed(uq) && (uq.AppendFilters == appendFilters))
-            .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
             .ToList();
     }
 
@@ -176,7 +176,7 @@ public static class UserQueryLogic
         return UserQueriesByTypeForQuickLinks.Value.TryGetC(entityType).EmptyIfNull()
              .Select(lite => UserQueries.Value.GetOrThrow(lite))
              .Where(uq => isAllowed(uq))
-             .Select(uq => uq.ToLite(TranslatedInstanceLogic.TranslatedField(uq, d => d.DisplayName)))
+             .Select(uq => uq.ToLite(PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName)))
              .ToList();
     }
 
@@ -186,16 +186,16 @@ public static class UserQueryLogic
 
         return UserQueries.Value.Values
             .Where(uq => uq.EntityType == null && isAllowed(uq))
-             .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+             .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
              .Autocomplete(subString, limit)
              .ToList();
     }
 
     public static void RegisterTranslatableRoutes()
     {
-        TranslatedInstanceLogic.AddRoute((UserQueryEntity uq) => uq.DisplayName);
-        TranslatedInstanceLogic.AddRoute((UserQueryEntity uq) => uq.Columns[0].DisplayName);
-        TranslatedInstanceLogic.AddRoute((UserQueryEntity uq) => uq.Filters[0].Pinned!.Label);
+        PropertyRouteTranslationLogic.AddRoute((UserQueryEntity uq) => uq.DisplayName);
+        PropertyRouteTranslationLogic.AddRoute((UserQueryEntity uq) => uq.Columns[0].DisplayName);
+        PropertyRouteTranslationLogic.AddRoute((UserQueryEntity uq) => uq.Filters[0].Pinned!.Label);
     }
 
     public static UserQueryEntity RetrieveUserQuery(this Lite<UserQueryEntity> userQuery)

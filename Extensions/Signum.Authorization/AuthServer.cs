@@ -8,6 +8,7 @@ using Signum.Authorization.AuthToken;
 using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Json;
+using Signum.React.Translation;
 
 namespace Signum.Authorization;
 
@@ -30,6 +31,21 @@ public static class AuthServer
         {
             Culture = ReflectionServer.GetCurrentValidCulture(),
             Role = UserEntity.Current == null ? null : RoleEntity.Current,
+        };
+
+        CultureController.OnChangeCulture = culture =>
+        {
+            if (UserEntity.Current != null && !UserEntity.Current.Is(AuthLogic.AnonymousUser)) //Won't be used till next refresh
+            {
+                using (AuthLogic.Disable())
+                using (OperationLogic.AllowSave<UserEntity>())
+                {
+                    var user = UserEntity.Current.RetrieveAndRemember();
+                    user.CultureInfo = culture.RetrieveAndRemember();
+                    UserHolder.Current = new UserWithClaims(user);
+                    user.Save();
+                }
+            }
         };
 
         AuthLogic.OnRulesChanged += ReflectionServer.InvalidateCache;

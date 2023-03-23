@@ -340,7 +340,7 @@ static class EntityDeclarationGenerator
 
         foreach (var prop in properties)
         {
-            string context = $"By type {type.Name} and property {prop.Name}";
+            string context = $"Generating {type.Name}.{prop.Name}";
             var propertyType = TypeScriptNameInternal(prop.PropertyType, type, options, namespacesReferences, context) + (prop.GetTypescriptNull(defaultNullableCustomAttribute) ? " | null" : "");
 
             var undefined = prop.GetTypescriptUndefined() ? "?" : "";
@@ -630,7 +630,7 @@ static class EntityDeclarationGenerator
                 if (type.Interfaces.Any(i => i.InterfaceType.FullName == typeof(IEnumerable).FullName))
                     return "Array";
 
-                throw new InvalidOperationException($"{errorContext}:  Type {type.ToString()} is declared in the assembly '{type.Module.Assembly.Name}', but no React directory for it is found.");
+                throw new InvalidOperationException($"{errorContext}: Declaring a {type} requires a reference to '{type.Module.Assembly.Name.Name}.csproj'");
             }
 
             return CombineNamespace(nsReference.VariableName, BaseTypeScriptName(type));

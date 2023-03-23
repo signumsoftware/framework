@@ -11,7 +11,7 @@ using System.Xml.Linq;
 namespace Signum.Entities.Word;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class WordTemplateEntity : Entity, IUserAssetEntity
+public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 {
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();

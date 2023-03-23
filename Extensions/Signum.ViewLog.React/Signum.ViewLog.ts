@@ -2,24 +2,23 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Scripts/Reflection'
-import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
-import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
+import * as Entities from '../../Signum.React/Signum.Entities'
+import * as Security from '../../Signum.React/Signum.Security'
 
 
 export const ViewLogEntity = new Type<ViewLogEntity>("ViewLog");
 export interface ViewLogEntity extends Entities.Entity {
   Type: "ViewLog";
   target: Entities.Lite<Entities.Entity>;
-  user: Entities.Lite<Basics.IUserEntity>;
+  user: Entities.Lite<Security.IUserEntity>;
   viewAction: string;
   startDate: string /*DateTime*/;
   endDate: string /*DateTime*/;
-  data: Basics.BigStringEmbedded;
+  data: Entities.BigStringEmbedded;
 }
 
 export module ViewLogMessage {
   export const ViewLogMyLast = new MessageKey("ViewLogMessage", "ViewLogMyLast");
 }
-
 

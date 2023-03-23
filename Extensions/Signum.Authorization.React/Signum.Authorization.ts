@@ -93,7 +93,7 @@ export interface RoleEntity extends Entities.Entity {
   name: string;
   mergeStrategy: MergeStrategy;
   isTrivialMerge: boolean;
-  inheritsFrom: Entities.MList<Entities.Lite<RoleEntity>>;
+  inheritsFrom: Array<Entities.Lite<RoleEntity>>;
   description: string | null;
 }
 
