@@ -380,6 +380,7 @@ public class ImporterFromExcel
             {
                 var t when t.IsLite() => Lite.Parse(strValue),
                 var t when t.IsEntity() => Lite.Parse(strValue).Retrieve(),
+                var t when t.IsEnum => EnumExtensions.TryParse(strValue, ut, true, out var result) ? result : null,
                 var t when ExcelExtensions.IsNumber(t) => Convert.ChangeType(ExcelExtensions.FromExcelNumber(strValue), ut),
                 var t when ExcelExtensions.IsDate(t) => ReflectionTools.ChangeType(ExcelExtensions.FromExcelDate(strValue, token.DateTimeKind), ut),
                 var t when t == typeof(TimeOnly) => ExcelExtensions.FromExcelTime(strValue),
