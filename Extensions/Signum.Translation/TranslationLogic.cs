@@ -1,10 +1,12 @@
 using System.Globalization;
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
 using Signum.Entities.Translation;
 using System.Xml.Linq;
 using System.IO;
 using System.Collections.Concurrent;
+using Signum.Authorization;
+using Signum.Engine.Basics;
+using Signum.Authorization.Rules;
+using Signum.Engine.Sync;
 
 namespace Signum.Engine.Translation;
 
@@ -33,7 +35,7 @@ public static class TranslationLogic
         {
             CultureInfoLogic.AssertStarted(sb);
             
-            PermissionAuthLogic.RegisterTypes(typeof(TranslationPermission));
+            PermissionLogic.RegisterTypes(typeof(TranslationPermission));
             
             if (countLocalizationHits)
                 DescriptionManager.NotLocalizedMember += DescriptionManager_NotLocalizedMemeber;

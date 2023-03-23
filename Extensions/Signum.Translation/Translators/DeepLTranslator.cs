@@ -1,7 +1,7 @@
 using DeepL;
 using DeepL.Model;
 
-namespace Signum.Engine.Translation;
+namespace Signum.Translation.Translators;
 
 public class DeepLTranslator : ITranslator
 {
@@ -13,7 +13,7 @@ public class DeepLTranslator : ITranslator
 
     public DeepLTranslator(Func<string?> deepLKey)
     {
-        this.DeepLApiKey = deepLKey;
+        DeepLApiKey = deepLKey;
     }
 
     List<SourceLanguage>? sourceLanguages;
@@ -26,7 +26,7 @@ public class DeepLTranslator : ITranslator
 
         var apiKey = DeepLApiKey();
 
-        if(string.IsNullOrEmpty(apiKey))
+        if (string.IsNullOrEmpty(apiKey))
         {
             return null;
         }
@@ -62,15 +62,15 @@ public class DeepLTranslator : ITranslator
 
     public bool AutoSelect() => true;
 
-    public List<string?>? TranslateBatch(List<string> list, string from, string to) 
+    public List<string?>? TranslateBatch(List<string> list, string from, string to)
     {
         var result = Task.Run(async () =>
         {
-            return await this.TranslateBatchAsync(list, from, to);
+            return await TranslateBatchAsync(list, from, to);
         }).Result;
 
         return result;
     }
 }
 
-   
+

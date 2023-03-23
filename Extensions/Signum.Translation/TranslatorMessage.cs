@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Translation;
 

@@ -1,15 +1,14 @@
 using Signum.Engine.Translation;
-using Signum.React.Filters;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Signum.Entities.Translation;
 using Signum.Utilities.Reflection;
-using Signum.React.Files;
 using System.IO;
 using Signum.Entities.Basics;
+using Signum.React.Translation;
+using Signum.API.Filters;
 
-namespace Signum.React.Translation;
+namespace Signum.Translation.Instances;
 
 [ValidateModelFilter]
 public class TranslatedInstanceController : ControllerBase
@@ -61,13 +60,13 @@ public class TranslatedInstanceController : ControllerBase
                                  where master.ContainsKey(kvpLocIns.Key)
                                  where filtered(kvpLocIns.Key)
                                  let newText = master.TryGet(kvpLocIns.Key, null)
-                                 group (lockIns: kvpLocIns.Key, translatedInstance: kvpLocIns.Value, culture: kvpCult.Key, newText: newText) by kvpLocIns.Key.Instance into gInstance
+                                 group (lockIns: kvpLocIns.Key, translatedInstance: kvpLocIns.Value, culture: kvpCult.Key, newText) by kvpLocIns.Key.Instance into gInstance
                                  select KeyValuePair.Create(gInstance.Key,
                                  gInstance.AgGroupToDictionary(a => a.lockIns.RouteAndRowId(),
                                     gr => gr.ToDictionary(a => a.culture.Name, a => new TranslatedPairViewTS
                                     {
                                         OriginalText = a.translatedInstance.OriginalText,
-                                        NewText = a.newText, 
+                                        NewText = a.newText,
                                         TranslatedText = a.translatedInstance.TranslatedText
                                     })
                                 ))).ToDictionary();
@@ -93,9 +92,9 @@ public class TranslatedInstanceController : ControllerBase
     public TypeInstancesChangesTS Sync(string type, string culture)
     {
         Type t = TypeLogic.GetType(type);
-        
+
         var deletedTranslations = TranslatedInstanceLogic.CleanTranslations(t);
-        
+
         var c = CultureInfo.GetCultureInfo(culture);
 
         int totalInstances;
@@ -138,7 +137,7 @@ public class TranslatedInstanceController : ControllerBase
 
         CultureInfo? c = culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
-        var records =  GetTranslationRecords(body, t);
+        var records = GetTranslationRecords(body, t);
 
         TranslatedInstanceLogic.SaveRecords(records, t, isSync, c);
     }
@@ -163,7 +162,7 @@ public class TranslatedInstanceController : ControllerBase
                         Key = new LocalizedInstanceKey(
                             prInfo.pr,
                             rec.Lite,
-                            prInfo.mlistPkType == null ? (PrimaryKey?)null : new PrimaryKey((IComparable)ReflectionTools.Parse(rec.RowId!, prInfo.mlistPkType)!)
+                            prInfo.mlistPkType == null ? null : new PrimaryKey((IComparable)ReflectionTools.Parse(rec.RowId!, prInfo.mlistPkType)!)
                             ),
                         OriginalText = rec.OriginalText,
                         TranslatedText = rec.TranslatedText,
@@ -180,7 +179,7 @@ public class TranslatedInstanceController : ControllerBase
 
         var file = TranslatedInstanceLogic.ExportExcelFile(t, c);
 
-        return FilesController.GetFileStreamResult(file);
+        return MimeMapping.GetFileStreamResult(file);
     }
 
     [HttpGet("api/translatedInstance/syncFile/{type}")]
@@ -191,7 +190,7 @@ public class TranslatedInstanceController : ControllerBase
 
         var file = TranslatedInstanceLogic.ExportExcelFileSync(t, c);
 
-        return FilesController.GetFileStreamResult(file);
+        return MimeMapping.GetFileStreamResult(file);
     }
 
     [HttpPost("api/translatedInstance/uploadFile")]
@@ -221,7 +220,7 @@ public class TypeInstancesChangesTS
 
     public Dictionary<string, TranslateableRouteType> Routes { get; internal set; }
 
-    public int DeletedTranslations; 
+    public int DeletedTranslations;
 }
 
 public class InstanceChangesTS
@@ -256,7 +255,7 @@ public class TranslatedInstanceViewTypeTS
     public string TypeName;
     public string MasterCulture;
     public Dictionary<string, TranslateableRouteType> Routes;
-    public List<TranslatedInstanceViewTS> Instances; 
+    public List<TranslatedInstanceViewTS> Instances;
 }
 
 public class TranslatedInstanceViewTS
@@ -282,9 +281,9 @@ public class TranslatedTypeSummaryTS
 
     public TranslatedTypeSummaryTS(TranslatedTypeSummary ts)
     {
-        this.IsDefaultCulture = ts.CultureInfo.Name == TranslatedInstanceLogic.DefaultCulture.Name;
-        this.Type = TypeLogic.GetCleanName(ts.Type);
-        this.Culture = ts.CultureInfo.Name;
-        this.State = ts.State;
+        IsDefaultCulture = ts.CultureInfo.Name == TranslatedInstanceLogic.DefaultCulture.Name;
+        Type = TypeLogic.GetCleanName(ts.Type);
+        Culture = ts.CultureInfo.Name;
+        State = ts.State;
     }
 }

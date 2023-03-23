@@ -1,6 +1,7 @@
 using System.Globalization;
+using Signum.Engine.Translation;
 
-namespace Signum.Engine.Translation;
+namespace Signum.Translation.Translators;
 
 public interface ITranslator
 {
@@ -9,7 +10,7 @@ public interface ITranslator
     List<string?>? TranslateBatch(List<string> list, string from, string to);
 }
 
-public interface ITranslatorWithFeedback: ITranslator
+public interface ITranslatorWithFeedback : ITranslator
 {
     void Feedback(string to, string wrongTranslation, string fixedTranslation);
 }
@@ -54,10 +55,10 @@ public class AlreadyTranslatedTranslator : ITranslator
                                  select KeyValuePair.Create(g.Key, only))
                                  .ToDictionary();
 
-        return list.Select(s => (string?)alreadyTranslated.TryGetC(s)).ToList();
+        return list.Select(s => alreadyTranslated.TryGetC(s)).ToList();
     }
 
-    private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(Assembly assembly, string from, string to) 
+    private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(Assembly assembly, string from, string to)
     {
         var locFrom = DescriptionManager.GetLocalizedAssembly(assembly, CultureInfo.GetCultureInfo(from));
         var locTo = DescriptionManager.GetLocalizedAssembly(assembly, CultureInfo.GetCultureInfo(to));
@@ -65,7 +66,7 @@ public class AlreadyTranslatedTranslator : ITranslator
         if (locFrom == null || locTo == null)
             return Enumerable.Empty<KeyValuePair<string, string>>();
 
-        return (locFrom.Types.JoinDictionary(locTo.Types, (type, ft, tt)=>GetAllTranslations(ft, tt))).Values.SelectMany(pairs => pairs);
+        return locFrom.Types.JoinDictionary(locTo.Types, (type, ft, tt) => GetAllTranslations(ft, tt)).Values.SelectMany(pairs => pairs);
     }
 
     private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(LocalizedType from, LocalizedType to)
@@ -97,7 +98,7 @@ public class ReplacerTranslator : ITranslatorWithFeedback
         if (inner == null)
             throw new ArgumentNullException(nameof(inner));
 
-        this.Inner = inner;
+        Inner = inner;
     }
 
     public List<string?>? TranslateBatch(List<string> list, string from, string to)
@@ -164,7 +165,7 @@ public class ReplacerTranslator : ITranslatorWithFeedback
 //    {
 //        return true;
 //    }
- 
+
 //    public class googleResponse
 //    {
 //        public List<googleSentence> sentences;

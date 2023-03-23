@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 
-namespace Signum.Engine.Translation;
+namespace Signum.Translation.Translators;
 
 // https://docs.microsoft.com/en-us/azure/cognitive-services/translator/reference/v3-0-translate
 public class AzureTranslator : ITranslator
@@ -15,9 +15,9 @@ public class AzureTranslator : ITranslator
 
     public AzureTranslator(Func<string?> azureKey, Func<string?>? region = null, Func<string?>? proxy = null)
     {
-        this.AzureKey = azureKey;
-        this.Region = region;
-        this.Proxy = proxy;
+        AzureKey = azureKey;
+        Region = region;
+        Proxy = proxy;
     }
 
     public async Task<List<string?>?> TranslateBatchAsync(List<string> list, string from, string to)
@@ -47,7 +47,7 @@ public class AzureTranslator : ITranslator
 
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsByteArrayAsync();
-            TranslationResult[] deserializedOutput = JsonSerializer.Deserialize<TranslationResult[]>(responseBody, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true })!;
+            TranslationResult[] deserializedOutput = JsonSerializer.Deserialize<TranslationResult[]>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 
             return deserializedOutput.Select(a => (string?)a.Translations.Single().Text).ToList();
         }
@@ -55,14 +55,14 @@ public class AzureTranslator : ITranslator
 
     public List<string?>? TranslateBatch(List<string> list, string from, string to)
     {
-        if(this.AzureKey() == null)
+        if (AzureKey() == null)
             return null;
 
         var result = list.Chunk(10).SelectMany(listPart => Task.Run(async () =>
         {
-            return await this.TranslateBatchAsync(listPart.ToList(), from, to);
+            return await TranslateBatchAsync(listPart.ToList(), from, to);
         }).Result!).ToList();
-        
+
         return result;
     }
 
@@ -75,7 +75,7 @@ public static class ExtendedHttpClient
     public static HttpClient GetClientWithProxy(string? proxy)
     {
         HttpClient client;
-        if (!String.IsNullOrEmpty(proxy))
+        if (!string.IsNullOrEmpty(proxy))
         {
             HttpClientHandler handler = new HttpClientHandler() { Proxy = new WebProxy() { Address = new Uri(proxy) } };
             client = new HttpClient(handler);

@@ -1,15 +1,15 @@
 using Signum.Entities.Basics;
 
-namespace Signum.Entities.Translation;
+namespace Signum.Translation.Instances;
 
 [EntityKind(EntityKind.System, EntityData.Master)]
 public class TranslatedInstanceEntity : Entity
-{   
+{
     public CultureInfoEntity Culture { get; set; }
 
     [ImplementedByAll]
     public Lite<Entity> Instance { get; set; }
-    
+
     public PropertyRouteEntity PropertyRoute { get; set; }
 
     public string? RowId { get; set; }
@@ -40,20 +40,7 @@ public class TranslatedInstanceEntity : Entity
     }
 }
 
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class TranslateFieldAttribute : Attribute
-{
-    public TranslateableRouteType TranslatableRouteType = TranslateableRouteType.Text;
 
-
-}
-
-[InTypeScript(true)]
-public enum TranslateableRouteType
-{
-    Text,
-    Html
-}
 
 [InTypeScript(true)]
 public enum TranslatedSummaryState

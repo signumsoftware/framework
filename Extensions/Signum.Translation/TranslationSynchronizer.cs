@@ -1,5 +1,6 @@
 using System.Globalization;
-using Signum.Entities.Authorization;
+using Signum.Authorization;
+using Signum.Translation.Translators;
 
 namespace Signum.Engine.Translation;
 

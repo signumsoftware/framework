@@ -1,6 +1,8 @@
 using System.Globalization;
+using Signum.Engine.Translation;
+using Signum.Translation.Translators;
 
-namespace Signum.Engine.Translation;
+namespace Signum.Translation.Instances;
 
 public static class TranslatedInstanceSynchronizer
 {
@@ -37,7 +39,7 @@ public static class TranslatedInstanceSynchronizer
             foreach (var tr in translators)
             {
                 var result = tr.TranslateBatch(originals, gr.Key.Name, targetCulture.Name);
-                if(result != null)
+                if (result != null)
                 {
                     gr.ZipForeach(result, (sp, translated) =>
                     {
