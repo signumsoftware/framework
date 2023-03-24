@@ -158,7 +158,7 @@ export default function PredictLine(p : PredictLineProps){
   }
   return (
     <FormGroup ctx={p.sctx} label={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
-      {renderValue()}
+      {() => renderValue()} 
     </FormGroup>
   );
 }

@@ -19,7 +19,8 @@ export interface TypeaheadProps {
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
   itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLButtonElement>;
   noResultsMessage?: string;
-  renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>
+  renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>;
+  inputId?: string;
 }
 
 export class TypeaheadController {
@@ -235,6 +236,7 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
 
   const input =
     <input ref={controller.setInput} type="text" autoComplete="asdfsdf" {...p.inputAttrs}
+      id={p.inputId}
       value={p.value}
       onFocus={controller.handleFocus}
       onBlur={controller.handleBlur}

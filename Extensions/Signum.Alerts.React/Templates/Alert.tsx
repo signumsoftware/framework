@@ -42,12 +42,13 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
       {
         !ctx.value.isNew && !edit ?
           <FormGroup ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Text.niceToString()} >
-            <div style={{ whiteSpace: "pre-wrap" }}>
-              {AlertsClient.format(ctx.value.textField || ctx.value.textFromAlertType || "", ctx.value)}
-              <br />
-              <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setEdit(true) }}>Edit</a>
-            </div>
+            {() => <div style={{ whiteSpace: "pre-wrap" }}>
+                {AlertsClient.format(ctx.value.textField || ctx.value.textFromAlertType || "", ctx.value)}
+                <br />
+                <a href="#" className="text-muted" onClick={e => { e.preventDefault(); setEdit(true) }}>Edit</a>
+              </div>}
           </FormGroup>
+          
           :
           <ValueLine ctx={ctx.subCtx(n => n.textField)} label={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
       }

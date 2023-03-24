@@ -15,6 +15,7 @@ import { useMounted } from '../Hooks';
 import { FormGroup } from './FormGroup';
 import { classes } from '../Globals';
 import { getTimeMachineIcon } from './TimeMachineIcon';
+import Input from 'react-widgets/cjs/Input';
 
 export interface EntityMultiSelectProps extends EntityListBaseProps {
   vertical?: boolean;
@@ -115,8 +116,9 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-      <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined)}>
+      {inputId => <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined)}>
         <Multiselect
+          id={inputId}
           readOnly={p.ctx.readOnly}
           dataKey={item => isMListElement(item) ? liteKey(getLite(item.element)) : liteKey((item as ResultRow).entity!)}
           textField="name"
@@ -128,7 +130,7 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
             p.onRenderItem ? p.onRenderItem(item) : Navigator.renderLite(item.entity!)
           }
         />
-      </div>
+      </div>}
     </FormGroup>
   );
 

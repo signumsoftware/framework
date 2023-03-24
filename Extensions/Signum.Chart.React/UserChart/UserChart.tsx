@@ -42,7 +42,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
       <EntityLine ctx={ctx.subCtx(e => e.owner)} />
       <ValueLine ctx={ctx.subCtx(e => e.displayName)} />
       <FormGroup ctx={ctx.subCtx(e => e.query)}>
-        {
+        {() =>
           Finder.isFindable(queryKey, true) ?
             <a className="form-control-static" href={Finder.findOptionsPath({ queryName: queryKey })}>{getQueryNiceName(queryKey)}</a> :
             <span>{getQueryNiceName(queryKey)}</span>

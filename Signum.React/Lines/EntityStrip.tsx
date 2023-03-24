@@ -99,8 +99,8 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-      <div className="sf-entity-strip sf-control-container">
-        <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
+      {inputId => <div className="sf-entity-strip sf-control-container">
+        <ul id={inputId} className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
           {
             p.groupElementsBy == undefined ?
               c.getMListItemContext(p.ctx).map((mlec, i) => renderElement(mlec, i)) :
@@ -113,7 +113,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
           }
           {renderLastElement()}
         </ul>
-      </div>
+      </div>}
     </FormGroup>
   );
 

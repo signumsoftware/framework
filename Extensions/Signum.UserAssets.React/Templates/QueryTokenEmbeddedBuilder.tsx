@@ -43,8 +43,7 @@ export default function QueryTokenEntityBuilder(p: QueryTokenEmbeddedBuilderProp
 
   return (
     <FormGroup ctx={p.ctx} helpText={p.helpText}>
-      {
-        !qte || !qte.parseException ? tokenBuilder :
+      {() => !qte || !qte.parseException ? tokenBuilder :
           <div>
             <code>{qte.tokenString}</code>
             <br />

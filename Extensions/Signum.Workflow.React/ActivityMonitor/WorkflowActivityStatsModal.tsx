@@ -62,9 +62,9 @@ const [show, setShow] = React.useState<boolean>(true);
 
     return (
       <FormGroup ctx={ctx}>
-        <button className="btn btn-default" onClick={handleClick}>
+        {() => <button className="btn btn-default" onClick={handleClick}>
           <FontAwesomeIcon icon="gauge" color="green" /> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
-        </button>
+        </button>}
       </FormGroup>
     );
   }
@@ -87,9 +87,13 @@ const [show, setShow] = React.useState<boolean>(true);
     <div className="modal-body">
       {
         <div>
-          <FormGroup ctx={ctx} label={CaseActivityEntity.nicePluralName()}><FormControlReadonly ctx={ctx}>{stats.caseActivityCount}</FormControlReadonly></FormGroup>
+          <FormGroup ctx={ctx} label={CaseActivityEntity.nicePluralName()}>
+            {inputId => <FormControlReadonly id={inputId} ctx={ctx}>{stats.caseActivityCount}</FormControlReadonly>} 
+          </FormGroup>
           {config.columns.map((col, i) =>
-            <FormGroup ctx={ctx} label={col.displayName || col.token!.niceName}><FormControlReadonly ctx={ctx}>{stats.customValues[i]}</FormControlReadonly></FormGroup>
+            <FormGroup ctx={ctx} label={col.displayName || col.token!.niceName}> 
+              {inputId => <FormControlReadonly id={inputId} ctx={ctx}>{stats.customValues[i]}</FormControlReadonly>}
+            </FormGroup>
           )}
           {activity.type == "CallWorkflow" || activity.type == "DecompositionWorkflow" ?
             renderSubWorkflowExtra(ctx) :

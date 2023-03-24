@@ -5,22 +5,23 @@ import "./Lines.css"
 
 export interface FormGroupProps {
   label?: React.ReactNode;
-  controlId?: string;
   ctx: StyleContext;
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   helpText?: React.ReactNode;
-  children?: React.ReactNode;
+  children?: (inputId: string) => React.ReactNode;
 }
 
 export function FormGroup(p: FormGroupProps) {
   const ctx = p.ctx;
+  const controlId = React.useId();
+
   const tCtx = ctx as TypeContext<any>;
   const errorClass = tCtx.errorClass;
   const errorAtts = tCtx.errorAttributes && tCtx.errorAttributes();
 
   if (ctx.formGroupStyle == "None") {
-    const c = p.children as React.ReactElement<any>;
+    const c = p.children?.(controlId);
 
     return (
       <span {...p.htmlAttributes} className={errorClass} {...errorAtts}>
@@ -38,7 +39,7 @@ export function FormGroup(p: FormGroupProps) {
   let pr = tCtx.propertyRoute;
   var labelText = p.label ?? (pr?.member?.niceName);
   const label = (
-    <label htmlFor={p.controlId} {...p.labelHtmlAttributes} className={addClass(p.labelHtmlAttributes, labelClasses)} >
+    <label htmlFor={controlId} {...p.labelHtmlAttributes} className={addClass(p.labelHtmlAttributes, labelClasses)} >
       {labelText}
     </label>
   );
@@ -55,10 +56,10 @@ export function FormGroup(p: FormGroupProps) {
       {...errorAtts}>
       {(ctx.formGroupStyle == "Basic" || ctx.formGroupStyle == "LabelColumns" || ctx.formGroupStyle == "SrOnly") && label}
       {
-        ctx.formGroupStyle != "LabelColumns" ? p.children :
+        ctx.formGroupStyle != "LabelColumns" ? p.children?.(controlId) :
           (
             <div className={ctx.valueColumnsCss} >
-              {p.children}
+              {p.children?.(controlId)}
               {p.helpText && ctx.formGroupStyle == "LabelColumns" && <small className="form-text d-block">{p.helpText}</small>}
             </div>
           )

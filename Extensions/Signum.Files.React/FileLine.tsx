@@ -69,7 +69,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}>
-      {hasValue ? renderFile() : p.ctx.readOnly ? undefined :
+      {() => hasValue ? renderFile() : p.ctx.readOnly ? undefined :
         <FileUploader
           accept={p.accept}
           maxSizeInBytes={p.maxSizeInBytes}

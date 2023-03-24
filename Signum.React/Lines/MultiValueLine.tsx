@@ -75,32 +75,34 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-      <div className="row">
-      {
+      {inputId => <>
+        <div className="row">
+          {
             mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) => {
               return (
-                
+
                 <ErrorBoundary key={c.keyGenerator.getKey((mlec.binding as MListElementBinding<any>).getMListElement())}>
                   <div className={p.valueColumClass!} >
                     <MultiValueLineElement
-                    ctx={mlec}
-                    onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
-                    onRenderItem={p.onRenderItem}
+                      ctx={mlec}
+                      onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
+                      onRenderItem={p.onRenderItem}
                       valueColumClass={p.valueColumClass!} />
                   </div>
-                  </ErrorBoundary>
-               
+                </ErrorBoundary>
+
               );
             })
-      }
-      </div>
-          {!p.ctx.readOnly &&
-            <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
-              className="sf-line-button sf-create"
-              onClick={c.handleAddValue}>
-              {EntityBaseController.getCreateIcon()}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
-            </a>}
-       
+          }
+        </div>
+        {!p.ctx.readOnly &&
+          <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
+            className="sf-line-button sf-create"
+            onClick={c.handleAddValue}>
+            {EntityBaseController.getCreateIcon()}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
+          </a>}
+
+      </>}
     </FormGroup>
   );
 });

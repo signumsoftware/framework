@@ -272,6 +272,8 @@ public class ImporterFromExcel
 
                                 value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
                                 var parent = getSet.ParentGetter != null ? getSet.ParentGetter(entity) : entity;
+                                if(getSet.Required && value == null)
+                                   throw new InvalidOperationException($"Value of column {token} is null");
                                 getSet.Setter!(parent, value);
                             }
                         }
@@ -610,6 +612,7 @@ public class ImporterFromExcel
                     ParentGetter = parentGetter?.Compile(),
                     Setter = lambda.Compile(),
                     EntityFinder = entityFinder,
+                    Required = prop.PropertyType.IsValueType && !prop.PropertyType.IsNullable(),
                 };
             }
         });
@@ -622,6 +625,7 @@ public class ImporterFromExcel
         public required Func<ModifiableEntity, ModifiableEntity>? ParentGetter { get; set; }
         public required Action<ModifiableEntity, object?>? Setter { get; set; }
         public Func<object?, object?>? EntityFinder { get; set; }
+        public bool Required { get; set; }
     }
 
     public class ParsedQueryForImport

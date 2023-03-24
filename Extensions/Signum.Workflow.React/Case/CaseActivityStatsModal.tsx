@@ -107,10 +107,10 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
 
   function renderSubWorkflowExtra(ctx: StyleContext) {
     return (
-      <FormGroup ctx={ctx}>
-        <button className="btn btn-light" onClick={handleClick}>
+      <FormGroup ctx={ctx} >
+        {() => <button className="btn btn-light" onClick={handleClick}>
           <FontAwesomeIcon icon="shuffle" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
-        </button>
+        </button>}      
       </FormGroup>
     );
   }
@@ -120,16 +120,38 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
 
   return (
     <div>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.niceName()}>{getToString(stats.caseActivity)}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneBy)}>{stats.doneBy && <EntityLink lite={stats.doneBy} />}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.startDate)}>{formatDate(stats.startDate)}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneDate)}>{formatDate(stats.doneDate)}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneType)}>{stats.doneType && DoneType.niceToString(stats.doneType)}</FormGroup>
-      <FormGroup ctx={ctx} label={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)}>{formatMinutes(stats.estimatedDuration)}</FormGroup>
-      <FormGroup ctx={ctx} label={WorkflowActivityMessage.AverageDuration.niceToString()}>{formatMinutes(stats.averageDuration)}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.duration)}>{formatMinutes(stats.duration)}</FormGroup>
-      {stats.workflowActivityType && <FormGroup ctx={ctx} label={WorkflowActivityType.niceTypeName()}>{WorkflowActivityType.niceToString(stats.workflowActivityType)}</FormGroup>}
-      {stats.workflowEventType && <FormGroup ctx={ctx} label={WorkflowEventType.niceTypeName()}>{WorkflowEventType.niceToString(stats.workflowEventType)}</FormGroup>}
+      <FormGroup ctx={ctx} label={CaseActivityEntity.niceName()}>
+        {() => getToString(stats.caseActivity)}
+      </FormGroup>
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneBy)}>
+        {() => stats.doneBy && <EntityLink lite={stats.doneBy} />}
+      </FormGroup>
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.startDate)}>
+        {() => formatDate(stats.startDate)}
+      </FormGroup>
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneDate)}>
+        {() => formatDate(stats.doneDate)}
+      </FormGroup>
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneType)}>
+        {() => stats.doneType && DoneType.niceToString(stats.doneType)}
+      </FormGroup>
+      <FormGroup ctx={ctx} label={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)}>
+        {() => formatMinutes(stats.estimatedDuration)}
+      </FormGroup>
+      <FormGroup ctx={ctx} label={WorkflowActivityMessage.AverageDuration.niceToString()}>
+        {() => formatMinutes(stats.averageDuration)}
+      </FormGroup>
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.duration)}>
+        {() => formatMinutes(stats.duration)}
+      </FormGroup>
+      {stats.workflowActivityType && <FormGroup ctx={ctx} label={WorkflowActivityType.niceTypeName()}>
+          {() => stats.workflowActivityType && WorkflowActivityType.niceToString(stats.workflowActivityType)}
+        </ FormGroup>
+      }
+      {stats.workflowEventType && <FormGroup ctx={ctx} label={WorkflowEventType.niceTypeName()}>
+        {() => stats.workflowEventType && WorkflowEventType.niceToString(stats.workflowEventType)}
+        </FormGroup>
+      }
       {
         stats.workflowActivityType == "Task" || stats.workflowActivityType == "Decision" ? renderTaskExtra() :
           stats.workflowActivityType == "Script" ? renderScriptTaskExtra() :

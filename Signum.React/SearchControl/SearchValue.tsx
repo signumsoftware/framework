@@ -19,6 +19,7 @@ import { TimeMachineColors } from '../Lines/TimeMachineIcon'
 
 export interface SearchValueProps {
   ctx?: StyleContext;
+  id?: string;
   valueToken?: string | QueryTokenString<any>;
   findOptions: FindOptions;
   multipleValues?: { vertical?: boolean, showType?: boolean };
@@ -293,7 +294,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 
   if (p.formControlClass) {
     return (
-      <div className={className} style={p.customStyle} {...p.htmlAttributes}>
+      <div id={p.id} className={className} style={p.customStyle} {...p.htmlAttributes}>
         {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
         {renderValue()}
       </div>
@@ -303,14 +304,14 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 
   if (p.isLink) {
     return (
-      <a className={className} onClick={handleClick} href="#" style={p.customStyle} {...p.htmlAttributes}>
+      <a id={p.id} className={className} onClick={handleClick} href="#" style={p.customStyle} {...p.htmlAttributes}>
         {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
         {renderValue()}
       </a>
     );
   }
 
-  return <span className={className} style={p.customStyle} {...p.htmlAttributes}>
+  return <span id={p.id} className={className} style={p.customStyle} {...p.htmlAttributes}>
     {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
     {renderValue()}
   </span>

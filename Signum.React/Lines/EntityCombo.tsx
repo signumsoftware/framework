@@ -117,11 +117,12 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
       label={getLabelText()}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
-      labelHtmlAttributes={p.labelHtmlAttributes} >
-      <div className="sf-entity-combo">
+      labelHtmlAttributes={p.labelHtmlAttributes}>
+      {inputId => <div className="sf-entity-combo">
         <div className={EntityBaseController.hasChildrens(buttons) ? p.ctx.inputGroupClass : undefined}>
-          {getTimeMachineIcon({ ctx: p.ctx})}
+          {getTimeMachineIcon({ ctx: p.ctx })}
           <EntityComboSelect
+            id={inputId}
             ref={comboRef}
             ctx={p.ctx}
             onChange={c.handleOnChange}
@@ -142,7 +143,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
           />
           {EntityBaseController.hasChildrens(buttons) ? buttons : undefined}
         </div>
-      </div>
+      </div>}
     </FormGroup>
   );
 }), (prev, next) => EntityBaseController.propEquals(prev, next));
@@ -163,7 +164,8 @@ export interface EntityComboSelectProps {
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
   toStringFromData?: boolean;
-  overrideSelectedLite?: () => Lite<Entity> | null
+  overrideSelectedLite?: () => Lite<Entity> | null;
+  id: string;
 }
 
 
@@ -233,7 +235,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
 
   if (ctx.readOnly)
     return (
-      <FormControlReadonly ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>
+      <FormControlReadonly id={p.id} ctx={ctx} htmlAttributes={p.selectHtmlAttributes}>
         {ctx.value &&
           (p.onRenderItem ? p.onRenderItem({ entity: lite } as ResultRow, "Value", undefined) :
           p.liteToString ? getToString(lite!, p.liteToString) :
@@ -261,6 +263,7 @@ export const EntityComboSelect = React.forwardRef(function EntityComboSelect(p: 
     return (
       <select className={classes(ctx.formSelectClass, p.mandatoryClass)} onChange={handleOnChange} value={lite ? liteKey(lite) : ""}
         title={getToString(lite)}
+        id={p.id}
         onClick={() => setLoadData(true)}
         disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
         {getOptionRows().map((r, i) => <option key={i} value={r?.entity ? liteKey(r.entity!) : ""}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
