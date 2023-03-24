@@ -107,11 +107,11 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
 
   function renderSubWorkflowExtra(ctx: StyleContext) {
     return (
-      <FormGroup ctx={ctx}>
-        <button className="btn btn-light" onClick={handleClick}>
+      <FormGroup ctx={ctx}
+        children={() => <button className="btn btn-light" onClick={handleClick}>
           <FontAwesomeIcon icon="shuffle" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
-        </button>
-      </FormGroup>
+        </button>}
+      />
     );
   }
 
@@ -120,16 +120,16 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
 
   return (
     <div>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.niceName()}>{getToString(stats.caseActivity)}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneBy)}>{stats.doneBy && <EntityLink lite={stats.doneBy} />}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.startDate)}>{formatDate(stats.startDate)}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneDate)}>{formatDate(stats.doneDate)}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneType)}>{stats.doneType && DoneType.niceToString(stats.doneType)}</FormGroup>
-      <FormGroup ctx={ctx} label={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)}>{formatMinutes(stats.estimatedDuration)}</FormGroup>
-      <FormGroup ctx={ctx} label={WorkflowActivityMessage.AverageDuration.niceToString()}>{formatMinutes(stats.averageDuration)}</FormGroup>
-      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.duration)}>{formatMinutes(stats.duration)}</FormGroup>
-      {stats.workflowActivityType && <FormGroup ctx={ctx} label={WorkflowActivityType.niceTypeName()}>{WorkflowActivityType.niceToString(stats.workflowActivityType)}</FormGroup>}
-      {stats.workflowEventType && <FormGroup ctx={ctx} label={WorkflowEventType.niceTypeName()}>{WorkflowEventType.niceToString(stats.workflowEventType)}</FormGroup>}
+      <FormGroup ctx={ctx} label={CaseActivityEntity.niceName()} children={() => getToString(stats.caseActivity)} />
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneBy)} children={() => stats.doneBy && <EntityLink lite={stats.doneBy} />} />
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.startDate)} children={() => formatDate(stats.startDate)} />
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneDate)} children={() => formatDate(stats.doneDate)} />
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.doneType)} children={() => stats.doneType && DoneType.niceToString(stats.doneType)} />
+      <FormGroup ctx={ctx} label={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)} children={() => formatMinutes(stats.estimatedDuration)} />
+      <FormGroup ctx={ctx} label={WorkflowActivityMessage.AverageDuration.niceToString()} children={() => formatMinutes(stats.averageDuration)} />
+      <FormGroup ctx={ctx} label={CaseActivityEntity.nicePropertyName(a => a.duration)} children={() => formatMinutes(stats.duration)} />
+      {stats.workflowActivityType && <FormGroup ctx={ctx} label={WorkflowActivityType.niceTypeName()} children={() => stats.workflowActivityType && WorkflowActivityType.niceToString(stats.workflowActivityType)} />}
+      {stats.workflowEventType && <FormGroup ctx={ctx} label={WorkflowEventType.niceTypeName()} children={() => stats.workflowEventType && WorkflowEventType.niceToString(stats.workflowEventType)} />}
       {
         stats.workflowActivityType == "Task" || stats.workflowActivityType == "Decision" ? renderTaskExtra() :
           stats.workflowActivityType == "Script" ? renderScriptTaskExtra() :

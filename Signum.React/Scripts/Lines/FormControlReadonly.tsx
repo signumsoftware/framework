@@ -9,9 +9,10 @@ export interface FormControlReadonlyProps {
   className?: string;
   innerRef?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
+  inputId: string;
 }
 
-export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, innerRef, children }: FormControlReadonlyProps) {
+export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, innerRef, children, inputId }: FormControlReadonlyProps) {
 
   const array = React.Children.toArray(children);
   const onlyText = array.length == 1 && typeof array[0] == "string" ? array[0] as string : undefined;
@@ -19,11 +20,11 @@ export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, inn
   if (onlyText) { //Text is scrollable in inputs
     if (ctx.readonlyAsPlainText) {
       return (
-        <input {...attrs} readOnly className={classes(ctx.formControlPlainTextClass, attrs?.className, className)} tabIndex={-1} value={onlyText} ref={innerRef as React.RefObject<HTMLInputElement>} />
+        <input id={inputId} {...attrs} readOnly className={classes(ctx.formControlPlainTextClass, attrs?.className, className)} tabIndex={-1} value={onlyText} ref={innerRef as React.RefObject<HTMLInputElement>} />
       );
     } else {
       return (
-        <input {...attrs} readOnly className={classes(ctx.formControlClass, attrs?.className, className)} tabIndex={-1} value={onlyText} ref={innerRef as React.RefObject<HTMLInputElement>} />
+        <input id={inputId} {...attrs} readOnly className={classes(ctx.formControlClass, attrs?.className, className)} tabIndex={-1} value={onlyText} ref={innerRef as React.RefObject<HTMLInputElement>} />
       );
     }
   }
