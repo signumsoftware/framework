@@ -56,7 +56,6 @@ public static class UserAssetsImporter
 {
     public static Dictionary<string, Type> UserAssetNames = new();
     public static Polymorphic<Action<Entity>> SaveEntity = new();
-    public static Dictionary<string, Type> PartNames = new();
     public static Func<XDocument, XDocument>? PreImport = null;
 
     class PreviewContext : IFromXmlContext

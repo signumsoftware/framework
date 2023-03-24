@@ -104,7 +104,6 @@ public interface IFromXmlContext
 
     DynamicQuery.QueryDescription GetQueryDescription(QueryEntity Query);
 
-
     Lite<Entity>? ParseLite(string liteKey, IUserAssetEntity userAsset, PropertyRoute route);
 
     Lite<T>? ParseLite<E, T>(string liteKey, E entity, Expression<Func<E, Lite<T>?>> property)

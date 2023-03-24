@@ -2,10 +2,9 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Scripts/Reflection'
-import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
-import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
-import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
+import * as Entities from '../../Signum.React/Signum.Entities'
+import * as Basics from '../../Signum.React/Signum.Basics'
 
 
 export module DiffLogMessage {
@@ -26,8 +25,8 @@ export module DiffLogMessage {
 export const DiffLogMixin = new Type<DiffLogMixin>("DiffLogMixin");
 export interface DiffLogMixin extends Entities.MixinEntity {
   Type: "DiffLogMixin";
-  initialState: Basics.BigStringEmbedded;
-  finalState: Basics.BigStringEmbedded;
+  initialState: Entities.BigStringEmbedded;
+  finalState: Entities.BigStringEmbedded;
   cleaned: boolean;
 }
 
@@ -51,7 +50,6 @@ export module TimeMachineMessage {
 }
 
 export module TimeMachinePermission {
-  export const ShowTimeMachine : Authorization.PermissionSymbol = registerSymbol("Permission", "TimeMachinePermission.ShowTimeMachine");
+  export const ShowTimeMachine : Basics.PermissionSymbol = registerSymbol("Permission", "TimeMachinePermission.ShowTimeMachine");
 }
-
 

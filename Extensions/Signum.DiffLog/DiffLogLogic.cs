@@ -1,9 +1,4 @@
-using Signum.Entities.Basics;
 using Signum.Entities.DiffLog;
-using Signum.Utilities.DataStructures;
-using Signum.Engine.Authorization;
-using System.Text.RegularExpressions;
-using Signum.Entities.Reflection;
 
 namespace Signum.Engine.DiffLog;
 
@@ -17,7 +12,7 @@ public static class DiffLogLogic
         {
             MixinDeclarations.AssertDeclared(typeof(OperationLogEntity), typeof(DiffLogMixin));
 
-            PermissionAuthLogic.RegisterTypes(typeof(TimeMachinePermission));
+            PermissionLogic.RegisterTypes(typeof(TimeMachinePermission));
 
             OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 

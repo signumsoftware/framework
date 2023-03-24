@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Basics;
 
 namespace Signum.React.DiffLog;
 

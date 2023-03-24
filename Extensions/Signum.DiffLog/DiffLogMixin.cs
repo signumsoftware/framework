@@ -1,5 +1,3 @@
-using Signum.Entities.Basics;
-
 namespace Signum.Entities.DiffLog;
 
 public class DiffLogMixin : MixinEntity
