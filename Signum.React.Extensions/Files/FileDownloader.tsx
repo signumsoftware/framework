@@ -130,7 +130,7 @@ registerConfiguration(FileEntity, {
 });
 
 registerConfiguration(FilePathEntity, {
-  fileUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
+  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadFilePath/${file.id}?${QueryString.stringify({ hash: file.hash })}`),
   fileLiteUrl: file => AppContext.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id),
 });
 
@@ -140,7 +140,8 @@ registerConfiguration(FileEmbedded, {
 });
 
 registerConfiguration(FilePathEmbedded, {
-  fileUrl: file => AppContext.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId })}`)
+  fileUrl: file => AppContext.toAbsoluteUrl(
+    `~/api/files/downloadEmbeddedFilePath/${file.rootType}/${file.entityId}?${QueryString.stringify({ route: file.propertyRoute, rowId: file.mListRowId, hash: file.hash })}`)
 });
 
 export function downloadFile(file: IFilePath & ModifiableEntity): Promise<Response> {

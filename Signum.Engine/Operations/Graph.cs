@@ -537,14 +537,6 @@ public class Graph<T>
             {
                 OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
 
-                string? error = OnCanExecute((T)entity);
-                if (error != null)
-                {
-                    var ex= new ApplicationException(error);
-                    OperationLogic.OnOperationExceptionHandlerArgs(Symbol.Symbol, entity,ex, args);
-                    throw ex;
-
-                }
 
                 OperationLogEntity log = new OperationLogEntity
                 {
@@ -555,10 +547,6 @@ public class Graph<T>
 
                 try
                 {
-
-                    OperationLogic.OnOperationBeforeExecuteHandlerArgs(Symbol.Symbol, entity, args);
-
-
                     using (var tr = new Transaction())
                     {
                         using (OperationLogic.AllowSave(entity.GetType()))
@@ -566,6 +554,14 @@ public class Graph<T>
                             var assertEnd = AssertEntity((T)entity);
                             OperationLogic.OnSuroundOperation(this, log, entity, args).EndUsing(_ =>
                             {
+
+                                string? error = OnCanExecute((T)entity);
+                                if (error != null)
+                                {
+                                    var ex = new ApplicationException(error);
+                                    throw ex;
+                                }
+
                                 Execute((T)entity, args);
 
                                 assertEnd?.Invoke();
@@ -583,7 +579,6 @@ public class Graph<T>
                         tr.Commit();
                     }
 
-                    OperationLogic.OnOperationExecutedHandlerArgs(Symbol.Symbol, entity, args);
                 }
                 catch (Exception ex)
                 {
@@ -591,7 +586,6 @@ public class Graph<T>
 
                     if (Transaction.InTestTransaction)
                     {
-                        OperationLogic.OnOperationExceptionHandlerArgs(Symbol.Symbol, entity, ex, args);
                         throw;
                     }
                         
@@ -615,7 +609,6 @@ public class Graph<T>
                         tr2.Commit();
                     }
 
-                    OperationLogic.OnOperationExceptionHandlerArgs(Symbol.Symbol, entity, ex, args);
 
                     throw;
                 }
@@ -726,10 +719,6 @@ public class Graph<T>
                     {
                         try
                         {
-
-                            OperationLogic.OnOperationBeforeExecuteHandlerArgs(Symbol.Symbol, entity, args);
-
-
                             using (var tr = new Transaction())
                             {
                                 OnDelete((T)entity, args);
@@ -741,8 +730,6 @@ public class Graph<T>
 
                                 tr.Commit();
                             }
-
-                            OperationLogic.OnOperationExecutedHandlerArgs(Symbol.Symbol, entity, args);
                         }
                         catch (Exception ex)
                         {

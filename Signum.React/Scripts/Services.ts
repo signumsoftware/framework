@@ -18,6 +18,8 @@ export interface AjaxOptions {
   signal?: AbortSignal;
 }
 
+export interface AjaxOptionsOverride extends Omit<AjaxOptions, "url"> { };
+
 export function baseUrl(options: AjaxOptions): string {
   const baseUrl = window.__baseUrl;
 
@@ -37,7 +39,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
 
   return wrapRequest(options, () => {
 
-    const cache = options.cache || "no-cache";
+    const cache = options.cache || 'no-store';
     const isIE11 = !!(window as any).MSInputMethodContext && !!(document as any).documentMode;
 
     const headers = {
@@ -54,7 +56,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
       headers: headers,
       mode: options.mode,
       credentials: options.credentials || "same-origin",
-      cache: options.cache || "no-cache",
+      cache: cache,
       signal: options.signal
     } as RequestInit);
   });

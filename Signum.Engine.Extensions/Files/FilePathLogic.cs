@@ -6,6 +6,9 @@ namespace Signum.Engine.Files;
 
 public static class FilePathLogic
 {
+
+    public static Func<IFilePath, int> MaxAge = (fp) => 30 * 24 * 60 * 60; //used to set HTTP Cache-Control max-age, one month as default
+
     public static void AssertStarted(SchemaBuilder sb)
     {
         sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null!)));
