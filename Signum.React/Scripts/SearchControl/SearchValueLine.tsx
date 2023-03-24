@@ -157,8 +157,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...p.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
       helpText={p.helpText && svRef.current && p.helpText(svRef.current)}
-    >
-      <div className={isFormControl ? ((unit || view || extra || find || create) ? p.ctx.inputGroupClass : undefined) : p.ctx.formControlPlainTextClass}>
+      children={inputId => <div className={isFormControl ? ((unit || view || extra || find || create) ? p.ctx.inputGroupClass : undefined) : p.ctx.formControlPlainTextClass}>
         {svRef.current && renderTimeMachineIcon(svRef.current.hasHistoryChanges, `translate(-40%, -40%)`)}
         <SearchValue
           ctx={p.ctx}
@@ -186,14 +185,13 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           customRequest={p.customRequest}
           avoidRenderTimeMachineIcon
         />
-
         {unit}
         {view}
         {find}
         {create}
         {extra}
-      </div>
-    </FormGroup>
+      </div>}
+    />
   );
 
 

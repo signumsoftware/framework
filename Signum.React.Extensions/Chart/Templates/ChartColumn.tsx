@@ -198,8 +198,8 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps) {
 
   return (
     <FormGroup ctx={p.ctx}
-      label={ChartMessage.ColorsFor0.niceToString(p.type.niceName)}>
-      {palette === undefined ?
+      label={ChartMessage.ColorsFor0.niceToString(p.type.niceName)}
+      children={() => palette === undefined ?
         <span className={p.ctx.formControlPlainTextClass}>
           {JavascriptMessage.loading.niceToString()}
         </span> :
@@ -219,7 +219,7 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps) {
           {palette ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()}
         </a>
       }
-    </FormGroup>
+    />
   );
 }
 

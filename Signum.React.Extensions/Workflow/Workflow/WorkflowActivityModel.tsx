@@ -199,11 +199,10 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
       {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
         <div>
           {ctx.value.mainEntityType ? <>
-            <FormGroup ctx={ctx.subCtx(d => d.viewName)} label={ctx.niceName(d => d.viewName)}>
-              {
-                <div className="row">
+            <FormGroup ctx={ctx.subCtx(d => d.viewName)} label={ctx.niceName(d => d.viewName)} 
+            children={inputId => <div className="row">
                   <div className="col-sm-6">
-                  <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-select form-select-sm" onChange={handleViewNameChange}>
+                  <select id={inputId} value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-select form-select-sm" onChange={handleViewNameChange}>
                       <option value="">{" - "}</option>
                       {(viewNames ?? []).map((v, i) => <option key={i} value={v}>{v}</option>)}
                     </select>
@@ -213,9 +212,9 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
                   </div>
                 </div>
               }
-            </FormGroup>
-            <FormGroup ctx={ctx.subCtx(d => d.viewNameProps)}>
-              <EntityTable avoidFieldSet
+            />
+            <FormGroup ctx={ctx.subCtx(d => d.viewNameProps)}
+              children={() => <EntityTable avoidFieldSet
                 ctx={ctx.subCtx(d => d.viewNameProps)}
                 columns={EntityTable.typedColumns<ViewNamePropEmbedded>([
                   {
@@ -228,8 +227,8 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
                       <ValueLine ctx={ctx.subCtx(a => a.expression)} helpText={getViewNamePropsExpressionHelpText(ctx)} mandatory={getViewNamePropsIsMandatory(ctx)}
                       />
                   }
-                ])} />
-            </FormGroup>
+                ])} />}
+            />
           </>
             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
 

@@ -145,9 +145,9 @@ export default function DynamicValidation(p: DynamicValidationProps) {
     <div>
       <ValueLine ctx={ctx.subCtx(d => d.name)} />
       <EntityLine ctx={ctx.subCtx(d => d.entityType)} onChange={handleEntityTypeChange} />
-      <FormGroup ctx={ctx.subCtx(d => d.subEntity)}>
-        {ctx.value.entityType && <PropertyRouteCombo ctx={ctx.subCtx(d => d.subEntity)} type={ctx.value.entityType} onChange={forceUpdate} routes={PropertyRoute.generateAll(ctx.value.entityType.cleanName).filter(a => a.propertyRouteType == "Mixin" || a.typeReference().isEmbedded && !a.typeReference().isCollection)} />}
-      </FormGroup>
+      <FormGroup ctx={ctx.subCtx(d => d.subEntity)}
+        children={() => ctx.value.entityType && <PropertyRouteCombo ctx={ctx.subCtx(d => d.subEntity)} type={ctx.value.entityType} onChange={forceUpdate} routes={PropertyRoute.generateAll(ctx.value.entityType.cleanName).filter(a => a.propertyRouteType == "Mixin" || a.typeReference().isEmbedded && !a.typeReference().isCollection)} />}
+      />
       {ctx.value.entityType &&
         <div>
           <br />

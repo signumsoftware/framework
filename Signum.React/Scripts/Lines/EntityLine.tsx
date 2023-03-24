@@ -149,25 +149,25 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
   return (
     <FormGroup ctx={p.ctx} label={p.label} helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
-      labelHtmlAttributes={p.labelHtmlAttributes}>
-      <div className="sf-entity-line">
+      labelHtmlAttributes={p.labelHtmlAttributes}
+      children={inputId => <div className="sf-entity-line">
         {getTimeMachineIcon({ ctx: p.ctx })}
         {
           !EntityBaseController.hasChildrens(buttons) ?
-            (hasValue ? renderLink() : renderAutoComplete()) :
+            (hasValue ? renderLink(inputId) : renderAutoComplete(inputId)) :
             (hasValue ?
               <div className={p.ctx.inputGroupClass}>
-                {renderLink()}
+                {renderLink(inputId)}
                 {buttons}
               </div> :
-              renderAutoComplete(input => <div className={p.ctx.inputGroupClass}>
+              renderAutoComplete(inputId, input => <div className={p.ctx.inputGroupClass}>
                 {input}
                 {buttons}
               </div>)
             )
-          }
-      </div>
-    </FormGroup>
+        }
+      </div>}
+    />
   );
 
   function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
@@ -180,19 +180,20 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     c.paste(text);
   }
 
-  function renderAutoComplete(renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {
+  function renderAutoComplete(inputId: string, renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {
 
     const ctx = p.ctx;
 
     var ac = p.autocomplete;
 
     if (ac == null || ctx.readOnly) {
-      var fcr = <FormControlReadonly ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
+      var fcr = <FormControlReadonly inputId={inputId} ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
       return renderInput ? renderInput(fcr) : fcr;
     }
 
     return (
       <Typeahead ref={c.typeahead}
+        inputId={inputId}
         inputAttrs={{
           className: classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
           placeholder: ctx.placeholderLabels ? p.ctx.niceName() : undefined,
@@ -211,7 +212,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     );
   }
 
-  function renderLink() {
+  function renderLink(inputId: string) {
 
     var value = p.ctx.value!;
 
@@ -221,7 +222,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
           getToString(value);
 
     if (p.ctx.readOnly)
-      return <FormControlReadonly ctx={p.ctx}>{str}</FormControlReadonly>
+      return <FormControlReadonly inputId={inputId} ctx={p.ctx}>{str}</FormControlReadonly>
 
     if (p.view && !p.avoidLink) {
       return (

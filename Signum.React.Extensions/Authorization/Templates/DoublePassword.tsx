@@ -32,22 +32,22 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
 
   if (!isOpen) {
     return (
-      <FormGroup label={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx}>
-        <a className="btn btn-light btn-sm" onClick={() => setIsOpen(true)}>
-          <FontAwesomeIcon icon="key" /> {LoginAuthMessage.ChangePassword.niceToString()}
-        </a>
-      </FormGroup>
+      <FormGroup label={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx}
+        children={() => <a className="btn btn-light btn-sm" onClick={() => setIsOpen(true)}>
+            <FontAwesomeIcon icon="key" /> {LoginAuthMessage.ChangePassword.niceToString()}
+          </a>}
+      />
     );
   }
 
   return (
     <div>
-      <FormGroup ctx={p.ctx} label={LoginAuthMessage.NewPassword.niceToString()}>
-        <input type="password" ref={newPass} autoComplete="off" placeholder={LoginAuthMessage.NewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />
-      </FormGroup>
-      <FormGroup ctx={p.ctx} label={LoginAuthMessage.ConfirmNewPassword.niceToString()}>
-        <input type="password" ref={newPass2} autoComplete="off" placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass2.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />
-      </FormGroup>
+      <FormGroup ctx={p.ctx} label={LoginAuthMessage.NewPassword.niceToString()}
+        children={inputId => <input id={inputId} type="password" ref={newPass} autoComplete="off" placeholder={LoginAuthMessage.NewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />}
+      />
+      <FormGroup ctx={p.ctx} label={LoginAuthMessage.ConfirmNewPassword.niceToString()}
+        children={inputId => <input id={inputId} type="password" ref={newPass2} autoComplete="off" placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass2.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />}
+      />
     </div>
   );
 }

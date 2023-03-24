@@ -41,13 +41,13 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
     <div>
       <EntityLine ctx={ctx.subCtx(e => e.owner)} />
       <ValueLine ctx={ctx.subCtx(e => e.displayName)} />
-      <FormGroup ctx={ctx.subCtx(e => e.query)}>
-        {
+      <FormGroup ctx={ctx.subCtx(e => e.query)}
+        children={() =>
           Finder.isFindable(queryKey, true) ?
             <a className="form-control-static" href={Finder.findOptionsPath({ queryName: queryKey })}>{getQueryNiceName(queryKey)}</a> :
             <span>{getQueryNiceName(queryKey)}</span>
         }
-      </FormGroup>
+      />
       <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => forceUpdate()}
         helpText={
           <div>

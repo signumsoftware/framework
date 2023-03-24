@@ -130,10 +130,10 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
   return (
     <FormGroup ctx={p.ctx} label={p.label}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
-      labelHtmlAttributes={p.labelHtmlAttributes}>
-      <div className="sf-entity-line">
+      labelHtmlAttributes={p.labelHtmlAttributes}
+      children={inputId => <div className="sf-entity-line">
         <div className={p.ctx.inputGroupClass}>
-          <select className={p.ctx.formSelectClass} size={p.size ?? 30} style={{ height: "120px", overflow: "auto" }} onChange={c.handleOnSelect} ref={c.handleSelectLoad}>
+          <select id={inputId} className={p.ctx.formSelectClass} size={p.size ?? 30} style={{ height: "120px", overflow: "auto" }} onChange={c.handleOnSelect} ref={c.handleSelectLoad}>
             {list.map(mle => <option key={c.keyGenerator.getKey(mle)} title={p.ctx.titleLabels ? c.getTitle(mle.element) : undefined} {...EntityListBaseController.entityHtmlAttributes(mle.element)}>{getToString(mle.element)}</option>)}
           </select>
           <span className="input-group-vertical">
@@ -145,7 +145,7 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
             {selectedIndex != undefined && p.move && selectedIndex != null && selectedIndex < list.length - 1 && c.renderMoveDown(true, selectedIndex!, "v")}
           </span>
         </div>
-      </div>
-    </FormGroup>
+      </div>}
+    />
   );
 });
