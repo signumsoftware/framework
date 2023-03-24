@@ -1,6 +1,4 @@
-using Signum.Entities.ConcurrentUser;
-
-namespace Signum.Engine.ConcurrentUser;
+namespace Signum.ConcurrentUser;
 public static class ConcurrentUserLogic
 {
     public static Func<Type, bool> WatchSaveFor = null!; 

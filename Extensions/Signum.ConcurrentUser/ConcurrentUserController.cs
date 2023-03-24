@@ -1,9 +1,7 @@
-using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.ConcurrentUser;
-using Signum.Entities.Authorization;
+using Signum.Authorization;
 
-namespace Signum.React.ConcurrentUser;
+namespace Signum.ConcurrentUser;
 
 public class ConcurrentUserController : ControllerBase
 {

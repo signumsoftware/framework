@@ -1,7 +1,8 @@
-using Signum.Entities.Authorization;
+using Signum.Authorization;
 using System.ComponentModel;
 
-namespace Signum.Entities.ConcurrentUser;
+namespace Signum.ConcurrentUser;
+
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class ConcurrentUserEntity : Entity
 {
