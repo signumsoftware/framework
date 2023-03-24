@@ -1,11 +1,8 @@
 using Signum.React.UserAssets;
-using Signum.React.Facades;
-using Signum.Engine.Dashboard;
-using Signum.Entities.Dashboard;
-using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Signum.API;
 
-namespace Signum.React.Dashboard;
+namespace Signum.Dashboard;
 
 public static class DashboardServer
 {

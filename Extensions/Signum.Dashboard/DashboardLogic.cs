@@ -1,25 +1,24 @@
-using Signum.Engine.Authorization;
-using Signum.Engine.Chart;
-using Signum.Engine.Files;
-using Signum.Engine.Json;
-using Signum.Engine.Scheduler;
-using Signum.Engine.Translation;
+using Signum.API.Json;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Chart;
+using Signum.Chart.UserChart;
+using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Sync;
 using Signum.Engine.UserAssets;
-using Signum.Engine.UserQueries;
-using Signum.Engine.ViewLog;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Chart;
-using Signum.Entities.Dashboard;
 using Signum.Entities.UserAssets;
-using Signum.Entities.UserQueries;
+using Signum.Files;
+using Signum.Scheduler;
+using Signum.UserAssets.Queries;
+using Signum.UserQueries;
 using Signum.Utilities.Reflection;
+using Signum.ViewLog;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Xml.Linq;
 
-namespace Signum.Engine.Dashboard;
+namespace Signum.Dashboard;
 
 public static class DashboardLogic
 {
@@ -28,6 +27,8 @@ public static class DashboardLogic
     public static ResetLazy<Dictionary<Type, List<Lite<DashboardEntity>>>> DashboardsByType = null!;
 
     public static Polymorphic<Func<IPartEntity, PanelPartEmbedded, IEnumerable<CachedQueryDefinition>>> OnGetCachedQueryDefinition = new();
+
+
 
 
     [AutoExpressionField]
@@ -46,13 +47,13 @@ public static class DashboardLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-            PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
+            PermissionLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
 
             FileTypeLogic.Register(CachedQueryFileType.CachedQuery, cachedQueryAlgorithm);
 
             UserAssetsImporter.Register<DashboardEntity>("Dashboard", DashboardOperation.Save);
 
-            UserAssetsImporter.PartNames.AddRange(new Dictionary<string, Type>
+            PartNames.AddRange(new Dictionary<string, Type>
             {
                 {"UserChartPart", typeof(UserChartPartEntity)},
                 {"CombinedUserChartPart", typeof(CombinedUserChartPartEntity)},
@@ -234,6 +235,21 @@ public static class DashboardLogic
         }
     }
 
+
+    public static Dictionary<string, Type> PartNames = new();
+
+    public static IPartEntity GetPart(IFromXmlContext ctx, IPartEntity old, XElement element)
+    {
+        Type type = PartNames.GetOrThrow(element.Name.ToString());
+
+        var part = old != null && old.GetType() == type ? old : (IPartEntity)Activator.CreateInstance(type)!;
+
+        part.FromXml(element, ctx);
+
+
+        return part;
+    }
+
     public static void UpdateDashboardIconNameInDB()
     {
         Database.Query<DashboardEntity>().Where(db => db.Parts.Any(p => p.IconName.HasText())).ToList().ForEach(db => {
@@ -348,7 +364,7 @@ public static class DashboardLogic
 
                         var bytes =  JsonSerializer.SerializeToUtf8Bytes(json, EntityJsonContext.FullJsonSerializerOptions);
 
-                        var file = new Entities.Files.FilePathEmbedded(CachedQueryFileType.CachedQuery, "CachedQuery.json", bytes).SaveFile();
+                        var file = new FilePathEmbedded(CachedQueryFileType.CachedQuery, "CachedQuery.json", bytes).SaveFile();
 
                         var uploadDuration = sw.ElapsedMilliseconds;
 
@@ -399,8 +415,8 @@ public static class DashboardLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        TranslatedInstanceLogic.AddRoute((DashboardEntity d) => d.DisplayName);
-        TranslatedInstanceLogic.AddRoute((DashboardEntity d) => d.Parts[0].Title);
+        PropertyRouteTranslationLogic.AddRoute((DashboardEntity d) => d.DisplayName);
+        PropertyRouteTranslationLogic.AddRoute((DashboardEntity d) => d.Parts[0].Title);
     }
 
     public static List<DashboardEntity> GetEmbeddedDashboards(Type entityType)
@@ -429,7 +445,7 @@ public static class DashboardLogic
         var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
         return Dashboards.Value.Values
             .Where(d => d.EntityType == null && isAllowed(d))
-            .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
             .ToList();
     }
 
@@ -440,7 +456,7 @@ public static class DashboardLogic
             .EmptyIfNull()
             .Select(lite => Dashboards.Value.GetOrThrow(lite))
             .Where(d => isAllowed(d))
-            .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
             .ToList();
     }
 
@@ -449,7 +465,7 @@ public static class DashboardLogic
         var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
         return Dashboards.Value.Values
             .Where(d => d.EntityType == null && isAllowed(d))
-            .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
             .Autocomplete(subString, limit).ToList();
     }
 

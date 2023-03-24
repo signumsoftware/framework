@@ -1,11 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Dashboard;
-using Signum.Engine.Dashboard;
-using Signum.Engine.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Operations;
+using Signum.Authorization;
 
-namespace Signum.React.Dashboard;
+namespace Signum.Dashboard;
 
 public class DashboardController : ControllerBase
 {

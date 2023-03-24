@@ -1,6 +1,6 @@
-using Signum.Entities.Omnibox;
+using Signum.Omnibox;
 
-namespace Signum.Entities.Dashboard;
+namespace Signum.Dashboard;
 
 public class DashboardOmniboxResultGenerator : OmniboxResultGenerator<DashboardOmniboxResult>
 {
@@ -15,7 +15,7 @@ public class DashboardOmniboxResultGenerator : OmniboxResultGenerator<DashboardO
 
     public override IEnumerable<DashboardOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
     {
-        if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedPermission(DashboardPermission.ViewDashboard))
+        if (tokenPattern != "S" || !PermissionLogic.IsAuthorized(DashboardPermission.ViewDashboard))
             yield break;
 
         string ident = OmniboxUtils.CleanCommas(tokens[0].Value);

@@ -1,15 +1,11 @@
 using System.ComponentModel;
 using System.Collections.Specialized;
-using Signum.Entities.Basics;
-using Signum.Entities.Chart;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
-using Signum.Entities.Authorization;
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.UserQueries;
-using Signum.Entities.Scheduler;
+using Signum.Scheduler;
+using Signum.UserAssets.QueryTokens;
 
-namespace Signum.Entities.Dashboard;
+namespace Signum.Dashboard;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
@@ -36,7 +32,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
 
     public int? DashboardPriority { get; set; }
 
-    [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThanOrEqualTo, 10)]
+    [Unit("s"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 10)]
     public int? AutoRefreshPeriod { get; set; }
 
     [StringLengthValidator(Min = 2, Max = 200)]

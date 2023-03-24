@@ -1,12 +1,11 @@
 using Signum.Entities.UserAssets;
-using Signum.Entities.Chart;
 using System.Xml.Linq;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.UserQueries;
-using Signum.Entities.Basics;
 using System.ComponentModel;
+using Signum.UserQueries;
+using Signum.Chart.UserChart;
 
-namespace Signum.Entities.Dashboard;
+namespace Signum.Dashboard;
 
 public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 {
@@ -114,7 +113,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         InteractionGroup = x.Attribute("InteractionGroup")?.Value.ToEnum<InteractionGroup>();
         CustomColor = x.Attribute("CustomColor")?.Value;
         UseIconColorForTitle = x.Attribute("UseIconColorForTitle")?.Let(a => bool.Parse(a.Value)) ?? false;
-        Content = ctx.GetPart(Content, x.Elements().Single());
+        Content = DashboardLogic.GetPart(ctx, Content, x.Elements().Single());
     }
 
     internal Interval<int> ColumnInterval()

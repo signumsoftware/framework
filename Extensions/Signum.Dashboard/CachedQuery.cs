@@ -1,9 +1,9 @@
-using Signum.Entities.Chart;
-using Signum.Entities.Files;
+using Signum.Chart.UserChart;
 using Signum.Entities.UserAssets;
-using Signum.Entities.UserQueries;
+using Signum.Files;
+using Signum.UserQueries;
 
-namespace Signum.Entities.Dashboard;
+namespace Signum.Dashboard;
 
 [EntityKind(EntityKind.System, EntityData.Master)]
 public class CachedQueryEntity : Entity
