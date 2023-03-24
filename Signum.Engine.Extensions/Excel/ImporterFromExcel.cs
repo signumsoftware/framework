@@ -613,7 +613,7 @@ public class ImporterFromExcel
                     ParentGetter = parentGetter?.Compile(),
                     Setter = lambda.Compile(),
                     EntityFinder = entityFinder,
-                    Required = ReflectionTools.IsNullable(prop) == false,
+                    Required = prop.PropertyType.IsValueType && !prop.PropertyType.IsNullable(),
                 };
             }
         });
