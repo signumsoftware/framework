@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Calendar;
+namespace Signum.Calendar;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class CalendarDayEntity : Entity

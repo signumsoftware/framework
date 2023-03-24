@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class MultiColumnsChartScript : ChartScript                
+public class MultiColumnsChartScript : ChartScript
 {
     public MultiColumnsChartScript() : base(D3ChartScript.MultiColumns)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("multicolumns.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("multicolumns.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
             new ChartScriptColumn("Split Columns", ChartColumnType.Groupable) { IsOptional = true },
@@ -17,7 +15,7 @@ public class MultiColumnsChartScript : ChartScript
             new ChartScriptColumn("Height 4", ChartColumnType.Positionable) { IsOptional = true },
             new ChartScriptColumn("Height 5", ChartColumnType.Positionable) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -38,5 +36,5 @@ public class MultiColumnsChartScript : ChartScript
                 new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
-    }      
-}                
+    }
+}

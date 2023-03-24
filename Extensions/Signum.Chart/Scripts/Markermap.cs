@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class MarkermapChartScript : ChartScript                
+public class MarkermapChartScript : ChartScript
 {
-    public MarkermapChartScript(): base(GoogleMapsChartScript.Markermap)
+    public MarkermapChartScript() : base(GoogleMapsChartScript.Markermap)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("markermap.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("markermap.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Latitude", ChartColumnType.Magnitude) ,
             new ChartScriptColumn("Longitude", ChartColumnType.Magnitude) ,
@@ -18,7 +16,7 @@ public class MarkermapChartScript : ChartScript
             new ChartScriptColumn("Color Scale", ChartColumnType.Real) { IsOptional = true },
             new ChartScriptColumn("Color Category", ChartColumnType.Groupable) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup("Map")
             {
@@ -48,5 +46,5 @@ public class MarkermapChartScript : ChartScript
                 new ChartScriptParameter("MaxZoom", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = null } },
             },
         };
-    }      
-}                
+    }
+}

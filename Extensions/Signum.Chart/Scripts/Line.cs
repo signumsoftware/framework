@@ -1,18 +1,16 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class LineChartScript : ChartScript                
+public class LineChartScript : ChartScript
 {
     public LineChartScript() : base(D3ChartScript.Line)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("lines.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("lines.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Horizontal Axis", ChartColumnType.Any),
-            new ChartScriptColumn("Height", ChartColumnType.Positionable) 
+            new ChartScriptColumn("Height", ChartColumnType.Positionable)
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -43,7 +41,7 @@ public class LineChartScript : ChartScript
             new ChartScriptParameterGroup("Form")
             {
                 new ChartScriptParameter("Interpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle|catmull-rom") },
-            } 
+            }
         };
-    }      
-}                
+    }
+}

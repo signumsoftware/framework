@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class StackedColumnsChartScript : ChartScript                
+public class StackedColumnsChartScript : ChartScript
 {
     public StackedColumnsChartScript() : base(D3ChartScript.StackedColumns)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("stackedcolumns.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("stackedcolumns.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
             new ChartScriptColumn("Split Columns", ChartColumnType.Groupable) { IsOptional = true },
@@ -17,7 +15,7 @@ public class StackedColumnsChartScript : ChartScript
             new ChartScriptColumn("Height 4", ChartColumnType.Magnitude) { IsOptional = true },
             new ChartScriptColumn("Height 5", ChartColumnType.Magnitude) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup("Scale")
             {
@@ -48,5 +46,5 @@ public class StackedColumnsChartScript : ChartScript
                 new ChartScriptParameter("ValueAsPercent", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Yes") },
             },
         };
-    }      
-}                
+    }
+}

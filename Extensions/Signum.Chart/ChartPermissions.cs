@@ -1,6 +1,5 @@
-﻿using Signum.Entities.Authorization;
 
-namespace Signum.Entities.Chart;
+namespace Signum.Chart;
 
 [AutoInit]
 public static class ChartPermission

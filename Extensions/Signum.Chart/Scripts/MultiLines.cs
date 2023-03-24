@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class MultiLinesChartScript : ChartScript                
+public class MultiLinesChartScript : ChartScript
 {
-    public MultiLinesChartScript(): base(D3ChartScript.MultiLines)
+    public MultiLinesChartScript() : base(D3ChartScript.MultiLines)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("multilines.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("multilines.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Horizontal Axis", ChartColumnType.Any),
             new ChartScriptColumn("Split Lines", ChartColumnType.Groupable) { IsOptional = true },
@@ -17,7 +15,7 @@ public class MultiLinesChartScript : ChartScript
             new ChartScriptColumn("Height 4", ChartColumnType.Positionable) { IsOptional = true },
             new ChartScriptColumn("Height 5", ChartColumnType.Positionable) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -50,5 +48,5 @@ public class MultiLinesChartScript : ChartScript
                 new ChartScriptParameter("Interpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle") },
             }
         };
-    }      
-}                
+    }
+}

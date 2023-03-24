@@ -1,7 +1,6 @@
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.UserQueries;
+using Signum.DynamicQuery.Tokens;
 
-namespace Signum.Entities.Chart;
+namespace Signum.Chart;
 
 public interface IChartBase
 {

@@ -1,6 +1,4 @@
-using Signum.Entities.Basics;
-
-namespace Signum.Entities.Chart;
+namespace Signum.Chart;
 
 [EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
 public class ChartScriptSymbol : Symbol
@@ -67,7 +65,7 @@ public abstract class ChartScript
 {
     public ChartScript(ChartScriptSymbol symbol)
     {
-        this.Symbol = symbol;
+        Symbol = symbol;
     }
 
     public ChartScriptSymbol Symbol { get; set; }

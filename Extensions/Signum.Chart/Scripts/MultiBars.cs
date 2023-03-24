@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class MultiBarsChartScript : ChartScript                
+public class MultiBarsChartScript : ChartScript
 {
     public MultiBarsChartScript() : base(D3ChartScript.MultiBars)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("multibars.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("multibars.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable),
             new ChartScriptColumn("Split Bars", ChartColumnType.Groupable) { IsOptional = true },
@@ -17,7 +15,7 @@ public class MultiBarsChartScript : ChartScript
             new ChartScriptColumn("Width 4", ChartColumnType.Positionable) { IsOptional = true },
             new ChartScriptColumn("Width 5", ChartColumnType.Positionable) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -38,5 +36,5 @@ public class MultiBarsChartScript : ChartScript
                 new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
-    }      
-}                
+    }
+}

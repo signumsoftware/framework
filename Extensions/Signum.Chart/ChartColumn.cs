@@ -1,8 +1,8 @@
-using Signum.Entities.DynamicQuery;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
+using Signum.UserAssets.QueryTokens;
 
-namespace Signum.Entities.Chart;
+namespace Signum.Chart;
 
 public class ChartColumnEmbedded : EmbeddedEntity
 {

@@ -1,9 +1,8 @@
 using System.Text.RegularExpressions;
-using Signum.Entities.Omnibox;
-using Signum.Entities.DynamicQuery;
+using Signum.Omnibox;
 using System.Text.Json.Serialization;
 
-namespace Signum.Entities.Chart;
+namespace Signum.Chart;
 
 public class ChartOmniboxResultGenerator : OmniboxResultGenerator<ChartOmniboxResult>
 {
@@ -12,7 +11,7 @@ public class ChartOmniboxResultGenerator : OmniboxResultGenerator<ChartOmniboxRe
     Regex regex = new Regex(@"^II?$", RegexOptions.ExplicitCapture);
     public override IEnumerable<ChartOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
     {
-        if (!OmniboxParser.Manager.AllowedPermission(ChartPermission.ViewCharting))
+        if (!PermissionLogic.IsAuthorized(ChartPermission.ViewCharting))
             yield break;
 
         Match m = regex.Match(tokenPattern);
@@ -36,7 +35,7 @@ public class ChartOmniboxResultGenerator : OmniboxResultGenerator<ChartOmniboxRe
 
             bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-            foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.GetQueries(), OmniboxParser.Manager.AllowedQuery, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+            foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.GetQueries(),  q => QueryLogic.Queries.QueryAllowed(q, fullScreen: true), pattern, isPascalCase).OrderBy(ma => ma.Distance))
             {
                 yield return new ChartOmniboxResult
                 {

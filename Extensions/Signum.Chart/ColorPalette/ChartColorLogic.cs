@@ -1,8 +1,4 @@
-using Signum.Entities.Chart;
-using Signum.Utilities.Reflection;
-using Signum.Entities.Basics;
-
-namespace Signum.Engine.Chart;
+namespace Signum.Chart.ColorPalette;
 
 public static class ColorPaletteLogic
 {
@@ -12,7 +8,7 @@ public static class ColorPaletteLogic
 
     internal static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             sb.Include<ColorPaletteEntity>()
                 .WithSave(ColorPaletteOperation.Save)

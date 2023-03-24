@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class PivotTableScript : ChartScript                
+public class PivotTableScript : ChartScript
 {
     public PivotTableScript() : base(HtmlChartScript.PivotTable)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("pivottable.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("pivottable.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable) { IsOptional = true },
             new ChartScriptColumn("Horizontal Axis (2)", ChartColumnType.Groupable) { IsOptional = true },
@@ -22,7 +20,7 @@ public class PivotTableScript : ChartScript
             new ChartScriptColumn("Value (3)", ChartColumnType.Magnitude){ IsOptional = true },
             new ChartScriptColumn("Value (4)", ChartColumnType.Magnitude){ IsOptional = true },
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             CreateBlock("Complete ", ChartParameterType.Enum, EnumValueList.Parse("No|Yes|Consistent|FromFilters"), includeValues: false),
             CreateBlock("Order ", ChartParameterType.Enum, EnumValueList.Parse("None|Ascending|AscendingKey|AscendingToStr|AscendingSumValues|Descending|DescendingKey|DescendingToStr|DescendingSumValues"), includeValues: false),
@@ -69,4 +67,4 @@ public class PivotTableScript : ChartScript
         }
         return result;
     }
-}                
+}

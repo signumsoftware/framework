@@ -1,6 +1,6 @@
-using Signum.Entities.Omnibox;
+using Signum.Omnibox;
 
-namespace Signum.Entities.Chart;
+namespace Signum.Chart.UserChart;
 
 public class UserChartOmniboxResultGenerator : OmniboxResultGenerator<UserChartOmniboxResult>
 {
@@ -15,7 +15,7 @@ public class UserChartOmniboxResultGenerator : OmniboxResultGenerator<UserChartO
 
     public override IEnumerable<UserChartOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
     {
-        if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedPermission(ChartPermission.ViewCharting))
+        if (tokenPattern != "S" || !PermissionLogic.IsAuthorized(ChartPermission.ViewCharting))
             yield break;
 
         string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
@@ -31,7 +31,7 @@ public class UserChartOmniboxResultGenerator : OmniboxResultGenerator<UserChartO
                 ToStr = ident,
                 ToStrMatch = match,
                 Distance = match.Distance,
-                UserChart = (Lite<UserChartEntity>)uq,
+                UserChart = uq,
             };
         }
     }

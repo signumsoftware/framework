@@ -1,18 +1,16 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class CalendarStreamChartScript : ChartScript                
+public class CalendarStreamChartScript : ChartScript
 {
     public CalendarStreamChartScript() : base(D3ChartScript.CalendarStream)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("calendar.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("calendar.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Date", ChartColumnType.DateOnly),
-            new ChartScriptColumn("Color Scale", ChartColumnType.Magnitude) 
+            new ChartScriptColumn("Color Scale", ChartColumnType.Magnitude)
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -21,5 +19,5 @@ public class CalendarStreamChartScript : ChartScript
                 new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) { ColumnIndex = 1, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             }
         };
-    }      
-}                
+    }
+}

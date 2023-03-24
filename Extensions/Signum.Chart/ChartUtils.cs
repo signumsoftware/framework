@@ -1,8 +1,7 @@
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.UserQueries;
+using Signum.DynamicQuery.Tokens;
 using System.ComponentModel;
 
-namespace Signum.Entities.Chart;
+namespace Signum.Chart;
 
 public static class ChartUtils
 {

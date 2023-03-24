@@ -74,7 +74,7 @@ export type AuthThumbnail =
 export interface BaseRulePack<T> extends Entities.ModelEntity {
   role: Entities.Lite<Authorization.RoleEntity>;
   strategy: string;
-  rules: Array<T>;
+  rules: Entities.MList<T>;
 }
 
 export module BasicPermission {
@@ -182,7 +182,7 @@ export const RuleTypeConditionEntity = new Type<RuleTypeConditionEntity>("RuleTy
 export interface RuleTypeConditionEntity extends Entities.Entity {
   Type: "RuleTypeCondition";
   ruleType: Entities.Lite<RuleTypeEntity>;
-  conditions: Array<TypeConditionSymbol>;
+  conditions: Entities.MList<TypeConditionSymbol>;
   allowed: TypeAllowed;
   order: number;
 }
@@ -190,7 +190,7 @@ export interface RuleTypeConditionEntity extends Entities.Entity {
 export const RuleTypeEntity = new Type<RuleTypeEntity>("RuleType");
 export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
   Type: "RuleType";
-  conditionRules: Array<RuleTypeConditionEntity>;
+  conditionRules: Entities.MList<RuleTypeConditionEntity>;
 }
 
 export const TypeAllowed = new EnumType<TypeAllowed>("TypeAllowed");
@@ -206,7 +206,7 @@ export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("Type
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
   Type: "TypeAllowedAndConditions";
   fallback: TypeAllowed;
-  conditionRules: Array<TypeConditionRuleModel>;
+  conditionRules: Entities.MList<TypeConditionRuleModel>;
 }
 
 export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic");
@@ -227,7 +227,7 @@ export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllo
 export const TypeConditionRuleModel = new Type<TypeConditionRuleModel>("TypeConditionRuleModel");
 export interface TypeConditionRuleModel extends Entities.ModelEntity {
   Type: "TypeConditionRuleModel";
-  typeConditions: Array<TypeConditionSymbol>;
+  typeConditions: Entities.MList<TypeConditionSymbol>;
   allowed: TypeAllowed;
 }
 

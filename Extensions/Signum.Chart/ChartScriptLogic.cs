@@ -1,8 +1,6 @@
-using Signum.Entities.Chart;
-using Signum.Entities.Basics;
-using Signum.Engine.Chart.Scripts;
+using Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart;
+namespace Signum.Chart;
 
 public static class ChartScriptLogic
 {
@@ -10,7 +8,7 @@ public static class ChartScriptLogic
 
     internal static void Start(SchemaBuilder sb, bool googleMapsChartScripts, string[]? svgMapUrls = null)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
 
             SymbolLogic<ChartScriptSymbol>.Start(sb, () => Scripts.Keys);
@@ -47,7 +45,7 @@ public static class ChartScriptLogic
                 RegisterScript(new MarkermapChartScript());
             }
 
-            if(svgMapUrls != null)
+            if (svgMapUrls != null)
             {
                 RegisterScript(new SvgMapScript(svgMapUrls));
             }

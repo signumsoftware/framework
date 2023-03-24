@@ -1,10 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Chart;
-using Signum.Engine.Chart;
-using System.ComponentModel.DataAnnotations;
-using Signum.Engine.Authorization;
-using HtmlAgilityPack;
-using Signum.Entities.Basics;
+using Signum.Chart.ColorPalette;
 
 namespace Signum.React.Chart;
 

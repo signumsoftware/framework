@@ -1,7 +1,7 @@
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Chart;
+namespace Signum.Chart;
 
 
 public class ChartParameterEmbedded : EmbeddedEntity

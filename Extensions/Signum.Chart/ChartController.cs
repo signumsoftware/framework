@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Chart;
-using Signum.Engine.Chart;
+using Signum.Chart;
 
 namespace Signum.React.Chart;
 

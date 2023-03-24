@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class SvgMapScript : ChartScript                
+public class SvgMapScript : ChartScript
 {
     public SvgMapScript(string[] svgMaps) : base(SvgMapsChartScript.SvgMap)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("svgmap.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("svgmap.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("LocationCode", ChartColumnType.String),
             new ChartScriptColumn("Location", ChartColumnType.Groupable) { IsOptional = true },
@@ -15,7 +13,7 @@ public class SvgMapScript : ChartScript
             new ChartScriptColumn("Color Category", ChartColumnType.Groupable) { IsOptional = true },
             new ChartScriptColumn("Opacity", ChartColumnType.Magnitude) { IsOptional = true },
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup("Url")
             {
@@ -51,5 +49,5 @@ public class SvgMapScript : ChartScript
                 new ChartScriptParameter("ColorCategory", ChartParameterType.Special) { ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
-    }      
-}                
+    }
+}

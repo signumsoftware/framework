@@ -1,16 +1,16 @@
-using Signum.Entities.Basics;
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.UserQueries;
-using System.Xml.Linq;
 using Signum.Entities.UserAssets;
-namespace Signum.Entities.Chart;
+using Signum.UserAssets.Queries;
+using Signum.UserQueries;
+using System.Xml.Linq;
+
+namespace Signum.Chart.UserChart;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEntity
 {
     public UserChartEntity()
     {
-        this.BindParent();
+        BindParent();
     }
 
     public UserChartEntity(object queryName) : this()
@@ -52,14 +52,14 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         {
             if (Set(ref chartScript, value))
             {
-                this.GetChartScript().SynchronizeColumns(this, null);
+                GetChartScript().SynchronizeColumns(this, null);
             }
         }
     }
 
     public ChartScript GetChartScript()
     {
-        return ChartRequestModel.GetChartScriptFunc(this.ChartScript);
+        return ChartRequestModel.GetChartScriptFunc(ChartScript);
     }
 
     [NoRepeatValidator]
@@ -105,7 +105,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
 
         try
         {
-            this.GetChartScript().SynchronizeColumns(this, ctx);
+            GetChartScript().SynchronizeColumns(this, ctx);
         }
         catch (InvalidOperationException e) when (e.Message.Contains("sealed"))
         {
@@ -123,7 +123,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             new XAttribute("HideQuickLink", HideQuickLink),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
-            new XAttribute("ChartScript", this.ChartScript.Key),
+            new XAttribute("ChartScript", ChartScript.Key),
             MaxRows == null ? null! : new XAttribute("MaxRows", MaxRows.Value),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
@@ -139,7 +139,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, uc => uc.Owner))!;
         IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
-        ChartScript = ctx.ChartScript(element.Attribute("ChartScript")!.Value);
+        ChartScript = SymbolLogic<ChartScriptSymbol>.ToSymbol(element.Attribute("ChartScript")!.Value);
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
         Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
@@ -180,7 +180,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             {
                 EnumerableExtensions.JoinStrict(
                     Parameters,
-                    this.GetChartScript().AllParameters(),
+                    GetChartScript().AllParameters(),
                     p => p.Name,
                     ps => ps.Name,
                     (p, ps) => new { p, ps }, pi.NiceName());

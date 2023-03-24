@@ -1,18 +1,16 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class BarsChartScript : ChartScript                
+public class BarsChartScript : ChartScript
 {
-    public BarsChartScript(): base(D3ChartScript.Bars)
+    public BarsChartScript() : base(D3ChartScript.Bars)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("bars.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("bars.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Bars", ChartColumnType.Groupable),
-            new ChartScriptColumn("Width", ChartColumnType.Positionable) 
+            new ChartScriptColumn("Width", ChartColumnType.Positionable)
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -34,5 +32,5 @@ public class BarsChartScript : ChartScript
                 new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
-    }      
-}                
+    }
+}

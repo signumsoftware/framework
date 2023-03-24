@@ -1,8 +1,7 @@
-using Signum.Entities.Chart;
-using Signum.Utilities.Reflection;
-using Signum.Engine.Authorization;
+using Signum.Chart.ColorPalette;
+using Signum.Chart.UserChart;
 
-namespace Signum.Engine.Chart;
+namespace Signum.Chart;
 
 public static class ChartLogic
 {
@@ -12,7 +11,7 @@ public static class ChartLogic
         {
             QueryLogic.Start(sb);
 
-            PermissionAuthLogic.RegisterTypes(typeof(ChartPermission));
+            PermissionLogic.RegisterTypes(typeof(ChartPermission));
 
             ColorPaletteLogic.Start(sb);
             ChartScriptLogic.Start(sb, googleMapsChartScripts, svgMapUrls);

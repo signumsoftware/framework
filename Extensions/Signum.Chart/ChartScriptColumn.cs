@@ -1,12 +1,11 @@
-
-namespace Signum.Entities.Chart;
+namespace Signum.Chart;
 
 public class ChartScriptColumn
 {
     public ChartScriptColumn(string displayName, ChartColumnType columnType)
     {
-        this.DisplayName = displayName;
-        this.ColumnType = columnType;
+        DisplayName = displayName;
+        ColumnType = columnType;
     }
 
     public string DisplayName { get; set; }
@@ -14,7 +13,7 @@ public class ChartScriptColumn
     public ChartColumnType ColumnType { get; set; }
 }
 
-   
+
 [Flags, InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
 public enum ChartColumnType
 {
@@ -84,7 +83,7 @@ public static class ChartColumnTypeUtils
             return result;
 
         return EnumExtensions.GetValues<ChartColumnType>()
-            .Where(a => (int)a < ChartColumnTypeUtils.GroupMargin && columnType.HasFlag(a))
+            .Where(a => (int)a < GroupMargin && columnType.HasFlag(a))
             .ToString(GetCode, ",");
     }
 
@@ -102,7 +101,7 @@ public static class ChartColumnTypeUtils
 
     public static string? TryParseComposed(string code, out ChartColumnType type)
     {
-        type = default(ChartColumnType);
+        type = default;
         foreach (var item in code.Split(','))
         {
             string? error = TryParse(item, out ChartColumnType temp);

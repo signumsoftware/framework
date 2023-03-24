@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class PunchcardChartScript : ChartScript                
+public class PunchcardChartScript : ChartScript
 {
     public PunchcardChartScript() : base(D3ChartScript.Punchcard)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("punchcard.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("punchcard.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
             new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable),
@@ -17,7 +15,7 @@ public class PunchcardChartScript : ChartScript
             new ChartScriptColumn("Inner Size", ChartColumnType.Magnitude) { IsOptional = true },
             new ChartScriptColumn("Ordering", ChartColumnType.Magnitude) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -65,10 +63,10 @@ public class PunchcardChartScript : ChartScript
                 new ChartScriptParameter("OpacityScale", ChartParameterType.Enum) { ColumnIndex = 4,  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log|Sqrt") },
             },
             new ChartScriptParameterGroup("Inner Size")
-            { 
+            {
                 new ChartScriptParameter("InnerSizeType", ChartParameterType.Enum) { ColumnIndex = 5, ValueDefinition = EnumValueList.Parse("Absolute|Relative|Independent") },
                 new ChartScriptParameter("InnerFillColor", ChartParameterType.String) { ColumnIndex = 5, ValueDefinition = new StringValue("red") },
             }
         };
-    }      
-}                
+    }
+}

@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class BubblePackChartScript : ChartScript                
+public class BubblePackChartScript : ChartScript
 {
     public BubblePackChartScript() : base(D3ChartScript.BubblePack)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("bubblepack.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("bubblepack.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Bubble", ChartColumnType.Groupable),
             new ChartScriptColumn("Size", ChartColumnType.Magnitude) ,
@@ -15,7 +13,7 @@ public class BubblePackChartScript : ChartScript
             new ChartScriptColumn("Color Scale", ChartColumnType.Magnitude) { IsOptional = true },
             new ChartScriptColumn("Color Category", ChartColumnType.Groupable) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -46,5 +44,5 @@ public class BubblePackChartScript : ChartScript
                 new ChartScriptParameter("ColorCategory", ChartParameterType.Special) { ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             },
         };
-    }      
-}                
+    }
+}

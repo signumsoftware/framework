@@ -1,6 +1,5 @@
-using Signum.Entities.Calendar;
 
-namespace Signum.Engine.Calendar;
+namespace Signum.Calendar;
 
 public static class CalendarDayLogic
 {

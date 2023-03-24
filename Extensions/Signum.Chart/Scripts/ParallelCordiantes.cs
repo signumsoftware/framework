@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class ParallelCoordiantesChartScript : ChartScript                
+public class ParallelCoordiantesChartScript : ChartScript
 {
-    public ParallelCoordiantesChartScript(): base(D3ChartScript.ParallelCoordinates)
+    public ParallelCoordiantesChartScript() : base(D3ChartScript.ParallelCoordinates)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("parallelcoordinates.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("parallelcoordinates.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Line", ChartColumnType.Groupable),
             new ChartScriptColumn("Dimension1", ChartColumnType.Positionable) ,
@@ -19,7 +17,7 @@ public class ParallelCoordiantesChartScript : ChartScript
             new ChartScriptColumn("Dimension7", ChartColumnType.Positionable) { IsOptional = true },
             new ChartScriptColumn("Dimension8", ChartColumnType.Positionable) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
 
             new ChartScriptParameterGroup()
@@ -42,5 +40,5 @@ public class ParallelCoordiantesChartScript : ChartScript
                 new ChartScriptParameter("Interpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle") }
             },
         };
-    }      
-}                
+    }
+}

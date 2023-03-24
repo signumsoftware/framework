@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class StackedLinesChartScript : ChartScript                
+public class StackedLinesChartScript : ChartScript
 {
     public StackedLinesChartScript() : base(D3ChartScript.StackedLines)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("stackedareas.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("stackedareas.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Horizontal Axis", ChartColumnType.Any),
             new ChartScriptColumn("Areas", ChartColumnType.Groupable) { IsOptional = true },
@@ -17,7 +15,7 @@ public class StackedLinesChartScript : ChartScript
             new ChartScriptColumn("Height 4", ChartColumnType.Magnitude) { IsOptional = true },
             new ChartScriptColumn("Height 5", ChartColumnType.Magnitude) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -29,7 +27,7 @@ public class StackedLinesChartScript : ChartScript
                 new ChartScriptParameter("Horizontal Margin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20m } },
             },
             new ChartScriptParameterGroup("Number")
-            { 
+            {
                 new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
                 new ChartScriptParameter("NumberColor", ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
             },
@@ -48,5 +46,5 @@ public class StackedLinesChartScript : ChartScript
                 new ChartScriptParameter("ValueAsPercent", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Yes") },
             },
         };
-    }      
-}                
+    }
+}

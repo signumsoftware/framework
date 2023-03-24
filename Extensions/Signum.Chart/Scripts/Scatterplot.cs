@@ -1,24 +1,22 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class ScatterplotChartScript : ChartScript                
+public class ScatterplotChartScript : ChartScript
 {
     public ScatterplotChartScript() : base(D3ChartScript.Scatterplot)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("points.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("points.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Point", ChartColumnType.Groupable),
             new ChartScriptColumn("Horizontal Axis", ChartColumnType.Positionable) ,
-            new ChartScriptColumn("Vertical Axis", ChartColumnType.Positionable), 
+            new ChartScriptColumn("Vertical Axis", ChartColumnType.Positionable),
             new ChartScriptColumn("Horizontal Axis (2)", ChartColumnType.Positionable) { IsOptional = true } ,
             new ChartScriptColumn("Vertical Axis (2)", ChartColumnType.Positionable) { IsOptional = true } ,
             new ChartScriptColumn("Color Scale", ChartColumnType.Magnitude) { IsOptional = true },
             new ChartScriptColumn("Color Category", ChartColumnType.Groupable) { IsOptional = true }
 
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -40,10 +38,10 @@ public class ScatterplotChartScript : ChartScript
                 new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ColumnIndex = 5, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
             new ChartScriptParameterGroup("Color Category")
-            { 
+            {
                 new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ColumnIndex = 6, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory)  }
             },
-            
+
         };
-    }      
-}                
+    }
+}

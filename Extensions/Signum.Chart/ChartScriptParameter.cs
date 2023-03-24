@@ -1,12 +1,12 @@
 using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
-using Signum.Entities.DynamicQuery;
 using System.Globalization;
 using System.Collections;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Signum.DynamicQuery.Tokens;
 
-namespace Signum.Entities.Chart;
+namespace Signum.Chart;
 
 [JsonConverter(typeof(ChartScriptParameterGroupJsonConverter))]
 public class ChartScriptParameterGroup : IEnumerable<ChartScriptParameter>
@@ -15,12 +15,12 @@ public class ChartScriptParameterGroup : IEnumerable<ChartScriptParameter>
 
     public ChartScriptParameterGroup(string? name = null)
     {
-        this.Name = name;
+        Name = name;
     }
 
     public void Add(ChartScriptParameter p)
     {
-        this.Parameters.Add(p);
+        Parameters.Add(p);
     }
 
     public IEnumerator<ChartScriptParameter> GetEnumerator() => Parameters.GetEnumerator();
@@ -36,8 +36,8 @@ public class ChartScriptParameterGroup : IEnumerable<ChartScriptParameter>
         }
 
         public override void Write(Utf8JsonWriter writer, ChartScriptParameterGroup value, JsonSerializerOptions options)
-        {  
-            var group = (ChartScriptParameterGroup)value!;
+        {
+            var group = value!;
             writer.WriteStartObject();
             writer.WritePropertyName("name");
             writer.WriteStringValue(group.Name);
@@ -70,10 +70,10 @@ public class ChartScriptParameter
 
     public QueryToken? GetToken(IChartBase chartBase)
     {
-        if (this.ColumnIndex == null)
+        if (ColumnIndex == null)
             return null;
 
-        return chartBase.Columns[this.ColumnIndex.Value].Token?.Token;
+        return chartBase.Columns[ColumnIndex.Value].Token?.Token;
     }
 
     public string? Validate(string? value, QueryToken? token)
@@ -83,7 +83,7 @@ public class ChartScriptParameter
 
     internal string DefaultValue(QueryToken? token)
     {
-        return this.ValueDefinition.DefaultValue(token);
+        return ValueDefinition.DefaultValue(token);
     }
 }
 
@@ -158,7 +158,7 @@ public enum SpecialParameterType
 
 public class SpecialParameter : IChartParameterValueDefinition
 {
-    public SpecialParameterType SpecialParameterType { get;  }
+    public SpecialParameterType SpecialParameterType { get; }
 
     public SpecialParameter(SpecialParameterType specialParameterType)
     {
@@ -299,7 +299,7 @@ public class StringValue : IChartParameterValueDefinition
 
     public StringValue(string defaultValue)
     {
-        this.DefaultValue = defaultValue;
+        DefaultValue = defaultValue;
     }
 
     public string? Validate(string? parameter, QueryToken? token)

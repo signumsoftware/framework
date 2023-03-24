@@ -1,13 +1,11 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class TreeMapChartScript : ChartScript                
+public class TreeMapChartScript : ChartScript
 {
     public TreeMapChartScript() : base(D3ChartScript.Treemap)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("treemap.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("treemap.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Square", ChartColumnType.Groupable),
             new ChartScriptColumn("Size", ChartColumnType.Magnitude) ,
@@ -15,14 +13,14 @@ public class TreeMapChartScript : ChartScript
             new ChartScriptColumn("Color Scale", ChartColumnType.Magnitude) { IsOptional = true },
             new ChartScriptColumn("Color Category", ChartColumnType.Groupable) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
                 new ChartScriptParameter("Scale", ChartParameterType.Enum) { ColumnIndex = 0, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log") },
             },
             new ChartScriptParameterGroup("Margin")
-            { 
+            {
                 new ChartScriptParameter("Padding", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 4m } },
                 new ChartScriptParameter("Opacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.5m } },
             },
@@ -41,5 +39,5 @@ public class TreeMapChartScript : ChartScript
                 new ChartScriptParameter("ColorCategory", ChartParameterType.Special) { ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
-    }      
-}                
+    }
+}

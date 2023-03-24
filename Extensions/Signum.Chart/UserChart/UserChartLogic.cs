@@ -1,14 +1,12 @@
-using Signum.Engine.Authorization;
-using Signum.Engine.Translation;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Engine.Sync;
 using Signum.Engine.UserAssets;
-using Signum.Engine.ViewLog;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Chart;
-using Signum.Entities.UserAssets;
-using Signum.Entities.UserQueries;
+using Signum.UserAssets.Queries;
+using Signum.UserAssets.QueryTokens;
+using Signum.ViewLog;
 
-namespace Signum.Engine.Chart;
+namespace Signum.Chart.UserChart;
 
 public static class UserChartLogic
 {
@@ -18,7 +16,7 @@ public static class UserChartLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             UserAssetsImporter.Register<UserChartEntity>("UserChart", UserChartOperation.Save);
 
@@ -44,8 +42,8 @@ public static class UserChartLogic
 
             sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
               Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query.Is(e)));
-            
-           
+
+
             UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),
                 new InvalidateWith(typeof(UserChartEntity)));
 
@@ -96,7 +94,7 @@ public static class UserChartLogic
         return UserChartsByQuery.Value.TryGetC(queryName).EmptyIfNull()
             .Select(lite => UserCharts.Value.GetOrThrow(lite))
             .Where(uc => isAllowed(uc))
-            .Select(uc => uc.ToLite(TranslatedInstanceLogic.TranslatedField(uc, d => d.DisplayName)))
+            .Select(uc => uc.ToLite(PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName)))
             .ToList();
     }
 
@@ -107,7 +105,7 @@ public static class UserChartLogic
         return UserChartsByTypeForQuickLinks.Value.TryGetC(entityType).EmptyIfNull()
             .Select(lite => UserCharts.Value.GetOrThrow(lite))
             .Where(uc => isAllowed(uc))
-            .Select(uc => uc.ToLite(TranslatedInstanceLogic.TranslatedField(uc, d => d.DisplayName)))
+            .Select(uc => uc.ToLite(PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName)))
             .ToList();
     }
 
@@ -116,7 +114,7 @@ public static class UserChartLogic
         var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: false);
 
         return UserCharts.Value.Values.Where(uc => uc.EntityType == null && isAllowed(uc))
-            .Select(d => d.ToLite(TranslatedInstanceLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
             .Autocomplete(subString, limit)
             .ToList();
     }
@@ -135,7 +133,7 @@ public static class UserChartLogic
         }
     }
 
-    internal static ChartRequestModel ToChartRequest(this UserChartEntity userChart)
+    public static ChartRequestModel ToChartRequest(this UserChartEntity userChart)
     {
         var cr = new ChartRequestModel(userChart.Query.ToQueryName())
         {
@@ -144,7 +142,7 @@ public static class UserChartLogic
             Parameters = userChart.Parameters.ToMList(),
             MaxRows = userChart.MaxRows,
         };
-        
+
         cr.Columns.ZipForeach(userChart.Columns, (a, b) =>
         {
             a.Token = b.Token == null ? null : new QueryTokenEmbedded(b.Token.Token);
@@ -168,15 +166,15 @@ public static class UserChartLogic
     {
         sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(RoleEntity));
 
-        TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, 
+        TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition,
             uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
     }
 
     public static void RegisterTranslatableRoutes()
     {
-        TranslatedInstanceLogic.AddRoute((UserChartEntity uc) => uc.DisplayName);
-        TranslatedInstanceLogic.AddRoute((UserChartEntity uq) => uq.Columns[0].DisplayName);
-        TranslatedInstanceLogic.AddRoute((UserChartEntity uq) => uq.Filters[0].Pinned!.Label);
+        PropertyRouteTranslationLogic.AddRoute((UserChartEntity uc) => uc.DisplayName);
+        PropertyRouteTranslationLogic.AddRoute((UserChartEntity uq) => uq.Columns[0].DisplayName);
+        PropertyRouteTranslationLogic.AddRoute((UserChartEntity uq) => uq.Filters[0].Pinned!.Label);
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
@@ -195,7 +193,7 @@ public static class UserChartLogic
             return cmd;
         }
     }
-    
+
     static SqlPreCommand? ProcessUserChart(Replacements replacements, Table table, UserChartEntity uc)
     {
         Console.Write(".");
@@ -261,7 +259,7 @@ public static class UserChartLogic
 
                 foreach (var item in uc.Filters.Where(f => !f.IsGroup).ToList())
                 {
-                    retry:
+                retry:
                     string? val = item.ValueString;
                     switch (QueryTokenSynchronizer.FixValue(replacements, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), entityType))
                     {
@@ -281,7 +279,7 @@ public static class UserChartLogic
                 foreach (var item in uc.Parameters)
                 {
                     string? val = item.Value;
-                    retry:
+                retry:
                     switch (FixParameter(item, ref val))
                     {
                         case FixTokenResult.Nothing: break;

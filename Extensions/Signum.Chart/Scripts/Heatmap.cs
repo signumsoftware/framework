@@ -1,19 +1,17 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class HeatmapChartScript : ChartScript                
+public class HeatmapChartScript : ChartScript
 {
     public HeatmapChartScript() : base(GoogleMapsChartScript.Heatmap)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("heatmap.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("heatmap.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Latitude", ChartColumnType.Magnitude),
             new ChartScriptColumn("Longitude", ChartColumnType.Magnitude),
             new ChartScriptColumn("Weight", ChartColumnType.Magnitude) { IsOptional = true }
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup("Map")
             {
@@ -30,5 +28,5 @@ public class HeatmapChartScript : ChartScript
                 new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             }
         };
-    }      
-}                
+    }
+}

@@ -1,18 +1,16 @@
-using Signum.Entities.Chart;
+namespace Signum.Chart.Scripts;
 
-namespace Signum.Engine.Chart.Scripts;
-
-public class ColumnsChartScript : ChartScript                
+public class ColumnsChartScript : ChartScript
 {
     public ColumnsChartScript() : base(D3ChartScript.Columns)
     {
-        this.Icon = ChartScriptLogic.LoadIcon("columns.png");
-        this.Columns = new List<ChartScriptColumn>
+        Icon = ChartScriptLogic.LoadIcon("columns.png");
+        Columns = new List<ChartScriptColumn>
         {
             new ChartScriptColumn("Columns", ChartColumnType.Groupable),
-            new ChartScriptColumn("Height", ChartColumnType.Positionable) 
+            new ChartScriptColumn("Height", ChartColumnType.Positionable)
         };
-        this.ParameterGroups = new List<ChartScriptParameterGroup>
+        ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
@@ -36,5 +34,5 @@ public class ColumnsChartScript : ChartScript
                 new ChartScriptParameter("ForceColor", ChartParameterType.String) {  ValueDefinition = new StringValue("") },
             }
         };
-    }      
-}                
+    }
+}

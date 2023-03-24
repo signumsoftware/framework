@@ -1,14 +1,13 @@
-using Signum.Entities.Basics;
 using System.ComponentModel;
 
-namespace Signum.Entities.Chart;
+namespace Signum.Chart.ColorPalette;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class ColorPaletteEntity : Entity
 {
     public ColorPaletteEntity()
     {
-        this.BindParent();
+        BindParent();
     }
 
 
@@ -38,12 +37,12 @@ public class SpecificColorEmbedded : EmbeddedEntity
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if(pi.Name == nameof(Entity))
+        if (pi.Name == nameof(Entity))
         {
-            var cp = this.GetParentEntity<ColorPaletteEntity>();
+            var cp = GetParentEntity<ColorPaletteEntity>();
 
-            if (cp.SpecificColors.Any(a => a != this && a.Entity.Is(this.Entity)))
-                return ValidationMessage._0IsRepeated.NiceToString(this.Entity);
+            if (cp.SpecificColors.Any(a => a != this && a.Entity.Is(Entity)))
+                return ValidationMessage._0IsRepeated.NiceToString(Entity);
         }
 
         return base.PropertyValidation(pi);
