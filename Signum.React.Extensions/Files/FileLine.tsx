@@ -68,8 +68,8 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
     <FormGroup ctx={p.ctx} label={p.label}
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
-      helpText={p.helpText}
-      children={() => hasValue ? renderFile() : p.ctx.readOnly ? undefined :
+      helpText={p.helpText}>
+      {() => hasValue ? renderFile() : p.ctx.readOnly ? undefined :
         <FileUploader
           accept={p.accept}
           maxSizeInBytes={p.maxSizeInBytes}
@@ -82,7 +82,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
           fileDropCssClass={c.mandatoryClass ?? undefined}
           divHtmlAttributes={{ className: "sf-file-line-new" }} />
       }
-    />
+    </FormGroup>
   );
 
 

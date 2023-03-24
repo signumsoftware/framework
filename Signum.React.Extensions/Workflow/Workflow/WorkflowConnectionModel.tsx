@@ -28,13 +28,13 @@ export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<W
 
 
       {ctx.value.type == "Decision" &&
-        < FormGroup ctx={ctx.subCtx(e => e.decisionOptionName)} label={ctx.niceName(e => e.decisionOptionName)}
-        children={inputId => <select id={inputId} value={ctx.value.decisionOptionName ? ctx.value.decisionOptionName : ""} className="form-select" onChange={handleDecisionNameChange} >
+        < FormGroup ctx={ctx.subCtx(e => e.decisionOptionName)} label={ctx.niceName(e => e.decisionOptionName)}>
+        {inputId => <select id={inputId} value={ctx.value.decisionOptionName ? ctx.value.decisionOptionName : ""} className="form-select" onChange={handleDecisionNameChange} >
             <option value="" />
             {(ctx.value.decisionOptions ?? []).map((d, i) => <option key={i} value={d.element.name} selected={d.element.name == ctx.value.decisionOptionName}>{d.element.name}</option>)}
             </select>
           }
-        />}
+        </FormGroup>}
 
 
       <div className="row">

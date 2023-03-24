@@ -261,13 +261,13 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
       <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={forceUpdate} onRemove={handleTypeRemove} />
       {
         ctx.value.entityType && viewNames &&
-        <FormGroup ctx={ctx.subCtx(d => d.viewName)} label={ctx.niceName(d => d.viewName)}
-          children={inputId => <select id={inputId} value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-select" onChange={handleViewNameChange}>
+        <FormGroup ctx={ctx.subCtx(d => d.viewName)} label={ctx.niceName(d => d.viewName)}>
+          {inputId => <select id={inputId} value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-select" onChange={handleViewNameChange}>
               <option value="">{" - "}</option>
               {(viewNames ?? []).map((v, i) => <option key={i} value={v}>{v}</option>)}
             </select>
           }
-        />
+        </FormGroup>
       }
 
       {ctx.value.entityType &&

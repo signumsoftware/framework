@@ -157,7 +157,9 @@ export default function PredictLine(p : PredictLineProps){
       predicted == original || isLite(predicted) && isLite(original) && is(predicted, original) ? "green" : "red";
   }
   return (
-    <FormGroup ctx={p.sctx} label={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }} children={() => renderValue()} />
+    <FormGroup ctx={p.sctx} label={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
+      {() => renderValue()} 
+    </FormGroup>
   );
 }
 

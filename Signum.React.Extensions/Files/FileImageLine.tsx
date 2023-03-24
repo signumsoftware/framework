@@ -68,8 +68,8 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
     <FormGroup ctx={p.ctx} label={p.label}
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
-      helpText={c.props.helpText}
-      children={() => hasValue ? renderImage() : p.ctx.readOnly ? undefined :
+      helpText={c.props.helpText}>
+      {() => hasValue ? renderImage() : p.ctx.readOnly ? undefined :
         <FileUploader
           accept={p.accept}
           maxSizeInBytes={p.maxSizeInBytes}
@@ -81,7 +81,7 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
           buttonCss={p.ctx.buttonClass}
           divHtmlAttributes={{ className: "sf-file-line-new" }} />
       }
-    />
+    </FormGroup>
   );
 
   function renderImage() {

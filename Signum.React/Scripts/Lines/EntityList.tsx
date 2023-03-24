@@ -130,8 +130,8 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
   return (
     <FormGroup ctx={p.ctx} label={p.label}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
-      labelHtmlAttributes={p.labelHtmlAttributes}
-      children={inputId => <div className="sf-entity-line">
+      labelHtmlAttributes={p.labelHtmlAttributes}>
+      {inputId => <div className="sf-entity-line">
         <div className={p.ctx.inputGroupClass}>
           <select id={inputId} className={p.ctx.formSelectClass} size={p.size ?? 30} style={{ height: "120px", overflow: "auto" }} onChange={c.handleOnSelect} ref={c.handleSelectLoad}>
             {list.map(mle => <option key={c.keyGenerator.getKey(mle)} title={p.ctx.titleLabels ? c.getTitle(mle.element) : undefined} {...EntityListBaseController.entityHtmlAttributes(mle.element)}>{getToString(mle.element)}</option>)}
@@ -146,6 +146,6 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
           </span>
         </div>
       </div>}
-    />
+    </FormGroup>
   );
 });

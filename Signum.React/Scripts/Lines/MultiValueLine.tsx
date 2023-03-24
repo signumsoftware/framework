@@ -74,8 +74,8 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
     <FormGroup ctx={p.ctx} label={p.label}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
-      labelHtmlAttributes={p.labelHtmlAttributes}
-      children={inputId => <>
+      labelHtmlAttributes={p.labelHtmlAttributes}>
+      {inputId => <>
         <div className="row">
           {
             mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) => {
@@ -103,7 +103,7 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
           </a>}
 
       </>}
-    />
+    </FormGroup>
   );
 });
 

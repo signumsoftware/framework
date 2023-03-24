@@ -105,8 +105,8 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
     <FormGroup ctx={p.ctx} label={p.label}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
-      labelHtmlAttributes={p.labelHtmlAttributes}
-      children={() => <table className="sf-multi-value">
+      labelHtmlAttributes={p.labelHtmlAttributes}>
+      {() => <table className="sf-multi-value">
         <tbody>
           {
             c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
@@ -156,7 +156,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
           </tr>
         </tbody>
       </table>}
-    />
+    </FormGroup>
   );
 });
 

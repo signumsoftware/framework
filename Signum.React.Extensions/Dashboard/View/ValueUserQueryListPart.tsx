@@ -54,8 +54,8 @@ export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
 
   return (
     <div>
-      <FormGroup ctx={ctx} label={ctx.value.label ?? getQueryNiceName(fo.queryName)}
-        children={() =>
+      <FormGroup ctx={ctx} label={ctx.value.label ?? getQueryNiceName(fo.queryName)}>
+        {() =>
           <div className="row align-items-center">
             <div className="col-auto">
               <span>{ctx.value.label ?? getQueryNiceName(fo!.queryName)}</span>
@@ -65,7 +65,7 @@ export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
                 customRequest={p.cachedQuery && ((qr, fo, token) => p.cachedQuery!.then(cq => executeQueryValueCached(qr, fo, token, cq)))} />
             </div>
           </div>}
-      />
+      </FormGroup>
     </div>
   );
 }

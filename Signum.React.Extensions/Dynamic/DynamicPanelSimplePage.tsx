@@ -144,8 +144,8 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
   }
 
   return (
-    <FormGroup ctx={p.ctx} label={getQueryNiceName(p.findOptions.queryName)} 
-      children={() => <>
+    <FormGroup ctx={p.ctx} label={getQueryNiceName(p.findOptions.queryName)}>
+      {() => <>
         <SearchValue findOptions={p.findOptions} isLink={true} />
         {
           state == "loading" ?
@@ -174,7 +174,7 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
 
         }
       </>}
-    />
+    </FormGroup>
   );
 }
 

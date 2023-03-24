@@ -81,10 +81,10 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     if (isList(f.operation!))
       return (
-        <FormGroup ctx={ctx} label={label}
-          children={inputId => <MultiValue  values={f.value} readOnly={readOnly} onChange={() => handleValueChange(f)}
+        <FormGroup ctx={ctx} label={label}>
+          {inputId => <MultiValue  values={f.value} readOnly={readOnly} onChange={() => handleValueChange(f)}
               onRenderItem={ctx => createFilterValueControl(ctx, f.token!, () => handleValueChange(f))} />}
-        />
+        </FormGroup>
       );
 
     return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), label, f.pinned!.active == "WhenHasValue");

@@ -149,8 +149,8 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
   return (
     <FormGroup ctx={p.ctx} label={p.label} helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
-      labelHtmlAttributes={p.labelHtmlAttributes}
-      children={inputId => <div className="sf-entity-line">
+      labelHtmlAttributes={p.labelHtmlAttributes}>
+      {inputId => <div className="sf-entity-line">
         {getTimeMachineIcon({ ctx: p.ctx })}
         {
           !EntityBaseController.hasChildrens(buttons) ?
@@ -167,7 +167,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
             )
         }
       </div>}
-    />
+    </FormGroup>
   );
 
   function handleOnPaste(e: React.ClipboardEvent<HTMLInputElement>) {
@@ -187,7 +187,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     var ac = p.autocomplete;
 
     if (ac == null || ctx.readOnly) {
-      var fcr = <FormControlReadonly inputId={inputId} ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
+      var fcr = <FormControlReadonly id={inputId} ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
       return renderInput ? renderInput(fcr) : fcr;
     }
 
@@ -222,7 +222,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
           getToString(value);
 
     if (p.ctx.readOnly)
-      return <FormControlReadonly inputId={inputId} ctx={p.ctx}>{str}</FormControlReadonly>
+      return <FormControlReadonly id={inputId} ctx={p.ctx}>{str}</FormControlReadonly>
 
     if (p.view && !p.avoidLink) {
       return (

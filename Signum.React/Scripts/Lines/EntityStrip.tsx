@@ -99,8 +99,8 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
       label={p.label}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
-      children={inputId => <div className="sf-entity-strip sf-control-container">
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
+      {inputId => <div className="sf-entity-strip sf-control-container">
         <ul id={inputId} className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
           {
             p.groupElementsBy == undefined ?
@@ -115,7 +115,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
           {renderLastElement()}
         </ul>
       </div>}
-    />
+    </FormGroup>
   );
 
   function renderElement(mlec: TypeContext<any>, index: number): JSX.Element {
