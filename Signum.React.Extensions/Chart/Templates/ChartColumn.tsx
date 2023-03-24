@@ -197,9 +197,8 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps) {
   const [palette, reload] = useAPIWithReload(() => ColorPaletteClient.getColorPalette(p.type.name), [p.type.name]);
 
   return (
-    <FormGroup ctx={p.ctx}
-      label={ChartMessage.ColorsFor0.niceToString(p.type.niceName)}>
-      {palette === undefined ?
+    <FormGroup ctx={p.ctx} label={ChartMessage.ColorsFor0.niceToString(p.type.niceName)}>
+      {() => palette === undefined ?
         <span className={p.ctx.formControlPlainTextClass}>
           {JavascriptMessage.loading.niceToString()}
         </span> :
@@ -219,7 +218,7 @@ export function ChartPaletteLink(p: ChartPaletteLinkProps) {
           {palette ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()}
         </a>
       }
-    </FormGroup>
+    </FormGroup>    
   );
 }
 

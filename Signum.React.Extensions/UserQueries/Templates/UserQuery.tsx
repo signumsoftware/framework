@@ -34,8 +34,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
       <EntityLine ctx={ctx.subCtx(e => e.owner)} />
       <ValueLine ctx={ctx.subCtx(e => e.displayName)} />
       <FormGroup ctx={ctx.subCtx(e => e.query)}>
-        {
-          query && (
+        {() => query && (
             Finder.isFindable(query.key, true) ?
               <a className="form-control-static" href={Finder.findOptionsPath({ queryName: query.key })}>{getQueryNiceName(query.key)}</a> :
               <span>{getQueryNiceName(query.key)}</span>)
