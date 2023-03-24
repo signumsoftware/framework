@@ -1,13 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using Signum.React.Facades;
-using Signum.Entities.Word;
-using Signum.Engine.Word;
-using Signum.React.Files;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.Filters;
-using Signum.Entities.Basics;
+using Signum.API;
+using Signum.API.Filters;
 
-namespace Signum.React.Word;
+namespace Signum.Word;
 
 [ValidateModelFilter]
 public class WordController : ControllerBase
@@ -20,7 +16,7 @@ public class WordController : ControllerBase
 
         var file = template.CreateReportFileContent(modifiableEntity);
 
-        return FilesController.GetFileStreamResult(file);
+        return MimeMapping.GetFileStreamResult(file);
     }
 
     public class CreateWordReportRequest

@@ -30,7 +30,7 @@ export interface ClientErrorModel extends Entities.ModelEntity {
 export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
 export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
   Type: "DeleteLogParametersEmbedded";
-  deleteLogs: Array<DeleteLogsTypeOverridesEmbedded>;
+  deleteLogs: Entities.MList<DeleteLogsTypeOverridesEmbedded>;
   chunkSize: number;
   maxChunks: number;
   pauseTime: number | null;

@@ -1,11 +1,9 @@
-using Signum.Engine.Mailing;
-using Signum.Entities.Word;
-using Signum.Entities.Mailing;
-using Signum.Engine.Templating;
-using Signum.Entities.Files;
-using Signum.Engine.Files;
+using Signum.Files;
+using Signum.Mailing;
+using Signum.Mailing.Templates;
+using Signum.Templating;
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 public class WordAttachmentLogic
 {

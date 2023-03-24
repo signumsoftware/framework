@@ -1,9 +1,9 @@
-using Signum.Entities.Mailing;
-using Signum.Entities.Templating;
 using Signum.Entities.UserAssets;
+using Signum.Mailing.Templates;
+using Signum.Templating;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Word;
+namespace Signum.Word;
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity

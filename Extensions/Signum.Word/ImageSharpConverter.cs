@@ -5,7 +5,7 @@ using SixLabors.ImageSharp.Processing;
 using System.IO;
 #pragma warning disable CA1416 // Validate platform compatibility
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 public class ImageSharpConverter : IImageConverter<Image>
 {

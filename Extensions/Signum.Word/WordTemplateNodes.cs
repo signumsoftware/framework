@@ -2,13 +2,14 @@ using DocumentFormat.OpenXml;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
 using S = DocumentFormat.OpenXml.Spreadsheet;
-using Signum.Engine.Templating;
 using Signum.Utilities.DataStructures;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Signum.DynamicQuery.Tokens;
+using Signum.Templating;
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 public interface INodeProvider
 {

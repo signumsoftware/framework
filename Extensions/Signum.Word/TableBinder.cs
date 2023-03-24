@@ -5,21 +5,19 @@ using Wordprocessing = DocumentFormat.OpenXml.Wordprocessing;
 using Charts = DocumentFormat.OpenXml.Drawing.Charts;
 using Data = System.Data;
 using DocumentFormat.OpenXml;
-using Signum.Entities.UserQueries;
-using Signum.Entities.Chart;
-using Signum.Engine.UserQueries;
-using Signum.Entities.UserAssets;
-using Signum.Engine.Chart;
 using DocumentFormat.OpenXml.Packaging;
 using System.Globalization;
-using Signum.Engine.Templating;
-using Signum.Entities.Word;
 using System.Text.RegularExpressions;
-using Signum.Engine.Excel;
 using Signum.Utilities.Reflection;
 using System.Data;
+using Signum.Templating;
+using Signum.Excel;
+using Signum.UserQueries;
+using Signum.Entities.UserAssets;
+using Signum.Chart.UserChart;
+using Signum.Chart;
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 public static class TableBinder
 {

@@ -6,7 +6,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using System.IO;
 #pragma warning disable CA1416 // Validate platform compatibility
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 public static class WordImageReplacer
 {

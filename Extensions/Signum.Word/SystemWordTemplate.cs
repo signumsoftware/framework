@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Word;
+namespace Signum.Word;
 
 [EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
 public class WordModelEntity : Entity

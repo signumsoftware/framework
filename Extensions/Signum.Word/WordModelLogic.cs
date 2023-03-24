@@ -1,11 +1,10 @@
-using Signum.Entities.Word;
 using System.Globalization;
-using Signum.Engine.Templating;
-using Signum.Entities.Templating;
-using Signum.Entities.Basics;
 using DocumentFormat.OpenXml.Packaging;
+using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Sync;
+using Signum.Templating;
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 public class WordTemplateParameters : TemplateParameters
 {

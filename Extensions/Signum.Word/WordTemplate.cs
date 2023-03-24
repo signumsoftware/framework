@@ -1,14 +1,13 @@
-using Signum.Entities.Authorization;
+using Signum.Engine.Basics;
 using Signum.Entities.Basics;
-using Signum.Entities.Files;
-using System.ComponentModel;
-using Signum.Entities.Templating;
-using Signum.Entities.UserQueries;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
+using Signum.Files;
+using Signum.Templating;
+using Signum.UserAssets.Queries;
+using System.ComponentModel;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Word;
+namespace Signum.Word;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
@@ -107,8 +106,8 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         DisableAuthorization = element.Attribute("DisableAuthorization")?.Let(a => bool.Parse(a.Value)) ?? false;
 
         Query = ctx.GetQuery(element.Attribute("Query")!.Value);
-        Model = element.Attribute("Model")?.Let(at => ctx.GetWordModel(at.Value));
-        Culture = ctx.GetCultureInfoEntity(element.Attribute("Culture")!.Value);
+        Model = element.Attribute("Model")?.Let(at => WordModelLogic.GetWordModelEntity(at.Value));
+        Culture =  CultureInfoLogic.GetCultureInfoEntity(element.Attribute("Culture")!.Value);
 
         FileName = element.Attribute("FileName")!.Value;
 

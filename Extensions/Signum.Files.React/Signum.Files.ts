@@ -47,6 +47,7 @@ export module FileMessage {
   export const TheFile0IsNotA1 = new MessageKey("FileMessage", "TheFile0IsNotA1");
   export const File0IsTooBigTheMaximumSizeIs1 = new MessageKey("FileMessage", "File0IsTooBigTheMaximumSizeIs1");
   export const TheNameOfTheFileMustNotContainPercentSymbol = new MessageKey("FileMessage", "TheNameOfTheFileMustNotContainPercentSymbol");
+  export const FileImage = new MessageKey("FileMessage", "FileImage");
 }
 
 export const FilePathEmbedded = new Type<FilePathEmbedded>("FilePathEmbedded");

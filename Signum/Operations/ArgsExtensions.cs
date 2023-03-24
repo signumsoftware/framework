@@ -5,17 +5,17 @@ namespace Signum.Operations;
 
 public static class ArgsExtensions
 {
-    public static T GetArg<T>(this IEnumerable<object?>? args)
+    public static T GetArg<T>(this object?[]? args)
     {
         return args!.SmartConvertTo<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
     }
 
-    public static T? TryGetArgC<T>(this IEnumerable<object?>? args) where T : class
+    public static T? TryGetArgC<T>(this object?[]? args) where T : class
     {
         return args?.SmartConvertTo<T?>().SingleOrDefaultEx(() => "There are more than one {0} in the argument list".FormatWith(typeof(T)));
     }
 
-    public static T? TryGetArgS<T>(this IEnumerable<object?>? args) where T : struct
+    public static T? TryGetArgS<T>(this object?[]? args) where T : struct
     {
         var casted = args?.SmartConvertTo<T>();
 

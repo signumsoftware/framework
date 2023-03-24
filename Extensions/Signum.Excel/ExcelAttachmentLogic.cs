@@ -1,4 +1,9 @@
 using Signum.Entities.UserAssets;
+using Signum.Files;
+using Signum.Mailing;
+using Signum.Mailing.Templates;
+using Signum.Templating;
+using Signum.UserQueries;
 
 namespace Signum.Excel;
 
@@ -46,7 +51,7 @@ public class ExcelAttachmentLogic
                 {
                     new EmailAttachmentEmbedded
                     {
-                        File = Files.FilePathEmbeddedLogic.SaveFile(new Entities.Files.FilePathEmbedded(EmailFileType.Attachment, fileName, bytes)),
+                        File = Files.FilePathEmbeddedLogic.SaveFile(new FilePathEmbedded(EmailFileType.Attachment, fileName, bytes)),
                         Type = EmailAttachmentType.Attachment,
                     }
                 };

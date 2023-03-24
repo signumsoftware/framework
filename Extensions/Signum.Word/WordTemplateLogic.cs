@@ -1,23 +1,19 @@
 using DocumentFormat.OpenXml.Packaging;
-using Signum.Entities.Word;
 using System.IO;
-using Signum.Engine.UserAssets;
-using Signum.Engine.Templating;
-using Signum.Entities.Files;
 using Signum.Utilities.DataStructures;
 using DocumentFormat.OpenXml;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 using System.Data;
 using System.Globalization;
-using Signum.Entities.Reflection;
-using Signum.Entities.Templating;
-using Signum.Engine.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Workflow;
-using Signum.Entities.Mailing;
-using Signum.Entities.UserAssets;
+using Signum.Engine.Sync;
+using Signum.UserAssets.QueryTokens;
+using Signum.Templating;
+using Signum.Files;
+using Signum.Engine.UserAssets;
+using Signum.Authorization.Rules;
+using Signum.Engine.Basics;
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 
 public interface IWordDataTableProvider
@@ -84,7 +80,7 @@ public static class WordTemplateLogic
             sb.Schema.EntityEvents<WordTemplateEntity>().Retrieved += WordTemplateLogic_Retrieved;
 
             UserAssetsImporter.Register<WordTemplateEntity>("WordTemplate", WordTemplateOperation.Save);
-            PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
+            PermissionLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
             WordModelLogic.Start(sb);
 
@@ -336,7 +332,7 @@ public static class WordTemplateLogic
                 {
                     entity = modifiableEntity as Entity ?? throw new InvalidOperationException("Model should be an Entity");
                 }
-
+                
                 using (template.DisableAuthorization ? ExecutionMode.Global() : null)
                 using (CultureInfoUtils.ChangeBothCultures(template.Culture.ToCultureInfo()))
                 {

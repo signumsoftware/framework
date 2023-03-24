@@ -1,11 +1,11 @@
 using DocumentFormat.OpenXml.Packaging;
 using D = DocumentFormat.OpenXml.Drawing;
 using System.Globalization;
-using Signum.Entities.Word;
-using Signum.Engine.Templating;
-using Signum.Entities.UserQueries;
+using Signum.Templating;
+using Signum.DynamicQuery.Tokens;
+using Signum.UserAssets.Queries;
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 class WordTemplateRenderer
 {
@@ -46,11 +46,12 @@ class WordTemplateRenderer
         if (this.fileNameBlock != null)
             this.fileNameBlock.FillQueryTokens(tokens);
 
-        var columns = tokens.NotNull().Distinct().Select(qt => new Signum.Entities.DynamicQuery.Column(qt, null)).ToList();
+        var columns = tokens.NotNull().Distinct().Select(qt => new Signum.DynamicQuery.Column(qt, null)).ToList();
 
         var filters = model != null ? model.GetFilters(this.queryDescription) :
             entity != null ? new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) } :
             throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(model)}' are both null");
+        
 
         filters.AddRange(template.Filters.ToFilterList());
 

@@ -3,12 +3,12 @@ using DocumentFormat.OpenXml.Packaging;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
 using S = DocumentFormat.OpenXml.Spreadsheet;
-using Signum.Engine.Templating;
 using Signum.Utilities.DataStructures;
 using System.Text.RegularExpressions;
-using Signum.Entities.Word;
+using Signum.Templating;
+using Signum.DynamicQuery.Tokens;
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 public class WordTemplateParser : ITemplateParser
 {

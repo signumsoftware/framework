@@ -9,7 +9,7 @@ public static class ExcelLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-            PermissionAuthLogic.RegisterTypes(typeof(ExcelPermission));
+            PermissionLogic.RegisterTypes(typeof(ExcelPermission));
             
             if (excelReport)
             {

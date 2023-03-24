@@ -1,23 +1,21 @@
-using Signum.React.ApiControllers;
-using Signum.React.Facades;
-using Signum.Engine.Authorization;
-using Signum.Entities.Templating;
-using Signum.Entities.Word;
-using Signum.Engine.Word;
-using Signum.React.TypeHelp;
 using Microsoft.AspNetCore.Builder;
-using Signum.React.Extensions.Templating;
+using Signum.API;
+using Signum.API.Controllers;
+using Signum.API.Json;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Eval.TypeHelp;
+using Signum.Templating;
 using System.Text.Json;
-using Signum.Engine.Json;
 
-namespace Signum.React.Word;
+namespace Signum.Word;
 
 public static class WordServer
 {
     public static void Start(IApplicationBuilder app)
     {
 
-        TemplatingServer.TemplateTokenMessageAllowed += () => TypeAuthLogic.GetAllowed(typeof(WordTemplateEntity)).MaxUI() > Entities.Authorization.TypeAllowedBasic.None;
+        TemplatingServer.TemplateTokenMessageAllowed += () => TypeAuthLogic.GetAllowed(typeof(WordTemplateEntity)).MaxUI() > TypeAllowedBasic.None;
 
         TypeHelpServer.Start(app);
         SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());

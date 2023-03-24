@@ -1,16 +1,9 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.Packaging;
-using HtmlAgilityPack;
-using Signum.Engine.Mailing;
-using Signum.Entities.Files;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Signum.Files;
 
-namespace Signum.Engine.Word;
+namespace Signum.Word;
 
 public static class FileToLinkConverter
 {
