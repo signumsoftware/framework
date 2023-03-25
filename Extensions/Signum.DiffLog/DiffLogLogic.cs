@@ -1,6 +1,6 @@
-using Signum.Entities.DiffLog;
+using Signum.DiffLog;
 
-namespace Signum.Engine.DiffLog;
+namespace Signum.DiffLog;
 
 public static class DiffLogLogic
 {

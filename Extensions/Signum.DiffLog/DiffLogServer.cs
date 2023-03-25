@@ -1,10 +1,10 @@
-using Signum.Entities.DiffLog;
+using Signum.DiffLog;
 using Microsoft.AspNetCore.Builder;
 using Signum.API;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 
-namespace Signum.React.DiffLog;
+namespace Signum.DiffLog;
 
 public static class DiffLogServer
 {

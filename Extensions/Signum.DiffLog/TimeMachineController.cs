@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Signum.React.DiffLog;
+namespace Signum.DiffLog;
 
 public class TimeMachineController : ControllerBase
 {

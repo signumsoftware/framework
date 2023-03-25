@@ -1,7 +1,7 @@
-using Signum.Entities.DiffLog;
+using Signum.DiffLog;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Signum.React.DiffLog;
+namespace Signum.DiffLog;
 
 public class DiffLogController : ControllerBase
 {

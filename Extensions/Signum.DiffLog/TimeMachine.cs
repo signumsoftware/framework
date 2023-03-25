@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Signum.Entities.DiffLog;
+namespace Signum.DiffLog;
 
 public enum TimeMachineMessage
 {
