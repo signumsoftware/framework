@@ -1,10 +1,8 @@
-using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Entities.Files;
+using Signum.Files;
 using System.ComponentModel;
-using System.Globalization;
 
-namespace Signum.Entities.WhatsNew;
+namespace Signum.WhatsNew;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class WhatsNewEntity : Entity

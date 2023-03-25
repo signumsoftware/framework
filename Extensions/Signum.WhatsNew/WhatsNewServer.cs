@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Builder;
-using Signum.React;
+using Signum.API;
 
-namespace Signum.React.WhatsNew;
+namespace Signum.WhatsNew;
 
 public static class WhatsNewServer
 {

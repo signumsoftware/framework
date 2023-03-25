@@ -1,15 +1,11 @@
 using System.IO;
-using Signum.Entities.Authorization;
-using Signum.Engine.Files;
-using Signum.Engine.Mailing;
-using Signum.Engine.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.WhatsNew;
-using Signum.Engine.WhatsNew;
-using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
+using Signum.API.Filters;
+using Signum.Authorization;
+using Signum.Files;
 
-namespace Signum.React.WhatsNew;
+namespace Signum.WhatsNew;
 
 public class WhatsNewController : ControllerBase
 {

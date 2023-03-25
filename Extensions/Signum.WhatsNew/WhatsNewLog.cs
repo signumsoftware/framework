@@ -1,6 +1,6 @@
-using Signum.Entities.Authorization;
+using Signum.Authorization;
 
-namespace Signum.Entities.WhatsNew;
+namespace Signum.WhatsNew;
 
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]

@@ -1,11 +1,9 @@
-using Signum.Engine.Authorization;
-using Signum.Engine.Files;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.WhatsNew;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Files;
 using System.Globalization;
 
-namespace Signum.Engine.WhatsNew;
+namespace Signum.WhatsNew;
 
 public static class WhatsNewLogic
 {
