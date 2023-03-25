@@ -1,10 +1,8 @@
-using Signum.Entities.Map;
-using Signum.Entities.Operations;
-using Signum.Entities.Reflection;
+using Signum.Chart.ColorPalette;
 using Signum.Utilities.Reflection;
 using System.Collections;
 
-namespace Signum.React.Map;
+namespace Signum.Map;
 
 public static class OperationMap
 {
@@ -43,7 +41,7 @@ public static class OperationMap
                           key = e.ToString(),
                           niceName = e.NiceToString(),
                           isSpecial = t == typeof(DefaultState),
-                          color = Engine.Chart.ColorPaletteLogic.ColorFor(EnumEntity.FromEnumUntyped(e)),
+                          color = ColorPaletteLogic.ColorFor(EnumEntity.FromEnumUntyped(e)),
                           token = tokens.GetOrThrow(e.GetType()),
                       }).ToList(),
 

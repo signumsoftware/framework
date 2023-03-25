@@ -1,10 +1,8 @@
 using Signum.React.Maps;
-using Signum.Entities.Map;
-using Signum.React.Facades;
 using Microsoft.AspNetCore.Builder;
-using Signum.Engine.Authorization;
+using Signum.API;
 
-namespace Signum.React.Map;
+namespace Signum.Map;
 
 public static class MapServer
 {
@@ -13,7 +11,7 @@ public static class MapServer
         ReflectionServer.RegisterLike(typeof(MapMessage), () => MapPermission.ViewMap.IsAuthorized());
         SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-        SchemaMap.GetColorProviders += () => new[]
+        MapColorProvider.GetColorProviders += () => new[]
         {
             new MapColorProvider
             {
@@ -22,7 +20,7 @@ public static class MapServer
             },
         };
 
-        SchemaMap.GetColorProviders += () => new[]
+        MapColorProvider.GetColorProviders += () => new[]
         {
             new MapColorProvider
             {
@@ -31,7 +29,7 @@ public static class MapServer
             }
         };
 
-        SchemaMap.GetColorProviders += () => new[]
+        MapColorProvider.GetColorProviders += () => new[]
         {
             new MapColorProvider
             {
@@ -40,7 +38,7 @@ public static class MapServer
             }
         };
 
-        SchemaMap.GetColorProviders += () => new[]
+        MapColorProvider.GetColorProviders += () => new[]
         {
             new MapColorProvider
             {
@@ -49,7 +47,7 @@ public static class MapServer
             }
         };
 
-        SchemaMap.GetColorProviders += () => new[]
+        MapColorProvider.GetColorProviders += () => new[]
         {
             new MapColorProvider
             {
@@ -60,7 +58,7 @@ public static class MapServer
 
         if (Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
         {
-            SchemaMap.GetColorProviders += () => new[]
+            MapColorProvider.GetColorProviders += () => new[]
             {
                 new MapColorProvider
                 {
@@ -70,7 +68,7 @@ public static class MapServer
             };
         }
 
-        SchemaMap.GetColorProviders += () => new[]
+        MapColorProvider.GetColorProviders += () => new[]
         {
             new MapColorProvider
             {
@@ -81,7 +79,7 @@ public static class MapServer
 
         if(Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
         {
-            SchemaMap.GetColorProviders += () => new[]
+            MapColorProvider.GetColorProviders += () => new[]
             {
                 new MapColorProvider
                 {

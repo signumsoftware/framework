@@ -1,9 +1,11 @@
-using Signum.Entities.Basics;
-using Signum.Entities.Omnibox;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Omnibox;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Xml.XPath;
 
-namespace Signum.Entities.Map;
+namespace Signum.Map;
 
 
 public class MapOmniboxResultGenerator : OmniboxResultGenerator<MapOmniboxResult>
@@ -20,7 +22,7 @@ public class MapOmniboxResultGenerator : OmniboxResultGenerator<MapOmniboxResult
     Regex regex = new Regex(@"^II?$", RegexOptions.ExplicitCapture);
     public override IEnumerable<MapOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
     {
-        if (!OmniboxParser.Manager.AllowedPermission(MapPermission.ViewMap))
+        if (!PermissionLogic.IsAuthorized(MapPermission.ViewMap))
             yield break;
 
         Match m = regex.Match(tokenPattern);
@@ -46,7 +48,7 @@ public class MapOmniboxResultGenerator : OmniboxResultGenerator<MapOmniboxResult
 
             var types = OmniboxParser.Manager.Types().Where(a => HasOperations(a.Value)).ToDictionary();
 
-            foreach (var match in OmniboxUtils.Matches(types, OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+            foreach (var match in OmniboxUtils.Matches(types, t => TypeAuthLogic.GetAllowed(t).MinUI() > TypeAllowedBasic.None, pattern, isPascalCase).OrderBy(ma => ma.Distance))
             {
                 var type = match.Value;
                 yield return new MapOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = (Type)type, TypeMatch = match };

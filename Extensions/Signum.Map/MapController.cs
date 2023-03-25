@@ -1,10 +1,7 @@
-﻿using Signum.Entities.Map;
-using Signum.Engine.Authorization;
 using Signum.React.Maps;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Basics;
 
-namespace Signum.React.Map;
+namespace Signum.Map;
 
 public class MapController : ControllerBase
 {

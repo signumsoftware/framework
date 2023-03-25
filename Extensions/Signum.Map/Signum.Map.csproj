@@ -12,12 +12,14 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0-beta" />
-		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta2" />
+		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta5" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
+		<ProjectReference Include="..\Signum.Chart\Signum.Chart.csproj" />
+		<ProjectReference Include="..\Signum.Omnibox\Signum.Omnibox.csproj" />
 	</ItemGroup>
 
     <ItemGroup>

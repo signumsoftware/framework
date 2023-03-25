@@ -1,7 +1,6 @@
-using Signum.Entities.Authorization;
 using System.ComponentModel;
 
-namespace Signum.Entities.Map;
+namespace Signum.Map;
 
 public enum MapMessage
 {
