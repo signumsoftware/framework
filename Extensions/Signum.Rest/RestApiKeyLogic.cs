@@ -1,8 +1,7 @@
-using Signum.Entities.Rest;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace Signum.Engine.Rest;
+namespace Signum.Rest;
 
 public class RestApiKeyLogic
 {

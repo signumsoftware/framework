@@ -2,11 +2,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Signum.Entities.Basics;
-using Signum.Entities.Rest;
 using System.IO;
 
-namespace Signum.React.RestLog;
+namespace Signum.Rest;
 
 public class RestLogFilter : ActionFilterAttribute
 {

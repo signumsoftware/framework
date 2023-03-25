@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
+using Signum.API;
 
-namespace Signum.React.RestLog;
+namespace Signum.Rest;
 
 public static class RestLogServer
 {

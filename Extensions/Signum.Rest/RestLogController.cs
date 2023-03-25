@@ -1,11 +1,7 @@
 using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Rest;
-using Signum.Engine.Rest;
-using DocumentFormat.OpenXml.Office2010.Excel;
 
-namespace Signum.React.RestLog;
+namespace Signum.Rest;
 
 public class RestLogController : ControllerBase
 {

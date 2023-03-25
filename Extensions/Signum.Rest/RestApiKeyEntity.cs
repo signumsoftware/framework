@@ -1,6 +1,6 @@
-using Signum.Entities.Authorization;
+using Signum.Authorization;
 
-namespace Signum.Entities.Rest;
+namespace Signum.Rest;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class RestApiKeyEntity : Entity

@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Rest;
-using Signum.Entities.Authorization;
-using Signum.Entities.Rest;
+using Signum.Authorization;
 
-namespace Signum.React.Profiler;
+namespace Signum.Rest;
 
 public class RestApiKeyController : ControllerBase
 {

@@ -1,7 +1,6 @@
-using Signum.Entities.Basics;
 using static System.Int32;
 
-namespace Signum.Entities.Rest;
+namespace Signum.Rest;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class RestLogEntity : Entity

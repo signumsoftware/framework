@@ -1,8 +1,6 @@
 using System.Net.Http;
-using Signum.Entities.Basics;
-using Signum.Entities.Rest;
 
-namespace Signum.Engine.Rest;
+namespace Signum.Rest;
 
 public class RestLogLogic
 {
