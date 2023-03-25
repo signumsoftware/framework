@@ -1,8 +1,6 @@
 using Microsoft.SqlServer.Types;
-using Signum.Entities.Basics;
-using Signum.Entities.Tree;
 
-namespace Signum.Engine.Tree;
+namespace Signum.Tree;
 
 public static class TreeLogic
 {

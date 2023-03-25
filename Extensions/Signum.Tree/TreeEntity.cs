@@ -2,7 +2,7 @@ using Microsoft.SqlServer.Types;
 using System.ComponentModel;
 using System.Data;
 
-namespace Signum.Entities.Tree;
+namespace Signum.Tree;
 
 public abstract class TreeEntity : Entity
 {

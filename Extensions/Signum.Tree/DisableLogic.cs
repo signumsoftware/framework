@@ -1,9 +1,6 @@
-using Signum.Engine.Tree;
-using Signum.Entities.Basics;
-using Signum.Entities.Tree;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.Basics;
+namespace Signum.Tree;
 
 public static class DisableLogic
 {

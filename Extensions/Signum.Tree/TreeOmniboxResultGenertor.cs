@@ -1,9 +1,11 @@
-using Signum.Entities.Omnibox;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Omnibox;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-namespace Signum.Entities.Tree;
+namespace Signum.Tree;
 
 public class TreeOmniboxResultGenerator : OmniboxResultGenerator<TreeOmniboxResult>
 {
@@ -17,7 +19,7 @@ public class TreeOmniboxResultGenerator : OmniboxResultGenerator<TreeOmniboxResu
 
         bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-        foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), t => typeof(TreeEntity).IsAssignableFrom(t) && OmniboxParser.Manager.AllowedType(t) && OmniboxParser.Manager.AllowedQuery(t), pattern, isPascalCase).OrderBy(ma => ma.Distance))
+        foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), t => typeof(TreeEntity).IsAssignableFrom(t) && QueryLogic.Queries.QueryAllowed(t, fullScreen: true), pattern, isPascalCase).OrderBy(ma => ma.Distance))
         {
             var type = match.Value;
 

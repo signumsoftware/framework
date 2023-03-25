@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Builder;
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
-using Signum.Entities.Tree;
-using Signum.React.Facades;
+using Signum.API;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
 
-namespace Signum.React.Tree;
+namespace Signum.Tree;
 
 public class TreeServer
 {

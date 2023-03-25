@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Basics;
+namespace Signum.Tree;
 
 
 public class DisabledMixin : MixinEntity
