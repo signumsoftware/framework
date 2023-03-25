@@ -1,9 +1,9 @@
-using Signum.Engine.Cache;
-using Signum.Entities.Migrations;
+using Signum.Cache;
+using Signum.Engine.Sync;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Signum.Engine.Migrations;
+namespace Signum.Migrations;
 
 public class SqlMigrationRunner
 {

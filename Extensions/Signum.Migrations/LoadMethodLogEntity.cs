@@ -1,6 +1,4 @@
-using Signum.Entities.Basics;
-
-namespace Signum.Entities.Migrations;
+namespace Signum.Migrations;
 
 [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
 public class LoadMethodLogEntity : Entity

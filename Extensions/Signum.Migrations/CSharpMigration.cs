@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Migrations;
+namespace Signum.Migrations;
 
 [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
 public class CSharpMigrationEntity : Entity

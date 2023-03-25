@@ -1,8 +1,4 @@
-using Signum.Entities.Migrations;
-using Signum.Engine.SchemaInfoTables;
-using Signum.Entities.Basics;
-
-namespace Signum.Engine.Migrations;
+namespace Signum.Migrations;
 
 public static class MigrationLogic
 {

@@ -1,7 +1,7 @@
-using Signum.Entities.Migrations;
 using Microsoft.Data.SqlClient;
+using Signum.Engine.Sync;
 
-namespace Signum.Engine.Migrations;
+namespace Signum.Migrations;
 
 public class CSharpMigrationRunner: IEnumerable<CSharpMigrationRunner.MigrationInfo>
 {
