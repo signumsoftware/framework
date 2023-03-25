@@ -12,7 +12,6 @@ public static class DiffLogLogic
         {
             MixinDeclarations.AssertDeclared(typeof(OperationLogEntity), typeof(DiffLogMixin));
 
-            PermissionLogic.RegisterTypes(typeof(TimeMachinePermission));
 
             OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 

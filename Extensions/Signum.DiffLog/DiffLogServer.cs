@@ -12,6 +12,6 @@ public static class DiffLogServer
     {
         SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-        ReflectionServer.RegisterLike(typeof(DiffLogMessage), () => TimeMachinePermission.ShowTimeMachine.IsAuthorized() || TypeAuthLogic.GetAllowed(typeof(OperationLogEntity)).MaxUI() > TypeAllowedBasic.None);
+        ReflectionServer.RegisterLike(typeof(DiffLogMessage), () => TypeAuthLogic.GetAllowed(typeof(OperationLogEntity)).MaxUI() > TypeAllowedBasic.None);
     }
 }
