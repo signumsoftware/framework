@@ -1,9 +1,8 @@
-using Signum.Engine.Mailing;
-using Signum.Entities.Authorization;
-using Signum.Entities.Mailing;
-using Signum.Services;
-using Signum.Entities.Basics;
-using Signum.Security;
+using Signum.Authorization;
+using Signum.Engine.Basics;
+using Signum.Mailing;
+using Signum.Mailing.Templates;
+using Signum.ResetPassword;
 
 namespace Signum.Engine.Authorization;
 
@@ -28,10 +27,10 @@ public static class ResetPasswordRequestLogic
         AuthLogic.OnDeactivateUser = u =>
         {
             var config = EmailLogic.Configuration;
-            var request = ResetPasswordRequestLogic.ResetPasswordRequest(user);
+            var request = ResetPasswordRequestLogic.ResetPasswordRequest(u);
             var url = $"{config.UrlLeft}/auth/resetPassword?code={request.Code}";
 
-            var mail = new UserLockedMail(user, url);
+            var mail = new UserLockedMail(u, url);
             mail.SendMailAsync();
         };
 
@@ -83,7 +82,7 @@ public static class ResetPasswordRequestLogic
                         user.Execute(UserOperation.Reactivate);
                     }
                     
-                    user.PasswordHash = Security.EncodePassword(password);
+                    user.PasswordHash = PasswordEncoding.EncodePassword(password);
                     user.LoginFailedCounter = 0;
                     using (AuthLogic.Disable())
                     {

@@ -1,21 +1,15 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
+using Signum.Authorization;
 using Signum.Authorization.AuthToken;
-using Signum.Authorization.UserTicket;
 using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
-using Signum.React.Authorization;
-using Signum.Security;
 
-namespace Signum.Authorization;
+namespace Signum.ResetPassword;
 
 [ValidateModelFilter]
 public class ResetPasswordController : ControllerBase
 {
-
-
     [HttpPost("api/auth/forgotPasswordEmail"), SignumAllowAnonymous]
     public string? ForgotPasswordEmail([Required, FromBody] ForgotPasswordRequest request)
     {
