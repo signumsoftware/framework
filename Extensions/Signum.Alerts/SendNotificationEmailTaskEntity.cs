@@ -1,6 +1,6 @@
-using Signum.Entities.Scheduler;
+using Signum.Scheduler;
 
-namespace Signum.Entities.Alerts;
+namespace Signum.Alerts;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
 public class SendNotificationEmailTaskEntity : Entity, ITaskEntity

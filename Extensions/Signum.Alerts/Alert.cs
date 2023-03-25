@@ -1,7 +1,6 @@
-using Signum.Entities.Basics;
 using System.ComponentModel;
 
-namespace Signum.Entities.Alerts;
+namespace Signum.Alerts;
 
 [EntityKind(EntityKind.Main, EntityData.Transactional)]
 public class AlertEntity : Entity

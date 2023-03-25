@@ -1,13 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
-using Signum.Engine.Cache;
-using Signum.Entities.Alerts;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.React.Facades;
+using Signum.API;
+using Signum.Authorization;
+using Signum.Cache;
 
-namespace Signum.React.Alerts;
+namespace Signum.Alerts;
 
 public static class AlertsServer
 {

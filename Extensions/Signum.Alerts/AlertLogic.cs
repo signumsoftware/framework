@@ -1,20 +1,18 @@
-using Signum.Entities.Authorization;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Basics;
-using Signum.Entities.Alerts;
-using Signum.Engine.Extensions.Basics;
-using Signum.Engine.Authorization;
-using Signum.Engine.Mailing;
-using Signum.Entities.Mailing;
-using Signum.Engine.Templating;
-using Signum.Engine.Scheduler;
-using Signum.Entities.UserAssets;
 using Microsoft.AspNetCore.Html;
 using System.Text.RegularExpressions;
-using Signum.Entities.Scheduler;
-using Signum.Utilities;
+using Signum.Mailing;
+using Signum.Authorization;
+using Signum.Entities.Mailing;
+using Signum.MailPackage;
+using Signum.Authorization.Rules;
+using Signum.Entities.UserAssets;
+using Signum.Mailing.Templates;
+using Signum.Engine.Basics;
+using Signum.Scheduler;
+using Signum.Templating;
 
-namespace Signum.Engine.Alerts;
+namespace Signum.Alerts;
 
 public static class AlertLogic
 {
@@ -170,7 +168,7 @@ public static class AlertLogic
             emails.ForEach(a =>
             {
                 a.State = EmailMessageState.ReadyToSend;
-                a.Package = emailPackage.ToLite();
+                a.Mixin<EmailMessagePackageMixin>().Package = emailPackage.ToLite();
             });
 
             emails.BulkInsertQueryIds(a => a.Target!);

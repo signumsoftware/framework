@@ -1,11 +1,7 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
-using Signum.Entities.Basics;
-using Signum.React.Alerts;
-using Signum.React.Authorization;
-using System.Threading.Tasks;
+using Signum.Authorization.AuthToken;
 
-namespace Signum.React.Alerts;
+namespace Signum.Alerts;
 
 public interface IAlertsClient
 {

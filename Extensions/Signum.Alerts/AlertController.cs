@@ -1,10 +1,8 @@
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.Filters;
-using Signum.Entities.Alerts;
+using Signum.API.Filters;
+using Signum.Authorization;
 
-namespace Signum.React.Alerts;
+namespace Signum.Alerts;
 
 [ValidateModelFilter]
 public class AlertController : ControllerBase
