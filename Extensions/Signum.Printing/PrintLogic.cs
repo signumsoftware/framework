@@ -1,14 +1,9 @@
-using Signum.Engine.Files;
-using Signum.Engine.Authorization;
-using Signum.Engine.Processes;
-using Signum.Entities.Files;
-using Signum.Entities.Processes;
-using Signum.Entities.Printing;
+using Signum.Files;
+using Signum.Processes;
+using Signum.Scheduler;
 using System.IO;
-using Signum.Engine.Scheduler;
-using Signum.Entities.Basics;
 
-namespace Signum.Engine.Printing;
+namespace Signum.Printing;
 
 public static class PrintingLogic
 {
@@ -50,7 +45,7 @@ public static class PrintingLogic
 
             ProcessLogic.AssertStarted(sb);
             ProcessLogic.Register(PrintPackageProcess.PrintPackage, new PrintPackageAlgorithm());
-            PermissionAuthLogic.RegisterPermissions(PrintPermission.ViewPrintPanel);
+            PermissionLogic.RegisterPermissions(PrintPermission.ViewPrintPanel);
             PrintLineGraph.Register();
 
             SimpleTaskLogic.Register(PrintTask.RemoveOldFiles, (ScheduledTaskContext ctx) =>

@@ -1,12 +1,11 @@
-using Signum.Entities.Processes;
-using Signum.Entities.Files;
-using Signum.Entities.Authorization;
-using Signum.Entities.Scheduler;
+using Signum.Files;
+using Signum.Processes;
+using Signum.Scheduler;
 
-namespace Signum.Entities.Printing;
+namespace Signum.Printing;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
-public class PrintLineEntity : Entity, IProcessLineDataEntity
+public class PrintLineEntity : Entity
 {
     public DateTime CreationDate { get; private set; } = Clock.Now;
 

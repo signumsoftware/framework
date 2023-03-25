@@ -1,6 +1,6 @@
-using Signum.Entities.Processes;
+using Signum.Processes;
 
-namespace Signum.Entities.Printing;
+namespace Signum.Printing;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class PrintPackageEntity : Entity, IProcessDataEntity
