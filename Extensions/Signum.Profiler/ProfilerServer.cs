@@ -1,9 +1,7 @@
-using Signum.React.Facades;
-using Signum.Entities.Profiler;
 using Microsoft.AspNetCore.Builder;
-using Signum.Engine.Authorization;
+using Signum.API;
 
-namespace Signum.React.Profiler;
+namespace Signum.Profiler;
 
 public static class ProfilerServer
 {

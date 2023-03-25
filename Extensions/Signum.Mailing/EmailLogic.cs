@@ -26,7 +26,7 @@ public static class EmailLogic
         return EmailSenders.Invoke(config.Service, config);
     }
 
-    internal static void AssertStarted(SchemaBuilder sb)
+    public static void AssertStarted(SchemaBuilder sb)
     {
         sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null!, null!, null!, null)));
     }

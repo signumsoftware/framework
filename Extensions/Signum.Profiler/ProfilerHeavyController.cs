@@ -1,15 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Authorization;
-using Signum.Entities.Profiler;
 using System.Drawing;
-using Signum.Entities.Reflection;
 using System.Xml.Linq;
 using System.IO;
-using Signum.React.Files;
-using Signum.React.Filters;
+using Signum.API.Filters;
 
-namespace Signum.React.Profiler;
+namespace Signum.Profiler;
 
 [ValidateModelFilter]
 public class ProfilerHeavyController : ControllerBase
@@ -128,7 +124,7 @@ public class ProfilerHeavyController : ControllerBase
 
             string fileName = "Profile-{0}.xml".FormatWith(DateTime.Now.ToString("o").Replace(":", "."));
 
-            return FilesController.GetFileStreamResult(new MemoryStream(ms.ToArray()), fileName);
+            return MimeMapping.GetFileStreamResult(new MemoryStream(ms.ToArray()), fileName);
         }
     }
 

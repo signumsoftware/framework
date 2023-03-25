@@ -1,6 +1,4 @@
-﻿using Signum.Entities.Authorization;
-
-namespace Signum.Entities.Profiler;
+﻿namespace Signum.Profiler;
 
 [AutoInit]
 public static class ProfilerPermission

@@ -1,7 +1,6 @@
-﻿using Signum.Engine.Authorization;
-using Signum.Entities.Profiler;
+using Signum.Authorization.Rules;
 
-namespace Signum.Engine.Profiler;
+namespace Signum.Profiler;
 
 public static class ProfilerLogic
 {
@@ -17,13 +16,13 @@ public static class ProfilerLogic
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             if (timeTracker)
-                PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewTimeTracker);
+                PermissionLogic.RegisterPermissions(ProfilerPermission.ViewTimeTracker);
 
             if (heavyProfiler)
-                PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewHeavyProfiler);
+                PermissionLogic.RegisterPermissions(ProfilerPermission.ViewHeavyProfiler);
 
             if (overrideSessionTimeout)
-                PermissionAuthLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout);
+                PermissionLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout);
         }
     }
 

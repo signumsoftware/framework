@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Authorization;
-using Signum.Entities.Profiler;
 
-namespace Signum.React.Profiler;
+namespace Signum.Profiler;
 
 public class ProfilerTimesController : ControllerBase
 {
