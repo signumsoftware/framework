@@ -1,6 +1,7 @@
+using Signum.Engine.Sync;
 using System.Xml.Linq;
 
-namespace Signum.Engine.Help;
+namespace Signum.Help;
 
 static class HelpTools
 {

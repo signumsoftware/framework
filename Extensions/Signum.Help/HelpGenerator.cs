@@ -1,8 +1,6 @@
-using Signum.Entities.Reflection;
-using Signum.Entities.Help;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.Help;
+namespace Signum.Help;
 
 public static class HelpGenerator
 {

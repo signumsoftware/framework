@@ -3,14 +3,13 @@ using System.Xml.Schema;
 using System.Globalization;
 using System.IO;
 using System.Xml;
-using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
-using Signum.Entities.Help;
-using Signum.Engine.Authorization;
 using System.Diagnostics.CodeAnalysis;
+using Signum.Engine.Sync;
+using Signum.Engine.Basics;
 
-namespace Signum.Engine.Help;
+namespace Signum.Help;
 
 public static class HelpLogic
 {
@@ -117,7 +116,7 @@ public static class HelpLogic
             Queries = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>(),
                invalidateWith: new InvalidateWith(typeof(QueryHelpEntity)));
 
-            PermissionAuthLogic.RegisterPermissions(HelpPermissions.ViewHelp);
+            PermissionLogic.RegisterPermissions(HelpPermissions.ViewHelp);
         }
     }
 
@@ -128,7 +127,7 @@ public static class HelpLogic
         return Namespaces.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
         {
             var namespaces = AllTypes().GroupBy(type => type.Namespace!);
-
+            
             var dic = Database.Query<NamespaceHelpEntity>().Where(n => n.Culture.Is(ci.ToCultureInfoEntity())).ToDictionary(a => a.Name);
 
             return namespaces.ToDictionary(gr => gr.Key, gr => new NamespaceHelp(gr.Key, ci, dic.TryGetC(gr.Key), gr.ToArray()));

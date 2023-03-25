@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Signum.Engine.Help;
+namespace Signum.Help;
 
 public static class HelpUtilities
 {

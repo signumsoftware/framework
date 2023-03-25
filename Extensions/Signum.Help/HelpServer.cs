@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
+using Signum.API;
 
-namespace Signum.React.Help;
+namespace Signum.Help;
 
 public static class HelpServer
 {

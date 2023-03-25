@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
-using Signum.Entities.Help;
 
-namespace Signum.Engine.Help;
+namespace Signum.Help;
 
 public static class HelpSearch
 {

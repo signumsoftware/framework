@@ -1,10 +1,10 @@
-using Signum.Entities.Omnibox;
 using System.Text.RegularExpressions;
-using Signum.Entities.Basics;
-using Signum.Entities.Authorization;
 using System.Text.Json.Serialization;
+using Signum.Omnibox;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
 
-namespace Signum.Entities.Help;
+namespace Signum.Help;
 
 public class HelpModuleOmniboxResultGenerator : OmniboxResultGenerator<HelpModuleOmniboxResult>
 {
@@ -14,7 +14,7 @@ public class HelpModuleOmniboxResultGenerator : OmniboxResultGenerator<HelpModul
 
     public override IEnumerable<HelpModuleOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
     {
-        if (!OmniboxParser.Manager.AllowedPermission(HelpPermissions.ViewHelp))
+        if (!PermissionLogic.IsAuthorized(HelpPermissions.ViewHelp))
             yield break;
 
         if (tokens.Count == 0 || !regex.IsMatch(tokenPattern))
@@ -46,13 +46,10 @@ public class HelpModuleOmniboxResultGenerator : OmniboxResultGenerator<HelpModul
 
         bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-        foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+        foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.Types(), t => TypeAuthLogic.GetAllowed(t).MinUI() > TypeAllowedBasic.None, pattern, isPascalCase).OrderBy(ma => ma.Distance))
         {
             var type = (Type)match.Value;
-            if (OmniboxParser.Manager.AllowedType(type))
-            {
-                yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = type, SecondMatch = match };
-            }
+            yield return new HelpModuleOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = type, SecondMatch = match };
         }
     }
 

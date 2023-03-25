@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Signum.Entities.Help;
+namespace Signum.Help;
 
 public enum HelpMessage
 {

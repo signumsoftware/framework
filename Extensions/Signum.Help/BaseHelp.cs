@@ -1,9 +1,8 @@
-using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 using System.Globalization;
-using Signum.Entities.Help;
 using System.Text.Json.Serialization;
 
-namespace Signum.Engine.Help;
+namespace Signum.Help;
 
 public abstract class BaseHelp
 {

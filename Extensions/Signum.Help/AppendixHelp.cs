@@ -1,6 +1,6 @@
 using Signum.Entities.Basics;
 
-namespace Signum.Entities.Help;
+namespace Signum.Help;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class AppendixHelpEntity : Entity

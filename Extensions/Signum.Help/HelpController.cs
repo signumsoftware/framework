@@ -1,14 +1,10 @@
-using Signum.Engine.Authorization;
-using Signum.React.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Signum.Engine.Help;
-using Signum.Entities.Help;
 using System.Globalization;
-using Signum.Entities.Basics;
-using Signum.Entities.Operations;
+using Signum.API.Filters;
+using Signum.Engine.Basics;
 
-namespace Signum.React.Help;
+namespace Signum.Help;
 
 [ValidateModelFilter]
 public class HelpController : ControllerBase

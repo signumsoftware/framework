@@ -1,12 +1,11 @@
+using Signum.Engine.Basics;
+using Signum.Engine.Sync;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using Signum.Entities.Basics;
-using Signum.Entities.Help;
-using Signum.Entities.Reflection;
 
-namespace Signum.Engine.Help;
+namespace Signum.Help;
 
 public static class HelpXml
 {

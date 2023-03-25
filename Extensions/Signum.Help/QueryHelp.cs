@@ -1,6 +1,6 @@
 using Signum.Entities.Basics;
 
-namespace Signum.Entities.Help;
+namespace Signum.Help;
 
 [EntityKind(EntityKind.SharedPart, EntityData.Master)]
 public class QueryHelpEntity : Entity
