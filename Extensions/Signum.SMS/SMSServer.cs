@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Builder;
-using Signum.Entities.SMS;
-using Signum.React.Facades;
+using Signum.API;
 
-namespace Signum.React.SMS;
+namespace Signum.SMS;
 
 public static class SMSServer
 {

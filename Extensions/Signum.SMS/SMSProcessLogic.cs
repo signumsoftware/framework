@@ -1,9 +1,7 @@
-using Signum.Engine.Processes;
-using Signum.Engine.Scheduler;
-using Signum.Entities.Processes;
-using Signum.Entities.SMS;
+using Signum.Processes;
+using Signum.Scheduler;
 
-namespace Signum.Engine.SMS;
+namespace Signum.SMS;
 
 public static class SMSProcessLogic
 {
@@ -35,7 +33,7 @@ public static class SMSProcessLogic
                     e.Name,
                     NumLines = e.SMSMessages().Count(),
                     LastProcess = p,
-                    NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
+                    NumErrors = e.SMSMessages().Count(s => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(s)) != null),
                 });
 
             QueryLogic.Queries.Register(typeof(SMSUpdatePackageEntity), () =>
@@ -48,7 +46,7 @@ public static class SMSProcessLogic
                     e.Name,
                     NumLines = e.SMSMessages().Count(),
                     LastProcess = p,
-                    NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
+                    NumErrors = e.SMSMessages().Count(s => p.ExceptionLines().SingleOrDefault(el => el.Line.Is(s)) != null),
                 });
         }
     }

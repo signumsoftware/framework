@@ -1,12 +1,11 @@
-using Signum.Entities.SMS;
+using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Basics;
+using Signum.Processes;
+using Signum.Templating;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Processes;
-using Signum.Entities.Processes;
-using Signum.Entities.Basics;
 using System.Globalization;
-using Signum.Engine.Templating;
 
-namespace Signum.Engine.SMS;
+namespace Signum.SMS;
 
 
 public static class SMSLogic

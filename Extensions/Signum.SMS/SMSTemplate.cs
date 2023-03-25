@@ -1,9 +1,8 @@
 using Signum.Entities.Basics;
+using Signum.UserAssets.QueryTokens;
 using System.ComponentModel;
-using Signum.Entities.UserAssets;
-using Signum.Entities.DynamicQuery;
 
-namespace Signum.Entities.SMS;
+namespace Signum.SMS;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class SMSTemplateEntity : Entity

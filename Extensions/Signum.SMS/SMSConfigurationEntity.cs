@@ -1,6 +1,6 @@
 using Signum.Entities.Basics;
 
-namespace Signum.Entities.SMS;
+namespace Signum.SMS;
 
 public class SMSConfigurationEmbedded : EmbeddedEntity
 {

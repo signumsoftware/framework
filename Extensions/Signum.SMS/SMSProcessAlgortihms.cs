@@ -1,7 +1,6 @@
-using Signum.Engine.Processes;
-using Signum.Entities.SMS;
+using Signum.Processes;
 
-namespace Signum.Engine.SMS;
+namespace Signum.SMS;
 
 public class SMSMessageSendProcessAlgortihm : IProcessAlgorithm
 {

@@ -1,6 +1,6 @@
-using Signum.Entities.Processes;
+using Signum.Processes;
 
-namespace Signum.Entities.SMS;
+namespace Signum.SMS;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class SMSSendPackageEntity : SMSPackageEntity

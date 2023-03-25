@@ -1,11 +1,10 @@
-using Signum.Entities.Processes;
-using Signum.Entities.Basics;
-using Signum.Entities.Scheduler;
+using Signum.Processes;
+using Signum.Scheduler;
 
-namespace Signum.Entities.SMS;
+namespace Signum.SMS;
 
 [EntityKind(EntityKind.Main, EntityData.Transactional)]
-public class SMSMessageEntity : Entity, IProcessLineDataEntity
+public class SMSMessageEntity : Entity
 {
     public Lite<SMSTemplateEntity>? Template { get; set; }
 

@@ -1,8 +1,8 @@
-using Signum.Entities.Isolation;
-using Signum.Entities.SMS;
+using Signum.Engine.Sync;
+using Signum.Isolation;
 using System.Globalization;
 
-namespace Signum.Engine.SMS;
+namespace Signum.SMS;
 
 public interface ISMSModel
 {

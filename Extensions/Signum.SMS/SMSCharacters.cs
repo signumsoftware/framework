@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Signum.Entities.SMS;
+namespace Signum.SMS;
 
 public static class SMSCharacters
 {
