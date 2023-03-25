@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Signum.Entities.MachineLearning;
+namespace Signum.MachineLearning;
 
 public enum PredictorMessage
 {

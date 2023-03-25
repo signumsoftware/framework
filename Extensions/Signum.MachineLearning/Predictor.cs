@@ -1,13 +1,11 @@
-using Signum.Entities.Basics;
-using Signum.Entities.UserAssets;
-using Signum.Entities.UserQueries;
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.Files;
-using Signum.Entities.Authorization;
-using Signum.Entities.Processes;
+using Signum.Authorization;
+using Signum.Files;
+using Signum.Processes;
+using Signum.UserAssets.Queries;
+using Signum.UserAssets.QueryTokens;
 using System.ComponentModel;
 
-namespace Signum.Entities.MachineLearning;
+namespace Signum.MachineLearning;
 
 [EntityKind(EntityKind.Main, EntityData.Transactional)]
 public class PredictorEntity : Entity, IProcessDataEntity
@@ -205,7 +203,6 @@ public static class PredictorOperation
 public class PredictorColumnEmbedded : EmbeddedEntity, IEquatable<PredictorColumnEmbedded>
 {
     public PredictorColumnUsage Usage { get; set; }
-
 
     public QueryTokenEmbedded Token { get; set; }
 

@@ -1,10 +1,8 @@
-using Signum.React.UserAssets;
-using Signum.Entities.MachineLearning;
-using Signum.Engine.MachineLearning;
 using Microsoft.AspNetCore.Builder;
-using Signum.React.Facades;
+using Signum.API;
+using Signum.React.UserAssets;
 
-namespace Signum.React.MachineLearning;
+namespace Signum.MachineLearning;
 
 public static class PredictorServer
 {

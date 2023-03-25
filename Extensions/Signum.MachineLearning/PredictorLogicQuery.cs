@@ -1,7 +1,7 @@
-using Signum.Entities.MachineLearning;
-using Signum.Entities.UserQueries;
+using Signum.DynamicQuery.Tokens;
+using Signum.UserAssets.Queries;
 
-namespace Signum.Engine.MachineLearning;
+namespace Signum.MachineLearning;
 
 public static class PredictorLogicQuery
 {

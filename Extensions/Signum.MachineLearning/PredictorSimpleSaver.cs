@@ -1,7 +1,7 @@
-using Signum.Entities.MachineLearning;
+using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.MachineLearning;
+namespace Signum.MachineLearning;
 
 public class PredictorSimpleSaver : IPredictorResultSaver
 {

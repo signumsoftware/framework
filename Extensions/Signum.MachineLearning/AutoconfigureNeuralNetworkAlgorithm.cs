@@ -1,7 +1,6 @@
-using Signum.Engine.Processes;
-using Signum.Entities.MachineLearning;
+using Signum.Processes;
 
-namespace Signum.Engine.MachineLearning;
+namespace Signum.MachineLearning;
 
 public class AutoconfigureNeuralNetworkAlgorithm : Processes.IProcessAlgorithm
 {

@@ -1,7 +1,7 @@
-using Signum.Entities.Processes;
+using Signum.Processes;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Entities.MachineLearning;
+namespace Signum.MachineLearning;
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class NeuralNetworkSettingsEntity : Entity, IPredictorAlgorithmSettings

@@ -1,13 +1,10 @@
-using Signum.Engine.Files;
-using Signum.Engine.Processes;
-using Signum.Entities.Basics;
-using Signum.Entities.MachineLearning;
-using Signum.Entities.Processes;
-using Signum.Entities.Reflection;
+using Signum.DynamicQuery.Tokens;
+using Signum.Files;
+using Signum.Processes;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 
-namespace Signum.Engine.MachineLearning;
+namespace Signum.MachineLearning;
 
 public class PredictorTrainingState
 {

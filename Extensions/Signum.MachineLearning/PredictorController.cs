@@ -1,10 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.MachineLearning;
-using Signum.Engine.MachineLearning;
-using Signum.React.Filters;
+using Signum.API.Filters;
 
-namespace Signum.React.MachineLearning;
+namespace Signum.MachineLearning;
 
 [ValidateModelFilter]
 public class PredictorController : ControllerBase

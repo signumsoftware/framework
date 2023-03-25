@@ -1,8 +1,7 @@
-using Signum.Entities.MachineLearning;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets.QueryTokens;
 using System.Collections.Concurrent;
 
-namespace Signum.Engine.MachineLearning;
+namespace Signum.MachineLearning;
 
 public class TrainingProgress
 {

@@ -1,7 +1,7 @@
-using Signum.Entities.MachineLearning;
+using Signum.DynamicQuery.Tokens;
 using Signum.Entities.UserAssets;
 
-namespace Signum.Engine.MachineLearning;
+namespace Signum.MachineLearning;
 
 public static class PredictorCodificationLogic
 {

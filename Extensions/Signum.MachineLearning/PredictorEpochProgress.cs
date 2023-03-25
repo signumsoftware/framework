@@ -1,5 +1,5 @@
 ﻿
-namespace Signum.Entities.MachineLearning;
+namespace Signum.MachineLearning;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class PredictorEpochProgressEntity : Entity

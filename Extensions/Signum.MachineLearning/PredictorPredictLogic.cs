@@ -1,8 +1,8 @@
-using Signum.Entities.MachineLearning;
-using Signum.Entities.UserQueries;
+using Signum.DynamicQuery.Tokens;
+using Signum.UserAssets.Queries;
 using Signum.Utilities.DataStructures;
 
-namespace Signum.Engine.MachineLearning;
+namespace Signum.MachineLearning;
 
 public static class PredictorPredictLogic
 {
@@ -123,7 +123,7 @@ public static class PredictorPredictLogic
             Dictionary<string, string> tokenReplacements = mainQueryKeys.ZipStrict(parentKeys, (m, p) => KeyValuePair.Create(m.FullKey(), p.FullKey())).ToDictionaryEx();
 
             Filter[] mainFilters = filters.Select(f => Replace(f, tokenReplacements, sqd)).ToArray();
-
+            
             List<Filter> additionalFilters = sqe.Filters.ToFilterList();
 
             List<Column> allColumns = sqe.Columns.Select(c => new Column(c.Token.Token, null)).ToList();
