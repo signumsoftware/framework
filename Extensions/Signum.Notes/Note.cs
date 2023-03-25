@@ -1,7 +1,7 @@
 using Signum.Entities.Basics;
 using System.ComponentModel;
 
-namespace Signum.Entities.Notes;
+namespace Signum.Notes;
 
 [EntityKind(EntityKind.Main, EntityData.Transactional)]
 public class NoteEntity : Entity

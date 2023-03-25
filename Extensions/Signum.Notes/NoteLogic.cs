@@ -1,9 +1,7 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Notes;
-using Signum.Engine.Extensions.Basics;
+using Signum.Authorization.Rules;
+using Signum.Authorization;
 
-namespace Signum.Engine.Notes;
+namespace Signum.Notes;
 
 public static class NoteLogic
 {
