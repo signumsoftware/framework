@@ -1,21 +1,15 @@
-using Signum.Engine.Authorization;
-using Signum.Engine.Chart;
-using Signum.Engine.Dashboard;
-using Signum.Engine.Translation;
-using Signum.Engine.UserAssets;
-using Signum.Engine.UserQueries;
-using Signum.Engine.Workflow;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Chart;
-using Signum.Entities.Dashboard;
-using Signum.Entities.Toolbar;
-using Signum.Entities.UserQueries;
-using Signum.Entities.Workflow;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Chart;
+using Signum.Dashboard;
+using Signum.UserAssets;
+using Signum.UserQueries;
 using Signum.Utilities.DataStructures;
 using System.Text.Json.Serialization;
+using Signum.Chart.UserChart;
+using Signum.Engine.UserAssets;
 
-namespace Signum.Engine.Toolbar;
+namespace  Signum.Toolbar;
 
 public static class ToolbarLogic
 {
@@ -66,23 +60,23 @@ public static class ToolbarLogic
             RegisterDelete<QueryEntity>(sb);
             RegisterDelete<DashboardEntity>(sb);
             RegisterDelete<ToolbarMenuEntity>(sb);
-            RegisterDelete<WorkflowEntity>(sb);
+    
 
             RegisterContentConfig<ToolbarMenuEntity>(
                 lite => ToolbarMenus.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false),
-                lite => TranslatedInstanceLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name));
+                lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name));
 
             RegisterContentConfig<ToolbarEntity>(
                 lite => Toolbars.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false),
-                lite => TranslatedInstanceLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name));
+                lite => PropertyRouteTranslationLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name));
 
             RegisterContentConfig<UserQueryEntity>(
                 lite => { var uq = UserQueryLogic.UserQueries.Value.GetOrCreate(lite); return InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); },
-                lite => TranslatedInstanceLogic.TranslatedField(UserQueryLogic.UserQueries.Value.GetOrCreate(lite), a => a.DisplayName));
+                lite => PropertyRouteTranslationLogic.TranslatedField(UserQueryLogic.UserQueries.Value.GetOrCreate(lite), a => a.DisplayName));
 
             RegisterContentConfig<UserChartEntity>(
                 lite => { var uc = UserChartLogic.UserCharts.Value.GetOrCreate(lite); return InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); },
-                lite => TranslatedInstanceLogic.TranslatedField(UserChartLogic.UserCharts.Value.GetOrCreate(lite), a => a.DisplayName));
+                lite => PropertyRouteTranslationLogic.TranslatedField(UserChartLogic.UserCharts.Value.GetOrCreate(lite), a => a.DisplayName));
 
             RegisterContentConfig<QueryEntity>(
               lite => IsQueryAllowed(lite),
@@ -90,7 +84,7 @@ public static class ToolbarLogic
 
             RegisterContentConfig<DashboardEntity>(
               lite => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate(lite)),
-              lite => TranslatedInstanceLogic.TranslatedField(DashboardLogic.Dashboards.Value.GetOrCreate(lite), a => a.DisplayName));
+              lite => PropertyRouteTranslationLogic.TranslatedField(DashboardLogic.Dashboards.Value.GetOrCreate(lite), a => a.DisplayName));
 
             RegisterContentConfig<PermissionSymbol>(
                 lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)),
@@ -105,14 +99,6 @@ public static class ToolbarLogic
 
                 return null;
             };
-
-            RegisterContentConfig<WorkflowEntity>(
-              lite => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); },
-                lite => TranslatedInstanceLogic.TranslatedField(WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite).Workflow, a => a.Name));
-
-
-            
-
 
             //    { typeof(QueryEntity), a => IsQueryAllowed((Lite<QueryEntity>)a) },
             //{ typeof(PermissionSymbol), a => PermissionAuthLogic.IsAuthorized((PermissionSymbol)a.RetrieveAndRemember()) },
@@ -256,10 +242,10 @@ public static class ToolbarLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        TranslatedInstanceLogic.AddRoute((ToolbarEntity tb) => tb.Name);
-        TranslatedInstanceLogic.AddRoute((ToolbarEntity tb) => tb.Elements[0].Label);
-        TranslatedInstanceLogic.AddRoute((ToolbarMenuEntity tm) => tm.Name);
-        TranslatedInstanceLogic.AddRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
+        PropertyRouteTranslationLogic.AddRoute((ToolbarEntity tb) => tb.Name);
+        PropertyRouteTranslationLogic.AddRoute((ToolbarEntity tb) => tb.Elements[0].Label);
+        PropertyRouteTranslationLogic.AddRoute((ToolbarMenuEntity tm) => tm.Name);
+        PropertyRouteTranslationLogic.AddRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
     }
 
     public static ToolbarEntity? GetCurrent(ToolbarLocation location)
@@ -281,7 +267,7 @@ public static class ToolbarLogic
         if (curr == null)
             return null;
 
-        var responses = ToResponseList(TranslatedInstanceLogic.TranslatedMList(curr, c => c.Elements).ToList());
+        var responses = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(curr, c => c.Elements).ToList());
 
         if (responses.Count == 0)
             return null;
@@ -290,7 +276,7 @@ public static class ToolbarLogic
         {
             type = ToolbarElementType.Header,
             content = curr.ToLite(),
-            label = TranslatedInstanceLogic.TranslatedField(curr, a => a.Name),
+            label = PropertyRouteTranslationLogic.TranslatedField(curr, a => a.Name),
             elements = responses,
         };
     }
@@ -357,7 +343,7 @@ public static class ToolbarLogic
         if (element.Content is Lite<ToolbarMenuEntity>)
         {
             var tme = ToolbarMenus.Value.GetOrThrow((Lite<ToolbarMenuEntity>)element.Content);
-            result.elements = ToResponseList(TranslatedInstanceLogic.TranslatedMList(tme, t => t.Elements).ToList());
+            result.elements = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tme, t => t.Elements).ToList());
             if (result.elements.Count == 0)
                 return null;
         }
@@ -365,7 +351,7 @@ public static class ToolbarLogic
         if (element.Content is Lite<ToolbarEntity>)
         {
             var tme = Toolbars.Value.GetOrThrow((Lite<ToolbarEntity>)element.Content);
-            var res = ToResponseList(TranslatedInstanceLogic.TranslatedMList(tme, t => t.Elements).ToList());
+            var res = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tme, t => t.Elements).ToList());
             if (res.Count == 0)
                 return null;
 

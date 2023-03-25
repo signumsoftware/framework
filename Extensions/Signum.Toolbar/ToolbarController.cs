@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Toolbar;
-using Signum.Engine.Toolbar;
+using Signum.Toolbar;
 
-namespace Signum.React.Toolbar;
+namespace  Signum.Toolbar;
 
 public class ToolbarController : ControllerBase
 {

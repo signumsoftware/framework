@@ -1,14 +1,16 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Chart;
-using Signum.Entities.Dashboard;
-using Signum.Entities.UserAssets;
-using Signum.Entities.UserQueries;
+using Signum.Authorization;
+using Signum.Basics;
+using Signum.Chart;
+using Signum.Dashboard;
+using Signum.UserAssets;
+using Signum.UserQueries;
 using System.Xml.Linq;
 using Signum.Utilities.Reflection;
 using System.ComponentModel;
+using Signum.Entities.UserAssets;
+using Signum.Chart.UserChart;
 
-namespace Signum.Entities.Toolbar;
+namespace  Signum.Toolbar;
 
 public interface IToolbarEntity: IEntity
 {
@@ -99,7 +101,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
     public bool OpenInPopup { get; set; }
 
 
-    [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThanOrEqualTo, 10)]
+    [Unit("s"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 10)]
     public int? AutoRefreshPeriod { get; set; }
 
     internal XElement ToXml(IToXmlContext ctx)
@@ -134,7 +136,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
         Content = !content.HasText() ? null :
             Guid.TryParse(content, out Guid guid) ? (Lite<Entity>)ctx.GetEntity(guid).ToLiteFat() :
             (Lite<Entity>?)ctx.TryGetQuery(content)?.ToLite() ??
-            (Lite<Entity>?)ctx.TryPermission(content)?.ToLite() ??
+            (Lite<Entity>?)SymbolLogic<PermissionSymbol>.TryToSymbol(content)?.ToLite() ??
             throw new InvalidOperationException($"Content '{content}' not found");
 
         Url = x.Attribute("Url")?.Value;

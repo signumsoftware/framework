@@ -70,6 +70,8 @@ public static class UserAssetsImporter
 
         public bool IsPreview => true;
 
+        public Dictionary<Guid, ModelEntity?> CustomResolutionModel => customResolutionModel;
+
         public PreviewContext(XDocument doc)
         {
             elements = doc.Element("Entities")!.Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid")!.Value));
@@ -204,6 +206,8 @@ public static class UserAssetsImporter
         public Dictionary<Guid, XElement> elements;
 
         public bool IsPreview => false;
+
+        public Dictionary<Guid, ModelEntity?> CustomResolutionModel => customResolutionModel;
 
         public ImporterContext(XDocument doc, Dictionary<Guid, bool> overrideEntity, Dictionary<Guid, ModelEntity?> customResolution, Dictionary<Guid, Dictionary<(Lite<Entity> from, PropertyRoute route), Lite<Entity>?>> liteConflicts)
         {

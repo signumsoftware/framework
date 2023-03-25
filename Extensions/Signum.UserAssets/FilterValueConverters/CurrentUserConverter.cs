@@ -54,11 +54,9 @@ public class CurrentUserConverter : IFilterValueConverter
     }
 }
 
-static class SimpleMemberEvaluator
+public static class SimpleMemberEvaluator
 {
-    
-
-    internal static Result<object?> EvaluateExpression(object? result, string[] parts)
+    public static Result<object?> EvaluateExpression(object? result, string[] parts)
     {
         if (result == null)
             return new Result<object?>.Success(null);
