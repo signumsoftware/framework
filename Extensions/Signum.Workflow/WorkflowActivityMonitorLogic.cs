@@ -1,6 +1,6 @@
-using Signum.Entities.Workflow;
+using Signum.DynamicQuery.Tokens;
 
-namespace Signum.Engine.Workflow;
+namespace Signum.Workflow;
 
 public static class WorkflowActivityMonitorLogic
 {

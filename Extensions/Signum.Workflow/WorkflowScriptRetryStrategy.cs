@@ -2,7 +2,7 @@ using Signum.Entities.UserAssets;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowScriptRetryStrategyEntity : Entity, IUserAssetEntity

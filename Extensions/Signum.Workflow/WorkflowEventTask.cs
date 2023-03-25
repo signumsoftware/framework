@@ -1,7 +1,7 @@
-using Signum.Entities.Dynamic;
-using Signum.Entities.Scheduler;
+using Signum.Eval;
+using Signum.Scheduler;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
 public class WorkflowEventTaskEntity : Entity, ITaskEntity
@@ -95,10 +95,10 @@ public class WorkflowEventTaskConditionEval : EvalEmbedded<IWorkflowEventTaskCon
         var script = this.Script.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
 
-        return Compile(DynamicCode.GetCoreMetadataReferences()
-            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+        return Compile(EvalLogic.GetCoreMetadataReferences()
+            .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
                 @"
-                namespace Signum.Entities.Workflow
+                namespace Signum.Workflow
                 {
                     class MyWorkflowEventTaskConditionEvaluator : IWorkflowEventTaskConditionEvaluator
                     {
@@ -123,10 +123,10 @@ public class WorkflowEventTaskActionEval : EvalEmbedded<IWorkflowEventTaskAction
         var script = this.Script.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
 
-        return Compile(DynamicCode.GetCoreMetadataReferences()
-            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+        return Compile(EvalLogic.GetCoreMetadataReferences()
+            .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
                 @"
-                namespace Signum.Entities.Workflow
+                namespace Signum.Workflow
                 {
                     class MyWorkflowEventTaskActionEvaluator : IWorkflowEventTaskActionEval
                     {

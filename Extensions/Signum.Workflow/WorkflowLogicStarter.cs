@@ -1,6 +1,4 @@
-﻿using Signum.Entities.Workflow;
-
-namespace Signum.Engine.Workflow;
+﻿namespace Signum.Workflow;
 
 
 public static class WorkflowLogicStarter

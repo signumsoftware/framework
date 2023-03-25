@@ -1,6 +1,4 @@
-using Signum.Entities.Basics;
-
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 
 [EntityKind(EntityKind.Main, EntityData.Master)]

@@ -1,15 +1,9 @@
-using Signum.Entities.Workflow;
-using Signum.Entities.Authorization;
-using Signum.Engine.Authorization;
-using Signum.Entities.Dynamic;
-using System.Text.RegularExpressions;
-using Signum.Entities.Reflection;
+using Signum.Authorization;
 using Signum.Engine.UserAssets;
-using Signum.Entities.Basics;
-using Signum.Engine.Translation;
-using Microsoft.Graph.SecurityNamespace;
+using Signum.Eval;
+using System.Text.RegularExpressions;
 
-namespace Signum.Engine.Workflow;
+namespace Signum.Workflow;
 
 
 public static class WorkflowLogic
@@ -199,9 +193,9 @@ public static class WorkflowLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-            PermissionAuthLogic.RegisterPermissions(WorkflowPermission.ViewWorkflowPanel);
-            PermissionAuthLogic.RegisterPermissions(WorkflowPermission.ViewCaseFlow);
-            PermissionAuthLogic.RegisterPermissions(WorkflowPermission.WorkflowToolbarMenu);
+            PermissionLogic.RegisterPermissions(WorkflowPermission.ViewWorkflowPanel);
+            PermissionLogic.RegisterPermissions(WorkflowPermission.ViewCaseFlow);
+            PermissionLogic.RegisterPermissions(WorkflowPermission.WorkflowToolbarMenu);
 
             WorkflowLogic.getConfiguration = getConfiguration;
 
@@ -211,6 +205,12 @@ public static class WorkflowLogic
             UserAssetsImporter.Register<WorkflowConditionEntity>("WorkflowCondition", WorkflowConditionOperation.Save);
             UserAssetsImporter.Register<WorkflowActionEntity>("WorkflowAction", WorkflowActionOperation.Save);
             UserAssetsImporter.Register<WorkflowScriptRetryStrategyEntity>("WorkflowScriptRetryStrategy", WorkflowScriptRetryStrategyOperation.Save);
+
+            ToolbarLogic.RegisterDelete<WorkflowEntity>(sb);
+
+            RegisterContentConfig<WorkflowEntity>(
+              lite => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); },
+                lite => PropertyRouteTranslationLogic.TranslatedField(WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite).Workflow, a => a.Name));
 
             sb.Include<WorkflowEntity>()
                 .WithConstruct(WorkflowOperation.Create)
@@ -233,7 +233,7 @@ public static class WorkflowLogic
             QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.HasExpired(), WorkflowMessage.HasExpired);
             sb.AddIndex((WorkflowEntity wf) => wf.ExpirationDate);
 
-            DynamicCode.GetCustomErrors += GetCustomErrors;
+            EvalLogic.GetCustomErrors += GetCustomErrors;
 
             Workflows = sb.GlobalLazy(() => Database.Query<WorkflowEntity>().ToDictionary(a => a.ToLite()),
                 new InvalidateWith(typeof(WorkflowEntity)));
@@ -407,7 +407,7 @@ public static class WorkflowLogic
                     return result;
                 }
             }, new InvalidateWith(typeof(WorkflowConnectionEntity)));
-            WorkflowGraphLazy.OnReset += (e, args) => DynamicCode.OnInvalidated?.Invoke();
+            WorkflowGraphLazy.OnReset += (e, args) => EvalLogic.OnInvalidated?.Invoke();
 
             Validator.PropertyValidator((WorkflowConnectionEntity c) => c.Condition).StaticPropertyValidation = (e, pi) =>
             {
@@ -435,9 +435,9 @@ public static class WorkflowLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        TranslatedInstanceLogic.AddRoute((WorkflowEntity tb) => tb.Name);
-        TranslatedInstanceLogic.AddRoute((WorkflowActivityEntity tb) => tb.Name);
-        TranslatedInstanceLogic.AddRoute((WorkflowActivityEntity tb) => tb.UserHelp, Entities.Translation.TranslateableRouteType.Html);
+        PropertyRouteTranslationLogic.AddRoute((WorkflowEntity tb) => tb.Name);
+        PropertyRouteTranslationLogic.AddRoute((WorkflowActivityEntity tb) => tb.Name);
+        PropertyRouteTranslationLogic.AddRoute((WorkflowActivityEntity tb) => tb.UserHelp, TranslateableRouteType.Html);
     }
 
 
@@ -749,7 +749,7 @@ public static class WorkflowLogic
                     }
 
                     WorkflowLogic.ApplyDocument(e, args.TryGetArgC<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
-                    DynamicCode.OnInvalidated?.Invoke();
+                    EvalLogic.OnInvalidated?.Invoke();
                 }
             }.Register();
 
@@ -785,7 +785,7 @@ public static class WorkflowLogic
                 {
                     var wb = new WorkflowBuilder(w);
                     wb.Delete();
-                    DynamicCode.OnInvalidated?.Invoke();
+                    EvalLogic.OnInvalidated?.Invoke();
                 }
             }.Register();
 

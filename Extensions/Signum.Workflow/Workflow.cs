@@ -1,10 +1,8 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
 using Signum.Entities.UserAssets;
 using System.ComponentModel;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class WorkflowEntity : Entity, IUserAssetEntity
@@ -30,12 +28,40 @@ public class WorkflowEntity : Entity, IUserAssetEntity
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        return ctx.GetFullWorkflowElement(this);
+        var wie = new WorkflowImportExport(this);
+        return wie.ToXml(ctx);
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        ctx.SetFullWorkflowElement(this, element);
+        if (ctx.IsPreview)
+        {
+            var wie = new WorkflowImportExport(this);
+            wie.FromXml(element, ctx);
+
+            if (wie.HasChanges)
+            {
+                if (wie.ReplacementModel != null)
+                {
+                    wie.ReplacementModel.NewTasks = wie.Activities.Select(a => new NewTasksEmbedded
+                    {
+                        BpmnId = a.BpmnElementId,
+                        Name = a.GetName()!,
+                        SubWorkflow = (a as WorkflowActivityEntity)?.SubWorkflow?.Workflow.ToLite(),
+                    }).ToMList();
+                }
+                ctx.CustomResolutionModel.Add(Guid.Parse(element.Attribute("Guid")!.Value), wie.ReplacementModel);
+            }
+        }
+        else
+        {
+            var model = (WorkflowReplacementModel?)ctx.CustomResolutionModel.TryGetCN(Guid.Parse(element.Attribute("Guid")!.Value));
+            var wie = new WorkflowImportExport(this)
+            {
+                ReplacementModel = model
+            };
+            wie.FromXml(element, ctx);
+        }
     }
 
     [AutoExpressionField]

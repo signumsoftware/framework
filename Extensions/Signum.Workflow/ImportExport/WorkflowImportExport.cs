@@ -1,13 +1,10 @@
-using Signum.Entities.Workflow;
-using Signum.Entities.Reflection;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 using System.Globalization;
-using Signum.Entities.Scheduler;
-using Signum.Entities.Authorization;
-using Signum.Engine.Authorization;
+using Signum.Engine.Sync;
+using Signum.Scheduler;
 
-namespace Signum.Engine.Workflow;
+namespace Signum.Workflow;
 
 
 public class WorkflowImportExport

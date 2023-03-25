@@ -1,6 +1,6 @@
-using Signum.Entities.Authorization;
+using Signum.Authorization;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class CaseNotificationEntity : Entity

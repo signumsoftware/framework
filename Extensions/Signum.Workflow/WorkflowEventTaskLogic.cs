@@ -1,13 +1,8 @@
-using Signum.Engine.Authorization;
-using Signum.Engine.Processes;
-using Signum.Engine.Scheduler;
-using Signum.Entities.Basics;
-using Signum.Entities.Processes;
-using Signum.Entities.Reflection;
-using Signum.Entities.Scheduler;
-using Signum.Entities.Workflow;
+using Signum.Authorization;
+using Signum.Processes;
+using Signum.Scheduler;
 
-namespace Signum.Engine.Workflow;
+namespace Signum.Workflow;
 
 
 public static class WorkflowEventTaskLogic

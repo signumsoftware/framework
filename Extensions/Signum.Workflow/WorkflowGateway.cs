@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.String, EntityData.Master)]
 public class WorkflowGatewayEntity : Entity, IWorkflowNodeEntity, IWithModel

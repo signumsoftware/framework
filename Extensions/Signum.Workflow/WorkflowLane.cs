@@ -1,8 +1,7 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Entities.Dynamic;
+using Signum.Authorization;
+using Signum.Eval;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
@@ -83,10 +82,10 @@ public class WorkflowLaneActorsEval : EvalEmbedded<IWorkflowLaneActorsEvaluator>
         script = script.Contains(';') ? script : ("return " + script + ";");
         var WorkflowEntityTypeName = parent.Pool.Workflow.MainEntityType.ToType().FullName;
 
-        return Compile(DynamicCode.GetCoreMetadataReferences()
-            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+        return Compile(EvalLogic.GetCoreMetadataReferences()
+            .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
                 @"
-                namespace Signum.Entities.Workflow
+                namespace Signum.Workflow
                 {
                     class MyWorkflowLaneActorEvaluator : IWorkflowLaneActorsEvaluator
                     {

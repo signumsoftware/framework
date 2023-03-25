@@ -1,17 +1,15 @@
-using Signum.Entities.Workflow;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
+using Signum.Alerts;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
+using Signum.Dynamic.Types;
+using Signum.Mailing;
+using Signum.MailPackage;
+using Signum.Processes;
+using Signum.Scheduler;
+using Signum.SMS;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Dynamic;
-using Signum.Engine.Scheduler;
-using Signum.Engine.Processes;
-using Signum.Entities.Processes;
-using Signum.Engine.Alerts;
-using Signum.Entities.SMS;
-using Signum.Entities.Mailing;
-using Signum.Engine.Authorization;
 
-namespace Signum.Engine.Workflow;
+namespace Signum.Workflow;
 
 public static class CaseActivityLogic
 {
@@ -379,7 +377,7 @@ public static class CaseActivityLogic
                 }.Save(),
             }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
-
+            
             QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
                     from cn in Database.Query<CaseNotificationEntity>()
                     where cn.User.Is(UserEntity.Current)
@@ -1609,7 +1607,7 @@ public static class CaseActivityLogic
                         e.Sent,
                         e.Target,
                         e.Mixin<CaseActivityMixin>().CaseActivity,
-                        e.Package,
+                        e.Mixin<EmailMessagePackageMixin>().Package,
                         e.Exception,
                     });
         });

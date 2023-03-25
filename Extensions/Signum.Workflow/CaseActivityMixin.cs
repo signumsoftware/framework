@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 public class CaseActivityMixin : MixinEntity
 {

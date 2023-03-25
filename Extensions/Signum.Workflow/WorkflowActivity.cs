@@ -1,9 +1,9 @@
-using Signum.Entities.Dynamic;
-using Signum.Entities.Basics;
+using Signum.Dynamic.Views;
+using Signum.Eval;
 using System.ComponentModel;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
@@ -303,10 +303,10 @@ public class SubEntitiesEval : EvalEmbedded<ISubEntitiesEvaluator>
         var MainEntityTypeName = activity.Lane.Pool.Workflow.MainEntityType.ToType().FullName;
         var SubEntityTypeName = decomposition.Workflow.MainEntityType.ToType().FullName;
 
-        return Compile(DynamicCode.GetCoreMetadataReferences()
-            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+        return Compile(EvalLogic.GetCoreMetadataReferences()
+            .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
                 @"
-                namespace Signum.Entities.Workflow
+                namespace Signum.Workflow
                 {
                     class MySubEntitiesEvaluator : ISubEntitiesEvaluator
                     {

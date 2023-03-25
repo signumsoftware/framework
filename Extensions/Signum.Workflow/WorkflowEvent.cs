@@ -1,6 +1,6 @@
-using Signum.Entities.Basics;
+using System.Xml.Linq;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.String, EntityData.Master)]
 public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
@@ -163,4 +163,68 @@ public class WorkflowEventModel : ModelEntity
     public WorkflowTimerEmbedded? Timer { get; set; }
 
     public string BpmnElementId { get; set; }
+}
+
+public class TimeSpanEmbedded : EmbeddedEntity
+{
+    public int Days { get; set; }
+
+    public int Hours { get; set; }
+
+    public int Minutes { get; set; }
+
+    public int Seconds { get; set; }
+
+    public bool IsZero()
+    {
+        return Days == 0 && Hours == 0 && Minutes == 0 && Seconds == 0;
+    }
+
+    [AutoExpressionField]
+    public DateTime Add(DateTime date) => As.Expression(() => date.AddDays(Days).AddHours(Hours).AddMinutes(Minutes).AddSeconds(Seconds));
+
+    [AutoExpressionField]
+    public DateTime Subtract(DateTime date) => As.Expression(() => date.AddDays(-Days).AddHours(-Hours).AddMinutes(-Minutes).AddMinutes(-Seconds));
+
+    public TimeSpan ToTimeSpan()
+    {
+        return new TimeSpan(Days, Hours, Minutes, Seconds);
+    }
+
+    public override string ToString()
+    {
+        return ToTimeSpan().ToString();
+    }
+
+    public TimeSpanEmbedded Clone()
+    {
+        TimeSpanEmbedded ds = new TimeSpanEmbedded
+        {
+            Days = this.Days,
+            Hours = this.Hours,
+            Minutes = this.Minutes,
+            Seconds = this.Seconds,
+        };
+
+        return ds;
+    }
+
+
+    public XElement ToXml(string elementName)
+    {
+        return new XElement(elementName,
+            new XAttribute("Days", Days),
+            new XAttribute("Hours", Hours),
+            new XAttribute("Minutes", Minutes),
+            new XAttribute("Seconds", Seconds));
+    }
+
+
+    public void FromXml(XElement element)
+    {
+        Days = int.Parse(element.Attribute("Days")!.Value);
+        Hours = int.Parse(element.Attribute("Hours")!.Value);
+        Minutes = int.Parse(element.Attribute("Minutes")!.Value);
+        Seconds = int.Parse(element.Attribute("Seconds")!.Value);
+    }
 }

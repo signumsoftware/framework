@@ -1,9 +1,8 @@
-using Signum.Entities.Workflow;
-using Signum.Entities.Reflection;
 using System.Xml.Linq;
 using System.Xml;
+using Signum.Engine.Sync;
 
-namespace Signum.Engine.Workflow;
+namespace Signum.Workflow;
 
 public partial class WorkflowBuilder
 {

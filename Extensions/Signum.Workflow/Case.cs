@@ -1,8 +1,7 @@
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
+using Signum.Authorization;
 using System.ComponentModel;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class CaseEntity : Entity

@@ -1,7 +1,4 @@
-using Signum.Entities.Basics;
-using Signum.Entities.Workflow;
-
-namespace Signum.Engine.Workflow;
+namespace Signum.Workflow;
 
 public static class CaseFlowLogic
 {

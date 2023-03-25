@@ -1,10 +1,6 @@
-using Signum.Entities.Workflow;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Authorization;
-using Signum.Engine.Authorization;
-using Signum.Entities.Reflection;
 
-namespace Signum.Engine.Workflow;
+namespace Signum.Workflow;
 
 public class WorkflowNodeGraph
 {

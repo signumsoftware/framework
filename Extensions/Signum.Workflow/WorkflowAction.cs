@@ -1,9 +1,8 @@
-using Signum.Entities.Basics;
-using Signum.Entities.Dynamic;
 using Signum.Entities.UserAssets;
+using Signum.Eval;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
 public class WorkflowActionEntity : Entity, IUserAssetEntity
@@ -63,10 +62,10 @@ public class WorkflowActionEval : EvalEmbedded<IWorkflowActionExecutor>
         var script = this.Script.Trim();
         var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
-        return Compile(DynamicCode.GetCoreMetadataReferences()
-            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+        return Compile(EvalLogic.GetCoreMetadataReferences()
+            .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
                 @"
-                namespace Signum.Entities.Workflow
+                namespace Signum.Workflow
                 {
                     class MyWorkflowActionEvaluator : IWorkflowActionExecutor
                     {

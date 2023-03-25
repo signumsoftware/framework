@@ -1,9 +1,8 @@
-using Signum.Entities.Basics;
-using Signum.Entities.Dynamic;
 using Signum.Entities.UserAssets;
+using Signum.Eval;
 using System.Xml.Linq;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
 public class WorkflowTimerConditionEntity : Entity, IUserAssetEntity
@@ -69,10 +68,10 @@ public class WorkflowTimerConditionEval : EvalEmbedded<IWorkflowTimerConditionEv
         script = script.Contains(';') ? script : ("return " + script + ";");
         var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
-        return Compile(DynamicCode.GetCoreMetadataReferences()
-            .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
+        return Compile(EvalLogic.GetCoreMetadataReferences()
+            .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
                 @"
-                namespace Signum.Entities.Workflow
+                namespace Signum.Workflow
                 {
                     class MyWorkflowTimerConditionEvaluator : IWorkflowTimerConditionEvaluator
                     {

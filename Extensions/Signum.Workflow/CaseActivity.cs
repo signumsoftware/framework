@@ -1,10 +1,10 @@
-using Signum.Entities.Authorization;
+using Signum.Authorization;
+using Signum.Dynamic.Types;
+using Signum.Processes;
+using Signum.Scheduler;
 using System.ComponentModel;
-using Signum.Entities.Dynamic;
-using Signum.Entities.Scheduler;
-using Signum.Entities.Processes;
 
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class CaseActivityEntity : Entity

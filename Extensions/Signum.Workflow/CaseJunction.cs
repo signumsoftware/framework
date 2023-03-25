@@ -1,5 +1,5 @@
 ﻿
-namespace Signum.Entities.Workflow;
+namespace Signum.Workflow;
 
 //Only for split and join
 [EntityKind(EntityKind.System, EntityData.Transactional)]
