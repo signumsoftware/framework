@@ -1,8 +1,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Signum.Engine.Authorization;
-using Signum.Entities.Basics;
+using Signum.Dynamic.Controllers;
 using Signum.Entities.Dynamic;
+using Signum.Eval;
 using System.IO;
 
 namespace Signum.Engine.Dynamic;
@@ -13,10 +13,10 @@ public static class DynamicLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-            PermissionAuthLogic.RegisterPermissions(DynamicPanelPermission.ViewDynamicPanel);
+            PermissionLogic.RegisterPermissions(DynamicPanelPermission.ViewDynamicPanel);
             if (withCodeGen)
             {
-                PermissionAuthLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);
+                PermissionLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);
                 DynamicLogic.GetCodeFiles += GetCodeGenStarter;
                 AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
             }
@@ -25,8 +25,8 @@ public static class DynamicLogic
 
     private static Assembly AssemblyResolveHandler(object? sender, ResolveEventArgs args)
     {
-        if (args.Name!.StartsWith(DynamicCode.CodeGenAssembly.Before(".")))
-            return Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
+        if (args.Name!.StartsWith(EvalLogic.CodeGenAssembly.Before(".")))
+            return Assembly.LoadFrom(EvalLogic.CodeGenAssemblyPath!);
 
         return null!;
     }
@@ -37,54 +37,54 @@ public static class DynamicLogic
 
     public static FileInfo? GetLastCodeGenAssemblyFileInfo()
     {
-        Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
+        Directory.CreateDirectory(EvalLogic.CodeGenDirectory);
 
-        return new DirectoryInfo(DynamicCode.CodeGenDirectory)
-            .GetFiles($"{DynamicCode.CodeGenAssembly.Before(".")}*.dll")
+        return new DirectoryInfo(EvalLogic.CodeGenDirectory)
+            .GetFiles($"{EvalLogic.CodeGenAssembly.Before(".")}*.dll")
             .OrderByDescending(f => f.CreationTime)
             .FirstOrDefault();
     }
 
     public static FileInfo? GetLastCodeGenControllerAssemblyFileInfo()
     {
-        Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
+        Directory.CreateDirectory(EvalLogic.CodeGenDirectory);
 
-        return new DirectoryInfo(DynamicCode.CodeGenDirectory)
-            .GetFiles($"{DynamicCode.CodeGenControllerAssembly.Before(".")}*.dll")
+        return new DirectoryInfo(EvalLogic.CodeGenDirectory)
+            .GetFiles($"{EvalLogic.CodeGenControllerAssembly.Before(".")}*.dll")
             .OrderByDescending(f => f.CreationTime)
             .FirstOrDefault();
     }
 
     public static FileInfo? GetLoadedCodeGenAssemblyFileInfo()
     {
-        if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())
+        if (EvalLogic.CodeGenAssemblyPath.IsNullOrEmpty())
             return null;
 
-        return new DirectoryInfo(DynamicCode.CodeGenDirectory)
-            .GetFiles(Path.GetFileName(DynamicCode.CodeGenAssemblyPath))
+        return new DirectoryInfo(EvalLogic.CodeGenDirectory)
+            .GetFiles(Path.GetFileName(EvalLogic.CodeGenAssemblyPath))
             .FirstOrDefault();
     }
 
     public static FileInfo? GetLoadedCodeGenControllerAssemblyFileInfo()
     {
-        if (DynamicCode.CodeGenControllerAssemblyPath.IsNullOrEmpty())
+        if (EvalLogic.CodeGenControllerAssemblyPath.IsNullOrEmpty())
             return null;
 
-        return new DirectoryInfo(DynamicCode.CodeGenDirectory)
-            .GetFiles(Path.GetFileName(DynamicCode.CodeGenControllerAssemblyPath))
+        return new DirectoryInfo(EvalLogic.CodeGenDirectory)
+            .GetFiles(Path.GetFileName(EvalLogic.CodeGenControllerAssemblyPath))
             .FirstOrDefault();
     }
 
     private static void BindCodeGenAssemblies()
     {
-        DynamicCode.CodeGenAssemblyPath = GetLastCodeGenAssemblyFileInfo()?.FullName;
-        DynamicCode.CodeGenControllerAssemblyPath = GetLastCodeGenControllerAssemblyFileInfo()?.FullName;
+        EvalLogic.CodeGenAssemblyPath = GetLastCodeGenAssemblyFileInfo()?.FullName;
+        EvalLogic.CodeGenControllerAssemblyPath = GetLastCodeGenControllerAssemblyFileInfo()?.FullName;
     }
 
     public static void CompileDynamicCode()
     {
         DynamicLogic.BindCodeGenAssemblies();
-        Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
+        Directory.CreateDirectory(EvalLogic.CodeGenDirectory);
 
         var errors = new List<string>();
         try
@@ -92,7 +92,7 @@ public static class DynamicLogic
             CompilationResult? cr = null;
 
             bool cleaned = false;
-            if (DynamicCode.CodeGenAssemblyPath.IsNullOrEmpty())
+            if (EvalLogic.CodeGenAssemblyPath.IsNullOrEmpty())
             {
                 CleanCodeGenFolder();
                 cleaned = true;
@@ -100,22 +100,22 @@ public static class DynamicLogic
                 {
                     Dictionary<string, CodeFile> codeFiles = GetCodeFilesDictionary();
 
-                    cr = Compile(codeFiles, inMemory: false, assemblyName: DynamicCode.CodeGenAssembly, needsCodeGenAssembly: false);
+                    cr = Compile(codeFiles, inMemory: false, assemblyName: EvalLogic.CodeGenAssembly, needsCodeGenAssembly: false);
 
                     if (cr.Errors.Count == 0)
-                        DynamicCode.CodeGenAssemblyPath = cr.OutputAssembly;
+                        EvalLogic.CodeGenAssemblyPath = cr.OutputAssembly;
                     else
                         errors.Add("Errors compiling  dynamic assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
                 }
             }
 
-            if (DynamicApiLogic.IsStarted && (DynamicCode.CodeGenControllerAssemblyPath.IsNullOrEmpty() || cleaned))
+            if (DynamicApiLogic.IsStarted && (EvalLogic.CodeGenControllerAssemblyPath.IsNullOrEmpty() || cleaned))
             {
                 Dictionary<string, CodeFile> codeFiles = DynamicApiLogic.GetCodeFiles().ToDictionary(a => a.FileContent);
-                cr = Compile(codeFiles, inMemory: false, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true);
+                cr = Compile(codeFiles, inMemory: false, assemblyName: EvalLogic.CodeGenControllerAssembly, needsCodeGenAssembly: true);
 
                 if (cr.Errors.Count == 0)
-                    DynamicCode.CodeGenControllerAssemblyPath = cr.OutputAssembly;
+                    EvalLogic.CodeGenControllerAssemblyPath = cr.OutputAssembly;
                 else
                     errors.Add("Errors compiling  dynamic api controller assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
             }
@@ -152,7 +152,7 @@ public static class DynamicLogic
 
         try
         {
-            Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
+            Assembly assembly = Assembly.LoadFrom(EvalLogic.CodeGenAssemblyPath!);
             Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenMixinLogic").SingleEx();
             MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static)!;
             mi.Invoke(null, null);
@@ -170,7 +170,7 @@ public static class DynamicLogic
 
         try
         {
-            Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
+            Assembly assembly = Assembly.LoadFrom(EvalLogic.CodeGenAssemblyPath!);
             Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenIsolationLogic").SingleEx();
             MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static)!;
             mi.Invoke(null, null);
@@ -188,7 +188,7 @@ public static class DynamicLogic
 
         try
         {
-            Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
+            Assembly assembly = Assembly.LoadFrom(EvalLogic.CodeGenAssemblyPath!);
             Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenBeforeSchemaLogic").SingleEx();
             MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static)!;
             mi.Invoke(null, new[] { sb });
@@ -206,7 +206,7 @@ public static class DynamicLogic
 
         try
         {
-            Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath!);
+            Assembly assembly = Assembly.LoadFrom(EvalLogic.CodeGenAssemblyPath!);
             Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenStarter").SingleEx();
             MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static)!;
             mi.Invoke(null, new object[] { sb });
@@ -264,7 +264,7 @@ public static class DynamicLogic
     {
         try
         {
-            Directory.EnumerateFiles(DynamicCode.CodeGenDirectory)
+            Directory.EnumerateFiles(EvalLogic.CodeGenDirectory)
                 .ToList()
                 .ForEach(a => File.Delete(a));
         }
@@ -283,18 +283,18 @@ public static class DynamicLogic
         {
             if (!inMemory)
             {
-                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(DynamicCode.CodeGenDirectory, a.FileName), a.FileContent, Encoding.UTF8));
+                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(EvalLogic.CodeGenDirectory, a.FileName), a.FileContent, Encoding.UTF8));
             }
 
-            var references = DynamicCode.GetCoreMetadataReferences()
-                .Concat(DynamicCode.GetMetadataReferences(needsCodeGenAssembly));
+            var references = EvalLogic.GetCoreMetadataReferences()
+                .Concat(EvalLogic.GetMetadataReferences(needsCodeGenAssembly));
 
             var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(assemblyName))
                   .WithOptions(new CSharpCompilationOptions(outputKind: OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable))
                   .AddReferences(references)
-                  .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(DynamicCode.CodeGenDirectory, v.FileName), options: new CSharpParseOptions(LanguageVersion.CSharp8))));
+                  .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(EvalLogic.CodeGenDirectory, v.FileName), options: new CSharpParseOptions(LanguageVersion.CSharp8))));
 
-            var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, $"{assemblyName.Before(".")}.{Guid.NewGuid()}.dll");
+            var outputAssembly = inMemory ? null : Path.Combine(EvalLogic.CodeGenDirectory, $"{assemblyName.Before(".")}.{Guid.NewGuid()}.dll");
 
             using (var stream = new MemoryStream())
             {
@@ -322,7 +322,7 @@ public static class DynamicLogic
 
     private static List<CodeFile> GetCodeGenStarter()
     {
-        var dscg = new DynamicStarterCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, DynamicCode.Namespaces);
+        var dscg = new DynamicStarterCodeGenerator(EvalLogic.CodeGenEntitiesNamespace, EvalLogic.Namespaces);
 
         var code = dscg.GetFileCode();
 

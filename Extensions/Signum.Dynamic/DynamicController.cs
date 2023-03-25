@@ -1,19 +1,15 @@
 using Signum.Engine.Dynamic;
-using Signum.Engine.Scheduler;
-using Signum.Entities.Reflection;
-using Signum.React.ApiControllers;
 using Signum.Utilities.DataStructures;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
 using Signum.Entities.Dynamic;
 using Microsoft.Extensions.Hosting;
-using Signum.Engine.Authorization;
-using Signum.Engine.Json;
-using Signum.React.Facades;
-using Signum.Entities.Operations;
+using Signum.Dynamic.Controllers;
+using Signum.API.Filters;
+using Signum.API.Json;
+using Signum.API;
+using Signum.Eval;
 
 namespace Signum.React.Dynamic;
 
@@ -38,12 +34,12 @@ public class DynamicController : ControllerBase
             DynamicLogic.CleanCodeGenFolder();
 
         Dictionary<string, CodeFile> codeFiles = DynamicLogic.GetCodeFilesDictionary();
-        compileResult.Add(DynamicLogic.Compile(codeFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenAssembly, needsCodeGenAssembly: false));
+        compileResult.Add(DynamicLogic.Compile(codeFiles, inMemory: inMemory, assemblyName: EvalLogic.CodeGenAssembly, needsCodeGenAssembly: false));
 
         if (DynamicApiLogic.IsStarted)
         {
             Dictionary<string, CodeFile> apiFiles = DynamicApiLogic.GetCodeFiles().ToDictionaryEx(a => a.FileName, "CodeGenController C# code file");
-            compileResult.Add(DynamicLogic.Compile(apiFiles, inMemory: inMemory, assemblyName: DynamicCode.CodeGenControllerAssembly, needsCodeGenAssembly: true));
+            compileResult.Add(DynamicLogic.Compile(apiFiles, inMemory: inMemory, assemblyName: EvalLogic.CodeGenControllerAssembly, needsCodeGenAssembly: true));
             codeFiles.AddRange(apiFiles);
         }
 
@@ -78,7 +74,7 @@ public class DynamicController : ControllerBase
 
 
         SystemEventLogLogic.Log("DynamicController.RestartServer");
-        DynamicCode.OnApplicationServerRestarted?.Invoke();
+        EvalLogic.OnApplicationServerRestarted?.Invoke();
         lifeTime.StopApplication();
     }
 
@@ -131,7 +127,7 @@ public class DynamicController : ControllerBase
             loadedCodeGenAssemblyDateTime = DynamicLogic.GetLoadedCodeGenAssemblyFileInfo()?.CreationTime,
             loadedCodeGenControllerAssemblyDateTime = DynamicLogic.GetLoadedCodeGenControllerAssemblyFileInfo()?.CreationTime,
             lastDynamicChangeDateTime = Database.Query<OperationLogEntity>()
-                    .Where(a => DynamicCode.RegisteredDynamicTypes.Contains(a.Target!.EntityType))
+                    .Where(a => EvalLogic.RegisteredDynamicTypes.Contains(a.Target!.EntityType))
                     .Max(a => a.End),
         };
     } 
