@@ -7,7 +7,6 @@ using Signum.Entities.Reflection;
 using Signum.Engine.UserAssets;
 using Signum.Entities.Basics;
 using Signum.Engine.Translation;
-using Microsoft.Graph.SecurityNamespace;
 
 namespace Signum.Engine.Workflow;
 

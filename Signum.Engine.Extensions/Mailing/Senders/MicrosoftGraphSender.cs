@@ -1,14 +1,13 @@
 using Signum.Entities.Mailing;
 using Signum.Engine.Authorization;
 using Signum.Engine.Files;
-using Microsoft.Identity.Client;
-using Microsoft.Graph.Auth;
 using Microsoft.Graph;
 using Signum.Entities.Authorization;
 using System.IO;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Entity = Signum.Entities.Entity;
+using Microsoft.Graph.Users.Item.Messages.Item.Attachments.CreateUploadSession;
+using Microsoft.Graph.Models;
+using Azure.Identity;
+using Azure.Core;
 
 namespace Signum.Engine.Mailing.Senders;
 
@@ -28,9 +27,8 @@ public class MicrosoftGraphSender : BaseEmailSender
     {
         try
         {
-            var authProvider = microsoftGraph.GetAuthProvider();
-        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-
+            var tokenCritical = microsoftGraph.GeTokenCredential();
+            GraphServiceClient graphClient = new GraphServiceClient(tokenCritical);
 
             var bigAttachments = email.Attachments.Where(a => a.File.FileLength > MicrosoftGraphFileSizeLimit).ToList();
 
@@ -40,25 +38,30 @@ public class MicrosoftGraphSender : BaseEmailSender
 
             if (bigAttachments.IsEmpty())
             {
-                user.SendMail(message, false).Request().PostAsync().Wait();
+                user.SendMail.PostAsync(new Microsoft.Graph.Users.Item.SendMail.SendMailPostRequestBody
+                {
+                    Message = message,
+                    SaveToSentItems = false,
+                }).Wait();
             }
             else if (bigAttachments.Any())
             {
                 message.IsDraft = true;
 
-                var newMessage = user.Messages.Request().AddAsync(message).Result;
+                var newMessage = user.Messages.PostAsync(message).Result!;
                 foreach (var a in bigAttachments)
                 {
-                    AttachmentItem attachmentItem = new AttachmentItem
+                    UploadSession uploadSession = user.Messages[newMessage.Id].Attachments.CreateUploadSession.PostAsync(new  CreateUploadSessionPostRequestBody
                     {
-                        AttachmentType = AttachmentType.File,
-                        IsInline = a.Type == EmailAttachmentType.LinkedResource,
-                        Name = a.File.FileName,
-                        Size = a.File.FileLength,
-                        ContentType = MimeMapping.GetMimeType(a.File.FileName)
-                    };
-
-                    UploadSession uploadSession = user.Messages[newMessage.Id].Attachments.CreateUploadSession(attachmentItem).Request().PostAsync().Result;
+                        AttachmentItem = new AttachmentItem
+                        {
+                            AttachmentType = AttachmentType.File,
+                            IsInline = a.Type == EmailAttachmentType.LinkedResource,
+                            Name = a.File.FileName,
+                            Size = a.File.FileLength,
+                            ContentType = MimeMapping.GetMimeType(a.File.FileName)
+                        },
+                    }).Result!;
 
                     int maxSliceSize = 320 * 1024;
 
@@ -70,7 +73,7 @@ public class MicrosoftGraphSender : BaseEmailSender
                         throw new InvalidOperationException("Upload of big files to Microsoft Graph didn't succeed");
     }
 
-                user.MailFolders["Drafts"].Messages[newMessage.Id].Send().Request().PostAsync().Wait();
+                user.MailFolders["Drafts"].Messages[newMessage.Id].Send.PostAsync().Wait();
             }
         }
         catch(AggregateException e)
@@ -80,7 +83,7 @@ public class MicrosoftGraphSender : BaseEmailSender
             {
                 if(only is ServiceException se)
                 {
-                    if (se.StatusCode == System.Net.HttpStatusCode.RequestEntityTooLarge)
+                    if (se.ResponseStatusCode == (int)System.Net.HttpStatusCode.RequestEntityTooLarge)
                         throw new InvalidOperationException("Request was rejected by Microsoft Graph for being too large", se);
                 }
 
@@ -113,9 +116,9 @@ public class MicrosoftGraphSender : BaseEmailSender
         };
     }
 
-    private IMessageAttachmentsCollectionPage GetAttachments(MList<EmailAttachmentEmbedded> attachments)
+    private List<Attachment> GetAttachments(MList<EmailAttachmentEmbedded> attachments)
     {
-        var result = new MessageAttachmentsCollectionPage();
+        var result = new List<Attachment>();
         
         foreach (var a in attachments)
         {
@@ -162,73 +165,67 @@ public static class MicrosoftGraphExtensions
         };
     }
 
-    static AsyncThreadVariable<IAuthenticationProvider?> AuthenticationProvider = Statics.ThreadVariable<IAuthenticationProvider?>("OverrideAuthenticationProvider");
+    static AsyncThreadVariable<TokenCredential?> OverridenTokenCredential = Statics.ThreadVariable<TokenCredential?>("OverrideAuthenticationProvider");
 
 
-    public static IDisposable OverrideAuthenticationProvider(IAuthenticationProvider value)
+    public static IDisposable OverrideAuthenticationProvider(TokenCredential value)
     {
-        var old = AuthenticationProvider.Value;
-        AuthenticationProvider.Value = value;
-        return new Disposable(() => AuthenticationProvider.Value = old);
+        var old = OverridenTokenCredential.Value;
+        OverridenTokenCredential.Value = value;
+        return new Disposable(() => OverridenTokenCredential.Value = old);
     }
 
-    public static IAuthenticationProvider GetAuthProvider(this MicrosoftGraphEmailServiceEntity microsoftGraph, string[]? scopes = null)
+    public static TokenCredential GeTokenCredential(this MicrosoftGraphEmailServiceEntity microsoftGraph, string[]? scopes = null)
     {
-        if (AuthenticationProvider.Value is var ap && ap != null)
+        if (OverridenTokenCredential.Value is var ap && ap != null)
             return ap;
 
         if (microsoftGraph.UseActiveDirectoryConfiguration)
-            return AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada ? ada.GetConfig().GetAuthProvider() :
+            return AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada ? ada.GetConfig().GetTokenCredential() :
                 throw new InvalidOperationException("AuthLogic.Authorizer is not an ActiveDirectoryAuthorizer");
 
-        IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
-        .Create(microsoftGraph.Azure_ApplicationID.ToString())
-        .WithTenantId(microsoftGraph.Azure_DirectoryID.ToString())
-        .WithClientSecret(microsoftGraph.Azure_ClientSecret)
-        .Build();
+        ClientSecretCredential result = new ClientSecretCredential(
+            tenantId: microsoftGraph.Azure_DirectoryID.ToString(),
+            clientId: microsoftGraph.Azure_ApplicationID.ToString(),
+            clientSecret: microsoftGraph.Azure_ClientSecret);
 
-        var authResultDirect = confidentialClientApplication.AcquireTokenForClient(scopes ?? new string[] { "https://graph.microsoft.com/.default" }).ExecuteAsync().Result;
-
-        //Microsoft.Graph.Auth is required for the following to work
-        ClientCredentialProvider authProvider = new ClientCredentialProvider(confidentialClientApplication);
-        return authProvider;
+        return result;
     }
 
-    public static IAuthenticationProvider GetAuthProvider(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
+    public static TokenCredential GetTokenCredential(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
     {
-        if (AuthenticationProvider.Value is var ap && ap != null)
+        if (OverridenTokenCredential.Value is var ap && ap != null)
             return ap;
 
-        IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
-        .Create(activeDirectoryConfig.Azure_ApplicationID.ToString())
-        .WithTenantId(activeDirectoryConfig.Azure_DirectoryID.ToString())
-        .WithClientSecret(activeDirectoryConfig.Azure_ClientSecret)
-        .Build();
+        ClientSecretCredential result = new ClientSecretCredential(
+            tenantId: activeDirectoryConfig.Azure_DirectoryID.ToString(),
+            clientId: activeDirectoryConfig.Azure_ApplicationID.ToString(),
+            clientSecret: activeDirectoryConfig.Azure_ClientSecret);
 
-        var authResultDirect = confidentialClientApplication.AcquireTokenForClient(scopes ?? new string[] { "https://graph.microsoft.com/.default" }).ExecuteAsync().Result;
-
-        //Microsoft.Graph.Auth is required for the following to work
-        ClientCredentialProvider authProvider = new ClientCredentialProvider(confidentialClientApplication);
-        return authProvider;
+        return result;
     }
 
     public static IDisposable OverrideAuthenticationProvider(string accessToken) =>
-        OverrideAuthenticationProvider(new AccessTokenProvider(accessToken));
+        OverrideAuthenticationProvider(new AccessTokenCredential(accessToken));
 }
 
-public class AccessTokenProvider : IAuthenticationProvider
+public class AccessTokenCredential : TokenCredential
 {
+    private DateTimeOffset expiresOn;
     private string accessToken;
 
-    public AccessTokenProvider(string accessToken)
+    public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
-        this.accessToken = accessToken;
+        return new AccessToken(accessToken, expiresOn);
     }
 
-    public Task AuthenticateRequestAsync(HttpRequestMessage request)
+    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        return new ValueTask<AccessToken>(new AccessToken(accessToken, expiresOn));
+    }
 
-        return Task.CompletedTask;
+    public AccessTokenCredential(string accessToken)
+    {
+        this.accessToken = accessToken;
     }
 }
