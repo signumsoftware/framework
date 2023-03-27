@@ -475,6 +475,7 @@ public static class Pop3ConfigurationLogic
                     using (var tr = Transaction.ForceNew())
                     {
                         reception.NewEmails = messageInfos.Count - already.Count;
+                        reception.ServerEmails = messageInfos.Count;
                         reception.Save();
                         tr.Commit();
                     }
