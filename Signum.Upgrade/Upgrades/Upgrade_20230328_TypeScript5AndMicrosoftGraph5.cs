@@ -16,8 +16,10 @@ class Upgrade_20230328_TypeScript5AndMicrosoftGraph5 : CodeUpgradeBase
                     <PackageReference Include="Microsoft.Graph" Version="5.3.0" />
                     <PackageReference Include="Selenium.WebDriver" Version="4.8.2" />
                     """);
+        });
 
-
+        uctx.ChangeCodeFile("Southwind.React/package.json", file =>
+        {
             file.UpdateNpmPackages("""
                     "typescript": "5.0.2",
                     "@types/diff" : "5.0.3",
