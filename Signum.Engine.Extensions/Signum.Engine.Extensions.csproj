@@ -19,7 +19,7 @@
 		<PackageReference Include="DeepL.net" Version="1.6.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
 		<PackageReference Include="Microsoft.Exchange.WebServices.NETStandard" Version="2.0.0-beta3" />
-		<PackageReference Include="Microsoft.Graph" Version="5.2.0" />
+		<PackageReference Include="Microsoft.Graph" Version="5.3.0" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.51.0" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="7.0.0" />
