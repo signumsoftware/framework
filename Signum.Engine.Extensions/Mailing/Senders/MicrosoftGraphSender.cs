@@ -211,17 +211,16 @@ public static class MicrosoftGraphExtensions
 
 public class AccessTokenCredential : TokenCredential
 {
-    private DateTimeOffset expiresOn;
     private string accessToken;
 
     public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
-        return new AccessToken(accessToken, expiresOn);
+        return new AccessToken(accessToken, default);
     }
 
     public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
-        return new ValueTask<AccessToken>(new AccessToken(accessToken, expiresOn));
+        return new ValueTask<AccessToken>(new AccessToken(accessToken, default));
     }
 
     public AccessTokenCredential(string accessToken)
