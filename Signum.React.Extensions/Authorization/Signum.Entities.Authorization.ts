@@ -232,21 +232,21 @@ export type MergeStrategy =
 export const OnPremisesExtensionAttributesModel = new Type<OnPremisesExtensionAttributesModel>("OnPremisesExtensionAttributesModel");
 export interface OnPremisesExtensionAttributesModel extends Entities.ModelEntity {
   Type: "OnPremisesExtensionAttributesModel";
-  extensionAttribute1: string;
-  extensionAttribute2: string;
-  extensionAttribute3: string;
-  extensionAttribute4: string;
-  extensionAttribute5: string;
-  extensionAttribute6: string;
-  extensionAttribute7: string;
-  extensionAttribute8: string;
-  extensionAttribute9: string;
-  extensionAttribute10: string;
-  extensionAttribute11: string;
-  extensionAttribute12: string;
-  extensionAttribute13: string;
-  extensionAttribute14: string;
-  extensionAttribute15: string;
+  extensionAttribute1: string | null;
+  extensionAttribute2: string | null;
+  extensionAttribute3: string | null;
+  extensionAttribute4: string | null;
+  extensionAttribute5: string | null;
+  extensionAttribute6: string | null;
+  extensionAttribute7: string | null;
+  extensionAttribute8: string | null;
+  extensionAttribute9: string | null;
+  extensionAttribute10: string | null;
+  extensionAttribute11: string | null;
+  extensionAttribute12: string | null;
+  extensionAttribute13: string | null;
+  extensionAttribute14: string | null;
+  extensionAttribute15: string | null;
 }
 
 export const OperationAllowed = new EnumType<OperationAllowed>("OperationAllowed");
