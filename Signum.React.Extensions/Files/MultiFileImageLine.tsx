@@ -93,7 +93,7 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-      <div>
+      {() => <div>
         <div className="d-flex">
           {
             c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
@@ -127,8 +127,8 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
               buttonCss={p.ctx.buttonClass}
               divHtmlAttributes={{ className: "sf-file-line-new" }} />}
         </div>
-      </div>
-    </FormGroup >
+      </div>}
+    </FormGroup>
   );
 
 

@@ -311,7 +311,7 @@ public class CodeFile
     {
         var packages = packageJsonBlock.Lines().Select(a => a.Trim()).Where(a => a.HasText()).Select(a => new
         {
-            PackageName = a.Before(":").Trim('"'),
+            PackageName = a.Before(":").Trim('"', ' '),
             Version = a.After(":").Trim(',', '"', ' '),
         }).ToList();
 

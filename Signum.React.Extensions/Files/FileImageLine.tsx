@@ -69,7 +69,7 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       helpText={c.props.helpText}>
-      {hasValue ? renderImage() : p.ctx.readOnly ? undefined :
+      {() => hasValue ? renderImage() : p.ctx.readOnly ? undefined :
         <FileUploader
           accept={p.accept}
           maxSizeInBytes={p.maxSizeInBytes}

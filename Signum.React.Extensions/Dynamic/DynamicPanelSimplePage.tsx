@@ -145,33 +145,35 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
 
   return (
     <FormGroup ctx={p.ctx} label={getQueryNiceName(p.findOptions.queryName)}>
-      <SearchValue findOptions={p.findOptions} isLink={true} />
-      {
-        state == "loading" ?
-          <FontAwesomeIcon icon="arrows-rotate" spin={true} /> :
-          <span onClick={e => { e.preventDefault(); loadData(p); }} style={{ cursor: "pointer" }} ><FontAwesomeIcon icon="arrows-rotate" className="sf-line-button" title={DynamicPanelMessage.OpenErrors.niceToString()} /></span>
-      }
-      {
-        state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="triangle-exclamation" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
-          errors && errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{errors.length}</strong> {errors.length == 1 ? "Error" : "Errors"} found</span> :
-            errors && errors?.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
-              undefined
-      }
-      {
-        errors != null && errors.length > 0 &&
-        <div className="table-responsive">
-          <table className="table table-sm">
-            <tbody>
-              {errors.map((e, i) => <tr key={i}>
-                <td><EntityLink lite={e.lite} /></td>
-                <td className="text-danger">{e.error.split("\n").map((line, i) => <p key={i}>{line}</p>)}</td>
-              </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {() => <>
+        <SearchValue findOptions={p.findOptions} isLink={true} />
+        {
+          state == "loading" ?
+            <FontAwesomeIcon icon="arrows-rotate" spin={true} /> :
+            <span onClick={e => { e.preventDefault(); loadData(p); }} style={{ cursor: "pointer" }} ><FontAwesomeIcon icon="arrows-rotate" className="sf-line-button" title={DynamicPanelMessage.OpenErrors.niceToString()} /></span>
+        }
+        {
+          state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="triangle-exclamation" /> Exception checking {getQueryNiceName(p.findOptions.queryName)}</span> :
+            errors && errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{errors.length}</strong> {errors.length == 1 ? "Error" : "Errors"} found</span> :
+              errors && errors?.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
+                undefined
+        }
+        {
+          errors != null && errors.length > 0 &&
+          <div className="table-responsive">
+            <table className="table table-sm">
+              <tbody>
+                {errors.map((e, i) => <tr key={i}>
+                  <td><EntityLink lite={e.lite} /></td>
+                  <td className="text-danger">{e.error.split("\n").map((line, i) => <p key={i}>{line}</p>)}</td>
+                </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      }
+        }
+      </>}
     </FormGroup>
   );
 }
