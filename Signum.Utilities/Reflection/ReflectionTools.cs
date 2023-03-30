@@ -25,8 +25,8 @@ public static class ReflectionTools
 
         if (info.ReadState == NullabilityState.Unknown)
             return null;
-        
-            return info.ReadState == NullabilityState.Nullable;
+
+        return info.ReadState == NullabilityState.Nullable;
     }
 
     public static bool FieldEquals(FieldInfo? f1, FieldInfo? f2)
