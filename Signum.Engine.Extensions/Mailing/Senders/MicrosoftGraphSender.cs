@@ -8,6 +8,8 @@ using Microsoft.Graph.Users.Item.Messages.Item.Attachments.CreateUploadSession;
 using Microsoft.Graph.Models;
 using Azure.Identity;
 using Azure.Core;
+using Microsoft.Graph.Models.ODataErrors;
+using Microsoft.Kiota.Abstractions.Extensions;
 
 namespace Signum.Engine.Mailing.Senders;
 
@@ -27,74 +29,75 @@ public class MicrosoftGraphSender : BaseEmailSender
     {
         try
         {
-            var tokenCritical = microsoftGraph.GeTokenCredential();
-            GraphServiceClient graphClient = new GraphServiceClient(tokenCritical);
-
-            var bigAttachments = email.Attachments.Where(a => a.File.FileLength > MicrosoftGraphFileSizeLimit).ToList();
-
-            var message = ToGraphMessageWithSmallAttachments(email);
-            var userId = email.From.AzureUserId.ToString();
-            var user = graphClient.Users[userId];
-
-            if (bigAttachments.IsEmpty())
+            try
             {
-                user.SendMail.PostAsync(new Microsoft.Graph.Users.Item.SendMail.SendMailPostRequestBody
-                {
-                    Message = message,
-                    SaveToSentItems = false,
-                }).Wait();
-            }
-            else if (bigAttachments.Any())
-            {
-                message.IsDraft = true;
+                var tokenCritical = microsoftGraph.GeTokenCredential();
+                GraphServiceClient graphClient = new GraphServiceClient(tokenCritical);
 
-                var newMessage = user.Messages.PostAsync(message).Result!;
-                foreach (var a in bigAttachments)
+                var bigAttachments = email.Attachments.Where(a => a.File.FileLength > MicrosoftGraphFileSizeLimit).ToList();
+
+                var message = ToGraphMessageWithSmallAttachments(email);
+                var userId = email.From.AzureUserId.ToString();
+                var user = graphClient.Users[userId];
+
+                if (bigAttachments.IsEmpty())
                 {
-                    UploadSession uploadSession = user.Messages[newMessage.Id].Attachments.CreateUploadSession.PostAsync(new  CreateUploadSessionPostRequestBody
+                    user.SendMail.PostAsync(new Microsoft.Graph.Users.Item.SendMail.SendMailPostRequestBody
                     {
-                        AttachmentItem = new AttachmentItem
+                        Message = message,
+                        SaveToSentItems = false,
+                    }).Wait();
+                }
+                else if (bigAttachments.Any())
+                {
+                    message.IsDraft = true;
+
+                    var newMessage = user.Messages.PostAsync(message).Result!;
+                    foreach (var a in bigAttachments)
+                    {
+                        UploadSession uploadSession = user.Messages[newMessage.Id].Attachments.CreateUploadSession.PostAsync(new CreateUploadSessionPostRequestBody
                         {
-                            AttachmentType = AttachmentType.File,
-                            IsInline = a.Type == EmailAttachmentType.LinkedResource,
-                            Name = a.File.FileName,
-                            Size = a.File.FileLength,
-                            ContentType = MimeMapping.GetMimeType(a.File.FileName)
-                        },
-                    }).Result!;
+                            AttachmentItem = new AttachmentItem
+                            {
+                                AttachmentType = AttachmentType.File,
+                                IsInline = a.Type == EmailAttachmentType.LinkedResource,
+                                Name = a.File.FileName,
+                                Size = a.File.FileLength,
+                                ContentType = MimeMapping.GetMimeType(a.File.FileName)
+                            },
+                        }).Result!;
 
-                    int maxSliceSize = 320 * 1024;
+                        int maxSliceSize = 320 * 1024;
 
-                    using var fileStream = new MemoryStream(a.File.GetByteArray());
+                        using var fileStream = new MemoryStream(a.File.GetByteArray());
 
-                    var fileUploadTask = new LargeFileUploadTask<FileAttachment>(uploadSession, fileStream, maxSliceSize).UploadAsync().Result;
+                        var fileUploadTask = new LargeFileUploadTask<FileAttachment>(uploadSession, fileStream, maxSliceSize).UploadAsync().Result;
 
-                    if (!fileUploadTask.UploadSucceeded)
-                        throw new InvalidOperationException("Upload of big files to Microsoft Graph didn't succeed");
-    }
+                        if (!fileUploadTask.UploadSucceeded)
+                            throw new InvalidOperationException("Upload of big files to Microsoft Graph didn't succeed");
+                    }
 
-                user.MailFolders["Drafts"].Messages[newMessage.Id].Send.PostAsync().Wait();
+                    user.MailFolders["Drafts"].Messages[newMessage.Id].Send.PostAsync().Wait();
+                }
+            }
+            catch (AggregateException e)
+            {
+                var only = e.InnerExceptions.Only();
+                if (only != null)
+                {
+                    only.PreserveStackTrace();
+                    throw only;
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
-        catch(AggregateException e)
-    {
-            var only = e.InnerExceptions.Only();
-            if(only != null)
-            {
-                if(only is ServiceException se)
-                {
-                    if (se.ResponseStatusCode == (int)System.Net.HttpStatusCode.RequestEntityTooLarge)
-                        throw new InvalidOperationException("Request was rejected by Microsoft Graph for being too large", se);
-                }
-
-                only.PreserveStackTrace();
-                throw only;
-            }
-            else
-            {
-                throw;
-            }
-
+        catch (ODataError er)
+        {
+            er.Data["MainError"] = er.Error;
+            throw;
         }
     }
 
@@ -211,17 +214,16 @@ public static class MicrosoftGraphExtensions
 
 public class AccessTokenCredential : TokenCredential
 {
-    private DateTimeOffset expiresOn;
     private string accessToken;
 
     public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
-        return new AccessToken(accessToken, expiresOn);
+        return new AccessToken(accessToken, default);
     }
 
     public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
-        return new ValueTask<AccessToken>(new AccessToken(accessToken, expiresOn));
+        return new ValueTask<AccessToken>(new AccessToken(accessToken, default));
     }
 
     public AccessTokenCredential(string accessToken)
