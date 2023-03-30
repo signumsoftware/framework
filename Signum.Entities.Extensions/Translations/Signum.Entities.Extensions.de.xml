@@ -118,6 +118,7 @@
     <Member Name="NewUnreadNotifications" Description="Neue ungelesene Benachrichtigungen" />
     <Member Name="OtherNotifications" Description="Andere Benachrichtigungen" />
     <Member Name="PleaseVisit0" Description="Bitte besuchen Sie {0}" />
+    <Member Name="Ringing" Description="Klingeln!" />
     <Member Name="Show0AlertsMore" Description="Weitere {0} Benachrichtigungen anzeigen" />
     <Member Name="Show0GroupsMore1Remaining" Description="Weitere {0} Gruppen anzeigen ({1} verbleibend)" />
     <Member Name="Text" Description="Text" />
@@ -173,12 +174,14 @@
     <Member Name="_0InUI" Description="{0} (im UI)" />
     <Member Name="_0of1" Description="{0} von {1}" />
     <Member Name="_0RulesFor1" Description="{0} Regeln für {1}" />
+    <Member Name="AddCondition" Description="Bedingung hinzufügen" />
     <Member Name="Allow" Description="Erlauben" />
     <Member Name="CanNotBeModified" Description="Kann nicht geändert werden" />
     <Member Name="CanNotBeModifiedBecauseIsInCondition0" Description="Kann nicht geändert werden, da es die Bedingung {0} erfüllt" />
     <Member Name="CanNotBeModifiedBecauseIsNotInCondition0" Description="Kann nicht geändert werden, da es die Bedingung {0} nicht erfüllt" />
     <Member Name="CanNotBeReadBecauseIsInCondition0" Description="Kann nicht gelesen werden, da es die Bedingung {0} erfüllt" />
     <Member Name="CanNotBeReadBecauseIsNotInCondition0" Description="Kann nicht gelesen werden, da es die Bedingung {0} nicht erfüllt" />
+    <Member Name="Check" Description="Aktivieren " />
     <Member Name="ConflictMergingTypeConditions" Description="Konflikt durch Verschmelzung von Typbedingungen" />
     <Member Name="DefaultAuthorization" Description="Standardautorisierung: " />
     <Member Name="Deny" Description="Verweigern" />
@@ -192,6 +195,7 @@
     <Member Name="Overriden" Description="Überschrieben" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
     <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
+    <Member Name="RemoveCondition" Description="Bedingung entfernen" />
     <Member Name="RepeatedTypeCondition" Description="Wiederholte Typbedingungen" />
     <Member Name="ResetChanges" Description="Zurücksetzen von Änderungen" />
     <Member Name="Role0InheritsFromTrivialMergeRole1" Description="Rolle {0} erbt von der triviale Zusammenführung Rolle {1}" />
@@ -206,6 +210,7 @@
     <Member Name="ThereAre0TypeConditionsDefinedFor1" Description="Es sind {0} Typbedingungen für {1} definiert." />
     <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert werden." />
     <Member Name="TypeRules" Description="Typregeln" />
+    <Member Name="Uncheck" Description="Deaktivieren" />
   </Type>
   <Type Name="AuthEmailMessage">
     <Member Name="EmailNotFound" Description="E-Mail nicht gefunden" />
@@ -527,6 +532,10 @@
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
+  <Type Name="CollapsableCardMessage">
+    <Member Name="Collapse" Description="Einklappen" />
+    <Member Name="Expand" Description="Erweitern" />
+  </Type>
   <Type Name="CollectionElementEmbedded" Description="Collection-Element">
     <Member Name="CollectionElement" Description="Collection-Element" />
     <Member Name="MatchByColumn" Description="Übereinstimmung nach Spalte" />
@@ -540,6 +549,8 @@
   <Type Name="ColorPaletteMessage">
     <Member Name="FillAutomatically" Description="Automatisch ausfüllen" />
     <Member Name="Select0OnlyIfYouWantToOverrideTheAutomaticColor" Description="Wählen Sie {0} nur aus, wenn Sie die automatische Farbe überschreiben möchten" />
+    <Member Name="ShowList" Description="Liste anzeigen" />
+    <Member Name="ShowPalette" Description="Palette anzeigen" />
   </Type>
   <Type Name="ColorPaletteOperation">
     <Member Name="Delete" Description="Löschen" />
@@ -641,6 +652,7 @@
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
     <Member Name="CreateNewPart" Description="Neues Teil erstellen" />
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Titel muss angegeben werden für {0}" />
+    <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="ForPerformanceReasonsThisDashboardMayShowOutdatedInformation" Description="Aus Leistungsgründen kann dieses Dashboard veraltete Informationen anzeigen" />
     <Member Name="LasUpdateWasOn0" Description="Die letzte Aktualisierung erfolgte am {0}" />
     <Member Name="Part0IsTooLarge" Description="Teil {0} ist zu groß" />
@@ -877,6 +889,7 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="DynamicPanelMessage" />
   <Type Name="DynamicPanelPermission">
     <Member Name="RestartApplication" Description="Anwendung neu starten" />
     <Member Name="ViewDynamicPanel" Description="Dynamic Panel anzeigen" />
@@ -1282,6 +1295,7 @@
     <Member Name="DownloadFile" Description="Datei downloaden" />
     <Member Name="ErrorSavingFile" Description="Fehler beim Speichern der Datei" />
     <Member Name="File0IsTooBigTheMaximumSizeIs1" Description="Datei '{0}' ist zu groß, die maximale Größe ist {1}." />
+    <Member Name="FileImage" Description="Dateiabbild" />
     <Member Name="FileTypes" Description="Filetypen" />
     <Member Name="OnlyOneFileIsSupported" Description="Nur eine Datei wird unterstützt" />
     <Member Name="Open" Description="Öffnen" />
@@ -1365,8 +1379,10 @@
     <Member Name="In0" Description="(in {0})" />
     <Member Name="Integer" Description="ganze Zahl " />
     <Member Name="Key0NotFound" Description="Key {0} wurde nicht gefunden" />
+    <Member Name="Next" Description="Nächstes" />
     <Member Name="OfThe0" Description="der {0}" />
     <Member Name="OrNull" Description="oder null" />
+    <Member Name="Previous" Description="Vorherige" />
     <Member Name="Property0NotExistsInType1" Description="Die Eigenschaft {0} ist in Typ {1} nicht vorhanden" />
     <Member Name="QueryOf0" Description="Abfrage von {0} " />
     <Member Name="RemovesThe0FromTheDatabase" Description="Entfernt {0} aus der Datenbank" />
@@ -1443,6 +1459,7 @@
     <Member Name="Type" Description="Typ" />
   </Type>
   <Type Name="ImagePartEntity" Description="Bildteil" PluralDescription="Bildteile" Gender="m">
+    <Member Name="AltText" Description="Alternativer Text" />
     <Member Name="ClickActionURL" Description="Aktions-URL" />
     <Member Name="ImageSrcContent" Description="Bild src Inhalt" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
@@ -1629,6 +1646,7 @@
     <Member Name="RequestAccepted" Description="Anfrage angenommen" />
     <Member Name="SendEmail" Description="E-Mail senden" />
     <Member Name="ShowLoginForm" Description="Anmeldeformular anzeigen" />
+    <Member Name="SignInWithMicrosoft" Description="Mit Microsoft anmelden" />
     <Member Name="Success" Description="Erfolg" />
     <Member Name="SwitchUser" Description="Benutzer wechseln" />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="Das Kennwort muss mindestens {0} Zeichen enthalten." />
@@ -1973,6 +1991,7 @@
     <Member Name="LastProcess" Description="Letzter Prozess" />
     <Member Name="Lines" Description="Linien" />
     <Member Name="Process0IsNotRunningAnymore" Description="Prozess {0} wird nicht mehr ausgeführt" />
+    <Member Name="ProcessSettings" Description="Prozesseinstellungen" />
     <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Prozessstart ist größer als Prozessende" />
     <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Prozessstart ist null aber Prozessende nicht" />
     <Member Name="SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway" Description="Aussetzen ist der sicherere Weg, um einen laufenden Prozess zu stoppen. Trotzdem Abbrechen?" />
@@ -2095,6 +2114,9 @@
   <Type Name="RestApiKeyEntity" Description="Rest-API-Schlüssel" Gender="m">
     <Member Name="ApiKey" Description="API-Schlüssel" />
     <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="RestApiKeyMessage">
+    <Member Name="GenerateApiKey" Description="API-Schlüssel generieren" />
   </Type>
   <Type Name="RestApiKeyOperation">
     <Member Name="Delete" Description="Löschen" />
@@ -2545,6 +2567,8 @@
     <Member Name="BackToSyncAssembly0" Description="Zurück zur Synchronisierung der Assembly {0}" />
     <Member Name="BackToTranslationStatus" Description="Zurück zum Übersetzungsstatus" />
     <Member Name="CodeTranslations" Description="Code-Übersetzungen" />
+    <Member Name="DownloadSync" Description="Download-Synchronisierung" />
+    <Member Name="DownloadView" Description="Download-Ansicht" />
     <Member Name="Edit" Description="bearbeiten" />
     <Member Name="Instance" Description="Instanz" />
     <Member Name="InstanceTranslations" Description="Instanz-Übersetzungen" />

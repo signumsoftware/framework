@@ -353,8 +353,8 @@ export module ConnectionMessage {
 }
 
 export module ContainerToggleMessage {
-  export const Minimize = new MessageKey("ContainerToggleMessage", "Minimize");
-  export const Exxpand = new MessageKey("ContainerToggleMessage", "Exxpand");
+  export const Compress = new MessageKey("ContainerToggleMessage", "Compress");
+  export const Expand = new MessageKey("ContainerToggleMessage", "Expand");
 }
 
 export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
