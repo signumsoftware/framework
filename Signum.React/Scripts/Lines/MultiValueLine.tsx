@@ -16,6 +16,7 @@ interface MultiValueLineProps extends LineBaseProps {
   onCreate?: () => Promise<any[] | any | undefined>;
   addValueText?: string;
   valueColumClass?: string;
+  filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[];
 }
 
 export class MultiValueLineController extends LineBaseController<MultiValueLineProps> {
@@ -60,6 +61,15 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
   defaultCreate() {
     return Promise.resolve(null);
   }
+
+  getMListItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
+    var rows = mlistItemContext(ctx);
+
+    if (this.props.filterRows)
+      return this.props.filterRows(rows);
+
+    return rows;
+  }
 }
 
 export const MultiValueLine = React.forwardRef(function MultiValueLine(props: MultiValueLineProps, ref: React.Ref<MultiValueLineController>) {
@@ -77,7 +87,7 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
       labelHtmlAttributes={p.labelHtmlAttributes}>
       <div className="row">
       {
-            mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) => {
+          c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) => {
               return (
                 
                 <ErrorBoundary key={c.keyGenerator.getKey((mlec.binding as MListElementBinding<any>).getMListElement())}>

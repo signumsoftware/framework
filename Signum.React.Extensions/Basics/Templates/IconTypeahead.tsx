@@ -53,6 +53,7 @@ export interface IconTypeaheadProps {
 function toFamilyName(prefix: string) {
   switch (prefix) {
     case "fas": return "fa-solid"; 
+    case "fab": return "fa-brands"; 
     case "far": return "fa-regular"; 
     case "fal": return "fa-light"; 
     case "fat": return "fa-thin"; 
