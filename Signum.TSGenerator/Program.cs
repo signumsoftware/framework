@@ -25,17 +25,15 @@ public static class Program
             string intermediateAssembly = args[0];
             string referencesFile = args[1];
 
-            currentCsproj = Path.Combine(Directory.GetCurrentDirectory(), Path.GetFileNameWithoutExtension(intermediateAssembly) + ".csproj");
+            var currentDirectory = Directory.GetCurrentDirectory();
+
+            currentCsproj = Path.Combine(currentDirectory, Path.GetFileNameWithoutExtension(intermediateAssembly) + ".csproj");
             if (!File.Exists(currentCsproj))
                 throw new InvalidOperationException($"Project file not found in ({currentCsproj})");
 
-            var currentReactDirectory = FindReactDirectory(currentCsproj);
-            if (!Directory.Exists(currentReactDirectory))
-                throw new InvalidOperationException($"No React Directory found ({currentReactDirectory})");
-
             log.WriteLine("Starting SignumTSGenerator");
 
-            var currentT4Files = GetAllT4SFiles(currentReactDirectory);
+            var currentT4Files = GetAllT4SFiles(currentDirectory);
             var signumUpToDatePath = Path.Combine(Path.GetDirectoryName(intermediateAssembly), "SignumUpToDate.txt");
 
             if (File.Exists(signumUpToDatePath))
@@ -57,14 +55,14 @@ public static class Program
             var candidates = projXml.Document.Descendants("ProjectReference").Select(a => a.Attribute("Include").Value).Prepend(currentCsproj).ToList();
             var assemblyReferences = (from csproj in candidates
                                       where ReferencesOrIsSignum(csproj)
-                                      let reactDirectory = FindReactDirectory(csproj)
+                                      let dir = Path.GetDirectoryName(csproj)
                                       let assemblyName = Path.GetFileNameWithoutExtension(csproj)
                                       select new AssemblyReference
                                       {
                                           AssemblyName = assemblyName,
                                           //AssemblyFullPath = assemblyLocations[assemblyName],
-                                          ReactDirectory = reactDirectory,
-                                          AllTypescriptFiles = GetAllT4SFiles(Path.Combine(Directory.GetCurrentDirectory(), reactDirectory)),
+                                          Directory = dir,
+                                          AllTypescriptFiles = GetAllT4SFiles(Path.Combine(Directory.GetCurrentDirectory(), dir)),
                                       }).ToDictionary(a => a.AssemblyName);
 
 
@@ -102,7 +100,7 @@ public static class Program
             var missing = shouldT4s.Where(kvp => !currentT4s.ContainsKey(kvp.Key)).ToList();
             foreach (var m in missing)
             {
-                var newT4S = Path.Combine(currentReactDirectory, m.Key + ".t4s");
+                var newT4S = Path.Combine(currentDirectory, m.Key + ".t4s");
                 currentT4Files.Add(newT4S);
                 currentT4s.Add(m.Key, newT4S);
                 log.WriteLine($"Automatically creating {newT4S}");
@@ -159,15 +157,6 @@ public static class Program
 
         var projectReferences = XDocument.Load(csprojFilePath).Document.Descendants("ProjectReference").ToList();
         return projectReferences.Any(p => Path.GetFileName(p.Attribute("Include").Value) == "Signum.csproj");
-    }
-
-    static string FindReactDirectory(string csproFilePath)
-    {
-        var projectDirectory = Path.GetDirectoryName(csproFilePath);
-
-        var projectName = Path.GetFileName(projectDirectory);
-
-        return Path.Combine(Path.GetDirectoryName(projectDirectory), projectName + ".React");
     }
 
     public static List<string> GetAllT4SFiles(string reactDirectory)

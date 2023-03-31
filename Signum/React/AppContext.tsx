@@ -8,6 +8,7 @@ import { PseudoType, Type, getTypeName } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
 import { navigateRoute } from "./Navigator";
 
+
 Dic.skipClasses.push(React.Component);
 
 export let currentCulture: string | undefined;

@@ -12,6 +12,7 @@ declare global {
     exploreGraphDebugMode: boolean;
   }
 
+
   interface RegExpConstructor {
     escape(str: string): string;
   }

@@ -10,10 +10,10 @@
       "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Authorization.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Authorization\\obj\\SignumReferences.txt\"",
       "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Authorization\\"
     },
-    "Caching": {
+    "Files": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Caching.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Caching\\obj\\SignumReferences.txt\"",
-      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Caching\\"
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Files.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Files\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Files\\"
     },
     "MailingPackage": {
       "commandName": "Project",

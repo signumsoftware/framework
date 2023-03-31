@@ -9,6 +9,8 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     readonly Dictionary<string, Meta?> metas;
 
+
+
     public AutoDynamicQueryCore(IQueryable<T> query)
     {
         this.Query = query;

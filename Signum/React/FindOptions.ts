@@ -3,7 +3,7 @@ import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
 import { BsSize } from './Components';
-
+int a = 2;
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
 export interface ValueFindOptions {

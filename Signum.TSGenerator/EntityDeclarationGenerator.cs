@@ -718,9 +718,9 @@ static class EntityDeclarationGenerator
             return result.Single().RemoveSuffix(".t4s") + ".ts";
 
         if (result.Count > 1)
-            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
+            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.Directory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
 
-        throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileT4S}' found inside '{assemblyReference.ReactDirectory}'");
+        throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileT4S}' found inside '{assemblyReference.Directory}'");
     }
 
     private static string BaseTypeScriptName(TypeDefinition type)
@@ -814,7 +814,7 @@ public class AssemblyOptions
 [Serializable]
 public class AssemblyReference
 {
-    public string ReactDirectory;
+    public string Directory;
     //public string AssemblyFullPath;
     public string AssemblyName;
 
