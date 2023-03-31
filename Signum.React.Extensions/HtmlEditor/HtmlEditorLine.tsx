@@ -4,6 +4,9 @@ import HtmlEditor, { HtmlEditorController, HtmlEditorProps } from './HtmlEditor'
 import { TypeContext } from '@framework/TypeContext';
 import { ErrorBoundary } from '@framework/Components';
 import { getTimeMachineIcon } from '@framework/Lines/TimeMachineIcon';
+import ListCommandsPlugin from './Plugins/ListCommandsPlugin';
+import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
+import './HtmlEditorLine.css';
 
 export interface HtmlEditorLineProps extends Omit<HtmlEditorProps & Partial<draftjs.EditorProps>, "binding"> {
   ctx: TypeContext<string | null | undefined>;
@@ -13,9 +16,17 @@ export interface HtmlEditorLineProps extends Omit<HtmlEditorProps & Partial<draf
 export default function HtmlEditorLine({ ctx, htmlEditorRef, ...p }: HtmlEditorLineProps) {
   return (
     <ErrorBoundary>
-      <div style={p.htmlAttributes?.style}>
+      <div style={p.htmlAttributes?.style} className="html-editor-line">
         {getTimeMachineIcon({ ctx: ctx })}
-        <HtmlEditor binding={ctx.binding} ref={htmlEditorRef} {...p} />
+        <HtmlEditor 
+          binding={ctx.binding}
+          ref={htmlEditorRef}
+          plugins={p.plugins ?? [
+            new ListCommandsPlugin(),
+            new BasicCommandsPlugin(),
+          ]}
+          {...p}
+        />
       </div>
     </ErrorBoundary>
   );

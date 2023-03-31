@@ -2,6 +2,7 @@ import * as React from 'react'
 import { TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
+import * as Services from '@framework/Services'
 import { ModifiableEntity, Lite, Entity, isLite, isEntity } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
 import { EntityBaseProps, EntityBaseController } from '@framework/Lines/EntityBase'
@@ -24,6 +25,7 @@ export interface FileImageLineProps extends EntityBaseProps {
   configuration?: FileDownloaderConfiguration<IFile>;
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
   maxSizeInBytes?: number;
+  ajaxOptions?: Omit<Services.AjaxOptions, "url">;
 }
 
 
@@ -67,7 +69,7 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       helpText={c.props.helpText}>
-      {hasValue ? renderImage() : p.ctx.readOnly ? undefined :
+      {() => hasValue ? renderImage() : p.ctx.readOnly ? undefined :
         <FileUploader
           accept={p.accept}
           maxSizeInBytes={p.maxSizeInBytes}
@@ -90,7 +92,7 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
 
     var content = ctx.propertyRoute!.typeReference().isLite ?
       <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(file as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} />;
+      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} ajaxOptions={p.ajaxOptions} />;
 
     const removeButton = c.renderRemoveButton(true, val);
 

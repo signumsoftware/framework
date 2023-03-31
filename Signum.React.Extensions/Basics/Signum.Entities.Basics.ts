@@ -17,6 +17,11 @@ export type BootstrapStyle =
   "Warning" |
   "Danger";
 
+export module CollapsableCardMessage {
+  export const Collapse = new MessageKey("CollapsableCardMessage", "Collapse");
+  export const Expand = new MessageKey("CollapsableCardMessage", "Expand");
+}
+
 export const CultureInfoEntity = new Type<CultureInfoEntity>("CultureInfo");
 export interface CultureInfoEntity extends Entities.Entity {
   Type: "CultureInfo";

@@ -1,5 +1,8 @@
+using Azure.Core;
 using Microsoft.Graph;
-using Microsoft.Graph.Auth;
+using Microsoft.Graph.DeviceManagement.Reports.GetReportFilters;
+using Microsoft.Graph.Models;
+using Microsoft.Kiota.Abstractions.Authentication;
 using Signum.Engine.Mailing.Senders;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Authorization;
@@ -13,13 +16,12 @@ namespace Signum.Engine.Authorization;
 
 public static class AzureADLogic
 {
-    public static Func<IAuthenticationProvider> GetClientCredentialProvider = () => ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig().GetAuthProvider();
-
+    public static Func<TokenCredential> GetTokenCredential = () => ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig().GetTokenCredential();
 
     public static async Task<List<ActiveDirectoryUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
     {
-        IAuthenticationProvider authProvider = GetClientCredentialProvider();
-        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+        var tokenCredential = GetTokenCredential();
+        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
         subStr = subStr.Replace("'", "''");
 
@@ -28,14 +30,18 @@ public static class AzureADLogic
             subStr.Contains(" ") ? $"startswith(givenName, '{subStr.Before(" ").Trim()}') AND startswith(surname, '{subStr.After(" ").Trim()}') OR startswith(displayname, '{subStr.Trim()}')" :
              $"startswith(givenName, '{subStr}') OR startswith(surname, '{subStr}') OR startswith(displayname, '{subStr.Trim()}') OR startswith(mail, '{subStr.Trim()}')";
 
-        var result = await graphClient.Users.Request().Filter(query).Top(top).GetAsync(token);
-
-        return result.Select(a => new ActiveDirectoryUser
+        var result = await graphClient.Users.GetAsync(req =>
         {
-            UPN = a.UserPrincipalName,
-            DisplayName = a.DisplayName,
-            JobTitle = a.JobTitle,
-            ObjectID = Guid.Parse(a.Id),
+            req.QueryParameters.Top = top;
+            req.QueryParameters.Filter = query;
+        }, token);
+
+        return result!.Value!.Select(a => new ActiveDirectoryUser
+        {
+            UPN = a.UserPrincipalName!,
+            DisplayName = a.DisplayName!,
+            JobTitle = a.JobTitle!,
+            ObjectID = Guid.Parse(a.Id!),
         }).ToList();
     }
 
@@ -60,15 +66,18 @@ public static class AzureADLogic
     {
         using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
         {
-            IAuthenticationProvider authProvider = AzureADLogic.GetClientCredentialProvider();
-            GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-            var result = graphClient.Users[oid.ToString()].TransitiveMemberOf.WithODataCast("microsoft.graph.group").Request().Top(999).Select("id, displayName, ODataType").GetAsync().Result.ToList();
+            var tokenCredential = AzureADLogic.GetTokenCredential();
+            GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+            var result = graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req => 
+            {
+                req.QueryParameters.Top = 999;
+                req.QueryParameters.Select = new[] { "id", "displayName", "ODataType" };
+            }).Result;
 
-            return result.Select(di => new SimpleGroup(Guid.Parse(di.Id), ((JsonElement?)di.AdditionalData["displayName"])?.GetString())).ToList();
+            return result!.Value!.Select(di => new SimpleGroup(Guid.Parse(di.Id!), di.DisplayName)).ToList();
         }
     }
 
-    public record SimpleGroup(Guid Id, string? DisplayName);
 
     public static void Start(SchemaBuilder sb, bool adGroups, bool deactivateUsersTask)
     {
@@ -80,14 +89,17 @@ public static class AzureADLogic
                 {
                     var list = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID != null).ToList();
 
-                    IAuthenticationProvider authProvider = GetClientCredentialProvider();
-                    GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+                    var tokenCredential = GetTokenCredential();
+                    GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
                     stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
                     {
                         var filter = gr.Select(a => "id eq '" + a.Mixin<UserADMixin>().OID + "'").Combined(FilterGroupOperation.Or);
-                        var users = graphClient.Users.Request().Filter(filter).Select("accountEnabled, id").GetAsync().Result;
+                        var users = graphClient.Users.GetAsync(r =>
+                        {
+                            r.QueryParameters.Select = new[] { "id", "accountEnabled" };
+                        }).Result;
 
-                        var isEnabledDictionary = users.ToDictionary(a => Guid.Parse(a.Id), a => a.AccountEnabled!.Value);
+                        var isEnabledDictionary = users!.Value!.ToDictionary(a => Guid.Parse(a.Id!), a => a.AccountEnabled!.Value);
 
                         foreach (var u in gr)
                         {
@@ -138,29 +150,43 @@ public static class AzureADLogic
                  {
                      using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryUsers"))
                      {
-                         IAuthenticationProvider authProvider = GetClientCredentialProvider();
-                         GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+                         var tokenCredential = GetTokenCredential();
+                         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
                          var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "InGroup" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
 
-                         var query = graphClient.Users.Request()
-                            .InGroup(inGroup?.Value as Lite<ADGroupEntity>)
-                            .Filter(request.Filters)
-                            .Search(request.Filters)
-                            .Select(request.Columns)
-                            .OrderBy(request.Orders)
-                            .Paginate(request.Pagination);
 
-                         query.QueryOptions.Add(new QueryOption("$count", "true"));
-                         query.Headers.Add(new HeaderOption("ConsistencyLevel", "eventual"));
-
-                         var result = await query.GetAsync(cancellationToken);
-
-                         var count = ((JsonElement)result.AdditionalData["@odata.count"]).GetInt32();
+                         UserCollectionResponse response;
+                         if (inGroup?.Value is Lite<ADGroupEntity> group)
+                         {
+                             response = (await graphClient.Groups[group.Id.ToString()].TransitiveMembers.GraphUser.GetAsync(req =>
+                             {
+                                 req.QueryParameters.Filter = GetFilters(request.Filters);
+                                 req.QueryParameters.Search = GetSearch(request.Filters);
+                                 req.QueryParameters.Select = GetSelect(request.Columns);
+                                 req.QueryParameters.Orderby = GetOrderBy(request.Orders);
+                                 req.QueryParameters.Top = GetTop(request.Pagination);
+                                 req.QueryParameters.Count = true;
+                                 req.Headers.Add("ConsistencyLevel", "eventual");
+                             }))!;
+                         }
+                         else
+                         {
+                             response = (await graphClient.Users.GetAsync(req =>
+                             {
+                                 req.QueryParameters.Filter = GetFilters(request.Filters);
+                                 req.QueryParameters.Search = GetSearch(request.Filters);
+                                 req.QueryParameters.Select = GetSelect(request.Columns);
+                                 req.QueryParameters.Orderby = GetOrderBy(request.Orders);
+                                 req.QueryParameters.Top = GetTop(request.Pagination);
+                                 req.QueryParameters.Count = true;
+                                 req.Headers.Add("ConsistencyLevel", "eventual");
+                             }))!;
+                         }
 
                          var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
 
-                         return result.Skip(skip).Select(u => new
+                         return response.Value!.Skip(skip).Select(u => new
                          {
                              Entity = (Lite<Entities.Entity>?)null,
                              u.Id,
@@ -196,7 +222,7 @@ public static class AzureADLogic
                              u.CreationType,
                              u.AccountEnabled,
                              InGroup = (Lite<ADGroupEntity>?)null,
-                         }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount(count);
+                         }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount((int?)response.OdataCount);
                      }
                  })
                 .Column(a => a.Entity, c => c.Implementations = Implementations.By())
@@ -218,29 +244,47 @@ public static class AzureADLogic
                 {
                     using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryGroups"))
                     {
-                        IAuthenticationProvider authProvider = GetClientCredentialProvider();
-                        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+                        var tokenCredential = GetTokenCredential();
+                        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
                         var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "HasUser" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
 
-                        var query = graphClient.Groups.Request()
-                           .HasUser(inGroup?.Value as Lite<UserEntity>)
-                           .Filter(request.Filters)
-                           .Search(request.Filters)
-                           .Select(request.Columns)
-                           .OrderBy(request.Orders)
-                           .Paginate(request.Pagination);
 
-                        query.QueryOptions.Add(new QueryOption("$count", "true"));
-                        query.Headers.Add(new HeaderOption("ConsistencyLevel", "eventual"));
+                        GroupCollectionResponse response;
+                        if (inGroup?.Value is Lite<UserEntity> user)
+                        {
+                            var oid = user.InDB(a => a.Mixin<UserADMixin>().OID);
+                            if (oid == null)
+                                throw new InvalidOperationException($"User {user} has no OID");
 
-                        var result = await query.GetAsync(cancellationToken);
-
-                        var count = ((JsonElement)result.AdditionalData["@odata.count"]).GetInt32();
-
+                            response = (await graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req =>
+                            {
+                                req.QueryParameters.Filter = GetFilters(request.Filters);
+                                req.QueryParameters.Search = GetSearch(request.Filters);
+                                req.QueryParameters.Select = GetSelect(request.Columns);
+                                req.QueryParameters.Orderby = GetOrderBy(request.Orders);
+                                req.QueryParameters.Top = GetTop(request.Pagination);
+                                req.QueryParameters.Count = true;
+                                req.Headers.Add("ConsistencyLevel", "eventual");
+                            }))!;
+                        }
+                        else
+                        {
+                            response = (await graphClient.Groups.GetAsync(req =>
+                            {
+                                req.QueryParameters.Filter = GetFilters(request.Filters);
+                                req.QueryParameters.Search = GetSearch(request.Filters);
+                                req.QueryParameters.Select = GetSelect(request.Columns);
+                                req.QueryParameters.Orderby = GetOrderBy(request.Orders);
+                                req.QueryParameters.Top = GetTop(request.Pagination);
+                                req.QueryParameters.Count = true;
+                                req.Headers.Add("ConsistencyLevel", "eventual");
+                            }))!;
+                        }
+             
                         var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
 
-                        return result.Skip(skip).Select(u => new
+                        return response.Value!.Skip(skip).Select(u => new
                         {
                             Entity = (Lite<Entities.Entity>?)null,
                             u.Id,
@@ -249,7 +293,7 @@ public static class AzureADLogic
                             u.SecurityEnabled,
                             u.Visibility,
                             HasUser = (Lite<UserEntity>?)null,
-                        }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount(count);
+                        }).ToDEnumerable(queryDescription).Select(request.Columns).WithCount((int?)response.OdataCount);
                     }
                 })
                 .Column(a => a.Entity, c => c.Implementations = Implementations.By())
@@ -265,6 +309,10 @@ public static class AzureADLogic
         }
     }
 
+    private static string[]? GetOrderBy(List<Order> orders)
+    {
+        return orders.Select(c => ToGraphField(c.Token) + " " + (c.OrderType == OrderType.Ascending ? "asc" : "desc")).ToArray();
+    }
 
     static string ToGraphField(QueryToken token, bool simplify = false)
     {
@@ -288,51 +336,9 @@ public static class AzureADLogic
             value?.ToString() ?? "";
     }
 
-    static IGraphServiceUsersCollectionRequest InGroup(this IGraphServiceUsersCollectionRequest users, Lite<ADGroupEntity>? group)
+    private static string? GetFilters(List<Filter> filters)
     {
-        if (group == null)
-            return users;
-
-        var client = (GraphServiceClient)users.Client;
-
-        var url = client.Groups[group.Id.ToString()].TransitiveMembers.AppendSegmentToRequestUrl("microsoft.graph.user");
-
-        var constructor = users.GetType().GetConstructors().SingleEx();
-
-        return (IGraphServiceUsersCollectionRequest)constructor.Invoke(new object[] { url, client, users.QueryOptions });
-    }
-
-    static IGraphServiceGroupsCollectionRequest HasUser(this IGraphServiceGroupsCollectionRequest groups, Lite<UserEntity>? user)
-    {
-        if (user == null)
-            return groups;
-
-        var oid = user.InDB(a => a.Mixin<UserADMixin>().OID);
-        if (oid == null)
-            return groups.Filter("Id eq 'invalid'");
-
-        var client = (GraphServiceClient)groups.Client;
-
-        var url = client.Users[oid.ToString()].TransitiveMemberOf.AppendSegmentToRequestUrl("microsoft.graph.group");
-
-        var constructor = groups.GetType().GetConstructors().SingleEx();
-
-        return (IGraphServiceGroupsCollectionRequest)constructor.Invoke(new object[] { url, client, groups.QueryOptions });
-    }
-
-    /// <summary>
-    /// Applies an OData cast filter to the returned collection.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="requestBuilder">Current request builder</param>
-    /// <param name="oDataCast">The OData type name</param>
-    /// <returns>Request builder with OData cast filter applied</returns>
-    public static T WithODataCast<T>(this T requestBuilder, string oDataCast) where T : IBaseRequestBuilder
-    {
-        var updatedUrl = requestBuilder.AppendSegmentToRequestUrl(oDataCast);
-        var updatedBuilder = (T)Activator.CreateInstance(requestBuilder.GetType(), updatedUrl, requestBuilder.Client)!;
-
-        return updatedBuilder;
+        return filters.Select(f => ToFilter(f)).Combined(FilterGroupOperation.And);
     }
 
     static string? ToFilter(Filter f)
@@ -368,6 +374,11 @@ public static class AzureADLogic
             throw new UnexpectedValueException(f);
     }
 
+    private static string? GetSearch(List<Filter> filters)
+    {
+        return filters.Select(f => ToSearch(f)).Combined(FilterGroupOperation.And);
+    }
+
     static string? ToSearch(Filter f)
     {
         if (f is FilterCondition fc)
@@ -386,23 +397,6 @@ public static class AzureADLogic
             throw new UnexpectedValueException(f);
     }
 
-    static BR Filter<BR>(this BR request, List<Filter> filters) where BR : IBaseRequest
-    {
-        var filterStr = filters.Select(f => ToFilter(f)).Combined(FilterGroupOperation.And);
-        if (filterStr.HasText())
-            request.QueryOptions.Add(new QueryOption("$filter", filterStr));
-
-        return request;
-    }
-
-    static BR Search<BR>(this BR request, List<Filter> filters) where BR : IBaseRequest
-    {
-        var searchStr = filters.Select(f => ToSearch(f)).Combined(FilterGroupOperation.And);
-        if (searchStr.HasText())
-            request.QueryOptions.Add(new QueryOption("$search", searchStr));
-
-        return request;
-    }
 
     static string? Combined(this IEnumerable<string?> filterEnumerable, FilterGroupOperation groupOperation)
     {
@@ -431,23 +425,12 @@ public static class AzureADLogic
         }
     }
 
-    static BR Select<BR>(this BR request, List<Column> columns) where BR : IBaseRequest
+    private static string[]? GetSelect(List<Column> columns)
     {
-        var selectStr = columns.Select(c => ToGraphField(c.Token, simplify: true)).Distinct().ToString(",");
-        request.QueryOptions.Add(new QueryOption("$select", selectStr));
-        return request;
+        return columns.Select(c => ToGraphField(c.Token, simplify: true)).Distinct().ToArray();
     }
 
-    static BR OrderBy<BR>(this BR request, List<Order> orders) where BR : IBaseRequest
-    {
-        var orderStr = orders.Select(c => ToGraphField(c.Token) + " " + (c.OrderType == OrderType.Ascending ? "asc" : "desc")).ToString(",");
-        if (orderStr.HasText())
-            request.QueryOptions.Add(new QueryOption("$orderby", orderStr));
-
-        return request;
-    }
-
-    static BR Paginate<BR>(this BR request, Pagination pagination) where BR : IBaseRequest
+    static int? GetTop(Pagination pagination)
     {
         var top = pagination switch
         {
@@ -457,11 +440,7 @@ public static class AzureADLogic
             _ => throw new UnexpectedValueException(pagination)
         };
 
-        if (top != null)
-            request.QueryOptions.Add(new QueryOption("$top", top.ToString()));
-
-
-        return request;
+        return top;
     }
 
     public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
@@ -498,18 +477,18 @@ public static class AzureADLogic
 
     private static MicrosoftGraphCreateUserContext GetMicrosoftGraphContext(ActiveDirectoryUser adUser)
     {
-        IAuthenticationProvider authProvider = GetClientCredentialProvider();
-        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
-        var msGraphUser = graphClient.Users[adUser.ObjectID.ToString()].Request().GetAsync().Result;
+        var tokenCredential = GetTokenCredential();
+        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+        var msGraphUser = graphClient.Users[adUser.ObjectID.ToString()].GetAsync().Result;
 
-        return new MicrosoftGraphCreateUserContext(msGraphUser);
+        return new MicrosoftGraphCreateUserContext(msGraphUser!);
     }
 
 
     public static Task<MemoryStream> GetUserPhoto(Guid OId, int size)
     {
-        IAuthenticationProvider authProvider = GetClientCredentialProvider();
-        GraphServiceClient graphClient = new GraphServiceClient(authProvider);
+        var tokenCredential = GetTokenCredential();
+        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
         int imageSize = 
             size <= 48 ? 48 : 
             size <= 64 ? 64 : 
@@ -520,14 +499,16 @@ public static class AzureADLogic
             size <= 432 ? 432 : 
             size <= 504 ? 504 : 648;
 
-        return graphClient.Users[OId.ToString()].Photos[$"{imageSize}x{imageSize}"].Content.Request().GetAsync().ContinueWith(photo =>
+        return graphClient.Users[OId.ToString()].Photos[$"{imageSize}x{imageSize}"].Content.GetAsync().ContinueWith(photo =>
         {
             MemoryStream ms = new MemoryStream();
-            photo.Result.CopyTo(ms);
+            photo.Result!.CopyTo(ms);
             return ms;
         }, TaskContinuationOptions.OnlyOnRanToCompletion);
     }
 }
+
+public record SimpleGroup(Guid Id, string? DisplayName);
 
 public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
 {
@@ -538,13 +519,13 @@ public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
 
     public User User { get; set; }
 
-    public string UserName => User.UserPrincipalName;
+    public string UserName => User.UserPrincipalName!;
     public string? EmailAddress => User.UserPrincipalName;
 
-    public string FirstName => User.GivenName;
-    public string LastName => User.Surname;
+    public string FirstName => User.GivenName!;
+    public string LastName => User.Surname!;
 
-    public Guid? OID => Guid.Parse(User.Id);
+    public Guid? OID => Guid.Parse(User.Id!);
 
     public string? SID => null;
 }

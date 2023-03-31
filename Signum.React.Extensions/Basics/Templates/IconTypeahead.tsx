@@ -29,13 +29,13 @@ export function IconTypeaheadLine(p : IconTypeaheadLineProps){
   var ctx = p.ctx;
 
   return (
-    <FormGroup ctx={ctx} label={ctx.niceName()} >
-      <IconTypeahead icon={ctx.value}
+    <FormGroup ctx={ctx} label={ctx.niceName()}>
+      {inputId => <IconTypeahead icon={ctx.value}
         placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined}
         extraIcons={p.extraIcons}
         formControlClass={ctx.formControlClass}
         inputAttrs={p.inputAttrs}
-        onChange={handleChange} />
+        onChange={handleChange} />}
     </FormGroup>
   );
 }
@@ -53,6 +53,7 @@ export interface IconTypeaheadProps {
 function toFamilyName(prefix: string) {
   switch (prefix) {
     case "fas": return "fa-solid"; 
+    case "fab": return "fa-brands"; 
     case "far": return "fa-regular"; 
     case "fal": return "fa-light"; 
     case "fat": return "fa-thin"; 

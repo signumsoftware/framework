@@ -16,6 +16,7 @@ interface MultiValueLineProps extends LineBaseProps {
   onCreate?: () => Promise<any[] | any | undefined>;
   addValueText?: string;
   valueColumClass?: string;
+  filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[];
 }
 
 export class MultiValueLineController extends LineBaseController<MultiValueLineProps> {
@@ -60,6 +61,15 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
   defaultCreate() {
     return Promise.resolve(null);
   }
+
+  getMListItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
+    var rows = mlistItemContext(ctx);
+
+    if (this.props.filterRows)
+      return this.props.filterRows(rows);
+
+    return rows;
+  }
 }
 
 export const MultiValueLine = React.forwardRef(function MultiValueLine(props: MultiValueLineProps, ref: React.Ref<MultiValueLineController>) {
@@ -75,32 +85,34 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
-      <div className="row">
-      {
-            mlistItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) => {
+      {inputId => <>
+        <div className="row">
+          {
+          c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) => {
               return (
-                
+
                 <ErrorBoundary key={c.keyGenerator.getKey((mlec.binding as MListElementBinding<any>).getMListElement())}>
                   <div className={p.valueColumClass!} >
                     <MultiValueLineElement
-                    ctx={mlec}
-                    onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
-                    onRenderItem={p.onRenderItem}
+                      ctx={mlec}
+                      onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
+                      onRenderItem={p.onRenderItem}
                       valueColumClass={p.valueColumClass!} />
                   </div>
-                  </ErrorBoundary>
-               
+                </ErrorBoundary>
+
               );
             })
-      }
-      </div>
-          {!p.ctx.readOnly &&
-            <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
-              className="sf-line-button sf-create"
-              onClick={c.handleAddValue}>
-              {EntityBaseController.createIcon}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
-            </a>}
-       
+          }
+        </div>
+        {!p.ctx.readOnly &&
+          <a href="#" title={p.ctx.titleLabels ? p.addValueText ?? SearchMessage.AddValue.niceToString() : undefined}
+            className="sf-line-button sf-create"
+            onClick={c.handleAddValue}>
+            {EntityBaseController.getCreateIcon()}&nbsp;{p.addValueText ?? SearchMessage.AddValue.niceToString()}
+          </a>}
+
+      </>}
     </FormGroup>
   );
 });
@@ -126,7 +138,7 @@ export function MultiValueLineElement(props: MultiValueLineElementProps) {
           <FontAwesomeIcon icon="xmark" />
         </a>
       }
-      {renderItem(ctx)}
+      {React.cloneElement(renderItem(ctx) as React.ReactElement, { mandatory: true })}
     </div>
   );
 }

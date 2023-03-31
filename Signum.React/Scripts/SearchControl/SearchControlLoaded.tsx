@@ -662,11 +662,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const isManualOrAll = this.isManualRefreshOrAllPagination();
     var changesExpected = s.dataChanged || s.resultFindOptions == null || toFindOptionsPath(s.resultFindOptions) != toFindOptionsPath(p.findOptions);
 
+    var buttonBarElements = [
+      ...Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this }),
+      ...this.props.querySettings?.extraButtons?.(this) ?? [],
+      ...this.props.extraButtons?.(this) ?? [],
+    ].filter(a => Boolean(a)) as ButtonBarElement[];
 
-
-    var buttonBarElements = Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this });
-    var leftButtonBarElements = buttonBarElements.extract(a => a.order != null && a.order < 0);
-
+    var leftButtonBarElements = buttonBarElements.filter(a => a.order != null && a.order < 0).orderBy(a => a.order ?? 0);
+    var rightButtonBarElements = buttonBarElements.filter(a => a.order == null || a.order > 0).orderBy(a => a.order!);
 
     const titleLabels = StyleContext.default.titleLabels;
 
@@ -720,14 +723,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         </button>
       },
 
-      ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
       ...leftButtonBarElements
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
       .map(a => a as ButtonBarElement);
 
     var rightButtons = ([
-      ...(this.props.hideButtonBar ? [] : buttonBarElements),
+      ...(this.props.hideButtonBar ? [] : rightButtonBarElements),
 
       !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) && {
         button: <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} title={FrameMessage.Fullscreen.niceToString()}>
@@ -737,8 +739,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       this.state.isMobile == true && this.getMobileOptions(this.props.findOptions).showSwitchViewModesButton && {
         button: <button className="sf-query-button btn btn-light" onClick={this.handleViewModeClick}>
-          {this.state.viewMode == "Mobile" ? <FontAwesomeIcon icon="desktop" /> :
-            <FontAwesomeIcon icon="mobile-alt" />}
+          <FontAwesomeIcon icon={this.state.viewMode == "Mobile" ? "desktop" : "mobile-alt"} title={SearchMessage.SwitchViewMode.niceToString()} /> 
         </button>
       }
     ] as (ButtonBarElement | null | false | undefined)[])

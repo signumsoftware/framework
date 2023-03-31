@@ -103,10 +103,13 @@ function WhatsNewDropdownImp() {
 
   return (
     <>
-      <div className="nav-link sf-bell-container" onClick={handleOnToggle}>
-        <FontAwesomeIcon icon="bullhorn" className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")} />
+      <button className="nav-link sf-bell-container" onClick={handleOnToggle} style={{ border: 0, backgroundColor: 'transparent' }}>
+        <FontAwesomeIcon icon="bullhorn"
+          className={classes("sf-newspaper", isOpen && "open", countResult && countResult.numWhatsNews > 0 && "active")}
+          title={(countResult ? WhatsNewEntity.niceCount(countResult.numWhatsNews) : WhatsNewEntity.nicePluralName())}
+        />
         {countResult && countResult.numWhatsNews > 0 && <span className="badge bg-danger badge-pill sf-news-badge">{countResult.numWhatsNews}</span>}
-      </div>
+      </button>
       {isOpen && <div className="sf-news-toasts mt-2" ref={divRef} style={{
         backgroundColor: "rgba(255,255,255, 0.7)",
         backdropFilter: "blur(10px)",
@@ -172,7 +175,11 @@ export function WhatsNewToast(p: { whatsnew: WhatsNewShort, onClose: (e: WhatsNe
         <small>{DateTime.fromISO(p.whatsnew.creationDate!).toRelative()}</small>
       </Toast.Header>
       <Toast.Body style={{ whiteSpace: "pre-wrap" }}>
-        <img onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }} src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)} style={{ maxHeight: "30vh", cursor:"pointer", maxWidth: "10vw", margin: "0px 0px 0px 10px" }} />
+        <img onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }}
+          alt={p.whatsnew.title}
+          src={AppContext.toAbsoluteUrl("/api/whatsnew/previewPicture/" + p.whatsnew.whatsNew.id)}
+          style={{ maxHeight: "30vh", cursor: "pointer", maxWidth: "10vw", margin: "0px 0px 0px 10px" }}
+        />
         <HtmlViewer text={HTMLSubstring(p.whatsnew.description)} />
         <br />
         <Link onClick={e => { p.onClose([p.whatsnew]); handleClickPreviewPicture(e) }} to={"/newspage/" + p.whatsnew.whatsNew.id}>{WhatsNewMessage.ReadFurther.niceToString()}</Link>

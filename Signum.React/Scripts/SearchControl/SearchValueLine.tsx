@@ -128,21 +128,21 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
     <a href="#" className={classes("sf-line-button sf-find", isFormControl ? "btn input-group-text" : undefined)}
       onClick={svRef.current!.handleClick}
       title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
-      {EntityBaseController.findIcon}
+      {EntityBaseController.getFindIcon()}
     </a>;
   
   const create = !p.ctx.frame?.currentDate && ((p.create == "ifNull" && value === null) || (p.create ?? false)) &&
     <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
-      {EntityBaseController.createIcon}
+      {EntityBaseController.getCreateIcon()}
     </a>;
 
   const view = value != undefined && (p.viewEntityButton ?? (isLite(value) && Navigator.isViewable(value.EntityType))) &&
     <a href="#" className={classes("sf-line-button sf-view", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleViewEntityClick}
       title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
-      {EntityBaseController.viewIcon}
+      {EntityBaseController.getViewIcon()}
     </a>
 
   let extra = svRef.current && p.extraButtons && p.extraButtons(svRef.current);
@@ -156,12 +156,12 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       label={label ?? token?.niceName ?? getQueryNiceName(fo.queryName)}
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...p.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
-      helpText={p.helpText && svRef.current && p.helpText(svRef.current)}
-    >
-      <div className={isFormControl ? ((unit || view || extra || find || create) ? p.ctx.inputGroupClass : undefined) : p.ctx.formControlPlainTextClass}>
+      helpText={p.helpText && svRef.current && p.helpText(svRef.current)}>
+      {inputId => <div className={isFormControl ? ((unit || view || extra || find || create) ? p.ctx.inputGroupClass : undefined) : p.ctx.formControlPlainTextClass}>
         {svRef.current && renderTimeMachineIcon(svRef.current.hasHistoryChanges, `translate(-40%, -40%)`)}
         <SearchValue
           ctx={p.ctx}
+          id={inputId}
           ref={handleSearchValueLoaded}
           findOptions={fo}
           format={p.format}
@@ -186,14 +186,14 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           customRequest={p.customRequest}
           avoidRenderTimeMachineIcon
         />
-
         {unit}
         {view}
         {find}
         {create}
         {extra}
-      </div>
+      </div>}
     </FormGroup>
+    
   );
 
 

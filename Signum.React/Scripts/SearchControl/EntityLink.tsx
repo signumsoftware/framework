@@ -22,7 +22,7 @@ export default function EntityLink(p: EntityLinkProps) {
   const settings = Navigator.getSettings(p.lite.EntityType);
 
   if (!Navigator.isViewable(lite.EntityType, { isSearch: p.inSearch || false }))
-    return <span data-entity={liteKey(lite)} className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}>{p.children ?? getToString(lite)}</span>;
+    return <span data-entity={liteKey(lite)} className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}>{p.children ?? Navigator.renderLite(lite)}</span>;
 
 
   return (

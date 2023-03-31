@@ -9,6 +9,7 @@ export default function ImagePart(p: { ctx: TypeContext<ImagePartEntity> }) {
     <div className="form-inline">
       <ValueLine ctx={ctx.subCtx(c => c.imageSrcContent)} />
       <ValueLine ctx={ctx.subCtx(c => c.clickActionURL)} />
+      <ValueLine ctx={ctx.subCtx(c => c.altText)} />
     </div>
   );
 }

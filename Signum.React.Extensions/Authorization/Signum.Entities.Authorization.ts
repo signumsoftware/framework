@@ -124,6 +124,10 @@ export module AuthAdminMessage {
   export const Role0InheritsFromTrivialMergeRole1 = new MessageKey("AuthAdminMessage", "Role0InheritsFromTrivialMergeRole1");
   export const IncludeTrivialMerges = new MessageKey("AuthAdminMessage", "IncludeTrivialMerges");
   export const Role0IsTrivialMerge = new MessageKey("AuthAdminMessage", "Role0IsTrivialMerge");
+  export const Check = new MessageKey("AuthAdminMessage", "Check");
+  export const Uncheck = new MessageKey("AuthAdminMessage", "Uncheck");
+  export const AddCondition = new MessageKey("AuthAdminMessage", "AddCondition");
+  export const RemoveCondition = new MessageKey("AuthAdminMessage", "RemoveCondition");
 }
 
 export module AuthEmailMessage {
@@ -217,6 +221,7 @@ export module LoginAuthMessage {
   export const _0HasBeenSucessfullyAssociatedWithUser1InThisDevice = new MessageKey("LoginAuthMessage", "_0HasBeenSucessfullyAssociatedWithUser1InThisDevice");
   export const TryToLogInWithIt = new MessageKey("LoginAuthMessage", "TryToLogInWithIt");
   export const LoginWith0 = new MessageKey("LoginAuthMessage", "LoginWith0");
+  export const SignInWithMicrosoft = new MessageKey("LoginAuthMessage", "SignInWithMicrosoft");
 }
 
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");
@@ -227,21 +232,21 @@ export type MergeStrategy =
 export const OnPremisesExtensionAttributesModel = new Type<OnPremisesExtensionAttributesModel>("OnPremisesExtensionAttributesModel");
 export interface OnPremisesExtensionAttributesModel extends Entities.ModelEntity {
   Type: "OnPremisesExtensionAttributesModel";
-  extensionAttribute1: string;
-  extensionAttribute2: string;
-  extensionAttribute3: string;
-  extensionAttribute4: string;
-  extensionAttribute5: string;
-  extensionAttribute6: string;
-  extensionAttribute7: string;
-  extensionAttribute8: string;
-  extensionAttribute9: string;
-  extensionAttribute10: string;
-  extensionAttribute11: string;
-  extensionAttribute12: string;
-  extensionAttribute13: string;
-  extensionAttribute14: string;
-  extensionAttribute15: string;
+  extensionAttribute1: string | null;
+  extensionAttribute2: string | null;
+  extensionAttribute3: string | null;
+  extensionAttribute4: string | null;
+  extensionAttribute5: string | null;
+  extensionAttribute6: string | null;
+  extensionAttribute7: string | null;
+  extensionAttribute8: string | null;
+  extensionAttribute9: string | null;
+  extensionAttribute10: string | null;
+  extensionAttribute11: string | null;
+  extensionAttribute12: string | null;
+  extensionAttribute13: string | null;
+  extensionAttribute14: string | null;
+  extensionAttribute15: string | null;
 }
 
 export const OperationAllowed = new EnumType<OperationAllowed>("OperationAllowed");

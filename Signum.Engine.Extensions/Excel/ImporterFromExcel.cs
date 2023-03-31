@@ -102,7 +102,7 @@ public class ImporterFromExcel
         {
             WorkbookPart workbookPart = document.WorkbookPart!;
 
-            WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
+            WorksheetPart worksheetPart = document.GetWorksheetPartBySheetName("Sheet1");
 
             var data = worksheetPart.Worksheet.Descendants<SheetData>().Single();
 
@@ -273,6 +273,8 @@ public class ImporterFromExcel
 
                                 value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
                                 var parent = getSet.ParentGetter != null ? getSet.ParentGetter(entity) : entity;
+                                if(getSet.Required && value == null)
+                                   throw new InvalidOperationException($"Value of column {token} is null");
                                 getSet.Setter!(parent, value);
                             }
                         }
@@ -380,6 +382,7 @@ public class ImporterFromExcel
             {
                 var t when t.IsLite() => Lite.Parse(strValue),
                 var t when t.IsEntity() => Lite.Parse(strValue).Retrieve(),
+                var t when t.IsEnum => EnumExtensions.TryParse(strValue, ut, true, out var result) ? result : null,
                 var t when ExcelExtensions.IsNumber(t) => Convert.ChangeType(ExcelExtensions.FromExcelNumber(strValue), ut),
                 var t when ExcelExtensions.IsDate(t) => ReflectionTools.ChangeType(ExcelExtensions.FromExcelDate(strValue, token.DateTimeKind), ut),
                 var t when t == typeof(TimeOnly) => ExcelExtensions.FromExcelTime(strValue),
@@ -610,6 +613,7 @@ public class ImporterFromExcel
                     ParentGetter = parentGetter?.Compile(),
                     Setter = lambda.Compile(),
                     EntityFinder = entityFinder,
+                    Required = prop.PropertyType.IsValueType && !prop.PropertyType.IsNullable(),
                 };
             }
         });
@@ -622,6 +626,7 @@ public class ImporterFromExcel
         public required Func<ModifiableEntity, ModifiableEntity>? ParentGetter { get; set; }
         public required Action<ModifiableEntity, object?>? Setter { get; set; }
         public Func<object?, object?>? EntityFinder { get; set; }
+        public bool Required { get; set; }
     }
 
     public class ParsedQueryForImport

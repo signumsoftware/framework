@@ -654,7 +654,7 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
         var prev = this.innerList[index];
 
         if(prev.RowId.HasValue)
-            throw new InvalidOperationException("Index {0} already as RowId".FormatWith(index));
+            throw new InvalidOperationException("Index {0} already has RowId".FormatWith(index));
 
         this.innerList[index] = new RowIdElement(prev.Element, rowId, null);
     }

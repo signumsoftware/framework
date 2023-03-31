@@ -49,7 +49,8 @@
     .sf-file-image-container .sf-remove {
         position: absolute;
         right: 3px;
-        top: 0px;
+        top: 2px;
+        padding: 3px 6px;
     }
 
 

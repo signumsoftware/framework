@@ -107,4 +107,6 @@ public enum CaseMessage
 
     [Description("Do you want to also delete the main entities?")]
     DoYouWAntToAlsoDeleteTheMainEntities,
+
+    SetTags
 }

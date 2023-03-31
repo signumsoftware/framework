@@ -1,5 +1,5 @@
 import * as Navigator from './Navigator'
-import { GraphExplorer } from './Reflection'
+import { getTypeName, GraphExplorer } from './Reflection'
 import { Entity, is, isEntity, isModifiableEntity, MListElement, ModifiableEntity } from './Signum.Entities';
 
 
@@ -8,12 +8,11 @@ export function assignServerChanges<T extends ModifiableEntity>(local: T, server
   if (!isModifiableEntity(local))
     return;
 
-  if (isEntity(local)) {
+  if (isEntity(local) && getTypeName(local) != "FileType") {
     let serverEntity = server as ModifiableEntity as Entity;
 
     if (local.id != serverEntity.id && local.temporalId != serverEntity.temporalId)
       throw new Error("Temporal Id of local and server are not equal.");
-
     local.id = serverEntity.id;
     local.ticks = serverEntity.ticks;
     local.toStr = serverEntity.toStr;

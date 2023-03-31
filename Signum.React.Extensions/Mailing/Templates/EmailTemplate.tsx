@@ -136,7 +136,7 @@ function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, que
       <div className="row">
         <div className="col-sm-2" >
           <FormGroup label={EmailTemplateEntity.nicePropertyName(a => a.recipients![0].element.kind)} ctx={sc}>
-            <span className={sc.formControlClass}>{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>
+            {() => <span className={sc.formControlClass}>{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>}
           </FormGroup>
         </div>
         <div className="col-sm-10">
