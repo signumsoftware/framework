@@ -55,3 +55,9 @@ public enum UserOIDMessage
     [Description("The user {0} is connected to Active Directory and can not have a local password set")]
     TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet
 }
+
+[AutoInit]
+public static class ActiveDirectoryPermission
+{
+    public static PermissionSymbol InviteUsersFromAD;
+}

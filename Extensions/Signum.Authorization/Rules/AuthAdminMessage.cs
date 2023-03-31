@@ -1,5 +1,3 @@
-
-
 namespace Signum.Authorization.Rules;
 
 public enum AuthAdminMessage
@@ -89,4 +87,10 @@ public enum AuthAdminMessage
 
     [Description("Role {0} is trivial merge")]
     Role0IsTrivialMerge,
+
+    Check,
+    Uncheck,
+
+    AddCondition,
+    RemoveCondition,
 }

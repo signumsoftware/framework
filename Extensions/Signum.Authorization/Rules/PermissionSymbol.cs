@@ -11,8 +11,3 @@ public static class BasicPermission
     public static PermissionSymbol AutomaticUpgradeOfOperations;
 }
 
-[AutoInit]
-public static class ActiveDirectoryPermission
-{
-    public static PermissionSymbol InviteUsersFromAD;
-}

@@ -1,5 +1,3 @@
-using Signum.Authorization.Rules;
-
 namespace Signum.Authorization.SessionLog;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]

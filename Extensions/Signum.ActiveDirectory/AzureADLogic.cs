@@ -74,7 +74,12 @@ public static class AzureADLogic
         {
             if (MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)))
             {
-                
+
+                if (activeDirectoryIntegration)
+                {
+                    PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+                }
+
 
                 //As.OverrideExpression
 

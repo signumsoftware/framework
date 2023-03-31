@@ -453,7 +453,7 @@ public static class AuthLogic
         }
     }
 
-    public static void StartAllModules(SchemaBuilder sb, bool activeDirectoryIntegration = false)
+    public static void StartAllModules(SchemaBuilder sb)
     {
         TypeAuthLogic.Start(sb);
         PropertyAuthLogic.Start(sb);
@@ -461,10 +461,7 @@ public static class AuthLogic
         OperationAuthLogic.Start(sb);
         PermissionAuthLogic.Start(sb);
 
-        if (activeDirectoryIntegration)
-        {
-            PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
-        }
+
     }
 
     public static HashSet<Lite<RoleEntity>> CurrentRoles()
