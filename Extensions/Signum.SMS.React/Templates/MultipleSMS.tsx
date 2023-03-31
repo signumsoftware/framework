@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { MultipleSMSModel } from '../Signum.Entities.SMS'
+import { MultipleSMSModel } from '../Signum.SMS'
 
 export default function MultipleSMS(p: { ctx: TypeContext<MultipleSMSModel> }){
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ScheduleRuleWeekDaysEntity } from '../Signum.Entities.Scheduler'
+import { ScheduleRuleWeekDaysEntity } from '../Signum.Scheduler'
 import { useForceUpdate } from '@framework/Hooks';
 
 export default function ScheduleRuleWeekDays(p : { ctx: TypeContext<ScheduleRuleWeekDaysEntity> }){

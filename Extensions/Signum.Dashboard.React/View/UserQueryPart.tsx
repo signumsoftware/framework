@@ -5,7 +5,7 @@ import { getQueryKey, getQueryNiceName, getTypeInfos } from '@framework/Reflecti
 import { Entity, Lite, is, JavascriptMessage, toLite, liteKey } from '@framework/Signum.Entities'
 import { SearchControl, SearchValue, SearchValueController } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { UserQueryPartEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
+import { UserQueryPartEntity, PanelPartEmbedded } from '../Signum.Dashboard'
 import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import * as Finder from '@framework/Finder'

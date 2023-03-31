@@ -8,7 +8,7 @@ import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import "./TypeHelpComponent.css"
 import { useAPI } from '@framework/Hooks'
-import { HelpMessage } from './Signum.Entities.Help'
+import { HelpMessage } from './Signum.Help'
 
 interface TypeHelpComponentProps {
   initialType?: string;

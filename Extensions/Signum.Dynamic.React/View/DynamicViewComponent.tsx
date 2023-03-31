@@ -14,7 +14,7 @@ import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewTabs } from './DynamicViewTabs'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import ShowCodeModal from './ShowCodeModal'
-import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage, DynamicViewPropEmbedded } from '../Signum.Entities.Dynamic'
+import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage, DynamicViewPropEmbedded } from '../Signum.Dynamic'
 import { Dropdown, DropdownButton, Tabs, Tab } from 'react-bootstrap';
 import "./DynamicView.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';

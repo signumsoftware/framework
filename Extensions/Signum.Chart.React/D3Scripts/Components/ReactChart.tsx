@@ -10,7 +10,7 @@ import { parseLite, SearchMessage } from '@framework/Signum.Entities';
 import { ChartRow } from '../../ChartClient';
 import { Rectangle } from '../../../Map/Utils';
 import { useThrottle, useSize, useAPI, areEqualDeps } from '@framework/Hooks';
-import { ChartRequestModel } from '../../Signum.Entities.Chart';
+import { ChartRequestModel } from '../../Signum.Chart';
 import { DashboardFilter } from '../../../Dashboard/View/DashboardFilterController';
 
 export interface ReactChartProps {

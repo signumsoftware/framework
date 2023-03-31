@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivityEntity, WorkflowOperation, NewTasksEmbedded } from '../Signum.Entities.Workflow'
+import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivityEntity, WorkflowOperation, NewTasksEmbedded } from '../Signum.Workflow'
 import { TypeContext } from '@framework/Lines'
 import { SearchValueLine } from '@framework/Search'
 import { symbolNiceName } from '@framework/Reflection'

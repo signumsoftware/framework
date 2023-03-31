@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity } from '../Signum.Toolbar'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MList } from '@framework/Signum.Entities';
 import { parseIcon } from '../../Basics/Templates/IconTypeahead';

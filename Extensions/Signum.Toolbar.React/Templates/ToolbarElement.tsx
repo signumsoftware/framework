@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
+import { ToolbarElementEmbedded } from '../Signum.Toolbar'
 import { IconTypeaheadLine, parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as Dashboard from '../../Dashboard/Admin/Dashboard'

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import * as AppContext from '@framework/AppContext'
-import { IsolationEntity, IsolationMessage } from './Signum.Entities.Isolation'
+import { IsolationEntity, IsolationMessage } from './Signum.Isolation'
 import { Lite, liteKey, ModifiableEntity } from '@framework/Signum.Entities'
 import { ajaxGet, addContextHeaders } from '@framework/Services'
 import { onWidgets, WidgetContext } from '@framework/Frames/Widgets'

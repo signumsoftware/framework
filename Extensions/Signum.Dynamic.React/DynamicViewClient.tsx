@@ -16,7 +16,7 @@ import SelectorModal from '@framework/SelectorModal'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as Lines from '@framework/Lines'
 import * as FileLineModule from '../Files/FileLine'
-import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewSelectorOperation, DynamicViewPropEmbedded } from './Signum.Entities.Dynamic'
+import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewSelectorOperation, DynamicViewPropEmbedded } from './Signum.Dynamic'
 import DynamicViewEntityComponent from './View/DynamicView' //Just Typing
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as Nodes from './View/Nodes' //Typings-only

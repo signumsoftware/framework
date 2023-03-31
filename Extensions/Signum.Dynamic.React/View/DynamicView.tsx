@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
-import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
+import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding } from '@framework/Reflection'

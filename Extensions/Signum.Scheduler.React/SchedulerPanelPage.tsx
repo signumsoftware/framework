@@ -7,7 +7,7 @@ import EntityLink from '@framework/SearchControl/EntityLink'
 import * as Operations from '@framework/Operations'
 import { tryGetTypeInfos, getTypeInfos } from '@framework/Reflection'
 import { API, SchedulerState, SchedulerItemState, SchedulerRunningTaskState } from './SchedulerClient'
-import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation } from './Signum.Entities.Scheduler'
+import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation } from './Signum.Scheduler'
 import { Lite } from "@framework/Signum.Entities";
 import { StyleContext } from "@framework/Lines";
 import { useAPIWithReload, useInterval } from '@framework/Hooks'

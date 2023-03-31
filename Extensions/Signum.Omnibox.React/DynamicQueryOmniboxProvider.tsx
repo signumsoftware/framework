@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { OmniboxMessage } from './Signum.Entities.Omnibox'
+import { OmniboxMessage } from './Signum.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from './OmniboxClient'
 import { QueryToken, FilterOperation, FindOptions } from '@framework/FindOptions'
 import * as Finder from '@framework/Finder'

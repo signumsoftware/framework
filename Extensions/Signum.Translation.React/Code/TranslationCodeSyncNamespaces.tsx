@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { API, NamespaceSyncStats } from '../TranslationClient'
-import { TranslationMessage } from '../Signum.Entities.Translation'
+import { TranslationMessage } from '../Signum.Translation'
 import "../Translation.css"
 import { encodeDots, decodeDots } from './TranslationCodeStatus'
 import { useAPI } from '@framework/Hooks'

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { openModal, IModalProps } from '@framework/Modals';
 import { FrameMessage, Lite } from '@framework/Signum.Entities'
 import { getTypeInfo } from '@framework/Reflection'
-import { TreeEntity } from './Signum.Entities.Tree'
+import { TreeEntity } from './Signum.Tree'
 import * as TreeClient from './TreeClient'
 import { TreeNode } from './TreeClient'
 import { TreeViewer } from './TreeViewer'

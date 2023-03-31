@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { getToString, Lite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import { EmailTemplateEntity, EmailMessageEntity } from './Signum.Entities.Mailing'
+import { EmailTemplateEntity, EmailMessageEntity } from './Signum.Mailing'
 import * as MailingClient from './MailingClient'
 import { DropdownButton, Dropdown } from 'react-bootstrap';
 

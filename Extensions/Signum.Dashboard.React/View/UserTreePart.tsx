@@ -6,7 +6,7 @@ import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import { SearchControl, SearchValue } from '@framework/Search'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { UserTreePartEntity } from '../Signum.Entities.Dashboard'
+import { UserTreePartEntity } from '../Signum.Dashboard'
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAPI } from '@framework/Hooks'

@@ -4,7 +4,7 @@ import * as Constructor from '@framework/Constructor';
 import * as Navigator from '@framework/Navigator';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as WhatsNewClient from '../WhatsNewClient';
-import { WhatsNewEntity, WhatsNewMessage, WhatsNewMessageEmbedded } from '../Signum.Entities.WhatsNew';
+import { WhatsNewEntity, WhatsNewMessage, WhatsNewMessageEmbedded } from '../Signum.WhatsNew';
 import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
 import { Binding, EntityCombo, EntityLine, EntityTabRepeater, TypeContext, ValueLine } from '../../../Signum.React/Scripts/Lines';
 import { FileLine } from '../../Files/FileLine';

@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Binding, EntityBaseController, EntityCombo, EntityLine, EntityTable, ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ColorPaletteEntity, ColorPaletteMessage, SpecificColorEmbedded } from '../Signum.Entities.Chart';
+import { ColorPaletteEntity, ColorPaletteMessage, SpecificColorEmbedded } from '../Signum.Chart';
 import { colorSchemes } from './ColorUtils';
 import { classes, Dic } from '@framework/Globals';
 import * as Navigator from '@framework/Navigator';

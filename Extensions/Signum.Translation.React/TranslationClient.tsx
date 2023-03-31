@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import { TranslationPermission, TranslatedSummaryState } from './Signum.Entities.Translation'
+import { TranslationPermission, TranslatedSummaryState } from './Signum.Translation'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportComponent } from '@framework/ImportComponent'

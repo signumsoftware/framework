@@ -6,8 +6,8 @@
   "keywords": [],
   "author": "Signum Software",
   "license": "MIT",
-  "resolutions": {
-  },
+  "resolutions": {},
   "dependencies": {
+    "react": ""
   }
 }

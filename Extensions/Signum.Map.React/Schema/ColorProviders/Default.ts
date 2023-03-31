@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
 import { colorScaleLog } from '../../Utils'
-import { MapMessage } from '../../Signum.Entities.Map'
+import { MapMessage } from '../../Signum.Map'
 import { bytesToSize } from '@framework/Globals'
 import { toNumberFormat } from '@framework/Reflection'
 

@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
 import * as Operations from '@framework/Operations';
 import { useForceUpdate, useAPIWithReload } from '@framework/Hooks';
-import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpEntity, AppendixHelpOperation } from '../Signum.Entities.Help';
+import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpEntity, AppendixHelpOperation } from '../Signum.Help';
 import { getTypeInfo, GraphExplorer, symbolNiceName } from '@framework/Reflection';
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
 import { TypeContext } from '@framework/Lines';

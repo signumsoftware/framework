@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { PredictorEntity, PredictSimpleResultEntity, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning';
+import { PredictorEntity, PredictSimpleResultEntity, DefaultColumnEncodings } from '../Signum.MachineLearning';
 import * as ChartClient from '../../Chart/ChartClient'
 import { TypeContext } from '@framework/Lines';
 import { is } from '@framework/Signum.Entities';

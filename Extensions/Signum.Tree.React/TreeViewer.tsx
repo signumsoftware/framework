@@ -9,7 +9,7 @@ import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import * as Operations from '@framework/Operations'
 import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString } from '@framework/Signum.Entities'
-import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Entities.Tree'
+import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Tree'
 import * as TreeClient from './TreeClient'
 import { FilterOptionParsed, QueryDescription, SubTokensOptions, FilterOption } from "@framework/FindOptions";
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";

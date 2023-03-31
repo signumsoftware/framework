@@ -4,7 +4,7 @@ import { FilterOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed 
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
-import { ChartMessage, ChartRequestModel } from './Signum.Entities.Chart'
+import { ChartMessage, ChartRequestModel } from './Signum.Chart'
 import * as ChartClient from './ChartClient'
 import { Button } from 'react-bootstrap'
 import * as Finder from '@framework//Finder';

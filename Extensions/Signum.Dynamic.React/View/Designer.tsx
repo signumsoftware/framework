@@ -7,7 +7,7 @@ import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
-import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Entities.Dynamic'
+import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Dynamic'
 import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'

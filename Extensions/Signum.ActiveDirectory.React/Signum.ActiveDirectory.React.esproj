@@ -2,7 +2,4 @@
   <PropertyGroup>
     <BuildCommand>yarn run tsc</BuildCommand>
   </PropertyGroup>
-  <ItemGroup>
-    <TypeScriptConfiguration Include="tsconfig.base.json" />
-  </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { CaseTagTypeEntity } from '../Signum.Entities.Workflow'
+import { CaseTagTypeEntity } from '../Signum.Workflow'
 import { Color } from '../../Basics/Color'
 import "./Tag.css"
 

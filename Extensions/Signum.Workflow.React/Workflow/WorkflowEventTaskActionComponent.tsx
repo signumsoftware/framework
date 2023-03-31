@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { WorkflowEventTaskActionEval } from '../Signum.Entities.Workflow'
+import { WorkflowEventTaskActionEval } from '../Signum.Workflow'
 import { TypeContext, PropertyRoute } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'

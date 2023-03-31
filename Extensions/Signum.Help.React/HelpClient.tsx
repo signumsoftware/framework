@@ -6,7 +6,7 @@ import { OperationSymbol } from '@framework/Signum.Entities'
 import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo} from '@framework/Reflection'
 import { ImportComponent } from '@framework/ImportComponent'
 import "./Help.css"
-import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity } from './Signum.Entities.Help';
+import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity } from './Signum.Help';
 import { QueryString } from '@framework/QueryString';
 
 export function start(options: { routes: RouteObject[], markdownToHtml: (txt: string) => string }) {

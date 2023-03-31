@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
+import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Dynamic'
 import { EntityLine, TypeContext, FormGroup } from '@framework/Lines'
 import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute, ReadonlyBinding } from '@framework/Reflection'

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Lite, toLite, Entity, EntityPack, getToString } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
-import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
+import { WordTemplateEntity, WordTemplateMessage } from './Signum.Word'
 import * as WordClient from './WordClient'
 import { saveFile } from "@framework/Services";
 import { DropdownButton, Dropdown } from 'react-bootstrap';

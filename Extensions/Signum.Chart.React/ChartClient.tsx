@@ -14,7 +14,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
   IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SvgMapsChartScript, SpecialParameterType
-} from './Signum.Entities.Chart'
+} from './Signum.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'

@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import * as AppContext from '@framework/AppContext'
-import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Entities.Dashboard'
+import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Dashboard'
 import { PanelPartContentProps } from '../DashboardClient';
 import { urlVariables } from '../UrlVariables';
 import { Dic } from '@framework/Globals';

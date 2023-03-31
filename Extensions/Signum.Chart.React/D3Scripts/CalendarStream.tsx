@@ -8,7 +8,7 @@ import { ChartRow } from '../ChartClient';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { MemoRepository } from './Components/ReactChart';
-import { ChartRequestModel } from '../Signum.Entities.Chart';
+import { ChartRequestModel } from '../Signum.Chart';
 import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController';
 
 

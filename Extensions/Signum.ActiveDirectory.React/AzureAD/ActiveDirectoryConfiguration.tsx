@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { EntityLine, EntityTable, ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ActiveDirectoryConfigurationEmbedded } from '../Signum.Entities.Authorization';
+import { ActiveDirectoryConfigurationEmbedded } from '../Signum.Authorization';
 import { useForceUpdate } from '@framework/Hooks';
 
 export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<ActiveDirectoryConfigurationEmbedded> }) {

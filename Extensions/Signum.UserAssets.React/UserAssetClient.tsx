@@ -6,7 +6,7 @@ import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite } from '@f
 import * as QuickLinks from '@framework/QuickLinks'
 import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed, FindOptions, FindOptionsParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
-import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded } from './Signum.Entities.UserAssets'
+import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded } from './Signum.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { QueryToken } from '@framework/FindOptions';

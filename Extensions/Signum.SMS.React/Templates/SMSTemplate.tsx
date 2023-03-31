@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityTabRepeater, EntityCombo, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { SMSTemplateEntity, SMSCharactersMessage, SMSTemplateMessageEmbedded, SMSTemplateMessage } from '../Signum.Entities.SMS'
+import { SMSTemplateEntity, SMSCharactersMessage, SMSTemplateMessageEmbedded, SMSTemplateMessage } from '../Signum.SMS'
 import { useForceUpdate, useAPI, useThrottle } from '@framework/Hooks';
 import ValueLineModal from '@framework/ValueLineModal';
 import TemplateControls from '../../Templating/TemplateControls';

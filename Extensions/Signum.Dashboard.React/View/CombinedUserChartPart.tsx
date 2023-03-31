@@ -9,7 +9,7 @@ import * as ChartClient from '../../Chart/ChartClient'
 import { ChartRequestModel, UserChartEntity } from '../../Chart/Signum.Entities.Chart'
 import ChartRenderer from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
-import { CombinedUserChartPartEntity, UserChartPartEntity } from '../Signum.Entities.Dashboard'
+import { CombinedUserChartPartEntity, UserChartPartEntity } from '../Signum.Dashboard'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { useAPI, useAPIWithReload, useForceUpdate, useSize, useThrottle } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'

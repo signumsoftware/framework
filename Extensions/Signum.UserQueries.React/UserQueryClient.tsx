@@ -16,7 +16,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserQueryEntity, UserQueryPermission, UserQueryMessage,
   QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded
-} from './Signum.Entities.UserQueries'
+} from './Signum.UserQueries'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'

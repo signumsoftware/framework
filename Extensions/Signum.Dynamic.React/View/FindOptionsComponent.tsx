@@ -19,7 +19,7 @@ import { DesignerNode, Expression } from './NodeUtils'
 import { BaseNode, SearchControlNode } from './Nodes'
 import { FindOptionsExpr, FilterOptionExpr, OrderOptionExpr, ColumnOptionExpr } from './FindOptionsExpression'
 import * as DynamicViewClient from '../DynamicViewClient'
-import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
+import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Dynamic'
 import SelectorModal from '@framework/SelectorModal';
 import { tryGetTypeInfos } from '@framework/Reflection';
 import { TypeInfo } from '@framework/Reflection';

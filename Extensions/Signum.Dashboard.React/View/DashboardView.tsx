@@ -4,7 +4,7 @@ import { classes, getColorContrasColorBWByHex} from '@framework/Globals'
 import { Entity, getToString, is, Lite, MListElement, SearchMessage, toLite } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as DashboardClient from '../DashboardClient'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage, CachedQueryEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage, CachedQueryEntity } from '../Signum.Dashboard'
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { useAPI, useForceUpdate } from '@framework/Hooks'

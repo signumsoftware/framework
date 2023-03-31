@@ -9,7 +9,7 @@ import { Lite, Entity, registerToString, JavascriptMessage, toLite } from '@fram
 import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName, getAllTypes } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { SMSTemplateMessageEmbedded, SMSMessageEntity, SMSTemplateEntity, SMSSendPackageEntity, SMSUpdatePackageEntity, MultipleSMSModel, SMSMessageOperation, ISMSOwnerEntity } from './Signum.Entities.SMS'
+import { SMSTemplateMessageEmbedded, SMSMessageEntity, SMSTemplateEntity, SMSSendPackageEntity, SMSUpdatePackageEntity, MultipleSMSModel, SMSMessageOperation, ISMSOwnerEntity } from './Signum.SMS'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '@framework/QuickLinks'

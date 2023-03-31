@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityDetail, EntityAccordion } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailSenderConfigurationEntity, EmailRecipientEmbedded, EmailMessageEntity } from '../Signum.Entities.Mailing'
+import { EmailSenderConfigurationEntity, EmailRecipientEmbedded, EmailMessageEntity } from '../Signum.Mailing'
 import { SearchValueLine } from '@framework/Search';
 
 export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSenderConfigurationEntity> }) {

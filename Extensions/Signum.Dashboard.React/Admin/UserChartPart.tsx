@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { UserChartPartEntity, DashboardEntity } from '../Signum.Entities.Dashboard'
+import { UserChartPartEntity, DashboardEntity } from '../Signum.Dashboard'
 import { IsQueryCachedLine } from './Dashboard';
 
 export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity> }) {

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, TypeContext } from '@framework/Lines'
 import CSSCodeMirror from '../../Codemirror/CSSCodeMirror'
-import { DynamicCSSOverrideEntity } from '../Signum.Entities.Dynamic'
+import { DynamicCSSOverrideEntity } from '../Signum.Dynamic'
 import { useForceUpdate } from '@framework/Hooks'
 
 export default function DynamicCSSOverrideComponent(p : { ctx: TypeContext<DynamicCSSOverrideEntity> }){

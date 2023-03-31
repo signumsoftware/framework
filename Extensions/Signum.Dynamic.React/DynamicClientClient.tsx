@@ -9,7 +9,7 @@ import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
 import * as Constructor from '@framework/Constructor'
 import * as DynamicClientOptions from './DynamicClientOptions'
 import { globalModules } from './View/GlobalModules'
-import { DynamicClientEntity } from './Signum.Entities.Dynamic'
+import { DynamicClientEntity } from './Signum.Dynamic'
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicClientEntity, w => import('./Client/DynamicClientComponent')));

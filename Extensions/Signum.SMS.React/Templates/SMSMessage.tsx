@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { SMSMessageEntity } from '../Signum.Entities.SMS'
+import { SMSMessageEntity } from '../Signum.SMS'
 
 export default function SMSMessage(p: { ctx: TypeContext<SMSMessageEntity> }) {
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as AppContext from '@framework/AppContext'
 import { PanelPartContentProps } from '../DashboardClient';
-import { ImagePartEntity } from '../Signum.Entities.Dashboard';
+import { ImagePartEntity } from '../Signum.Dashboard';
 
 
 export default function ImagePart(p: PanelPartContentProps<ImagePartEntity>) {

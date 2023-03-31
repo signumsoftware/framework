@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DynamicClientEntity } from '../Signum.Entities.Dynamic'
+import { DynamicClientEntity } from '../Signum.Dynamic'
 import { ValueLine, TypeContext } from '@framework/Lines'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'

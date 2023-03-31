@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { HolidayCalendarEntity, HolidayEmbedded } from '../Signum.Entities.Scheduler'
+import { HolidayCalendarEntity, HolidayEmbedded } from '../Signum.Scheduler'
 
 export default function HolidayCalendar(p : { ctx: TypeContext<HolidayCalendarEntity> }){
   const e = p.ctx;

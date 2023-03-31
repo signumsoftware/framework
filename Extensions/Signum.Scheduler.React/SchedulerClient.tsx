@@ -9,7 +9,7 @@ import { Lite } from '@framework/Signum.Entities'
 import {
   ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduleRuleMinutelyEntity, ScheduleRuleMonthsEntity,
   ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission, SchedulerTaskExceptionLineEntity, ITaskOperation, ITaskMessage
-} from './Signum.Entities.Scheduler'
+} from './Signum.Scheduler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'

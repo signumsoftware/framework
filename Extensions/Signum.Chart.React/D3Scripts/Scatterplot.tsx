@@ -8,7 +8,7 @@ import { YScaleTicks, XScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
-import { ChartRequestModel } from '../Signum.Entities.Chart';
+import { ChartRequestModel } from '../Signum.Chart';
 import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController';
 
 

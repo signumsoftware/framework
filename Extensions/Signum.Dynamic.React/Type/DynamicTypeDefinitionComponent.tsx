@@ -18,7 +18,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import * as DynamicClientOptions from '../DynamicClientOptions';
 import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
-import { DynamicTypeMessage, DynamicTypeEntity, DynamicMixinConnectionEntity } from '../Signum.Entities.Dynamic';
+import { DynamicTypeMessage, DynamicTypeEntity, DynamicMixinConnectionEntity } from '../Signum.Dynamic';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'

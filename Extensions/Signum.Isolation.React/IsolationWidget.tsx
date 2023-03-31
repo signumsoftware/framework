@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { getToString, ModifiableEntity, tryGetMixin } from '@framework/Signum.Entities'
-import { IsolationMessage, IsolationMixin } from './Signum.Entities.Isolation';
+import { IsolationMessage, IsolationMixin } from './Signum.Isolation';
 import * as IsolationClient from './IsolationClient';
 import { WidgetContext } from '@framework/Frames/Widgets';
 

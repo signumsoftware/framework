@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityCombo, EntityTabRepeater, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
+import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Mailing'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IframeRenderer'
 import { useForceUpdate } from '@framework/Hooks'

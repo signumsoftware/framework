@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { RestLogEntity, RestApiKeyEntity } from './Signum.Entities.Rest'
+import { RestLogEntity, RestApiKeyEntity } from './Signum.Rest'
 import { EntitySettings } from "@framework/Navigator";
 import * as Navigator from "@framework/Navigator";
 import { ajaxGet } from "@framework/Services";

@@ -15,7 +15,7 @@ import {
   PredictorResultSaverSymbol, PredictorSimpleResultSaver,
   NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState,
   PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity, TensorFlowPredictorAlgorithm
-} from './Signum.Entities.MachineLearning'
+} from './Signum.MachineLearning'
 import * as QuickLinks from '@framework/QuickLinks'
 import { QueryToken } from '@framework/FindOptions';
 import { ImportComponent } from '@framework/ImportComponent';

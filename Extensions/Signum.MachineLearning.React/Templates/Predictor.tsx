@@ -5,7 +5,7 @@ import { ValueLine, EntityLine, EntityDetail, EntityCombo, EntityRepeater, Entit
 import { SearchControl, ColumnOption, FindOptions } from '@framework/Search'
 import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
 import { FileLine } from '../../Files/FileLine';
-import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.MachineLearning'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'

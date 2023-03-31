@@ -5,7 +5,7 @@ import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { Entity } from '@framework/Signum.Entities'
-import { DynamicExpressionEntity } from '../Signum.Entities.Dynamic'
+import { DynamicExpressionEntity } from '../Signum.Dynamic'
 import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
 import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'

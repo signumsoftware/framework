@@ -13,7 +13,7 @@ import "./WhatsNewDropdown.css"
 import { Link } from 'react-router-dom';
 import { classes, Dic } from '@framework/Globals'
 import MessageModal from '@framework/Modals/MessageModal'
-import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.Entities.WhatsNew'
+import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.WhatsNew'
 import * as AppContext from "@framework/AppContext"
 import { API, NumWhatsNews, WhatsNewFull, WhatsNewShort } from '../WhatsNewClient'
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'

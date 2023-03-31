@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityRepeater, EntityDetail } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailSenderConfigurationEntity, SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmailServiceEntity, } from '../../Signum.Entities.Mailing'
+import { EmailSenderConfigurationEntity, SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmailServiceEntity, } from '../../Signum.Mailing'
 import { Binding } from '@framework/Reflection'
 import { DoublePassword } from '../../../Authorization/Templates/DoublePassword'
 

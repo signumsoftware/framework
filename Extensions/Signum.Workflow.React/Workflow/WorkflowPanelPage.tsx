@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
-import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { Tabs, Tab } from 'react-bootstrap';
 import { useAPIWithReload, useInterval } from '@framework/Hooks'

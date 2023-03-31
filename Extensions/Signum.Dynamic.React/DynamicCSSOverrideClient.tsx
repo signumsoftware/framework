@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
-import { DynamicCSSOverrideEntity } from './Signum.Entities.Dynamic'
+import { DynamicCSSOverrideEntity } from './Signum.Dynamic'
 import * as DynamicClientOptions from './DynamicClientOptions'
 
 export function start(options: { routes: RouteObject[] }) {

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ExchangeWebServiceEmailServiceEntity } from '../../Signum.Entities.Mailing'
+import { ExchangeWebServiceEmailServiceEntity } from '../../Signum.Mailing'
 import { Binding } from '@framework/Reflection'
 import { DoublePassword } from '../../../Authorization/Templates/DoublePassword'
 

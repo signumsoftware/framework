@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { RestLogEntity } from '../Signum.Entities.Rest'
+import { RestLogEntity } from '../Signum.Rest'
 import { TypeContext, ValueLine, EntityLine, EntityRepeater, EntityTable } from "@framework/Lines";
 import { } from "@framework/ConfigureReactWidgets";
 import { API } from '../RestClient'

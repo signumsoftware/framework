@@ -8,7 +8,7 @@ import { Entity, JavascriptMessage, entityInfo, getToString, toLite, EntityPack 
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
-import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, WorkflowMainEntityStrategy, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, WorkflowMainEntityStrategy, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'

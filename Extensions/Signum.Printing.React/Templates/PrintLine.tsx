@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
-import { PrintLineEntity } from '../Signum.Entities.Printing'
+import { PrintLineEntity } from '../Signum.Printing'
 import { ProcessExceptionLineEntity } from '../../Processes/Signum.Entities.Processes'
 import { FileLine } from '../../Files/FileLine'
 

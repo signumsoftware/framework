@@ -4,7 +4,7 @@ import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { Typeahead, ErrorBoundary } from '@framework/Components'
 import * as OmniboxClient from './OmniboxClient'
-import { OmniboxMessage } from './Signum.Entities.Omnibox'
+import { OmniboxMessage } from './Signum.Omnibox'
 import '@framework/Frames/MenuIcons.css'
 import { TypeaheadController } from '@framework/Components/Typeahead';
 

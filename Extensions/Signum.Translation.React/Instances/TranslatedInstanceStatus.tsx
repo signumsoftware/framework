@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 import { Dic, classes } from '@framework/Globals'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { API, TranslatedTypeSummary } from '../TranslatedInstanceClient'
-import { TranslationMessage } from '../Signum.Entities.Translation'
+import { TranslationMessage } from '../Signum.Translation'
 import "../Translation.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'

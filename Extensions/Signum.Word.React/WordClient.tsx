@@ -10,7 +10,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import { Type, isTypeEntity, QueryTokenString } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import * as Constructor from '@framework/Constructor'
-import { WordTemplateEntity, WordTemplateOperation, WordModelEntity, WordTemplateVisibleOn } from './Signum.Entities.Word'
+import { WordTemplateEntity, WordTemplateOperation, WordModelEntity, WordTemplateVisibleOn } from './Signum.Word'
 import { QueryModel, MultiEntityModel } from '../Templating/Signum.Entities.Templating'
 import { ButtonBarManager } from '@framework/Frames/ButtonBar';
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'

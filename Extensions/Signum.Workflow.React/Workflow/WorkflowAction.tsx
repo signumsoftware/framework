@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig, AutocompleteConfig } from '@framework/Lines'
 import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import { WorkflowActionEntity } from '../Signum.Entities.Workflow'
+import { WorkflowActionEntity } from '../Signum.Workflow'
 import { API, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import ValueLineModal from '@framework/ValueLineModal'

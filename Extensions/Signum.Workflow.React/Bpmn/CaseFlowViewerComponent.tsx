@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { WorkflowEntitiesDictionary, WorkflowConnectionModel, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity, IWorkflowNodeEntity } from '../Signum.Entities.Workflow'
+import { WorkflowEntitiesDictionary, WorkflowConnectionModel, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity, IWorkflowNodeEntity } from '../Signum.Workflow'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
 import { CaseFlow } from '../WorkflowClient'

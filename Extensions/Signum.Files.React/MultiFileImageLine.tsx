@@ -5,7 +5,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EmbeddedEntity, EntityControlMessage, getToString } from '@framework/Signum.Entities'
-import { IFile, FileTypeSymbol } from './Signum.Entities.Files'
+import { IFile, FileTypeSymbol } from './Signum.Files'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import { FileUploader } from './FileUploader'
 import { Modal } from 'react-bootstrap';
@@ -15,9 +15,6 @@ import { EntityListBaseController, EntityListBaseProps } from '@framework/Lines/
 import { FetchAndRemember } from '@framework/Lines'
 import { FileImage } from './FileImage';
 import { useController } from '@framework/Lines/LineBase'
-import { center, wrap } from '../Map/Utils'
-import { openModal, IModalProps } from '@framework/Modals'
-import { useForceUpdate } from '@framework/Hooks'
 import { ImageModal } from './ImageModal'
 
 export { FileTypeSymbol };

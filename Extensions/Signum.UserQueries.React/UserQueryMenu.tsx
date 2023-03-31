@@ -7,7 +7,7 @@ import * as Finder from '@framework/Finder'
 import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
-import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation, QueryFilterEmbedded, PinnedQueryFilterEmbedded } from './Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation, QueryFilterEmbedded, PinnedQueryFilterEmbedded } from './Signum.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets';

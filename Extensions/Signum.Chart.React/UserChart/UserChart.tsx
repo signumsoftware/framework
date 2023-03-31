@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { UserQueryMessage, QueryOrderEmbedded, UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
-import { UserChartEntity } from '../Signum.Entities.Chart'
+import { UserChartEntity } from '../Signum.Chart'
 import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'

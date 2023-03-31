@@ -2,7 +2,7 @@ import { QueryDescription } from '@framework/FindOptions';
 import * as React from 'react'
 
 import ReactChart, { MemoRepository } from './ReactChart';
-import { ChartRequestModel } from '../../Signum.Entities.Chart';
+import { ChartRequestModel } from '../../Signum.Chart';
 import * as ChartClient from '../../ChartClient';
 import { useSize, useThrottle } from '@framework/Hooks';
 import { classes } from '@framework/Globals';

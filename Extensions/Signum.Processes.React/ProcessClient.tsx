@@ -13,7 +13,7 @@ import { ContextualOperationContext, EntityOperationSettings } from '@framework/
 import { GraphExplorer, OperationType } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import * as ContextualOperations from '@framework/Operations/ContextualOperations'
-import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity, ProcessOperation, ProcessMessage } from './Signum.Entities.Processes'
+import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity, ProcessOperation, ProcessMessage } from './Signum.Processes'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'

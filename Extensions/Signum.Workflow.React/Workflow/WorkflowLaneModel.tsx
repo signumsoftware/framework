@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, TypeContext, EntityStrip, EntityDetail } from '@framework/Lines'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import { WorkflowLaneModel, WorkflowLaneActorsEval, WorkflowMessage } from '../Signum.Entities.Workflow'
+import { WorkflowLaneModel, WorkflowLaneActorsEval, WorkflowMessage } from '../Signum.Workflow'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import { useForceUpdate } from '@framework/Hooks'
 

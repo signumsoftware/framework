@@ -13,7 +13,7 @@ import { Color } from '../../Basics/Color';
 import { isLite, Lite, Entity, BooleanEnum, EntityControlMessage } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
 import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption, FindOptions } from '@framework/FindOptions';
-import { ChartColumnType } from '../Signum.Entities.Chart';
+import { ChartColumnType } from '../Signum.Chart';
 import { EntityBaseController } from '@framework/Lines';
 import { isBooleanOrFunctionOrNull } from '../../Dynamic/View/NodeUtils';
 import { QueryTokenMessage } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery';

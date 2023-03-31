@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { EntityCheckboxList, ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { AlertEntity, AlertState, AlertTypeSymbol, SendNotificationEmailTaskEntity } from '../Signum.Entities.Alerts'
+import { AlertEntity, AlertState, AlertTypeSymbol, SendNotificationEmailTaskEntity } from '../Signum.Alerts'
 import { useForceUpdate } from '../../../Signum.React/Scripts/Hooks';
 import { SearchValueLine } from '../../../Signum.React/Scripts/Search';
 import { toLite } from '@framework/Signum.Entities'

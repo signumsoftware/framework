@@ -4,7 +4,7 @@ import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Omnibox/Omnibox
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import * as UserQueryClient from './UserQueryClient'
-import { UserQueryEntity } from './Signum.Entities.UserQueries'
+import { UserQueryEntity } from './Signum.UserQueries'
 
 export default class UserQueryOmniboxProvider extends OmniboxProvider<UserQueryOmniboxResult>
 {

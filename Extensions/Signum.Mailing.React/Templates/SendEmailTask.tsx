@@ -4,7 +4,7 @@ import * as Finder from '@framework/Finder'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { Lite, is } from '@framework/Signum.Entities'
 import { TypeContext } from '@framework/TypeContext'
-import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mailing'
+import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Mailing'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 
 export default function SendEmailTask(p: { ctx: TypeContext<SendEmailTaskEntity> }) {

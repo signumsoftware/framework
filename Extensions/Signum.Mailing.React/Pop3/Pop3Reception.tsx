@@ -3,7 +3,7 @@ import { ValueLine, EntityLine } from '@framework/Lines'
 import { SearchValueLine } from '@framework/Search'
 import { ExceptionEntity } from '@framework/Signum.Entities.Basics'
 import { TypeContext } from '@framework/TypeContext'
-import { Pop3ReceptionEntity, EmailMessageEntity, EmailReceptionMixin } from '../Signum.Entities.Mailing'
+import { Pop3ReceptionEntity, EmailMessageEntity, EmailReceptionMixin } from '../Signum.Mailing'
 
 export default function Pop3Reception(p : { ctx: TypeContext<Pop3ReceptionEntity> }){
   const sc = p.ctx;

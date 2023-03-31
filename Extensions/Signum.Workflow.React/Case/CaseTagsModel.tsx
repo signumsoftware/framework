@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { CaseTagsModel, CaseTagTypeEntity } from '../Signum.Entities.Workflow'
+import { CaseTagsModel, CaseTagTypeEntity } from '../Signum.Workflow'
 import { EntityStrip, TypeContext } from '@framework/Lines'
 import Tag from './Tag'
 

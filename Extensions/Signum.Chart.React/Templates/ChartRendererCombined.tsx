@@ -3,7 +3,7 @@ import { DomUtils, Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { FilterOptionParsed, ColumnOption, hasAggregate, withoutAggregate, FilterOption, FindOptions, withoutPinned } from '@framework/FindOptions'
-import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
+import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 import { toFilterOptions } from '@framework/Finder';
 

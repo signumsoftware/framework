@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { UserQueryPartEntity, DashboardEntity } from '../Signum.Entities.Dashboard'
+import { UserQueryPartEntity, DashboardEntity } from '../Signum.Dashboard'
 import { useForceUpdate } from '@framework/Hooks';
 import { IsQueryCachedLine } from './Dashboard';
 

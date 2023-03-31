@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { TranslationMessage } from '../Signum.Entities.Translation'
+import { TranslationMessage } from '../Signum.Translation'
 import { API, AssemblyResult, LocalizedType, LocalizableType, LocalizedMember } from '../TranslationClient'
 import { Dic } from '@framework/Globals'
 import TextArea from '@framework/Components/TextArea';

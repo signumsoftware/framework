@@ -14,7 +14,7 @@ import { API, CompilationError, EvalEntityError, DynamicPanelInformation } from 
 import { Options } from './DynamicClientOptions'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
-import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
+import { DynamicPanelPermission } from './Signum.Dynamic'
 import { useLocation, useParams } from "react-router";
 import { Tab, Tabs } from 'react-bootstrap';
 import { FormGroup } from '@framework/Lines';

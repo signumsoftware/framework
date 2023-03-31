@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { ajaxGet } from '@framework/Services';
 import { SchemaMapInfo, ClientColorProvider } from './Schema/SchemaMap'
 import { OperationMapInfo } from './Operation/OperationMap'
-import { } from './Signum.Entities.Map'
+import { } from './Signum.Map'
 import { ImportComponent } from '@framework/ImportComponent'
 import * as Navigator from "@framework/Navigator";
 import * as AppContext from "@framework/AppContext";

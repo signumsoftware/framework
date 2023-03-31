@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { SearchControl } from '@framework/Search';
-import { SMSSendPackageEntity, SMSMessageEntity } from '../Signum.Entities.SMS'
+import { SMSSendPackageEntity, SMSMessageEntity } from '../Signum.SMS'
 
 export default function SMSSendPackage(p: { ctx: TypeContext<SMSSendPackageEntity> }) {
 

@@ -8,7 +8,7 @@ import { useAPI, useAPIWithReload, useForceUpdate, useThrottle, useUpdatedRef } 
 import * as AuthClient from '../Authorization/AuthClient'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AlertDropDownGroup, AlertEntity, AlertMessage, AlertOperation } from './Signum.Entities.Alerts'
+import { AlertDropDownGroup, AlertEntity, AlertMessage, AlertOperation } from './Signum.Alerts'
 import * as AlertsClient from './AlertsClient'
 import "./AlertDropdown.css"
 import { Link } from 'react-router-dom';

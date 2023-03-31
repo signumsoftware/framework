@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { TypeContext, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
 import { IconTypeaheadLine, parseIcon } from '../../Basics/Templates/IconTypeahead';
-import { PanelPartEmbedded } from '../Signum.Entities.Dashboard';
+import { PanelPartEmbedded } from '../Signum.Dashboard';
 import { useForceUpdate } from '@framework/Hooks'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 

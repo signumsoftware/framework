@@ -17,7 +17,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { Entity, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'
 import { EntityLink } from '@framework/Search'
 import { ISymbol, PropertyRoute, symbolNiceName, Type } from '@framework/Reflection'
-import { WhatsNewMessageEmbedded, WhatsNewEntity, WhatsNewOperation, WhatsNewMessage } from './Signum.Entities.WhatsNew'
+import { WhatsNewMessageEmbedded, WhatsNewEntity, WhatsNewOperation, WhatsNewMessage } from './Signum.WhatsNew'
 import { ImportComponent } from '@framework/ImportComponent'
 import { FilePathEmbedded } from '../Files/Signum.Entities.Files'
 

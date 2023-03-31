@@ -1,3 +1,17 @@
 {
-  "extends": "./tsconfig.base"
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./ts_out",
+    "paths": {
+      "@framework/*": [ "../../Signum.React/*" ]
+    }
+
+  },
+  "references": [
+    { "path": "../../Signum.React" }
+  ],
+  "exclude": [
+    "../../Signum.React/ts_out",
+    "./ts_out"
+  ]
 }

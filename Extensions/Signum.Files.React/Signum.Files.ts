@@ -7,6 +7,30 @@ import * as Entities from '../../Signum.React/Signum.Entities'
 import * as Basics from '../../Signum.React/Signum.Basics'
 import * as Operations from '../../Signum.React/Signum.Operations'
 
+export interface IFile
+{
+  __isFile__ : true; //only for type-checking
+  binaryFile?: string | null;
+  fileName?: string | null;
+  fullWebPath?: string | null;
+}
+
+export interface FileEntity extends IFile { }
+export interface FileEmbedded extends IFile { }
+
+export interface IFilePath extends IFile
+{
+  fileType?: FileTypeSymbol | null;
+  suffix?: string | null;
+}
+
+export interface FilePathEntity extends IFilePath { }
+export interface FilePathEmbedded extends IFilePath {
+  entityId: number | string;
+  mListRowId: number | string | null;
+  propertyRoute: string;
+  rootType: string;
+}
 
 export const BigStringMixin = new Type<BigStringMixin>("BigStringMixin");
 export interface BigStringMixin extends Entities.MixinEntity {

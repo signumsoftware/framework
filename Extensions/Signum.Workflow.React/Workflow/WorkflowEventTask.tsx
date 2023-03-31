@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, TypeContext, EntityCombo } from '@framework/Lines'
 import * as Navigator from '@framework/Navigator'
-import { WorkflowEventTaskEntity, WorkflowEventEntity, WorkflowEventTaskActionEval, WorkflowEventType, TriggeredOn, WorkflowEventTaskConditionEval, WorkflowEventTaskModel } from '../Signum.Entities.Workflow'
+import { WorkflowEventTaskEntity, WorkflowEventEntity, WorkflowEventTaskActionEval, WorkflowEventType, TriggeredOn, WorkflowEventTaskConditionEval, WorkflowEventTaskModel } from '../Signum.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
 import { useForceUpdate } from '@framework/Hooks'

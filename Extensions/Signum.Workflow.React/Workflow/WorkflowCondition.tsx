@@ -4,7 +4,7 @@ import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@fra
 import { PropertyRoute, Binding } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import { WorkflowConditionEntity, ICaseMainEntity } from '../Signum.Entities.Workflow'
+import { WorkflowConditionEntity, ICaseMainEntity } from '../Signum.Workflow'
 import { WorkflowConditionTestResponse, API, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities'
-import { MapMessage } from '../Signum.Entities.Map'
+import { MapMessage } from '../Signum.Map'
 import * as MapClient from '../MapClient'
 import { SchemaMapInfo, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
 import { useLocation, useParams, Location } from "react-router";

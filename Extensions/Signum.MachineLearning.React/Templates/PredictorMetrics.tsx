@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { PredictorMetricsEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
+import { PredictorMetricsEmbedded, PredictorEntity } from '../Signum.MachineLearning'
 
 export default function PredictorRegressionMetrics(p : { ctx: TypeContext<PredictorEntity> }){
 

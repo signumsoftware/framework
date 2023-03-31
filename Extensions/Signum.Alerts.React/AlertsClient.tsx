@@ -8,7 +8,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import SelectorModal from '@framework/SelectorModal'
 import ValueLineModal from '@framework/ValueLineModal'
-import { AlertEntity, AlertTypeSymbol, AlertOperation, DelayOption, AlertMessage, SendNotificationEmailTaskEntity } from './Signum.Entities.Alerts'
+import { AlertEntity, AlertTypeSymbol, AlertOperation, DelayOption, AlertMessage, SendNotificationEmailTaskEntity } from './Signum.Alerts'
 import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
 import * as AuthClient from '../Authorization/AuthClient'

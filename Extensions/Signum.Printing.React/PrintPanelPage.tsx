@@ -4,7 +4,7 @@ import { SearchValue, SearchControl, SearchValueLine, SearchValueController } fr
 import { StyleContext } from '@framework/Lines'
 import { API, PrintStat } from './PrintClient'
 import * as Navigator from '@framework/Navigator'
-import { PrintLineState, PrintLineEntity, PrintPackageEntity } from './Signum.Entities.Printing'
+import { PrintLineState, PrintLineEntity, PrintPackageEntity } from './Signum.Printing'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { useAPI } from '@framework/Hooks'

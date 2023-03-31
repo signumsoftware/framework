@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { SearchMessage } from '@framework/Signum.Entities'
-import { ChartMessage } from '../Signum.Entities.Chart'
+import { ChartMessage } from '../Signum.Chart'
 
 import "../Chart.css"
 

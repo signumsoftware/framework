@@ -1,4 +1,4 @@
-import { DashboardEntity, InteractionGroup, PanelPartEmbedded, UserChartPartEntity, UserQueryPartEntity } from '../Signum.Entities.Dashboard';
+import { DashboardEntity, InteractionGroup, PanelPartEmbedded, UserChartPartEntity, UserQueryPartEntity } from '../Signum.Dashboard';
 import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, FindOptions, isActive, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { ChartRequestModel, UserChartEntity } from '../../Chart/Signum.Entities.Chart';

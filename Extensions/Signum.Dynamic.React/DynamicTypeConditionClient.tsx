@@ -10,7 +10,7 @@ import * as Operations from '@framework/Operations'
 import { Entity } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as DynamicClientOptions from './DynamicClientOptions'
-import { DynamicTypeConditionEntity, DynamicTypeConditionEval, DynamicTypeConditionOperation } from './Signum.Entities.Dynamic'
+import { DynamicTypeConditionEntity, DynamicTypeConditionEval, DynamicTypeConditionOperation } from './Signum.Dynamic'
 
 export function start(options: { routes: RouteObject[] }) {
 

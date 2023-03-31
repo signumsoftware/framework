@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { UserTreePartEntity } from '../Signum.Entities.Dashboard'
+import { UserTreePartEntity } from '../Signum.Dashboard'
 import { EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 

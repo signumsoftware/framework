@@ -4,7 +4,7 @@ import { Dic, classes } from '@framework/Globals'
 import * as Navigator from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
 import { getToString, Lite, newMListElement } from '@framework/Signum.Entities'
-import { CaseTagTypeEntity, CaseEntity, CaseTagsModel, CaseOperation, CaseMessage } from '../Signum.Entities.Workflow'
+import { CaseTagTypeEntity, CaseEntity, CaseTagsModel, CaseOperation, CaseMessage } from '../Signum.Workflow'
 import Tag from './Tag'
 import * as WorkflowClient from '../WorkflowClient'
 

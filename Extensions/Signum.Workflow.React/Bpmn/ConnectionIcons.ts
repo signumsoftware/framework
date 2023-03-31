@@ -1,5 +1,5 @@
 /// <reference path="../bpmn-js.d.ts" />
-import { WorkflowConditionEntity, WorkflowActionEntity } from '../Signum.Entities.Workflow'
+import { WorkflowConditionEntity, WorkflowActionEntity } from '../Signum.Workflow'
 import { getToString, Lite, liteKey } from '@framework/Signum.Entities'
 
 export function getOrientation(rect: BPMN.DiElement, reference: BPMN.DiElement, padding: number) {

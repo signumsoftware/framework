@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
 import { Entity, parseLite, getToString, JavascriptMessage, EntityPack } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
-import { DashboardEntity, DashboardMessage } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, DashboardMessage } from '../Signum.Dashboard'
 import DashboardView from './DashboardView'
 import { useLocation, useParams } from "react-router";
 import "../Dashboard.css"

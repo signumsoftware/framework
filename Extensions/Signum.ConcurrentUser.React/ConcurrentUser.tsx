@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import * as AppContext from '@framework/AppContext'
 import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from '../Alerts/useSignalR'
-import { ConcurrentUserEntity, ConcurrentUserMessage } from './Signum.Entities.ConcurrentUser'
+import { ConcurrentUserEntity, ConcurrentUserMessage } from './Signum.ConcurrentUser'
 import { OverlayTrigger, Popover } from 'react-bootstrap';
 import { Entity, getToString, Lite, liteKey, toLite } from '@framework/Signum.Entities'
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization'

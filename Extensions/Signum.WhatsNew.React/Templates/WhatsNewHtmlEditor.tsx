@@ -12,7 +12,7 @@ import { FileImage } from '../../Files/FileImage';
 import { TypeContext, ReadonlyBinding } from '@framework/Lines';
 import { ErrorBoundary } from '@framework/Components';
 import { ImageModal } from '../../../../Framework/Signum.React.Extensions/Files/ImageModal';
-import { WhatsNewEntity } from '../Signum.Entities.WhatsNew';
+import { WhatsNewEntity } from '../Signum.WhatsNew';
 
 export default function WhatsNewHtmlEditor(p: {
   binding: Binding<string | undefined | null>;

@@ -4,7 +4,7 @@ import * as Navigator from '@framework/Navigator'
 import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartClient from './ChartClient'
-import { UserChartEntity } from './Signum.Entities.Chart'
+import { UserChartEntity } from './Signum.Chart'
 import { liteKey } from '@framework/Signum.Entities'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
 

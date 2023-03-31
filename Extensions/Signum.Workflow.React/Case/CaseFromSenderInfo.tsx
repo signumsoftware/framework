@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import * as Navigator from '@framework/Navigator'
 import { JavascriptMessage, is, getToString } from '@framework/Signum.Entities'
-import { CaseActivityEntity, CaseActivityMessage } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, CaseActivityMessage } from '../Signum.Workflow'
 import { useFetchInState } from '@framework/Navigator'
 
 interface CaseFromSenderInfoProps {

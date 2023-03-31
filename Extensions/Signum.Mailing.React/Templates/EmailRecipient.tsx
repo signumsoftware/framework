@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailRecipientEmbedded } from '../Signum.Entities.Mailing'
+import { EmailRecipientEmbedded } from '../Signum.Mailing'
 
 export default function EmailRecipient(p : { ctx: TypeContext<EmailRecipientEmbedded> }){
   const sc = p.ctx.subCtx({ placeholderLabels: true, formGroupStyle: "SrOnly" });

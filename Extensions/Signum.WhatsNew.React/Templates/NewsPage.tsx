@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { EntityControlMessage, getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities';
-import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage } from '../Signum.Entities.WhatsNew';
+import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage } from '../Signum.WhatsNew';
 import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks';
 import { API, WhatsNewFull } from "../WhatsNewClient";
 import "./NewsPage.css"

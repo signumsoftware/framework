@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ConcurrentUserEntity } from './Signum.Entities.ConcurrentUser'
+import { ConcurrentUserEntity } from './Signum.ConcurrentUser'
 import { Entity, isEntity, Lite, toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import * as Widgets from '@framework/Frames/Widgets';

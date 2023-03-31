@@ -4,7 +4,7 @@ import { SearchValueLine, SearchValueLineController } from '@framework/Search'
 import { toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TypeContext } from '@framework/TypeContext'
-import { ProcessEntity, ProcessExceptionLineEntity, ProcessState } from '../Signum.Entities.Processes'
+import { ProcessEntity, ProcessExceptionLineEntity, ProcessState } from '../Signum.Processes'
 import ProgressBar from '../../MachineLearning/Templates/ProgressBar';
 import { BsColor } from '@framework/Components';
 import { useInterval } from '@framework/Hooks'

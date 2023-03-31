@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityStrip, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { UserChartPartEntity, DashboardEntity, CombinedUserChartPartEntity, CombinedUserChartElementEmbedded } from '../Signum.Entities.Dashboard'
+import { UserChartPartEntity, DashboardEntity, CombinedUserChartPartEntity, CombinedUserChartElementEmbedded } from '../Signum.Dashboard'
 import { D3ChartScript, UserChartEntity } from '../../Chart/Signum.Entities.Chart';
 import { IsQueryCachedLine } from './Dashboard';
 

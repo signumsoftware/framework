@@ -5,7 +5,7 @@ import { Dic, softCast } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations'
 import * as CultureClient from '../CultureClient'
 import { API, PropertyRouteConflic, TypeInstancesChanges, TranslationRecord, PropertyChange } from '../TranslatedInstanceClient'
-import { TranslationMessage } from '../Signum.Entities.Translation'
+import { TranslationMessage } from '../Signum.Translation'
 import { useLocation, useParams } from "react-router";
 import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'

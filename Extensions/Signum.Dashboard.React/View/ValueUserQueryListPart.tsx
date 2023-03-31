@@ -7,7 +7,7 @@ import { Entity, Lite, is, JavascriptMessage, liteKey, toLite } from '@framework
 import { SearchValueLine } from '@framework/Search'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, PanelPartEmbedded, CachedQueryEntity } from '../Signum.Entities.Dashboard'
+import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, PanelPartEmbedded, CachedQueryEntity } from '../Signum.Dashboard'
 import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../DashboardClient'
 import { DashboardController } from './DashboardFilterController'

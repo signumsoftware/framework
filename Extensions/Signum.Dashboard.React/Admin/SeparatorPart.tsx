@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { TypeContext, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
-import { SeparatorPartEntity } from '../Signum.Entities.Dashboard';
+import { SeparatorPartEntity } from '../Signum.Dashboard';
 
 export default function SeparatorPart(p: { ctx: TypeContext<SeparatorPartEntity> }) {
   const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });

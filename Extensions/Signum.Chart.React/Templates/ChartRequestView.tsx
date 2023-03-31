@@ -13,7 +13,7 @@ import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExp
 import * as Navigator from '@framework/Navigator'
 import FilterBuilder from '@framework/SearchControl/FilterBuilder'
 import { ValidationErrors } from '@framework/Frames/ValidationErrors'
-import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
+import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartBuilder from './ChartBuilder'
 import ChartTableComponent from './ChartTable'

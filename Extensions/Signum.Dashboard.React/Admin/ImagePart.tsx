@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { TypeContext, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
-import { ImagePartEntity } from '../Signum.Entities.Dashboard';
+import { ImagePartEntity } from '../Signum.Dashboard';
 
 export default function ImagePart(p: { ctx: TypeContext<ImagePartEntity> }) {
   const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });

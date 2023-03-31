@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
-import { PackageEntity, PackageLineEntity, PackageQuery } from '../Signum.Entities.Processes'
+import { PackageEntity, PackageLineEntity, PackageQuery } from '../Signum.Processes'
 
 export default function Package(p : { ctx: TypeContext<PackageEntity> }){
   const e = p.ctx;

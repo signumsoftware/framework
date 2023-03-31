@@ -4,7 +4,7 @@ import * as React from 'react';
 import { RouteObject } from 'react-router'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import { ChartMessage, ColorPaletteEntity } from '../Signum.Entities.Chart'
+import { ChartMessage, ColorPaletteEntity } from '../Signum.Chart'
 import * as ColorUtils from './ColorUtils'
 import { PseudoType, getTypeName, tryGetTypeInfo } from '@framework/Reflection';
 import { Lite } from '@framework/Signum.Entities';

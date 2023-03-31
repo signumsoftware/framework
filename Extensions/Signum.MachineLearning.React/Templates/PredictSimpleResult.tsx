@@ -3,7 +3,7 @@ import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityLine, IRenderButtons } from '@framework/Lines'
 import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
-import { PredictSimpleResultEntity, PredictorMessage } from '../Signum.Entities.MachineLearning'
+import { PredictSimpleResultEntity, PredictorMessage } from '../Signum.MachineLearning'
 import { predict } from '../PredictorClient';
 
 export default class PredictSimpleResult extends React.Component<{ ctx: TypeContext<PredictSimpleResultEntity> }> implements IRenderButtons {

@@ -4,7 +4,7 @@ import * as Finder from '@framework/Finder'
 import { getToString, Lite, PaginationMessage, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import { ExcelReportEntity, ExcelMessage, ExcelReportOperation, ImportFromExcelMessage } from './Signum.Entities.Excel'
+import { ExcelReportEntity, ExcelMessage, ExcelReportOperation, ImportFromExcelMessage } from './Signum.Excel'
 import * as ExcelClient from './ExcelClient'
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import * as Operations from '@framework/Operations';

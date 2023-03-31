@@ -12,7 +12,7 @@ import InitialMessage from './Components/InitialMessage';
 import { ChartScriptHorizontalProps, paintLine } from './Line';
 import { paintColumns } from './Columns';
 import { ReactChartCombinedInfo } from './Components/ReactChartCombined';
-import { D3ChartScript } from '../Signum.Entities.Chart';
+import { D3ChartScript } from '../Signum.Chart';
 import { MemoRepository } from './Components/ReactChart';
 
 const supportedTypes = [

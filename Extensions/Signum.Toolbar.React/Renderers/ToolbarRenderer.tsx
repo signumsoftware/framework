@@ -14,7 +14,7 @@ import { getToString } from '@framework/Signum.Entities'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { urlVariables } from '../../Dashboard/UrlVariables';
 import { Dic } from '@framework/Globals';
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage } from '../Signum.Entities.Toolbar';
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage } from '../Signum.Toolbar';
 
 
 

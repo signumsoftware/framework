@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { QueryTokenEmbedded } from '../Signum.Entities.UserAssets'
+import { QueryTokenEmbedded } from '../Signum.UserAssets'
 import { FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { QueryToken, SubTokensOptions } from '@framework/FindOptions'

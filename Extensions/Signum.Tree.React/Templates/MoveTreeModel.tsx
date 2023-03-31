@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { Lite } from '@framework/Signum.Entities'
 import { TypeContext } from '@framework/TypeContext'
-import { MoveTreeModel, TreeEntity } from '../Signum.Entities.Tree'
+import { MoveTreeModel, TreeEntity } from '../Signum.Tree'
 import * as TreeClient from '../TreeClient'
 import { TypeReference, QueryTokenString } from "@framework/Reflection";
 import { useForceUpdate } from '@framework/Hooks'

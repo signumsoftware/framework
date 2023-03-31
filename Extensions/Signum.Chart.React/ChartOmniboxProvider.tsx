@@ -3,7 +3,7 @@ import { getQueryKey } from '@framework/Reflection'
 import { OmniboxMessage } from '../Omnibox/Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Omnibox/OmniboxClient'
 import * as ChartClient from './ChartClient'
-import { ChartRequestModel } from './Signum.Entities.Chart'
+import { ChartRequestModel } from './Signum.Chart'
 
 export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxResult>
 {

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
-import { TreeMessage } from './Signum.Entities.Tree'
+import { TreeMessage } from './Signum.Tree'
 import * as TreeClient from './TreeClient'
 import { Button } from 'react-bootstrap';
 

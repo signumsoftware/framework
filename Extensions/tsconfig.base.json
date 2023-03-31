@@ -7,7 +7,6 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "incremental": true,
-    "outDir": "./ts_out",
     "composite": true,
     //"noEmit": true,
     "strict": true,

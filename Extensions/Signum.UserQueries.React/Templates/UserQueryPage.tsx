@@ -7,7 +7,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@frame
 import { SearchMessage, JavascriptMessage, parseLite, toLite } from '@framework/Signum.Entities'
 import { getQueryNiceName, newLite } from '@framework/Reflection'
 import SearchControl, { SearchControlHandler } from '@framework/SearchControl/SearchControl'
-import { UserQueryEntity } from '../Signum.Entities.UserQueries'
+import { UserQueryEntity } from '../Signum.UserQueries'
 import * as UserQueryClient from '../UserQueryClient'
 import { useLocation, useParams } from "react-router";
 import { useAPI, useForceUpdate } from '@framework/Hooks'

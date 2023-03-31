@@ -14,7 +14,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { NormalControlMessage } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
-import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission, DynamicApiEntity } from './Signum.Entities.Dynamic'
+import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission, DynamicApiEntity } from './Signum.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Authorization/AuthClient'

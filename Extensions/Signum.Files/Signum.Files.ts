@@ -2,33 +2,11 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Scripts/Reflection'
-import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
 
-export interface IFile
-{
-  __isFile__ : true; //only for type-checking
-  binaryFile?: string | null;
-  fileName?: string | null;
-  fullWebPath?: string | null;
-}
-
-export interface FileEntity extends IFile { }
-export interface FileEmbedded extends IFile { }
-
-export interface IFilePath extends IFile
-{
-  fileType?: FileTypeSymbol | null;
-  suffix?: string | null;
-}
-
-export interface FilePathEntity extends IFilePath { }
-export interface FilePathEmbedded extends IFilePath {
-  entityId: number | string;
-  mListRowId: number | string | null;
-  propertyRoute: string;
-  rootType: string;
-}
 
 export const BigStringMixin = new Type<BigStringMixin>("BigStringMixin");
 export interface BigStringMixin extends Entities.MixinEntity {
@@ -96,12 +74,11 @@ export interface FilePathEntity extends Entities.Entity {
 }
 
 export module FilePathOperation {
-  export const Save : Entities.ExecuteSymbol<FilePathEntity> = registerSymbol("Operation", "FilePathOperation.Save");
+  export const Save : Operations.ExecuteSymbol<FilePathEntity> = registerSymbol("Operation", "FilePathOperation.Save");
 }
 
 export const FileTypeSymbol = new Type<FileTypeSymbol>("FileType");
-export interface FileTypeSymbol extends Entities.Symbol {
+export interface FileTypeSymbol extends Basics.Symbol {
   Type: "FileType";
 }
-
 

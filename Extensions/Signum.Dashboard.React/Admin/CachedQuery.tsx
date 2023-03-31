@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityRepeater, EntityTable, EntityStrip } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, DashboardEntity, CachedQueryEntity } from '../Signum.Entities.Dashboard'
+import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, DashboardEntity, CachedQueryEntity } from '../Signum.Dashboard'
 import { IsQueryCachedLine } from './Dashboard';
 import * as FilesClient from '../../Files/FilesClient';
 import { downloadFile } from '../../Files/FileDownloader';

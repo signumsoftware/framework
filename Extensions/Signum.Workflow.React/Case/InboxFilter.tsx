@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DateTime, Settings } from 'luxon'
 import { newMListElement } from '@framework/Signum.Entities'
-import { InboxFilterModel, InboxMessage, CaseNotificationState, CaseActivityEntity, CaseNotificationEntity } from '../Signum.Entities.Workflow'
+import { InboxFilterModel, InboxMessage, CaseNotificationState, CaseActivityEntity, CaseNotificationEntity } from '../Signum.Workflow'
 import { TypeContext, ValueLine, EnumCheckboxList } from '@framework/Lines'
 import { ISimpleFilterBuilder, extractFilterValue, FilterOption } from '@framework/Search'
 import { FilterOptionParsed } from "@framework/FindOptions";

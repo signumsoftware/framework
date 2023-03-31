@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { getTypeInfo } from '@framework/Reflection'
 import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
-import { WorkflowEntity, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
+import { WorkflowEntity, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import { NavDropdown, Dropdown } from 'react-bootstrap'
 import { useAPI } from '@framework/Hooks';

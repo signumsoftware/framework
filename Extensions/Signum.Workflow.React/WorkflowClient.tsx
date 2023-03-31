@@ -25,7 +25,7 @@ import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
   ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation, CaseActivityMessage, CaseMessage, WorkflowScriptRetryStrategyEntity, WorkflowEventType
-} from './Signum.Entities.Workflow'
+} from './Signum.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
 import * as QuickLinks from '@framework/QuickLinks'
@@ -38,7 +38,7 @@ import {
   WorkflowReplacementModel, WorkflowModel, BpmnEntityPairEmbedded, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
   WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimerEmbedded, CaseTagsModel, CaseTagTypeEntity,
   WorkflowPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType, CaseActivityMixin,
-} from './Signum.Entities.Workflow'
+} from './Signum.Workflow'
 
 
 import InboxFilter from './Case/InboxFilter'

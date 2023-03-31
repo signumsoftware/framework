@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { AlertTypeSymbol } from '../Signum.Entities.Alerts'
+import { AlertTypeSymbol } from '../Signum.Alerts'
 
 export default function AlertType(p : { ctx: TypeContext<AlertTypeSymbol> }){
   const ctx = p.ctx;

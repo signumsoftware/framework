@@ -9,7 +9,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { Type, tryGetTypeInfo } from '@framework/Reflection'
 import { getToString, Lite } from '@framework/Signum.Entities'
-import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
+import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
 import TreeModal from './TreeModal'
 import { FilterRequest, FilterOption } from "@framework/FindOptions";
 import { ImportComponent } from '@framework/ImportComponent'

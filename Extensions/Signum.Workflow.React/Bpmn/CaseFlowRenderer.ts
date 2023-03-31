@@ -1,7 +1,7 @@
 /// <reference path="../bpmn-js.d.ts" />
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { DateTime, Duration } from 'luxon'
-import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Workflow'
 import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseActivityStats, formatDuration } from '../WorkflowClient'

@@ -7,7 +7,7 @@ import { getToString, Lite } from '@framework/Signum.Entities'
 import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult } from '../TranslationClient'
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
-import { TranslationMessage } from '../Signum.Entities.Translation'
+import { TranslationMessage } from '../Signum.Translation'
 import { TranslationTypeTable } from './TranslationTypeTable'
 import "../Translation.css"
 import { decodeDots } from './TranslationCodeStatus'

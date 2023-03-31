@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityCombo, FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { AlertEntity, AlertMessage } from '../Signum.Entities.Alerts'
+import { AlertEntity, AlertMessage } from '../Signum.Alerts'
 import * as AlertsClient from '../AlertsClient'
 import { useForceUpdate } from '@framework/Hooks';
 

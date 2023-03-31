@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ScheduleRuleMonthsEntity } from '../Signum.Entities.Scheduler'
+import { ScheduleRuleMonthsEntity } from '../Signum.Scheduler'
 
 export default function ScheduleRuleMonths(p : { ctx: TypeContext<ScheduleRuleMonthsEntity> }){
   const ctx4 = p.ctx.subCtx({ labelColumns: { sm: 4 } });

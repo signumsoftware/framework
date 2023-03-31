@@ -3,7 +3,7 @@ import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityTable } from '@
 import { TypeContext } from '@framework/TypeContext'
 import ValueLineModal from '@framework/ValueLineModal'
 import { useForceUpdate } from '@framework/Hooks'
-import { WordTemplateEntity } from '../Signum.Entities.Word'
+import { WordTemplateEntity } from '../Signum.Word'
 import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
 import { FileLine } from '../../Files/FileLine'
 import TemplateControls from '../../Templating/TemplateControls'

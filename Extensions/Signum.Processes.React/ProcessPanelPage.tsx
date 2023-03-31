@@ -3,7 +3,7 @@ import { useLocation, useParams } from 'react-router-dom'
 import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, ProcessLogicState } from './ProcessClient'
-import { ProcessEntity } from './Signum.Entities.Processes'
+import { ProcessEntity } from './Signum.Processes'
 import { SearchControl } from '@framework/Search';
 import * as AppContext from '@framework/AppContext'
 import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'

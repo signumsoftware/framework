@@ -10,7 +10,7 @@ import * as Finder from '@framework/Finder'
 import { Lite, Entity, getToString, isEntity, JavascriptMessage } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import * as QuickLinks from '@framework/QuickLinks'
-import { TimeMachineMessage, TimeMachinePermission } from './Signum.Entities.DiffLog';
+import { TimeMachineMessage, TimeMachinePermission } from './Signum.DiffLog';
 import { ImportComponent } from '@framework/ImportComponent'
 import { getTypeInfo, getTypeInfos, QueryTokenString } from '@framework/Reflection';
 import { EntityLink, SearchControl, SearchControlLoaded } from '@framework/Search';

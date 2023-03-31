@@ -6,7 +6,7 @@ import { IModalProps, openModal } from '@framework/Modals';
 import { jsonObjectStream } from '@framework/Operations/jsonObjectStream';
 import { JavascriptMessage, liteKey } from '@framework/Signum.Entities';
 import { ImportFromExcelReport, ImportResult } from './ExcelClient';
-import { ImportFromExcelMessage } from './Signum.Entities.Excel';
+import { ImportFromExcelMessage } from './Signum.Excel';
 import { TypeInfo } from '@framework/Reflection';
 
 

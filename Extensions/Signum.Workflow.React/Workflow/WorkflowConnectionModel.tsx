@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { WorkflowConnectionModel, WorkflowConditionEntity, WorkflowActionEntity, WorkflowMessage, ConnectionType } from '../Signum.Entities.Workflow'
+import { WorkflowConnectionModel, WorkflowConditionEntity, WorkflowActionEntity, WorkflowMessage, ConnectionType } from '../Signum.Workflow'
 import { ValueLine, EntityLine, TypeContext, FormGroup, EntityTable } from '@framework/Lines'
 import { useForceUpdate } from '@framework/Hooks';
 

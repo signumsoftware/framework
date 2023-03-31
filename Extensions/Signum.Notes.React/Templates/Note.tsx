@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityCombo } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { NoteEntity } from '../Signum.Entities.Notes'
+import { NoteEntity } from '../Signum.Notes'
 
 export default function Note(p : { ctx: TypeContext<NoteEntity> }){
   const e = p.ctx;

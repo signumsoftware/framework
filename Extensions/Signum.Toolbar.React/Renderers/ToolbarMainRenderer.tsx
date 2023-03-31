@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import { ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarMenuEntity } from '../Signum.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
