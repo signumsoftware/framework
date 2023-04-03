@@ -215,7 +215,8 @@ public static class AlertLogic
                     var lite = prop is Entity e ? e.ToLite() :
                                 prop is Lite<Entity> l ? l : null;
 
-                    var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Replace("~", EmailLogic.Configuration.UrlLeft) ?? (lite != null ? EntityUrl(lite) : "#");
+                    var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Let(url => url.StartsWith("~") ? (EmailLogic.Configuration.UrlLeft + url.After("~")) : url) ?? 
+                    (lite != null ? EntityUrl(lite) : "#");
 
                     var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite?.ToString());
 

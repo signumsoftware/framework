@@ -253,6 +253,8 @@ public class SqlServerConnector : Connector
                 }
             });
         }
+
+
         catch (InvalidOperationException ioe)
         {
             if (ioe.Message.Contains("SqlDependency.Start()") && !reconected)
