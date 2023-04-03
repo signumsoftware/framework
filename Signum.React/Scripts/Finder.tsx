@@ -1653,7 +1653,7 @@ export module Encoder {
 
 
 
-  export function encodeFilters(query: any, filterOptions?: FilterOption[]) {
+  export function encodeFilters(query: any, filterOptions?: FilterOption[], prefix?: string) {
 
     var i: number = 0;
 
@@ -1664,7 +1664,7 @@ export module Encoder {
 
       if (fo.pinned) {
         var p = fo.pinned;
-        query["filterPinned" + index + identSuffix] = scapeTilde(typeof p.label == "function" ? p.label() : p.label ?? "") +
+        query[(prefix ?? "") + "filterPinned" + index + identSuffix] = scapeTilde(typeof p.label == "function" ? p.label() : p.label ?? "") +
           "~" + (p.column == null ? "" : p.column) +
           "~" + (p.row == null ? "" : p.row) +
           "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
@@ -1673,11 +1673,11 @@ export module Encoder {
 
 
       if (isFilterGroupOption(fo)) {
-        query["filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
+        query[(prefix ?? "") + "filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
 
         fo.filters.notNull().forEach(f => encodeFilter(f, identation + 1, ignoreValues || shouldIgnoreValues(fo.pinned)));
       } else {
-        query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
+        query[(prefix ?? "") + "filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
       }
 
     }
@@ -1686,12 +1686,12 @@ export module Encoder {
       filterOptions.forEach(fo => encodeFilter(fo, 0, false));
   }
 
-  export function encodeOrders(query: any, orderOptions?: OrderOption[]) {
+  export function encodeOrders(query: any, orderOptions?: OrderOption[], prefix?: string) {
     if (orderOptions)
-      orderOptions.forEach((oo, i) => query["order" + i] = (oo.orderType == "Descending" ? "-" : "") + oo.token);
+      orderOptions.forEach((oo, i) => query[(prefix ?? "") + "order" + i] = (oo.orderType == "Descending" ? "-" : "") + oo.token);
   }
 
-  export function encodeColumns(query: any, columnOptions?: ColumnOption[]) {
+  export function encodeColumns(query: any, columnOptions?: ColumnOption[], prefix?: string) {
     if (columnOptions) {
       columnOptions.forEach((co, i) => {
 
@@ -1699,9 +1699,9 @@ export module Encoder {
           co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
             undefined;
 
-        query["column" + i] = co.token + (displayName ? ("~" + displayName) : "");
+        query[(prefix ?? "") + "column" + i] = co.token + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
-          query["summary" + i] = co.summaryToken.toString();
+          query[(prefix ?? "") + "summary" + i] = co.summaryToken.toString();
       });
     }
   }
@@ -1754,7 +1754,7 @@ export module Decoder {
       .orderBy(a => a.order);
   }
 
-  export function decodeFilters(query: any): FilterOption[] {
+  export function decodeFilters(query: any, prefix?: string): FilterOption[] {
 
     function parsePinnedFilter(str: string): PinnedFilter {
       var parts = str.split("~");
@@ -1774,7 +1774,7 @@ export module Decoder {
 
         var identSuffix = identation == 0 ? "" : ("_" + identation);
 
-        var pinnedText = query["filterPinned" + gr.key.order + identSuffix] as string;
+        var pinnedText = query[(prefix ?? "") + "filterPinned" + gr.key.order + identSuffix] as string;
 
         var pinned = pinnedText == undefined ? null : parsePinnedFilter(pinnedText);
 
@@ -1801,7 +1801,7 @@ export module Decoder {
       });
     }
 
-    return toFilterList(filterInOrder(query, "filter"), 0, false)
+    return toFilterList(filterInOrder(query, (prefix ?? "") + "filter"), 0, false)
   }
 
   export function unscapeTildes(str: string | undefined): string | undefined {
@@ -1820,18 +1820,18 @@ export module Decoder {
       .orderBy(a => a.index);   
   }
 
-  export function decodeOrders(query: any): OrderOption[] {
-    return valuesInOrder(query, "order").map(p => ({
+  export function decodeOrders(query: any, prefix?: string): OrderOption[] {
+    return valuesInOrder(query, (prefix ?? "") + "order").map(p => ({
       orderType: p.value[0] == "-" ? "Descending" : "Ascending",
       token: p.value[0] == "-" ? p.value.tryAfter("-") : p.value
     } as OrderOption));
   }
 
 
-  export function decodeColumns(query: any): ColumnOption[] {
-    var summary = valuesInOrder(query, "summary");
+  export function decodeColumns(query: any, prefix?: string): ColumnOption[] {
+    var summary = valuesInOrder(query, (prefix ?? "") + "summary");
 
-    return valuesInOrder(query, "column").map(p => {
+    return valuesInOrder(query, (prefix ?? "") + "column").map(p => {
 
       var displayName = unscapeTildes(p.value.tryAfter("~")); 
 
