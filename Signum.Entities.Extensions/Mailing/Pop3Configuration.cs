@@ -77,6 +77,8 @@ public class Pop3ReceptionEntity : Entity
 
     public int NewEmails { get; set; }
     public int ServerEmails { get; set; }
+    public int DeletedEmails { get; set; }
+
     public string? LastServerMessageUID { get; set; }
     public bool MailsFromDifferentAccounts { get; set; }
     public Lite<ExceptionEntity>? Exception { get; set; }

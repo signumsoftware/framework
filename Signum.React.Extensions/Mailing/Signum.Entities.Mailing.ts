@@ -386,6 +386,7 @@ export interface Pop3ReceptionEntity extends Entities.Entity {
   endDate: string /*DateTime*/ | null;
   newEmails: number;
   serverEmails: number;
+  deletedEmails: number;
   lastServerMessageUID: string | null;
   mailsFromDifferentAccounts: boolean;
   exception: Entities.Lite<Signum.ExceptionEntity> | null;
