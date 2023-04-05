@@ -21,6 +21,7 @@ public static class FilePathLogic
             FileTypeLogic.Start(sb);
 
             sb.Include<FilePathEntity>()
+                .WithUniqueIndex(f => new { f.Suffix, f.FileType })
                 .WithQuery(() => p => new
                 {
                     Entity = p,
@@ -59,7 +60,6 @@ public static class FilePathLogic
                 }
             }.Register();
 
-            sb.AddUniqueIndex<FilePathEntity>(f => new { f.Suffix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
         }
     }
 
