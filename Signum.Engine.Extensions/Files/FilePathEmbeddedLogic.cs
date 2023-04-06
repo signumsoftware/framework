@@ -23,7 +23,7 @@ public static class FilePathEmbeddedLogic
 
             FilePathEmbedded.OnPreSaving += fpe =>
             {
-                if (fpe.BinaryFile != null) //First time
+                if (fpe.BinaryFile != null && !fpe.KeepSuffix) //First time
                 {
                     if (SyncFileSave)
                         fpe.SaveFile();
@@ -199,6 +199,7 @@ public static class FilePathEmbeddedLogic
 
     public static FilePathEmbedded SaveFile(this FilePathEmbedded fpe)
     {
+        
         var alg = fpe.FileType.GetAlgorithm();
         alg.ValidateFile(fpe);
         alg.SaveFile(fpe);
