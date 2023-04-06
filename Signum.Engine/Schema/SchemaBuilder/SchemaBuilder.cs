@@ -4,6 +4,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.DynamicQuery;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Signum.Engine.Maps;
 
@@ -107,6 +108,19 @@ public class SchemaBuilder
         return index;
     }
 
+    public FullTextTableIndex AddFullTextIndex<T>(Expression<Func<T, object?>> fields) where T : Entity
+    {
+        var table = Schema.Table<T>();
+
+        IColumn[] columns = IndexKeyColumns.Split(table, fields);
+
+        var index = new FullTextTableIndex(table, columns);
+
+        AddIndex(index);
+
+        return index;
+    }
+
     public UniqueTableIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
         Expression<Func<MListElement<T, V>, object>> fields,
         Expression<Func<MListElement<T, V>, bool>>? where = null,
@@ -164,6 +178,34 @@ public class SchemaBuilder
         return index;
     }
 
+    public FullTextTableIndex AddFullTextIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
+        Expression<Func<MListElement<T, V>, object>> fields)
+        where T : Entity
+    {
+        TableMList table = ((FieldMList)Schema.FindField(Schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
+
+        IColumn[] columns = IndexKeyColumns.Split(table, fields);
+
+        var index = new FullTextTableIndex(table, columns);
+
+        AddIndex(index);
+
+        return index;
+    }
+
+    public FullTextTableIndex AddFullTextIndex(ITable table, Field[] fields)
+    {
+        var index = new FullTextTableIndex(table, TableIndex.GetColumnsFromFields(fields));
+        AddIndex(index);
+        return index;
+    }
+
+    public FullTextTableIndex AddFullTextIndex(ITable table, IColumn[] columns)
+    {
+        var index = new FullTextTableIndex(table, columns);
+        AddIndex(index);
+        return index;
+    }
 
     public UniqueTableIndex AddUniqueIndex(ITable table, Field[] fields)
     {
@@ -1046,6 +1088,29 @@ public class ViewBuilder : SchemaBuilder
         };
 
         table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
+
+        table.GenerateColumns();
+
+        return table;
+    }
+
+    public Table NewFullTextResultTable(ITable forTable)
+    {
+        var type = typeof(FullTextResultTable);
+        Table table = new Table(type)
+        {
+            Name = GenerateTableName(type, null),
+            IsView = true
+        };
+
+        var fiKey = ReflectionTools.GetFieldInfo((FullTextResultTable ft) => ft.Key);
+        var fiRank = ReflectionTools.GetFieldInfo((FullTextResultTable ft) => ft.Rank);
+
+        table.Fields = new Dictionary<string, EntityField>
+        {
+            { fiKey.Name, new EntityField(type, fiKey, new FieldPrimaryKey(PropertyRoute.Root(type).Add(fiKey), table, "KEY", forTable.PrimaryKey.Type)) },
+            { fiRank.Name, new EntityField(type, fiRank, new FieldValue(PropertyRoute.Root(type).Add(fiRank), typeof(int), "RANK")) }
+        };
 
         table.GenerateColumns();
 

@@ -8,6 +8,7 @@ using Signum.Utilities.Reflection;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Signum.Engine;
 
@@ -1813,6 +1814,7 @@ internal class SignumTable<E> : Query<E>, IQuerySignumTable
         return this.Table.GetHashCode();
     }
 }
+
 
 public interface IUpdateable
 {

@@ -122,6 +122,36 @@ public class UniqueTableIndex : TableIndex
     public bool AvoidAttachToUniqueIndexes { get; set; }
 }
 
+public class FullTextTableIndex : TableIndex
+{
+    public Dictionary<IColumn, int> Language = new Dictionary<IColumn, int>();
+
+    public string CatallogName = "DefaultFullTextCatallog";
+
+    public FullTextIndexChangeTracking? ChangeTraking;
+    public string? StoplistName;
+    public string? PropertyListName;
+
+    public static readonly string FULL_TEXT = "FULL_TEXT_INDEX";
+
+    public override string GetIndexName(ObjectName tableName)
+    {
+        return FULL_TEXT;
+    }
+
+    public FullTextTableIndex(ITable table, IColumn[] columns) : base(table, columns)
+    {
+    }
+}
+
+public enum FullTextIndexChangeTracking
+{
+    Manual,
+    Auto,
+    Off,
+    Off_NoPopulation
+}
+
 public class IndexKeyColumns
 {
 

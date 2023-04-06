@@ -230,4 +230,13 @@ public static class PostgresCatalogSchema
         }
         return result;
     }
+
+    internal static List<FullTextCatallogName> GetFullTextSearchCatallogs(List<DatabaseName?> list)
+    {
+        return new List<FullTextCatallogName>();
+    }
+
+
 }
+
+

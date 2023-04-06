@@ -26,7 +26,8 @@ public class ExpressionNominator : ExpressionVisitor
         {
             var m = ((MethodCallExpression)expression);
 
-            return m.Method.DeclaringType == typeof(Queryable) || m.Method.HasAttribute<AvoidEagerEvaluationAttribute>();
+            return m.Method.DeclaringType == typeof(Queryable) || 
+                m.Method.HasAttribute<AvoidEagerEvaluationAttribute>();
         }
 
         //Query<UserEntity>().Select(u => new ComboBox()) expects N different ComboBoxes
