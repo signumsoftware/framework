@@ -10,8 +10,6 @@ namespace Signum.Engine;
 
 public enum SqlServerVersion
 {
-    AzureSQL,
-
     SqlServer2005,
     SqlServer2008,
     SqlServer2012,
@@ -20,6 +18,8 @@ public enum SqlServerVersion
     SqlServer2017,
     SqlServer2019,
     SqlServer2022,
+
+    AzureSQL = 100,
 }
 
 public static class SqlServerVersionDetector
