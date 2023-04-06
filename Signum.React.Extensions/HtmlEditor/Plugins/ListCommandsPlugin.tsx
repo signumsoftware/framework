@@ -35,26 +35,35 @@ export default class ListCommandsPlugin implements HtmlEditorPlugin {
 
     var prevKeyBindingFn = props.keyBindingFn;
     props.keyBindingFn = (e) => {
+
       if (prevKeyBindingFn)
         prevKeyBindingFn(e);
 
-      if ((e.keyCode == KeyCodes.space || e.keyCode == KeyCodes.backspace)) {
+      if ((e.keyCode == KeyCodes.space || e.keyCode == KeyCodes.backspace || e.keyCode == KeyCodes.tab)) {
         var block = getSelectedBlock(controller.editorState);
         var blockText = block.getText();
         var blockType = block.getType();
 
-        if (e.keyCode == KeyCodes.space && blockText && blockText.length <= 2) {
+        if (e.keyCode === KeyCodes.tab) {
+          const newEditorState = draftjs.RichUtils.onTab(e, controller.editorState, 6 /* maxDepth */)
+          if (newEditorState !== controller.editorState) {
+            controller.setEditorState(newEditorState);
+          }
+          return null;
+        }
 
+        if (e.keyCode == KeyCodes.space && blockText && blockText.length <= 2) {
           if (blockText == "*") {
             return 'unordered-list-item';
-          } else if (blockText == "1.") {
+          }
+          else if (blockText == "1.") {
             return 'ordered-list-item';
           }
-
-        } else if (e.keyCode == KeyCodes.backspace && (blockType == 'unordered-list-item' || blockType == 'ordered-list-item') && blockText.length == 0) {
+        }
+        else if (e.keyCode == KeyCodes.backspace && (blockType == 'unordered-list-item' || blockType == 'ordered-list-item') && blockText.length == 0) {
           return 'end-list';
         }
-      }
+      } 
 
       return getDefaultKeyBinding(e);
     }

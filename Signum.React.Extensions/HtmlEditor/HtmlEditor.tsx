@@ -176,16 +176,6 @@ export default React.forwardRef(function HtmlEditor({
 
   if (editorProps.keyBindingFn == undefined) {
     editorProps.keyBindingFn = e => {
-
-      if (e.keyCode === KeyCodes.tab) {
-        const newEditorState = draftjs.RichUtils.onTab(e, c.editorState, 6 /* maxDepth */)
-        if (newEditorState !== c.editorState) {
-          c.setEditorState(newEditorState)
-        }
-
-        return null;
-      }
-
       if (e.ctrlKey && e.key == "s") {
         c.saveHtml();
       }
