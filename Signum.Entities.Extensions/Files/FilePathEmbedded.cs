@@ -91,6 +91,11 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     [ForceNotNullable]
     public FileTypeSymbol FileType { get; internal set; }
 
+    //Old UnsafeMode
+    [Ignore]
+    public bool KeepSuffix;
+
+
     [Ignore]
     internal PrefixPair? _prefixPair;
     public void SetPrefixPair(PrefixPair prefixPair)

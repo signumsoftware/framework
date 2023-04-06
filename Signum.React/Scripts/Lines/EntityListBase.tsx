@@ -413,7 +413,6 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
 
 
   handleMoveKeyDown = (ke: React.KeyboardEvent<any>, index : number) => {
-    ke.preventDefault();
 
     if (ke.ctrlKey) {
       var direction =
@@ -422,6 +421,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
             null;
 
       if (direction != null) {
+        ke.preventDefault();
         const list = this.props.ctx.value!;
         if (index + direction < 0 || list.length <= index + direction)
           return;
