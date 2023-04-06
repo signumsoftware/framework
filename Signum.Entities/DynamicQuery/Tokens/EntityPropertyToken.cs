@@ -28,9 +28,12 @@ public class EntityPropertyToken : QueryToken
     }
 
 
-    internal static Func<EntityPropertyToken, DateTimeKind> DateTimeKindField = null!;
+    internal static Func<EntityPropertyToken, DateTimeKind> DateTimeKindFunc = null!;
+    public override DateTimeKind DateTimeKind => DateTimeKindFunc(this);
 
-    public override DateTimeKind DateTimeKind => DateTimeKindField(this);
+    internal static Func<EntityPropertyToken, bool> HasFullTextIndexFunc = null!;
+    public bool HasFullTextIndex => HasFullTextIndexFunc(this);
+
 
     public override Type Type
     {

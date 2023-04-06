@@ -247,6 +247,8 @@ public enum FilterOperation
     NotLike,
     IsIn,
     IsNotIn,
+    FullText_Condition,
+    FullText_FreeText
 }
 
 [InTypeScript(true)]

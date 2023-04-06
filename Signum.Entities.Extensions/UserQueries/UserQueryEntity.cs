@@ -356,7 +356,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
                     if (filterType == null)
                         return UserQueryMessage._0IsNotFilterable.NiceToString().FormatWith(token);
 
-                    if (!QueryUtils.GetFilterOperations(filterType.Value).Contains(Operation.Value))
+                    if (!QueryUtils.GetFilterOperations(Token!.Token).Contains(Operation.Value))
                         return UserQueryMessage.TheFilterOperation0isNotCompatibleWith1.NiceToString().FormatWith(Operation, filterType);
                 }
 
