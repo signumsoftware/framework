@@ -8,7 +8,32 @@
 	<PropertyGroup>
 		<CompileTypeScriptDependsOn>
 			GenerateSignumTS;
+			StartTypescript;
 			$(CompileTypeScriptDependsOn);
 		</CompileTypeScriptDependsOn>
-	</PropertyGroup>
+		<CompileDependsOn>
+			$([MSBuild]::Unescape($(CompileDependsOn.Replace("CompileTypeScriptWithTSConfig;", ""))))
+		</CompileDependsOn>
+		<BuildDependsOn>
+			MyCustomTarget;
+			$(BuildDependsOn);
+			CompileTypeScriptWithTSConfig;
+			EndTypescript;
+		</BuildDependsOn>
+	</PropertyGroup> 
+	<Target Name="MyCustomTarget">
+	    <!-- <Message Text="BEFORE $(CompileDependsOn)" Importance="high" /> -->
+	    <PropertyGroup>
+			<CompileDependsOn>
+				$([MSBuild]::Unescape($(CompileDependsOn.Replace("CompileTypeScriptWithTSConfig;", ""))))
+			</CompileDependsOn>
+		</PropertyGroup>
+		<!-- <Message Text="AFTER $(CompileDependsOn)" Importance="high" /> -->
+	</Target>
+	<Target Name="StartTypescript" Condition="'$(TypeScriptCompileBlocked)' == 'false'">
+		<Message Text="TypeScript Compiler Starting" Importance="high" />
+	</Target>
+	<Target Name="EndTypescript" Condition="'$(TypeScriptCompileBlocked)' == 'false'">
+		<Message Text="TypeScript Compiler Finished" Importance="high" />
+	</Target>
 </Project>

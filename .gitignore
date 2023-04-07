@@ -38,11 +38,6 @@ Signum.React/node_modules/*.js
 /.vs/*
 /Signum.MSBuildTask/Binaries/*
 /Signum.TSGenerator/Binaries/*
-/Signum.React/node_modules/**
-/Signum.React/ts_out/*
-/Signum.React.Extensions/ts_out/*
-/Signum.React.Extensions/node_modules/**
 /Utils/CheckUrl/.vs/**
-/Sigum.React/node_modules/**
-*/ts_out/**
 **/ts_out/**
+**/node_modules/**
