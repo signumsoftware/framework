@@ -12,7 +12,63 @@ class Upgrade_20230407_REVOLUTION : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        Directory.EnumerateDirectories(Path.Combine(uctx.RootFolder, "Framework/Extensions"))
+        var reactDirectories = Directory.EnumerateDirectories(Path.Combine(uctx.RootFolder, @"Framework\Extensions"))
+            .Where(a => Path.GetFileName(a).EndsWith(".React"))
+            .Select(a => a.After(uctx.RootFolder + @"\"));
+
+
+        var regex = new Regex("""signum-(?<name>.*)-react""");
+
+        foreach (var reactDir in reactDirectories)
+        {
+            var dir = reactDir.BeforeLast(".React");
+            var projName = Path.GetFileName(dir);
+            uctx.ChangeCodeFile(Path.Combine(dir, projName + ".csproj"), c =>
+            {
+                c.Replace("<Project Sdk=\"Microsoft.NET.Sdk\">", "<Project Sdk=\"Microsoft.NET.Sdk.Web\">");
+                c.ReplaceLine(a => a.Contains("<FrameworkReference Include=\"Microsoft.AspNetCore.App\" />"),"""
+                    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
+                    	<PrivateAssets>all</PrivateAssets>
+                    	<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+                    </PackageReference>
+                    """);
+            });
+
+            uctx.DeleteFile(Path.Combine(reactDir, "tsconfig.json"));
+            uctx.CreateCodeFile(Path.Combine(reactDir, "tsconfig.json"), $$"""
+                {                                
+                  "extends": "../tsconfig.base.json",
+                  "compilerOptions": {
+                    "outDir": "./ts_out",
+                    "paths": {
+                      "@framework/*": [ "../../Signum/React/*" ]
+                    }
+                  },
+                  "references": [
+                    { "path": "../../Signum" }
+                  ],
+                  "exclude": [
+                    "../../Signum/ts_out",
+                    "./ts_out"
+                  ]
+                }
+                """);
+
+            MoveAllFiles(uctx, dir, reactDir, "*.ts");
+            MoveAllFiles(uctx, dir, reactDir, "*.t4s");
+            MoveAllFiles(uctx, dir, reactDir, "*.css");
+            MoveAllFiles(uctx, dir, reactDir, "*.tsx");
+            MoveAllFiles(uctx, dir, reactDir, "*.json");
+
+            uctx.ChangeCodeFile(Path.Combine(dir, "package.json"), c =>
+            {
+                c.Replace(regex, m => $"""signum-{m.Groups["name"].Value}""");
+            });
+
+            Directory.Delete(Path.Combine(uctx.RootFolder, reactDir), true);
+
+            CommitFramework(uctx, "Merge " + projName);
+        }
 
 
 
@@ -40,47 +96,47 @@ class Upgrade_20230407_REVOLUTION : CodeUpgradeBase
         //}
 
 
-        ExtractExtensions(uctx, "Alerts");
-        ExtractExtensions(uctx, "Authorization");
-        CreateEmptyExtensionsProject(uctx, "ResetPassword");
-        CreateEmptyExtensionsProject(uctx, "ActiveDirectory");
-        ExtractExtensions(uctx, "Cache", projectName: "Signum.Caching");
-        ExtractExtensions(uctx, "Calendar");
-        ExtractExtensions(uctx, "Chart");
-        ExtractExtensions(uctx, "ConcurrentUser");
-        ExtractExtensions(uctx, "Dashboard");
-        ExtractExtensions(uctx, "DiffLog");
-        CreateEmptyExtensionsProject(uctx, "TimeMachine");
-        ExtractExtensions(uctx, "Disconnected");
-        ExtractExtensions(uctx, "Discovery");
-        ExtractExtensions(uctx, "Dynamic");
-        ExtractExtensions(uctx, "Excel");
-        ExtractExtensions(uctx, "Files");
-        ExtractExtensions(uctx, "Help");
-        ExtractExtensions(uctx, "Isolation");
-        ExtractExtensions(uctx, "MachineLearning");
-        ExtractExtensions(uctx, "Mailing");
-        CreateEmptyExtensionsProject(uctx, "MailPackage");
-        ExtractExtensions(uctx, "Map");
-        ExtractExtensions(uctx, "Migrations");
-        ExtractExtensions(uctx, "Notes");
-        ExtractExtensions(uctx, "Omnibox");
-        ExtractExtensions(uctx, "Printing");
-        ExtractExtensions(uctx, "Processes");
-        ExtractExtensions(uctx, "Profiler");
-        ExtractExtensions(uctx, "Rest");
-        ExtractExtensions(uctx, "Scheduler");
-        ExtractExtensions(uctx, "SMS");
-        ExtractExtensions(uctx, "Templating");
-        ExtractExtensions(uctx, "Toolbar");
-        ExtractExtensions(uctx, "Translation");
-        ExtractExtensions(uctx, "Tree");
-        ExtractExtensions(uctx, "UserAssets");
-        ExtractExtensions(uctx, "UserQueries");
-        ExtractExtensions(uctx, "ViewLog");
-        ExtractExtensions(uctx, "WhatsNew");
-        ExtractExtensions(uctx, "Word");
-        ExtractExtensions(uctx, "Workflow");
+        //ExtractExtensions(uctx, "Alerts");
+        //ExtractExtensions(uctx, "Authorization");
+        //CreateEmptyExtensionsProject(uctx, "ResetPassword");
+        //CreateEmptyExtensionsProject(uctx, "ActiveDirectory");
+        //ExtractExtensions(uctx, "Cache", projectName: "Signum.Caching");
+        //ExtractExtensions(uctx, "Calendar");
+        //ExtractExtensions(uctx, "Chart");
+        //ExtractExtensions(uctx, "ConcurrentUser");
+        //ExtractExtensions(uctx, "Dashboard");
+        //ExtractExtensions(uctx, "DiffLog");
+        //CreateEmptyExtensionsProject(uctx, "TimeMachine");
+        //ExtractExtensions(uctx, "Disconnected");
+        //ExtractExtensions(uctx, "Discovery");
+        //ExtractExtensions(uctx, "Dynamic");
+        //ExtractExtensions(uctx, "Excel");
+        //ExtractExtensions(uctx, "Files");
+        //ExtractExtensions(uctx, "Help");
+        //ExtractExtensions(uctx, "Isolation");
+        //ExtractExtensions(uctx, "MachineLearning");
+        //ExtractExtensions(uctx, "Mailing");
+        //CreateEmptyExtensionsProject(uctx, "MailPackage");
+        //ExtractExtensions(uctx, "Map");
+        //ExtractExtensions(uctx, "Migrations");
+        //ExtractExtensions(uctx, "Notes");
+        //ExtractExtensions(uctx, "Omnibox");
+        //ExtractExtensions(uctx, "Printing");
+        //ExtractExtensions(uctx, "Processes");
+        //ExtractExtensions(uctx, "Profiler");
+        //ExtractExtensions(uctx, "Rest");
+        //ExtractExtensions(uctx, "Scheduler");
+        //ExtractExtensions(uctx, "SMS");
+        //ExtractExtensions(uctx, "Templating");
+        //ExtractExtensions(uctx, "Toolbar");
+        //ExtractExtensions(uctx, "Translation");
+        //ExtractExtensions(uctx, "Tree");
+        //ExtractExtensions(uctx, "UserAssets");
+        //ExtractExtensions(uctx, "UserQueries");
+        //ExtractExtensions(uctx, "ViewLog");
+        //ExtractExtensions(uctx, "WhatsNew");
+        //ExtractExtensions(uctx, "Word");
+        //ExtractExtensions(uctx, "Workflow");
     }
 
     static void ExtractExtensions(UpgradeContext uctx, string folderName, string? projectName = null)

@@ -8,11 +8,6 @@
 		<NoWarn>8618</NoWarn>
 	</PropertyGroup>
 
-	<ItemGroup>
-	  <TypeScriptCompile Remove="CacheClient.tsx" />
-	  <TypeScriptCompile Remove="CacheStatisticsPage.tsx" />
-	  <TypeScriptCompile Remove="Signum.Cache.ts" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
