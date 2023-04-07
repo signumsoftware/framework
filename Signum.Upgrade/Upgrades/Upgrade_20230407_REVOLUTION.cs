@@ -6,26 +6,30 @@ using System.IO;
 
 namespace Signum.Upgrade.Upgrades;
 
-class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
+class Upgrade_20230407_REVOLUTION : CodeUpgradeBase
 {
     public override string Description => "Updates Nugets";
 
     public override void Execute(UpgradeContext uctx)
     {
+        Directory.EnumerateDirectories(Path.Combine(uctx.RootFolder, "Framework/Extensions"))
 
-        var signumReactRegex = new Regex(@"(../)+Signum.React/Scripts/");
 
-        uctx.ForeachCodeFile("*.tsx", uctx.AbsolutePath("Framework/Extensions"), cf =>
-        {
-            cf.Replace(signumReactRegex, "@framework/");
-        });
 
-        foreach (var item in uctx.GetCodeFiles(uctx.AbsolutePath("Framework/Extensions"), new[] { "*.ts", ".csproj" }, UpgradeContext.DefaultIgnoreDirectories))
-        {
-            var filePath = uctx.AbsolutePath(item.FilePath);
 
-            File.Move(filePath, Path.ChangeExtension(filePath, ".cs"));
-        }
+        //var signumReactRegex = new Regex(@"(../)+Signum.React/Scripts/");
+
+        //uctx.ForeachCodeFile("*.tsx", uctx.AbsolutePath("Framework/Extensions"), cf =>
+        //{
+        //    cf.Replace(signumReactRegex, "@framework/");
+        //});
+
+        //foreach (var item in uctx.GetCodeFiles(uctx.AbsolutePath("Framework/Extensions"), new[] { "*.ts", ".csproj" }, UpgradeContext.DefaultIgnoreDirectories))
+        //{
+        //    var filePath = uctx.AbsolutePath(item.FilePath);
+
+        //    File.Move(filePath, Path.ChangeExtension(filePath, ".cs"));
+        //}
 
 
         //foreach (var item in uctx.GetCodeFiles(uctx.AbsolutePath("Framework/Extensions"), new[] { "Attributes.csproj", "GlobalUsings.csproj" }, UpgradeContext.DefaultIgnoreDirectories))
@@ -79,7 +83,7 @@ class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
         ExtractExtensions(uctx, "Workflow");
     }
 
-    static void ExtractExtensions(UpgradeContext uctx, string folderName, string? projectName = null) 
+    static void ExtractExtensions(UpgradeContext uctx, string folderName, string? projectName = null)
     {
         if (projectName == null)
             projectName = "Signum." + folderName;
@@ -146,7 +150,7 @@ class Upgrade_20230307_REVOLUTION : CodeUpgradeBase
             Directory.CreateDirectory(dir);
 
             File.Move(filePath, destFilePath);
-        } 
+        }
     }
 
     private static void CopyAndRenameTranslations(UpgradeContext uctx, string destination, string source, string projectName)

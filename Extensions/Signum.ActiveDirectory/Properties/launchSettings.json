@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Signum.ActiveDirectory": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:51326;http://localhost:51327"
+    }
+  }
+}

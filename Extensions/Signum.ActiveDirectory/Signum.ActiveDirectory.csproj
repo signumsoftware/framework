@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
@@ -9,6 +9,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="package.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="System.DirectoryServices" Version="7.0.1" />
 		<PackageReference Include="System.DirectoryServices.AccountManagement" Version="7.0.0" />
@@ -35,5 +43,9 @@
 
     <ItemGroup>
       <Folder Include="EmailSender\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="package.json" />
     </ItemGroup>
 </Project>
