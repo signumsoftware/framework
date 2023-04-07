@@ -534,7 +534,7 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
         )
         }
         {s.datalist &&
-          <datalist id={inputId}>
+          <datalist id={s.ctx.getUniqueId("dataList")}>
             {s.datalist.map((item, i) => <option key={i} value={item} />)}
           </datalist>
         }

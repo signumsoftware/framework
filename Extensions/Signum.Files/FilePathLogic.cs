@@ -68,9 +68,19 @@ public static class FilePathLogic
             return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
     }
 
+    static readonly Variable<bool> avoidDeleteFiles = Statics.ThreadVariable<bool>("filePathUnsafeMode");
+
+    public static IDisposable? AvoidDeleteFiles()
+    {
+        if (avoidDeleteFiles.Value) return null;
+        avoidDeleteFiles.Value = true;
+        return new Disposable(() => avoidDeleteFiles.Value = false);
+    }
+
+
     public static IDisposable? FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
     {
-        if (!unsafeMode.Value)
+        if (!avoidDeleteFiles.Value)
         {
             var list = query.ToList();
 
@@ -87,18 +97,9 @@ public static class FilePathLogic
         return null;
     }
 
-    static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
-
-    public static IDisposable? UnsafeMode()
-    {
-        if (unsafeMode.Value) return null;
-        unsafeMode.Value = true;
-        return new Disposable(() => unsafeMode.Value = false);
-    }
-
     public static void FilePath_PreSaving(FilePathEntity fp, PreSavingContext ctx)
     {
-        if (fp.IsNew && !unsafeMode.Value)
+        if (fp.IsNew && !fp.KeepSuffix)
         {
             var alg = fp.FileType.GetAlgorithm();
             alg.ValidateFile(fp);

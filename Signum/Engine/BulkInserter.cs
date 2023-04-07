@@ -204,7 +204,7 @@ public static class BulkInserter
 
             if (ic != null)
             {
-                var withEntites = ic.WithEntities(GraphExplorer.FromRoots(entities));
+                var withEntites = ic.WithEntities(GraphExplorer.FromRoot(e));
                 errors.AddRange(withEntites);
             }
         }

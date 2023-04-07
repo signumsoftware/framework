@@ -329,12 +329,12 @@ public static class EnumerableExtensions
     
     public static bool IsNullOrEmpty<T>([NotNullWhen(false)]this IEnumerable<T>? collection)
     {
-        return collection == null || collection.IsEmpty();
+        return collection == null || collection is string s && s.Length == 0 || collection.IsEmpty();
     }
 
     public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this ICollection<T>? collection)
     {
-        return collection == null || collection.Count == 0;
+        return collection == null || collection is string s && s.Length == 0 || collection.Count == 0;
     }
 
     public static bool HasItems<T>([NotNullWhen(true)]this IEnumerable<T>? collection)

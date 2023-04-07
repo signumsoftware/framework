@@ -508,6 +508,6 @@ public enum VoidEnumMessage
 
 public enum ContainerToggleMessage
 {
-    Minimize,
-    Exxpand,
+    Compress,
+    Expand,
 }

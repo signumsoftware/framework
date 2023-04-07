@@ -60,12 +60,15 @@
     <Member Name="LessThanOrEqualTo" Description="kleiner oder gleich" />
   </Type>
   <Type Name="ConnectionMessage">
-    <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Um fortzufahren ist eine Verbindung mit dem Server ist erforderlich" />
     <Member Name="ANewVersionHasJustBeenDeployedConsiderReload" Description="Sieht aus, als wäre gerade eine neue Version eingeführt worden! Wenn Sie keine Änderungen haben, die gespeichert werden müssen, erwägen Sie, die Seite neu zu laden" />
     <Member Name="ANewVersionHasJustBeenDeployedSaveChangesAnd0" Description="Eine neue Version wurde bereitgestellt! Speichere deine Änderungen und {0}" />
     <Member Name="OutdatedClientApplication" Description="Veraltete Clientanwendung" />
     <Member Name="Refresh" Description="Aktualisieren" />
-    <Member Name="SessionExpired" Description="Sitzung abgelaufen" />
+    <Member Name="VersionInfo" Description="Versions-Info" />
+  </Type>
+  <Type Name="ContainerToggleMessage">
+    <Member Name="Compress" Description="Komprimieren" />
+    <Member Name="Expand" Description="Erweitern" />
   </Type>
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Korrupt" />
@@ -104,8 +107,12 @@
     <Member Name="Add" Description="hinzufügen..." />
     <Member Name="Added" Description="Hinzugefügt" />
     <Member Name="Changed" Description="Geändert" />
+    <Member Name="Collapse" Description="Einklappen" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Detail" Description="Detail" />
+    <Member Name="Download" Description="Herunterladen" />
+    <Member Name="Edit" Description="Bearbeiten" />
+    <Member Name="Expand" Description="Ausklappen" />
     <Member Name="Find" Description="Finden" />
     <Member Name="Move" Description="Bewegen" />
     <Member Name="Moved" Description="Bewegt" />
@@ -119,10 +126,12 @@
     <Member Name="NoChanges" Description="Keine Änderungen" />
     <Member Name="Paste" Description="Einfügen" />
     <Member Name="PreviousValueWas0" Description="Der vorherige Wert war: {0}" />
+    <Member Name="Reload" Description="Neu laden" />
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="Removed0" Description="Entfernt {0}" />
     <Member Name="RemovedAndSelectedAgain" Description="Entfernt und wieder ausgewählt" />
     <Member Name="Selected" Description="Ausgewählt" />
+    <Member Name="ToggleSideBar" Description="Seitenleiste ein-/ausblenden" />
     <Member Name="View" Description="Ansehen" />
   </Type>
   <Type Name="EnumEntity`1" />
@@ -481,6 +490,7 @@
     <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elemente" />
     <Member Name="ParentValue" Description="Übergeordneter Wert" />
     <Member Name="PinnedFilter" Description="vorgewahlter Filter" />
+    <Member Name="PinnFilter" Description="Pinn-Filter" />
     <Member Name="PleaseSelectA0_G" Description="Bitte wählen Sie ein[m:en|f:e|n:] {0}" />
     <Member Name="PleaseSelectAnEntity" Description="Bitte wählen Sie eine Entität aus" />
     <Member Name="PleaseSelectOneOrMore0_G" Description="Wählen Sie ein[m:en|f:e|n:] oder mehrere {0}" />
@@ -498,8 +508,10 @@
     <Member Name="SplitText" Description="Text aufteilen" />
     <Member Name="SummaryHeader" Description="Zusammenfassungskopfzeile" />
     <Member Name="SummaryHeaderMustBeAnAggregate" Description="Die Zusammenfassungskopfzeile muss ein Aggregat sein (wie Summe, Anzahl, etc.)" />
+    <Member Name="SwitchViewMode" Description="Ansichtsmodus wechseln" />
     <Member Name="ThereIsNo0" Description="Es gibt keine {0}" />
     <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Um Leistungsprobleme zu vermeiden, ist die automatische Suche deaktiviert. Überprüfen Sie zuerst Ihre Filter und klicken Sie dann auf die [Suchen] Taste." />
+    <Member Name="UnpinnFilter" Description="Unpinn-Filter" />
     <Member Name="Value" Description="Wert" />
     <Member Name="View" Description="Anzeigen" />
     <Member Name="ViewSelected" Description="Ausgewählte Ansicht" />

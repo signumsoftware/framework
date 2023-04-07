@@ -10,7 +10,7 @@ import {
 } from '@framework/Signum.Entities'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
-import { Type, PropertyRoute, OperationInfo } from '@framework/Reflection'
+import { Type, PropertyRoute, OperationInfo, toNumberFormat } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
@@ -755,6 +755,8 @@ export function getViewPromiseCompoment(ca: CaseActivityEntity): Promise<(ctx: T
   return viewPromise.promise;
 }
 
+const intFormatter = toNumberFormat("D");
+
 export function formatDuration(d: Duration) {
 
   var a = {
@@ -769,7 +771,7 @@ export function formatDuration(d: Duration) {
     milliseconds: "ms",
   };
 
-  var result = Object.entries(a).map(([key, label]) => d.get(key as DurationUnit) == 0 ? null : d.get(key as DurationUnit) + label).filter(a => a != null).join(" ");
+  var result = Object.entries(a).map(([key, label]) => d.get(key as DurationUnit) == 0 ? null : intFormatter.format(d.get(key as DurationUnit)) + label).notNull().join(" ");
 
   return result;
 }

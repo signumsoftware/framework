@@ -1,4 +1,4 @@
-import type { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable, FilterConditionOptionParsed } from './FindOptions'
+import type { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable, FilterConditionOptionParsed, FilterGroupOptionParsed, FilterGroupOption } from './FindOptions'
 import { isFilterGroupOption, isFilterGroupOptionParsed, isActive } from './FindOptions'
 export { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable };
 
@@ -50,6 +50,26 @@ export function extractFilter<T>(filters: FilterOptionParsed[], token: string | 
 
   filters.remove(f);
   return f;
+}
+
+export function extractGroupFilter(filters: FilterOptionParsed[], fo: FilterGroupOption): FilterGroupOptionParsed | undefined
+{
+  var f = filters.firstOrNull(f => isFilterGroupOptionParsed(f) && Boolean(f.pinned) == Boolean(fo.pinned) && f.pinned?.splitText == fo.pinned?.splitText && f.groupOperation == fo.groupOperation
+    && f.filters.length == fo.filters.length &&
+    f.filters.every((f2, i) => {
+      var fo2 = fo.filters[i];
+      if (fo2 == null || isFilterGroupOptionParsed(f2) || isFilterGroupOption(fo2))
+        return false;
+
+      return similarToken(f2.token?.fullKey, fo2.token?.toString()) && f2.operation == fo2.operation && f2.value == fo2.value;
+    }));
+
+  if (!f) {
+    return undefined;
+  }
+
+  filters.remove(f);
+  return f as FilterGroupOptionParsed;
 }
 
 export function similarToken(tokenA: string | undefined, tokenB: string | undefined) {
