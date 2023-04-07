@@ -4,7 +4,7 @@ import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { Type, PropertyRoute } from '@framework/Reflection'
 import { customTypeComponent } from '@framework/Lines/DynamicComponent'
-import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Files'
+import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from '../Signum.Files'
 import { FileLine } from './FileLine'
 import CellFormatter = Finder.CellFormatter;
 import { ModifiableEntity, Lite, Entity, isLite, registerToString } from "@framework/Signum.Entities";

@@ -1,5 +1,5 @@
 {
-  "name": "signum-files-react",
+  "name": "signum-file",
   "version": "1.0.0",
   "description": "Resable modules to use on top of Signum Framework",
   "repository": "",
@@ -8,6 +8,5 @@
   "license": "MIT",
   "resolutions": {},
   "dependencies": {
-    "react": ""
   }
 }

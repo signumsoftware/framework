@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, bytesToSize } from '@framework/Globals'
 import { ModifiableEntity, JavascriptMessage } from '@framework/Signum.Entities'
-import { IFile, IFilePath, FileMessage, FileTypeSymbol } from './Signum.Files'
+import { IFile, IFilePath, FileMessage, FileTypeSymbol } from '../Signum.Files'
 
 import "./Files.css"
 import { New, PseudoType } from '@framework/Reflection';

@@ -5,7 +5,7 @@ import { ButtonBarElement, TypeContext } from '@framework/TypeContext'
 import { getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EntityControlMessage, EmbeddedEntity, MListElement, getToString } from '@framework/Signum.Entities'
-import { IFile, FileTypeSymbol } from './Signum.Files'
+import { IFile, FileTypeSymbol } from '../Signum.Files'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import { FileUploader } from './FileUploader'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

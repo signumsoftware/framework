@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { isModifiableEntity, ModifiableEntity, } from '@framework/Signum.Entities'
-import { IFile } from './Signum.Files'
+import { IFile } from '../Signum.Files'
 import { Modal } from 'react-bootstrap';
 import "./Files.css"
 import { FileImage } from './FileImage';
