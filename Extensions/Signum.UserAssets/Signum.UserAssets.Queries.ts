@@ -2,9 +2,9 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
 import * as QueryTokens from './Signum.UserAssets.QueryTokens'
 
 

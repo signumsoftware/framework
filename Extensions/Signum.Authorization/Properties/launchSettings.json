@@ -1,12 +1,4 @@
 {
   "profiles": {
-    "Signum.Authorization": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:55191;http://localhost:55192"
-    }
   }
 }

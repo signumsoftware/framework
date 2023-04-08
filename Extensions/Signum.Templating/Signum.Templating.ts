@@ -2,11 +2,11 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Basics from '../../Signum.React/Signum.Basics'
-import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
-import * as Eval from '../Signum.Eval.React/Signum.Eval'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
+import * as Eval from '../Signum.Eval/Signum.Eval'
 
 
 export interface IContainsQuery extends Entities.Entity {
