@@ -9,5 +9,7 @@
   "resolutions": {
   },
   "dependencies": {
+    "@types/googlemaps": "3.43.3"
+
   }
 }

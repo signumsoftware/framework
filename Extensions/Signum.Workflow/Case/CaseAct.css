@@ -1,0 +1,45 @@
+﻿
+div.workflow-buttons {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+
+    div.workflow-buttons .btn-toolbar {
+        margin-bottom: 0px;
+    }
+
+    div.workflow-buttons .btn {
+        margin-right: 10px;
+    }
+
+
+.case-main-entity .sf-widgets {
+    margin-top: 0px;
+}
+
+.case-main-entity .sf-button-widget-container {
+}
+
+.case-alert {
+    margin-bottom: 5px;
+    padding: 5px;
+    white-space: pre;
+}
+
+.case-help-button {
+    background: #ddd;
+    padding: 3px;
+}
+
+.inline-tags {
+    text-align: right;
+    margin-top: -40px;
+}
+
+
+.case-activity-widgets {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
