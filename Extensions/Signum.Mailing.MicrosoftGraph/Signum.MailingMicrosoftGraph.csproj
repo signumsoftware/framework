@@ -24,7 +24,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
-		<ProjectReference Include="..\Signum.ActiveDirectory\Signum.ActiveDirectory.csproj" />
 		<ProjectReference Include="..\Signum.Mailing\Signum.Mailing.csproj" />
 	</ItemGroup>
 
