@@ -2,12 +2,12 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Basics from '../../Signum.React/Signum.Entities.Basics'
-import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
-import * as Signum from '../../Signum.React/Signum.Basics'
-import * as Operations from '../../Signum.React/Signum.Operations'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Entities.Basics'
+import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
+import * as Signum from '../../Signum/React/Signum.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
 
 
 export const AppendixHelpEntity = new Type<AppendixHelpEntity>("AppendixHelp");

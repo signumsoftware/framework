@@ -75,15 +75,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="Authorization\AuthClient.tsx" />
-		<None Remove="Authorization\Templates\DoublePassword.tsx" />
-		<None Remove="Chart\HtmlScripts\PivotTable.tsx" />
-		<None Remove="Dashboard\View\UserTreePart.tsx" />
-		<None Remove="Files\ImageModal.tsx" />
-		<None Remove="Files\MultiFileImageLine.tsx" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Content Update="package.json">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>

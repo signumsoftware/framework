@@ -2,12 +2,12 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Basics from '../../Signum.React/Signum.Entities.Basics'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as Files from '../Signum.Files.React/Signum.Files'
-import * as Authorization from '../Signum.Authorization.React/Signum.Authorization'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Entities.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Files from '../Signum.Files/Signum.Files'
+import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 
 
 export const WhatsNewEntity = new Type<WhatsNewEntity>("WhatsNew");

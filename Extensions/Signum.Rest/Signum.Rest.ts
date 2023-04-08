@@ -2,12 +2,12 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Security from '../../Signum.React/Signum.Security'
-import * as Basics from '../../Signum.React/Signum.Basics'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as Authorization from '../Signum.Authorization.React/Signum.Authorization'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Security from '../../Signum/React/Signum.Security'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 
 
 export const QueryStringValueEmbedded = new Type<QueryStringValueEmbedded>("QueryStringValueEmbedded");

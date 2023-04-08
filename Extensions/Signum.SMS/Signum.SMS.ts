@@ -2,15 +2,15 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Basics from '../../Signum.React/Signum.Entities.Basics'
-import * as Signum from '../../Signum.React/Signum.Basics'
-import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as Processes from '../Signum.Processes.React/Signum.Processes'
-import * as QueryTokens from '../Signum.UserAssets.React/Signum.UserAssets.QueryTokens'
-import * as Scheduler from '../Signum.Scheduler.React/Signum.Scheduler'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Entities.Basics'
+import * as Signum from '../../Signum/React/Signum.Basics'
+import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Processes from '../Signum.Processes/Signum.Processes'
+import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
+import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
 
 
 export interface ISMSOwnerEntity extends Entities.Entity {
