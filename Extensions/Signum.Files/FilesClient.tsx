@@ -4,16 +4,16 @@ import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { Type, PropertyRoute } from '@framework/Reflection'
 import { customTypeComponent } from '@framework/Lines/DynamicComponent'
-import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from '../Signum.Files'
-import { FileLine } from './FileLine'
+import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Files'
+import { FileLine } from './Components/FileLine'
 import CellFormatter = Finder.CellFormatter;
 import { ModifiableEntity, Lite, Entity, isLite, registerToString } from "@framework/Signum.Entities";
-import { FileImageLine } from './FileImageLine';
-import { MultiFileLine } from './MultiFileLine';
-import { FileDownloader } from './FileDownloader';
+import { FileImageLine } from './Components/FileImageLine';
+import { MultiFileLine } from './Components/MultiFileLine';
+import { FileDownloader } from './Components/FileDownloader';
 import { FetchInState } from '@framework/Lines/Retrieve';
-import { FileImage } from './FileImage';
-import { ImageModal } from './ImageModal';
+import { FileImage } from './Components/FileImage';
+import { ImageModal } from './Components/ImageModal';
 import { IconName } from '@fortawesome/fontawesome-svg-core';
 
 export function start(options: { routes: RouteObject[] }) {

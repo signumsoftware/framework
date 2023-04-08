@@ -4,7 +4,7 @@ import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { ModifiableEntity, Lite, Entity, isModifiableEntity, getToString, EntityControlMessage } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFilePath } from '../Signum.Files'
-import { ExtensionInfo, extensionInfo } from './FilesClient'
+import { ExtensionInfo, extensionInfo } from '../FilesClient'
 import { Type } from '@framework/Reflection';
 import "./Files.css"
 import { QueryString } from '@framework/QueryString'
