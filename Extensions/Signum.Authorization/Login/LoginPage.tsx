@@ -10,7 +10,6 @@ import MessageModal from '@framework/Modals/MessageModal'
 import * as AppContext from '@framework/AppContext'
 import "./Login.css"
 
-
 export interface LoginContext {
   loading: string | undefined;
   setLoading: (loading: string | undefined) => void;
