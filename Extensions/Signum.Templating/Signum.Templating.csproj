@@ -30,9 +30,4 @@
 		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	    </None>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Templating\" />
-      <Folder Include="TypeHelp\" />
-    </ItemGroup>
 </Project>
