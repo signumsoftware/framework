@@ -7,7 +7,7 @@ import { API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
 import * as AppContext from '@framework/AppContext'
 import { Tab, Tabs, Button } from 'react-bootstrap';
-import { FormatJson } from '../../../Signum.React/Scripts/Exceptions/Exception';
+import { FormatJson } from '@framework/Exceptions/Exception';
 
 export interface RestLogState {
   replayResult?: string,

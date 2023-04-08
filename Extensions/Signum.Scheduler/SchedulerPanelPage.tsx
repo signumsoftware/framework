@@ -12,7 +12,7 @@ import { Lite } from "@framework/Signum.Entities";
 import { StyleContext } from "@framework/Lines";
 import { useAPIWithReload, useInterval } from '@framework/Hooks'
 import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
-import { classes } from '../../Signum.React/Scripts/Globals'
+import { classes } from '@framework/Globals'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 

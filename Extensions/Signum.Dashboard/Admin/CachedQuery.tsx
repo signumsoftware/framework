@@ -6,9 +6,9 @@ import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, DashboardE
 import { IsQueryCachedLine } from './Dashboard';
 import * as FilesClient from '../../Files/FilesClient';
 import { downloadFile } from '../../Files/FileDownloader';
-import * as Services from '../../../Signum.React/Scripts/Services';
-import { useAPI } from '../../../Signum.React/Scripts/Hooks';
-import { FormatJson } from '../../../Signum.React/Scripts/Exceptions/Exception';
+import * as Services from '@framework/Services';
+import { useAPI } from '@framework/Hooks';
+import { FormatJson } from '@framework/Exceptions/Exception';
 import { FileLine } from '../../Files/FileLine';
 import { JavascriptMessage } from '@framework/Signum.Entities';
 

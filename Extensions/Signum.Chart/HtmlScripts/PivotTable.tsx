@@ -16,7 +16,7 @@ import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, Fil
 import { ChartColumnType } from '../Signum.Chart';
 import { EntityBaseController } from '@framework/Lines';
 import { isBooleanOrFunctionOrNull } from '../../Dynamic/View/NodeUtils';
-import { QueryTokenMessage } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery';
+import { QueryTokenMessage } from '@framework/Signum.Entities.DynamicQuery';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };

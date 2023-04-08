@@ -3,7 +3,7 @@ import * as AppContext from '@framework/AppContext'
 import * as signalR from '@microsoft/signalr'
 import * as AuthClient from '../Authorization/AuthClient'
 import { HubConnectionState } from '@microsoft/signalr'
-import { useForceUpdate } from '../../Signum.React/Scripts/Hooks';
+import { useForceUpdate } from '@framework/Hooks';
 
 //Originally from https://github.com/pguilbert/react-use-signalr/
 

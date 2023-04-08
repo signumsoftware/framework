@@ -15,7 +15,7 @@ import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { parseIcon } from '../Basics/Templates/IconTypeahead';
 import { Nav } from 'react-bootstrap';
 import { SidebarMode } from './SidebarContainer';
-import { Dic } from '../../Signum.React/Scripts/Globals';
+import { Dic } from '@framework/Globals';
 import { ToolbarNavItem } from './Renderers/ToolbarRenderer';
 
 export function start(options: { routes: RouteObject[] }, ...configs: ToolbarConfig<any>[]) {

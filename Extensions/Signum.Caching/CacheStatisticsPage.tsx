@@ -4,8 +4,8 @@ import { useLocation, useParams } from 'react-router-dom'
 import { Tab, Tabs } from 'react-bootstrap'
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
-import { SearchControl } from '../../Signum.React/Scripts/Search'
-import { ExceptionEntity } from '../../Signum.React/Scripts/Signum.Entities.Basics'
+import { SearchControl } from '@framework/Search'
+import { ExceptionEntity } from '@framework/Signum.Entities.Basics'
 
 export default function CacheStatisticsPage() {
 

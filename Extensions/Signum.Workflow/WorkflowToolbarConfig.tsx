@@ -6,7 +6,7 @@ import { WorkflowEntity, WorkflowMainEntityStrategy } from './Signum.Workflow'
 import { is } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
-import SelectorModal from '../../Signum.React/Scripts/SelectorModal'
+import SelectorModal from '@framework/SelectorModal'
 
 export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity> {
 

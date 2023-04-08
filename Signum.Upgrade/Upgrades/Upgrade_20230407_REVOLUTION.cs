@@ -12,63 +12,85 @@ class Upgrade_20230407_REVOLUTION : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        var reactDirectories = Directory.EnumerateDirectories(Path.Combine(uctx.RootFolder, @"Framework\Extensions"))
-            .Where(a => Path.GetFileName(a).EndsWith(".React"))
-            .Select(a => a.After(uctx.RootFolder + @"\"));
+        var regex = new Regex(@"(../)*Signum.React/Scripts");
 
-
-        var regex = new Regex("""signum-(?<name>.*)-react""");
-
-        foreach (var reactDir in reactDirectories)
+        uctx.ForeachCodeFile("*.ts, *.tsx", "Framework/Extensions", a =>
         {
-            var dir = reactDir.BeforeLast(".React");
-            var projName = Path.GetFileName(dir);
-            uctx.ChangeCodeFile(Path.Combine(dir, projName + ".csproj"), c =>
-            {
-                c.Replace("<Project Sdk=\"Microsoft.NET.Sdk\">", "<Project Sdk=\"Microsoft.NET.Sdk.Web\">");
-                c.ReplaceLine(a => a.Contains("<FrameworkReference Include=\"Microsoft.AspNetCore.App\" />"),"""
-                    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
-                    	<PrivateAssets>all</PrivateAssets>
-                    	<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-                    </PackageReference>
-                    """);
-            });
+            a.Replace(regex, "@framework");
+        });
 
-            uctx.DeleteFile(Path.Combine(reactDir, "tsconfig.json"));
-            uctx.CreateCodeFile(Path.Combine(reactDir, "tsconfig.json"), $$"""
-                {                                
-                  "extends": "../tsconfig.base.json",
-                  "compilerOptions": {
-                    "outDir": "./ts_out",
-                    "paths": {
-                      "@framework/*": [ "../../Signum/React/*" ]
-                    }
-                  },
-                  "references": [
-                    { "path": "../../Signum" }
-                  ],
-                  "exclude": [
-                    "../../Signum/ts_out",
-                    "./ts_out"
-                  ]
-                }
-                """);
 
-            MoveAllFiles(uctx, dir, reactDir, "*.ts");
-            MoveAllFiles(uctx, dir, reactDir, "*.t4s");
-            MoveAllFiles(uctx, dir, reactDir, "*.css");
-            MoveAllFiles(uctx, dir, reactDir, "*.tsx");
-            MoveAllFiles(uctx, dir, reactDir, "*.json");
+        //var directory = Directory.EnumerateDirectories(Path.Combine(uctx.RootFolder, @"Framework\Extensions"))
+        //      .Select(a => a.After(uctx.RootFolder + @"\")); ;
 
-            uctx.ChangeCodeFile(Path.Combine(dir, "package.json"), c =>
-            {
-                c.Replace(regex, m => $"""signum-{m.Groups["name"].Value}""");
-            });
+        //foreach (var dir in directory)
+        //{
+        //    uctx.DeleteFile(Path.Combine(dir, "Properties\\launchSettings.json"));
+        //    uctx.CreateCodeFile(Path.Combine(dir, "Properties\\launchSettings.json"), """
+        //        {
+        //          "profiles": {
+        //          }
+        //        }
+        //        """);
+        //}
 
-            Directory.Delete(Path.Combine(uctx.RootFolder, reactDir), true);
+        //var reactDirectories = Directory.EnumerateDirectories(Path.Combine(uctx.RootFolder, @"Framework\Extensions"))
+        //    .Where(a => Path.GetFileName(a).EndsWith(".React"))
+        //    .Select(a => a.After(uctx.RootFolder + @"\"));
 
-            CommitFramework(uctx, "Merge " + projName);
-        }
+
+        //var regex = new Regex("""signum-(?<name>.*)-react""");
+
+        //foreach (var reactDir in reactDirectories)
+        //{
+        //    var dir = reactDir.BeforeLast(".React");
+        //    var projName = Path.GetFileName(dir);
+        //    uctx.ChangeCodeFile(Path.Combine(dir, projName + ".csproj"), c =>
+        //    {
+        //        c.Replace("<Project Sdk=\"Microsoft.NET.Sdk\">", "<Project Sdk=\"Microsoft.NET.Sdk.Web\">");
+        //        c.ReplaceLine(a => a.Contains("<FrameworkReference Include=\"Microsoft.AspNetCore.App\" />"),"""
+        //            <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
+        //            	<PrivateAssets>all</PrivateAssets>
+        //            	<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        //            </PackageReference>
+        //            """);
+        //    });
+
+        //    uctx.DeleteFile(Path.Combine(reactDir, "tsconfig.json"));
+        //    uctx.CreateCodeFile(Path.Combine(reactDir, "tsconfig.json"), $$"""
+        //        {                                
+        //          "extends": "../tsconfig.base.json",
+        //          "compilerOptions": {
+        //            "outDir": "./ts_out",
+        //            "paths": {
+        //              "@framework/*": [ "../../Signum/React/*" ]
+        //            }
+        //          },
+        //          "references": [
+        //            { "path": "../../Signum" }
+        //          ],
+        //          "exclude": [
+        //            "../../Signum/ts_out",
+        //            "./ts_out"
+        //          ]
+        //        }
+        //        """);
+
+        //    MoveAllFiles(uctx, dir, reactDir, "*.ts");
+        //    MoveAllFiles(uctx, dir, reactDir, "*.t4s");
+        //    MoveAllFiles(uctx, dir, reactDir, "*.css");
+        //    MoveAllFiles(uctx, dir, reactDir, "*.tsx");
+        //    MoveAllFiles(uctx, dir, reactDir, "*.json");
+
+        //    uctx.ChangeCodeFile(Path.Combine(dir, "package.json"), c =>
+        //    {
+        //        c.Replace(regex, m => $"""signum-{m.Groups["name"].Value}""");
+        //    });
+
+        //    Directory.Delete(Path.Combine(uctx.RootFolder, reactDir), true);
+
+        //    CommitFramework(uctx, "Merge " + projName);
+        //}
 
 
 

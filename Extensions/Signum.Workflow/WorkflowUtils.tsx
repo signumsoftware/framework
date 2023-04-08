@@ -1,4 +1,4 @@
-import type { FunctionalFrameComponent } from '../../Signum.React/Scripts/TypeContext'
+import type { FunctionalFrameComponent } from '@framework/TypeContext'
 import type { IHasCaseActivity } from './WorkflowClient'
 
 export function isWorkflowFrame(frameComponent: FunctionalFrameComponent | React.Component): frameComponent is FunctionalFrameComponent & IHasCaseActivity  {

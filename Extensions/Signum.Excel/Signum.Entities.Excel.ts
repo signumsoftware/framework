@@ -2,9 +2,9 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Scripts/Reflection'
-import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
-import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
+import * as Entities from '@framework/Signum.Entities'
+import * as Basics from '@framework/Signum.Entities.Basics'
 import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Files from '../Files/Signum.Entities.Files'

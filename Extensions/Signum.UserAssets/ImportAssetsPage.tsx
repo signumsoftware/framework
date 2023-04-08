@@ -10,8 +10,8 @@ import { useTitle } from '@framework/AppContext'
 import { ChangeEvent, EntityLine, EntityTable, PropertyRoute, ValueLine } from '@framework/Lines'
 import { EntityLink } from '@framework/Search'
 import { getToString, is, liteKey, liteKeyLong, MList } from '@framework/Signum.Entities'
-import SelectorModal from '../../Signum.React/Scripts/SelectorModal'
-import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal'
+import SelectorModal from '@framework/SelectorModal'
+import MessageModal from '@framework/Modals/MessageModal'
 
 export default function ImportAssetsPage() {
 

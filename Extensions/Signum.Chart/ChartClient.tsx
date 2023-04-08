@@ -28,7 +28,7 @@ import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 import { MemoRepository } from './D3Scripts/Components/ReactChart';
 import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
-import { Dic, softCast } from '../../Signum.React/Scripts/Globals';
+import { Dic, softCast } from '@framework/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 import { UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';

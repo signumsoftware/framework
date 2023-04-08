@@ -18,7 +18,7 @@ import { Entity, getToString, isEntity, isLite, Lite, toLite } from '@framework/
 import { EntityLink } from '@framework/Search'
 import Alert from './Templates/Alert'
 import { ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
-import { toAbsoluteUrl } from '../../Signum.React/Scripts/AppContext'
+import { toAbsoluteUrl } from '@framework/AppContext'
 
 export function start(options: { routes: RouteObject[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));

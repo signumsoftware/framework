@@ -2,16 +2,16 @@ import * as React from 'react'
 import { SubTokensOptions, QueryToken, hasAnyOrAll, FindOptions } from '@framework/FindOptions'
 import { TemplateTokenMessage } from './Signum.Templating'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
-import ValueLineModal from '../../Signum.React/Scripts/ValueLineModal'
+import ValueLineModal from '@framework/ValueLineModal'
 import { UserChartEntity } from '../Chart/Signum.Entities.Chart'
-import { useAPI } from '../../Signum.React/Scripts/Hooks'
-import * as Navigator from '../../Signum.React/Scripts/Navigator'
-import * as Finder from '../../Signum.React/Scripts/Finder'
+import { useAPI } from '@framework/Hooks'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
 import { UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries'
 import { getTypeInfos, TypeReference } from '@framework/Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ajaxGet } from '../../Signum.React/Scripts/Services'
-import { softCast } from '../../Signum.React/Scripts/Globals'
+import { ajaxGet } from '@framework/Services'
+import { softCast } from '@framework/Globals'
 
 export interface TemplateControlsProps {
   queryKey: string;

@@ -2,8 +2,8 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Scripts/Reflection'
-import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
+import * as Entities from '@framework/Signum.Entities'
 
 
 export const IsolationEntity = new Type<IsolationEntity>("Isolation");

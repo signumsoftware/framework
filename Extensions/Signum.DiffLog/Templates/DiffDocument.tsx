@@ -3,7 +3,7 @@ import { NumericTextBox, ValueLine, isNumber } from '@framework/Lines/ValueLine'
 import { useForceUpdate } from '@framework/Hooks'
 import { toNumberFormat } from '@framework/Reflection';
 import { Change, diffLines, diffWords } from 'diff';
-import { softCast } from '../../../Signum.React/Scripts/Globals';
+import { softCast } from '@framework/Globals';
 
 
 export interface LineOrWordsChange {

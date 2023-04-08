@@ -14,7 +14,7 @@ import { translated } from '../../Translation/TranslatedInstanceTools'
 import { DashboardController } from './DashboardFilterController'
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files'
 import { CachedQueryJS } from '../CachedQueryExecutor'
-import PinnedFilterBuilder from '../../../Signum.React/Scripts/SearchControl/PinnedFilterBuilder'
+import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; }) {
 

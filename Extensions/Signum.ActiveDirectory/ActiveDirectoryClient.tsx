@@ -15,7 +15,7 @@ import { isPermissionAuthorized } from './AuthClient';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 import ProfilePhoto, { urlProviders } from './Templates/ProfilePhoto';
 import * as AppContext from "@framework/AppContext"
-import { TypeaheadOptions } from '../../Signum.React/Scripts/Components/Typeahead';
+import { TypeaheadOptions } from '@framework/Components/Typeahead';
 
 export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 

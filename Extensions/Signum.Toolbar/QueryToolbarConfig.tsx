@@ -11,7 +11,7 @@ import * as Navigator from '@framework/Navigator';
 import { useAPI, useDocumentEvent, useInterval, useUpdatedRef } from '@framework/Hooks'
 import { parseIcon } from '../Basics/Templates/IconTypeahead'
 import a from 'bpmn-js/lib/features/search'
-import { classes } from '../../Signum.React/Scripts/Globals'
+import { classes } from '@framework/Globals'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   constructor() {

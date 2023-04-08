@@ -5,15 +5,15 @@ import * as Navigator from '@framework/Navigator';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as WhatsNewClient from '../WhatsNewClient';
 import { WhatsNewEntity, WhatsNewMessage, WhatsNewMessageEmbedded } from '../Signum.WhatsNew';
-import { useAPI, useForceUpdate } from '../../../../Framework/Signum.React/Scripts/Hooks';
-import { Binding, EntityCombo, EntityLine, EntityTabRepeater, TypeContext, ValueLine } from '../../../Signum.React/Scripts/Lines';
+import { useAPI, useForceUpdate } from '../../../../Framewo@framework/Hooks';
+import { Binding, EntityCombo, EntityLine, EntityTabRepeater, TypeContext, ValueLine } from '@framework/Lines';
 import { FileLine } from '../../Files/FileLine';
 import WhatsNewHtmlEditor from './WhatsNewHtmlEditor';
-import SelectorModal from '../../../Signum.React/Scripts/SelectorModal';
+import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
 import { OperationSymbol } from '@framework/Signum.Entities';
-import { QueryEntity, TypeEntity } from '../../../Signum.React/Scripts/Signum.Entities.Basics';
+import { QueryEntity, TypeEntity } from '@framework/Signum.Entities.Basics';
 
 export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
   const ctx = p.ctx;

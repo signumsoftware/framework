@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { EntityControlMessage, getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities';
 import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage } from '../Signum.WhatsNew';
-import { useAPI } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { useAPI } from '../../../../Framewo@framework/Hooks';
 import { API, WhatsNewFull } from "../WhatsNewClient";
 import "./NewsPage.css"
 import * as AppContext from "@framework/AppContext"
@@ -11,10 +11,10 @@ import * as Services from '@framework/Services'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLocation, useParams } from "react-router-dom";
 import WhatsNewHtmlEditor, { HtmlViewer } from './WhatsNewHtmlEditor';
-import { Binding } from '../../../Signum.React/Scripts/Lines';
+import { Binding } from '@framework/Lines';
 import { Link } from 'react-router-dom';
 import * as Navigator from '@framework/Navigator'
-import EntityLink from '../../../Signum.React/Scripts/SearchControl/EntityLink';
+import EntityLink from '@framework/SearchControl/EntityLink';
 
 export default function NewsPage() {
   const params = useParams() as { newsId: string };

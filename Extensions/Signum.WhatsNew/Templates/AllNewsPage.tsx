@@ -3,7 +3,7 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStr
 import { SearchValueLine } from '@framework/Search';
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { useInDB } from '@framework/Finder';
-import { useAPI, useAPIWithReload } from '../../../../Framework/Signum.React/Scripts/Hooks';
+import { useAPI, useAPIWithReload } from '../../../../Framewo@framework/Hooks';
 import { API, WhatsNewFull } from "../WhatsNewClient";
 import "./AllNewsPage.css"
 import * as AppContext from "@framework/AppContext"

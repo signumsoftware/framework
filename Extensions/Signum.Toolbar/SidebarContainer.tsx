@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ErrorBoundary } from '@framework/Components';
 import "./Sidebar.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { classes } from '../../Signum.React/Scripts/Globals';
+import { classes } from '@framework/Globals';
 import { EntityControlMessage } from '@framework/Signum.Entities';
 
 export type SidebarMode = "Wide" | "Narrow" | "Hidden";   

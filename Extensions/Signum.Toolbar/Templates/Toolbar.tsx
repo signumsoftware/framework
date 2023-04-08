@@ -6,13 +6,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MList } from '@framework/Signum.Entities';
 import { parseIcon } from '../../Basics/Templates/IconTypeahead';
 import * as ToolbarClient from '../ToolbarClient';
-import SelectorModal from '../../../Signum.React/Scripts/SelectorModal';
+import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Constructor from '@framework/Constructor';
 import * as Navigator from '@framework/Navigator';
 import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
-import { classes } from '../../../Signum.React/Scripts/Globals';
+import { classes } from '@framework/Globals';
 import { ToolbarCount } from '../QueryToolbarConfig';
 
 export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {

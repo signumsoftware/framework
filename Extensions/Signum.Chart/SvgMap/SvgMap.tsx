@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import * as AppContext from '@framework/AppContext';
-import { useAPI } from '../../../Signum.React/Scripts/Hooks';
+import { useAPI } from '@framework/Hooks';
 import { scaleFor } from '../D3Scripts/Components/ChartUtils';
 import { MemoRepository } from '../D3Scripts/Components/ReactChart';
 

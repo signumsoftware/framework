@@ -23,8 +23,8 @@ import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { toFilterRequests } from '@framework/Finder';
 import "./TreeViewer.css"
 import { QueryTokenString } from '@framework/Reflection';
-import * as Hooks from '../../Signum.React/Scripts/Hooks'
-import SearchPage from '../../Signum.React/Scripts/SearchControl/SearchPage'
+import * as Hooks from '@framework/Hooks'
+import SearchPage from '@framework/SearchControl/SearchPage'
 
 interface TreeViewerProps {
   typeName: string;

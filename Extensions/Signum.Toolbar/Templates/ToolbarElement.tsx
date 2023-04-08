@@ -8,7 +8,7 @@ import * as Dashboard from '../../Dashboard/Admin/Dashboard'
 import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
 import { getToString } from '@framework/Signum.Entities'
 import { useForceUpdate } from '@framework/Hooks'
-import { classes } from '../../../Signum.React/Scripts/Globals'
+import { classes } from '@framework/Globals'
 import { ToolbarCount } from '../QueryToolbarConfig'
 
 export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbedded> }) {

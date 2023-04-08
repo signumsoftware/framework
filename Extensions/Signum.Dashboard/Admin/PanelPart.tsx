@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TypeContext, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines';
+import { TypeContext, ValueLine } from '../../../../Framewo@framework/Lines';
 import { IconTypeaheadLine, parseIcon } from '../../Basics/Templates/IconTypeahead';
 import { PanelPartEmbedded } from '../Signum.Dashboard';
 import { useForceUpdate } from '@framework/Hooks'

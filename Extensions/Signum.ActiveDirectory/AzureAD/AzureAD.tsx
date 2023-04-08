@@ -3,7 +3,7 @@ import * as msal from "@azure/msal-browser";
 import * as AppContext from "@framework/AppContext";
 import * as AuthClient from "../AuthClient";
 import { LoginContext } from "../Login/LoginPage";
-import { ExternalServiceError } from "../../../Signum.React/Scripts/Services";
+import { ExternalServiceError } from "@framework/Services";
 import { LoginAuthMessage } from "../Signum.Entities.Authorization";
 
 /*     Add this to Index.cshtml

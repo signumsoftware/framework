@@ -6,7 +6,7 @@ import { ConcurrentUserEntity, ConcurrentUserMessage } from './Signum.Concurrent
 import { OverlayTrigger, Popover } from 'react-bootstrap';
 import { Entity, getToString, Lite, liteKey, toLite } from '@framework/Signum.Entities'
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization'
-import { useAPI, useForceUpdate, useUpdatedRef } from '../../Signum.React/Scripts/Hooks'
+import { useAPI, useForceUpdate, useUpdatedRef } from '@framework/Hooks'
 import { GraphExplorer } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -14,7 +14,7 @@ import { classes } from '@framework/Globals';
 import MessageModal from '@framework/Modals/MessageModal'
 import './ConcurrentUser.css'
 import * as ConcurrentUserClient from './ConcurrentUserClient';
-import { exploreWindowsOpen } from '../../Signum.React/Scripts/Finder'
+import { exploreWindowsOpen } from '@framework/Finder'
 import { HubConnectionState } from '@microsoft/signalr'
 import { SmallProfilePhoto } from '../Authorization/Templates/ProfilePhoto'
 

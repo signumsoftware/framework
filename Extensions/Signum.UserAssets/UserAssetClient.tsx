@@ -19,7 +19,7 @@ import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import SelectorModal from '@framework/SelectorModal';
 import * as UserQueryClient from '../UserQueries/UserQueryClient'
-import { SearchControlLoaded } from '../../Signum.React/Scripts/Search';
+import { SearchControlLoaded } from '@framework/Search';
 
 let started = false;
 export function start(options: { routes: RouteObject[] }) {

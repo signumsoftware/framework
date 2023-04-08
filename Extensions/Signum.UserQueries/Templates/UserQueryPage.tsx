@@ -14,7 +14,7 @@ import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { useState } from 'react'
 import { translated } from '../../Translation/TranslatedInstanceTools'
 import SearchPage from '@framework/SearchControl/SearchPage'
-import { useTitle } from '../../../Signum.React/Scripts/AppContext'
+import { useTitle } from '@framework/AppContext'
 
 
 

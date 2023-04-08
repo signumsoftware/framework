@@ -11,7 +11,7 @@ import { useTitle } from '@framework/AppContext'
 import { toNumberFormat } from '@framework/Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { withClassName } from '../Dynamic/View/HtmlAttributesExpression'
-import { classes } from '../../Signum.React/Scripts/Globals'
+import { classes } from '@framework/Globals'
 import { ProcessProgressBar } from './Templates/Process'
 import { getToString } from '@framework/Signum.Entities'
 

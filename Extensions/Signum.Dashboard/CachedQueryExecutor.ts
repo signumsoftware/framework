@@ -1,8 +1,8 @@
 import * as Finder from '@framework/Finder'
 import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, FindOptionsParsed, isFilterGroupOptionParsed, isFilterGroupRequest, OrderRequest, Pagination, QueryRequest, QueryToken, QueryValueRequest, ResultRow, ResultTable } from '@framework/FindOptions'
 import { Entity, getToString, is, Lite } from '@framework/Signum.Entities';
-import { useFetchAll } from '../../Signum.React/Scripts/Navigator';
-import { ignoreErrors } from '../../Signum.React/Scripts/QuickLinks';
+import { useFetchAll } from '@framework/Navigator';
+import { ignoreErrors } from '@framework/QuickLinks';
 import * as ChartClient from '../Chart/ChartClient'
 import { ChartRequestModel } from '../Chart/Signum.Entities.Chart';
 

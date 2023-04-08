@@ -18,8 +18,8 @@ import SelectorModal from '@framework/SelectorModal'
 import { DashboardFilter, DashboardController, DashboardFilterRow, DashboardPinnedFilters, equalsDFR } from "./DashboardFilterController"
 import { filterOperations, FilterOptionParsed, isActive, isFilterGroupOption, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions'
 import { CachedQueryJS, executeChartCached } from '../CachedQueryExecutor'
-import { DashboardBehaviour } from '../../../Signum.React/Scripts/Signum.Entities.DynamicQuery'
-import { softCast } from '../../../Signum.React/Scripts/Globals'
+import { DashboardBehaviour } from '@framework/Signum.Entities.DynamicQuery'
+import { softCast } from '@framework/Globals'
 
 export interface UserChartPartHandler {
   chartRequest: ChartRequestModel | undefined;

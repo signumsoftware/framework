@@ -2,9 +2,9 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Scripts/Reflection'
-import * as Entities from '../../Signum.React/Scripts/Signum.Entities'
-import * as Basics from '../../Signum.React/Scripts/Signum.Entities.Basics'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
+import * as Entities from '@framework/Signum.Entities'
+import * as Basics from '@framework/Signum.Entities.Basics'
 
 
 export const DisconnectedCreatedMixin = new Type<DisconnectedCreatedMixin>("DisconnectedCreatedMixin");

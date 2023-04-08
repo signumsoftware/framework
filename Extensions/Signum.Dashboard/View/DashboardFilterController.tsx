@@ -4,9 +4,9 @@ import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 import { ChartRequestModel, UserChartEntity } from '../../Chart/Signum.Entities.Chart';
 import { ChartRow } from '../../Chart/ChartClient';
 import { Entity, is, Lite } from '@framework/Signum.Entities';
-import * as Finder from '../../../Signum.React/Scripts/Finder';
+import * as Finder from '@framework/Finder';
 import { getQueryKey } from '@framework/Reflection';
-import { Dic, softCast } from '../../../Signum.React/Scripts/Globals';
+import { Dic, softCast } from '@framework/Globals';
 import { UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries';
 
 

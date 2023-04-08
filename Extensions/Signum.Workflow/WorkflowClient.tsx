@@ -57,9 +57,9 @@ import { QueryString } from '@framework/QueryString';
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 import { OperationMenuItem } from '@framework/Operations/ContextualOperations';
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization';
-import { SearchControl } from '../../Signum.React/Scripts/Search';
-import SearchModal from '../../Signum.React/Scripts/SearchControl/SearchModal';
-import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal';
+import { SearchControl } from '@framework/Search';
+import SearchModal from '@framework/SearchControl/SearchModal';
+import MessageModal from '@framework/Modals/MessageModal';
 
 export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }) {
 
