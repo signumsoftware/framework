@@ -1,9 +1,4 @@
-using System;
-using System.Linq;
 using OpenQA.Selenium;
-using Signum.Entities;
-using Signum.Entities.Basics;
-using Signum.Utilities;
 
 namespace Signum.React.Selenium;
 

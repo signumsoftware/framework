@@ -11,9 +11,9 @@
 		<PackageReference Include="Selenium.Support" Version="4.8.2" />
 		<PackageReference Include="Selenium.WebDriver" Version="4.8.2" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
-		<ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj" />
-		<ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
-		<ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
-		<ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
+		<ProjectReference Include="..\..\Signum\Signum.csproj" />
+		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
+		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />
+		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
 	</ItemGroup>
 </Project>

@@ -1,10 +1,5 @@
 using OpenQA.Selenium;
-using Signum.Entities;
-using Signum.Entities.Operations;
-using Signum.Entities.Processes;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
+using Signum.Processes;
 
 namespace Signum.React.Selenium;
 

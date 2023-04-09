@@ -1,6 +1,4 @@
 using OpenQA.Selenium;
-using Signum.Entities;
-using Signum.Utilities;
 using System.Collections.ObjectModel;
 
 namespace Signum.React.Selenium;

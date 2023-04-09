@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.DynamicQuery.Request;
-using Signum.Utilities;
 
 namespace Signum.React.Selenium;
 

@@ -1,5 +1,4 @@
 using OpenQA.Selenium;
-using Signum.Entities;
 using Signum.React.Selenium;
 
 namespace Signum.React.Extensions.Selenium.Search;

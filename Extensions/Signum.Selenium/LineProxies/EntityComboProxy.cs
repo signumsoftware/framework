@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
 using OpenQA.Selenium;
-using Signum.Entities;
-using Signum.Utilities;
 using OpenQA.Selenium.Support.UI;
 
 namespace Signum.React.Selenium;
