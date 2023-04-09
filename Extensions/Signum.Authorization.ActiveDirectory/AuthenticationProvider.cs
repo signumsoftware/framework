@@ -8,53 +8,56 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Azure.Core;
+using Azure.Identity;
 
 namespace Signum.ActiveDirectory;
+
 public static class AuthenticationProviderUtils
 {
-    public static AsyncThreadVariable<IAuthenticationProvider?> AuthenticationProvider = Statics.ThreadVariable<IAuthenticationProvider?>("OverrideAuthenticationProvider");
+    public static AsyncThreadVariable<TokenCredential?> OverridenTokenCredential = Statics.ThreadVariable<TokenCredential?>("OverrideAuthenticationProvider");
 
-    public static IDisposable OverrideAuthenticationProvider(IAuthenticationProvider value)
+
+    public static IDisposable OverrideAuthenticationProvider(TokenCredential value)
     {
-        var old = AuthenticationProvider.Value;
-        AuthenticationProvider.Value = value;
-        return new Disposable(() => AuthenticationProvider.Value = old);
+        var old = OverridenTokenCredential.Value;
+        OverridenTokenCredential.Value = value;
+        return new Disposable(() => OverridenTokenCredential.Value = old);
     }
 
-    public static IAuthenticationProvider GetAuthProvider(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
+    public static TokenCredential GetTokenCredential(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
     {
-        if (AuthenticationProvider.Value is var ap && ap != null)
+        if (OverridenTokenCredential.Value is var ap && ap != null)
             return ap;
 
-        IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
-        .Create(activeDirectoryConfig.Azure_ApplicationID.ToString())
-        .WithTenantId(activeDirectoryConfig.Azure_DirectoryID.ToString())
-        .WithClientSecret(activeDirectoryConfig.Azure_ClientSecret)
-        .Build();
+        ClientSecretCredential result = new ClientSecretCredential(
+            tenantId: activeDirectoryConfig.Azure_DirectoryID.ToString(),
+            clientId: activeDirectoryConfig.Azure_ApplicationID.ToString(),
+            clientSecret: activeDirectoryConfig.Azure_ClientSecret);
 
-        var authResultDirect = confidentialClientApplication.AcquireTokenForClient(scopes ?? new string[] { "https://graph.microsoft.com/.default" }).ExecuteAsync().Result;
-
-        ClientCredentialProvider authProvider = new ClientCredentialProvider(confidentialClientApplication);
-        return authProvider;
+        return result;
     }
 
     public static IDisposable OverrideAuthenticationProvider(string accessToken) =>
-        OverrideAuthenticationProvider(new AccessTokenProvider(accessToken));
+        OverrideAuthenticationProvider(new AccessTokenCredential(accessToken));
 }
 
-public class AccessTokenProvider : IAuthenticationProvider
+public class AccessTokenCredential : TokenCredential
 {
     private string accessToken;
 
-    public AccessTokenProvider(string accessToken)
+    public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
-        this.accessToken = accessToken;
+        return new AccessToken(accessToken, default);
     }
 
-    public Task AuthenticateRequestAsync(HttpRequestMessage request)
+    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
     {
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        return new ValueTask<AccessToken>(new AccessToken(accessToken, default));
+    }
 
-        return Task.CompletedTask;
+    public AccessTokenCredential(string accessToken)
+    {
+        this.accessToken = accessToken;
     }
 }

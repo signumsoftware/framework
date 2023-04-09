@@ -2,16 +2,15 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Basics from '../../Signum.React/Signum.Basics'
-import * as Security from '../../Signum.React/Signum.Security'
-import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as Processes from '../Signum.Processes.React/Signum.Processes'
-import * as Files from '../Signum.Files.React/Signum.Files'
-import * as Queries from '../Signum.UserAssets.React/Signum.UserAssets.Queries'
-import * as QueryTokens from '../Signum.UserAssets.React/Signum.UserAssets.QueryTokens'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Security from '../../Signum/React/Signum.Security'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Processes from '../Signum.Processes/Signum.Processes'
+import * as Files from '../Signum.Files/Signum.Files'
+import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
+import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
 
 
 export const AutoconfigureNeuralNetworkEntity = new Type<AutoconfigureNeuralNetworkEntity>("AutoconfigureNeuralNetwork");
@@ -215,7 +214,7 @@ export module PredictorFileType {
 export const PredictorMainQueryEmbedded = new Type<PredictorMainQueryEmbedded>("PredictorMainQueryEmbedded");
 export interface PredictorMainQueryEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorMainQueryEmbedded";
-  query: DynamicQuery.QueryEntity;
+  query: Basics.QueryEntity;
   groupResults: boolean;
   filters: Entities.MList<Queries.QueryFilterEmbedded>;
   columns: Entities.MList<PredictorColumnEmbedded>;
@@ -336,7 +335,7 @@ export interface PredictorSubQueryEntity extends Entities.Entity {
   Type: "PredictorSubQuery";
   predictor: Entities.Lite<PredictorEntity>;
   name: string;
-  query: DynamicQuery.QueryEntity;
+  query: Basics.QueryEntity;
   filters: Entities.MList<Queries.QueryFilterEmbedded>;
   columns: Entities.MList<PredictorSubQueryColumnEmbedded>;
   order: number;

@@ -74,7 +74,7 @@ public class TranslatedInstanceController : ControllerBase
         return new TranslatedInstanceViewTypeTS
         {
             TypeName = type,
-            Routes = TranslatedInstanceLogic.TranslateableRoutes.GetOrThrow(t).ToDictionary(a => a.Key.PropertyString(), a => a.Value),
+            Routes = PropertyRouteTranslationLogic.TranslateableRoutes.GetOrThrow(t).ToDictionary(a => a.Key.PropertyString(), a => a.Value),
             MasterCulture = TranslatedInstanceLogic.DefaultCulture.Name,
             Instances = master.Where(kvp => filtered(kvp.Key)).GroupBy(a => a.Key.Instance).Select(gr => new TranslatedInstanceViewTS
             {
@@ -106,7 +106,7 @@ public class TranslatedInstanceController : ControllerBase
         return new TypeInstancesChangesTS
         {
             MasterCulture = TranslatedInstanceLogic.DefaultCulture.Name,
-            Routes = TranslatedInstanceLogic.TranslateableRoutes.GetOrThrow(t).ToDictionary(a => a.Key.PropertyString(), a => a.Value),
+            Routes = PropertyRouteTranslationLogic.TranslateableRoutes.GetOrThrow(t).ToDictionary(a => a.Key.PropertyString(), a => a.Value),
             TotalInstances = totalInstances,
             TypeName = t.Name,
             Instances = changes.Instances.Select(a => new InstanceChangesTS
@@ -144,7 +144,7 @@ public class TranslatedInstanceController : ControllerBase
 
     private List<TranslationRecord> GetTranslationRecords(List<TranslationRecordTS> records, Type type)
     {
-        var propertyRoute = TranslatedInstanceLogic.TranslateableRoutes.GetOrThrow(type).Keys
+        var propertyRoute = PropertyRouteTranslationLogic.TranslateableRoutes.GetOrThrow(type).Keys
             .ToDictionaryEx(pr => pr.PropertyString(), pr =>
             {
                 var mlistPr = pr.GetMListItemsRoute();

@@ -2,17 +2,17 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Security from '../../Signum.React/Signum.Security'
-import * as Basics from '../../Signum.React/Signum.Basics'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as Authorization from '../Signum.Authorization.React/Signum.Authorization'
-import * as UserAssets from '../Signum.UserAssets.React/Signum.Entities.UserAssets'
-import * as Eval from '../Signum.Eval.React/Signum.Eval'
-import * as Scheduler from '../Signum.Scheduler.React/Signum.Scheduler'
-import * as Types from '../Signum.Dynamic.React/Signum.Dynamic.Types'
-import * as Processes from '../Signum.Processes.React/Signum.Processes'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Security from '../../Signum/React/Signum.Security'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Authorization from '../Signum.Authorization/Signum.Authorization'
+import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
+import * as Eval from '../Signum.Eval/Signum.Eval'
+import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
+import * as Types from '../Signum.Dynamic/Signum.Dynamic.Types'
+import * as Processes from '../Signum.Processes/Signum.Processes'
 
 
 export const ActivityWithRemarks = new Type<ActivityWithRemarks>("ActivityWithRemarks");

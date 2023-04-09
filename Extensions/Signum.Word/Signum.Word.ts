@@ -2,17 +2,15 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
-import * as Basics from '../../Signum.React/Signum.Entities.Basics'
-import * as Signum from '../../Signum.React/Signum.Basics'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as Templates from '../Signum.Mailing.React/Signum.Mailing.Templates'
-import * as Templating from '../Signum.Templating.React/Signum.Templating'
-import * as UserAssets from '../Signum.UserAssets.React/Signum.Entities.UserAssets'
-import * as Queries from '../Signum.UserAssets.React/Signum.UserAssets.Queries'
-import * as Files from '../Signum.Files.React/Signum.Files'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Templates from '../Signum.Mailing/Signum.Mailing.Templates'
+import * as Templating from '../Signum.Templating/Signum.Templating'
+import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
+import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
+import * as Files from '../Signum.Files/Signum.Files'
 
 
 export const WordAttachmentEntity = new Type<WordAttachmentEntity>("WordAttachment");
@@ -25,7 +23,7 @@ export interface WordAttachmentEntity extends Entities.Entity, Templates.IAttach
 }
 
 export const WordConverterSymbol = new Type<WordConverterSymbol>("WordConverter");
-export interface WordConverterSymbol extends Signum.Symbol {
+export interface WordConverterSymbol extends Basics.Symbol {
   Type: "WordConverter";
 }
 
@@ -40,7 +38,7 @@ export interface WordTemplateEntity extends Entities.Entity, UserAssets.IUserAss
   Type: "WordTemplate";
   guid: string /*Guid*/;
   name: string;
-  query: DynamicQuery.QueryEntity;
+  query: Basics.QueryEntity;
   model: WordModelEntity | null;
   culture: Basics.CultureInfoEntity;
   groupResults: boolean;
@@ -73,7 +71,7 @@ export module WordTemplateOperation {
 }
 
 export module WordTemplatePermission {
-  export const GenerateReport : Signum.PermissionSymbol = registerSymbol("Permission", "WordTemplatePermission.GenerateReport");
+  export const GenerateReport : Basics.PermissionSymbol = registerSymbol("Permission", "WordTemplatePermission.GenerateReport");
 }
 
 export const WordTemplateVisibleOn = new EnumType<WordTemplateVisibleOn>("WordTemplateVisibleOn");
@@ -83,7 +81,7 @@ export type WordTemplateVisibleOn =
   "Query";
 
 export const WordTransformerSymbol = new Type<WordTransformerSymbol>("WordTransformer");
-export interface WordTransformerSymbol extends Signum.Symbol {
+export interface WordTransformerSymbol extends Basics.Symbol {
   Type: "WordTransformer";
 }
 

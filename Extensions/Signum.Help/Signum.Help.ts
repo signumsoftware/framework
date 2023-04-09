@@ -4,9 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
-import * as Basics from '../../Signum/React/Signum.Entities.Basics'
-import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
-import * as Signum from '../../Signum/React/Signum.Basics'
+import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
@@ -81,7 +79,7 @@ export module HelpMessage {
 }
 
 export module HelpPermissions {
-  export const ViewHelp : Signum.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ViewHelp");
+  export const ViewHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ViewHelp");
 }
 
 export module HelpSearchMessage {
@@ -145,7 +143,7 @@ export interface OperationHelpEmbedded extends Entities.EmbeddedEntity {
 export const PropertyRouteHelpEmbedded = new Type<PropertyRouteHelpEmbedded>("PropertyRouteHelpEmbedded");
 export interface PropertyRouteHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "PropertyRouteHelpEmbedded";
-  property: Signum.PropertyRouteEntity;
+  property: Basics.PropertyRouteEntity;
   info: string;
   description: string | null;
 }
@@ -162,7 +160,7 @@ export interface QueryColumnHelpEmbedded extends Entities.EmbeddedEntity {
 export const QueryHelpEntity = new Type<QueryHelpEntity>("QueryHelp");
 export interface QueryHelpEntity extends Entities.Entity {
   Type: "QueryHelp";
-  query: DynamicQuery.QueryEntity;
+  query: Basics.QueryEntity;
   culture: Basics.CultureInfoEntity;
   info: string;
   description: string | null;
@@ -178,7 +176,7 @@ export module QueryHelpOperation {
 export const TypeHelpEntity = new Type<TypeHelpEntity>("TypeHelp");
 export interface TypeHelpEntity extends Entities.Entity {
   Type: "TypeHelp";
-  type: Signum.TypeEntity;
+  type: Basics.TypeEntity;
   culture: Basics.CultureInfoEntity;
   description: string | null;
   properties: Entities.MList<PropertyRouteHelpEmbedded>;

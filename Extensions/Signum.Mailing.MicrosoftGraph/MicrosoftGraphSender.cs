@@ -1,8 +1,5 @@
 using Signum.Mailing;
-using Signum.Engine.Authorization;
-using Signum.Engine.Files;
 using Microsoft.Graph;
-using Signum.Entities.Authorization;
 using System.IO;
 using Microsoft.Graph.Users.Item.Messages.Item.Attachments.CreateUploadSession;
 using Microsoft.Graph.Models;
@@ -10,8 +7,11 @@ using Azure.Identity;
 using Azure.Core;
 using Microsoft.Graph.Models.ODataErrors;
 using Microsoft.Kiota.Abstractions.Extensions;
+using Signum.Authorization;
+using Signum.ActiveDirectory;
+using Signum.Files;
 
-namespace Signum.Mailing.Senders;
+namespace Signum.Mailing.MicrosoftGraph;
 
 //https://jatindersingh81.medium.com/c-code-to-to-send-emails-using-microsoft-graph-api-2a90da6d648a
 //https://www.jeancloud.dev/2020/06/05/using-microsoft-graph-as-smtp-server.html
@@ -68,7 +68,7 @@ public class MicrosoftGraphSender : EmailSenderBase
                         }).Result!;
 
                         int maxSliceSize = 320 * 1024;
-
+                        
                         using var fileStream = new MemoryStream(a.File.GetByteArray());
 
                         var fileUploadTask = new LargeFileUploadTask<FileAttachment>(uploadSession, fileStream, maxSliceSize).UploadAsync().Result;
@@ -168,19 +168,11 @@ public static class MicrosoftGraphExtensions
         };
     }
 
-    static AsyncThreadVariable<TokenCredential?> OverridenTokenCredential = Statics.ThreadVariable<TokenCredential?>("OverrideAuthenticationProvider");
 
-
-    public static IDisposable OverrideAuthenticationProvider(TokenCredential value)
-    {
-        var old = OverridenTokenCredential.Value;
-        OverridenTokenCredential.Value = value;
-        return new Disposable(() => OverridenTokenCredential.Value = old);
-    }
 
     public static TokenCredential GeTokenCredential(this MicrosoftGraphEmailServiceEntity microsoftGraph, string[]? scopes = null)
     {
-        if (OverridenTokenCredential.Value is var ap && ap != null)
+        if (AuthenticationProviderUtils.OverridenTokenCredential.Value is var ap && ap != null)
             return ap;
 
         if (microsoftGraph.UseActiveDirectoryConfiguration)
@@ -195,39 +187,8 @@ public static class MicrosoftGraphExtensions
         return result;
     }
 
-    public static TokenCredential GetTokenCredential(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
-    {
-        if (OverridenTokenCredential.Value is var ap && ap != null)
-            return ap;
 
-        ClientSecretCredential result = new ClientSecretCredential(
-            tenantId: activeDirectoryConfig.Azure_DirectoryID.ToString(),
-            clientId: activeDirectoryConfig.Azure_ApplicationID.ToString(),
-            clientSecret: activeDirectoryConfig.Azure_ClientSecret);
 
-        return result;
-    }
-
-    public static IDisposable OverrideAuthenticationProvider(string accessToken) =>
-        OverrideAuthenticationProvider(new AccessTokenCredential(accessToken));
+  
 }
 
-public class AccessTokenCredential : TokenCredential
-{
-    private string accessToken;
-
-    public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
-    {
-        return new AccessToken(accessToken, default);
-    }
-
-    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
-    {
-        return new ValueTask<AccessToken>(new AccessToken(accessToken, default));
-    }
-
-    public AccessTokenCredential(string accessToken)
-    {
-        this.accessToken = accessToken;
-    }
-}

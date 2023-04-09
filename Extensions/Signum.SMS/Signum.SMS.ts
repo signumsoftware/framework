@@ -4,9 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
-import * as Basics from '../../Signum/React/Signum.Entities.Basics'
-import * as Signum from '../../Signum/React/Signum.Basics'
-import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
+import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Processes from '../Signum.Processes/Signum.Processes'
 import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
@@ -64,7 +62,7 @@ export interface SMSMessageEntity extends Entities.Entity {
   updatePackage: Entities.Lite<SMSUpdatePackageEntity> | null;
   updatePackageProcessed: boolean;
   referred: Entities.Lite<ISMSOwnerEntity> | null;
-  exception: Entities.Lite<Signum.ExceptionEntity> | null;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export module SMSMessageOperation {
@@ -114,7 +112,7 @@ export interface SMSTemplateEntity extends Entities.Entity {
   certified: boolean;
   editableMessage: boolean;
   disableAuthorization: boolean;
-  query: DynamicQuery.QueryEntity | null;
+  query: Basics.QueryEntity | null;
   model: SMSModelEntity | null;
   messages: Entities.MList<SMSTemplateMessageEmbedded>;
   from: string | null;

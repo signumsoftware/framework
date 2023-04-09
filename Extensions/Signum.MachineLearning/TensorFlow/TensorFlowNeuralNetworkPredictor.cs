@@ -4,6 +4,7 @@ using static Tensorflow.Binding;
 using Tensorflow;
 using Tensorflow.NumPy;
 using Signum.UserAssets.QueryTokens;
+using Signum.Files;
 
 namespace Signum.MachineLearning.TensorFlow;
 
@@ -206,7 +207,7 @@ public class TensorFlowNeuralNetworkPredictor : IPredictorAlgorithm
 
         var files = Directory.GetFiles(TrainingModelDirectory(ctx.Predictor, best.ModelIndex));
 
-        p.Files.AddRange(files.Select(p => new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, p)));
+        p.Files.AddRange(files.Select(p => new FilePathEmbedded(PredictorFileType.PredictorFile, p)));
 
         using (OperationLogic.AllowSave<PredictorEntity>())
             p.Save();

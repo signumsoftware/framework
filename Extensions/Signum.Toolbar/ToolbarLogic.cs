@@ -424,7 +424,7 @@ public static class ToolbarLogic
         }
     }
 
-    static bool InMemoryFilter<T>(T entity) where T : Entity
+    public static bool InMemoryFilter<T>(T entity) where T : Entity
     {
         if (Schema.Current.IsAllowed(typeof(T), inUserInterface: false) != null)
             return false;

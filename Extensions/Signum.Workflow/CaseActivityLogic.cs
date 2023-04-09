@@ -3,7 +3,7 @@ using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Dynamic.Types;
 using Signum.Mailing;
-using Signum.MailPackage;
+using Signum.Mailing.Package;
 using Signum.Processes;
 using Signum.Scheduler;
 using Signum.SMS;

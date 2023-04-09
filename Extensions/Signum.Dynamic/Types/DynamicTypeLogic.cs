@@ -1,6 +1,6 @@
 using Signum.Cache;
 using Signum.Dynamic.SqlMigrations;
-using Signum.Engine.Dynamic;
+using Signum.Dynamic;
 using Signum.Engine.Sync;
 using Signum.Eval;
 using System.Data;

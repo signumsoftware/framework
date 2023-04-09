@@ -8,6 +8,7 @@ using System.Runtime.Intrinsics.Arm;
 using Signum.Translation;
 using Signum.Basics;
 using Signum.Engine.Sync;
+using Signum.Excel;
 
 namespace Signum.Translation.Instances;
 
@@ -336,7 +337,7 @@ public static class TranslatedInstanceLogic
 
         if (translatedText.HasText())
         {
-            var originalText = GetPropertyRouteAccesor(propertyRoute)(entity)!;
+            var originalText = PropertyRouteTranslationLogic.GetPropertyRouteAccesor(propertyRoute)(entity)!;
             var current = translation?.TryGetC(pr);
             if (current != null)
             {

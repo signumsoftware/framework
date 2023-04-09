@@ -1,6 +1,6 @@
 using Signum.Mailing;
 
-namespace Signum.MailingMicrosoftGraph;
+namespace Signum.Mailing.MicrosoftGraph;
 
 public static class MailingMicrosoftGraphLogic
 {

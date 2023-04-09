@@ -32,7 +32,7 @@ public static class DynamicCSSOverrideLogic
 // In order to work this module, you should apply below mentioned changes to your index.cshtml file
 /*
 @using Signum.Utilities;
-@using Signum.Engine.Dynamic; <====*
+@using Signum.Dynamic; <====*
 
 @{
    ...

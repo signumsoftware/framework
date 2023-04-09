@@ -1,6 +1,6 @@
 using Signum.Authorization;
 using Signum.Dynamic.Types;
-using Signum.Engine.Dynamic;
+using Signum.Dynamic;
 using Signum.Engine.Sync;
 using Signum.Migrations;
 using System.IO;

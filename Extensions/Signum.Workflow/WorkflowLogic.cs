@@ -2,6 +2,7 @@ using Signum.Authorization;
 using Signum.UserAssets;
 using Signum.Eval;
 using System.Text.RegularExpressions;
+using Signum.Toolbar;
 
 namespace Signum.Workflow;
 
@@ -208,8 +209,8 @@ public static class WorkflowLogic
 
             ToolbarLogic.RegisterDelete<WorkflowEntity>(sb);
 
-            RegisterContentConfig<WorkflowEntity>(
-              lite => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); },
+            ToolbarLogic.RegisterContentConfig<WorkflowEntity>(
+              lite => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite); return ToolbarLogic.InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); },
                 lite => PropertyRouteTranslationLogic.TranslatedField(WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate(lite).Workflow, a => a.Name));
 
             sb.Include<WorkflowEntity>()

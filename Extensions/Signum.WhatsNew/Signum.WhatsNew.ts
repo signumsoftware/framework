@@ -4,7 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
-import * as Basics from '../../Signum/React/Signum.Entities.Basics'
+import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Files from '../Signum.Files/Signum.Files'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'

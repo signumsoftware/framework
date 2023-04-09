@@ -4,9 +4,8 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
-import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
-import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Templates from '../Signum.Mailing/Signum.Mailing.Templates'
 import * as UserQueries from '../Signum.UserQueries/Signum.UserQueries'
 import * as Files from '../Signum.Files/Signum.Files'
@@ -50,7 +49,7 @@ export module ExcelPermission {
 export const ExcelReportEntity = new Type<ExcelReportEntity>("ExcelReport");
 export interface ExcelReportEntity extends Entities.Entity {
   Type: "ExcelReport";
-  query: DynamicQuery.QueryEntity;
+  query: Basics.QueryEntity;
   displayName: string;
   file: Files.FileEmbedded;
 }

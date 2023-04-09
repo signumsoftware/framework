@@ -1,7 +1,7 @@
 using Signum.Mailing;
 using System.ComponentModel;
 
-namespace Signum.MailingMicrosoftGraph;
+namespace Signum.Mailing.MicrosoftGraph;
 
 
 [EntityKind(EntityKind.Part, EntityData.Master)]

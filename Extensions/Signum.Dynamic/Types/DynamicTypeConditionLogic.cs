@@ -1,7 +1,7 @@
 using Signum.Authorization.Rules;
 using Signum.Cache;
 using Signum.Dynamic.SqlMigrations;
-using Signum.Engine.Dynamic;
+using Signum.Dynamic;
 using Signum.Eval;
 
 namespace Signum.Dynamic.Types;

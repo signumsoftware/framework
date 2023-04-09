@@ -1,6 +1,6 @@
 using Signum.Eval;
 using Signum.Tree;
-using static Signum.Engine.Dynamic.DynamicLogic;
+using static Signum.Dynamic.DynamicLogic;
 
 namespace Signum.Dynamic.Controllers;
 

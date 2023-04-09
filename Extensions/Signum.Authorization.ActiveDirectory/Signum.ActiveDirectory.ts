@@ -2,11 +2,12 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as Authorization from '../Signum.Authorization.React/Signum.Authorization'
-import * as Scheduler from '../Signum.Scheduler.React/Signum.Scheduler'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Authorization from '../Signum.Authorization/Signum.Authorization'
+import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
 
 
 export module ActiveDirectoryAuthorizerMessage {
@@ -52,6 +53,10 @@ export module ActiveDirectoryMessage {
   export const HasUser = new MessageKey("ActiveDirectoryMessage", "HasUser");
 }
 
+export module ActiveDirectoryPermission {
+  export const InviteUsersFromAD : Basics.PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
+}
+
 export module ActiveDirectoryTask {
   export const DeactivateUsers : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "ActiveDirectoryTask.DeactivateUsers");
 }
@@ -70,21 +75,21 @@ export module ADGroupOperation {
 export const OnPremisesExtensionAttributesModel = new Type<OnPremisesExtensionAttributesModel>("OnPremisesExtensionAttributesModel");
 export interface OnPremisesExtensionAttributesModel extends Entities.ModelEntity {
   Type: "OnPremisesExtensionAttributesModel";
-  extensionAttribute1: string;
-  extensionAttribute2: string;
-  extensionAttribute3: string;
-  extensionAttribute4: string;
-  extensionAttribute5: string;
-  extensionAttribute6: string;
-  extensionAttribute7: string;
-  extensionAttribute8: string;
-  extensionAttribute9: string;
-  extensionAttribute10: string;
-  extensionAttribute11: string;
-  extensionAttribute12: string;
-  extensionAttribute13: string;
-  extensionAttribute14: string;
-  extensionAttribute15: string;
+  extensionAttribute1: string | null;
+  extensionAttribute2: string | null;
+  extensionAttribute3: string | null;
+  extensionAttribute4: string | null;
+  extensionAttribute5: string | null;
+  extensionAttribute6: string | null;
+  extensionAttribute7: string | null;
+  extensionAttribute8: string | null;
+  extensionAttribute9: string | null;
+  extensionAttribute10: string | null;
+  extensionAttribute11: string | null;
+  extensionAttribute12: string | null;
+  extensionAttribute13: string | null;
+  extensionAttribute14: string | null;
+  extensionAttribute15: string | null;
 }
 
 export const RoleMappingEmbedded = new Type<RoleMappingEmbedded>("RoleMappingEmbedded");

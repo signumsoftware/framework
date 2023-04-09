@@ -2,17 +2,16 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Basics from '../../Signum.React/Signum.Basics'
-import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as UserAssets from '../Signum.UserAssets.React/Signum.Entities.UserAssets'
-import * as QueryTokens from '../Signum.UserAssets.React/Signum.UserAssets.QueryTokens'
-import * as Files from '../Signum.Files.React/Signum.Files'
-import * as Scheduler from '../Signum.Scheduler.React/Signum.Scheduler'
-import * as UserQueries from '../Signum.UserQueries.React/Signum.UserQueries'
-import * as UserChart from '../Signum.Chart.React/Signum.Chart.UserChart'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
+import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
+import * as Files from '../Signum.Files/Signum.Files'
+import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
+import * as UserQueries from '../Signum.UserQueries/Signum.UserQueries'
+import * as UserChart from '../Signum.Chart/Signum.Chart.UserChart'
 
 
 export const AutoUpdate = new EnumType<AutoUpdate>("AutoUpdate");
@@ -179,7 +178,7 @@ export interface SeparatorPartEntity extends Entities.Entity, IPartEntity {
 export const TokenEquivalenceEmbedded = new Type<TokenEquivalenceEmbedded>("TokenEquivalenceEmbedded");
 export interface TokenEquivalenceEmbedded extends Entities.EmbeddedEntity {
   Type: "TokenEquivalenceEmbedded";
-  query: DynamicQuery.QueryEntity;
+  query: Basics.QueryEntity;
   token: QueryTokens.QueryTokenEmbedded;
 }
 

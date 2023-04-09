@@ -25,7 +25,7 @@ public class TranslationServer
 
         ReflectionServer.PropertyRouteExtension += (mi, pr) =>
         {
-            var type = TranslatedInstanceLogic.TranslateableRoutes.TryGetC(pr.RootType)?.TryGetS(pr);
+            var type = PropertyRouteTranslationLogic.TranslateableRoutes.TryGetC(pr.RootType)?.TryGetS(pr);
             if (type != null)
             {
                 mi.Extension.Add("translatable", true);
@@ -33,7 +33,7 @@ public class TranslationServer
             return mi;
         };
 
-        var pairs = TranslatedInstanceLogic.TranslateableRoutes.Values.SelectMany(a => a.Keys)
+        var pairs = PropertyRouteTranslationLogic.TranslateableRoutes.Values.SelectMany(a => a.Keys)
             .Select(pr => (type: pr.Parent!.Type, prop: pr.PropertyInfo!))
             .Distinct()
             .ToList();
@@ -49,7 +49,7 @@ public class TranslationServer
                 {
                     var pr = ctx.ParentPropertyRoute.Add(prop);
 
-                    if (TranslatedInstanceLogic.RouteType(pr) == null)
+                    if (PropertyRouteTranslationLogic.RouteType(pr) == null)
                         return;
 
                     var discard = reader.GetString();
@@ -58,7 +58,7 @@ public class TranslationServer
                 {
                     var pr = ctx.ParentPropertyRoute.Add(prop);
 
-                    if (TranslatedInstanceLogic.RouteType(pr) == null)
+                    if (PropertyRouteTranslationLogic.RouteType(pr) == null)
                         return;
 
                     var hastMList = pr.GetMListItemsRoute() != null;
@@ -70,7 +70,7 @@ public class TranslationServer
                     writer.WritePropertyName(ctx.LowerCaseName);
 
                     var value = entity == null || entity.IsNew || hastMList && rowId == null /*UserQuery apply changes*/ ? null :
-                    TranslatedInstanceLogic.TranslatedField(entity.ToLite(), pr, rowId, null!);
+                    PropertyRouteTranslationLogic.TranslatedField(entity.ToLite(), pr, rowId, null!);
 
                     writer.WriteStringValue(value);
                 }

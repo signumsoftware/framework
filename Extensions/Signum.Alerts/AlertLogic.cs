@@ -8,7 +8,7 @@ using Signum.UserAssets;
 using Signum.Mailing.Templates;
 using Signum.Scheduler;
 using Signum.Templating;
-using Signum.MailPackage;
+using Signum.Mailing.Package;
 
 namespace Signum.Alerts;
 
