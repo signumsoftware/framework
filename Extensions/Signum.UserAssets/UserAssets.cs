@@ -1,7 +1,8 @@
 using Signum.Authorization.Rules;
 using System.ComponentModel;
 using System.Xml.Linq;
-namespace Signum.Entities.UserAssets;
+
+namespace Signum.UserAssets;
 
 public class UserAssetPreviewModel : ModelEntity
 {

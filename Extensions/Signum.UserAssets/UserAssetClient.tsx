@@ -10,7 +10,7 @@ import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPer
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { QueryToken } from '@framework/FindOptions';
-import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
+import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.DynamicQuery';
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded, UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';
 import { Dic, softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
