@@ -1,11 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
-using Signum.Authorization;
 using Signum.Authorization.AuthToken;
-using Signum.Engine.Authorization;
 
-namespace Signum.ResetPassword;
+namespace Signum.Authorization.ResetPassword;
 
 [ValidateModelFilter]
 public class ResetPasswordController : ControllerBase

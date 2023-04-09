@@ -1,5 +1,5 @@
 using System.Globalization;
-using Signum.Engine.Translation;
+using Signum.Translation;
 
 namespace Signum.Translation.Translators;
 

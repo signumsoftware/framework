@@ -2,7 +2,7 @@ using Microsoft.Exchange.WebServices.Data;
 using Signum.Files;
 using Signum.Mailing;
 
-namespace Signum.MailingExchangeWS;
+namespace Signum.Mailing.ExchangeWS;
 
 public class ExchangeWebServiceSender : EmailSenderBase
 {

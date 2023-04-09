@@ -36,9 +36,9 @@ public class DynamicApiEval : EvalEmbedded<IDynamicApiEvaluator>
         return Compile(EvalLogic.GetCoreMetadataReferences()
             .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
 @"
-namespace Signum.Entities.Dynamic
+namespace Signum.Dynamic
 {
-class Evaluator : ControllerBase, Signum.Entities.Dynamic.IDynamicApiEvaluator
+class Evaluator : ControllerBase, Signum.Dynamic.IDynamicApiEvaluator
 {
     " + script + @"
 

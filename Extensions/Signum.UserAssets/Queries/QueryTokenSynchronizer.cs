@@ -1,6 +1,6 @@
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 
 namespace Signum.UserAssets.QueryTokens;
 

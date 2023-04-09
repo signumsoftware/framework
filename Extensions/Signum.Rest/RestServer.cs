@@ -6,7 +6,7 @@ using Signum.API;
 using Signum.Rest;
 using Signum.Authorization;
 
-namespace Signum.React.Rest;
+namespace Signum.Rest;
 
 public static class RestServer
 {

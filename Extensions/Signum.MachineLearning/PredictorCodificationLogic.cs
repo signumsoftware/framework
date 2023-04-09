@@ -1,5 +1,5 @@
 using Signum.DynamicQuery.Tokens;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 
 namespace Signum.MachineLearning;
 

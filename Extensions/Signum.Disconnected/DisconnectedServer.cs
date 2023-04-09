@@ -1,9 +1,8 @@
-﻿using Signum.React.Maps;
-using Signum.Engine.Disconnected;
+using Signum.Disconnected;
 using Microsoft.AspNetCore.Builder;
-using Signum.Entities.Basics;
+using Signum.API;
 
-namespace Signum.React.Map;
+namespace Signum.Map;
 
 public static class DisconnectedServer
 {
@@ -11,7 +10,7 @@ public static class DisconnectedServer
     {
         SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-        SchemaMap.GetColorProviders += GetMapColors;
+        MapColorProvider.GetColorProviders += GetMapColors;
     }
 
     static MapColorProvider[] GetMapColors()

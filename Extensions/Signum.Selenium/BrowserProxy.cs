@@ -2,7 +2,7 @@ using Signum.Entities.Reflection;
 using OpenQA.Selenium;
 using System.Globalization;
 
-namespace Signum.React.Selenium;
+namespace Signum.Selenium;
 
 public class BrowserProxy
 {

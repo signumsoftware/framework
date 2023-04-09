@@ -1,6 +1,6 @@
 using Signum.Authorization.Rules;
 using Signum.DynamicQuery.Tokens;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
 using System.Xml.Linq;

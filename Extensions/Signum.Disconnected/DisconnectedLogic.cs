@@ -1,8 +1,9 @@
-using Signum.Entities.Basics;
-using Signum.Entities.Disconnected;
+using Signum.Engine.Sync;
+using Signum.Basics;
+using Signum.Disconnected;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.Disconnected;
+namespace Signum.Disconnected;
 
 public static class DisconnectedLogic
 {
@@ -409,7 +410,7 @@ public class DisconnectedStrategy<T> : IDisconnectedStrategy where T : Entity
 
         this.Importer = importer;
 
-        this.Exporter = download == Entities.Disconnected.Download.Replace ? new DeleteAndCopyExporter<T>() : new BasicExporter<T>();
+        this.Exporter = download == Download.Replace ? new DeleteAndCopyExporter<T>() : new BasicExporter<T>();
     }
 
     public Download Download { get; private set; }

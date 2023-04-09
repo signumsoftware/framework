@@ -1,6 +1,6 @@
 ﻿using OpenQA.Selenium;
 
-namespace Signum.React.Selenium;
+namespace Signum.Selenium;
 
 public interface IWidgetContainer
 {

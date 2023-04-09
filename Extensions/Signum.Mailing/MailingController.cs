@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Basics;
+using Signum.Basics;
 using Signum.Mailing.Templates;
 using Signum.API.Filters;
-using Signum.Engine.Basics;
+using Signum.Basics;
 using Signum.API;
 using Signum.Authorization;
 

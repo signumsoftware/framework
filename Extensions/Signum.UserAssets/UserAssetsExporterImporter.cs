@@ -1,11 +1,12 @@
 using Signum.Authorization;
 using Signum.Authorization.Rules;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
+using Signum.UserAssets;
 using Signum.Utilities.Reflection;
 using System.IO;
 using System.Xml.Linq;
 
-namespace Signum.Engine.UserAssets;
+namespace Signum.UserAssets;
 
 public static class UserAssetsExporter
 {

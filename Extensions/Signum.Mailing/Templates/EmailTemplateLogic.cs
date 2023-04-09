@@ -1,8 +1,8 @@
 using System.Globalization;
 using Signum.DynamicQuery.Tokens;
-using Signum.Engine.Basics;
+using Signum.Basics;
 using Signum.Engine.Sync;
-using Signum.Entities.Basics;
+using Signum.Basics;
 using Signum.Templating;
 using Signum.UserAssets.QueryTokens;
 

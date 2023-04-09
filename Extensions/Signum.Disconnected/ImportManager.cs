@@ -1,11 +1,10 @@
-using Signum.Entities.Disconnected;
+using Signum.Disconnected;
 using System.IO;
 using System.Data.Common;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
+using Signum.Engine.Sync;
 
-namespace Signum.Engine.Disconnected;
+namespace Signum.Disconnected;
 
 public class ImportManager
 {

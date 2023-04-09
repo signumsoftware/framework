@@ -2,14 +2,14 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as Basics from '../../Signum.React/Signum.Basics'
-import * as Templates from '../Signum.Mailing.React/Signum.Mailing.Templates'
-import * as UserQueries from '../Signum.UserQueries.React/Signum.UserQueries'
-import * as Files from '../Signum.Files.React/Signum.Files'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Templates from '../Signum.Mailing/Signum.Mailing.Templates'
+import * as UserQueries from '../Signum.UserQueries/Signum.UserQueries'
+import * as Files from '../Signum.Files/Signum.Files'
 
 
 export const CollectionElementEmbedded = new Type<CollectionElementEmbedded>("CollectionElementEmbedded");

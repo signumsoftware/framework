@@ -13,10 +13,15 @@ class Upgrade_20230407_REVOLUTION : CodeUpgradeBase
     public override void Execute(UpgradeContext uctx)
     {
         var regex = new Regex(@"(../)*Signum.React/Scripts");
-
         uctx.ForeachCodeFile("*.ts, *.tsx", "Framework/Extensions", a =>
         {
             a.Replace(regex, "@framework");
+            a.Replace("@framework/Signum.Entities.DynamicQuery", "@framework/Signum.DynamicQuery");
+            a.Replace("/Authorization/", "/Signum.Authorization/");
+            a.Replace("/Omnibox/", "/Signum.Omnibox/");
+            a.Replace("/Translation/", "/Signum.Translation/");
+            a.Replace("/UserQueries/", "/Signum.UserQueries/");
+            a.Replace("/UserQueries/", "/Signum.UserQueries/");
         });
 
 

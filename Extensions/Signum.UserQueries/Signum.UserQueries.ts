@@ -4,17 +4,17 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
-import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
 import * as Basics from '../../Signum/React/Signum.Basics'
+import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
 import * as Operations from '../../Signum/React/Signum.Operations'
-import * as UserAssets from '../Signum.UserAssets/Signum.Entities.UserAssets'
+import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
 
 
 export const UserQueryEntity = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserQuery";
-  query: DynamicQuery.QueryEntity;
+  query: Basics.QueryEntity;
   groupResults: boolean;
   entityType: Entities.Lite<Basics.TypeEntity> | null;
   hideQuickLink: boolean;

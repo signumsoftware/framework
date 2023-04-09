@@ -36,9 +36,9 @@ public class DynamicTypeConditionEval : EvalEmbedded<IDynamicTypeConditionEvalua
         return Compile(EvalLogic.GetCoreMetadataReferences()
             .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
 @"
-namespace Signum.Entities.Dynamic
+namespace Signum.Dynamic
 {
-class Evaluator : Signum.Entities.Dynamic.IDynamicTypeConditionEvaluator
+class Evaluator : Signum.Dynamic.IDynamicTypeConditionEvaluator
 {
     public bool EvaluateUntyped(ModifiableEntity e)
     {

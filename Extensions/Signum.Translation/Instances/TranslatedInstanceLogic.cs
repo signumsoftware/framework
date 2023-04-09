@@ -1,12 +1,12 @@
 using System.Globalization;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Basics;
+using Signum.Basics;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Intrinsics.Arm;
-using Signum.Engine.Translation;
-using Signum.Engine.Basics;
+using Signum.Translation;
+using Signum.Basics;
 using Signum.Engine.Sync;
 
 namespace Signum.Translation.Instances;

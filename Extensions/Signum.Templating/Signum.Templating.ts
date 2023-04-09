@@ -5,12 +5,11 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
-import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
 import * as Eval from '../Signum.Eval/Signum.Eval'
 
 
 export interface IContainsQuery extends Entities.Entity {
-  query: DynamicQuery.QueryEntity;
+  query: Basics.QueryEntity;
 }
 
 export const ModelConverterSymbol = new Type<ModelConverterSymbol>("ModelConverter");

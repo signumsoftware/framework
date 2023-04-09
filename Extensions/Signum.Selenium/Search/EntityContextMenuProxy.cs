@@ -1,7 +1,7 @@
 using OpenQA.Selenium;
 using Signum.Processes;
 
-namespace Signum.React.Selenium;
+namespace Signum.Selenium;
 
 public class EntityContextMenuProxy
 {

@@ -1,4 +1,4 @@
-using Signum.React.UserAssets;
+using Signum.UserAssets;
 using Microsoft.AspNetCore.Builder;
 using Signum.API;
 

@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using System.Collections.Specialized;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using System.Xml.Linq;
 using Signum.Scheduler;
 using Signum.UserAssets.QueryTokens;

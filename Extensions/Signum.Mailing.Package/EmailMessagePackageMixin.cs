@@ -1,6 +1,6 @@
-using Signum.Entities.Mailing;
+using Signum.Mailing;
 
-namespace Signum.MailPackage;
+namespace Signum.Mailing.Package;
 
 
 public class EmailMessagePackageMixin : MixinEntity

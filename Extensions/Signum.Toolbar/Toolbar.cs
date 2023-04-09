@@ -7,7 +7,7 @@ using Signum.UserQueries;
 using System.Xml.Linq;
 using Signum.Utilities.Reflection;
 using System.ComponentModel;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.Chart.UserChart;
 
 namespace  Signum.Toolbar;

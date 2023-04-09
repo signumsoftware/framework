@@ -1,7 +1,6 @@
 using OpenQA.Selenium;
-using Signum.React.Selenium;
 
-namespace Signum.React.Extensions.Selenium.Search;
+namespace Signum.Selenium;
 
 public class SearchValueLineProxy
 {

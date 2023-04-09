@@ -1,14 +1,14 @@
 using System.Globalization;
-using Signum.Entities.Translation;
+using Signum.Translation;
 using System.Xml.Linq;
 using System.IO;
 using System.Collections.Concurrent;
 using Signum.Authorization;
-using Signum.Engine.Basics;
+using Signum.Basics;
 using Signum.Authorization.Rules;
 using Signum.Engine.Sync;
 
-namespace Signum.Engine.Translation;
+namespace Signum.Translation;
 
 public static class TranslationLogic
 {

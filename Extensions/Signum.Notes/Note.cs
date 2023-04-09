@@ -1,4 +1,4 @@
-using Signum.Entities.Basics;
+using Signum.Basics;
 using System.ComponentModel;
 
 namespace Signum.Notes;

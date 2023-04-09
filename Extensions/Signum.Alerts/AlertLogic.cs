@@ -3,14 +3,12 @@ using Microsoft.AspNetCore.Html;
 using System.Text.RegularExpressions;
 using Signum.Mailing;
 using Signum.Authorization;
-using Signum.Entities.Mailing;
-using Signum.MailPackage;
 using Signum.Authorization.Rules;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.Mailing.Templates;
-using Signum.Engine.Basics;
 using Signum.Scheduler;
 using Signum.Templating;
+using Signum.MailPackage;
 
 namespace Signum.Alerts;
 

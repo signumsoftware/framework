@@ -1,7 +1,7 @@
 using Signum.Mailing;
 using Signum.Processes;
 
-namespace Signum.Entities.Mailing;
+namespace Signum.Mailing.Package;
 
 [EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
 public class EmailPackageEntity : Entity, IProcessDataEntity

@@ -1,9 +1,8 @@
 using Signum.Entities.Reflection;
 using OpenQA.Selenium;
-using Signum.React.Extensions.Selenium.Search;
 using Signum.UserAssets.QueryTokens;
 
-namespace Signum.React.Selenium;
+namespace Signum.Selenium;
 
 public interface ILineContainer<T> : ILineContainer where T : IModifiableEntity
 {

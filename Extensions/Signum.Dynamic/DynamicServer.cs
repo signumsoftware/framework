@@ -4,7 +4,7 @@ using Signum.Authorization;
 using Signum.Dynamic.Views;
 using Signum.Eval.TypeHelp;
 
-namespace Signum.React.Dynamic;
+namespace Signum.Dynamic;
 
 public static class DynamicServer
 {

@@ -1,6 +1,6 @@
 using OpenQA.Selenium;
 
-namespace Signum.React.Selenium;
+namespace Signum.Selenium;
 
 public class FramePageProxy<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IValidationSummaryContainer, IDisposable where T : ModifiableEntity
 {

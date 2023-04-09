@@ -1,3 +1,5 @@
+using Signum.Mailing;
+
 namespace Signum.MailingReception;
 
 public interface IPop3Client : IDisposable

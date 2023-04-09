@@ -9,9 +9,9 @@ using Signum.Engine.Sync;
 using Signum.UserAssets.QueryTokens;
 using Signum.Templating;
 using Signum.Files;
-using Signum.Engine.UserAssets;
+using Signum.UserAssets;
 using Signum.Authorization.Rules;
-using Signum.Engine.Basics;
+using Signum.Basics;
 
 namespace Signum.Word;
 

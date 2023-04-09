@@ -1,11 +1,11 @@
-using Signum.Engine.Translation;
+using Signum.Translation;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Signum.Utilities.Reflection;
 using System.IO;
-using Signum.Entities.Basics;
-using Signum.React.Translation;
+using Signum.Basics;
+using Signum.Translation;
 using Signum.API.Filters;
 
 namespace Signum.Translation.Instances;

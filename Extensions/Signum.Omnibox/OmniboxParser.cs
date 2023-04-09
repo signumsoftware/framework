@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text.Json.Serialization;
 using System.Text.Json;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 
 namespace Signum.Omnibox;
 

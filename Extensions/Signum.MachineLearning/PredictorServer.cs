@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Signum.API;
-using Signum.React.UserAssets;
+using Signum.UserAssets;
 
 namespace Signum.MachineLearning;
 

@@ -3,7 +3,7 @@ using Signum.Utilities.Reflection;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
 
-namespace Signum.DynamicQuery;
+namespace Signum.Basics;
 
 public static class QueryLogic
 {

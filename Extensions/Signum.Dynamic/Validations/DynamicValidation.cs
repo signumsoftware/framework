@@ -43,9 +43,9 @@ public class DynamicValidationEval : EvalEmbedded<IDynamicValidationEvaluator>
         return Compile(EvalLogic.GetCoreMetadataReferences()
             .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
 @"
-namespace Signum.Entities.Dynamic
+namespace Signum.Dynamic
 {
-class Evaluator : Signum.Entities.Dynamic.IDynamicValidationEvaluator
+class Evaluator : Signum.Dynamic.IDynamicValidationEvaluator
 {
     public string EvaluateUntyped(ModifiableEntity e, PropertyInfo pi)
     {

@@ -1,4 +1,4 @@
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 

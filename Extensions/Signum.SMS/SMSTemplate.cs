@@ -1,4 +1,4 @@
-using Signum.Entities.Basics;
+using Signum.Basics;
 using Signum.UserAssets.QueryTokens;
 using System.ComponentModel;
 

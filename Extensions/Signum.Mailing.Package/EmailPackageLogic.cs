@@ -1,12 +1,10 @@
 using Signum.Authorization;
-using Signum.Entities.Mailing;
 using Signum.Mailing;
 using Signum.Mailing.Templates;
-using Signum.MailPackage;
 using Signum.Processes;
 using Signum.Templating;
 
-namespace Signum.Engine.Mailing;
+namespace Signum.Mailing.Package;
 
 public static class EmailPackageLogic
 {

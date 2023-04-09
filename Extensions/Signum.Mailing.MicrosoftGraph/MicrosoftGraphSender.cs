@@ -1,4 +1,4 @@
-using Signum.Entities.Mailing;
+using Signum.Mailing;
 using Signum.Engine.Authorization;
 using Signum.Engine.Files;
 using Microsoft.Graph;
@@ -11,7 +11,7 @@ using Azure.Core;
 using Microsoft.Graph.Models.ODataErrors;
 using Microsoft.Kiota.Abstractions.Extensions;
 
-namespace Signum.Engine.Mailing.Senders;
+namespace Signum.Mailing.Senders;
 
 //https://jatindersingh81.medium.com/c-code-to-to-send-emails-using-microsoft-graph-api-2a90da6d648a
 //https://www.jeancloud.dev/2020/06/05/using-microsoft-graph-as-smtp-server.html

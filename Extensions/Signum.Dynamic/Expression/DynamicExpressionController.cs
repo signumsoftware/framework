@@ -19,9 +19,9 @@ public class DynamicExpressionController : ControllerBase
             var code = $@"
 {EvalLogic.GetUsingNamespaces()}
 
-namespace Signum.Entities.Dynamic
+namespace Signum.Dynamic
 {{
-public class ExprEvaluator : Signum.Entities.Dynamic.IDynamicExpressionEvaluator
+public class ExprEvaluator : Signum.Dynamic.IDynamicExpressionEvaluator
 {{
     static Expression<Func<{de.FromType}, {de.ReturnType}>> {de.Name}Expression =
         e => {de.Body};

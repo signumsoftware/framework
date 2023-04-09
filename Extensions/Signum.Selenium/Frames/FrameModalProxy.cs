@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using OpenQA.Selenium;
 
-namespace Signum.React.Selenium;
+namespace Signum.Selenium;
 
 public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer where T : ModifiableEntity
 {

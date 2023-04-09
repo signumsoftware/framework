@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Signum.Entities.Translation;
+using Signum.Translation;
 
-namespace Signum.Engine.Translation;
+namespace Signum.Translation;
 
 public static class TranslationReplacementLogic
 {

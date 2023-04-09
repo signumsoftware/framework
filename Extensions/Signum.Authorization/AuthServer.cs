@@ -8,7 +8,6 @@ using Signum.Authorization.AuthToken;
 using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Json;
-using Signum.React.Translation;
 
 namespace Signum.Authorization;
 

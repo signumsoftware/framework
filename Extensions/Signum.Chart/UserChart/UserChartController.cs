@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
 using Signum.Chart.UserChart;
 
-namespace Signum.React.Chart;
+namespace Signum.Chart;
 
 [ValidateModelFilter]
 public class UserChartController : ControllerBase

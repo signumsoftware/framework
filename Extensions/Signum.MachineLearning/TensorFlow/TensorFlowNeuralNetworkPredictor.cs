@@ -1,21 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Entities.MachineLearning;
-using Signum.Entities.DynamicQuery;
-using Signum.Utilities;
-using Signum.Entities;
 using System.Diagnostics;
-using Signum.Engine.Files;
-using Signum.Engine.Operations;
-using Signum.Entities.UserAssets;
 using System.IO;
 using static Tensorflow.Binding;
 using Tensorflow;
-using Tensorflow.Keras.Optimizers;
 using Tensorflow.NumPy;
+using Signum.UserAssets.QueryTokens;
 
-namespace Signum.Engine.MachineLearning.TensorFlow;
+namespace Signum.MachineLearning.TensorFlow;
 
 public class TensorFlowNeuralNetworkPredictor : IPredictorAlgorithm
 {

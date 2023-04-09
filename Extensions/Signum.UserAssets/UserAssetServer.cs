@@ -1,4 +1,4 @@
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Microsoft.AspNetCore.Builder;
 using System.Text.Json;
 using Signum.API;
@@ -8,7 +8,7 @@ using Signum.API.Controllers;
 using Signum.Authorization.Rules;
 using Signum.UserAssets.QueryTokens;
 
-namespace Signum.React.UserAssets;
+namespace Signum.UserAssets;
 
 public static class UserAssetServer
 {

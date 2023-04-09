@@ -2,7 +2,7 @@ using System.Net.Mail;
 using Signum.Utilities.Reflection;
 using Signum.Mailing.Templates;
 using Signum.Files;
-using Signum.Engine.Basics;
+using Signum.Basics;
 using Signum.Mailing;
 
 namespace Signum.Mailing;

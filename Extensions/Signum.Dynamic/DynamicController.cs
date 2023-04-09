@@ -3,7 +3,7 @@ using Signum.Utilities.DataStructures;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Signum.Entities.Dynamic;
+using Signum.Dynamic;
 using Microsoft.Extensions.Hosting;
 using Signum.Dynamic.Controllers;
 using Signum.API.Filters;
@@ -11,7 +11,7 @@ using Signum.API.Json;
 using Signum.API;
 using Signum.Eval;
 
-namespace Signum.React.Dynamic;
+namespace Signum.Dynamic;
 
 [ValidateModelFilter]
 public class DynamicController : ControllerBase

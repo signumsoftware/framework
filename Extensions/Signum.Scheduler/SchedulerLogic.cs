@@ -1,7 +1,7 @@
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Basics;
+using Signum.Basics;
 using System.Collections.Concurrent;
-using Signum.Engine.UserAssets;
+using Signum.UserAssets;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 

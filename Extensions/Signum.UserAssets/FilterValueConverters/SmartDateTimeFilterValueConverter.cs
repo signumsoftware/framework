@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using System.Globalization;
 
-namespace Signum.Entities.UserAssets;
+namespace Signum.UserAssets;
 
 public class SmartDateTimeFilterValueConverter : IFilterValueConverter
 {

@@ -1,5 +1,5 @@
 using System.Xml.Linq;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using System.Globalization;
 using Signum.Engine.Sync;
 using Signum.Scheduler;

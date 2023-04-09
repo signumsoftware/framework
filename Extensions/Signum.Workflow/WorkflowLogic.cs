@@ -1,5 +1,5 @@
 using Signum.Authorization;
-using Signum.Engine.UserAssets;
+using Signum.UserAssets;
 using Signum.Eval;
 using System.Text.RegularExpressions;
 

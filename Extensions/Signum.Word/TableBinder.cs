@@ -13,7 +13,7 @@ using System.Data;
 using Signum.Templating;
 using Signum.Excel;
 using Signum.UserQueries;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.Chart.UserChart;
 using Signum.Chart;
 

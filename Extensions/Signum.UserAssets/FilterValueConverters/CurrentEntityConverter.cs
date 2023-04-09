@@ -1,5 +1,5 @@
 
-namespace Signum.Entities.UserAssets;
+namespace Signum.UserAssets;
 
 public class CurrentEntityConverter : IFilterValueConverter
 {

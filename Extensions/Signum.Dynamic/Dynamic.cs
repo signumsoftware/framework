@@ -1,4 +1,4 @@
-namespace Signum.Entities.Dynamic;
+namespace Signum.Dynamic;
 
 [AutoInit]
 public static class DynamicPanelPermission

@@ -1,14 +1,15 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Translation;
+using Signum.Translation;
 using Microsoft.AspNetCore.Builder;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Signum.Translation.Translators;
 using Signum.Translation.Instances;
 using Signum.API;
+using Signum.API.Json;
 
-namespace Signum.React.Translation;
+namespace Signum.Translation;
 
 public class TranslationServer
 {

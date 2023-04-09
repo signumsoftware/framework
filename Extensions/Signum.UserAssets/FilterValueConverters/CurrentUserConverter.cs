@@ -1,7 +1,7 @@
 using Signum.Authorization;
-using Signum.Entities.Basics;
+using Signum.Basics;
 
-namespace Signum.Entities.UserAssets;
+namespace Signum.UserAssets;
 
 public class CurrentUserConverter : IFilterValueConverter
 {

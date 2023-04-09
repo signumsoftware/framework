@@ -1,12 +1,10 @@
-using Signum.Entities.Basics;
 using System.ComponentModel;
 using System.Xml.Linq;
 using Signum.Mailing.Templates;
 using Signum.UserAssets.QueryTokens;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.Templating;
-using Signum.Engine.Basics;
 
 namespace Signum.Mailing.Templates;
 

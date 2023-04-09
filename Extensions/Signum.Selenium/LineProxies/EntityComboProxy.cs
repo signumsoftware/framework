@@ -1,7 +1,7 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
-namespace Signum.React.Selenium;
+namespace Signum.Selenium;
 
 public class EntityComboProxy : EntityBaseProxy
 {

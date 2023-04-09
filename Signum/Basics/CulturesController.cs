@@ -1,4 +1,3 @@
-using Signum.Entities.Basics;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -6,9 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Signum.API.Filters;
-using Signum.Engine.Basics;
 
-namespace Signum.React.Translation;
+namespace Signum.Basics;
 
 [ValidateModelFilter]
 public class CultureController : ControllerBase

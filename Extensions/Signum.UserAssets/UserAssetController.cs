@@ -1,6 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Signum.Entities.UserAssets;
-using Signum.Engine.UserAssets;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.ObjectModel;
@@ -9,7 +7,7 @@ using Signum.API.Controllers;
 using Signum.API;
 using Signum.API.Filters;
 
-namespace Signum.React.UserAssets;
+namespace Signum.UserAssets;
 
 [ValidateModelFilter]
 public class UserAssetController : ControllerBase

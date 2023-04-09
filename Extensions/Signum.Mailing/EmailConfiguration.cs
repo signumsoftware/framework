@@ -1,4 +1,3 @@
-using Signum.Entities.Basics;
 
 namespace Signum.Mailing;
 

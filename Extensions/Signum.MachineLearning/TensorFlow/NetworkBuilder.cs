@@ -1,14 +1,7 @@
-using Signum.Entities.MachineLearning;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Tensorflow;
-using Tensorflow.Keras.Optimizers;
 using static Tensorflow.Binding;
-using static Tensorflow.KerasApi;
 
-namespace Signum.Engine.MachineLearning.TensorFlow;
+namespace Signum.MachineLearning.TensorFlow;
 
 public static class NetworkBuilder
 {

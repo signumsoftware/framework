@@ -2,7 +2,7 @@ using OpenQA.Selenium;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 
-namespace Signum.React.Selenium;
+namespace Signum.Selenium;
 
 public class ValueLineProxy : BaseLineProxy
 {

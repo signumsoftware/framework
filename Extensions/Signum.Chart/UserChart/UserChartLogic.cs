@@ -1,7 +1,7 @@
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Engine.Sync;
-using Signum.Engine.UserAssets;
+using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
 using Signum.ViewLog;

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.Chart.ColorPalette;
 
-namespace Signum.React.Chart;
+namespace Signum.Chart;
 
 public class ColorPaletteController : ControllerBase
 {

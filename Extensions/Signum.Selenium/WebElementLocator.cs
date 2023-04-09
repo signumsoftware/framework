@@ -1,7 +1,7 @@
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 
-namespace Signum.React.Selenium;
+namespace Signum.Selenium;
 
 public class WebElementLocator
 {

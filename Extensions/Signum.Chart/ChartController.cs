@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.Chart;
 
-namespace Signum.React.Chart;
+namespace Signum.Chart;
 
 public class ChartController : ControllerBase
 {

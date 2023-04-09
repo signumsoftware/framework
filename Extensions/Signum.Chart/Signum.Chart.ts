@@ -2,11 +2,11 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as DynamicQuery from '../../Signum.React/Signum.DynamicQuery'
-import * as Basics from '../../Signum.React/Signum.Basics'
-import * as QueryTokens from '../Signum.UserAssets.React/Signum.UserAssets.QueryTokens'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
 
 
 export const ChartColumnEmbedded = new Type<ChartColumnEmbedded>("ChartColumnEmbedded");

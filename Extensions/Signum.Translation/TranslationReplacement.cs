@@ -1,6 +1,6 @@
-﻿using Signum.Entities.Basics;
+﻿using Signum.Basics;
 
-namespace Signum.Entities.Translation;
+namespace Signum.Translation;
 
 
 [EntityKind(EntityKind.Main, EntityData.Master)]

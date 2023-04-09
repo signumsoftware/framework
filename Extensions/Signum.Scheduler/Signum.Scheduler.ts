@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Security from '../../Signum/React/Signum.Security'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
-import * as UserAssets from '../Signum.UserAssets/Signum.Entities.UserAssets'
+import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 
 
 export const HolidayCalendarEntity = new Type<HolidayCalendarEntity>("HolidayCalendar");

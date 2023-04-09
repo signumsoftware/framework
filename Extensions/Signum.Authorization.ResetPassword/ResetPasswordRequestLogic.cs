@@ -1,10 +1,9 @@
 using Signum.Authorization;
-using Signum.Engine.Basics;
+using Signum.Basics;
 using Signum.Mailing;
 using Signum.Mailing.Templates;
-using Signum.ResetPassword;
 
-namespace Signum.Engine.Authorization;
+namespace Signum.Authorization.ResetPassword;
 
 public static class ResetPasswordRequestLogic
 {

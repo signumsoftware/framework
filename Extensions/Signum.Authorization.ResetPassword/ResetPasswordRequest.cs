@@ -1,6 +1,7 @@
 using Signum.Authorization;
+using System.ComponentModel;
 
-namespace Signum.ResetPassword;
+namespace Signum.Authorization.ResetPassword;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class ResetPasswordRequestEntity : Entity

@@ -1,11 +1,11 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Signum.Dynamic.Controllers;
-using Signum.Entities.Dynamic;
+using Signum.Dynamic;
 using Signum.Eval;
 using System.IO;
 
-namespace Signum.Engine.Dynamic;
+namespace Signum.Dynamic;
 
 public static class DynamicLogic
 {

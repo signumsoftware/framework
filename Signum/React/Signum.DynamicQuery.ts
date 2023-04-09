@@ -82,12 +82,6 @@ export type PinnedFilterActive =
   "NotCheckbox_StartChecked" |
   "NotCheckbox_StartUnchecked";
 
-export const QueryEntity = new Type<QueryEntity>("Query");
-export interface QueryEntity extends Entities.Entity {
-  Type: "Query";
-  key: string;
-}
-
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");
 export type RefreshMode =
   "Auto" |

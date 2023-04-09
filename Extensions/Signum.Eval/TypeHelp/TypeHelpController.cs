@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Basics;
+using Signum.Basics;
 using Signum.API.Filters;
 using Signum.API;
 

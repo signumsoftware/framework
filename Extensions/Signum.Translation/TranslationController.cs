@@ -1,13 +1,13 @@
-using Signum.Engine.Translation;
+using Signum.Translation;
 using Signum.Utilities.DataStructures;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using static Signum.React.Translation.TranslationController;
+using static Signum.Translation.TranslationController;
 using Signum.Translation.Instances;
 using Signum.API.Filters;
 
-namespace Signum.React.Translation;
+namespace Signum.Translation;
 
 [ValidateModelFilter]
 public class TranslationController : ControllerBase

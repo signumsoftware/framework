@@ -1,4 +1,4 @@
-using Signum.React.UserAssets;
+using Signum.UserAssets;
 using Signum.Chart;
 using Microsoft.AspNetCore.Builder;
 using System.Text.Json;
@@ -8,7 +8,7 @@ using Signum.API.Json;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 
-namespace Signum.React.Chart;
+namespace Signum.Chart;
 
 public static class ChartServer
 {

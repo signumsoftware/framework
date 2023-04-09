@@ -1,5 +1,5 @@
 using Signum.DynamicQuery.Tokens;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 using System.Globalization;

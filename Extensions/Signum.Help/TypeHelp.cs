@@ -1,4 +1,4 @@
-using Signum.Entities.Basics;
+using Signum.Basics;
 
 namespace Signum.Help;
 

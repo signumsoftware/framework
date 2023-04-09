@@ -2,17 +2,16 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Basics from '../../Signum.React/Signum.Entities.Basics'
-import * as Signum from '../../Signum.React/Signum.Basics'
-import * as Operations from '../../Signum.React/Signum.Operations'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Templates from './Signum.Mailing.Templates'
-import * as Files from '../Signum.Files.React/Signum.Files'
+import * as Files from '../Signum.Files/Signum.Files'
 
 
 export module AsyncEmailSenderPermission {
-  export const ViewAsyncEmailSenderPanel : Signum.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
+  export const ViewAsyncEmailSenderPanel : Basics.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
 }
 
 export const CertFileType = new EnumType<CertFileType>("CertFileType");
@@ -28,7 +27,7 @@ export interface ClientCertificationFileEmbedded extends Entities.EmbeddedEntity
 }
 
 export interface EmailAddressEmbedded extends Entities.EmbeddedEntity {
-  emailOwner: Entities.Lite<Signum.IEmailOwnerEntity> | null;
+  emailOwner: Entities.Lite<Basics.IEmailOwnerEntity> | null;
   emailAddress: string;
   invalidEmail: boolean;
   displayName: string | null;
@@ -86,7 +85,7 @@ export interface EmailMessageEntity extends Entities.Entity {
   body: Entities.BigStringEmbedded;
   bodyHash: string | null;
   isBodyHtml: boolean;
-  exception: Entities.Lite<Signum.ExceptionEntity> | null;
+  exception: Entities.Lite<Basics.ExceptionEntity> | null;
   state: EmailMessageState;
   uniqueIdentifier: string /*Guid*/ | null;
   editableMessage: boolean;

@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Signum.Entities.Translation;
+namespace Signum.Translation;
 
 [AutoInit]
 public static class TranslationPermission

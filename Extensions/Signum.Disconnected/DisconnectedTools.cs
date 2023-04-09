@@ -2,8 +2,9 @@ using System.Data.Common;
 using System.Data;
 using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
+using Signum.Engine.Sync;
 
-namespace Signum.Engine.Disconnected;
+namespace Signum.Disconnected;
 
 public static class DisconnectedTools
 {

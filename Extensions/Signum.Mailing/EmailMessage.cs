@@ -150,7 +150,7 @@ public class EmailAttachmentEmbedded : EmbeddedEntity
         };
     }
 
-    internal bool Similar(EmailAttachmentEmbedded a)
+    public bool Similar(EmailAttachmentEmbedded a)
     {
         return ContentId == a.ContentId || File.FileName == a.File.FileName;
     }

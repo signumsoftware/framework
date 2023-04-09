@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Signum.API;
 using Signum.Excel;
 
-namespace Signum.React.Excel;
+namespace Signum.Excel;
 
 public static class ExcelServer
 {

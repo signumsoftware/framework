@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.MachineLearning;
-using Signum.Entities.UserAssets;
-using Signum.Utilities;
+using Signum.UserAssets.QueryTokens;
 using Signum.Utilities.Reflection;
 
-namespace Signum.Engine.MachineLearning.TensorFlow;
+namespace Signum.MachineLearning.TensorFlow;
 
 public interface ITensorFlowEncoding
 {

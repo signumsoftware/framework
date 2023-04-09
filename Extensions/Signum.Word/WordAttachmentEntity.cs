@@ -1,4 +1,4 @@
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.Mailing.Templates;
 using Signum.Templating;
 using System.Xml.Linq;

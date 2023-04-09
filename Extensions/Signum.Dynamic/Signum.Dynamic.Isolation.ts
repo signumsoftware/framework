@@ -2,9 +2,9 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Isolation from '../Signum.Isolation.React/Signum.Isolation'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Isolation from '../Signum.Isolation/Signum.Isolation'
 
 
 export const DynamicIsolationMixin = new Type<DynamicIsolationMixin>("DynamicIsolationMixin");

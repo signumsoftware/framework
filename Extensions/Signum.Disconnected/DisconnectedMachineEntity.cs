@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using Signum.Utilities.DataStructures;
 
-namespace Signum.Entities.Disconnected;
+namespace Signum.Disconnected;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
 public class DisconnectedMachineEntity : Entity

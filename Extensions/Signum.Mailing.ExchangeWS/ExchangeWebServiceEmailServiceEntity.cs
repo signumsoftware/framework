@@ -1,7 +1,7 @@
 using Microsoft.Exchange.WebServices.Data;
 using Signum.Mailing;
 
-namespace Signum.MailingExchangeWS;
+namespace Signum.Mailing.ExchangeWS;
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class ExchangeWebServiceEmailServiceEntity : EmailServiceEntity

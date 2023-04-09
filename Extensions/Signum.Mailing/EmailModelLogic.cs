@@ -2,7 +2,7 @@ using System.Globalization;
 using Signum.Mailing.Templates;
 using Signum.Engine.Sync;
 using Signum.Templating;
-using Signum.Engine.UserAssets;
+using Signum.UserAssets;
 using Signum.Authorization;
 
 namespace Signum.Mailing;

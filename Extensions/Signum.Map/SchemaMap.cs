@@ -3,7 +3,7 @@ using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
 using System.Text.Json.Serialization;
 
-namespace Signum.React.Maps;
+namespace Signum.Map;
 
 public static class SchemaMap
 {

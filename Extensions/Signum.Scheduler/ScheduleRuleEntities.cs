@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.ComponentModel;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using System.Xml.Linq;
 
 namespace Signum.Scheduler;

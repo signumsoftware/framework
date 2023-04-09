@@ -1,5 +1,4 @@
-using Signum.Engine.Basics;
-using Signum.Engine.UserAssets;
+using Signum.UserAssets;
 using System.Globalization;
 
 namespace Signum.Mailing.Templates;

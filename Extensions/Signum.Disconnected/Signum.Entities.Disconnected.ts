@@ -2,9 +2,10 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
-import * as Entities from '@framework/Signum.Entities'
-import * as Basics from '@framework/Signum.Entities.Basics'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Basics from '../../Signum/React/Signum.Basics'
+import * as Operations from '../../Signum/React/Signum.Operations'
 
 
 export const DisconnectedCreatedMixin = new Type<DisconnectedCreatedMixin>("DisconnectedCreatedMixin");
@@ -91,9 +92,9 @@ export interface DisconnectedMachineEntity extends Entities.Entity {
 }
 
 export module DisconnectedMachineOperation {
-  export const Save : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.Save");
-  export const UnsafeUnlock : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.UnsafeUnlock");
-  export const FixImport : Entities.ConstructSymbol_From<DisconnectedImportEntity, DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.FixImport");
+  export const Save : Operations.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.Save");
+  export const UnsafeUnlock : Operations.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.UnsafeUnlock");
+  export const FixImport : Operations.ConstructSymbol_From<DisconnectedImportEntity, DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.FixImport");
 }
 
 export const DisconnectedMachineState = new EnumType<DisconnectedMachineState>("DisconnectedMachineState");
@@ -130,5 +131,4 @@ export type Upload =
   "None" |
   "New" |
   "Subset";
-
 

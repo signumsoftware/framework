@@ -1,7 +1,7 @@
 using System.IO;
 using Microsoft.Data.SqlClient;
 
-namespace Signum.Engine.Disconnected;
+namespace Signum.Disconnected;
 
 public class LocalBackupManager
 {

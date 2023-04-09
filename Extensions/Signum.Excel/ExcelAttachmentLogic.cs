@@ -1,4 +1,4 @@
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.Files;
 using Signum.Mailing;
 using Signum.Mailing.Templates;

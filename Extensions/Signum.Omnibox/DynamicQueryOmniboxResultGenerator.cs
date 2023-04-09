@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Collections.Immutable;
 using Signum.DynamicQuery.Tokens;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 
 namespace Signum.Omnibox;
 

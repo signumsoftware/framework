@@ -1,3 +1,4 @@
+using Signum.Mailing;
 using Signum.Scheduler;
 
 namespace Signum.MailingReception;

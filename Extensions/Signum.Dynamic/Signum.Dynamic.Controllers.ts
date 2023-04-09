@@ -2,10 +2,10 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum.React/Reflection'
-import * as Entities from '../../Signum.React/Signum.Entities'
-import * as Operations from '../../Signum.React/Signum.Operations'
-import * as Eval from '../Signum.Eval.React/Signum.Eval'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
+import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Eval from '../Signum.Eval/Signum.Eval'
 
 
 export const DynamicApiEntity = new Type<DynamicApiEntity>("DynamicApi");

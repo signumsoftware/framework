@@ -1,6 +1,6 @@
-using Signum.Entities.Basics;
+using Signum.Basics;
 
-namespace Signum.Entities.Disconnected;
+namespace Signum.Disconnected;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class DisconnectedExportEntity : Entity

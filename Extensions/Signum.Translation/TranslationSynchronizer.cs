@@ -2,7 +2,7 @@ using System.Globalization;
 using Signum.Authorization;
 using Signum.Translation.Translators;
 
-namespace Signum.Engine.Translation;
+namespace Signum.Translation;
 
 public static class TranslationSynchronizer
 {

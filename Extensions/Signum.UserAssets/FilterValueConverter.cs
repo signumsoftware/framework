@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Collections;
 using System.Collections.ObjectModel;
 
-namespace Signum.Entities.UserAssets;
+namespace Signum.UserAssets;
 
 public static class FilterValueConverter
 {

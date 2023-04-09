@@ -1,8 +1,9 @@
-using Signum.Entities.Disconnected;
+using Signum.Disconnected;
 using System.IO;
-using Signum.Entities.Basics;
+using Signum.Basics;
+using Signum.Engine.Sync;
 
-namespace Signum.Engine.Disconnected;
+namespace Signum.Disconnected;
 
 public class ExportManager
 {

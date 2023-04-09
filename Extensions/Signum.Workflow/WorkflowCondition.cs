@@ -1,4 +1,4 @@
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.Eval;
 using System.Xml.Linq;
 

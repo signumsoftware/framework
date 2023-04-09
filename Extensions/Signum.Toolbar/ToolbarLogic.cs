@@ -7,7 +7,7 @@ using Signum.UserQueries;
 using Signum.Utilities.DataStructures;
 using System.Text.Json.Serialization;
 using Signum.Chart.UserChart;
-using Signum.Engine.UserAssets;
+using Signum.UserAssets;
 
 namespace  Signum.Toolbar;
 

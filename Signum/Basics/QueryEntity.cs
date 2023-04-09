@@ -1,4 +1,4 @@
-namespace Signum.DynamicQuery;
+namespace Signum.Basics;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
 [EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]

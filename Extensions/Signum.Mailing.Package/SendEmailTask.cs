@@ -4,7 +4,7 @@ using Signum.Scheduler;
 using Signum.Templating;
 using Signum.UserQueries;
 
-namespace Signum.Entities.Mailing;
+namespace Signum.Mailing.Package;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
 public class SendEmailTaskEntity : Entity, ITaskEntity

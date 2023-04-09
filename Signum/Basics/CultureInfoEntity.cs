@@ -1,6 +1,7 @@
+
 using System.Globalization;
 
-namespace Signum.Entities.Basics;
+namespace Signum.Basics;
 
 [EntityKind(EntityKind.String, EntityData.Master), AllowUnathenticated]
 public class CultureInfoEntity : Entity

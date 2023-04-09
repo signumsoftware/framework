@@ -22,9 +22,9 @@ public class TemplateApplicableEval : EvalEmbedded<ITemplateApplicable>
         return Compile(EvalLogic.GetCoreMetadataReferences()
             .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
 @"
-namespace Signum.Entities.Templating
+namespace Signum.Templating
 {
-class Evaluator : Signum.Entities.Templating.ITemplateApplicable
+class Evaluator : Signum.Templating.ITemplateApplicable
 {
     public bool ApplicableUntyped(Entity? e)
     {

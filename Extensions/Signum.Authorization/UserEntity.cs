@@ -1,5 +1,4 @@
 using Signum.Authorization.Rules;
-using Signum.Entities.Basics;
 using System.Globalization;
 
 namespace Signum.Authorization;

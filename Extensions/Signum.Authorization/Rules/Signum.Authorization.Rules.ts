@@ -5,7 +5,6 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Signum/React/Reflection'
 import * as Entities from '../../../Signum/React/Signum.Entities'
 import * as Basics from '../../../Signum/React/Signum.Basics'
-import * as DynamicQuery from '../../../Signum/React/Signum.DynamicQuery'
 import * as Operations from '../../../Signum/React/Signum.Operations'
 import * as Authorization from '../Signum.Authorization'
 
@@ -142,7 +141,7 @@ export type QueryAllowed =
   "Allow";
 
 export const QueryAllowedRule = new Type<QueryAllowedRule>("QueryAllowedRule");
-export interface QueryAllowedRule extends AllowedRuleCoerced<DynamicQuery.QueryEntity, QueryAllowed> {
+export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, QueryAllowed> {
   Type: "QueryAllowedRule";
 }
 
@@ -174,7 +173,7 @@ export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntit
 }
 
 export const RuleQueryEntity = new Type<RuleQueryEntity>("RuleQuery");
-export interface RuleQueryEntity extends RuleEntity<DynamicQuery.QueryEntity, QueryAllowed> {
+export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAllowed> {
   Type: "RuleQuery";
 }
 

@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
-using Signum.Entities.Basics;
+using Signum.Basics;
 using System.Xml.Linq;
 using Signum.Mailing.Templates;
-using Signum.Entities.UserAssets;
-using Signum.Engine.Basics;
+using Signum.UserAssets;
+using Signum.Basics;
 
 namespace Signum.Mailing.Templates;
 

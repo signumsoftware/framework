@@ -1,5 +1,5 @@
 using Signum.Chart.UserChart;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 using Signum.Files;
 using Signum.UserQueries;
 

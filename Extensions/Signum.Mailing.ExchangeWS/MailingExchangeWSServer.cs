@@ -8,7 +8,7 @@ using Signum.Authorization;
 using Signum.Mailing;
 using Signum.Authorization.Rules;
 
-namespace Signum.MailingExchangeWS;
+namespace Signum.Mailing.ExchangeWS;
 
 internal class MailingExchangeWSServer
 {

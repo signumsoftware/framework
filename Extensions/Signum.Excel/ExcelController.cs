@@ -7,7 +7,7 @@ using Signum.Excel;
 using Signum.API;
 using Signum.API.Controllers;
 
-namespace Signum.React.Excel;
+namespace Signum.Excel;
 
 [ValidateModelFilter]
 public class ExcelController : ControllerBase

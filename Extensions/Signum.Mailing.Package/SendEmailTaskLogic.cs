@@ -1,14 +1,11 @@
-using Signum.Entities.Mailing;
 using Signum.Mailing;
 using Signum.Mailing.Templates;
-using Signum.MailPackage;
 using Signum.Processes;
 using Signum.Scheduler;
 using Signum.Templating;
 using Signum.UserQueries;
 
-namespace Signum.Engine.Mailing;
-
+namespace Signum.Mailing.Package;
 
 public static class SendEmailTaskLogic
 {

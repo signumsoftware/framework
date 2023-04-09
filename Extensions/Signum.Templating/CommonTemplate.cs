@@ -5,7 +5,7 @@ using Signum.Utilities.Reflection;
 using Signum.UserAssets.QueryTokens;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
-using Signum.Entities.UserAssets;
+using Signum.UserAssets;
 
 namespace Signum.Templating;
 

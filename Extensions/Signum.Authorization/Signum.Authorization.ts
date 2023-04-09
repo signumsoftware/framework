@@ -6,7 +6,6 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Security from '../../Signum/React/Signum.Security'
-import * as Signum from '../../Signum/React/Signum.Entities.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Rules from './Rules/Signum.Authorization.Rules'
 
@@ -97,7 +96,7 @@ export interface UserEntity extends Entities.Entity, Basics.IEmailOwnerEntity, S
   passwordHash: string /*Byte[]*/ | null;
   role: Entities.Lite<RoleEntity>;
   email: string | null;
-  cultureInfo: Signum.CultureInfoEntity | null;
+  cultureInfo: Basics.CultureInfoEntity | null;
   disabledOn: string /*DateTime*/ | null;
   state: UserState;
   loginFailedCounter: number;

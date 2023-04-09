@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Signum.Engine.Sync;
-using Signum.Engine.Basics;
+using Signum.Basics;
 
 namespace Signum.Help;
 
