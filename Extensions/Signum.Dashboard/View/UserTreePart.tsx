@@ -5,7 +5,7 @@ import * as Finder from '@framework/Finder'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import { SearchControl, SearchValue } from '@framework/Search'
-import * as UserQueryClient from '../../UserQueries/UserQueryClient'
+import * as UserQueryClient from '../../Signum.UserQueries/UserQueryClient'
 import { UserTreePartEntity } from '../Signum.Dashboard'
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

@@ -9,7 +9,7 @@ import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { parseIcon } from '../../Basics/Templates/IconTypeahead'
-import { translated } from '../../Translation/TranslatedInstanceTools'
+import { translated } from '../../Signum.Translation/TranslatedInstanceTools'
 
 import { DashboardController } from './DashboardFilterController'
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files'

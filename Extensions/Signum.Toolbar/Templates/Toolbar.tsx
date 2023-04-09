@@ -11,7 +11,7 @@ import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Constructor from '@framework/Constructor';
 import * as Navigator from '@framework/Navigator';
-import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
+import { PermissionSymbol } from '../../Signum.Authorization/Signum.Entities.Authorization';
 import { classes } from '@framework/Globals';
 import { ToolbarCount } from '../QueryToolbarConfig';
 

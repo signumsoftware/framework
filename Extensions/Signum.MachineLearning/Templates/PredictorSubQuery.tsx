@@ -7,7 +7,7 @@ import * as Finder from '@framework/Finder'
 import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
-import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import { QueryFilterEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { initializeColumn } from './Predictor';

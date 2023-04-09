@@ -8,7 +8,7 @@ import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import {
   EntityPack, Lite, toLite, newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity, liteKey, getToString
 } from '@framework/Signum.Entities'
-import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
 import { Type, PropertyRoute, OperationInfo, toNumberFormat } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
@@ -43,7 +43,7 @@ import {
 
 import InboxFilter from './Case/InboxFilter'
 import Workflow, { WorkflowHandle } from './Workflow/Workflow'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { FilterRequest, ColumnRequest, FindOptions } from '@framework/FindOptions';
 import { BsColor } from '@framework/Components/Basic';
@@ -56,7 +56,7 @@ import { FunctionalAdapter } from '@framework/Modals';
 import { QueryString } from '@framework/QueryString';
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 import { OperationMenuItem } from '@framework/Operations/ContextualOperations';
-import { UserEntity } from '../Authorization/Signum.Entities.Authorization';
+import { UserEntity } from '../Signum.Authorization/Signum.Entities.Authorization';
 import { SearchControl } from '@framework/Search';
 import SearchModal from '@framework/SearchControl/SearchModal';
 import MessageModal from '@framework/Modals/MessageModal';

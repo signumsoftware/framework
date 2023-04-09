@@ -10,7 +10,7 @@ import { ChartColumn } from './ChartColumn'
 import * as  ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
 import { ColorInterpolate, ColorScheme } from '../ColorPalette/ColorPaletteClient'
 import { useForceUpdate, useAPI } from '@framework/Hooks'
-import { UserState } from '../../Authorization/Signum.Entities.Authorization'
+import { UserState } from '../../Signum.Authorization/Signum.Entities.Authorization'
 import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
 import { Dic } from '@framework/Globals'
 

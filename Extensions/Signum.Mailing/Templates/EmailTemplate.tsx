@@ -11,7 +11,7 @@ import IFrameRenderer from './IframeRenderer'
 import ValueLineModal from '@framework/ValueLineModal'
 import TemplateApplicable from '../../Templating/Templates/TemplateApplicable';
 import { useForceUpdate, useUpdatedRef } from '@framework/Hooks'
-import { QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import { QueryOrderEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded'
 import { Tabs, Tab } from 'react-bootstrap';
 import { QueryEntity } from '@framework/Signum.Entities.Basics'

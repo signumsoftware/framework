@@ -15,8 +15,8 @@ import { useForceUpdate } from '@framework/Hooks'
 import { tryGetOperationInfo } from '@framework/Operations'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyCodes } from '@framework/Components'
-import { UserQueryMerger } from '../../UserQueries/UserQueryMenu'
-import { translated } from '../../Translation/TranslatedInstanceTools'
+import { UserQueryMerger } from '../../Signum.UserQueries/UserQueryMenu'
+import { translated } from '../../Signum.Translation/TranslatedInstanceTools'
 
 export interface UserChartMenuProps {
   chartRequestView: ChartRequestViewHandle;
@@ -76,7 +76,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
     const ucNew = await createUserChart();
     const crmNew = crv.chartRequest;
 
-    const sd = await import("../../UserQueries/StringDistance").then(mod => new mod.default());
+    const sd = await import("../../Signum.UserQueries/StringDistance").then(mod => new mod.default());
 
     ucOld.chartScript = ucNew.chartScript;
     ucOld.maxRows = ucNew.maxRows;

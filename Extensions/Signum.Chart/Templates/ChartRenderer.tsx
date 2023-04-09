@@ -16,9 +16,9 @@ import { useAPI } from '@framework/Hooks'
 import { FullscreenComponent } from './FullscreenComponent'
 import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
 import { toAbsoluteUrl } from '@framework/AppContext'
-import * as UserQueryClient from '../../UserQueries/UserQueryClient'
+import * as UserQueryClient from '../../Signum.UserQueries/UserQueryClient'
 import { DynamicTypeConditionSymbolEntity } from '../../Dynamic/Signum.Entities.Dynamic'
-import { extractFindOptions } from '../../UserQueries/UserQueryClient'
+import { extractFindOptions } from '../../Signum.UserQueries/UserQueryClient'
 import { Lite } from '@framework/Signum.Entities'
 
 export interface ChartRendererProps {

@@ -7,7 +7,7 @@ import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import { UserAssetMessage } from '../Signum.UserAssets'
-import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
 import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";

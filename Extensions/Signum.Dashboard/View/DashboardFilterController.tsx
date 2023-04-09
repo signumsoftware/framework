@@ -1,13 +1,13 @@
 import { DashboardEntity, InteractionGroup, PanelPartEmbedded, UserChartPartEntity, UserQueryPartEntity } from '../Signum.Dashboard';
 import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, FindOptions, isActive, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions';
-import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
+import { FilterGroupOperation } from '@framework/Signum.DynamicQuery';
 import { ChartRequestModel, UserChartEntity } from '../../Chart/Signum.Entities.Chart';
 import { ChartRow } from '../../Chart/ChartClient';
 import { Entity, is, Lite } from '@framework/Signum.Entities';
 import * as Finder from '@framework/Finder';
 import { getQueryKey } from '@framework/Reflection';
 import { Dic, softCast } from '@framework/Globals';
-import { UserQueryEntity } from '../../UserQueries/Signum.Entities.UserQueries';
+import { UserQueryEntity } from '../../Signum.UserQueries/Signum.Entities.UserQueries';
 
 
 export class DashboardController {

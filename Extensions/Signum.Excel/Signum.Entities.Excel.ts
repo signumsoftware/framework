@@ -6,9 +6,9 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework
 import * as Entities from '@framework/Signum.Entities'
 import * as Basics from '@framework/Signum.Entities.Basics'
 import * as Mailing from '../Mailing/Signum.Entities.Mailing'
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
+import * as UserQueries from '../Signum.UserQueries/Signum.Entities.UserQueries'
 import * as Files from '../Files/Signum.Entities.Files'
-import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import * as Authorization from '../Signum.Authorization/Signum.Entities.Authorization'
 
 
 export const CollectionElementEmbedded = new Type<CollectionElementEmbedded>("CollectionElementEmbedded");

@@ -12,17 +12,17 @@ import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SelectorMessage
 import * as QuickLinks from '@framework/QuickLinks'
 import { getTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framework/Reflection'
 import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
-import * as UserQueryClient from '../UserQueries/UserQueryClient'
+import * as UserQueryClient from '../Signum.UserQueries/UserQueryClient'
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, ImagePartEntity, SeparatorPartEntity } from './Signum.Dashboard'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { useAPI } from '@framework/Hooks';
 import { ChartPermission } from '../Chart/Signum.Entities.Chart';
 import SelectorModal from '@framework/SelectorModal';
-import { translated } from '../Translation/TranslatedInstanceTools';
+import { translated } from '../Signum.Translation/TranslatedInstanceTools';
 import { DashboardController } from "./View/DashboardFilterController";
 import { EntityFrame } from '@framework/TypeContext';
 import { CachedQueryJS } from './CachedQueryExecutor';

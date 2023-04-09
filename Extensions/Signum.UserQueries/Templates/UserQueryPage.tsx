@@ -12,7 +12,7 @@ import * as UserQueryClient from '../UserQueryClient'
 import { useLocation, useParams } from "react-router";
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { useState } from 'react'
-import { translated } from '../../Translation/TranslatedInstanceTools'
+import { translated } from '../../Signum.Translation/TranslatedInstanceTools'
 import SearchPage from '@framework/SearchControl/SearchPage'
 import { useTitle } from '@framework/AppContext'
 

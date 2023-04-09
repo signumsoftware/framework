@@ -2,8 +2,8 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { CachePermission } from './Signum.Cache'
-import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 
 

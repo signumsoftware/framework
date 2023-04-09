@@ -3,8 +3,8 @@ import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '@framework/Services';
 import * as AppContext from '@framework/AppContext';
 import { TranslationPermission, TranslatedSummaryState, TranslateableRouteType, TranslationMessage } from './Signum.Translation'
-import * as AuthClient from '../Authorization/AuthClient'
-import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { QueryString } from '@framework/QueryString';
 import { Lite, Entity, ModifiableEntity } from '@framework/Signum.Entities';

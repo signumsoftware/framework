@@ -8,9 +8,9 @@ import * as Basics from '@framework/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
+import * as UserQueries from '../Signum.UserQueries/Signum.Entities.UserQueries'
 import * as Chart from '../Chart/Signum.Entities.Chart'
-import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import * as Authorization from '../Signum.Authorization/Signum.Entities.Authorization'
 
 
 export const AutoUpdate = new EnumType<AutoUpdate>("AutoUpdate");

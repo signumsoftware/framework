@@ -13,7 +13,7 @@ import { getQueryNiceName, QueryTokenString } from '@framework/Reflection'
 import { API, CompilationError, EvalEntityError, DynamicPanelInformation } from './DynamicClient'
 import { Options } from './DynamicClientOptions'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { DynamicPanelMessage, DynamicPanelPermission } from './Signum.Dynamic'
 import { useLocation, useParams } from "react-router";
 import { Tab, Tabs } from 'react-bootstrap';

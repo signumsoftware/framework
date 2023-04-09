@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework
 import * as Entities from '@framework/Signum.Entities'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as Basics from '../Basics/Signum.Entities.Basics'
-import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import * as Authorization from '../Signum.Authorization/Signum.Entities.Authorization'
 
 
 export const WhatsNewEntity = new Type<WhatsNewEntity>("WhatsNew");

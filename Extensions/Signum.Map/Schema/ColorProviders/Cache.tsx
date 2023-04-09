@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
 import { CachePermission } from '../../../Cache/Signum.Entities.Cache'
-import { isPermissionAuthorized } from '../../../Authorization/AuthClient'
+import { isPermissionAuthorized } from '../../../Signum.Authorization/AuthClient'
 import { colorScale } from '../../Utils'
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {

@@ -10,7 +10,7 @@ import { useLocation, useParams } from "react-router";
 import "../Dashboard.css"
 import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
-import { translated } from '../../Translation/TranslatedInstanceTools'
+import { translated } from '../../Signum.Translation/TranslatedInstanceTools'
 import * as DashboardClient from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 

@@ -8,7 +8,7 @@ import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templat
 import { FileLine } from '../../Files/FileLine'
 import TemplateControls from '../../Templating/TemplateControls'
 import TemplateApplicable from '../../Templating/Templates/TemplateApplicable'
-import { QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import { QueryOrderEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded'
 import { Tabs, Tab } from 'react-bootstrap';
 import CollapsableCard from '../../Basics/Templates/CollapsableCard'

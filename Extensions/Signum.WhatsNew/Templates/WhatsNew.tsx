@@ -11,7 +11,7 @@ import { FileLine } from '../../Files/FileLine';
 import WhatsNewHtmlEditor from './WhatsNewHtmlEditor';
 import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
-import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
+import { PermissionSymbol } from '../../Signum.Authorization/Signum.Entities.Authorization';
 import { OperationSymbol } from '@framework/Signum.Entities';
 import { QueryEntity, TypeEntity } from '@framework/Signum.Entities.Basics';
 

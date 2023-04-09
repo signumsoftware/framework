@@ -17,7 +17,7 @@ import * as QuickLinks from '@framework/QuickLinks'
 import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission, DynamicApiEntity } from './Signum.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClientOptions from './DynamicClientOptions'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { Tab } from 'react-bootstrap';
 
 export function start(options: { routes: RouteObject[] }) {

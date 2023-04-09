@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Omnibox/OmniboxClient'
+import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Signum.Omnibox/OmniboxClient'
 
 export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult>
 {

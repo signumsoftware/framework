@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework
 import * as Entities from '@framework/Signum.Entities'
 import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'
-import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import * as Authorization from '../Signum.Authorization/Signum.Entities.Authorization'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 
 

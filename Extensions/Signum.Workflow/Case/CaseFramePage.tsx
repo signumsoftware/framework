@@ -18,7 +18,7 @@ import { ErrorBoundary } from '@framework/Components';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
-import * as AuthClient from '../../Authorization/AuthClient'
+import * as AuthClient from '../../Signum.Authorization/AuthClient'
 import { FunctionalAdapter } from '@framework/Modals'
 import { useForceUpdate, useStateWithPromise } from '@framework/Hooks'
 

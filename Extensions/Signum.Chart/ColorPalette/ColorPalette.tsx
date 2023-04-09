@@ -11,7 +11,7 @@ import * as Finder from '@framework/Finder';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
 import { getTypeInfo, IBinding, tryGetTypeInfo } from '@framework/Reflection';
 import { Entity, EntityControlMessage, Lite, newMListElement, toLite } from '@framework/Signum.Entities';
-import { UserEntity } from '../../Authorization/Signum.Entities.Authorization';
+import { UserEntity } from '../../Signum.Authorization/Signum.Entities.Authorization';
 import { EntityLink } from '@framework/Search';
 import { calculateColor, ColorScheme } from './ColorPaletteClient';
 

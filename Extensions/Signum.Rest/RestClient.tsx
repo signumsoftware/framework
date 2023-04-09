@@ -4,7 +4,7 @@ import { RestLogEntity, RestApiKeyEntity } from './Signum.Rest'
 import { EntitySettings } from "@framework/Navigator";
 import * as Navigator from "@framework/Navigator";
 import { ajaxGet } from "@framework/Services";
-import * as AuthClient from "../Authorization/AuthClient";
+import * as AuthClient from "../Signum.Authorization/AuthClient";
 import { QueryString } from '@framework/QueryString';
 
 export function registerAuthenticator() {

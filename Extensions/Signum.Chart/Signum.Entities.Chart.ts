@@ -4,11 +4,11 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
 import * as Entities from '@framework/Signum.Entities'
-import * as DynamicQuery from '@framework/Signum.Entities.DynamicQuery'
+import * as DynamicQuery from '@framework/Signum.DynamicQuery'
 import * as Basics from '@framework/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
-import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import * as UserQueries from '../Signum.UserQueries/Signum.Entities.UserQueries'
+import * as Authorization from '../Signum.Authorization/Signum.Entities.Authorization'
 
 import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions'
 

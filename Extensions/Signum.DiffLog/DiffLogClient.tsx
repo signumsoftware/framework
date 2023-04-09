@@ -19,7 +19,7 @@ import { EntityControlMessage } from '@framework/Signum.Entities';
 import { tryGetTypeInfos } from '@framework/Reflection';
 import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
-import { isPermissionAuthorized } from '../Authorization/AuthClient';
+import { isPermissionAuthorized } from '../Signum.Authorization/AuthClient';
 import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
 import { TimeMachineCompareModal, TimeMachineModal } from './Templates/TimeMachinePage';
 import { QueryString } from '@framework/QueryString';

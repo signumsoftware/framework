@@ -2,8 +2,8 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { TranslationPermission, TranslatedSummaryState } from './Signum.Translation'
-import * as AuthClient from '../Authorization/AuthClient'
-import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
 import { ImportComponent } from '@framework/ImportComponent'
 
 export function start(options: { routes: RouteObject[] }) {

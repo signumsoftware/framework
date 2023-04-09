@@ -5,9 +5,9 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
 import * as Entities from '@framework/Signum.Entities'
 import * as Basics from '@framework/Signum.Entities.Basics'
-import * as DynamicQuery from '@framework/Signum.Entities.DynamicQuery'
+import * as DynamicQuery from '@framework/Signum.DynamicQuery'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
-import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import * as Authorization from '../Signum.Authorization/Signum.Entities.Authorization'
 
 
 export const PinnedQueryFilterEmbedded = new Type<PinnedQueryFilterEmbedded>("PinnedQueryFilterEmbedded");

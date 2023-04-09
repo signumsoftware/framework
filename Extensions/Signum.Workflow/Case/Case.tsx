@@ -11,7 +11,7 @@ import { SearchControl, SearchControlLoaded } from "@framework/Search";
 import * as Navigator from "@framework/Navigator";
 import { Tooltip, Tab, Tabs, OverlayTrigger } from "react-bootstrap";
 import { ResultRow } from '@framework/FindOptions';
-import * as AuthClient from '../../Authorization/AuthClient'
+import * as AuthClient from '../../Signum.Authorization/AuthClient'
 import { useAPI } from '@framework/Hooks'
 
 type CaseTab = "CaseFlow" | "CaseActivities" | "InprogressCaseActivities";

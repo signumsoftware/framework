@@ -10,9 +10,9 @@ import * as Finder from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'
-import { translated  } from '../Translation/TranslatedInstanceTools'
+import { translated  } from '../Signum.Translation/TranslatedInstanceTools'
 import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import {
   UserQueryEntity, UserQueryPermission, UserQueryMessage,
   QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded

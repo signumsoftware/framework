@@ -3,7 +3,7 @@ import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ExchangeWebServiceEmailServiceEntity } from '../../Signum.Mailing'
 import { Binding } from '@framework/Reflection'
-import { DoublePassword } from '../../../Authorization/Templates/DoublePassword'
+import { DoublePassword } from '../../../Signum.Authorization/Templates/DoublePassword'
 
 export default function ExchangeWebServiceEmailService(p: { ctx: TypeContext<ExchangeWebServiceEmailServiceEntity> }) {
   const sc = p.ctx;

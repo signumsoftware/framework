@@ -5,7 +5,7 @@ import { ToolbarElementEmbedded } from '../Signum.Toolbar'
 import { IconTypeaheadLine, parseIcon } from '../../Basics/Templates/IconTypeahead'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as Dashboard from '../../Dashboard/Admin/Dashboard'
-import { PermissionSymbol } from '../../Authorization/Signum.Entities.Authorization';
+import { PermissionSymbol } from '../../Signum.Authorization/Signum.Entities.Authorization';
 import { getToString } from '@framework/Signum.Entities'
 import { useForceUpdate } from '@framework/Hooks'
 import { classes } from '@framework/Globals'

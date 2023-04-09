@@ -6,7 +6,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { NoteEntity, NoteOperation } from './Signum.Notes'
 import * as QuickLinks from '@framework/QuickLinks'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 
 export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeName: string) => boolean }) {
   Navigator.addSettings(new EntitySettings(NoteEntity, e => import('./Templates/Note')));

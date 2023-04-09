@@ -7,7 +7,7 @@ import * as Entities from '@framework/Signum.Entities'
 import * as Basics from '@framework/Signum.Entities.Basics'
 import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
+import * as UserQueries from '../Signum.UserQueries/Signum.Entities.UserQueries'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 

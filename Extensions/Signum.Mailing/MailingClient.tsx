@@ -13,8 +13,8 @@ import * as Operations from '@framework/Operations'
 import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity, EmailFromEmbedded, ExchangeWebServiceEmailServiceEntity, MicrosoftGraphEmailServiceEntity, SmtpEmailServiceEntity } from './Signum.Mailing'
 import { EmailSenderConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Mailing'
 import { SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Mailing'
-import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import * as QuickLinks from '@framework/QuickLinks'
 import { ImportComponent } from '@framework/ImportComponent'
 import { ModifiableEntity } from "@framework/Signum.Entities";
@@ -28,7 +28,7 @@ import { Dropdown } from 'react-bootstrap';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import "./Mailing.css";
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics';
-import { currentCulture } from '../Translation/CultureClient';
+import { currentCulture } from '../Signum.Translation/CultureClient';
 import { SearchControlLoaded } from '@framework/Search';
 
 

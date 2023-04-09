@@ -8,8 +8,8 @@ import * as Operations from '@framework/Operations'
 import { PrintLineEntity, PrintPackageEntity, PrintPermission, PrintLineOperation } from './Signum.Printing'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
-import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 
 export function start(options: { routes: RouteObject[], }) {

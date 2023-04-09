@@ -10,7 +10,7 @@ import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInf
 import {
   FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions
 } from '@framework/FindOptions'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import {
   UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
   IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SvgMapsChartScript, SpecialParameterType
@@ -31,7 +31,7 @@ import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
 import { Dic, softCast } from '@framework/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
-import { UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';
+import { UserQueryEntity } from '../Signum.UserQueries/Signum.Entities.UserQueries';
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 
 export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }) {

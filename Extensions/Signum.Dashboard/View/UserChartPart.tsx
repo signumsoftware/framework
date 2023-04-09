@@ -18,7 +18,7 @@ import SelectorModal from '@framework/SelectorModal'
 import { DashboardFilter, DashboardController, DashboardFilterRow, DashboardPinnedFilters, equalsDFR } from "./DashboardFilterController"
 import { filterOperations, FilterOptionParsed, isActive, isFilterGroupOption, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions'
 import { CachedQueryJS, executeChartCached } from '../CachedQueryExecutor'
-import { DashboardBehaviour } from '@framework/Signum.Entities.DynamicQuery'
+import { DashboardBehaviour } from '@framework/Signum.DynamicQuery'
 import { softCast } from '@framework/Globals'
 
 export interface UserChartPartHandler {

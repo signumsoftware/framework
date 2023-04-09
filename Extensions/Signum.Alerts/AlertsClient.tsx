@@ -11,7 +11,7 @@ import ValueLineModal from '@framework/ValueLineModal'
 import { AlertEntity, AlertTypeSymbol, AlertOperation, DelayOption, AlertMessage, SendNotificationEmailTaskEntity } from './Signum.Alerts'
 import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
-import * as AuthClient from '../Authorization/AuthClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ajaxGet } from '@framework/Services'
 import * as Finder from '@framework/Finder'
 import { Entity, getToString, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'

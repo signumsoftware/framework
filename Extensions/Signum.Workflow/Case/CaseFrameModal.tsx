@@ -23,7 +23,7 @@ import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import { FunctionalAdapter } from '@framework/Modals';
-import * as AuthClient from '../../Authorization/AuthClient'
+import * as AuthClient from '../../Signum.Authorization/AuthClient'
 import { useForceUpdate, useStateWithPromise } from '@framework/Hooks'
 
 interface CaseFrameModalProps extends IModalProps<CaseActivityEntity | undefined> {

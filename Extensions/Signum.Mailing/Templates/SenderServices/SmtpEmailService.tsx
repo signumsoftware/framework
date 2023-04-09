@@ -3,7 +3,7 @@ import { ValueLine, EntityRepeater, EntityDetail } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailSenderConfigurationEntity, SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmailServiceEntity, } from '../../Signum.Mailing'
 import { Binding } from '@framework/Reflection'
-import { DoublePassword } from '../../../Authorization/Templates/DoublePassword'
+import { DoublePassword } from '../../../Signum.Authorization/Templates/DoublePassword'
 
 export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceEntity> }) {
   const sc = p.ctx;

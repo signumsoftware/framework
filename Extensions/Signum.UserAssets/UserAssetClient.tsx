@@ -5,20 +5,20 @@ import { Type } from '@framework/Reflection'
 import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed, FindOptions, FindOptionsParsed } from '@framework/FindOptions'
-import * as AuthClient from '../Authorization/AuthClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded } from './Signum.UserAssets'
-import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { QueryToken } from '@framework/FindOptions';
 import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.DynamicQuery';
-import { QueryFilterEmbedded, PinnedQueryFilterEmbedded, UserQueryEntity } from '../UserQueries/Signum.Entities.UserQueries';
+import { QueryFilterEmbedded, PinnedQueryFilterEmbedded, UserQueryEntity } from '../Signum.UserQueries/Signum.Entities.UserQueries';
 import { Dic, softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
-import { translated } from '../Translation/TranslatedInstanceTools'
+import { translated } from '../Signum.Translation/TranslatedInstanceTools'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import SelectorModal from '@framework/SelectorModal';
-import * as UserQueryClient from '../UserQueries/UserQueryClient'
+import * as UserQueryClient from '../Signum.UserQueries/UserQueryClient'
 import { SearchControlLoaded } from '@framework/Search';
 
 let started = false;

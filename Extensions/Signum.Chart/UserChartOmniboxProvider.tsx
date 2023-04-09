@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Lite } from '@framework/Signum.Entities'
-import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Omnibox/OmniboxClient'
+import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Signum.Omnibox/OmniboxClient'
 import * as Navigator from '@framework/Navigator'
 import * as ChartClient from './ChartClient'
 import * as UserChartClient from './UserChart/UserChartClient'
