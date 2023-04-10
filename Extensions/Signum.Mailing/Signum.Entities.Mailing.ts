@@ -4,8 +4,8 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
 import * as Entities from '@framework/Signum.Entities'
-import * as Signum from '@framework/Signum.Entities.Basics'
-import * as Basics from '../Basics/Signum.Entities.Basics'
+import * as Signum from '@framework/Signum.Basics'
+import * as Basics from '../Basics/Signum.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'

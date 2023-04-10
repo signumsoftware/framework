@@ -19,7 +19,7 @@ import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { IModalProps, openModal } from '@framework/Modals'
 import { EntityDump } from '../DiffLogClient'
 import MessageModal from '@framework/Modals/MessageModal'
-import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
+import { OperationLogEntity } from '@framework/Signum.Basics'
 import { ResultRow } from '@framework/FindOptions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { classes } from '@framework/Globals'

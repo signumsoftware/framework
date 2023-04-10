@@ -17,7 +17,7 @@ import { ISimpleFilterBuilder } from "@framework/Search";
 import { is } from "@framework/Signum.Entities";
 import { ContextualItemsContext, renderContextualItems } from "@framework/SearchControl/ContextualItems";
 import { Entity } from "@framework/Signum.Entities";
-import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
+import { DisabledMixin } from "../Basics/Signum.Basics";
 import { tryGetMixin } from "@framework/Signum.Entities";
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { toFilterRequests } from '@framework/Finder';

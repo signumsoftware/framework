@@ -4,7 +4,7 @@ import { getQueryKey, getQueryNiceName, getTypeInfos, IsByAll } from '@framework
 import { getToString } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
-import { QueryEntity } from '@framework/Signum.Entities.Basics'
+import { QueryEntity } from '@framework/Signum.Basics'
 import { IconColor, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { SearchValue, FindOptions } from '@framework/Search';
 import * as Navigator from '@framework/Navigator';

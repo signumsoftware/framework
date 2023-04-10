@@ -4,7 +4,7 @@ import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
 import { useForceUpdate } from '@framework/Hooks'
-import { TypeEntity } from '@framework/Signum.Entities.Basics'
+import { TypeEntity } from '@framework/Signum.Basics'
 
 interface WorkflowEventModelComponentProps {
   ctx: TypeContext<WorkflowEventModel>;

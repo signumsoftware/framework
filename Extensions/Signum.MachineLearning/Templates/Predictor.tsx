@@ -16,7 +16,7 @@ import { newMListElement } from '@framework/Signum.Entities';
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import PredictorSubQuery from './PredictorSubQuery';
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
-import { QueryEntity } from '@framework/Signum.Entities.Basics';
+import { QueryEntity } from '@framework/Signum.Basics';
 import ProgressBar from './ProgressBar'
 import LineChart, { LineChartSerie } from './LineChart'
 import { QueryToken } from '@framework/FindOptions';

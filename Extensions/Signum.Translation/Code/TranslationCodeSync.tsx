@@ -5,7 +5,7 @@ import { notifySuccess } from '@framework/Operations'
 import { getToString, Lite } from '@framework/Signum.Entities'
 import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult } from '../TranslationClient'
-import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
+import { CultureInfoEntity } from '../../Basics/Signum.Basics'
 import { TranslationMessage } from '../Signum.Translation'
 import { TranslationTypeTable } from './TranslationTypeTable'
 import { Link } from "react-router-dom";

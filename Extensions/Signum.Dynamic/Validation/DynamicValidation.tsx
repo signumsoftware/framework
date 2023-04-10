@@ -15,7 +15,7 @@ import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import PropertyRouteCombo from "../../Basics/Templates/PropertyRouteCombo";
 import { ModifiableEntity } from '@framework/Signum.Entities';
 import { Lite } from '@framework/Signum.Entities';
-import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics';
+import { PropertyRouteEntity } from '@framework/Signum.Basics';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 

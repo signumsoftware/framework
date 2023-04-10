@@ -3,15 +3,14 @@
   "compilerOptions": {
     "outDir": "./ts_out",
     "paths": {
-      "@framework/*": [ "../../Signum.React/*" ]
+      "@framework/*": [ "../../Signum/React/*" ]
     }
-
   },
   "references": [
-    { "path": "../../Signum.React" }
+    { "path": "../../Signum" }
   ],
   "exclude": [
-    "../../Signum.React/ts_out",
+    "../../Signum/ts_out",
     "./ts_out"
   ]
 }

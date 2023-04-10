@@ -4,7 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
 import * as Entities from '@framework/Signum.Entities'
-import * as Basics from '@framework/Signum.Entities.Basics'
+import * as Basics from '@framework/Signum.Basics'
 
 
 export const CSharpMigrationEntity = new Type<CSharpMigrationEntity>("CSharpMigration");

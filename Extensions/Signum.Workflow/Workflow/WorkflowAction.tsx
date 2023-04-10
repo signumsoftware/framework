@@ -6,7 +6,7 @@ import { WorkflowActionEntity } from '../Signum.Workflow'
 import { API, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import ValueLineModal from '@framework/ValueLineModal'
-import { TypeEntity } from '@framework/Signum.Entities.Basics';
+import { TypeEntity } from '@framework/Signum.Basics';
 import { Lite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
 

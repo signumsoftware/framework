@@ -10,7 +10,7 @@ import * as ChartClient from '../ChartClient'
 import { ChartScriptColumn, ChartScript } from '../ChartClient'
 import * as ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
-import { External, JavascriptMessage, toLite } from '@framework/Signum.Entities';
+import { JavascriptMessage, toLite } from '@framework/Signum.Entities';
 import { useAPI, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Parameters } from './ChartBuilder'
 

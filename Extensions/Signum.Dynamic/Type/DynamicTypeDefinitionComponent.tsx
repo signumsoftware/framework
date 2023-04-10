@@ -11,7 +11,7 @@ import { SearchControl } from '@framework/Search'
 import { StyleContext, FormGroupStyle } from '@framework/TypeContext'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '@framework/Signum.Entities'
-import { QueryEntity, TypeEntity } from '@framework/Signum.Entities.Basics'
+import { QueryEntity, TypeEntity } from '@framework/Signum.Basics'
 import { FilterOperation, PaginationMode } from '@framework/Signum.DynamicQuery'
 import SelectorModal from '@framework/SelectorModal';
 import MessageModal from '@framework/Modals/MessageModal'

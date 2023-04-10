@@ -1,6 +1,6 @@
 /// <reference path="../bpmn-js.d.ts" />
 import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
-import { BootstrapStyle } from "../../Basics/Signum.Entities.Basics";
+import { BootstrapStyle } from "../../Basics/Signum.Basics";
 import { ConnectionType } from '../Signum.Workflow'
 import * as BpmnUtils from './BpmnUtils'
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { WorkflowEventTaskActionEval } from '../Signum.Workflow'
 import { TypeContext, PropertyRoute } from '@framework/Lines'
-import { TypeEntity } from '@framework/Signum.Entities.Basics'
+import { TypeEntity } from '@framework/Signum.Basics'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';

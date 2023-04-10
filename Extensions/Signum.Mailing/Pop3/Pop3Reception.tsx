@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { SearchValueLine } from '@framework/Search'
-import { ExceptionEntity } from '@framework/Signum.Entities.Basics'
+import { ExceptionEntity } from '@framework/Signum.Basics'
 import { TypeContext } from '@framework/TypeContext'
 import { Pop3ReceptionEntity, EmailMessageEntity, EmailReceptionMixin } from '../Signum.Mailing'
 

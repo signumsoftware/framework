@@ -18,7 +18,7 @@ import { TypeInfo } from "@framework/Reflection";
 import TreeButton from './TreeButton'
 import { toLite } from "@framework/Signum.Entities";
 import { SearchControlLoaded } from "@framework/Search";
-import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
+import { DisabledMixin } from "../Basics/Signum.Basics";
 import { LiteAutocompleteConfig } from '@framework/Lines';
 import { QueryString } from '@framework/QueryString';
 

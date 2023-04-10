@@ -14,7 +14,7 @@ import { useForceUpdate, useUpdatedRef } from '@framework/Hooks'
 import { QueryOrderEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded'
 import { Tabs, Tab } from 'react-bootstrap';
-import { QueryEntity } from '@framework/Signum.Entities.Basics'
+import { QueryEntity } from '@framework/Signum.Basics'
 import HtmlEditor from '../../HtmlEditor/HtmlEditor'
 
 export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }) {

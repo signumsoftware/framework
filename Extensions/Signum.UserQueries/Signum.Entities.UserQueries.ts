@@ -4,7 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
 import * as Entities from '@framework/Signum.Entities'
-import * as Basics from '@framework/Signum.Entities.Basics'
+import * as Basics from '@framework/Signum.Basics'
 import * as DynamicQuery from '@framework/Signum.DynamicQuery'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Authorization from '../Signum.Authorization/Signum.Entities.Authorization'

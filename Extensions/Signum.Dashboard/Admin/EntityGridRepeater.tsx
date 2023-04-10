@@ -7,7 +7,7 @@ import { ModifiableEntity, EntityControlMessage } from '@framework/Signum.Entiti
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
 import { useController } from '@framework/Lines/LineBase';
-import { BootstrapStyle } from '../../Basics/Signum.Entities.Basics';
+import { BootstrapStyle } from '../../Basics/Signum.Basics';
 
 
 export interface IGridEntity {

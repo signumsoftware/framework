@@ -7,7 +7,7 @@ import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import { TemplateApplicableEval } from "../Signum.Entities.Templating";
-import { QueryEntity } from "@framework/Signum.Entities.Basics";
+import { QueryEntity } from "@framework/Signum.Basics";
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 
 interface TemplateApplicableProps {

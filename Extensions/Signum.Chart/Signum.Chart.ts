@@ -8,6 +8,22 @@ import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
 
+import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions'
+
+//Partial
+export interface ChartRequestModel {
+  queryKey: string;
+  
+  filterOptions: FilterOptionParsed[];
+
+  filters: FilterRequest[];
+}
+
+export interface ChartScriptParameterEmbedded {
+  enumValues: { name: string, typeFilter : ChartColumnType }[];
+}
+
+export type IChartBase = ChartRequestModel | UserChartEntity;
 
 export const ChartColumnEmbedded = new Type<ChartColumnEmbedded>("ChartColumnEmbedded");
 export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {

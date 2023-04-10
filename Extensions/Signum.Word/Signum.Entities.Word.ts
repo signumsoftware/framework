@@ -4,11 +4,11 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '@framework/Reflection'
 import * as Entities from '@framework/Signum.Entities'
-import * as Basics from '@framework/Signum.Entities.Basics'
+import * as Basics from '@framework/Signum.Basics'
 import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 import * as Templating from '../Templating/Signum.Entities.Templating'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
-import * as Signum from '../Basics/Signum.Entities.Basics'
+import * as Signum from '../Basics/Signum.Basics'
 import * as UserQueries from '../Signum.UserQueries/Signum.Entities.UserQueries'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Signum.Authorization/Signum.Entities.Authorization'

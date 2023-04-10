@@ -21,7 +21,7 @@ import { QueryRequest, ColumnOption } from "@framework/FindOptions";
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
-import { TypeEntity } from '@framework/Signum.Entities.Basics';
+import { TypeEntity } from '@framework/Signum.Basics';
 
 export var allTypes: string[] = [];
 

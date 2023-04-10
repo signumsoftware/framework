@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Dic } from '../Globals';
 import { Lite, is, getToString } from '../Signum.Entities'
-import { CultureInfoEntity } from '../Signum.Entities.Basics'
+import { CultureInfoEntity } from '../Signum.Basics'
 import * as CultureClient from './CultureClient'
 import { NavDropdown } from 'react-bootstrap';
 import { useAPI } from '../Hooks';

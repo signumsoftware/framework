@@ -15,20 +15,18 @@ import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import {
   UserQueryEntity, UserQueryPermission, UserQueryMessage,
-  QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded
 } from './Signum.UserQueries'
-import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
+import { QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
-import * as UserAssetsClient from '../UserAssets/UserAssetClient'
+import * as UserAssetsClient from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import ContextMenu from '@framework/SearchControl/ContextMenu';
 import { ContextualItemsContext, MenuItemBlock, onContextualItems } from '@framework/SearchControl/ContextualItems';
 import SearchControlLoaded, { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
 import SelectorModal from '@framework/SelectorModal';
-import { DynamicTypeConditionSymbolEntity } from '../Dynamic/Signum.Entities.Dynamic';
 import { Dic } from '@framework/Globals';
-import { ChartRequestModel, UserChartEntity } from '../Chart/Signum.Entities.Chart';
-import { ChartRow, hasAggregates } from '../Chart/ChartClient';
+import { ChartRequestModel, UserChartEntity } from '../Signum.Chart/Signum.Chart';
+import { ChartRow, hasAggregates } from '../Signum.Chart/ChartClient';
 
 export function start(options: { routes: RouteObject[] }) {
   UserAssetsClient.start({ routes: options.routes });

@@ -26,7 +26,7 @@ import { translated } from '../Signum.Translation/TranslatedInstanceTools';
 import { DashboardController } from "./View/DashboardFilterController";
 import { EntityFrame } from '@framework/TypeContext';
 import { CachedQueryJS } from './CachedQueryExecutor';
-import { QueryEntity } from '@framework/Signum.Entities.Basics';
+import { QueryEntity } from '@framework/Signum.Basics';
 import { downloadFile } from '../Files/FileDownloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { UserChartPartHandler } from './View/UserChartPart';

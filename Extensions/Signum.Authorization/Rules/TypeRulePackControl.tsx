@@ -27,7 +27,7 @@ import "./AuthAdmin.css"
 import { is } from '@framework/Signum.Entities';
 import { RoleEntity } from '../Signum.Authorization'
 import { OperationSymbol } from '@framework/Signum.Operations'
-import { QueryEntity } from '@framework/Signum.DynamicQuery'
+import { QueryEntity } from '@framework/Signum.Basics'
 
 export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
 

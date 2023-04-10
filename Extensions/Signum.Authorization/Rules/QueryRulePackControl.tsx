@@ -9,7 +9,7 @@ import { Button } from 'react-bootstrap'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks';
 import { getToString } from '@framework/Signum.Entities';
-import { QueryEntity } from '@framework/Signum.DynamicQuery'
+import { QueryEntity } from '@framework/Signum.Basics'
 
 export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: TypeContext<QueryRulePack> }, ref: React.Ref<IRenderButtons>) {
 

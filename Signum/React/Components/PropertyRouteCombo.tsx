@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { Dic } from '@framework/Globals'
-import { TypeEntity, PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
-import { TypeContext } from '@framework/Lines'
-import { getTypeInfo, MemberInfo, PropertyRoute } from "@framework/Reflection";
-import { useForceUpdate } from '@framework/Hooks'
+import { Dic } from '../Globals'
+import { TypeEntity, PropertyRouteEntity } from '../Signum.Basics'
+import { TypeContext } from '../Lines'
+import { getTypeInfo, MemberInfo, PropertyRoute } from "../Reflection";
+import { useForceUpdate } from '../Hooks'
 
 
 export interface PropertyRouteComboProps {

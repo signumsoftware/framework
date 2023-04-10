@@ -27,7 +27,7 @@ import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import { Dropdown } from 'react-bootstrap';
 import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import "./Mailing.css";
-import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics';
+import { CultureInfoEntity } from '../Basics/Signum.Basics';
 import { currentCulture } from '../Signum.Translation/CultureClient';
 import { SearchControlLoaded } from '@framework/Search';
 

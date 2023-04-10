@@ -5,7 +5,7 @@ import { Tab, Tabs } from 'react-bootstrap'
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { SearchControl } from '@framework/Search'
-import { ExceptionEntity } from '@framework/Signum.Entities.Basics'
+import { ExceptionEntity } from '@framework/Signum.Basics'
 
 export default function CacheStatisticsPage() {
 

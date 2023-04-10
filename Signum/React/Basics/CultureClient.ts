@@ -1,7 +1,7 @@
 import { ajaxPost, ajaxGet } from '../Services';
 import { Lite } from '../Signum.Entities'
 import * as AppContext from '../AppContext'
-import { CultureInfoEntity } from '../Signum.Entities.Basics'
+import { CultureInfoEntity } from '../Signum.Basics'
 import { reloadTypes } from '../Reflection'
 import { toLite } from '../Signum.Entities';
 

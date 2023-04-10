@@ -1,6 +1,6 @@
 import * as d3 from "d3"
 import * as Finder from '@framework/Finder'
-import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
+import { OperationLogEntity } from '@framework/Signum.Basics'
 import { Point, Rectangle, calculatePoint, wrap, colorScale, forceBoundingBox } from '../Utils'
 
 export interface OperationMapInfo {

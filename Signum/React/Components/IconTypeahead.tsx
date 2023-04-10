@@ -1,13 +1,13 @@
 
 import * as React from 'react'
-import { classes, Dic } from '@framework/Globals'
-import { FormGroup } from '@framework/Lines'
-import { Typeahead } from '@framework/Components'
-import { TypeContext } from '@framework/TypeContext'
+import { classes, Dic } from '../Globals'
+import { FormGroup } from '../Lines'
+import { Typeahead } from '../Components'
+import { TypeContext } from '../TypeContext'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useForceUpdate } from '@framework/Hooks'
-import { TypeaheadOptions } from '@framework/Components/Typeahead'
+import { useForceUpdate } from '../Hooks'
+import { TypeaheadOptions } from './Typeahead'
 import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 
 export interface IconTypeaheadLineProps {

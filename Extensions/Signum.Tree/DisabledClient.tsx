@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import { DisableOperation, DisabledMixin } from './Signum.Entities.Basics'
+import { DisableOperation, DisabledMixin } from './Signum.Basics'
 import { getAllTypes } from "@framework/Reflection";
 
 export function start(options: { routes: RouteObject[] }) {

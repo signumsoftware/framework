@@ -15,7 +15,7 @@ import TextArea from '@framework/Components/TextArea'
 import { KeyCodes } from '@framework/Components'
 import { getTypeInfo } from '@framework/Reflection'
 import { useTitle } from '@framework/AppContext'
-import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
+import { CultureInfoEntity } from '../../Basics/Signum.Basics'
 import { TranslationMember, initialElementIf } from '../Code/TranslationTypeTable'
 import { getToString, Lite } from '@framework/Signum.Entities'
 

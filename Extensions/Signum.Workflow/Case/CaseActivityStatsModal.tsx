@@ -10,7 +10,7 @@ import { CaseActivityStats, formatDuration } from "../WorkflowClient";
 import { FormGroup, StyleContext } from "@framework/Lines";
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity, WorkflowEventType } from "../Signum.Entities.Workflow";
 import { EntityLink, SearchControl } from "@framework/Search";
-import { OperationLogEntity } from "@framework/Signum.Entities.Basics";
+import { OperationLogEntity } from "@framework/Signum.Basics";
 import { Tab, Tabs, Modal } from 'react-bootstrap';
 
 interface CaseActivityStatsModalProps extends IModalProps<undefined> {

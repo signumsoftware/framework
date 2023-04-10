@@ -13,7 +13,7 @@ import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import { PermissionSymbol } from '../../Signum.Authorization/Signum.Entities.Authorization';
 import { OperationSymbol } from '@framework/Signum.Entities';
-import { QueryEntity, TypeEntity } from '@framework/Signum.Entities.Basics';
+import { QueryEntity, TypeEntity } from '@framework/Signum.Basics';
 
 export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
   const ctx = p.ctx;

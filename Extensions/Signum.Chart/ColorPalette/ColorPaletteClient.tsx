@@ -11,7 +11,7 @@ import { Lite } from '@framework/Signum.Entities';
 import * as Constructor from '@framework/Constructor';
 import * as Finder from '@framework/Finder';
 import { Dic } from '@framework/Globals';
-import { TypeEntity } from '@framework/Signum.Entities.Basics';
+import { TypeEntity } from '@framework/Signum.Basics';
 import { getColorInterpolation } from './ColorUtils';
 
 export function start(options: { routes: RouteObject[] }) {

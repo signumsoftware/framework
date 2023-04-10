@@ -9,7 +9,7 @@ import {
   EntityPack, Lite, toLite, newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity, liteKey, getToString
 } from '@framework/Signum.Entities'
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
-import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
+import { TypeEntity, IUserEntity } from '@framework/Signum.Basics'
 import { Type, PropertyRoute, OperationInfo, toNumberFormat } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import * as AppContext from '@framework/AppContext'
@@ -20,7 +20,7 @@ import * as Operations from '@framework/Operations'
 import { confirmInNecessary, OperationButton } from '@framework/Operations/EntityOperations'
 import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
 import { CodeContext } from '../Dynamic/View/NodeUtils'
-import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
+import { TimeSpanEmbedded } from '../Basics/Signum.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,

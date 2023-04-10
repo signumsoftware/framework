@@ -3,7 +3,7 @@ import {
   WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, ButtonOptionEmbedded, WorkflowActivityMessage,
 } from '../Signum.Workflow'
 import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable, EntityDetail } from '@framework/Lines'
-import { TypeEntity } from '@framework/Signum.Entities.Basics'
+import { TypeEntity } from '@framework/Signum.Basics'
 import { Binding } from '@framework/Reflection';
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";

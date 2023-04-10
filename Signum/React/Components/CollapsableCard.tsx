@@ -1,10 +1,10 @@
 import * as React from 'react'
 import Collapse from 'react-bootstrap/Collapse'
-import { classes } from '@framework/Globals'
-import { BsColor } from '@framework/Components/Basic';
+import { classes } from '../Globals'
+import { BsColor } from './Basic';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { CollapsableCardMessage } from '../Signum.Entities.Basics';
+import { CollapsableCardMessage } from '../Signum.Basics';
 
 export interface CollapsableCardProps {
   color?: BsColor;

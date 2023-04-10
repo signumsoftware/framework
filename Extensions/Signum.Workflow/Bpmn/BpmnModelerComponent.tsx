@@ -16,7 +16,7 @@ import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
 import { Button } from 'react-bootstrap';
 import { newMListElement } from '@framework/Signum.Entities';
-import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
+import { TimeSpanEmbedded } from '../../Basics/Signum.Basics';
 import { Dic } from '@framework/Globals';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 

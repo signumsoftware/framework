@@ -8,7 +8,7 @@ import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity, getToString, isEntity, JavascriptMessage } from '@framework/Signum.Entities'
-import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
+import { OperationLogEntity } from '@framework/Signum.Operations'
 import * as QuickLinks from '@framework/QuickLinks'
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.DiffLog';
 import { ImportComponent } from '@framework/ImportComponent'

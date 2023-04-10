@@ -12,6 +12,22 @@ class Upgrade_20230407_REVOLUTION : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
+        uctx.ForeachCodeFile("*.d.ts", "Framework", a =>
+        {
+            uctx.DeleteFile(a.FilePath);
+        });
+
+        uctx.ForeachCodeFile("*.js", "Framework", a =>
+        {
+            uctx.DeleteFile(a.FilePath);
+        });
+
+        uctx.ForeachCodeFile("*.d.ts.map", "Framework", a =>
+        {
+            uctx.DeleteFile(a.FilePath);
+        });
+
+
         var regex = new Regex(@"(../)*Signum.React/Scripts");
         uctx.ForeachCodeFile("*.ts, *.tsx", "Framework/Extensions", a =>
         {

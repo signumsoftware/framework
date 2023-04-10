@@ -14,10 +14,10 @@ import {
   isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany
 } from './FindOptions';
 
-import { FilterOperation, FilterGroupOperation, PinnedFilterActive, QueryEntity } from './Signum.DynamicQuery';
+import { FilterOperation, FilterGroupOperation, PinnedFilterActive } from './Signum.DynamicQuery';
 
 import { Entity, Lite, toLite, liteKey, parseLite, isLite, isEntity, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
-import { TypeEntity } from './Signum.Basics';
+import { TypeEntity, QueryEntity } from './Signum.Basics';
 
 import {
   Type, QueryKey, getQueryKey, isQueryDefined, TypeReference,
