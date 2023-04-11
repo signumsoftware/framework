@@ -33,6 +33,7 @@
     "@types/react": "18.0.33",
     "@types/react-dom": "18.0.6",
     "@types/react-transition-group": "4.4.5",
+    "@microsoft/signalr": "7.0.2",
     "luxon": "3.2.1",
     "popper.js": "1.16.1",
     "react": "18.2.0",

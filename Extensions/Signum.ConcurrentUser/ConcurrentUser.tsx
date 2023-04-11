@@ -1,11 +1,10 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import * as AppContext from '@framework/AppContext'
-import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from '../Alerts/useSignalR'
+import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from '@framework/useSignalR'
 import { ConcurrentUserEntity, ConcurrentUserMessage } from './Signum.ConcurrentUser'
 import { OverlayTrigger, Popover } from 'react-bootstrap';
 import { Entity, getToString, Lite, liteKey, toLite } from '@framework/Signum.Entities'
-import { UserEntity } from '../Signum.Authorization/Signum.Entities.Authorization'
 import { useAPI, useForceUpdate, useUpdatedRef } from '@framework/Hooks'
 import { GraphExplorer } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
@@ -17,6 +16,7 @@ import * as ConcurrentUserClient from './ConcurrentUserClient';
 import { exploreWindowsOpen } from '@framework/Finder'
 import { HubConnectionState } from '@microsoft/signalr'
 import { SmallProfilePhoto } from '../Signum.Authorization/Templates/ProfilePhoto'
+import { UserEntity } from '../Signum.Authorization/Signum.Authorization'
 
 export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }) {
   

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { TypeContext } from '@framework/TypeContext'
-import { CodeMirrorComponent, CodeMirrorComponentHandler } from '../Codemirror/CodeMirrorComponent'
+import { CodeMirrorComponent, CodeMirrorComponentHandler } from './CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
 import "codemirror/lib/codemirror.css"

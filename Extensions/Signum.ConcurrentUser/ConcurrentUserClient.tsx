@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import * as Widgets from '@framework/Frames/Widgets';
 import ConcurrentUser from './ConcurrentUser'
 import { ajaxGet } from '@framework/Services'
-import { UserEntity } from '../Signum.Authorization/Signum.Entities.Authorization';
+import { UserEntity } from '../Signum.Authorization/Signum.Authorization';
 import { getTypeInfo, TypeInfo } from '@framework/Reflection'
 
 export function start(options: { routes: RouteObject[], activatedFor?: (e: Entity) => boolean }) {
