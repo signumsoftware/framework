@@ -5,7 +5,7 @@ import * as Finder from '@framework/Finder'
 import * as Operations from '@framework/Operations'
 import { TreeViewer } from './TreeViewer'
 import { useLocation, useParams } from "react-router";
-import { TreeOperation } from "./Signum.Entities.Tree";
+import { TreeOperation } from "./Signum.Tree";
 import { QueryString } from '@framework/QueryString'
 import { FrameMessage } from '@framework/Signum.Entities'
 

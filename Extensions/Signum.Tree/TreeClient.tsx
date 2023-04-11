@@ -9,7 +9,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { Type, tryGetTypeInfo } from '@framework/Reflection'
 import { getToString, Lite } from '@framework/Signum.Entities'
-import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
+import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage, DisabledMixin } from './Signum.Tree'
 import TreeModal from './TreeModal'
 import { FilterRequest, FilterOption } from "@framework/FindOptions";
 import { ImportComponent } from '@framework/ImportComponent'
@@ -18,7 +18,6 @@ import { TypeInfo } from "@framework/Reflection";
 import TreeButton from './TreeButton'
 import { toLite } from "@framework/Signum.Entities";
 import { SearchControlLoaded } from "@framework/Search";
-import { DisabledMixin } from "../Basics/Signum.Basics";
 import { LiteAutocompleteConfig } from '@framework/Lines';
 import { QueryString } from '@framework/QueryString';
 

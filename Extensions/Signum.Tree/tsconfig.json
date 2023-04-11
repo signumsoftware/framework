@@ -7,7 +7,8 @@
     }
   },
   "references": [
-    { "path": "../../Signum" }
+    { "path": "../../Signum" },
+    { "path": "../Signum.Omnibox" }
   ],
   "exclude": [
     "../../Signum/ts_out",
