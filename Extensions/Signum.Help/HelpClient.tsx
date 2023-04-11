@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxGet, ajaxPost } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
-import { OperationSymbol } from '@framework/Signum.Entities'
+import { OperationSymbol } from '@framework/Signum.Operations'
 import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo} from '@framework/Reflection'
 import { ImportComponent } from '@framework/ImportComponent'
 import "./Help.css"
