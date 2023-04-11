@@ -158,3 +158,14 @@ public abstract class EvalEmbedded<T> : EmbeddedEntity
         }
     }
 }
+
+[AutoInit]
+public static class EvalPanelPermission
+{
+    public static PermissionSymbol ViewDynamicPanel;
+}
+
+public enum EvalPanelMessage
+{
+    OpenErrors
+}
