@@ -2,24 +2,22 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
-import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, translated } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed, FindOptions, FindOptionsParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded } from './Signum.UserAssets'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission } from './Signum.UserAssets'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { ImportComponent } from '@framework/ImportComponent'
 import { QueryToken } from '@framework/FindOptions';
 import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.DynamicQuery';
-import { QueryFilterEmbedded, PinnedQueryFilterEmbedded, UserQueryEntity } from '../Signum.UserQueries/Signum.Entities.UserQueries';
 import { Dic, softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
-import { translated } from '../Signum.Translation/TranslatedInstanceTools'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import SelectorModal from '@framework/SelectorModal';
-import * as UserQueryClient from '../Signum.UserQueries/UserQueryClient'
 import { SearchControlLoaded } from '@framework/Search';
+import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from './Signum.UserAssets.Queries';
 
 let started = false;
 export function start(options: { routes: RouteObject[] }) {
@@ -27,7 +25,7 @@ export function start(options: { routes: RouteObject[] }) {
     return;
 
   options.routes.push({ path: "/userAssets/import", element: <ImportComponent onImport={() => import("./ImportAssetsPage")} /> });
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
     key: "ImportUserAssets",
     onClick: () => Promise.resolve("/userAssets/import")

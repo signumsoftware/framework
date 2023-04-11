@@ -4,12 +4,12 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 
 export function start(...params: OmniboxProvider<OmniboxResult>[]) {
   params.forEach(op => registerProvider(op));
 
   AppContext.clearSettingsActions.push(clearProviders);
-  AppContext.clearSettingsActions.push(clearSpecialActions);
 }
 
 export const providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {};
@@ -82,9 +82,11 @@ function getProvider(resultTypeName: string) {
 export namespace API {
 
   export function getResults(query: string, signal: AbortSignal): Promise<OmniboxResult[]> {
+    var specialActions = OmniboxSpecialAction.specialActions; 
     return ajaxPost({ url: "/api/omnibox", signal }, {
       query: query ?? "",
-      specialActions: Dic.getKeys(specialActions).filter(a => specialActions[a].allowed == null || specialActions[a].allowed())
+      specialActions: Dic.getKeys(specialActions)
+        .filter(a => specialActions[a].allowed == null || specialActions[a].allowed()) 
     })
   }
 }

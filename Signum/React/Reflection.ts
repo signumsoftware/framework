@@ -747,6 +747,8 @@ function calculateRequiresSaveOperation(entityKind: EntityKind): boolean {
   }
 }
 
+
+
 export interface IBinding<T> {
   getValue(): T;
   setValue(val: T): void;

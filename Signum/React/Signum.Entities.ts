@@ -5,6 +5,8 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection'
 import * as Entities from './Signum.Entities'
 
+import { getLambdaMembers } from './Reflection'
+
 export interface ModifiableEntity {
   Type: string;
   toStr: string | undefined;
@@ -42,6 +44,17 @@ export function getMixin<M extends MixinEntity>(entity: ModifiableEntity, type: 
 
 export function tryGetMixin<M extends MixinEntity>(entity: ModifiableEntity, type: Type<M>): M | undefined {
   return entity.mixins && entity.mixins[type.typeName] as M;
+}
+
+export function translated<T extends ModifiableEntity, S extends string | null | undefined>(entity: T, field: (e: T) => S): S {
+  var members = getLambdaMembers(field);
+
+  if (members.length != 1 || members[0].type != 'Member')
+    throw new Error("Invalid lambda");
+
+  const prop = members[0].name;
+
+  return (entity as any)[prop + "_translated"] as S ?? (entity as any)[prop] as S;
 }
 
 export type MList<T> = Array<MListElement<T>>;

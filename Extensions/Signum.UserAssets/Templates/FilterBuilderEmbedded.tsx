@@ -7,8 +7,10 @@ import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import { UserAssetMessage } from '../Signum.UserAssets'
-import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed } from '@framework/FindOptions'
+import {
+  QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed,
+  isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed
+} from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
 import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent, RenderValueContext } from '@framework/SearchControl/FilterBuilder';
@@ -16,7 +18,7 @@ import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
-import { QueryTokenEmbedded } from '../Signum.UserAssets.QueryTokens'
+import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets.Queries'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;

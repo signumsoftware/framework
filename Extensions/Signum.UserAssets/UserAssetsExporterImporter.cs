@@ -1,7 +1,4 @@
 using Signum.Authorization;
-using Signum.Authorization.Rules;
-using Signum.UserAssets;
-using Signum.UserAssets;
 using Signum.Utilities.Reflection;
 using System.IO;
 using System.Xml.Linq;

@@ -1,6 +1,6 @@
 using Signum.DynamicQuery.Tokens;
 
-namespace Signum.UserAssets.QueryTokens;
+namespace Signum.UserAssets.Queries;
 
 public sealed class QueryTokenEmbedded : EmbeddedEntity, IEquatable<QueryTokenEmbedded>
 {

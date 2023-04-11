@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { CachePermission } from './Signum.Cache'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 
@@ -10,7 +10,7 @@ import { ImportComponent } from '@framework/ImportComponent'
 export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/cache/statistics", element: <ImportComponent onImport={() => import("./CacheStatisticsPage")} /> });
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(CachePermission.InvalidateCache),
     key: "ViewCache",
     onClick: () => Promise.resolve("/cache/statistics")

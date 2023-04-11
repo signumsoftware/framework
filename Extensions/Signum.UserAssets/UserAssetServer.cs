@@ -7,6 +7,7 @@ using Signum.API.Json;
 using Signum.API.Controllers;
 using Signum.Authorization.Rules;
 using Signum.UserAssets.QueryTokens;
+using Signum.UserAssets.Queries;
 
 namespace Signum.UserAssets;
 

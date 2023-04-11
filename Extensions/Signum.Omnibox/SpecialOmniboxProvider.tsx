@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { OmniboxResult, OmniboxMatch, OmniboxProvider, specialActions } from './OmniboxClient'
+import { OmniboxResult, OmniboxMatch, OmniboxProvider } from './OmniboxClient'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 
 export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmniboxResult>
 {
@@ -25,7 +26,7 @@ export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmnib
   }
 
   navigateTo(result: SpecialOmniboxResult) {
-    return specialActions[result.key].onClick();
+    return OmniboxSpecialAction.specialActions[result.key].onClick();
   }
 
   toString(result: SpecialOmniboxResult) {

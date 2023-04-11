@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { QueryTokenEmbedded } from '../Signum.UserAssets'
 import { FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { QueryToken, SubTokensOptions } from '@framework/FindOptions'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import { useForceUpdate } from '@framework/Hooks'
+import { QueryTokenEmbedded } from '../Signum.UserAssets.Queries'
 
 interface QueryTokenEmbeddedBuilderProps {
   ctx: TypeContext<QueryTokenEmbedded | null>;
